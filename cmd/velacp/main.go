@@ -8,8 +8,8 @@ import (
 
 func main() {
 	app := commands.NewApp(
-		"pipecd",
-		"Control-plane component for PipeCD.",
+		"velacp",
+		"KubeVela control plane",
 	)
 	app.AddCommands(
 		commands.NewServerCommand(),
