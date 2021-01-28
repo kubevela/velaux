@@ -10,20 +10,17 @@ import (
 )
 
 type server struct {
-	Logger       *zap.Logger
-	cacheCfg     cacheConfig
+	logger       *zap.Logger
 	dataStoreCfg datastore.Config
-	restAPICfg   restAPIConfig
+	grpcApiCfg   grpcapi.Config
 }
 
-type cacheConfig struct{}
-type dataStoreConfig struct{}
-type restAPIConfig struct {
-	Port int
-}
 
 func NewServerCommand() *cobra.Command {
 	s := &server{}
+	logger:= newLogger()
+	s.logger = logger
+	s.grpcApiCfg.Logger = logger
 
 	cmd := &cobra.Command{
 		Use:   "server",
@@ -34,7 +31,7 @@ func NewServerCommand() *cobra.Command {
 	}
 
 	// grpc
-	cmd.Flags().IntVar(&s.restAPICfg.Port, "api-port", s.restAPICfg.Port, "The port number used to serve the REST APIs.")
+	cmd.Flags().IntVar(&s.grpcApiCfg.Port, "api-port", s.grpcApiCfg.Port, "The port number used to serve the grpc APIs.")
 
 	// datastore
 	cmd.Flags().StringVar(&s.dataStoreCfg.User, "db-user", s.dataStoreCfg.User, "Username for database login")
@@ -49,6 +46,25 @@ func NewServerCommand() *cobra.Command {
 	return cmd
 }
 
+func newLogger() *zap.Logger{
+	c := zap.Config{
+		Level:       zap.NewAtomicLevel(),
+		Development: false,
+		Sampling: &zap.SamplingConfig{
+			Initial:    100,
+			Thereafter: 100,
+		},
+		OutputPaths:      []string{"stderr"},
+		ErrorOutputPaths: []string{"stderr"},
+	}
+	var opt []zap.Option
+	l, err  := c.Build(opt...)
+	if err != nil {
+		panic(err)
+	}
+	return l
+}
+
 func (s *server) run() error {
 	ctx := context.Background()
 
@@ -57,6 +73,6 @@ func (s *server) run() error {
 		return err
 	}
 
-	server := grpcapi.New(d)
+	server := grpcapi.New(d, s.grpcApiCfg)
 	return server.Run(ctx)
 }
