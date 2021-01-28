@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/oam-dev/velacp/pkg/datastore"
-	"github.com/oam-dev/velacp/pkg/restapi"
+	"github.com/oam-dev/velacp/pkg/grpcapi"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -33,10 +33,10 @@ func NewServerCommand() *cobra.Command {
 		},
 	}
 
-	// rest api
+	// grpc
 	cmd.Flags().IntVar(&s.restAPICfg.Port, "api-port", s.restAPICfg.Port, "The port number used to serve the REST APIs.")
 
-	// database
+	// datastore
 	cmd.Flags().StringVar(&s.dataStoreCfg.User, "db-user", s.dataStoreCfg.User, "Username for database login")
 	cmd.MarkFlagRequired("db-user")
 	cmd.Flags().StringVar(&s.dataStoreCfg.Password, "db-password", s.dataStoreCfg.Password, "Password for database login")
@@ -57,6 +57,6 @@ func (s *server) run() error {
 		return err
 	}
 
-	r := restapi.New(d)
-	return r.Run(ctx)
+	server := grpcapi.New(d)
+	return server.Run(ctx)
 }
