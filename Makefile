@@ -4,5 +4,6 @@ build:
 
 .PHONY: gen-proto
 gen-proto:
-	protoc --proto_path=pkg/proto --go_out=pkg/generated/pb --go_opt=paths=source_relative \
-	pkg/proto/catalogservice/service.proto
+	protoc --go_out=. --go_opt=paths=source_relative \
+        --go-grpc_out=require_unimplemented_servers=false:. --go-grpc_opt=paths=source_relative \
+        pkg/proto/catalogservice/service.proto

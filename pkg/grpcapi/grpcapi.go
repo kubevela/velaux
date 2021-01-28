@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/oam-dev/velacp/pkg/datastore"
+	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
+	"github.com/oam-dev/velacp/pkg/grpcapi/services"
 )
 
 type Config struct {
@@ -41,6 +43,8 @@ func New(d datastore.DataStore, cfg Config) GrpcServer {
 
 
 func (s *grpcServer) Run(context.Context) error {
+	s.registerServices()
+
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", s.Port))
 	if err != nil {
 		return errors.Wrap(err, "failed to listen")
@@ -51,4 +55,8 @@ func (s *grpcServer) Run(context.Context) error {
 		return errors.Wrap(err,"failed to serve")
 	}
 	return nil
+}
+
+func (s *grpcServer) registerServices() {
+	catalogservice.RegisterCatalogServiceServer(s.server, &services.CatalogService{})
 }
