@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package vela.api.service.catalogservice;
+option go_package = "github.com/oam-dev/velacp/pkg/generated/pb/catalogservice";
+
+service CatalogService {
+  rpc AddCatalog(AddCatalogRequest) returns (AddCatalogResponse) {}
+  rpc GetCatalog(GetCatalogRequest) returns (GetCatalogResponse) {}
+  rpc ListCatalogs(ListCatalogsRequest) returns (ListCatalogsResponse) {}
+  rpc DelCatalog(DelCatalogRequest) returns (DelCatalogResponse) {}
+}
+
+message AddCatalogRequest {
+}
+
+message AddCatalogResponse {
+}
+
+message GetCatalogRequest {
+}
+
+message GetCatalogResponse {
+}
+
+message ListCatalogsRequest {
+}
+
+message ListCatalogsResponse {
+}
+
+message DelCatalogRequest {
+}
+
+message DelCatalogResponse {
+}
