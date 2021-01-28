@@ -1,5 +1,11 @@
 ﻿export default [
   {
+    path: '/catalogs',
+    name: 'catalogs',
+    icon: 'smile',
+    component: './Catalog',
+  },
+  {
     path: '/user',
     layout: false,
     routes: [
