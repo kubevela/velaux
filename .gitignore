@@ -5,6 +5,8 @@
 *.so
 *.dylib
 _bin/
+node_modules/
+.umi/
 
 # Test binary, built with `go test -c`
 *.test
@@ -17,3 +19,4 @@ vendor/
 
 # IDE
 .idea
+.vscode
