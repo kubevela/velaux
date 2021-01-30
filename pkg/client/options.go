@@ -5,6 +5,9 @@ import (
 	"errors"
 
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
+
+	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 )
 
 type Options struct {
@@ -22,9 +25,14 @@ func (o *Options) Validate() error {
 	return nil
 }
 
-func (o *Options) NewClient(ctx context.Context) (APIServiceClient, error) {
+func (o *Options) NewCatalogClient(ctx context.Context) (catalogservice.CatalogServiceClient, *grpc.ClientConn, error) {
 	if err := o.Validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	panic("")
+	var opts []grpc.DialOption
+	conn, err := grpc.DialContext(ctx, o.Address, opts...)
+	if err != nil {
+		return nil, nil, err
+	}
+	return catalogservice.NewCatalogServiceClient(conn), conn, nil
 }
