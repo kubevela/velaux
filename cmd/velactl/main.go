@@ -1,4 +1,4 @@
-package velactl
+package main
 
 import (
 	"log"
