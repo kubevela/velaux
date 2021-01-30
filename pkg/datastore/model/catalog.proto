@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package vela.api.model;
+option go_package = "github.com/oam-dev/velacp/pkg/datastore/model";
+
+import "validate/validate.proto";
+
+message Catalog {
+  // The generated unique identifier.
+  string id = 1 [(validate.rules).string.min_len = 1];
+  // The name of the catalog.
+  // This field is not changeable.
+  string name = 2 [(validate.rules).string.min_len = 1];
+  // The additional description about the environment.
+  string desc = 3;
+  // Unix time when the catalog is created.
+  int64 created_at = 14 [(validate.rules).int64.gt = 0];
+  // Unix time of the last time when the catalog is updated.
+  int64 updated_at = 15 [(validate.rules).int64.gt = 0];
+}

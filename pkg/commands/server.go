@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/oam-dev/velacp/pkg/datastore"
+	"github.com/oam-dev/velacp/pkg/datastore/mongodb"
 	"github.com/oam-dev/velacp/pkg/grpcapi"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -15,10 +16,9 @@ type server struct {
 	grpcApiCfg   grpcapi.Config
 }
 
-
 func NewServerCommand() *cobra.Command {
 	s := &server{}
-	logger:= newLogger()
+	logger := newLogger()
 	s.logger = logger
 	s.grpcApiCfg.Logger = logger
 
@@ -34,19 +34,19 @@ func NewServerCommand() *cobra.Command {
 	cmd.Flags().IntVar(&s.grpcApiCfg.Port, "api-port", s.grpcApiCfg.Port, "The port number used to serve the grpc APIs.")
 
 	// datastore
-	cmd.Flags().StringVar(&s.dataStoreCfg.User, "db-user", s.dataStoreCfg.User, "Username for database login")
+	cmd.Flags().StringVar(&s.dataStoreCfg.User, "db-user", s.dataStoreCfg.User, "The username for database login")
 	cmd.MarkFlagRequired("db-user")
-	cmd.Flags().StringVar(&s.dataStoreCfg.Password, "db-password", s.dataStoreCfg.Password, "Password for database login")
+	cmd.Flags().StringVar(&s.dataStoreCfg.Password, "db-password", s.dataStoreCfg.Password, "The password for database login")
 	cmd.MarkFlagRequired("db-password")
 	cmd.Flags().StringVar(&s.dataStoreCfg.Address, "db-address", s.dataStoreCfg.Address, "The address of the database")
 	cmd.MarkFlagRequired("db-address")
-	cmd.Flags().StringVar(&s.dataStoreCfg.DBName, "db-name", s.dataStoreCfg.DBName, "Database name")
+	cmd.Flags().StringVar(&s.dataStoreCfg.Database, "db-name", s.dataStoreCfg.Database, "The name of the database")
 	cmd.MarkFlagRequired("db-name")
 
 	return cmd
 }
 
-func newLogger() *zap.Logger{
+func newLogger() *zap.Logger {
 	c := zap.Config{
 		Level:       zap.NewAtomicLevel(),
 		Development: false,
@@ -58,7 +58,7 @@ func newLogger() *zap.Logger{
 		ErrorOutputPaths: []string{"stderr"},
 	}
 	var opt []zap.Option
-	l, err  := c.Build(opt...)
+	l, err := c.Build(opt...)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +68,7 @@ func newLogger() *zap.Logger{
 func (s *server) run() error {
 	ctx := context.Background()
 
-	d, err := datastore.New(s.dataStoreCfg)
+	d, err := mongodb.New(ctx, s.dataStoreCfg)
 	if err != nil {
 		return err
 	}

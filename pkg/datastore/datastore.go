@@ -1,35 +1,23 @@
 package datastore
 
-import (
-	"database/sql"
-	"fmt"
-
-	_ "github.com/go-sql-driver/mysql"
-)
+import "context"
 
 type Config struct {
 	User     string
 	Password string
 	Address  string
-	DBName   string
+	Database string
 }
 
 type DataStore interface {
+	// Find executes a find commandand returns an iterator over the matching items.
+	Find(ctx context.Context, kind string) (Iterator, error)
 }
 
-type mysqlStore struct {
-	db *sql.DB
-}
+type Iterator interface {
+	// Next gets the next item for this cursor.
+	Next(ctx context.Context) bool
 
-func New(cfg Config) (DataStore, error) {
-	db, err := sql.Open("mysql",
-		fmt.Sprintf("%s:%s@tcp(%s)/%s", cfg.User, cfg.Password, cfg.Address, cfg.DBName))
-	if err != nil {
-		return nil, err
-	}
-
-	s := mysqlStore{
-		db: db,
-	}
-	return s, nil
+	// Decode will unmarshal the current item into given value.
+	Decode(value interface{}) error
 }
