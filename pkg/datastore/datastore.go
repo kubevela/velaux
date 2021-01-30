@@ -10,6 +10,8 @@ type Config struct {
 }
 
 type DataStore interface {
+	Put(ctx context.Context, kind string, entity interface{}) error
+
 	// Find executes a find commandand returns an iterator over the matching items.
 	Find(ctx context.Context, kind string) (Iterator, error)
 }

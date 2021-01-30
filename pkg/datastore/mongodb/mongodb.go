@@ -33,6 +33,15 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 	return m, nil
 }
 
+func (m *mongodb) Put(ctx context.Context, kind string, entity interface{}) error {
+	collection := m.client.Database(m.database).Collection(kind)
+	_, err := collection.InsertOne(ctx, entity)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *mongodb) Find(ctx context.Context, kind string) (datastore.Iterator, error) {
 	collection := m.client.Database(m.database).Collection(kind)
 	// bson.D{{}} specifies 'all documents'
