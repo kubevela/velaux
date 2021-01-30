@@ -20,6 +20,8 @@ type Iterator interface {
 	// Next gets the next item for this cursor.
 	Next(ctx context.Context) bool
 
-	// Decode will unmarshal the current item into given value.
-	Decode(value interface{}) error
+	// Decode will unmarshal the current item into given entity.
+	Decode(entity interface{}) error
+
+	Close(ctx context.Context)
 }

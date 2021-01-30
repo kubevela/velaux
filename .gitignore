@@ -5,6 +5,7 @@
 *.so
 *.dylib
 _bin/
+_tmp/
 node_modules/
 .umi/
 

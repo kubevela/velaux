@@ -14,10 +14,14 @@ type Iterator struct {
 	cur *mongo.Cursor
 }
 
+func (i *Iterator) Close(ctx context.Context) {
+	i.cur.Close(ctx)
+}
+
 func (i *Iterator) Next(ctx context.Context) bool {
 	return i.cur.Next(ctx)
 }
 
-func (i *Iterator) Decode(value interface{}) error {
-	return i.Decode(value)
+func (i *Iterator) Decode(entity interface{}) error {
+	return i.cur.Decode(entity)
 }

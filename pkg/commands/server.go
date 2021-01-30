@@ -31,7 +31,7 @@ func NewServerCommand() *cobra.Command {
 	}
 
 	// grpc
-	cmd.Flags().IntVar(&s.grpcApiCfg.Port, "api-port", s.grpcApiCfg.Port, "The port number used to serve the grpc APIs.")
+	cmd.Flags().IntVar(&s.grpcApiCfg.Port, "api-port", 9000, "The port number used to serve the grpc APIs.")
 
 	// datastore
 	cmd.Flags().StringVar(&s.dataStoreCfg.User, "db-user", s.dataStoreCfg.User, "The username for database login")
@@ -54,6 +54,8 @@ func newLogger() *zap.Logger {
 			Initial:    100,
 			Thereafter: 100,
 		},
+		Encoding:         "console",
+		EncoderConfig:    zap.NewProductionEncoderConfig(),
 		OutputPaths:      []string{"stderr"},
 		ErrorOutputPaths: []string{"stderr"},
 	}

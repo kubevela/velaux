@@ -15,7 +15,7 @@ type Options struct {
 }
 
 func (o *Options) RegisterPersistentFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&o.Address, "address", o.Address, "The address to control-plane api.")
+	cmd.PersistentFlags().StringVar(&o.Address, "address", "localhost:9000", "The address to control-plane api.")
 }
 
 func (o *Options) Validate() error {
@@ -30,6 +30,7 @@ func (o *Options) NewCatalogClient(ctx context.Context) (catalogservice.CatalogS
 		return nil, nil, err
 	}
 	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithInsecure())
 	conn, err := grpc.DialContext(ctx, o.Address, opts...)
 	if err != nil {
 		return nil, nil, err

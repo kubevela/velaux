@@ -39,5 +39,6 @@ func (c *catalogStore) ListCatalogs(ctx context.Context) ([]*model.Catalog, erro
 		}
 		cs = append(cs, &c)
 	}
+	iter.Close(ctx)
 	return cs, nil
 }
