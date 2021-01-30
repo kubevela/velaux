@@ -11,6 +11,11 @@ build-cli:
 
 .PHONY: gen-proto
 gen-proto:
-	protoc --go_out=. --go_opt=paths=source_relative \
-        --go-grpc_out=require_unimplemented_servers=false:. --go-grpc_opt=paths=source_relative \
-        pkg/proto/catalogservice/service.proto
+	protoc \
+		-I . \
+		-I ${GOPATH}/src/github.com/envoyproxy/protoc-gen-validate \
+		--go_out=. --go_opt=paths=source_relative \
+		--go-grpc_out=require_unimplemented_servers=false:. --go-grpc_opt=paths=source_relative \
+		--validate_out="lang=go:." --validate_opt=paths=source_relative \
+		pkg/proto/catalogservice/service.proto \
+		pkg/datastore/model/catalog.proto

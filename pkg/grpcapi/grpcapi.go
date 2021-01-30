@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/oam-dev/velacp/pkg/datastore"
-	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 	"github.com/oam-dev/velacp/pkg/grpcapi/services"
+	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 )
 
 type Config struct {
@@ -24,15 +24,14 @@ type GrpcServer interface {
 }
 
 type grpcServer struct {
-	store  datastore.DataStore
+	ds     datastore.DataStore
 	server *grpc.Server
 	Config
 }
 
-
 func New(d datastore.DataStore, cfg Config) GrpcServer {
 	s := &grpcServer{
-		store: d,
+		ds:     d,
 		Config: cfg,
 	}
 
@@ -40,7 +39,6 @@ func New(d datastore.DataStore, cfg Config) GrpcServer {
 	s.server = grpc.NewServer(opts...)
 	return s
 }
-
 
 func (s *grpcServer) Run(context.Context) error {
 	s.registerServices()
@@ -52,11 +50,11 @@ func (s *grpcServer) Run(context.Context) error {
 	s.Logger.Info("grpc server is running on", zap.Int("port", s.Port))
 	err = s.server.Serve(l)
 	if err != nil && err != grpc.ErrServerStopped {
-		return errors.Wrap(err,"failed to serve")
+		return errors.Wrap(err, "failed to serve")
 	}
 	return nil
 }
 
 func (s *grpcServer) registerServices() {
-	catalogservice.RegisterCatalogServiceServer(s.server, &services.CatalogService{})
+	catalogservice.RegisterCatalogServiceServer(s.server, &services.CatalogService{Store: datastore.NewCatalogStore(s.ds)})
 }
