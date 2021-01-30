@@ -13,6 +13,8 @@ service CatalogService {
 }
 
 message AddCatalogRequest {
+  string name = 1;
+  string desc = 2;
 }
 
 message AddCatalogResponse {

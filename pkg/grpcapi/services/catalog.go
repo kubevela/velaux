@@ -2,8 +2,11 @@ package services
 
 import (
 	"context"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/oam-dev/velacp/pkg/datastore"
+	"github.com/oam-dev/velacp/pkg/datastore/model"
 	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 )
 
@@ -12,7 +15,23 @@ type CatalogService struct {
 }
 
 func (c *CatalogService) AddCatalog(ctx context.Context, request *catalogservice.AddCatalogRequest) (*catalogservice.AddCatalogResponse, error) {
-	panic("implement me")
+	catalog := &model.Catalog{
+		Id:   uuid.New().String(),
+		Name: request.Name,
+		Desc: request.Desc,
+	}
+
+	now := time.Now().Unix()
+	if catalog.CreatedAt == 0 {
+		catalog.CreatedAt = now
+	}
+	catalog.UpdatedAt = now
+
+	err := c.Store.PutCatalog(ctx, catalog)
+	if err != nil {
+		return nil, err
+	}
+	return &catalogservice.AddCatalogResponse{}, nil
 }
 
 func (c *CatalogService) GetCatalog(ctx context.Context, request *catalogservice.GetCatalogRequest) (*catalogservice.GetCatalogResponse, error) {

@@ -44,6 +44,10 @@ func (m *AddCatalogRequest) Validate() error {
 		return nil
 	}
 
+	// no validation rules for Name
+
+	// no validation rules for Desc
+
 	return nil
 }
 
