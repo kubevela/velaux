@@ -50,6 +50,8 @@ func newAddCommand(o *client.Options) *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar(&req.Name, "name", req.Name, "The catalog name.")
+	cmd.MarkFlagRequired("name")
+	cmd.Flags().StringVar(&req.Desc, "desc", req.Desc, "The catalog description.")
 	return cmd
 }
 
