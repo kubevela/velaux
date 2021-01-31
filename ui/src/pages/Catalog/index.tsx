@@ -7,8 +7,6 @@ type CatalogItem = {
   id: string;
   name: string;
   desc: string;
-  created_at: string;
-  updated_at: string;
   url: string;
 };
 
@@ -17,7 +15,7 @@ export default () => (
     toolBarRender={() => {
       return [
         <Button key="3" type="primary">
-          新建
+          Add
         </Button>,
       ];
     }}
@@ -25,12 +23,17 @@ export default () => (
       filterType: 'light',
     }}
     rowKey="name"
-    headerTitle="基础列表"
+    headerTitle="Catalog list"
     request={async (params = {}) =>
       request<{
-        data: CatalogItem[];
+        catalogs: CatalogItem[];
       }>('/api/catalogs', {
         params,
+      }).then((res) => {
+        return {
+          data: res.catalogs,
+          success: true,
+        };
       })
     }
     pagination={{
@@ -40,7 +43,7 @@ export default () => (
     metas={{
       title: {
         dataIndex: 'name',
-        title: '用户',
+        title: 'Name',
       },
       description: {
         dataIndex: 'desc',
@@ -49,31 +52,30 @@ export default () => (
       actions: {
         render: (text, row) => [
           <a href={row.url} target="_blank" rel="noopener noreferrer" key="warning">
-            信息
+            Detail
           </a>,
           <a href={row.url} target="_blank" rel="noopener noreferrer" key="view">
-            打开
+            Open
           </a>,
         ],
         search: false,
       },
-      status: {
-        // 自己扩展的字段，主要用于筛选，不在列表中显示
-        title: '状态',
+      type: {
+        title: 'Type',
         valueType: 'select',
         valueEnum: {
-          all: { text: '全部', status: 'Default' },
-          open: {
-            text: '未解决',
-            status: 'Error',
+          all: { text: 'All', status: 'Default' },
+          builtin: {
+            text: 'Builtin',
+            status: 'builtin',
           },
-          closed: {
-            text: '已解决',
-            status: 'Success',
+          helm: {
+            text: 'Helm',
+            status: 'helm',
           },
-          processing: {
-            text: '解决中',
-            status: 'Processing',
+          terraform: {
+            text: 'Terraform',
+            status: 'terraform',
           },
         },
       },
