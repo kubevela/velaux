@@ -2,20 +2,20 @@ import { Request, Response } from 'express';
 
 const getCatalogs = (req: Request, res: Response) => {
   res.json({
-    data: [
+    catalogs: [
       {
-        id: '000000001',
+        id: 'f430df0d-c76e-400e-ba62-db1098da71b9',
         name: 'test',
         desc: 'First catalog',
-        created_at: '2021-01-20',
-        updated_at: '2021-01-21',
+        createdAt: '1612121016',
+        updatedAt: '1612121016',
       },
       {
-        id: '000000002',
+        id: 'd63b41e3-398e-48d5-9b07-e26a519d1075',
         name: 'test2',
         desc: 'Second catalog',
-        created_at: '2021-01-20',
-        updated_at: '2021-01-21',
+        createdAt: '1612121016',
+        updatedAt: '1612121016',
       },
     ],
   });
