@@ -4,11 +4,16 @@ package vela.api.service.catalogservice;
 option go_package = "github.com/oam-dev/velacp/pkg/proto/catalogservice";
 
 import "pkg/datastore/model/catalog.proto";
+import "google/api/annotations.proto";
 
 service CatalogService {
   rpc AddCatalog(AddCatalogRequest) returns (AddCatalogResponse) {}
   rpc GetCatalog(GetCatalogRequest) returns (GetCatalogResponse) {}
-  rpc ListCatalogs(ListCatalogsRequest) returns (ListCatalogsResponse) {}
+  rpc ListCatalogs(ListCatalogsRequest) returns (ListCatalogsResponse) {
+    option (google.api.http) = {
+      get: "/api/catalogs"
+    };
+  }
   rpc DelCatalog(DelCatalogRequest) returns (DelCatalogResponse) {}
 }
 
