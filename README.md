@@ -1,13 +1,18 @@
 # velacp
+
 KubeVela control plane to manage KubeVela resources: applications, environments, catalogs, clusters, etc.
 
 ![alt](./doc/images/vela_logo.png)
+
+## Architecture
 
 This project is based on the following tech stacks:
 
 - grpc
 - mongodb
 - ant-design-pro
+
+![alt](./doc/images/velacp-arch.png)
 
 ## Quickstart
 
