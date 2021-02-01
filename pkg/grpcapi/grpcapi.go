@@ -77,5 +77,7 @@ func (s *grpcServer) startHTTP(ctx context.Context) {
 	}
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	http.ListenAndServe(fmt.Sprintf(":%d", s.HttpPort), mux)
+	addr := fmt.Sprintf(":%d", s.HttpPort)
+	s.Logger.Info("http server is running on", zap.Int("port", s.HttpPort))
+	http.ListenAndServe(addr, mux)
 }

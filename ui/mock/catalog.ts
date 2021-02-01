@@ -22,5 +22,5 @@ const getCatalogs = (req: Request, res: Response) => {
 };
 
 export default {
-  'GET /api/catalogs': getCatalogs,
+  // 'GET /api/catalogs': getCatalogs,
 };
