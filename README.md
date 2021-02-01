@@ -68,10 +68,11 @@ $ _bin/velactl catalog list
 ### Start dashboard
 
 Run:
-```
+```bash
 $ cd ui/
 $ yarn
 ... download dependencies ...
+
 $ yarn start
 Starting the development server...
 ```
