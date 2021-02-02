@@ -35,7 +35,12 @@ func (c *CatalogService) PutCatalog(ctx context.Context, request *catalogservice
 }
 
 func (c *CatalogService) GetCatalog(ctx context.Context, request *catalogservice.GetCatalogRequest) (*catalogservice.GetCatalogResponse, error) {
-	panic("implement me")
+	res, err := c.Store.GetCatalog(ctx, request.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &catalogservice.GetCatalogResponse{Catalog: res}, nil
+
 }
 
 func (c *CatalogService) ListCatalogs(ctx context.Context, request *catalogservice.ListCatalogsRequest) (*catalogservice.ListCatalogsResponse, error) {

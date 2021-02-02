@@ -11,6 +11,7 @@ const catalogKind = "Catalog"
 type CatalogStore interface {
 	PutCatalog(ctx context.Context, catalog *model.Catalog) error
 	DelCatalog(ctx context.Context, name string) error
+	GetCatalog(ctx context.Context, name string) (*model.Catalog, error)
 	ListCatalogs(ctx context.Context) ([]*model.Catalog, error)
 }
 
@@ -20,6 +21,15 @@ func NewCatalogStore(ds DataStore) CatalogStore {
 
 type catalogStore struct {
 	ds DataStore
+}
+
+func (c *catalogStore) GetCatalog(ctx context.Context, name string) (*model.Catalog, error) {
+	res := &model.Catalog{}
+	err := c.ds.Get(ctx, catalogKind, name, res)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (c *catalogStore) DelCatalog(ctx context.Context, name string) error {

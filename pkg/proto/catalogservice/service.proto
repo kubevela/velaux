@@ -26,9 +26,11 @@ message PutCatalogResponse {
 }
 
 message GetCatalogRequest {
+  string name = 1;
 }
 
 message GetCatalogResponse {
+  vela.api.model.Catalog catalog = 1;
 }
 
 message ListCatalogsRequest {

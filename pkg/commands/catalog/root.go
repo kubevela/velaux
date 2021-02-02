@@ -24,7 +24,7 @@ func NewCatalogCommand() *cobra.Command {
 	cmd.AddCommand(
 		newPutCommand(o),
 		newListCommand(o),
-		// newGetCommand(o),
+		newGetCommand(o),
 		newDelCommand(o),
 	)
 	return cmd
@@ -46,7 +46,7 @@ func newPutCommand(o *client.Options) *cobra.Command {
 			defer conn.Close()
 
 			if len(args) < 1 {
-				return errors.New("must specify name for the app")
+				return errors.New("must specify name for the catalog")
 			}
 			req.Name = args[0]
 
@@ -74,17 +74,52 @@ func newListCommand(o *client.Options) *cobra.Command {
 			defer conn.Close()
 
 			req := &catalogservice.ListCatalogsRequest{}
-			resp, err := c.ListCatalogs(ctx, req)
+			res, err := c.ListCatalogs(ctx, req)
 			if err != nil {
 				return err
 			}
 
-			b, err := json.MarshalIndent(resp, "", "  ")
+			b, err := json.MarshalIndent(res, "", "  ")
 			if err != nil {
 				return err
 			}
 			fmt.Println(string(b))
 
+			return nil
+		},
+	}
+	return cmd
+}
+
+func newGetCommand(o *client.Options) *cobra.Command {
+	req := &catalogservice.GetCatalogRequest{}
+
+	cmd := &cobra.Command{
+		Use:   "get",
+		Short: "Get a catalog",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			c, conn, err := o.NewCatalogClient(ctx)
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			if len(args) < 1 {
+				return errors.New("must specify name for the catalog")
+			}
+			req.Name = args[0]
+
+			res, err := c.GetCatalog(ctx, req)
+			if err != nil {
+				return err
+			}
+
+			b, err := json.MarshalIndent(res, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Println(string(b))
 			return nil
 		},
 	}
@@ -106,7 +141,7 @@ func newDelCommand(o *client.Options) *cobra.Command {
 			defer conn.Close()
 
 			if len(args) < 1 {
-				return errors.New("must specify name for the app")
+				return errors.New("must specify name for the catalog")
 			}
 			req.Name = args[0]
 

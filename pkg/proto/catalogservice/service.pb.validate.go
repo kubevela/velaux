@@ -182,6 +182,8 @@ func (m *GetCatalogRequest) Validate() error {
 		return nil
 	}
 
+	// no validation rules for Name
+
 	return nil
 }
 
@@ -247,6 +249,16 @@ var _ interface {
 func (m *GetCatalogResponse) Validate() error {
 	if m == nil {
 		return nil
+	}
+
+	if v, ok := interface{}(m.GetCatalog()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetCatalogResponseValidationError{
+				field:  "Catalog",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
 	}
 
 	return nil
