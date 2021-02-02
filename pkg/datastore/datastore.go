@@ -14,7 +14,9 @@ type DataStore interface {
 
 	Delete(ctx context.Context, kind, name string) error
 
-	// Find executes a find commandand returns an iterator over the matching items.
+	Get(ctx context.Context, kind, name string, decodeTo interface{}) error
+
+	// Find executes a find command and returns an iterator over the matching items.
 	Find(ctx context.Context, kind string) (Iterator, error)
 }
 

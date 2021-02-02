@@ -33,6 +33,11 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 	return m, nil
 }
 
+func (m *mongodb) Get(ctx context.Context, kind, name string, decodeTo interface{}) error {
+	collection := m.client.Database(m.database).Collection(kind)
+	return collection.FindOne(ctx, makeNameFilter(name)).Decode(decodeTo)
+}
+
 func (m *mongodb) Put(ctx context.Context, kind string, entity interface{}) error {
 	collection := m.client.Database(m.database).Collection(kind)
 	_, err := collection.InsertOne(ctx, entity)
@@ -52,6 +57,7 @@ func (m *mongodb) Find(ctx context.Context, kind string) (datastore.Iterator, er
 	}
 	return &Iterator{cur: cur}, nil
 }
+
 func (m *mongodb) Delete(ctx context.Context, kind, name string) error {
 	collection := m.client.Database(m.database).Collection(kind)
 	// delete at most one document in which the "name" field is "Bob" or "bob"
@@ -61,6 +67,10 @@ func (m *mongodb) Delete(ctx context.Context, kind, name string) error {
 		Strength:  1,
 		CaseLevel: false,
 	})
-	_, err := collection.DeleteOne(ctx, bson.D{{"name", name}}, opts)
+	_, err := collection.DeleteOne(ctx, makeNameFilter(name), opts)
 	return err
+}
+
+func makeNameFilter(name string) bson.D {
+	return bson.D{{"name", name}}
 }
