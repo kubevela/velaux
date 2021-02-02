@@ -39,8 +39,8 @@ $ _bin/velacp server \
 
 Use velactl to add catalogs
 ```bash
-$ _bin/velactl catalog add --name test --desc "First catalog"
-$ _bin/velactl catalog add --name test2 --desc "Second catalog"
+$ _bin/velactl catalog put test --desc "First catalog"
+$ _bin/velactl catalog put test2 --desc "Second catalog"
 ```
 
 Use velactl to list catalogs:

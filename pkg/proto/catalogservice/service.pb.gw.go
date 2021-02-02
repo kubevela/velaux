@@ -31,8 +31,8 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_CatalogService_AddCatalog_0(ctx context.Context, marshaler runtime.Marshaler, client CatalogServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq AddCatalogRequest
+func request_CatalogService_PutCatalog_0(ctx context.Context, marshaler runtime.Marshaler, client CatalogServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq PutCatalogRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -43,13 +43,13 @@ func request_CatalogService_AddCatalog_0(ctx context.Context, marshaler runtime.
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.AddCatalog(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.PutCatalog(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_CatalogService_AddCatalog_0(ctx context.Context, marshaler runtime.Marshaler, server CatalogServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq AddCatalogRequest
+func local_request_CatalogService_PutCatalog_0(ctx context.Context, marshaler runtime.Marshaler, server CatalogServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq PutCatalogRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -60,7 +60,7 @@ func local_request_CatalogService_AddCatalog_0(ctx context.Context, marshaler ru
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.AddCatalog(ctx, &protoReq)
+	msg, err := server.PutCatalog(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -157,18 +157,18 @@ func local_request_CatalogService_DelCatalog_0(ctx context.Context, marshaler ru
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCatalogServiceHandlerFromEndpoint instead.
 func RegisterCatalogServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server CatalogServiceServer) error {
 
-	mux.Handle("POST", pattern_CatalogService_AddCatalog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_CatalogService_PutCatalog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/vela.api.service.catalogservice.CatalogService/AddCatalog")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/vela.api.service.catalogservice.CatalogService/PutCatalog")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_CatalogService_AddCatalog_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_CatalogService_PutCatalog_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -176,7 +176,7 @@ func RegisterCatalogServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 			return
 		}
 
-		forward_CatalogService_AddCatalog_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CatalogService_PutCatalog_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -290,23 +290,23 @@ func RegisterCatalogServiceHandler(ctx context.Context, mux *runtime.ServeMux, c
 // "CatalogServiceClient" to call the correct interceptors.
 func RegisterCatalogServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client CatalogServiceClient) error {
 
-	mux.Handle("POST", pattern_CatalogService_AddCatalog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_CatalogService_PutCatalog_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/vela.api.service.catalogservice.CatalogService/AddCatalog")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/vela.api.service.catalogservice.CatalogService/PutCatalog")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_CatalogService_AddCatalog_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_CatalogService_PutCatalog_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_CatalogService_AddCatalog_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CatalogService_PutCatalog_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -374,7 +374,7 @@ func RegisterCatalogServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_CatalogService_AddCatalog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"vela.api.service.catalogservice.CatalogService", "AddCatalog"}, ""))
+	pattern_CatalogService_PutCatalog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"vela.api.service.catalogservice.CatalogService", "PutCatalog"}, ""))
 
 	pattern_CatalogService_GetCatalog_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"vela.api.service.catalogservice.CatalogService", "GetCatalog"}, ""))
 
@@ -384,7 +384,7 @@ var (
 )
 
 var (
-	forward_CatalogService_AddCatalog_0 = runtime.ForwardResponseMessage
+	forward_CatalogService_PutCatalog_0 = runtime.ForwardResponseMessage
 
 	forward_CatalogService_GetCatalog_0 = runtime.ForwardResponseMessage
 

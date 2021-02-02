@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -21,18 +22,20 @@ func NewCatalogCommand() *cobra.Command {
 	o.RegisterPersistentFlags(cmd)
 
 	cmd.AddCommand(
-		newAddCommand(o),
+		newPutCommand(o),
 		newListCommand(o),
+		// newGetCommand(o),
+		newDelCommand(o),
 	)
 	return cmd
 
 }
 
-func newAddCommand(o *client.Options) *cobra.Command {
-	req := &catalogservice.AddCatalogRequest{}
+func newPutCommand(o *client.Options) *cobra.Command {
+	req := &catalogservice.PutCatalogRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "add",
+		Use:   "put",
 		Short: "Add a catalog or update existing one",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -42,15 +45,18 @@ func newAddCommand(o *client.Options) *cobra.Command {
 			}
 			defer conn.Close()
 
-			_, err = c.AddCatalog(ctx, req)
+			if len(args) < 1 {
+				return errors.New("must specify name for the app")
+			}
+			req.Name = args[0]
+
+			_, err = c.PutCatalog(ctx, req)
 			if err != nil {
 				return err
 			}
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&req.Name, "name", req.Name, "The catalog name.")
-	cmd.MarkFlagRequired("name")
 	cmd.Flags().StringVar(&req.Desc, "desc", req.Desc, "The catalog description.")
 	return cmd
 }
@@ -79,6 +85,35 @@ func newListCommand(o *client.Options) *cobra.Command {
 			}
 			fmt.Println(string(b))
 
+			return nil
+		},
+	}
+	return cmd
+}
+
+func newDelCommand(o *client.Options) *cobra.Command {
+	req := &catalogservice.DelCatalogRequest{}
+
+	cmd := &cobra.Command{
+		Use:   "del",
+		Short: "Delete a catalog",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			c, conn, err := o.NewCatalogClient(ctx)
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			if len(args) < 1 {
+				return errors.New("must specify name for the app")
+			}
+			req.Name = args[0]
+
+			_, err = c.DelCatalog(ctx, req)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	}

@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CatalogServiceClient interface {
-	AddCatalog(ctx context.Context, in *AddCatalogRequest, opts ...grpc.CallOption) (*AddCatalogResponse, error)
+	PutCatalog(ctx context.Context, in *PutCatalogRequest, opts ...grpc.CallOption) (*PutCatalogResponse, error)
 	GetCatalog(ctx context.Context, in *GetCatalogRequest, opts ...grpc.CallOption) (*GetCatalogResponse, error)
 	ListCatalogs(ctx context.Context, in *ListCatalogsRequest, opts ...grpc.CallOption) (*ListCatalogsResponse, error)
 	DelCatalog(ctx context.Context, in *DelCatalogRequest, opts ...grpc.CallOption) (*DelCatalogResponse, error)
@@ -32,9 +32,9 @@ func NewCatalogServiceClient(cc grpc.ClientConnInterface) CatalogServiceClient {
 	return &catalogServiceClient{cc}
 }
 
-func (c *catalogServiceClient) AddCatalog(ctx context.Context, in *AddCatalogRequest, opts ...grpc.CallOption) (*AddCatalogResponse, error) {
-	out := new(AddCatalogResponse)
-	err := c.cc.Invoke(ctx, "/vela.api.service.catalogservice.CatalogService/AddCatalog", in, out, opts...)
+func (c *catalogServiceClient) PutCatalog(ctx context.Context, in *PutCatalogRequest, opts ...grpc.CallOption) (*PutCatalogResponse, error) {
+	out := new(PutCatalogResponse)
+	err := c.cc.Invoke(ctx, "/vela.api.service.catalogservice.CatalogService/PutCatalog", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *catalogServiceClient) DelCatalog(ctx context.Context, in *DelCatalogReq
 // All implementations should embed UnimplementedCatalogServiceServer
 // for forward compatibility
 type CatalogServiceServer interface {
-	AddCatalog(context.Context, *AddCatalogRequest) (*AddCatalogResponse, error)
+	PutCatalog(context.Context, *PutCatalogRequest) (*PutCatalogResponse, error)
 	GetCatalog(context.Context, *GetCatalogRequest) (*GetCatalogResponse, error)
 	ListCatalogs(context.Context, *ListCatalogsRequest) (*ListCatalogsResponse, error)
 	DelCatalog(context.Context, *DelCatalogRequest) (*DelCatalogResponse, error)
@@ -82,8 +82,8 @@ type CatalogServiceServer interface {
 type UnimplementedCatalogServiceServer struct {
 }
 
-func (UnimplementedCatalogServiceServer) AddCatalog(context.Context, *AddCatalogRequest) (*AddCatalogResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddCatalog not implemented")
+func (UnimplementedCatalogServiceServer) PutCatalog(context.Context, *PutCatalogRequest) (*PutCatalogResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutCatalog not implemented")
 }
 func (UnimplementedCatalogServiceServer) GetCatalog(context.Context, *GetCatalogRequest) (*GetCatalogResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCatalog not implemented")
@@ -106,20 +106,20 @@ func RegisterCatalogServiceServer(s grpc.ServiceRegistrar, srv CatalogServiceSer
 	s.RegisterService(&CatalogService_ServiceDesc, srv)
 }
 
-func _CatalogService_AddCatalog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddCatalogRequest)
+func _CatalogService_PutCatalog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutCatalogRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CatalogServiceServer).AddCatalog(ctx, in)
+		return srv.(CatalogServiceServer).PutCatalog(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/vela.api.service.catalogservice.CatalogService/AddCatalog",
+		FullMethod: "/vela.api.service.catalogservice.CatalogService/PutCatalog",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CatalogServiceServer).AddCatalog(ctx, req.(*AddCatalogRequest))
+		return srv.(CatalogServiceServer).PutCatalog(ctx, req.(*PutCatalogRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -186,8 +186,8 @@ var CatalogService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CatalogServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "AddCatalog",
-			Handler:    _CatalogService_AddCatalog_Handler,
+			MethodName: "PutCatalog",
+			Handler:    _CatalogService_PutCatalog_Handler,
 		},
 		{
 			MethodName: "GetCatalog",

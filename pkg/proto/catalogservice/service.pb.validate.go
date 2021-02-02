@@ -36,10 +36,10 @@ var (
 // define the regex for a UUID once up-front
 var _service_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
-// Validate checks the field values on AddCatalogRequest with the rules defined
+// Validate checks the field values on PutCatalogRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, an
 // error is returned.
-func (m *AddCatalogRequest) Validate() error {
+func (m *PutCatalogRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -51,9 +51,9 @@ func (m *AddCatalogRequest) Validate() error {
 	return nil
 }
 
-// AddCatalogRequestValidationError is the validation error returned by
-// AddCatalogRequest.Validate if the designated constraints aren't met.
-type AddCatalogRequestValidationError struct {
+// PutCatalogRequestValidationError is the validation error returned by
+// PutCatalogRequest.Validate if the designated constraints aren't met.
+type PutCatalogRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -61,24 +61,24 @@ type AddCatalogRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e AddCatalogRequestValidationError) Field() string { return e.field }
+func (e PutCatalogRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e AddCatalogRequestValidationError) Reason() string { return e.reason }
+func (e PutCatalogRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e AddCatalogRequestValidationError) Cause() error { return e.cause }
+func (e PutCatalogRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e AddCatalogRequestValidationError) Key() bool { return e.key }
+func (e PutCatalogRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e AddCatalogRequestValidationError) ErrorName() string {
-	return "AddCatalogRequestValidationError"
+func (e PutCatalogRequestValidationError) ErrorName() string {
+	return "PutCatalogRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e AddCatalogRequestValidationError) Error() string {
+func (e PutCatalogRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -90,14 +90,14 @@ func (e AddCatalogRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sAddCatalogRequest.%s: %s%s",
+		"invalid %sPutCatalogRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = AddCatalogRequestValidationError{}
+var _ error = PutCatalogRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -105,12 +105,12 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = AddCatalogRequestValidationError{}
+} = PutCatalogRequestValidationError{}
 
-// Validate checks the field values on AddCatalogResponse with the rules
+// Validate checks the field values on PutCatalogResponse with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *AddCatalogResponse) Validate() error {
+func (m *PutCatalogResponse) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -118,9 +118,9 @@ func (m *AddCatalogResponse) Validate() error {
 	return nil
 }
 
-// AddCatalogResponseValidationError is the validation error returned by
-// AddCatalogResponse.Validate if the designated constraints aren't met.
-type AddCatalogResponseValidationError struct {
+// PutCatalogResponseValidationError is the validation error returned by
+// PutCatalogResponse.Validate if the designated constraints aren't met.
+type PutCatalogResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -128,24 +128,24 @@ type AddCatalogResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e AddCatalogResponseValidationError) Field() string { return e.field }
+func (e PutCatalogResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e AddCatalogResponseValidationError) Reason() string { return e.reason }
+func (e PutCatalogResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e AddCatalogResponseValidationError) Cause() error { return e.cause }
+func (e PutCatalogResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e AddCatalogResponseValidationError) Key() bool { return e.key }
+func (e PutCatalogResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e AddCatalogResponseValidationError) ErrorName() string {
-	return "AddCatalogResponseValidationError"
+func (e PutCatalogResponseValidationError) ErrorName() string {
+	return "PutCatalogResponseValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e AddCatalogResponseValidationError) Error() string {
+func (e PutCatalogResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -157,14 +157,14 @@ func (e AddCatalogResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sAddCatalogResponse.%s: %s%s",
+		"invalid %sPutCatalogResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = AddCatalogResponseValidationError{}
+var _ error = PutCatalogResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -172,7 +172,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = AddCatalogResponseValidationError{}
+} = PutCatalogResponseValidationError{}
 
 // Validate checks the field values on GetCatalogRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, an
@@ -464,6 +464,8 @@ func (m *DelCatalogRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
+
+	// no validation rules for Name
 
 	return nil
 }
