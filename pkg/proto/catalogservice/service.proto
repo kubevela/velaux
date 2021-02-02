@@ -7,7 +7,7 @@ import "pkg/datastore/model/catalog.proto";
 import "google/api/annotations.proto";
 
 service CatalogService {
-  rpc AddCatalog(AddCatalogRequest) returns (AddCatalogResponse) {}
+  rpc PutCatalog(PutCatalogRequest) returns (PutCatalogResponse) {}
   rpc GetCatalog(GetCatalogRequest) returns (GetCatalogResponse) {}
   rpc ListCatalogs(ListCatalogsRequest) returns (ListCatalogsResponse) {
     option (google.api.http) = {
@@ -17,12 +17,12 @@ service CatalogService {
   rpc DelCatalog(DelCatalogRequest) returns (DelCatalogResponse) {}
 }
 
-message AddCatalogRequest {
+message PutCatalogRequest {
   string name = 1;
   string desc = 2;
 }
 
-message AddCatalogResponse {
+message PutCatalogResponse {
 }
 
 message GetCatalogRequest {
@@ -39,6 +39,7 @@ message ListCatalogsResponse {
 }
 
 message DelCatalogRequest {
+  string name = 1;
 }
 
 message DelCatalogResponse {

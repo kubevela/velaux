@@ -10,6 +10,7 @@ const catalogKind = "Catalog"
 
 type CatalogStore interface {
 	PutCatalog(ctx context.Context, catalog *model.Catalog) error
+	DelCatalog(ctx context.Context, name string) error
 	ListCatalogs(ctx context.Context) ([]*model.Catalog, error)
 }
 
@@ -19,6 +20,10 @@ func NewCatalogStore(ds DataStore) CatalogStore {
 
 type catalogStore struct {
 	ds DataStore
+}
+
+func (c *catalogStore) DelCatalog(ctx context.Context, name string) error {
+	return c.ds.Delete(ctx, catalogKind, name)
 }
 
 func (c *catalogStore) PutCatalog(ctx context.Context, catalog *model.Catalog) error {

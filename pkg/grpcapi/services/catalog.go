@@ -14,7 +14,7 @@ type CatalogService struct {
 	Store datastore.CatalogStore
 }
 
-func (c *CatalogService) AddCatalog(ctx context.Context, request *catalogservice.AddCatalogRequest) (*catalogservice.AddCatalogResponse, error) {
+func (c *CatalogService) PutCatalog(ctx context.Context, request *catalogservice.PutCatalogRequest) (*catalogservice.PutCatalogResponse, error) {
 	catalog := &model.Catalog{
 		Id:   uuid.New().String(),
 		Name: request.Name,
@@ -31,7 +31,7 @@ func (c *CatalogService) AddCatalog(ctx context.Context, request *catalogservice
 	if err != nil {
 		return nil, err
 	}
-	return &catalogservice.AddCatalogResponse{}, nil
+	return &catalogservice.PutCatalogResponse{}, nil
 }
 
 func (c *CatalogService) GetCatalog(ctx context.Context, request *catalogservice.GetCatalogRequest) (*catalogservice.GetCatalogResponse, error) {
@@ -49,5 +49,9 @@ func (c *CatalogService) ListCatalogs(ctx context.Context, request *catalogservi
 }
 
 func (c *CatalogService) DelCatalog(ctx context.Context, request *catalogservice.DelCatalogRequest) (*catalogservice.DelCatalogResponse, error) {
-	panic("implement me")
+	err := c.Store.DelCatalog(ctx, request.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &catalogservice.DelCatalogResponse{}, nil
 }

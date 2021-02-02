@@ -52,3 +52,15 @@ func (m *mongodb) Find(ctx context.Context, kind string) (datastore.Iterator, er
 	}
 	return &Iterator{cur: cur}, nil
 }
+func (m *mongodb) Delete(ctx context.Context, kind, name string) error {
+	collection := m.client.Database(m.database).Collection(kind)
+	// delete at most one document in which the "name" field is "Bob" or "bob"
+	// specify the SetCollation option to provide a collation that will ignore case for string comparisons
+	opts := options.Delete().SetCollation(&options.Collation{
+		Locale:    "en_US",
+		Strength:  1,
+		CaseLevel: false,
+	})
+	_, err := collection.DeleteOne(ctx, bson.D{{"name", name}}, opts)
+	return err
+}
