@@ -22,9 +22,6 @@ func (c *CatalogService) PutCatalog(ctx context.Context, request *catalogservice
 	}
 
 	now := time.Now().Unix()
-	if catalog.CreatedAt == 0 {
-		catalog.CreatedAt = now
-	}
 	catalog.UpdatedAt = now
 
 	err := c.Store.PutCatalog(ctx, catalog)

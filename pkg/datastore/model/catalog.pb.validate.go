@@ -59,13 +59,6 @@ func (m *Catalog) Validate() error {
 
 	// no validation rules for Desc
 
-	if m.GetCreatedAt() <= 0 {
-		return CatalogValidationError{
-			field:  "CreatedAt",
-			reason: "value must be greater than 0",
-		}
-	}
-
 	if m.GetUpdatedAt() <= 0 {
 		return CatalogValidationError{
 			field:  "UpdatedAt",
