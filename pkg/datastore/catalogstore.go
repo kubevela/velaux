@@ -60,5 +60,7 @@ func (c *catalogStore) ListCatalogs(ctx context.Context) ([]*model.Catalog, erro
 }
 
 func (c *catalogStore) PutPackages(ctx context.Context, plist []*model.Package) error {
-	return nil
+	for _, p := range plist {
+		c.ds.Put(ctx, "Package", p)
+	}
 }
