@@ -37,11 +37,19 @@ func (c *CatalogService) PutCatalog(ctx context.Context, request *catalogservice
 }
 
 func (c *CatalogService) GetCatalog(ctx context.Context, request *catalogservice.GetCatalogRequest) (*catalogservice.GetCatalogResponse, error) {
-	res, err := c.Store.GetCatalog(ctx, request.Name)
+	catalog, err := c.Store.GetCatalog(ctx, request.Name)
 	if err != nil {
 		return nil, err
 	}
-	return &catalogservice.GetCatalogResponse{Catalog: res}, nil
+	packages, err := c.Store.GetPackages(ctx, request.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &catalogservice.GetCatalogResponse{
+		Catalog:  catalog,
+		Packages: packages,
+	}, nil
 
 }
 
@@ -74,7 +82,7 @@ func (c *CatalogService) SyncCatalog(ctx context.Context, request *catalogservic
 		return nil, err
 	}
 
-	err = c.Store.PutPackages(ctx, plist)
+	err = c.Store.PutPackages(ctx, request.Name, plist)
 	if err != nil {
 		return nil, err
 	}
