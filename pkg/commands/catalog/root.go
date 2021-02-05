@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/oam-dev/velacp/pkg/client"
+	"github.com/oam-dev/velacp/pkg/datastore/model"
 	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 )
 
@@ -33,7 +34,9 @@ func NewCatalogCommand() *cobra.Command {
 }
 
 func newPutCommand(o *client.Options) *cobra.Command {
-	req := &catalogservice.PutCatalogRequest{}
+	req := &catalogservice.PutCatalogRequest{
+		Catalog: &model.Catalog{},
+	}
 
 	cmd := &cobra.Command{
 		Use:   "put",

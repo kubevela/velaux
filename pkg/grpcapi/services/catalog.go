@@ -95,7 +95,8 @@ func scanRepo(ctx context.Context, url string, rootdir string) ([]*model.Package
 	storer := memory.NewStorage()
 
 	_, err := git.CloneContext(ctx, storer, fs, &git.CloneOptions{
-		URL: url,
+		URL:   url,
+		Depth: 1,
 	})
 	if err != nil {
 		return nil, err
