@@ -26,52 +26,6 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type Definition_DefinitionType int32
-
-const (
-	Definition_WORKLOAD_DEFINITION Definition_DefinitionType = 0
-	Definition_TRAIT_DEFINITION    Definition_DefinitionType = 1
-)
-
-// Enum value maps for Definition_DefinitionType.
-var (
-	Definition_DefinitionType_name = map[int32]string{
-		0: "WORKLOAD_DEFINITION",
-		1: "TRAIT_DEFINITION",
-	}
-	Definition_DefinitionType_value = map[string]int32{
-		"WORKLOAD_DEFINITION": 0,
-		"TRAIT_DEFINITION":    1,
-	}
-)
-
-func (x Definition_DefinitionType) Enum() *Definition_DefinitionType {
-	p := new(Definition_DefinitionType)
-	*p = x
-	return p
-}
-
-func (x Definition_DefinitionType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (Definition_DefinitionType) Descriptor() protoreflect.EnumDescriptor {
-	return file_pkg_datastore_model_catalog_proto_enumTypes[0].Descriptor()
-}
-
-func (Definition_DefinitionType) Type() protoreflect.EnumType {
-	return &file_pkg_datastore_model_catalog_proto_enumTypes[0]
-}
-
-func (x Definition_DefinitionType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use Definition_DefinitionType.Descriptor instead.
-func (Definition_DefinitionType) EnumDescriptor() ([]byte, []int) {
-	return file_pkg_datastore_model_catalog_proto_rawDescGZIP(), []int{3, 0}
-}
-
 type Catalog struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -176,7 +130,7 @@ type Package struct {
 	Name        string            `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description string            `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	Labels      map[string]string `protobuf:"bytes,3,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	Versions    []*PackageVersion `protobuf:"bytes,15,rep,name=versions,proto3" json:"versions,omitempty"`
+	Versions    []*PackageVersion `protobuf:"bytes,9,rep,name=versions,proto3" json:"versions,omitempty"`
 }
 
 func (x *Package) Reset() {
@@ -244,9 +198,8 @@ type PackageVersion struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Version     string        `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
-	Definitions []*Definition `protobuf:"bytes,2,rep,name=definitions,proto3" json:"definitions,omitempty"`
-	Modules     []*Module     `protobuf:"bytes,3,rep,name=modules,proto3" json:"modules,omitempty"`
+	Version string    `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	Modules []*Module `protobuf:"bytes,9,rep,name=modules,proto3" json:"modules,omitempty"`
 }
 
 func (x *PackageVersion) Reset() {
@@ -288,13 +241,6 @@ func (x *PackageVersion) GetVersion() string {
 	return ""
 }
 
-func (x *PackageVersion) GetDefinitions() []*Definition {
-	if x != nil {
-		return x.Definitions
-	}
-	return nil
-}
-
 func (x *PackageVersion) GetModules() []*Module {
 	if x != nil {
 		return x.Modules
@@ -302,73 +248,19 @@ func (x *PackageVersion) GetModules() []*Module {
 	return nil
 }
 
-type Definition struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Type Definition_DefinitionType `protobuf:"varint,1,opt,name=type,proto3,enum=vela.api.model.Definition_DefinitionType" json:"type,omitempty"`
-	Name string                    `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-}
-
-func (x *Definition) Reset() {
-	*x = Definition{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_datastore_model_catalog_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *Definition) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Definition) ProtoMessage() {}
-
-func (x *Definition) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_datastore_model_catalog_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Definition.ProtoReflect.Descriptor instead.
-func (*Definition) Descriptor() ([]byte, []int) {
-	return file_pkg_datastore_model_catalog_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *Definition) GetType() Definition_DefinitionType {
-	if x != nil {
-		return x.Type
-	}
-	return Definition_WORKLOAD_DEFINITION
-}
-
-func (x *Definition) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
 type Module struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Helm *HelmChart `protobuf:"bytes,1,opt,name=helm,proto3" json:"helm,omitempty"`
+	Helm   *HelmModule   `protobuf:"bytes,1,opt,name=helm,proto3" json:"helm,omitempty"`
+	Native *NativeModule `protobuf:"bytes,2,opt,name=native,proto3" json:"native,omitempty"`
 }
 
 func (x *Module) Reset() {
 	*x = Module{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_pkg_datastore_model_catalog_proto_msgTypes[4]
+		mi := &file_pkg_datastore_model_catalog_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -381,7 +273,7 @@ func (x *Module) String() string {
 func (*Module) ProtoMessage() {}
 
 func (x *Module) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_datastore_model_catalog_proto_msgTypes[4]
+	mi := &file_pkg_datastore_model_catalog_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -394,26 +286,82 @@ func (x *Module) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Module.ProtoReflect.Descriptor instead.
 func (*Module) Descriptor() ([]byte, []int) {
-	return file_pkg_datastore_model_catalog_proto_rawDescGZIP(), []int{4}
+	return file_pkg_datastore_model_catalog_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Module) GetHelm() *HelmChart {
+func (x *Module) GetHelm() *HelmModule {
 	if x != nil {
 		return x.Helm
 	}
 	return nil
 }
 
-type HelmChart struct {
+func (x *Module) GetNative() *NativeModule {
+	if x != nil {
+		return x.Native
+	}
+	return nil
+}
+
+type HelmModule struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Remote *HelmChartRemote `protobuf:"bytes,1,opt,name=remote,proto3" json:"remote,omitempty"`
+	Remote *HelmModuleRemote `protobuf:"bytes,1,opt,name=remote,proto3" json:"remote,omitempty"`
 }
 
-func (x *HelmChart) Reset() {
-	*x = HelmChart{}
+func (x *HelmModule) Reset() {
+	*x = HelmModule{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkg_datastore_model_catalog_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *HelmModule) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HelmModule) ProtoMessage() {}
+
+func (x *HelmModule) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_datastore_model_catalog_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HelmModule.ProtoReflect.Descriptor instead.
+func (*HelmModule) Descriptor() ([]byte, []int) {
+	return file_pkg_datastore_model_catalog_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *HelmModule) GetRemote() *HelmModuleRemote {
+	if x != nil {
+		return x.Remote
+	}
+	return nil
+}
+
+type HelmModuleRemote struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Repo    string `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
+	Name    string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Version string `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+}
+
+func (x *HelmModuleRemote) Reset() {
+	*x = HelmModuleRemote{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pkg_datastore_model_catalog_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -421,13 +369,13 @@ func (x *HelmChart) Reset() {
 	}
 }
 
-func (x *HelmChart) String() string {
+func (x *HelmModuleRemote) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*HelmChart) ProtoMessage() {}
+func (*HelmModuleRemote) ProtoMessage() {}
 
-func (x *HelmChart) ProtoReflect() protoreflect.Message {
+func (x *HelmModuleRemote) ProtoReflect() protoreflect.Message {
 	mi := &file_pkg_datastore_model_catalog_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -439,30 +387,42 @@ func (x *HelmChart) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HelmChart.ProtoReflect.Descriptor instead.
-func (*HelmChart) Descriptor() ([]byte, []int) {
+// Deprecated: Use HelmModuleRemote.ProtoReflect.Descriptor instead.
+func (*HelmModuleRemote) Descriptor() ([]byte, []int) {
 	return file_pkg_datastore_model_catalog_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *HelmChart) GetRemote() *HelmChartRemote {
+func (x *HelmModuleRemote) GetRepo() string {
 	if x != nil {
-		return x.Remote
+		return x.Repo
 	}
-	return nil
+	return ""
 }
 
-type HelmChartRemote struct {
+func (x *HelmModuleRemote) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *HelmModuleRemote) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+type NativeModule struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Repo    string `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
-	Name    string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Version string `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	Path string `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
 }
 
-func (x *HelmChartRemote) Reset() {
-	*x = HelmChartRemote{}
+func (x *NativeModule) Reset() {
+	*x = NativeModule{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pkg_datastore_model_catalog_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -470,13 +430,13 @@ func (x *HelmChartRemote) Reset() {
 	}
 }
 
-func (x *HelmChartRemote) String() string {
+func (x *NativeModule) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*HelmChartRemote) ProtoMessage() {}
+func (*NativeModule) ProtoMessage() {}
 
-func (x *HelmChartRemote) ProtoReflect() protoreflect.Message {
+func (x *NativeModule) ProtoReflect() protoreflect.Message {
 	mi := &file_pkg_datastore_model_catalog_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -488,28 +448,14 @@ func (x *HelmChartRemote) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HelmChartRemote.ProtoReflect.Descriptor instead.
-func (*HelmChartRemote) Descriptor() ([]byte, []int) {
+// Deprecated: Use NativeModule.ProtoReflect.Descriptor instead.
+func (*NativeModule) Descriptor() ([]byte, []int) {
 	return file_pkg_datastore_model_catalog_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *HelmChartRemote) GetRepo() string {
+func (x *NativeModule) GetPath() string {
 	if x != nil {
-		return x.Repo
-	}
-	return ""
-}
-
-func (x *HelmChartRemote) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *HelmChartRemote) GetVersion() string {
-	if x != nil {
-		return x.Version
+		return x.Path
 	}
 	return ""
 }
@@ -541,51 +487,42 @@ var file_pkg_datastore_model_catalog_proto_rawDesc = []byte{
 	0x0b, 0x32, 0x23, 0x2e, 0x76, 0x65, 0x6c, 0x61, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x6f, 0x64,
 	0x65, 0x6c, 0x2e, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x2e, 0x4c, 0x61, 0x62, 0x65, 0x6c,
 	0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x06, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x12, 0x3a,
-	0x0a, 0x08, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x0f, 0x20, 0x03, 0x28, 0x0b,
+	0x0a, 0x08, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x09, 0x20, 0x03, 0x28, 0x0b,
 	0x32, 0x1e, 0x2e, 0x76, 0x65, 0x6c, 0x61, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x6f, 0x64, 0x65,
 	0x6c, 0x2e, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e,
 	0x52, 0x08, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x1a, 0x39, 0x0a, 0x0b, 0x4c, 0x61,
 	0x62, 0x65, 0x6c, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76,
 	0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75,
-	0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x9a, 0x01, 0x0a, 0x0e, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67,
-	0x65, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73,
-	0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69,
-	0x6f, 0x6e, 0x12, 0x3c, 0x0a, 0x0b, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e,
-	0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x76, 0x65, 0x6c, 0x61, 0x2e, 0x61,
-	0x70, 0x69, 0x2e, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x2e, 0x44, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74,
-	0x69, 0x6f, 0x6e, 0x52, 0x0b, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73,
-	0x12, 0x30, 0x0a, 0x07, 0x6d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28,
-	0x0b, 0x32, 0x16, 0x2e, 0x76, 0x65, 0x6c, 0x61, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x6f, 0x64,
-	0x65, 0x6c, 0x2e, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x52, 0x07, 0x6d, 0x6f, 0x64, 0x75, 0x6c,
-	0x65, 0x73, 0x22, 0xa0, 0x01, 0x0a, 0x0a, 0x44, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x6f,
-	0x6e, 0x12, 0x3d, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32,
-	0x29, 0x2e, 0x76, 0x65, 0x6c, 0x61, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x6f, 0x64, 0x65, 0x6c,
-	0x2e, 0x44, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x44, 0x65, 0x66, 0x69,
-	0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65,
-	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
-	0x6e, 0x61, 0x6d, 0x65, 0x22, 0x3f, 0x0a, 0x0e, 0x44, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69,
-	0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x12, 0x17, 0x0a, 0x13, 0x57, 0x4f, 0x52, 0x4b, 0x4c, 0x4f,
-	0x41, 0x44, 0x5f, 0x44, 0x45, 0x46, 0x49, 0x4e, 0x49, 0x54, 0x49, 0x4f, 0x4e, 0x10, 0x00, 0x12,
-	0x14, 0x0a, 0x10, 0x54, 0x52, 0x41, 0x49, 0x54, 0x5f, 0x44, 0x45, 0x46, 0x49, 0x4e, 0x49, 0x54,
-	0x49, 0x4f, 0x4e, 0x10, 0x01, 0x22, 0x37, 0x0a, 0x06, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x12,
-	0x2d, 0x0a, 0x04, 0x68, 0x65, 0x6c, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e,
-	0x76, 0x65, 0x6c, 0x61, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x2e, 0x48,
-	0x65, 0x6c, 0x6d, 0x43, 0x68, 0x61, 0x72, 0x74, 0x52, 0x04, 0x68, 0x65, 0x6c, 0x6d, 0x22, 0x44,
-	0x0a, 0x09, 0x48, 0x65, 0x6c, 0x6d, 0x43, 0x68, 0x61, 0x72, 0x74, 0x12, 0x37, 0x0a, 0x06, 0x72,
-	0x65, 0x6d, 0x6f, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x76, 0x65,
+	0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x5c, 0x0a, 0x0e, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65,
+	0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69,
+	0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f,
+	0x6e, 0x12, 0x30, 0x0a, 0x07, 0x6d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x73, 0x18, 0x09, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x16, 0x2e, 0x76, 0x65, 0x6c, 0x61, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x6f,
+	0x64, 0x65, 0x6c, 0x2e, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x52, 0x07, 0x6d, 0x6f, 0x64, 0x75,
+	0x6c, 0x65, 0x73, 0x22, 0x6e, 0x0a, 0x06, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x12, 0x2e, 0x0a,
+	0x04, 0x68, 0x65, 0x6c, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x76, 0x65,
 	0x6c, 0x61, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x2e, 0x48, 0x65, 0x6c,
-	0x6d, 0x43, 0x68, 0x61, 0x72, 0x74, 0x52, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x52, 0x06, 0x72, 0x65,
-	0x6d, 0x6f, 0x74, 0x65, 0x22, 0x53, 0x0a, 0x0f, 0x48, 0x65, 0x6c, 0x6d, 0x43, 0x68, 0x61, 0x72,
-	0x74, 0x52, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x72, 0x65, 0x70, 0x6f, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x72, 0x65, 0x70, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x6e,
-	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12,
-	0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x42, 0x2f, 0x5a, 0x2d, 0x67, 0x69, 0x74,
-	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6f, 0x61, 0x6d, 0x2d, 0x64, 0x65, 0x76, 0x2f,
-	0x76, 0x65, 0x6c, 0x61, 0x63, 0x70, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x73,
-	0x74, 0x6f, 0x72, 0x65, 0x2f, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x6d, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x52, 0x04, 0x68, 0x65, 0x6c, 0x6d, 0x12, 0x34, 0x0a,
+	0x06, 0x6e, 0x61, 0x74, 0x69, 0x76, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e,
+	0x76, 0x65, 0x6c, 0x61, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x2e, 0x4e,
+	0x61, 0x74, 0x69, 0x76, 0x65, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x52, 0x06, 0x6e, 0x61, 0x74,
+	0x69, 0x76, 0x65, 0x22, 0x46, 0x0a, 0x0a, 0x48, 0x65, 0x6c, 0x6d, 0x4d, 0x6f, 0x64, 0x75, 0x6c,
+	0x65, 0x12, 0x38, 0x0a, 0x06, 0x72, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x20, 0x2e, 0x76, 0x65, 0x6c, 0x61, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x6f, 0x64,
+	0x65, 0x6c, 0x2e, 0x48, 0x65, 0x6c, 0x6d, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x52, 0x65, 0x6d,
+	0x6f, 0x74, 0x65, 0x52, 0x06, 0x72, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x22, 0x54, 0x0a, 0x10, 0x48,
+	0x65, 0x6c, 0x6d, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65, 0x52, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x12,
+	0x12, 0x0a, 0x04, 0x72, 0x65, 0x70, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x72,
+	0x65, 0x70, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69,
+	0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f,
+	0x6e, 0x22, 0x22, 0x0a, 0x0c, 0x4e, 0x61, 0x74, 0x69, 0x76, 0x65, 0x4d, 0x6f, 0x64, 0x75, 0x6c,
+	0x65, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x74, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x04, 0x70, 0x61, 0x74, 0x68, 0x42, 0x2f, 0x5a, 0x2d, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
+	0x63, 0x6f, 0x6d, 0x2f, 0x6f, 0x61, 0x6d, 0x2d, 0x64, 0x65, 0x76, 0x2f, 0x76, 0x65, 0x6c, 0x61,
+	0x63, 0x70, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x64, 0x61, 0x74, 0x61, 0x73, 0x74, 0x6f, 0x72, 0x65,
+	0x2f, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -600,32 +537,29 @@ func file_pkg_datastore_model_catalog_proto_rawDescGZIP() []byte {
 	return file_pkg_datastore_model_catalog_proto_rawDescData
 }
 
-var file_pkg_datastore_model_catalog_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_pkg_datastore_model_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_pkg_datastore_model_catalog_proto_goTypes = []interface{}{
-	(Definition_DefinitionType)(0), // 0: vela.api.model.Definition.DefinitionType
-	(*Catalog)(nil),                // 1: vela.api.model.Catalog
-	(*Package)(nil),                // 2: vela.api.model.Package
-	(*PackageVersion)(nil),         // 3: vela.api.model.PackageVersion
-	(*Definition)(nil),             // 4: vela.api.model.Definition
-	(*Module)(nil),                 // 5: vela.api.model.Module
-	(*HelmChart)(nil),              // 6: vela.api.model.HelmChart
-	(*HelmChartRemote)(nil),        // 7: vela.api.model.HelmChartRemote
-	nil,                            // 8: vela.api.model.Package.LabelsEntry
+	(*Catalog)(nil),          // 0: vela.api.model.Catalog
+	(*Package)(nil),          // 1: vela.api.model.Package
+	(*PackageVersion)(nil),   // 2: vela.api.model.PackageVersion
+	(*Module)(nil),           // 3: vela.api.model.Module
+	(*HelmModule)(nil),       // 4: vela.api.model.HelmModule
+	(*HelmModuleRemote)(nil), // 5: vela.api.model.HelmModuleRemote
+	(*NativeModule)(nil),     // 6: vela.api.model.NativeModule
+	nil,                      // 7: vela.api.model.Package.LabelsEntry
 }
 var file_pkg_datastore_model_catalog_proto_depIdxs = []int32{
-	8, // 0: vela.api.model.Package.labels:type_name -> vela.api.model.Package.LabelsEntry
-	3, // 1: vela.api.model.Package.versions:type_name -> vela.api.model.PackageVersion
-	4, // 2: vela.api.model.PackageVersion.definitions:type_name -> vela.api.model.Definition
-	5, // 3: vela.api.model.PackageVersion.modules:type_name -> vela.api.model.Module
-	0, // 4: vela.api.model.Definition.type:type_name -> vela.api.model.Definition.DefinitionType
-	6, // 5: vela.api.model.Module.helm:type_name -> vela.api.model.HelmChart
-	7, // 6: vela.api.model.HelmChart.remote:type_name -> vela.api.model.HelmChartRemote
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	7, // 0: vela.api.model.Package.labels:type_name -> vela.api.model.Package.LabelsEntry
+	2, // 1: vela.api.model.Package.versions:type_name -> vela.api.model.PackageVersion
+	3, // 2: vela.api.model.PackageVersion.modules:type_name -> vela.api.model.Module
+	4, // 3: vela.api.model.Module.helm:type_name -> vela.api.model.HelmModule
+	6, // 4: vela.api.model.Module.native:type_name -> vela.api.model.NativeModule
+	5, // 5: vela.api.model.HelmModule.remote:type_name -> vela.api.model.HelmModuleRemote
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_pkg_datastore_model_catalog_proto_init() }
@@ -671,18 +605,6 @@ func file_pkg_datastore_model_catalog_proto_init() {
 			}
 		}
 		file_pkg_datastore_model_catalog_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Definition); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_pkg_datastore_model_catalog_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Module); i {
 			case 0:
 				return &v.state
@@ -694,8 +616,20 @@ func file_pkg_datastore_model_catalog_proto_init() {
 				return nil
 			}
 		}
+		file_pkg_datastore_model_catalog_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HelmModule); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 		file_pkg_datastore_model_catalog_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HelmChart); i {
+			switch v := v.(*HelmModuleRemote); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -707,7 +641,7 @@ func file_pkg_datastore_model_catalog_proto_init() {
 			}
 		}
 		file_pkg_datastore_model_catalog_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HelmChartRemote); i {
+			switch v := v.(*NativeModule); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -724,14 +658,13 @@ func file_pkg_datastore_model_catalog_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_pkg_datastore_model_catalog_proto_rawDesc,
-			NumEnums:      1,
+			NumEnums:      0,
 			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_pkg_datastore_model_catalog_proto_goTypes,
 		DependencyIndexes: file_pkg_datastore_model_catalog_proto_depIdxs,
-		EnumInfos:         file_pkg_datastore_model_catalog_proto_enumTypes,
 		MessageInfos:      file_pkg_datastore_model_catalog_proto_msgTypes,
 	}.Build()
 	File_pkg_datastore_model_catalog_proto = out.File

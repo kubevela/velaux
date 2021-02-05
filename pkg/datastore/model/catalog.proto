@@ -36,38 +36,32 @@ message Package {
 
   map<string, string> labels = 3;
 
-  repeated PackageVersion versions = 15;
+  repeated PackageVersion versions = 9;
 }
 
 message PackageVersion {
 
   string version = 1;
 
-  repeated Definition definitions = 2;
-
-  repeated Module modules = 3;
+  repeated Module modules = 9;
 }
 
-message Definition {
-  enum DefinitionType {
-    WORKLOAD_DEFINITION = 0;
-    TRAIT_DEFINITION = 1;
-  }
-  DefinitionType type = 1;
-
-  string name = 2;
-}
 
 message Module {
-  HelmChart helm = 1;
+  HelmModule helm = 1;
+  NativeModule native = 2;
 }
 
-message HelmChart {
-  HelmChartRemote remote = 1;
+message HelmModule {
+  HelmModuleRemote remote = 1;
 }
 
-message HelmChartRemote {
+message HelmModuleRemote {
   string repo = 1;
   string name = 2;
   string version = 3;
+}
+
+message NativeModule {
+  string path = 1;
 }
