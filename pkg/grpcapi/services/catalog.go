@@ -11,7 +11,6 @@ import (
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	"gopkg.in/yaml.v2"
 
@@ -25,7 +24,7 @@ type CatalogService struct {
 }
 
 func (c *CatalogService) PutCatalog(ctx context.Context, request *catalogservice.PutCatalogRequest) (*catalogservice.PutCatalogResponse, error) {
-	catalog := proto.Clone(request.Catalog).(*model.Catalog)
+	catalog := request.Catalog.Clone()
 	catalog.Id = uuid.New().String()
 	now := time.Now().Unix()
 	catalog.UpdatedAt = now
@@ -207,7 +206,7 @@ func (r *repo) readModules(fp string) ([]*model.Module, error) {
 	}
 	res := make([]*model.Module, 0, len(raw.Modules))
 	for _, m := range raw.Modules {
-		res = append(res, proto.Clone(m).(*model.Module))
+		res = append(res, m.Clone())
 	}
 	return res, nil
 }
