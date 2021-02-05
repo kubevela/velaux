@@ -4,6 +4,8 @@ go 1.15
 
 require (
 	github.com/envoyproxy/protoc-gen-validate v0.4.1
+	github.com/go-git/go-billy/v5 v5.0.0
+	github.com/go-git/go-git/v5 v5.2.0
 	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.1.0
@@ -17,4 +19,5 @@ require (
 	google.golang.org/genproto v0.0.0-20210126160654-44e461bb6506
 	google.golang.org/grpc v1.35.0
 	google.golang.org/protobuf v1.25.0
+	gopkg.in/yaml.v2 v2.4.0
 )
