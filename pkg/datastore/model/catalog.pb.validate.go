@@ -227,21 +227,6 @@ func (m *PackageVersion) Validate() error {
 
 	// no validation rules for Version
 
-	for idx, item := range m.GetDefinitions() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return PackageVersionValidationError{
-					field:  fmt.Sprintf("Definitions[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
 	for idx, item := range m.GetModules() {
 		_, _ = idx, item
 
@@ -314,74 +299,6 @@ var _ interface {
 	ErrorName() string
 } = PackageVersionValidationError{}
 
-// Validate checks the field values on Definition with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *Definition) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for Type
-
-	// no validation rules for Name
-
-	return nil
-}
-
-// DefinitionValidationError is the validation error returned by
-// Definition.Validate if the designated constraints aren't met.
-type DefinitionValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e DefinitionValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e DefinitionValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e DefinitionValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e DefinitionValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e DefinitionValidationError) ErrorName() string { return "DefinitionValidationError" }
-
-// Error satisfies the builtin error interface
-func (e DefinitionValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sDefinition.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = DefinitionValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = DefinitionValidationError{}
-
 // Validate checks the field values on Module with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *Module) Validate() error {
@@ -393,6 +310,16 @@ func (m *Module) Validate() error {
 		if err := v.Validate(); err != nil {
 			return ModuleValidationError{
 				field:  "Helm",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetNative()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ModuleValidationError{
+				field:  "Native",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -456,16 +383,16 @@ var _ interface {
 	ErrorName() string
 } = ModuleValidationError{}
 
-// Validate checks the field values on HelmChart with the rules defined in the
+// Validate checks the field values on HelmModule with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
-func (m *HelmChart) Validate() error {
+func (m *HelmModule) Validate() error {
 	if m == nil {
 		return nil
 	}
 
 	if v, ok := interface{}(m.GetRemote()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return HelmChartValidationError{
+			return HelmModuleValidationError{
 				field:  "Remote",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -476,9 +403,9 @@ func (m *HelmChart) Validate() error {
 	return nil
 }
 
-// HelmChartValidationError is the validation error returned by
-// HelmChart.Validate if the designated constraints aren't met.
-type HelmChartValidationError struct {
+// HelmModuleValidationError is the validation error returned by
+// HelmModule.Validate if the designated constraints aren't met.
+type HelmModuleValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -486,22 +413,22 @@ type HelmChartValidationError struct {
 }
 
 // Field function returns field value.
-func (e HelmChartValidationError) Field() string { return e.field }
+func (e HelmModuleValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e HelmChartValidationError) Reason() string { return e.reason }
+func (e HelmModuleValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e HelmChartValidationError) Cause() error { return e.cause }
+func (e HelmModuleValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e HelmChartValidationError) Key() bool { return e.key }
+func (e HelmModuleValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e HelmChartValidationError) ErrorName() string { return "HelmChartValidationError" }
+func (e HelmModuleValidationError) ErrorName() string { return "HelmModuleValidationError" }
 
 // Error satisfies the builtin error interface
-func (e HelmChartValidationError) Error() string {
+func (e HelmModuleValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -513,14 +440,14 @@ func (e HelmChartValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sHelmChart.%s: %s%s",
+		"invalid %sHelmModule.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = HelmChartValidationError{}
+var _ error = HelmModuleValidationError{}
 
 var _ interface {
 	Field() string
@@ -528,12 +455,12 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = HelmChartValidationError{}
+} = HelmModuleValidationError{}
 
-// Validate checks the field values on HelmChartRemote with the rules defined
+// Validate checks the field values on HelmModuleRemote with the rules defined
 // in the proto definition for this message. If any rules are violated, an
 // error is returned.
-func (m *HelmChartRemote) Validate() error {
+func (m *HelmModuleRemote) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -547,9 +474,9 @@ func (m *HelmChartRemote) Validate() error {
 	return nil
 }
 
-// HelmChartRemoteValidationError is the validation error returned by
-// HelmChartRemote.Validate if the designated constraints aren't met.
-type HelmChartRemoteValidationError struct {
+// HelmModuleRemoteValidationError is the validation error returned by
+// HelmModuleRemote.Validate if the designated constraints aren't met.
+type HelmModuleRemoteValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -557,22 +484,22 @@ type HelmChartRemoteValidationError struct {
 }
 
 // Field function returns field value.
-func (e HelmChartRemoteValidationError) Field() string { return e.field }
+func (e HelmModuleRemoteValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e HelmChartRemoteValidationError) Reason() string { return e.reason }
+func (e HelmModuleRemoteValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e HelmChartRemoteValidationError) Cause() error { return e.cause }
+func (e HelmModuleRemoteValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e HelmChartRemoteValidationError) Key() bool { return e.key }
+func (e HelmModuleRemoteValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e HelmChartRemoteValidationError) ErrorName() string { return "HelmChartRemoteValidationError" }
+func (e HelmModuleRemoteValidationError) ErrorName() string { return "HelmModuleRemoteValidationError" }
 
 // Error satisfies the builtin error interface
-func (e HelmChartRemoteValidationError) Error() string {
+func (e HelmModuleRemoteValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -584,14 +511,14 @@ func (e HelmChartRemoteValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sHelmChartRemote.%s: %s%s",
+		"invalid %sHelmModuleRemote.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = HelmChartRemoteValidationError{}
+var _ error = HelmModuleRemoteValidationError{}
 
 var _ interface {
 	Field() string
@@ -599,4 +526,71 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = HelmChartRemoteValidationError{}
+} = HelmModuleRemoteValidationError{}
+
+// Validate checks the field values on NativeModule with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *NativeModule) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Path
+
+	return nil
+}
+
+// NativeModuleValidationError is the validation error returned by
+// NativeModule.Validate if the designated constraints aren't met.
+type NativeModuleValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e NativeModuleValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e NativeModuleValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e NativeModuleValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e NativeModuleValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e NativeModuleValidationError) ErrorName() string { return "NativeModuleValidationError" }
+
+// Error satisfies the builtin error interface
+func (e NativeModuleValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sNativeModule.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = NativeModuleValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = NativeModuleValidationError{}

@@ -106,11 +106,11 @@ func scanRepo(ctx context.Context, url string, rootdir string) ([]*model.Package
 		rootdir: rootdir,
 	}
 
-	files, err := fs.ReadDir(rootdir)
+	packages, err := fs.ReadDir(rootdir)
 	if err != nil {
 		return nil, err
 	}
-	for _, file := range files {
+	for _, file := range packages {
 		if !file.IsDir() {
 			continue
 		}
@@ -136,11 +136,11 @@ func (r *repo) scanPackage(dir os.FileInfo) (*model.Package, error) {
 		return nil, err
 	}
 
-	files, err := r.fs.ReadDir(path.Join(r.rootdir, dir.Name()))
+	versions, err := r.fs.ReadDir(path.Join(r.rootdir, dir.Name()))
 	if err != nil {
 		return nil, err
 	}
-	for _, file := range files {
+	for _, file := range versions {
 		if !file.IsDir() {
 			continue
 		}
@@ -178,54 +178,13 @@ func (r *repo) scanPackageVersion(pkg, ver string) (*model.PackageVersion, error
 
 	pvdir := path.Join(r.rootdir, pkg, ver)
 
-	// read definitions
-	defdir := path.Join(pvdir, "definitions")
-	files, err := r.fs.ReadDir(defdir)
+	modules, err := r.readModules(path.Join(pvdir, "modules.yaml"))
 	if err != nil {
 		return nil, err
 	}
-	for _, file := range files {
-		def, err := r.readDefinitionFile(defdir, file.Name())
-		if err != nil {
-			return nil, err
-		}
-		pv.Definitions = append(pv.Definitions, def)
-	}
-
-	pv.Modules, err = r.readModules(path.Join(pvdir, "modules.yaml"))
-	if err != nil {
-		return nil, err
-	}
+	pv.Modules = modules
 
 	return pv, nil
-}
-
-func (r *repo) readDefinitionFile(defdir, name string) (*model.Definition, error) {
-	def := &model.Definition{}
-	f, err := r.fs.Open(path.Join(defdir, name))
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	dec := yaml.NewDecoder(bufio.NewReader(f))
-	raw := map[string]interface{}{}
-	err = dec.Decode(raw)
-	if err != nil {
-		return nil, err
-	}
-
-	switch raw["kind"] {
-	case "WorkloadDefinition":
-		def.Type = model.Definition_WORKLOAD_DEFINITION
-	case "TraitDefinition":
-		def.Type = model.Definition_TRAIT_DEFINITION
-	}
-
-	md := raw["metadata"].(map[string]interface{})
-	def.Name = md["name"].(string)
-
-	return def, nil
 }
 
 type modules struct {
