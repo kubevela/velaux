@@ -13,6 +13,7 @@ type CatalogStore interface {
 	DelCatalog(ctx context.Context, name string) error
 	GetCatalog(ctx context.Context, name string) (*model.Catalog, error)
 	ListCatalogs(ctx context.Context) ([]*model.Catalog, error)
+	PutPackages(ctx context.Context, plist []*model.Package) error
 }
 
 func NewCatalogStore(ds DataStore) CatalogStore {
@@ -56,4 +57,8 @@ func (c *catalogStore) ListCatalogs(ctx context.Context) ([]*model.Catalog, erro
 	}
 	iter.Close(ctx)
 	return cs, nil
+}
+
+func (c *catalogStore) PutPackages(ctx context.Context, plist []*model.Package) error {
+	return nil
 }

@@ -6,13 +6,68 @@ option go_package = "github.com/oam-dev/velacp/pkg/datastore/model";
 import "validate/validate.proto";
 
 message Catalog {
+
   // The generated unique identifier.
   string id = 1 [(validate.rules).string.min_len = 1];
+
   // The name of the catalog.
   // This field is not changeable.
   string name = 2 [(validate.rules).string.min_len = 1];
+
   // The additional description about the environment.
   string desc = 3;
+
   // Unix time of the last time when the catalog is updated.
-  int64 updated_at = 15 [(validate.rules).int64.gt = 0];
+  int64 updated_at = 4 [(validate.rules).int64.gt = 0];
+
+  // The url of the catalog, e.g. https://github.com/hongchaodeng/catalog-example.git
+  string url = 5;
+
+  // The root directory where the packages are put in the catalog repo.
+  string rootdir = 6;
+}
+
+message Package {
+  // The name of the package.
+  // This field is not changeable.
+  string name = 1 [(validate.rules).string.min_len = 1];
+
+  string description = 2;
+
+  map<string, string> labels = 3;
+
+  repeated PackageVersion versions = 15;
+}
+
+message PackageVersion {
+
+  string version = 1;
+
+  repeated Definition definitions = 2;
+
+  repeated Module modules = 3;
+}
+
+message Definition {
+  enum DefinitionType {
+    WORKLOAD_DEFINITION = 0;
+    TRAIT_DEFINITION = 1;
+  }
+  DefinitionType type = 1;
+
+  string name = 2;
+}
+
+message Module {
+  HelmChart helm = 1;
+}
+
+message HelmChart {
+  HelmChartRemote remote = 1;
+}
+
+message HelmChartRemote {
+  string repo = 1;
+  string name = 2;
+  string version = 3;
 }

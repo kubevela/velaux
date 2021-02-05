@@ -15,11 +15,11 @@ service CatalogService {
     };
   }
   rpc DelCatalog(DelCatalogRequest) returns (DelCatalogResponse) {}
+  rpc SyncCatalog(SyncCatalogRequest) returns(SyncCatalogResponse) {}
 }
 
 message PutCatalogRequest {
-  string name = 1;
-  string desc = 2;
+  vela.api.model.Catalog catalog = 1;
 }
 
 message PutCatalogResponse {
@@ -45,4 +45,11 @@ message DelCatalogRequest {
 }
 
 message DelCatalogResponse {
+}
+
+message SyncCatalogRequest {
+  string name = 1;
+}
+
+message SyncCatalogResponse {
 }

@@ -26,6 +26,7 @@ func NewCatalogCommand() *cobra.Command {
 		newListCommand(o),
 		newGetCommand(o),
 		newDelCommand(o),
+		newSyncCommand(o),
 	)
 	return cmd
 
@@ -48,7 +49,7 @@ func newPutCommand(o *client.Options) *cobra.Command {
 			if len(args) < 1 {
 				return errors.New("must specify name for the catalog")
 			}
-			req.Name = args[0]
+			req.Catalog.Name = args[0]
 
 			_, err = c.PutCatalog(ctx, req)
 			if err != nil {
@@ -57,7 +58,9 @@ func newPutCommand(o *client.Options) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&req.Desc, "desc", req.Desc, "The catalog description.")
+	cmd.Flags().StringVar(&req.Catalog.Desc, "desc", "", "The catalog description.")
+	cmd.Flags().StringVar(&req.Catalog.Url, "url", "", "The catalog url.")
+	cmd.Flags().StringVar(&req.Catalog.Rootdir, "rootdir", "", "The root directory where packages are put in the catalog repo.")
 	return cmd
 }
 
@@ -146,6 +149,35 @@ func newDelCommand(o *client.Options) *cobra.Command {
 			req.Name = args[0]
 
 			_, err = c.DelCatalog(ctx, req)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+	return cmd
+}
+
+func newSyncCommand(o *client.Options) *cobra.Command {
+	req := &catalogservice.SyncCatalogRequest{}
+
+	cmd := &cobra.Command{
+		Use:   "sync",
+		Short: "Sync a catalog's package list",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			c, conn, err := o.NewCatalogClient(ctx)
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			if len(args) < 1 {
+				return errors.New("must specify name for the catalog")
+			}
+			req.Name = args[0]
+
+			_, err = c.SyncCatalog(ctx, req)
 			if err != nil {
 				return err
 			}

@@ -66,6 +66,10 @@ func (m *Catalog) Validate() error {
 		}
 	}
 
+	// no validation rules for Url
+
+	// no validation rules for Rootdir
+
 	return nil
 }
 
@@ -122,3 +126,477 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CatalogValidationError{}
+
+// Validate checks the field values on Package with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Package) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if utf8.RuneCountInString(m.GetName()) < 1 {
+		return PackageValidationError{
+			field:  "Name",
+			reason: "value length must be at least 1 runes",
+		}
+	}
+
+	// no validation rules for Description
+
+	// no validation rules for Labels
+
+	for idx, item := range m.GetVersions() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PackageValidationError{
+					field:  fmt.Sprintf("Versions[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// PackageValidationError is the validation error returned by Package.Validate
+// if the designated constraints aren't met.
+type PackageValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PackageValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PackageValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PackageValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PackageValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PackageValidationError) ErrorName() string { return "PackageValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PackageValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPackage.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PackageValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PackageValidationError{}
+
+// Validate checks the field values on PackageVersion with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *PackageVersion) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Version
+
+	for idx, item := range m.GetDefinitions() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PackageVersionValidationError{
+					field:  fmt.Sprintf("Definitions[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetModules() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PackageVersionValidationError{
+					field:  fmt.Sprintf("Modules[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// PackageVersionValidationError is the validation error returned by
+// PackageVersion.Validate if the designated constraints aren't met.
+type PackageVersionValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PackageVersionValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PackageVersionValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PackageVersionValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PackageVersionValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PackageVersionValidationError) ErrorName() string { return "PackageVersionValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PackageVersionValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPackageVersion.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PackageVersionValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PackageVersionValidationError{}
+
+// Validate checks the field values on Definition with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Definition) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Type
+
+	// no validation rules for Name
+
+	return nil
+}
+
+// DefinitionValidationError is the validation error returned by
+// Definition.Validate if the designated constraints aren't met.
+type DefinitionValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DefinitionValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DefinitionValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DefinitionValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DefinitionValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DefinitionValidationError) ErrorName() string { return "DefinitionValidationError" }
+
+// Error satisfies the builtin error interface
+func (e DefinitionValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDefinition.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DefinitionValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DefinitionValidationError{}
+
+// Validate checks the field values on Module with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Module) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetHelm()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ModuleValidationError{
+				field:  "Helm",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// ModuleValidationError is the validation error returned by Module.Validate if
+// the designated constraints aren't met.
+type ModuleValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ModuleValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ModuleValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ModuleValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ModuleValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ModuleValidationError) ErrorName() string { return "ModuleValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ModuleValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sModule.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ModuleValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ModuleValidationError{}
+
+// Validate checks the field values on HelmChart with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *HelmChart) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetRemote()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return HelmChartValidationError{
+				field:  "Remote",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// HelmChartValidationError is the validation error returned by
+// HelmChart.Validate if the designated constraints aren't met.
+type HelmChartValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e HelmChartValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e HelmChartValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e HelmChartValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e HelmChartValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e HelmChartValidationError) ErrorName() string { return "HelmChartValidationError" }
+
+// Error satisfies the builtin error interface
+func (e HelmChartValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sHelmChart.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = HelmChartValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = HelmChartValidationError{}
+
+// Validate checks the field values on HelmChartRemote with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *HelmChartRemote) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Repo
+
+	// no validation rules for Name
+
+	// no validation rules for Version
+
+	return nil
+}
+
+// HelmChartRemoteValidationError is the validation error returned by
+// HelmChartRemote.Validate if the designated constraints aren't met.
+type HelmChartRemoteValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e HelmChartRemoteValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e HelmChartRemoteValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e HelmChartRemoteValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e HelmChartRemoteValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e HelmChartRemoteValidationError) ErrorName() string { return "HelmChartRemoteValidationError" }
+
+// Error satisfies the builtin error interface
+func (e HelmChartRemoteValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sHelmChartRemote.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = HelmChartRemoteValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = HelmChartRemoteValidationError{}
