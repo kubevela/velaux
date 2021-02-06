@@ -31,6 +31,7 @@ message GetCatalogRequest {
 
 message GetCatalogResponse {
   vela.api.model.Catalog catalog = 1;
+  repeated vela.api.model.Package packages = 2;
 }
 
 message ListCatalogsRequest {

@@ -6,14 +6,18 @@ import (
 	"github.com/oam-dev/velacp/pkg/datastore/model"
 )
 
-const catalogKind = "Catalog"
+const (
+	catalogKind     = "Catalog"
+	catalogRepoKind = "CatalogRepo"
+)
 
 type CatalogStore interface {
 	PutCatalog(ctx context.Context, catalog *model.Catalog) error
 	DelCatalog(ctx context.Context, name string) error
 	GetCatalog(ctx context.Context, name string) (*model.Catalog, error)
 	ListCatalogs(ctx context.Context) ([]*model.Catalog, error)
-	PutPackages(ctx context.Context, plist []*model.Package) error
+	PutPackages(ctx context.Context, catalogName string, plist []*model.Package) error
+	GetPackages(ctx context.Context, catalogName string) ([]*model.Package, error)
 }
 
 func NewCatalogStore(ds DataStore) CatalogStore {
@@ -59,12 +63,19 @@ func (c *catalogStore) ListCatalogs(ctx context.Context) ([]*model.Catalog, erro
 	return cs, nil
 }
 
-func (c *catalogStore) PutPackages(ctx context.Context, plist []*model.Package) error {
-	for _, p := range plist {
-		err := c.ds.Put(ctx, "Package", p)
-		if err != nil {
-			return err
-		}
+func (c *catalogStore) GetPackages(ctx context.Context, catalogName string) ([]*model.Package, error) {
+	catalog := &model.CatalogRepo{}
+	err := c.ds.Get(ctx, catalogRepoKind, catalogName, catalog)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return catalog.Packages, nil
+}
+
+func (c *catalogStore) PutPackages(ctx context.Context, catalogName string, plist []*model.Package) error {
+	catalog := &model.CatalogRepo{
+		Name:     catalogName,
+		Packages: plist,
+	}
+	return c.ds.Put(ctx, catalogRepoKind, catalog)
 }

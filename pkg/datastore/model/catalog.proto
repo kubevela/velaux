@@ -20,11 +20,21 @@ message Catalog {
   // Unix time of the last time when the catalog is updated.
   int64 updated_at = 4 [(validate.rules).int64.gt = 0];
 
+  // Unix time of the last time when the catalog is synced and scanned.
+  int64 last_synced = 5;
+
   // The url of the catalog, e.g. https://github.com/hongchaodeng/catalog-example.git
-  string url = 5;
+  string url = 6;
 
   // The root directory where the packages are put in the catalog repo.
-  string rootdir = 6;
+  string rootdir = 7;
+}
+
+message CatalogRepo {
+  // The name of the catalog.
+  string name = 1;
+
+  repeated Package packages = 3;
 }
 
 message Package {
