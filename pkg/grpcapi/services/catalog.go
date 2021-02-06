@@ -19,6 +19,8 @@ import (
 	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 )
 
+var _ catalogservice.CatalogServiceServer = &CatalogService{}
+
 type CatalogService struct {
 	Store datastore.CatalogStore
 }
@@ -41,19 +43,14 @@ func (c *CatalogService) GetCatalog(ctx context.Context, request *catalogservice
 	if err != nil {
 		return nil, err
 	}
-	packages, err := c.Store.GetPackages(ctx, request.Name)
-	if err != nil {
-		return nil, err
-	}
 
 	return &catalogservice.GetCatalogResponse{
-		Catalog:  catalog,
-		Packages: packages,
+		Catalog: catalog,
 	}, nil
 
 }
 
-func (c *CatalogService) ListCatalogs(ctx context.Context, request *catalogservice.ListCatalogsRequest) (*catalogservice.ListCatalogsResponse, error) {
+func (c *CatalogService) ListCatalogs(ctx context.Context, _ *catalogservice.ListCatalogsRequest) (*catalogservice.ListCatalogsResponse, error) {
 	catalogs, err := c.Store.ListCatalogs(ctx)
 	if err != nil {
 		return nil, err
@@ -69,6 +66,20 @@ func (c *CatalogService) DelCatalog(ctx context.Context, request *catalogservice
 		return nil, err
 	}
 	return &catalogservice.DelCatalogResponse{}, nil
+}
+
+func (c *CatalogService) ListPackages(ctx context.Context, request *catalogservice.ListPackagesRequest) (*catalogservice.ListPackagesResponse, error) {
+	packages, err := c.Store.GetPackages(ctx, request.CatalogName)
+	if err != nil {
+		return nil, err
+	}
+	return &catalogservice.ListPackagesResponse{
+		Packages: packages,
+	}, nil
+}
+
+func (c *CatalogService) InstallPackage(ctx context.Context, request *catalogservice.InstallPackageRequest) (*catalogservice.InstallPackageResponse, error) {
+	return &catalogservice.InstallPackageResponse{}, nil
 }
 
 func (c *CatalogService) SyncCatalog(ctx context.Context, request *catalogservice.SyncCatalogRequest) (*catalogservice.SyncCatalogResponse, error) {

@@ -16,6 +16,9 @@ service CatalogService {
   }
   rpc DelCatalog(DelCatalogRequest) returns (DelCatalogResponse) {}
   rpc SyncCatalog(SyncCatalogRequest) returns(SyncCatalogResponse) {}
+
+  rpc ListPackages(ListPackagesRequest) returns(ListPackagesResponse) {}
+  rpc InstallPackage(InstallPackageRequest) returns(InstallPackageResponse) {}
 }
 
 message PutCatalogRequest {
@@ -31,7 +34,6 @@ message GetCatalogRequest {
 
 message GetCatalogResponse {
   vela.api.model.Catalog catalog = 1;
-  repeated vela.api.model.Package packages = 2;
 }
 
 message ListCatalogsRequest {
@@ -53,4 +55,18 @@ message SyncCatalogRequest {
 }
 
 message SyncCatalogResponse {
+}
+
+message ListPackagesRequest {
+  string catalog_name = 1;
+}
+
+message ListPackagesResponse {
+  repeated vela.api.model.Package packages = 1;
+}
+
+message InstallPackageRequest {
+}
+
+message InstallPackageResponse {
 }

@@ -267,21 +267,6 @@ func (m *GetCatalogResponse) Validate() error {
 		}
 	}
 
-	for idx, item := range m.GetPackages() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return GetCatalogResponseValidationError{
-					field:  fmt.Sprintf("Packages[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
 	return nil
 }
 
@@ -761,3 +746,288 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = SyncCatalogResponseValidationError{}
+
+// Validate checks the field values on ListPackagesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ListPackagesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for CatalogName
+
+	return nil
+}
+
+// ListPackagesRequestValidationError is the validation error returned by
+// ListPackagesRequest.Validate if the designated constraints aren't met.
+type ListPackagesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListPackagesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListPackagesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListPackagesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListPackagesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListPackagesRequestValidationError) ErrorName() string {
+	return "ListPackagesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListPackagesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListPackagesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListPackagesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListPackagesRequestValidationError{}
+
+// Validate checks the field values on ListPackagesResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ListPackagesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetPackages() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListPackagesResponseValidationError{
+					field:  fmt.Sprintf("Packages[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ListPackagesResponseValidationError is the validation error returned by
+// ListPackagesResponse.Validate if the designated constraints aren't met.
+type ListPackagesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListPackagesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListPackagesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListPackagesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListPackagesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListPackagesResponseValidationError) ErrorName() string {
+	return "ListPackagesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListPackagesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListPackagesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListPackagesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListPackagesResponseValidationError{}
+
+// Validate checks the field values on InstallPackageRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *InstallPackageRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// InstallPackageRequestValidationError is the validation error returned by
+// InstallPackageRequest.Validate if the designated constraints aren't met.
+type InstallPackageRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e InstallPackageRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e InstallPackageRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e InstallPackageRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e InstallPackageRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e InstallPackageRequestValidationError) ErrorName() string {
+	return "InstallPackageRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e InstallPackageRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sInstallPackageRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = InstallPackageRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = InstallPackageRequestValidationError{}
+
+// Validate checks the field values on InstallPackageResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *InstallPackageResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// InstallPackageResponseValidationError is the validation error returned by
+// InstallPackageResponse.Validate if the designated constraints aren't met.
+type InstallPackageResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e InstallPackageResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e InstallPackageResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e InstallPackageResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e InstallPackageResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e InstallPackageResponseValidationError) ErrorName() string {
+	return "InstallPackageResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e InstallPackageResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sInstallPackageResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = InstallPackageResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = InstallPackageResponseValidationError{}
