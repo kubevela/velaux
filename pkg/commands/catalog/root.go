@@ -28,6 +28,8 @@ func NewCatalogCommand() *cobra.Command {
 		newGetCommand(o),
 		newDelCommand(o),
 		newSyncCommand(o),
+		newListPkgCommand(o),
+		newInstallPkgCommand(o),
 	)
 	return cmd
 
@@ -85,11 +87,7 @@ func newListCommand(o *client.Options) *cobra.Command {
 				return err
 			}
 
-			b, err := json.MarshalIndent(res, "", "  ")
-			if err != nil {
-				return err
-			}
-			fmt.Println(string(b))
+			printResult(res)
 
 			return nil
 		},
@@ -121,11 +119,7 @@ func newGetCommand(o *client.Options) *cobra.Command {
 				return err
 			}
 
-			b, err := json.MarshalIndent(res, "", "  ")
-			if err != nil {
-				return err
-			}
-			fmt.Println(string(b))
+			printResult(res)
 			return nil
 		},
 	}
@@ -188,4 +182,68 @@ func newSyncCommand(o *client.Options) *cobra.Command {
 		},
 	}
 	return cmd
+}
+
+func newListPkgCommand(o *client.Options) *cobra.Command {
+	req := &catalogservice.ListPackagesRequest{}
+
+	cmd := &cobra.Command{
+		Use:   "list-pkg",
+		Short: "List packages of a catalog",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			c, conn, err := o.NewCatalogClient(ctx)
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			if len(args) < 1 {
+				return errors.New("must specify name for the catalog")
+			}
+			req.CatalogName = args[0]
+
+			res, err := c.ListPackages(ctx, req)
+			if err != nil {
+				return err
+			}
+
+			printResult(res)
+			return nil
+		},
+	}
+	return cmd
+}
+
+func newInstallPkgCommand(o *client.Options) *cobra.Command {
+	req := &catalogservice.InstallPackageRequest{}
+
+	cmd := &cobra.Command{
+		Use:   "install-pkg",
+		Short: "Install a packages from a catalog to a cluster",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			c, conn, err := o.NewCatalogClient(ctx)
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			res, err := c.InstallPackage(ctx, req)
+			if err != nil {
+				return err
+			}
+			printResult(res)
+			return nil
+		},
+	}
+	return cmd
+}
+
+func printResult(res interface{}) {
+	b, err := json.MarshalIndent(res, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
 }

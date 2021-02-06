@@ -23,6 +23,8 @@ type CatalogServiceClient interface {
 	ListCatalogs(ctx context.Context, in *ListCatalogsRequest, opts ...grpc.CallOption) (*ListCatalogsResponse, error)
 	DelCatalog(ctx context.Context, in *DelCatalogRequest, opts ...grpc.CallOption) (*DelCatalogResponse, error)
 	SyncCatalog(ctx context.Context, in *SyncCatalogRequest, opts ...grpc.CallOption) (*SyncCatalogResponse, error)
+	ListPackages(ctx context.Context, in *ListPackagesRequest, opts ...grpc.CallOption) (*ListPackagesResponse, error)
+	InstallPackage(ctx context.Context, in *InstallPackageRequest, opts ...grpc.CallOption) (*InstallPackageResponse, error)
 }
 
 type catalogServiceClient struct {
@@ -78,6 +80,24 @@ func (c *catalogServiceClient) SyncCatalog(ctx context.Context, in *SyncCatalogR
 	return out, nil
 }
 
+func (c *catalogServiceClient) ListPackages(ctx context.Context, in *ListPackagesRequest, opts ...grpc.CallOption) (*ListPackagesResponse, error) {
+	out := new(ListPackagesResponse)
+	err := c.cc.Invoke(ctx, "/vela.api.service.catalogservice.CatalogService/ListPackages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *catalogServiceClient) InstallPackage(ctx context.Context, in *InstallPackageRequest, opts ...grpc.CallOption) (*InstallPackageResponse, error) {
+	out := new(InstallPackageResponse)
+	err := c.cc.Invoke(ctx, "/vela.api.service.catalogservice.CatalogService/InstallPackage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CatalogServiceServer is the server API for CatalogService service.
 // All implementations should embed UnimplementedCatalogServiceServer
 // for forward compatibility
@@ -87,6 +107,8 @@ type CatalogServiceServer interface {
 	ListCatalogs(context.Context, *ListCatalogsRequest) (*ListCatalogsResponse, error)
 	DelCatalog(context.Context, *DelCatalogRequest) (*DelCatalogResponse, error)
 	SyncCatalog(context.Context, *SyncCatalogRequest) (*SyncCatalogResponse, error)
+	ListPackages(context.Context, *ListPackagesRequest) (*ListPackagesResponse, error)
+	InstallPackage(context.Context, *InstallPackageRequest) (*InstallPackageResponse, error)
 }
 
 // UnimplementedCatalogServiceServer should be embedded to have forward compatible implementations.
@@ -107,6 +129,12 @@ func (UnimplementedCatalogServiceServer) DelCatalog(context.Context, *DelCatalog
 }
 func (UnimplementedCatalogServiceServer) SyncCatalog(context.Context, *SyncCatalogRequest) (*SyncCatalogResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SyncCatalog not implemented")
+}
+func (UnimplementedCatalogServiceServer) ListPackages(context.Context, *ListPackagesRequest) (*ListPackagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPackages not implemented")
+}
+func (UnimplementedCatalogServiceServer) InstallPackage(context.Context, *InstallPackageRequest) (*InstallPackageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InstallPackage not implemented")
 }
 
 // UnsafeCatalogServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -210,6 +238,42 @@ func _CatalogService_SyncCatalog_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogService_ListPackages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPackagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).ListPackages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vela.api.service.catalogservice.CatalogService/ListPackages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).ListPackages(ctx, req.(*ListPackagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CatalogService_InstallPackage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InstallPackageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).InstallPackage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vela.api.service.catalogservice.CatalogService/InstallPackage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).InstallPackage(ctx, req.(*InstallPackageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CatalogService_ServiceDesc is the grpc.ServiceDesc for CatalogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -236,6 +300,14 @@ var CatalogService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SyncCatalog",
 			Handler:    _CatalogService_SyncCatalog_Handler,
+		},
+		{
+			MethodName: "ListPackages",
+			Handler:    _CatalogService_ListPackages_Handler,
+		},
+		{
+			MethodName: "InstallPackage",
+			Handler:    _CatalogService_InstallPackage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
