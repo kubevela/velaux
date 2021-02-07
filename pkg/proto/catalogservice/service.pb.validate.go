@@ -906,6 +906,14 @@ func (m *InstallPackageRequest) Validate() error {
 		return nil
 	}
 
+	// no validation rules for CatalogName
+
+	// no validation rules for PackageName
+
+	// no validation rules for PackageVersion
+
+	// no validation rules for ClusterName
+
 	return nil
 }
 

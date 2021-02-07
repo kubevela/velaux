@@ -56,17 +56,14 @@ message PackageVersion {
   repeated Module modules = 9;
 }
 
-
 message Module {
+
   HelmModule helm = 1;
+
   NativeModule native = 2;
 }
 
 message HelmModule {
-  HelmModuleRemote remote = 1;
-}
-
-message HelmModuleRemote {
   string repo = 1;
   string name = 2;
   string version = 3;
@@ -74,4 +71,5 @@ message HelmModuleRemote {
 
 message NativeModule {
   string path = 1;
+  string url = 2;
 }

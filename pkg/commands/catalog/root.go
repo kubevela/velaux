@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -99,7 +100,7 @@ func newGetCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.GetCatalogRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "get",
+		Use:   "get catalog_name",
 		Short: "Get a catalog",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -130,7 +131,7 @@ func newDelCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.DelCatalogRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "del",
+		Use:   "del catalog_name",
 		Short: "Delete a catalog",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -159,7 +160,7 @@ func newSyncCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.SyncCatalogRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "sync",
+		Use:   "sync catalog_name",
 		Short: "Sync a catalog's package list",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -188,7 +189,7 @@ func newListPkgCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.ListPackagesRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "list-pkg",
+		Use:   "list-pkg catalog_name",
 		Short: "List packages of a catalog",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -219,7 +220,7 @@ func newInstallPkgCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.InstallPackageRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "install-pkg",
+		Use:   "install-pkg catalog_name pkg_name@version",
 		Short: "Install a packages from a catalog to a cluster",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -228,6 +229,16 @@ func newInstallPkgCommand(o *client.Options) *cobra.Command {
 				return err
 			}
 			defer conn.Close()
+
+			if len(args) < 2 {
+				return errors.New("must specify catalog name and pkg name")
+			}
+			req.CatalogName = args[0]
+			subs := strings.SplitN(args[1], "@", 2)
+			req.PackageName = subs[0]
+			if len(subs) > 1 {
+				req.PackageVersion = subs[1]
+			}
 
 			res, err := c.InstallPackage(ctx, req)
 			if err != nil {
