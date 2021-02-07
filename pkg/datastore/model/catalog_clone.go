@@ -9,3 +9,11 @@ func (x *Catalog) Clone() *Catalog {
 func (x *Module) Clone() *Module {
 	return proto.Clone(x).(*Module)
 }
+
+func (x *Package) Clone() *Package {
+	return proto.Clone(x).(*Package)
+}
+
+func (x *PackageVersion) Clone() *PackageVersion {
+	return proto.Clone(x).(*PackageVersion)
+}
