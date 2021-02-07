@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"context"
+	"errors"
 
 	"github.com/oam-dev/velacp/pkg/datastore/model"
 )
@@ -81,7 +82,27 @@ func (c *catalogStore) ListPackages(ctx context.Context, catalogName string) ([]
 }
 
 func (c *catalogStore) GetPackage(ctx context.Context, catalogName, pkgName, version string) (*model.Package, error) {
-	panic("implement me")
+	packages, err := c.ListPackages(ctx, catalogName)
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range packages {
+		if p.Name != pkgName {
+			continue
+		}
+		if version == "" {
+			return p, nil
+		}
+		cp := p.Clone()
+		for _, v := range p.Versions {
+			if v.Version != version {
+				continue
+			}
+			cp.Versions = []*model.PackageVersion{v.Clone()}
+			return cp, nil
+		}
+	}
+	return nil, errors.New("package not found")
 }
 
 func (c *catalogStore) PutPackages(ctx context.Context, catalogName string, plist []*model.Package) error {

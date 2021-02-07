@@ -18,6 +18,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 
 	"github.com/oam-dev/velacp/pkg/datastore"
@@ -36,6 +37,7 @@ type CatalogService struct {
 
 	// catalogMap map[string]*catalogMeta
 	catalogMap sync.Map
+	logger     *zap.Logger
 }
 
 type catalogMeta struct {
@@ -43,10 +45,31 @@ type catalogMeta struct {
 	rootdir string
 }
 
-func NewCatalogService(store datastore.CatalogStore) *CatalogService {
-	return &CatalogService{
-		Store: store,
+func makeRootDir(dir string) string {
+	if dir == "" {
+		return DefaultCatalogRootdir
 	}
+	return dir
+}
+
+func NewCatalogService(store datastore.CatalogStore, l *zap.Logger) *CatalogService {
+	c := &CatalogService{
+		Store:  store,
+		logger: l,
+	}
+
+	res, err := c.ListCatalogs(context.TODO(), &catalogservice.ListCatalogsRequest{})
+	if err != nil {
+		panic(err)
+	}
+	for _, cat := range res.Catalogs {
+		c.catalogMap.Store(cat.Name, &catalogMeta{
+			url:     cat.Url,
+			rootdir: makeRootDir(cat.Rootdir),
+		})
+	}
+
+	return c
 }
 
 func (c *CatalogService) PutCatalog(ctx context.Context, request *catalogservice.PutCatalogRequest) (*catalogservice.PutCatalogResponse, error) {
@@ -140,22 +163,24 @@ func (c *CatalogService) installModule(ctx context.Context, cm *catalogMeta, pkg
 		if err != nil {
 			return err
 		}
+		c.logger.Info("installed native module successfully", zap.String("package", pkgName), zap.String("version", ver))
 	case m.Helm != nil:
 		err := c.installHelmModule(ctx, m.Helm)
 		if err != nil {
 			return err
 		}
+		c.logger.Info("installed helm module successfully", zap.String("package", pkgName), zap.String("version", ver))
 	}
 	return nil
 }
 
 func (c *CatalogService) installNativeModule(ctx context.Context, cm *catalogMeta, pkgName, ver string, m *model.NativeModule) error {
 	if m.Url != "" {
-		out, err := exec.CommandContext(ctx, "kubectl", "-f", m.Url).CombinedOutput()
+		out, err := exec.CommandContext(ctx, "kubectl", "apply", "-f", m.Url).CombinedOutput()
+		c.logger.Info(string(out))
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%s\n", out)
 	}
 	if m.Path != "" {
 		// Tempdir to clone the repository
@@ -173,37 +198,37 @@ func (c *CatalogService) installNativeModule(ctx context.Context, cm *catalogMet
 		})
 		localPath := filepath.Join(dir, cm.rootdir, pkgName, ver, m.Path)
 
-		out, err := exec.CommandContext(ctx, "kubectl", "-f", localPath).CombinedOutput()
+		out, err := exec.CommandContext(ctx, "kubectl", "apply", "-f", localPath).CombinedOutput()
+		c.logger.Info(string(out))
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%s\n", out)
 	}
 	return nil
 }
 
 func (c *CatalogService) installHelmModule(ctx context.Context, m *model.HelmModule) error {
 	out, err := exec.CommandContext(ctx, "helm", "repo", "add", m.Name, m.Repo).CombinedOutput()
+	c.logger.Info(string(out))
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%s\n", out)
 
 	installArgs := []string{"install", m.Name, m.Name + "/" + m.Name}
 	if m.Version != "" {
 		installArgs = append(installArgs, "--version", m.Version)
 	}
 	out, err = exec.CommandContext(ctx, "helm", installArgs...).CombinedOutput()
+	c.logger.Info(string(out))
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%s\n", out)
 
 	out, err = exec.CommandContext(ctx, "helm", "repo", "remove", m.Name).CombinedOutput()
+	c.logger.Info(string(out))
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%s\n", out)
 	return nil
 }
 
@@ -215,10 +240,7 @@ func (c *CatalogService) SyncCatalog(ctx context.Context, request *catalogservic
 
 	cm := &catalogMeta{
 		url:     getres.Catalog.Url,
-		rootdir: getres.Catalog.Rootdir,
-	}
-	if cm.rootdir == "" {
-		cm.rootdir = DefaultCatalogRootdir
+		rootdir: makeRootDir(getres.Catalog.Rootdir),
 	}
 	c.catalogMap.Store(request.Name, cm)
 
