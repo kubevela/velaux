@@ -3,8 +3,14 @@ package services
 import (
 	"bufio"
 	"context"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
+	"os/exec"
 	"path"
+	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/go-git/go-billy/v5"
@@ -21,8 +27,26 @@ import (
 
 var _ catalogservice.CatalogServiceServer = &CatalogService{}
 
+const (
+	DefaultCatalogRootdir = "catalog/"
+)
+
 type CatalogService struct {
 	Store datastore.CatalogStore
+
+	// catalogMap map[string]*catalogMeta
+	catalogMap sync.Map
+}
+
+type catalogMeta struct {
+	url     string
+	rootdir string
+}
+
+func NewCatalogService(store datastore.CatalogStore) *CatalogService {
+	return &CatalogService{
+		Store: store,
+	}
 }
 
 func (c *CatalogService) PutCatalog(ctx context.Context, request *catalogservice.PutCatalogRequest) (*catalogservice.PutCatalogResponse, error) {
@@ -69,7 +93,7 @@ func (c *CatalogService) DelCatalog(ctx context.Context, request *catalogservice
 }
 
 func (c *CatalogService) ListPackages(ctx context.Context, request *catalogservice.ListPackagesRequest) (*catalogservice.ListPackagesResponse, error) {
-	packages, err := c.Store.GetPackages(ctx, request.CatalogName)
+	packages, err := c.Store.ListPackages(ctx, request.CatalogName)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +103,88 @@ func (c *CatalogService) ListPackages(ctx context.Context, request *catalogservi
 }
 
 func (c *CatalogService) InstallPackage(ctx context.Context, request *catalogservice.InstallPackageRequest) (*catalogservice.InstallPackageResponse, error) {
+	p, err := c.Store.GetPackage(ctx, request.CatalogName, request.PackageName, request.PackageVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	cm, ok := c.catalogMap.Load(request.CatalogName)
+	if !ok {
+		return nil, fmt.Errorf("catalog (%s) not exist", request.CatalogName)
+	}
+
+	for _, pv := range p.Versions {
+		err := c.installPackageVersion(ctx, cm.(*catalogMeta), p.Name, pv)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &catalogservice.InstallPackageResponse{}, nil
+}
+
+func (c *CatalogService) installPackageVersion(ctx context.Context, cm *catalogMeta, pkgName string, pv *model.PackageVersion) error {
+	for _, m := range pv.Modules {
+		err := c.installModule(ctx, cm, pkgName, pv.Version, m)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *CatalogService) installModule(ctx context.Context, cm *catalogMeta, pkgName, ver string, m *model.Module) error {
+	switch {
+	case m.Native != nil:
+		err := c.installNativeModule(ctx, cm, pkgName, ver, m.Native)
+		if err != nil {
+			return err
+		}
+	case m.Helm != nil:
+		err := c.installHelmModule(ctx, m.Helm)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *CatalogService) installNativeModule(ctx context.Context, cm *catalogMeta, pkgName, ver string, m *model.NativeModule) error {
+	if m.Url != "" {
+		out, err := exec.CommandContext(ctx, "kubectl", "-f", m.Url).CombinedOutput()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n", out)
+	}
+	if m.Path != "" {
+		// Tempdir to clone the repository
+		dir, err := ioutil.TempDir("", "catalog-clone")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer os.RemoveAll(dir) // clean up
+
+		// Clones the repository into the given dir, just as a normal git clone does
+		_, err = git.PlainCloneContext(ctx, dir, false, &git.CloneOptions{
+			URL:   cm.url,
+			Depth: 1,
+		})
+		localPath := filepath.Join(dir, cm.rootdir, pkgName, ver, m.Path)
+
+		out, err := exec.CommandContext(ctx, "kubectl", "-f", localPath).CombinedOutput()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n", out)
+	}
+	return nil
+}
+
+func (c *CatalogService) installHelmModule(ctx context.Context, m *model.HelmModule) error {
+
+	return nil
 }
 
 func (c *CatalogService) SyncCatalog(ctx context.Context, request *catalogservice.SyncCatalogRequest) (*catalogservice.SyncCatalogResponse, error) {
@@ -88,7 +193,16 @@ func (c *CatalogService) SyncCatalog(ctx context.Context, request *catalogservic
 		return nil, err
 	}
 
-	plist, err := scanRepo(ctx, getres.Catalog.Url, getres.Catalog.Rootdir)
+	cm := &catalogMeta{
+		url:     getres.Catalog.Url,
+		rootdir: getres.Catalog.Rootdir,
+	}
+	if cm.rootdir == "" {
+		cm.rootdir = DefaultCatalogRootdir
+	}
+	c.catalogMap.Store(request.Name, cm)
+
+	plist, err := scanRepo(ctx, cm)
 	if err != nil {
 		return nil, err
 	}
@@ -100,12 +214,8 @@ func (c *CatalogService) SyncCatalog(ctx context.Context, request *catalogservic
 	return &catalogservice.SyncCatalogResponse{}, nil
 }
 
-func scanRepo(ctx context.Context, url string, rootdir string) ([]*model.Package, error) {
+func scanRepo(ctx context.Context, cm *catalogMeta) ([]*model.Package, error) {
 	var plist []*model.Package
-
-	if rootdir == "" {
-		rootdir = "catalog/"
-	}
 
 	// Filesystem abstraction based on memory
 	fs := memfs.New()
@@ -113,7 +223,7 @@ func scanRepo(ctx context.Context, url string, rootdir string) ([]*model.Package
 	storer := memory.NewStorage()
 
 	_, err := git.CloneContext(ctx, storer, fs, &git.CloneOptions{
-		URL:   url,
+		URL:   cm.url,
 		Depth: 1,
 	})
 	if err != nil {
@@ -122,10 +232,10 @@ func scanRepo(ctx context.Context, url string, rootdir string) ([]*model.Package
 
 	r := &repo{
 		fs:      fs,
-		rootdir: rootdir,
+		rootdir: cm.rootdir,
 	}
 
-	packages, err := fs.ReadDir(rootdir)
+	packages, err := fs.ReadDir(cm.rootdir)
 	if err != nil {
 		return nil, err
 	}

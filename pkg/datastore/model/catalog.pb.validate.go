@@ -474,15 +474,11 @@ func (m *HelmModule) Validate() error {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetRemote()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return HelmModuleValidationError{
-				field:  "Remote",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for Repo
+
+	// no validation rules for Name
+
+	// no validation rules for Version
 
 	return nil
 }
@@ -541,77 +537,6 @@ var _ interface {
 	ErrorName() string
 } = HelmModuleValidationError{}
 
-// Validate checks the field values on HelmModuleRemote with the rules defined
-// in the proto definition for this message. If any rules are violated, an
-// error is returned.
-func (m *HelmModuleRemote) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for Repo
-
-	// no validation rules for Name
-
-	// no validation rules for Version
-
-	return nil
-}
-
-// HelmModuleRemoteValidationError is the validation error returned by
-// HelmModuleRemote.Validate if the designated constraints aren't met.
-type HelmModuleRemoteValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e HelmModuleRemoteValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e HelmModuleRemoteValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e HelmModuleRemoteValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e HelmModuleRemoteValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e HelmModuleRemoteValidationError) ErrorName() string { return "HelmModuleRemoteValidationError" }
-
-// Error satisfies the builtin error interface
-func (e HelmModuleRemoteValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sHelmModuleRemote.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = HelmModuleRemoteValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = HelmModuleRemoteValidationError{}
-
 // Validate checks the field values on NativeModule with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
 // is returned.
@@ -621,6 +546,8 @@ func (m *NativeModule) Validate() error {
 	}
 
 	// no validation rules for Path
+
+	// no validation rules for Url
 
 	return nil
 }

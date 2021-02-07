@@ -13,11 +13,19 @@ const (
 
 type CatalogStore interface {
 	PutCatalog(ctx context.Context, catalog *model.Catalog) error
+
 	DelCatalog(ctx context.Context, name string) error
+
 	GetCatalog(ctx context.Context, name string) (*model.Catalog, error)
+
 	ListCatalogs(ctx context.Context) ([]*model.Catalog, error)
+
+	// If version is empty (""), then all versions will be returned.
+	GetPackage(ctx context.Context, catalogName, pkgName, version string) (*model.Package, error)
+
 	PutPackages(ctx context.Context, catalogName string, plist []*model.Package) error
-	GetPackages(ctx context.Context, catalogName string) ([]*model.Package, error)
+
+	ListPackages(ctx context.Context, catalogName string) ([]*model.Package, error)
 }
 
 func NewCatalogStore(ds DataStore) CatalogStore {
@@ -63,13 +71,17 @@ func (c *catalogStore) ListCatalogs(ctx context.Context) ([]*model.Catalog, erro
 	return cs, nil
 }
 
-func (c *catalogStore) GetPackages(ctx context.Context, catalogName string) ([]*model.Package, error) {
+func (c *catalogStore) ListPackages(ctx context.Context, catalogName string) ([]*model.Package, error) {
 	catalog := &model.CatalogRepo{}
 	err := c.ds.Get(ctx, catalogRepoKind, catalogName, catalog)
 	if err != nil {
 		return nil, err
 	}
 	return catalog.Packages, nil
+}
+
+func (c *catalogStore) GetPackage(ctx context.Context, catalogName, pkgName, version string) (*model.Package, error) {
+	panic("implement me")
 }
 
 func (c *catalogStore) PutPackages(ctx context.Context, catalogName string, plist []*model.Package) error {

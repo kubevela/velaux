@@ -66,6 +66,10 @@ message ListPackagesResponse {
 }
 
 message InstallPackageRequest {
+  string catalog_name = 1;
+  string package_name = 2;
+  string package_version = 3;
+  string cluster_name = 4;
 }
 
 message InstallPackageResponse {

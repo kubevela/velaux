@@ -63,7 +63,7 @@ func (s *grpcServer) Run(ctx context.Context) error {
 }
 
 func (s *grpcServer) registerServices() {
-	catalogservice.RegisterCatalogServiceServer(s.server, &services.CatalogService{Store: datastore.NewCatalogStore(s.ds)})
+	catalogservice.RegisterCatalogServiceServer(s.server, services.NewCatalogService(datastore.NewCatalogStore(s.ds)))
 }
 
 func (s *grpcServer) startHTTP(ctx context.Context) {
