@@ -42,7 +42,7 @@ func newPutCommand(o *client.Options) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "put",
+		Use:   "put [NAME] [flags]",
 		Short: "Add a catalog or update existing one",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -72,7 +72,7 @@ func newPutCommand(o *client.Options) *cobra.Command {
 
 func newListCommand(o *client.Options) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
+		Use:   "list [flags]",
 		Short: "Show the list of catalogs.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -100,7 +100,7 @@ func newGetCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.GetCatalogRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "get catalog_name",
+		Use:   "get [NAME] [flags]",
 		Short: "Get a catalog",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -131,7 +131,7 @@ func newDelCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.DelCatalogRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "del catalog_name",
+		Use:   "del [NAME] [flags]",
 		Short: "Delete a catalog",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -160,7 +160,7 @@ func newSyncCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.SyncCatalogRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "sync catalog_name",
+		Use:   "sync [NAME] [flags]",
 		Short: "Sync a catalog's package list",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -189,7 +189,7 @@ func newListPkgCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.ListPackagesRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "list-pkg catalog_name",
+		Use:   "list-pkg [NAME] [flags]",
 		Short: "List packages of a catalog",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -220,7 +220,7 @@ func newInstallPkgCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.InstallPackageRequest{}
 
 	cmd := &cobra.Command{
-		Use:   "install-pkg catalog_name pkg_name@version",
+		Use:   "install-pkg [CATALOG_NAME] [PACKAGE_NAME@VERSION] [flags]",
 		Short: "Install a packages from a catalog to a cluster",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -239,6 +239,7 @@ func newInstallPkgCommand(o *client.Options) *cobra.Command {
 			if len(subs) > 1 {
 				req.PackageVersion = subs[1]
 			}
+			// TODO: select a cluster to install
 
 			res, err := c.InstallPackage(ctx, req)
 			if err != nil {

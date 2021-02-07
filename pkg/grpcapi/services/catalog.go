@@ -183,7 +183,27 @@ func (c *CatalogService) installNativeModule(ctx context.Context, cm *catalogMet
 }
 
 func (c *CatalogService) installHelmModule(ctx context.Context, m *model.HelmModule) error {
+	out, err := exec.CommandContext(ctx, "helm", "repo", "add", m.Name, m.Repo).CombinedOutput()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n", out)
 
+	installArgs := []string{"install", m.Name, m.Name + "/" + m.Name}
+	if m.Version != "" {
+		installArgs = append(installArgs, "--version", m.Version)
+	}
+	out, err = exec.CommandContext(ctx, "helm", installArgs...).CombinedOutput()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n", out)
+
+	out, err = exec.CommandContext(ctx, "helm", "repo", "remove", m.Name).CombinedOutput()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n", out)
 	return nil
 }
 
