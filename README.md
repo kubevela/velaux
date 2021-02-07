@@ -84,3 +84,8 @@ Starting the development server...
 
 ![alt](./doc/images/ui.png)
 
+## Catalog Structure
+
+The catalog repo has a standard structure format in order to be managed in Vela Control Plane.
+
+See [catalog-example](https://github.com/hongchaodeng/catalog-example) repo for more details.
