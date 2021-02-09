@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
+	"github.com/oam-dev/velacp/pkg/proto/clusterservice"
 )
 
 type Options struct {
@@ -25,15 +26,27 @@ func (o *Options) Validate() error {
 	return nil
 }
 
-func (o *Options) NewCatalogClient(ctx context.Context) (catalogservice.CatalogServiceClient, *grpc.ClientConn, error) {
+func (o *Options) newgrpcConn(ctx context.Context) (*grpc.ClientConn, error) {
 	if err := o.Validate(); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
-	conn, err := grpc.DialContext(ctx, o.Address, opts...)
+	return grpc.DialContext(ctx, o.Address, opts...)
+}
+
+func (o *Options) NewCatalogClient(ctx context.Context) (catalogservice.CatalogServiceClient, *grpc.ClientConn, error) {
+	conn, err := o.newgrpcConn(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
 	return catalogservice.NewCatalogServiceClient(conn), conn, nil
+}
+
+func (o *Options) NewClusterClient(ctx context.Context) (clusterservice.ClusterServiceClient, *grpc.ClientConn, error) {
+	conn, err := o.newgrpcConn(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	return clusterservice.NewClusterServiceClient(conn), conn, nil
 }

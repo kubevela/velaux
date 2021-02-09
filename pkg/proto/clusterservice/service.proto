@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package vela.api.service.clusterservice;
+option go_package = "github.com/oam-dev/velacp/pkg/proto/clusterservice";
+
+service ClusterService {
+  rpc PutCluster(PutClusterRequest) returns (PutClusterResponse) {}
+  rpc GetCluster(GetClusterRequest) returns (GetClusterResponse) {}
+  rpc ListClusters(ListClustersRequest) returns (ListClustersResponse) {}
+  rpc DelCluster(DelClusterRequest) returns (DelClusterResponse) {}
+}
+
+message PutClusterRequest {
+}
+
+message PutClusterResponse {
+}
+
+message GetClusterRequest {
+  string name = 1;
+}
+
+message GetClusterResponse {
+}
+
+message ListClustersRequest {
+}
+
+message ListClustersResponse {
+}
+
+message DelClusterRequest {
+}
+
+message DelClusterResponse {
+}

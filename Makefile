@@ -23,4 +23,5 @@ gen-proto:
 			--grpc-gateway_opt paths=source_relative \
 			--grpc-gateway_opt generate_unbound_methods=true \
 		pkg/proto/catalogservice/service.proto \
+		pkg/proto/clusterservice/service.proto \
 		pkg/datastore/model/catalog.proto

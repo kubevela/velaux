@@ -1,10 +1,8 @@
-package catalog
+package commands
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -24,19 +22,19 @@ func NewCatalogCommand() *cobra.Command {
 	o.RegisterPersistentFlags(cmd)
 
 	cmd.AddCommand(
-		newPutCommand(o),
-		newListCommand(o),
-		newGetCommand(o),
-		newDelCommand(o),
-		newSyncCommand(o),
-		newListPkgCommand(o),
-		newInstallPkgCommand(o),
+		newCatalogPutCommand(o),
+		newCatalogListCommand(o),
+		newCatalogGetCommand(o),
+		newCatalogDelCommand(o),
+		newCatalogSyncCommand(o),
+		newCatalogListPkgCommand(o),
+		newCatalogInstallPkgCommand(o),
 	)
 	return cmd
 
 }
 
-func newPutCommand(o *client.Options) *cobra.Command {
+func newCatalogPutCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.PutCatalogRequest{
 		Catalog: &model.Catalog{},
 	}
@@ -70,7 +68,7 @@ func newPutCommand(o *client.Options) *cobra.Command {
 	return cmd
 }
 
-func newListCommand(o *client.Options) *cobra.Command {
+func newCatalogListCommand(o *client.Options) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list [flags]",
 		Short: "Show the list of catalogs.",
@@ -96,7 +94,7 @@ func newListCommand(o *client.Options) *cobra.Command {
 	return cmd
 }
 
-func newGetCommand(o *client.Options) *cobra.Command {
+func newCatalogGetCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.GetCatalogRequest{}
 
 	cmd := &cobra.Command{
@@ -127,7 +125,7 @@ func newGetCommand(o *client.Options) *cobra.Command {
 	return cmd
 }
 
-func newDelCommand(o *client.Options) *cobra.Command {
+func newCatalogDelCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.DelCatalogRequest{}
 
 	cmd := &cobra.Command{
@@ -156,7 +154,7 @@ func newDelCommand(o *client.Options) *cobra.Command {
 	return cmd
 }
 
-func newSyncCommand(o *client.Options) *cobra.Command {
+func newCatalogSyncCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.SyncCatalogRequest{}
 
 	cmd := &cobra.Command{
@@ -185,7 +183,7 @@ func newSyncCommand(o *client.Options) *cobra.Command {
 	return cmd
 }
 
-func newListPkgCommand(o *client.Options) *cobra.Command {
+func newCatalogListPkgCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.ListPackagesRequest{}
 
 	cmd := &cobra.Command{
@@ -216,7 +214,7 @@ func newListPkgCommand(o *client.Options) *cobra.Command {
 	return cmd
 }
 
-func newInstallPkgCommand(o *client.Options) *cobra.Command {
+func newCatalogInstallPkgCommand(o *client.Options) *cobra.Command {
 	req := &catalogservice.InstallPackageRequest{}
 
 	cmd := &cobra.Command{
@@ -250,12 +248,4 @@ func newInstallPkgCommand(o *client.Options) *cobra.Command {
 		},
 	}
 	return cmd
-}
-
-func printResult(res interface{}) {
-	b, err := json.MarshalIndent(res, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(b))
 }
