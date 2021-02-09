@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/oam-dev/velacp/pkg/commands"
-	catalogcmd "github.com/oam-dev/velacp/pkg/commands/catalog"
 )
 
 func main() {
@@ -13,7 +12,8 @@ func main() {
 		"KubeVela CLI tool",
 	)
 	app.AddCommands(
-		catalogcmd.NewCatalogCommand(),
+		commands.NewCatalogCommand(),
+		commands.NewClusterCommand(),
 	)
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
