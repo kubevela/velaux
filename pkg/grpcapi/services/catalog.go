@@ -93,7 +93,6 @@ func (c *CatalogService) GetCatalog(ctx context.Context, request *catalogservice
 	return &catalogservice.GetCatalogResponse{
 		Catalog: catalog,
 	}, nil
-
 }
 
 func (c *CatalogService) ListCatalogs(ctx context.Context, _ *catalogservice.ListCatalogsRequest) (*catalogservice.ListCatalogsResponse, error) {

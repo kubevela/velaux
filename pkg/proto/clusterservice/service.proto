@@ -24,6 +24,7 @@ message GetClusterRequest {
 }
 
 message GetClusterResponse {
+  vela.api.model.Cluster cluster = 1;
 }
 
 message ListClustersRequest {

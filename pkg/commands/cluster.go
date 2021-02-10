@@ -145,6 +145,7 @@ func newClusterDelCommand(o *client.Options) *cobra.Command {
 			if len(args) < 1 {
 				return errors.New("must specify name for the cluster")
 			}
+			req.Name = args[0]
 
 			_, err = c.DelCluster(ctx, req)
 			if err != nil {

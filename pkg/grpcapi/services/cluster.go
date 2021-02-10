@@ -37,7 +37,14 @@ func (s *ClusterService) PutCluster(ctx context.Context, request *clusterservice
 }
 
 func (s *ClusterService) GetCluster(ctx context.Context, request *clusterservice.GetClusterRequest) (*clusterservice.GetClusterResponse, error) {
-	panic("implement me")
+	cluster, err := s.store.GetCluster(ctx, request.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &clusterservice.GetClusterResponse{
+		Cluster: cluster,
+	}, nil
 }
 
 func (s *ClusterService) ListClusters(ctx context.Context, request *clusterservice.ListClustersRequest) (*clusterservice.ListClustersResponse, error) {
@@ -51,5 +58,9 @@ func (s *ClusterService) ListClusters(ctx context.Context, request *clusterservi
 }
 
 func (s *ClusterService) DelCluster(ctx context.Context, request *clusterservice.DelClusterRequest) (*clusterservice.DelClusterResponse, error) {
-	panic("implement me")
+	err := s.store.DelCatalog(ctx, request.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &clusterservice.DelClusterResponse{}, nil
 }

@@ -13,6 +13,8 @@ const (
 type ClusterStore interface {
 	PutCluster(ctx context.Context, cluster *model.Cluster) error
 	ListClusters(ctx context.Context) ([]*model.Cluster, error)
+	GetCluster(ctx context.Context, name string) (*model.Cluster, error)
+	DelCatalog(ctx context.Context, name string) error
 }
 
 type clusterStore struct {
@@ -44,4 +46,15 @@ func (c clusterStore) ListClusters(ctx context.Context) ([]*model.Cluster, error
 		cs = append(cs, &c)
 	}
 	return cs, nil
+}
+func (c clusterStore) GetCluster(ctx context.Context, name string) (*model.Cluster, error) {
+	res := &model.Cluster{}
+	err := c.ds.Get(ctx, clusterKind, name, res)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+func (c clusterStore) DelCatalog(ctx context.Context, name string) error {
+	return c.ds.Delete(ctx, clusterKind, name)
 }
