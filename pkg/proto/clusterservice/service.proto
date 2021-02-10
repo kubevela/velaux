@@ -30,6 +30,7 @@ message ListClustersRequest {
 }
 
 message ListClustersResponse {
+  repeated vela.api.model.Cluster clusters = 1;
 }
 
 message DelClusterRequest {

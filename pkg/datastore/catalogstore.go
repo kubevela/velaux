@@ -59,6 +59,7 @@ func (c *catalogStore) ListCatalogs(ctx context.Context) ([]*model.Catalog, erro
 	if err != nil {
 		return nil, err
 	}
+	defer iter.Close(ctx)
 	cs := make([]*model.Catalog, 0)
 	for iter.Next(ctx) {
 		var c model.Catalog
@@ -68,7 +69,6 @@ func (c *catalogStore) ListCatalogs(ctx context.Context) ([]*model.Catalog, erro
 		}
 		cs = append(cs, &c)
 	}
-	iter.Close(ctx)
 	return cs, nil
 }
 
