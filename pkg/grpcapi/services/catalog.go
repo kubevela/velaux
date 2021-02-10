@@ -35,7 +35,6 @@ const (
 type CatalogService struct {
 	Store datastore.CatalogStore
 
-	// catalogMap map[string]*catalogMeta
 	catalogMap sync.Map
 	logger     *zap.Logger
 }

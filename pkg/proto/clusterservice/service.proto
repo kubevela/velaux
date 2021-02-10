@@ -3,6 +3,8 @@ syntax = "proto3";
 package vela.api.service.clusterservice;
 option go_package = "github.com/oam-dev/velacp/pkg/proto/clusterservice";
 
+import "pkg/datastore/model/cluster.proto";
+
 service ClusterService {
   rpc PutCluster(PutClusterRequest) returns (PutClusterResponse) {}
   rpc GetCluster(GetClusterRequest) returns (GetClusterResponse) {}
@@ -11,6 +13,7 @@ service ClusterService {
 }
 
 message PutClusterRequest {
+  vela.api.model.Cluster cluster = 1;
 }
 
 message PutClusterResponse {
@@ -30,6 +33,7 @@ message ListClustersResponse {
 }
 
 message DelClusterRequest {
+  string name = 1;
 }
 
 message DelClusterResponse {
