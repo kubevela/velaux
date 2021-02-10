@@ -26,7 +26,7 @@ func (o *Options) Validate() error {
 	return nil
 }
 
-func (o *Options) newgrpcConn(ctx context.Context) (*grpc.ClientConn, error) {
+func (o *Options) newGrpcConn(ctx context.Context) (*grpc.ClientConn, error) {
 	if err := o.Validate(); err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (o *Options) newgrpcConn(ctx context.Context) (*grpc.ClientConn, error) {
 }
 
 func (o *Options) NewCatalogClient(ctx context.Context) (catalogservice.CatalogServiceClient, *grpc.ClientConn, error) {
-	conn, err := o.newgrpcConn(ctx)
+	conn, err := o.newGrpcConn(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -44,7 +44,7 @@ func (o *Options) NewCatalogClient(ctx context.Context) (catalogservice.CatalogS
 }
 
 func (o *Options) NewClusterClient(ctx context.Context) (clusterservice.ClusterServiceClient, *grpc.ClientConn, error) {
-	conn, err := o.newgrpcConn(ctx)
+	conn, err := o.newGrpcConn(ctx)
 	if err != nil {
 		return nil, nil, err
 	}

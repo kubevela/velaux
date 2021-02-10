@@ -44,6 +44,16 @@ func (m *PutClusterRequest) Validate() error {
 		return nil
 	}
 
+	if v, ok := interface{}(m.GetCluster()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PutClusterRequestValidationError{
+				field:  "Cluster",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -447,6 +457,8 @@ func (m *DelClusterRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
+
+	// no validation rules for Name
 
 	return nil
 }

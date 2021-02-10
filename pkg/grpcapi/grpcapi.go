@@ -14,6 +14,7 @@ import (
 	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/grpcapi/services"
 	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
+	"github.com/oam-dev/velacp/pkg/proto/clusterservice"
 )
 
 type Config struct {
@@ -64,6 +65,7 @@ func (s *grpcServer) Run(ctx context.Context) error {
 
 func (s *grpcServer) registerServices() {
 	catalogservice.RegisterCatalogServiceServer(s.server, services.NewCatalogService(datastore.NewCatalogStore(s.ds), s.Logger))
+	clusterservice.RegisterClusterServiceServer(s.server, services.NewClusterService(datastore.NewClusterStore(s.ds), s.Logger))
 }
 
 func (s *grpcServer) startHTTP(ctx context.Context) {
