@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"io/ioutil"
 
@@ -58,7 +59,8 @@ func newClusterPutCommand(o *client.Options) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			req.Cluster.Kubeconfig = b
+			encoded := base64.StdEncoding.EncodeToString(b)
+			req.Cluster.Kubeconfig = encoded
 
 			_, err = c.PutCluster(ctx, req)
 			if err != nil {
