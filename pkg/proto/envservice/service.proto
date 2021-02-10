@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package vela.api.service.envservice;
+option go_package = "github.com/oam-dev/velacp/pkg/proto/envservice";
+
+import "pkg/datastore/model/environment.proto";
+
+service EnvService {
+  rpc PutEnv(PutEnvRequest) returns (PutEnvResponse) {}
+  rpc GetEnv(GetEnvRequest) returns (GetEnvResponse) {}
+  rpc ListEnvs(ListEnvsRequest) returns (ListEnvsResponse) {}
+  rpc DelEnv(DelEnvRequest) returns (DelEnvResponse) {}
+}
+
+message PutEnvRequest {
+  vela.api.model.Environment env = 1;
+}
+
+message PutEnvResponse {
+}
+
+message GetEnvRequest {
+  string name = 1;
+}
+
+message GetEnvResponse {
+  vela.api.model.Environment env = 1;
+}
+
+message ListEnvsRequest {
+}
+
+message ListEnvsResponse {
+  repeated vela.api.model.Environment envs = 1;
+}
+
+message DelEnvRequest {
+  string name = 1;
+}
+
+message DelEnvResponse {
+}

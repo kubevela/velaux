@@ -9,6 +9,7 @@ import (
 
 	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 	"github.com/oam-dev/velacp/pkg/proto/clusterservice"
+	"github.com/oam-dev/velacp/pkg/proto/envservice"
 )
 
 type Options struct {
@@ -49,4 +50,12 @@ func (o *Options) NewClusterClient(ctx context.Context) (clusterservice.ClusterS
 		return nil, nil, err
 	}
 	return clusterservice.NewClusterServiceClient(conn), conn, nil
+}
+
+func (o *Options) NewEnvClient(ctx context.Context) (envservice.EnvServiceClient, *grpc.ClientConn, error) {
+	conn, err := o.newGrpcConn(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	return envservice.NewEnvServiceClient(conn), conn, nil
 }

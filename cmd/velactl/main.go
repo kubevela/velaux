@@ -14,6 +14,7 @@ func main() {
 	app.AddCommands(
 		commands.NewCatalogCommand(),
 		commands.NewClusterCommand(),
+		commands.NewEnvCommand(),
 	)
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
