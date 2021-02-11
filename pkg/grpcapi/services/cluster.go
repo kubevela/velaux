@@ -58,7 +58,7 @@ func (s *ClusterService) ListClusters(ctx context.Context, request *clusterservi
 }
 
 func (s *ClusterService) DelCluster(ctx context.Context, request *clusterservice.DelClusterRequest) (*clusterservice.DelClusterResponse, error) {
-	err := s.store.DelCatalog(ctx, request.Name)
+	err := s.store.DelCluster(ctx, request.Name)
 	if err != nil {
 		return nil, err
 	}

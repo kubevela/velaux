@@ -11,4 +11,19 @@ message Environment {
 
   // Unix time of the last time when the cluster is updated.
   int64 updated_at = 2 [(validate.rules).int64.gt = 0];
+
+  map<string, string> config = 10;
+
+  repeated ClusterRef clusters = 11;
+
+  repeated PackageRef packages = 12;
+}
+
+message ClusterRef {
+  string cluster_name = 1;
+}
+
+message PackageRef {
+  string package_name = 1;
+  string catalog_name = 2;
 }

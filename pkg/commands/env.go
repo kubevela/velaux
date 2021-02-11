@@ -34,8 +34,6 @@ func newEnvPutCommand(o *client.Options) *cobra.Command {
 		Env: &model.Environment{},
 	}
 
-	var configFilePath string
-
 	cmd := &cobra.Command{
 		Use:   "put [NAME] [flags]",
 		Short: "Add a env or update existing one",
@@ -59,7 +57,6 @@ func newEnvPutCommand(o *client.Options) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&configFilePath, "kubeconfig-path", "", "The file path of kubeconfig")
 	return cmd
 }
 

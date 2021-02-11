@@ -14,7 +14,7 @@ type ClusterStore interface {
 	PutCluster(ctx context.Context, cluster *model.Cluster) error
 	ListClusters(ctx context.Context) ([]*model.Cluster, error)
 	GetCluster(ctx context.Context, name string) (*model.Cluster, error)
-	DelCatalog(ctx context.Context, name string) error
+	DelCluster(ctx context.Context, name string) error
 }
 
 type clusterStore struct {
@@ -27,10 +27,10 @@ func NewClusterStore(ds DataStore) ClusterStore {
 	}
 }
 
-func (c clusterStore) PutCluster(ctx context.Context, cluster *model.Cluster) error {
+func (c *clusterStore) PutCluster(ctx context.Context, cluster *model.Cluster) error {
 	return c.ds.Put(ctx, clusterKind, cluster)
 }
-func (c clusterStore) ListClusters(ctx context.Context) ([]*model.Cluster, error) {
+func (c *clusterStore) ListClusters(ctx context.Context) ([]*model.Cluster, error) {
 	iter, err := c.ds.Find(ctx, clusterKind)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (c clusterStore) ListClusters(ctx context.Context) ([]*model.Cluster, error
 	}
 	return cs, nil
 }
-func (c clusterStore) GetCluster(ctx context.Context, name string) (*model.Cluster, error) {
+func (c *clusterStore) GetCluster(ctx context.Context, name string) (*model.Cluster, error) {
 	res := &model.Cluster{}
 	err := c.ds.Get(ctx, clusterKind, name, res)
 	if err != nil {
@@ -55,6 +55,6 @@ func (c clusterStore) GetCluster(ctx context.Context, name string) (*model.Clust
 	}
 	return res, nil
 }
-func (c clusterStore) DelCatalog(ctx context.Context, name string) error {
+func (c *clusterStore) DelCluster(ctx context.Context, name string) error {
 	return c.ds.Delete(ctx, clusterKind, name)
 }

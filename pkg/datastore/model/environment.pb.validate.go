@@ -58,6 +58,38 @@ func (m *Environment) Validate() error {
 		}
 	}
 
+	// no validation rules for Config
+
+	for idx, item := range m.GetClusters() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EnvironmentValidationError{
+					field:  fmt.Sprintf("Clusters[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetPackages() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EnvironmentValidationError{
+					field:  fmt.Sprintf("Packages[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -114,3 +146,137 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = EnvironmentValidationError{}
+
+// Validate checks the field values on ClusterRef with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *ClusterRef) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for ClusterName
+
+	return nil
+}
+
+// ClusterRefValidationError is the validation error returned by
+// ClusterRef.Validate if the designated constraints aren't met.
+type ClusterRefValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ClusterRefValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ClusterRefValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ClusterRefValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ClusterRefValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ClusterRefValidationError) ErrorName() string { return "ClusterRefValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ClusterRefValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sClusterRef.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ClusterRefValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ClusterRefValidationError{}
+
+// Validate checks the field values on PackageRef with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *PackageRef) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for PackageName
+
+	// no validation rules for CatalogName
+
+	return nil
+}
+
+// PackageRefValidationError is the validation error returned by
+// PackageRef.Validate if the designated constraints aren't met.
+type PackageRefValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PackageRefValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PackageRefValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PackageRefValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PackageRefValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PackageRefValidationError) ErrorName() string { return "PackageRefValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PackageRefValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPackageRef.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PackageRefValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PackageRefValidationError{}
