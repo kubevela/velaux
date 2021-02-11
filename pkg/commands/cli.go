@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type App struct {
+type CLI struct {
 	rootCmd *cobra.Command
 }
 
-func NewApp(name, desc string) *App {
-	a := &App{
+func NewCLI(name, desc string) *CLI {
+	a := &CLI{
 		rootCmd: &cobra.Command{
 			Use:           name,
 			Short:         desc,
@@ -31,16 +31,16 @@ func NewApp(name, desc string) *App {
 	return a
 }
 
-func (a *App) setGlobalFlags() {
+func (c *CLI) setGlobalFlags() {
 	// set global flags here
 }
 
-func (a *App) AddCommands(cmds ...*cobra.Command) {
+func (c *CLI) AddCommands(cmds ...*cobra.Command) {
 	for _, cmd := range cmds {
-		a.rootCmd.AddCommand(cmd)
+		c.rootCmd.AddCommand(cmd)
 	}
 }
 
-func (a *App) Run() error {
-	return a.rootCmd.Execute()
+func (c *CLI) Run() error {
+	return c.rootCmd.Execute()
 }

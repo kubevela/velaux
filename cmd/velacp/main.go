@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	app := commands.NewApp(
+	app := commands.NewCLI(
 		"velacp",
 		"KubeVela control plane",
 	)

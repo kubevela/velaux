@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
+	"github.com/oam-dev/velacp/pkg/proto/appservice"
 	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 	"github.com/oam-dev/velacp/pkg/proto/clusterservice"
 	"github.com/oam-dev/velacp/pkg/proto/envservice"
@@ -58,4 +59,12 @@ func (o *Options) NewEnvClient(ctx context.Context) (envservice.EnvServiceClient
 		return nil, nil, err
 	}
 	return envservice.NewEnvServiceClient(conn), conn, nil
+}
+
+func (o *Options) NewAppClient(ctx context.Context) (appservice.ApplicationServiceClient, *grpc.ClientConn, error) {
+	conn, err := o.newGrpcConn(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	return appservice.NewApplicationServiceClient(conn), conn, nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	app := commands.NewApp(
+	app := commands.NewCLI(
 		"velactl",
 		"KubeVela CLI tool",
 	)
@@ -15,6 +15,7 @@ func main() {
 		commands.NewCatalogCommand(),
 		commands.NewClusterCommand(),
 		commands.NewEnvCommand(),
+		commands.NewAppCommand(),
 	)
 	if err := app.Run(); err != nil {
 		log.Fatal(err)

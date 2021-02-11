@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package vela.api.service.appservice;
+option go_package = "github.com/oam-dev/velacp/pkg/proto/appservice";
+
+import "pkg/datastore/model/application.proto";
+
+service ApplicationService {
+  rpc PutApplication(PutApplicationRequest) returns (PutApplicationResponse) {}
+  rpc GetApplication(GetApplicationRequest) returns (GetApplicationResponse) {}
+  rpc ListApplications(ListApplicationsRequest) returns (ListApplicationsResponse) {}
+  rpc DelApplication(DelApplicationRequest) returns (DelApplicationResponse) {}
+}
+
+message PutApplicationRequest {
+  vela.api.model.Application app = 1;
+}
+
+message PutApplicationResponse {
+}
+
+message GetApplicationRequest {
+  string name = 1;
+}
+
+message GetApplicationResponse {
+  vela.api.model.Application app = 1;
+}
+
+message ListApplicationsRequest {
+}
+
+message ListApplicationsResponse {
+  repeated vela.api.model.Application apps = 1;
+}
+
+message DelApplicationRequest {
+  string name = 1;
+}
+
+message DelApplicationResponse {
+}
