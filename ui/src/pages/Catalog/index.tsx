@@ -9,7 +9,7 @@ type CatalogItem = {
   id: string;
   name: string;
   desc: string;
-  updatedAt: string;
+  updatedAt: number;
   labels: Map<string, string>;
   url: string;
   rootdir: string;
