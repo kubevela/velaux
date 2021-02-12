@@ -1,7 +1,7 @@
 ﻿export default [
   {
     path: '/catalogs',
-    name: 'catalogs',
+    name: 'Catalogs',
     icon: 'smile',
     component: './Catalog',
   },
