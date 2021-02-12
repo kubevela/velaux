@@ -1,220 +1,180 @@
-import React, { useRef } from 'react';
-import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Tag, Space, Menu, Dropdown } from 'antd';
-import type { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProTable, { TableDropdown } from '@ant-design/pro-table';
-import request from 'umi-request';
+import React, { useRef, useState } from 'react';
+import { Button, message, Space, Tooltip } from 'antd';
+import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import type { ActionType, ProColumns } from '@ant-design/pro-table';
+import ProTable from '@ant-design/pro-table';
+import { PageContainer } from '@ant-design/pro-layout';
+import { FormattedMessage, Link, useIntl, useModel } from 'umi';
+import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 
-type CatalogItem = {
-  id: string;
-  name: string;
-  desc: string;
-  updatedAt: number;
-  labels: Map<string, string>;
-  url: string;
-  rootdir: string;
+const handleAdd = async (fields: API.CatalogType) => {
+  const hide = message.loading('正在添加');
+  try {
+    // await addRule({ ...fields });
+    hide();
+    message.success('添加成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('添加失败请重试！');
+    return false;
+  }
 };
 
-const columns: ProColumns<CatalogItem>[] = [
-  {
-    dataIndex: 'index',
-    valueType: 'indexBorder',
-    width: 48,
-  },
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    ellipsis: true,
-    tip: '标题过长会自动收缩',
-    formItemProps: {
-      rules: [
-        {
-          required: true,
-          message: '此项为必填项',
-        },
-      ],
+const CatalogList: React.FC = () => {
+  /** 新建窗口的弹窗 */
+  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
+  const actionRef = useRef<ActionType>();
+
+  /** 国际化配置 */
+  const intl = useIntl();
+
+  const { listCatalogs } = useModel('useCatalogs');
+
+  const columns: ProColumns<API.CatalogType>[] = [
+    {
+      title: 'Index',
+      dataIndex: 'index',
+      valueType: 'indexBorder',
+      width: 48,
     },
-  },
-  {
-    title: 'Description',
-    dataIndex: 'desc',
-    search: false,
-  },
-  // {
-  //   title: '状态',
-  //   dataIndex: 'state',
-  //   filters: true,
-  //   onFilter: true,
-  //   valueType: 'select',
-  //   valueEnum: {
-  //     all: { text: '全部', status: 'Default' },
-  //     open: {
-  //       text: '未解决',
-  //       status: 'Error',
-  //     },
-  //     closed: {
-  //       text: '已解决',
-  //       status: 'Success',
-  //       disabled: true,
-  //     },
-  //     processing: {
-  //       text: '解决中',
-  //       status: 'Processing',
-  //     },
-  //   },
-  // },
-  {
-    title: 'Type',
-    dataIndex: 'labels',
-    hideInTable: true,
-    filters: true,
-    onFilter: true,
-    valueType: 'select',
-    valueEnum: {
-      all: { text: 'All', status: 'Default' },
-      open: {
-        text: 'Helm',
-        status: 'Error',
-      },
-      closed: {
-        text: 'Terraform',
-        status: 'Success',
-      },
-      processing: {
-        text: 'Native',
-        status: 'Processing',
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      render: (dom, record) => (
+        // https://ui.dev/react-router-v4-pass-props-to-link/
+        <Link to={{ pathname: '/api/catalogs/' + record.name, state: { fromNotifications: true } }}>
+          <a>{dom}</a>
+        </Link>
+      ),
+    },
+    {
+      title: 'Description',
+      dataIndex: 'desc',
+      search: false,
+    },
+    {
+      title: (
+        <>
+          Last Updated
+          <Tooltip placement="top" title="这是一段描述">
+            <QuestionCircleOutlined style={{ marginLeft: 4 }} />
+          </Tooltip>
+        </>
+      ),
+      dataIndex: 'updatedAt',
+      valueType: 'date',
+      sorter: (a, b) => a.updatedAt - b.updatedAt,
+      render: (text, record) => {
+        var date = new Date(record.updatedAt * 1000);
+        return date.toISOString();
       },
     },
-  },
-  {
-    title: 'Labels',
-    dataIndex: 'labels',
-    renderFormItem: (_, { defaultRender }) => {
-      return defaultRender(_);
+
+    {
+      title: <FormattedMessage id="pages.catalogTable.titleOption" defaultMessage="操作" />,
+      width: '164px',
+      dataIndex: 'option',
+      valueType: 'option',
+      render: (_, record) => (
+        <Space>
+          <Button id="sync" onClick={() => message.success('ok')}>
+            <FormattedMessage id="pages.catalogTable.sync" defaultMessage="同步" />
+          </Button>
+          <Button id="edit" type="primary" onClick={() => message.success('ok')}>
+            <FormattedMessage id="pages.catalogTable.edit" defaultMessage="编辑" />
+          </Button>
+          <Button id="delete" type="primary" danger onClick={() => message.success('ok')}>
+            <FormattedMessage id="pages.catalogTable.delete" defaultMessage="删除" />
+          </Button>
+        </Space>
+      ),
     },
-    render: (_, record) => (
-      <Space>
-        {record.labels &&
-          Object.keys(record.labels).map((key) => (
-            <Tag color={'green'} key={key}>
-              {key}: {record.labels[key]}
-            </Tag>
-          ))}
-      </Space>
-    ),
-  },
-  {
-    title: 'Last updated',
-    key: 'last_updated',
-    dataIndex: 'updated_at',
-    // valueType: 'date',
-    hideInSearch: true,
-    render: (text, record) => {
-      var date = new Date(record.updatedAt * 1000);
-      return date.toISOString();
-    },
-  },
-  // {
-  //   title: '创建时间',
-  //   dataIndex: 'created_at',
-  //   valueType: 'dateRange',
-  //   hideInTable: true,
-  //   search: {
-  //     transform: (value) => {
-  //       return {
-  //         startTime: value[0],
-  //         endTime: value[1],
-  //       };
-  //     },
-  //   },
-  // },
-  {
-    title: '操作',
-    valueType: 'option',
-    render: (text, record, _, action) => [
-      <a
-        key="editable"
-        onClick={() => {
-          action.startEditable?.(record.id);
+  ];
+
+  return (
+    <PageContainer>
+      <ProTable<API.CatalogType>
+        columns={columns}
+        rowKey="key"
+        dateFormatter="string"
+        headerTitle="查询表格"
+        actionRef={actionRef}
+        pagination={{
+          showQuickJumper: true,
+        }}
+        search={{
+          // filterType: 'light',
+          labelWidth: 120,
+        }}
+        toolBarRender={() => [
+          <Button
+            type="primary"
+            key="primary"
+            onClick={() => {
+              handleModalVisible(true);
+            }}
+          >
+            <PlusOutlined /> <FormattedMessage id="pages.catalogTable.new" defaultMessage="新建" />
+          </Button>,
+        ]}
+        request={async (params, sorter, filter) => {
+          // 表单搜索项会从 params 传入，传递给后端接口。
+          console.log('params', params, 'sorter', sorter, 'filter', filter);
+
+          const catalogs = await listCatalogs();
+
+          let filtered: API.CatalogType[] = [];
+
+          if (!params.name) {
+            filtered = catalogs;
+          } else {
+            filtered = catalogs.filter((val) => val.name?.includes(params.name));
+          }
+          return Promise.resolve({
+            data: filtered,
+            success: true,
+          });
+        }}
+      />
+
+      <ModalForm
+        title={intl.formatMessage({
+          id: 'pages.catalogTable.createForm.newRule',
+          defaultMessage: '新建规则',
+        })}
+        width="400px"
+        visible={createModalVisible}
+        onVisibleChange={handleModalVisible}
+        onFinish={async (value) => {
+          const success = await handleAdd(value as API.CatalogType);
+          if (success) {
+            handleModalVisible(false);
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+          }
         }}
       >
-        编辑
-      </a>,
-      <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
-        查看
-      </a>,
-      <TableDropdown
-        key="actionGroup"
-        onSelect={() => action.reload()}
-        menus={[
-          { key: 'copy', name: '复制' },
-          { key: 'delete', name: '删除' },
-        ]}
-      />,
-    ],
-  },
-];
-
-const menu = (
-  <Menu>
-    <Menu.Item key="1">1st item</Menu.Item>
-    <Menu.Item key="2">2nd item</Menu.Item>
-    <Menu.Item key="3">3rd item</Menu.Item>
-  </Menu>
-);
-
-export default () => {
-  const actionRef = useRef<ActionType>();
-  return (
-    <ProTable<CatalogItem>
-      columns={columns}
-      actionRef={actionRef}
-      request={async (params = {}) =>
-        request<{
-          catalogs: CatalogItem[];
-        }>('/api/catalogs', {
-          params,
-        }).then((res) => {
-          return {
-            data: res.catalogs,
-            success: true,
-          };
-        })
-      }
-      editable={{
-        type: 'multiple',
-      }}
-      rowKey="id"
-      search={{
-        labelWidth: 'auto',
-      }}
-      form={{
-        // 由于配置了 transform，提交的参与与定义的不同这里需要转化一下
-        syncToUrl: (values, type) => {
-          if (type === 'get') {
-            return {
-              ...values,
-              created_at: [values.startTime, values.endTime],
-            };
-          }
-          return values;
-        },
-      }}
-      pagination={{
-        pageSize: 5,
-      }}
-      dateFormatter="string"
-      headerTitle="高级表格"
-      toolBarRender={() => [
-        <Button key="button" icon={<PlusOutlined />} type="primary">
-          新建
-        </Button>,
-        <Dropdown key="menu" overlay={menu}>
-          <Button>
-            <EllipsisOutlined />
-          </Button>
-        </Dropdown>,
-      ]}
-    />
+        <ProFormText
+          rules={[
+            {
+              required: true,
+              message: (
+                <FormattedMessage
+                  id="pages.catalogTable.ruleName"
+                  defaultMessage="规则名称为必填项"
+                />
+              ),
+            },
+          ]}
+          width="md"
+          name="name"
+        />
+        <ProFormTextArea width="md" name="desc" />
+      </ModalForm>
+    </PageContainer>
   );
 };
+
+export default CatalogList;
