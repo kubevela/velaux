@@ -82,7 +82,7 @@ $ yarn start
 Starting the development server...
 ```
 
-![alt](./doc/images/ui.png)
+![alt](./doc/images/ui-catalog.png)
 
 ## Catalog Structure
 
