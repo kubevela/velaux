@@ -217,6 +217,9 @@ const TableList: React.FC = () => {
           id: 'pages.searchTable.title',
           defaultMessage: '查询表格',
         })}
+        pagination={{
+          showQuickJumper: true,
+        }}
         actionRef={actionRef}
         rowKey="key"
         search={{
@@ -274,6 +277,7 @@ const TableList: React.FC = () => {
           </Button>
         </FooterToolbar>
       )}
+
       <ModalForm
         title={intl.formatMessage({
           id: 'pages.searchTable.createForm.newRule',
@@ -309,6 +313,7 @@ const TableList: React.FC = () => {
         />
         <ProFormTextArea width="md" name="desc" />
       </ModalForm>
+
       <UpdateForm
         onSubmit={async (value) => {
           const success = await handleUpdate(value);

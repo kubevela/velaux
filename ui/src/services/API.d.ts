@@ -1,4 +1,17 @@
 declare namespace API {
+  export type ListCatalogsResponse = {
+    catalogs: CatalogType[];
+  };
+
+  export type CatalogType = {
+    name: string;
+    desc: string;
+    updatedAt: number;
+    url: string;
+    rootdir?: string;
+    labels?: Map<string, string>;
+  };
+
   export type CurrentUser = {
     avatar?: string;
     name?: string;
