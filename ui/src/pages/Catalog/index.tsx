@@ -40,7 +40,8 @@ const CatalogList: React.FC = () => {
     const hide = message.loading('正在更改');
     try {
       console.log('update', val);
-      await updateCatalog(val);
+      const newVal = await updateCatalog(val);
+      handleUpdateModal({ ...updateModal, value: newVal });
       hide();
       message.success('更改成功，即将刷新');
       return true;
@@ -209,7 +210,7 @@ const CatalogList: React.FC = () => {
           defaultMessage: 'Update Catalog',
         }}
         visible={updateModal.visible}
-        onVisibleChange={(show) => handleUpdateModal({ ...updateModal, visible: show })}
+        onVisibleChange={(visible) => handleUpdateModal({ ...updateModal, visible: visible })}
         onFinish={async (value: any) => {
           const success = await handleUpdate(value as API.CatalogType);
           if (success) {
