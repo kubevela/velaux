@@ -189,7 +189,6 @@ const CatalogList: React.FC = () => {
           defaultMessage: 'Create Catalog',
         }}
         visible={createModalVisible}
-        onVisibleChange={handleCreateModalVisible}
         onFinish={async (value: any) => {
           const success = await handleAdd(value as API.CatalogType);
           if (success) {
@@ -210,7 +209,6 @@ const CatalogList: React.FC = () => {
           defaultMessage: 'Update Catalog',
         }}
         visible={updateModal.visible}
-        onVisibleChange={(visible) => handleUpdateModal({ ...updateModal, visible: visible })}
         onFinish={async (value: any) => {
           const success = await handleUpdate(value as API.CatalogType);
           if (success) {

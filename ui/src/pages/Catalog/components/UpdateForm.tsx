@@ -10,7 +10,6 @@ export type FormTitleType = {
 export type UpdateFormProps = {
   title: FormTitleType;
   visible: boolean;
-  onVisibleChange: (visible: boolean) => void;
   onFinish: any;
   initialValues?: API.CatalogType;
 };
@@ -24,7 +23,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         defaultMessage: props.title.defaultMessage,
       })}
       visible={props.visible}
-      onVisibleChange={props.onVisibleChange}
       onFinish={props.onFinish}
     >
       <ProForm.Group>
