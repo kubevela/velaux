@@ -4,12 +4,12 @@ declare namespace API {
   };
 
   export type CatalogType = {
+    id?: string;
     name: string;
-    desc: string;
+    desc?: string;
     updatedAt: number;
-    url: string;
+    url?: string;
     rootdir?: string;
-    labels?: Map<string, string>;
   };
 
   export type CurrentUser = {
