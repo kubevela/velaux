@@ -1,20 +1,26 @@
 import { useState } from 'react';
 import * as api from '@/services/catalog';
 
-interface State {}
+interface State {
+  catalogs?: API.CatalogType[];
+}
 
 export default function useCatalogs(params: {}) {
-  const [state, setState] = useState<State>({});
-
   const listCatalogs = async () => {
-    setState({ ...state, loading: true });
     const { catalogs } = await api.listCatalogs();
-    // setCatalogs(catalogs);
     return catalogs;
   };
 
+  const addCatalog = async (val: API.CatalogType) => {
+    return api.addCatalog(val);
+  };
+  const removeCatalog = async (val: API.CatalogType) => {
+    return api.removeCatalog(val);
+  };
+
   return {
-    ...state,
     listCatalogs,
+    addCatalog,
+    removeCatalog,
   };
 }
