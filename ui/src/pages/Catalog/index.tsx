@@ -9,14 +9,14 @@ import ProForm, { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-
 import UpdateForm from './components/UpdateForm';
 
 interface UpdateState {
-  show: boolean;
+  visible: boolean;
   value?: API.CatalogType;
 }
 
 const CatalogList: React.FC = () => {
   /** 新建窗口的弹窗 */
   const [createModalVisible, handleCreateModalVisible] = useState<boolean>(false);
-  const [updateModal, handleUpdateModal] = useState<UpdateState>({ show: false });
+  const [updateModal, handleUpdateModal] = useState<UpdateState>({ visible: false });
 
   const actionRef = useRef<ActionType>();
 
@@ -119,7 +119,7 @@ const CatalogList: React.FC = () => {
             id="edit"
             type="primary"
             onClick={() => {
-              handleUpdateModal({ show: true, value: record });
+              handleUpdateModal({ visible: true, value: record });
             }}
           >
             <FormattedMessage id="pages.catalogTable.edit" defaultMessage="编辑" />
@@ -208,12 +208,12 @@ const CatalogList: React.FC = () => {
           id: 'pages.catalogTable.updateForm.updateCatalog',
           defaultMessage: 'Update Catalog',
         }}
-        visible={updateModal.show}
-        onVisibleChange={(show) => handleUpdateModal({ ...updateModal, show: show })}
+        visible={updateModal.visible}
+        onVisibleChange={(show) => handleUpdateModal({ ...updateModal, visible: show })}
         onFinish={async (value: any) => {
           const success = await handleUpdate(value as API.CatalogType);
           if (success) {
-            handleUpdateModal({ ...updateModal, show: false });
+            handleUpdateModal({ ...updateModal, visible: false });
             if (actionRef.current) {
               actionRef.current.reload();
             }
