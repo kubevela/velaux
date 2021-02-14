@@ -19,6 +19,15 @@ let catalogList: API.CatalogType[] = [
   },
 ];
 
+let packageList: API.PackageType[] = [
+  {
+    name: 'pkg-1',
+    description: 'First package',
+    labels: ['helm', 'autoscaling', 'lightweight', 'cloud-native'],
+    versions: [{ version: 'v1' }, { version: 'v2' }],
+  },
+];
+
 const getCatalogs = (req: Request, res: Response) => {
   res.json({
     catalogs: catalogList,
@@ -88,7 +97,15 @@ function postCatalogs(req: Request, res: Response, u: string, b: Request) {
 
   return res.json(result);
 }
+
+const getPackages = (req: Request, res: Response) => {
+  res.json({
+    packages: packageList,
+  });
+};
+
 export default {
   'GET /api/catalogs': getCatalogs,
+  'GET /api/catalogs/:name': getPackages,
   'POST /api/catalogs': postCatalogs,
 };

@@ -33,3 +33,7 @@ export async function updateCatalog(params: API.CatalogType) {
     },
   });
 }
+
+export async function listPackages(catalogName: string) {
+  return request<API.ListPackagesResponse>('/api/catalogs/' + catalogName);
+}

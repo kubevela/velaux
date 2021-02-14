@@ -4,8 +4,7 @@ import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
-import { FormattedMessage, Link, useIntl, useModel } from 'umi';
-import ProForm, { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
+import { FormattedMessage, Link, useModel } from 'umi';
 import UpdateForm from './components/UpdateForm';
 
 interface UpdateState {
@@ -15,6 +14,7 @@ interface UpdateState {
 
 const CatalogList: React.FC = () => {
   /** 新建窗口的弹窗 */
+
   const [createModalVisible, handleCreateModalVisible] = useState<boolean>(false);
   const [updateModal, handleUpdateModal] = useState<UpdateState>({ visible: false });
 
@@ -77,8 +77,9 @@ const CatalogList: React.FC = () => {
       title: 'Name',
       dataIndex: 'name',
       render: (dom, record) => (
-        // https://ui.dev/react-router-v4-pass-props-to-link/
-        <Link to={{ pathname: '/api/catalogs/' + record.name, state: { fromNotifications: true } }}>
+        // https://pro.ant.design/docs/router-and-nav-cn
+        // 带参数的路由
+        <Link to={{ pathname: '/catalogs/' + record.name }}>
           <a>{dom}</a>
         </Link>
       ),

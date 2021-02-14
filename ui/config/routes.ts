@@ -2,8 +2,20 @@
   {
     path: '/catalogs',
     name: 'Catalogs',
-    icon: 'smile',
-    component: './Catalog',
+    icon: 'table',
+    routes: [
+      {
+        path: '/catalogs',
+        hideInMenu: true,
+        component: './Catalog',
+      },
+      {
+        path: '/catalogs/:catalogName',
+        hideInMenu: true,
+        name: 'Packages',
+        component: './PackageList',
+      },
+    ],
   },
   {
     path: '/user',

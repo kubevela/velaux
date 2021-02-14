@@ -2,6 +2,9 @@ declare namespace API {
   export type ListCatalogsResponse = {
     catalogs: CatalogType[];
   };
+  export type ListPackagesResponse = {
+    packages: PackageType[];
+  };
 
   export type CatalogType = {
     id?: string;
@@ -10,6 +13,23 @@ declare namespace API {
     updatedAt: number;
     url?: string;
     rootdir?: string;
+  };
+
+  export type PackageType = {
+    name: string;
+    description?: string;
+    labels?: string[];
+    versions: PackageVersionType[];
+  };
+
+  export type PackageVersionType = {
+    version: string;
+    modules?: PackageModuleType[];
+  };
+
+  export type PackageModuleType = {
+    helm: any;
+    native: any;
   };
 
   export type CurrentUser = {

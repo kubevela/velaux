@@ -1,9 +1,4 @@
-import { useState } from 'react';
 import * as api from '@/services/catalog';
-
-interface State {
-  catalogs?: API.CatalogType[];
-}
 
 export default function useCatalogs(params: {}) {
   const listCatalogs = async () => {
