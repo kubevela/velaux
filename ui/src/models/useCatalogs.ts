@@ -17,10 +17,14 @@ export default function useCatalogs(params: {}) {
   const removeCatalog = async (val: API.CatalogType) => {
     return api.removeCatalog(val);
   };
+  const updateCatalog = async (val: API.CatalogType) => {
+    return api.updateCatalog(val);
+  };
 
   return {
     listCatalogs,
     addCatalog,
     removeCatalog,
+    updateCatalog,
   };
 }

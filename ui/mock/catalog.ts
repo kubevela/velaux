@@ -82,8 +82,11 @@ function postCatalogs(req: Request, res: Response, u: string, b: Request) {
     default:
       break;
   }
+  const result = {
+    catalogs: catalogList,
+  };
 
-  return res.json({});
+  return res.json(result);
 }
 export default {
   'GET /api/catalogs': getCatalogs,

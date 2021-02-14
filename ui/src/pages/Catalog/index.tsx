@@ -6,16 +6,21 @@ import ProTable from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
 import { FormattedMessage, Link, useIntl, useModel } from 'umi';
 import ProForm, { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
+import UpdateForm from './components/UpdateForm';
+
+interface UpdateState {
+  show: boolean;
+  value?: API.CatalogType;
+}
 
 const CatalogList: React.FC = () => {
   /** 新建窗口的弹窗 */
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
+  const [createModalVisible, handleCreateModalVisible] = useState<boolean>(false);
+  const [updateModal, handleUpdateModal] = useState<UpdateState>({ show: false });
+
   const actionRef = useRef<ActionType>();
 
-  /** 国际化配置 */
-  const intl = useIntl();
-
-  const { listCatalogs, addCatalog, removeCatalog } = useModel('useCatalogs');
+  const { listCatalogs, addCatalog, removeCatalog, updateCatalog } = useModel('useCatalogs');
 
   const handleAdd = async (fields: API.CatalogType) => {
     const hide = message.loading('正在添加');
@@ -27,6 +32,21 @@ const CatalogList: React.FC = () => {
     } catch (error) {
       hide();
       message.error('添加失败请重试！');
+      return false;
+    }
+  };
+
+  const handleUpdate = async (val: API.CatalogType) => {
+    const hide = message.loading('正在更改');
+    try {
+      console.log('update', val);
+      await updateCatalog(val);
+      hide();
+      message.success('更改成功，即将刷新');
+      return true;
+    } catch (error) {
+      hide();
+      message.error('更改失败，请重试');
       return false;
     }
   };
@@ -95,7 +115,13 @@ const CatalogList: React.FC = () => {
           <Button id="sync" onClick={() => message.success('ok')}>
             <FormattedMessage id="pages.catalogTable.sync" defaultMessage="同步" />
           </Button>
-          <Button id="edit" type="primary" onClick={() => message.success('ok')}>
+          <Button
+            id="edit"
+            type="primary"
+            onClick={() => {
+              handleUpdateModal({ show: true, value: record });
+            }}
+          >
             <FormattedMessage id="pages.catalogTable.edit" defaultMessage="编辑" />
           </Button>
           <Button
@@ -134,7 +160,7 @@ const CatalogList: React.FC = () => {
             type="primary"
             key="primary"
             onClick={() => {
-              handleModalVisible(true);
+              handleCreateModalVisible(true);
             }}
           >
             <PlusOutlined /> <FormattedMessage id="pages.catalogTable.new" defaultMessage="新建" />
@@ -156,17 +182,17 @@ const CatalogList: React.FC = () => {
         }}
       />
 
-      <ModalForm
-        title={intl.formatMessage({
-          id: 'pages.catalogTable.createForm.newRule',
+      <UpdateForm
+        title={{
+          id: 'pages.catalogTable.updateForm.newCatalog',
           defaultMessage: 'Create Catalog',
-        })}
+        }}
         visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
-        onFinish={async (value) => {
+        onVisibleChange={handleCreateModalVisible}
+        onFinish={async (value: any) => {
           const success = await handleAdd(value as API.CatalogType);
           if (success) {
-            handleModalVisible(false);
+            handleCreateModalVisible(false);
             if (actionRef.current) {
               actionRef.current.reload();
             }
@@ -175,72 +201,29 @@ const CatalogList: React.FC = () => {
           message.success('提交成功');
           return true;
         }}
-      >
-        <ProForm.Group>
-          <ProFormText
-            width="md"
-            name="name"
-            label="Catalog Name"
-            tooltip="最长为 24 位"
-            placeholder="请输入名称"
-          />
-          <ProFormText width="md" name="desc" label="Description" placeholder="请输入名称" />
-        </ProForm.Group>
-        <ProForm.Group>
-          <ProFormSelect
-            disabled
-            options={[
-              {
-                value: 'git',
-                label: 'Git',
-              },
-            ]}
-            width="xs"
-            name="protocol"
-            label="Protocol"
-            initialValue="Git"
-          />
-          <ProFormText width="xl" name="url" label="URL" placeholder="请输入名称" />
-          <ProFormText width="md" name="rootdir" label="Root Directory" placeholder="请输入名称" />
-        </ProForm.Group>
-        {/* <ProFormText name="project" disabled label="项目名称" initialValue="xxxx项目" /> */}
-      </ModalForm>
+      />
 
-      {/* <ModalForm
-        title={intl.formatMessage({
-          id: 'pages.catalogTable.createForm.newRule',
-          defaultMessage: '新建规则',
-        })}
-        width="400px"
-        visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
-        onFinish={async (value) => {
-          const success = await handleAdd(value as API.CatalogType);
+      <UpdateForm
+        title={{
+          id: 'pages.catalogTable.updateForm.updateCatalog',
+          defaultMessage: 'Update Catalog',
+        }}
+        visible={updateModal.show}
+        onVisibleChange={(show) => handleUpdateModal({ ...updateModal, show: show })}
+        onFinish={async (value: any) => {
+          const success = await handleUpdate(value as API.CatalogType);
           if (success) {
-            handleModalVisible(false);
+            handleUpdateModal({ ...updateModal, show: false });
             if (actionRef.current) {
               actionRef.current.reload();
             }
           }
+
+          message.success('提交成功');
+          return true;
         }}
-      >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.catalogTable.ruleName"
-                  defaultMessage="规则名称为必填项"
-                />
-              ),
-            },
-          ]}
-          width="md"
-          name="name"
-        />
-        <ProFormTextArea width="md" name="desc" />
-      </ModalForm> */}
+        initialValues={updateModal.value}
+      />
     </PageContainer>
   );
 };

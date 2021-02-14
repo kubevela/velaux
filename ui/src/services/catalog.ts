@@ -23,3 +23,13 @@ export async function removeCatalog(params: API.CatalogType) {
     },
   });
 }
+
+export async function updateCatalog(params: API.CatalogType) {
+  return request<API.CatalogType>('/api/catalogs', {
+    method: 'POST',
+    data: {
+      ...params,
+      method: 'update',
+    },
+  });
+}
