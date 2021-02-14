@@ -58,8 +58,20 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           label="Protocol"
           initialValue="git"
         />
-        <ProFormText width="lg" name="url" label="URL" placeholder="请输入名称" />
-        <ProFormText width="xs" name="rootdir" label="Root Directory" placeholder="请输入名称" />
+        <ProFormText
+          width="lg"
+          name="url"
+          label="URL"
+          placeholder="请输入名称"
+          initialValue={props.initialValues?.url}
+        />
+        <ProFormText
+          width="xs"
+          name="rootdir"
+          label="Root Directory"
+          placeholder="请输入名称"
+          initialValue={props.initialValues?.rootdir}
+        />
       </ProForm.Group>
       {/* <ProFormText name="project" disabled label="项目名称" initialValue="xxxx项目" /> */}
     </ModalForm>
