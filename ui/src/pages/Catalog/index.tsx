@@ -66,12 +66,11 @@ const CatalogList: React.FC = () => {
     }
   };
 
-  const handleSync = async() => {
-      const hide = message.loading('正在同步')
-      hide();
-      message.success('同步成功')
-    
-  }
+  const handleSync = async () => {
+    const hide = message.loading('正在同步');
+    hide();
+    message.success('同步成功');
+  };
 
   const columns: ProColumns<API.CatalogType>[] = [
     {
