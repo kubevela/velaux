@@ -1,4 +1,18 @@
 declare namespace API {
+  export type ListClustersResponse = {
+    clusters: ClusterType[];
+  };
+  export type ClusterResponse = {
+    cluster: ClusterType;
+  };
+
+  export type ClusterType = {
+    name: string;
+    desc?: string;
+    updatedAt: number;
+    kubeconfig?: string;
+  };
+
   export type ListCatalogsResponse = {
     catalogs: CatalogType[];
   };

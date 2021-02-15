@@ -4,28 +4,27 @@ import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
-import { FormattedMessage, Link, useModel } from 'umi';
+import { FormattedMessage, useModel } from 'umi';
 import UpdateForm from './components/UpdateForm';
 
 interface UpdateState {
   visible: boolean;
-  value?: API.CatalogType;
+  value?: API.ClusterType;
 }
 
-const CatalogList: React.FC = () => {
+const ClusterList: React.FC = () => {
   /** 新建窗口的弹窗 */
-
   const [createModalVisible, handleCreateModalVisible] = useState<boolean>(false);
   const [updateModal, handleUpdateModal] = useState<UpdateState>({ visible: false });
 
   const actionRef = useRef<ActionType>();
 
-  const { listCatalogs, addCatalog, removeCatalog, updateCatalog } = useModel('useCatalogs');
+  const { listClusters, addCluster, removeCluster, updateCluster } = useModel('useClusters');
 
-  const handleAdd = async (fields: API.CatalogType) => {
+  const handleAdd = async (fields: API.ClusterType) => {
     const hide = message.loading('正在添加');
     try {
-      await addCatalog({ ...fields });
+      await addCluster({ ...fields });
       hide();
       message.success('添加成功');
       return true;
@@ -36,11 +35,11 @@ const CatalogList: React.FC = () => {
     }
   };
 
-  const handleUpdate = async (val: API.CatalogType) => {
+  const handleUpdate = async (val: API.ClusterType) => {
     const hide = message.loading('正在更改');
     try {
       console.log('update', val);
-      const newVal = await updateCatalog(val);
+      const newVal = await updateCluster(val);
       handleUpdateModal({ ...updateModal, value: newVal });
       hide();
       message.success('更改成功，即将刷新');
@@ -52,10 +51,10 @@ const CatalogList: React.FC = () => {
     }
   };
 
-  const handleRemove = async (val: API.CatalogType) => {
+  const handleRemove = async (val: API.ClusterType) => {
     const hide = message.loading('正在删除');
     try {
-      await removeCatalog(val);
+      await removeCluster(val);
       hide();
       message.success('删除成功，即将刷新');
       return true;
@@ -66,14 +65,7 @@ const CatalogList: React.FC = () => {
     }
   };
 
-  const handleSync = async() => {
-      const hide = message.loading('正在同步')
-      hide();
-      message.success('同步成功')
-    
-  }
-
-  const columns: ProColumns<API.CatalogType>[] = [
+  const columns: ProColumns<API.ClusterType>[] = [
     {
       title: 'Index',
       dataIndex: 'index',
@@ -83,12 +75,16 @@ const CatalogList: React.FC = () => {
     {
       title: 'Name',
       dataIndex: 'name',
-      render: (dom, record) => (
-        // https://pro.ant.design/docs/router-and-nav-cn
-        // 带参数的路由
-        <Link to={{ pathname: '/catalogs/' + record.name }}>
-          <a>{dom}</a>
-        </Link>
+      render: (dom, entity) => (
+        <a
+          onClick={() => {
+            // setCurrentRow(entity);
+            // setShowDetail(true);
+            message.warning('TODO: 展示 cluster');
+          }}
+        >
+          {dom}
+        </a>
       ),
     },
     {
@@ -115,15 +111,12 @@ const CatalogList: React.FC = () => {
     },
 
     {
-      title: <FormattedMessage id="pages.catalogTable.titleOption" defaultMessage="操作" />,
+      title: <FormattedMessage id="pages.clusterTable.titleOption" defaultMessage="操作" />,
       width: '164px',
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => (
         <Space>
-          <Button id="sync" onClick={handleSync}>
-            <FormattedMessage id="pages.catalogTable.sync" defaultMessage="同步" />
-          </Button>
           <Button
             id="edit"
             type="primary"
@@ -131,7 +124,7 @@ const CatalogList: React.FC = () => {
               handleUpdateModal({ visible: true, value: record });
             }}
           >
-            <FormattedMessage id="pages.catalogTable.edit" defaultMessage="编辑" />
+            <FormattedMessage id="pages.clusterTable.edit" defaultMessage="编辑" />
           </Button>
           <Button
             id="delete"
@@ -142,7 +135,7 @@ const CatalogList: React.FC = () => {
               actionRef.current?.reloadAndRest?.();
             }}
           >
-            <FormattedMessage id="pages.catalogTable.delete" defaultMessage="删除" />
+            <FormattedMessage id="pages.clusterTable.delete" defaultMessage="删除" />
           </Button>
         </Space>
       ),
@@ -151,7 +144,7 @@ const CatalogList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<API.CatalogType>
+      <ProTable<API.ClusterType>
         columns={columns}
         rowKey="key"
         dateFormatter="string"
@@ -172,20 +165,20 @@ const CatalogList: React.FC = () => {
               handleCreateModalVisible(true);
             }}
           >
-            <PlusOutlined /> <FormattedMessage id="pages.catalogTable.new" defaultMessage="新建" />
+            <PlusOutlined /> <FormattedMessage id="pages.clusterTable.new" defaultMessage="新建" />
           </Button>,
         ]}
         request={async (params, sorter, filter) => {
           // 表单搜索项会从 params 传入，传递给后端接口。
           console.log('params', params, 'sorter', sorter, 'filter', filter);
 
-          let catalogs = await listCatalogs();
+          let clusters = await listClusters();
 
           if (params.name) {
-            catalogs = catalogs.filter((val) => val.name?.includes(params.name));
+            clusters = clusters.filter((val) => val.name?.includes(params.name));
           }
           return Promise.resolve({
-            data: catalogs,
+            data: clusters,
             success: true,
           });
         }}
@@ -193,12 +186,12 @@ const CatalogList: React.FC = () => {
 
       <UpdateForm
         title={{
-          id: 'pages.catalogTable.updateForm.newCatalog',
-          defaultMessage: 'Create Catalog',
+          id: 'pages.clusterTable.updateForm.newCluster',
+          defaultMessage: 'Create Cluster',
         }}
         visible={createModalVisible}
         onFinish={async (value: any) => {
-          const success = await handleAdd(value as API.CatalogType);
+          const success = await handleAdd(value as API.ClusterType);
           if (success) {
             handleCreateModalVisible(false);
             if (actionRef.current) {
@@ -213,12 +206,12 @@ const CatalogList: React.FC = () => {
 
       <UpdateForm
         title={{
-          id: 'pages.catalogTable.updateForm.updateCatalog',
-          defaultMessage: 'Update Catalog',
+          id: 'pages.clusterTable.updateForm.updateCluster',
+          defaultMessage: 'Update Cluster',
         }}
         visible={updateModal.visible}
         onFinish={async (value: any) => {
-          const success = await handleUpdate(value as API.CatalogType);
+          const success = await handleUpdate(value as API.ClusterType);
           if (success) {
             handleUpdateModal({ ...updateModal, visible: false });
             if (actionRef.current) {
@@ -235,4 +228,4 @@ const CatalogList: React.FC = () => {
   );
 };
 
-export default CatalogList;
+export default ClusterList;

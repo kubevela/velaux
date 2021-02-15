@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 let catalogList: API.CatalogType[] = [
   {
     id: 'f430df0d-c76e-400e-ba62-db1098da71b9',
-    name: 'test',
+    name: 'catalog',
     desc: 'First catalog',
     updatedAt: 1612121016,
     url: 'https://github.com/hongchaodeng/catalog-example.git',
@@ -11,7 +11,7 @@ let catalogList: API.CatalogType[] = [
   },
   {
     id: 'd63b41e3-398e-48d5-9b07-e26a519d1075',
-    name: 'test-2',
+    name: 'catalog-2',
     desc: 'Second catalog',
     updatedAt: 1612121016,
     url: 'https://github.com/hongchaodeng/catalog-example.git',

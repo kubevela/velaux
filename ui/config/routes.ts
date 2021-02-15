@@ -1,5 +1,11 @@
 ﻿export default [
   {
+    path: '/clusters',
+    name: 'Clusters',
+    icon: 'table',
+    component: './Cluster',
+  },
+  {
     path: '/catalogs',
     name: 'Catalogs',
     icon: 'table',
