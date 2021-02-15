@@ -1,5 +1,5 @@
 import React from 'react';
-import ProForm, { ProFormSelect, ProFormText, ModalForm } from '@ant-design/pro-form';
+import ProForm, { ProFormText, ModalForm } from '@ant-design/pro-form';
 import { useIntl } from 'umi';
 
 export type FormTitleType = {
@@ -11,7 +11,7 @@ export type UpdateFormProps = {
   title: FormTitleType;
   visible: boolean;
   onFinish: any;
-  initialValues?: API.CatalogType;
+  initialValues?: API.ClusterType;
 };
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
@@ -42,35 +42,13 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           initialValue={props.initialValues?.desc}
         />
       </ProForm.Group>
-      <ProForm.Group>
-        <ProFormSelect
-          disabled
-          options={[
-            {
-              value: 'git',
-              label: 'Git',
-            },
-          ]}
-          width="xs"
-          name="protocol"
-          label="Protocol"
-          initialValue="git"
-        />
-        <ProFormText
-          width="lg"
-          name="url"
-          label="URL"
-          placeholder="请输入名称"
-          initialValue={props.initialValues?.url}
-        />
-        <ProFormText
-          width="xs"
-          name="rootdir"
-          label="Root Directory"
-          placeholder="请输入名称"
-          initialValue={props.initialValues?.rootdir}
-        />
-      </ProForm.Group>
+      <ProFormText
+        width="lg"
+        name="kubeconfig"
+        label="kubeconfig"
+        placeholder="请输入名称"
+        initialValue={props.initialValues?.kubeconfig}
+      />
       {/* <ProFormText name="project" disabled label="项目名称" initialValue="xxxx项目" /> */}
     </ModalForm>
   );
