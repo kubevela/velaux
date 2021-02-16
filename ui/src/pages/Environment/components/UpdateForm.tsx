@@ -70,7 +70,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
                   label="value"
                   name={[field.name, 'value']}
                   fieldKey={[field.fieldKey, 'value']}
-                  rules={[{ required: true, message: 'Missing value' }]}
                 >
                   <Input placeholder="Value" />
                 </Form.Item>

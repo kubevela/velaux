@@ -6,6 +6,12 @@
     component: './Welcome',
   },
   {
+    path: '/apptemplates',
+    name: 'Application Templates',
+    icon: 'table',
+    component: './Welcome',
+  },
+  {
     path: '/clusters',
     name: 'Clusters',
     icon: 'table',
