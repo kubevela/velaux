@@ -55,26 +55,32 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               <UnorderedListOutlined /> Config
             </Divider>
             {fields.map((field) => (
-              <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                <Form.Item
-                  {...field}
-                  label="name"
-                  name={[field.name, 'name']}
-                  fieldKey={[field.fieldKey, 'name']}
-                  rules={[{ required: true, message: 'Missing name' }]}
+              <ProForm.Group>
+                <Space
+                  key={field.key}
+                  style={{ display: 'flex', marginBottom: 8 }}
+                  align="baseline"
                 >
-                  <Input placeholder="Name" />
-                </Form.Item>
-                <Form.Item
-                  {...field}
-                  label="value"
-                  name={[field.name, 'value']}
-                  fieldKey={[field.fieldKey, 'value']}
-                >
-                  <Input placeholder="Value" />
-                </Form.Item>
-                <MinusCircleOutlined onClick={() => remove(field.name)} />
-              </Space>
+                  <Form.Item
+                    {...field}
+                    label="name"
+                    name={[field.name, 'name']}
+                    fieldKey={[field.fieldKey, 'name']}
+                    rules={[{ required: true, message: 'Missing name' }]}
+                  >
+                    <Input placeholder="Name" />
+                  </Form.Item>
+                  <Form.Item
+                    {...field}
+                    label="value"
+                    name={[field.name, 'value']}
+                    fieldKey={[field.fieldKey, 'value']}
+                  >
+                    <Input placeholder="Value" />
+                  </Form.Item>
+                  <MinusCircleOutlined onClick={() => remove(field.name)} />
+                </Space>
+              </ProForm.Group>
             ))}
             <Form.Item>
               <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
@@ -92,18 +98,24 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               <UnorderedListOutlined /> Clusters
             </Divider>
             {fields.map((field) => (
-              <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                <Form.Item
-                  {...field}
-                  label="name"
-                  name={[field.name, 'name']}
-                  fieldKey={[field.fieldKey, 'name']}
-                  rules={[{ required: true, message: 'Missing name' }]}
+              <ProForm.Group>
+                <Space
+                  key={field.key}
+                  style={{ display: 'flex', marginBottom: 8 }}
+                  align="baseline"
                 >
-                  <Input placeholder="Name" />
-                </Form.Item>
-                <MinusCircleOutlined onClick={() => remove(field.name)} />
-              </Space>
+                  <Form.Item
+                    {...field}
+                    label="name"
+                    name={[field.name, 'name']}
+                    fieldKey={[field.fieldKey, 'name']}
+                    rules={[{ required: true, message: 'Missing name' }]}
+                  >
+                    <Input placeholder="Name" />
+                  </Form.Item>
+                  <MinusCircleOutlined onClick={() => remove(field.name)} />
+                </Space>
+              </ProForm.Group>
             ))}
             <Form.Item>
               <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
@@ -121,36 +133,42 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               <UnorderedListOutlined /> Packages
             </Divider>
             {fields.map((field) => (
-              <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                <Form.Item
-                  {...field}
-                  label="catalog"
-                  name={[field.name, 'catalog']}
-                  fieldKey={[field.fieldKey, 'catalog']}
-                  rules={[{ required: true, message: 'Missing catalog' }]}
+              <ProForm.Group>
+                <Space
+                  key={field.key}
+                  style={{ display: 'flex', marginBottom: 8 }}
+                  align="baseline"
                 >
-                  <Input placeholder="catalog" />
-                </Form.Item>
-                <Form.Item
-                  {...field}
-                  label="package"
-                  name={[field.name, 'package']}
-                  fieldKey={[field.fieldKey, 'package']}
-                  rules={[{ required: true, message: 'Missing package' }]}
-                >
-                  <Input placeholder="package" />
-                </Form.Item>
-                <Form.Item
-                  {...field}
-                  label="version"
-                  name={[field.name, 'version']}
-                  fieldKey={[field.fieldKey, 'version']}
-                  rules={[{ required: true, message: 'Missing version' }]}
-                >
-                  <Input placeholder="version" />
-                </Form.Item>
-                <MinusCircleOutlined onClick={() => remove(field.name)} />
-              </Space>
+                  <Form.Item
+                    {...field}
+                    label="catalog"
+                    name={[field.name, 'catalog']}
+                    fieldKey={[field.fieldKey, 'catalog']}
+                    rules={[{ required: true, message: 'Missing catalog' }]}
+                  >
+                    <Input placeholder="catalog" />
+                  </Form.Item>
+                  <Form.Item
+                    {...field}
+                    label="package"
+                    name={[field.name, 'package']}
+                    fieldKey={[field.fieldKey, 'package']}
+                    rules={[{ required: true, message: 'Missing package' }]}
+                  >
+                    <Input placeholder="package" />
+                  </Form.Item>
+                  <Form.Item
+                    {...field}
+                    label="version"
+                    name={[field.name, 'version']}
+                    fieldKey={[field.fieldKey, 'version']}
+                    rules={[{ required: true, message: 'Missing version' }]}
+                  >
+                    <Input placeholder="version" />
+                  </Form.Item>
+                  <MinusCircleOutlined onClick={() => remove(field.name)} />
+                </Space>
+              </ProForm.Group>
             ))}
             <Form.Item>
               <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
