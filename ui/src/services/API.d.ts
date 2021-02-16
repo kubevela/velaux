@@ -1,4 +1,26 @@
 declare namespace API {
+  export type ListEnvironmentsResponse = {
+    environments: EnvironmentType[];
+  };
+  export type EnvironmentResponse = {
+    environment: EnvironmentType;
+  };
+
+  export type EnvironmentType = {
+    name: string;
+    desc?: string;
+    updatedAt: number;
+    config?: Map<string, string>;
+    clusters?: string[];
+    packages?: PackageRef[];
+  };
+
+  export type PackageRef = {
+    Catalog: string;
+    Package: string;
+    Version: string;
+  };
+
   export type ListClustersResponse = {
     clusters: ClusterType[];
   };

@@ -6,6 +6,12 @@
     component: './Cluster',
   },
   {
+    path: '/environments',
+    name: 'Environments',
+    icon: 'table',
+    component: './Environment',
+  },
+  {
     path: '/catalogs',
     name: 'Catalogs',
     icon: 'table',

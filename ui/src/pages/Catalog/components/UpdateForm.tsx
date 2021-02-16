@@ -11,7 +11,8 @@ export type UpdateFormProps = {
   title: FormTitleType;
   visible: boolean;
   onFinish: any;
-  initialValues?: API.CatalogType;
+  onVisibleChange: (visible: boolean) => void;
+  initialValues?: API.ClusterType;
 };
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
@@ -24,12 +25,13 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
       })}
       visible={props.visible}
       onFinish={props.onFinish}
+      onVisibleChange={props.onVisibleChange}
     >
       <ProForm.Group>
         <ProFormText
           width="md"
           name="name"
-          label="Catalog Name"
+          label="Name"
           tooltip="最长为 24 位"
           placeholder="请输入名称"
           initialValue={props.initialValues?.name}

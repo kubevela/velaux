@@ -12,7 +12,7 @@ export type UpdateFormProps = {
   visible: boolean;
   onFinish: any;
   onVisibleChange: (visible: boolean) => void;
-  initialValues?: API.ClusterType;
+  initialValues?: API.EnvironmentType;
 };
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
@@ -44,13 +44,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           initialValue={props.initialValues?.desc}
         />
       </ProForm.Group>
-      <ProFormText
-        width="lg"
-        name="kubeconfig"
-        label="kubeconfig"
-        placeholder="请输入名称"
-        initialValue={props.initialValues?.kubeconfig}
-      />
       {/* <ProFormText name="project" disabled label="项目名称" initialValue="xxxx项目" /> */}
     </ModalForm>
   );

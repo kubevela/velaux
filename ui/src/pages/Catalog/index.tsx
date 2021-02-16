@@ -208,6 +208,9 @@ const CatalogList: React.FC = () => {
           message.success('提交成功');
           return true;
         }}
+        onVisibleChange={async (visible) => {
+          handleCreateModalVisible(visible);
+        }}
       />
 
       <UpdateForm
@@ -227,6 +230,9 @@ const CatalogList: React.FC = () => {
 
           message.success('提交成功');
           return true;
+        }}
+        onVisibleChange={async (visible) => {
+          handleCreateModalVisible(visible);
         }}
         initialValues={updateModal.value}
       />
