@@ -58,6 +58,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                 <Form.Item
                   {...field}
+                  label="name"
                   name={[field.name, 'name']}
                   fieldKey={[field.fieldKey, 'name']}
                   rules={[{ required: true, message: 'Missing name' }]}
@@ -66,6 +67,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
                 </Form.Item>
                 <Form.Item
                   {...field}
+                  label="value"
                   name={[field.name, 'value']}
                   fieldKey={[field.fieldKey, 'value']}
                   rules={[{ required: true, message: 'Missing value' }]}
@@ -94,6 +96,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                 <Form.Item
                   {...field}
+                  label="name"
                   name={[field.name, 'name']}
                   fieldKey={[field.fieldKey, 'name']}
                   rules={[{ required: true, message: 'Missing name' }]}
@@ -122,6 +125,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                 <Form.Item
                   {...field}
+                  label="catalog"
                   name={[field.name, 'catalog']}
                   fieldKey={[field.fieldKey, 'catalog']}
                   rules={[{ required: true, message: 'Missing catalog' }]}
@@ -130,6 +134,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
                 </Form.Item>
                 <Form.Item
                   {...field}
+                  label="package"
                   name={[field.name, 'package']}
                   fieldKey={[field.fieldKey, 'package']}
                   rules={[{ required: true, message: 'Missing package' }]}
@@ -138,6 +143,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
                 </Form.Item>
                 <Form.Item
                   {...field}
+                  label="version"
                   name={[field.name, 'version']}
                   fieldKey={[field.fieldKey, 'version']}
                   rules={[{ required: true, message: 'Missing version' }]}
