@@ -194,6 +194,7 @@ const EnvironmentList: React.FC = () => {
         }}
         visible={createModalVisible}
         onFinish={async (value: any) => {
+          console.log('value', value);
           const success = await handleAdd(value as API.EnvironmentType);
           if (success) {
             handleCreateModalVisible(false);
@@ -229,7 +230,7 @@ const EnvironmentList: React.FC = () => {
           return true;
         }}
         onVisibleChange={async (visible) => {
-          handleCreateModalVisible(visible);
+          handleUpdateModal({ ...updateModal, visible });
         }}
         initialValues={updateModal.value}
       />

@@ -1,5 +1,11 @@
 ﻿export default [
   {
+    path: '/applications',
+    name: 'Applications',
+    icon: 'table',
+    component: './Welcome',
+  },
+  {
     path: '/clusters',
     name: 'Clusters',
     icon: 'table',
@@ -44,6 +50,12 @@
         ],
       },
     ],
+  },
+  {
+    path: '/pipelines',
+    name: 'Pipelines',
+    icon: 'table',
+    component: './Welcome',
   },
   {
     path: '/welcome',

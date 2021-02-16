@@ -232,7 +232,7 @@ const CatalogList: React.FC = () => {
           return true;
         }}
         onVisibleChange={async (visible) => {
-          handleCreateModalVisible(visible);
+          handleUpdateModal({ ...updateModal, visible });
         }}
         initialValues={updateModal.value}
       />

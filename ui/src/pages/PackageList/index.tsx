@@ -6,7 +6,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { FormattedMessage } from 'umi';
 import { listPackages } from '@/services/catalog';
 
-const colors = ['blue', 'purple', 'pink',  'orange', 'cyan', 'green'];
+const colors = ['blue', 'purple', 'pink', 'orange', 'cyan', 'green'];
 
 const PackageList: React.FC = (props) => {
   // @ts-ignore

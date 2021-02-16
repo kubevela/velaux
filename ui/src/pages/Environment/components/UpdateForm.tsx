@@ -17,6 +17,7 @@ export type UpdateFormProps = {
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
   const intl = useIntl();
+
   return (
     <ModalForm
       title={intl.formatMessage({
@@ -44,6 +45,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           initialValue={props.initialValues?.desc}
         />
       </ProForm.Group>
+
       {/* <ProFormText name="project" disabled label="项目名称" initialValue="xxxx项目" /> */}
     </ModalForm>
   );
