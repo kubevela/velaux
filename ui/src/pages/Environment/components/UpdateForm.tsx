@@ -55,7 +55,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               Config
             </Divider>
             {fields.map((field) => (
-              <Space key={field.name} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+              <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                 <Form.Item
                   {...field}
                   name={[field.name, 'name']}
@@ -71,6 +71,78 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
                   rules={[{ required: true, message: 'Missing value' }]}
                 >
                   <Input placeholder="Value" />
+                </Form.Item>
+                <MinusCircleOutlined onClick={() => remove(field.name)} />
+              </Space>
+            ))}
+            <Form.Item>
+              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                Add config
+              </Button>
+            </Form.Item>
+          </>
+        )}
+      </Form.List>
+
+      <Form.List name="clusters" initialValue={props.initialValues?.clusters}>
+        {(fields, { add, remove }) => (
+          <>
+            <Divider orientation="left" plain>
+              Clusters
+            </Divider>
+            {fields.map((field) => (
+              <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                <Form.Item
+                  {...field}
+                  name={[field.name, 'name']}
+                  fieldKey={[field.fieldKey, 'name']}
+                  rules={[{ required: true, message: 'Missing name' }]}
+                >
+                  <Input placeholder="Name" />
+                </Form.Item>
+                <MinusCircleOutlined onClick={() => remove(field.name)} />
+              </Space>
+            ))}
+            <Form.Item>
+              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                Add config
+              </Button>
+            </Form.Item>
+          </>
+        )}
+      </Form.List>
+
+      <Form.List name="packages" initialValue={props.initialValues?.packages}>
+        {(fields, { add, remove }) => (
+          <>
+            <Divider orientation="left" plain>
+              Packages
+            </Divider>
+            {fields.map((field) => (
+              <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                <Form.Item
+                  {...field}
+                  name={[field.name, 'catalog']}
+                  fieldKey={[field.fieldKey, 'catalog']}
+                  rules={[{ required: true, message: 'Missing catalog' }]}
+                >
+                  <Input placeholder="catalog" />
+                </Form.Item>
+                <Form.Item
+                  {...field}
+                  name={[field.name, 'package']}
+                  fieldKey={[field.fieldKey, 'package']}
+                  rules={[{ required: true, message: 'Missing package' }]}
+                >
+                  <Input placeholder="package" />
+                </Form.Item>
+                <Form.Item
+                  {...field}
+                  name={[field.name, 'version']}
+                  fieldKey={[field.fieldKey, 'version']}
+                  rules={[{ required: true, message: 'Missing version' }]}
+                >
+                  <Input placeholder="version" />
                 </Form.Item>
                 <MinusCircleOutlined onClick={() => remove(field.name)} />
               </Space>

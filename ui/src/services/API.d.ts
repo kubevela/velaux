@@ -11,7 +11,7 @@ declare namespace API {
     desc?: string;
     updatedAt: number;
     config?: ConfigType[];
-    clusters?: string[];
+    clusters?: ClusterRef[];
     packages?: PackageRef[];
   };
 
@@ -20,10 +20,14 @@ declare namespace API {
     value?: string;
   };
 
+  export type ClusterRef = {
+    name: string;
+  };
+
   export type PackageRef = {
-    Catalog: string;
-    Package: string;
-    Version: string;
+    catalog: string;
+    package: string;
+    version: string;
   };
 
   export type ListClustersResponse = {

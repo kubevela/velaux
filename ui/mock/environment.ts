@@ -26,7 +26,7 @@ function postEnvironments(req: Request, res: Response, u: string, b: Request) {
   }
 
   const body = (b && b.body) || req.body;
-  const { method, name, desc, config } = body;
+  const { method, name, desc, config, packages, clusters } = body;
 
   switch (method) {
     case 'delete':
@@ -46,6 +46,8 @@ function postEnvironments(req: Request, res: Response, u: string, b: Request) {
           name,
           desc,
           config,
+          packages,
+          clusters,
           updatedAt: new Date().getTime() / 1000,
         };
         environmentList.unshift(newEnvironment);
@@ -63,6 +65,8 @@ function postEnvironments(req: Request, res: Response, u: string, b: Request) {
               desc,
               name,
               config,
+              packages,
+              clusters,
               updatedAt: new Date().getTime() / 1000,
             };
             return selectedEnvironment;
