@@ -1,6 +1,8 @@
 import React from 'react';
 import ProForm, { ProFormText, ModalForm } from '@ant-design/pro-form';
 import { useIntl } from 'umi';
+import { Form, Input, Button, Space, Divider } from 'antd';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 export type FormTitleType = {
   id?: string;
@@ -46,7 +48,41 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         />
       </ProForm.Group>
 
-      {/* <ProFormText name="project" disabled label="项目名称" initialValue="xxxx项目" /> */}
+      <Form.List name="config" initialValue={props.initialValues?.config}>
+        {(fields, { add, remove }) => (
+          <>
+            <Divider orientation="left" plain>
+              Config
+            </Divider>
+            {fields.map((field) => (
+              <Space key={field.name} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                <Form.Item
+                  {...field}
+                  name={[field.name, 'name']}
+                  fieldKey={[field.fieldKey, 'name']}
+                  rules={[{ required: true, message: 'Missing name' }]}
+                >
+                  <Input placeholder="Name" />
+                </Form.Item>
+                <Form.Item
+                  {...field}
+                  name={[field.name, 'value']}
+                  fieldKey={[field.fieldKey, 'value']}
+                  rules={[{ required: true, message: 'Missing value' }]}
+                >
+                  <Input placeholder="Value" />
+                </Form.Item>
+                <MinusCircleOutlined onClick={() => remove(field.name)} />
+              </Space>
+            ))}
+            <Form.Item>
+              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                Add config
+              </Button>
+            </Form.Item>
+          </>
+        )}
+      </Form.List>
     </ModalForm>
   );
 };

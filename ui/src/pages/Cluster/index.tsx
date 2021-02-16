@@ -38,7 +38,6 @@ const ClusterList: React.FC = () => {
   const handleUpdate = async (val: API.ClusterType) => {
     const hide = message.loading('正在更改');
     try {
-      console.log('update', val);
       const newVal = await updateCluster(val);
       handleUpdateModal({ ...updateModal, value: newVal });
       hide();

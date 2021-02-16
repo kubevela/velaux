@@ -24,6 +24,7 @@ const EnvironmentList: React.FC = () => {
   );
 
   const handleAdd = async (fields: API.EnvironmentType) => {
+    console.log('fields', fields);
     const hide = message.loading('正在添加');
     try {
       await addEnvironment({ ...fields });
@@ -40,7 +41,6 @@ const EnvironmentList: React.FC = () => {
   const handleUpdate = async (val: API.EnvironmentType) => {
     const hide = message.loading('正在更改');
     try {
-      console.log('update', val);
       const newVal = await updateEnvironment(val);
       handleUpdateModal({ ...updateModal, value: newVal });
       hide();
@@ -194,7 +194,6 @@ const EnvironmentList: React.FC = () => {
         }}
         visible={createModalVisible}
         onFinish={async (value: any) => {
-          console.log('value', value);
           const success = await handleAdd(value as API.EnvironmentType);
           if (success) {
             handleCreateModalVisible(false);

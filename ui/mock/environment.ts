@@ -26,7 +26,7 @@ function postEnvironments(req: Request, res: Response, u: string, b: Request) {
   }
 
   const body = (b && b.body) || req.body;
-  const { method, name, desc } = body;
+  const { method, name, desc, config } = body;
 
   switch (method) {
     case 'delete':
@@ -45,6 +45,7 @@ function postEnvironments(req: Request, res: Response, u: string, b: Request) {
         const newEnvironment: API.EnvironmentType = {
           name,
           desc,
+          config,
           updatedAt: new Date().getTime() / 1000,
         };
         environmentList.unshift(newEnvironment);
@@ -61,6 +62,7 @@ function postEnvironments(req: Request, res: Response, u: string, b: Request) {
               ...item,
               desc,
               name,
+              config,
               updatedAt: new Date().getTime() / 1000,
             };
             return selectedEnvironment;

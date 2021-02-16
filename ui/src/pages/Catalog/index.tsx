@@ -39,7 +39,6 @@ const CatalogList: React.FC = () => {
   const handleUpdate = async (val: API.CatalogType) => {
     const hide = message.loading('正在更改');
     try {
-      console.log('update', val);
       const newVal = await updateCatalog(val);
       handleUpdateModal({ ...updateModal, value: newVal });
       hide();

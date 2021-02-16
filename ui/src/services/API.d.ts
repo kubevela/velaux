@@ -10,9 +10,14 @@ declare namespace API {
     name: string;
     desc?: string;
     updatedAt: number;
-    config?: Map<string, string>;
+    config?: ConfigType[];
     clusters?: string[];
     packages?: PackageRef[];
+  };
+
+  export type ConfigType = {
+    name: string;
+    value?: string;
   };
 
   export type PackageRef = {
