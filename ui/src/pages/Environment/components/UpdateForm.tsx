@@ -2,7 +2,7 @@ import React from 'react';
 import ProForm, { ProFormText, ModalForm } from '@ant-design/pro-form';
 import { useIntl } from 'umi';
 import { Form, Input, Button, Space, Divider } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, UnorderedListOutlined } from '@ant-design/icons';
 
 export type FormTitleType = {
   id?: string;
@@ -52,7 +52,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         {(fields, { add, remove }) => (
           <>
             <Divider orientation="left" plain>
-              Config
+              <UnorderedListOutlined /> Config
             </Divider>
             {fields.map((field) => (
               <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
@@ -88,7 +88,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         {(fields, { add, remove }) => (
           <>
             <Divider orientation="left" plain>
-              Clusters
+              <UnorderedListOutlined /> Clusters
             </Divider>
             {fields.map((field) => (
               <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
@@ -116,7 +116,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         {(fields, { add, remove }) => (
           <>
             <Divider orientation="left" plain>
-              Packages
+              <UnorderedListOutlined /> Packages
             </Divider>
             {fields.map((field) => (
               <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
