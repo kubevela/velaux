@@ -72,6 +72,7 @@
   },
   {
     path: '/admin',
+    hideInMenu: true,
     name: 'admin',
     icon: 'crown',
     access: 'canAdmin',
@@ -87,6 +88,7 @@
   },
   {
     name: 'list.table-list',
+    hideInMenu: true,
     icon: 'table',
     path: '/list',
     component: './TableList',
