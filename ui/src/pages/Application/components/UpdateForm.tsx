@@ -1,6 +1,8 @@
 import React from 'react';
-import ProForm, { ProFormSelect, ProFormText, ModalForm } from '@ant-design/pro-form';
+import ProForm, { ProFormText, ModalForm } from '@ant-design/pro-form';
 import { useIntl } from 'umi';
+import { Form, Input, Button, Space, Divider } from 'antd';
+import { MinusCircleOutlined, PlusOutlined, UnorderedListOutlined } from '@ant-design/icons';
 
 export type FormTitleType = {
   id?: string;
@@ -12,11 +14,12 @@ export type UpdateFormProps = {
   visible: boolean;
   onFinish: any;
   onVisibleChange: (visible: boolean) => void;
-  initialValues?: API.ClusterType;
+  initialValues?: API.ApplicationType;
 };
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
   const intl = useIntl();
+
   return (
     <ModalForm
       title={intl.formatMessage({
@@ -45,36 +48,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           initialValue={props.initialValues?.desc}
         />
       </ProForm.Group>
-      <ProForm.Group>
-        <ProFormSelect
-          disabled
-          options={[
-            {
-              value: 'git',
-              label: 'Git',
-            },
-          ]}
-          width="xs"
-          name="protocol"
-          label="Protocol"
-          initialValue="git"
-        />
-        <ProFormText
-          width="lg"
-          name="url"
-          label="URL"
-          placeholder="请输入名称"
-          initialValue={props.initialValues?.url}
-        />
-        <ProFormText
-          width="xs"
-          name="rootdir"
-          label="Root Directory"
-          placeholder="请输入名称"
-          initialValue={props.initialValues?.rootdir}
-        />
-      </ProForm.Group>
-      {/* <ProFormText name="project" disabled label="项目名称" initialValue="xxxx项目" /> */}
     </ModalForm>
   );
 };

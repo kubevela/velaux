@@ -80,7 +80,6 @@ const EnvironmentList: React.FC = () => {
       render: (dom, entity) => (
         <a
           onClick={() => {
-            // setCurrentRow(entity);
             // setShowDetail(true);
             message.warning('TODO: 展示 environment');
           }}

@@ -3,7 +3,7 @@
     path: '/applications',
     name: 'Applications',
     icon: 'table',
-    component: './Welcome',
+    component: './Application',
   },
   {
     path: '/apptemplates',
@@ -12,16 +12,22 @@
     component: './Welcome',
   },
   {
-    path: '/clusters',
-    name: 'Clusters',
+    path: '/pipelines',
+    name: 'Pipelines',
     icon: 'table',
-    component: './Cluster',
+    component: './Welcome',
   },
   {
     path: '/environments',
     name: 'Environments',
     icon: 'table',
     component: './Environment',
+  },
+  {
+    path: '/clusters',
+    name: 'Clusters',
+    icon: 'table',
+    component: './Cluster',
   },
   {
     path: '/catalogs',
@@ -58,13 +64,8 @@
     ],
   },
   {
-    path: '/pipelines',
-    name: 'Pipelines',
-    icon: 'table',
-    component: './Welcome',
-  },
-  {
     path: '/welcome',
+    hideInMenu: true,
     name: 'welcome',
     icon: 'smile',
     component: './Welcome',

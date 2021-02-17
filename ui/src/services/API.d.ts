@@ -1,4 +1,17 @@
 declare namespace API {
+  export type ListApplicationsResponse = {
+    apps: ApplicationType[];
+  };
+  export type ApplicationResponse = {
+    app: ApplicationType;
+  };
+
+  export type ApplicationType = {
+    name: string;
+    desc?: string;
+    updatedAt: number;
+  };
+
   export type ListEnvironmentsResponse = {
     environments: EnvironmentType[];
   };

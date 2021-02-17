@@ -26,6 +26,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
       visible={props.visible}
       onFinish={props.onFinish}
       onVisibleChange={props.onVisibleChange}
+      rules={[{ required: true, message: 'Missing name' }]}
     >
       <ProForm.Group>
         <ProFormText

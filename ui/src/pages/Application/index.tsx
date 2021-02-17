@@ -9,22 +9,25 @@ import UpdateForm from './components/UpdateForm';
 
 interface UpdateState {
   visible: boolean;
-  value?: API.ClusterType;
+  value?: API.ApplicationType;
 }
 
-const ClusterList: React.FC = () => {
+const ApplicationList: React.FC = () => {
   /** 新建窗口的弹窗 */
   const [createModalVisible, handleCreateModalVisible] = useState<boolean>(false);
   const [updateModal, handleUpdateModal] = useState<UpdateState>({ visible: false });
 
   const actionRef = useRef<ActionType>();
 
-  const { listClusters, addCluster, removeCluster, updateCluster } = useModel('useClusters');
+  const { listApplications, addApplication, removeApplication, updateApplication } = useModel(
+    'useApplications',
+  );
 
-  const handleAdd = async (fields: API.ClusterType) => {
+  const handleAdd = async (fields: API.ApplicationType) => {
+    console.log('fields', fields);
     const hide = message.loading('正在添加');
     try {
-      await addCluster({ ...fields });
+      await addApplication({ ...fields });
       hide();
       message.success('添加成功');
       return true;
@@ -35,10 +38,10 @@ const ClusterList: React.FC = () => {
     }
   };
 
-  const handleUpdate = async (val: API.ClusterType) => {
+  const handleUpdate = async (val: API.ApplicationType) => {
     const hide = message.loading('正在更改');
     try {
-      const newVal = await updateCluster(val);
+      const newVal = await updateApplication(val);
       handleUpdateModal({ ...updateModal, value: newVal });
       hide();
       message.success('更改成功，即将刷新');
@@ -50,10 +53,10 @@ const ClusterList: React.FC = () => {
     }
   };
 
-  const handleRemove = async (val: API.ClusterType) => {
+  const handleRemove = async (val: API.ApplicationType) => {
     const hide = message.loading('正在删除');
     try {
-      await removeCluster(val);
+      await removeApplication(val);
       hide();
       message.success('删除成功，即将刷新');
       return true;
@@ -64,7 +67,7 @@ const ClusterList: React.FC = () => {
     }
   };
 
-  const columns: ProColumns<API.ClusterType>[] = [
+  const columns: ProColumns<API.ApplicationType>[] = [
     {
       title: 'Index',
       dataIndex: 'index',
@@ -78,7 +81,7 @@ const ClusterList: React.FC = () => {
         <a
           onClick={() => {
             // setShowDetail(true);
-            message.warning('TODO: 展示 cluster');
+            message.warning('TODO: 展示 application');
           }}
         >
           {dom}
@@ -109,7 +112,7 @@ const ClusterList: React.FC = () => {
     },
 
     {
-      title: <FormattedMessage id="pages.clusterTable.titleOption" defaultMessage="操作" />,
+      title: <FormattedMessage id="pages.applicationTable.titleOption" defaultMessage="操作" />,
       width: '164px',
       dataIndex: 'option',
       valueType: 'option',
@@ -122,7 +125,7 @@ const ClusterList: React.FC = () => {
               handleUpdateModal({ visible: true, value: record });
             }}
           >
-            <FormattedMessage id="pages.clusterTable.edit" defaultMessage="编辑" />
+            <FormattedMessage id="pages.applicationTable.edit" defaultMessage="编辑" />
           </Button>
           <Button
             id="delete"
@@ -133,7 +136,7 @@ const ClusterList: React.FC = () => {
               actionRef.current?.reloadAndRest?.();
             }}
           >
-            <FormattedMessage id="pages.clusterTable.delete" defaultMessage="删除" />
+            <FormattedMessage id="pages.applicationTable.delete" defaultMessage="删除" />
           </Button>
         </Space>
       ),
@@ -142,7 +145,7 @@ const ClusterList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<API.ClusterType>
+      <ProTable<API.ApplicationType>
         columns={columns}
         rowKey="key"
         dateFormatter="string"
@@ -163,20 +166,21 @@ const ClusterList: React.FC = () => {
               handleCreateModalVisible(true);
             }}
           >
-            <PlusOutlined /> <FormattedMessage id="pages.clusterTable.new" defaultMessage="新建" />
+            <PlusOutlined />{' '}
+            <FormattedMessage id="pages.applicationTable.new" defaultMessage="新建" />
           </Button>,
         ]}
         request={async (params, sorter, filter) => {
           // 表单搜索项会从 params 传入，传递给后端接口。
           console.log('params', params, 'sorter', sorter, 'filter', filter);
 
-          let clusters = await listClusters();
+          let apps = await listApplications();
 
           if (params.name) {
-            clusters = clusters.filter((val) => val.name?.includes(params.name));
+            apps = apps.filter((val) => val.name?.includes(params.name));
           }
           return Promise.resolve({
-            data: clusters,
+            data: apps,
             success: true,
           });
         }}
@@ -184,12 +188,12 @@ const ClusterList: React.FC = () => {
 
       <UpdateForm
         title={{
-          id: 'pages.clusterTable.updateForm.newCluster',
-          defaultMessage: 'Create Cluster',
+          id: 'pages.applicationTable.updateForm.newApplication',
+          defaultMessage: 'Create Application',
         }}
         visible={createModalVisible}
         onFinish={async (value: any) => {
-          const success = await handleAdd(value as API.ClusterType);
+          const success = await handleAdd(value as API.ApplicationType);
           if (success) {
             handleCreateModalVisible(false);
             if (actionRef.current) {
@@ -207,12 +211,12 @@ const ClusterList: React.FC = () => {
 
       <UpdateForm
         title={{
-          id: 'pages.clusterTable.updateForm.updateCluster',
-          defaultMessage: 'Update Cluster',
+          id: 'pages.applicationTable.updateForm.updateApplication',
+          defaultMessage: 'Update Application',
         }}
         visible={updateModal.visible}
         onFinish={async (value: any) => {
-          const success = await handleUpdate(value as API.ClusterType);
+          const success = await handleUpdate(value as API.ApplicationType);
           if (success) {
             handleUpdateModal({ ...updateModal, visible: false });
             if (actionRef.current) {
@@ -232,4 +236,4 @@ const ClusterList: React.FC = () => {
   );
 };
 
-export default ClusterList;
+export default ApplicationList;

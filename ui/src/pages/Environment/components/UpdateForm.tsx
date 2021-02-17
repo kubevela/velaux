@@ -38,6 +38,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           tooltip="最长为 24 位"
           placeholder="请输入名称"
           initialValue={props.initialValues?.name}
+          rules={[{ required: true, message: 'Missing name' }]}
         />
         <ProFormText
           width="md"
@@ -119,7 +120,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
             ))}
             <Form.Item>
               <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                Add config
+                Add clusters
               </Button>
             </Form.Item>
           </>
@@ -172,7 +173,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
             ))}
             <Form.Item>
               <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                Add config
+                Add packages
               </Button>
             </Form.Item>
           </>
