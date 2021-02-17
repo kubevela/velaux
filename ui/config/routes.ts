@@ -1,19 +1,37 @@
 ﻿export default [
   {
-    path: '/applications',
-    name: 'Applications',
-    icon: 'table',
-    component: './Application',
-  },
-  {
-    path: '/apptemplates',
-    name: 'Application Templates',
+    path: '/pipelines',
+    name: 'Pipelines',
     icon: 'table',
     component: './Welcome',
   },
   {
-    path: '/pipelines',
-    name: 'Pipelines',
+    path: '/insights',
+    name: 'Insights',
+    icon: 'table',
+    component: './Welcome',
+  },
+  {
+    path: '/applications',
+    name: 'Applications',
+    icon: 'table',
+    routes: [
+      {
+        path: '/applications',
+        hideInMenu: true,
+        component: './Application',
+      },
+      {
+        path: '/applications/create',
+        hideInMenu: true,
+        name: 'Create Application',
+        component: './Welcome',
+      },
+    ],
+  },
+  {
+    path: '/apptemplates',
+    name: 'Application Templates',
     icon: 'table',
     component: './Welcome',
   },
@@ -46,6 +64,12 @@
         component: './PackageList',
       },
     ],
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    icon: 'SettingOutlined',
+    component: './Cluster',
   },
   {
     path: '/user',
