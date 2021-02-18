@@ -19,10 +19,16 @@ export default function useEnvironments(params: {}) {
     return environment;
   };
 
+  const listCapabilities = async (envName: string) => {
+    const { capabilities } = await api.listCapabilities(envName);
+    return capabilities;
+  };
+
   return {
     listEnvironments,
     addEnvironment,
     removeEnvironment,
     updateEnvironment,
+    listCapabilities,
   };
 }

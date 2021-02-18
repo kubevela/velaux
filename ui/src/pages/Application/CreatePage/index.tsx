@@ -1,18 +1,20 @@
-import React from 'react';
-import ProForm, {
-  StepsForm,
-  ProFormText,
-  ProFormDatePicker,
-  ProFormSelect,
-  ProFormCheckbox,
-} from '@ant-design/pro-form';
+import React, { useState } from 'react';
+import { StepsForm, ProFormText, ProFormSelect, ProFormCheckbox } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { message } from 'antd';
+import { Button, Form, message, Space } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
+import { useModel } from 'umi';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 export type FormProps = {};
 
 const CreateForm: React.FC<FormProps> = (props) => {
+  const { listEnvironments, listCapabilities } = useModel('useEnvironments');
+
+  const [capsState, setCapsState] = useState<API.CapabilityType[]>();
+
+  const [chosenCaps, setChosenCaps] = useState<API.CapabilityType[]>([]);
+
   return (
     <PageContainer>
       <ProCard>
@@ -36,6 +38,9 @@ const CreateForm: React.FC<FormProps> = (props) => {
             title="Basic info"
             onFinish={async (value) => {
               console.log('form 1', value);
+
+              const caps = await listCapabilities(value.env);
+              setCapsState(caps);
               return true;
             }}
           >
@@ -49,34 +54,88 @@ const CreateForm: React.FC<FormProps> = (props) => {
             <ProFormText width="md" name="desc" label="Description" placeholder="请输入名称" />
             <ProFormSelect
               width="md"
-              request={async () => [{ value: 'Environment' }, { value: 'Environment-2' }]}
               name="env"
               label="Choose environment"
+              request={async () => {
+                const environments = await listEnvironments();
+                let names: { value: string }[] = [];
+                environments.forEach((val) => {
+                  names.push({ value: val.name });
+                });
+                return names;
+              }}
             />
           </StepsForm.StepForm>
 
           <StepsForm.StepForm<{
-            checkbox: string;
+            capabilities: API.CapabilityType[];
           }>
-            name="checkbox"
-            title="设置参数"
+            name="cap-options"
+            title="Choose capabilities"
           >
-            <ProFormCheckbox.Group
-              name="checkbox"
-              label="迁移类型"
-              width="lg"
-              options={['结构迁移', '全量迁移', '增量迁移', '全量校验']}
-            />
-            <ProForm.Group>
-              <ProFormText name="dbname" label="业务 DB 用户名" />
-              <ProFormDatePicker name="datetime" label="记录保存时间" width="sm" />
-              <ProFormCheckbox.Group
-                name="checkbox"
-                label="迁移类型"
-                options={['完整 LOB', '不同步 LOB', '受限制 LOB']}
-              />
-            </ProForm.Group>
+            <Form.List name="capabilities">
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map((field, index) => {
+                    return (
+                      <ProCard key={field.key} split="vertical">
+                        <ProCard>
+                          <ProFormSelect
+                            width="sm"
+                            request={async () => {
+                              let names: { value: string }[] = [];
+                              capsState?.forEach((val) => {
+                                names.push({ value: val.name });
+                              });
+                              return names;
+                            }}
+                            name="capabilities"
+                            label="Choose capability"
+                            fieldProps={{
+                              onChange: (capName) => {
+                                capsState?.forEach((cap) => {
+                                  if (cap.name === capName) {
+                                    if (chosenCaps.length > index) {
+                                      setChosenCaps(
+                                        chosenCaps.map((val, i) => {
+                                          if (i != index) {
+                                            return val;
+                                          } else {
+                                            return cap;
+                                          }
+                                        }),
+                                      );
+                                    } else {
+                                      setChosenCaps([...chosenCaps, cap]);
+                                    }
+                                  }
+                                });
+                              },
+                            }}
+                          />
+                          <MinusCircleOutlined
+                            onClick={() => {
+                              setChosenCaps(chosenCaps.filter((_, i) => i != index));
+                              remove(field.name);
+                            }}
+                          />
+                        </ProCard>
+                        <ProCard>
+                          <div>{chosenCaps.length > index && chosenCaps[index].name}</div>
+                        </ProCard>
+                      </ProCard>
+                    );
+                  })}
+                  <Form.Item>
+                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                      Add capability
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
           </StepsForm.StepForm>
+
           <StepsForm.StepForm name="time" title="发布实验">
             <ProFormCheckbox.Group
               name="checkbox"

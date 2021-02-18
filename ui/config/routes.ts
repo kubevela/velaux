@@ -75,7 +75,7 @@
     path: '/settings',
     name: 'Settings',
     icon: 'SettingOutlined',
-    component: './Cluster',
+    component: './Welcome',
   },
   {
     path: '/user',

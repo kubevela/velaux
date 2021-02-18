@@ -4,6 +4,10 @@ export async function listEnvironments() {
   return request<API.ListEnvironmentsResponse>('/api/environments');
 }
 
+export async function listCapabilities(envName: string) {
+  return request<API.ListCapabilitiesResponse>('/api/environments/' + envName + '/capabilities');
+}
+
 export async function addEnvironment(params: API.EnvironmentType) {
   return request<API.EnvironmentResponse>('/api/environments', {
     method: 'POST',

@@ -13,9 +13,20 @@ declare namespace API {
     env: string;
   };
 
+  export type CapabilityType = {
+    name: string;
+    type: string; // Workload or Trait
+    schema?: string;
+  };
+
+  export type ListCapabilitiesResponse = {
+    capabilities: CapabilityType[];
+  };
+
   export type ListEnvironmentsResponse = {
     environments: EnvironmentType[];
   };
+
   export type EnvironmentResponse = {
     environment: EnvironmentType;
   };

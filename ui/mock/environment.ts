@@ -1,5 +1,23 @@
 import { Request, Response } from 'express';
 
+let capabilitiList: API.CapabilityType[] = [
+  {
+    name: 'WebService',
+    type: 'Workload',
+    jsonschema: '',
+  },
+  {
+    name: 'Routing',
+    type: 'Trait',
+    jsonschema: '',
+  },
+];
+
+const getCapabilities = (req: Request, res: Response) => {
+  res.json({
+    capabilities: capabilitiList,
+  });
+};
 let environmentList: API.EnvironmentType[] = [
   {
     name: 'Environment',
@@ -88,5 +106,6 @@ function postEnvironments(req: Request, res: Response, u: string, b: Request) {
 
 export default {
   'GET /api/environments': getEnvironments,
+  'GET /api/environments/:env/capabilities': getCapabilities,
   'POST /api/environments': postEnvironments,
 };
