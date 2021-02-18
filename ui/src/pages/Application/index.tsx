@@ -4,7 +4,8 @@ import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
-import { FormattedMessage, useModel } from 'umi';
+import { FormattedMessage, Link, useModel } from 'umi';
+import { useHistory } from 'react-router-dom';
 import UpdateForm from './components/UpdateForm';
 
 interface UpdateState {
@@ -13,30 +14,13 @@ interface UpdateState {
 }
 
 const ApplicationList: React.FC = () => {
-  /** 新建窗口的弹窗 */
-  const [createModalVisible, handleCreateModalVisible] = useState<boolean>(false);
   const [updateModal, handleUpdateModal] = useState<UpdateState>({ visible: false });
 
   const actionRef = useRef<ActionType>();
 
-  const { listApplications, addApplication, removeApplication, updateApplication } = useModel(
-    'useApplications',
-  );
+  const history = useHistory();
 
-  const handleAdd = async (fields: API.ApplicationType) => {
-    console.log('fields', fields);
-    const hide = message.loading('正在添加');
-    try {
-      await addApplication({ ...fields });
-      hide();
-      message.success('添加成功');
-      return true;
-    } catch (error) {
-      hide();
-      message.error('添加失败请重试！');
-      return false;
-    }
-  };
+  const { listApplications, removeApplication, updateApplication } = useModel('useApplications');
 
   const handleUpdate = async (val: API.ApplicationType) => {
     const hide = message.loading('正在更改');
@@ -78,14 +62,9 @@ const ApplicationList: React.FC = () => {
       title: 'Name',
       dataIndex: 'name',
       render: (dom, entity) => (
-        <a
-          onClick={() => {
-            // setShowDetail(true);
-            message.warning('TODO: 展示 application');
-          }}
-        >
-          {dom}
-        </a>
+        <Link to={'/applications/' + entity.name}>
+          <a>{dom}</a>
+        </Link>
       ),
     },
     {
@@ -162,11 +141,12 @@ const ApplicationList: React.FC = () => {
           <Button
             type="primary"
             key="primary"
+            icon={<PlusOutlined />}
             onClick={() => {
-              handleCreateModalVisible(true);
+              history.push('/applications/create');
+              // handleCreateModalVisible(true);
             }}
           >
-            <PlusOutlined />{' '}
             <FormattedMessage id="pages.applicationTable.new" defaultMessage="新建" />
           </Button>,
         ]}
@@ -183,29 +163,6 @@ const ApplicationList: React.FC = () => {
             data: apps,
             success: true,
           });
-        }}
-      />
-
-      <UpdateForm
-        title={{
-          id: 'pages.applicationTable.updateForm.newApplication',
-          defaultMessage: 'Create Application',
-        }}
-        visible={createModalVisible}
-        onFinish={async (value: any) => {
-          const success = await handleAdd(value as API.ApplicationType);
-          if (success) {
-            handleCreateModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-
-          message.success('提交成功');
-          return true;
-        }}
-        onVisibleChange={async (visible) => {
-          handleCreateModalVisible(visible);
         }}
       />
 

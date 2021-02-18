@@ -10,6 +10,7 @@ declare namespace API {
     name: string;
     desc?: string;
     updatedAt: number;
+    env: string;
   };
 
   export type ListEnvironmentsResponse = {

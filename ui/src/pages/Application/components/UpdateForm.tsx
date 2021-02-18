@@ -1,8 +1,6 @@
 import React from 'react';
 import ProForm, { ProFormText, ModalForm } from '@ant-design/pro-form';
 import { useIntl } from 'umi';
-import { Form, Input, Button, Space, Divider } from 'antd';
-import { MinusCircleOutlined, PlusOutlined, UnorderedListOutlined } from '@ant-design/icons';
 
 export type FormTitleType = {
   id?: string;
