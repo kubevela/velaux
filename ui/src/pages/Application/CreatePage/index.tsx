@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { StepsForm, ProFormText, ProFormSelect, ProFormCheckbox } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { Button, Form, message, Space } from 'antd';
+import { Button, Form as AntdForm, message } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import { useModel } from 'umi';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { withTheme } from '@rjsf/core';
+// @ts-ignore
+import { Theme as AntDTheme } from '@rjsf/antd';
+import 'antd/dist/antd.css';
+
+const FormRender = withTheme(AntDTheme);
 
 export type FormProps = {};
 
@@ -21,6 +27,7 @@ const CreateForm: React.FC<FormProps> = (props) => {
         <StepsForm<API.ApplicationType>
           onFinish={async (value) => {
             console.log('form total', value);
+            // handleAdd
             message.success('提交成功');
           }}
           formProps={{
@@ -71,72 +78,84 @@ const CreateForm: React.FC<FormProps> = (props) => {
             capabilities: API.CapabilityType[];
           }>
             name="cap-options"
-            title="Choose capabilities"
+            title="Capabilities"
+            onFinish={async (value) => {
+              console.log('form 2', value);
+            }}
           >
-            <Form.List name="capabilities">
+            <AntdForm.List name="capabilities">
               {(fields, { add, remove }) => (
                 <>
-                  {fields.map((field, index) => {
-                    return (
-                      <ProCard key={field.key} split="vertical">
-                        <ProCard>
-                          <ProFormSelect
-                            width="sm"
-                            request={async () => {
-                              let names: { value: string }[] = [];
-                              capsState?.forEach((val) => {
-                                names.push({ value: val.name });
-                              });
-                              return names;
-                            }}
-                            name="capabilities"
-                            label="Choose capability"
-                            fieldProps={{
-                              onChange: (capName) => {
-                                capsState?.forEach((cap) => {
-                                  if (cap.name === capName) {
-                                    if (chosenCaps.length > index) {
-                                      setChosenCaps(
-                                        chosenCaps.map((val, i) => {
-                                          if (i != index) {
-                                            return val;
-                                          } else {
-                                            return cap;
-                                          }
-                                        }),
-                                      );
-                                    } else {
-                                      setChosenCaps([...chosenCaps, cap]);
-                                    }
+                  {fields.map((field, index) => (
+                    <ProCard key={field.key} split="vertical">
+                      <ProCard>
+                        <ProFormSelect
+                          width="sm"
+                          request={async () => {
+                            let names: { value: string }[] = [];
+                            capsState?.forEach((val) => {
+                              names.push({ value: val.name });
+                            });
+                            return names;
+                          }}
+                          name="capabilities"
+                          label="Choose capability"
+                          fieldProps={{
+                            onChange: (capName) => {
+                              capsState?.forEach((cap) => {
+                                if (cap.name === capName) {
+                                  if (chosenCaps.length > index) {
+                                    setChosenCaps(
+                                      chosenCaps.map((val, i) => {
+                                        if (i != index) {
+                                          return val;
+                                        } else {
+                                          return cap;
+                                        }
+                                      }),
+                                    );
+                                  } else {
+                                    setChosenCaps([...chosenCaps, cap]);
                                   }
-                                });
-                              },
-                            }}
-                          />
-                          <MinusCircleOutlined
-                            onClick={() => {
-                              setChosenCaps(chosenCaps.filter((_, i) => i != index));
-                              remove(field.name);
-                            }}
-                          />
-                        </ProCard>
-                        <ProCard>
-                          <div>{chosenCaps.length > index && chosenCaps[index].name}</div>
-                        </ProCard>
+                                }
+                              });
+                            },
+                          }}
+                        />
+                        <MinusCircleOutlined
+                          onClick={() => {
+                            setChosenCaps(chosenCaps.filter((_, i) => i != index));
+                            remove(field.name);
+                          }}
+                        />
                       </ProCard>
-                    );
-                  })}
-                  <Form.Item>
+                      <ProCard>
+                        {/* <div>{chosenCaps.length > index && chosenCaps[index]}</div> */}
+                        <div>
+                          {(() => {
+                            console.log('hahaha');
+                            if (chosenCaps.length > index) {
+                              const cap = chosenCaps[index];
+                              const schema = JSON.parse(cap.jsonschema);
+                              return <FormRender schema={schema} />;
+                            }
+                            return 'Not found';
+                          })()}
+                        </div>
+                      </ProCard>
+                    </ProCard>
+                  ))}
+                  <AntdForm.Item>
                     <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
                       Add capability
                     </Button>
-                  </Form.Item>
+                  </AntdForm.Item>
                 </>
               )}
-            </Form.List>
+            </AntdForm.List>
           </StepsForm.StepForm>
 
-          <StepsForm.StepForm name="time" title="发布实验">
+          <StepsForm.StepForm name="release" title="Release strategy">
             <ProFormCheckbox.Group
               name="checkbox"
               label="部署单元"

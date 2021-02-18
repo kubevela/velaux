@@ -16,7 +16,7 @@ declare namespace API {
   export type CapabilityType = {
     name: string;
     type: string; // Workload or Trait
-    schema?: string;
+    jsonschema: string;
   };
 
   export type ListCapabilitiesResponse = {
