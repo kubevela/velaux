@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StepsForm, ProFormText, ProFormSelect, ProFormCheckbox } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { Button, Form as AntdForm, message } from 'antd';
+import { Button, Form, message } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import { useModel } from 'umi';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -81,77 +81,79 @@ const CreateForm: React.FC<FormProps> = (props) => {
             title="Capabilities"
             onFinish={async (value) => {
               console.log('form 2', value);
+              return true;
             }}
           >
-            <AntdForm.List name="capabilities">
+            <Form.List name="capabilities">
               {(fields, { add, remove }) => (
                 <>
                   {fields.map((field, index) => (
-                    <ProCard key={field.key} split="vertical">
-                      <ProCard>
-                        <ProFormSelect
-                          width="sm"
-                          request={async () => {
-                            let names: { value: string }[] = [];
-                            capsState?.forEach((val) => {
-                              names.push({ value: val.name });
-                            });
-                            return names;
-                          }}
-                          name="capabilities"
-                          label="Choose capability"
-                          fieldProps={{
-                            onChange: (capName) => {
-                              capsState?.forEach((cap) => {
-                                if (cap.name === capName) {
-                                  if (chosenCaps.length > index) {
-                                    setChosenCaps(
-                                      chosenCaps.map((val, i) => {
-                                        if (i != index) {
-                                          return val;
-                                        } else {
-                                          return cap;
-                                        }
-                                      }),
-                                    );
-                                  } else {
-                                    setChosenCaps([...chosenCaps, cap]);
-                                  }
-                                }
+                    <Form.Item>
+                      <ProCard key={field.key} split="vertical">
+                        <ProCard>
+                          <ProFormSelect
+                            width="sm"
+                            request={async () => {
+                              let names: { value: string }[] = [];
+                              capsState?.forEach((val) => {
+                                names.push({ value: val.name });
                               });
-                            },
-                          }}
-                        />
-                        <MinusCircleOutlined
-                          onClick={() => {
-                            setChosenCaps(chosenCaps.filter((_, i) => i != index));
-                            remove(field.name);
-                          }}
-                        />
+                              return names;
+                            }}
+                            name="capabilities"
+                            label="Choose capability"
+                            fieldProps={{
+                              onChange: (capName) => {
+                                capsState?.forEach((cap) => {
+                                  if (cap.name === capName) {
+                                    if (chosenCaps.length > index) {
+                                      setChosenCaps(
+                                        chosenCaps.map((val, i) => {
+                                          if (i != index) {
+                                            return val;
+                                          } else {
+                                            return cap;
+                                          }
+                                        }),
+                                      );
+                                    } else {
+                                      setChosenCaps([...chosenCaps, cap]);
+                                    }
+                                  }
+                                });
+                              },
+                            }}
+                          />
+                          <MinusCircleOutlined
+                            onClick={() => {
+                              setChosenCaps(chosenCaps.filter((_, i) => i != index));
+                              remove(field.name);
+                            }}
+                          />
+                        </ProCard>
+                        <ProCard>
+                          <div>
+                            {(() => {
+                              if (chosenCaps.length > index) {
+                                const cap = chosenCaps[index];
+                                const schema = JSON.parse(cap.jsonschema);
+                                return <FormRender schema={schema} children={true} />;
+                              }
+                              return 'Please select an option';
+                            })()}
+                          </div>
+                        </ProCard>
                       </ProCard>
-                      <ProCard>
-                        {/* <div>{chosenCaps.length > index && chosenCaps[index]}</div> */}
-                        <div>
-                          {(() => {
-                            if (chosenCaps.length > index) {
-                              const cap = chosenCaps[index];
-                              const schema = JSON.parse(cap.jsonschema);
-                              return <FormRender schema={schema} />;
-                            }
-                            return 'Please select an option';
-                          })()}
-                        </div>
-                      </ProCard>
-                    </ProCard>
+                    </Form.Item>
                   ))}
-                  <AntdForm.Item>
+                  <Form.Item>
                     <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
                       Add capability
                     </Button>
-                  </AntdForm.Item>
+                  </Form.Item>
                 </>
               )}
-            </AntdForm.List>
+            </Form.List>
           </StepsForm.StepForm>
 
           <StepsForm.StepForm name="release" title="Release strategy">

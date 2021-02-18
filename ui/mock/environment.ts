@@ -17,7 +17,7 @@ let capabilitiList: API.CapabilityType[] = [
         "port": {
           "type": "string",
           "description": "Expose service port"
-        },
+        }
       }
     }`,
   },
