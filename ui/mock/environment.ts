@@ -10,19 +10,14 @@ let capabilitiList: API.CapabilityType[] = [
       "title": "WebService",
       "type": "object",
       "properties": {
-        "firstName": {
+        "image": {
           "type": "string",
-          "description": "The person's first name."
+          "description": "Container image"
         },
-        "lastName": {
+        "port": {
           "type": "string",
-          "description": "The person's last name."
+          "description": "Expose service port"
         },
-        "age": {
-          "description": "Age in years which must be equal to or greater than zero.",
-          "type": "integer",
-          "minimum": 0
-        }
       }
     }`,
   },

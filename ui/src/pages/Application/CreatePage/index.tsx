@@ -133,13 +133,12 @@ const CreateForm: React.FC<FormProps> = (props) => {
                         {/* <div>{chosenCaps.length > index && chosenCaps[index]}</div> */}
                         <div>
                           {(() => {
-                            console.log('hahaha');
                             if (chosenCaps.length > index) {
                               const cap = chosenCaps[index];
                               const schema = JSON.parse(cap.jsonschema);
                               return <FormRender schema={schema} />;
                             }
-                            return 'Not found';
+                            return 'Please select an option';
                           })()}
                         </div>
                       </ProCard>
