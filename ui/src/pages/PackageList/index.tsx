@@ -28,6 +28,16 @@ const PackageList: React.FC = (props) => {
     {
       title: 'Name',
       dataIndex: 'name',
+      render: (dom, entity) => (
+        <a
+          onClick={() => {
+            // setShowDetail(true);
+            message.warning('TODO: 展示 package');
+          }}
+        >
+          {dom}
+        </a>
+      ),
     },
     {
       title: 'Description',
