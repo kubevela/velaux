@@ -73,6 +73,7 @@ const CreateForm: React.FC<FormProps> = (props) => {
               label="Name"
               tooltip="最长为 24 位"
               placeholder="请输入名称"
+              rules={[{ required: true }]}
             />
             <ProFormText width="md" name="desc" label="Description" placeholder="请输入名称" />
             <ProFormSelect
