@@ -2,12 +2,20 @@ import React from 'react';
 import moment from 'moment';
 
 import ProDescriptions from '@ant-design/pro-descriptions';
-import { Button, Card } from 'antd';
+import { Button, Card, Timeline } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 
 export default () => {
   return (
     <PageContainer>
+      <Card>
+        <Timeline>
+          <Timeline.Item>Created 2/18/2021, 11:18:00 PM</Timeline.Item>
+          <Timeline.Item>Canary rollout 2/18/2021, 11:20:00 PM</Timeline.Item>
+          <Timeline.Item color="green">Released 2/18/2021, 11:30:00 PM</Timeline.Item>
+          <Timeline.Item color="red">Unhealthy 2/18/2021, 11:50:00 PM</Timeline.Item>
+        </Timeline>
+      </Card>
       <Card>
         <ProDescriptions
           column={2}
