@@ -102,7 +102,7 @@ const CreateForm: React.FC<FormProps> = (props) => {
               {(fields, { add, remove }) => (
                 <>
                   {fields.map((field, index) => (
-                    <ProCard key={field.key} split="vertical">
+                    <ProCard key={field.key} split="vertical" bordered>
                       <ProCard>
                         <ProFormSelect
                           width="sm"
