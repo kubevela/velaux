@@ -5,6 +5,7 @@ import { Button, Form, message } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import { useModel } from 'umi';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { useHistory } from 'react-router-dom';
 import { withTheme } from '@rjsf/core';
 // @ts-ignore
 import { Theme as AntDTheme } from '@rjsf/antd';
@@ -15,19 +16,36 @@ const FormRender = withTheme(AntDTheme);
 export type FormProps = {};
 
 const CreateForm: React.FC<FormProps> = (props) => {
+  const history = useHistory();
+
+  const { addApplication } = useModel('useApplications');
   const { listEnvironments, listCapabilities } = useModel('useEnvironments');
 
   const [capsState, setCapsState] = useState<API.CapabilityType[]>();
 
   const [chosenCaps, setChosenCaps] = useState<API.CapabilityType[]>([]);
 
+  const handleAdd = async (val: API.ApplicationType) => {
+    const hide = message.loading('正在添加');
+    try {
+      await addApplication(val);
+      hide();
+      message.success('添加成功，即将刷新');
+      return true;
+    } catch (error) {
+      hide();
+      message.error('添加失败，请重试');
+      return false;
+    }
+  };
+
   return (
     <PageContainer>
       <ProCard>
         <StepsForm<API.ApplicationType>
           onFinish={async (value) => {
-            console.log('form total', value);
-            // handleAdd
+            handleAdd(value as API.ApplicationType);
+            history.push('/applications');
             message.success('提交成功');
           }}
           formProps={{
@@ -44,8 +62,6 @@ const CreateForm: React.FC<FormProps> = (props) => {
             name="base"
             title="Basic info"
             onFinish={async (value) => {
-              console.log('form 1', value);
-
               const caps = await listCapabilities(value.env);
               setCapsState(caps);
               return true;
@@ -78,7 +94,6 @@ const CreateForm: React.FC<FormProps> = (props) => {
             name="cap-options"
             title="Capabilities"
             onFinish={async (value) => {
-              console.log('form 2', value);
               return true;
             }}
           >
