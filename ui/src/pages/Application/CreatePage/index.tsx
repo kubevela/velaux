@@ -145,19 +145,17 @@ const CreateForm: React.FC<FormProps> = (props) => {
                         />
                       </ProCard>
                       <ProCard>
-                        <div>
-                          {(() => {
-                            if (chosenCaps.length > index) {
-                              const cap = chosenCaps[index];
-                              const schema = JSON.parse(cap.jsonschema);
-                              return (
-                                // add onChange listener to get values
-                                <FormRender name="capbody" schema={schema} children={true} />
-                              );
-                            }
-                            return 'Please select an option';
-                          })()}
-                        </div>
+                        {(() => {
+                          if (chosenCaps.length > index) {
+                            const cap = chosenCaps[index];
+                            const schema = JSON.parse(cap.jsonschema);
+                            return (
+                              // add onChange listener to get values
+                              <FormRender name="capbody" schema={schema} children={true} />
+                            );
+                          }
+                          return 'Please select an option';
+                        })()}
                       </ProCard>
                     </ProCard>
                   ))}
