@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StepsForm, ProFormText, ProFormSelect, ProFormCheckbox } from '@ant-design/pro-form';
+import { StepsForm, ProFormText, ProFormSelect, ProFormRadio } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
 import { Button, Form, message } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
@@ -74,9 +74,7 @@ const CreateForm: React.FC<FormProps> = (props) => {
             />
           </StepsForm.StepForm>
 
-          <StepsForm.StepForm<{
-            capabilities: API.CapabilityType[];
-          }>
+          <StepsForm.StepForm
             name="cap-options"
             title="Capabilities"
             onFinish={async (value) => {
@@ -100,7 +98,7 @@ const CreateForm: React.FC<FormProps> = (props) => {
                               });
                               return names;
                             }}
-                            name="capabilities"
+                            name="capname"
                             label="Choose capability"
                             fieldProps={{
                               onChange: (capName) => {
@@ -137,7 +135,10 @@ const CreateForm: React.FC<FormProps> = (props) => {
                               if (chosenCaps.length > index) {
                                 const cap = chosenCaps[index];
                                 const schema = JSON.parse(cap.jsonschema);
-                                return <FormRender schema={schema} children={true} />;
+                                return (
+                                  // add onChange listener to get values
+                                  <FormRender name="capbody" schema={schema} children={true} />
+                                );
                               }
                               return 'Please select an option';
                             })()}
@@ -156,39 +157,31 @@ const CreateForm: React.FC<FormProps> = (props) => {
             </Form.List>
           </StepsForm.StepForm>
 
-          <StepsForm.StepForm name="release" title="Release strategy">
-            <ProFormCheckbox.Group
-              name="checkbox"
-              label="部署单元"
-              options={['部署单元1', '部署单元2', '部署单元3']}
-            />
+          <StepsForm.StepForm name="release" title="Release">
             <ProFormSelect
-              label="部署分组策略"
-              name="remark"
-              rules={[
-                {
-                  required: true,
-                },
-              ]}
+              label="Releasse strategy"
+              name="releaseStrategy"
               initialValue="1"
               options={[
                 {
                   value: '1',
-                  label: '策略一',
+                  label: 'Regular',
                 },
-                { value: '2', label: '策略二' },
+                { value: '2', label: 'Canary' },
               ]}
             />
-            <ProFormSelect
-              label="Pod 调度策略"
-              name="remark2"
-              initialValue="2"
+            <ProFormRadio.Group
+              name="approval"
+              label="Approval Gate"
               options={[
                 {
+                  label: 'Yes',
                   value: '1',
-                  label: '策略一',
                 },
-                { value: '2', label: '策略二' },
+                {
+                  label: 'No',
+                  value: '2',
+                },
               ]}
             />
           </StepsForm.StepForm>
