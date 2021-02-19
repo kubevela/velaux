@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StepsForm, ProFormText, ProFormSelect, ProFormRadio } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { Button, Form, message } from 'antd';
+import { Button, Form, message, Space, Tag } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import { useModel } from 'umi';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -105,7 +105,6 @@ const CreateForm: React.FC<FormProps> = (props) => {
                     <ProCard key={field.key} split="vertical" bordered>
                       <ProCard>
                         <ProFormSelect
-                          width="sm"
                           request={async () => {
                             let names: { value: string }[] = [];
                             capsState?.forEach((val) => {
@@ -154,7 +153,7 @@ const CreateForm: React.FC<FormProps> = (props) => {
                               <FormRender name="capbody" schema={schema} children={true} />
                             );
                           }
-                          return 'Please select an option';
+                          return <Tag color="red">Please select an option</Tag>;
                         })()}
                       </ProCard>
                     </ProCard>
