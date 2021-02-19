@@ -102,66 +102,64 @@ const CreateForm: React.FC<FormProps> = (props) => {
               {(fields, { add, remove }) => (
                 <>
                   {fields.map((field, index) => (
-                    <Form.Item>
-                      <ProCard key={field.key} split="vertical">
-                        <ProCard>
-                          <ProFormSelect
-                            width="sm"
-                            request={async () => {
-                              let names: { value: string }[] = [];
-                              capsState?.forEach((val) => {
-                                names.push({ value: val.name });
-                              });
-                              return names;
-                            }}
-                            name="capname"
-                            label="Choose capability"
-                            fieldProps={{
-                              onChange: (capName) => {
-                                capsState?.forEach((cap) => {
-                                  if (cap.name === capName) {
-                                    if (chosenCaps.length > index) {
-                                      setChosenCaps(
-                                        chosenCaps.map((val, i) => {
-                                          if (i != index) {
-                                            return val;
-                                          } else {
-                                            return cap;
-                                          }
-                                        }),
-                                      );
-                                    } else {
-                                      setChosenCaps([...chosenCaps, cap]);
-                                    }
+                    <ProCard key={field.key} split="vertical">
+                      <ProCard>
+                        <ProFormSelect
+                          width="sm"
+                          request={async () => {
+                            let names: { value: string }[] = [];
+                            capsState?.forEach((val) => {
+                              names.push({ value: val.name });
+                            });
+                            return names;
+                          }}
+                          name="capname"
+                          label="Choose capability"
+                          fieldProps={{
+                            onChange: (capName) => {
+                              capsState?.forEach((cap) => {
+                                if (cap.name === capName) {
+                                  if (chosenCaps.length > index) {
+                                    setChosenCaps(
+                                      chosenCaps.map((val, i) => {
+                                        if (i != index) {
+                                          return val;
+                                        } else {
+                                          return cap;
+                                        }
+                                      }),
+                                    );
+                                  } else {
+                                    setChosenCaps([...chosenCaps, cap]);
                                   }
-                                });
-                              },
-                            }}
-                          />
-                          <MinusCircleOutlined
-                            onClick={() => {
-                              setChosenCaps(chosenCaps.filter((_, i) => i != index));
-                              remove(field.name);
-                            }}
-                          />
-                        </ProCard>
-                        <ProCard>
-                          <div>
-                            {(() => {
-                              if (chosenCaps.length > index) {
-                                const cap = chosenCaps[index];
-                                const schema = JSON.parse(cap.jsonschema);
-                                return (
-                                  // add onChange listener to get values
-                                  <FormRender name="capbody" schema={schema} children={true} />
-                                );
-                              }
-                              return 'Please select an option';
-                            })()}
-                          </div>
-                        </ProCard>
+                                }
+                              });
+                            },
+                          }}
+                        />
+                        <MinusCircleOutlined
+                          onClick={() => {
+                            setChosenCaps(chosenCaps.filter((_, i) => i != index));
+                            remove(field.name);
+                          }}
+                        />
                       </ProCard>
-                    </Form.Item>
+                      <ProCard>
+                        <div>
+                          {(() => {
+                            if (chosenCaps.length > index) {
+                              const cap = chosenCaps[index];
+                              const schema = JSON.parse(cap.jsonschema);
+                              return (
+                                // add onChange listener to get values
+                                <FormRender name="capbody" schema={schema} children={true} />
+                              );
+                            }
+                            return 'Please select an option';
+                          })()}
+                        </div>
+                      </ProCard>
+                    </ProCard>
                   ))}
                   <Form.Item>
                     <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
