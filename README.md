@@ -1,8 +1,8 @@
 # velacp
 
-KubeVela control plane to manage KubeVela resources: applications, environments, catalogs, clusters, etc.
-
-![alt](./doc/images/vela_logo.png)
+KubeVela control plane to manage hybrid multi-cloud clusters,
+provide plug-and-play capability management,
+create stream-line application delivery pipelines.
 
 ## Architecture
 
