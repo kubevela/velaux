@@ -89,3 +89,30 @@ Starting the development server...
 The catalog repo has a standard structure format in order to be managed in Vela Control Plane.
 
 See [catalog-example](https://github.com/hongchaodeng/catalog-example) repo for more details.
+
+### Setup catalog
+
+Add a catalog:
+
+![alt](./doc/images/ui-add-catalog.png)
+
+Sync it:
+
+![alt](./doc/images/ui-sync-catalog.jpg)
+
+### Setup environment
+
+Add an environment with the package predefined in it:
+
+![alt](./doc/images/ui-add-env.jpg)
+
+### Input capabilities parameters via rendered forms
+
+When creating an application, select the environment with the packages included:
+
+![alt](./doc/images/ui-create-app-1.jpg)
+
+Then the [json schema for the capabilities](https://github.com/hongchaodeng/catalog-example/tree/master/catalog/test/schema) will be rendered to take user input:
+
+![alt](./doc/images/ui-create-app-2.jpg)
+
