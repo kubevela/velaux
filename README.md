@@ -94,7 +94,7 @@ See [catalog-example](https://github.com/hongchaodeng/catalog-example) repo for 
 
 Add a catalog:
 
-![alt](./doc/images/ui-add-catalog.png)
+![alt](./doc/images/ui-add-catalog.jpg)
 
 Sync it:
 
@@ -110,7 +110,7 @@ Add an environment with the package predefined in it:
 
 When creating an application, select the environment with the packages included:
 
-![alt](./doc/images/ui-create-app-1.jpg)
+![alt](./doc/images/ui-create-app-1.png)
 
 Then the [json schema for the capabilities](https://github.com/hongchaodeng/catalog-example/tree/master/catalog/test/schema) will be rendered to take user input:
 
