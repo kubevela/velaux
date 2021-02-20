@@ -1,11 +1,4 @@
 declare namespace API {
-  export type ListApplicationsResponse = {
-    apps: ApplicationType[];
-  };
-  export type ApplicationResponse = {
-    app: ApplicationType;
-  };
-
   export type ApplicationType = {
     name: string;
     desc?: string;
@@ -19,6 +12,38 @@ declare namespace API {
     jsonschema: string;
   };
 
+  export type ClusterType = {
+    name: string;
+    desc?: string;
+    updatedAt: number;
+    kubeconfig?: string;
+  };
+
+  export type EnvironmentType = {
+    name: string;
+    desc?: string;
+    updatedAt: number;
+    config?: ConfigType[];
+    clusters?: ClusterRef[];
+    packages?: PackageRef[];
+  };
+
+  export type CatalogType = {
+    id?: string;
+    name: string;
+    desc?: string;
+    updatedAt: number;
+    url?: string;
+    rootdir?: string;
+  };
+
+  export type ListApplicationsResponse = {
+    apps: ApplicationType[];
+  };
+  export type ApplicationResponse = {
+    app: ApplicationType;
+  };
+
   export type ListCapabilitiesResponse = {
     capabilities: CapabilityType[];
   };
@@ -29,15 +54,6 @@ declare namespace API {
 
   export type EnvironmentResponse = {
     environment: EnvironmentType;
-  };
-
-  export type EnvironmentType = {
-    name: string;
-    desc?: string;
-    updatedAt: number;
-    config?: ConfigType[];
-    clusters?: ClusterRef[];
-    packages?: PackageRef[];
   };
 
   export type ConfigType = {
@@ -62,27 +78,11 @@ declare namespace API {
     cluster: ClusterType;
   };
 
-  export type ClusterType = {
-    name: string;
-    desc?: string;
-    updatedAt: number;
-    kubeconfig?: string;
-  };
-
   export type ListCatalogsResponse = {
     catalogs: CatalogType[];
   };
   export type ListPackagesResponse = {
     packages: PackageType[];
-  };
-
-  export type CatalogType = {
-    id?: string;
-    name: string;
-    desc?: string;
-    updatedAt: number;
-    url?: string;
-    rootdir?: string;
   };
 
   export type PackageType = {

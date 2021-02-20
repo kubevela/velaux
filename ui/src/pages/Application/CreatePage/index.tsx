@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StepsForm, ProFormText, ProFormSelect, ProFormRadio } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { Button, Form, message, Space, Tag } from 'antd';
+import { Button, Form, message, Tag } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import { useModel } from 'umi';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';

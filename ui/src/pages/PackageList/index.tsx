@@ -61,15 +61,13 @@ const PackageList: React.FC = (props) => {
     },
 
     {
-      title: <FormattedMessage id="pages.packageList.titleOption" defaultMessage="操作" />,
-      width: '164px',
+      title: <FormattedMessage id="pages.packageList.titleOption" defaultMessage="版本" />,
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => (
         <Space>
-          <Button id="install" onClick={handleInstallPackage}>
-            <FormattedMessage id="pages.packageList.install" defaultMessage="安装" />
-          </Button>
+          <Tag>1.0</Tag>
+          <Tag>2.0</Tag>
         </Space>
       ),
     },

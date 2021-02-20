@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -28,7 +27,6 @@ func NewCatalogCommand() *cobra.Command {
 		newCatalogDelCommand(o),
 		newCatalogSyncCommand(o),
 		newCatalogListPkgCommand(o),
-		newCatalogInstallPkgCommand(o),
 	)
 	return cmd
 
@@ -207,42 +205,6 @@ func newCatalogListPkgCommand(o *client.Options) *cobra.Command {
 				return err
 			}
 
-			printResult(res)
-			return nil
-		},
-	}
-	return cmd
-}
-
-func newCatalogInstallPkgCommand(o *client.Options) *cobra.Command {
-	req := &catalogservice.InstallPackageRequest{}
-
-	cmd := &cobra.Command{
-		Use:   "install-pkg [CATALOG_NAME] [PACKAGE_NAME@VERSION] [flags]",
-		Short: "Install a packages from a catalog to a cluster",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
-			c, conn, err := o.NewCatalogClient(ctx)
-			if err != nil {
-				return err
-			}
-			defer conn.Close()
-
-			if len(args) < 2 {
-				return errors.New("must specify catalog name and pkg name")
-			}
-			req.CatalogName = args[0]
-			subs := strings.SplitN(args[1], "@", 2)
-			req.PackageName = subs[0]
-			if len(subs) > 1 {
-				req.PackageVersion = subs[1]
-			}
-			// TODO: select a cluster to install
-
-			res, err := c.InstallPackage(ctx, req)
-			if err != nil {
-				return err
-			}
 			printResult(res)
 			return nil
 		},

@@ -220,9 +220,11 @@ func (m *PackageRef) Validate() error {
 		return nil
 	}
 
+	// no validation rules for CatalogName
+
 	// no validation rules for PackageName
 
-	// no validation rules for CatalogName
+	// no validation rules for PackageVersion
 
 	return nil
 }
