@@ -64,3 +64,7 @@ func (s *EnvService) DelEnv(ctx context.Context, request *envservice.DelEnvReque
 	}
 	return &envservice.DelEnvResponse{}, nil
 }
+
+func (s *EnvService) ListCaps(ctx context.Context, request *envservice.ListCapsRequest) (*envservice.ListCapsResponse, error) {
+	return &envservice.ListCapsResponse{}, nil
+}

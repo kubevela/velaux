@@ -227,8 +227,6 @@ func (m *Package) Validate() error {
 
 	// no validation rules for Description
 
-	// no validation rules for Labels
-
 	for idx, item := range m.GetCaps() {
 		_, _ = idx, item
 
