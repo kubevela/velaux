@@ -163,7 +163,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
                     label="version"
                     name={[field.name, 'version']}
                     fieldKey={[field.fieldKey, 'version']}
-                    rules={[{ required: true, message: 'Missing version' }]}
+                    tooltip="If no version is given, the latest version will be used"
                   >
                     <Input placeholder="version" />
                   </Form.Item>
