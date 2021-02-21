@@ -2,12 +2,12 @@ import { Request, Response } from 'express';
 
 let applicationList: API.ApplicationType[] = [
   {
-    name: 'Application',
+    name: 'app-1',
     desc: 'First Application',
     updatedAt: 1612121016,
   },
   {
-    name: 'Application-2',
+    name: 'app-2',
     desc: 'Second Application',
     updatedAt: 1612121016,
   },

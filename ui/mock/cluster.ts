@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 let clusterList: API.ClusterType[] = [
   {
-    name: 'cluster',
+    name: 'cluster-1',
     desc: 'First cluster',
     updatedAt: 1612121016,
     kubeconfig: 'kubeconfig-1',

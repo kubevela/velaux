@@ -70,12 +70,12 @@ const getCapabilities = (req: Request, res: Response) => {
 
 let environmentList: API.EnvironmentType[] = [
   {
-    name: 'Environment',
+    name: 'env-1',
     desc: 'First Environment',
     updatedAt: 1612121016,
   },
   {
-    name: 'Environment-2',
+    name: 'env-2',
     desc: 'Second Environment',
     updatedAt: 1612121016,
   },

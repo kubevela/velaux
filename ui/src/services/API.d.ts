@@ -3,7 +3,7 @@ declare namespace API {
     name: string;
     desc?: string;
     updatedAt: number;
-    env: string;
+    env?: string;
   };
 
   export type CapabilityType = {
