@@ -4,12 +4,14 @@ package vela.api.service.envservice;
 option go_package = "github.com/oam-dev/velacp/pkg/proto/envservice";
 
 import "pkg/datastore/model/environment.proto";
+import "pkg/datastore/model/catalog.proto";
 
 service EnvService {
   rpc PutEnv(PutEnvRequest) returns (PutEnvResponse) {}
   rpc GetEnv(GetEnvRequest) returns (GetEnvResponse) {}
   rpc ListEnvs(ListEnvsRequest) returns (ListEnvsResponse) {}
   rpc DelEnv(DelEnvRequest) returns (DelEnvResponse) {}
+  rpc ListCaps(ListCapsRequest) returns (ListCapsResponse) {}
 }
 
 message PutEnvRequest {
@@ -39,4 +41,12 @@ message DelEnvRequest {
 }
 
 message DelEnvResponse {
+}
+
+message ListCapsRequest {
+  string env_name = 1;
+}
+
+message ListCapsResponse {
+  repeated vela.api.model.Capability caps = 1;
 }

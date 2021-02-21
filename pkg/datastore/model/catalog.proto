@@ -46,7 +46,15 @@ message Package {
 
   map<string, string> labels = 3;
 
+  repeated Capability caps = 8;
+
   repeated PackageVersion versions = 9;
+}
+
+message Capability {
+  string name = 1;
+  string type = 2; // Workload or Trait
+  string jsonschema = 3;
 }
 
 message PackageVersion {

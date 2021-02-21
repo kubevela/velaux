@@ -24,6 +24,7 @@ type CatalogServiceClient interface {
 	DelCatalog(ctx context.Context, in *DelCatalogRequest, opts ...grpc.CallOption) (*DelCatalogResponse, error)
 	SyncCatalog(ctx context.Context, in *SyncCatalogRequest, opts ...grpc.CallOption) (*SyncCatalogResponse, error)
 	ListPackages(ctx context.Context, in *ListPackagesRequest, opts ...grpc.CallOption) (*ListPackagesResponse, error)
+	// Install a package to a specified cluster.
 	InstallPackage(ctx context.Context, in *InstallPackageRequest, opts ...grpc.CallOption) (*InstallPackageResponse, error)
 }
 
@@ -108,6 +109,7 @@ type CatalogServiceServer interface {
 	DelCatalog(context.Context, *DelCatalogRequest) (*DelCatalogResponse, error)
 	SyncCatalog(context.Context, *SyncCatalogRequest) (*SyncCatalogResponse, error)
 	ListPackages(context.Context, *ListPackagesRequest) (*ListPackagesResponse, error)
+	// Install a package to a specified cluster.
 	InstallPackage(context.Context, *InstallPackageRequest) (*InstallPackageResponse, error)
 }
 

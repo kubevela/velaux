@@ -22,6 +22,7 @@ type EnvServiceClient interface {
 	GetEnv(ctx context.Context, in *GetEnvRequest, opts ...grpc.CallOption) (*GetEnvResponse, error)
 	ListEnvs(ctx context.Context, in *ListEnvsRequest, opts ...grpc.CallOption) (*ListEnvsResponse, error)
 	DelEnv(ctx context.Context, in *DelEnvRequest, opts ...grpc.CallOption) (*DelEnvResponse, error)
+	ListCaps(ctx context.Context, in *ListCapsRequest, opts ...grpc.CallOption) (*ListCapsResponse, error)
 }
 
 type envServiceClient struct {
@@ -68,6 +69,15 @@ func (c *envServiceClient) DelEnv(ctx context.Context, in *DelEnvRequest, opts .
 	return out, nil
 }
 
+func (c *envServiceClient) ListCaps(ctx context.Context, in *ListCapsRequest, opts ...grpc.CallOption) (*ListCapsResponse, error) {
+	out := new(ListCapsResponse)
+	err := c.cc.Invoke(ctx, "/vela.api.service.envservice.EnvService/ListCaps", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EnvServiceServer is the server API for EnvService service.
 // All implementations should embed UnimplementedEnvServiceServer
 // for forward compatibility
@@ -76,6 +86,7 @@ type EnvServiceServer interface {
 	GetEnv(context.Context, *GetEnvRequest) (*GetEnvResponse, error)
 	ListEnvs(context.Context, *ListEnvsRequest) (*ListEnvsResponse, error)
 	DelEnv(context.Context, *DelEnvRequest) (*DelEnvResponse, error)
+	ListCaps(context.Context, *ListCapsRequest) (*ListCapsResponse, error)
 }
 
 // UnimplementedEnvServiceServer should be embedded to have forward compatible implementations.
@@ -93,6 +104,9 @@ func (UnimplementedEnvServiceServer) ListEnvs(context.Context, *ListEnvsRequest)
 }
 func (UnimplementedEnvServiceServer) DelEnv(context.Context, *DelEnvRequest) (*DelEnvResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DelEnv not implemented")
+}
+func (UnimplementedEnvServiceServer) ListCaps(context.Context, *ListCapsRequest) (*ListCapsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCaps not implemented")
 }
 
 // UnsafeEnvServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -178,6 +192,24 @@ func _EnvService_DelEnv_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EnvService_ListCaps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCapsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EnvServiceServer).ListCaps(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vela.api.service.envservice.EnvService/ListCaps",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EnvServiceServer).ListCaps(ctx, req.(*ListCapsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EnvService_ServiceDesc is the grpc.ServiceDesc for EnvService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -200,6 +232,10 @@ var EnvService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DelEnv",
 			Handler:    _EnvService_DelEnv_Handler,
+		},
+		{
+			MethodName: "ListCaps",
+			Handler:    _EnvService_ListCaps_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

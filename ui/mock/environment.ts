@@ -67,6 +67,7 @@ const getCapabilities = (req: Request, res: Response) => {
     capabilities: capabilitiList,
   });
 };
+
 let environmentList: API.EnvironmentType[] = [
   {
     name: 'Environment',

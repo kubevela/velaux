@@ -18,6 +18,8 @@ service CatalogService {
   rpc SyncCatalog(SyncCatalogRequest) returns(SyncCatalogResponse) {}
 
   rpc ListPackages(ListPackagesRequest) returns(ListPackagesResponse) {}
+
+  // Install a package to a specified cluster.
   rpc InstallPackage(InstallPackageRequest) returns(InstallPackageResponse) {}
 }
 
