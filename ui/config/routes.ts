@@ -25,7 +25,7 @@
         path: '/applications/create',
         hideInMenu: true,
         name: 'Create Application',
-        component: './Application/CreatePage',
+        component: './Application/Create',
       },
       {
         path: '/applications/:appName',

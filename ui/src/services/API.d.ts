@@ -4,11 +4,13 @@ declare namespace API {
     desc?: string;
     updatedAt: number;
     env?: string;
+    services?: { [key: string]: any };
   };
 
   export type CapabilityType = {
     name: string;
-    type: string; // Workload or Trait
+    desc?: string;
+    type: string;
     jsonschema: string;
   };
 

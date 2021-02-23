@@ -45,8 +45,8 @@ const CreateForm: React.FC<FormProps> = (props) => {
         <StepsForm<API.ApplicationType>
           onFinish={async (value) => {
             handleAdd(value as API.ApplicationType);
-            history.push('/applications');
             message.success('提交成功');
+            history.push('/applications');
           }}
           formProps={{
             validateMessages: {
