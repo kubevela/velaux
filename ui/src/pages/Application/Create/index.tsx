@@ -10,7 +10,7 @@ import { CloseOutlined, SaveOutlined } from '@ant-design/icons';
 import { FooterToolbar, PageContainer } from '@ant-design/pro-layout';
 
 import ServiceForm from './components/ServiceForm';
-import { ProFormText } from '@ant-design/pro-form';
+import { ProFormRadio, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 
 export default (): React.ReactNode => {
   const [services, setServices] = useState<{ [key: string]: any }>({});
@@ -140,22 +140,40 @@ export default (): React.ReactNode => {
                     });
                   }
                 });
-                // if (Object.keys(servicesObj).length < value.length) {
-                //   setErrorFields({ ...errorFields, services: { name: '' } });
-                //   setShowError(true);
-                // } else {
-                //   if (errorFields.services?.name != null) {
-                //     delete errorFields.services.name;
-                //     setErrorFields({ ...errorFields });
-                //   }
-                //   setShowError(false);
-                // }
                 setServices(servicesObj);
               }}
               onValidate={(errors) => {
                 setErrorFields(errors);
               }}
               caps={caps}
+            />
+          </Card>
+          <Card title="Release">
+            <ProFormSelect
+              label="Releasse strategy"
+              name="releaseStrategy"
+              initialValue="1"
+              options={[
+                {
+                  value: '1',
+                  label: 'Regular',
+                },
+                { value: '2', label: 'Canary' },
+              ]}
+            />
+            <ProFormRadio.Group
+              name="approvalGate"
+              label="Approval Gate"
+              options={[
+                {
+                  label: 'Yes',
+                  value: '1',
+                },
+                {
+                  label: 'No',
+                  value: '2',
+                },
+              ]}
             />
           </Card>
         </Space>
