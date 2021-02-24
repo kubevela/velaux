@@ -10,9 +10,8 @@ interface TraitItem {
 }
 const TraitsFrom: React.FC<{
   onChange?: (data: { [key: string]: object }) => void;
-  onValidate?: (errorFields: { [field: string]: any }) => void;
   caps: API.CapabilityType[];
-}> = ({ onChange, onValidate, caps }) => {
+}> = ({ onChange, caps }) => {
   const [items, setItems] = useState<TraitItem[]>([{ id: 1 }]);
   const [activeId, setActiveId] = useState<number>(1);
   const [data, setData] = useState<{ [key: string]: object }>({});
@@ -93,13 +92,6 @@ const TraitsFrom: React.FC<{
                 }
               }}
               disableCapabilities={Object.keys(data)}
-              onValidate={
-                onValidate == null
-                  ? undefined
-                  : (fields) => {
-                      onValidate(Object.keys(fields).length === 0 ? {} : { traits: fields });
-                    }
-              }
               caps={caps}
             />
           </Tabs.TabPane>

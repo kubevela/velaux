@@ -15,14 +15,12 @@ export interface CapabilityFormItemData {
 }
 interface CapabilityFormItemProps extends CapabilitySelectorProps {
   onChange?: (currentData: CapabilityFormItemData, oldData?: CapabilityFormItemData) => void;
-  onValidate?: (errorFields: { [field: string]: any }) => void;
   caps: API.CapabilityType[];
 }
 const CapabilityFormItem: React.FC<CapabilityFormItemProps> = ({
   onChange,
   onSelect,
   disableCapabilities,
-  onValidate,
   caps,
 }) => {
   const [schema, setSchema] = useState<object>();

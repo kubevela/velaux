@@ -15,8 +15,6 @@ import { ProFormRadio, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 export default (): React.ReactNode => {
   const [services, setServices] = useState<{ [key: string]: any }>({});
 
-  const [errorFields, setErrorFields] = useState<{ [key: string]: any }>({});
-  const [showError, setShowError] = useState<boolean>(false);
   const [environments, setEnvironments] = useState<API.EnvironmentType[]>([]);
   const [caps, setCaps] = useState<API.CapabilityType[]>([]);
 
@@ -42,49 +40,9 @@ export default (): React.ReactNode => {
 
   return (
     <PageContainer>
-      {showError ? (
-        <Alert
-          showIcon
-          type="error"
-          message="The following fields failed validation:"
-          description={
-            <ul>
-              {Object.keys(errorFields).map((f) =>
-                errorFields[f] == null
-                  ? null
-                  : Object.entries(errorFields[f]).map((ff) => {
-                      return (
-                        <li key={ff[0]}>
-                          - {f}.{ff[0]}
-                        </li>
-                      );
-                    }),
-              )}
-            </ul>
-          }
-        />
-      ) : null}
       <Form
         labelCol={{ span: 4 }}
-        onFinishFailed={({ errorFields: ef }) => {
-          setShowError(true);
-          const appErrorFields = {};
-          ef.forEach((f) => {
-            appErrorFields[f.name.join('.')] = f.errors.join(',');
-          });
-          setErrorFields({ ...errorFields, app: appErrorFields });
-        }}
         onFinish={(values) => {
-          delete errorFields['app.name'];
-          Object.keys(errorFields).forEach((f) => {
-            if (errorFields[f] == null) {
-              delete errorFields[f];
-            }
-          });
-          if (Object.keys(errorFields).length > 0) {
-            setShowError(true);
-            return;
-          }
           saveApp({ ...values, services });
         }}
       >

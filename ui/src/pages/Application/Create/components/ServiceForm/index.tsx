@@ -15,15 +15,9 @@ interface ServiceEntry {
 interface ServiceFormItemProps {
   service: ServiceEntry;
   setService: (service: ServiceEntry) => void;
-  onValidate?: (errorFields: { [field: string]: any }) => void;
   caps: API.CapabilityType[];
 }
-const ServiceFormItem: React.FC<ServiceFormItemProps> = ({
-  service,
-  setService,
-  onValidate,
-  caps,
-}) => {
+const ServiceFormItem: React.FC<ServiceFormItemProps> = ({ service, setService, caps }) => {
   return (
     <div>
       <Form.Item
@@ -47,26 +41,12 @@ const ServiceFormItem: React.FC<ServiceFormItemProps> = ({
           onChange={(wd) => {
             setService({ ...service, data: wd.data, type: wd.capabilityType });
           }}
-          onValidate={
-            onValidate == null
-              ? undefined
-              : (fields) => {
-                  onValidate(Object.keys(fields).length === 0 ? {} : { services: fields });
-                }
-          }
           caps={caps.filter((cap) => cap.type === 'Workload')}
         />
       </Form.Item>
       <Card title="Traits">
         <TraitsFrom
           onChange={(td) => setService({ ...service, traits: td })}
-          onValidate={
-            onValidate == null
-              ? undefined
-              : (fields) => {
-                  onValidate(Object.keys(fields).length === 0 ? {} : { traits: fields });
-                }
-          }
           caps={caps.filter((cap) => cap.type === 'Trait')}
         />
       </Card>
@@ -75,10 +55,9 @@ const ServiceFormItem: React.FC<ServiceFormItemProps> = ({
 };
 interface ServiceFormProps {
   onChange: (services: ServiceEntry[]) => void;
-  onValidate: (errorFields: { [field: string]: any }) => void;
   caps: API.CapabilityType[];
 }
-export default ({ onChange, onValidate, caps }: ServiceFormProps) => {
+export default ({ onChange, caps }: ServiceFormProps) => {
   const [autoId, setAutoId] = useState(0);
   const [services, setServices] = useState<ServiceEntry[]>([{ id: autoId }]);
   const [activeId, setActiveId] = useState<number>(autoId);
@@ -159,9 +138,6 @@ export default ({ onChange, onValidate, caps }: ServiceFormProps) => {
           <ServiceFormItem
             service={s}
             setService={(i) => updateService(s.id, () => i)}
-            onValidate={(errors) => {
-              onValidate(errors);
-            }}
             caps={caps}
           />
         </Tabs.TabPane>
