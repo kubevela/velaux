@@ -45,3 +45,19 @@ packages:
   - catalog: production-catalog
     package: loki-logging
 ```
+
+Assume we are deploying the following application:
+
+```yaml
+name: example-app
+env: staging | prod
+components:
+- name: backend
+  settings:
+    cmd:
+      - /bin/myservice
+  traits:
+    - name: logging
+      properties:
+        rotate: 1d
+```
