@@ -58,7 +58,15 @@ func (m *Environment) Validate() error {
 		}
 	}
 
-	// no validation rules for Config
+	if v, ok := interface{}(m.GetConfig()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return EnvironmentValidationError{
+				field:  "Config",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	for idx, item := range m.GetClusters() {
 		_, _ = idx, item
@@ -147,6 +155,82 @@ var _ interface {
 	ErrorName() string
 } = EnvironmentValidationError{}
 
+// Validate checks the field values on ConfigType with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *ConfigType) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetPatch()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ConfigTypeValidationError{
+				field:  "Patch",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Parameters
+
+	return nil
+}
+
+// ConfigTypeValidationError is the validation error returned by
+// ConfigType.Validate if the designated constraints aren't met.
+type ConfigTypeValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConfigTypeValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConfigTypeValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConfigTypeValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConfigTypeValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConfigTypeValidationError) ErrorName() string { return "ConfigTypeValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ConfigTypeValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConfigType.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConfigTypeValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConfigTypeValidationError{}
+
 // Validate checks the field values on ClusterRef with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
 func (m *ClusterRef) Validate() error {
@@ -220,11 +304,11 @@ func (m *PackageRef) Validate() error {
 		return nil
 	}
 
-	// no validation rules for CatalogName
+	// no validation rules for Catalog
 
-	// no validation rules for PackageName
+	// no validation rules for Package
 
-	// no validation rules for PackageVersion
+	// no validation rules for Version
 
 	return nil
 }

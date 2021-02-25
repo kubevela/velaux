@@ -60,6 +60,7 @@ declare namespace API {
 
   export type ConfigType = {
     patch?: object;
+    parameters?: Map<string, string>;
   };
 
   export type ClusterRef = {
