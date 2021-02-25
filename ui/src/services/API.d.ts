@@ -39,6 +39,13 @@ declare namespace API {
     rootdir?: string;
   };
 
+  export type PackageType = {
+    name: string;
+    description?: string;
+    labels?: string[];
+    versions: PackageVersionType[];
+  };
+
   export type ListApplicationsResponse = {
     apps: ApplicationType[];
   };
@@ -89,13 +96,6 @@ declare namespace API {
     packages: PackageType[];
   };
 
-  export type PackageType = {
-    name: string;
-    description?: string;
-    labels?: string[];
-    versions: PackageVersionType[];
-  };
-
   export type PackageVersionType = {
     version: string;
     modules?: PackageModuleType[];
@@ -103,7 +103,7 @@ declare namespace API {
 
   export type PackageModuleType = {
     helm: any;
-    native: any;
+    kube: any;
   };
 
   export type CurrentUser = {

@@ -18,18 +18,37 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // EnvironmentSpec defines the desired state of Environment
 type EnvironmentSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Config EnvironmentConfig `json:"config"`
 
-	// Foo is an example field of Environment. Edit Environment_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Clusters []ClusterRef `json:"clusters"`
+
+	Packages []PackageRef `json:"packages"`
+}
+
+type ClusterRef struct {
+	Name string `json:"name"`
+}
+
+type PackageRef struct {
+	Catalog string `json:"catalog"`
+	Package string `json:"package"`
+	Version string `json:"version"`
+}
+
+type EnvironmentConfig struct {
+
+	// strategic merge patch on Application components.
+	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
+	Patch runtime.RawExtension `json:"patch"`
+
+	Parameters map[string]string `json:"parameters"`
 }
 
 // EnvironmentStatus defines the observed state of Environment

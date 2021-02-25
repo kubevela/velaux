@@ -68,7 +68,7 @@ message Module {
 
   HelmModule helm = 1;
 
-  NativeModule native = 2;
+  KubeModule kube = 2;
 }
 
 message HelmModule {
@@ -77,7 +77,7 @@ message HelmModule {
   string version = 3;
 }
 
-message NativeModule {
+message KubeModule {
   string path = 1;
   string url = 2;
 }

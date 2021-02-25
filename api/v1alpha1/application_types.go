@@ -18,24 +18,42 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // ApplicationSpec defines the desired state of Application
 type ApplicationSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Env        string                 `json:"env"`
+	Components []ApplicationComponent `json:"components"`
+}
 
-	// Foo is an example field of Application. Edit Application_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+// ApplicationTrait defines the trait of application
+type ApplicationTrait struct {
+	Name string `json:"name"`
+	// +kubebuilder:pruning:PreserveUnknownFields
+	Properties runtime.RawExtension `json:"properties"`
+}
+
+// ApplicationComponent describe the component of application
+type ApplicationComponent struct {
+	Name         string `json:"name"`
+	WorkloadType string `json:"type"`
+	// +kubebuilder:pruning:PreserveUnknownFields
+	Settings runtime.RawExtension `json:"settings"`
+
+	// Traits define the trait of one component, the type must be array to keep the order.
+	Traits []ApplicationTrait `json:"traits,omitempty"`
+
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// scopes in ApplicationComponent defines the component-level scopes
+	// the format is <scope-type:scope-instance-name> pairs, the key represents type of `ScopeDefinition` while the value represent the name of scope instance.
+	Scopes map[string]string `json:"scopes,omitempty"`
 }
 
 // ApplicationStatus defines the observed state of Application
 type ApplicationStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // +kubebuilder:object:root=true

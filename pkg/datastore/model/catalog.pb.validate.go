@@ -483,10 +483,10 @@ func (m *Module) Validate() error {
 		}
 	}
 
-	if v, ok := interface{}(m.GetNative()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetKube()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return ModuleValidationError{
-				field:  "Native",
+				field:  "Kube",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -620,10 +620,9 @@ var _ interface {
 	ErrorName() string
 } = HelmModuleValidationError{}
 
-// Validate checks the field values on NativeModule with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *NativeModule) Validate() error {
+// Validate checks the field values on KubeModule with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *KubeModule) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -635,9 +634,9 @@ func (m *NativeModule) Validate() error {
 	return nil
 }
 
-// NativeModuleValidationError is the validation error returned by
-// NativeModule.Validate if the designated constraints aren't met.
-type NativeModuleValidationError struct {
+// KubeModuleValidationError is the validation error returned by
+// KubeModule.Validate if the designated constraints aren't met.
+type KubeModuleValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -645,22 +644,22 @@ type NativeModuleValidationError struct {
 }
 
 // Field function returns field value.
-func (e NativeModuleValidationError) Field() string { return e.field }
+func (e KubeModuleValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e NativeModuleValidationError) Reason() string { return e.reason }
+func (e KubeModuleValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e NativeModuleValidationError) Cause() error { return e.cause }
+func (e KubeModuleValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e NativeModuleValidationError) Key() bool { return e.key }
+func (e KubeModuleValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e NativeModuleValidationError) ErrorName() string { return "NativeModuleValidationError" }
+func (e KubeModuleValidationError) ErrorName() string { return "KubeModuleValidationError" }
 
 // Error satisfies the builtin error interface
-func (e NativeModuleValidationError) Error() string {
+func (e KubeModuleValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -672,14 +671,14 @@ func (e NativeModuleValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sNativeModule.%s: %s%s",
+		"invalid %sKubeModule.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = NativeModuleValidationError{}
+var _ error = KubeModuleValidationError{}
 
 var _ interface {
 	Field() string
@@ -687,4 +686,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = NativeModuleValidationError{}
+} = KubeModuleValidationError{}

@@ -156,8 +156,8 @@ func (c *CatalogService) installPackageVersion(ctx context.Context, cm *catalogM
 
 func (c *CatalogService) installModule(ctx context.Context, cm *catalogMeta, pkgName, ver string, m *model.Module) error {
 	switch {
-	case m.Native != nil:
-		err := c.installNativeModule(ctx, cm, pkgName, ver, m.Native)
+	case m.Kube != nil:
+		err := c.installNativeModule(ctx, cm, pkgName, ver, m.Kube)
 		if err != nil {
 			return err
 		}
@@ -172,7 +172,7 @@ func (c *CatalogService) installModule(ctx context.Context, cm *catalogMeta, pkg
 	return nil
 }
 
-func (c *CatalogService) installNativeModule(ctx context.Context, cm *catalogMeta, pkgName, ver string, m *model.NativeModule) error {
+func (c *CatalogService) installNativeModule(ctx context.Context, cm *catalogMeta, pkgName, ver string, m *model.KubeModule) error {
 	if m.Url != "" {
 		out, err := exec.CommandContext(ctx, "kubectl", "apply", "-f", m.Url).CombinedOutput()
 		c.logger.Info(string(out))

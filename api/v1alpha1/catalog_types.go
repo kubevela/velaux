@@ -20,16 +20,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // CatalogSpec defines the desired state of Catalog
 type CatalogSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of Catalog. Edit Catalog_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	URL     string `json:"url"`
+	Rootdir string `json:"rootdir"`
 }
 
 // CatalogStatus defines the observed state of Catalog
@@ -58,6 +54,59 @@ type CatalogList struct {
 	Items           []Catalog `json:"items"`
 }
 
+// PackageSpec defines the desired state of Package
+type PackageSpec struct {
+	Versions []PackageVersion `json:"versions"`
+}
+
+type PackageVersion struct {
+	Version string          `json:"version"`
+	Modules []PackageModule `json:"modules"`
+}
+
+type PackageModuleHelm struct {
+	Repo    string `json:"repo"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+
+type PackageModuleKube struct {
+	Path string `json:"path"`
+	URL  string `json:"url"`
+}
+
+type PackageModule struct {
+	Helm *PackageModuleHelm `json:"helm"`
+	Kube *PackageModuleKube `json:"kube"`
+}
+
+// PackageStatus defines the observed state of Package
+type PackageStatus struct {
+	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+}
+
+// +kubebuilder:object:root=true
+
+// Package is the Schema for the packages API
+type Package struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   PackageSpec   `json:"spec,omitempty"`
+	Status PackageStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// PackageList contains a list of Package
+type PackageList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []Package `json:"items"`
+}
+
 func init() {
 	SchemeBuilder.Register(&Catalog{}, &CatalogList{})
+	SchemeBuilder.Register(&Package{}, &PackageList{})
 }
