@@ -49,49 +49,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         />
       </ProForm.Group>
 
-      <Form.List name="config" initialValue={props.initialValues?.config}>
-        {(fields, { add, remove }) => (
-          <>
-            <Divider orientation="left" plain>
-              <UnorderedListOutlined /> Config
-            </Divider>
-            {fields.map((field) => (
-              <ProForm.Group>
-                <Space
-                  key={field.key}
-                  style={{ display: 'flex', marginBottom: 8 }}
-                  align="baseline"
-                >
-                  <Form.Item
-                    {...field}
-                    label="name"
-                    name={[field.name, 'name']}
-                    fieldKey={[field.fieldKey, 'name']}
-                    rules={[{ required: true, message: 'Missing name' }]}
-                  >
-                    <Input placeholder="Name" />
-                  </Form.Item>
-                  <Form.Item
-                    {...field}
-                    label="value"
-                    name={[field.name, 'value']}
-                    fieldKey={[field.fieldKey, 'value']}
-                  >
-                    <Input placeholder="Value" />
-                  </Form.Item>
-                  <MinusCircleOutlined onClick={() => remove(field.name)} />
-                </Space>
-              </ProForm.Group>
-            ))}
-            <Form.Item>
-              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                Add config
-              </Button>
-            </Form.Item>
-          </>
-        )}
-      </Form.List>
-
       <Form.List name="clusters" initialValue={props.initialValues?.clusters}>
         {(fields, { add, remove }) => (
           <>
@@ -179,6 +136,14 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           </>
         )}
       </Form.List>
+
+      <Form.Item
+        name={['config', 'patch']}
+        label="Patch Config"
+        initialValue={props.initialValues?.config?.patch}
+      >
+        <Input.TextArea />
+      </Form.Item>
     </ModalForm>
   );
 };

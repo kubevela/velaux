@@ -3,7 +3,7 @@ import 'antd/dist/antd.css';
 
 import React, { useEffect, useState } from 'react';
 
-import { Alert, Button, Card, Form, message, Select, Space } from 'antd';
+import { Button, Card, Form, message, Select, Space } from 'antd';
 import { history, useModel } from 'umi';
 
 import { CloseOutlined, SaveOutlined } from '@ant-design/icons';
@@ -99,9 +99,6 @@ export default (): React.ReactNode => {
                   }
                 });
                 setServices(servicesObj);
-              }}
-              onValidate={(errors) => {
-                setErrorFields(errors);
               }}
               caps={caps}
             />

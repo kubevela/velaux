@@ -4,7 +4,16 @@ declare namespace API {
     desc?: string;
     updatedAt: number;
     env?: string;
-    services?: { [key: string]: any };
+    services?: { [key: string]: any }; // components
+  };
+
+  export type EnvironmentType = {
+    name: string;
+    desc?: string;
+    updatedAt: number;
+    config?: ConfigType;
+    clusters?: ClusterRef[];
+    packages?: PackageRef[];
   };
 
   export type CapabilityType = {
@@ -19,15 +28,6 @@ declare namespace API {
     desc?: string;
     updatedAt: number;
     kubeconfig?: string;
-  };
-
-  export type EnvironmentType = {
-    name: string;
-    desc?: string;
-    updatedAt: number;
-    config?: ConfigType[];
-    clusters?: ClusterRef[];
-    packages?: PackageRef[];
   };
 
   export type CatalogType = {
@@ -59,8 +59,7 @@ declare namespace API {
   };
 
   export type ConfigType = {
-    name: string;
-    value?: string;
+    patch?: object;
   };
 
   export type ClusterRef = {
