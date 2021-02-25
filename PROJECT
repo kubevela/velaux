@@ -1,0 +1,19 @@
+domain: velacp.oam.dev
+repo: github.com/oam-dev/velacp
+resources:
+- group: velacp.oam.dev
+  kind: Environment
+  version: v1alpha1
+- group: velacp.oam.dev
+  kind: Application
+  version: v1alpha1
+- group: velacp.oam.dev
+  kind: Cluster
+  version: v1alpha1
+- group: velacp.oam.dev
+  kind: Catalog
+  version: v1alpha1
+- group: velacp.oam.dev
+  kind: Package
+  version: v1alpha1
+version: "2"

@@ -72,5 +72,5 @@ func (m *mongodb) Delete(ctx context.Context, kind, name string) error {
 }
 
 func makeNameFilter(name string) bson.D {
-	return bson.D{{"name", name}}
+	return bson.D{{Key: "name", Value: name}}
 }
