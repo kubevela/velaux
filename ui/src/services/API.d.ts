@@ -68,7 +68,7 @@ declare namespace API {
   export type ConfigType = {
     // strategic merge patch on Application components
     // https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
-    patch?: object;
+    patch?: any;
     parameters?: Map<string, string>;
   };
 
