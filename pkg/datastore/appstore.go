@@ -27,8 +27,8 @@ func NewApplicationStore(ds DataStore) ApplicationStore {
 	}
 }
 
-func (s *applicationStore) PutApplication(ctx context.Context, cluster *model.Application) error {
-	return s.ds.Put(ctx, applicationKind, cluster)
+func (s *applicationStore) PutApplication(ctx context.Context, app *model.Application) error {
+	return s.ds.Put(ctx, applicationKind, app)
 }
 func (s *applicationStore) ListApplications(ctx context.Context) ([]*model.Application, error) {
 	iter, err := s.ds.Find(ctx, applicationKind)

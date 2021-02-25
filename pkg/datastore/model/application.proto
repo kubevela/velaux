@@ -4,6 +4,7 @@ package vela.api.model;
 option go_package = "github.com/oam-dev/velacp/pkg/datastore/model";
 
 import "validate/validate.proto";
+import "google/protobuf/any.proto";
 
 message Application {
 
@@ -11,4 +12,26 @@ message Application {
 
   // Unix time of the last time when the cluster is updated.
   int64 updated_at = 2 [(validate.rules).int64.gt = 0];
+
+  string desc = 3;
+
+  string env = 4;
+
+  repeated ApplicationComponent components = 9;
+}
+
+message ApplicationComponent {
+
+  string name = 1;
+
+  string type = 2;
+
+  google.protobuf.Any settings = 3;
+}
+
+message ApplicationTrait {
+
+  string name = 1;
+
+  google.protobuf.Any properties = 2;
 }

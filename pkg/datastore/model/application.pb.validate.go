@@ -58,6 +58,25 @@ func (m *Application) Validate() error {
 		}
 	}
 
+	// no validation rules for Desc
+
+	// no validation rules for Env
+
+	for idx, item := range m.GetComponents() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ApplicationValidationError{
+					field:  fmt.Sprintf("Components[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -114,3 +133,161 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ApplicationValidationError{}
+
+// Validate checks the field values on ApplicationComponent with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ApplicationComponent) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Name
+
+	// no validation rules for Type
+
+	if v, ok := interface{}(m.GetSettings()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ApplicationComponentValidationError{
+				field:  "Settings",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// ApplicationComponentValidationError is the validation error returned by
+// ApplicationComponent.Validate if the designated constraints aren't met.
+type ApplicationComponentValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ApplicationComponentValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ApplicationComponentValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ApplicationComponentValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ApplicationComponentValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ApplicationComponentValidationError) ErrorName() string {
+	return "ApplicationComponentValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ApplicationComponentValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sApplicationComponent.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ApplicationComponentValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ApplicationComponentValidationError{}
+
+// Validate checks the field values on ApplicationTrait with the rules defined
+// in the proto definition for this message. If any rules are violated, an
+// error is returned.
+func (m *ApplicationTrait) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Name
+
+	if v, ok := interface{}(m.GetProperties()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ApplicationTraitValidationError{
+				field:  "Properties",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// ApplicationTraitValidationError is the validation error returned by
+// ApplicationTrait.Validate if the designated constraints aren't met.
+type ApplicationTraitValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ApplicationTraitValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ApplicationTraitValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ApplicationTraitValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ApplicationTraitValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ApplicationTraitValidationError) ErrorName() string { return "ApplicationTraitValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ApplicationTraitValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sApplicationTrait.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ApplicationTraitValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ApplicationTraitValidationError{}
