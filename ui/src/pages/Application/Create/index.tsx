@@ -75,7 +75,7 @@ export default (): React.ReactNode => {
             </Form.Item>
           </Card>
 
-          <Card title="Services">
+          <Card title="Components">
             <ServiceForm
               onChange={(value) => {
                 const servicesObj = {};
