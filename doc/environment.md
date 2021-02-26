@@ -15,7 +15,8 @@ config:
         image: staging/myimage
       traits:
         - name: autoscaling
-          max: 1
+          properties:
+            max: 1
 
 clusters:
   - name: prod-cluster
@@ -35,8 +36,9 @@ config:
         image: production/myimage
       traits:
         - name: autoscaling
-          min: 1
-          max: 10
+          properties:
+            min: 1
+            max: 10
 
 clusters:
   - name: staging-cluster
