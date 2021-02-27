@@ -64,10 +64,10 @@ patch: # strategic merge patch to the components based on env
               max: 10
 ```
 
-We can use the above to create the following application:
+We can use the above template to create the following application:
 
 ```yaml
 name: example-app
 env: staging | prod
-templateRef: example-app-template
+template: example-app-template
 ```
