@@ -45,16 +45,9 @@ spec:
               type: array
             config:
               properties:
-                parameters:
-                  additionalProperties:
-                    type: string
-                  type: object
                 patch:
                   description: strategic merge patch on Application components. https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
                   type: object
-              required:
-              - parameters
-              - patch
               type: object
             packages:
               items:
@@ -68,13 +61,8 @@ spec:
                 required:
                 - catalog
                 - package
-                - version
                 type: object
               type: array
-          required:
-          - clusters
-          - config
-          - packages
           type: object
         status:
           description: EnvironmentStatus defines the observed state of Environment

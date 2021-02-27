@@ -25,11 +25,11 @@ import (
 
 // EnvironmentSpec defines the desired state of Environment
 type EnvironmentSpec struct {
-	Config EnvironmentConfig `json:"config"`
+	Config *EnvironmentConfig `json:"config,omitempty"`
 
-	Clusters []ClusterRef `json:"clusters"`
+	Clusters []ClusterRef `json:"clusters,omitempty"`
 
-	Packages []PackageRef `json:"packages"`
+	Packages []PackageRef `json:"packages,omitempty"`
 }
 
 type ClusterRef struct {
@@ -39,16 +39,14 @@ type ClusterRef struct {
 type PackageRef struct {
 	Catalog string `json:"catalog"`
 	Package string `json:"package"`
-	Version string `json:"version"`
+	Version string `json:"version,omitempty"`
 }
 
 type EnvironmentConfig struct {
 
 	// strategic merge patch on Application components.
 	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
-	Patch runtime.RawExtension `json:"patch"`
-
-	Parameters map[string]string `json:"parameters"`
+	Patch runtime.RawExtension `json:"patch,omitempty"`
 }
 
 // EnvironmentStatus defines the observed state of Environment

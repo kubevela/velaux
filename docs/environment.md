@@ -9,7 +9,8 @@ Below are two examples of `staging` and `prod` environments:
 name: staing
 
 config:
-  patch: # strategic merge patch to the components field of Application 
+  patch: # strategic merge patch to the components field of Application
+    components:
     - name: backend
       settings:
         image: staging/myimage
@@ -30,7 +31,8 @@ packages:
 name: production
 
 config:
-  patch: # strategic merge patch to the components field of Application 
+  patch: # strategic merge patch to the components field of Application
+    components:
     - name: backend
       settings:
         image: production/myimage
