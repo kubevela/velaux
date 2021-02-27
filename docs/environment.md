@@ -41,7 +41,6 @@ template:
         - name: logging
           properties:
             rotate: 1d
-        rotate: 1d
 patch: # strategic merge patch to the components based on env
   - env: staging
     components:
