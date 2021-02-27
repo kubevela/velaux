@@ -50,6 +50,11 @@ func (r *ApplicationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, err
 	}
 
+	// patch config
+	for _, p := range app.Spec.Patch {
+		if p.Env == app
+	}
+
 	// get env
 	env := &velacptypes.Environment{}
 	err = r.Client.Get(ctx, client.ObjectKey{
@@ -59,8 +64,6 @@ func (r *ApplicationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-
-	// patch config
 
 	// get cluster; if empty then use self cluster
 

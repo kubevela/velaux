@@ -17,29 +17,30 @@ packages:
 
 ---
 
-name: production
+name: prod
 
 clusters:
   - name: staging-cluster
 
 packages:
-  - catalog: production-catalog
+  - catalog: prod-catalog
     package: loki-logging
 ```
 
-Assume we are deploying the following application:
+Assume we have the following application template:
 
 ```yaml
-name: example-app
-env: staging | prod
-components:
-- name: backend
-  settings:
-    cmd:
-      - /bin/myservice
-  traits:
-    - name: logging
-      properties:
+name: example-app-template
+template:
+  components:
+    - name: backend
+      settings:
+        cmd:
+          - /bin/myservice
+      traits:
+        - name: logging
+          properties:
+            rotate: 1d
         rotate: 1d
 patch: # strategic merge patch to the components based on env
   - env: staging
@@ -61,5 +62,12 @@ patch: # strategic merge patch to the components based on env
             properties:
               min: 1
               max: 10
+```
 
+We can use the above to create the following application:
+
+```yaml
+name: example-app
+env: staging | prod
+templateRef: example-app-template
 ```
