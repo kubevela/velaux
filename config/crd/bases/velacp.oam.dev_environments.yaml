@@ -47,9 +47,9 @@ spec:
                 type: array
               config:
                 properties:
-                  patch:
-                    description: strategic merge patch on Application components.
-                      https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
+                  parameters:
+                    additionalProperties:
+                      type: string
                     type: object
                 type: object
               packages:
