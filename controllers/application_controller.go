@@ -41,7 +41,13 @@ func (r *ApplicationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	_ = context.Background()
 	_ = r.Log.WithValues("application", req.NamespacedName)
 
-	// your logic here
+	// get env
+
+	// patch config
+
+	// get cluster; if empty then use self cluster
+
+	// deploy app
 
 	return ctrl.Result{}, nil
 }
