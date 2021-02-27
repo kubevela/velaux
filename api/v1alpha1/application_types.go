@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	velatypes "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -25,17 +24,8 @@ import (
 
 // ApplicationSpec defines the desired state of Application
 type ApplicationSpec struct {
-	Env        string                           `json:"env"`
-	Components []velatypes.ApplicationComponent `json:"components"`
-	Patch      []EnvBasedPatch                  `json:"patch,omitempt"`
-}
-
-type EnvBasedPatch struct {
-	Env string `json:"env,omitempt"`
-
-	// strategic merge patch on Application components.
-	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
-	Components []velatypes.ApplicationComponent `json:"components,omitempt"`
+	Env      string `json:"env"`
+	Template string `json:"template"`
 }
 
 // ApplicationStatus defines the observed state of Application

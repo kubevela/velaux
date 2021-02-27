@@ -16,4 +16,7 @@ resources:
 - group: velacp.oam.dev
   kind: Package
   version: v1alpha1
+- group: velacp.oam.dev
+  kind: AppTemplate
+  version: v1alpha1
 version: "2"

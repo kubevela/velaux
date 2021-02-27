@@ -50,10 +50,9 @@ func (r *ApplicationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, err
 	}
 
+	// get template
+
 	// patch config
-	for _, p := range app.Spec.Patch {
-		if p.Env == app
-	}
 
 	// get env
 	env := &velacptypes.Environment{}
