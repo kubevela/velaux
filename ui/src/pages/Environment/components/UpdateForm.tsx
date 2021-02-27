@@ -136,14 +136,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           </>
         )}
       </Form.List>
-
-      <Form.Item
-        name={['config', 'patch']}
-        label="Patch Config"
-        initialValue={props.initialValues?.config?.patch}
-      >
-        <Input.TextArea placeholder={'strategic merge patch to components'} />
-      </Form.Item>
     </ModalForm>
   );
 };
