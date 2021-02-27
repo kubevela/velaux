@@ -12,7 +12,7 @@ This project is based on the following tech stacks:
 - mongodb
 - ant-design-pro
 
-![alt](./doc/images/velacp-arch.png)
+![alt](docs/images/velacp-arch.png)
 
 ## Quickstart
 
@@ -68,7 +68,7 @@ $ _bin/velactl catalog list
 
 (Optional) Verfy the data in mongodb:
 
-![alt](doc/images/mongo_catalog.png)
+![alt](docs/images/mongo_catalog.png)
 
 ### Start dashboard
 
@@ -82,7 +82,7 @@ $ yarn start
 Starting the development server...
 ```
 
-![alt](./doc/images/ui-all.png)
+![alt](docs/images/ui-all.png)
 
 ## Catalog Structure
 
@@ -94,25 +94,25 @@ See [catalog-example](https://github.com/hongchaodeng/catalog-example) repo for 
 
 Add a catalog:
 
-![alt](./doc/images/ui-add-catalog.jpg)
+![alt](docs/images/ui-add-catalog.jpg)
 
 Sync it:
 
-![alt](./doc/images/ui-sync-catalog.jpg)
+![alt](docs/images/ui-sync-catalog.jpg)
 
 ### Setup environment
 
 Add an environment with the package predefined in it:
 
-![alt](./doc/images/ui-add-env.jpg)
+![alt](docs/images/ui-add-env.jpg)
 
 ### Input capabilities parameters via rendered forms
 
 When creating an application, select the environment with the packages included:
 
-![alt](./doc/images/ui-create-app-1.png)
+![alt](docs/images/ui-create-app-1.png)
 
 Then the [json schema for the capabilities](https://github.com/hongchaodeng/catalog-example/tree/master/catalog/test/schema) will be rendered to take user input:
 
-![alt](./doc/images/ui-create-app-2.jpg)
+![alt](docs/images/ui-create-app-2.jpg)
 
