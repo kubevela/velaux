@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -43,10 +42,7 @@ type PackageRef struct {
 }
 
 type EnvironmentConfig struct {
-
-	// strategic merge patch on Application components.
-	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
-	Patch runtime.RawExtension `json:"patch,omitempty"`
+	Parameters map[string]string `json:"parameters,omitempty"`
 }
 
 // EnvironmentStatus defines the observed state of Environment

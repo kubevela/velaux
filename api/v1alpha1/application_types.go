@@ -17,39 +17,25 @@ limitations under the License.
 package v1alpha1
 
 import (
+	velatypes "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // ApplicationSpec defines the desired state of Application
 type ApplicationSpec struct {
-	Env        string                 `json:"env"`
-	Components []ApplicationComponent `json:"components"`
+	Env        string                           `json:"env"`
+	Components []velatypes.ApplicationComponent `json:"components"`
+	Patch      []EnvBasedPatch                  `json:"patch,omitempt"`
 }
 
-// ApplicationTrait defines the trait of application
-type ApplicationTrait struct {
-	Name string `json:"name"`
-	// +kubebuilder:pruning:PreserveUnknownFields
-	Properties runtime.RawExtension `json:"properties"`
-}
+type EnvBasedPatch struct {
+	Env string `json:"env,omitempt"`
 
-// ApplicationComponent describe the component of application
-type ApplicationComponent struct {
-	Name         string `json:"name"`
-	WorkloadType string `json:"type"`
-	// +kubebuilder:pruning:PreserveUnknownFields
-	Settings runtime.RawExtension `json:"settings"`
-
-	// Traits define the trait of one component, the type must be array to keep the order.
-	Traits []ApplicationTrait `json:"traits,omitempty"`
-
-	// +kubebuilder:pruning:PreserveUnknownFields
-	// scopes in ApplicationComponent defines the component-level scopes
-	// the format is <scope-type:scope-instance-name> pairs, the key represents type of `ScopeDefinition` while the value represent the name of scope instance.
-	Scopes map[string]string `json:"scopes,omitempty"`
+	// strategic merge patch on Application components.
+	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
+	Components []velatypes.ApplicationComponent `json:"components,omitempt"`
 }
 
 // ApplicationStatus defines the observed state of Application

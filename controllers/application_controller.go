@@ -24,7 +24,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	velacpoamdevv1alpha1 "github.com/oam-dev/velacp/api/v1alpha1"
+	velacptypes "github.com/oam-dev/velacp/api/v1alpha1"
 )
 
 // ApplicationReconciler reconciles a Application object
@@ -38,10 +38,27 @@ type ApplicationReconciler struct {
 // +kubebuilder:rbac:groups=velacp.oam.dev.velacp.oam.dev,resources=applications/status,verbs=get;update;patch
 
 func (r *ApplicationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
+	ctx := context.Background()
 	_ = r.Log.WithValues("application", req.NamespacedName)
 
+	app := &velacptypes.Application{}
+	err := r.Client.Get(ctx, client.ObjectKey{
+		Name:      req.Name,
+		Namespace: req.Namespace,
+	}, app)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// get env
+	env := &velacptypes.Environment{}
+	err = r.Client.Get(ctx, client.ObjectKey{
+		Name:      app.Spec.Env,
+		Namespace: req.Namespace,
+	}, env)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	// patch config
 
@@ -54,6 +71,6 @@ func (r *ApplicationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 
 func (r *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&velacpoamdevv1alpha1.Application{}).
+		For(&velacptypes.Application{}).
 		Complete(r)
 }

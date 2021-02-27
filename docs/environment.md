@@ -8,17 +8,6 @@ Below are two examples of `staging` and `prod` environments:
 ```yaml
 name: staing
 
-config:
-  patch: # strategic merge patch to the components field of Application
-    components:
-    - name: backend
-      settings:
-        image: staging/myimage
-      traits:
-        - name: autoscaling
-          properties:
-            max: 1
-
 clusters:
   - name: prod-cluster
 
@@ -29,18 +18,6 @@ packages:
 ---
 
 name: production
-
-config:
-  patch: # strategic merge patch to the components field of Application
-    components:
-    - name: backend
-      settings:
-        image: production/myimage
-      traits:
-        - name: autoscaling
-          properties:
-            min: 1
-            max: 10
 
 clusters:
   - name: staging-cluster
@@ -64,4 +41,25 @@ components:
     - name: logging
       properties:
         rotate: 1d
+patch: # strategic merge patch to the components based on env
+  - env: staging
+    components:
+      - name: backend
+        settings:
+          image: staging/myimage
+        traits:
+          - name: autoscaling
+            properties:
+              max: 1
+  - env: prod
+    components:
+      - name: backend
+        settings:
+          image: production/myimage
+        traits:
+          - name: autoscaling
+            properties:
+              min: 1
+              max: 10
+
 ```
