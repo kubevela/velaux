@@ -1,4 +1,4 @@
-# Environment
+# Environment-Based Config Patch
 
 An environment is a shared base consisting of the same configuration, clusters, packages (equiv. capabilities)
 to which the applications to deploy.
@@ -69,4 +69,30 @@ We can use the above template to create the following application:
 name: example-app
 env: staging | prod
 template: example-app-template
+```
+
+Let's say we deploy the app to prod:
+
+```
+env: prod
+```
+
+The finalized application config will be rendered like below:
+
+```yaml
+spec
+  components:
+    - name: backend
+      settings:
+        image: production/myimage
+        cmd:
+          - /bin/myservice
+      traits:
+        - name: logging
+          properties:
+            rotate: 1d
+        - name: autoscaling
+          properties:
+            min: 1
+            max: 10
 ```
