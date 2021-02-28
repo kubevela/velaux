@@ -47,6 +47,8 @@ patch: # strategic merge patch to the components based on env
       - name: backend
         settings:
           image: staging/myimage
+          cmd:
+            - /bin/myservice
         traits:
           - name: autoscaling
             properties:
@@ -56,6 +58,8 @@ patch: # strategic merge patch to the components based on env
       - name: backend
         settings:
           image: production/myimage
+          cmd:
+            - /bin/myservice
         traits:
           - name: autoscaling
             properties:

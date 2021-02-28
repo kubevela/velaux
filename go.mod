@@ -4,11 +4,13 @@ go 1.15
 
 require (
 	github.com/envoyproxy/protoc-gen-validate v0.4.1
+	github.com/evanphx/json-patch v4.9.0+incompatible // indirect
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/go-logr/logr v0.1.0
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.3 // indirect
+	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.2.0
 	github.com/oam-dev/kubevela v0.3.3
