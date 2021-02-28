@@ -1,11 +1,15 @@
 package util
 
 import (
+	"bytes"
 	"encoding/json"
 
-	velatypes "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/strategicpatch"
+	"sigs.k8s.io/kustomize/api/filters/patchstrategicmerge"
+	"sigs.k8s.io/kustomize/kyaml/kio"
+	"sigs.k8s.io/kustomize/kyaml/yaml"
+
+	velatypes "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 )
 
 func patchComponents(original, modified []velatypes.ApplicationComponent) ([]velatypes.ApplicationComponent, error) {
@@ -21,22 +25,11 @@ func patchComponents(original, modified []velatypes.ApplicationComponent) ([]vel
 				continue
 			}
 			// patch settings
-			ori, err := json.Marshal(c1.Settings)
+			mod, err := patchJSON(c1.Settings.Raw, c2.Settings.Raw)
 			if err != nil {
 				return nil, err
 			}
-			pat, err := json.Marshal(c2.Settings)
-			if err != nil {
-				return nil, err
-			}
-			mod, err := strategicMergePatch(ori, pat, &runtime.RawExtension{})
-			if err != nil {
-				return nil, err
-			}
-			err = json.Unmarshal(mod, &res[i].Settings)
-			if err != nil {
-				return nil, err
-			}
+			res[i].Settings = runtime.RawExtension{Raw: mod}
 
 			// patch traits
 			for j, t1 := range c1.Traits {
@@ -44,23 +37,12 @@ func patchComponents(original, modified []velatypes.ApplicationComponent) ([]vel
 					if t1.Name != t2.Name {
 						continue
 					}
-					ori, err := json.Marshal(t1.Properties)
-					if err != nil {
-						return nil, err
-					}
-					pat, err := json.Marshal(t2.Properties)
-					if err != nil {
-						return nil, err
-					}
-					mod, err := strategicMergePatch(ori, pat, &runtime.RawExtension{})
-					if err != nil {
-						return nil, err
-					}
-					err = json.Unmarshal(mod, &res[i].Traits[j].Properties)
-					if err != nil {
-						return nil, err
-					}
 
+					mod, err := patchJSON(t1.Properties.Raw, t2.Properties.Raw)
+					if err != nil {
+						return nil, err
+					}
+					res[i].Traits[j].Properties = runtime.RawExtension{Raw: mod}
 				}
 			}
 		}
@@ -69,15 +51,47 @@ func patchComponents(original, modified []velatypes.ApplicationComponent) ([]vel
 	return res, nil
 }
 
-func strategicMergePatch(original, modified []byte, dataStruct interface{}) ([]byte, error) {
-	b, err := strategicpatch.CreateTwoWayMergePatch(original, modified, dataStruct)
+func patchJSON(origin, overlay []byte) ([]byte, error) {
+	oriN, err := yaml.ConvertJSONToYamlNode(string(origin))
 	if err != nil {
 		return nil, err
+	}
+	ori := oriN.MustString()
+	patN, err := yaml.ConvertJSONToYamlNode(string(overlay))
+	if err != nil {
+		return nil, err
+	}
+	pat := patN.MustString()
+	mod, err := patchYAML(ori, pat)
+	if err != nil {
+		return nil, err
+	}
+	obj := map[string]interface{}{}
+	err = yaml.Unmarshal([]byte(mod), &obj)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(obj)
+}
+
+func patchYAML(origin, overlay string) (string, error) {
+	patch := yaml.MustParse(overlay)
+	f := patchstrategicmerge.Filter{
+		Patch: patch,
+	}
+	var out bytes.Buffer
+	rw := kio.ByteReadWriter{
+		Reader: bytes.NewBufferString(origin),
+		Writer: &out,
 	}
 
-	res, err := strategicpatch.StrategicMergePatch(original, b, dataStruct)
+	err := kio.Pipeline{
+		Inputs:  []kio.Reader{&rw},
+		Filters: []kio.Filter{f},
+		Outputs: []kio.Writer{&rw},
+	}.Execute()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return res, nil
+	return out.String(), nil
 }

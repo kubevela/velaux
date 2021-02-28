@@ -10,7 +10,7 @@ require (
 	github.com/go-logr/logr v0.1.0
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.3 // indirect
-	github.com/google/go-cmp v0.5.4 // indirect
+	github.com/google/go-cmp v0.5.4
 	github.com/google/uuid v1.1.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.2.0
 	github.com/oam-dev/kubevela v0.3.3
@@ -27,6 +27,8 @@ require (
 	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v12.0.0+incompatible
 	sigs.k8s.io/controller-runtime v0.6.2
+	sigs.k8s.io/kustomize/api v0.8.3
+	sigs.k8s.io/kustomize/kyaml v0.10.12
 )
 
 replace (

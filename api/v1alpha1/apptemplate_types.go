@@ -26,10 +26,10 @@ import (
 // AppTemplateSpec defines the desired state of AppTemplate
 type AppTemplateSpec struct {
 	Patch    []EnvBasedPatch `json:"patch,omitempty"`
-	Template TemplateType    `json:"template"`
+	Template AppTemplateType `json:"template"`
 }
 
-type TemplateType struct {
+type AppTemplateType struct {
 	Components []velatypes.ApplicationComponent `json:"components"`
 }
 

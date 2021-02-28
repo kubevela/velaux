@@ -41,14 +41,12 @@ template:
         - name: logging
           properties:
             rotate: 1d
-patch: # strategic merge patch to the components based on env
+patch: # kustomize-style overlay patch to the components based on env
   - env: staging
     components:
       - name: backend
         settings:
           image: staging/myimage
-          cmd:
-            - /bin/myservice
         traits:
           - name: autoscaling
             properties:
@@ -58,8 +56,6 @@ patch: # strategic merge patch to the components based on env
       - name: backend
         settings:
           image: production/myimage
-          cmd:
-            - /bin/myservice
         traits:
           - name: autoscaling
             properties:
