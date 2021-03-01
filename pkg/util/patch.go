@@ -29,6 +29,9 @@ func patchComponents(original, modified []velatypes.ApplicationComponent) ([]vel
 			if err != nil {
 				return nil, err
 			}
+			if c2.WorkloadType != "" {
+				res[i].WorkloadType = c2.WorkloadType
+			}
 			res[i].Settings = runtime.RawExtension{Raw: mod}
 
 			// patch traits
