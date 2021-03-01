@@ -28,7 +28,13 @@ packages:
 
 ---
 name: prod-2
-...
+
+clusters:
+  - name: prod-2-cluster
+
+packages:
+  - catalog: prod-catalog
+    package: loki-logging
 
 ```
 
@@ -57,7 +63,7 @@ patch: # kustomize-style overlay patch to the components based on env
           - name: autoscaling
             properties:
               max: 1
-  - env:
+  - envs:
       - prod
       - prod-2
     components:
