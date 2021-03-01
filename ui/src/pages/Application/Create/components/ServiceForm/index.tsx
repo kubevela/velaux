@@ -10,7 +10,7 @@ interface ServiceEntry {
   name?: string;
   type?: string;
   data?: object;
-  traits?: object;
+  traits?: API.TraitType[];
 }
 interface ServiceFormItemProps {
   service: ServiceEntry;
@@ -61,6 +61,7 @@ export default ({ onChange, caps }: ServiceFormProps) => {
   const [autoId, setAutoId] = useState(0);
   const [services, setServices] = useState<ServiceEntry[]>([{ id: autoId }]);
   const [activeId, setActiveId] = useState<number>(autoId);
+
   const addService = () => {
     const newId = autoId + 1;
     setAutoId(newId);
@@ -68,6 +69,7 @@ export default ({ onChange, caps }: ServiceFormProps) => {
     setServices(newServices);
     onChange(newServices);
   };
+
   const removeService = (id: number) => {
     const removedItem = services.find((i) => i.id === id);
     if (removedItem == null) {
@@ -81,6 +83,7 @@ export default ({ onChange, caps }: ServiceFormProps) => {
       setActiveId(newServices[length - 1].id);
     }
   };
+
   const updateService = (id: number, updater: (service: ServiceEntry) => ServiceEntry) => {
     const index = services.findIndex((i) => i.id === id);
     if (index === -1) {
@@ -92,6 +95,7 @@ export default ({ onChange, caps }: ServiceFormProps) => {
     setServices(newServices);
     onChange(newServices);
   };
+
   return (
     <Tabs
       type="editable-card"

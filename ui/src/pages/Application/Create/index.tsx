@@ -13,7 +13,7 @@ import ServiceForm from './components/ServiceForm';
 import { ProFormRadio, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 
 export default (): React.ReactNode => {
-  const [services, setServices] = useState<{ [key: string]: any }>({});
+  const [components, setComponents] = useState<API.ComponentType[]>({});
 
   const [environments, setEnvironments] = useState<API.EnvironmentType[]>([]);
   const [caps, setCaps] = useState<API.CapabilityType[]>([]);
@@ -43,7 +43,7 @@ export default (): React.ReactNode => {
       <Form
         labelCol={{ span: 4 }}
         onFinish={(values) => {
-          saveApp({ ...values, services });
+          saveApp({ ...values, components: components });
         }}
       >
         <Space direction="vertical" style={{ width: '100%' }}>
@@ -78,27 +78,33 @@ export default (): React.ReactNode => {
           <Card title="Components">
             <ServiceForm
               onChange={(value) => {
-                const servicesObj = {};
+                let compList: API.ComponentType[] = [];
                 value.forEach((service) => {
                   const { name, type, data, traits } = service;
                   if (name == null || type == null) {
                     return;
                   }
-                  const serviceObj: any = { type };
-                  servicesObj[name] = serviceObj;
+                  let comp: API.ComponentType = { name, type };
 
                   if (data != null) {
-                    Object.keys(data).forEach((k) => {
-                      serviceObj[k] = data[k];
-                    });
+                    comp.settings = data;
                   }
                   if (traits != null) {
+                    let ts: API.TraitType[] = [];
+
                     Object.keys(traits).forEach((k) => {
-                      serviceObj[k] = traits[k];
+                      const t = {
+                        name: k,
+                        properties: traits[k],
+                      };
+                      ts.push(t);
                     });
+
+                    comp.traits = ts;
                   }
+                  compList.push(comp);
                 });
-                setServices(servicesObj);
+                setComponents(compList);
               }}
               caps={caps}
             />

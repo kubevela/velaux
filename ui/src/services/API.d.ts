@@ -4,7 +4,18 @@ declare namespace API {
     desc?: string;
     updatedAt: number;
     env?: string;
-    services?: { [key: string]: any }; // components
+
+    // either use a template or input components
+    template?: string;
+    components?: ComponentType[];
+  };
+
+  export type AppTemplateType = {
+    name: string;
+    template: {
+      components: ComponentType[];
+    };
+    patch: EnvBasedPatch[];
   };
 
   export type EnvironmentType = {
@@ -44,6 +55,24 @@ declare namespace API {
     description?: string;
     labels?: string[];
     versions: PackageVersionType[];
+  };
+
+  export type ComponentType = {
+    name: string;
+    type?: string;
+    settings?: object;
+    traits?: TraitType[];
+  };
+
+  export type TraitType = {
+    name: string;
+    properties?: object;
+  };
+
+  // kustomize-style overlay patch to the components based on env
+  export type EnvBasedPatch = {
+    Env: string;
+    Components: ComponentType[];
   };
 
   export type ListApplicationsResponse = {
