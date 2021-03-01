@@ -40,8 +40,7 @@ spec:
                 items:
                   properties:
                     components:
-                      description: strategic merge patch on Application components.
-                        https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
+                      description: Kustomize style overlay-patch on Application components.
                       items:
                         description: ApplicationComponent describe the component of
                           application
@@ -86,9 +85,12 @@ spec:
                       type: array
                     env:
                       type: string
-                  required:
-                  - components
-                  - env
+                    parameters:
+                      additionalProperties:
+                        type: string
+                      description: Go-template style parameters input on Components
+                        template.
+                      type: object
                   type: object
                 type: array
               template:

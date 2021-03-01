@@ -34,11 +34,13 @@ type AppTemplateType struct {
 }
 
 type EnvBasedPatch struct {
-	Env string `json:"env,omitempt"`
+	Env string `json:"env,omitempty"`
 
-	// strategic merge patch on Application components.
-	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md
-	Components []velatypes.ApplicationComponent `json:"components,omitempt"`
+	// Kustomize style overlay-patch on Application components.
+	Components []velatypes.ApplicationComponent `json:"components,omitempty"`
+
+	// Go-template style parameters input on Components template.
+	Parameters map[string]string `json:"parameters,omitempty"`
 }
 
 // AppTemplateStatus defines the observed state of AppTemplate
