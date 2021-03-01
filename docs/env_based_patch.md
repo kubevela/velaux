@@ -9,7 +9,7 @@ Below are two examples of `staging` and `prod` environments:
 name: staging
 
 clusters:
-  - name: prod-cluster
+  - name: staging-cluster
 
 packages:
   - catalog: staging-catalog
@@ -20,7 +20,7 @@ packages:
 name: prod
 
 clusters:
-  - name: staging-cluster
+  - name: prod-cluster
 
 packages:
   - catalog: prod-catalog
@@ -47,7 +47,8 @@ template:
           properties:
             rotate: 1d
 patch: # kustomize-style overlay patch to the components based on env
-  - env: [staging]
+  - envs:
+      - staging
     components:
       - name: backend
         settings:
@@ -56,7 +57,9 @@ patch: # kustomize-style overlay patch to the components based on env
           - name: autoscaling
             properties:
               max: 1
-  - env: [prod, prod-2]
+  - env:
+      - prod
+      - prod-2
     components:
       - name: backend
         settings:
@@ -72,14 +75,8 @@ We can use the above template to create the following application:
 
 ```yaml
 name: example-app
-env: staging | prod
-template: example-app-template
-```
-
-Let's say we deploy the app to prod:
-
-```
 env: prod
+template: example-app-template
 ```
 
 The finalized application config will be rendered like below:

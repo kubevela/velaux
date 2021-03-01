@@ -83,7 +83,7 @@ spec:
                         - type
                         type: object
                       type: array
-                    env:
+                    envs:
                       items:
                         type: string
                       type: array

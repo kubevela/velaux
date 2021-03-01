@@ -34,7 +34,7 @@ type AppTemplateType struct {
 }
 
 type EnvBasedPatch struct {
-	Env []string `json:"env,omitempty"`
+	Envs []string `json:"envs,omitempty"`
 
 	// Kustomize style overlay-patch on Application components.
 	Components []velatypes.ApplicationComponent `json:"components,omitempty"`
