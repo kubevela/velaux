@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	velatypes "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -24,8 +25,11 @@ import (
 
 // ApplicationSpec defines the desired state of Application
 type ApplicationSpec struct {
-	Env      string `json:"env"`
-	Template string `json:"template"`
+	Env string `json:"env"`
+
+	// either use a template or input components
+	Template   string                           `json:"template,omitempty"`
+	Components []velatypes.ApplicationComponent `json:"components,omitempty"`
 }
 
 // ApplicationStatus defines the observed state of Application
