@@ -82,7 +82,9 @@ spec:
                       type: object
                     type: array
                   env:
-                    type: string
+                    items:
+                      type: string
+                    type: array
                   parameters:
                     additionalProperties:
                       type: string

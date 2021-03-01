@@ -6,7 +6,7 @@ to which the applications to deploy.
 Below are two examples of `staging` and `prod` environments:
 
 ```yaml
-name: staing
+name: staging
 
 clusters:
   - name: prod-cluster
@@ -25,6 +25,11 @@ clusters:
 packages:
   - catalog: prod-catalog
     package: loki-logging
+
+---
+name: prod-2
+...
+
 ```
 
 Assume we have the following application template:
@@ -42,7 +47,7 @@ template:
           properties:
             rotate: 1d
 patch: # kustomize-style overlay patch to the components based on env
-  - env: staging
+  - env: [staging]
     components:
       - name: backend
         settings:
@@ -51,7 +56,7 @@ patch: # kustomize-style overlay patch to the components based on env
           - name: autoscaling
             properties:
               max: 1
-  - env: prod
+  - env: [prod, prod-2]
     components:
       - name: backend
         settings:
