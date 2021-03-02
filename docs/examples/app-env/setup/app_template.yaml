@@ -1,0 +1,33 @@
+apiVersion: velacp.oam.dev/v1alpha1
+kind: AppTemplate
+metadata:
+  name: app-template-1
+spec:
+  template:
+    components:
+      - name: backend
+        type: worker
+        settings:
+          cmd:
+            - sleep
+            - '1000'
+      - name: frontend
+        type: webservice
+        settings:
+          image: nginx
+        traits:
+          - name: autoscaler
+            properties:
+              min: 1
+              max: 10
+  patch:
+    - env: env-1
+      components:
+        - name: backend
+          settings:
+            image: busybox
+        - name: frontend
+          traits:
+            - name: sidecar
+              properties:
+                image: "fluentd"

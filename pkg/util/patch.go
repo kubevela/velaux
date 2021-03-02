@@ -19,6 +19,7 @@ func patchComponents(original, modified []velatypes.ApplicationComponent) ([]vel
 		res = append(res, *c.DeepCopy())
 	}
 
+	// modify patch
 	for i, c1 := range original {
 		for _, c2 := range modified {
 			if c1.Name != c2.Name {
@@ -50,6 +51,23 @@ func patchComponents(original, modified []velatypes.ApplicationComponent) ([]vel
 			}
 		}
 	}
+
+	// addition patch
+	for _, c2 := range modified {
+		exists := false
+		for _, c1 := range original {
+			if c1.Name == c2.Name {
+				exists = true
+				break
+			}
+		}
+		if exists {
+			continue
+		}
+		res = append(res, *c2.DeepCopy())
+	}
+
+	// TODO: support `$patch: delete` on components/traits
 
 	return res, nil
 }

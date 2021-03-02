@@ -1,0 +1,7 @@
+apiVersion: velacp.oam.dev/v1alpha1
+kind: Application
+metadata:
+  name: app-1
+spec:
+  env: env-1
+  template: app-template-1
