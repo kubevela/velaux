@@ -9,11 +9,11 @@ import (
 	"sigs.k8s.io/kustomize/kyaml/kio"
 	"sigs.k8s.io/kustomize/kyaml/yaml"
 
-	velatypes "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
+	oamcore "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 )
 
-func patchComponents(original, modified []velatypes.ApplicationComponent) ([]velatypes.ApplicationComponent, error) {
-	res := make([]velatypes.ApplicationComponent, 0, len(original))
+func PatchComponents(original, modified []oamcore.ApplicationComponent) ([]oamcore.ApplicationComponent, error) {
+	res := make([]oamcore.ApplicationComponent, 0, len(original))
 
 	for _, c := range original {
 		res = append(res, *c.DeepCopy())
@@ -35,7 +35,7 @@ func patchComponents(original, modified []velatypes.ApplicationComponent) ([]vel
 			}
 			res[i].Settings = runtime.RawExtension{Raw: mod}
 
-			// patch traits
+			// traits: modify patch
 			for j, t1 := range c1.Traits {
 				for _, t2 := range c2.Traits {
 					if t1.Name != t2.Name {
@@ -49,6 +49,23 @@ func patchComponents(original, modified []velatypes.ApplicationComponent) ([]vel
 					res[i].Traits[j].Properties = runtime.RawExtension{Raw: mod}
 				}
 			}
+
+			// traits: addition patch
+			for _, t2 := range c2.Traits {
+				exists := false
+				for _, t1 := range c1.Traits {
+					if t1.Name == t2.Name {
+						exists = true
+						break
+					}
+				}
+				if exists {
+					continue
+				}
+				res[i].Traits = append(res[i].Traits, *t2.DeepCopy())
+			}
+
+			// TODO: support `$patch: delete` on traits
 		}
 	}
 
@@ -67,7 +84,7 @@ func patchComponents(original, modified []velatypes.ApplicationComponent) ([]vel
 		res = append(res, *c2.DeepCopy())
 	}
 
-	// TODO: support `$patch: delete` on components/traits
+	// TODO: support `$patch: delete` on components
 
 	return res, nil
 }

@@ -7,37 +7,43 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	velatypes "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
+	oamcore "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 )
 
 func TestPatch(t *testing.T) {
 	var (
-		original = []velatypes.ApplicationComponent{{
+		original = []oamcore.ApplicationComponent{{
 			Name:     "backend",
 			Settings: runtime.RawExtension{Raw: []byte(`{"image":"original","additional":"keep"}`)},
-			Traits: []velatypes.ApplicationTrait{{
+			Traits: []oamcore.ApplicationTrait{{
 				Name:       "logging",
 				Properties: runtime.RawExtension{Raw: []byte(`{"abc":"123"}`)},
+			}},
+		}}
+		modified = []oamcore.ApplicationComponent{{
+			Name:     "backend",
+			Settings: runtime.RawExtension{Raw: []byte(`{"image":"newimage"}`)},
+			Traits: []oamcore.ApplicationTrait{{
+				Name:       "logging",
+				Properties: runtime.RawExtension{Raw: []byte(`{"ddd":"123"}`)},
+			}, {
+				Name:       "autoscaling",
+				Properties: runtime.RawExtension{Raw: []byte(`{"ddd":"123"}`)},
 			}},
 		}, {
 			Name:     "frontend",
 			Settings: runtime.RawExtension{Raw: []byte(`{"image":"myimage2"}`)},
 		}}
-		modified = []velatypes.ApplicationComponent{{
-			Name:     "backend",
-			Settings: runtime.RawExtension{Raw: []byte(`{"image":"newimage"}`)},
-			Traits: []velatypes.ApplicationTrait{{
-				Name:       "logging",
-				Properties: runtime.RawExtension{Raw: []byte(`{"ddd":"123"}`)},
-			}},
-		}}
 
-		expected = []velatypes.ApplicationComponent{{
+		expected = []oamcore.ApplicationComponent{{
 			Name:     "backend",
 			Settings: runtime.RawExtension{Raw: []byte(`{"image":"newimage","additional":"keep"}`)},
-			Traits: []velatypes.ApplicationTrait{{
+			Traits: []oamcore.ApplicationTrait{{
 				Name:       "logging",
 				Properties: runtime.RawExtension{Raw: []byte(`{"abc":"123","ddd":"123"}`)},
+			}, {
+				Name:       "autoscaling",
+				Properties: runtime.RawExtension{Raw: []byte(`{"ddd":"123"}`)},
 			}},
 		}, {
 			Name:     "frontend",
@@ -45,7 +51,7 @@ func TestPatch(t *testing.T) {
 		}}
 	)
 
-	patched, err := patchComponents(original, modified)
+	patched, err := PatchComponents(original, modified)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +60,7 @@ func TestPatch(t *testing.T) {
 	}
 }
 
-func compareComponents(l1, l2 []velatypes.ApplicationComponent) string {
+func compareComponents(l1, l2 []oamcore.ApplicationComponent) string {
 	if diff := cmp.Diff(len(l1), len(l2)); diff != "" {
 		return "comp length:" + diff
 	}
