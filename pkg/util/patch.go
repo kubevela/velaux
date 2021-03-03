@@ -13,6 +13,9 @@ import (
 )
 
 func PatchComponents(original, modified []oamcore.ApplicationComponent) ([]oamcore.ApplicationComponent, error) {
+	// TODO: change to use kustomize openapi schema
+	// https://github.com/kubernetes-sigs/kustomize/blob/1d524b6fbe27178961657539756acc16c4be2b82/api/krusty/openapicustomschema_test.go#L88
+
 	res := make([]oamcore.ApplicationComponent, 0, len(original))
 
 	for _, c := range original {
