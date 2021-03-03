@@ -21,7 +21,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"encoding/json"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
@@ -128,8 +127,10 @@ func (in *AppTemplateType) DeepCopyInto(out *AppTemplateType) {
 	*out = *in
 	if in.Components != nil {
 		in, out := &in.Components, &out.Components
-		*out = make(json.RawMessage, len(*in))
-		copy(*out, *in)
+		*out = make([]v1alpha2.ApplicationComponent, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 }
 
@@ -442,8 +443,10 @@ func (in *EnvBasedPatch) DeepCopyInto(out *EnvBasedPatch) {
 	}
 	if in.Components != nil {
 		in, out := &in.Components, &out.Components
-		*out = make(json.RawMessage, len(*in))
-		copy(*out, *in)
+		*out = make([]v1alpha2.ApplicationComponent, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 	if in.Parameters != nil {
 		in, out := &in.Parameters, &out.Parameters

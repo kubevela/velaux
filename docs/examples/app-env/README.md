@@ -12,7 +12,7 @@ Before running the below command, please fill in your kubeconfig into `setup/clu
 
 Run:
 ```shell
-kubectl apply -f ./setup/ --validate=false
+kubectl apply -f ./setup/
 ```
 
 ## Create the application from the template
