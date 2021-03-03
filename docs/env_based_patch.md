@@ -1,9 +1,8 @@
 # Environment-Based Config Patch
 
-An environment is a shared base consisting of the same configuration, clusters, packages (equiv. capabilities)
-to which the applications to deploy.
+Below we demonstrate how we use app templates and environments to apply per-environment deployment configuration.
 
-Below are two examples of `staging` and `prod` environments:
+Assume we have three environments:
 
 ```yaml
 name: staging
@@ -11,31 +10,17 @@ name: staging
 clusters:
   - name: staging-cluster
 
-packages:
-  - catalog: staging-catalog
-    package: in-mem-logging
-
 ---
-
 name: prod
 
 clusters:
   - name: prod-cluster
-
-packages:
-  - catalog: prod-catalog
-    package: loki-logging
 
 ---
 name: prod-2
 
 clusters:
   - name: prod-2-cluster
-
-packages:
-  - catalog: prod-catalog
-    package: loki-logging
-
 ```
 
 Assume we have the following application template:
