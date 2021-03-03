@@ -17,7 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	oamcore "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
+	"encoding/json"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -30,14 +31,14 @@ type AppTemplateSpec struct {
 }
 
 type AppTemplateType struct {
-	Components []oamcore.ApplicationComponent `json:"components"`
+	Components json.RawMessage `json:"components"`
 }
 
 type EnvBasedPatch struct {
 	Envs []string `json:"envs,omitempty"`
 
 	// Kustomize style overlay-patch on Application components.
-	Components []oamcore.ApplicationComponent `json:"components,omitempty"`
+	Components json.RawMessage `json:"components,omitempty"`
 
 	// Go-template style parameters input on Components template.
 	Parameters map[string]string `json:"parameters,omitempty"`

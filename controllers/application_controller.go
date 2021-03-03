@@ -76,7 +76,10 @@ func (r *ApplicationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		}
 
 		// patch config
-		components := apptmpl.Spec.Template.Components
+		components, err := util.UnmarshalComponents(apptmpl.Spec.Template.Components)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 		for _, p := range apptmpl.Spec.Patch {
 			contains := false
 			for _, e := range p.Envs {

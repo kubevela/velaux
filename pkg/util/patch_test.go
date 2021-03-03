@@ -50,8 +50,16 @@ func TestPatch(t *testing.T) {
 			Settings: runtime.RawExtension{Raw: []byte(`{"image":"myimage2"}`)},
 		}}
 	)
+	b1, err := json.Marshal(original)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b2, err := json.Marshal(modified)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	patched, err := PatchComponents(original, modified)
+	patched, err := PatchComponents(b1, b2)
 	if err != nil {
 		t.Fatal(err)
 	}

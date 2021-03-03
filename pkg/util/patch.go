@@ -12,9 +12,27 @@ import (
 	oamcore "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 )
 
-func PatchComponents(original, modified []oamcore.ApplicationComponent) ([]oamcore.ApplicationComponent, error) {
+func UnmarshalComponents(message json.RawMessage) ([]oamcore.ApplicationComponent, error) {
+	l := make([]oamcore.ApplicationComponent, 0)
+	err := json.Unmarshal(message, l)
+	if err != nil {
+		return nil, err
+	}
+	return l, nil
+}
+
+func PatchComponents(originalData, modifiedData json.RawMessage) ([]oamcore.ApplicationComponent, error) {
 	// TODO: change to use kustomize openapi schema
 	// https://github.com/kubernetes-sigs/kustomize/blob/1d524b6fbe27178961657539756acc16c4be2b82/api/krusty/openapicustomschema_test.go#L88
+
+	original, err := UnmarshalComponents(originalData)
+	if err != nil {
+		return nil, err
+	}
+	modified, err := UnmarshalComponents(modifiedData)
+	if err != nil {
+		return nil, err
+	}
 
 	res := make([]oamcore.ApplicationComponent, 0, len(original))
 
