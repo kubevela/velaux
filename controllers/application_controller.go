@@ -86,12 +86,12 @@ func (r *ApplicationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 					break
 				}
 			}
-			if contains {
-				break
-			}
 			components, err = util.PatchComponents(apptmpl.Spec.Template.Components, p.Components)
 			if err != nil {
 				return ctrl.Result{}, err
+			}
+			if contains {
+				break
 			}
 		}
 		app.Spec.Components = components
