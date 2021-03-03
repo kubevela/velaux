@@ -22,6 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	oamcore "github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -152,6 +153,8 @@ func makeOAMApp(app *velacptypes.Application) *oamcore.Application {
 	res := &oamcore.Application{}
 	res.Name = app.Name
 	res.Namespace = app.Namespace
+	res.OwnerReferences = append(res.OwnerReferences,
+		*metav1.NewControllerRef(app, velacptypes.GroupVersion.WithKind("Application")))
 	res.Spec.Components = app.Spec.Components
 
 	return res
