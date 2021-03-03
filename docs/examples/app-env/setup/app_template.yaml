@@ -21,12 +21,16 @@ spec:
               min: 1
               max: 10
   patch:
-    - env: env-1
+    - envs:
+        - env-1
       components:
         - name: backend
+          type: "" # TODO: oamcore types require this. Make this optional
           settings:
             image: busybox
         - name: frontend
+          type: "" # TODO: oamcore types require this. Make this optional
+          settings: {} # TODO: oamcore types require this. Make this optional
           traits:
             - name: sidecar
               properties:
