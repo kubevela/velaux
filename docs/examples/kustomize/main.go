@@ -78,6 +78,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	// object type overriding issue: https://github.com/kubernetes-sigs/kustomize/issues/3677
 	fmt.Println(string(b))
 }
 
