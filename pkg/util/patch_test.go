@@ -14,7 +14,7 @@ func TestPatch(t *testing.T) {
 	var (
 		original = []oamcore.ApplicationComponent{{
 			Name:     "backend",
-			Settings: runtime.RawExtension{Raw: []byte(`{"image":"original","additional":"keep"}`)},
+			Settings: runtime.RawExtension{Raw: []byte(`{"nested":{"image":"original","additional":"keep"}}`)},
 			Traits: []oamcore.ApplicationTrait{{
 				Name:       "logging",
 				Properties: runtime.RawExtension{Raw: []byte(`{"abc":"123"}`)},
@@ -22,7 +22,7 @@ func TestPatch(t *testing.T) {
 		}}
 		modified = []oamcore.ApplicationComponent{{
 			Name:     "backend",
-			Settings: runtime.RawExtension{Raw: []byte(`{"image":"newimage"}`)},
+			Settings: runtime.RawExtension{Raw: []byte(`{"nested":{"image":"newimage"}}`)},
 			Traits: []oamcore.ApplicationTrait{{
 				Name:       "logging",
 				Properties: runtime.RawExtension{Raw: []byte(`{"ddd":"123"}`)},
@@ -37,7 +37,7 @@ func TestPatch(t *testing.T) {
 
 		expected = []oamcore.ApplicationComponent{{
 			Name:     "backend",
-			Settings: runtime.RawExtension{Raw: []byte(`{"image":"newimage","additional":"keep"}`)},
+			Settings: runtime.RawExtension{Raw: []byte(`{"nested":{"image":"newimage","additional":"keep"}}`)},
 			Traits: []oamcore.ApplicationTrait{{
 				Name:       "logging",
 				Properties: runtime.RawExtension{Raw: []byte(`{"abc":"123","ddd":"123"}`)},
