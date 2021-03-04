@@ -1,5 +1,7 @@
 # Environment
 
+## 1. Introduction
+
 An environment is a shared infra-base consisting of the same clusters, packages (equiv. capabilities), etc.
 to which the applications are deployed.
 
@@ -30,7 +32,7 @@ packages:
 
 We are going to explain what an environment includes in the following.
 
-## Clusters
+## 2. Clusters
 
 An environment consists of a group of clusters. For example, multiple small clusters from different data centers could form a staging environment to simplify management and serve maximum availability. While each production environment might consist of only one cluster and users need to calibrate high availability for their apps.
 
@@ -75,7 +77,7 @@ clusters:
 ```
 
 
-## Packages
+## 3. Packages
 
 Within an environment, deployment on all clusters should be consistent. Thus, all packages should be installed the same across clusters.
 To provide such guarantee, environment includes `packages` list to ensure those dependencies are declared and installed consistently.
@@ -126,7 +128,7 @@ VelaCP will take care of them under the hood and use corresponding tooling to do
 - Helm chart: same as `helm install`/`helm upgrade`
 - Terraform resources: same as `terraform apply`
 
-## Env-based Config Patch
+## 4. Env-based Config Patch
 
 You can also do per-environment configuration management based on app templates.
 Check out [this doc](./env_based_patch.md)
