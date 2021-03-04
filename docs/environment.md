@@ -44,6 +44,8 @@ clusters:
   - cluster-1
 ```
 
+The clusters that environments reference to are abstraction over a k8s cluster. It could be an existing one which should have credentials set, or a need-to-be-created one that VelaCP can call over some cloud providers (e.g. ACK, GKE, EKS) to create one.
+
 ## Packages
 
 Within an environment, deployment on all clusters should be consistent. Thus, all capabilities should be installed the same.
