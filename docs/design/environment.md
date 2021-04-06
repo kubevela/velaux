@@ -131,5 +131,5 @@ VelaCP will take care of them under the hood and use corresponding tooling to do
 ## 4. Env-based Config Patch
 
 You can also do per-environment configuration management based on app templates.
-Check out [this doc](./env_based_patch.md)
+Check out [this doc](env_based_patch.md)
 

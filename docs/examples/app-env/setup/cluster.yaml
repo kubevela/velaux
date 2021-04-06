@@ -1,7 +1,0 @@
-apiVersion: velacp.oam.dev/v1alpha1
-kind: Cluster
-metadata:
-  name: cluster-1
-spec:
-  kubeconfig: |
-    ${KUBECONFIG_DATA}
