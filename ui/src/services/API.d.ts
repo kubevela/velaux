@@ -60,12 +60,12 @@ declare namespace API {
   export type ComponentType = {
     name: string;
     type?: string;
-    settings?: object;
+    properties?: object;
     traits?: TraitType[];
   };
 
   export type TraitType = {
-    name: string;
+    type: string;
     properties?: object;
   };
 

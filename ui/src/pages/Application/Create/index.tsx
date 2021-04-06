@@ -13,7 +13,7 @@ import ServiceForm from './components/ServiceForm';
 import { ProFormRadio, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 
 export default (): React.ReactNode => {
-  const [components, setComponents] = useState<API.ComponentType[]>({});
+  const [components, setComponents] = useState<API.ComponentType[]>([]);
 
   const [environments, setEnvironments] = useState<API.EnvironmentType[]>([]);
   const [caps, setCaps] = useState<API.CapabilityType[]>([]);
@@ -87,7 +87,7 @@ export default (): React.ReactNode => {
                   let comp: API.ComponentType = { name, type };
 
                   if (data != null) {
-                    comp.settings = data;
+                    comp.properties = data;
                   }
                   if (traits != null) {
                     let ts: API.TraitType[] = [];
@@ -111,13 +111,13 @@ export default (): React.ReactNode => {
           </Card>
           <Card title="Release">
             <ProFormSelect
-              label="Releasse strategy"
+              label="Release strategy"
               name="releaseStrategy"
               initialValue="1"
               options={[
                 {
                   value: '1',
-                  label: 'Regular',
+                  label: 'Rolling',
                 },
                 { value: '2', label: 'Canary' },
               ]}

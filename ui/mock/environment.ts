@@ -31,30 +31,10 @@ let capabilitiList: API.CapabilityType[] = [
       "title": "Routing",
       "type": "object",
       "properties": {
-        "fruits": {
+        "hosts": {
           "type": "array",
           "items": {
             "type": "string"
-          }
-        },
-        "vegetables": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/veggie" }
-        }
-      },
-      "definitions": {
-        "veggie": {
-          "type": "object",
-          "required": [ "veggieName", "veggieLike" ],
-          "properties": {
-            "veggieName": {
-              "type": "string",
-              "description": "The name of the vegetable."
-            },
-            "veggieLike": {
-              "type": "boolean",
-              "description": "Do I like this vegetable?"
-            }
           }
         }
       }

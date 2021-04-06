@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 
-import { Tabs } from 'antd';
+import {Tabs} from 'antd';
 
 import CapabilityFormItem from '../CapabilityFormItem';
 
@@ -8,21 +8,23 @@ interface TraitItem {
   id: number;
   type?: string;
 }
+
 const TraitsFrom: React.FC<{
-  onChange?: (data: { [key: string]: object }) => void;
+  onChange?: (traits: API.TraitType[]) => void;
   caps: API.CapabilityType[];
-}> = ({ onChange, caps }) => {
-  const [items, setItems] = useState<TraitItem[]>([{ id: 1 }]);
+}> = ({onChange, caps}) => {
+  const [items, setItems] = useState<TraitItem[]>([{id: 1}]);
   const [activeId, setActiveId] = useState<number>(1);
-  const [data, setData] = useState<{ [key: string]: object }>({});
+  const [data, setData] = useState<API.TraitType[]>([]);
 
   const removeFormData = (key: string) => {
-    delete data[key];
+    const newTraits = data.filter(item => item.type !== key)
+    setData(newTraits)
   };
 
   const addItem = () => {
     const newId = items.length + 1;
-    setItems([...items, { id: newId }]);
+    setItems([...items, {id: newId}]);
     setActiveId(newId);
   };
 
@@ -35,10 +37,9 @@ const TraitsFrom: React.FC<{
       removeFormData(removedItem.type);
     }
 
-    setData({ ...data });
     const newItems = items.filter((i) => i !== removedItem);
     setItems(newItems);
-    const { length } = newItems;
+    const {length} = newItems;
     if (length > 0) {
       setActiveId(newItems[length - 1].id);
     }
@@ -78,20 +79,23 @@ const TraitsFrom: React.FC<{
           <Tabs.TabPane key={item.id} tab={item.type ?? 'New trait'} closable>
             <CapabilityFormItem
               onSelect={(e) => {
-                updateItem(item.id, (i) => ({ ...i, type: e }));
+                updateItem(item.id, (i) => ({...i, type: e}));
               }}
               onChange={(current, old) => {
                 if (old?.capabilityType != null) {
                   removeFormData(old.capabilityType);
                 }
-                data[current.capabilityType] = current.data;
-                const newData = { ...data };
-                setData(newData);
+                const newTrait: API.TraitType = {
+                  type: current.capabilityType,
+                  properties: current.data,
+                }
+                data.push(newTrait)
+                setData(data);
                 if (onChange != null) {
-                  onChange(newData);
+                  onChange(data);
                 }
               }}
-              disableCapabilities={Object.keys(data)}
+              disableCapabilities={data.map(item => item.type)}
               caps={caps}
             />
           </Tabs.TabPane>

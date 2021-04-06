@@ -22,7 +22,7 @@ const ServiceFormItem: React.FC<ServiceFormItemProps> = ({ service, setService, 
     <div>
       <Form.Item
         name={['service', service.id, 'name']}
-        label="Service Name"
+        label="Name"
         required
         rules={[{ required: true, max: 200 }]}
       >
@@ -33,7 +33,7 @@ const ServiceFormItem: React.FC<ServiceFormItemProps> = ({ service, setService, 
       </Form.Item>
       <Form.Item
         name={['service', service.id, 'type']}
-        label="Service Type"
+        label="Workload Type"
         required
         rules={[{ required: true }]}
       >
@@ -120,7 +120,7 @@ export default ({ onChange, caps }: ServiceFormProps) => {
           key={s.id}
           tab={
             s.name == null || s.name === '' ? (
-              'New service'
+              'New component'
             ) : (
               <div
                 title={s.name}
