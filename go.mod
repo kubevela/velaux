@@ -39,12 +39,12 @@ replace (
 	// fix build issue https://github.com/docker/distribution/issues/2406
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
-
-	// kustomize issue: https://github.com/kubernetes-sigs/kustomize/issues/3443
-	github.com/go-openapi/spec => github.com/go-openapi/spec v0.19.3
 	github.com/wercker/stern => github.com/oam-dev/stern v1.13.0-alpha
 	// fix build issue https://github.com/ory/dockertest/issues/208
-	golang.org/x/sys => golang.org/x/sys v0.0.0-20200826173525-f9321e4c35a6
+	golang.org/x/sys => golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4
 	// clint-go had a buggy release, https://github.com/kubernetes/client-go/issues/749
 	k8s.io/client-go => k8s.io/client-go v0.18.8
+
+	// kustomize issue: https://github.com/kubernetes-sigs/kustomize/issues/3443
+    github.com/go-openapi/spec => github.com/go-openapi/spec v0.19.3
 )

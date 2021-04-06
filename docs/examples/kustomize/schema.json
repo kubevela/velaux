@@ -582,7 +582,14 @@
           "type": "object"
         }
       },
-      "type": "object"
+      "type": "object",
+      "x-kubernetes-group-version-kind": [
+        {
+          "group": "core.oam.dev",
+          "kind": "Application",
+          "version": "v1alpha2"
+        }
+      ]
     }
   }
 }

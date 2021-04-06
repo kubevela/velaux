@@ -29,7 +29,7 @@ import (
 
 	velacptypes "github.com/oam-dev/velacp/api/v1alpha1"
 	"github.com/oam-dev/velacp/pkg/clustermanager"
-	"github.com/oam-dev/velacp/pkg/util"
+	"github.com/oam-dev/velacp/pkg/patch"
 )
 
 // ApplicationReconciler reconciles a Application object
@@ -90,7 +90,7 @@ func (r *ApplicationReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 				continue
 			}
 
-			components, err = util.PatchComponents(apptmpl.Spec.Template.Components, p.Components)
+			components, err = patch.PatchComponents(apptmpl.Spec.Template.Components, p.Components)
 			if err != nil {
 				return ctrl.Result{}, err
 			}
