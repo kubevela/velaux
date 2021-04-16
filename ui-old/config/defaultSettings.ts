@@ -14,7 +14,7 @@ const Settings: LayoutSettings & {
   colorWeak: false,
   title: '',
   pwa: false,
-  logo: 'https://raw.githubusercontent.com/oam-dev/kubevela/master/docs/resources/KubeVela-06.png',
+  logo: 'icons/KubeVela-06.png',
   iconfontUrl: '',
 };
 
