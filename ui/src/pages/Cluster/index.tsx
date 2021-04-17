@@ -104,6 +104,7 @@ const ClusterList: React.FC = () => {
           </Tooltip>
         </>
       ),
+      search: false,
       dataIndex: 'updatedAt',
       valueType: 'date',
       sorter: (a, b) => {

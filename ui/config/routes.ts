@@ -42,7 +42,7 @@
   {
     path: '/clusters',
     name: 'Clusters',
-    icon: 'table',
+    icon: 'AppstoreOutlined',
     component: './Cluster',
   },
   {
