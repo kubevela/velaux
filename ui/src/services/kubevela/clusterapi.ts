@@ -41,5 +41,5 @@ export async function listComponentDefinitions(cluster: string) {
 }
 
 export async function listTraitDefinitions(cluster: string) {
-  return request<API.ComponentDefinitionsResponse>(`/api/clusters/${cluster}/traitdefinitions`);
+  return request<API.TraitDefinitionsResponse>(`/api/clusters/${cluster}/traitdefinitions`);
 }
