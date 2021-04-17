@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import { request } from 'umi';
+import { request, useParams } from 'umi';
 
 export async function listClusters() {
   return request<API.ListClustersResponse>('/api/clusters');
@@ -34,4 +34,12 @@ export async function removeCluster(params: API.ClusterType) {
       method: 'delete',
     },
   });
+}
+
+export async function listComponentDefinitions(cluster: string) {
+  return request<API.ComponentDefinitionsResponse>(`/api/clusters/${cluster}/componentdefinitions`);
+}
+
+export async function listTraitDefinitions(cluster: string) {
+  return request<API.ComponentDefinitionsResponse>(`/api/clusters/${cluster}/traitdefinitions`);
 }

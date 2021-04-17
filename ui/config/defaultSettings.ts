@@ -14,7 +14,7 @@ const Settings: LayoutSettings & {
   colorWeak: false,
   title: 'KubeVela',
   pwa: false,
-  logo: 'icons/KubeVela-04.png',
+  logo: '/icons/KubeVela-04.png',
   iconfontUrl: '',
 };
 
