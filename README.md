@@ -38,12 +38,14 @@ $ _bin/velacp server \
 ```
 
 Use velactl to add catalogs
+
 ```bash
 $ _bin/velactl catalog put test --desc "First catalog"
 $ _bin/velactl catalog put test2 --desc "Second catalog"
 ```
 
 Use velactl to list catalogs:
+
 ```bash
 $ _bin/velactl catalog list
 {
@@ -73,6 +75,7 @@ $ _bin/velactl catalog list
 ### Start dashboard
 
 Run:
+
 ```bash
 $ cd ui/
 $ yarn
@@ -83,6 +86,10 @@ Starting the development server...
 ```
 
 ![alt](docs/images/ui-all.png)
+
+## Cluster
+
+![alt](docs/images/cluster-detail.png)
 
 ## Catalog Structure
 
@@ -115,4 +122,3 @@ When creating an application, select the environment with the packages included:
 Then the [json schema for the capabilities](https://github.com/hongchaodeng/catalog-example/tree/master/catalog/test/schema) will be rendered to take user input:
 
 ![alt](docs/images/ui-create-app-2.jpg)
-
