@@ -43,7 +43,19 @@
     path: '/clusters',
     name: 'Clusters',
     icon: 'AppstoreOutlined',
-    component: './Cluster',
+    routes: [
+      {
+        path: '/clusters',
+        hideInMenu: true,
+        name: 'Clusters',
+        component: './Cluster',
+      },
+      {
+        path: '/clusters/:clusterName',
+        hideInMenu: true,
+        component: './Cluster/Detail',
+      },
+    ],
   },
   {
     path: '/welcome',

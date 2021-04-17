@@ -1,6 +1,5 @@
+import ProForm, { ModalForm, ProFormText } from '@ant-design/pro-form';
 import React from 'react';
-import ProForm, { ProFormText, ModalForm } from '@ant-design/pro-form';
-import { useIntl } from 'umi';
 
 export type InputFormProps = {
   title: string;
@@ -10,15 +9,13 @@ export type InputFormProps = {
   initialValues?: API.ClusterType;
 };
 
-const InputForm: React.FC<InputFormProps> = (props) => {
-  const intl = useIntl();
+const InputForm = (props: InputFormProps) => {
   return (
     <ModalForm
       title={props.title}
       visible={props.visible}
       onFinish={props.onFinish}
       onVisibleChange={props.onVisibleChange}
-      rules={[{ required: true, message: 'Missing name' }]}
     >
       <ProForm.Group>
         <ProFormText
