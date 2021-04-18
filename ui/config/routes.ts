@@ -15,30 +15,30 @@
       },
     ],
   },
-  // {
-  //   path: '/applications',
-  //   name: 'Applications',
-  //   icon: 'table',
-  //   routes: [
-  //     {
-  //       path: '/applications',
-  //       hideInMenu: true,
-  //       component: './Application',
-  //     },
-  //     {
-  //       path: '/applications/create',
-  //       hideInMenu: true,
-  //       name: 'Create Application',
-  //       component: './Application/Create',
-  //     },
-  //     {
-  //       path: '/applications/:appName',
-  //       hideInMenu: true,
-  //       name: 'Application',
-  //       component: './Application/DetailPage',
-  //     },
-  //   ],
-  // },
+  {
+    path: '/applications',
+    name: 'Applications',
+    icon: 'AppstoreOutlined',
+    routes: [
+      {
+        path: '/applications',
+        hideInMenu: true,
+        component: './Application',
+      },
+      {
+        path: '/applications/create',
+        hideInMenu: true,
+        name: 'Create Application',
+        component: './Application/Create',
+      },
+      {
+        path: '/applications/:appName',
+        hideInMenu: true,
+        name: 'Application',
+        component: './Application/Detail',
+      },
+    ],
+  },
   {
     path: '/clusters',
     name: 'Clusters',

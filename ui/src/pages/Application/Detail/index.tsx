@@ -43,13 +43,11 @@ export default (props: any) => {
       }}
     >
       <ProCard direction="column" ghost gutter={[16, 16]}>
-        <ProCard>
+        <ProCard title="KubeVela Controller" style={{ height: 200 }} headerBordered>
           <ProCard>
-            <Typography.Title level={3}>KubeVela Controller</Typography.Title>
-          </ProCard>
-          <ProCard className={styles.desc}>
-            <Typography.Text type="secondary">Status:</Typography.Text>{' '}
-            <Typography.Text type="success">Latest</Typography.Text>
+            <Space className={styles.desc}>
+              Status: <Typography.Text type="success">Installed</Typography.Text>
+            </Space>
           </ProCard>
           <ProCard>
             <Space style={{ float: 'right' }}>

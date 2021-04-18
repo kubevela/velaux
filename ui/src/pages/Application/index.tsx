@@ -1,35 +1,42 @@
 import {
-  addCluster,
-  listClusters,
-  removeCluster,
-  updateCluster,
-} from '@/services/kubevela/clusterapi';
+  addApplication,
+  listApplications,
+  removeApplication,
+  updateApplication,
+} from '@/services/kubevela/applicationapi';
+import { listClusterNames } from '@/services/kubevela/clusterapi';
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
 import { Button, message, Space, Tooltip } from 'antd';
 import moment from 'moment';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, Link } from 'umi';
 import InputForm from './InputForm';
 
 interface UpdateState {
   visible: boolean;
-  value?: API.ClusterType;
+  value?: API.ApplicationType;
 }
 
-const ClusterList = () => {
-  /** 新建窗口的弹窗 */
+const ApplicationList = () => {
   const [createModalVisible, handleCreateModalVisible] = useState<boolean>(false);
   const [updateModal, handleUpdateModal] = useState<UpdateState>({ visible: false });
+  const [clusterNames, setClusterNames] = useState<string[]>([]);
+  const [selectedCluster, setSelectedCluster] = useState<string>('');
+
+  let clusterEnum = {};
+  clusterNames.forEach((value) => {
+    clusterEnum[value] = { text: value };
+  });
 
   const actionRef = useRef<ActionType>();
 
-  const handleAdd = async (fields: API.ClusterType) => {
+  const handleAdd = async (fields: API.ApplicationType) => {
     const hide = message.loading('Adding');
     try {
-      await addCluster({ ...fields });
+      await addApplication(selectedCluster, { ...fields });
       hide();
       message.success('Added successfully');
       return true;
@@ -40,11 +47,11 @@ const ClusterList = () => {
     }
   };
 
-  const handleUpdate = async (val: API.ClusterType) => {
+  const handleUpdate = async (val: API.ApplicationType) => {
     const hide = message.loading('Updating');
     try {
-      const newVal = await updateCluster(val);
-      handleUpdateModal({ ...updateModal, value: newVal.cluster });
+      const newVal = await updateApplication(selectedCluster, val);
+      handleUpdateModal({ ...updateModal, value: newVal.application });
       hide();
       message.success('Updated successfully');
       return true;
@@ -55,10 +62,16 @@ const ClusterList = () => {
     }
   };
 
-  const handleRemove = async (val: API.ClusterType) => {
+  useEffect(() => {
+    listClusterNames().then((resp) => {
+      setClusterNames(resp.clusters);
+    });
+  }, []);
+
+  const handleRemove = async (val: API.ApplicationType) => {
     const hide = message.loading('Deleting');
     try {
-      await removeCluster(val);
+      await removeApplication(selectedCluster, val);
       hide();
       message.success('Deleted successfully');
       return true;
@@ -69,7 +82,7 @@ const ClusterList = () => {
     }
   };
 
-  const columns: ProColumns<API.ClusterType>[] = [
+  const columns: ProColumns<API.ApplicationType>[] = [
     {
       title: 'Index',
       dataIndex: 'index',
@@ -80,9 +93,10 @@ const ClusterList = () => {
       title: 'Name',
       dataIndex: 'name',
       render: (dom, entity) => (
-        // https://pro.ant.design/docs/router-and-nav-cn
-        // 带参数的路由
-        <Link to={{ pathname: '/clusters/' + entity.name }}>
+        // https://stackoverflow.com/questions/41736048/what-is-a-state-in-link-component-of-react-router
+        // https://reactrouter.com/web/api/Link
+        // use props.match.params.appName and props.location.state.app
+        <Link to={{ pathname: `/clusters/${selectedCluster}/applications/${entity.name}` }}>
           <a>{dom}</a>
         </Link>
       ),
@@ -117,7 +131,6 @@ const ClusterList = () => {
         return '';
       },
     },
-
     {
       title: <FormattedMessage id="pages.table.titleOption" defaultMessage="Option" />,
       width: '164px',
@@ -150,9 +163,22 @@ const ClusterList = () => {
     },
   ];
 
+  if (clusterNames.length > 0) {
+    columns.unshift({
+      title: 'Cluster',
+      dataIndex: 'cluster',
+      hideInTable: true,
+      filters: true,
+      onFilter: true,
+      valueType: 'select',
+      initialValue: clusterNames[0],
+      valueEnum: clusterEnum,
+    });
+  }
+
   return (
-    <PageContainer>
-      <ProTable<API.ClusterType>
+    <PageContainer loading={clusterNames.length == 0}>
+      <ProTable<API.ApplicationType>
         columns={columns}
         rowKey="key"
         dateFormatter="string"
@@ -177,24 +203,25 @@ const ClusterList = () => {
           </Button>,
         ]}
         request={async (params, sorter, filter) => {
-          let resp = await listClusters();
-          let clusters = resp.clusters;
+          setSelectedCluster(params.cluster);
+          let resp = await listApplications(params.cluster);
+          let apps = resp.applications;
 
           if (params.name) {
-            clusters = clusters.filter((val) => val.name?.includes(params.name));
+            apps = apps.filter((val) => val.name?.includes(params.name));
           }
           return Promise.resolve({
-            data: clusters,
+            data: apps,
             success: true,
           });
         }}
       />
 
       <InputForm
-        title={'Create Cluster'}
+        title={'Create Application'}
         visible={createModalVisible}
         onFinish={async (value: any) => {
-          const success = await handleAdd(value as API.ClusterType);
+          const success = await handleAdd(value as API.ApplicationType);
           if (success) {
             handleCreateModalVisible(false);
             if (actionRef.current) {
@@ -211,10 +238,10 @@ const ClusterList = () => {
       />
 
       <InputForm
-        title={'Update Cluster'}
+        title={'Update Application'}
         visible={updateModal.visible}
         onFinish={async (value: any) => {
-          const success = await handleUpdate(value as API.ClusterType);
+          const success = await handleUpdate(value as API.ApplicationType);
           if (success) {
             handleUpdateModal({ ...updateModal, visible: false });
             if (actionRef.current) {
@@ -234,4 +261,4 @@ const ClusterList = () => {
   );
 };
 
-export default ClusterList;
+export default ApplicationList;

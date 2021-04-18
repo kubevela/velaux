@@ -15,6 +15,11 @@ let clusterList: API.ClusterType[] = [
     kubeconfig: 'TODO: kubeconfig data',
   },
 ];
+const getClusterNames = (req: Request, res: Response) => {
+  res.json({
+    clusters: clusterList.map((item) => item.name),
+  });
+};
 
 const getClusters = (req: Request, res: Response) => {
   res.json({
@@ -79,6 +84,7 @@ function postClusters(req: Request, res: Response, u: string, b: Request) {
 }
 
 export default {
+  'GET /api/clusternames': getClusterNames,
   'GET /api/clusters': getClusters,
   'POST /api/clusters': postClusters,
 };
