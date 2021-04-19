@@ -59,7 +59,7 @@ const ApplicationList = () => {
         // https://stackoverflow.com/questions/41736048/what-is-a-state-in-link-component-of-react-router
         // https://reactrouter.com/web/api/Link
         // use props.match.params.appName and props.location.state.app
-        <Link to={{ pathname: `/clusters/${selectedCluster}/applications/${entity.name}` }}>
+        <Link to={{ pathname: `/applications/${entity.name}`, state: {} }}>
           <a>{dom}</a>
         </Link>
       ),
