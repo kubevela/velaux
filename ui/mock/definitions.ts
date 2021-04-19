@@ -66,15 +66,18 @@ let traitDefList: API.CapabilityType[] = [
       "$schema": "http://json-schema.org/draft-07/schema#",
       "description": "A representation of a person, company, organization, or place",
       "title": "Routing",
-      "type": "object",
       "properties": {
-        "hosts": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "replicas": {
+            "default": 1,
+            "description": "Replicas of the workload",
+            "title": "replicas",
+            "type": "integer"
         }
-      }
+      },
+      "required": [
+          "replicas"
+      ],
+      "type": "object"
     }`,
   },
 ];
