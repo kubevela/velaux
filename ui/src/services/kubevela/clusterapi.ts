@@ -41,9 +41,13 @@ export async function removeCluster(params: API.ClusterType) {
 }
 
 export async function listComponentDefinitions(cluster: string) {
-  return request<API.ComponentDefinitionsResponse>(`/api/clusters/${cluster}/componentdefinitions`);
+  return request<{ componentDefinitions: API.CapabilityType[] }>(
+    `/api/clusters/${cluster}/componentdefinitions`,
+  );
 }
 
 export async function listTraitDefinitions(cluster: string) {
-  return request<API.TraitDefinitionsResponse>(`/api/clusters/${cluster}/traitdefinitions`);
+  return request<{ traitDefinitions: API.CapabilityType[] }>(
+    `/api/clusters/${cluster}/traitdefinitions`,
+  );
 }

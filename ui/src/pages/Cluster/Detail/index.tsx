@@ -10,8 +10,8 @@ export default (props: any) => {
   // @ts-ignore
   const clusterName = props.match.params.clusterName;
 
-  const [compDefs, setCompDefs] = useState<API.ComponentDefinition[]>([]);
-  const [traitDefs, setTraitDefs] = useState<API.TraitDefinition[]>([]);
+  const [compDefs, setCompDefs] = useState<API.CapabilityType[]>([]);
+  const [traitDefs, setTraitDefs] = useState<API.CapabilityType[]>([]);
 
   useEffect(() => {
     listComponentDefinitions(clusterName).then((resp) => {

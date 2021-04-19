@@ -2,13 +2,13 @@ import { Tabs } from 'antd';
 import React, { useState } from 'react';
 import ComponentFormItem, { ComponentEntry } from '../ComponentFormItem';
 
-interface ServiceFormProps {
+interface FormProps {
   onChange: (comps: API.ComponentType[]) => void;
-  compDefs: API.ComponentDefinition[];
-  traitDefs: API.TraitDefinition[];
+  compDefs: API.CapabilityType[];
+  traitDefs: API.CapabilityType[];
 }
 
-export default ({ onChange, compDefs, traitDefs }: ServiceFormProps) => {
+export default ({ onChange, compDefs, traitDefs }: FormProps) => {
   const [autoId, setAutoId] = useState(0);
   const [comps, setComps] = useState<ComponentEntry[]>([]);
   const [activeId, setActiveId] = useState<number>(autoId);
@@ -16,6 +16,7 @@ export default ({ onChange, compDefs, traitDefs }: ServiceFormProps) => {
   const addComp = () => {
     const newId = autoId + 1;
     setAutoId(newId);
+    setActiveId(newId);
     const newComps = comps.concat([{ id: newId, name: '' }]);
     setComps(newComps);
     onChange(newComps);
@@ -83,7 +84,6 @@ export default ({ onChange, compDefs, traitDefs }: ServiceFormProps) => {
               </div>
             )
           }
-          closable={comps.length > 1}
           forceRender
         >
           <ComponentFormItem

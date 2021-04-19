@@ -8,55 +8,52 @@ import CapabilitySelector, { CapabilitySelectorProps } from '../CapabilitySelect
 
 const FormRender = withTheme(AntDTheme);
 
-export interface CapabilityFormItemData {
+export interface CapabilityFormData {
   type: string;
   data: object;
 }
-interface CapabilityFormItemProps extends CapabilitySelectorProps {
-  onChange?: (currentData: CapabilityFormItemData, oldData?: CapabilityFormItemData) => void;
-  caps: { name: string; jsonschema: string }[];
+interface FormProps extends CapabilitySelectorProps {
+  onChange: (currentData: CapabilityFormData, oldData?: CapabilityFormData) => void;
+
+  disableCapabilities?: string[];
+  caps: API.CapabilityType[];
 }
 
-export default ({ onChange, onSelect, disableCapabilities, caps }: CapabilityFormItemProps) => {
+export default ({ onChange, disableCapabilities, caps }: FormProps) => {
   const [schema, setSchema] = useState<object>();
-  const [value, setValue] = useState<string>();
-  const [data, setData] = useState<CapabilityFormItemData>();
+  const [selectType, setSelectType] = useState<string>();
+  const [data, setData] = useState<CapabilityFormData>();
   useEffect(() => {
-    if (value == null) {
+    if (selectType == null) {
       return;
     }
     caps.forEach((cap) => {
-      if (cap.name === value) {
+      if (cap.name === selectType) {
         setSchema(JSON.parse(cap.jsonschema));
       }
     });
-  }, [value]);
+  }, [selectType]);
   return (
     <div>
       <CapabilitySelector
         onSelect={(name) => {
-          setValue(name);
-          if (onSelect != null) {
-            onSelect(name);
-          }
+          setSelectType(name);
         }}
         disableCapabilities={disableCapabilities}
         caps={caps}
       />
       {schema == null ? null : (
         <div style={{ marginTop: '10px' }}>
-          <Card title={value}>
+          <Card title={selectType}>
             <FormRender
               schema={schema}
               formData={data?.data ?? {}}
               onChange={(fd) => {
-                const newData = { type: value as string, data: fd.formData ?? {} };
+                const newData = { type: selectType as string, data: fd.formData ?? {} };
                 setData(newData);
-                if (onChange != null) {
-                  onChange(newData, data);
-                }
+                onChange(newData, data);
               }}
-              children={true}
+              children={true} // Without this there will be a submit button for each rendered form
             />
           </Card>
         </div>

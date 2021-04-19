@@ -29,22 +29,9 @@ declare namespace API {
     kubeconfig?: string;
   };
 
-  export type ComponentDefinition = {
+  export type CapabilityType = {
     name: string;
     desc?: string;
     jsonschema: string;
-  };
-
-  export type TraitDefinition = {
-    name: string;
-    desc?: string;
-    jsonschema: string;
-  };
-
-  export type ComponentDefinitionsResponse = {
-    componentDefinitions: ComponentDefinition[];
-  };
-  export type TraitDefinitionsResponse = {
-    traitDefinitions: ComponentDefinition[];
   };
 }

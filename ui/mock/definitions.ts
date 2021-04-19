@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import moment from 'moment';
 
-let compDefList: API.ComponentDefinition[] = [
+let compDefList: API.CapabilityType[] = [
   {
     name: 'webservice',
     desc:
@@ -15,10 +15,6 @@ let compDefList: API.ComponentDefinition[] = [
         "image": {
           "type": "string",
           "description": "Container image"
-        },
-        "port": {
-          "type": "string",
-          "description": "Expose service port"
         }
       }
     }`,
@@ -35,17 +31,13 @@ let compDefList: API.ComponentDefinition[] = [
         "image": {
           "type": "string",
           "description": "Container image"
-        },
-        "port": {
-          "type": "string",
-          "description": "Expose service port"
         }
       }
     }`,
   },
 ];
 
-let traitDefList: API.ComponentDefinition[] = [
+let traitDefList: API.CapabilityType[] = [
   {
     name: 'ingress',
     desc:

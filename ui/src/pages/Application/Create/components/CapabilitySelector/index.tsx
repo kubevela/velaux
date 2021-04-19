@@ -1,20 +1,16 @@
 import { Select, Typography } from 'antd';
 
-export interface CapabilitySelectorProps {
-  onSelect?: (name: string) => void;
+interface CapabilitySelectorProps {
+  onSelect: (name: string) => void;
   disableCapabilities?: string[];
   caps: API.CapabilityType[];
 }
-const CapabilitySelector: React.FC<CapabilitySelectorProps> = ({
-  onSelect,
-  disableCapabilities,
-  caps,
-}) => {
+const CapabilitySelector = ({ disableCapabilities, onSelect, caps }: CapabilitySelectorProps) => {
   let loading: boolean | undefined;
 
   return (
     <Select
-      onSelect={onSelect == null ? undefined : (e) => onSelect(e.toString())}
+      onSelect={onSelect}
       loading={loading}
       placeholder={`Select an operation`}
       style={{ width: '100%' }}

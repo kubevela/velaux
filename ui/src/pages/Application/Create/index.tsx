@@ -14,8 +14,8 @@ export default (props: any) => {
 
   const [components, setComponents] = useState<API.ComponentType[]>([]);
 
-  const [compDefs, setCompDefs] = useState<API.ComponentDefinition[]>([]);
-  const [traitDefs, setTraitDefs] = useState<API.TraitDefinition[]>([]);
+  const [compDefs, setCompDefs] = useState<API.CapabilityType[]>([]);
+  const [traitDefs, setTraitDefs] = useState<API.CapabilityType[]>([]);
 
   useEffect(() => {
     listComponentDefinitions(clusterName).then((resp) => {
