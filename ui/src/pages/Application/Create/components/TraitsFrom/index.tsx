@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
-import {Tabs} from 'antd';
+import { Tabs } from 'antd';
 
 import CapabilityFormItem from '../CapabilityFormItem';
 
@@ -9,22 +9,25 @@ interface TraitItem {
   type?: string;
 }
 
-const TraitsFrom: React.FC<{
+interface FormProps {
   onChange?: (traits: API.TraitType[]) => void;
-  caps: API.CapabilityType[];
-}> = ({onChange, caps}) => {
-  const [items, setItems] = useState<TraitItem[]>([{id: 1}]);
+  caps: { name: string; jsonschema: string }[];
+}
+
+export default ({ onChange, caps }: FormProps) => {
+  const [items, setItems] = useState<TraitItem[]>([{ id: 1 }]);
   const [activeId, setActiveId] = useState<number>(1);
   const [data, setData] = useState<API.TraitType[]>([]);
 
   const removeFormData = (key: string) => {
-    const newTraits = data.filter(item => item.type !== key)
-    setData(newTraits)
+    const newTraits = data.filter((item) => item.type !== key);
+    setData(newTraits);
   };
 
   const addItem = () => {
     const newId = items.length + 1;
-    setItems([...items, {id: newId}]);
+    setItems([...items, { id: newId }]);
+    // TODO: data?
     setActiveId(newId);
   };
 
@@ -39,7 +42,7 @@ const TraitsFrom: React.FC<{
 
     const newItems = items.filter((i) => i !== removedItem);
     setItems(newItems);
-    const {length} = newItems;
+    const { length } = newItems;
     if (length > 0) {
       setActiveId(newItems[length - 1].id);
     }
@@ -79,7 +82,7 @@ const TraitsFrom: React.FC<{
           <Tabs.TabPane key={item.id} tab={item.type ?? 'New trait'} closable>
             <CapabilityFormItem
               onSelect={(e) => {
-                updateItem(item.id, (i) => ({...i, type: e}));
+                updateItem(item.id, (i) => ({ ...i, type: e }));
               }}
               onChange={(current, old) => {
                 if (old?.capabilityType != null) {
@@ -88,14 +91,14 @@ const TraitsFrom: React.FC<{
                 const newTrait: API.TraitType = {
                   type: current.capabilityType,
                   properties: current.data,
-                }
-                data.push(newTrait)
+                };
+                data.push(newTrait);
                 setData(data);
                 if (onChange != null) {
                   onChange(data);
                 }
               }}
-              disableCapabilities={data.map(item => item.type)}
+              disableCapabilities={data.map((item) => item.type)}
               caps={caps}
             />
           </Tabs.TabPane>
@@ -104,5 +107,3 @@ const TraitsFrom: React.FC<{
     </div>
   );
 };
-
-export default TraitsFrom;

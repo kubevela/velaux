@@ -1,9 +1,4 @@
-import {
-  addApplication,
-  listApplications,
-  removeApplication,
-  updateApplication,
-} from '@/services/kubevela/applicationapi';
+import { listApplications, removeApplication } from '@/services/kubevela/applicationapi';
 import { listClusterNames } from '@/services/kubevela/clusterapi';
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
@@ -13,7 +8,6 @@ import { Button, message, Space, Tooltip } from 'antd';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, Link } from 'umi';
-import InputForm from './InputForm';
 
 interface UpdateState {
   visible: boolean;
@@ -21,8 +15,6 @@ interface UpdateState {
 }
 
 const ApplicationList = () => {
-  const [createModalVisible, handleCreateModalVisible] = useState<boolean>(false);
-  const [updateModal, handleUpdateModal] = useState<UpdateState>({ visible: false });
   const [clusterNames, setClusterNames] = useState<string[]>([]);
   const [selectedCluster, setSelectedCluster] = useState<string>('');
 
@@ -32,41 +24,6 @@ const ApplicationList = () => {
   });
 
   const actionRef = useRef<ActionType>();
-
-  const handleAdd = async (fields: API.ApplicationType) => {
-    const hide = message.loading('Adding');
-    try {
-      await addApplication(selectedCluster, { ...fields });
-      hide();
-      message.success('Added successfully');
-      return true;
-    } catch (error) {
-      hide();
-      message.error('Failed to add; retry again!');
-      return false;
-    }
-  };
-
-  const handleUpdate = async (val: API.ApplicationType) => {
-    const hide = message.loading('Updating');
-    try {
-      const newVal = await updateApplication(selectedCluster, val);
-      handleUpdateModal({ ...updateModal, value: newVal.application });
-      hide();
-      message.success('Updated successfully');
-      return true;
-    } catch (error) {
-      hide();
-      message.error('Failed to update; retry again!');
-      return false;
-    }
-  };
-
-  useEffect(() => {
-    listClusterNames().then((resp) => {
-      setClusterNames(resp.clusters);
-    });
-  }, []);
 
   const handleRemove = async (val: API.ApplicationType) => {
     const hide = message.loading('Deleting');
@@ -81,6 +38,12 @@ const ApplicationList = () => {
       return false;
     }
   };
+
+  useEffect(() => {
+    listClusterNames().then((resp) => {
+      setClusterNames(resp.clusters);
+    });
+  }, []);
 
   const columns: ProColumns<API.ApplicationType>[] = [
     {
@@ -138,15 +101,12 @@ const ApplicationList = () => {
       valueType: 'option',
       render: (_, record) => (
         <Space>
-          <Button
-            id="edit"
-            type="primary"
-            onClick={() => {
-              handleUpdateModal({ visible: true, value: record });
-            }}
-          >
-            <FormattedMessage id="pages.table.edit" defaultMessage="Edit" />
-          </Button>
+          <Link to={{ pathname: `/applications/create`, state: { cluster: selectedCluster } }}>
+            <Button id="edit" type="primary">
+              <FormattedMessage id="pages.table.edit" defaultMessage="Edit" />
+            </Button>
+          </Link>
+
           <Button
             id="delete"
             type="primary"
@@ -164,7 +124,7 @@ const ApplicationList = () => {
   ];
 
   if (clusterNames.length > 0) {
-    columns.unshift({
+    columns.push({
       title: 'Cluster',
       dataIndex: 'cluster',
       hideInTable: true,
@@ -192,15 +152,11 @@ const ApplicationList = () => {
           labelWidth: 120,
         }}
         toolBarRender={() => [
-          <Button
-            type="primary"
-            key="primary"
-            onClick={() => {
-              handleCreateModalVisible(true);
-            }}
-          >
-            <PlusOutlined /> <FormattedMessage id="pages.table.new" defaultMessage="New" />
-          </Button>,
+          <Link to={{ pathname: `/applications/create`, state: { cluster: selectedCluster } }}>
+            <Button type="primary" key="primary">
+              <PlusOutlined /> <FormattedMessage id="pages.table.new" defaultMessage="New" />
+            </Button>
+          </Link>,
         ]}
         request={async (params, sorter, filter) => {
           setSelectedCluster(params.cluster);
@@ -215,47 +171,6 @@ const ApplicationList = () => {
             success: true,
           });
         }}
-      />
-
-      <InputForm
-        title={'Create Application'}
-        visible={createModalVisible}
-        onFinish={async (value: any) => {
-          const success = await handleAdd(value as API.ApplicationType);
-          if (success) {
-            handleCreateModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-
-          message.success('提交成功');
-          return true;
-        }}
-        onVisibleChange={async (visible) => {
-          handleCreateModalVisible(visible);
-        }}
-      />
-
-      <InputForm
-        title={'Update Application'}
-        visible={updateModal.visible}
-        onFinish={async (value: any) => {
-          const success = await handleUpdate(value as API.ApplicationType);
-          if (success) {
-            handleUpdateModal({ ...updateModal, visible: false });
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-
-          message.success('提交成功');
-          return true;
-        }}
-        onVisibleChange={async (visible) => {
-          handleUpdateModal({ ...updateModal, visible });
-        }}
-        initialValues={updateModal.value}
       />
     </PageContainer>
   );

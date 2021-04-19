@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
-
-import { withTheme } from '@rjsf/core';
 // @ts-ignore
 import { Theme as AntDTheme } from '@rjsf/antd';
-import 'antd/dist/antd.css';
-const FormRender = withTheme(AntDTheme);
-
-import CapabilitySelector, { CapabilitySelectorProps } from '../CapabilitySelector';
+import { withTheme } from '@rjsf/core';
 import { Card } from 'antd';
+import 'antd/dist/antd.css';
+import React, { useEffect, useState } from 'react';
+import CapabilitySelector, { CapabilitySelectorProps } from '../CapabilitySelector';
+
+const FormRender = withTheme(AntDTheme);
 
 export interface CapabilityFormItemData {
   capabilityType: string;
@@ -15,14 +14,10 @@ export interface CapabilityFormItemData {
 }
 interface CapabilityFormItemProps extends CapabilitySelectorProps {
   onChange?: (currentData: CapabilityFormItemData, oldData?: CapabilityFormItemData) => void;
-  caps: API.CapabilityType[];
+  caps: { name: string; jsonschema: string }[];
 }
-const CapabilityFormItem: React.FC<CapabilityFormItemProps> = ({
-  onChange,
-  onSelect,
-  disableCapabilities,
-  caps,
-}) => {
+
+export default ({ onChange, onSelect, disableCapabilities, caps }: CapabilityFormItemProps) => {
   const [schema, setSchema] = useState<object>();
   const [value, setValue] = useState<string>();
   const [data, setData] = useState<CapabilityFormItemData>();
@@ -69,5 +64,3 @@ const CapabilityFormItem: React.FC<CapabilityFormItemProps> = ({
     </div>
   );
 };
-
-export default CapabilityFormItem;

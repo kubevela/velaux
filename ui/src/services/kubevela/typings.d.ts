@@ -13,13 +13,13 @@ declare namespace API {
   export type ComponentType = {
     name: string;
     type?: string;
-    properties?: object;
+    properties?: {};
     traits?: TraitType[];
   };
 
   export type TraitType = {
     type: string;
-    properties?: object;
+    properties?: {};
   };
 
   export type ClusterType = {
@@ -32,11 +32,13 @@ declare namespace API {
   export type ComponentDefinition = {
     name: string;
     desc?: string;
+    jsonschema: string;
   };
 
   export type TraitDefinition = {
     name: string;
     desc?: string;
+    jsonschema: string;
   };
 
   export type ComponentDefinitionsResponse = {
