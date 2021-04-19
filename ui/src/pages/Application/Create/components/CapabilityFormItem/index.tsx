@@ -9,7 +9,7 @@ import CapabilitySelector, { CapabilitySelectorProps } from '../CapabilitySelect
 const FormRender = withTheme(AntDTheme);
 
 export interface CapabilityFormItemData {
-  capabilityType: string;
+  type: string;
   data: object;
 }
 interface CapabilityFormItemProps extends CapabilitySelectorProps {
@@ -50,7 +50,7 @@ export default ({ onChange, onSelect, disableCapabilities, caps }: CapabilityFor
               schema={schema}
               formData={data?.data ?? {}}
               onChange={(fd) => {
-                const newData = { capabilityType: value as string, data: fd.formData ?? {} };
+                const newData = { type: value as string, data: fd.formData ?? {} };
                 setData(newData);
                 if (onChange != null) {
                   onChange(newData, data);

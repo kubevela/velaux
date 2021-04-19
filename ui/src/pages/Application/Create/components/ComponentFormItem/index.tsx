@@ -37,7 +37,7 @@ export default ({ component, setComponent, compDefs, traitDefs }: ComponentFormI
       >
         <CapabilityFormItem
           onChange={(wd) => {
-            setComponent({ ...component, properties: wd.data, type: wd.capabilityType });
+            setComponent({ ...component, properties: wd.data, type: wd.type });
           }}
           caps={compDefs}
         />

@@ -85,11 +85,11 @@ export default ({ onChange, caps }: FormProps) => {
                 updateItem(item.id, (i) => ({ ...i, type: e }));
               }}
               onChange={(current, old) => {
-                if (old?.capabilityType != null) {
-                  removeFormData(old.capabilityType);
+                if (old?.type != null) {
+                  removeFormData(old.type);
                 }
                 const newTrait: API.TraitType = {
-                  type: current.capabilityType,
+                  type: current.type,
                   properties: current.data,
                 };
                 data.push(newTrait);
