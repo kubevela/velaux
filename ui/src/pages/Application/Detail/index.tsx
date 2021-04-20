@@ -18,7 +18,7 @@ export default (props: any) => {
           routes: [
             {
               path: '',
-              breadcrumbName: 'Clusters',
+              breadcrumbName: 'Applications',
             },
             {
               path: '',
