@@ -1,5 +1,7 @@
 # Environment
 
+DEPRECATED!!!
+
 ## 1. Introduction
 
 An environment is a shared infra-base consisting of the same clusters, packages (equiv. capabilities), etc.
@@ -18,7 +20,6 @@ packages:
     package: inmem-logging
 
 ---
-
 name: prod-env
 
 clusters:
@@ -27,7 +28,6 @@ clusters:
 packages:
   - catalog: prod-catalog
     package: loki-logging
-
 ```
 
 We are going to explain what an environment includes in the following.
@@ -56,7 +56,7 @@ Before creating any Environment, users need to create Clusters first. Here is an
 name: prod-cluster
 spec:
   external: # This is pointing to externally managed clusters without VelaCP reconciling
-    kubeconfig: "..." 
+    kubeconfig: "..."
   managed: # This would trigger cluster reconciler in VelaCP to create and manage a cluster
     provider: ack
     parameters:
@@ -75,7 +75,6 @@ name: prod-env
 clusters:
   - prod-cluster
 ```
-
 
 ## 3. Packages
 
@@ -132,4 +131,3 @@ VelaCP will take care of them under the hood and use corresponding tooling to do
 
 You can also do per-environment configuration management based on app templates.
 Check out [this doc](env_based_patch.md)
-
