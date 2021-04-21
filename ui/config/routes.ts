@@ -16,6 +16,12 @@
     ],
   },
   {
+    path: '/application-input',
+    hideInMenu: true,
+    name: 'Application Form',
+    component: './Application/InputForm',
+  },
+  {
     path: '/applications',
     name: 'Applications',
     icon: 'AppstoreOutlined',
@@ -24,12 +30,6 @@
         path: '/applications',
         hideInMenu: true,
         component: './Application',
-      },
-      {
-        path: '/applications/create',
-        hideInMenu: true,
-        name: 'Create Application',
-        component: './Application/Create',
       },
       {
         path: '/applications/:appName',

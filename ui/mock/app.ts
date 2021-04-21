@@ -27,7 +27,7 @@ function postApps(req: Request, res: Response, u: string, b: Request) {
   }
 
   const body = (b && b.body) || req.body;
-  const { method, name, desc } = body;
+  const { method, name, desc, components } = body;
 
   let selectedApp: API.ApplicationType = { name: '' };
 
@@ -46,6 +46,7 @@ function postApps(req: Request, res: Response, u: string, b: Request) {
       const newApp: API.ApplicationType = {
         name,
         desc,
+        components,
         updatedAt: moment().valueOf(),
       };
       app.unshift(newApp);
@@ -58,6 +59,7 @@ function postApps(req: Request, res: Response, u: string, b: Request) {
             ...item,
             desc,
             name,
+            components,
             updatedAt: moment().valueOf(),
           };
           return selectedApp;

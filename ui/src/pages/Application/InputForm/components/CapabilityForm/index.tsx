@@ -4,7 +4,7 @@ import { withTheme } from '@rjsf/core';
 import { Card } from 'antd';
 import 'antd/dist/antd.css';
 import React, { useEffect, useState } from 'react';
-import CapabilitySelector, { CapabilitySelectorProps } from '../CapabilitySelector';
+import CapabilitySelector from '../CapabilitySelector';
 
 const FormRender = withTheme(AntDTheme);
 
@@ -12,7 +12,7 @@ export interface CapabilityFormData {
   type: string;
   data: object;
 }
-interface FormProps extends CapabilitySelectorProps {
+interface FormProps {
   onChange: (currentData: CapabilityFormData, oldData?: CapabilityFormData) => void;
 
   disableCapabilities?: string[];

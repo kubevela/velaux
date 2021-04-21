@@ -101,7 +101,15 @@ const ApplicationList = () => {
       valueType: 'option',
       render: (_, record) => (
         <Space>
-          <Link to={{ pathname: `/applications/create`, state: { cluster: selectedCluster } }}>
+          <Link
+            to={{
+              pathname: `/application-input`,
+              state: {
+                cluster: selectedCluster,
+                app: record,
+              },
+            }}
+          >
             <Button id="edit" type="primary">
               <FormattedMessage id="pages.table.edit" defaultMessage="Edit" />
             </Button>
@@ -152,7 +160,7 @@ const ApplicationList = () => {
           labelWidth: 120,
         }}
         toolBarRender={() => [
-          <Link to={{ pathname: `/applications/create`, state: { cluster: selectedCluster } }}>
+          <Link to={{ pathname: `/application-input`, state: { cluster: selectedCluster } }}>
             <Button type="primary" key="primary">
               <PlusOutlined /> <FormattedMessage id="pages.table.new" defaultMessage="New" />
             </Button>

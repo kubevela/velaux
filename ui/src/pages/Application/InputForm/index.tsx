@@ -10,7 +10,8 @@ import ComponentForm from './components/ComponentForm';
 
 export default (props: any) => {
   // @ts-ignore
-  const clusterName = props.location.state.cluster;
+  const clusterName: string = props.location.state.cluster;
+  const app: API.ApplicationType = props.location.state.app;
 
   const [components, setComponents] = useState<API.ComponentType[]>([]);
 
@@ -53,10 +54,11 @@ export default (props: any) => {
               label="Application Name"
               name="name"
               rules={[{ required: true, message: 'Please input name!' }]}
+              initialValue={app?.name}
             >
               <Input />
             </Form.Item>
-            <Form.Item label="Description" name="desc">
+            <Form.Item label="Description" name="desc" initialValue={app?.desc}>
               <Input />
             </Form.Item>
           </Card>
@@ -68,6 +70,7 @@ export default (props: any) => {
               }}
               compDefs={compDefs}
               traitDefs={traitDefs}
+              initialValue={app?.components ?? []}
             />
           </Card>
         </Space>
