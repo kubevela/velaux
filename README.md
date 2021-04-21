@@ -72,7 +72,7 @@ $ _bin/velactl catalog list
 
 ![alt](docs/images/mongo_catalog.png)
 
-### Start dashboard
+## Start dashboard
 
 Run:
 
@@ -85,40 +85,23 @@ $ yarn start
 Starting the development server...
 ```
 
-![alt](docs/images/ui-all.png)
+### Cluster
 
-## Cluster
-
+![alt](docs/images/cluster-list.png)
 ![alt](docs/images/cluster-detail.png)
 
-## Catalog Structure
+### Application
+
+![alt](docs/images/app-list.png)
+
+### Environment
+
+TODO: UI
+
+### Catalog
 
 The catalog repo has a standard structure format in order to be managed in Vela Control Plane.
 
 See [catalog-example](https://github.com/hongchaodeng/catalog-example) repo for more details.
 
-### Setup catalog
-
-Add a catalog:
-
-![alt](docs/images/ui-add-catalog.jpg)
-
-Sync it:
-
-![alt](docs/images/ui-sync-catalog.jpg)
-
-### Setup environment
-
-Add an environment with the package predefined in it:
-
-![alt](docs/images/ui-add-env.jpg)
-
-### Input capabilities parameters via rendered forms
-
-When creating an application, select the environment with the packages included:
-
-![alt](docs/images/ui-create-app-1.png)
-
-Then the [json schema for the capabilities](https://github.com/hongchaodeng/catalog-example/tree/master/catalog/test/schema) will be rendered to take user input:
-
-![alt](docs/images/ui-create-app-2.jpg)
+TODO: UI
