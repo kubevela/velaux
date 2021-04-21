@@ -34,10 +34,6 @@ export default (props: any) => {
               path: '',
               breadcrumbName: 'Clusters',
             },
-            {
-              path: '',
-              breadcrumbName: clusterName,
-            },
           ],
         },
       }}

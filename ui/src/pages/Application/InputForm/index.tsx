@@ -10,8 +10,8 @@ import ComponentForm from './components/ComponentForm';
 
 export default (props: any) => {
   // @ts-ignore
-  const clusterName: string = props.location.state.cluster;
-  const app: API.ApplicationType = props.location.state.app;
+  const clusterName: string = props.location?.state?.cluster ?? '';
+  const app: API.ApplicationType = props.location?.state?.app ?? undefined;
 
   const [components, setComponents] = useState<API.ComponentType[]>([]);
 
@@ -70,7 +70,6 @@ export default (props: any) => {
               }}
               compDefs={compDefs}
               traitDefs={traitDefs}
-              initialValue={app?.components ?? []}
             />
           </Card>
         </Space>
