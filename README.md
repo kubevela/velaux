@@ -93,6 +93,7 @@ Starting the development server...
 ### Application
 
 ![alt](docs/images/app-list.png)
+![alt](docs/images/app-input.png)
 
 ### Environment
 
