@@ -32,8 +32,7 @@ func NewServerCommand() *cobra.Command {
 
 	// api
 	cmd.Flags().IntVar(&s.grpcApiCfg.GrpcPort, "grpc-port", 9000, "The port number used to serve the grpc APIs.")
-	cmd.Flags().IntVar(&s.grpcApiCfg.APIPort, "api-port", 9001, "The port number used to serve the http APIs.")
-	cmd.Flags().IntVar(&s.grpcApiCfg.UIPort, "ui-port", 8000, "The port number used to serve the static files.")
+	cmd.Flags().IntVar(&s.grpcApiCfg.HTTPPort, "http-port", 8000, "The port number used to serve the http APIs.")
 
 	// datastore
 	cmd.Flags().StringVar(&s.dataStoreCfg.URL, "db-url", s.dataStoreCfg.URL, "The login url of the database")

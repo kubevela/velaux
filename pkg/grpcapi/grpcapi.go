@@ -21,8 +21,7 @@ import (
 
 type Config struct {
 	GrpcPort int
-	APIPort  int
-	UIPort   int
+	HTTPPort int
 	Logger   *zap.Logger
 }
 
@@ -52,9 +51,7 @@ func New(d datastore.DataStore, cfg Config) GrpcServer {
 func (s *grpcServer) Run(ctx context.Context) error {
 	s.registerServices()
 
-	go s.serveStatic(ctx)
-
-	go s.startAPI(ctx)
+	go s.startHTTP(ctx)
 
 	return s.startGRPC(ctx)
 }
@@ -66,19 +63,27 @@ func (s *grpcServer) registerServices() {
 	appservice.RegisterApplicationServiceServer(s.server, services.NewAppService(datastore.NewApplicationStore(s.ds), s.Logger))
 }
 
-func (s *grpcServer) startAPI(ctx context.Context) {
-	// Register gRPC server endpoint
-	// Note: Make sure the gRPC server is running properly and accessible
-	mux := runtime.NewServeMux()
+func (s *grpcServer) startHTTP(ctx context.Context) {
+	mux := http.NewServeMux()
+
+	// Register gRPC server endpoint which will proxy calls to gRPC server endpoint
+	grpcMux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err := catalogservice.RegisterCatalogServiceHandlerFromEndpoint(ctx, mux, s.grpcServerEndpoint, opts)
+	err := catalogservice.RegisterCatalogServiceHandlerFromEndpoint(ctx, grpcMux, s.grpcServerEndpoint, opts)
 	if err != nil {
 		panic(err)
 	}
 
-	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	addr := fmt.Sprintf(":%d", s.APIPort)
-	s.Logger.Info("APIs are being served on", zap.Int("port", s.APIPort))
+	mux.Handle("/api/", grpcMux)
+
+	// register static files endpoint
+	fs := http.FileServer(http.Dir("./ui/dist/"))
+	mux.Handle("/", fs)
+
+	// Start HTTP server
+	addr := fmt.Sprintf(":%d", s.HTTPPort)
+	s.Logger.Info("HTTP APIs are being served on", zap.Int("port", s.HTTPPort))
+
 	http.ListenAndServe(addr, mux)
 }
 
@@ -87,18 +92,10 @@ func (s *grpcServer) startGRPC(ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to listen")
 	}
-	s.Logger.Info("GRPC is being served", zap.Int("port", s.GrpcPort))
+	s.Logger.Info("GRPC APIs are being served", zap.Int("port", s.GrpcPort))
 	err = s.server.Serve(l)
 	if err != nil && err != grpc.ErrServerStopped {
 		return errors.Wrap(err, "failed to serve")
 	}
 	return nil
-}
-
-func (s *grpcServer) serveStatic(ctx context.Context) {
-	fs := http.FileServer(http.Dir("./ui/dist/"))
-	http.Handle("/", fs)
-
-	s.Logger.Info("Static files are running on", zap.Int("port", s.UIPort))
-	http.ListenAndServe(fmt.Sprintf(":%d", s.UIPort), nil)
 }

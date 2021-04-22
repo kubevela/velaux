@@ -7,7 +7,7 @@
 - Install [protoc-gen-validate](https://github.com/envoyproxy/protoc-gen-validate)
 - Install [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway)
 - Setup [mongodb](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#run-mongodb-community-edition)
-  - Ensure env `MONGO_URL` is set, e.g. "127.0.0.1:27071".
+  - Ensure env `MONGO_URL` is set, e.g. "127.0.0.1:27017".
 
 ## Development
 
