@@ -33,7 +33,7 @@ _bin/velacp server \
     --db-name=vela
 ```
 
-The dashboard will be served at `localhost:8000`.
+The dashboard will be served at localhost:8000 .
 
 ### Cluster
 
