@@ -42,7 +42,7 @@
   {
     path: '/clusters',
     name: 'Clusters',
-    icon: 'AppstoreOutlined',
+    icon: 'ClusterOutlined',
     routes: [
       {
         path: '/clusters',
