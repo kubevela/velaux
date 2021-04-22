@@ -11,10 +11,10 @@
 
 ## Development
 
-In [frontend development](./frontend.md), developers will use mock APIs first.
-The production rollout of velacp will have both frontend and backend APIs served.
+In [frontend development](./frontend.md), developers will use mock backend services first.
+But eventually the production rollout of velacp will have both frontend and backend services served.
 
-Developing backend APIs in velacp has a well-defined architecture and systematic process. We will walk through the steps in the following.
+Developing backend services in velacp has a well-defined architecture and systematic process. We will walk through the steps in the following.
 
 Let's assume we are building a new service "Cluster".
 
@@ -103,8 +103,8 @@ The process goes as:
    _bin/velacp server \
      --db-address=${MONGO_URL} \
      --db-user=${MONGO_USER} \
-     --db-password=${MONGO_PASSWORD}
-     --db-name=vela \
+     --db-password=${MONGO_PASSWORD} \
+     --db-name=vela
    ```
 
    You can now test the APIs and UIs.
