@@ -18,8 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ClusterServiceClient interface {
-	PutCluster(ctx context.Context, in *PutClusterRequest, opts ...grpc.CallOption) (*PutClusterResponse, error)
 	GetCluster(ctx context.Context, in *GetClusterRequest, opts ...grpc.CallOption) (*GetClusterResponse, error)
+	PutCluster(ctx context.Context, in *PutClusterRequest, opts ...grpc.CallOption) (*PutClusterResponse, error)
 	ListClusters(ctx context.Context, in *ListClustersRequest, opts ...grpc.CallOption) (*ListClustersResponse, error)
 	DelCluster(ctx context.Context, in *DelClusterRequest, opts ...grpc.CallOption) (*DelClusterResponse, error)
 }
@@ -32,18 +32,18 @@ func NewClusterServiceClient(cc grpc.ClientConnInterface) ClusterServiceClient {
 	return &clusterServiceClient{cc}
 }
 
-func (c *clusterServiceClient) PutCluster(ctx context.Context, in *PutClusterRequest, opts ...grpc.CallOption) (*PutClusterResponse, error) {
-	out := new(PutClusterResponse)
-	err := c.cc.Invoke(ctx, "/vela.api.service.clusterservice.ClusterService/PutCluster", in, out, opts...)
+func (c *clusterServiceClient) GetCluster(ctx context.Context, in *GetClusterRequest, opts ...grpc.CallOption) (*GetClusterResponse, error) {
+	out := new(GetClusterResponse)
+	err := c.cc.Invoke(ctx, "/vela.api.service.clusterservice.ClusterService/GetCluster", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *clusterServiceClient) GetCluster(ctx context.Context, in *GetClusterRequest, opts ...grpc.CallOption) (*GetClusterResponse, error) {
-	out := new(GetClusterResponse)
-	err := c.cc.Invoke(ctx, "/vela.api.service.clusterservice.ClusterService/GetCluster", in, out, opts...)
+func (c *clusterServiceClient) PutCluster(ctx context.Context, in *PutClusterRequest, opts ...grpc.CallOption) (*PutClusterResponse, error) {
+	out := new(PutClusterResponse)
+	err := c.cc.Invoke(ctx, "/vela.api.service.clusterservice.ClusterService/PutCluster", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,8 +72,8 @@ func (c *clusterServiceClient) DelCluster(ctx context.Context, in *DelClusterReq
 // All implementations should embed UnimplementedClusterServiceServer
 // for forward compatibility
 type ClusterServiceServer interface {
-	PutCluster(context.Context, *PutClusterRequest) (*PutClusterResponse, error)
 	GetCluster(context.Context, *GetClusterRequest) (*GetClusterResponse, error)
+	PutCluster(context.Context, *PutClusterRequest) (*PutClusterResponse, error)
 	ListClusters(context.Context, *ListClustersRequest) (*ListClustersResponse, error)
 	DelCluster(context.Context, *DelClusterRequest) (*DelClusterResponse, error)
 }
@@ -82,11 +82,11 @@ type ClusterServiceServer interface {
 type UnimplementedClusterServiceServer struct {
 }
 
-func (UnimplementedClusterServiceServer) PutCluster(context.Context, *PutClusterRequest) (*PutClusterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PutCluster not implemented")
-}
 func (UnimplementedClusterServiceServer) GetCluster(context.Context, *GetClusterRequest) (*GetClusterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCluster not implemented")
+}
+func (UnimplementedClusterServiceServer) PutCluster(context.Context, *PutClusterRequest) (*PutClusterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutCluster not implemented")
 }
 func (UnimplementedClusterServiceServer) ListClusters(context.Context, *ListClustersRequest) (*ListClustersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListClusters not implemented")
@@ -106,24 +106,6 @@ func RegisterClusterServiceServer(s grpc.ServiceRegistrar, srv ClusterServiceSer
 	s.RegisterService(&ClusterService_ServiceDesc, srv)
 }
 
-func _ClusterService_PutCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PutClusterRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ClusterServiceServer).PutCluster(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/vela.api.service.clusterservice.ClusterService/PutCluster",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClusterServiceServer).PutCluster(ctx, req.(*PutClusterRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ClusterService_GetCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetClusterRequest)
 	if err := dec(in); err != nil {
@@ -138,6 +120,24 @@ func _ClusterService_GetCluster_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ClusterServiceServer).GetCluster(ctx, req.(*GetClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClusterService_PutCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).PutCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vela.api.service.clusterservice.ClusterService/PutCluster",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).PutCluster(ctx, req.(*PutClusterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -186,12 +186,12 @@ var ClusterService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ClusterServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "PutCluster",
-			Handler:    _ClusterService_PutCluster_Handler,
-		},
-		{
 			MethodName: "GetCluster",
 			Handler:    _ClusterService_GetCluster_Handler,
+		},
+		{
+			MethodName: "PutCluster",
+			Handler:    _ClusterService_PutCluster_Handler,
 		},
 		{
 			MethodName: "ListClusters",
