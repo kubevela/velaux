@@ -19,7 +19,7 @@ type mongodb struct {
 }
 
 func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error) {
-	url := fmt.Sprintf("mongodb://%s:%s@%s", cfg.User, cfg.Password, cfg.Address)
+	url := fmt.Sprintf("mongodb://%s", cfg.URL)
 	clientOpts := options.Client().ApplyURI(url)
 	client, err := mongo.Connect(ctx, clientOpts)
 	if err != nil {

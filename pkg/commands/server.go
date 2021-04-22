@@ -32,14 +32,11 @@ func NewServerCommand() *cobra.Command {
 
 	// api
 	cmd.Flags().IntVar(&s.grpcApiCfg.GrpcPort, "grpc-port", 9000, "The port number used to serve the grpc APIs.")
-	cmd.Flags().IntVar(&s.grpcApiCfg.HttpPort, "http-port", 9001, "The port number used to serve the http APIs.")
+	cmd.Flags().IntVar(&s.grpcApiCfg.APIPort, "api-port", 9001, "The port number used to serve the http APIs.")
+	cmd.Flags().IntVar(&s.grpcApiCfg.UIPort, "ui-port", 8000, "The port number used to serve the static files.")
 
 	// datastore
-	cmd.Flags().StringVar(&s.dataStoreCfg.User, "db-user", s.dataStoreCfg.User, "The username for database login")
-	cmd.MarkFlagRequired("db-user")
-	cmd.Flags().StringVar(&s.dataStoreCfg.Password, "db-password", s.dataStoreCfg.Password, "The password for database login")
-	cmd.MarkFlagRequired("db-password")
-	cmd.Flags().StringVar(&s.dataStoreCfg.Address, "db-address", s.dataStoreCfg.Address, "The address of the database")
+	cmd.Flags().StringVar(&s.dataStoreCfg.URL, "db-url", s.dataStoreCfg.URL, "The login url of the database")
 	cmd.MarkFlagRequired("db-address")
 	cmd.Flags().StringVar(&s.dataStoreCfg.Database, "db-name", s.dataStoreCfg.Database, "The name of the database")
 	cmd.MarkFlagRequired("db-name")

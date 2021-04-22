@@ -3,9 +3,7 @@ package datastore
 import "context"
 
 type Config struct {
-	User     string
-	Password string
-	Address  string
+	URL      string
 	Database string
 }
 

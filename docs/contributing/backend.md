@@ -6,8 +6,8 @@
 - Install [protoc](https://grpc.io/docs/protoc-installation/)
 - Install [protoc-gen-validate](https://github.com/envoyproxy/protoc-gen-validate)
 - Install [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway)
-- Setup [mongodb](https://www.mongodb.com/)
-  - Make sure these envs are ready: `MONGO_URL`, `MONGO_USER`, `MONGO_PASSWORD`
+- Setup [mongodb](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#run-mongodb-community-edition)
+  - Ensure env `MONGO_URL` is set, e.g. "127.0.0.1:27071".
 
 ## Development
 
@@ -85,7 +85,7 @@ The process goes as:
    }
    ```
 
-1. You might notice in previous step there is a ClusterStore object. There is a generic datastore interface defined in `pkg/datastore/datastore.go`. Its mongo backend is implemented in `pkg/datastore/mongodb/mongodb.go`. For each service, you will implement a more specific store to handle its own types and special logic. In this case it is the ClusterStore.
+1. There is a generic datastore interface defined in `pkg/datastore/datastore.go`. Its mongo backend is implemented in `pkg/datastore/mongodb/mongodb.go`. You might notice in previous step there is a ClusterStore object. For each service, you will implement a more specific store to handle its own types and special logic. In this case it is the ClusterStore.
 
 1. Once the code is done, build it:
 
@@ -95,15 +95,13 @@ The process goes as:
 
    This will include the frontend as well.
 
-1. Start mongodb.
+1. Start mongodb
 
 1. Start velacp:
 
-   ```
+   ```bash
    _bin/velacp server \
-     --db-address=${MONGO_URL} \
-     --db-user=${MONGO_USER} \
-     --db-password=${MONGO_PASSWORD} \
+     --db-url=${MONGO_URL} \
      --db-name=vela
    ```
 

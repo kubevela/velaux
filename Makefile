@@ -1,6 +1,13 @@
 all: build
 
-build: proto
+build: build-ui build-cp
+
+build-ui:
+	cd ui/
+	yarn build
+	cd ..
+
+build-cp: proto
 	go build -o _bin/velacp ./cmd/velacp/main.go
 
 build-cli:
@@ -21,9 +28,7 @@ fmt:
 vet:
 	go vet ./pkg/... ./cmd/...
 
-dev: build-cp
+run: build
 	_bin/velacp server \
-		--db-address=${MONGO_URL} \
-		--db-user=${MONGO_USER} \
-		--db-password=${MONGO_PASSWORD}
-		--db-name=vela \
+		--db-url=${MONGO_URL} \
+		--db-name=vela

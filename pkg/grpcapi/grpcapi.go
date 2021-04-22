@@ -21,7 +21,8 @@ import (
 
 type Config struct {
 	GrpcPort int
-	HttpPort int
+	APIPort  int
+	UIPort   int
 	Logger   *zap.Logger
 }
 
@@ -51,18 +52,11 @@ func New(d datastore.DataStore, cfg Config) GrpcServer {
 func (s *grpcServer) Run(ctx context.Context) error {
 	s.registerServices()
 
-	go s.startHTTP(ctx)
+	go s.serveStatic(ctx)
 
-	l, err := net.Listen("tcp", s.grpcServerEndpoint)
-	if err != nil {
-		return errors.Wrap(err, "failed to listen")
-	}
-	s.Logger.Info("grpc server is running on", zap.Int("port", s.GrpcPort))
-	err = s.server.Serve(l)
-	if err != nil && err != grpc.ErrServerStopped {
-		return errors.Wrap(err, "failed to serve")
-	}
-	return nil
+	go s.startAPI(ctx)
+
+	return s.startGRPC(ctx)
 }
 
 func (s *grpcServer) registerServices() {
@@ -72,7 +66,7 @@ func (s *grpcServer) registerServices() {
 	appservice.RegisterApplicationServiceServer(s.server, services.NewAppService(datastore.NewApplicationStore(s.ds), s.Logger))
 }
 
-func (s *grpcServer) startHTTP(ctx context.Context) {
+func (s *grpcServer) startAPI(ctx context.Context) {
 	// Register gRPC server endpoint
 	// Note: Make sure the gRPC server is running properly and accessible
 	mux := runtime.NewServeMux()
@@ -83,7 +77,28 @@ func (s *grpcServer) startHTTP(ctx context.Context) {
 	}
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	addr := fmt.Sprintf(":%d", s.HttpPort)
-	s.Logger.Info("http server is running on", zap.Int("port", s.HttpPort))
+	addr := fmt.Sprintf(":%d", s.APIPort)
+	s.Logger.Info("APIs are being served on", zap.Int("port", s.APIPort))
 	http.ListenAndServe(addr, mux)
+}
+
+func (s *grpcServer) startGRPC(ctx context.Context) error {
+	l, err := net.Listen("tcp", s.grpcServerEndpoint)
+	if err != nil {
+		return errors.Wrap(err, "failed to listen")
+	}
+	s.Logger.Info("GRPC is being served", zap.Int("port", s.GrpcPort))
+	err = s.server.Serve(l)
+	if err != nil && err != grpc.ErrServerStopped {
+		return errors.Wrap(err, "failed to serve")
+	}
+	return nil
+}
+
+func (s *grpcServer) serveStatic(ctx context.Context) {
+	fs := http.FileServer(http.Dir("./ui/dist/"))
+	http.Handle("/", fs)
+
+	s.Logger.Info("Static files are running on", zap.Int("port", s.UIPort))
+	http.ListenAndServe(fmt.Sprintf(":%d", s.UIPort), nil)
 }
