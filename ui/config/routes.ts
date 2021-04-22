@@ -58,7 +58,7 @@
     ],
   },
   {
-    path: '/welcome',
+    path: '/',
     name: 'welcome',
     hideInMenu: true,
     icon: 'smile',
@@ -85,10 +85,6 @@
   //   path: '/list',
   //   component: './TableList',
   // },
-  {
-    path: '/',
-    redirect: '/welcome',
-  },
   {
     component: './404',
   },
