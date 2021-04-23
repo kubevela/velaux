@@ -68,6 +68,7 @@ func (s *restServer) Run(ctx context.Context) error {
 }
 
 func (s *restServer) registerServices() {
+	// All react routes need to be setup here. Otherwise the server returns 404 not found.
 	rewrites := map[string]string{}
 	for _, route := range frontendRoutes {
 		s.server.Static("/", "ui/dist")
