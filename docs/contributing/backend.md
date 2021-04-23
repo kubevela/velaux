@@ -76,6 +76,20 @@ The process goes as:
    touch pkg/grpcapi/services/cluster.go
    ```
 
+   Implement the server stubs:
+
+   ```go
+   func (s *ClusterService) ListClusters(ctx context.Context, request *clusterservice.ListClustersRequest) (*clusterservice.ListClustersResponse, error) {
+    clusters, err := s.store.ListClusters(ctx)
+    if err != nil {
+      return nil, err
+    }
+    return &clusterservice.ListClustersResponse{
+      Clusters: clusters,
+    }, nil
+   }
+   ```
+
    The new service needs to be registered to grpcServer in `pkg/grpcapi/grpcapi.go`:
 
    ```go
@@ -85,7 +99,30 @@ The process goes as:
    }
    ```
 
-1. There is a generic datastore interface defined in `pkg/datastore/datastore.go`. Its mongo backend is implemented in `pkg/datastore/mongodb/mongodb.go`. You might notice in previous step there is a ClusterStore object. For each service, you will implement a more specific store to handle its own types and special logic. In this case it is the ClusterStore.
+1. There is a generic datastore interface defined in `pkg/datastore/datastore.go`. Its mongo backend is implemented in `pkg/datastore/mongodb/mongodb.go`. For each service, you will implement a more specific store adapter to handle its own types and special logic, e.g. ClusterStore in above example.
+
+   All specific store adapter is defined in `pkg/datastore/storeadapter/`. Create one for ClusterStore:
+
+   ```
+   touch pkg/datastore/storeadapter/clusterstore.go
+   ```
+
+   We can see its interface:
+
+   ```go
+   type ClusterStore interface {
+     PutCluster(ctx context.Context, cluster *model.Cluster) error
+     ListClusters(ctx context.Context) ([]*model.Cluster, error)
+     GetCluster(ctx context.Context, name string) (*model.Cluster, error)
+     DelCluster(ctx context.Context, name string) error
+   }
+   ```
+
+   Its returned model, in this case `model.Cluster` is defined in `pkg/datastore/model/` as a protobuf definition:
+
+   ```
+   touch pkg/datastore/model/cluster.proto
+   ```
 
 1. Once the code is done, build it:
 

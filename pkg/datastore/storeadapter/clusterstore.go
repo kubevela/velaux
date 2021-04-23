@@ -1,8 +1,9 @@
-package datastore
+package storeadapter
 
 import (
 	"context"
 
+	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/datastore/model"
 )
 
@@ -18,10 +19,10 @@ type ClusterStore interface {
 }
 
 type clusterStore struct {
-	ds DataStore
+	ds datastore.DataStore
 }
 
-func NewClusterStore(ds DataStore) ClusterStore {
+func NewClusterStore(ds datastore.DataStore) ClusterStore {
 	return &clusterStore{
 		ds: ds,
 	}

@@ -15,7 +15,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // ensure the imports are used
@@ -30,32 +30,42 @@ var (
 	_ = time.Duration(0)
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
-	_ = ptypes.DynamicAny{}
+	_ = anypb.Any{}
 )
-
-// define the regex for a UUID once up-front
-var _application_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 // Validate checks the field values on Application with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *Application) Validate() error {
+// is returned. When asked to return all errors, validation continues after
+// first violation, and the result is a list of violation errors wrapped in
+// ApplicationMultiError, or nil if none found. Otherwise, only the first
+// error is returned, if any.
+func (m *Application) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	if utf8.RuneCountInString(m.GetName()) < 1 {
-		return ApplicationValidationError{
+		err := ApplicationValidationError{
 			field:  "Name",
 			reason: "value length must be at least 1 runes",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if m.GetUpdatedAt() <= 0 {
-		return ApplicationValidationError{
+		err := ApplicationValidationError{
 			field:  "UpdatedAt",
 			reason: "value must be greater than 0",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	// no validation rules for Desc
@@ -65,20 +75,43 @@ func (m *Application) Validate() error {
 	for idx, item := range m.GetComponents() {
 		_, _ = idx, item
 
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ApplicationValidationError{
+		if v, ok := interface{}(item).(interface{ Validate(bool) error }); ok {
+			if err := v.Validate(all); err != nil {
+				err = ApplicationValidationError{
 					field:  fmt.Sprintf("Components[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
 			}
 		}
 
 	}
 
+	if len(errors) > 0 {
+		return ApplicationMultiError(errors)
+	}
 	return nil
 }
+
+// ApplicationMultiError is an error wrapping multiple validation errors
+// returned by Application.Validate(true) if the designated constraints aren't met.
+type ApplicationMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ApplicationMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ApplicationMultiError) AllErrors() []error { return m }
 
 // ApplicationValidationError is the validation error returned by
 // Application.Validate if the designated constraints aren't met.
@@ -136,28 +169,57 @@ var _ interface {
 
 // Validate checks the field values on ApplicationComponent with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *ApplicationComponent) Validate() error {
+// violated, an error is returned. When asked to return all errors, validation
+// continues after first violation, and the result is a list of violation
+// errors wrapped in ApplicationComponentMultiError, or nil if none found.
+// Otherwise, only the first error is returned, if any.
+func (m *ApplicationComponent) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
+
+	var errors []error
 
 	// no validation rules for Name
 
 	// no validation rules for Type
 
-	if v, ok := interface{}(m.GetSettings()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ApplicationComponentValidationError{
+	if v, ok := interface{}(m.GetSettings()).(interface{ Validate(bool) error }); ok {
+		if err := v.Validate(all); err != nil {
+			err = ApplicationComponentValidationError{
 				field:  "Settings",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
 	}
 
+	if len(errors) > 0 {
+		return ApplicationComponentMultiError(errors)
+	}
 	return nil
 }
+
+// ApplicationComponentMultiError is an error wrapping multiple validation
+// errors returned by ApplicationComponent.Validate(true) if the designated
+// constraints aren't met.
+type ApplicationComponentMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ApplicationComponentMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ApplicationComponentMultiError) AllErrors() []error { return m }
 
 // ApplicationComponentValidationError is the validation error returned by
 // ApplicationComponent.Validate if the designated constraints aren't met.
@@ -217,26 +279,55 @@ var _ interface {
 
 // Validate checks the field values on ApplicationTrait with the rules defined
 // in the proto definition for this message. If any rules are violated, an
-// error is returned.
-func (m *ApplicationTrait) Validate() error {
+// error is returned. When asked to return all errors, validation continues
+// after first violation, and the result is a list of violation errors wrapped
+// in ApplicationTraitMultiError, or nil if none found. Otherwise, only the
+// first error is returned, if any.
+func (m *ApplicationTrait) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	// no validation rules for Name
 
-	if v, ok := interface{}(m.GetProperties()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ApplicationTraitValidationError{
+	if v, ok := interface{}(m.GetProperties()).(interface{ Validate(bool) error }); ok {
+		if err := v.Validate(all); err != nil {
+			err = ApplicationTraitValidationError{
 				field:  "Properties",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
 	}
 
+	if len(errors) > 0 {
+		return ApplicationTraitMultiError(errors)
+	}
 	return nil
 }
+
+// ApplicationTraitMultiError is an error wrapping multiple validation errors
+// returned by ApplicationTrait.Validate(true) if the designated constraints
+// aren't met.
+type ApplicationTraitMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ApplicationTraitMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ApplicationTraitMultiError) AllErrors() []error { return m }
 
 // ApplicationTraitValidationError is the validation error returned by
 // ApplicationTrait.Validate if the designated constraints aren't met.

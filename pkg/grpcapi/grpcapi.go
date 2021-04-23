@@ -11,12 +11,14 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
+	"github.com/oam-dev/velacp/pkg/proto/envservice"
+
 	"github.com/oam-dev/velacp/pkg/datastore"
+	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/grpcapi/services"
 	"github.com/oam-dev/velacp/pkg/proto/appservice"
 	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 	"github.com/oam-dev/velacp/pkg/proto/clusterservice"
-	"github.com/oam-dev/velacp/pkg/proto/envservice"
 )
 
 type Config struct {
@@ -57,10 +59,10 @@ func (s *grpcServer) Run(ctx context.Context) error {
 }
 
 func (s *grpcServer) registerServices() {
-	catalogservice.RegisterCatalogServiceServer(s.server, services.NewCatalogService(datastore.NewCatalogStore(s.ds), s.Logger))
-	clusterservice.RegisterClusterServiceServer(s.server, services.NewClusterService(datastore.NewClusterStore(s.ds), s.Logger))
+	catalogservice.RegisterCatalogServiceServer(s.server, services.NewCatalogService(storeadapter.NewCatalogStore(s.ds), s.Logger))
+	clusterservice.RegisterClusterServiceServer(s.server, services.NewClusterService(storeadapter.NewClusterStore(s.ds), s.Logger))
 	envservice.RegisterEnvServiceServer(s.server, services.NewEnvService(datastore.NewEnvStore(s.ds), s.Logger))
-	appservice.RegisterApplicationServiceServer(s.server, services.NewAppService(datastore.NewApplicationStore(s.ds), s.Logger))
+	appservice.RegisterApplicationServiceServer(s.server, services.NewAppService(storeadapter.NewApplicationStore(s.ds), s.Logger))
 }
 
 func (s *grpcServer) startHTTP(ctx context.Context) {

@@ -15,7 +15,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // ensure the imports are used
@@ -30,32 +30,58 @@ var (
 	_ = time.Duration(0)
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
-	_ = ptypes.DynamicAny{}
+	_ = anypb.Any{}
 )
-
-// define the regex for a UUID once up-front
-var _service_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 // Validate checks the field values on PutApplicationRequest with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *PutApplicationRequest) Validate() error {
+// violated, an error is returned. When asked to return all errors, validation
+// continues after first violation, and the result is a list of violation
+// errors wrapped in PutApplicationRequestMultiError, or nil if none found.
+// Otherwise, only the first error is returned, if any.
+func (m *PutApplicationRequest) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetApp()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PutApplicationRequestValidationError{
+	var errors []error
+
+	if v, ok := interface{}(m.GetApp()).(interface{ Validate(bool) error }); ok {
+		if err := v.Validate(all); err != nil {
+			err = PutApplicationRequestValidationError{
 				field:  "App",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
 	}
 
+	if len(errors) > 0 {
+		return PutApplicationRequestMultiError(errors)
+	}
 	return nil
 }
+
+// PutApplicationRequestMultiError is an error wrapping multiple validation
+// errors returned by PutApplicationRequest.Validate(true) if the designated
+// constraints aren't met.
+type PutApplicationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PutApplicationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PutApplicationRequestMultiError) AllErrors() []error { return m }
 
 // PutApplicationRequestValidationError is the validation error returned by
 // PutApplicationRequest.Validate if the designated constraints aren't met.
@@ -115,14 +141,39 @@ var _ interface {
 
 // Validate checks the field values on PutApplicationResponse with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *PutApplicationResponse) Validate() error {
+// violated, an error is returned. When asked to return all errors, validation
+// continues after first violation, and the result is a list of violation
+// errors wrapped in PutApplicationResponseMultiError, or nil if none found.
+// Otherwise, only the first error is returned, if any.
+func (m *PutApplicationResponse) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
+	if len(errors) > 0 {
+		return PutApplicationResponseMultiError(errors)
+	}
 	return nil
 }
+
+// PutApplicationResponseMultiError is an error wrapping multiple validation
+// errors returned by PutApplicationResponse.Validate(true) if the designated
+// constraints aren't met.
+type PutApplicationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PutApplicationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PutApplicationResponseMultiError) AllErrors() []error { return m }
 
 // PutApplicationResponseValidationError is the validation error returned by
 // PutApplicationResponse.Validate if the designated constraints aren't met.
@@ -182,16 +233,41 @@ var _ interface {
 
 // Validate checks the field values on GetApplicationRequest with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *GetApplicationRequest) Validate() error {
+// violated, an error is returned. When asked to return all errors, validation
+// continues after first violation, and the result is a list of violation
+// errors wrapped in GetApplicationRequestMultiError, or nil if none found.
+// Otherwise, only the first error is returned, if any.
+func (m *GetApplicationRequest) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	// no validation rules for Name
 
+	if len(errors) > 0 {
+		return GetApplicationRequestMultiError(errors)
+	}
 	return nil
 }
+
+// GetApplicationRequestMultiError is an error wrapping multiple validation
+// errors returned by GetApplicationRequest.Validate(true) if the designated
+// constraints aren't met.
+type GetApplicationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetApplicationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetApplicationRequestMultiError) AllErrors() []error { return m }
 
 // GetApplicationRequestValidationError is the validation error returned by
 // GetApplicationRequest.Validate if the designated constraints aren't met.
@@ -251,24 +327,53 @@ var _ interface {
 
 // Validate checks the field values on GetApplicationResponse with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *GetApplicationResponse) Validate() error {
+// violated, an error is returned. When asked to return all errors, validation
+// continues after first violation, and the result is a list of violation
+// errors wrapped in GetApplicationResponseMultiError, or nil if none found.
+// Otherwise, only the first error is returned, if any.
+func (m *GetApplicationResponse) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetApp()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetApplicationResponseValidationError{
+	var errors []error
+
+	if v, ok := interface{}(m.GetApp()).(interface{ Validate(bool) error }); ok {
+		if err := v.Validate(all); err != nil {
+			err = GetApplicationResponseValidationError{
 				field:  "App",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
 	}
 
+	if len(errors) > 0 {
+		return GetApplicationResponseMultiError(errors)
+	}
 	return nil
 }
+
+// GetApplicationResponseMultiError is an error wrapping multiple validation
+// errors returned by GetApplicationResponse.Validate(true) if the designated
+// constraints aren't met.
+type GetApplicationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetApplicationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetApplicationResponseMultiError) AllErrors() []error { return m }
 
 // GetApplicationResponseValidationError is the validation error returned by
 // GetApplicationResponse.Validate if the designated constraints aren't met.
@@ -328,14 +433,39 @@ var _ interface {
 
 // Validate checks the field values on ListApplicationsRequest with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *ListApplicationsRequest) Validate() error {
+// violated, an error is returned. When asked to return all errors, validation
+// continues after first violation, and the result is a list of violation
+// errors wrapped in ListApplicationsRequestMultiError, or nil if none found.
+// Otherwise, only the first error is returned, if any.
+func (m *ListApplicationsRequest) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
+	if len(errors) > 0 {
+		return ListApplicationsRequestMultiError(errors)
+	}
 	return nil
 }
+
+// ListApplicationsRequestMultiError is an error wrapping multiple validation
+// errors returned by ListApplicationsRequest.Validate(true) if the designated
+// constraints aren't met.
+type ListApplicationsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListApplicationsRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListApplicationsRequestMultiError) AllErrors() []error { return m }
 
 // ListApplicationsRequestValidationError is the validation error returned by
 // ListApplicationsRequest.Validate if the designated constraints aren't met.
@@ -395,29 +525,58 @@ var _ interface {
 
 // Validate checks the field values on ListApplicationsResponse with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *ListApplicationsResponse) Validate() error {
+// violated, an error is returned. When asked to return all errors, validation
+// continues after first violation, and the result is a list of violation
+// errors wrapped in ListApplicationsResponseMultiError, or nil if none found.
+// Otherwise, only the first error is returned, if any.
+func (m *ListApplicationsResponse) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	for idx, item := range m.GetApps() {
 		_, _ = idx, item
 
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ListApplicationsResponseValidationError{
+		if v, ok := interface{}(item).(interface{ Validate(bool) error }); ok {
+			if err := v.Validate(all); err != nil {
+				err = ListApplicationsResponseValidationError{
 					field:  fmt.Sprintf("Apps[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
 			}
 		}
 
 	}
 
+	if len(errors) > 0 {
+		return ListApplicationsResponseMultiError(errors)
+	}
 	return nil
 }
+
+// ListApplicationsResponseMultiError is an error wrapping multiple validation
+// errors returned by ListApplicationsResponse.Validate(true) if the
+// designated constraints aren't met.
+type ListApplicationsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListApplicationsResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListApplicationsResponseMultiError) AllErrors() []error { return m }
 
 // ListApplicationsResponseValidationError is the validation error returned by
 // ListApplicationsResponse.Validate if the designated constraints aren't met.
@@ -477,16 +636,41 @@ var _ interface {
 
 // Validate checks the field values on DelApplicationRequest with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *DelApplicationRequest) Validate() error {
+// violated, an error is returned. When asked to return all errors, validation
+// continues after first violation, and the result is a list of violation
+// errors wrapped in DelApplicationRequestMultiError, or nil if none found.
+// Otherwise, only the first error is returned, if any.
+func (m *DelApplicationRequest) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	// no validation rules for Name
 
+	if len(errors) > 0 {
+		return DelApplicationRequestMultiError(errors)
+	}
 	return nil
 }
+
+// DelApplicationRequestMultiError is an error wrapping multiple validation
+// errors returned by DelApplicationRequest.Validate(true) if the designated
+// constraints aren't met.
+type DelApplicationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DelApplicationRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DelApplicationRequestMultiError) AllErrors() []error { return m }
 
 // DelApplicationRequestValidationError is the validation error returned by
 // DelApplicationRequest.Validate if the designated constraints aren't met.
@@ -546,14 +730,39 @@ var _ interface {
 
 // Validate checks the field values on DelApplicationResponse with the rules
 // defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *DelApplicationResponse) Validate() error {
+// violated, an error is returned. When asked to return all errors, validation
+// continues after first violation, and the result is a list of violation
+// errors wrapped in DelApplicationResponseMultiError, or nil if none found.
+// Otherwise, only the first error is returned, if any.
+func (m *DelApplicationResponse) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
+	if len(errors) > 0 {
+		return DelApplicationResponseMultiError(errors)
+	}
 	return nil
 }
+
+// DelApplicationResponseMultiError is an error wrapping multiple validation
+// errors returned by DelApplicationResponse.Validate(true) if the designated
+// constraints aren't met.
+type DelApplicationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DelApplicationResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DelApplicationResponseMultiError) AllErrors() []error { return m }
 
 // DelApplicationResponseValidationError is the validation error returned by
 // DelApplicationResponse.Validate if the designated constraints aren't met.

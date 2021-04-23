@@ -15,7 +15,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // ensure the imports are used
@@ -30,40 +30,55 @@ var (
 	_ = time.Duration(0)
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
-	_ = ptypes.DynamicAny{}
+	_ = anypb.Any{}
 )
 
-// define the regex for a UUID once up-front
-var _catalog_uuidPattern = regexp.MustCompile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-
 // Validate checks the field values on Catalog with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *Catalog) Validate() error {
+// proto definition for this message. If any rules are violated, an error is
+// returned. When asked to return all errors, validation continues after first
+// violation, and the result is a list of violation errors wrapped in
+// CatalogMultiError, or nil if none found. Otherwise, only the first error is
+// returned, if any.
+func (m *Catalog) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	if utf8.RuneCountInString(m.GetId()) < 1 {
-		return CatalogValidationError{
+		err := CatalogValidationError{
 			field:  "Id",
 			reason: "value length must be at least 1 runes",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if utf8.RuneCountInString(m.GetName()) < 1 {
-		return CatalogValidationError{
+		err := CatalogValidationError{
 			field:  "Name",
 			reason: "value length must be at least 1 runes",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	// no validation rules for Desc
 
 	if m.GetUpdatedAt() <= 0 {
-		return CatalogValidationError{
+		err := CatalogValidationError{
 			field:  "UpdatedAt",
 			reason: "value must be greater than 0",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	// no validation rules for LastSynced
@@ -72,8 +87,27 @@ func (m *Catalog) Validate() error {
 
 	// no validation rules for Rootdir
 
+	if len(errors) > 0 {
+		return CatalogMultiError(errors)
+	}
 	return nil
 }
+
+// CatalogMultiError is an error wrapping multiple validation errors returned
+// by Catalog.Validate(true) if the designated constraints aren't met.
+type CatalogMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CatalogMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CatalogMultiError) AllErrors() []error { return m }
 
 // CatalogValidationError is the validation error returned by Catalog.Validate
 // if the designated constraints aren't met.
@@ -131,31 +165,59 @@ var _ interface {
 
 // Validate checks the field values on CatalogRepo with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *CatalogRepo) Validate() error {
+// is returned. When asked to return all errors, validation continues after
+// first violation, and the result is a list of violation errors wrapped in
+// CatalogRepoMultiError, or nil if none found. Otherwise, only the first
+// error is returned, if any.
+func (m *CatalogRepo) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
+
+	var errors []error
 
 	// no validation rules for Name
 
 	for idx, item := range m.GetPackages() {
 		_, _ = idx, item
 
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return CatalogRepoValidationError{
+		if v, ok := interface{}(item).(interface{ Validate(bool) error }); ok {
+			if err := v.Validate(all); err != nil {
+				err = CatalogRepoValidationError{
 					field:  fmt.Sprintf("Packages[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
 			}
 		}
 
 	}
 
+	if len(errors) > 0 {
+		return CatalogRepoMultiError(errors)
+	}
 	return nil
 }
+
+// CatalogRepoMultiError is an error wrapping multiple validation errors
+// returned by CatalogRepo.Validate(true) if the designated constraints aren't met.
+type CatalogRepoMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CatalogRepoMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CatalogRepoMultiError) AllErrors() []error { return m }
 
 // CatalogRepoValidationError is the validation error returned by
 // CatalogRepo.Validate if the designated constraints aren't met.
@@ -212,17 +274,27 @@ var _ interface {
 } = CatalogRepoValidationError{}
 
 // Validate checks the field values on Package with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *Package) Validate() error {
+// proto definition for this message. If any rules are violated, an error is
+// returned. When asked to return all errors, validation continues after first
+// violation, and the result is a list of violation errors wrapped in
+// PackageMultiError, or nil if none found. Otherwise, only the first error is
+// returned, if any.
+func (m *Package) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
+	var errors []error
+
 	if utf8.RuneCountInString(m.GetName()) < 1 {
-		return PackageValidationError{
+		err := PackageValidationError{
 			field:  "Name",
 			reason: "value length must be at least 1 runes",
 		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	// no validation rules for Description
@@ -230,13 +302,17 @@ func (m *Package) Validate() error {
 	for idx, item := range m.GetCaps() {
 		_, _ = idx, item
 
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return PackageValidationError{
+		if v, ok := interface{}(item).(interface{ Validate(bool) error }); ok {
+			if err := v.Validate(all); err != nil {
+				err = PackageValidationError{
 					field:  fmt.Sprintf("Caps[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
 			}
 		}
 
@@ -245,20 +321,43 @@ func (m *Package) Validate() error {
 	for idx, item := range m.GetVersions() {
 		_, _ = idx, item
 
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return PackageValidationError{
+		if v, ok := interface{}(item).(interface{ Validate(bool) error }); ok {
+			if err := v.Validate(all); err != nil {
+				err = PackageValidationError{
 					field:  fmt.Sprintf("Versions[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
 			}
 		}
 
 	}
 
+	if len(errors) > 0 {
+		return PackageMultiError(errors)
+	}
 	return nil
 }
+
+// PackageMultiError is an error wrapping multiple validation errors returned
+// by Package.Validate(true) if the designated constraints aren't met.
+type PackageMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PackageMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PackageMultiError) AllErrors() []error { return m }
 
 // PackageValidationError is the validation error returned by Package.Validate
 // if the designated constraints aren't met.
@@ -315,11 +414,17 @@ var _ interface {
 } = PackageValidationError{}
 
 // Validate checks the field values on Capability with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *Capability) Validate() error {
+// proto definition for this message. If any rules are violated, an error is
+// returned. When asked to return all errors, validation continues after first
+// violation, and the result is a list of violation errors wrapped in
+// CapabilityMultiError, or nil if none found. Otherwise, only the first error
+// is returned, if any.
+func (m *Capability) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
+
+	var errors []error
 
 	// no validation rules for Name
 
@@ -327,8 +432,27 @@ func (m *Capability) Validate() error {
 
 	// no validation rules for Jsonschema
 
+	if len(errors) > 0 {
+		return CapabilityMultiError(errors)
+	}
 	return nil
 }
+
+// CapabilityMultiError is an error wrapping multiple validation errors
+// returned by Capability.Validate(true) if the designated constraints aren't met.
+type CapabilityMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CapabilityMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CapabilityMultiError) AllErrors() []error { return m }
 
 // CapabilityValidationError is the validation error returned by
 // Capability.Validate if the designated constraints aren't met.
@@ -386,31 +510,60 @@ var _ interface {
 
 // Validate checks the field values on PackageVersion with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *PackageVersion) Validate() error {
+// is returned. When asked to return all errors, validation continues after
+// first violation, and the result is a list of violation errors wrapped in
+// PackageVersionMultiError, or nil if none found. Otherwise, only the first
+// error is returned, if any.
+func (m *PackageVersion) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
+
+	var errors []error
 
 	// no validation rules for Version
 
 	for idx, item := range m.GetModules() {
 		_, _ = idx, item
 
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return PackageVersionValidationError{
+		if v, ok := interface{}(item).(interface{ Validate(bool) error }); ok {
+			if err := v.Validate(all); err != nil {
+				err = PackageVersionValidationError{
 					field:  fmt.Sprintf("Modules[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
 			}
 		}
 
 	}
 
+	if len(errors) > 0 {
+		return PackageVersionMultiError(errors)
+	}
 	return nil
 }
+
+// PackageVersionMultiError is an error wrapping multiple validation errors
+// returned by PackageVersion.Validate(true) if the designated constraints
+// aren't met.
+type PackageVersionMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PackageVersionMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PackageVersionMultiError) AllErrors() []error { return m }
 
 // PackageVersionValidationError is the validation error returned by
 // PackageVersion.Validate if the designated constraints aren't met.
@@ -467,34 +620,67 @@ var _ interface {
 } = PackageVersionValidationError{}
 
 // Validate checks the field values on Module with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *Module) Validate() error {
+// proto definition for this message. If any rules are violated, an error is
+// returned. When asked to return all errors, validation continues after first
+// violation, and the result is a list of violation errors wrapped in
+// ModuleMultiError, or nil if none found. Otherwise, only the first error is
+// returned, if any.
+func (m *Module) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetHelm()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ModuleValidationError{
+	var errors []error
+
+	if v, ok := interface{}(m.GetHelm()).(interface{ Validate(bool) error }); ok {
+		if err := v.Validate(all); err != nil {
+			err = ModuleValidationError{
 				field:  "Helm",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
 	}
 
-	if v, ok := interface{}(m.GetKube()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ModuleValidationError{
+	if v, ok := interface{}(m.GetKube()).(interface{ Validate(bool) error }); ok {
+		if err := v.Validate(all); err != nil {
+			err = ModuleValidationError{
 				field:  "Kube",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
 	}
 
+	if len(errors) > 0 {
+		return ModuleMultiError(errors)
+	}
 	return nil
 }
+
+// ModuleMultiError is an error wrapping multiple validation errors returned by
+// Module.Validate(true) if the designated constraints aren't met.
+type ModuleMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ModuleMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ModuleMultiError) AllErrors() []error { return m }
 
 // ModuleValidationError is the validation error returned by Module.Validate if
 // the designated constraints aren't met.
@@ -551,11 +737,17 @@ var _ interface {
 } = ModuleValidationError{}
 
 // Validate checks the field values on HelmModule with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *HelmModule) Validate() error {
+// proto definition for this message. If any rules are violated, an error is
+// returned. When asked to return all errors, validation continues after first
+// violation, and the result is a list of violation errors wrapped in
+// HelmModuleMultiError, or nil if none found. Otherwise, only the first error
+// is returned, if any.
+func (m *HelmModule) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
+
+	var errors []error
 
 	// no validation rules for Repo
 
@@ -563,8 +755,27 @@ func (m *HelmModule) Validate() error {
 
 	// no validation rules for Version
 
+	if len(errors) > 0 {
+		return HelmModuleMultiError(errors)
+	}
 	return nil
 }
+
+// HelmModuleMultiError is an error wrapping multiple validation errors
+// returned by HelmModule.Validate(true) if the designated constraints aren't met.
+type HelmModuleMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m HelmModuleMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m HelmModuleMultiError) AllErrors() []error { return m }
 
 // HelmModuleValidationError is the validation error returned by
 // HelmModule.Validate if the designated constraints aren't met.
@@ -621,18 +832,43 @@ var _ interface {
 } = HelmModuleValidationError{}
 
 // Validate checks the field values on KubeModule with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *KubeModule) Validate() error {
+// proto definition for this message. If any rules are violated, an error is
+// returned. When asked to return all errors, validation continues after first
+// violation, and the result is a list of violation errors wrapped in
+// KubeModuleMultiError, or nil if none found. Otherwise, only the first error
+// is returned, if any.
+func (m *KubeModule) Validate(all bool) error {
 	if m == nil {
 		return nil
 	}
+
+	var errors []error
 
 	// no validation rules for Path
 
 	// no validation rules for Url
 
+	if len(errors) > 0 {
+		return KubeModuleMultiError(errors)
+	}
 	return nil
 }
+
+// KubeModuleMultiError is an error wrapping multiple validation errors
+// returned by KubeModule.Validate(true) if the designated constraints aren't met.
+type KubeModuleMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m KubeModuleMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m KubeModuleMultiError) AllErrors() []error { return m }
 
 // KubeModuleValidationError is the validation error returned by
 // KubeModule.Validate if the designated constraints aren't met.

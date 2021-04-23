@@ -6,18 +6,18 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/oam-dev/velacp/pkg/datastore"
+	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/proto/clusterservice"
 )
 
 var _ clusterservice.ClusterServiceServer = &ClusterService{}
 
 type ClusterService struct {
-	store  datastore.ClusterStore
+	store  storeadapter.ClusterStore
 	logger *zap.Logger
 }
 
-func NewClusterService(store datastore.ClusterStore, l *zap.Logger) *ClusterService {
+func NewClusterService(store storeadapter.ClusterStore, l *zap.Logger) *ClusterService {
 	s := &ClusterService{
 		store:  store,
 		logger: l,

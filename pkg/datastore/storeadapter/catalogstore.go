@@ -1,9 +1,10 @@
-package datastore
+package storeadapter
 
 import (
 	"context"
 	"errors"
 
+	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/datastore/model"
 )
 
@@ -29,12 +30,12 @@ type CatalogStore interface {
 	ListPackages(ctx context.Context, catalogName string) ([]*model.Package, error)
 }
 
-func NewCatalogStore(ds DataStore) CatalogStore {
+func NewCatalogStore(ds datastore.DataStore) CatalogStore {
 	return &catalogStore{ds: ds}
 }
 
 type catalogStore struct {
-	ds DataStore
+	ds datastore.DataStore
 }
 
 func (c *catalogStore) GetCatalog(ctx context.Context, name string) (*model.Catalog, error) {

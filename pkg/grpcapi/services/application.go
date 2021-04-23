@@ -6,18 +6,18 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/oam-dev/velacp/pkg/datastore"
+	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/proto/appservice"
 )
 
 var _ appservice.ApplicationServiceServer = &AppService{}
 
 type AppService struct {
-	store  datastore.ApplicationStore
+	store  storeadapter.ApplicationStore
 	logger *zap.Logger
 }
 
-func NewAppService(store datastore.ApplicationStore, l *zap.Logger) *AppService {
+func NewAppService(store storeadapter.ApplicationStore, l *zap.Logger) *AppService {
 	s := &AppService{
 		store:  store,
 		logger: l,

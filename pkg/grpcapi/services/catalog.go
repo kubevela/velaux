@@ -21,8 +21,8 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 
-	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/datastore/model"
+	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/proto/catalogservice"
 )
 
@@ -33,7 +33,7 @@ const (
 )
 
 type CatalogService struct {
-	Store datastore.CatalogStore
+	Store storeadapter.CatalogStore
 
 	catalogMap sync.Map
 	logger     *zap.Logger
@@ -51,7 +51,7 @@ func makeRootDir(dir string) string {
 	return dir
 }
 
-func NewCatalogService(store datastore.CatalogStore, l *zap.Logger) *CatalogService {
+func NewCatalogService(store storeadapter.CatalogStore, l *zap.Logger) *CatalogService {
 	c := &CatalogService{
 		Store:  store,
 		logger: l,
