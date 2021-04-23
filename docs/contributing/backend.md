@@ -3,11 +3,9 @@
 ## Preparation
 
 - Install [go](https://golang.org/dl/)
+- Install [yarn](https://yarnpkg.com/)
 - Install [protoc](https://grpc.io/docs/protoc-installation/)
-- Install [protoc-gen-validate](https://github.com/envoyproxy/protoc-gen-validate)
-- Install [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway)
-- Setup [mongodb](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#run-mongodb-community-edition)
-  - Ensure env `MONGO_URL` is set, e.g. "127.0.0.1:27017".
+- Install [mongodb](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition)
 
 ## Development
 
@@ -20,36 +18,18 @@ Let's assume we are building a new service "Cluster".
 
 The process goes as:
 
-1. In `pkg/proto/`, add a new folder for the new service:
+1. All public APIs, including records stored in database, should be defined in protobuf. In `pkg/proto/`, add a new protobuf definition:
 
    ```
-   mkdir pkg/proto/clusterservice/
+   touch pkg/proto/cluster.proto
    ```
 
-   The proto file must be named as:
-
-   ```
-   touch pkg/proto/clusterservice/service.proto
-   ```
-
-   Add service definitions:
+   Add definitions for cluster service API types:
 
    ```protobuf
-   service ClusterService {
-    rpc PutCluster(PutClusterRequest) returns (PutClusterResponse) {
-      option (google.api.http) = {
-        post: "/api/catalogs"
-      };}
-    rpc ListClusters(ListClustersRequest) returns (ListClustersResponse) {
-      option (google.api.http) = {
-        get: "/api/catalogs"
-      };
-    }
-    rpc DelCluster(DelClusterRequest) returns (DelClusterResponse) {
-      option (google.api.http) = {
-        delete: "/api/catalogs"
-      };
-    }
+   message Cluster {
+     string name = 1;
+     ...
    }
    ```
 
@@ -59,47 +39,41 @@ The process goes as:
    make proto
    ```
 
-   You should see the following files generated in `pkg/proto/clusterservice/`:
+1. Add the service endpoints. First create a new service in `pkg/rest/services/`:
 
    ```
-   pkg/proto/clusterservice
-   ├── service.pb.go
-   ├── service.pb.gw.go
-   ├── service.pb.validate.go
-   ├── service.proto
-   └── service_grpc.pb.go
+   touch pkg/rest/services//cluster.go
    ```
 
-1. Then Implement the server stubs. First create a new file in `pkg/grpcapi/services/`:
-
-   ```
-   touch pkg/grpcapi/services/cluster.go
-   ```
-
-   Implement the server stubs:
+   Implement the services:
 
    ```go
-   func (s *ClusterService) ListClusters(ctx context.Context, request *clusterservice.ListClustersRequest) (*clusterservice.ListClustersResponse, error) {
-    clusters, err := s.store.ListClusters(ctx)
-    if err != nil {
-      return nil, err
-    }
-    return &clusterservice.ListClustersResponse{
-      Clusters: clusters,
-    }, nil
+   type ClusterService struct {
+     ...
    }
-   ```
 
-   The new service needs to be registered to grpcServer in `pkg/grpcapi/grpcapi.go`:
+   func NewClusterService(store storeadapter.ClusterStore) *ClusterService {
+     return &ClusterService{
+       ...
+     }
+   }
 
-   ```go
-   func (s *grpcServer) registerServices() {
-     clusterservice.RegisterClusterServiceServer(s.server, services.NewClusterService(datastore.NewClusterStore(s.ds), s.Logger))
+   func (s *ClusterService) GetClusters(c echo.Context) error {
      ...
    }
    ```
 
-1. There is a generic datastore interface defined in `pkg/datastore/datastore.go`. Its mongo backend is implemented in `pkg/datastore/mongodb/mongodb.go`. For each service, you will implement a more specific store adapter to handle its own types and special logic, e.g. ClusterStore in above example.
+   The new service needs to be registered to in `pkg/rest/rest_server.go`:
+
+   ```go
+   func (s *restServer) registerServices() {
+     ...
+     clusterService := services.NewClusterService(storeadapter.NewClusterStore(s.ds))
+     s.server.GET("/api/clusters", clusterService.GetClusters)
+   }
+   ```
+
+1. There is a generic datastore interface defined in `pkg/datastore/datastore.go`. Its mongo backend is implemented in `pkg/datastore/mongodb/mongodb.go`. For each service, you will implement a more specific store adapter to handle its own types and special logic, e.g. ClusterStore.
 
    All specific store adapter is defined in `pkg/datastore/storeadapter/`. Create one for ClusterStore:
 
@@ -111,18 +85,13 @@ The process goes as:
 
    ```go
    type ClusterStore interface {
-     PutCluster(ctx context.Context, cluster *model.Cluster) error
-     ListClusters(ctx context.Context) ([]*model.Cluster, error)
-     GetCluster(ctx context.Context, name string) (*model.Cluster, error)
-     DelCluster(ctx context.Context, name string) error
+     PutCluster(cluster *model.Cluster) error
+     ListClusters() ([]*model.Cluster, error)
+     DelCluster(name string) error
    }
    ```
 
-   Its returned model, in this case `model.Cluster` is defined in `pkg/datastore/model/` as a protobuf definition:
-
-   ```
-   touch pkg/datastore/model/cluster.proto
-   ```
+   Its returned model, i.e. `model.Cluster`, is defined in the `pkg/proto/model/cluster.proto`.
 
 1. Once the code is done, build it:
 
@@ -132,7 +101,8 @@ The process goes as:
 
    This will include the frontend as well.
 
-1. Start mongodb
+1. Start [mongodb](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#run-mongodb-community-edition).
+   Ensure env `MONGO_URL` is set, e.g. "127.0.0.1:27017".
 
 1. Start velacp:
 

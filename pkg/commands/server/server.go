@@ -5,22 +5,17 @@ import (
 
 	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/datastore/mongodb"
-	"github.com/oam-dev/velacp/pkg/grpcapi"
+	"github.com/oam-dev/velacp/pkg/rest"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 type server struct {
-	logger       *zap.Logger
 	dataStoreCfg datastore.Config
-	grpcApiCfg   grpcapi.Config
+	restCfg      rest.Config
 }
 
 func NewServerCommand() *cobra.Command {
 	s := &server{}
-	logger := newLogger()
-	s.logger = logger
-	s.grpcApiCfg.Logger = logger
 
 	cmd := &cobra.Command{
 		Use:   "server",
@@ -30,9 +25,8 @@ func NewServerCommand() *cobra.Command {
 		},
 	}
 
-	// api
-	cmd.Flags().IntVar(&s.grpcApiCfg.GrpcPort, "grpc-port", 9000, "The port number used to serve the grpc APIs.")
-	cmd.Flags().IntVar(&s.grpcApiCfg.HTTPPort, "http-port", 8000, "The port number used to serve the http APIs.")
+	// rest
+	cmd.Flags().IntVar(&s.restCfg.Port, "port", 8000, "The port number used to serve the http APIs.")
 
 	// datastore
 	cmd.Flags().StringVar(&s.dataStoreCfg.URL, "db-url", s.dataStoreCfg.URL, "The login url of the database")
@@ -43,27 +37,6 @@ func NewServerCommand() *cobra.Command {
 	return cmd
 }
 
-func newLogger() *zap.Logger {
-	c := zap.Config{
-		Level:       zap.NewAtomicLevel(),
-		Development: false,
-		Sampling: &zap.SamplingConfig{
-			Initial:    100,
-			Thereafter: 100,
-		},
-		Encoding:         "console",
-		EncoderConfig:    zap.NewProductionEncoderConfig(),
-		OutputPaths:      []string{"stderr"},
-		ErrorOutputPaths: []string{"stderr"},
-	}
-	var opt []zap.Option
-	l, err := c.Build(opt...)
-	if err != nil {
-		panic(err)
-	}
-	return l
-}
-
 func (s *server) run() error {
 	ctx := context.Background()
 
@@ -72,6 +45,6 @@ func (s *server) run() error {
 		return err
 	}
 
-	server := grpcapi.New(d, s.grpcApiCfg)
+	server := rest.New(d, s.restCfg)
 	return server.Run(ctx)
 }

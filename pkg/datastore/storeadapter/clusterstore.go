@@ -4,22 +4,19 @@ import (
 	"context"
 
 	"github.com/oam-dev/velacp/pkg/datastore"
-	"github.com/oam-dev/velacp/pkg/datastore/model"
+	"github.com/oam-dev/velacp/pkg/proto/model"
 )
 
 const (
-	clusterKind = "Cluster"
+	clusterKind = "cluster"
 )
 
-type ClusterStore interface {
-	PutCluster(ctx context.Context, cluster *model.Cluster) error
-	ListClusters(ctx context.Context) ([]*model.Cluster, error)
-	GetCluster(ctx context.Context, name string) (*model.Cluster, error)
-	DelCluster(ctx context.Context, name string) error
-}
+var _ ClusterStore = &clusterStore{}
 
-type clusterStore struct {
-	ds datastore.DataStore
+type ClusterStore interface {
+	PutCluster(cluster *model.Cluster) error
+	ListClusters() ([]*model.Cluster, error)
+	DelCluster(name string) error
 }
 
 func NewClusterStore(ds datastore.DataStore) ClusterStore {
@@ -28,10 +25,16 @@ func NewClusterStore(ds datastore.DataStore) ClusterStore {
 	}
 }
 
-func (c *clusterStore) PutCluster(ctx context.Context, cluster *model.Cluster) error {
-	return c.ds.Put(ctx, clusterKind, cluster)
+type clusterStore struct {
+	ds datastore.DataStore
 }
-func (c *clusterStore) ListClusters(ctx context.Context) ([]*model.Cluster, error) {
+
+func (c *clusterStore) PutCluster(cluster *model.Cluster) error {
+	panic("implement me")
+}
+
+func (c *clusterStore) ListClusters() ([]*model.Cluster, error) {
+	ctx := context.Background()
 	iter, err := c.ds.Find(ctx, clusterKind)
 	if err != nil {
 		return nil, err
@@ -48,14 +51,7 @@ func (c *clusterStore) ListClusters(ctx context.Context) ([]*model.Cluster, erro
 	}
 	return cs, nil
 }
-func (c *clusterStore) GetCluster(ctx context.Context, name string) (*model.Cluster, error) {
-	res := &model.Cluster{}
-	err := c.ds.Get(ctx, clusterKind, name, res)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-func (c *clusterStore) DelCluster(ctx context.Context, name string) error {
-	return c.ds.Delete(ctx, clusterKind, name)
+
+func (c *clusterStore) DelCluster(name string) error {
+	panic("implement me")
 }

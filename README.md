@@ -8,9 +8,10 @@ create stream-line application delivery pipelines.
 
 This project is based on the following tech stacks:
 
-- grpc
-- mongodb
-- ant-design-pro
+- [Protobuf](https://developers.google.com/protocol-buffers/docs/gotutorial)
+- [Echo](https://echo.labstack.com/)
+- Mongodb
+- Ant Design Pro
 
 ![alt](docs/images/velacp-arch.png)
 
