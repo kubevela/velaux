@@ -9,9 +9,9 @@ create stream-line application delivery pipelines.
 This project is based on the following tech stacks:
 
 - [Protobuf](https://developers.google.com/protocol-buffers/docs/gotutorial)
-- [Echo](https://echo.labstack.com/)
+- Go & [Echo](https://echo.labstack.com/)
+- React & Ant Design Pro
 - Mongodb
-- Ant Design Pro
 
 ![alt](docs/images/velacp-arch.png)
 
