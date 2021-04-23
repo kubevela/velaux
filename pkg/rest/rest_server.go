@@ -15,6 +15,12 @@ import (
 
 var _ RestServer = &restServer{}
 
+var frontendRoutes = []string{
+	"/",
+	"/clusters",
+	"/applicatons",
+}
+
 type Config struct {
 	Port int
 }
@@ -62,7 +68,12 @@ func (s *restServer) Run(ctx context.Context) error {
 }
 
 func (s *restServer) registerServices() {
-	s.server.Static("/", "ui/dist")
+	rewrites := map[string]string{}
+	for _, route := range frontendRoutes {
+		s.server.Static("/", "ui/dist")
+		rewrites[route] = "/"
+	}
+	s.server.Pre(middleware.Rewrite(rewrites))
 
 	clusterService := services.NewClusterService(storeadapter.NewClusterStore(s.ds))
 	s.server.GET("/api/clusters", clusterService.GetClusters)

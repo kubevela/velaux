@@ -26,7 +26,7 @@ fmt:
 vet:
 	go vet ./pkg/... ./cmd/...
 
-run: build
+run: build-cp
 	_bin/velacp server \
 		--db-url=${MONGO_URL} \
 		--db-name=vela
