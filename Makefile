@@ -15,7 +15,7 @@ proto:
 	hack/gen_proto.sh
 
 # Run tests
-test: proto fmt vet
+test: fmt vet
 	go test ./pkg/... ./cmd/...
 
 # Run go fmt against code
