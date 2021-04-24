@@ -6,19 +6,14 @@ import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
 import { Button, message, Space, Tooltip } from 'antd';
 import moment from 'moment';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, Link } from 'umi';
-
-interface UpdateState {
-  visible: boolean;
-  value?: API.ApplicationType;
-}
 
 const ApplicationList = () => {
   const [clusterNames, setClusterNames] = useState<string[]>([]);
   const [selectedCluster, setSelectedCluster] = useState<string>('');
 
-  let clusterEnum = {};
+  const clusterEnum = {};
   clusterNames.forEach((value) => {
     clusterEnum[value] = { text: value };
   });
@@ -152,7 +147,7 @@ const ApplicationList = () => {
   }
 
   return (
-    <PageContainer loading={clusterNames.length == 0}>
+    <PageContainer loading={clusterNames.length === 0}>
       <ProTable<API.ApplicationType>
         columns={columns}
         rowKey="key"
@@ -175,7 +170,7 @@ const ApplicationList = () => {
         ]}
         request={async (params, sorter, filter) => {
           setSelectedCluster(params.cluster);
-          let resp = await listApplications(params.cluster);
+          const resp = await listApplications(params.cluster);
           let apps = resp.applications;
 
           if (params.name) {

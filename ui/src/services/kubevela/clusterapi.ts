@@ -51,3 +51,9 @@ export async function listTraitDefinitions(cluster: string) {
     `/api/clusters/${cluster}/traitdefinitions`,
   );
 }
+
+export async function installVelaController(cluster: string, helmrepo: string, version: string) {
+  return request<{version: string}>(
+    `/api/clusters/${cluster}/installvela`
+  )
+}
