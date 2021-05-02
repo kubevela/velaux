@@ -33,14 +33,23 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 	return m, nil
 }
 
+func (m *mongodb) Add(ctx context.Context, kind string, entity interface{}) error {
+	collection := m.client.Database(m.database).Collection(kind)
+	_, err := collection.InsertOne(ctx, entity)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *mongodb) Get(ctx context.Context, kind, name string, decodeTo interface{}) error {
 	collection := m.client.Database(m.database).Collection(kind)
 	return collection.FindOne(ctx, makeNameFilter(name)).Decode(decodeTo)
 }
 
-func (m *mongodb) Put(ctx context.Context, kind string, entity interface{}) error {
+func (m *mongodb) Put(ctx context.Context, kind, name string, entity interface{}) error {
 	collection := m.client.Database(m.database).Collection(kind)
-	_, err := collection.InsertOne(ctx, entity)
+	_, err := collection.UpdateOne(ctx, makeNameFilter(name), makeEntityUpdate(entity))
 	if err != nil {
 		return err
 	}
@@ -73,4 +82,8 @@ func (m *mongodb) Delete(ctx context.Context, kind, name string) error {
 
 func makeNameFilter(name string) bson.D {
 	return bson.D{{Key: "name", Value: name}}
+}
+
+func makeEntityUpdate(entity interface{}) bson.M {
+	return bson.M{"$set": entity}
 }

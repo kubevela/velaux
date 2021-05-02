@@ -8,7 +8,9 @@ type Config struct {
 }
 
 type DataStore interface {
-	Put(ctx context.Context, kind string, entity interface{}) error
+	Add(ctx context.Context, kind string, entity interface{}) error
+
+	Put(ctx context.Context, kind, name string, entity interface{}) error
 
 	Delete(ctx context.Context, kind, name string) error
 
