@@ -5,7 +5,7 @@ build: build-ui build-cp
 build-ui:
 	cd ui/ && yarn build &&	cd ..
 
-build-cp: proto
+build-cp:
 	go build -o _bin/velacp ./cmd/velacp/main.go
 
 build-cli:
