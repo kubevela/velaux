@@ -1,17 +1,40 @@
 syntax = "proto3";
-
 package vela.api.model;
+
+import "google/protobuf/struct.proto";
+
+
 option go_package = "github.com/oam-dev/velacp/pkg/proto/model";
 
 message Application {
 
   string name = 1;
 
-  string desc = 2;
+  string namespace = 2;
+
+  string desc = 3;
 
   // Unix time of the last time when the cluster is updated.
-  int64 updated_at = 3;
+  int64 updated_at = 4;
+
+  repeated ComponentType components = 5;
+
+  string clusterName = 6;
+
 }
+
+message ComponentType {
+  string name = 1;
+  string type = 2;
+  google.protobuf.Struct properties = 3;
+  repeated TraitType traits = 4;
+}
+
+message TraitType {
+  string type = 1;
+  google.protobuf.Struct properties = 2;
+}
+
 
 message ApplicationListResponse {
   repeated Application applications = 1;
