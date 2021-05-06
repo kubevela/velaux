@@ -14,7 +14,9 @@ const (
 var _ ClusterStore = &clusterStore{}
 
 type ClusterStore interface {
+	AddCluster(cluster *model.Cluster) error
 	PutCluster(cluster *model.Cluster) error
+	GetCluster(name string) (*model.Cluster, error)
 	ListClusters() ([]*model.Cluster, error)
 	DelCluster(name string) error
 }
@@ -29,8 +31,30 @@ type clusterStore struct {
 	ds datastore.DataStore
 }
 
+func (c *clusterStore) AddCluster(cluster *model.Cluster) error {
+	ctx := context.Background()
+	if err := c.ds.Add(ctx, clusterKind, cluster); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *clusterStore) PutCluster(cluster *model.Cluster) error {
-	panic("implement me")
+	ctx := context.Background()
+	if err := c.ds.Put(ctx, clusterKind, cluster.Name, cluster); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *clusterStore) GetCluster(name string) (*model.Cluster, error) {
+	ctx := context.Background()
+	cluster := &model.Cluster{}
+	err := c.ds.Get(ctx, clusterKind, name, cluster)
+	if err != nil {
+		return nil, err
+	}
+	return cluster, nil
 }
 
 func (c *clusterStore) ListClusters() ([]*model.Cluster, error) {
@@ -53,5 +77,10 @@ func (c *clusterStore) ListClusters() ([]*model.Cluster, error) {
 }
 
 func (c *clusterStore) DelCluster(name string) error {
-	panic("implement me")
+	ctx := context.Background()
+	err := c.ds.Delete(ctx, clusterKind, name)
+	if err != nil {
+		return err
+	}
+	return nil
 }

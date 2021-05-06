@@ -78,6 +78,10 @@ func (s *restServer) registerServices() {
 
 	clusterService := services.NewClusterService(storeadapter.NewClusterStore(s.ds))
 	s.server.GET("/api/clusters", clusterService.GetClusters)
+	s.server.GET("/api/clusternames", clusterService.GetClusterNames)
+	s.server.POST("/api/clusters", clusterService.AddCluster)
+	s.server.PUT("/api/clusters", clusterService.UpdateCluster)
+	s.server.DELETE("/api/clusters/:clusterName", clusterService.DelCluster)
 }
 
 func (s *restServer) startHTTP(ctx context.Context) error {
