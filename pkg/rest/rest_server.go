@@ -76,12 +76,22 @@ func (s *restServer) registerServices() {
 	}
 	s.server.Pre(middleware.Rewrite(rewrites))
 
-	clusterService := services.NewClusterService(storeadapter.NewClusterStore(s.ds))
+	clusterStore := storeadapter.NewClusterStore(s.ds)
+	clusterService := services.NewClusterService(clusterStore)
 	s.server.GET("/api/clusters", clusterService.GetClusters)
 	s.server.GET("/api/clusternames", clusterService.GetClusterNames)
 	s.server.POST("/api/clusters", clusterService.AddCluster)
 	s.server.PUT("/api/clusters", clusterService.UpdateCluster)
 	s.server.DELETE("/api/clusters/:clusterName", clusterService.DelCluster)
+
+	// application
+	appStore := storeadapter.NewApplicationStore(s.ds)
+	applicationService := services.NewApplicationService(appStore, clusterStore)
+	s.server.GET("/api/clusters/:cluster/applications", applicationService.GetApplications)
+	s.server.POST("/api/clusters/:cluster/applications", applicationService.AddApplications)
+	s.server.PUT("/api/clusters/:cluster/applications", applicationService.UpdateApplications)
+	s.server.DELETE("/api/clusters/:cluster/applications", applicationService.RemoveApplications)
+
 }
 
 func (s *restServer) startHTTP(ctx context.Context) error {

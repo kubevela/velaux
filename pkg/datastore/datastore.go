@@ -18,6 +18,10 @@ type DataStore interface {
 
 	// Find executes a find command and returns an iterator over the matching items.
 	Find(ctx context.Context, kind string) (Iterator, error)
+
+	FindOne(ctx context.Context, kind, name string) (Iterator, error)
+
+	IsExist(ctx context.Context, kind, name string) (bool, error)
 }
 
 type Iterator interface {
