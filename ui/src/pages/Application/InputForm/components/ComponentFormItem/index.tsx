@@ -15,6 +15,7 @@ interface FormProps {
 }
 
 export default ({ component, setComponent, compDefs, traitDefs }: FormProps) => {
+  console.log(compDefs)
   return (
     <div>
       <Form.Item label="Name" required rules={[{ required: true, max: 200 }]}>
