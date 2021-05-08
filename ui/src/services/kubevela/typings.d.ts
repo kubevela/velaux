@@ -6,19 +6,25 @@ declare namespace API {
     name: string;
     desc?: string;
     updatedAt?: number; // unix milliseconds
-
     components?: ComponentType[];
+    events?: Event[];
   };
 
   export type ComponentType = {
     name: string;
-    type?: string;
+    namespace: string;
+    type: string;
+    workload: string;
+    desc?: string;
+    phase?: string;
+    health?: boolean;
     properties?: {};
     traits?: TraitType[];
   };
 
   export type TraitType = {
     type: string;
+    desc?: string;
     properties?: {};
   };
 
@@ -34,4 +40,11 @@ declare namespace API {
     desc?: string;
     jsonschema: string;
   };
+
+  export type Event = {
+    type: string;
+    reason: string;
+    age: string;
+    message: string;
+  }
 }
