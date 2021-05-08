@@ -92,6 +92,8 @@ func (s *restServer) registerServices() {
 	s.server.PUT("/api/clusters/:cluster/applications", applicationService.UpdateApplications)
 	s.server.DELETE("/api/clusters/:cluster/applications", applicationService.RemoveApplications)
 
+	velaInstallService := services.NewVelaInstallService(clusterStore)
+	s.server.GET("/api/clusters/:cluster/installvela", velaInstallService.InstallVela)
 }
 
 func (s *restServer) startHTTP(ctx context.Context) error {
