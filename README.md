@@ -1,16 +1,14 @@
 # velacp
 
-KubeVela control plane to manage hybrid multi-cloud clusters,
-provide plug-and-play capability management,
-create stream-line application delivery pipelines.
+KubeVela control plane (velacp) includes the UI/CLI and HTTP server components to provide application and cluster management experience based on KubeVela & K8s.
 
 ## Architecture
 
 This project is based on the following tech stacks:
 
 - [Protobuf](https://developers.google.com/protocol-buffers/docs/gotutorial)
-- Go & [Echo](https://echo.labstack.com/)
-- React & Ant Design Pro
+- Golang and [Echo](https://echo.labstack.com/)
+- React and [Ant Design Pro](https://pro.ant.design/)
 - Mongodb
 
 ![alt](docs/images/velacp-arch.png)
