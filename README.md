@@ -45,4 +45,5 @@ The dashboard will be served at http://localhost:8000 .
 
 ![alt](docs/images/app-list.png)
 ![alt](docs/images/app-input.png)
+![alt](docs/images/app-detail.png)
 
