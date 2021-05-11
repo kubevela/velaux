@@ -2,14 +2,19 @@ import ProCard from '@ant-design/pro-card';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Button, List, message, Space, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
-import styles from './index.less';
-import { listComponentDefinitions, listTraitDefinitions } from '@/services/kubevela/clusterapi';
+import {
+  listComponentDefinitions,
+  listTraitDefinitions,
+  isVelaInstalled,
+  installVelaController,
+} from '@/services/kubevela/clusterapi';
 export default (props: any) => {
   // See routing parameters:
   // https://umijs.org/docs/routing#routing-component-parameters
   // @ts-ignore
   const clusterName = props.match.params.clusterName;
 
+  const [velaInstalled, setVelaInstalled] = useState<boolean>(false);
   const [compDefs, setCompDefs] = useState<API.CapabilityType[]>([]);
   const [traitDefs, setTraitDefs] = useState<API.CapabilityType[]>([]);
 
@@ -20,7 +25,22 @@ export default (props: any) => {
     listTraitDefinitions(clusterName).then((resp) => {
       setTraitDefs(resp.traitDefinitions);
     });
+    isVelaInstalled(clusterName).then((resp) => setVelaInstalled(resp.installed));
   }, []);
+
+  let velaInstalledText;
+  if (velaInstalled) {
+    velaInstalledText = <Typography.Text type="success">Yes</Typography.Text>;
+  } else {
+    velaInstalledText = <Typography.Text type="danger">No</Typography.Text>;
+  }
+
+  const installVela = async () => {
+    const hide = message.loading('Installing Vela Helm Chart...');
+    await installVelaController(clusterName, '', '');
+    hide();
+    message.success('Installed Vela Helm Chart successfully');
+  };
 
   return (
     <PageContainer
@@ -39,25 +59,18 @@ export default (props: any) => {
       }}
     >
       <ProCard direction="column" ghost gutter={[16, 16]}>
-        <ProCard>
-          <ProCard>
-            <Typography.Title level={3}>KubeVela Controller</Typography.Title>
-          </ProCard>
-          <ProCard className={styles.desc}>
-            <Typography.Text type="secondary">Status:</Typography.Text>{' '}
-            <Typography.Text type="success">Latest</Typography.Text>
-          </ProCard>
-          <ProCard>
-            <Space style={{ float: 'right' }}>
-              <Button type="primary" size={'large'}>
-                Install KubeVela
-              </Button>
-            </Space>
-          </ProCard>
+        <ProCard colSpan={12}>
+          <Typography.Title level={3}>KubeVela Controller</Typography.Title>
+          <Typography.Text>Installed:</Typography.Text> {velaInstalledText}
+          <Space style={{ float: 'right' }}>
+            <Button type="primary" onClick={installVela}>
+              Install KubeVela
+            </Button>
+          </Space>
         </ProCard>
 
         <ProCard gutter={16} ghost style={{ minHeight: 200 }}>
-          <ProCard title="ComponentDefinition" colSpan={16}>
+          <ProCard title="ComponentDefinition" colSpan={12}>
             <List
               dataSource={compDefs}
               renderItem={(item) => (
@@ -70,7 +83,7 @@ export default (props: any) => {
               )}
             />
           </ProCard>
-          <ProCard title="TraitDefinition" colSpan={16}>
+          <ProCard title="TraitDefinition" colSpan={12}>
             <List
               dataSource={traitDefs}
               renderItem={(item) => (

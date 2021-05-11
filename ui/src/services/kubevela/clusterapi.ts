@@ -52,8 +52,12 @@ export async function listTraitDefinitions(cluster: string) {
   );
 }
 
+export async function isVelaInstalled(cluster: string) {
+  return request<{ installed: boolean }>(`/api/clusters/${cluster}/isvelainstalled`);
+}
+
 export async function installVelaController(cluster: string, helmrepo: string, version: string) {
-  return request<{version: string}>(
-    `/api/clusters/${cluster}/installvela`
-  )
+  return request<{ version: string }>(`/api/clusters/${cluster}/installvela`, {
+    data: { helmrepo, version },
+  });
 }

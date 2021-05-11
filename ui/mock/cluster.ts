@@ -83,8 +83,23 @@ function postClusters(req: Request, res: Response, u: string, b: Request) {
   return res.json(result);
 }
 
+const checkVelaInstalled = (req: Request, res: Response) => {
+  res.json({
+    installed: true,
+  });
+};
+
+
+const installVelaController = (req: Request, res: Response) => {
+  res.json({
+    version: '',
+  });
+};
+
 export default {
   'GET /api/clusternames': getClusterNames,
   'GET /api/clusters': getClusters,
   'POST /api/clusters': postClusters,
+  'GET /api/clusters/:cluster/isvelainstalled': checkVelaInstalled,
+  'GET /api/clusters/:cluster/installvela': installVelaController,
 };
