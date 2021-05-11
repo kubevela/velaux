@@ -34,7 +34,7 @@ _bin/velacp server \
     --db-name=vela
 ```
 
-The dashboard will be served at localhost:8000 .
+The dashboard will be served at http://localhost:8000 .
 
 ### Cluster
 
@@ -46,14 +46,3 @@ The dashboard will be served at localhost:8000 .
 ![alt](docs/images/app-list.png)
 ![alt](docs/images/app-input.png)
 
-### Environment
-
-TODO: UI
-
-### Catalog
-
-The catalog repo has a standard structure format in order to be managed in Vela Control Plane.
-
-See [catalog-example](https://github.com/hongchaodeng/catalog-example) repo for more details.
-
-TODO: UI
