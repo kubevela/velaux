@@ -74,6 +74,7 @@ const ApplicationList = () => {
     {
       title: 'Components',
       dataIndex: 'components',
+      hideInSearch: true,
       render: (_, entity) => (
         <>
           <Space>
