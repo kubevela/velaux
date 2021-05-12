@@ -1,4 +1,5 @@
-import ProForm, { ModalForm, ProFormText } from '@ant-design/pro-form';
+import ProForm, { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
+import { Input } from 'antd';
 import React from 'react';
 
 export type InputFormProps = {
@@ -23,22 +24,20 @@ const InputForm = (props: InputFormProps) => {
           name="name"
           label="Name"
           tooltip="最长为 24 位"
-          placeholder="请输入名称"
           initialValue={props.initialValues?.name}
         />
         <ProFormText
           width="md"
           name="desc"
           label="Description"
-          placeholder="请输入名称"
           initialValue={props.initialValues?.desc}
         />
       </ProForm.Group>
-      <ProFormText
+      
+      <ProFormTextArea
         width="lg"
         name="kubeconfig"
         label="kubeconfig"
-        placeholder="请输入名称"
         initialValue={props.initialValues?.kubeconfig}
       />
       {/* <ProFormText name="project" disabled label="项目名称" initialValue="xxxx项目" /> */}
