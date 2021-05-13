@@ -14,7 +14,7 @@ export default (props: any) => {
   // @ts-ignore
   const clusterName = props.match.params.clusterName;
 
-  const [velaInstalled, setVelaInstalled] = useState<boolean>(false);
+  const [velaInstalled, setVelaInstalled] = useState<boolean>(true);
   const [compDefs, setCompDefs] = useState<API.CapabilityType[]>([]);
   const [traitDefs, setTraitDefs] = useState<API.CapabilityType[]>([]);
 

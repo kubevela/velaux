@@ -1,13 +1,14 @@
-import {listApplications, removeApplication} from '@/services/kubevela/applicationapi';
-import {listClusterNames} from '@/services/kubevela/clusterapi';
-import {PlusOutlined, QuestionCircleOutlined} from '@ant-design/icons';
-import {PageContainer} from '@ant-design/pro-layout';
-import type {ActionType, ProColumns} from '@ant-design/pro-table';
+import { listApplications, removeApplication } from '@/services/kubevela/applicationapi';
+import { listClusterNames } from '@/services/kubevela/clusterapi';
+import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-layout';
+import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import {Button, message, Space, Tag, Tooltip} from 'antd';
+import { Button, message, Space, Tooltip } from 'antd';
 import moment from 'moment';
-import {useEffect, useRef, useState} from 'react';
-import {FormattedMessage, Link} from 'umi';
+import React, { useEffect, useRef, useState } from 'react';
+import { FormattedMessage, Link } from 'umi';
+import EditForm from './EditForm';
 
 const ApplicationList = () => {
   const [clusterNames, setClusterNames] = useState<string[]>([]);
@@ -15,7 +16,7 @@ const ApplicationList = () => {
 
   const clusterEnum = {};
   clusterNames.forEach((value) => {
-    clusterEnum[value] = {text: value};
+    clusterEnum[value] = { text: value };
   });
 
   const actionRef = useRef<ActionType>();
@@ -78,12 +79,12 @@ const ApplicationList = () => {
       render: (_, entity) => (
         <>
           <Space>
-            {entity.components?.map(comp => {
+            {entity.components?.map((comp) => {
               return (
-                  <Button type="primary" size="small">
-                    {comp.type} : {comp.name}
-                  </Button>
-                )
+                <Button type="primary" size="small">
+                  {comp.type} : {comp.name}
+                </Button>
+              );
             })}
           </Space>
         </>
@@ -94,7 +95,7 @@ const ApplicationList = () => {
         <>
           Last Updated
           <Tooltip placement="top" title="Last updated time">
-            <QuestionCircleOutlined style={{marginLeft: 4}}/>
+            <QuestionCircleOutlined style={{ marginLeft: 4 }} />
           </Tooltip>
         </>
       ),
@@ -115,25 +116,19 @@ const ApplicationList = () => {
       },
     },
     {
-      title: <FormattedMessage id="pages.table.titleOption" defaultMessage="Option"/>,
+      title: <FormattedMessage id="pages.table.titleOption" defaultMessage="Option" />,
       width: '164px',
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => (
         <Space>
-          <Link
-            to={{
-              pathname: `/application-input`,
-              state: {
-                cluster: selectedCluster,
-                app: record,
-              },
+          <EditForm
+            app={record}
+            cluster={selectedCluster}
+            onUpdate={() => {
+              actionRef.current?.reloadAndRest?.();
             }}
-          >
-            <Button id="edit" type="primary">
-              <FormattedMessage id="pages.table.edit" defaultMessage="Edit"/>
-            </Button>
-          </Link>
+          />
 
           <Button
             id="delete"
@@ -144,7 +139,7 @@ const ApplicationList = () => {
               actionRef.current?.reloadAndRest?.();
             }}
           >
-            <FormattedMessage id="pages.table.delete" defaultMessage="Delete"/>
+            <FormattedMessage id="pages.table.delete" defaultMessage="Delete" />
           </Button>
         </Space>
       ),
@@ -180,9 +175,9 @@ const ApplicationList = () => {
           labelWidth: 120,
         }}
         toolBarRender={() => [
-          <Link to={{pathname: `/application-input`, state: {cluster: selectedCluster}}}>
+          <Link to={{ pathname: `/application-input`, state: { cluster: selectedCluster } }}>
             <Button type="primary" key="primary">
-              <PlusOutlined/> <FormattedMessage id="pages.table.new" defaultMessage="New"/>
+              <PlusOutlined /> <FormattedMessage id="pages.table.new" defaultMessage="New" />
             </Button>
           </Link>,
         ]}

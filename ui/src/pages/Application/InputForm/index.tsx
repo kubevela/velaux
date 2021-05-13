@@ -1,4 +1,4 @@
-import {addApplication, updateApplication} from '@/services/kubevela/applicationapi';
+import { addApplication } from '@/services/kubevela/applicationapi';
 import { listComponentDefinitions, listTraitDefinitions } from '@/services/kubevela/clusterapi';
 import { CloseOutlined, SaveOutlined } from '@ant-design/icons';
 import { FooterToolbar, PageContainer } from '@ant-design/pro-layout';
@@ -11,7 +11,6 @@ import ComponentForm from './components/ComponentForm';
 export default (props: any) => {
   // @ts-ignore
   const clusterName: string = props.location?.state?.cluster ?? '';
-  const app: API.ApplicationType = props.location?.state?.app ?? undefined;
 
   const [components, setComponents] = useState<API.ComponentType[]>([]);
 
@@ -30,11 +29,7 @@ export default (props: any) => {
   const saveApp = async (record: API.ApplicationType) => {
     const hide = message.loading('正在添加');
     try {
-      if (!app) {
-        await addApplication(clusterName, record);
-      } else {
-        await updateApplication(clusterName, record)
-      }
+      await addApplication(clusterName, record);
       hide();
       message.success('添加成功，即将刷新');
       history.push('/applications');
@@ -58,11 +53,10 @@ export default (props: any) => {
               label="Application Name"
               name="name"
               rules={[{ required: true, message: 'Please input name!' }]}
-              initialValue={app?.name}
             >
               <Input />
             </Form.Item>
-            <Form.Item label="Description" name="desc" initialValue={app?.desc}>
+            <Form.Item label="Description" name="desc">
               <Input />
             </Form.Item>
           </Card>
