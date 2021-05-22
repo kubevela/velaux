@@ -14,16 +14,16 @@ export default (props: any) => {
   // @ts-ignore
   const clusterName = props.match.params.clusterName;
 
-  const [velaInstalled, setVelaInstalled] = useState<boolean>(true);
+  const [velaInstalled, setVelaInstalled] = useState<boolean>(false);
   const [compDefs, setCompDefs] = useState<API.CapabilityType[]>([]);
   const [traitDefs, setTraitDefs] = useState<API.CapabilityType[]>([]);
 
   useEffect(() => {
     listComponentDefinitions(clusterName).then((resp) => {
-      setCompDefs(resp.componentDefinitions);
+      setCompDefs(resp.definitions);
     });
     listTraitDefinitions(clusterName).then((resp) => {
-      setTraitDefs(resp.traitDefinitions);
+      setTraitDefs(resp.definitions);
     });
     isVelaInstalled(clusterName).then((resp) => setVelaInstalled(resp.installed));
   }, []);
@@ -76,7 +76,11 @@ export default (props: any) => {
               renderItem={(item) => (
                 <List.Item>
                   <Space direction="vertical">
-                    <Typography.Title level={5}>{item.name}</Typography.Title>
+                    <Typography.Title level={5}>
+                      <Typography.Link href={ '/clusters/' + clusterName + '/schema?name=' + item.name + '&namespace=' + item.namespace + '&type=component'} target="_blank">
+                        {item.name}
+                      </Typography.Link>
+                    </Typography.Title>
                     <Typography.Text type="secondary"> {item.desc}</Typography.Text>
                   </Space>
                 </List.Item>
@@ -89,7 +93,11 @@ export default (props: any) => {
               renderItem={(item) => (
                 <List.Item>
                   <Space direction="vertical">
-                    <Typography.Title level={5}>{item.name}</Typography.Title>
+                    <Typography.Title level={5}>
+                      <Typography.Link href={ '/clusters/' + clusterName + '/schema?name=' + item.name + '&namespace=' + item.namespace + '&type=trait'} target="_blank">
+                        {item.name}
+                      </Typography.Link>
+                    </Typography.Title>
                     <Typography.Text type="secondary"> {item.desc}</Typography.Text>
                   </Space>
                 </List.Item>

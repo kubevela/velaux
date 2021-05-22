@@ -101,6 +101,10 @@ func (s *restServer) registerServices() {
 	velaInstallService := services.NewVelaInstallService(clusterStore)
 	s.server.GET("/api/clusters/:cluster/installvela", velaInstallService.InstallVela)
 	s.server.GET("/api/clusters/:cluster/isvelainstalled", velaInstallService.IsVelaInstalled)
+
+	// show Definition schema
+	schemaService := services.NewSchemaService(clusterStore)
+	s.server.GET("/api/clusters/:cluster/schema", schemaService.GetWorkloadSchema)
 }
 
 func (s *restServer) startHTTP(ctx context.Context) error {

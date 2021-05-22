@@ -41,13 +41,13 @@ export async function removeCluster(params: API.ClusterType) {
 }
 
 export async function listComponentDefinitions(cluster: string) {
-  return request<{ componentDefinitions: API.CapabilityType[] }>(
+  return request<{ definitions: API.CapabilityType[] }>(
     `/api/clusters/${cluster}/componentdefinitions`,
   );
 }
 
 export async function listTraitDefinitions(cluster: string) {
-  return request<{ traitDefinitions: API.CapabilityType[] }>(
+  return request<{ definitions: API.CapabilityType[] }>(
     `/api/clusters/${cluster}/traitdefinitions`,
   );
 }
@@ -60,4 +60,12 @@ export async function installVelaController(cluster: string, helmrepo: string, v
   return request<{ version: string }>(`/api/clusters/${cluster}/installvela`, {
     params: { helmrepo, version },
   });
+}
+
+
+export async function getSchema(cluster: string, name: string, namespace: string, type: string) {
+  return request<{ definitions: API.CapabilityType[] }>(
+    `/api/clusters/${cluster}/schema`, {
+      params:{ name, namespace, type },
+    });
 }
