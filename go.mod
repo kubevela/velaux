@@ -20,6 +20,7 @@ require (
 	google.golang.org/protobuf v1.26.0
 	helm.sh/helm/v3 v3.2.4
 	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
+	k8s.io/api v0.18.8 // indirect
 	k8s.io/apimachinery v0.18.8
 	k8s.io/cli-runtime v0.18.6
 	k8s.io/client-go v12.0.0+incompatible

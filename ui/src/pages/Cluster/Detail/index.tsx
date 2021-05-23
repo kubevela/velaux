@@ -37,7 +37,7 @@ export default (props: any) => {
 
   const installVela = async () => {
     const hide = message.loading('Installing Vela Helm Chart...');
-    await installVelaController(clusterName, '', '');
+    await installVelaController(clusterName, 'https://kubevelacharts.oss-accelerate.aliyuncs.com/core', '1.0.5');
     hide();
     message.success('Installed Vela Helm Chart successfully');
   };

@@ -3,10 +3,19 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/oam-dev/velacp/pkg/rest/apis"
+	"github.com/oam-dev/velacp/pkg/runtime"
+	"helm.sh/helm/v3/pkg/release"
+	"helm.sh/helm/v3/pkg/storage/driver"
 	"io/ioutil"
+	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 	"sync"
 	"time"
@@ -44,7 +53,7 @@ func NewVelaInstallService(store storeadapter.ClusterStore) *VelaInstallService 
 }
 
 func (s *VelaInstallService) InstallVela(c echo.Context) error {
-	clusterName := c.QueryParam("cluster")
+	clusterName := c.Param("cluster")
 	helmRepo := c.QueryParam("helmrepo")
 	installVersion := c.QueryParam("version")
 
@@ -73,6 +82,40 @@ func (s *VelaInstallService) InstallVela(c echo.Context) error {
 	return c.JSON(http.StatusOK, model.InstallVelaResponse{
 		Version: fmt.Sprintf("%d", version),
 	})
+}
+
+func (s *VelaInstallService) IsVelaInstalled(c echo.Context) error {
+	var clusterName string
+	if clusterName = c.Param("cluster"); clusterName == "" {
+		return fmt.Errorf("get param error: cluster: %s", clusterName)
+	}
+
+	clusterConf, err := s.store.GetCluster(clusterName)
+	if err != nil {
+		return err
+	}
+
+	var (
+		velaNamespace = "vela-system"
+		velaName = "kubevela"
+		kubeConf = clusterConf.GetKubeconfig()
+	)
+	helmExist, err := CheckVelaHelmChartExist(kubeConf, velaNamespace, velaName)
+	if err != nil {
+		return err
+	} else {
+
+	}
+	if helmExist {
+		return c.JSON(http.StatusOK, apis.ClusterVelaStatus{Installed: true})
+	}
+
+	velaControllerExist := false
+	if velaControllerExist, err = CheckVelaControllerExist(kubeConf); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, apis.ClusterVelaStatus{Installed: velaControllerExist})
 }
 
 // AddHelmRepo adds repo with given name and url
@@ -176,6 +219,16 @@ func UpdateHelmRepo(settings *cli.EnvSettings) error {
 func InstallHelmChart(name, repo, chart, version string, kubeConfig string, settings *cli.EnvSettings) (int, error) {
 	f := "InstallHelmChart"
 
+	cli, err := runtime.GetClient([]byte(kubeConfig))
+	if err != nil {
+		return 0, err
+	}
+
+	velaNamespace := &corev1.Namespace{ObjectMeta:metav1.ObjectMeta{Name: "vela-system"}}
+	if err := cli.Create(context.TODO(), velaNamespace); err != nil && !apiErrors.IsAlreadyExists(err) {
+		return 0, fmt.Errorf("create vela namespace error: %v", err)
+	}
+
 	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(kubeConfig))
 	actionConfig, err := getActionConfig("vela-system", config)
 
@@ -239,6 +292,52 @@ func InstallHelmChart(name, repo, chart, version string, kubeConfig string, sett
 
 	log.Logger.Infof("install complete")
 	return release.Version, nil
+}
+
+func CheckVelaControllerExist(kubeConfig string) (bool, error) {
+	cli, err := runtime.GetClient([]byte(kubeConfig))
+	if err != nil {
+		return false, err
+	}
+
+	objectKey := client.ObjectKey{Namespace: "vela-system", Name: "kubevela-vela-core"}
+	if err := cli.Get(context.TODO(), objectKey, &v1.Deployment{}); err != nil{
+		if apiErrors.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+func CheckVelaHelmChartExist(kubeConfig string, namespace string,  name string) (bool, error) {
+	rel, err := GetHelmChartRelease(kubeConfig, namespace,name)
+
+	if err != nil && !errors.Is(err, driver.ErrReleaseNotFound) {
+		return false, err
+	}
+
+	return rel != nil, nil
+}
+
+func GetHelmChartRelease(kubeConfig string, namespace string,  name string) (*release.Release, error) {
+	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(kubeConfig))
+	if err != nil {
+		return nil, fmt.Errorf("build restConfig error: %v", err)
+	}
+
+	actionConfig, err := getActionConfig(namespace, config)
+	if err != nil {
+		return nil, err
+	}
+
+	helmCli := action.NewStatus(actionConfig)
+	rel, err := helmCli.Run(name)
+	if err != nil {
+		return nil, err
+	}
+	return rel, nil
 }
 
 func getActionConfig(namespace string, config *rest.Config) (*action.Configuration, error) {
