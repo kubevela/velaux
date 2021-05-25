@@ -31,8 +31,8 @@ export async function updateCluster(params: API.ClusterType) {
 }
 
 export async function removeCluster(params: API.ClusterType) {
-  return request<{ cluster: API.ClusterType }>('/api/clusters', {
-    method: 'POST',
+  return request<{ cluster: API.ClusterType }>(`/api/clusters/${params.name}`, {
+    method: 'DELETE',
     data: {
       ...params,
       method: 'delete',
@@ -58,6 +58,6 @@ export async function isVelaInstalled(cluster: string) {
 
 export async function installVelaController(cluster: string, helmrepo: string, version: string) {
   return request<{ version: string }>(`/api/clusters/${cluster}/installvela`, {
-    data: { helmrepo, version },
+    params: { helmrepo, version },
   });
 }

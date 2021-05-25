@@ -97,8 +97,8 @@ func (s *VelaInstallService) IsVelaInstalled(c echo.Context) error {
 
 	var (
 		velaNamespace = "vela-system"
-		velaName = "kubevela"
-		kubeConf = clusterConf.GetKubeconfig()
+		velaName      = "kubevela"
+		kubeConf      = clusterConf.GetKubeconfig()
 	)
 	helmExist, err := CheckVelaHelmChartExist(kubeConf, velaNamespace, velaName)
 	if err != nil {
@@ -146,7 +146,7 @@ func AddHelmRepo(name, url string, settings *cli.EnvSettings) error {
 	}
 
 	var file repo.File
-	if err := yaml.Unmarshal(b, &f); err != nil {
+	if err := yaml.Unmarshal(b, &file); err != nil {
 		return fmt.Errorf("%s, unmarshal err: %s", f, err.Error())
 	}
 
@@ -224,7 +224,7 @@ func InstallHelmChart(name, repo, chart, version string, kubeConfig string, sett
 		return 0, err
 	}
 
-	velaNamespace := &corev1.Namespace{ObjectMeta:metav1.ObjectMeta{Name: "vela-system"}}
+	velaNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "vela-system"}}
 	if err := cli.Create(context.TODO(), velaNamespace); err != nil && !apiErrors.IsAlreadyExists(err) {
 		return 0, fmt.Errorf("create vela namespace error: %v", err)
 	}
@@ -279,8 +279,6 @@ func InstallHelmChart(name, repo, chart, version string, kubeConfig string, sett
 					return 0, fmt.Errorf("%s, dependency update err: %s", f, err.Error())
 				}
 			}
-		} else {
-			return 0, fmt.Errorf("%s, check dependency update err: %s", f, err.Error())
 		}
 	}
 
@@ -295,13 +293,13 @@ func InstallHelmChart(name, repo, chart, version string, kubeConfig string, sett
 }
 
 func CheckVelaControllerExist(kubeConfig string) (bool, error) {
-	cli, err := runtime.GetClient([]byte(kubeConfig))
+	k8sCli, err := runtime.GetClient([]byte(kubeConfig))
 	if err != nil {
 		return false, err
 	}
 
 	objectKey := client.ObjectKey{Namespace: "vela-system", Name: "kubevela-vela-core"}
-	if err := cli.Get(context.TODO(), objectKey, &v1.Deployment{}); err != nil{
+	if err := k8sCli.Get(context.TODO(), objectKey, &v1.Deployment{}); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return false, nil
 		}
@@ -311,8 +309,8 @@ func CheckVelaControllerExist(kubeConfig string) (bool, error) {
 	return true, nil
 }
 
-func CheckVelaHelmChartExist(kubeConfig string, namespace string,  name string) (bool, error) {
-	rel, err := GetHelmChartRelease(kubeConfig, namespace,name)
+func CheckVelaHelmChartExist(kubeConfig string, namespace string, name string) (bool, error) {
+	rel, err := GetHelmChartRelease(kubeConfig, namespace, name)
 
 	if err != nil && !errors.Is(err, driver.ErrReleaseNotFound) {
 		return false, err
@@ -321,7 +319,7 @@ func CheckVelaHelmChartExist(kubeConfig string, namespace string,  name string) 
 	return rel != nil, nil
 }
 
-func GetHelmChartRelease(kubeConfig string, namespace string,  name string) (*release.Release, error) {
+func GetHelmChartRelease(kubeConfig string, namespace string, name string) (*release.Release, error) {
 	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(kubeConfig))
 	if err != nil {
 		return nil, fmt.Errorf("build restConfig error: %v", err)

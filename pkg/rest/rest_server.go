@@ -16,8 +16,9 @@ var _ RestServer = &restServer{}
 
 var frontendRoutes = []string{
 	"/",
-	"/clusters",
-	"/applicatons",
+	"^/clusters",
+	"^/clusters/*",
+	"^/applicatons",
 }
 
 type Config struct {
@@ -67,13 +68,13 @@ func (s *restServer) Run(ctx context.Context) error {
 }
 
 func (s *restServer) registerServices() {
-	//// All react routes need to be setup here. Otherwise the server returns 404 not found.
-	//rewrites := map[string]string{}
-	//for _, route := range frontendRoutes {
-	//	s.server.Static("/", "ui/dist")
-	//	rewrites[route] = "/"
-	//}
-	//s.server.Pre(middleware.Rewrite(rewrites))
+	// All react routes need to be setup here. Otherwise the server returns 404 not found.
+	rewrites := map[string]string{}
+	s.server.Use(middleware.Static("ui/dist"))
+	for _, route := range frontendRoutes {
+		rewrites[route] = "/"
+	}
+	s.server.Pre(middleware.Rewrite(rewrites))
 
 	clusterStore := storeadapter.NewClusterStore(s.ds)
 	clusterService := services.NewClusterService(clusterStore)
