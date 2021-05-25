@@ -29,3 +29,7 @@ type ClusterRequest struct {
 	ClusterType
 	Method Action `json:"method"`
 }
+
+type ClusterVelaStatus struct {
+	Installed bool `json:"installed"`
+}

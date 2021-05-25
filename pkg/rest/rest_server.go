@@ -3,22 +3,22 @@ package rest
 import (
 	"context"
 	"fmt"
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/log"
 	"github.com/oam-dev/velacp/pkg/rest/services"
+	"net/http"
 )
 
 var _ RestServer = &restServer{}
 
 var frontendRoutes = []string{
 	"/",
-	"/clusters",
-	"/applicatons",
+	"^/clusters",
+	"^/clusters/*",
+	"^/applicatons",
 }
 
 type Config struct {
@@ -70,8 +70,8 @@ func (s *restServer) Run(ctx context.Context) error {
 func (s *restServer) registerServices() {
 	// All react routes need to be setup here. Otherwise the server returns 404 not found.
 	rewrites := map[string]string{}
+	s.server.Use(middleware.Static("ui/dist"))
 	for _, route := range frontendRoutes {
-		s.server.Static("/", "ui/dist")
 		rewrites[route] = "/"
 	}
 	s.server.Pre(middleware.Rewrite(rewrites))
@@ -94,6 +94,7 @@ func (s *restServer) registerServices() {
 
 	velaInstallService := services.NewVelaInstallService(clusterStore)
 	s.server.GET("/api/clusters/:cluster/installvela", velaInstallService.InstallVela)
+	s.server.GET("/api/clusters/:cluster/isvelainstalled", velaInstallService.IsVelaInstalled)
 }
 
 func (s *restServer) startHTTP(ctx context.Context) error {
