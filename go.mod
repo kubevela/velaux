@@ -3,11 +3,12 @@ module github.com/oam-dev/velacp
 go 1.16
 
 require (
+	github.com/getkin/kin-openapi v0.34.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/gofrs/flock v0.7.1
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/labstack/echo/v4 v4.2.2
-	github.com/oam-dev/kubevela v1.0.4
+	github.com/oam-dev/kubevela v1.0.5
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.1.1
 	github.com/xdg/stringprep v1.0.0 // indirect
@@ -20,10 +21,12 @@ require (
 	google.golang.org/protobuf v1.26.0
 	helm.sh/helm/v3 v3.2.4
 	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
-	k8s.io/api v0.18.8 // indirect
+	k8s.io/api v0.18.8
+	k8s.io/apiextensions-apiserver v0.18.6
 	k8s.io/apimachinery v0.18.8
 	k8s.io/cli-runtime v0.18.6
 	k8s.io/client-go v12.0.0+incompatible
+	k8s.io/klog/v2 v2.4.0
 	rsc.io/letsencrypt v0.0.3 // indirect
 	sigs.k8s.io/controller-runtime v0.6.2
 )

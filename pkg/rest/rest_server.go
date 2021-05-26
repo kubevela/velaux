@@ -3,13 +3,14 @@ package rest
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/log"
 	"github.com/oam-dev/velacp/pkg/rest/services"
-	"net/http"
 )
 
 var _ RestServer = &restServer{}
@@ -83,6 +84,10 @@ func (s *restServer) registerServices() {
 	s.server.POST("/api/clusters", clusterService.AddCluster)
 	s.server.PUT("/api/clusters", clusterService.UpdateCluster)
 	s.server.DELETE("/api/clusters/:clusterName", clusterService.DelCluster)
+
+	// definitions
+	s.server.GET("/api/clusters/:clusterName/componentdefinitions", clusterService.ListComponentDef)
+	s.server.GET("/api/clusters/:clusterName/traitdefinitions", clusterService.ListTraitDef)
 
 	// application
 	appStore := storeadapter.NewApplicationStore(s.ds)
