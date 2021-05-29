@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package vela.api.model;
+option go_package = "github.com/oam-dev/velacp/pkg/proto/model";
+
+message Definition{
+  string name = 1;
+  string desc = 2;
+  string jsonSchema = 3;
+}
+
+message DefinitionsResponse{
+  repeated Definition definitions = 1;
+}
