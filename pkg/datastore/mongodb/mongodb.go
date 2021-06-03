@@ -59,7 +59,7 @@ func (m *mongodb) Put(ctx context.Context, kind, name string, entity interface{}
 func (m *mongodb) Find(ctx context.Context, kind string) (datastore.Iterator, error) {
 	collection := m.client.Database(m.database).Collection(kind)
 	// bson.D{{}} specifies 'all documents'
-	filter := bson.D{{}}
+	filter := bson.D{}
 	cur, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err

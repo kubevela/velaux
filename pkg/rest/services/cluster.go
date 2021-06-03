@@ -35,12 +35,21 @@ func (s *ClusterService) GetClusterNames(c echo.Context) error {
 	return c.JSON(http.StatusOK, apis.ClustersMeta{Clusters: names})
 }
 
-func (s *ClusterService) GetClusters(c echo.Context) error {
+func (s *ClusterService) ListClusters(c echo.Context) error {
 	clusters, err := s.store.ListClusters()
 	if err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, model.ClusterListResponse{Clusters: clusters})
+}
+
+func (s *ClusterService) GetCluster(c echo.Context) error {
+	clusterName := c.QueryParam("clusterName")
+	cluster, err := s.store.GetCluster(clusterName)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, model.ClusterResponse{Cluster: cluster})
 }
 
 func (s *ClusterService) AddCluster(c echo.Context) error {
