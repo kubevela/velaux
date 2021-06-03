@@ -79,7 +79,8 @@ func (s *restServer) registerServices() {
 
 	clusterStore := storeadapter.NewClusterStore(s.ds)
 	clusterService := services.NewClusterService(clusterStore)
-	s.server.GET("/api/clusters", clusterService.GetClusters)
+	s.server.GET("/api/cluster", clusterService.GetCluster)
+	s.server.GET("/api/clusters", clusterService.ListClusters)
 	s.server.GET("/api/clusternames", clusterService.GetClusterNames)
 	s.server.POST("/api/clusters", clusterService.AddCluster)
 	s.server.PUT("/api/clusters", clusterService.UpdateCluster)
