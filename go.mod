@@ -3,7 +3,6 @@ module github.com/oam-dev/velacp
 go 1.16
 
 require (
-	github.com/getkin/kin-openapi v0.34.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/gofrs/flock v0.7.1
 	github.com/golang/protobuf v1.5.2 // indirect

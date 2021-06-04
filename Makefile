@@ -26,6 +26,15 @@ fmt:
 vet:
 	go vet ./pkg/... ./cmd/...
 
+reviewable: fmt vet
+	go mod tidy
+
+# Execute auto-gen code commands and ensure branch is clean.
+check-diff: reviewable
+	git --no-pager diff
+	git diff --quiet || ($(ERR) please run 'make reviewable' to include all changes && false)
+	@$(OK) branch is clean
+
 run: build-cp
 	_bin/velacp server \
 		--db-url=${MONGO_URL} \
