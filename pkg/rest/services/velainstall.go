@@ -103,8 +103,6 @@ func (s *VelaInstallService) IsVelaInstalled(c echo.Context) error {
 	helmExist, err := CheckVelaHelmChartExist(kubeConf, velaNamespace, velaName)
 	if err != nil {
 		return err
-	} else {
-
 	}
 	if helmExist {
 		return c.JSON(http.StatusOK, apis.ClusterVelaStatus{Installed: true})
@@ -134,6 +132,7 @@ func AddHelmRepo(name, url string, settings *cli.EnvSettings) error {
 	defer cancel()
 	locked, err := fileLock.TryLockContext(lockCtx, time.Second)
 	if err == nil && locked {
+		//nolint:errcheck
 		defer fileLock.Unlock()
 	}
 	if err != nil {
@@ -230,7 +229,13 @@ func InstallHelmChart(name, repo, chart, version string, kubeConfig string, sett
 	}
 
 	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(kubeConfig))
+	if err != nil {
+		return 0, fmt.Errorf("get restconfig from kubeconfig bytes failed : %v", err)
+	}
 	actionConfig, err := getActionConfig("vela-system", config)
+	if err != nil {
+		return 0, fmt.Errorf("get action config failed : %v", err)
+	}
 
 	client := action.NewInstall(actionConfig)
 	client.Version = version
@@ -341,8 +346,7 @@ func GetHelmChartRelease(kubeConfig string, namespace string, name string) (*rel
 func getActionConfig(namespace string, config *rest.Config) (*action.Configuration, error) {
 	actionConfig := new(action.Configuration)
 
-	var kubeConfig *genericclioptions.ConfigFlags
-	kubeConfig = genericclioptions.NewConfigFlags(false)
+	var kubeConfig = genericclioptions.NewConfigFlags(false)
 	kubeConfig.APIServer = &config.Host
 	kubeConfig.BearerToken = &config.BearerToken
 	kubeConfig.CAFile = &config.CAFile
