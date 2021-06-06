@@ -19,12 +19,14 @@ export default (props: any) => {
 
   useEffect(() => {
     listComponentDefinitions(clusterName).then((resp) => {
-      setCompDefs(resp.componentDefinitions);
+      setCompDefs(resp.definitions);
     });
     listTraitDefinitions(clusterName).then((resp) => {
-      setTraitDefs(resp.traitDefinitions);
+      setTraitDefs(resp.definitions);
     });
   }, []);
+
+  console.log(compDefs, traitDefs)
 
   const saveApp = async (record: API.ApplicationType) => {
     const hide = message.loading('正在添加');
