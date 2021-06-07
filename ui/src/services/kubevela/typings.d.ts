@@ -37,6 +37,7 @@ declare namespace API {
 
   export type CapabilityType = {
     name: string;
+    namespace: string;
     desc?: string;
     jsonschema: string;
   };

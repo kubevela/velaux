@@ -55,6 +55,11 @@
         hideInMenu: true,
         component: './Cluster/Detail',
       },
+      {
+        path: '/clusters/:clusterName/schema',
+        hideInMenu: true,
+        component: './Cluster/Schema',
+      },
     ],
   },
   {

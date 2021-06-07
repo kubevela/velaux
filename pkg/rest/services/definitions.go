@@ -119,6 +119,7 @@ func GenDefinition(cli client.Client, name, namespace string) (*model.Definition
 
 	return &model.Definition{
 		Name:       name,
-		JsonSchema: string(jsonSchema),
+		Namespace:  namespace,
+		Jsonschema: string(jsonSchema),
 	}, nil
 }

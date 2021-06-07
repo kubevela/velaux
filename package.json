@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@ant-design/compatible": "^1.0.8",
+    "@ant-design/pro-list": "^1.8.2",
+    "antd-jsonschema-form": "^1.0.3",
+    "swagger-ui": "^3.50.0"
+  }
+}
