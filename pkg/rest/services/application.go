@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -57,7 +56,7 @@ func (s *ApplicationService) AddApplications(c echo.Context) error {
 	}
 
 	if isAppExist {
-		return errors.New(fmt.Sprintf("application %s has existed", app.Name))
+		return fmt.Errorf("application %s has existed", app.Name)
 	}
 
 	cluster, err := s.clusterStore.GetCluster(clusterName)
@@ -103,7 +102,7 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 	}
 
 	if !isAppExist {
-		return errors.New(fmt.Sprintf("application %s not existed", app.Name))
+		return fmt.Errorf("application %s not existed", app.Name)
 	}
 
 	cluster, err := s.clusterStore.GetCluster(clusterName)

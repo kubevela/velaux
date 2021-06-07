@@ -10,7 +10,6 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/gofrs/flock v0.7.1
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/echo/v4 v4.2.2
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect

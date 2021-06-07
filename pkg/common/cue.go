@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -70,25 +69,6 @@ type StringType = string
 
 // BoolType is bool type
 type BoolType = bool
-
-// getCUEPrintableDefaultValue converts the value in `interface{}` type to be printable
-func getCUEPrintableDefaultValue(v interface{}) string {
-	if v == nil {
-		return ""
-	}
-	switch value := v.(type) {
-	case Int64Type:
-		return strconv.FormatInt(value, 10)
-	case StringType:
-		if v == "" {
-			return "empty"
-		}
-		return value
-	case BoolType:
-		return strconv.FormatBool(value)
-	}
-	return ""
-}
 
 // prepareParameterCue cuts `parameter` section form definition .cue file
 func prepareParameterCue(capabilityName, capabilityTemplate string) (string, error) {

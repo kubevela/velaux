@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	crdv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -28,7 +27,7 @@ func init() {
 	// +kubebuilder:scaffold:scheme
 }
 
-func Get(c client.Client, resource runtime.Object, result interface{}, name, namespace string) error {
+func Get(c client.Client, resource k8sruntime.Object, result interface{}, name, namespace string) error {
 	fun := func(gvk schema.GroupVersionKind, c client.Client) (map[string]interface{}, error) {
 		key := types.NamespacedName{
 			Namespace: namespace,
@@ -45,9 +44,9 @@ func Get(c client.Client, resource runtime.Object, result interface{}, name, nam
 	return getUnstructuredObj(c, resource, result, fun)
 }
 
-func List(c client.Client, options client.ListOption, resource runtime.Object, result interface{}) error {
+func List(c client.Client, options client.ListOption, resource k8sruntime.Object, result interface{}) error {
 	fun := func(gvk schema.GroupVersionKind, c client.Client) (map[string]interface{}, error) {
-		var obj runtime.Object
+		var obj k8sruntime.Object
 		obj, err := list(context.Background(), c, gvk, options)
 		if err != nil {
 			return nil, errors.Wrap(err, "fail to list resource")
@@ -59,7 +58,7 @@ func List(c client.Client, options client.ListOption, resource runtime.Object, r
 	return getUnstructuredObj(c, resource, result, fun)
 }
 
-func list(ctx context.Context, a client.Client, gvk schema.GroupVersionKind, listOptions client.ListOption) (runtime.Object, error) {
+func list(ctx context.Context, a client.Client, gvk schema.GroupVersionKind, listOptions client.ListOption) (k8sruntime.Object, error) {
 	u := &unstructured.UnstructuredList{}
 	u.SetGroupVersionKind(gvk)
 	if err := a.List(ctx, u, listOptions); err != nil {
@@ -69,7 +68,7 @@ func list(ctx context.Context, a client.Client, gvk schema.GroupVersionKind, lis
 	return u, nil
 }
 
-func get(ctx context.Context, c client.Client, namespaceName types.NamespacedName, groupVersion schema.GroupVersionKind) (runtime.Object, error) {
+func get(ctx context.Context, c client.Client, namespaceName types.NamespacedName, groupVersion schema.GroupVersionKind) (k8sruntime.Object, error) {
 	existing := &unstructured.Unstructured{}
 	existing.GetObjectKind().SetGroupVersionKind(groupVersion)
 	if err := c.Get(ctx, namespaceName, existing); err != nil {
@@ -79,7 +78,7 @@ func get(ctx context.Context, c client.Client, namespaceName types.NamespacedNam
 	return existing, nil
 }
 
-func getUnstructuredObj(c client.Client, resource runtime.Object, result interface{},
+func getUnstructuredObj(c client.Client, resource k8sruntime.Object, result interface{},
 	hook func(schema.GroupVersionKind, client.Client) (map[string]interface{}, error)) error {
 	gvk, err := apiutil.GVKForObject(resource, Scheme)
 	if err != nil {
@@ -91,7 +90,7 @@ func getUnstructuredObj(c client.Client, resource runtime.Object, result interfa
 		return errors.Wrap(err, "fail to get resource object")
 	}
 
-	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj, result); err != nil {
+	if err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(obj, result); err != nil {
 		return errors.Wrap(err, "fail to convert unstructured object to result")
 	}
 

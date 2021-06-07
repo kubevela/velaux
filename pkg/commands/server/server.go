@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-
 	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/datastore/mongodb"
 	"github.com/oam-dev/velacp/pkg/rest"
@@ -30,9 +29,9 @@ func NewServerCommand() *cobra.Command {
 
 	// datastore
 	cmd.Flags().StringVar(&s.dataStoreCfg.URL, "db-url", s.dataStoreCfg.URL, "The login url of the database")
-	cmd.MarkFlagRequired("db-address")
+	_ = cmd.MarkFlagRequired("db-address")
 	cmd.Flags().StringVar(&s.dataStoreCfg.Database, "db-name", s.dataStoreCfg.Database, "The name of the database")
-	cmd.MarkFlagRequired("db-name")
+	_ = cmd.MarkFlagRequired("db-name")
 
 	return cmd
 }
