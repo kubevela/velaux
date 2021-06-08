@@ -96,7 +96,7 @@ func (s *restServer) registerServices() {
 	s.server.GET("/api/clusters/:cluster/applications", applicationService.GetApplications)
 	s.server.POST("/api/clusters/:cluster/applications", applicationService.AddApplications)
 	s.server.PUT("/api/clusters/:cluster/applications", applicationService.UpdateApplications)
-	s.server.DELETE("/api/clusters/:cluster/applications", applicationService.RemoveApplications)
+	s.server.DELETE("/api/clusters/:cluster/applications/:application", applicationService.RemoveApplications)
 
 	velaInstallService := services.NewVelaInstallService(clusterStore)
 	s.server.GET("/api/clusters/:cluster/installvela", velaInstallService.InstallVela)

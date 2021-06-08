@@ -20,7 +20,7 @@ interface FormProps {
 }
 
 export default ({ onChange, disableCapabilities, caps }: FormProps) => {
-  const [schema, setSchema] = useState<object>();
+  const [schema, setSchema] = useState<any>();
   const [selectType, setSelectType] = useState<string>();
   const [data, setData] = useState<CapabilityFormData>();
   useEffect(() => {
@@ -33,6 +33,7 @@ export default ({ onChange, disableCapabilities, caps }: FormProps) => {
       }
     });
   }, [selectType]);
+
   return (
     <div>
       <CapabilitySelector

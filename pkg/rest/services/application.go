@@ -144,7 +144,7 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 
 // RemoveApplications for remove application from cluster
 func (s *ApplicationService) RemoveApplications(c echo.Context) error {
-	appName := c.QueryParam("appName")
+	appName := c.Param("application")
 	clusterName := c.Param("cluster")
 
 	app, err := s.appStore.GetApplications(appName)
