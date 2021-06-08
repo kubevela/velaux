@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -112,14 +113,19 @@ func GenDefinition(cli client.Client, name, namespace string) (*model.Definition
 	}
 	klog.InfoS("success to get def from cm", "cm", cmName, cm.Data)
 
-	jsonSchema, err := json.Marshal(cm.Data[types.OpenapiV3JSONSchema])
+	jsonSchemaBytes, err := json.Marshal(cm.Data[types.OpenapiV3JSONSchema])
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to marshal definition to string")
+	}
+
+	jsonSchema, err := strconv.Unquote(string(jsonSchemaBytes))
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to disable escape")
 	}
 
 	return &model.Definition{
 		Name:       name,
 		Namespace:  namespace,
-		Jsonschema: string(jsonSchema),
+		Jsonschema: jsonSchema,
 	}, nil
 }

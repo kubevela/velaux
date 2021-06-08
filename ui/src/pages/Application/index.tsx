@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, Link } from 'umi';
 import EditForm from './EditForm';
 
-const ApplicationList = () => {
+const ApplicationList = (props: any) => {
   const [clusterNames, setClusterNames] = useState<string[]>([]);
   const [selectedCluster, setSelectedCluster] = useState<string>('');
 
@@ -21,10 +21,11 @@ const ApplicationList = () => {
 
   const actionRef = useRef<ActionType>();
 
+
   const handleRemove = async (val: API.ApplicationType) => {
     const hide = message.loading('Deleting');
     try {
-      await removeApplication(selectedCluster, val);
+      await removeApplication(selectedCluster, val.name);
       hide();
       message.success('Deleted successfully');
       return true;
