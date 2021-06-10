@@ -3,9 +3,9 @@ package storeadapter
 import (
 	"context"
 	"encoding/json"
+	"github.com/oam-dev/velacp/pkg/proto/model"
 
 	"github.com/oam-dev/velacp/pkg/datastore"
-	"github.com/oam-dev/velacp/pkg/proto/model"
 )
 
 const (

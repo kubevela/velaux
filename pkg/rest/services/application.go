@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/oam-dev/velacp/pkg/proto/model"
 	"net/http"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
-	"github.com/oam-dev/velacp/pkg/proto/model"
 )
 
 type ApplicationService struct {
