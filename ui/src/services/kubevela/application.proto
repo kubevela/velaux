@@ -21,18 +21,35 @@ message Application {
 
   string clusterName = 6;
 
+  repeated Event events = 7;
+
 }
 
 message ComponentType {
+
   string name = 1;
-  string type = 2;
-  google.protobuf.Struct properties = 3;
-  repeated TraitType traits = 4;
+  string namespace = 2;
+  string type = 3;
+  string workload = 4;
+  string desc = 5;
+  string phase = 6;
+  bool health = 7;
+  google.protobuf.Struct properties = 8;
+  repeated TraitType traits = 9;
+
 }
 
 message TraitType {
   string type = 1;
-  google.protobuf.Struct properties = 2;
+  string desc = 2;
+  google.protobuf.Struct properties = 3;
+}
+
+message Event {
+  string type = 1;
+  string reason = 2;
+  string age = 3;
+  string message = 4;
 }
 
 
