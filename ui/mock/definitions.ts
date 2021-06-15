@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import moment from 'moment';
 
 let compDefList: API.CapabilityType[] = [
   {
     name: 'webservice',
+    namespace: 'default',
     desc:
       'Describes long-running, scalable, containerized services that have a stable network endpoint to receive external network traffic from customers.',
     jsonschema: `{
@@ -21,6 +21,7 @@ let compDefList: API.CapabilityType[] = [
   },
   {
     name: 'task',
+    namespace: 'default',
     desc: 'Describes jobs that run code or a script to completion.',
     jsonschema: `{
       "$id": "https://example.com/person.schema.json",
@@ -40,6 +41,7 @@ let compDefList: API.CapabilityType[] = [
 let traitDefList: API.CapabilityType[] = [
   {
     name: 'ingress',
+    namespace: 'default',
     desc:
       'Configures K8s ingress and service to enable web traffic for your service. Please use route trait in cap center for advanced usage.',
     jsonschema: `{
@@ -60,6 +62,7 @@ let traitDefList: API.CapabilityType[] = [
   },
   {
     name: 'scaler',
+    namespace: 'default',
     desc: 'Configures replicas for your service by patch replicas field.',
     jsonschema: `{
       "$id": "https://example.com/arrays.schema.json",

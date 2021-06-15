@@ -1,10 +1,13 @@
 import { Request, Response } from 'express';
 import moment from 'moment';
+import { vela } from '@/services/kubevela/application_pb'
 
-let app: API.ApplicationType[] = [
+let app: vela.api.model.Application[] = [
   {
     name: 'app-1',
+    namespace: 'default',
     desc: 'First app',
+    updatedAt: moment().valueOf(),
     components: [
       {
         name: 'frontend',
@@ -34,6 +37,7 @@ let app: API.ApplicationType[] = [
         health: false,
         traits: [],
       }],
+    clusterName: '',
     events: [
       {
         type: 'Warning',
@@ -42,10 +46,10 @@ let app: API.ApplicationType[] = [
         message: 'Application  component(frontend) parse trait(cpuscaler): LoadTemplate [cpuscaler] : TraitDefinition.core.oam.dev "cpuscaler" not found',
       }
     ],
-    updatedAt: moment().valueOf(),
   },
   {
     name: 'app-2',
+    namespace: 'default',
     desc: 'Second app',
     components: [
       {
@@ -76,6 +80,7 @@ let app: API.ApplicationType[] = [
         health: false,
         traits: [],
       }],
+    clusterName: '',
     events: [],
     updatedAt: moment().valueOf(),
   },
@@ -96,7 +101,15 @@ function postApps(req: Request, res: Response, u: string, b: Request) {
   const body = (b && b.body) || req.body;
   const { method, name, desc, components } = body;
 
-  let selectedApp: API.ApplicationType = { name: '' };
+  let selectedApp: vela.api.model.Application = {
+    name: '',
+    namespace: '',
+    desc: '',
+    updatedAt: moment().valueOf(),
+    components: [],
+    clusterName: '',
+    events: [],
+  };
 
   switch (method) {
     case 'delete':
@@ -110,11 +123,14 @@ function postApps(req: Request, res: Response, u: string, b: Request) {
       return res.json({ application: selectedApp });
 
     case 'post':
-      const newApp: API.ApplicationType = {
-        name,
-        desc,
-        components,
+      const newApp: vela.api.model.Application = {
+        name: name,
+        namespace: 'default',
+        desc: desc,
+        components: components,
         updatedAt: moment().valueOf(),
+        events: [],
+        clusterName: '',
       };
       app.unshift(newApp);
       return res.json({ application: newApp });

@@ -6,12 +6,13 @@ import ProList from '@ant-design/pro-list';
 import { BuildOutlined, CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons';
 import moment from 'moment';
 import TraitCard from './components/TraitCard'
+import { vela } from '@/services/kubevela/application_pb'
 
 export default (props: any) => {
   // See routing parameters:
   // https://umijs.org/docs/routing#routing-component-parameters
   // @ts-ignore
-  const app: API.ApplicationType = props.location?.state?.app;
+  const app: vela.api.model.Application = props.location?.state?.app;
   return (
     <PageContainer
       fixedHeader

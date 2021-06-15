@@ -1,17 +1,18 @@
 // @ts-ignore
 /* eslint-disable */
 import { request } from 'umi';
+import {vela} from "@/services/kubevela/cluster_pb";
 
 export async function listClusterNames() {
   return request<{ clusters: string[] }>('/api/clusternames');
 }
 
 export async function listClusters() {
-  return request<{ clusters: API.ClusterType[] }>('/api/clusters');
+  return request<{ clusters: vela.api.model.Cluster[] }>('/api/clusters');
 }
 
-export async function addCluster(params: API.ClusterType) {
-  return request<{ cluster: API.ClusterType }>('/api/clusters', {
+export async function addCluster(params: vela.api.model.Cluster) {
+  return request<{ cluster: vela.api.model.Cluster }>('/api/clusters', {
     method: 'POST',
     data: {
       ...params,
@@ -20,8 +21,8 @@ export async function addCluster(params: API.ClusterType) {
   });
 }
 
-export async function updateCluster(params: API.ClusterType) {
-  return request<{ cluster: API.ClusterType }>('/api/clusters', {
+export async function updateCluster(params: vela.api.model.Cluster) {
+  return request<{ cluster: vela.api.model.Cluster }>('/api/clusters', {
     method: 'POST',
     data: {
       ...params,
@@ -30,8 +31,8 @@ export async function updateCluster(params: API.ClusterType) {
   });
 }
 
-export async function removeCluster(params: API.ClusterType) {
-  return request<{ cluster: API.ClusterType }>(`/api/clusters/${params.name}`, {
+export async function removeCluster(params: vela.api.model.Cluster) {
+  return request<{ cluster: vela.api.model.Cluster }>(`/api/clusters/${params.name}`, {
     method: 'DELETE',
     data: {
       ...params,
@@ -41,13 +42,13 @@ export async function removeCluster(params: API.ClusterType) {
 }
 
 export async function listComponentDefinitions(cluster: string) {
-  return request<{ definitions: API.CapabilityType[] }>(
+  return request<{ definitions: vela.api.model.Cluster[] }>(
     `/api/clusters/${cluster}/componentdefinitions`,
   );
 }
 
 export async function listTraitDefinitions(cluster: string) {
-  return request<{ definitions: API.CapabilityType[] }>(
+  return request<{ definitions: vela.api.model.Cluster[] }>(
     `/api/clusters/${cluster}/traitdefinitions`,
   );
 }

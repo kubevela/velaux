@@ -131,7 +131,7 @@ export namespace vela {
                  * Converts this Application to JSON.
                  * @returns JSON object
                  */
-                public toJSON(): { [k: string]: any };
+                // public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a ComponentType. */

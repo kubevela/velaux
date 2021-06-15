@@ -9,6 +9,7 @@ import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, Link } from 'umi';
 import EditForm from './EditForm';
+import { vela } from '@/services/kubevela/application_pb';
 
 const ApplicationList = (props: any) => {
   const [clusterNames, setClusterNames] = useState<string[]>([]);
@@ -22,7 +23,7 @@ const ApplicationList = (props: any) => {
   const actionRef = useRef<ActionType>();
 
 
-  const handleRemove = async (val: API.ApplicationType) => {
+  const handleRemove = async (val: vela.api.model.Application) => {
     const hide = message.loading('Deleting');
     try {
       await removeApplication(selectedCluster, val.name);
@@ -42,7 +43,7 @@ const ApplicationList = (props: any) => {
     });
   }, []);
 
-  const columns: ProColumns<API.ApplicationType>[] = [
+  const columns: ProColumns<vela.api.model.Application>[] = [
     {
       title: 'Index',
       dataIndex: 'index',
@@ -162,7 +163,7 @@ const ApplicationList = (props: any) => {
 
   return (
     <PageContainer loading={clusterNames.length === 0}>
-      <ProTable<API.ApplicationType>
+      <ProTable<vela.api.model.Application>
         columns={columns}
         rowKey="key"
         dateFormatter="string"

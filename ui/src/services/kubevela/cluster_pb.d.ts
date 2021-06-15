@@ -1,4 +1,5 @@
 import * as $protobuf from "protobufjs";
+import { Long } from "protobufjs";
 /** Namespace vela. */
 export namespace vela {
 
@@ -29,7 +30,7 @@ export namespace vela {
 
                 /**
                  * Constructs a new Cluster.
-                 * @param [properties] Properties to set
+                 * @param [properties??] Properties to set
                  */
                 constructor(properties?: vela.api.model.ICluster);
 
@@ -113,7 +114,7 @@ export namespace vela {
                  * Converts this Cluster to JSON.
                  * @returns JSON object
                  */
-                public toJSON(): { [k: string]: any };
+                // public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a ClusterListResponse. */

@@ -13,10 +13,11 @@ import moment from 'moment';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage, Link } from 'umi';
 import InputForm from './InputForm';
+import { vela } from '@/services/kubevela/cluster_pb'
 
 interface UpdateState {
   visible: boolean;
-  value?: API.ClusterType;
+  value?: vela.api.model.Cluster;
 }
 
 const ClusterList = () => {
@@ -26,7 +27,7 @@ const ClusterList = () => {
 
   const actionRef = useRef<ActionType>();
 
-  const handleAdd = async (fields: API.ClusterType) => {
+  const handleAdd = async (fields: vela.api.model.Cluster) => {
     const hide = message.loading('Adding');
     try {
       await addCluster({ ...fields });
@@ -40,7 +41,7 @@ const ClusterList = () => {
     }
   };
 
-  const handleUpdate = async (val: API.ClusterType) => {
+  const handleUpdate = async (val: vela.api.model.Cluster) => {
     const hide = message.loading('Updating');
     try {
       const newVal = await updateCluster(val);
@@ -55,7 +56,7 @@ const ClusterList = () => {
     }
   };
 
-  const handleRemove = async (val: API.ClusterType) => {
+  const handleRemove = async (val: vela.api.model.Cluster) => {
     const hide = message.loading('Deleting');
     try {
       await removeCluster(val);
@@ -69,7 +70,7 @@ const ClusterList = () => {
     }
   };
 
-  const columns: ProColumns<API.ClusterType>[] = [
+  const columns: ProColumns<vela.api.model.Cluster>[] = [
     {
       title: 'Index',
       dataIndex: 'index',
@@ -152,7 +153,7 @@ const ClusterList = () => {
 
   return (
     <PageContainer>
-      <ProTable<API.ClusterType>
+      <ProTable<vela.api.model.Cluster>
         columns={columns}
         rowKey="key"
         dateFormatter="string"
@@ -194,7 +195,7 @@ const ClusterList = () => {
         title={'Create Cluster'}
         visible={createModalVisible}
         onFinish={async (value: any) => {
-          const success = await handleAdd(value as API.ClusterType);
+          const success = await handleAdd(value as vela.api.model.Cluster);
           if (success) {
             handleCreateModalVisible(false);
             if (actionRef.current) {
@@ -214,7 +215,7 @@ const ClusterList = () => {
         title={'Update Cluster'}
         visible={updateModal.visible}
         onFinish={async (value: any) => {
-          const success = await handleUpdate(value as API.ClusterType);
+          const success = await handleUpdate(value as vela.api.model.Cluster);
           if (success) {
             handleUpdateModal({ ...updateModal, visible: false });
             if (actionRef.current) {

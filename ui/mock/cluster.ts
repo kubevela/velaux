@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import moment from 'moment';
+import { vela } from '@/services/kubevela/cluster_pb';
 
-let clusterList: API.ClusterType[] = [
+
+let clusterList: vela.api.model.Cluster[] = [
   {
     name: 'cluster-1',
     desc: 'First cluster',
@@ -36,7 +38,12 @@ function postClusters(req: Request, res: Response, u: string, b: Request) {
   const body = (b && b.body) || req.body;
   const { method, name, desc, kubeconfig } = body;
 
-  let selectedCluster: API.ClusterType = { name: '' };
+  let selectedCluster: vela.api.model.Cluster = {
+    name: '',
+    desc: '',
+    updatedAt: moment().valueOf(),
+    kubeconfig: '',
+  };
 
   switch (method) {
     case 'delete':
@@ -50,9 +57,9 @@ function postClusters(req: Request, res: Response, u: string, b: Request) {
       return res.json({ cluster: selectedCluster });
 
     case 'post':
-      const newCluster: API.ClusterType = {
-        name,
-        desc,
+      const newCluster: vela.api.model.Cluster = {
+        name: name,
+        desc: desc,
         updatedAt: moment().valueOf(),
         kubeconfig: kubeconfig,
       };
@@ -64,10 +71,10 @@ function postClusters(req: Request, res: Response, u: string, b: Request) {
         if (item.name === name) {
           selectedCluster = {
             ...item,
-            desc,
-            name,
-            kubeconfig,
+            name: name,
+            desc: desc,
             updatedAt: moment().valueOf(),
+            kubeconfig: kubeconfig,
           };
           return selectedCluster;
         }

@@ -1,13 +1,14 @@
 import ProForm, { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import { Input } from 'antd';
 import React from 'react';
+import {vela} from "@/services/kubevela/cluster_pb";
 
 export type InputFormProps = {
   title: string;
   visible: boolean;
   onFinish: any;
   onVisibleChange: (visible: boolean) => void;
-  initialValues?: API.ClusterType;
+  initialValues?: vela.api.model.Cluster;
 };
 
 const InputForm = (props: InputFormProps) => {
@@ -33,7 +34,7 @@ const InputForm = (props: InputFormProps) => {
           initialValue={props.initialValues?.desc}
         />
       </ProForm.Group>
-      
+
       <ProFormTextArea
         width="lg"
         name="kubeconfig"

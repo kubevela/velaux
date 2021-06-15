@@ -7,6 +7,7 @@ import { Button, Card, Form, Input, message, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import { history } from 'umi';
 import ComponentForm from './components/ComponentForm';
+import { vela } from '@/services/kubevela/application_pb'
 
 export default (props: any) => {
   // @ts-ignore
@@ -28,7 +29,7 @@ export default (props: any) => {
 
   console.log(compDefs, traitDefs)
 
-  const saveApp = async (record: API.ApplicationType) => {
+  const saveApp = async (record: vela.api.model.Application) => {
     const hide = message.loading('正在添加');
     try {
       await addApplication(clusterName, record);

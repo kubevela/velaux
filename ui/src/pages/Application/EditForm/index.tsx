@@ -1,16 +1,16 @@
 import { updateApplication } from '@/services/kubevela/applicationapi';
 import { Button, Drawer, Input, message } from 'antd';
 import { useState } from 'react';
-
+import { vela } from '@/services/kubevela/application_pb'
 interface IProps {
-  app: API.ApplicationType;
+  app: vela.api.model.Application;
   cluster: string;
   onUpdate: () => void;
 }
 
 export default (props: IProps) => {
   const [appDrawerVisible, setAppDrawerVisible] = useState<boolean>(false);
-  const [data, setData] = useState<API.ApplicationType>(props.app);
+  const [data, setData] = useState<vela.api.model.Application>(props.app);
 
   const handleSubmit = async () => {
     const hide = message.loading('Updating');
