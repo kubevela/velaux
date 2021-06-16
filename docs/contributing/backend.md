@@ -4,7 +4,7 @@
 
 - Install [go](https://golang.org/dl/)
 - Install [yarn](https://yarnpkg.com/)
-- Install [protoc](https://grpc.io/docs/protoc-installation/)
+- Install [protoc](https://grpc.io/docs/protoc-installation/) and [protoc-gen-go](https://grpc.io/docs/languages/go/quickstart/#prerequisites)
 - Install [mongodb](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/#install-mongodb-community-edition)
 
 ## Development
