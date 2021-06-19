@@ -15,8 +15,11 @@ message Capability {
   // Catalog name.
   string catalog_name = 4;
 
-  // JSON schema of the Capability, type are parsed from schema.
-  string json_schema = 5;
+  // Type of the Capability, such as "componentDefinition" or "trait"
+  string type = 5;
+
+  // JSON schema of the Capability.
+  string json_schema = 6;
 
 }
 
