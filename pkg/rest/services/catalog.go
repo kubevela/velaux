@@ -82,6 +82,15 @@ func (s *CatalogService) DelCatalog(c echo.Context) error {
 	return c.JSON(http.StatusOK, true)
 }
 
+func (s *CatalogService) GetCapabilities(c echo.Context) error {
+	catalogName := c.Param("catalogName")
+	capabilities, err := s.capStore.ListCapabilitiesByCatalog(catalogName)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, model.CapabilityListResponse{Capabilities: capabilities})
+}
+
 // SyncCatalog syncs a catalog's capabilities, save them in capability store.
 //
 // TODO: implement this method,

@@ -90,6 +90,7 @@ func (s *restServer) registerServices() {
 	s.server.PUT("/api/catalogs", catalogService.UpdateCatalog)
 	s.server.GET("/api/catalogs/:catalogName", catalogService.GetCatalog)
 	s.server.DELETE("/api/catalogs/:catalogName", catalogService.DelCatalog)
+	s.server.GET("/api/catalogs/:catalogName/capabilities", catalogService.GetCapabilities)
 	s.server.POST("/api/catalogs/:catalogName/sync", catalogService.SyncCatalog)
 
 	clusterStore := storeadapter.NewClusterStore(s.ds)
