@@ -42,6 +42,24 @@ declare namespace API {
     jsonschema: string;
   };
 
+  export type CatalogType = {
+    name: string;
+    desc?: string;
+    updatedAt?: number; // unix milliseconds
+    type?: string;
+    url?: string;
+    token?: string;
+  };
+
+  export type CatalogCapabilityType = {
+    name: string;
+    desc?: string;
+    updatedAt?: number; // unix milliseconds
+    catalogName: string;
+    type: string;
+    jsonschema: string;
+  };
+
   export type Event = {
     type: string;
     reason: string;

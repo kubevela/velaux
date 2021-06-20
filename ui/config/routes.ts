@@ -63,6 +63,24 @@
     ],
   },
   {
+    path: '/catalogs',
+    name: 'Catalogs',
+    icon: 'CloudServerOutlined',
+    routes: [
+      {
+        path: '/catalogs',
+        hideInMenu: true,
+        name: 'Catalogs',
+        component: './Catalog',
+      },
+      {
+        path: '/catalogs/:catalogName',
+        hideInMenu: true,
+        component: './Catalog/Detail',
+      },
+    ],
+  },
+  {
     path: '/',
     name: 'welcome',
     hideInMenu: true,
