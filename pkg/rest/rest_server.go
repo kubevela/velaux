@@ -77,6 +77,22 @@ func (s *restServer) registerServices() {
 	}
 	s.server.Pre(middleware.Rewrite(rewrites))
 
+	capabilityStore := storeadapter.NewCapabilityStore(s.ds)
+	capabilityService := services.NewCapabilityService(capabilityStore)
+	s.server.GET("/api/capabilities", capabilityService.ListCapabilities)
+	s.server.GET("/api/capabilities/:capabilityName", capabilityService.GetCapability)
+	s.server.POST("/api/capabilities/:capabilityName/install", capabilityService.InstallCapability)
+
+	catalogStore := storeadapter.NewCatalogStore(s.ds)
+	catalogService := services.NewCatalogService(catalogStore, capabilityStore)
+	s.server.GET("/api/catalogs", catalogService.ListCatalogs)
+	s.server.POST("/api/catalogs", catalogService.AddCatalog)
+	s.server.PUT("/api/catalogs", catalogService.UpdateCatalog)
+	s.server.GET("/api/catalogs/:catalogName", catalogService.GetCatalog)
+	s.server.DELETE("/api/catalogs/:catalogName", catalogService.DelCatalog)
+	s.server.GET("/api/catalogs/:catalogName/capabilities", catalogService.GetCapabilities)
+	s.server.POST("/api/catalogs/:catalogName/sync", catalogService.SyncCatalog)
+
 	clusterStore := storeadapter.NewClusterStore(s.ds)
 	clusterService := services.NewClusterService(clusterStore)
 	s.server.GET("/api/cluster", clusterService.GetCluster)

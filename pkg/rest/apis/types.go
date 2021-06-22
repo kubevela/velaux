@@ -11,12 +11,6 @@ type ClusterType struct {
 	Kubeconfig string `json:"kubeconfig"`
 }
 
-type CapabilityType struct {
-	Name       string `json:"name"`
-	Desc       string `json:"desc,omitempty"`
-	Jsonschema string `json:"jsonschema"`
-}
-
 type ClusterMeta struct {
 	Cluster *model.Cluster `json:"cluster"`
 }
