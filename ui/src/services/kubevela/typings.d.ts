@@ -7,9 +7,16 @@ declare namespace API {
     desc?: string;
     updatedAt?: number; // unix milliseconds
     components?: ComponentType[];
-    events?: Event[];
+    // events?: Event[];
   };
 
+  export type ApplicationDetailType = {
+    name: string;
+    desc?: string;
+    updatedAt?: number; // unix milliseconds
+    components?: ComponentType[];
+    events?: Event[];
+  }
   export type ComponentType = {
     name: string;
     namespace: string;

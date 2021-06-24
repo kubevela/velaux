@@ -41,6 +41,16 @@ func (s *ApplicationService) GetApplications(c echo.Context) error {
 	})
 }
 
+func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
+	appName := c.Param("application")
+	clusterName := c.Param("cluster")
+	fmt.Println(appName)
+	fmt.Println(clusterName)
+	return c.JSON(http.StatusOK, model.ApplicationListResponse{
+		Applications: nil,
+	})
+}
+
 // AddApplications for add applications to cluster
 func (s *ApplicationService) AddApplications(c echo.Context) error {
 	clusterName := c.Param("cluster")

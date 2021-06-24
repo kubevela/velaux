@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import ProCard, { StatisticCard } from '@ant-design/pro-card';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Descriptions, List, Card, Col, Row, Space, Tag, Typography } from 'antd';
@@ -6,18 +6,28 @@ import ProList from '@ant-design/pro-list';
 import { BuildOutlined, CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons';
 import moment from 'moment';
 import TraitCard from './components/TraitCard'
+import {getApplication} from "@/services/kubevela/applicationapi";
 
 export default (props: any) => {
   // See routing parameters:
   // https://umijs.org/docs/routing#routing-component-parameters
   // @ts-ignore
-  const app: API.ApplicationType = props.location?.state?.app;
+  // const app: API.ApplicationType = props.location?.state?.app;
+  const [app, setapp] = useState<API.ApplicationDetailType>();
+
+  useEffect(() => {
+    console.log(props.location?.state?.cluster)
+    getApplication(props.location?.state?.cluster,props.location?.state?.app.name).then((resp) => {
+      setapp(resp.applications);
+    });
+  }, []);
+
   return (
     <PageContainer
       fixedHeader
       waterMarkProps={{ content: '' }} // disable watermark
       header={{
-        title: <Typography.Title level={2}>{app?.name}</Typography.Title>,
+        title: <Typography.Title level={2}>TEST-{app?.name}</Typography.Title>,
       }}
       content={
         <Descriptions column={2} style={{ marginBottom: -16 }}>
