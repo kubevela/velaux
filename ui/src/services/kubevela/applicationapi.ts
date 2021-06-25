@@ -7,7 +7,7 @@ export async function listApplications(cluster: string) {
 }
 
 export async function getApplication(cluster: string, appName: string) {
-  return request<{ applications: API.ApplicationDetailType }>(`/api/clusters/${cluster}/applications/${appName}`);
+  return request<{ application: API.ApplicationDetailType }>(`/api/clusters/${cluster}/applications/${appName}`);
 }
 
 export async function addApplication(cluster: string, params: API.ApplicationType) {

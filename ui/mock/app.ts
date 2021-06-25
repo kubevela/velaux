@@ -107,7 +107,19 @@ let appDetail: API.ApplicationDetailType =
         }],
       events: [
         {
+          type: 'Normal',
+          reason: 'FailedParse',
+          age: '3m13s (x7320 over 21h)',
+          message: 'Application  component(frontend) parse trait(cpuscaler): LoadTemplate [cpuscaler] : TraitDefinition.core.oam.dev "cpuscaler" not found',
+        },
+        {
           type: 'Warning',
+          reason: 'FailedParse',
+          age: '3m13s (x7320 over 21h)',
+          message: 'Application  component(frontend) parse trait(cpuscaler): LoadTemplate [cpuscaler] : TraitDefinition.core.oam.dev "cpuscaler" not found',
+        },
+        {
+          type: 'Other',
           reason: 'FailedParse',
           age: '3m13s (x7320 over 21h)',
           message: 'Application  component(frontend) parse trait(cpuscaler): LoadTemplate [cpuscaler] : TraitDefinition.core.oam.dev "cpuscaler" not found',
@@ -124,7 +136,7 @@ const listApps = (req: Request, res: Response) => {
 
 const getApp = (req: Request, res: Response) => {
   res.json({
-    applications: appDetail,
+    application: appDetail,
   });
 };
 
