@@ -33,7 +33,7 @@ require (
 	k8s.io/cli-runtime v0.18.6
 	k8s.io/client-go v12.0.0+incompatible
 	k8s.io/klog/v2 v2.4.0
-	k8s.io/kubectl v0.18.6 // indirect
+	k8s.io/kubectl v0.18.6
 	rsc.io/letsencrypt v0.0.3 // indirect
 	sigs.k8s.io/controller-runtime v0.6.2
 )
