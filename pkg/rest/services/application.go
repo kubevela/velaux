@@ -3,12 +3,18 @@ package services
 import (
 	"context"
 	"fmt"
-	"net/http"
-
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	kruntime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/duration"
+	"k8s.io/kubectl/pkg/util/event"
+	"net/http"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sort"
+	"time"
 
 	"github.com/oam-dev/velacp/pkg/runtime"
 
@@ -21,6 +27,10 @@ type ApplicationService struct {
 	appStore     storeadapter.ApplicationStore
 	clusterStore storeadapter.ClusterStore
 }
+
+const (
+	DefaultNamespace = "default"
+)
 
 func NewApplicationService(appStore storeadapter.ApplicationStore, clusterStore storeadapter.ClusterStore) *ApplicationService {
 	return &ApplicationService{
@@ -38,6 +48,70 @@ func (s *ApplicationService) GetApplications(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, model.ApplicationListResponse{
 		Applications: apps,
+	})
+}
+
+func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
+	appName := c.Param("application")
+	clusterName := c.Param("cluster")
+	app, err := s.appStore.GetApplications(appName)
+	if err != nil {
+		return err
+	}
+
+	app.ClusterName = clusterName
+	cluster, err := s.clusterStore.GetCluster(clusterName)
+	if err != nil {
+		return err
+	}
+
+	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
+	if err != nil {
+		return err
+	}
+
+	appObj := v1beta1.Application{}
+	key := client.ObjectKey{Namespace: DefaultNamespace, Name: appName}
+	if err := cli.Get(context.Background(), key, &appObj); err != nil {
+		return err
+	}
+
+	for i, c := range appObj.Status.Services {
+		app.Components[i].Namespace = DefaultNamespace
+		app.Components[i].Workload = c.WorkloadDefinition.Kind
+		app.Components[i].Health = c.Healthy
+		app.Components[i].Phase = string(appObj.Status.Phase)
+	}
+
+	el := corev1.EventList{}
+	if err := cli.List(context.Background(), &el, &client.ListOptions{
+		Namespace: DefaultNamespace,
+		Raw:       &metav1.ListOptions{FieldSelector: "involvedObject.name=" + appName},
+	}); err != nil {
+		return err
+	}
+	// sort event
+	sort.Sort(event.SortableEvents(el.Items))
+	for _, e := range el.Items {
+		var age string
+		if e.Count > 1 {
+			age = fmt.Sprintf("%s (x%d over %s)", translateTimestampSince(e.LastTimestamp), e.Count, translateTimestampSince(e.FirstTimestamp))
+		} else {
+			age = translateTimestampSince(e.FirstTimestamp)
+			if e.FirstTimestamp.IsZero() {
+				age = translateMicroTimestampSince(e.EventTime)
+			}
+		}
+		app.Events = append(app.Events, &model.AppEventType{
+			Type:    e.Type,
+			Age:     age,
+			Reason:  e.Reason,
+			Message: e.Message,
+		})
+	}
+
+	return c.JSON(http.StatusOK, model.ApplicationResponse{
+		Application: app,
 	})
 }
 
@@ -179,4 +253,20 @@ func (s *ApplicationService) RemoveApplications(c echo.Context) error {
 	return c.JSON(http.StatusOK, model.ApplicationResponse{
 		Application: &model.Application{Name: appName},
 	})
+}
+
+func translateTimestampSince(timestamp metav1.Time) string {
+	if timestamp.IsZero() {
+		return "<unknown>"
+	}
+
+	return duration.HumanDuration(time.Since(timestamp.Time))
+}
+
+func translateMicroTimestampSince(timestamp metav1.MicroTime) string {
+	if timestamp.IsZero() {
+		return "<unknown>"
+	}
+
+	return duration.HumanDuration(time.Since(timestamp.Time))
 }

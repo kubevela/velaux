@@ -61,6 +61,7 @@ const ApplicationList = (props: any) => {
             pathname: `/applications/${entity.name}`,
             state: {
               app: entity,
+              cluster: selectedCluster,
             },
           }}
         >

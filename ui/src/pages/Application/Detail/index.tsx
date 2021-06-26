@@ -1,39 +1,50 @@
-import React, { useState } from 'react';
-import ProCard, { StatisticCard } from '@ant-design/pro-card';
-import { PageContainer } from '@ant-design/pro-layout';
-import { Descriptions, List, Card, Col, Row, Space, Tag, Typography } from 'antd';
+import React, {useEffect, useState} from 'react';
+import ProCard from '@ant-design/pro-card';
+import {PageContainer} from '@ant-design/pro-layout';
+import {Descriptions, Space, Tag, Timeline, Typography} from 'antd';
 import ProList from '@ant-design/pro-list';
-import { BuildOutlined, CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons';
+import {BuildOutlined, CheckCircleTwoTone, CloseCircleTwoTone} from '@ant-design/icons';
 import moment from 'moment';
 import TraitCard from './components/TraitCard'
+import EventTimeline from './components/EventTimeline'
+import {getApplication} from "@/services/kubevela/applicationapi";
 
 export default (props: any) => {
   // See routing parameters:
   // https://umijs.org/docs/routing#routing-component-parameters
   // @ts-ignore
-  const app: API.ApplicationType = props.location?.state?.app;
+  // const app: API.ApplicationType = props.location?.state?.app;
+  const [app, setapp] = useState<API.ApplicationDetailType>();
+
+  useEffect(() => {
+    console.log(props.location?.state?.cluster)
+    getApplication(props.location?.state?.cluster, props.location?.state?.app.name).then((resp) => {
+      setapp(resp.application);
+    });
+  }, []);
+
   return (
     <PageContainer
       fixedHeader
-      waterMarkProps={{ content: '' }} // disable watermark
+      waterMarkProps={{content: ''}} // disable watermark
       header={{
         title: <Typography.Title level={2}>{app?.name}</Typography.Title>,
       }}
       content={
-        <Descriptions column={2} style={{ marginBottom: -16 }}>
+        <Descriptions column={2} style={{marginBottom: -16}}>
           <Descriptions.Item label="Description">{app?.desc}</Descriptions.Item>
           <Descriptions.Item label="Last updated">{moment(app?.updatedAt).format('YYYY-MM-DD')}</Descriptions.Item>
         </Descriptions>
       }
     >
       <ProCard direction="column" ghost gutter={[16, 16]} wrap>
-        <ProCard gutter={16} ghost style={{ minHeight: 200 }}>
+        <ProCard gutter={16} ghost style={{minHeight: 200}}>
           <ProList<any>
             pagination={{
               defaultPageSize: 2,
               showSizeChanger: false,
             }}
-            grid={{ gutter: 16, column: 2 }}
+            grid={{gutter: 16, column: 2}}
             metas={{
               title: {
                 dataIndex: 'name'
@@ -48,15 +59,15 @@ export default (props: any) => {
                   );
                 },
               },
-              actions: {
-                render: (_, record) => {
-                  return <a>详情</a>
-                },
-              },
+              // actions: {
+              //   render: (_, record) => {
+              //     return <a>详情</a>
+              //   },
+              // },
               avatar: {
                 render: () => {
                   return (
-                    <a><BuildOutlined /></a>
+                    <a><BuildOutlined/></a>
                   );
                 },
               },
@@ -69,15 +80,15 @@ export default (props: any) => {
                         size="small"
                         wrap
                       >
-                        <ProCard gutter={[16, 16]} wrap >
+                        <ProCard gutter={[16, 16]} wrap>
                           <ProCard colSpan={6} title="Type">
                             {record.type}
                           </ProCard>
                           <ProCard colSpan={6} title="Namespace">
                             {record.namespace}
                           </ProCard>
-                          <ProCard colSpan={6} title="Phase" >
-                            {record.phase =='running' ?
+                          <ProCard colSpan={6} title="Phase">
+                            {record.phase === 'running' ?
                               <Tag color="green">{record.phase}</Tag>
                               :
                               <Tag color="orange">{record.phase}</Tag>
@@ -85,17 +96,17 @@ export default (props: any) => {
                           </ProCard>
                           <ProCard colSpan={6} title="Health">
                             {record.health ?
-                              <a><CheckCircleTwoTone twoToneColor="#52c41a" style={{ fontSize: '20px' }} /></a>
+                              <a><CheckCircleTwoTone twoToneColor="#52c41a" style={{fontSize: '20px'}}/></a>
                               :
-                              <a><CloseCircleTwoTone twoToneColor="#eb2f96" style={{ fontSize: '20px' }} /></a>
+                              <a><CloseCircleTwoTone twoToneColor="#eb2f96" style={{fontSize: '20px'}}/></a>
                             }
                           </ProCard>
-                          <ProCard colSpan={24} title="Describe" >
+                          <ProCard colSpan={24} title="Describe">
                             {record.desc}
                           </ProCard>
                         </ProCard>
-                        <ProCard style={{ minHeight: 250 }}>
-                          <TraitCard traits={record.traits} />
+                        <ProCard style={{minHeight: 250}}>
+                          <TraitCard traits={record.traits}/>
                         </ProCard>
                       </ProCard>
                     </>
@@ -108,20 +119,13 @@ export default (props: any) => {
           />
         </ProCard>
 
-        <ProCard gutter={16} ghost style={{ minHeight: 200 }}>
+        <ProCard gutter={16} ghost style={{minHeight: 200}}>
           <ProCard title="Event">
-            <List
-              itemLayout="horizontal"
-              dataSource={app?.events}
-              renderItem={item => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={<a href="https://ant.design"><Tag color="orange">{item.type}</Tag><Tag color="red">{item.reason}</Tag> {item.age}</a>}
-                    description={item.message}
-                  />
-                </List.Item>
+            <Timeline>
+              {app?.events?.map((item) =>
+                <EventTimeline event={item}/>
               )}
-            />
+            </Timeline>
           </ProCard>
         </ProCard>
 
