@@ -6,6 +6,14 @@ GIT_COMMIT      ?= git-$(shell git rev-parse --short HEAD)
 ERR		= echo ${TIME} ${RED}[FAIL]${CNone}
 OK		= echo ${TIME} ${GREEN}[ OK ]${CNone}
 
+PROJECT_VERSION_VAR    := github.com/sunny0826/velacp/pkg/version.Version
+PROJECT_GITVERSION_VAR := github.com/sunny0826/velacp/pkg/version.GitRevision
+LDFLAGS             ?= "-X $(PROJECT_VERSION_VAR)=$(PROJECT_VERSION) -X $(PROJECT_GITVERSION_VAR)=$(GIT_COMMIT)"
+
+GOX         = go run github.com/mitchellh/gox
+TARGETS     := darwin/amd64 linux/amd64 windows/amd64
+DIST_DIRS   := find * -type d -maxdepth 0 -exec
+
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -25,6 +33,22 @@ build-cp:
 
 build-cli:
 	go build -o _bin/velactl ./cmd/velactl/main.go
+
+cross-build:
+	GO111MODULE=on CGO_ENABLED=0 $(GOX) -ldflags $(LDFLAGS) -parallel=2 -output="_bin/{{.OS}}-{{.Arch}}/velacp" -osarch="$(TARGETS)" ./cmd/velacp/
+
+compress:
+	( \
+		echo "\n## Release Info\nVERSION: $(PROJECT_VERSION)" >> README.md && \
+		echo "GIT_COMMIT: $(GIT_COMMIT_LONG)\n" >> README.md && \
+		cd _bin && \
+		$(DIST_DIRS) cp -r ../ui/dist {} \; && \
+		$(DIST_DIRS) cp ../LICENSE {} \; && \
+		$(DIST_DIRS) cp ../README.md {} \; && \
+		$(DIST_DIRS) tar -zcf velacp-{}.tar.gz {} \; && \
+		$(DIST_DIRS) zip -r velacp-{}.zip {} \; && \
+		sha256sum velacp-* > sha256sums.txt \
+	)
 
 proto:
 	hack/gen_proto.sh
