@@ -6,8 +6,8 @@ GIT_COMMIT      ?= git-$(shell git rev-parse --short HEAD)
 ERR		= echo ${TIME} ${RED}[FAIL]${CNone}
 OK		= echo ${TIME} ${GREEN}[ OK ]${CNone}
 
-PROJECT_VERSION_VAR    := github.com/sunny0826/velacp/pkg/version.Version
-PROJECT_GITVERSION_VAR := github.com/sunny0826/velacp/pkg/version.GitRevision
+PROJECT_VERSION_VAR    := github.com/oam-dev/velacp/pkg/version.Version
+PROJECT_GITVERSION_VAR := github.com/oam-dev/velacp/pkg/version.GitRevision
 LDFLAGS             ?= "-X $(PROJECT_VERSION_VAR)=$(PROJECT_VERSION) -X $(PROJECT_GITVERSION_VAR)=$(GIT_COMMIT)"
 
 GOX         = go run github.com/mitchellh/gox
