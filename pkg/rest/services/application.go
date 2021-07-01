@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
@@ -10,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	kruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/duration"
+	yamlutil "k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/kubectl/pkg/util/event"
 	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -84,9 +86,10 @@ func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
 	}
 
 	el := corev1.EventList{}
+	fieldStr := fmt.Sprintf("involvedObject.kind=Application,involvedObject.name=%s,,involvedObject.namespace=%s", appName, app.Namespace)
 	if err := cli.List(context.Background(), &el, &client.ListOptions{
 		Namespace: DefaultNamespace,
-		Raw:       &metav1.ListOptions{FieldSelector: "involvedObject.name=" + appName},
+		Raw:       &metav1.ListOptions{FieldSelector: fieldStr},
 	}); err != nil {
 		return err
 	}
@@ -149,6 +152,52 @@ func (s *ApplicationService) AddApplications(c echo.Context) error {
 	}
 
 	if err := cli.Create(context.Background(), &expectApp); err != nil {
+		return err
+	}
+
+	if err := s.appStore.AddApplication(app); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, model.ApplicationResponse{
+		Application: app,
+	})
+}
+
+// AddApplicationYaml for add applications with yaml to cluster
+func (s *ApplicationService) AddApplicationYaml(c echo.Context) error {
+	clusterName := c.Param("cluster")
+	appYaml := new(model.AppYaml)
+	if err := c.Bind(appYaml); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	cluster, err := s.clusterStore.GetCluster(clusterName)
+	if err != nil {
+		return err
+	}
+
+	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
+	if err != nil {
+		return err
+	}
+
+	decoder := yamlutil.NewYAMLOrJSONDecoder(bytes.NewReader([]byte(appYaml.Yaml)), 100)
+
+	var appObj v1beta1.Application
+	if err = decoder.Decode(&appObj); err != nil {
+		return err
+	}
+	if appObj.Namespace == "" {
+		appObj.Namespace = DefaultNamespace
+	}
+
+	if err := cli.Create(context.Background(), &appObj); err != nil {
+		return err
+	}
+
+	app, err := runtime.ParseApplicationYaml(&appObj)
+	if err != nil {
 		return err
 	}
 

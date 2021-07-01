@@ -6,9 +6,17 @@ import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 
+import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
+
 const { REACT_APP_ENV } = process.env;
 
 export default defineConfig({
+  chainWebpack: (memo) => {
+    memo.plugin('monaco-editor-webpack-plugin').use(MonacoWebpackPlugin, [
+      { languages: ['yaml','json'] }
+    ]);
+    return memo;
+  },
   hash: true,
   antd: {},
   dva: {

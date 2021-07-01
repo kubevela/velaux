@@ -20,6 +20,16 @@ export async function addApplication(cluster: string, params: API.ApplicationTyp
   });
 }
 
+export async function addApplicationYaml(cluster: string, yaml: string){
+  return request<{ yaml: string }>(`/api/clusters/${cluster}/appYaml`, {
+    method: 'POST',
+    data: {
+      yaml,
+      method: 'post',
+    },
+  });
+}
+
 export async function updateApplication(cluster: string, params: API.ApplicationType) {
   return request<{ application: API.ApplicationType }>(`/api/clusters/${cluster}/applications`, {
     method: 'PUT',

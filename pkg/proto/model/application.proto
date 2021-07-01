@@ -24,6 +24,10 @@ message Application {
   repeated AppEventType events = 7;
 }
 
+message AppYaml {
+  string yaml = 1;
+}
+
 message ComponentType {
   string name = 1;
   string type = 2;

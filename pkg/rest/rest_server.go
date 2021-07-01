@@ -112,6 +112,7 @@ func (s *restServer) registerServices() {
 	s.server.GET("/api/clusters/:cluster/applications", applicationService.GetApplications)
 	s.server.GET("/api/clusters/:cluster/applications/:application", applicationService.GetApplicationDetail)
 	s.server.POST("/api/clusters/:cluster/applications", applicationService.AddApplications)
+	s.server.POST("/api/clusters/:cluster/appYaml", applicationService.AddApplicationYaml)
 	s.server.PUT("/api/clusters/:cluster/applications", applicationService.UpdateApplications)
 	s.server.DELETE("/api/clusters/:cluster/applications/:application", applicationService.RemoveApplications)
 
