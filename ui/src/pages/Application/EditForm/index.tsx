@@ -1,12 +1,16 @@
 import { updateApplication } from '@/services/kubevela/applicationapi';
 import { Button, Drawer, Input, message } from 'antd';
 import { useState } from 'react';
+import MonacoEditor from "react-monaco-editor";
 
 interface IProps {
   app: API.ApplicationType;
   cluster: string;
   onUpdate: () => void;
 }
+const options = {
+  selectOnLineNumbers: true,
+};
 
 export default (props: IProps) => {
   const [appDrawerVisible, setAppDrawerVisible] = useState<boolean>(false);
@@ -29,6 +33,9 @@ export default (props: IProps) => {
     setAppDrawerVisible(false);
   };
 
+  const onChangeHandle = (newDate: string) => {
+    setData(JSON.parse(newDate))
+  }
   return (
     <>
       <Button id="edit" type="primary" onClick={showAppDrawer}>
@@ -57,16 +64,12 @@ export default (props: IProps) => {
           </div>
         }
       >
-        <Input.TextArea
-          style={{
-            width: '100%',
-            height: '100%',
-            resize: 'none',
-          }}
-          defaultValue={JSON.stringify(data, null, 2)}
-          onChange={(e) => {
-            setData(JSON.parse(e.target.value));
-          }}
+        <MonacoEditor
+          language="json"
+          theme="vs-dark"
+          value={JSON.stringify(data, null, 2)}
+          options={options}
+          onChange={onChangeHandle}
         />
       </Drawer>
     </>

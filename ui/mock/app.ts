@@ -200,4 +200,5 @@ export default {
   'GET /api/clusters/:cluster/applications': listApps,
   'GET /api/clusters/:cluster/applications/:appName': getApp,
   'POST /api/clusters/:cluster/applications': postApps,
+  'POST /api/clusters/:cluster/appYaml': postApps,
 };
