@@ -12,7 +12,6 @@ LDFLAGS             ?= "-X $(PROJECT_VERSION_VAR)=$(PROJECT_VERSION) -X $(PROJEC
 
 GOX         = go run github.com/mitchellh/gox
 TARGETS     := darwin/amd64 linux/amd64 windows/amd64
-#DIST_DIRS   := find * -type d -maxdepth 0 -exec
 DIST_DIRS   := find * -name "*-*" -type d -exec
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
