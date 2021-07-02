@@ -12,7 +12,7 @@ LDFLAGS             ?= "-X $(PROJECT_VERSION_VAR)=$(PROJECT_VERSION) -X $(PROJEC
 
 GOX         = go run github.com/mitchellh/gox
 TARGETS     := darwin/amd64 linux/amd64 windows/amd64
-DIST_DIRS   := find * -type d -maxdepth 0 -exec
+DIST_DIRS   := find * -name "*-*" -type d -exec
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -42,7 +42,9 @@ compress:
 		echo "\n## Release Info\nVERSION: $(PROJECT_VERSION)" >> README.md && \
 		echo "GIT_COMMIT: $(GIT_COMMIT_LONG)\n" >> README.md && \
 		cd _bin && \
-		$(DIST_DIRS) cp -r ../ui/dist {} \; && \
+		mkdir ui && \
+		cp -r ../ui/dist ui && \
+		$(DIST_DIRS) cp -r ui {} \; && \
 		$(DIST_DIRS) cp ../LICENSE {} \; && \
 		$(DIST_DIRS) cp ../README.md {} \; && \
 		$(DIST_DIRS) tar -zcf velacp-{}.tar.gz {} \; && \
