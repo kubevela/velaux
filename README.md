@@ -35,7 +35,7 @@ _bin/velacp server --db-url=${MONGO_URL} --db-name=vela
 
 The dashboard will be served at http://localhost:8000 .
 
-![alt](docs/images/app-list.png)
+![alt](docs/images/app-list.jpg)
 
 ## Community
 
