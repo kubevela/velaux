@@ -63,11 +63,14 @@ resources:
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   limits:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 500m
+    memory: 1Gi
   requests:
     cpu: 100m
     memory: 128Mi
+
+healthCheck:
+  port: 9550
 
 autoscaling:
   enabled: false
@@ -81,3 +84,14 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+#If non-empty, write log files in this path
+logFilePath: ""
+
+#Defines the maximum size a log file can grow to. Unit is megabytes.
+#If the value is 0, the maximum file size is unlimited.
+logFileMaxSize: 1024
+
+dbURL: "127.0.0.1:27017"
+
+dbName: "vela"
