@@ -40,8 +40,7 @@ WORKDIR /
 ARG TARGETARCH
 COPY --from=builder /workspace/manager-${TARGETARCH} /usr/local/bin/manager
 
-# USER nonroot:nonroot
-# ENTRYPOINT ["/manager"]
+COPY entrypoint.sh /usr/local/bin/
 
 ENTRYPOINT ["entrypoint.sh"]
 
