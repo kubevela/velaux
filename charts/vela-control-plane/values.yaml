@@ -8,7 +8,7 @@ image:
   repository: 249401644/vela-control-plane
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "git-f4cb1f4"
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
