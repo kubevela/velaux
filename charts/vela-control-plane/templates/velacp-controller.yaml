@@ -46,10 +46,10 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
+          command:
+            - "manager"
           args:
-            - "server"
-            - "--db-url={{ .Values.dbURL}}"
-            - "--db-name={{ .Values.dbName}}"
+            - "server  --db-url={{ .Values.dbURL}}  --db-name={{ .Values.dbName}}"
             {{ if ne .Values.logFilePath "" }}
             - "--log-file-path={{ .Values.logFilePath }}"
             - "--log-file-max-size={{ .Values.logFileMaxSize }}"
