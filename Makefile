@@ -26,7 +26,7 @@ all: build
 build: build-ui build-cp
 
 build-ui:
-	cd ui/ && yarn build &&	cd ..
+	cd ui/ &&yarn build &&  yarn build &&	cd ..
 
 build-cp:
 	go build -o _bin/velacp ./cmd/velacp/main.go
