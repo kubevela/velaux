@@ -1,4 +1,61 @@
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vela-control-plane.fullname" . }}
+  labels:
+  {{- include "vela-control-plane.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+  {{- include "vela-control-plane.selectorLabels" . | nindent 4 }}
+
+---
+
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "vela-control-plane.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "vela-control-plane.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+          {{- end }}
+    {{- end }}
+  {{- end }}
+
+---
 
 {{- if .Values.serviceAccount.create -}}
 apiVersion: v1
@@ -49,7 +106,9 @@ spec:
           command:
             - "manager"
           args:
-            - "server  --db-url={{ .Values.dbURL}}  --db-name={{ .Values.dbName}}"
+            - "server"
+            - "--db-url= {{ .Values.dbURL }}"
+            - "--db-name= {{ .Values.dbName }}"
             {{ if ne .Values.logFilePath "" }}
             - "--log-file-path={{ .Values.logFilePath }}"
             - "--log-file-max-size={{ .Values.logFileMaxSize }}"
