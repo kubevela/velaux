@@ -30,7 +30,7 @@ all: build
 build: build-ui build-cp
 
 build-ui:
-	cd ui/ && yarn build &&	cd ..
+	cd ui/ && yarn install && yarn build &&	cd ..
 
 build-cp:
 	go build -o _bin/velacp ./cmd/velacp/main.go
@@ -92,7 +92,7 @@ lint: golangci
 	$(GOLANGCILINT) run ./...
 
 # Build the docker image
-docker-build:
+docker-build: build-ui
 	docker build --build-arg=VERSION=$(VELA_CP_VERSION) --build-arg=GITVERSION=$(GIT_COMMIT) -t $(VELA_CP_TEST_IMAGE) .
 
 # Push the docker image

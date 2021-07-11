@@ -2,6 +2,7 @@
 FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.16-alpine as builder
 
 WORKDIR /workspace
+
 # Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -14,9 +15,8 @@ RUN go mod download
 # Copy the go source
 COPY cmd/velacp/main.go main.go
 COPY pkg/ pkg/
+COPY ui/dist/ ui/dist/
 COPY version/ version/
-# COPY api/ api/
-# COPY controllers/ controllers/
 
 # Build
 ARG TARGETARCH
@@ -38,10 +38,12 @@ RUN apk add --no-cache ca-certificates bash
 WORKDIR /
 
 ARG TARGETARCH
-COPY --from=builder /workspace/manager-${TARGETARCH} /usr/local/bin/manager
+COPY --from=builder /workspace/manager-${TARGETARCH}   /usr/local/bin/manager
+RUN mkdir ui
+COPY --from=builder /workspace/ui/dist/   /ui/
 
 COPY entrypoint.sh /usr/local/bin/
 
-ENTRYPOINT ["entrypoint.sh"]
+EXPOSE 8000
 
-CMD ["manager"]
+ENTRYPOINT ["entrypoint.sh"]
