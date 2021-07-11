@@ -56,7 +56,7 @@ proto:
 	hack/gen_proto.sh
 
 # Run tests
-test: fmt vet
+test: vet lint staticcheck
 	go test ./pkg/... ./cmd/...
 
 # Run go fmt against code
