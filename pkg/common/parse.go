@@ -1,13 +1,15 @@
 package common
 
 import (
-	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
-	"github.com/oam-dev/kubevela/apis/types"
-	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	kruntime "k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/oam-dev/velacp/pkg/proto/model"
+
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+	"github.com/oam-dev/kubevela/apis/types"
 )
 
 // ParseReference is used to include the common function `parseParameter`
@@ -20,7 +22,7 @@ func NewParseReference(cli client.Client) *ParseReference {
 }
 
 func (p *ParseReference) ParseDefinition(obj *unstructured.Unstructured, name, ns string) (*model.Definition, error) {
-	var wd v1alpha2.WorkloadDefinition
+	var wd v1beta1.WorkloadDefinition
 	err := kruntime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &wd)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to convert unstructured data to oam build-in WorkloadDefinition object")

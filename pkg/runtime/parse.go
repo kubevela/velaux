@@ -2,11 +2,14 @@ package runtime
 
 import (
 	"encoding/json"
-	oamcore "github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
-	"github.com/oam-dev/velacp/pkg/proto/model"
+
 	structpb "google.golang.org/protobuf/types/known/structpb"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	oamcore "github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+
+	"github.com/oam-dev/velacp/pkg/proto/model"
 )
 
 const (

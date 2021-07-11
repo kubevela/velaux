@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+
 	"github.com/oam-dev/kubevela/pkg/appfile"
 
 	"cuelang.org/go/encoding/openapi"
@@ -15,6 +16,7 @@ import (
 	"github.com/oam-dev/kubevela/apis/types"
 
 	"cuelang.org/go/cue"
+
 	"github.com/oam-dev/kubevela/pkg/controller/utils"
 	oamcue "github.com/oam-dev/kubevela/pkg/cue"
 )

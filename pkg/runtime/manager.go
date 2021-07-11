@@ -1,9 +1,10 @@
 package runtime
 
 import (
-	"github.com/oam-dev/kubevela/pkg/utils/common"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/oam-dev/kubevela/pkg/utils/common"
 )
 
 // GetClient returns a kube client for given kubeConfigData
