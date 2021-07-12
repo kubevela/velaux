@@ -7,14 +7,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oam-dev/kubevela/pkg/appfile"
-
-	"cuelang.org/go/encoding/openapi"
-
-	"github.com/oam-dev/kubevela/apis/types"
-
 	"cuelang.org/go/cue"
+	"cuelang.org/go/encoding/openapi"
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oam-dev/kubevela/apis/types"
+	"github.com/oam-dev/kubevela/pkg/appfile"
 	"github.com/oam-dev/kubevela/pkg/controller/utils"
 	oamcue "github.com/oam-dev/kubevela/pkg/cue"
 )

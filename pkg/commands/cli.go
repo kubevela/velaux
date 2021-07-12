@@ -3,8 +3,9 @@ package commands
 import (
 	"fmt"
 
-	"github.com/oam-dev/velacp/pkg/version"
 	"github.com/spf13/cobra"
+
+	"github.com/oam-dev/velacp/pkg/version"
 )
 
 type CLI struct {

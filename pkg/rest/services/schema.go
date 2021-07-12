@@ -4,17 +4,17 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/oam-dev/velacp/pkg/proto/model"
-
-	"github.com/oam-dev/velacp/pkg/common"
-
-	"github.com/labstack/echo/v4"
-	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1alpha2"
-	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
-	"github.com/oam-dev/velacp/pkg/runtime"
+	echo "github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+
+	"github.com/oam-dev/velacp/pkg/common"
+	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
+	"github.com/oam-dev/velacp/pkg/proto/model"
+	"github.com/oam-dev/velacp/pkg/runtime"
 )
 
 type SchemaService struct {
@@ -69,11 +69,11 @@ func GenDefinitionObj(name, wType string) (*unstructured.Unstructured, error) {
 	obj.SetName(name)
 	switch wType {
 	case "workload":
-		obj.SetGroupVersionKind(v1alpha2.WorkloadDefinitionGroupVersionKind)
+		obj.SetGroupVersionKind(v1beta1.WorkloadDefinitionGroupVersionKind)
 	case "trait":
-		obj.SetGroupVersionKind(v1alpha2.TraitDefinitionGroupVersionKind)
+		obj.SetGroupVersionKind(v1beta1.TraitDefinitionGroupVersionKind)
 	case "component":
-		obj.SetGroupVersionKind(v1alpha2.ComponentDefinitionGroupVersionKind)
+		obj.SetGroupVersionKind(v1beta1.ComponentDefinitionGroupVersionKind)
 	default:
 		return nil, errors.Errorf("not found definition %s", wType)
 	}

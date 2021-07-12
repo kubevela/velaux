@@ -6,16 +6,17 @@ import (
 	"net/http"
 	"strconv"
 
+	echo "github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	klog "k8s.io/klog/v2"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/labstack/echo/v4"
 	oamcore "github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
+
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/runtime"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/klog/v2"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ListComponentDef list component definitions under cluster

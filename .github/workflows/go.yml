@@ -9,7 +9,7 @@ on:
 env:
   # Common versions
   GO_VERSION: '1.16'
-  GOLANGCI_VERSION: 'v1.38.0'
+  GOLANGCI_VERSION: 'v1.38'
 
 jobs:
   detect-noop:

@@ -3,20 +3,20 @@ repo: github.com/oam-dev/velacp
 resources:
 - group: velacp.oam.dev
   kind: Environment
-  version: v1alpha1
+  version: v1beta1
 - group: velacp.oam.dev
   kind: Application
-  version: v1alpha1
+  version: v1beta1
 - group: velacp.oam.dev
   kind: Cluster
-  version: v1alpha1
+  version: v1beta1
 - group: velacp.oam.dev
   kind: Catalog
-  version: v1alpha1
+  version: v1beta1
 - group: velacp.oam.dev
   kind: Package
-  version: v1alpha1
+  version: v1beta1
 - group: velacp.oam.dev
   kind: AppTemplate
-  version: v1alpha1
+  version: v1beta1
 version: "2"

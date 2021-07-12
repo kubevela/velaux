@@ -26,7 +26,7 @@ all: build
 build: build-ui build-cp
 
 build-ui:
-	cd ui/ && yarn build &&	cd ..
+	cd ui/ && yarn install && yarn build &&	cd ..
 
 build-cp:
 	go build -o _bin/velacp ./cmd/velacp/main.go
@@ -56,12 +56,13 @@ proto:
 	hack/gen_proto.sh
 
 # Run tests
-test: fmt vet
+test: vet lint staticcheck
 	go test ./pkg/... ./cmd/...
 
 # Run go fmt against code
 fmt:
 	go fmt ./pkg/... ./cmd/...
+	$(GOIMPORTS) -local github.com/oam-dev/velacp -w $$(go list -f {{.Dir}} ./...)
 
 # Run go vet against code
 vet:
@@ -114,3 +115,16 @@ STATICCHECK=$(GOBIN)/staticcheck
 else
 STATICCHECK=$(shell which staticcheck)
 endif
+
+.PHONY: goimports
+goimports:
+ifeq (, $(shell which goimports))
+	@{ \
+	set -e ;\
+	GO111MODULE=off go get -u golang.org/x/tools/cmd/goimports ;\
+	}
+GOIMPORTS=$(GOBIN)/goimports
+else
+GOIMPORTS=$(shell which goimports)
+endif
+

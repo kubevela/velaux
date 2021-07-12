@@ -2,10 +2,12 @@ package server
 
 import (
 	"context"
+
+	"github.com/spf13/cobra"
+
 	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/datastore/mongodb"
 	"github.com/oam-dev/velacp/pkg/rest"
-	"github.com/spf13/cobra"
 )
 
 type server struct {

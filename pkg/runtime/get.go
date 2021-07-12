@@ -3,7 +3,6 @@ package runtime
 import (
 	"context"
 
-	core "github.com/oam-dev/kubevela/apis/core.oam.dev"
 	"github.com/pkg/errors"
 	crdv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -13,6 +12,8 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+
+	core "github.com/oam-dev/kubevela/apis/core.oam.dev"
 )
 
 var (
