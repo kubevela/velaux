@@ -9,7 +9,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: 8000
       protocol: TCP
       name: http
   selector:
@@ -43,8 +43,7 @@ spec:
   {{- end }}
   rules:
     {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
+    - http:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
@@ -107,8 +106,8 @@ spec:
             - "manager"
           args:
             - "server"
-            - "--db-url= {{ .Values.dbURL }}"
-            - "--db-name= {{ .Values.dbName }}"
+            - "--db-url={{ .Values.dbURL }}"
+            - "--db-name={{ .Values.dbName }}"
             {{ if ne .Values.logFilePath "" }}
             - "--log-file-path={{ .Values.logFilePath }}"
             - "--log-file-max-size={{ .Values.logFileMaxSize }}"

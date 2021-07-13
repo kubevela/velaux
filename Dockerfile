@@ -16,7 +16,6 @@ RUN go mod download
 COPY cmd/velacp/main.go main.go
 COPY pkg/ pkg/
 COPY ui/dist/ ui/dist/
-COPY version/ version/
 
 # Build
 ARG TARGETARCH
@@ -40,6 +39,5 @@ WORKDIR /
 ARG TARGETARCH
 COPY --from=builder /workspace/manager-${TARGETARCH}   /usr/local/bin/manager
 RUN mkdir ui
-COPY --from=builder /workspace/ui/dist/   /ui/
+COPY --from=builder /workspace/ui/   /ui/
 
-EXPOSE 8000
