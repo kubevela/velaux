@@ -42,8 +42,4 @@ COPY --from=builder /workspace/manager-${TARGETARCH}   /usr/local/bin/manager
 RUN mkdir ui
 COPY --from=builder /workspace/ui/dist/   /ui/
 
-COPY entrypoint.sh /usr/local/bin/
-
 EXPOSE 8000
-
-ENTRYPOINT ["entrypoint.sh"]
