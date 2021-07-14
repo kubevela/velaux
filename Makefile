@@ -21,6 +21,9 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+# Image URL to use all building/pushing image targets
+VELA_CP_IMAGE      ?= vela-control-plane:latest
+
 all: build
 
 build: build-ui build-cp
@@ -87,6 +90,15 @@ staticcheck: staticchecktool
 
 lint: golangci
 	$(GOLANGCILINT) run ./...
+
+# Build the docker image
+docker-build: build-ui
+	docker build --build-arg=VERSION=$(VELA_CP_VERSION) --build-arg=GITVERSION=$(GIT_COMMIT) -t $(VELA_CP_IMAGE) .
+
+# Push the docker image
+docker-push:
+	docker push $(VELA_CP_IMAGE)
+
 
 GOLANGCILINT_VERSION ?= v1.31.0
 
