@@ -96,7 +96,7 @@ docker-build: build-ui
 
 # Push the docker image
 docker-push:
-	docker push $(VELA_CP_IMAGE)F
+	docker push $(VELA_CP_IMAGE)
 
 
 GOLANGCILINT_VERSION ?= v1.31.0

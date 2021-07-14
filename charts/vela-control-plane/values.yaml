@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: 249401644/vela-control-plane
+  repository: oamdev/vela-control-plane
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest0713"
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
