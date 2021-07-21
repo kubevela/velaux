@@ -19,13 +19,12 @@ import (
 	"k8s.io/kubectl/pkg/util/event"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
-
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 
 	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/proto/model"
+	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 	"github.com/oam-dev/velacp/pkg/runtime"
 )
 
@@ -43,7 +42,7 @@ const (
 func NewApplicationService(appStore storeadapter.ApplicationStore, clusterStore storeadapter.ClusterStore) (*ApplicationService, error) {
 	client, err := initClient.NewK8sClient()
 	if err != nil {
-		return nil, fmt.Errorf("create client for clusterService failed")
+		return nil, fmt.Errorf("create client for Application Service failed: %s ", err.Error())
 	}
 	return &ApplicationService{
 		appStore:     appStore,
@@ -59,7 +58,7 @@ func (s *ApplicationService) GetApplications(c echo.Context) error {
 	var cmList v1.ConfigMapList
 	labels := &metav1.LabelSelector{
 		MatchLabels: map[string]string{
-			"app": "app.configdata",
+			"app": "configdata",
 		},
 	}
 	selector, err := metav1.LabelSelectorAsSelector(labels)

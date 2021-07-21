@@ -11,7 +11,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	echo "github.com/labstack/echo/v4"
-	"go.mongodb.org/mongo-driver/mongo"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,7 +22,6 @@ import (
 )
 
 type ClusterService struct {
-	store     storeadapter.ClusterStore
 	k8sClient client.Client
 }
 
@@ -33,30 +31,72 @@ func NewClusterService(store storeadapter.ClusterStore) (*ClusterService, error)
 		return nil, fmt.Errorf("create client for clusterService failed")
 	}
 	return &ClusterService{
-		store:     store,
 		k8sClient: client,
 	}, nil
 }
 
 func (s *ClusterService) GetClusterNames(c echo.Context) error {
-	clusters, err := s.store.ListClusters()
+	var cmList v1.ConfigMapList
+	labels := &metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"cluster": "configdata",
+		},
+	}
+	selector, err := metav1.LabelSelectorAsSelector(labels)
 	if err != nil {
 		return err
 	}
+	err = s.k8sClient.List(context.Background(), &cmList, &client.ListOptions{
+		LabelSelector: selector,
+	})
+	if err != nil {
+		return err
+	}
+
 	names := []string{}
-	for _, cluster := range clusters {
-		names = append(names, cluster.Name)
+	for i := range cmList.Items {
+		names = append(names, cmList.Items[i].Name)
 	}
 
 	return c.JSON(http.StatusOK, apis.ClustersMeta{Clusters: names})
 }
 
 func (s *ClusterService) ListClusters(c echo.Context) error {
-	clusters, err := s.store.ListClusters()
+	//clusters, err := s.store.ListClusters()
+	//if err != nil {
+	//	return err
+	//}
+	var cmList v1.ConfigMapList
+	labels := &metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"cluster": "configdata",
+		},
+	}
+	selector, err := metav1.LabelSelectorAsSelector(labels)
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, model.ClusterListResponse{Clusters: clusters})
+	err = s.k8sClient.List(context.Background(), &cmList, &client.ListOptions{
+		LabelSelector: selector,
+	})
+	if err != nil {
+		return err
+	}
+	var clusterList = make([]*model.Cluster, len(cmList.Items))
+	for i, c := range cmList.Items {
+		UpdateInt, err := strconv.ParseInt(cmList.Items[i].Data["UpdatedAt"], 10, 64)
+		if err != nil {
+			return err
+		}
+		cluster := model.Cluster{
+			Name:      c.Name,
+			UpdatedAt: UpdateInt,
+			Desc:      cmList.Items[i].Data["Desc"],
+		}
+		clusterList = append(clusterList, &cluster)
+	}
+
+	return c.JSON(http.StatusOK, model.ClusterListResponse{Clusters: clusterList})
 }
 
 func (s *ClusterService) GetCluster(c echo.Context) error {
@@ -87,7 +127,7 @@ func (s *ClusterService) AddCluster(c echo.Context) error {
 	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterReq.Name}, &cm)
 	if err != nil && apierrors.IsNotFound(err) {
 		// not found
-		conf, err := config.GetConfig()
+		conf, err := config.GetConfig() // need to change interface for multi-cluster management
 		if err != nil {
 			return err
 		}
@@ -98,7 +138,7 @@ func (s *ClusterService) AddCluster(c echo.Context) error {
 			"UpdatedAt": time.Now().String(),
 			"Kubecofig": conf.String(),
 		}
-		cm, err = ToConfigMap(clusterReq.Name, "default", configdata)
+		cm, err = ToConfigMap(clusterReq.Name, DefaultUINamespace, configdata)
 		if err != nil {
 			return fmt.Errorf("convert config map failed %s ", err.Error())
 		}
@@ -120,33 +160,44 @@ func (s *ClusterService) UpdateCluster(c echo.Context) error {
 		return err
 	}
 	cluster := convertToCluster(clusterReq)
-	if err := s.store.PutCluster(&cluster); err != nil {
-		return err
+	var cm *v1.ConfigMap
+	configdata := map[string]string{
+		"Name":      clusterReq.Name,
+		"Desc":      clusterReq.Desc,
+		"UpdatedAt": time.Now().String(),
+		"Kubecofig": clusterReq.Kubeconfig,
+	}
+	cm, err := ToConfigMap(clusterReq.Name, DefaultUINamespace, configdata)
+	if err != nil {
+		return fmt.Errorf("convert config map failed %s ", err.Error())
+	}
+	err = s.k8sClient.Update(context.Background(), cm)
+	if err != nil {
+		return fmt.Errorf("unable to update configmap for %s : %s ", clusterReq.Name, err.Error())
 	}
 	return c.JSON(http.StatusOK, apis.ClusterMeta{Cluster: &cluster})
 }
 
 func (s *ClusterService) DelCluster(c echo.Context) error {
 	clusterName := c.Param("clusterName")
-	if err := s.store.DelCluster(clusterName); err != nil {
-		return err
+	var cm v1.ConfigMap
+	cm.SetName(clusterName)
+	cm.SetNamespace(DefaultUINamespace)
+	if err := s.k8sClient.Delete(context.Background(), &cm); err != nil {
+		return c.JSON(http.StatusInternalServerError, false)
 	}
 	return c.JSON(http.StatusOK, true)
 }
 
 // checkClusterExist check whether cluster exist with name
-func (s *ClusterService) checkClusterExist(name string) (bool, error) {
-	cluster, err := s.store.GetCluster(name)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return false, nil
-		}
+func (s *ClusterService) checkClusterExist(clusterName string) (bool, error) {
+	var cm v1.ConfigMap
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm)
+	if err != nil && apierrors.IsNotFound(err) { // not found
 		return false, err
-	}
-	if len(cluster.Name) != 0 {
+	} else { // found
 		return true, nil
 	}
-	return false, nil
 }
 
 // convertToCluster get cluster model from request
@@ -168,6 +219,9 @@ func ToConfigMap(name, namespace string, configData map[string]string) (*v1.Conf
 	}
 	cm.SetName(name)
 	cm.SetNamespace(namespace)
+	cm.SetLabels(map[string]string{
+		"cluster": "configdata",
+	})
 	cm.Data = configData
 	return &cm, nil
 }
