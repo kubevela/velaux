@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	echo "github.com/labstack/echo/v4"
-	"github.com/prometheus/common/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -29,15 +27,15 @@ type ClusterService struct {
 	k8sClient client.Client
 }
 
-func NewClusterService(store storeadapter.ClusterStore) *ClusterService {
+func NewClusterService(store storeadapter.ClusterStore) (*ClusterService, error) {
 	client, err := initClient.NewK8sClient()
 	if err != nil {
-		log.Errorf("create client for clusterService failed")
+		return nil, fmt.Errorf("create client for clusterService failed")
 	}
 	return &ClusterService{
 		store:     store,
 		k8sClient: client,
-	}
+	}, nil
 }
 
 func (s *ClusterService) GetClusterNames(c echo.Context) error {
@@ -63,17 +61,16 @@ func (s *ClusterService) ListClusters(c echo.Context) error {
 
 func (s *ClusterService) GetCluster(c echo.Context) error {
 	clusterName := c.QueryParam("clusterName")
-	ctx := context.Background()
+
 	var cm v1.ConfigMap
-	namespace := "default"
-	err := s.k8sClient.Get(ctx, client.ObjectKey{Namespace: namespace, Name: clusterName}, &cm)
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm)
 	if err != nil {
 		return fmt.Errorf("unable to find configmap parameters in %s:%s ", clusterName, err.Error())
 	}
 	var cluster model.Cluster
 	cluster.Name = cm.Data["Name"]
 	cluster.Desc = cm.Data["Desc"]
-	cluster.UpdatedAt, err = strconv.ParseInt(strings.Split(cm.Data["UpdatedAt"], "Time:")[1], 10, 64)
+	cluster.UpdatedAt, err = strconv.ParseInt(cm.Data["UpdatedAt"], 10, 64)
 	if err != nil {
 		return fmt.Errorf("unable to resolve update parameter in %s:%s ", clusterName, err.Error())
 	}
@@ -87,9 +84,7 @@ func (s *ClusterService) AddCluster(c echo.Context) error {
 		return err
 	}
 	var cm v1.ConfigMap
-	namespace := "default"
-	ctx := context.Background()
-	err := s.k8sClient.Get(ctx, client.ObjectKey{Namespace: namespace, Name: clusterReq.Name}, &cm)
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterReq.Name}, &cm)
 	if err != nil && apierrors.IsNotFound(err) {
 		// not found
 		conf, err := config.GetConfig()
@@ -107,9 +102,9 @@ func (s *ClusterService) AddCluster(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("convert config map failed %s ", err.Error())
 		}
-		err = s.k8sClient.Create(ctx, cm)
+		err = s.k8sClient.Create(context.Background(), cm)
 		if err != nil {
-			log.Errorf("Unable to create configmap for %s : %s", clusterReq.Name, err)
+			return fmt.Errorf("unable to create configmap for %s : %s ", clusterReq.Name, err.Error())
 		}
 	} else {
 		// found

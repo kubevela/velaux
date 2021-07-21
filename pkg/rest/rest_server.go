@@ -7,6 +7,13 @@ import (
 
 	echo "github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 
 	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
@@ -32,19 +39,29 @@ type RestServer interface {
 }
 
 type restServer struct {
-	ds     datastore.DataStore
-	server *echo.Echo
-	Config
+	ds        datastore.DataStore
+	server    *echo.Echo
+	k8sClient client.Client
+	cfg       Config
 }
 
-func New(d datastore.DataStore, cfg Config) RestServer {
+const (
+	DefaultUINamespace = "velaui"
+)
+
+func New(d datastore.DataStore, cfg Config) (RestServer, error) {
+	client, err := initClient.NewK8sClient()
+	if err != nil {
+		return nil, fmt.Errorf("create client for clusterService failed")
+	}
 	s := &restServer{
-		ds:     d,
-		server: newEchoInstance(),
-		Config: cfg,
+		ds:        d,
+		server:    newEchoInstance(),
+		k8sClient: client,
+		cfg:       cfg,
 	}
 
-	return s
+	return s, nil
 }
 
 func newEchoInstance() *echo.Echo {
@@ -78,6 +95,21 @@ func (s *restServer) registerServices() {
 		rewrites[route] = "/"
 	}
 	s.server.Pre(middleware.Rewrite(rewrites))
+	// create specific namespace for better resource management
+
+	var ns v1.Namespace
+	if err := s.k8sClient.Get(context.Background(), types.NamespacedName{Name: DefaultUINamespace}, &ns); err != nil && apierrors.IsNotFound(err) {
+		// not found
+		ns = v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: DefaultUINamespace,
+			},
+		}
+		err := s.k8sClient.Create(context.Background(), &ns)
+		if err != nil {
+			log.Logger.Errorf("create namespace for velaui system failed %s ", err.Error())
+		}
+	}
 
 	capabilityStore := storeadapter.NewCapabilityStore(s.ds)
 	capabilityService := services.NewCapabilityService(capabilityStore)
@@ -96,7 +128,10 @@ func (s *restServer) registerServices() {
 	s.server.POST("/api/catalogs/:catalogName/sync", catalogService.SyncCatalog)
 
 	clusterStore := storeadapter.NewClusterStore(s.ds)
-	clusterService := services.NewClusterService(clusterStore)
+	clusterService, err := services.NewClusterService(clusterStore)
+	if err != nil {
+		log.Logger.Errorf("create cluster service failed! %s: ", err.Error())
+	}
 	s.server.GET("/api/cluster", clusterService.GetCluster)
 	s.server.GET("/api/clusters", clusterService.ListClusters)
 	s.server.GET("/api/clusternames", clusterService.GetClusterNames)
@@ -110,7 +145,10 @@ func (s *restServer) registerServices() {
 
 	// application
 	appStore := storeadapter.NewApplicationStore(s.ds)
-	applicationService := services.NewApplicationService(appStore, clusterStore)
+	applicationService, err := services.NewApplicationService(appStore, clusterStore)
+	if err != nil {
+		log.Logger.Errorf("create application service failed! %s: ", err.Error())
+	}
 	s.server.GET("/api/clusters/:cluster/applications", applicationService.GetApplications)
 	s.server.GET("/api/clusters/:cluster/applications/:application", applicationService.GetApplicationDetail)
 	s.server.POST("/api/clusters/:cluster/applications", applicationService.AddApplications)
@@ -129,7 +167,7 @@ func (s *restServer) registerServices() {
 
 func (s *restServer) startHTTP(ctx context.Context) error {
 	// Start HTTP server
-	log.Logger.Infof("HTTP APIs are being served on port: %d", s.Config.Port)
-	addr := fmt.Sprintf(":%d", s.Config.Port)
+	log.Logger.Infof("HTTP APIs are being served on port: %d", s.cfg.Port)
+	addr := fmt.Sprintf(":%d", s.cfg.Port)
 	return s.server.Start(addr)
 }

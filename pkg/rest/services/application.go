@@ -6,91 +6,145 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strconv"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
+	"github.com/labstack/echo/v4"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	kruntime "k8s.io/apimachinery/pkg/runtime"
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/duration"
 	yamlutil "k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/kubectl/pkg/util/event"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/labstack/echo/v4"
+	initClient "github.com/oam-dev/velacp/pkg/rest/client"
+
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+	"github.com/oam-dev/kubevela/pkg/utils/apply"
 
 	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/runtime"
-
-	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
-	"github.com/oam-dev/kubevela/pkg/utils/apply"
 )
 
 type ApplicationService struct {
 	appStore     storeadapter.ApplicationStore
 	clusterStore storeadapter.ClusterStore
+	k8sClient    client.Client
 }
 
 const (
-	DefaultNamespace = "default"
+	DefaultUINamespace  = "velaui"
+	DefaultAppNamespace = "default"
 )
 
-func NewApplicationService(appStore storeadapter.ApplicationStore, clusterStore storeadapter.ClusterStore) *ApplicationService {
+func NewApplicationService(appStore storeadapter.ApplicationStore, clusterStore storeadapter.ClusterStore) (*ApplicationService, error) {
+	client, err := initClient.NewK8sClient()
+	if err != nil {
+		return nil, fmt.Errorf("create client for clusterService failed")
+	}
 	return &ApplicationService{
 		appStore:     appStore,
 		clusterStore: clusterStore,
-	}
+		k8sClient:    client,
+	}, nil
 }
 
 // GetApplications for get applications from cluster
 func (s *ApplicationService) GetApplications(c echo.Context) error {
-	appName := c.QueryParam("appName")
-	apps, err := s.appStore.ListApplications(appName)
+	// appName := c.QueryParam("appName") // change to get application
+
+	var cmList v1.ConfigMapList
+	labels := &metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"app": "app.configdata",
+		},
+	}
+	selector, err := metav1.LabelSelectorAsSelector(labels)
 	if err != nil {
 		return err
 	}
+	err = s.k8sClient.List(context.Background(), &cmList, &client.ListOptions{
+		LabelSelector: selector,
+	})
+	if err != nil {
+		return err
+	}
+	var appList = make([]*model.Application, len(cmList.Items))
+	for i, c := range cmList.Items {
+		UpdateInt, err := strconv.ParseInt(cmList.Items[i].Data["UpdatedAt"], 10, 64)
+		if err != nil {
+			return err
+		}
+		app := model.Application{
+			Name:      c.Name,
+			Namespace: c.Namespace,
+			Desc:      cmList.Items[i].Data["Desc"],
+			UpdatedAt: UpdateInt,
+		}
+		appList = append(appList, &app)
+	}
+
 	return c.JSON(http.StatusOK, model.ApplicationListResponse{
-		Applications: apps,
+		Applications: appList,
 	})
 }
 
 func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
 	appName := c.Param("application")
 	clusterName := c.Param("cluster")
-	app, err := s.appStore.GetApplications(appName)
+
+	var cm v1.ConfigMap
+	// k8sClient is a common client for getting configmap info in current cluster.
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm) // cluster configmap info
+	if err != nil {
+		return fmt.Errorf("unable to find configmap parameters in %s:%s ", clusterName, err.Error())
+	}
+
+	// cli is the client running in specific cluster to get specific k8s crd resource.
+	cli, err := runtime.GetClient([]byte(cm.Data["Kubeconfig"]))
 	if err != nil {
 		return err
 	}
 
+	var app model.Application
+	err = s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: appName}, &cm) // application configmap info
+	if err != nil {
+		return fmt.Errorf("unable to find configmap parameters in %s:%s ", appName, err.Error())
+	}
+
+	app.Name = appName
+	app.Desc = cm.Data["Desc"]
+	app.Namespace = cm.Data["Namespace"]
 	app.ClusterName = clusterName
-	cluster, err := s.clusterStore.GetCluster(clusterName)
+	app.UpdatedAt, err = strconv.ParseInt(cm.Data["UpdatedAt"], 10, 64)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to resolve update parameter in %s:%s ", clusterName, err.Error())
 	}
 
-	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
-	if err != nil {
-		return err
-	}
-
-	appObj := v1beta1.Application{}
-	key := client.ObjectKey{Namespace: DefaultNamespace, Name: appName}
-	if err := cli.Get(context.Background(), key, &appObj); err != nil {
+	var appObj = v1beta1.Application{}
+	if err := cli.Get(context.Background(), client.ObjectKey{Namespace: DefaultAppNamespace, Name: appName}, &appObj); err != nil { // application crd info
 		return err
 	}
 
 	for i, c := range appObj.Status.Services {
-		app.Components[i].Namespace = DefaultNamespace
-		app.Components[i].Workload = c.WorkloadDefinition.Kind
-		app.Components[i].Health = c.Healthy
-		app.Components[i].Phase = string(appObj.Status.Phase)
+		comp := model.ComponentType{
+			Name:      c.Name,
+			Namespace: DefaultAppNamespace,
+			Workload:  c.WorkloadDefinition.Kind,
+			Type:      appObj.Spec.Components[i].Type,
+			Health:    c.Healthy,
+			Phase:     string(appObj.Status.Phase),
+		}
+		app.Components = append(app.Components, &comp)
 	}
 
-	el := corev1.EventList{}
+	el := v1.EventList{}
 	fieldStr := fmt.Sprintf("involvedObject.kind=Application,involvedObject.name=%s,,involvedObject.namespace=%s", appName, app.Namespace)
 	if err := cli.List(context.Background(), &el, &client.ListOptions{
-		Namespace: DefaultNamespace,
+		Namespace: DefaultAppNamespace,
 		Raw:       &metav1.ListOptions{FieldSelector: fieldStr},
 	}); err != nil {
 		return err
@@ -116,7 +170,7 @@ func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, model.ApplicationResponse{
-		Application: app,
+		Application: &app,
 	})
 }
 
@@ -191,7 +245,7 @@ func (s *ApplicationService) AddApplicationYaml(c echo.Context) error {
 		return err
 	}
 	if appObj.Namespace == "" {
-		appObj.Namespace = DefaultNamespace
+		appObj.Namespace = DefaultAppNamespace
 	}
 
 	if err := cli.Create(context.Background(), &appObj); err != nil {
@@ -245,7 +299,7 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 		return err
 	}
 
-	expectAppObj, err := kruntime.DefaultUnstructuredConverter.ToUnstructured(&expectApp)
+	expectAppObj, err := k8sruntime.DefaultUnstructuredConverter.ToUnstructured(&expectApp)
 	if err != nil {
 		return err
 	}
