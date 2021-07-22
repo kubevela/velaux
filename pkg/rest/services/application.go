@@ -11,6 +11,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
@@ -22,16 +23,13 @@ import (
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 
-	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 	"github.com/oam-dev/velacp/pkg/runtime"
 )
 
 type ApplicationService struct {
-	appStore     storeadapter.ApplicationStore
-	clusterStore storeadapter.ClusterStore
-	k8sClient    client.Client
+	k8sClient client.Client
 }
 
 const (
@@ -39,15 +37,13 @@ const (
 	DefaultAppNamespace = "default"
 )
 
-func NewApplicationService(appStore storeadapter.ApplicationStore, clusterStore storeadapter.ClusterStore) (*ApplicationService, error) {
+func NewApplicationService() (*ApplicationService, error) {
 	client, err := initClient.NewK8sClient()
 	if err != nil {
 		return nil, fmt.Errorf("create client for Application Service failed: %s ", err.Error())
 	}
 	return &ApplicationService{
-		appStore:     appStore,
-		clusterStore: clusterStore,
-		k8sClient:    client,
+		k8sClient: client,
 	}, nil
 }
 
@@ -95,24 +91,19 @@ func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
 	appName := c.Param("application")
 	clusterName := c.Param("cluster")
 
+	cli, err := s.getClientByClusterName(clusterName)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("get client info failed: %s ", err.Error()))
+	}
+
+	// get application configmap info
 	var cm v1.ConfigMap
-	// k8sClient is a common client for getting configmap info in current cluster.
-	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm) // cluster configmap info
-	if err != nil {
-		return fmt.Errorf("unable to find configmap parameters in %s:%s ", clusterName, err.Error())
-	}
-
-	// cli is the client running in specific cluster to get specific k8s crd resource.
-	cli, err := runtime.GetClient([]byte(cm.Data["Kubeconfig"]))
-	if err != nil {
-		return err
-	}
-
-	var app model.Application
-	err = s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: appName}, &cm) // application configmap info
+	err = s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: appName}, &cm)
 	if err != nil {
 		return fmt.Errorf("unable to find configmap parameters in %s:%s ", appName, err.Error())
 	}
+
+	var app model.Application
 
 	app.Name = appName
 	app.Desc = cm.Data["Desc"]
@@ -181,37 +172,42 @@ func (s *ApplicationService) AddApplications(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	app.ClusterName = clusterName
-
-	isAppExist, err := s.appStore.IsApplicationExist(app.Name)
+	isAppExist, err := s.checkAppExist(app.Name)
 	if err != nil {
 		return err
 	}
-
 	if isAppExist {
-		return fmt.Errorf("application %s has existed", app.Name)
+		return c.JSON(http.StatusBadRequest, fmt.Sprintf("application %s has existed", app.Name))
 	}
 
-	cluster, err := s.clusterStore.GetCluster(clusterName)
+	cli, err := s.getClientByClusterName(clusterName)
 	if err != nil {
-		return err
-	}
-
-	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
-	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("get client failed: %s ", err.Error()))
 	}
 
 	expectApp, err := runtime.ParseCoreApplication(app)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("parse app failed: %s ", err.Error()))
 	}
-
 	if err := cli.Create(context.Background(), &expectApp); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("create app failed: %s ", err.Error()))
 	}
 
-	if err := s.appStore.AddApplication(app); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	var cm *v1.ConfigMap
+	configdata := map[string]string{
+		"Name":        app.Name,
+		"Desc":        app.Desc,
+		"Namespace":   app.Namespace,
+		"UpdatedAt":   time.Now().String(),
+		"ClusterName": clusterName,
+	}
+	cm, err = s.ToConfigMap(app.Name, DefaultUINamespace, configdata)
+	if err != nil {
+		return fmt.Errorf("convert config map failed %s ", err.Error())
+	}
+	err = s.k8sClient.Create(context.Background(), cm)
+	if err != nil {
+		return fmt.Errorf("unable to create configmap for %s : %s ", app.Name, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, model.ApplicationResponse{
@@ -226,19 +222,12 @@ func (s *ApplicationService) AddApplicationYaml(c echo.Context) error {
 	if err := c.Bind(appYaml); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-
-	cluster, err := s.clusterStore.GetCluster(clusterName)
+	cli, err := s.getClientByClusterName(clusterName)
 	if err != nil {
-		return err
-	}
-
-	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
-	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("get client failed: %s ", err.Error()))
 	}
 
 	decoder := yamlutil.NewYAMLOrJSONDecoder(bytes.NewReader([]byte(appYaml.Yaml)), 100)
-
 	var appObj v1beta1.Application
 	if err = decoder.Decode(&appObj); err != nil {
 		return err
@@ -250,14 +239,25 @@ func (s *ApplicationService) AddApplicationYaml(c echo.Context) error {
 	if err := cli.Create(context.Background(), &appObj); err != nil {
 		return err
 	}
-
 	app, err := runtime.ParseApplicationYaml(&appObj)
 	if err != nil {
 		return err
 	}
 
-	if err := s.appStore.AddApplication(app); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	var cm *v1.ConfigMap
+	configdata := map[string]string{
+		"Name":        app.Name,
+		"Desc":        app.Desc,
+		"UpdatedAt":   time.Now().String(),
+		"ClusterName": clusterName,
+	}
+	cm, err = s.ToConfigMap(app.Name, DefaultUINamespace, configdata)
+	if err != nil {
+		return fmt.Errorf("convert config map failed %s ", err.Error())
+	}
+	err = s.k8sClient.Create(context.Background(), cm)
+	if err != nil {
+		return fmt.Errorf("unable to create configmap for %s : %s ", app.Name, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, model.ApplicationResponse{
@@ -274,7 +274,7 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 	}
 	app.ClusterName = clusterName
 
-	isAppExist, err := s.appStore.IsApplicationExist(app.Name)
+	isAppExist, err := s.checkAppExist(app.Name)
 	if err != nil {
 		return err
 	}
@@ -283,12 +283,7 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 		return fmt.Errorf("application %s not existed", app.Name)
 	}
 
-	cluster, err := s.clusterStore.GetCluster(clusterName)
-	if err != nil {
-		return err
-	}
-
-	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
+	cli, err := s.getClientByClusterName(clusterName)
 	if err != nil {
 		return err
 	}
@@ -311,8 +306,20 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 		return err
 	}
 
-	if err := s.appStore.PutApplication(app); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	var cm *v1.ConfigMap
+	configdata := map[string]string{
+		"Name":        app.Name,
+		"Desc":        app.Desc,
+		"UpdatedAt":   time.Now().String(),
+		"ClusterName": clusterName,
+	}
+	cm, err = s.ToConfigMap(app.Name, DefaultUINamespace, configdata)
+	if err != nil {
+		return fmt.Errorf("convert config map failed %s ", err.Error())
+	}
+	err = s.k8sClient.Create(context.Background(), cm)
+	if err != nil {
+		return fmt.Errorf("unable to create configmap for %s : %s ", app.Name, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, model.ApplicationResponse{
@@ -324,34 +331,32 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 func (s *ApplicationService) RemoveApplications(c echo.Context) error {
 	appName := c.Param("application")
 	clusterName := c.Param("cluster")
+	// get namespace for application
+	var cm v1.ConfigMap
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: appName}, &cm)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
 
-	app, err := s.appStore.GetApplications(appName)
+	cli, err := s.getClientByClusterName(clusterName)
 	if err != nil {
 		return err
 	}
 
-	cluster, err := s.clusterStore.GetCluster(clusterName)
-	if err != nil {
-		return err
-	}
-
-	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
-	if err != nil {
-		return err
-	}
-
-	application := &model.Application{Name: appName, Namespace: app.Namespace}
+	application := &model.Application{Name: appName, Namespace: cm.Data["Namespace"]}
 	expectApp, err := runtime.ParseCoreApplication(application)
 	if err != nil {
 		return err
 	}
-
 	if err := cli.Delete(context.Background(), &expectApp); err != nil {
 		return err
 	}
 
-	if err := s.appStore.DelApplication(appName); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	// delete configmap for app info
+	cm.SetName(appName)
+	cm.SetNamespace(DefaultUINamespace)
+	if err := s.k8sClient.Delete(context.Background(), &cm); err != nil {
+		return c.JSON(http.StatusInternalServerError, false)
 	}
 
 	return c.JSON(http.StatusOK, model.ApplicationResponse{
@@ -373,4 +378,46 @@ func translateMicroTimestampSince(timestamp metav1.MicroTime) string {
 	}
 
 	return duration.HumanDuration(time.Since(timestamp.Time))
+}
+
+func (s *ApplicationService) checkAppExist(appName string) (bool, error) {
+	var cm v1.ConfigMap
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: appName}, &cm)
+	if err != nil && apierrors.IsNotFound(err) { // not found
+		return false, err
+	} else { // found
+		return true, nil
+	}
+}
+
+func (s *ApplicationService) getClientByClusterName(clusterName string) (client.Client, error) {
+	var cm v1.ConfigMap
+	// k8sClient is a common client for getting configmap info in current cluster.
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm) // cluster configmap info
+	if err != nil {
+		return nil, fmt.Errorf("unable to find configmap parameters in %s:%s ", clusterName, err.Error())
+	}
+
+	// cli is the client running in specific cluster to get specific k8s cr resource.
+	cli, err := runtime.GetClient([]byte(cm.Data["Kubeconfig"]))
+	if err != nil {
+		return nil, err
+	}
+	return cli, nil
+}
+
+func (s *ApplicationService) ToConfigMap(name, namespace string, configData map[string]string) (*v1.ConfigMap, error) {
+	var cm = v1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "ConfigMap",
+		},
+	}
+	cm.SetName(name)
+	cm.SetNamespace(namespace)
+	cm.SetLabels(map[string]string{
+		"app": "configdata",
+	})
+	cm.Data = configData
+	return &cm, nil
 }

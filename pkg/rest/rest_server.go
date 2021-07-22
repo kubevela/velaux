@@ -88,7 +88,7 @@ func (s *restServer) Run(ctx context.Context) error {
 }
 
 func (s *restServer) registerServices() {
-	// All react routes need to be setup here. Otherwise the server returns 404 not found.
+	// All react routes need to be setup here. Otherwise the server returns 404 .
 	rewrites := map[string]string{}
 	s.server.Use(middleware.Static("ui/dist"))
 	for _, route := range frontendRoutes {
@@ -127,8 +127,8 @@ func (s *restServer) registerServices() {
 	s.server.GET("/api/catalogs/:catalogName/capabilities", catalogService.GetCapabilities)
 	s.server.POST("/api/catalogs/:catalogName/sync", catalogService.SyncCatalog)
 
-	clusterStore := storeadapter.NewClusterStore(s.ds)
-	clusterService, err := services.NewClusterService(clusterStore)
+	// cluster
+	clusterService, err := services.NewClusterService()
 	if err != nil {
 		log.Logger.Errorf("create cluster service failed! %s: ", err.Error())
 	}
@@ -144,8 +144,7 @@ func (s *restServer) registerServices() {
 	s.server.GET("/api/clusters/:clusterName/traitdefinitions", clusterService.ListTraitDef)
 
 	// application
-	appStore := storeadapter.NewApplicationStore(s.ds)
-	applicationService, err := services.NewApplicationService(appStore, clusterStore)
+	applicationService, err := services.NewApplicationService()
 	if err != nil {
 		log.Logger.Errorf("create application service failed! %s: ", err.Error())
 	}
@@ -156,12 +155,18 @@ func (s *restServer) registerServices() {
 	s.server.PUT("/api/clusters/:cluster/applications", applicationService.UpdateApplications)
 	s.server.DELETE("/api/clusters/:cluster/applications/:application", applicationService.RemoveApplications)
 
-	velaInstallService := services.NewVelaInstallService(clusterStore)
+	velaInstallService, err := services.NewVelaInstallService()
+	if err != nil {
+		log.Logger.Errorf(err.Error())
+	}
 	s.server.GET("/api/clusters/:cluster/installvela", velaInstallService.InstallVela)
 	s.server.GET("/api/clusters/:cluster/isvelainstalled", velaInstallService.IsVelaInstalled)
 
 	// show Definition schema
-	schemaService := services.NewSchemaService(clusterStore)
+	schemaService, err := services.NewSchemaService()
+	if err != nil {
+		log.Logger.Errorf(err.Error())
+	}
 	s.server.GET("/api/clusters/:cluster/schema", schemaService.GetWorkloadSchema)
 }
 

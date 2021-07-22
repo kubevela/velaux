@@ -2,29 +2,36 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	echo "github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 
 	"github.com/oam-dev/velacp/pkg/common"
-	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/runtime"
 )
 
 type SchemaService struct {
-	clusterStore storeadapter.ClusterStore
+	k8sClient client.Client
 }
 
-func NewSchemaService(clusterStore storeadapter.ClusterStore) *SchemaService {
-	return &SchemaService{
-		clusterStore: clusterStore,
+func NewSchemaService() (*SchemaService, error) {
+	client, err := initClient.NewK8sClient()
+	if err != nil {
+		return nil, fmt.Errorf("create client for clusterService failed")
 	}
+	return &SchemaService{
+		k8sClient: client,
+	}, nil
 }
 
 func (s *SchemaService) GetWorkloadSchema(c echo.Context) error {
@@ -33,12 +40,7 @@ func (s *SchemaService) GetWorkloadSchema(c echo.Context) error {
 	definitionType := c.QueryParam("type")
 
 	clusterName := c.Param("cluster")
-	cluster, err := s.clusterStore.GetCluster(clusterName)
-	if err != nil {
-		return err
-	}
-
-	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
+	cli, err := s.getClientByClusterName(clusterName)
 	if err != nil {
 		return err
 	}
@@ -79,4 +81,20 @@ func GenDefinitionObj(name, wType string) (*unstructured.Unstructured, error) {
 	}
 
 	return obj, nil
+}
+
+func (s *SchemaService) getClientByClusterName(clusterName string) (client.Client, error) {
+	var cm v1.ConfigMap
+	// k8sClient is a common client for getting configmap info in current cluster.
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm) // cluster configmap info
+	if err != nil {
+		return nil, fmt.Errorf("unable to find configmap parameters in %s:%s ", clusterName, err.Error())
+	}
+
+	// cli is the client running in specific cluster to get specific k8s cr resource.
+	cli, err := runtime.GetClient([]byte(cm.Data["Kubeconfig"]))
+	if err != nil {
+		return nil, err
+	}
+	return cli, nil
 }

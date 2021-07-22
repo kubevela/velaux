@@ -15,7 +15,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/rest/apis"
 	initClient "github.com/oam-dev/velacp/pkg/rest/client"
@@ -25,7 +24,7 @@ type ClusterService struct {
 	k8sClient client.Client
 }
 
-func NewClusterService(store storeadapter.ClusterStore) (*ClusterService, error) {
+func NewClusterService() (*ClusterService, error) {
 	client, err := initClient.NewK8sClient()
 	if err != nil {
 		return nil, fmt.Errorf("create client for clusterService failed")
@@ -62,10 +61,7 @@ func (s *ClusterService) GetClusterNames(c echo.Context) error {
 }
 
 func (s *ClusterService) ListClusters(c echo.Context) error {
-	//clusters, err := s.store.ListClusters()
-	//if err != nil {
-	//	return err
-	//}
+
 	var cmList v1.ConfigMapList
 	labels := &metav1.LabelSelector{
 		MatchLabels: map[string]string{
@@ -138,7 +134,7 @@ func (s *ClusterService) AddCluster(c echo.Context) error {
 			"UpdatedAt": time.Now().String(),
 			"Kubecofig": conf.String(),
 		}
-		cm, err = ToConfigMap(clusterReq.Name, DefaultUINamespace, configdata)
+		cm, err = s.ToConfigMap(clusterReq.Name, DefaultUINamespace, configdata)
 		if err != nil {
 			return fmt.Errorf("convert config map failed %s ", err.Error())
 		}
@@ -167,7 +163,7 @@ func (s *ClusterService) UpdateCluster(c echo.Context) error {
 		"UpdatedAt": time.Now().String(),
 		"Kubecofig": clusterReq.Kubeconfig,
 	}
-	cm, err := ToConfigMap(clusterReq.Name, DefaultUINamespace, configdata)
+	cm, err := s.ToConfigMap(clusterReq.Name, DefaultUINamespace, configdata)
 	if err != nil {
 		return fmt.Errorf("convert config map failed %s ", err.Error())
 	}
@@ -210,7 +206,7 @@ func convertToCluster(clusterReq *apis.ClusterRequest) model.Cluster {
 	}
 }
 
-func ToConfigMap(name, namespace string, configData map[string]string) (*v1.ConfigMap, error) {
+func (s *ClusterService) ToConfigMap(name, namespace string, configData map[string]string) (*v1.ConfigMap, error) {
 	var cm = v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
