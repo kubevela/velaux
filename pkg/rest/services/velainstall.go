@@ -11,8 +11,6 @@ import (
 	"sync"
 	"time"
 
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
-
 	"github.com/ghodss/yaml"
 	"github.com/gofrs/flock"
 	echo "github.com/labstack/echo/v4"
@@ -39,6 +37,7 @@ import (
 	"github.com/oam-dev/velacp/pkg/log"
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/rest/apis"
+	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 	"github.com/oam-dev/velacp/pkg/runtime"
 )
 

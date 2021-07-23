@@ -7,13 +7,12 @@ import (
 	"strconv"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
 	echo "github.com/labstack/echo/v4"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/rest/apis"
@@ -147,7 +146,7 @@ func (s *ClusterService) AddCluster(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("cluster %s exist", clusterReq.Name))
 	}
 	cluster := convertToCluster(clusterReq)
-	return c.JSON(http.StatusOK, apis.ClusterMeta{Cluster: &cluster})
+	return c.JSON(http.StatusCreated, apis.ClusterMeta{Cluster: &cluster})
 }
 
 func (s *ClusterService) UpdateCluster(c echo.Context) error {

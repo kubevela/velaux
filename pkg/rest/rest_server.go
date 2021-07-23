@@ -13,11 +13,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
-
 	"github.com/oam-dev/velacp/pkg/datastore"
-	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/log"
+	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 	"github.com/oam-dev/velacp/pkg/rest/services"
 )
 
@@ -111,26 +109,28 @@ func (s *restServer) registerServices() {
 		}
 	}
 
-	capabilityStore := storeadapter.NewCapabilityStore(s.ds)
-	capabilityService := services.NewCapabilityService(capabilityStore)
+	capabilityService, err := services.NewCapabilityService()
+	if err != nil {
+		log.Logger.Errorf(err.Error())
+	}
 	s.server.GET("/api/capabilities", capabilityService.ListCapabilities)
 	s.server.GET("/api/capabilities/:capabilityName", capabilityService.GetCapability)
 	s.server.POST("/api/capabilities/:capabilityName/install", capabilityService.InstallCapability)
 
-	catalogStore := storeadapter.NewCatalogStore(s.ds)
-	catalogService := services.NewCatalogService(catalogStore, capabilityStore)
+	catalogService, err := services.NewCatalogService()
+	if err != nil {
+		log.Logger.Errorf(err.Error())
+	}
 	s.server.GET("/api/catalogs", catalogService.ListCatalogs)
 	s.server.POST("/api/catalogs", catalogService.AddCatalog)
 	s.server.PUT("/api/catalogs", catalogService.UpdateCatalog)
 	s.server.GET("/api/catalogs/:catalogName", catalogService.GetCatalog)
 	s.server.DELETE("/api/catalogs/:catalogName", catalogService.DelCatalog)
-	s.server.GET("/api/catalogs/:catalogName/capabilities", catalogService.GetCapabilities)
-	s.server.POST("/api/catalogs/:catalogName/sync", catalogService.SyncCatalog)
 
 	// cluster
 	clusterService, err := services.NewClusterService()
 	if err != nil {
-		log.Logger.Errorf("create cluster service failed! %s: ", err.Error())
+		log.Logger.Errorf(err.Error())
 	}
 	s.server.GET("/api/cluster", clusterService.GetCluster)
 	s.server.GET("/api/clusters", clusterService.ListClusters)

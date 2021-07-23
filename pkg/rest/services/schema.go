@@ -11,12 +11,11 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
-
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 
 	"github.com/oam-dev/velacp/pkg/common"
 	"github.com/oam-dev/velacp/pkg/proto/model"
+	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 	"github.com/oam-dev/velacp/pkg/runtime"
 )
 

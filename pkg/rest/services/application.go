@@ -33,8 +33,9 @@ type ApplicationService struct {
 }
 
 const (
-	DefaultUINamespace  = "velaui"
-	DefaultAppNamespace = "default"
+	DefaultUINamespace   = "velaui"
+	DefaultAppNamespace  = "default"
+	DefaultVelaNamespace = "vela-system"
 )
 
 func NewApplicationService() (*ApplicationService, error) {
@@ -210,7 +211,7 @@ func (s *ApplicationService) AddApplications(c echo.Context) error {
 		return fmt.Errorf("unable to create configmap for %s : %s ", app.Name, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, model.ApplicationResponse{
+	return c.JSON(http.StatusCreated, model.ApplicationResponse{
 		Application: app,
 	})
 }
@@ -278,7 +279,6 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	if !isAppExist {
 		return fmt.Errorf("application %s not existed", app.Name)
 	}
@@ -292,7 +292,6 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	expectAppObj, err := k8sruntime.DefaultUnstructuredConverter.ToUnstructured(&expectApp)
 	if err != nil {
 		return err
@@ -383,11 +382,15 @@ func translateMicroTimestampSince(timestamp metav1.MicroTime) string {
 func (s *ApplicationService) checkAppExist(appName string) (bool, error) {
 	var cm v1.ConfigMap
 	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: appName}, &cm)
-	if err != nil && apierrors.IsNotFound(err) { // not found
-		return false, err
-	} else { // found
-		return true, nil
+	if err != nil {
+		if apierrors.IsNotFound(err) { // not found
+			return false, nil
+		} else { // other error
+			return false, err
+		}
 	}
+	// found
+	return true, nil
 }
 
 func (s *ApplicationService) getClientByClusterName(clusterName string) (client.Client, error) {
