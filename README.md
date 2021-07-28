@@ -1,8 +1,10 @@
-# VelaUX - The User Experience Plane for KubeVela
+![alt](docs/images/KubeVela-03.png)
+
+# velacp
 
 ## Overview
 
-VelaUX (previously known as `velacp`) introduces the UI/CLI and HTTP server components as the user experience layer for KubeVela.
+KubeVela control plane (velacp) includes the UI/CLI and HTTP server components to provide application and cluster management experience based on KubeVela & K8s.
 
 This project is based on the following tech stacks:
 
