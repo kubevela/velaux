@@ -1,8 +1,6 @@
 # Environment
 
-## WARNING
-
-This design has been **DEPRECATED** and moved to [KubeVela Environment Design](https://github.com/oam-dev/kubevela/blob/master/design/vela-core/environment.md).
+DEPRECATED!!!
 
 ## 1. Introduction
 
