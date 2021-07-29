@@ -81,11 +81,14 @@ func newEchoInstance() *echo.Echo {
 }
 
 func (s *restServer) Run(ctx context.Context) error {
-	s.registerServices()
+	err := s.registerServices()
+	if err != nil {
+		return err
+	}
 	return s.startHTTP(ctx)
 }
 
-func (s *restServer) registerServices() {
+func (s *restServer) registerServices() error {
 	// All react routes need to be setup here. Otherwise the server returns 404 .
 	rewrites := map[string]string{}
 	s.server.Use(middleware.Static("ui/dist"))
@@ -106,20 +109,24 @@ func (s *restServer) registerServices() {
 		err := s.k8sClient.Create(context.Background(), &ns)
 		if err != nil {
 			log.Logger.Errorf("create namespace for velaui system failed %s ", err.Error())
+			return err
 		}
 	}
 
 	capabilityService, err := services.NewCapabilityService()
 	if err != nil {
-		log.Logger.Errorf(err.Error())
+		return err
 	}
 	s.server.GET("/api/capabilities", capabilityService.ListCapabilities)
 	s.server.GET("/api/capabilities/:capabilityName", capabilityService.GetCapability)
 	s.server.POST("/api/capabilities/:capabilityName/install", capabilityService.InstallCapability)
-
-	catalogService, err := services.NewCatalogService()
+    client, err := initClient.NewK8sClient()
+	catalogService := &services.CatalogService{
+		k8sClient: client,
+	}
+	// services.NewCatalogService()
 	if err != nil {
-		log.Logger.Errorf(err.Error())
+		return err
 	}
 	s.server.GET("/api/catalogs", catalogService.ListCatalogs)
 	s.server.POST("/api/catalogs", catalogService.AddCatalog)
@@ -130,7 +137,7 @@ func (s *restServer) registerServices() {
 	// cluster
 	clusterService, err := services.NewClusterService()
 	if err != nil {
-		log.Logger.Errorf(err.Error())
+		return err
 	}
 	s.server.GET("/api/cluster", clusterService.GetCluster)
 	s.server.GET("/api/clusters", clusterService.ListClusters)
@@ -146,7 +153,7 @@ func (s *restServer) registerServices() {
 	// application
 	applicationService, err := services.NewApplicationService()
 	if err != nil {
-		log.Logger.Errorf("create application service failed! %s: ", err.Error())
+		return err
 	}
 	s.server.GET("/api/clusters/:cluster/applications", applicationService.GetApplications)
 	s.server.GET("/api/clusters/:cluster/applications/:application", applicationService.GetApplicationDetail)
@@ -157,7 +164,7 @@ func (s *restServer) registerServices() {
 
 	velaInstallService, err := services.NewVelaInstallService()
 	if err != nil {
-		log.Logger.Errorf(err.Error())
+		return err
 	}
 	s.server.GET("/api/clusters/:cluster/installvela", velaInstallService.InstallVela)
 	s.server.GET("/api/clusters/:cluster/isvelainstalled", velaInstallService.IsVelaInstalled)
@@ -165,9 +172,11 @@ func (s *restServer) registerServices() {
 	// show Definition schema
 	schemaService, err := services.NewSchemaService()
 	if err != nil {
-		log.Logger.Errorf(err.Error())
+		return err
 	}
 	s.server.GET("/api/clusters/:cluster/schema", schemaService.GetWorkloadSchema)
+
+	return nil
 }
 
 func (s *restServer) startHTTP(ctx context.Context) error {
