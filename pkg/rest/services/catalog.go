@@ -107,7 +107,11 @@ func (s *CatalogService) AddCatalog(c echo.Context) error {
 		"Desc":      catalogReq.Desc,
 		"UpdatedAt": time.Now().String(),
 	}
-	cm, err = s.ToConfigMap(catalogReq.Name, DefaultUINamespace, configdata)
+
+	label := map[string]string{
+		"catalog": "configdata",
+	}
+	cm, err = ToConfigMap(catalogReq.Name, DefaultUINamespace, label, configdata)
 	if err != nil {
 		return fmt.Errorf("convert config map failed %s ", err.Error())
 	}
@@ -131,7 +135,11 @@ func (s *CatalogService) UpdateCatalog(c echo.Context) error {
 		"Desc":      catalogReq.Desc,
 		"UpdatedAt": time.Now().String(),
 	}
-	cm, err := s.ToConfigMap(catalogReq.Name, DefaultUINamespace, configdata)
+
+	label := map[string]string{
+		"catalog": "configdata",
+	}
+	cm, err := ToConfigMap(catalogReq.Name, DefaultUINamespace, label, configdata)
 	if err != nil {
 		return fmt.Errorf("convert config map failed %s ", err.Error())
 	}
@@ -181,20 +189,4 @@ func convertToCatalog(catalogReq *apis.CatalogRequest) model.Catalog {
 		Url:       catalogReq.Url,
 		Token:     catalogReq.Token,
 	}
-}
-
-func (s *CatalogService) ToConfigMap(name, namespace string, configData map[string]string) (*v1.ConfigMap, error) {
-	var cm = v1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "ConfigMap",
-		},
-	}
-	cm.SetName(name)
-	cm.SetNamespace(namespace)
-	cm.SetLabels(map[string]string{
-		"catalog": "configdata",
-	})
-	cm.Data = configData
-	return &cm, nil
 }

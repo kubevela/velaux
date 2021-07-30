@@ -108,7 +108,7 @@ func (s *restServer) registerServices() error {
 		}
 		err := s.k8sClient.Create(context.Background(), &ns)
 		if err != nil {
-			log.Logger.Errorf("create namespace for velaui system failed %s ", err.Error())
+			log.Logger.Errorf("create namespace for velaux system failed %s ", err.Error())
 			return err
 		}
 	}

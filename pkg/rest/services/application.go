@@ -37,7 +37,7 @@ const (
 	DefaultVelaNamespace = "vela-system"
 )
 
-func NewApplicationService(client client.Client) *ApplicationService{
+func NewApplicationService(client client.Client) *ApplicationService {
 
 	return &ApplicationService{
 		k8sClient: client,
@@ -56,13 +56,13 @@ func (s *ApplicationService) GetApplications(c echo.Context) error {
 	}
 	selector, err := metav1.LabelSelectorAsSelector(labels)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("create label selector for configmap failed : %s", err.Error()))
 	}
 	err = s.k8sClient.List(context.Background(), &cmList, &client.ListOptions{
 		LabelSelector: selector,
 	})
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("list configmap for cluster info failed : %s", err.Error()))
 	}
 	var appList = make([]*model.Application, len(cmList.Items))
 	for i, c := range cmList.Items {
@@ -97,7 +97,7 @@ func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
 	var cm v1.ConfigMap
 	err = s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: appName}, &cm)
 	if err != nil {
-		return fmt.Errorf("unable to find configmap parameters in %s:%s ", appName, err.Error())
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("client get configmap for %s failed :%s ", appName, err.Error()))
 	}
 
 	var app model.Application
@@ -108,7 +108,7 @@ func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
 	app.ClusterName = clusterName
 	app.UpdatedAt, err = strconv.ParseInt(cm.Data["UpdatedAt"], 10, 64)
 	if err != nil {
-		return fmt.Errorf("unable to resolve update parameter in %s:%s ", clusterName, err.Error())
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("unable to resolve update parameter in %s:%s ", clusterName, err.Error()))
 	}
 
 	var appObj = v1beta1.Application{}
@@ -134,7 +134,7 @@ func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
 		Namespace: DefaultAppNamespace,
 		Raw:       &metav1.ListOptions{FieldSelector: fieldStr},
 	}); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("client get event failed :%s ", err.Error()))
 	}
 	// sort event
 	sort.Sort(event.SortableEvents(el.Items))
@@ -166,15 +166,15 @@ func (s *ApplicationService) AddApplications(c echo.Context) error {
 	clusterName := c.Param("cluster")
 	app := new(model.Application)
 	if err := c.Bind(app); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, fmt.Sprintf("resolve request failed %s ", err.Error()))
 	}
 	app.ClusterName = clusterName
 	isAppExist, err := s.checkAppExist(app.Name)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("check app existed failed :%s ", err.Error()))
 	}
 	if isAppExist {
-		return c.JSON(http.StatusBadRequest, fmt.Sprintf("application %s has existed", app.Name))
+		return c.JSON(http.StatusBadRequest, fmt.Sprintf("application %s has existed: %s ", app.Name, err.Error()))
 	}
 
 	cli, err := s.getClientByClusterName(clusterName)
@@ -198,13 +198,17 @@ func (s *ApplicationService) AddApplications(c echo.Context) error {
 		"UpdatedAt":   time.Now().String(),
 		"ClusterName": clusterName,
 	}
-	cm, err = s.ToConfigMap(app.Name, DefaultUINamespace, configdata)
+
+	label := map[string]string{
+		"app": "configdata",
+	}
+	cm, err = ToConfigMap(app.Name, DefaultUINamespace, label, configdata)
 	if err != nil {
-		return fmt.Errorf("convert config map failed %s ", err.Error())
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("convert config map failed %s ", err.Error()))
 	}
 	err = s.k8sClient.Create(context.Background(), cm)
 	if err != nil {
-		return fmt.Errorf("unable to create configmap for %s : %s ", app.Name, err.Error())
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("create configmap for %s failed: %s ", app.Name, err.Error()))
 	}
 
 	return c.JSON(http.StatusCreated, model.ApplicationResponse{
@@ -217,7 +221,7 @@ func (s *ApplicationService) AddApplicationYaml(c echo.Context) error {
 	clusterName := c.Param("cluster")
 	appYaml := new(model.AppYaml)
 	if err := c.Bind(appYaml); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, fmt.Sprintf("resolve request failed %s ", err.Error()))
 	}
 	cli, err := s.getClientByClusterName(clusterName)
 	if err != nil {
@@ -227,18 +231,18 @@ func (s *ApplicationService) AddApplicationYaml(c echo.Context) error {
 	decoder := yamlutil.NewYAMLOrJSONDecoder(bytes.NewReader([]byte(appYaml.Yaml)), 100)
 	var appObj v1beta1.Application
 	if err = decoder.Decode(&appObj); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, fmt.Sprintf("decode for app yaml failed: %s ", err.Error()))
 	}
 	if appObj.Namespace == "" {
 		appObj.Namespace = DefaultAppNamespace
 	}
 
 	if err := cli.Create(context.Background(), &appObj); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("client app failed: %s ", err.Error()))
 	}
 	app, err := runtime.ParseApplicationYaml(&appObj)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("client parse app failed: %s ", err.Error()))
 	}
 
 	var cm *v1.ConfigMap
@@ -248,13 +252,17 @@ func (s *ApplicationService) AddApplicationYaml(c echo.Context) error {
 		"UpdatedAt":   time.Now().String(),
 		"ClusterName": clusterName,
 	}
-	cm, err = s.ToConfigMap(app.Name, DefaultUINamespace, configdata)
+
+	label := map[string]string{
+		"app": "configdata",
+	}
+	cm, err = ToConfigMap(app.Name, DefaultUINamespace, label, configdata)
 	if err != nil {
-		return fmt.Errorf("convert config map failed %s ", err.Error())
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("convert config map failed %s ", err.Error()))
 	}
 	err = s.k8sClient.Create(context.Background(), cm)
 	if err != nil {
-		return fmt.Errorf("unable to create configmap for %s : %s ", app.Name, err.Error())
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("unable to create configmap for %s : %s ", app.Name, err.Error()))
 	}
 
 	return c.JSON(http.StatusOK, model.ApplicationResponse{
@@ -267,30 +275,30 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 	clusterName := c.Param("cluster")
 	app := new(model.Application)
 	if err := c.Bind(app); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, fmt.Sprintf("resolve request failed %s ", err.Error()))
 	}
 	app.ClusterName = clusterName
 
 	isAppExist, err := s.checkAppExist(app.Name)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("check app existed failed :%s ", err.Error()))
 	}
 	if !isAppExist {
-		return fmt.Errorf("application %s not existed", app.Name)
+		return c.JSON(http.StatusBadRequest, fmt.Sprintf("application %s do not existed: %s ", app.Name, err.Error()))
 	}
 
 	cli, err := s.getClientByClusterName(clusterName)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("get client failed :%s ", err.Error()))
 	}
 
 	expectApp, err := runtime.ParseCoreApplication(app)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("client parse app failed :%s ", err.Error()))
 	}
 	expectAppObj, err := k8sruntime.DefaultUnstructuredConverter.ToUnstructured(&expectApp)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("convert app to unstructrue failed :%s ", err.Error()))
 	}
 
 	expectAppUnStruct := &unstructured.Unstructured{Object: expectAppObj}
@@ -298,7 +306,7 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 
 	applicator := apply.NewAPIApplicator(cli)
 	if err := applicator.Apply(context.Background(), expectAppUnStruct); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("apply app failed :%s ", err.Error()))
 	}
 
 	var cm *v1.ConfigMap
@@ -308,13 +316,18 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 		"UpdatedAt":   time.Now().String(),
 		"ClusterName": clusterName,
 	}
-	cm, err = s.ToConfigMap(app.Name, DefaultUINamespace, configdata)
-	if err != nil {
-		return fmt.Errorf("convert config map failed %s ", err.Error())
+
+	label := map[string]string{
+		"app": "configdata",
 	}
+	cm, err = ToConfigMap(app.Name, DefaultUINamespace, label, configdata)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("convert config map failed %s ", err.Error()))
+	}
+
 	err = s.k8sClient.Create(context.Background(), cm)
 	if err != nil {
-		return fmt.Errorf("unable to create configmap for %s : %s ", app.Name, err.Error())
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("unable to create configmap for %s : %s ", app.Name, err.Error()))
 	}
 
 	return c.JSON(http.StatusOK, model.ApplicationResponse{
@@ -330,21 +343,21 @@ func (s *ApplicationService) RemoveApplications(c echo.Context) error {
 	var cm v1.ConfigMap
 	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: appName}, &cm)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("client get configmap failed: %s ", err.Error()))
 	}
 
 	cli, err := s.getClientByClusterName(clusterName)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("get client by name failed: %s ", err.Error()))
 	}
 
 	application := &model.Application{Name: appName, Namespace: cm.Data["Namespace"]}
 	expectApp, err := runtime.ParseCoreApplication(application)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("parse app failed: %s ", err.Error()))
 	}
 	if err := cli.Delete(context.Background(), &expectApp); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("delete app failed: %s ", err.Error()))
 	}
 
 	// delete configmap for app info
@@ -405,7 +418,7 @@ func (s *ApplicationService) getClientByClusterName(clusterName string) (client.
 	return cli, nil
 }
 
-func (s *ApplicationService) ToConfigMap(name, namespace string, configData map[string]string) (*v1.ConfigMap, error) {
+func ToConfigMap(name, namespace string, label map[string]string, configData map[string]string) (*v1.ConfigMap, error) {
 	var cm = v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -414,9 +427,7 @@ func (s *ApplicationService) ToConfigMap(name, namespace string, configData map[
 	}
 	cm.SetName(name)
 	cm.SetNamespace(namespace)
-	cm.SetLabels(map[string]string{
-		"app": "configdata",
-	})
+	cm.SetLabels(label)
 	cm.Data = configData
 	return &cm, nil
 }

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	DefaultUINamespace = "velaui"
+	DefaultUAppNamespace = "default"
 )
 
 func ParseCoreApplication(obj *model.Application) (oamcore.Application, error) {
@@ -57,7 +57,7 @@ func ParseCoreApplication(obj *model.Application) (oamcore.Application, error) {
 
 func NewApplication(name, namespace string) oamcore.Application {
 	if len(namespace) == 0 {
-		namespace = DefaultUINamespace
+		namespace = DefaultUAppNamespace
 	}
 
 	return oamcore.Application{
