@@ -1,47 +1,91 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	echo "github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
+	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/rest/apis"
 )
 
 type CatalogService struct {
-	store storeadapter.CatalogStore
-
-	capStore storeadapter.CapabilityStore
+	k8sClient client.Client
 }
 
-func NewCatalogService(store storeadapter.CatalogStore, capStore storeadapter.CapabilityStore) *CatalogService {
+func NewCatalogService(client client.Client) *CatalogService {
+
 	return &CatalogService{
-		store:    store,
-		capStore: capStore,
+		k8sClient: client,
 	}
 }
 
 func (s *CatalogService) ListCatalogs(c echo.Context) error {
-	catalogs, err := s.store.ListCatalogs()
+	var cmList v1.ConfigMapList
+	labels := &metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"catalog": "configdata",
+		},
+	}
+	selector, err := metav1.LabelSelectorAsSelector(labels)
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, model.CatalogListResponse{Catalogs: catalogs})
+	err = s.k8sClient.List(context.Background(), &cmList, &client.ListOptions{
+		LabelSelector: selector,
+	})
+	if err != nil {
+		return err
+	}
+	var catalogList = make([]*model.Catalog, len(cmList.Items))
+	for i, c := range cmList.Items {
+		UpdateInt, err := strconv.ParseInt(cmList.Items[i].Data["UpdatedAt"], 10, 64)
+		if err != nil {
+			return err
+		}
+		catalog := model.Catalog{
+			Name:      c.Name,
+			UpdatedAt: UpdateInt,
+			Desc:      cmList.Items[i].Data["Desc"],
+			Type:      cmList.Items[i].Data["Type"],
+			Url:       cmList.Items[i].Data["Url"],
+			Token:     cmList.Items[i].Data["Token"],
+		}
+		catalogList = append(catalogList, &catalog)
+	}
+
+	return c.JSON(http.StatusOK, model.CatalogListResponse{Catalogs: catalogList})
 }
 
 func (s *CatalogService) GetCatalog(c echo.Context) error {
 	catalogName := c.Param("catalogName")
-	catalog, err := s.store.GetCatalog(catalogName)
+
+	var cm v1.ConfigMap
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultVelaNamespace, Name: catalogName}, &cm)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("get config for %s failed %s", catalogName, err.Error()))
 	}
-	return c.JSON(http.StatusOK, model.CatalogResponse{Catalog: catalog})
+	UpdatedInt, err := strconv.ParseInt(cm.Data["UpdatedAt"], 10, 64)
+	if err != nil {
+		return fmt.Errorf("unable to resolve update parameter in %s:%s ", catalogName, err.Error())
+	}
+	var catalog = model.Catalog{
+		Name:      catalogName,
+		Desc:      cm.Data["Desc"],
+		UpdatedAt: UpdatedInt,
+		Type:      cm.Data["Type"],
+		Url:       cm.Data["Url"],
+		Token:     cm.Data["Token"],
+	}
+	return c.JSON(http.StatusOK, model.CatalogResponse{Catalog: &catalog})
 }
 
 func (s *CatalogService) AddCatalog(c echo.Context) error {
@@ -56,11 +100,27 @@ func (s *CatalogService) AddCatalog(c echo.Context) error {
 	if exist {
 		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("catalog %s exist", catalogReq.Name))
 	}
-	catalog := convertToCatalog(catalogReq)
-	if err := s.store.AddCatalog(&catalog); err != nil {
-		return err
+
+	var cm *v1.ConfigMap
+	configdata := map[string]string{
+		"Name":      catalogReq.Name,
+		"Desc":      catalogReq.Desc,
+		"UpdatedAt": time.Now().String(),
 	}
-	return c.JSON(http.StatusOK, apis.CatalogMeta{Catalog: &catalog})
+
+	label := map[string]string{
+		"catalog": "configdata",
+	}
+	cm, err = ToConfigMap(catalogReq.Name, DefaultUINamespace, label, configdata)
+	if err != nil {
+		return fmt.Errorf("convert config map failed %s ", err.Error())
+	}
+	err = s.k8sClient.Create(context.Background(), cm)
+	if err != nil {
+		return fmt.Errorf("unable to create configmap for %s : %s ", catalogReq.Name, err.Error())
+	}
+	catalog := convertToCatalog(catalogReq)
+	return c.JSON(http.StatusCreated, apis.CatalogMeta{Catalog: &catalog})
 }
 
 func (s *CatalogService) UpdateCatalog(c echo.Context) error {
@@ -69,99 +129,54 @@ func (s *CatalogService) UpdateCatalog(c echo.Context) error {
 		return err
 	}
 	catalog := convertToCatalog(catalogReq)
-	if err := s.store.PutCatalog(&catalog); err != nil {
-		return err
+	var cm *v1.ConfigMap
+	configdata := map[string]string{
+		"Name":      catalogReq.Name,
+		"Desc":      catalogReq.Desc,
+		"UpdatedAt": time.Now().String(),
 	}
+
+	label := map[string]string{
+		"catalog": "configdata",
+	}
+	cm, err := ToConfigMap(catalogReq.Name, DefaultUINamespace, label, configdata)
+	if err != nil {
+		return fmt.Errorf("convert config map failed %s ", err.Error())
+	}
+	err = s.k8sClient.Update(context.Background(), cm)
+	if err != nil {
+		return fmt.Errorf("unable to update configmap for %s : %s ", catalogReq.Name, err.Error())
+	}
+
 	return c.JSON(http.StatusOK, apis.CatalogMeta{Catalog: &catalog})
 }
 
 func (s *CatalogService) DelCatalog(c echo.Context) error {
 	catalogName := c.Param("catalogName")
-	if err := s.store.DelCatalog(catalogName); err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, true)
-}
 
-func (s *CatalogService) GetCapabilities(c echo.Context) error {
-	catalogName := c.Param("catalogName")
-	capabilities, err := s.capStore.ListCapabilitiesByCatalog(catalogName)
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, model.CapabilityListResponse{Capabilities: capabilities})
-}
-
-// SyncCatalog syncs a catalog's capabilities, save them in capability store.
-//
-// TODO: implement this method,
-// sync logic is same as the `vela` cli, we should find a way to reuse these code:
-// https://github.com/oam-dev/kubevela/blob/9a10e967eec8e42a8aa284ddb20fde204696aa69/references/common/capability.go#L261
-func (s *CatalogService) SyncCatalog(c echo.Context) error {
-	catalogName := c.Param("catalogName")
-
-	capabilities := []*model.Capability{
-		{
-			Name:        catalogName + "-foo",
-			Desc:        "Just a placeholder",
-			UpdatedAt:   time.Now().Unix(),
-			CatalogName: catalogName,
-			JsonSchema:  "{}",
-		},
-		{
-			Name:        catalogName + "-bar",
-			Desc:        "Just a placeholder",
-			UpdatedAt:   time.Now().Unix(),
-			CatalogName: catalogName,
-			JsonSchema:  "{}",
-		},
-	}
-
-	currentInStore, err := s.capStore.ListCapabilitiesByCatalog(catalogName)
-	if err != nil {
-		return errors.Wrap(err, "list capabilities by catalog error")
-	}
-	mapCurrentInStore := make(map[string]*model.Capability)
-	for _, capability := range currentInStore {
-		mapCurrentInStore[capability.Name] = capability
-	}
-
-	for _, capability := range capabilities {
-		if _, ok := mapCurrentInStore[capability.Name]; ok {
-			if err := s.capStore.PutCapability(capability); err != nil {
-				return err
-			}
-			delete(mapCurrentInStore, capability.Name)
-		} else {
-			if err := s.capStore.AddCapability(capability); err != nil {
-				return err
-			}
-		}
-	}
-
-	// in store, but no longer in catalog
-	for name := range mapCurrentInStore {
-		if err := s.capStore.DelCapability(name); err != nil {
-			return err
-		}
+	var cm v1.ConfigMap
+	cm.SetName(catalogName)
+	cm.SetNamespace(DefaultUINamespace)
+	if err := s.k8sClient.Delete(context.Background(), &cm); err != nil {
+		return c.JSON(http.StatusInternalServerError, false)
 	}
 
 	return c.JSON(http.StatusOK, true)
 }
 
 // checkCatalogExist check whether catalog exist with name
-func (s *CatalogService) checkCatalogExist(name string) (bool, error) {
-	catalog, err := s.store.GetCatalog(name)
+func (s *CatalogService) checkCatalogExist(catalogName string) (bool, error) {
+	var cm v1.ConfigMap
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: catalogName}, &cm)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if apierrors.IsNotFound(err) { // not found
 			return false, nil
+		} else { // other error
+			return false, err
 		}
-		return false, err
 	}
-	if len(catalog.Name) != 0 {
-		return true, nil
-	}
-	return false, nil
+	// found
+	return true, nil
 }
 
 // convertToCatalog get catalog model from request

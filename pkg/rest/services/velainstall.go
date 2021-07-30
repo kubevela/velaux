@@ -25,8 +25,8 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
 	"helm.sh/helm/v3/pkg/storage/driver"
-	v1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
+	appv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -34,7 +34,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/oam-dev/velacp/pkg/datastore/storeadapter"
 	"github.com/oam-dev/velacp/pkg/log"
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/rest/apis"
@@ -42,12 +41,13 @@ import (
 )
 
 type VelaInstallService struct {
-	store storeadapter.ClusterStore
+	k8sClient client.Client
 }
 
-func NewVelaInstallService(store storeadapter.ClusterStore) *VelaInstallService {
+func NewVelaInstallService(client client.Client) *VelaInstallService {
+
 	return &VelaInstallService{
-		store: store,
+		k8sClient: client,
 	}
 }
 
@@ -60,7 +60,8 @@ func (s *VelaInstallService) InstallVela(c echo.Context) error {
 		return fmt.Errorf("get params err: cluster: %s, helmrepo: %s", clusterName, helmRepo)
 	}
 
-	cluster, err := s.store.GetCluster(clusterName)
+	var cm v1.ConfigMap
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm)
 	if err != nil {
 		return err
 	}
@@ -73,7 +74,7 @@ func (s *VelaInstallService) InstallVela(c echo.Context) error {
 	if err := UpdateHelmRepo(settings); err != nil {
 		return err
 	}
-	version, err := InstallHelmChart("kubevela", repoName, "vela-core", installVersion, cluster.Kubeconfig, settings)
+	version, err := InstallHelmChart("kubevela", repoName, "vela-core", installVersion, cm.Data["Kubeconfig"], settings)
 	if err != nil {
 		return err
 	}
@@ -89,7 +90,8 @@ func (s *VelaInstallService) IsVelaInstalled(c echo.Context) error {
 		return fmt.Errorf("get param error: cluster: %s", clusterName)
 	}
 
-	clusterConf, err := s.store.GetCluster(clusterName)
+	var cm v1.ConfigMap
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm)
 	if err != nil {
 		return err
 	}
@@ -97,7 +99,7 @@ func (s *VelaInstallService) IsVelaInstalled(c echo.Context) error {
 	var (
 		velaNamespace = "vela-system"
 		velaName      = "kubevela"
-		kubeConf      = clusterConf.GetKubeconfig()
+		kubeConf      = cm.Data["Kubeconfig"]
 	)
 	helmExist, err := CheckVelaHelmChartExist(kubeConf, velaNamespace, velaName)
 	if err != nil {
@@ -222,7 +224,7 @@ func InstallHelmChart(name, repo, chart, version string, kubeConfig string, sett
 		return 0, err
 	}
 
-	velaNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "vela-system"}}
+	velaNamespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "vela-system"}}
 	if err := cli.Create(context.TODO(), velaNamespace); err != nil && !apiErrors.IsAlreadyExists(err) {
 		return 0, fmt.Errorf("create vela namespace error: %v", err)
 	}
@@ -303,7 +305,7 @@ func CheckVelaControllerExist(kubeConfig string) (bool, error) {
 	}
 
 	objectKey := client.ObjectKey{Namespace: "vela-system", Name: "kubevela-vela-core"}
-	if err := k8sCli.Get(context.TODO(), objectKey, &v1.Deployment{}); err != nil {
+	if err := k8sCli.Get(context.TODO(), objectKey, &appv1.Deployment{}); err != nil {
 		if apiErrors.IsNotFound(err) {
 			return false, nil
 		}

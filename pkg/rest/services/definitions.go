@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,7 +9,7 @@ import (
 
 	echo "github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
-	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	klog "k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -30,12 +31,15 @@ func (s *ClusterService) ListComponentDef(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("cluster %s not existed", clusterName))
 	}
 
-	cluster, err := s.store.GetCluster(clusterName)
+	var cm v1.ConfigMap
+	// k8sClient is a common client for getting configmap info in current cluster.
+	err = s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm) // cluster configmap info
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to find configmap parameters in %s:%s ", clusterName, err.Error())
 	}
 
-	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
+	// cli is the client running in specific cluster to get specific k8s crd resource.
+	cli, err := runtime.GetClient([]byte(cm.Data["Kubeconfig"]))
 	if err != nil {
 		return err
 	}
@@ -73,12 +77,15 @@ func (s *ClusterService) ListTraitDef(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("cluster %s not existed", clusterName))
 	}
 
-	cluster, err := s.store.GetCluster(clusterName)
+	var cm v1.ConfigMap
+	// k8sClient is a common client for getting configmap info in current cluster.
+	err = s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterName}, &cm) // cluster configmap info
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to find configmap parameters in %s:%s ", clusterName, err.Error())
 	}
 
-	cli, err := runtime.GetClient([]byte(cluster.Kubeconfig))
+	// cli is the client running in specific cluster to get specific k8s crd resource.
+	cli, err := runtime.GetClient([]byte(cm.Data["Kubeconfig"]))
 	if err != nil {
 		return err
 	}
@@ -107,7 +114,7 @@ func (s *ClusterService) ListTraitDef(c echo.Context) error {
 
 // GenDefinition from configmap get definition jsonSchema
 func GenDefinition(cli client.Client, name, namespace string) (*model.Definition, error) {
-	cm := &corev1.ConfigMap{}
+	cm := &v1.ConfigMap{}
 	cmName := fmt.Sprintf("%s%s", types.CapabilityConfigMapNamePrefix, name)
 	if err := runtime.Get(cli, cm, cm, cmName, namespace); err != nil {
 		return nil, errors.Wrap(err, "fail to get definition from configmap")

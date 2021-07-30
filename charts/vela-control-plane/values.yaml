@@ -46,7 +46,7 @@ ingress:
     kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: my.velaui.com
+    - host: my.velaux.com
       paths:
       - path:
         backend:

@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/cobra"
 
@@ -46,6 +47,9 @@ func (s *server) run() error {
 		return err
 	}
 
-	server := rest.New(d, s.restCfg)
+	server, err := rest.New(d, s.restCfg)
+	if err != nil {
+		return fmt.Errorf("create server failed : %s ", err.Error())
+	}
 	return server.Run(ctx)
 }
