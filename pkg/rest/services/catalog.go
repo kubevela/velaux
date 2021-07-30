@@ -15,21 +15,17 @@ import (
 
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/rest/apis"
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 )
 
 type CatalogService struct {
 	k8sClient client.Client
 }
 
-func NewCatalogService() (*CatalogService, error) {
-	client, err := initClient.NewK8sClient()
-	if err != nil {
-		return nil, fmt.Errorf("create client for clusterService failed")
-	}
+func NewCatalogService(client client.Client) *CatalogService {
+
 	return &CatalogService{
 		k8sClient: client,
-	}, nil
+	}
 }
 
 func (s *CatalogService) ListCatalogs(c echo.Context) error {

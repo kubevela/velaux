@@ -13,22 +13,17 @@ import (
 
 	"github.com/oam-dev/velacp/pkg/log"
 	"github.com/oam-dev/velacp/pkg/proto/model"
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 )
 
 type CapabilityService struct {
 	k8sClient client.Client
 }
 
-func NewCapabilityService() (*CapabilityService, error) {
-	client, err := initClient.NewK8sClient()
-	if err != nil {
-		return nil, fmt.Errorf("create client for clusterService failed")
-	}
+func NewCapabilityService(client client.Client) *CapabilityService {
+
 	return &CapabilityService{
 		k8sClient: client,
-	}, nil
-
+	}
 }
 
 func (s *CapabilityService) ListCapabilities(c echo.Context) error {

@@ -24,7 +24,6 @@ import (
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 
 	"github.com/oam-dev/velacp/pkg/proto/model"
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 	"github.com/oam-dev/velacp/pkg/runtime"
 )
 
@@ -33,19 +32,16 @@ type ApplicationService struct {
 }
 
 const (
-	DefaultUINamespace   = "velaui"
+	DefaultUINamespace   = "velaux-system"
 	DefaultAppNamespace  = "default"
 	DefaultVelaNamespace = "vela-system"
 )
 
-func NewApplicationService() (*ApplicationService, error) {
-	client, err := initClient.NewK8sClient()
-	if err != nil {
-		return nil, fmt.Errorf("create client for Application Service failed: %s ", err.Error())
-	}
+func NewApplicationService(client client.Client) *ApplicationService{
+
 	return &ApplicationService{
 		k8sClient: client,
-	}, nil
+	}
 }
 
 // GetApplications for get applications from cluster

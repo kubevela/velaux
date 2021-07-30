@@ -12,10 +12,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
-
 	"github.com/oam-dev/velacp/pkg/common"
 	"github.com/oam-dev/velacp/pkg/proto/model"
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 	"github.com/oam-dev/velacp/pkg/runtime"
 )
 
@@ -23,14 +21,11 @@ type SchemaService struct {
 	k8sClient client.Client
 }
 
-func NewSchemaService() (*SchemaService, error) {
-	client, err := initClient.NewK8sClient()
-	if err != nil {
-		return nil, fmt.Errorf("create client for clusterService failed")
-	}
+func NewSchemaService(client client.Client) *SchemaService {
+
 	return &SchemaService{
 		k8sClient: client,
-	}, nil
+	}
 }
 
 func (s *SchemaService) GetWorkloadSchema(c echo.Context) error {

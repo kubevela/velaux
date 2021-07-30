@@ -37,7 +37,6 @@ import (
 	"github.com/oam-dev/velacp/pkg/log"
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/rest/apis"
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 	"github.com/oam-dev/velacp/pkg/runtime"
 )
 
@@ -45,14 +44,11 @@ type VelaInstallService struct {
 	k8sClient client.Client
 }
 
-func NewVelaInstallService() (*VelaInstallService, error) {
-	client, err := initClient.NewK8sClient()
-	if err != nil {
-		return nil, fmt.Errorf("create client for clusterService failed")
-	}
+func NewVelaInstallService(client client.Client) *VelaInstallService {
+
 	return &VelaInstallService{
 		k8sClient: client,
-	}, nil
+	}
 }
 
 func (s *VelaInstallService) InstallVela(c echo.Context) error {

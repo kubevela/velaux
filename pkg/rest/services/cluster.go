@@ -16,21 +16,17 @@ import (
 
 	"github.com/oam-dev/velacp/pkg/proto/model"
 	"github.com/oam-dev/velacp/pkg/rest/apis"
-	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 )
 
 type ClusterService struct {
 	k8sClient client.Client
 }
 
-func NewClusterService() (*ClusterService, error) {
-	client, err := initClient.NewK8sClient()
-	if err != nil {
-		return nil, fmt.Errorf("create client for clusterService failed")
-	}
+func NewClusterService(client client.Client) *ClusterService {
+
 	return &ClusterService{
 		k8sClient: client,
-	}, nil
+	}
 }
 
 func (s *ClusterService) GetClusterNames(c echo.Context) error {

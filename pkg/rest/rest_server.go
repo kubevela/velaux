@@ -44,7 +44,7 @@ type restServer struct {
 }
 
 const (
-	DefaultUINamespace = "velaui"
+	DefaultUINamespace = "velaux-system"
 )
 
 func New(d datastore.DataStore, cfg Config) (RestServer, error) {
@@ -96,8 +96,8 @@ func (s *restServer) registerServices() error {
 		rewrites[route] = "/"
 	}
 	s.server.Pre(middleware.Rewrite(rewrites))
-	// create specific namespace for better resource management
 
+	// create specific namespace for better resource management
 	var ns v1.Namespace
 	if err := s.k8sClient.Get(context.Background(), types.NamespacedName{Name: DefaultUINamespace}, &ns); err != nil && apierrors.IsNotFound(err) {
 		// not found
@@ -112,22 +112,20 @@ func (s *restServer) registerServices() error {
 			return err
 		}
 	}
-
-	capabilityService, err := services.NewCapabilityService()
+	// init common client for all service
+	commonClient, err := initClient.NewK8sClient()
 	if err != nil {
 		return err
 	}
+
+	// capability
+	capabilityService := services.NewCapabilityService(commonClient)
 	s.server.GET("/api/capabilities", capabilityService.ListCapabilities)
 	s.server.GET("/api/capabilities/:capabilityName", capabilityService.GetCapability)
 	s.server.POST("/api/capabilities/:capabilityName/install", capabilityService.InstallCapability)
-    client, err := initClient.NewK8sClient()
-	catalogService := &services.CatalogService{
-		k8sClient: client,
-	}
-	// services.NewCatalogService()
-	if err != nil {
-		return err
-	}
+
+	// catalog
+	catalogService := services.NewCatalogService(commonClient)
 	s.server.GET("/api/catalogs", catalogService.ListCatalogs)
 	s.server.POST("/api/catalogs", catalogService.AddCatalog)
 	s.server.PUT("/api/catalogs", catalogService.UpdateCatalog)
@@ -135,10 +133,7 @@ func (s *restServer) registerServices() error {
 	s.server.DELETE("/api/catalogs/:catalogName", catalogService.DelCatalog)
 
 	// cluster
-	clusterService, err := services.NewClusterService()
-	if err != nil {
-		return err
-	}
+	clusterService := services.NewClusterService(commonClient)
 	s.server.GET("/api/cluster", clusterService.GetCluster)
 	s.server.GET("/api/clusters", clusterService.ListClusters)
 	s.server.GET("/api/clusternames", clusterService.GetClusterNames)
@@ -146,15 +141,12 @@ func (s *restServer) registerServices() error {
 	s.server.PUT("/api/clusters", clusterService.UpdateCluster)
 	s.server.DELETE("/api/clusters/:clusterName", clusterService.DelCluster)
 
-	// definitions
+	// definition
 	s.server.GET("/api/clusters/:clusterName/componentdefinitions", clusterService.ListComponentDef)
 	s.server.GET("/api/clusters/:clusterName/traitdefinitions", clusterService.ListTraitDef)
 
 	// application
-	applicationService, err := services.NewApplicationService()
-	if err != nil {
-		return err
-	}
+	applicationService := services.NewApplicationService(commonClient)
 	s.server.GET("/api/clusters/:cluster/applications", applicationService.GetApplications)
 	s.server.GET("/api/clusters/:cluster/applications/:application", applicationService.GetApplicationDetail)
 	s.server.POST("/api/clusters/:cluster/applications", applicationService.AddApplications)
@@ -162,18 +154,13 @@ func (s *restServer) registerServices() error {
 	s.server.PUT("/api/clusters/:cluster/applications", applicationService.UpdateApplications)
 	s.server.DELETE("/api/clusters/:cluster/applications/:application", applicationService.RemoveApplications)
 
-	velaInstallService, err := services.NewVelaInstallService()
-	if err != nil {
-		return err
-	}
+	// install KubeVela in helm way
+	velaInstallService := services.NewVelaInstallService(commonClient)
 	s.server.GET("/api/clusters/:cluster/installvela", velaInstallService.InstallVela)
 	s.server.GET("/api/clusters/:cluster/isvelainstalled", velaInstallService.IsVelaInstalled)
 
 	// show Definition schema
-	schemaService, err := services.NewSchemaService()
-	if err != nil {
-		return err
-	}
+	schemaService := services.NewSchemaService(commonClient)
 	s.server.GET("/api/clusters/:cluster/schema", schemaService.GetWorkloadSchema)
 
 	return nil
