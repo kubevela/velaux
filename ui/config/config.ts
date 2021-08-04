@@ -1,11 +1,9 @@
 // https://umijs.org/config/
 import { defineConfig } from 'umi';
 import { join } from 'path';
-
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
-
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 
 const { REACT_APP_ENV } = process.env;

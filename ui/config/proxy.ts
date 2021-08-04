@@ -5,26 +5,31 @@
  * For details, please see
  * https://pro.ant.design/docs/deploy
  */
+const PROXY_PORT =  process.env.PROXY_PORT || 8000
+const DEV_TAEGET = `http://localhost:${PROXY_PORT}`
+const TEST_TAEGET = `http://localhost:${PROXY_PORT}`
+const PRE_TAEGET = `http://localhost:${PROXY_PORT}`
+
 export default {
   dev: {
-    '/api/': {
-      target: 'https://preview.pro.ant.design',
+    '/api': {
+      target: DEV_TAEGET,
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^/api' : '' },
     },
   },
   test: {
-    '/api/': {
-      target: 'https://preview.pro.ant.design',
+    '/api': {
+      target: TEST_TAEGET,
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^/api' : '' },
     },
   },
   pre: {
-    '/api/': {
-      target: 'your pre url',
+    '/api': {
+      target: PRE_TAEGET,
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^/api' : '' },
     },
   },
 };

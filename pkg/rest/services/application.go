@@ -64,7 +64,7 @@ func (s *ApplicationService) GetApplications(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("list configmap for cluster info failed : %s", err.Error()))
 	}
-	var appList = make([]*model.Application, len(cmList.Items))
+	var appList = make([]*model.Application, 0, len(cmList.Items))
 	for i, c := range cmList.Items {
 		UpdateInt, err := strconv.ParseInt(cmList.Items[i].Data["UpdatedAt"], 10, 64)
 		if err != nil {

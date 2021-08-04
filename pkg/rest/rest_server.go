@@ -13,20 +13,12 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/oam-dev/velacp/pkg/datastore"
 	"github.com/oam-dev/velacp/pkg/log"
 	initClient "github.com/oam-dev/velacp/pkg/rest/client"
 	"github.com/oam-dev/velacp/pkg/rest/services"
 )
 
 var _ RestServer = &restServer{}
-
-var frontendRoutes = []string{
-	"/",
-	"^/clusters",
-	"^/clusters/*",
-	"^/applicatons",
-}
 
 type Config struct {
 	Port int
@@ -37,7 +29,6 @@ type RestServer interface {
 }
 
 type restServer struct {
-	ds        datastore.DataStore
 	server    *echo.Echo
 	k8sClient client.Client
 	cfg       Config
@@ -47,13 +38,12 @@ const (
 	DefaultUINamespace = "velaux-system"
 )
 
-func New(d datastore.DataStore, cfg Config) (RestServer, error) {
+func New(cfg Config) (RestServer, error) {
 	client, err := initClient.NewK8sClient()
 	if err != nil {
 		return nil, fmt.Errorf("create client for clusterService failed")
 	}
 	s := &restServer{
-		ds:        d,
 		server:    newEchoInstance(),
 		k8sClient: client,
 		cfg:       cfg,
@@ -89,13 +79,6 @@ func (s *restServer) Run(ctx context.Context) error {
 }
 
 func (s *restServer) registerServices() error {
-	// All react routes need to be setup here. Otherwise the server returns 404 .
-	rewrites := map[string]string{}
-	s.server.Use(middleware.Static("ui/dist"))
-	for _, route := range frontendRoutes {
-		rewrites[route] = "/"
-	}
-	s.server.Pre(middleware.Rewrite(rewrites))
 
 	// create specific namespace for better resource management
 	var ns v1.Namespace
@@ -120,48 +103,48 @@ func (s *restServer) registerServices() error {
 
 	// capability
 	capabilityService := services.NewCapabilityService(commonClient)
-	s.server.GET("/api/capabilities", capabilityService.ListCapabilities)
-	s.server.GET("/api/capabilities/:capabilityName", capabilityService.GetCapability)
-	s.server.POST("/api/capabilities/:capabilityName/install", capabilityService.InstallCapability)
+	s.server.GET("/capabilities", capabilityService.ListCapabilities)
+	s.server.GET("/capabilities/:capabilityName", capabilityService.GetCapability)
+	s.server.POST("/capabilities/:capabilityName/install", capabilityService.InstallCapability)
 
 	// catalog
 	catalogService := services.NewCatalogService(commonClient)
-	s.server.GET("/api/catalogs", catalogService.ListCatalogs)
-	s.server.POST("/api/catalogs", catalogService.AddCatalog)
-	s.server.PUT("/api/catalogs", catalogService.UpdateCatalog)
-	s.server.GET("/api/catalogs/:catalogName", catalogService.GetCatalog)
-	s.server.DELETE("/api/catalogs/:catalogName", catalogService.DelCatalog)
+	s.server.GET("/catalogs", catalogService.ListCatalogs)
+	s.server.POST("/catalogs", catalogService.AddCatalog)
+	s.server.PUT("/catalogs", catalogService.UpdateCatalog)
+	s.server.GET("/catalogs/:catalogName", catalogService.GetCatalog)
+	s.server.DELETE("/catalogs/:catalogName", catalogService.DelCatalog)
 
 	// cluster
 	clusterService := services.NewClusterService(commonClient)
-	s.server.GET("/api/cluster", clusterService.GetCluster)
-	s.server.GET("/api/clusters", clusterService.ListClusters)
-	s.server.GET("/api/clusternames", clusterService.GetClusterNames)
-	s.server.POST("/api/clusters", clusterService.AddCluster)
-	s.server.PUT("/api/clusters", clusterService.UpdateCluster)
-	s.server.DELETE("/api/clusters/:clusterName", clusterService.DelCluster)
+	s.server.GET("/cluster", clusterService.GetCluster)
+	s.server.GET("/clusters", clusterService.ListClusters)
+	s.server.GET("/clusternames", clusterService.GetClusterNames)
+	s.server.POST("/clusters", clusterService.AddCluster)
+	s.server.PUT("/clusters", clusterService.UpdateCluster)
+	s.server.DELETE("/clusters/:clusterName", clusterService.DelCluster)
 
 	// definition
-	s.server.GET("/api/clusters/:clusterName/componentdefinitions", clusterService.ListComponentDef)
-	s.server.GET("/api/clusters/:clusterName/traitdefinitions", clusterService.ListTraitDef)
+	s.server.GET("/clusters/:clusterName/componentdefinitions", clusterService.ListComponentDef)
+	s.server.GET("/clusters/:clusterName/traitdefinitions", clusterService.ListTraitDef)
 
 	// application
 	applicationService := services.NewApplicationService(commonClient)
-	s.server.GET("/api/clusters/:cluster/applications", applicationService.GetApplications)
-	s.server.GET("/api/clusters/:cluster/applications/:application", applicationService.GetApplicationDetail)
-	s.server.POST("/api/clusters/:cluster/applications", applicationService.AddApplications)
-	s.server.POST("/api/clusters/:cluster/appYaml", applicationService.AddApplicationYaml)
-	s.server.PUT("/api/clusters/:cluster/applications", applicationService.UpdateApplications)
-	s.server.DELETE("/api/clusters/:cluster/applications/:application", applicationService.RemoveApplications)
+	s.server.GET("/clusters/:cluster/applications", applicationService.GetApplications)
+	s.server.GET("/clusters/:cluster/applications/:application", applicationService.GetApplicationDetail)
+	s.server.POST("/clusters/:cluster/applications", applicationService.AddApplications)
+	s.server.POST("/clusters/:cluster/appYaml", applicationService.AddApplicationYaml)
+	s.server.PUT("/clusters/:cluster/applications", applicationService.UpdateApplications)
+	s.server.DELETE("/clusters/:cluster/applications/:application", applicationService.RemoveApplications)
 
 	// install KubeVela in helm way
 	velaInstallService := services.NewVelaInstallService(commonClient)
-	s.server.GET("/api/clusters/:cluster/installvela", velaInstallService.InstallVela)
-	s.server.GET("/api/clusters/:cluster/isvelainstalled", velaInstallService.IsVelaInstalled)
+	s.server.GET("/clusters/:cluster/installvela", velaInstallService.InstallVela)
+	s.server.GET("/clusters/:cluster/isvelainstalled", velaInstallService.IsVelaInstalled)
 
 	// show Definition schema
 	schemaService := services.NewSchemaService(commonClient)
-	s.server.GET("/api/clusters/:cluster/schema", schemaService.GetWorkloadSchema)
+	s.server.GET("/clusters/:cluster/schema", schemaService.GetWorkloadSchema)
 
 	return nil
 }

@@ -16,8 +16,6 @@ require (
 	github.com/oam-dev/kubevela v1.0.5
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.1.1
-	github.com/xdg/stringprep v1.0.0 // indirect
-	go.mongodb.org/mongo-driver v1.3.2
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
 	golang.org/x/sys v0.0.0-20210421221651-33663a62ff08 // indirect
