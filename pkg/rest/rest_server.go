@@ -21,13 +21,6 @@ import (
 
 var _ RestServer = &restServer{}
 
-var frontendRoutes = []string{
-	"/",
-	"^/clusters",
-	"^/clusters/*",
-	"^/applicatons",
-}
-
 type Config struct {
 	Port int
 }
