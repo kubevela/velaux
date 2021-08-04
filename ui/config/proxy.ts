@@ -15,21 +15,21 @@ export default {
     '/api': {
       target: DEV_TAEGET,
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^/api' : '' },
     },
   },
   test: {
     '/api': {
       target: TEST_TAEGET,
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^/api' : '' },
     },
   },
   pre: {
     '/api': {
       target: PRE_TAEGET,
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^/api' : '' },
     },
   },
 };
