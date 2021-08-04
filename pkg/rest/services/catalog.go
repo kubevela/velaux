@@ -45,7 +45,7 @@ func (s *CatalogService) ListCatalogs(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	var catalogList = make([]*model.Catalog, len(cmList.Items))
+	var catalogList = make([]*model.Catalog, 0, len(cmList.Items))
 	for i, c := range cmList.Items {
 		UpdateInt, err := strconv.ParseInt(cmList.Items[i].Data["UpdatedAt"], 10, 64)
 		if err != nil {

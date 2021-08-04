@@ -43,7 +43,7 @@ func (s *CapabilityService) ListCapabilities(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	var capabilityList = make([]*model.Capability, len(cmList.Items))
+	var capabilityList = make([]*model.Capability, 0, len(cmList.Items))
 	for i, c := range cmList.Items {
 		UpdateInt, err := strconv.ParseInt(cmList.Items[i].Data["UpdatedAt"], 10, 64)
 		if err != nil {

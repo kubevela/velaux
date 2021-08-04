@@ -72,7 +72,7 @@ func (s *ClusterService) ListClusters(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, fmt.Sprintf("list configmap for cluster info failed : %s", err.Error()))
 	}
-	var clusterList = make([]*model.Cluster, len(cmList.Items))
+	var clusterList = make([]*model.Cluster, 0, len(cmList.Items))
 	for i, c := range cmList.Items {
 		UpdateInt, err := strconv.ParseInt(cmList.Items[i].Data["UpdatedAt"], 10, 64)
 		if err != nil {
