@@ -2,9 +2,11 @@
 import { defineConfig } from 'umi';
 import { join } from 'path';
 import defaultSettings from './defaultSettings';
+import proxy from './proxy';
 import routes from './routes';
-
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
+
+const { REACT_APP_ENV } = process.env;
 
 export default defineConfig({
   chainWebpack: (memo) => {
@@ -38,12 +40,6 @@ export default defineConfig({
   targets: {
     ie: 11,
   },
-  proxy: {
-    '/api/': {
-      target: 'http://localhost:8000',
-      changeOrigin: true,
-    },
-  },
   // umi routes: https://umijs.org/docs/routing
   routes,
   // Theme for antd: https://ant.design/docs/react/customize-theme-cn
@@ -55,7 +51,7 @@ export default defineConfig({
   esbuild: {},
   title: false,
   ignoreMomentLocale: true,
-
+  proxy: proxy[REACT_APP_ENV || 'dev'],
   manifest: {
     basePath: '/',
   },
