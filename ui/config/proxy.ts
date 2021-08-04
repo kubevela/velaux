@@ -5,7 +5,7 @@
  * For details, please see
  * https://pro.ant.design/docs/deploy
  */
-const { PROXY_PORT } = process.env
+const PROXY_PORT =  process.env.PROXY_PORT || 8000
 const DEV_TAEGET = `http://localhost:${PROXY_PORT}`
 const TEST_TAEGET = `http://localhost:${PROXY_PORT}`
 const PRE_TAEGET = `http://localhost:${PROXY_PORT}`
