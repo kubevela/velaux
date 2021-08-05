@@ -13,6 +13,8 @@ This project is based on the following tech stacks:
 - React and [Ant Design Pro](https://pro.ant.design/)
 
 ![alt](docs/images/arch.jpg)
+![alt](docs/images/arch-2.jpg)
+
 
 ## Quickstart
 
