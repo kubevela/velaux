@@ -12,7 +12,12 @@ This project is based on the following tech stacks:
 - Golang and [Echo](https://echo.labstack.com/)
 - React and [Ant Design Pro](https://pro.ant.design/)
 
+Overview:
+
 ![alt](docs/images/arch.jpg)
+
+Internals:
+
 ![alt](docs/images/arch-2.jpg)
 
 
