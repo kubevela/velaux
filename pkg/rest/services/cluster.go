@@ -119,15 +119,12 @@ func (s *ClusterService) AddCluster(c echo.Context) error {
 	err := s.k8sClient.Get(context.Background(), client.ObjectKey{Namespace: DefaultUINamespace, Name: clusterReq.Name}, &cm)
 	if err != nil && apierrors.IsNotFound(err) {
 		// not found
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, fmt.Sprintf("get cluster config failed: %s ", err.Error()))
-		}
 		var cm *v1.ConfigMap
 		configdata := map[string]string{
-			"Name":      clusterReq.Name,
-			"Desc":      clusterReq.Desc,
-			"UpdatedAt": time.Now().String(),
-			"Kubecofig": clusterReq.Kubeconfig,
+			"Name":       clusterReq.Name,
+			"Desc":       clusterReq.Desc,
+			"UpdatedAt":  strconv.FormatInt(time.Now().Unix(), 10),
+			"Kubeconfig": clusterReq.Kubeconfig,
 		}
 		label := map[string]string{
 			"cluster": "configdata",
@@ -141,6 +138,9 @@ func (s *ClusterService) AddCluster(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, fmt.Sprintf("unable to create configmap for %s : %s ", clusterReq.Name, err.Error()))
 		}
 	} else {
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, fmt.Sprintf("get cluster config failed: %s ", err.Error()))
+		}
 		// found
 		return c.JSON(http.StatusBadRequest, fmt.Sprintf("cluster %s has exist", clusterReq.Name))
 	}
@@ -156,10 +156,10 @@ func (s *ClusterService) UpdateCluster(c echo.Context) error {
 	cluster := convertToCluster(clusterReq)
 	var cm *v1.ConfigMap
 	configdata := map[string]string{
-		"Name":      clusterReq.Name,
-		"Desc":      clusterReq.Desc,
-		"UpdatedAt": time.Now().String(),
-		"Kubecofig": clusterReq.Kubeconfig,
+		"Name":       clusterReq.Name,
+		"Desc":       clusterReq.Desc,
+		"UpdatedAt":  strconv.FormatInt(time.Now().Unix(), 10),
+		"Kubeconfig": clusterReq.Kubeconfig,
 	}
 
 	label := map[string]string{

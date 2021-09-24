@@ -105,7 +105,7 @@ func (s *CatalogService) AddCatalog(c echo.Context) error {
 	configdata := map[string]string{
 		"Name":      catalogReq.Name,
 		"Desc":      catalogReq.Desc,
-		"UpdatedAt": time.Now().String(),
+		"UpdatedAt": strconv.FormatInt(time.Now().Unix(), 10),
 	}
 
 	label := map[string]string{
@@ -133,7 +133,7 @@ func (s *CatalogService) UpdateCatalog(c echo.Context) error {
 	configdata := map[string]string{
 		"Name":      catalogReq.Name,
 		"Desc":      catalogReq.Desc,
-		"UpdatedAt": time.Now().String(),
+		"UpdatedAt": strconv.FormatInt(time.Now().Unix(), 10),
 	}
 
 	label := map[string]string{

@@ -195,7 +195,7 @@ func (s *ApplicationService) AddApplications(c echo.Context) error {
 		"Name":        app.Name,
 		"Desc":        app.Desc,
 		"Namespace":   app.Namespace,
-		"UpdatedAt":   time.Now().String(),
+		"UpdatedAt":   strconv.FormatInt(time.Now().Unix(), 10),
 		"ClusterName": clusterName,
 	}
 
@@ -249,7 +249,7 @@ func (s *ApplicationService) AddApplicationYaml(c echo.Context) error {
 	configdata := map[string]string{
 		"Name":        app.Name,
 		"Desc":        app.Desc,
-		"UpdatedAt":   time.Now().String(),
+		"UpdatedAt":   strconv.FormatInt(time.Now().Unix(), 10),
 		"ClusterName": clusterName,
 	}
 
@@ -313,7 +313,7 @@ func (s *ApplicationService) UpdateApplications(c echo.Context) error {
 	configdata := map[string]string{
 		"Name":        app.Name,
 		"Desc":        app.Desc,
-		"UpdatedAt":   time.Now().String(),
+		"UpdatedAt":   strconv.FormatInt(time.Now().Unix(), 10),
 		"ClusterName": clusterName,
 	}
 
