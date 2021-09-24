@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/oam-dev/kubevela/apis/types"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -125,6 +126,18 @@ func (s *ApplicationService) GetApplicationDetail(c echo.Context) error {
 			Health:    c.Healthy,
 			Phase:     string(appObj.Status.Phase),
 		}
+
+		for _, t := range c.Traits {
+			trait := &model.TraitType{}
+			traitsObj := v1beta1.TraitDefinition{}
+			if err := cli.Get(context.Background(), client.ObjectKey{Namespace: DefaultVelaNamespace, Name: t.Type}, &traitsObj); err != nil { // TraitDefinition crd info
+				return err
+			}
+			trait.Type = t.Type
+			trait.Desc = traitsObj.GetAnnotations()[types.AnnDescription]
+			comp.Traits = append(comp.Traits, trait)
+		}
+
 		app.Components = append(app.Components, &comp)
 	}
 
