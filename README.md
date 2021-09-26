@@ -9,6 +9,9 @@ KubeVela control plane dashboard. Designed as an extensible, application-oriente
 ## Quickstart
 
 // TODO
+```
+npm i && npm start
+```
 
 ## Community
 
