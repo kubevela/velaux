@@ -1,0 +1,79 @@
+.layout-topbar {
+  width: 100%;
+  position: relative;
+  height: 48px;
+  background-color: #0064c8; 
+  background-image: var(--btn-pure-primary-bg-image);
+  -webkit-app-region: drag;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  .windows-option-view {
+    -webkit-app-region: no-drag;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    z-index: 2;
+    right: 5px;
+    .option-icon {
+      width: 18px;
+      height: 18px;
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: contain;
+      margin-right: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      &:hover {
+        opacity: .8;
+      }
+    }
+    .min {
+      width: 16px;
+      height: 16px;
+     // background-image: url('../assets/min.png');
+     
+    }
+    .max {
+     // background-image: url('../assets/max.png');
+    }
+    .close {
+      width: 12px;
+      height: 12px;
+     // background-image: url('../assets/close.png');
+    }
+  }
+  .s-logo {
+    width: 50px;
+    margin-left: 100px;
+    -webkit-app-region: no-drag;
+  }
+  .word {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    -webkit-app-region: no-drag;
+  }
+
+ }
+ .layout-shell {
+   display: flex;
+ }
+ 
+ 
+ .layout-navigation {
+   padding-top: 12px;
+   width: 180px;
+   min-width:60px;
+   min-height: 100vh;
+   background-color:#252525;
+ }
+ 
+ .layout-content {
+   flex: 1;
+   min-height: 100vh;
+   padding: 15px;
+   background-color: #DBDBDB;
+ }

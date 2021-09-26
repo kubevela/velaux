@@ -1,0 +1,26 @@
+.layout-content {
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+  // background-color: #F6F6F6;
+}
+
+/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+.layout-content::-webkit-scrollbar {
+  width: 0px;
+  height: 5px;
+  background-color: #181818;
+}
+
+/*定义滚动条轨道 内阴影+圆角*/
+.layout-content::-webkit-scrollbar-track {
+  border-radius: 0px;
+  background-color: #181818;
+}
+
+/*定义滑块 内阴影+圆角*/
+.layout-content::-webkit-scrollbar-thumb {
+  border-radius: 0px;
+  background-color: #404040;
+  opacity: 0.9;
+}

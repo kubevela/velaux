@@ -1,0 +1,33 @@
+.home-wraper{
+    .nav-wraper{
+        display: flex;
+        direction: rtl;
+    }
+    .content-wraper{
+        text-align: center;
+        background-color: #ccc;
+        height: 300px
+    }
+    .dot-wraper{
+        div {
+            position: relative;
+            background: #3F3C53;
+            width: 50px;
+            height: 50px;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0px 0px 15px 1px #4185BC;
+            margin: 50px;
+          }
+          div:after {
+            content: '•••';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(90deg);
+            font-size: 15px; 
+            letter-spacing: 4px;
+            margin-top: 2px;
+          }
+    }
+}
