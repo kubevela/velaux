@@ -1,10 +1,10 @@
 ![alt](docs/images/KubeVela-03.png)
 
-# velaux
+# Velaux
 
 ## Overview
 
-KubeVela control plane dashboard. Designed as an extensible, application-oriented delivery control panel.
+The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Plane. Designed as an extensible, application-oriented delivery control panel.
 
 ## Quickstart
 
