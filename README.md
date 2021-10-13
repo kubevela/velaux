@@ -4,7 +4,7 @@
 
 ## Overview
 
-The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Plane. Designed as an extensible, application-oriented delivery control panel.
+The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Dashboard. Designed as an extensible, application-oriented delivery control panel.
 
 ## Quickstart
 
