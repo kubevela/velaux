@@ -8,7 +8,10 @@ KubeVela control plane dashboard. Designed as an extensible, application-oriente
 
 ## Quickstart
 
-// TODO
+```shell
+npm install
+npm run start
+```
 
 ## Community
 
@@ -16,10 +19,11 @@ KubeVela control plane dashboard. Designed as an extensible, application-oriente
 - Gitter: [oam-dev](https://gitter.im/oam-dev/community) (*English*)
 - [DingTalk Group](https://page.dingtalk.com/wow/dingtalk/act/en-home): `23310022` (*Chinese*)
 - Wechat Group (*Chinese*) : Broker wechat to add you into the user group.
- 
+
   <img src="https://static.kubevela.net/images/barnett-wechat.jpg" width="200" />
 
 ## Contributing
+
 Check out [CONTRIBUTING](./CONTRIBUTING.md) to see how to develop with KubeVela.
 
 ## Report Vulnerability

@@ -21,3 +21,5 @@ vendor/
 # IDE
 .idea
 .vscode
+
+.eslintcache
