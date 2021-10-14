@@ -106,3 +106,14 @@ export const getApplications = async (): Promise<IResponse> => {
     withCredentials: true,
   }).then(res => res.data).catch((err) => { err });
 };
+
+export const getClusters = async (): Promise<IResponse> => {
+  return await axios.get('/mock/cluster.json', {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    withCredentials: true,
+  }).then(res => res.data).catch((err) => { err });
+};
