@@ -5,6 +5,7 @@ import SelectSearch from '../../components/SelectSearch/index';
 import CardContend from '../../components/CardConten/index';
 import { getApplications } from '../../api/api';
 import { Applications, AppContent } from '../../model/application';
+import '../../common.less';
 
 type Props = {};
 type State = {

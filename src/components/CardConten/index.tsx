@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{MouseEvent} from 'react';
 import './index.less';
 import { Link } from 'react-router-dom';
 import { Button, Message, Grid, Dialog, Form, Input, Card, Icon } from '@b-design/ui';
@@ -20,8 +20,8 @@ class CardContent extends React.Component<any, State> {
     };
   }
 
-  handleClick = (index: number) => {
-    console.log('index', index);
+  handleClick = (index: number, e: MouseEvent) => {
+    e.preventDefault();
     const { extendDotVisible } = this.state;
     this.setState({
       extendDotVisible: !extendDotVisible,
@@ -43,36 +43,36 @@ class CardContent extends React.Component<any, State> {
               <Link to={`/application/${name}`}>
                 <Card contentHeight="auto">
                   <img src={imgSrc} alt="app-card" />
-                  <div className="content-wraper">
+                  <div className="content-wraper background-F9F8FF">
                     <Row className="content-title">
-                      <Col span="20"> {name}</Col>
+                      <Col span="20" className='font-size-16 color1A1A1A'> {name}</Col>
                       <Col
                         span="4"
                         className="dot-wraper"
-                        onClick={() => {
-                          this.handleClick(index);
+                        onClick={(e) => {
+                          this.handleClick(index, e);
                         }}
                       >
                         <div>
                           {extendDotVisible && choseIndex === index && (
-                            <ul>
-                              <li>
+                            <ul >
+                              <li >
                                 <Link to={`/application/${name}`}>
-                                  <Translation>Visit</Translation>
+                                  <Translation className="color545454">Visit</Translation>
                                 </Link>
                               </li>
                               <li>
                                 <Link to={`/workflow/${name}`}>
-                                  <Translation>Workflow</Translation>
+                                  <Translation className="color545454">Workflow</Translation>
                                 </Link>
                               </li>
                               <li>
                                 {' '}
-                                <Translation>Add component</Translation>
+                                <Translation className="color545454">Add component</Translation>
                               </li>
                               <li>
                                 {' '}
-                                <Translation>Publish model</Translation>
+                                <Translation className="color545454">Publish model</Translation>
                               </li>
                             </ul>
                           )}
@@ -80,15 +80,15 @@ class CardContent extends React.Component<any, State> {
                       </Col>
                     </Row>
                     <Row className="content-main">
-                      <h4>{description}</h4>
+                      <h4 className="color595959 font-size-14">{description}</h4>
                     </Row>
                     <Row className="content-main-btn">
-                      <Button type="secondary">{btnContent}</Button>
+                      <Button type="secondary" className="height-24">{btnContent}</Button>
                     </Row>
 
-                    <Row className="content-foot">
+                    <Row className="content-foot colorA6A6A6">
                       <Col span="16">
-                        <span>{createTime}</span>
+                        <span >{createTime}</span>
                       </Col>
                       <Col span="8">{status}</Col>
                     </Row>

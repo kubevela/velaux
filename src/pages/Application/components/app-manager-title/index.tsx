@@ -14,8 +14,8 @@ export default function () {
     <div>
       <Row className="title-wraper">
         <Col span="10">
-          <span className="title"> {managerTitle} </span>
-          <span className="subTitle"> {managerSubTitle} </span>
+          <span className="title font-size-20"> {managerTitle} </span>
+          <span className="subTitle font-size-14"> {managerSubTitle} </span>
         </Col>
         <Col span="14">
           <div className="float-right">

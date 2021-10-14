@@ -25,7 +25,7 @@ class SelectSearch extends React.Component<Props> {
     const clusterPlacehole = t('Cluster Screening').toString();
     const appPlacehole = t('Application name, description and search').toString();
     return (
-      <Row className="select-wraper">
+      <Row className="select-wraper boder-radius-8">
         <Col span="6">
           <Select
             mode="single"
