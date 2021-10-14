@@ -6,7 +6,6 @@ import TopBar from './top-bar/index';
 import './index.less';
 
 export default function MainLayout(props) {
-  console.log('wdqwq', props);
   return (
     <ConfigProvider>
       <div className="layout">

@@ -16,7 +16,7 @@ const LeftMenu = (data, context) => {
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       <div className="slide-wraper">
-        <ul className="ul-wraper">
+        <ul className="ul-wraper margin-top-5">
           <li className="first-nav">
             {' '}
             <Translation>Application Center</Translation>{' '}
