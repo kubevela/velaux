@@ -95,3 +95,14 @@ export const Login = async (params: ILogin): Promise<IResponse> => {
 export const getUserInfo = (params: IUser): Promise<IResponse> => {
   return axiosInstance.post('user/getInfo', params).then((res) => res.data);
 };
+
+export const getApplications = async (): Promise<IResponse> => {
+  return await axios.get('/mock/application.json', {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    withCredentials: true,
+  }).then(res => res.data).catch((err) => { err });
+};
