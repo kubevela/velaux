@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'dva/router';
 import { DragDropContext } from 'react-dnd';
 import HTMLBackend from 'react-dnd-html5-backend';
 import { Breadcrumb, Select, Grid, Button, Card, Step } from '@b-design/ui';

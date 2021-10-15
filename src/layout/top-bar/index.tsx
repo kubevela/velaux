@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import './index.less';
-import { ILogin } from '../../model/login';
-import { IResponse, Login } from '../../api/api';
 import { Button, Message, Grid, Search, Icon } from '@b-design/ui';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { withTranslation } from 'react-i18next';
@@ -23,9 +21,6 @@ class TopBar extends Component<Props> {
       finish: false,
     };
   }
-
-  componentDidMount = async () => {};
-
   openVersionDialog = () => {
     this.setState({
       visible: true,
@@ -36,16 +31,6 @@ class TopBar extends Component<Props> {
     this.setState({
       visible: false,
     });
-  };
-
-  handleLogin = async (login: ILogin) => {
-    const res: IResponse = await Login(login);
-    if (res.data.code === 200) {
-      // this.props.history.push('/login', { data: res.data });
-      Message.success(res.msg);
-    } else {
-      Message.error(res.msg);
-    }
   };
 
   render() {
@@ -63,7 +48,7 @@ class TopBar extends Component<Props> {
               key="12312"
               size="medium"
               shape="simple"
-              onSearch={() => {}}
+              onSearch={() => { }}
               className="search"
               placeholder={t('Please enter').toString()}
             />

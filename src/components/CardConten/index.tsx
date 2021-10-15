@@ -1,6 +1,7 @@
-import React,{MouseEvent} from 'react';
+import React, { MouseEvent } from 'react';
 import './index.less';
-import { Link } from 'react-router-dom';
+import { Link } from 'dva/router';
+
 import { Button, Message, Grid, Dialog, Form, Input, Card, Icon } from '@b-design/ui';
 import { AppContent } from '../../model/application';
 import Translation from '../Translation';
@@ -90,7 +91,9 @@ class CardContent extends React.Component<any, State> {
                       <Col span="16">
                         <span >{createTime}</span>
                       </Col>
-                      <Col span="8">{status}</Col>
+                      <Col span="8" className="text-align-right padding-right-10">
+                        {status}
+                      </Col>
                     </Row>
                   </div>
                 </Card>

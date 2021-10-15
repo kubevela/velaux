@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'dva/router';
 import { Button, Message, Grid, Search, Icon, Select, Step, Table, Breadcrumb } from '@b-design/ui';
 import {
   workflowSet,

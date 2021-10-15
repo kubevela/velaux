@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'dva/router';
 import { Icon } from '@b-design/ui';
 import Translation from '../../components/Translation';
 import './index.less';

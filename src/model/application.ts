@@ -1,58 +1,54 @@
-interface AppObj {
+export interface AppObj {
     "applications": [
         {
             "clusterList": [
                 {
-                    "description": "string",
-                    "icon": "string",
+                    "description": string;
+                    "icon": string;
                     "labels": {
-                        "additionalProp1": "string",
-                        "additionalProp2": "string",
-                        "additionalProp3": "string"
+                        [proppName: string]: string;
                     },
-                    "name": "string",
-                    "reason": "string",
-                    "status": "string"
+                    "name": string;
+                    "reason": string;
+                    "status": string;
                 }
             ],
-            "createTime": "string",
-            "description": "string",
+            "createTime": string;
+            "description": string;
             "gatewayRule": [
                 {
-                    "address": "string",
-                    "componentName": "string",
-                    "componentPort": 0,
-                    "protocol": "string",
-                    "ruleType": "string"
+                    "address": string;
+                    "componentName": string;
+                    "componentPort": number;
+                    "protocol": string;
+                    "ruleType": string;
                 }
             ],
-            "icon": "string",
+            "icon": string;
             "labels": {
-                "additionalProp1"?: "string",
-                "additionalProp2"?: "string",
-                "additionalProp3"?: "string"
+                [proppName: string]: string;
             },
-            "name": "string",
-            "btnContent": "string",
-            "namespace": "string",
-            "status": "string",
-            "updateTime": "string"
+            "name": string;
+            "btnContent": string;
+            "namespace": string;
+            "status": string;
+            "updateTime": string;
         }
     ]
 };
 
 export interface Applications {
-    "code": number | string;
-    "data": AppObj;
-    "msg": string;
+    code: number | string;
+    data: AppObj;
+    msg: string;
 }
 
 export interface AppContent {
-    "name": "string",
-    "btnContent": "string",
-    "status": "string",
-    "icon": "string",
-    "description": "string",
-    "createTime": "string",
-    "href": "string"
+    name: string,
+    btnContent: string,
+    status: string,
+    icon: string,
+    description: string,
+    createTime: string,
+    href: string
 }

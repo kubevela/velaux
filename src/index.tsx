@@ -1,18 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+import dva from 'dva';
+import { createModel } from './store';
+import { createBrowserHistory } from 'history';
+import RouterView from './router';
 import './i18n';
-import reportWebVitals from './reportWebVitals';
+import '@b-design/ui/dist/index.css';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root'),
-);
+const app = dva({
+  history: createBrowserHistory()
+});
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+createModel(app);
+app.router(RouterView);
+app.start('#root');
