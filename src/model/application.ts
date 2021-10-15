@@ -37,12 +37,6 @@ export interface AppObj {
     ]
 };
 
-export interface Applications {
-    code: number | string;
-    data: AppObj;
-    msg: string;
-}
-
 export interface AppContent {
     name: string,
     btnContent: string,

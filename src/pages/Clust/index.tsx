@@ -16,7 +16,8 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.clusters, ...store.application }
+  const list = [...store.application.applicationList];
+  return { ...store.clusters, ...{ applicationList: list } }
 })
 class Clust extends React.Component<Props, State> {
   constructor(props: Props) {

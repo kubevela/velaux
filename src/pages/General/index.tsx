@@ -133,7 +133,9 @@ class General extends Component<Props, State> {
             <div className="step-wraper">
               <div className="nav">
                 <div className="title"> Workflow</div>
-                <div className="detail"> {VIEW_DETAILS}</div>
+                <div className="detail">
+                  <Link to={`/workflows/${value}`}> {VIEW_DETAILS} </Link>
+                </div>
               </div>
               <Step current={1} shape="circle">
                 {steps}

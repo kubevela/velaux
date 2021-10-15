@@ -42,7 +42,7 @@ const LeftMenu = (data, context) => {
           <li>
             <ul>
               <li>
-                <Link to="/clust" className={isClust ? 'menu-item-active' : 'menu-item'}>
+                <Link to="/clusters" className={isClust ? 'menu-item-active' : 'menu-item'}>
                   <div className="">
                     <Icon type="Directory-tree" />
                     <span className={'menu-item-text'}>
