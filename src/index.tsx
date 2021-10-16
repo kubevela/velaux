@@ -6,7 +6,7 @@ import './i18n';
 import '@b-design/ui/dist/index.css';
 
 const app = dva({
-  history: createBrowserHistory()
+  history: createBrowserHistory(),
 });
 
 createModel(app);

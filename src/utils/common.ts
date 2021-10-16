@@ -21,13 +21,13 @@ export function getAppCardList(data: AppObj) {
       description: item.description,
       createTime: item.createTime,
       btnContent: item.btnContent,
-      href: item.description
+      href: item.description,
     };
     appContent.push(app);
   }
   return appContent;
 }
 
-export function isDEVEnvironment(){
-  return process.env.NODE_ENV == 'development' ? true : false
+export function isDEVEnvironment() {
+  return process.env.NODE_ENV == 'development' ? true : false;
 }

@@ -1,1 +1,1 @@
-export const applicationList_dev=  "/mock/application.json";
+export const applicationList_dev = '/mock/application.json';

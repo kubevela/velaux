@@ -1,13 +1,8 @@
-
 export default {
   namespace: 'clusters',
   state: {
-    defaultCluster:"test"
+    defaultCluster: 'test',
   },
-  reducers: {
-   
-  },
-  effects: {
-   
-  }
-}
+  reducers: {},
+  effects: {},
+};

@@ -6,22 +6,20 @@ import CardContend from '../../components/CardConten/index';
 import Img from '../../assets/clust-cloud.png';
 
 type Props = {
-  dispatch: ({ }) => {},
-  applicationList: [],
-  defaultCluster: string
+  dispatch: ({}) => {};
+  applicationList: [];
+  defaultCluster: string;
 };
 
-type State = {
-
-};
+type State = {};
 
 @connect((store: any) => {
   const list = [...store.application.applicationList];
-  return { ...store.clusters, ...{ applicationList: list } }
+  return { ...store.clusters, ...{ applicationList: list } };
 })
 class Clust extends React.Component<Props, State> {
   constructor(props: Props) {
-    super(props)
+    super(props);
   }
 
   render() {
@@ -31,10 +29,7 @@ class Clust extends React.Component<Props, State> {
         <div>
           <Title />
           <SelectSearch />
-          <CardContend
-            cardImg={Img}
-            appContent={applicationList}
-          />
+          <CardContend cardImg={Img} appContent={applicationList} />
         </div>
       </>
     );

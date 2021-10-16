@@ -48,7 +48,7 @@ class TopBar extends Component<Props> {
               key="12312"
               size="medium"
               shape="simple"
-              onSearch={() => { }}
+              onSearch={() => {}}
               className="search"
               placeholder={t('Please enter').toString()}
             />

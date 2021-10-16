@@ -1,5 +1,5 @@
 import { getApplicationList } from '../../api/application';
-import { getAppCardList } from "../../utils/common";
+import { getAppCardList } from '../../utils/common';
 
 export default {
   namespace: 'application',
@@ -7,28 +7,27 @@ export default {
     applicationList: [],
     projectList: [],
     clusterList: [],
-    searchAppName: ''
+    searchAppName: '',
   },
   reducers: {
     update(state, { type, payload }) {
       return {
         ...state,
-        searchAppName: payload
-      }
+        searchAppName: payload,
+      };
     },
     updateApplicationList(state, { type, payload }) {
-
       return {
         ...state,
-        applicationList: payload
-      }
-    }
+        applicationList: payload,
+      };
+    },
   },
   effects: {
-    * getApplicationList(action, { call, put }) {
+    *getApplicationList(action, { call, put }) {
       const result = yield call(getApplicationList);
       const appContent = getAppCardList(result.data);
-      yield put({ type: 'updateApplicationList', payload: appContent })
-    }
-  }
-}
+      yield put({ type: 'updateApplicationList', payload: appContent });
+    },
+  },
+};

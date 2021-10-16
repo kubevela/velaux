@@ -6,19 +6,17 @@ import CardContend from '../../components/CardConten/index';
 import '../../common.less';
 
 type Props = {
-  dispatch: ({ }) => {},
-  applicationList: []
+  dispatch: ({}) => {};
+  applicationList: [];
 };
-type State = {
-
-};
+type State = {};
 
 @connect((store: any) => {
-  return { ...store.application, ...store.cluster }
+  return { ...store.application, ...store.cluster };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
-    super(props)
+    super(props);
   }
 
   componentDidMount() {
@@ -28,9 +26,9 @@ class Application extends Component<Props, State> {
   getApplication = async () => {
     this.props.dispatch({
       type: 'application/getApplicationList',
-      payload: {}
+      payload: {},
     });
-  }
+  };
 
   render() {
     const { applicationList } = this.props;
@@ -42,7 +40,6 @@ class Application extends Component<Props, State> {
       </div>
     );
   }
-
 }
 
 export default Application;

@@ -1,1 +1,1 @@
-export const applicationList=  "http://www.xxx.com";
+export const applicationList = 'http://www.xxx.com';

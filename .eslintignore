@@ -1,0 +1,11 @@
+build/
+test/
+
+coverage/
+
+node_modules/
+
+src/assets/
+.DS_Store
+public
+/package-lock.json
