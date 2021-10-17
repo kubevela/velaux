@@ -28,6 +28,6 @@ export function getAppCardList(data: AppObj) {
   return appContent;
 }
 
-export function isDEVEnvironment() {
-  return process.env.NODE_ENV == 'development' ? true : false;
+export function isMock() {
+  return process.env.MOCK == 'mock' ? true : false;
 }
