@@ -20,7 +20,7 @@ export const publishDialog = {
   versionPlaceHold: 'Enter version overview',
 };
 
-export const COMPONENT_NAME = <Translation>Component Name</Translation>;
+export const COMPONENT_NAME = <Translation>Component Name-</Translation>;
 export const RUNNING_INSTANCES = <Translation>Running instances</Translation>;
 export const LOG_QUERY = <Translation>Log query</Translation>;
 export const SURVEILLANCE_PANEL = <Translation>Surveillance panel</Translation>;

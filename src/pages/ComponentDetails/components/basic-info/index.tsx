@@ -18,7 +18,7 @@ class BasicInfo extends Component {
         <Row>
           <Col span="12">
             <h3 className="padding-left-15">{DATA_INPUT}</h3>
-            <div className="height150 background-FFFFFF magin-right-10"></div>
+            <div className="height150 background-FFFFFF margin-right-10"></div>
           </Col>
           <Col span="12">
             <h3 className="padding-left-15">{DATA_OUTPUT}</h3>

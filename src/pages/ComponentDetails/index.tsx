@@ -41,7 +41,7 @@ class ComponentDetails extends Component<Props, State> {
   componentDidMount() {}
   handleSelect = (e: string) => {
     const { componentName } = this.state;
-    this.props.history.push(`/application/${e}/${componentName}`, {});
+    this.props.history.push(`/applications/${e}/${componentName}`, {});
     this.setState({
       appName: e,
     });
@@ -49,7 +49,7 @@ class ComponentDetails extends Component<Props, State> {
 
   handleSelectComponent = (e: string) => {
     const { appName } = this.state;
-    this.props.history.push(`/application/${appName}/${e}`, {});
+    this.props.history.push(`/applications/${appName}/${e}`, {});
     this.setState({
       componentName: e,
     });
