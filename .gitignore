@@ -21,5 +21,5 @@ vendor/
 # IDE
 .idea
 .vscode
-
+package-lock.json
 .eslintcache

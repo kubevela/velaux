@@ -24,7 +24,7 @@ class Cluster extends React.Component<Props, State> {
   }
 
   render() {
-    const { applicationList } = this.props;
+    const { applicationList, dispatch } = this.props;
     return (
       <>
         <div>
@@ -33,6 +33,7 @@ class Cluster extends React.Component<Props, State> {
             subTitle="Introduction to cluster management"
             btnName="Add cluster"
             dialogName={CLUSTERS_PATH}
+            dispatch={dispatch}
           />
           <SelectSearch />
           <CardContend

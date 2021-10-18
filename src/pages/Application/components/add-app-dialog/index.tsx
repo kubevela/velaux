@@ -1,24 +1,50 @@
 import React from 'react';
 import { useState } from 'react';
-import { Button, Message, Grid, Dialog, Form, Input, Select } from '@b-design/ui';
+import { Button, Message, Grid, Dialog, Form, Input, Select, Field } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-
 import { dataSourceProject, dataSourceCluster, addApp, addAppDialog } from '../../constants';
+
 import './index.less';
 
 type Props = {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {};
 
 class AppDialog extends React.Component<Props, State> {
+  field: any;
+  constructor(props: any) {
+    super(props);
+    this.field = new Field(this);
+  }
   onClose = () => {
     this.props.setVisible(false);
   };
   onOk = () => {
+    console.log('this.dispatch', this.props.dispatch);
+    this.field.validate((error: any, values: any) => {
+      if (error) {
+        return;
+      }
+      console.log('valuesvalues', values);
+      const { cluster, describe, name, project } = values;
+      const params = {
+        clusterList: cluster,
+        description: describe,
+        icon: '',
+        name: name,
+        namespace: '123',
+      };
+      this.props.dispatch({
+        type: 'application/createApplicationList',
+        payload: params,
+      });
+    });
+
     this.props.setVisible(false);
   };
 
@@ -45,10 +71,10 @@ class AppDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
-        fixedSpan: 4,
+        fixedSpan: 6,
       },
       wrapperCol: {
-        span: 20,
+        span: 18,
       },
     };
 
@@ -56,6 +82,7 @@ class AppDialog extends React.Component<Props, State> {
     const clustPlacehold = t(clustPlaceHold).toString();
     const describePlacehold = t(describePlaceHold).toString();
     const confirm = t('Confirm').toString();
+    const init = this.field.init;
     return (
       <div>
         <Dialog
@@ -72,28 +99,36 @@ class AppDialog extends React.Component<Props, State> {
           onCancel={this.onClose}
           onClose={this.onClose}
         >
-          <Form {...formItemLayout}>
-            <FormItem label={name}>
-              <Input htmlType="name" name="name" placeholder={namePlacehold} />
+          <Form {...formItemLayout} field={this.field}>
+            <FormItem {...formItemLayout} label={name} labelTextAlign="left" required={true}>
+              <Input htmlType="name" name="name" placeholder={namePlacehold} {...init('name')} />
             </FormItem>
-            <FormItem label={project}>
+            <FormItem {...formItemLayout} label={project} labelTextAlign="left" required={true}>
               <Select
                 mode="single"
                 onChange={this.handleSelectProject}
+                {...init('project')}
                 dataSource={dataSourceProject}
               />
             </FormItem>
-            <FormItem label={clusterBind}>
+            <FormItem {...formItemLayout} label={clusterBind} labelTextAlign="left" required={true}>
               <Select
                 mode="tag"
                 onChange={this.handleSelectCluster}
                 dataSource={dataSourceCluster}
+                {...init('cluster')}
                 placeholder={clustPlacehold}
+                required={true}
               />
             </FormItem>
 
-            <FormItem label={describe}>
-              <Input htmlType="describe" name="describe" placeholder={describePlacehold} />
+            <FormItem {...formItemLayout} label={describe} labelTextAlign="left" required={true}>
+              <Input
+                htmlType="describe"
+                name="describe"
+                {...init('describe')}
+                placeholder={describePlacehold}
+              />
             </FormItem>
           </Form>
         </Dialog>

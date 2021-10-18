@@ -20,10 +20,15 @@ type State = {};
 })
 class Addons extends React.Component<Props, State> {
   render() {
-    const { applicationList } = this.props;
+    const { applicationList, dispatch } = this.props;
     return (
       <div>
-        <Title title="Plug in management" subTitle="Plug in extension" dialogName={ADDONS_PATH} />
+        <Title
+          title="Plug in management"
+          subTitle="Plug in extension"
+          dialogName={ADDONS_PATH}
+          dispatch={dispatch}
+        />
         <SelectSearch />
         <CardContend
           cardImg={Img}

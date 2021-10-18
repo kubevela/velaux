@@ -12,11 +12,12 @@ type Props = {
   subTitle: string;
   btnName?: string;
   dialogName: string;
+  dispatch: ({}) => {};
 };
 export default function (props: Props) {
   const { Row, Col } = Grid;
   const [visible, setVisible] = useState(false);
-  const { title, subTitle, btnName, dialogName } = props;
+  const { title, subTitle, btnName, dialogName, dispatch } = props;
 
   return (
     <div>
@@ -46,7 +47,9 @@ export default function (props: Props) {
           </Col>
         )}
       </Row>
-      {dialogName === APPLICATION_PATH && <AppDialog visible={visible} setVisible={setVisible} />}
+      {dialogName === APPLICATION_PATH && (
+        <AppDialog visible={visible} setVisible={setVisible} dispatch={dispatch} />
+      )}
       {dialogName === CLUSTERS_PATH && <AddClustDialog visible={visible} setVisible={setVisible} />}
     </div>
   );

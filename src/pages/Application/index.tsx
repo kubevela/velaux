@@ -32,7 +32,7 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList } = this.props;
+    const { applicationList, dispatch } = this.props;
 
     return (
       <div>
@@ -41,6 +41,7 @@ class Application extends Component<Props, State> {
           subTitle="App ManagerSubTitle"
           btnName="Add App"
           dialogName={APPLICATION_PATH}
+          dispatch={dispatch}
         />
         <SelectSearch />
         <CardContend

@@ -1,5 +1,13 @@
-import axios, { AxiosPromise, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+import axios, {
+  AxiosPromise,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  Method,
+} from 'axios';
 import { HttpStatus } from '../api/status';
+import { baseURL } from '../api/config';
+import qs from 'qs';
 
 interface Params extends AxiosRequestConfig {
   method: Method;
@@ -8,6 +16,19 @@ interface Params extends AxiosRequestConfig {
 }
 
 const timing: number = 1000;
+
+export const axiosInstance: AxiosInstance = axios.create({
+  baseURL: baseURL,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
+  transformRequest: [
+    function (data) {
+      return JSON.stringify(data);
+    },
+  ],
+});
 
 axios.interceptors.request.use(
   (config: AxiosRequestConfig): AxiosRequestConfig => {
@@ -26,13 +47,17 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(
   (response: AxiosResponse<any>): any => {
-    return response.data;
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw Error(response.data.msg || 'server error');
+    }
   },
   (error: any): Promise<any> => {
     if (error.response.status === HttpStatus.Unauthorized) {
       throw new Error(`${HttpStatus.Unauthorized}`);
     }
-    return Promise.reject(error.response);
+    return Promise.reject(error);
   },
 );
 
@@ -40,7 +65,9 @@ const request = (url: string, params: Params): AxiosPromise<any> => {
   const options: AxiosRequestConfig = {
     url,
     headers: {
-      'X-Requested-With': 'XMLHttpRequest',
+      Accept: 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json; charset=UTF-8',
     },
     ...params,
   };
