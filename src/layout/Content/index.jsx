@@ -1,26 +1,29 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import Login from '../../pages/Login';
-import { Application } from '../../pages/Application';
-import Home from '../../pages/Home';
-import Clust from '../../pages/Clust/index';
-import { Operation } from '../../pages/Operation/index';
-import { Plugins } from '../../pages/Plugins/index';
+import { Router, Route, Switch, Redirect } from 'dva/router';
+import Application from '../../pages/Application';
+import Clusters from '../../pages/Cluster/index';
+import Addons from '../../pages/Plugins/index';
 import Workflow from '../../pages/Workflow/index';
 import General from '../../pages/General';
+import ComponentDetails from '../../pages/ComponentDetails';
+import NotFound from '../../pages/NotFound';
 
 export default function Content() {
   return (
     <Switch>
-      <Route path="/application/:name" component={General} />
-      <Route path="/application" component={Application} />
-      <Route path="/login" component={Login} />
-      <Route path="/home" component={Home} />
-      <Route path="/clust" component={Clust} />
-      <Route path="/operation" component={Operation} />
-      <Route path="/plugins" component={Plugins} />
-      <Route path="/workflow" component={Workflow} />
-      <Redirect from="/" to="/application" />
+      <Route exact path="/applications/:appName" component={General} />
+      <Route exact path="/applications" component={Application} />
+      <Route
+        exact
+        path="/applications/:appName/components/:componentName"
+        component={ComponentDetails}
+      />
+      <Route exact path="/" component={Application} />
+      <Route path="/clusters" component={Clusters} />
+      <Route path="/addons" component={Addons} />
+      <Route path="/workflows/:workflowName" component={Workflow} />
+      <Route path="/notFound" component={NotFound} />
+      <Redirect to="/notFound" />
     </Switch>
   );
 }

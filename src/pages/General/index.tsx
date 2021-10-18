@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'dva/router';
 import { DragDropContext } from 'react-dnd';
 import HTMLBackend from 'react-dnd-html5-backend';
 import { Breadcrumb, Select, Grid, Button, Card, Step } from '@b-design/ui';
@@ -50,7 +50,7 @@ class General extends Component<Props, State> {
   handleSelect = (e: string) => {
     console.log('eee', e);
     console.log('this.propss', this.props);
-    this.props.history.push(`/application/${e}`, {});
+    this.props.history.push(`/applications/${e}`, {});
     this.setState({
       value: e,
     });
@@ -133,7 +133,9 @@ class General extends Component<Props, State> {
             <div className="step-wraper">
               <div className="nav">
                 <div className="title"> Workflow</div>
-                <div className="detail"> {VIEW_DETAILS}</div>
+                <div className="detail">
+                  <Link to={`/workflows/${value}`}> {VIEW_DETAILS} </Link>
+                </div>
               </div>
               <Step current={1} shape="circle">
                 {steps}

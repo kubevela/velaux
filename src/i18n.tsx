@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import En from './locals/En/en.json';
 import Zh from './locals/Zh/zh.json';
 import { getLanguage } from './utils/common';
+
 const resources = {
   en: {
     translation: En,

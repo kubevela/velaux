@@ -13,7 +13,8 @@
     "lint-staged": "lint-staged",
     "precommit": "lint-staged",
     "prepare": "husky install",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "mock": "node scripts/mock.js"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "eslint --fix"
@@ -65,6 +66,7 @@
     "dagre": "^0.8.5",
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
+    "dva": "^2.4.1",
     "file-loader": "6.1.1",
     "fs-extra": "^9.0.1",
     "html-webpack-plugin": "4.5.0",
