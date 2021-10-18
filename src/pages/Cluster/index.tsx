@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import Title from '../../components/List-title';
+import Title from '../../components/ListTitle';
 import SelectSearch from './components/clust-select-search/index';
 import CardContend from './components/card-conten/index';
 import { CLUSTERS_PATH, WORKFLOWS_PATH } from '../../utils/common';
