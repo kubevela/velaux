@@ -33,7 +33,7 @@ class CardContent extends React.Component<any, State> {
   render() {
     const { Row, Col } = Grid;
     const { extendDotVisible, choseIndex } = this.state;
-    const { appContent } = this.props;
+    const { appContent, path, workFlowPath } = this.props;
     const imgSrc = this.props.cardImg || Img;
     return (
       <Row wrap={true}>
@@ -41,7 +41,7 @@ class CardContent extends React.Component<any, State> {
           const { name, status, icon, description, createTime, href, btnContent } = item;
           return (
             <Col span="6" className={`card-content-wraper`} key={index}>
-              <Link to={`/applications/${name}`}>
+              <Link to={`/${path}/${name}`}>
                 <Card contentHeight="auto">
                   <img src={imgSrc} alt="app-card" />
                   <div className="content-wraper background-F9F8FF">
@@ -66,7 +66,7 @@ class CardContent extends React.Component<any, State> {
                                 </Link>
                               </li>
                               <li>
-                                <Link to={`/workflow/${name}`}>
+                                <Link to={`/${workFlowPath}/${name}`}>
                                   <Translation className="color545454">Workflow</Translation>
                                 </Link>
                               </li>

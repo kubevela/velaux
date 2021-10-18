@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import Title from './components/clust-title/index';
 import SelectSearch from './components/clust-select-search/index';
 import CardContend from '../../components/CardConten/index';
+import { CLUSTERS_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import Img from '../../assets/clust-cloud.png';
 
 type Props = {
@@ -29,7 +30,12 @@ class Cluster extends React.Component<Props, State> {
         <div>
           <Title />
           <SelectSearch />
-          <CardContend cardImg={Img} appContent={applicationList} />
+          <CardContend
+            cardImg={Img}
+            appContent={applicationList}
+            path={CLUSTERS_PATH}
+            workFlowPath={WORKFLOWS_PATH}
+          />
         </div>
       </>
     );

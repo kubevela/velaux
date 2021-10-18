@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import Title from './components/plugin-title/index';
 import SelectSearch from '../../components/SelectSearch/index';
 import CardContend from '../../components/CardConten/index';
+import { ADDONS_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import Img from '../../assets/plugins.png';
 
 type Props = {
@@ -24,7 +25,12 @@ class Addons extends React.Component<Props, State> {
       <div>
         <Title />
         <SelectSearch />
-        <CardContend cardImg={Img} appContent={applicationList} />
+        <CardContend
+          cardImg={Img}
+          appContent={applicationList}
+          path={ADDONS_PATH}
+          workFlowPath={WORKFLOWS_PATH}
+        />
       </div>
     );
   }

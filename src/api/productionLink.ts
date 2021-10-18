@@ -1,2 +1,2 @@
-const baseURL = 'http://alibaba.com';
+import { baseURL } from './config';
 export const applicationList = `${baseURL}/api/v1/applications`;

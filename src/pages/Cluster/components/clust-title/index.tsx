@@ -24,8 +24,7 @@ export default function () {
                 setVisible(true);
               }}
             >
-              {' '}
-              {addClust}{' '}
+              {addClust}
             </Button>
           </div>
         </Col>

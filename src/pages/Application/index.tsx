@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import Title from './components/app-manager-title/index';
 import SelectSearch from '../../components/SelectSearch/index';
 import CardContend from '../../components/CardConten/index';
+import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
 
 type Props = {
@@ -36,7 +37,11 @@ class Application extends Component<Props, State> {
       <div>
         <Title />
         <SelectSearch />
-        <CardContend appContent={applicationList} />
+        <CardContend
+          appContent={applicationList}
+          path={APPLICATION_PATH}
+          workFlowPath={WORKFLOWS_PATH}
+        />
       </div>
     );
   }

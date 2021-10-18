@@ -47,3 +47,8 @@ export function isOperationPath(pathname: string) {
 export function isModelPath(pathname: string) {
   return (pathname || '').indexOf('/model') !== -1;
 }
+
+export const APPLICATION_PATH = 'applications';
+export const CLUSTERS_PATH = 'clusters';
+export const ADDONS_PATH = 'addons';
+export const WORKFLOWS_PATH = 'workflows';

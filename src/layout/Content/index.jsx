@@ -1,7 +1,7 @@
 import React from 'react';
 import { Router, Route, Switch, Redirect } from 'dva/router';
 import Application from '../../pages/Application';
-import Clust from '../../pages/Clust/index';
+import Clusters from '../../pages/Cluster/index';
 import Addons from '../../pages/Plugins/index';
 import Workflow from '../../pages/Workflow/index';
 import General from '../../pages/General';
@@ -13,9 +13,13 @@ export default function Content() {
     <Switch>
       <Route exact path="/applications/:appName" component={General} />
       <Route exact path="/applications" component={Application} />
-      <Route exact path="/applications/:appName/:componentName" component={ComponentDetails} />
+      <Route
+        exact
+        path="/applications/:appName/components/:componentName"
+        component={ComponentDetails}
+      />
       <Route exact path="/" component={Application} />
-      <Route path="/clusters" component={Clust} />
+      <Route path="/clusters" component={Clusters} />
       <Route path="/addons" component={Addons} />
       <Route path="/workflows/:workflowName" component={Workflow} />
       <Route path="/notFound" component={NotFound} />

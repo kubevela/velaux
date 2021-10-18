@@ -21,6 +21,7 @@ class SelectSearch extends React.Component<Props> {
   render() {
     const { Row, Col } = Grid;
     const { t } = this.props;
+    const clusterPlacehole = t('Cluster Screening').toString();
     return (
       <Row className="select-wraper">
         <Col span="18">
@@ -29,7 +30,7 @@ class SelectSearch extends React.Component<Props> {
             size="large"
             onChange={this.handleChange}
             dataSource={clustGroup}
-            defaultValue={'集群筛选'}
+            placeholder={clusterPlacehole}
             className="item"
           />
         </Col>
@@ -37,7 +38,6 @@ class SelectSearch extends React.Component<Props> {
         <Col span="6">
           <div className="btn-wrpaer">
             <Button type="primary" className="margin-right-20">
-              {' '}
               {t('Determine')}
             </Button>
             <Button type="primary"> {t('Cancel')}</Button>
