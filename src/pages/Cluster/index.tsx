@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'dva';
-import Title from './components/clust-title/index';
+import Title from '../../components/List-title';
 import SelectSearch from './components/clust-select-search/index';
-import CardContend from '../../components/CardConten/index';
+import CardContend from './components/card-conten/index';
 import { CLUSTERS_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import Img from '../../assets/clust-cloud.png';
 
@@ -28,7 +28,12 @@ class Cluster extends React.Component<Props, State> {
     return (
       <>
         <div>
-          <Title />
+          <Title
+            title="Cluster management"
+            subTitle="Introduction to cluster management"
+            btnName="Add cluster"
+            dialogName={CLUSTERS_PATH}
+          />
           <SelectSearch />
           <CardContend
             cardImg={Img}

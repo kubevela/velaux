@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import Title from './components/app-manager-title/index';
+import Title from '../../components/List-title';
 import SelectSearch from '../../components/SelectSearch/index';
-import CardContend from '../../components/CardConten/index';
+import CardContend from './components/card-conten/index';
 import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
 
@@ -33,9 +33,15 @@ class Application extends Component<Props, State> {
 
   render() {
     const { applicationList } = this.props;
+
     return (
       <div>
-        <Title />
+        <Title
+          title="App Manager"
+          subTitle="App ManagerSubTitle"
+          btnName="Add App"
+          dialogName={APPLICATION_PATH}
+        />
         <SelectSearch />
         <CardContend
           appContent={applicationList}

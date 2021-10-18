@@ -3,7 +3,7 @@ import './index.less';
 import { Button } from '@alifd/next';
 import { useTranslation } from 'react-i18next';
 import { publish } from 'tiny-pubsub';
-import { getLanguage } from '../../utils/common';
+import { getLanguage } from './utils';
 
 const SwitchLanguage = () => {
   let { i18n } = useTranslation();

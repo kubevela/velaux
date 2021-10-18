@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'dva';
-import Title from './components/plugin-title/index';
+import Title from '../../components/List-title';
 import SelectSearch from '../../components/SelectSearch/index';
-import CardContend from '../../components/CardConten/index';
+import CardContend from './components/card-conten/index';
 import { ADDONS_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import Img from '../../assets/plugins.png';
 
@@ -23,7 +23,7 @@ class Addons extends React.Component<Props, State> {
     const { applicationList } = this.props;
     return (
       <div>
-        <Title />
+        <Title title="Plug in management" subTitle="Plug in extension" dialogName={ADDONS_PATH} />
         <SelectSearch />
         <CardContend
           cardImg={Img}
