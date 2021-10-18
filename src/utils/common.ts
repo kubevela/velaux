@@ -31,3 +31,19 @@ export function getAppCardList(data: AppObj) {
 export function isMock() {
   return process.env.MOCK == 'mock' ? true : false;
 }
+
+export function isApplicationPath(pathname: string) {
+  return (pathname || '').indexOf('/applications') !== -1;
+}
+export function isClustersPath(pathname: string) {
+  return (pathname || '').indexOf('/clusters') !== -1;
+}
+export function isAddonsPath(pathname: string) {
+  return (pathname || '').indexOf('/addons') !== -1;
+}
+export function isOperationPath(pathname: string) {
+  return (pathname || '').indexOf('/operation') !== -1;
+}
+export function isModelPath(pathname: string) {
+  return (pathname || '').indexOf('/model') !== -1;
+}

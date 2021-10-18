@@ -17,7 +17,7 @@ type State = {};
   const list = [...store.application.applicationList];
   return { ...store.clusters, ...{ applicationList: list } };
 })
-class Clust extends React.Component<Props, State> {
+class Cluster extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
   }
@@ -36,4 +36,4 @@ class Clust extends React.Component<Props, State> {
   }
 }
 
-export default Clust;
+export default Cluster;

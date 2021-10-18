@@ -14,7 +14,7 @@
     "precommit": "lint-staged",
     "prepare": "husky install",
     "tsc": "tsc --noEmit",
-    "mock":"node scripts/mock.js"
+    "mock": "node scripts/mock.js"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "eslint --fix"
