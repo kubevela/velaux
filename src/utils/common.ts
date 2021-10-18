@@ -48,6 +48,10 @@ export function isModelPath(pathname: string) {
   return (pathname || '').indexOf('/model') !== -1;
 }
 
+export function isAPPStorePath(pathname: string) {
+  return (pathname || '').indexOf('/appstores') !== -1;
+}
+
 export const APPLICATION_PATH = 'applications';
 export const CLUSTERS_PATH = 'clusters';
 export const ADDONS_PATH = 'addons';

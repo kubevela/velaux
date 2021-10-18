@@ -65,5 +65,6 @@
   "Enter template name": "Enter template name",
   "Template version": "Template version",
   "Enter version overview": "Enter the version number. If the versions are consistent, the original version will be overwritten",
-  "Component Name-": "Component Name"
+  "Component Name-": "Component Name",
+  "App store": "App store"
 }

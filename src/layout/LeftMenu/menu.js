@@ -2,15 +2,13 @@ import {
   isApplicationPath,
   isClustersPath,
   isAddonsPath,
-  isOperationPath,
-  isModelPath,
+  isAPPStorePath,
 } from '../../utils/common';
 export function getLeftSider(pathname) {
   const isApplication = isApplicationPath(pathname);
   const isCluster = isClustersPath(pathname);
-  const isPlugins = isAddonsPath(pathname);
-  const isOperation = isOperationPath(pathname);
-  const isModel = isModelPath(pathname);
+  const isAddons = isAddonsPath(pathname);
+  const isAPPStore = isAPPStorePath(pathname);
 
   return [
     {
@@ -39,22 +37,16 @@ export function getLeftSider(pathname) {
       navName: 'Capability Center',
       children: [
         {
-          className: isPlugins,
+          className: isAddons,
           link: '/addons',
           iconType: 'database-set',
           navName: 'Plugins Manager',
         },
         {
-          className: isOperation,
-          link: '/operation',
-          iconType: 'set',
-          navName: 'Devs Feature',
-        },
-        {
-          className: isModel,
-          link: '/model',
-          iconType: 'cloud-machine',
-          navName: 'App Model',
+          className: isAPPStore,
+          link: '/appstores',
+          iconType: 'all-fill',
+          navName: 'App store',
         },
       ],
     },
