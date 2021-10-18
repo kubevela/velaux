@@ -1,24 +1,12 @@
-import { AppObj } from '../model/application';
+type Navigator = {
+  language: string;
+  userLanguage?: string;
+};
 
-export function getAppCardList(data: AppObj) {
-  const applicationsList = data.applications;
-  const appContent = [];
-  for (const item of applicationsList) {
-    const rules = item.gatewayRule && item.gatewayRule[0];
-    const { protocol, address, componentPort } = rules;
-    const href = protocol + address + componentPort;
-    const app = {
-      name: item.name,
-      status: item.status,
-      icon: item.icon,
-      description: item.description,
-      createTime: item.createTime,
-      btnContent: item.btnContent,
-      href: href,
-    };
-    appContent.push(app);
-  }
-  return appContent;
+export function getLanguage() {
+  let navigator: Navigator = window.navigator;
+  const lang = navigator.language || navigator.userLanguage || 'zh';
+  return localStorage.getItem('lang') || lang.split('-')[0];
 }
 
 export function isMock() {
