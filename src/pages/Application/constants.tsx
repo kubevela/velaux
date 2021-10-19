@@ -1,15 +1,15 @@
 import Translation from '../../components/Translation';
 
 export const dataSourceProject = [
-  { value: 10001, label: 'project1' },
-  { value: 10002, label: 'project2' },
-  { value: 10003, label: 'project3' },
+  { value: 'project1', label: 'project1' },
+  { value: 'project2', label: 'project2' },
+  { value: 'project3', label: 'project3' },
 ];
 
 export const dataSourceCluster = [
-  { value: '10001', label: 'cluster1' },
-  { value: 10002, label: 'cluster2' },
-  { value: 10003, label: 'cluster3' },
+  { value: 'cluster1', label: 'cluster1' },
+  { value: 'cluster2', label: 'cluster2' },
+  { value: 'cluster3', label: 'cluster3' },
 ];
 
 export const dataSourceApps = [

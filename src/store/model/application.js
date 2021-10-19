@@ -1,5 +1,4 @@
-import { getApplicationList } from '../../api/application';
-
+import { getApplicationList, createApplicationList } from '../../api/application';
 
 export default {
   namespace: 'application',
@@ -26,18 +25,25 @@ export default {
   effects: {
     *getApplicationList(action, { call, put }) {
       const result = yield call(getApplicationList);
-      const appContent = getAppCardList(result.data || {});
+      const appContent = getAppCardList(result || {});
       yield put({ type: 'updateApplicationList', payload: appContent });
+    },
+    *createApplicationList(action, { call, put }) {
+      const result = yield call(createApplicationList, action.payload);
+      yield put({ type: 'getApplicationList', payload: {} });
     },
   },
 };
 
 function getAppCardList(data) {
   const applicationsList = data.applications;
+  if (applicationsList === null) {
+    return [];
+  }
   const appContent = [];
   for (const item of applicationsList) {
     const rules = item.gatewayRule && item.gatewayRule[0];
-    const { protocol, address, componentPort } = rules;
+    const { protocol = '', address = '', componentPort = '' } = rules || {};
     const href = protocol + address + componentPort;
     const app = {
       name: item.name,

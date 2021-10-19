@@ -1,2 +1,1 @@
-import { baseURL } from './config';
-export const applicationList = `${baseURL}/api/v1/applications`;
+export const applicationList = `/api/v1/applications`;
