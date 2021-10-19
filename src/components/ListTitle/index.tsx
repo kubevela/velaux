@@ -1,4 +1,4 @@
-import React, { HtmlHTMLAttributes } from 'react';
+import React, { HtmlHTMLAttributes, useEffect } from 'react';
 import { useState } from 'react';
 import { Button, Message, Grid, Dialog, Form, Input } from '@b-design/ui';
 import Translation from '../Translation';
@@ -12,12 +12,20 @@ type Props = {
   subTitle: string;
   btnName?: string;
   dialogName: string;
-  dispatch: ({}) => {};
+  namespaceList?: [];
+  dispatch: ({ }) => {};
 };
 export default function (props: Props) {
   const { Row, Col } = Grid;
   const [visible, setVisible] = useState(false);
-  const { title, subTitle, btnName, dialogName, dispatch } = props;
+  const { title, subTitle, btnName, dialogName, namespaceList, dispatch } = props;
+  const fetchNamespaceList = () => {
+    props.dispatch({
+      type: 'application/getNamespaceList',
+      payload: {},
+    });
+    setVisible(true);
+  }
 
   return (
     <div>
@@ -38,7 +46,7 @@ export default function (props: Props) {
               <Button
                 type="primary"
                 onClick={() => {
-                  setVisible(true);
+                  fetchNamespaceList()
                 }}
               >
                 <Translation>{btnName}</Translation>
@@ -48,7 +56,7 @@ export default function (props: Props) {
         )}
       </Row>
       {dialogName === APPLICATION_PATH && (
-        <AppDialog visible={visible} setVisible={setVisible} dispatch={dispatch} />
+        <AppDialog visible={visible} setVisible={setVisible} dispatch={dispatch} namespaceList={namespaceList} />
       )}
       {dialogName === CLUSTERS_PATH && <AddClustDialog visible={visible} setVisible={setVisible} />}
     </div>
