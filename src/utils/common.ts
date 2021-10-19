@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 type Navigator = {
   language: string;
   userLanguage?: string;
@@ -37,3 +39,7 @@ export const APPLICATION_PATH = 'applications';
 export const CLUSTERS_PATH = 'clusters';
 export const ADDONS_PATH = 'addons';
 export const WORKFLOWS_PATH = 'workflows';
+
+export function momentDate(time: string): string {
+  return moment(time).format('YYYY/MM/DD hh:mm')
+}
