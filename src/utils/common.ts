@@ -11,7 +11,7 @@ export function getLanguage() {
   return localStorage.getItem('lang') || lang.split('-')[0];
 }
 
-export function isDev() {
+export function isMock() {
   return process.env.MOCK === 'mock' ? true : false;
 }
 
