@@ -7,8 +7,9 @@ import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
 
 type Props = {
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   applicationList: [];
+  namespaceList: []
 };
 type State = {};
 
@@ -32,7 +33,7 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList, dispatch } = this.props;
+    const { applicationList, namespaceList, dispatch } = this.props;
 
     return (
       <div>
@@ -41,6 +42,7 @@ class Application extends Component<Props, State> {
           subTitle="App ManagerSubTitle"
           btnName="Add App"
           dialogName={APPLICATION_PATH}
+          namespaceList={namespaceList}
           dispatch={dispatch}
         />
         <SelectSearch />

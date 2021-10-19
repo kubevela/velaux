@@ -1,4 +1,4 @@
-import { getApplicationList, createApplicationList } from '../../api/application';
+import { getApplicationList, createApplicationList, getNamespaceList } from '../../api/application';
 
 export default {
   namespace: 'application',
@@ -7,6 +7,7 @@ export default {
     projectList: [],
     clusterList: [],
     searchAppName: '',
+    namespaceList: []
   },
   reducers: {
     update(state, { type, payload }) {
@@ -21,6 +22,12 @@ export default {
         applicationList: payload,
       };
     },
+    updateNameSpaceList(state, { type, payload }) {
+      return {
+        ...state,
+        namespaceList: payload,
+      };
+    },
   },
   effects: {
     *getApplicationList(action, { call, put }) {
@@ -31,6 +38,11 @@ export default {
     *createApplicationList(action, { call, put }) {
       const result = yield call(createApplicationList, action.payload);
       yield put({ type: 'getApplicationList', payload: {} });
+    },
+    *getNamespaceList(action, { call, put }) {
+      const result = yield call(getNamespaceList, action.payload);
+      const namespaceList = getNamespace(result || {});
+      yield put({ type: 'updateNameSpaceList', payload: namespaceList });
     },
   },
 };
@@ -57,4 +69,19 @@ function getAppCardList(data) {
     appContent.push(app);
   }
   return appContent;
+}
+
+function getNamespace(data) {
+  const namespacesList = data.namespaces;
+  if (!namespacesList) {
+    return [];
+  }
+  const list = [];
+  for (const item of namespacesList) {
+   const namespace = {};
+   namespace.value = item.name;
+   namespace.label = item.name;
+   list.push(namespace);
+  }
+  return list;
 }

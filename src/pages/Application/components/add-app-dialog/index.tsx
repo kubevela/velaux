@@ -8,9 +8,10 @@ import './index.less';
 
 type Props = {
   visible: boolean;
+  namespaceList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {};
@@ -21,24 +22,32 @@ class AppDialog extends React.Component<Props, State> {
     super(props);
     this.field = new Field(this);
   }
+
+
   onClose = () => {
     this.props.setVisible(false);
     this.resetField();
   };
+
   onOk = () => {
     console.log('this.dispatch', this.props.dispatch);
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      const { cluster, describe, name, project } = values;
+      const { cluster, describe, name, project, namespace } = values;
+      let namespaceParam = namespace;
+      if (Object.prototype.toString.call(namespace) === '[object Array]') {
+        namespaceParam = namespace[0];
+      }
       const params = {
         clusterList: cluster,
         description: describe,
         icon: '',
         name: name,
-        namespace: '123', // test, hold on remove
+        namespace: namespaceParam,
       };
+     
       this.props.dispatch({
         type: 'application/createApplicationList',
         payload: params,
@@ -54,8 +63,12 @@ class AppDialog extends React.Component<Props, State> {
       project: '',
       cluster: [],
       describe: '',
+      namespace: []
     });
   }
+  handleSelectNameSpace = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('chose', e);
+  };
   handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('chose', e);
   };
@@ -63,6 +76,42 @@ class AppDialog extends React.Component<Props, State> {
   handleSelectCluster = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('chose', e);
   };
+
+  getNameSpace() {
+    const FormItem = Form.Item;
+    const formItemLayout = {
+      labelCol: {
+        fixedSpan: 6,
+      },
+      wrapperCol: {
+        span: 18,
+      },
+    };
+    const { visible, t, namespaceList } = this.props;
+    const init = this.field.init;
+    const enterPlaceHold = t('Please enter').toString();
+    const chosePlaceHold = t('Please chose').toString();
+    console.log('namespaceListnamespaceList', namespaceList)
+    if (namespaceList && namespaceList.length != 0) {
+      return (
+        <FormItem {...formItemLayout} label={'namespace'} labelTextAlign="left" required={true}>
+          <Select
+            mode="single"
+            onChange={this.handleSelectNameSpace}
+            dataSource={namespaceList}
+            {...init('namespace')}
+            placeholder={chosePlaceHold}
+          />
+        </FormItem>
+      )
+    } else {
+      return (
+        <FormItem {...formItemLayout} label={'namespace'} labelTextAlign="left" required={true}>
+          <Input htmlType="namespace" name="namespace" placeholder={enterPlaceHold} {...init('namespace')} />
+        </FormItem>
+      )
+    }
+  }
 
   render() {
     const { Row, Col } = Grid;
@@ -85,12 +134,12 @@ class AppDialog extends React.Component<Props, State> {
         span: 18,
       },
     };
-
     const namePlacehold = t(namePlaceHold).toString();
     const clustPlacehold = t(clustPlaceHold).toString();
     const describePlacehold = t(describePlaceHold).toString();
     const confirm = t('Confirm').toString();
     const init = this.field.init;
+    const namespaceForm = this.getNameSpace();
     return (
       <div>
         <Dialog
@@ -111,6 +160,7 @@ class AppDialog extends React.Component<Props, State> {
             <FormItem {...formItemLayout} label={name} labelTextAlign="left" required={true}>
               <Input htmlType="name" name="name" placeholder={namePlacehold} {...init('name')} />
             </FormItem>
+            {namespaceForm}
             <FormItem {...formItemLayout} label={project} labelTextAlign="left" required={true}>
               <Select
                 mode="single"

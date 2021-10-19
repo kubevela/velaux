@@ -58,15 +58,6 @@ class SelectSearch extends React.Component<Props> {
             className="item"
           />
         </Col>
-        <Col span="6">
-          <div className="btn-wrpaer">
-            <Button type="primary" className="margin-right-20">
-              {' '}
-              {t('Determine')}
-            </Button>
-            <Button type="primary"> {t('Cancel')}</Button>
-          </div>
-        </Col>
       </Row>
     );
   }
