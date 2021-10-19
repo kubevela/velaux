@@ -101,7 +101,8 @@ class CardContent extends React.Component<any, State> {
                       {btnContent && (
                         <Button type="secondary" className="height-24">
                           {btnContent}
-                        </Button>)}
+                        </Button>
+                      )}
                     </Row>
 
                     <Row className="content-foot colorA6A6A6">

@@ -10,7 +10,7 @@ type Props = {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {};
@@ -31,14 +31,13 @@ class AppDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      console.log('valuesvalues', values);
       const { cluster, describe, name, project } = values;
       const params = {
         clusterList: cluster,
         description: describe,
         icon: '',
         name: name,
-        namespace: '123',// test, hold on remove
+        namespace: '123', // test, hold on remove
       };
       this.props.dispatch({
         type: 'application/createApplicationList',
@@ -51,10 +50,10 @@ class AppDialog extends React.Component<Props, State> {
   };
   resetField() {
     this.field.setValues({
-      "name":'',
-      "project":'',
-      "cluster":[],
-      "describe":'',
+      name: '',
+      project: '',
+      cluster: [],
+      describe: '',
     });
   }
   handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -41,5 +41,5 @@ export const ADDONS_PATH = 'addons';
 export const WORKFLOWS_PATH = 'workflows';
 
 export function momentDate(time: string): string {
-  return moment(time).format('YYYY/MM/DD hh:mm')
+  return moment(time).format('YYYY/MM/DD hh:mm');
 }
