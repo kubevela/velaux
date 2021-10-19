@@ -22,7 +22,7 @@ import './index.less';
 type Props = {
   match: {
     params: {
-      name: string;
+      appName: string;
     };
   };
   history: {
@@ -40,7 +40,7 @@ class General extends Component<Props, State> {
     super(props);
     const { params } = this.props.match;
     this.state = {
-      value: params.name,
+      value: params.appName,
       visible: false,
     };
   }
@@ -89,7 +89,6 @@ class General extends Component<Props, State> {
                 <Link to={'/'}> {MANAGER_TITLE} </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item link="javascript:void(0);">
-                {MANAGER_NAME}
                 <Select
                   dataSource={dataSourceAppNames}
                   value={value}
@@ -102,7 +101,6 @@ class General extends Component<Props, State> {
           <Col span="7">
             <div className="title-nav-button">
               <Button
-                size="small"
                 type="secondary"
                 onClick={() => {
                   this.setVisible(true);
@@ -110,7 +108,7 @@ class General extends Component<Props, State> {
               >
                 {PUBLISH_MODEL}
               </Button>
-              <Button size="small" type="primary" className="margin-left-15">
+              <Button type="primary" className="margin-left-15">
                 {DEPLOYMENT_UPDATE}
               </Button>
             </div>

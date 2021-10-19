@@ -14,7 +14,7 @@ import './index.less';
 type Props = {
   match: {
     params: {
-      name: string;
+      workflowName: string;
     };
   };
   history: {
@@ -32,7 +32,7 @@ class Workflow extends Component<Props, State> {
     super(props);
     const { params } = this.props.match;
     this.state = {
-      value: params.name,
+      value: params.workflowName,
       visible: false,
     };
   }
@@ -43,7 +43,7 @@ class Workflow extends Component<Props, State> {
   handleSelect = (e: string) => {
     console.log('eee', e);
     console.log('this.propss', this.props);
-    this.props.history.push(`/workflow/${e}`, {});
+    this.props.history.push(`/workflows/${e}`, {});
     this.setState({
       value: e,
     });
@@ -141,7 +141,6 @@ class Workflow extends Component<Props, State> {
                 <Link to={'/'}> {MANAGER_TITLE} </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item link="javascript:void(0);">
-                {MANAGER_NAME}
                 <Select
                   dataSource={dataSourceAppNames}
                   value={value}
