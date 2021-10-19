@@ -36,7 +36,9 @@ const LeftMenu = (data, context) => {
     }
     return (
       <li className="first-nav">
-        <Translation>{item.navName}</Translation>
+        <div className="padding-left-20">
+          <Translation>{item.navName}</Translation>
+        </div>
         {ele}
       </li>
     );

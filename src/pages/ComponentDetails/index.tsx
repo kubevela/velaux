@@ -15,7 +15,7 @@ import './index.less';
 type Props = {
   match: {
     params: {
-      name: string;
+      appName: string;
       componentName: string;
     };
   };
@@ -34,14 +34,14 @@ class ComponentDetails extends Component<Props, State> {
     super(props);
     const { params } = this.props.match;
     this.state = {
-      appName: params.name,
+      appName: params.appName,
       componentName: params.componentName,
     };
   }
   componentDidMount() {}
   handleSelect = (e: string) => {
     const { componentName } = this.state;
-    this.props.history.push(`/applications/${e}/${componentName}`, {});
+    this.props.history.push(`/applications/${e}/components/${componentName}`, {});
     this.setState({
       appName: e,
     });
@@ -49,7 +49,7 @@ class ComponentDetails extends Component<Props, State> {
 
   handleSelectComponent = (e: string) => {
     const { appName } = this.state;
-    this.props.history.push(`/applications/${appName}/${e}`, {});
+    this.props.history.push(`/applications/${appName}/components/${e}`, {});
     this.setState({
       componentName: e,
     });
@@ -68,7 +68,6 @@ class ComponentDetails extends Component<Props, State> {
                 <Link to={'/'}> {MANAGER_TITLE} </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item link="javascript:void(0);">
-                {MANAGER_NAME}
                 <Select
                   dataSource={dataSourceAppNames}
                   value={appName}
@@ -76,7 +75,6 @@ class ComponentDetails extends Component<Props, State> {
                 />
               </Breadcrumb.Item>
               <Breadcrumb.Item link="javascript:void(0);">
-                {COMPONENT_NAME}
                 <Select
                   dataSource={componentsSourceNames}
                   value={componentName}
