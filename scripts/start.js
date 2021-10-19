@@ -1,9 +1,9 @@
 'use strict';
-
+const domain = require('../.env');
 // Do this as the first thing so that any code reading it knows the right env.
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
-process.env.DEV_DOMAIN= 'http://47.89.213.233:32465';
+process.env.DEV_DOMAIN = domain.BASE_URL;
 
 
 // Makes the script crash on unhandled rejections instead of silently
