@@ -11,8 +11,16 @@ export function getLanguage() {
   return localStorage.getItem('lang') || lang.split('-')[0];
 }
 
-export function isMock() {
-  return process.env.MOCK == 'mock' ? true : false;
+export function isDev() {
+  return process.env.MOCK === 'mock' ? true : false;
+}
+
+export function getDomain(): { MOCK: string | undefined; APIBASE: string | undefined } {
+  const { MOCK, DEV_DOMAIN, PRO_DOMAIN } = process.env;
+  return {
+    MOCK: MOCK,
+    APIBASE: DEV_DOMAIN || PRO_DOMAIN,
+  };
 }
 
 export function isApplicationPath(pathname: string) {

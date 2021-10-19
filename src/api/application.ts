@@ -1,14 +1,14 @@
-import { post, get } from './index';
+import { post, get } from './request';
 import { applicationList_dev } from './devLink';
 import { applicationList } from './productionLink';
-import { isMock } from '../utils/common';
-
+import { getDomain } from '../utils/common';
+const baseURLOject = getDomain();
 export function getApplicationList(params: any) {
-  const url = isMock() ? applicationList_dev : applicationList;
+  const url = baseURLOject.MOCK ? applicationList_dev : applicationList;
   return get(url, params).then((res) => res);
 }
 
 export function createApplicationList(params: any) {
-  const url = isMock() ? applicationList_dev : applicationList;
+  const url = baseURLOject.MOCK ? applicationList_dev : applicationList;
   return post(url, params).then((res) => res);
 }

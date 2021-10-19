@@ -5,8 +5,8 @@ import axios, {
   AxiosResponse,
   Method,
 } from 'axios';
-import { getMessage } from '../api/status';
-import { baseURL } from '../api/config';
+import { getMessage } from './status';
+import { baseURL } from './config';
 import { Message } from '@b-design/ui';
 import qs from 'qs';
 
@@ -59,7 +59,11 @@ export const post = (url: string, params: any) => {
       return res.data;
     })
     .catch((err) => {
-      Message.error(`${err.BusinessCode}:${err.Message}`);
+      if (err.BusinessCode) {
+        Message.error(`${err.BusinessCode}:${err.Message}`);
+      } else {
+        Message.error(getMessage(503));
+      }
     });
 };
 
@@ -70,6 +74,10 @@ export const get = (url: string, params: any) => {
       return res.data;
     })
     .catch((err) => {
-      Message.error(`${err.BusinessCode}:${err.Message}`);
+      if (err.BusinessCode) {
+        Message.error(`${err.BusinessCode}:${err.Message}`);
+      } else {
+        Message.error(getMessage(503));
+      }
     });
 };

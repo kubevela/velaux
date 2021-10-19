@@ -1,1 +1,3 @@
-export const baseURL = 'http://47.89.213.233:32465';
+import { getDomain } from '../utils/common';
+const domainObj = getDomain();
+export const baseURL = domainObj.APIBASE || domainObj.MOCK;
