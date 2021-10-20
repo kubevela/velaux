@@ -77,6 +77,7 @@ function getClientEnvironment(publicUrl) {
         // This should only be used as an escape hatch. Normally you would put
         // images into the `src` and `import` them in code to get their paths.
         PUBLIC_URL: publicUrl,
+        BASE_DOMAIN: process.env.BASE_DOMAIN,
         // We support configuring the sockjs pathname during development.
         // These settings let a developer run multiple simultaneous projects.
         // They are used as the connection `hostname`, `pathname` and `port`
@@ -86,7 +87,6 @@ function getClientEnvironment(publicUrl) {
         WDS_SOCKET_PATH: process.env.WDS_SOCKET_PATH,
         WDS_SOCKET_PORT: process.env.WDS_SOCKET_PORT,
         MOCK: process.env.MOCK,
-        DEV_DOMAIN:process.env.DEV_DOMAIN,
         // Whether or not react-refresh is enabled.
         // react-refresh is not 100% stable at this time,
         // which is why it's disabled by default.

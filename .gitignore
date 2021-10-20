@@ -22,4 +22,4 @@ vendor/
 .idea
 .vscode
 .eslintcache
-.env.js
+.env
