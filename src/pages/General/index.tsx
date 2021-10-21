@@ -52,7 +52,7 @@ class General extends Component<Props, State> {
 
   componentDidMount() {
     this.getApplicationDetails();
-    this.getTopology();
+    this.getApplicationComponents();
   }
 
   getApplicationDetails = async () => {
@@ -65,10 +65,10 @@ class General extends Component<Props, State> {
     });
   };
 
-  getTopology = async () => {
+  getApplicationComponents = async () => {
     const { value } = this.state;
     this.props.dispatch({
-      type: 'application/getTopology',
+      type: 'application/getApplicationComponents',
       payload: {
         urlParam: value,
       },

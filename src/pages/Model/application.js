@@ -3,7 +3,7 @@ import {
   getApplicationList,
   createApplicationList,
   getApplicationDetails,
-  getTopology,
+  getApplicationComponents,
 } from '../../api/application';
 
 import { getNamespaceList } from '../../api/namespace';
@@ -71,9 +71,9 @@ export default {
       const result = yield call(getApplicationDetails, { name: urlParam });
       yield put({ type: 'updateApplicationDetails', payload: result });
     },
-    *getTopology(action, { call, put }) {
+    *getApplicationComponents(action, { call, put }) {
       const { urlParam } = action.payload;
-      const result = yield call(getTopology, { name: urlParam });
+      const result = yield call(getApplicationComponents, { name: urlParam });
       yield put({ type: 'updateTopology', payload: result });
     },
   },

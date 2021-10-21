@@ -4,18 +4,20 @@ import { namespace } from './productionLink';
 import { getDomain } from '../utils/common';
 
 const baseURLOject = getDomain();
+const isMock = baseURLOject.MOCK;
+let url = isMock ? namespace_dev : namespace;
+
 export function getNamespaceList(params: any) {
-  const url = baseURLOject.MOCK ? namespace_dev : namespace;
   return get(url, params).then((res) => res);
 }
 
-export function createNamespaceList(params: any) {
-  const url = baseURLOject.MOCK ? namespace_dev : namespace;
+export function createNamespace(params: any) {
   return post(url, params).then((res) => res);
 }
 
 export function getOneNamespace(params: any) {
-  const realURL = `${namespace}/${params.namespace}`;
-  const url = baseURLOject.MOCK ? namespace_dev : realURL;
+  if (!isMock) {
+    url = `${namespace}/${params.namespace}`;
+  }
   return get(url, params).then((res) => res);
 }
