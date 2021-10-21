@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'dva';
 import { Link } from 'dva/router';
 import { DragDropContext } from 'react-dnd';
 import HTMLBackend from 'react-dnd-html5-backend';
@@ -28,6 +29,7 @@ type Props = {
   history: {
     push: (path: string, state: {}) => {};
   };
+  dispatch: ({}) => {};
 };
 
 type State = {
@@ -35,8 +37,11 @@ type State = {
   visible: boolean;
 };
 @DragDropContext(HTMLBackend)
+@connect((store: any) => {
+  return { ...store.application };
+})
 class General extends Component<Props, State> {
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     const { params } = this.props.match;
     this.state = {
@@ -44,16 +49,44 @@ class General extends Component<Props, State> {
       visible: false,
     };
   }
+
   componentDidMount() {
-    console.log('componentDidMount', window.screen.height);
+    this.getApplicationDetails();
+    this.getTopology();
   }
+
+  getApplicationDetails = async () => {
+    const { value } = this.state;
+    this.props.dispatch({
+      type: 'application/getApplicationDetails',
+      payload: {
+        urlParam: value,
+      },
+    });
+  };
+
+  getTopology = async () => {
+    const { value } = this.state;
+    this.props.dispatch({
+      type: 'application/getTopology',
+      payload: {
+        urlParam: value,
+      },
+    });
+  };
+
   handleSelect = (e: string) => {
     console.log('eee', e);
     console.log('this.propss', this.props);
     this.props.history.push(`/applications/${e}`, {});
-    this.setState({
-      value: e,
-    });
+    this.setState(
+      {
+        value: e,
+      },
+      () => {
+        this.getApplicationDetails();
+      },
+    );
   };
 
   setVisible = (visible: boolean) => {

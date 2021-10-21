@@ -1,4 +1,12 @@
-import { getApplicationList, createApplicationList, getNamespaceList } from '../../api/application';
+import { act } from 'react-dom/test-utils';
+import {
+  getApplicationList,
+  createApplicationList,
+  getApplicationDetails,
+  getTopology,
+} from '../../api/application';
+
+import { getNamespaceList } from '../../api/namespace';
 
 export default {
   namespace: 'application',
@@ -7,7 +15,9 @@ export default {
     projectList: [],
     clusterList: [],
     searchAppName: '',
-    namespaceList: []
+    namespaceList: [],
+    applicationDetail: {},
+    topologyData: {},
   },
   reducers: {
     update(state, { type, payload }) {
@@ -22,6 +32,18 @@ export default {
         applicationList: payload,
       };
     },
+    updateApplicationDetails(state, { type, payload }) {
+      return {
+        ...state,
+        applicationDetail: payload,
+      };
+    },
+    updateTopology(state, { type, payload }) {
+      return {
+        ...state,
+        topologyData: payload,
+      };
+    },
     updateNameSpaceList(state, { type, payload }) {
       return {
         ...state,
@@ -31,7 +53,7 @@ export default {
   },
   effects: {
     *getApplicationList(action, { call, put }) {
-      const result = yield call(getApplicationList);
+      const result = yield call(getApplicationList, action.payload);
       const appContent = getAppCardList(result || {});
       yield put({ type: 'updateApplicationList', payload: appContent });
     },
@@ -43,6 +65,16 @@ export default {
       const result = yield call(getNamespaceList, action.payload);
       const namespaceList = getNamespace(result || {});
       yield put({ type: 'updateNameSpaceList', payload: namespaceList });
+    },
+    *getApplicationDetails(action, { call, put }) {
+      const { urlParam } = action.payload;
+      const result = yield call(getApplicationDetails, { name: urlParam });
+      yield put({ type: 'updateApplicationDetails', payload: result });
+    },
+    *getTopology(action, { call, put }) {
+      const { urlParam } = action.payload;
+      const result = yield call(getTopology, { name: urlParam });
+      yield put({ type: 'updateTopology', payload: result });
     },
   },
 };
@@ -78,10 +110,10 @@ function getNamespace(data) {
   }
   const list = [];
   for (const item of namespacesList) {
-   const namespace = {};
-   namespace.value = item.name;
-   namespace.label = item.name;
-   list.push(namespace);
+    const namespace = {};
+    namespace.value = item.name;
+    namespace.label = item.name;
+    list.push(namespace);
   }
   return list;
 }

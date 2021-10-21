@@ -3,7 +3,7 @@ import './index.less';
 import { Link } from 'dva/router';
 
 import { Button, Message, Grid, Dialog, Form, Input, Card, Icon } from '@b-design/ui';
-import { AppContent } from '../../../../model/application';
+import { AppContent } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 import Img from '../../../../assets/card.png';
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { ConfigProvider } from '@alifd/next';
 import Content from './Content';
 import LeftMenu from './LeftMenu';
-import TopBar from './top-bar/index';
+import TopBar from './TopBar';
 import './index.less';
 
 export default function MainLayout(props) {
