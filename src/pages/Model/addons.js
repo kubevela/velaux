@@ -16,7 +16,7 @@ export default {
   effects: {
     *getAddonsList(action, { call, put }) {
       const result = yield call(getAddonsList);
-      const addonsList = getAddonsCardList(result || {});
+      const addonsList = getAddonsCardList(result || []);
       yield put({ type: 'updateAddonsList', payload: addonsList });
     },
   },

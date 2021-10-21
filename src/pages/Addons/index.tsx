@@ -28,7 +28,7 @@ class Addons extends React.Component<Props, State> {
     });
   };
   render() {
-    const { addonsList, dispatch } = this.props;
+    const { addonsList = [], dispatch } = this.props;
     return (
       <div>
         <Title
