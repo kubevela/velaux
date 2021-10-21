@@ -2,14 +2,15 @@ import React, { Component } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
 import SelectSearch from '../../components/SelectSearch/index';
-import CardContend from './components/card-conten/index';
+import CardContend from './components/CardContent';
 import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
 
 type Props = {
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   applicationList: [];
-  namespaceList: []
+  namespaceList: [];
+  clusterList?: [];
 };
 type State = {};
 
@@ -23,6 +24,8 @@ class Application extends Component<Props, State> {
 
   componentDidMount() {
     this.getApplication();
+    this.getNamespaceList();
+    this.getClusterList();
   }
 
   getApplication = async () => {
@@ -32,9 +35,22 @@ class Application extends Component<Props, State> {
     });
   };
 
-  render() {
-    const { applicationList, namespaceList, dispatch } = this.props;
+  getNamespaceList = async () => {
+    this.props.dispatch({
+      type: 'application/getNamespaceList',
+      payload: {},
+    });
+  };
 
+  getClusterList = async () => {
+    this.props.dispatch({
+      type: 'clusters/getClusterList',
+      payload: {},
+    });
+  };
+
+  render() {
+    const { applicationList, namespaceList, clusterList, dispatch } = this.props;
     return (
       <div>
         <Title
@@ -45,7 +61,7 @@ class Application extends Component<Props, State> {
           namespaceList={namespaceList}
           dispatch={dispatch}
         />
-        <SelectSearch />
+        <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
         <CardContend
           appContent={applicationList}
           path={APPLICATION_PATH}

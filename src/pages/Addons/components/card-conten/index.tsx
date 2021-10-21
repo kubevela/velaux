@@ -2,10 +2,9 @@ import React, { MouseEvent } from 'react';
 import './index.less';
 import { Link } from 'dva/router';
 
-import { Button, Message, Grid, Dialog, Form, Input, Card, Icon, Table } from '@b-design/ui';
-import { AppContent } from '../../../../model/application';
+import { Button, Message, Grid, Dialog, Form, Input, Card, Icon } from '@b-design/ui';
+import { AppContent } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
-import { momentDate } from '../../../../utils/common';
 import Img from '../../../../assets/card.png';
 
 type State = {
@@ -36,23 +35,13 @@ class CardContent extends React.Component<any, State> {
     const { extendDotVisible, choseIndex } = this.state;
     const { appContent, path, workFlowPath } = this.props;
     const imgSrc = this.props.cardImg || Img;
-    if (appContent.length === 0) {
-      return (
-        <Row wrap={false}>
-          <h3 className="text-align-center height-400 width-full margin-top-20">
-            <Translation>No data</Translation>
-          </h3>
-        </Row>
-      );
-    }
-
     return (
       <Row wrap={true}>
         {appContent.map((item: AppContent, index: number) => {
           const { name, status, icon, description, createTime, href, btnContent } = item;
           return (
             <Col span="6" className={`card-content-wraper`} key={index}>
-              <Link to={`/applications/${name}`}>
+              <Link to={`/addons/${name}`}>
                 <Card contentHeight="auto">
                   <img src={imgSrc} alt="app-card" />
                   <div className="content-wraper background-F9F8FF">
@@ -98,16 +87,14 @@ class CardContent extends React.Component<any, State> {
                       <h4 className="color595959 font-size-14">{description}</h4>
                     </Row>
                     <Row className="content-main-btn">
-                      {btnContent && (
-                        <Button type="secondary" className="height-24">
-                          {btnContent}
-                        </Button>
-                      )}
+                      <Button type="secondary" className="height-24">
+                        {btnContent}
+                      </Button>
                     </Row>
 
                     <Row className="content-foot colorA6A6A6">
                       <Col span="16">
-                        <span>{createTime && momentDate(createTime)}</span>
+                        <span>{createTime}</span>
                       </Col>
                       <Col span="8" className="text-align-right padding-right-10">
                         {status}

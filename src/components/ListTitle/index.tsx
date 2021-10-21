@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button, Message, Grid, Dialog, Form, Input } from '@b-design/ui';
 import Translation from '../Translation';
 import { APPLICATION_PATH, CLUSTERS_PATH } from '../../utils/common';
-import AppDialog from '../../pages/Application/components/add-app-dialog/index';
+import AppDialog from '../../pages/Application/components/AddAppDialog';
 import AddClustDialog from '../../pages/Cluster/components/add-clust-dialog';
 import './index.less';
 
@@ -13,7 +13,7 @@ type Props = {
   btnName?: string;
   dialogName: string;
   namespaceList?: [];
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 export default function (props: Props) {
   const { Row, Col } = Grid;
@@ -25,7 +25,7 @@ export default function (props: Props) {
       payload: {},
     });
     setVisible(true);
-  }
+  };
 
   return (
     <div>
@@ -46,7 +46,7 @@ export default function (props: Props) {
               <Button
                 type="primary"
                 onClick={() => {
-                  fetchNamespaceList()
+                  fetchNamespaceList();
                 }}
               >
                 <Translation>{btnName}</Translation>
@@ -56,7 +56,12 @@ export default function (props: Props) {
         )}
       </Row>
       {dialogName === APPLICATION_PATH && (
-        <AppDialog visible={visible} setVisible={setVisible} dispatch={dispatch} namespaceList={namespaceList} />
+        <AppDialog
+          visible={visible}
+          setVisible={setVisible}
+          dispatch={dispatch}
+          namespaceList={namespaceList}
+        />
       )}
       {dialogName === CLUSTERS_PATH && <AddClustDialog visible={visible} setVisible={setVisible} />}
     </div>

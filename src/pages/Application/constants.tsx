@@ -30,6 +30,7 @@ export const addAppDialog = {
   clustPlaceHold: 'Clust Placehold',
   describe: <Translation>App Describe</Translation>,
   describePlaceHold: 'App DescribePlaceHol',
+  envPlan: <Translation>Environmental planning</Translation>,
 };
 
 export const appContent = [
