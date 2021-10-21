@@ -19,7 +19,7 @@ export function getDomain(): { MOCK: string | undefined; APIBASE: string | undef
   const { MOCK, BASE_DOMAIN } = process.env;
   return {
     MOCK: MOCK,
-    APIBASE: BASE_DOMAIN || "",
+    APIBASE: BASE_DOMAIN || '',
   };
 }
 
