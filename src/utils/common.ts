@@ -12,7 +12,7 @@ export function getLanguage() {
 }
 
 export function isMock() {
-  return process.env.MOCK === 'mock' ? true : false;
+  return process.env.MOCK ? true : false;
 }
 
 export function getDomain(): { MOCK: string | undefined; APIBASE: string | undefined } {
