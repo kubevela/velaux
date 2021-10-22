@@ -1,11 +1,11 @@
 import { post, get } from './request';
-import { cluster_dev } from './devLink';
+import { cluster_mock, getClusterDetails_mock } from './devLink';
 import { cluster } from './productionLink';
 import { getDomain } from '../utils/common';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
-let url = isMock ? cluster_dev : cluster;
+let url = isMock ? cluster_mock : cluster;
 
 export function getClusterList(params: any) {
   return get(url, params).then((res) => res);
@@ -16,8 +16,6 @@ export function createCluster(params: any) {
 }
 
 export function getClusterDetails(params: any) {
-  if (!isMock) {
-    url = `${cluster}/${params.clusterName}`;
-  }
+  url = isMock ? `${getClusterDetails_mock}` : `${cluster}/${params.clusterName}`;
   return get(url, params).then((res) => res);
 }
