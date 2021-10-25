@@ -12,14 +12,14 @@ export function getLanguage() {
 }
 
 export function isMock() {
-  return process.env.MOCK === 'mock' ? true : false;
+  return process.env.MOCK ? true : false;
 }
 
 export function getDomain(): { MOCK: string | undefined; APIBASE: string | undefined } {
   const { MOCK, BASE_DOMAIN } = process.env;
   return {
     MOCK: MOCK,
-    APIBASE: BASE_DOMAIN || "",
+    APIBASE: BASE_DOMAIN || '',
   };
 }
 
@@ -49,5 +49,5 @@ export const ADDONS_PATH = 'addons';
 export const WORKFLOWS_PATH = 'workflows';
 
 export function momentDate(time: string): string {
-  return moment(time).format('YYYY/MM/DD hh:mm');
+  return moment(time).format('YYYY/MM/DD HH:MM');
 }

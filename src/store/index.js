@@ -1,4 +1,4 @@
-const context = require.context('./model', false, /\.(js|jsx|tsx)$/);
+const context = require.context('../pages/Model', false, /\.(js|jsx|tsx)$/);
 const getModel = context.keys().map((key) => context(key));
 
 export const createModel = function (app) {

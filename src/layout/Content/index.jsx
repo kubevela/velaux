@@ -2,7 +2,7 @@ import React from 'react';
 import { Router, Route, Switch, Redirect } from 'dva/router';
 import Application from '../../pages/Application';
 import Clusters from '../../pages/Cluster/index';
-import Addons from '../../pages/Plugins/index';
+import Addons from '../../pages/Addons/index';
 import Workflow from '../../pages/Workflow/index';
 import General from '../../pages/General';
 import ComponentDetails from '../../pages/ComponentDetails';

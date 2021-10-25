@@ -8,19 +8,27 @@ import Img from '../../assets/plugins.png';
 
 type Props = {
   dispatch: ({}) => {};
-  applicationList: [];
-  defaultCluster: string;
+  addonsList: [];
 };
 
 type State = {};
 
 @connect((store: any) => {
-  const list = [...store.application.applicationList];
-  return { ...store.addons, ...{ applicationList: list } };
+  return store.addons;
 })
 class Addons extends React.Component<Props, State> {
+  componentDidMount() {
+    this.getAddonsList();
+  }
+
+  getAddonsList = async () => {
+    this.props.dispatch({
+      type: 'addons/getAddonsList',
+      payload: {},
+    });
+  };
   render() {
-    const { applicationList, dispatch } = this.props;
+    const { addonsList = [], dispatch } = this.props;
     return (
       <div>
         <Title
@@ -29,10 +37,10 @@ class Addons extends React.Component<Props, State> {
           dialogName={ADDONS_PATH}
           dispatch={dispatch}
         />
-        <SelectSearch />
+        <SelectSearch dispatch={dispatch} />
         <CardContend
           cardImg={Img}
-          appContent={applicationList}
+          appContent={addonsList}
           path={ADDONS_PATH}
           workFlowPath={WORKFLOWS_PATH}
         />

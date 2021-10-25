@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'dva';
 import { Link } from 'dva/router';
 import { DragDropContext } from 'react-dnd';
 import HTMLBackend from 'react-dnd-html5-backend';
@@ -22,12 +23,13 @@ import './index.less';
 type Props = {
   match: {
     params: {
-      name: string;
+      appName: string;
     };
   };
   history: {
     push: (path: string, state: {}) => {};
   };
+  dispatch: ({}) => {};
 };
 
 type State = {
@@ -35,25 +37,56 @@ type State = {
   visible: boolean;
 };
 @DragDropContext(HTMLBackend)
+@connect((store: any) => {
+  return { ...store.application };
+})
 class General extends Component<Props, State> {
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     const { params } = this.props.match;
     this.state = {
-      value: params.name,
+      value: params.appName,
       visible: false,
     };
   }
+
   componentDidMount() {
-    console.log('componentDidMount', window.screen.height);
+    this.getApplicationDetails();
+    this.getApplicationComponents();
   }
+
+  getApplicationDetails = async () => {
+    const { value } = this.state;
+    this.props.dispatch({
+      type: 'application/getApplicationDetails',
+      payload: {
+        urlParam: value,
+      },
+    });
+  };
+
+  getApplicationComponents = async () => {
+    const { value } = this.state;
+    this.props.dispatch({
+      type: 'application/getApplicationComponents',
+      payload: {
+        urlParam: value,
+      },
+    });
+  };
+
   handleSelect = (e: string) => {
     console.log('eee', e);
     console.log('this.propss', this.props);
     this.props.history.push(`/applications/${e}`, {});
-    this.setState({
-      value: e,
-    });
+    this.setState(
+      {
+        value: e,
+      },
+      () => {
+        this.getApplicationDetails();
+      },
+    );
   };
 
   setVisible = (visible: boolean) => {
@@ -89,7 +122,6 @@ class General extends Component<Props, State> {
                 <Link to={'/'}> {MANAGER_TITLE} </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item link="javascript:void(0);">
-                {MANAGER_NAME}
                 <Select
                   dataSource={dataSourceAppNames}
                   value={value}
@@ -102,7 +134,6 @@ class General extends Component<Props, State> {
           <Col span="7">
             <div className="title-nav-button">
               <Button
-                size="small"
                 type="secondary"
                 onClick={() => {
                   this.setVisible(true);
@@ -110,7 +141,7 @@ class General extends Component<Props, State> {
               >
                 {PUBLISH_MODEL}
               </Button>
-              <Button size="small" type="primary" className="margin-left-15">
+              <Button type="primary" className="margin-left-15">
                 {DEPLOYMENT_UPDATE}
               </Button>
             </div>
