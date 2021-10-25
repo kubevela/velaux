@@ -1,3 +1,4 @@
+import React, { Component } from 'react';
 import Translation from '../../components/Translation';
 
 export const MANAGER_TITLE = <Translation>App Manager</Translation>;
