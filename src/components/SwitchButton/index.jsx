@@ -10,7 +10,7 @@ const SwitchLanguage = () => {
   const _isEnglish = getLanguage() === 'en';
   const [isEnglish, setIsEnglish] = useState(_isEnglish);
   return (
-    <div className="login-button-style">
+    <div className="language-button-style">
       <Button
         className={`english-part ${isEnglish ? 'is-english' : null}`}
         onClick={() => {
