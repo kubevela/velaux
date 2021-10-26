@@ -7,7 +7,7 @@ import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
 
 type Props = {
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   applicationList: [];
   namespaceList: [];
   clusterList?: [];
@@ -45,7 +45,11 @@ class Application extends Component<Props, State> {
   getClusterList = async () => {
     this.props.dispatch({
       type: 'clusters/getClusterList',
-      payload: {},
+      payload: {
+        query: '',
+        page: 0,
+        pageSize: 20
+      },
     });
   };
 

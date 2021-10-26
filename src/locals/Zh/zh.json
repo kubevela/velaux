@@ -68,5 +68,12 @@
   "Component Name-": "组件名称-",
   "App store": "应用商店",
   "No data": "没有数据",
-  "Environmental planning": "环境规划"
+  "Environmental planning": "环境规划",
+  "CLuster search query": "集群名称、描述搜索",
+  "Add from cloud service": "从云服务添加",
+  "Connecting clusters from cloud services": "从云服务对接集群",
+  "Supplier": "供应商",
+  "Abutment": "对接",
+  "NextStep": "下一步",
+  "Upload Yaml File": "上传Yaml文件"
 }
