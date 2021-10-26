@@ -21,6 +21,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
   },
+  "file": [
+    "./node_modules/tsx-control-statements/index.d.tsx"
+  ],
   "include": [
     "src",
     "./images.d.ts" //文件路径
