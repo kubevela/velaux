@@ -7,7 +7,7 @@ import { CLUSTERS_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import Img from '../../assets/clust-cloud.png';
 
 type Props = {
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   clusterList: [];
   defaultCluster: string;
 };
@@ -29,8 +29,7 @@ class Cluster extends React.Component<Props, State> {
       query: '',
       page: 0,
       pageSize: 10,
-
-    }
+    };
   }
 
   componentDidMount() {
@@ -44,18 +43,21 @@ class Cluster extends React.Component<Props, State> {
       payload: {
         query,
         page,
-        pageSize
+        pageSize,
       },
     });
   };
 
   getChildCompentQuery = (query: string) => {
-    this.setState({
-      query,
-    }, () => {
-      this.getClusterList();
-    })
-  }
+    this.setState(
+      {
+        query,
+      },
+      () => {
+        this.getClusterList();
+      },
+    );
+  };
   render() {
     const { clusterList = [], dispatch } = this.props;
     const { page, pageSize, query } = this.state;
@@ -66,7 +68,7 @@ class Cluster extends React.Component<Props, State> {
             title="Cluster management"
             subTitle="Introduction to cluster management"
             btnName="Add cluster"
-            btnSubName='Add from cloud service'
+            btnSubName="Add from cloud service"
             page={page}
             pageSize={pageSize}
             query={query}
@@ -75,7 +77,9 @@ class Cluster extends React.Component<Props, State> {
           />
           <SelectSearch
             dispatch={dispatch}
-            getChildCompentQuery={(query: string): any => { this.getChildCompentQuery(query) }}
+            getChildCompentQuery={(query: string): any => {
+              this.getChildCompentQuery(query);
+            }}
           />
           <CardContend
             cardImg={Img}

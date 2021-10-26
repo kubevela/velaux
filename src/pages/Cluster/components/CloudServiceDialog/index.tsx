@@ -1,14 +1,31 @@
 import React from 'react';
-import { Button, Message, Grid, Dialog, Form, Input, Select, Upload, Field, Table } from '@b-design/ui';
+import {
+  Button,
+  Message,
+  Grid,
+  Dialog,
+  Form,
+  Input,
+  Select,
+  Upload,
+  Field,
+  Table,
+} from '@b-design/ui';
 import Translation from '../../../../components/Translation';
-import { supplierList, cloudServerTitle, SUPPLIER, NEXTSTEP, Abutment } from '../../../../constants';
+import {
+  supplierList,
+  cloudServerTitle,
+  SUPPLIER,
+  NEXTSTEP,
+  Abutment,
+} from '../../../../constants';
 import './index.less';
 
 type Props = {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   setCloudService: (isCloudService: boolean) => void;
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {
@@ -17,14 +34,14 @@ type State = {
   SKValue: string;
   page: number;
   pageSize: number;
-  choseInput: boolean
+  choseInput: boolean;
 };
 type Record = {
   clusterID: string;
-  description: string
+  description: string;
   icon: string;
-  name: string
-}
+  name: string;
+};
 
 class CloudServiceDialog extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -36,7 +53,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       page: 0,
       pageSize: 20,
       choseInput: true,
-    }
+    };
   }
 
   onClose = () => {
@@ -53,15 +70,14 @@ class CloudServiceDialog extends React.Component<Props, State> {
       pageSize,
       body: {
         accessKeyID: AKValue,
-        accessKeySecret: SKValue
-      }
+        accessKeySecret: SKValue,
+      },
     };
     this.props.dispatch({
       type: 'clusters/getCloudClustersList',
       payload: params,
     });
-    this.setState({ choseInput: false })
-
+    this.setState({ choseInput: false });
   };
 
   resetField() {
@@ -69,30 +85,29 @@ class CloudServiceDialog extends React.Component<Props, State> {
       supplierValue: '',
       AKValue: '',
       SKValue: '',
-      choseInput: true
-    })
+      choseInput: true,
+    });
   }
-
 
   handleChangeSupplier = (value: string) => {
-    this.setState({ supplierValue: value })
-  }
+    this.setState({ supplierValue: value });
+  };
 
   handleChangeAKValue = (value: string) => {
-    this.setState({ AKValue: value })
-  }
+    this.setState({ AKValue: value });
+  };
 
   handleChangeSKValue = (value: string) => {
-    this.setState({ SKValue: value })
-  }
+    this.setState({ SKValue: value });
+  };
 
   renderInput = () => {
     const { Row, Col } = Grid;
     const { supplierValue, AKValue, SKValue } = this.state;
     return (
       <Row>
-        <Col span='8'>
-          <span className='margin-right-15'> {SUPPLIER}</span>
+        <Col span="8">
+          <span className="margin-right-15"> {SUPPLIER}</span>
           <Select
             mode="single"
             size="large"
@@ -103,24 +118,17 @@ class CloudServiceDialog extends React.Component<Props, State> {
             value={supplierValue}
           />
         </Col>
-        <Col span='8'>
-          <span className='margin-right-15'> AK</span>
-          <Input
-            value={AKValue}
-            onChange={this.handleChangeAKValue}
-
-          />
+        <Col span="8">
+          <span className="margin-right-15"> AK</span>
+          <Input value={AKValue} onChange={this.handleChangeAKValue} />
         </Col>
-        <Col span='8'>
-          <span className='margin-right-15'> SK</span>
-          <Input
-            value={SKValue}
-            onChange={this.handleChangeSKValue}
-
-          />
+        <Col span="8">
+          <span className="margin-right-15"> SK</span>
+          <Input value={SKValue} onChange={this.handleChangeSKValue} />
         </Col>
-      </Row>)
-  }
+      </Row>
+    );
+  };
 
   connectcloudCluster = (record: Record) => {
     const { clusterID = '', description = '', icon = '', name = '' } = record;
@@ -134,13 +142,13 @@ class CloudServiceDialog extends React.Component<Props, State> {
         description,
         icon,
         name,
-      }
-    }
+      },
+    };
     this.props.dispatch({
       type: 'clusters/connectcloudCluster',
       payload: params,
     });
-  }
+  };
 
   renderTable = () => {
     const { Column } = Table;
@@ -227,33 +235,31 @@ class CloudServiceDialog extends React.Component<Props, State> {
         title: '操作',
         dataIndex: 'operation',
         cell: (v: string, i: number, record: Record) => {
-
           return (
             <Button
               text
               ghost={true}
               component={'a'}
-              onClick={() => { this.connectcloudCluster(record) }}
-            >{Abutment}</Button>
-          )
+              onClick={() => {
+                this.connectcloudCluster(record);
+              }}
+            >
+              {Abutment}
+            </Button>
+          );
         },
       },
     ];
     return (
       <div>
-        <Table
-          dataSource={dataSource(10, 10)}
-          hasBorder={false}
-          loading={false}
-        >
+        <Table dataSource={dataSource(10, 10)} hasBorder={false} loading={false}>
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
       </div>
-    )
-  }
+    );
+  };
 
   render() {
-
     const { visible } = this.props;
     const { choseInput } = this.state;
 
@@ -267,7 +273,13 @@ class CloudServiceDialog extends React.Component<Props, State> {
           onOk={this.onOk}
           onCancel={this.onClose}
           onClose={this.onClose}
-          footer={choseInput && <Button type="primary" onClick={this.onOk}>{NEXTSTEP}</Button>}
+          footer={
+            choseInput && (
+              <Button type="primary" onClick={this.onOk}>
+                {NEXTSTEP}
+              </Button>
+            )
+          }
           footerAlign="center"
         >
           {choseInput && this.renderInput()}

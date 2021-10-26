@@ -7,7 +7,7 @@ import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
 
 type Props = {
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   applicationList: [];
   namespaceList: [];
   clusterList?: [];
@@ -48,7 +48,7 @@ class Application extends Component<Props, State> {
       payload: {
         query: '',
         page: 0,
-        pageSize: 20
+        pageSize: 20,
       },
     });
   };

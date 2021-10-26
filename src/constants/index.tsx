@@ -10,8 +10,6 @@ export const SUPPLIER = <Translation>Supplier</Translation>;
 export const NEXTSTEP = <Translation>NextStep</Translation>;
 export const Abutment = <Translation>Abutment</Translation>;
 
-
-
 export const dataSourceProject = [
   { value: 10001, label: 'project1' },
   { value: 10002, label: 'project2' },
@@ -40,8 +38,8 @@ export const addClustDialog = {
   describe: '集群说明',
   describePlaceHold: 'description',
   kubeAPI: 'KubeAPI 通信密钥',
-  dashboardURL: "Dashboard地址",
-  dashboarPlaceHold: "设置kubernetes集群的Dashboard地址"
+  dashboardURL: 'Dashboard地址',
+  dashboarPlaceHold: '设置kubernetes集群的Dashboard地址',
 };
 
 export const workflowSet = 'Workflow设置';
@@ -138,6 +136,4 @@ export const appContent = [
   },
 ];
 
-export const supplierList = [
-  { value: 'aliyun', label: '阿里云 ACK' },
-]
+export const supplierList = [{ value: 'aliyun', label: '阿里云 ACK' }];

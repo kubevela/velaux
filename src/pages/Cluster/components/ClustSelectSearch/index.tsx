@@ -5,31 +5,31 @@ import './index.less';
 
 type Props = {
   t: (key: string) => {};
-  dispatch: ({ }) => {};
-  getChildCompentQuery: (value: string) => (() => void) | undefined
+  dispatch: ({}) => {};
+  getChildCompentQuery: (value: string) => (() => void) | undefined;
 };
 
 type State = {
-  inputValue: string
-}
+  inputValue: string;
+};
 
 class InputSearch extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      inputValue: ''
-    }
+      inputValue: '',
+    };
   }
 
   handleChangName = (value: string) => {
     console.log(value);
-    this.setState({
-      inputValue: value,
-    },
-      this.props.getChildCompentQuery(value)
+    this.setState(
+      {
+        inputValue: value,
+      },
+      this.props.getChildCompentQuery(value),
     );
-  }
-
+  };
 
   render() {
     const { Row, Col } = Grid;

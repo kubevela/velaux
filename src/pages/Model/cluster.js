@@ -1,4 +1,9 @@
-import { getClusterList, createCluster, getCloudClustersList, connectcloudCluster } from '../../api/cluster';
+import {
+  getClusterList,
+  createCluster,
+  getCloudClustersList,
+  connectcloudCluster,
+} from '../../api/cluster';
 
 export default {
   namespace: 'clusters',
@@ -23,8 +28,8 @@ export default {
       const params = {
         query,
         page,
-        pageSize
-      }
+        pageSize,
+      };
       const result = yield call(createCluster, action.payload);
       yield put({ type: 'getClusterList', payload: params });
     },

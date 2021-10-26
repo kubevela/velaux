@@ -12,7 +12,7 @@ type Props = {
   pageSize?: number;
   query?: string;
   setVisible: (visible: boolean) => void;
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {
@@ -20,13 +20,13 @@ type State = {
 };
 
 class AddClustDialog extends React.Component<Props, State> {
-  field: any
+  field: any;
   constructor(props: Props) {
     super(props);
-    this.field = new Field(this)
+    this.field = new Field(this);
     this.state = {
-      kubeConfig: ''
-    }
+      kubeConfig: '',
+    };
   }
 
   onClose = () => {
@@ -49,7 +49,7 @@ class AddClustDialog extends React.Component<Props, State> {
         icon: '',
         page,
         pageSize,
-        query
+        query,
       };
       this.props.dispatch({
         type: 'clusters/createCluster',
@@ -67,16 +67,15 @@ class AddClustDialog extends React.Component<Props, State> {
       description: '',
       dashboardURL: '',
     });
-    this.setState({ kubeConfig: '' })
+    this.setState({ kubeConfig: '' });
   }
-
 
   onError = (r: {}) => {
     console.log('onError callback');
     this.setState({
-      kubeConfig: ''
+      kubeConfig: '',
     });
-  }
+  };
 
   customRequest = (option: any) => {
     let reader = new FileReader();
@@ -84,25 +83,31 @@ class AddClustDialog extends React.Component<Props, State> {
     reader.readAsText(fileselect);
     reader.onload = () => {
       console.log(reader.result);
-      this.setState({ kubeConfig: reader.result?.toString() || '' })
-    }
+      this.setState({ kubeConfig: reader.result?.toString() || '' });
+    };
     return {
       file: File,
       onError: this.onError,
-      abort() {
-
-      },
+      abort() {},
     };
-  }
+  };
 
   changeCode = (value: string) => {
-    this.setState({ kubeConfig: value || '' })
-  }
+    this.setState({ kubeConfig: value || '' });
+  };
 
   render() {
     const { Row, Col } = Grid;
     const { visible } = this.props;
-    const { name, describe, namePlaceHold, describePlaceHold, kubeAPI, dashboardURL, dashboarPlaceHold } = addClustDialog;
+    const {
+      name,
+      describe,
+      namePlaceHold,
+      describePlaceHold,
+      kubeAPI,
+      dashboardURL,
+      dashboarPlaceHold,
+    } = addClustDialog;
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
@@ -129,11 +134,7 @@ class AddClustDialog extends React.Component<Props, State> {
         >
           <Form {...formItemLayout} field={this.field}>
             <FormItem label={name}>
-              <Input
-                htmlType="name"
-                name="name"
-                placeholder={namePlaceHold}
-                {...init('name')} />
+              <Input htmlType="name" name="name" placeholder={namePlaceHold} {...init('name')} />
             </FormItem>
 
             <FormItem label={describe}>
@@ -141,7 +142,8 @@ class AddClustDialog extends React.Component<Props, State> {
                 htmlType="describe"
                 name="describe"
                 placeholder={describePlaceHold}
-                {...init('description')} />
+                {...init('description')}
+              />
             </FormItem>
 
             <FormItem label={dashboardURL}>
@@ -165,7 +167,9 @@ class AddClustDialog extends React.Component<Props, State> {
                 />
               </div>
               <Upload request={this.customRequest}>
-                <Button type="secondary" className='add-btn'>{UPLOADYMALFILE}</Button>
+                <Button type="secondary" className="add-btn">
+                  {UPLOADYMALFILE}
+                </Button>
               </Upload>
             </FormItem>
           </Form>

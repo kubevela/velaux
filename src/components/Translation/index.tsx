@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 type Props = {
   children: string;
   className?: string | undefined;
-}
-
+};
 
 const Translation = (props: Props) => {
   const { t } = useTranslation();

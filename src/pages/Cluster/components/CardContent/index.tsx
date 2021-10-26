@@ -55,15 +55,12 @@ class CardContent extends React.Component<any, State> {
                         onClick={(e) => {
                           this.handleClick(index, e);
                         }}
-                      >
-                      </Col>
+                      ></Col>
                     </Row>
                     <Row className="content-main">
                       <h4 className="color595959 font-size-14">{description}</h4>
                     </Row>
-                    <Row className="content-main-btn height-24">
-
-                    </Row>
+                    <Row className="content-main-btn height-24"></Row>
 
                     <Row className="content-foot colorA6A6A6">
                       <Col span="16">

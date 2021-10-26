@@ -1,5 +1,10 @@
 import { post, get } from './request';
-import { cluster_mock, getClusterDetails_mock, clusterCloudList_mock, connectClusterCloud_mock } from './devLink';
+import {
+  cluster_mock,
+  getClusterDetails_mock,
+  clusterCloudList_mock,
+  connectClusterCloud_mock,
+} from './devLink';
 import { cluster } from './productionLink';
 import { getDomain } from '../utils/common';
 
@@ -11,7 +16,6 @@ export function getClusterList(params: any) {
   const { query, page, pageSize } = params;
   url = isMock ? `${cluster_mock}` : `${cluster}?query=${query}page=${page}&pageSize=${pageSize}`;
   return get(url, { params: params }).then((res) => res);
-
 }
 
 export function createCluster(params: any) {
@@ -28,7 +32,9 @@ export function getClusterDetails(params: any) {
 
 export function getCloudClustersList(params: any) {
   const { provider, page, pageSize } = params;
-  url = isMock ? `${clusterCloudList_mock}` : `${cluster}/cloud-clusters/${provider}?page=${page}&pageSize=${pageSize}`;
+  url = isMock
+    ? `${clusterCloudList_mock}`
+    : `${cluster}/cloud-clusters/${provider}?page=${page}&pageSize=${pageSize}`;
   delete params.page;
   delete params.pageSize;
   delete params.provider;
@@ -41,6 +47,3 @@ export function connectcloudCluster(params: any) {
   delete params.provider;
   return post(url, params).then((res) => res);
 }
-
-
-
