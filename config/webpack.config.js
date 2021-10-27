@@ -28,9 +28,9 @@ const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
 const postcssNormalize = require('postcss-normalize');
-
+const statements = require('tsx-control-statements').default;
 const appPackageJson = require(paths.appPackageJson);
-
+const tsxControlStatements = require('tsx-control-statements');
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
 
@@ -393,10 +393,27 @@ module.exports = function (webpackEnv) {
             // Process application JS with Babel.
             // The preset includes JSX, Flow, TypeScript, and some ESnext features.
             {
+              test: /\.(ts|tsx)$/,
+              include: paths.appSrc,
+              use: [
+                {
+                  loader: require.resolve('ts-loader'),
+                  options: {
+                    // disable type checker - we will use it in fork plugin
+                    transpileOnly: true,
+                    getCustomTransformers: () => ({
+                      before: [tsxControlStatements.default()]
+                    })
+                  },
+                },
+              ],
+            },
+            {
               test: /\.(js|mjs|jsx|ts|tsx)$/,
               include: paths.appSrc,
               loader: require.resolve('babel-loader'),
               options: {
+                
                 customize: require.resolve(
                   'babel-preset-react-app/webpack-overrides',
                 ),

@@ -1,13 +1,14 @@
-import React, { createRef, LegacyRef } from 'react';
-import { Button, Message, Grid, Dialog, Form, Input, Select, Field, Radio } from '@b-design/ui';
+import React from 'react';
+import {  Grid,  Form, Input, Select, Field } from '@b-design/ui';
+import NameSpaceForm from './namespace-form';
 import { dataSourceProject, dataSourceCluster, addApp, addAppDialog } from '../../constants';
-
+import './index.less';
 type Props = {
   visible: boolean;
   namespaceList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {};
@@ -68,50 +69,9 @@ class GeneralConfig extends React.Component<Props, State> {
     console.log('chose', e);
   };
 
-  getNameSpace() {
-    const FormItem = Form.Item;
-    const formItemLayout = {
-      labelCol: {
-        fixedSpan: 6,
-      },
-      wrapperCol: {
-        span: 18,
-      },
-    };
-    const { visible, t, namespaceList } = this.props;
-    const init = this.field.init;
-    const enterPlaceHold = t('Please enter').toString();
-    const chosePlaceHold = t('Please chose').toString();
-    console.log('namespaceListnamespaceList', namespaceList);
-    if (namespaceList && namespaceList.length != 0) {
-      return (
-        <FormItem {...formItemLayout} label={'namespace'} labelTextAlign="left" required={true}>
-          <Select
-            mode="single"
-            onChange={this.handleSelectNameSpace}
-            dataSource={namespaceList}
-            {...init('namespace')}
-            placeholder={chosePlaceHold}
-          />
-        </FormItem>
-      );
-    } else {
-      return (
-        <FormItem {...formItemLayout} label={'namespace'} labelTextAlign="left" required={true}>
-          <Input
-            htmlType="namespace"
-            name="namespace"
-            placeholder={enterPlaceHold}
-            {...init('namespace')}
-          />
-        </FormItem>
-      );
-    }
-  }
-
   render() {
     const { Row, Col } = Grid;
-    const { visible, t } = this.props;
+    const { visible, t, namespaceList = [] } = this.props;
     const {
       name,
       project,
@@ -135,14 +95,14 @@ class GeneralConfig extends React.Component<Props, State> {
     const clustPlacehold = t(clustPlaceHold).toString();
     const describePlacehold = t(describePlaceHold).toString();
     const init = this.field.init;
-    const namespaceForm = this.getNameSpace();
+
     return (
       <div>
         <Form {...formItemLayout} field={this.field}>
           <FormItem {...formItemLayout} label={name} labelTextAlign="left" required={true}>
             <Input htmlType="name" name="name" placeholder={namePlacehold} {...init('name')} />
           </FormItem>
-          {namespaceForm}
+          <NameSpaceForm formItemLayout={formItemLayout} field={this.field} namespaceList={namespaceList} />
           <FormItem {...formItemLayout} label={project} labelTextAlign="left" required={true}>
             <Select
               mode="single"

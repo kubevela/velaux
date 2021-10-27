@@ -16,7 +16,7 @@ type Props = {
 };
 
 type State = {
-  kubeConfig: string | ArrayBuffer;
+  kubeConfig: string;
 };
 
 class AddClustDialog extends React.Component<Props, State> {
@@ -71,7 +71,6 @@ class AddClustDialog extends React.Component<Props, State> {
   }
 
   onError = (r: {}) => {
-    console.log('onError callback');
     this.setState({
       kubeConfig: '',
     });
@@ -97,7 +96,6 @@ class AddClustDialog extends React.Component<Props, State> {
   };
 
   render() {
-    const { Row, Col } = Grid;
     const { visible } = this.props;
     const {
       name,
@@ -159,7 +157,7 @@ class AddClustDialog extends React.Component<Props, State> {
               <div id="guideCode" className="guideCode">
                 <DefinitionCode
                   containerId="guideCode"
-                  language={''}
+                  language={'yaml'}
                   readOnly={false}
                   value={kubeConfig}
                   defineTheme={defineTheme}

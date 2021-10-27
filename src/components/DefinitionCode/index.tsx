@@ -1,12 +1,34 @@
-import { Component } from 'react';
+
+import React from 'react';
 import * as monaco from 'monaco-editor';
 
-class DefinitionCode extends Component {
-  constructor(props) {
+
+type Props = {
+  onRef?: (params: any) => {},
+  containerId: string,
+  value?: string,
+  readOnly: boolean,
+  language: string,
+  fileUrl?: string,
+  defineTheme: any,
+  runtime?: any,
+  onChange?: (params: any) => void,
+}
+
+type State = {
+  textModel: any
+};
+
+
+class DefinitionCode extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     const { onRef } = props;
     if (onRef) {
       onRef(this);
+    }
+    this.state = {
+      textModel: {}
     }
   }
 
@@ -14,13 +36,13 @@ class DefinitionCode extends Component {
     const {
       containerId,
       value = '',
-      language = 'yaml',
+      language,
       readOnly,
       onChange,
       fileUrl = `//b.txt`,
       defineTheme,
     } = this.props;
-    const container = document.getElementById(containerId);
+    const container: any = document.getElementById(containerId);
     if (container) {
       container.innerHTML = '';
     }
@@ -43,7 +65,7 @@ class DefinitionCode extends Component {
       model,
       theme: containerId,
     });
-    const textModel = editor.getModel();
+    const textModel: any = editor.getModel();
     if (onChange) {
       editor.onDidChangeModelContent(() => onChange(textModel.getValue()));
     }
@@ -51,9 +73,9 @@ class DefinitionCode extends Component {
     this.setState({ textModel });
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { language, value } = nextProps;
-    if (language !== this.props.language || value !== this.props.value) {
+  componentWillReceiveProps(nextProps: Props) {
+    const { language, value, runtime } = nextProps;
+    if (language !== this.props.language || runtime !== this.props.runtime) {
       this.state.textModel.setValue(value);
     }
   }
