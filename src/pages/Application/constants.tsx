@@ -5,7 +5,7 @@ export const dataSourceProject = [
   { value: 'project2', label: 'project2' },
   { value: 'project3', label: 'project3' },
 ];
-
+import React, { Component } from 'react';
 export const dataSourceCluster = [
   { value: 'cluster1', label: 'cluster1' },
   { value: 'cluster2', label: 'cluster2' },

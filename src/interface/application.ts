@@ -39,10 +39,11 @@ export interface AppObj {
 
 export interface AppContent {
   name: string;
-  btnContent: string;
+  btnContent?: string;
   status: string;
   icon: string;
   description: string;
   createTime: string;
-  href: string;
+  href?: string;
+  dashboardURL?: string;
 }

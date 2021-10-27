@@ -17,13 +17,11 @@
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "inlineSourceMap": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "react",
   },
-  "file": [
-    "./node_modules/tsx-control-statements/index.d.tsx"
-  ],
   "include": [
     "src",
     "./images.d.ts" //文件路径

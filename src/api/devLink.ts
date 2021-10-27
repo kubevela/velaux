@@ -25,3 +25,5 @@ export const createApplicationTemplate_mock = '/mock/createApplicationTemplate.j
 export const getWorkFlowsDetails_mock = '/mock/getWorkFlowsDetails.json';
 export const createWorkFlow_mock = '/mock/createWorkFlow.json';
 export const getWorkFlowsRecord_mock = '/mock/getWorkFlowsRecord.json';
+export const clusterCloudList_mock = '/mock/clusterCloudList.json';
+export const connectClusterCloud_mock = '/mock/connectClusterCloud.json';

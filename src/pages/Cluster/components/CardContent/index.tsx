@@ -1,6 +1,5 @@
 import React, { MouseEvent } from 'react';
 import './index.less';
-import { Link } from 'dva/router';
 
 import { Button, Message, Grid, Dialog, Form, Input, Card, Icon } from '@b-design/ui';
 import { AppContent } from '../../../../interface/application';
@@ -38,10 +37,10 @@ class CardContent extends React.Component<any, State> {
     return (
       <Row wrap={true}>
         {appContent.map((item: AppContent, index: number) => {
-          const { name, status, icon, description, createTime, href, btnContent } = item;
+          const { name, status, icon, description, createTime, dashboardURL = '' } = item;
           return (
             <Col span="6" className={`card-content-wraper`} key={index}>
-              <Link to={`/clusters/${name}`}>
+              <a href={dashboardURL}>
                 <Card contentHeight="auto">
                   <img src={imgSrc} alt="app-card" />
                   <div className="content-wraper background-F9F8FF">
@@ -56,41 +55,12 @@ class CardContent extends React.Component<any, State> {
                         onClick={(e) => {
                           this.handleClick(index, e);
                         }}
-                      >
-                        <div>
-                          {extendDotVisible && choseIndex === index && (
-                            <ul>
-                              <li>
-                                <Link to="">
-                                  <Translation className="color545454">Visit</Translation>
-                                </Link>
-                              </li>
-                              <li>
-                                <Link to={`/${workFlowPath}/${name}`}>
-                                  <Translation className="color545454">Workflow</Translation>
-                                </Link>
-                              </li>
-                              <li>
-                                {' '}
-                                <Translation className="color545454">Add component</Translation>
-                              </li>
-                              <li>
-                                {' '}
-                                <Translation className="color545454">Publish model</Translation>
-                              </li>
-                            </ul>
-                          )}
-                        </div>
-                      </Col>
+                      ></Col>
                     </Row>
                     <Row className="content-main">
                       <h4 className="color595959 font-size-14">{description}</h4>
                     </Row>
-                    <Row className="content-main-btn">
-                      <Button type="secondary" className="height-24">
-                        {btnContent}
-                      </Button>
-                    </Row>
+                    <Row className="content-main-btn height-24"></Row>
 
                     <Row className="content-foot colorA6A6A6">
                       <Col span="16">
@@ -102,7 +72,7 @@ class CardContent extends React.Component<any, State> {
                     </Row>
                   </div>
                 </Card>
-              </Link>
+              </a>
             </Col>
           );
         })}

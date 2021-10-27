@@ -1,4 +1,5 @@
-import { Component } from 'react';
+
+import React from 'react';
 import * as monaco from 'monaco-editor';
 
 
@@ -11,7 +12,7 @@ type Props = {
   fileUrl?: string,
   defineTheme: any,
   runtime?: any,
-  onChange?: (params: any) => {},
+  onChange?: (params: any) => void,
 }
 
 type State = {
@@ -19,7 +20,7 @@ type State = {
 };
 
 
-class DefinitionCode extends Component<Props, State> {
+class DefinitionCode extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const { onRef } = props;

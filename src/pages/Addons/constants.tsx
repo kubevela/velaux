@@ -1,3 +1,4 @@
+import React, { Component } from 'react';
 import Translation from '../../components/Translation';
 export const pluginTitle = <Translation>Plug in management</Translation>;
 export const pluginSubTitle = <Translation>Plug in extension</Translation>;
