@@ -10,9 +10,10 @@ import './index.less';
 type Props = {
   visible: boolean;
   namespaceList?: [];
+  clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {
@@ -22,10 +23,12 @@ type State = {
 class AppDialog extends React.Component<Props, State> {
   field: any;
   dialogRef: React.RefObject<GeneralConfig>;
+  ymalConfigRef: React.RefObject<YmalConfig>;
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
     this.dialogRef = React.createRef();
+    this.ymalConfigRef = React.createRef();
     this.state = {
       radioValue: 'General',
     };
@@ -41,6 +44,11 @@ class AppDialog extends React.Component<Props, State> {
     if (this.dialogRef.current) {
       this.dialogRef.current.submit();
     }
+
+    if (this.ymalConfigRef.current) {
+      this.ymalConfigRef.current.submit();
+    }
+
   };
 
   changeRadio = (value: string | number | boolean) => {
@@ -52,7 +60,7 @@ class AppDialog extends React.Component<Props, State> {
 
   renderConfig = () => {
     const { radioValue } = this.state;
-    const { visible, t, setVisible, dispatch, namespaceList } = this.props;
+    const { visible, t, setVisible, dispatch, namespaceList, clusterList } = this.props;
     if (radioValue === 'General') {
       return (
         <GeneralConfig
@@ -61,11 +69,21 @@ class AppDialog extends React.Component<Props, State> {
           setVisible={setVisible}
           dispatch={dispatch}
           namespaceList={namespaceList}
+          clusterList={clusterList}
           ref={this.dialogRef}
         />
       );
     } else {
-      return <YmalConfig />;
+      return (
+        <YmalConfig
+          t={t}
+          visible={visible}
+          setVisible={setVisible}
+          dispatch={dispatch}
+          namespaceList={namespaceList}
+          ref={this.ymalConfigRef}
+        />
+      );
     }
   };
 

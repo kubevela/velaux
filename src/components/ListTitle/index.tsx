@@ -15,10 +15,11 @@ type Props = {
   btnSubName?: string;
   dialogName: string;
   namespaceList?: [];
+  clusterList?: [];
   page?: number;
   pageSize?: number;
   query?: string;
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 export default function (props: Props) {
   const { Row, Col } = Grid;
@@ -30,6 +31,7 @@ export default function (props: Props) {
     btnName,
     dialogName,
     namespaceList,
+    clusterList,
     btnSubName = '',
     page = 0,
     pageSize = 10,
@@ -94,6 +96,7 @@ export default function (props: Props) {
           setVisible={setVisible}
           dispatch={dispatch}
           namespaceList={namespaceList}
+          clusterList={clusterList}
         />
       )}
 
@@ -107,15 +110,15 @@ export default function (props: Props) {
               dispatch={dispatch}
             />
           ) : (
-            <AddClustDialog
-              page={page}
-              pageSize={pageSize}
-              query={query}
-              visible={visible}
-              setVisible={setVisible}
-              dispatch={dispatch}
-            />
-          )}
+              <AddClustDialog
+                page={page}
+                pageSize={pageSize}
+                query={query}
+                visible={visible}
+                setVisible={setVisible}
+                dispatch={dispatch}
+              />
+            )}
         </div>
       )}
     </div>

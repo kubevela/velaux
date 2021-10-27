@@ -1,5 +1,17 @@
 .dialog-app-wraper {
-  width: 50%;
+  width: 70%;
+  .guideCode {
+    height: 340px;
+    overflow: hidden;
+    :global {
+      .overflow-guard {
+        padding-top: 16px;
+      }
+      .margin {
+        top: 16px !important;
+      }
+    }
+  }
   .next-select-trigger {
     width: 100%;
   }
@@ -14,5 +26,8 @@
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
+  }
+  .add-btn {
+    margin: 20px 0 10px;
   }
 }

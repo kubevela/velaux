@@ -1,29 +1,61 @@
 import React, { createRef, LegacyRef } from 'react';
-import { Button, Message, Grid, Dialog, Form, Input, Select, Field, Radio } from '@b-design/ui';
+import { Button, Message, Grid, Dialog, Form, Input, Select, Field, Radio, Icon } from '@b-design/ui';
 import { dataSourceProject, dataSourceCluster, addApp, addAppDialog } from '../../constants';
+import EnvPlan from '../../../../components/EnvPlan';
+import { stringify } from 'querystring';
 
 type Props = {
   visible: boolean;
   namespaceList?: [];
+  clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {};
 
+type itemObj = {
+  name: string;
+  cluster: string;
+  description: string
+}
+
+type itemObjInfo = {
+  name: string;
+  clusterSelector: string;
+  description: string
+}
+
 class GeneralConfig extends React.Component<Props, State> {
   field: any;
+  envBind: React.RefObject<EnvPlan>;
   constructor(props: any) {
     super(props);
     this.field = new Field(this);
+    this.envBind = React.createRef();
     this.state = {};
   }
   close = () => {
     this.resetField();
   };
   submit = () => {
-    console.log('this.dispatch', this.props.dispatch);
+    const envBindArray: any = [];
+    if (this.envBind.current) {
+      console.log('envbind', this.envBind.current)
+      const { filters } = this.envBind.current.state;
+      Object.values(filters).forEach((key) => {
+        key.forEach((item: itemObj) => {
+          const obj: any = {};
+          obj.name = item.name;
+          obj.clusterSelector = { name: item.cluster };
+          obj.description = item.description;
+          envBindArray.push(obj);
+        });
+      });
+    }
+
+    console.log('envBindArrayenvBindArrayh', envBindArray);
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
@@ -34,11 +66,13 @@ class GeneralConfig extends React.Component<Props, State> {
         namespaceParam = namespace[0];
       }
       const params = {
-        clusterList: cluster,
+        deploy: true,
         description: describe,
+        envBind: envBindArray,
         icon: '',
         name: name,
         namespace: namespaceParam,
+
       };
       this.props.dispatch({
         type: 'application/createApplicationList',
@@ -75,7 +109,7 @@ class GeneralConfig extends React.Component<Props, State> {
         fixedSpan: 6,
       },
       wrapperCol: {
-        span: 18,
+        span: 20,
       },
     };
     const { visible, t, namespaceList } = this.props;
@@ -109,13 +143,12 @@ class GeneralConfig extends React.Component<Props, State> {
     }
   }
 
+
   render() {
     const { Row, Col } = Grid;
-    const { visible, t } = this.props;
+    const { visible, t, clusterList } = this.props;
     const {
       name,
-      project,
-      clusterBind,
       describe,
       namePlaceHold,
       clustPlaceHold,
@@ -127,7 +160,7 @@ class GeneralConfig extends React.Component<Props, State> {
         fixedSpan: 6,
       },
       wrapperCol: {
-        span: 18,
+        span: 20,
       },
     };
 
@@ -143,24 +176,14 @@ class GeneralConfig extends React.Component<Props, State> {
             <Input htmlType="name" name="name" placeholder={namePlacehold} {...init('name')} />
           </FormItem>
           {namespaceForm}
-          <FormItem {...formItemLayout} label={project} labelTextAlign="left" required={true}>
-            <Select
-              mode="single"
-              onChange={this.handleSelectProject}
-              {...init('project')}
-              dataSource={dataSourceProject}
+
+          <FormItem {...formItemLayout} label={'环境规划'} labelTextAlign="left" required={true}>
+            <EnvPlan
+              clusterList={clusterList}
+              ref={this.envBind}
             />
           </FormItem>
-          <FormItem {...formItemLayout} label={clusterBind} labelTextAlign="left" required={true}>
-            <Select
-              mode="tag"
-              onChange={this.handleSelectCluster}
-              dataSource={dataSourceCluster}
-              {...init('cluster')}
-              placeholder={clustPlacehold}
-              required={true}
-            />
-          </FormItem>
+
 
           <FormItem {...formItemLayout} label={describe} labelTextAlign="left" required={true}>
             <Input

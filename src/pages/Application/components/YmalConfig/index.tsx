@@ -1,9 +1,228 @@
-import React, { Component } from 'react';
 
-class YmalConfig extends Component {
+import React, { createRef, LegacyRef } from 'react';
+import { Button, Message, Grid, Dialog, Form, Input, Select, Field, Upload } from '@b-design/ui';
+import { dataSourceProject, dataSourceCluster, addApp, addAppDialog } from '../../constants';
+import { addClust, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
+import DefinitionCode from '../../../../components/DefinitionCode';
+import defineTheme from '../../../../components/DefinitionCode/theme';
+
+
+
+type Props = {
+  visible: boolean;
+  namespaceList?: [];
+  setVisible: (visible: boolean) => void;
+  t: (key: string) => {};
+  dispatch: ({ }) => {};
+};
+
+type State = {
+  kubeConfig: string | ArrayBuffer;
+};
+
+class YmalConfig extends React.Component<Props, State> {
+  field: any;
+  constructor(props: any) {
+    super(props);
+    this.field = new Field(this);
+    this.state = {
+      kubeConfig: '',
+    };
+  }
+  close = () => {
+    this.resetField();
+    this.setState({ kubeConfig: '' });
+  };
+
+  onError = (r: {}) => {
+    console.log('onError callback');
+    this.setState({
+      kubeConfig: '',
+    });
+  };
+
+  submit = () => {
+    console.log('this.dispatch', this.props.dispatch);
+    this.field.validate((error: any, values: any) => {
+      if (error) {
+        return;
+      }
+      const { cluster, describe, name, project, namespace } = values;
+      const { kubeConfig } = this.state;
+      let namespaceParam = namespace;
+      if (Object.prototype.toString.call(namespace) === '[object Array]') {
+        namespaceParam = namespace[0];
+      }
+      const params = {
+        clusterList: cluster,
+        description: describe,
+        icon: '',
+        name: name,
+        namespace: namespaceParam,
+        yamlConfig: kubeConfig
+      };
+      this.props.dispatch({
+        type: 'application/createApplicationList',
+        payload: params,
+      });
+    });
+
+    this.props.setVisible(false);
+    this.resetField();
+  };
+
+  customRequest = (option: any) => {
+    let reader = new FileReader();
+    let fileselect = option.file;
+    reader.readAsText(fileselect);
+    reader.onload = () => {
+      console.log(reader.result);
+      this.setState({ kubeConfig: reader.result?.toString() || '' });
+    };
+    return {
+      file: File,
+      onError: this.onError,
+      abort() { },
+    };
+  };
+
+  changeCode = (value: string) => {
+    this.setState({ kubeConfig: value || '' });
+  };
+  resetField() {
+    this.field.setValues({
+      name: '',
+      project: '',
+      cluster: [],
+      describe: '',
+    });
+  }
+  handleSelectNameSpace = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('chose', e);
+  };
+  handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('chose', e);
+  };
+
+  handleSelectCluster = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('chose', e);
+  };
+
+  getNameSpace() {
+    const FormItem = Form.Item;
+    const formItemLayout = {
+      labelCol: {
+        fixedSpan: 6,
+      },
+      wrapperCol: {
+        span: 20,
+      },
+    };
+    const { visible, t, namespaceList } = this.props;
+    const init = this.field.init;
+    const enterPlaceHold = t('Please enter').toString();
+    const chosePlaceHold = t('Please chose').toString();
+    console.log('namespaceListnamespaceList', namespaceList);
+    if (namespaceList && namespaceList.length != 0) {
+      return (
+        <FormItem {...formItemLayout} label={'namespace'} labelTextAlign="left" required={true}>
+          <Select
+            mode="single"
+            onChange={this.handleSelectNameSpace}
+            dataSource={namespaceList}
+            {...init('namespace')}
+            placeholder={chosePlaceHold}
+          />
+        </FormItem>
+      );
+    } else {
+      return (
+        <FormItem {...formItemLayout} label={'namespace'} labelTextAlign="left" required={true}>
+          <Input
+            htmlType="namespace"
+            name="namespace"
+            placeholder={enterPlaceHold}
+            {...init('namespace')}
+          />
+        </FormItem>
+      );
+    }
+  }
+
   render() {
-    return <div>YmalConfig</div>;
+    const { Row, Col } = Grid;
+    const { visible, t } = this.props;
+    const {
+      name,
+      project,
+      clusterBind,
+      describe,
+      namePlaceHold,
+      clustPlaceHold,
+      describePlaceHold,
+    } = addAppDialog;
+    const FormItem = Form.Item;
+    const formItemLayout = {
+      labelCol: {
+        fixedSpan: 6,
+      },
+      wrapperCol: {
+        span: 20,
+      },
+    };
+
+    const { kubeAPI } = addClustDialog;
+    const namePlacehold = t(namePlaceHold).toString();
+    const clustPlacehold = t(clustPlaceHold).toString();
+    const describePlacehold = t(describePlaceHold).toString();
+    const init = this.field.init;
+    const namespaceForm = this.getNameSpace();
+    const { kubeConfig } = this.state;
+    return (
+      <div>
+        <Form {...formItemLayout} field={this.field}>
+          <FormItem {...formItemLayout} label={name} labelTextAlign="left" required={true}>
+            <Input
+              htmlType="name"
+              name="name"
+              placeholder={namePlacehold}
+              {...init('name')}
+            />
+          </FormItem>
+
+          {namespaceForm}
+
+          <FormItem {...formItemLayout} label={describe} labelTextAlign="left" required={true}>
+            <Input
+              htmlType="describe"
+              name="describe"
+              {...init('describe')}
+              placeholder={describePlacehold}
+            />
+          </FormItem>
+
+          <FormItem label={kubeAPI}>
+            <div id="guideCode" className="guideCode">
+              <DefinitionCode
+                containerId="guideCode"
+                language={''}
+                readOnly={false}
+                value={kubeConfig}
+                defineTheme={defineTheme}
+                onChange={this.changeCode}
+              />
+            </div>
+            <Upload request={this.customRequest}>
+              <Button type="secondary" className="add-btn">
+                {UPLOADYMALFILE}
+              </Button>
+            </Upload>
+          </FormItem>
+        </Form>
+      </div>
+    );
   }
 }
 
 export default YmalConfig;
+

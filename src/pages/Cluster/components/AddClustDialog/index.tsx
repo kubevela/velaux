@@ -3,7 +3,7 @@ import { Button, Message, Grid, Dialog, Form, Input, Select, Upload, Field } fro
 import Translation from '../../../../components/Translation';
 import { addClust, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import DefinitionCode from '../../../../components/DefinitionCode';
-import defineTheme from './theme';
+import defineTheme from '../../../../components/DefinitionCode/theme';
 import './index.less';
 
 type Props = {
