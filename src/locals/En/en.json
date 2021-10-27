@@ -69,5 +69,12 @@
   "App store": "App store",
   "No data": "No data",
   "Please chose": "Please chose",
-  "Environmental planning": "Environmental planning"
+  "Environmental planning": "Environmental planning",
+  "CLuster search query": "Cluster name, description search",
+  "Add from cloud service": "Add from cloud service",
+  "Connecting clusters from cloud services": "Connecting clusters from cloud services",
+  "Supplier": "Supplier",
+  "Abutment": "Abutment",
+  "NextStep": "NextStep",
+  "Upload Yaml File": "Upload Yaml File"
 }

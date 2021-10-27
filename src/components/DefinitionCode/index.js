@@ -14,7 +14,7 @@ class DefinitionCode extends Component {
     const {
       containerId,
       value = '',
-      language,
+      language = 'yaml',
       readOnly,
       onChange,
       fileUrl = `//b.txt`,
@@ -52,8 +52,8 @@ class DefinitionCode extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { language, value, runtime } = nextProps;
-    if (language !== this.props.language || runtime !== this.props.runtime) {
+    const { language, value } = nextProps;
+    if (language !== this.props.language || value !== this.props.value) {
       this.state.textModel.setValue(value);
     }
   }

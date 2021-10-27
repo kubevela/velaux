@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
-import SelectSearch from '../../components/SelectSearch/index';
+import SelectSearch from '../../components/SelectSearch';
 import CardContend from './components/CardContent';
 import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
@@ -45,7 +45,11 @@ class Application extends Component<Props, State> {
   getClusterList = async () => {
     this.props.dispatch({
       type: 'clusters/getClusterList',
-      payload: {},
+      payload: {
+        query: '',
+        page: 0,
+        pageSize: 20,
+      },
     });
   };
 
