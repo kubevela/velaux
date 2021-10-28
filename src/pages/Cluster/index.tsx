@@ -7,9 +7,10 @@ import { CLUSTERS_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import Img from '../../assets/clust-cloud.png';
 
 type Props = {
-  dispatch: ({}) => {};
   clusterList: [];
   defaultCluster: string;
+  cloudClusters: [];
+  dispatch: ({ }) => {};
 };
 
 type State = {
@@ -59,7 +60,7 @@ class Cluster extends React.Component<Props, State> {
     );
   };
   render() {
-    const { clusterList = [], dispatch } = this.props;
+    const { clusterList = [], cloudClusters = [], dispatch } = this.props;
     const { page, pageSize, query } = this.state;
     return (
       <>
@@ -73,6 +74,7 @@ class Cluster extends React.Component<Props, State> {
             pageSize={pageSize}
             query={query}
             dialogName={CLUSTERS_PATH}
+            cloudClusters={cloudClusters}
             dispatch={dispatch}
           />
           <SelectSearch

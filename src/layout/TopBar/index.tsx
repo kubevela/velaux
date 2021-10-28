@@ -43,7 +43,7 @@ class TopBar extends Component<Props> {
             <img src={logo} className="logo" />
             <span className="text">Kubevala</span>
           </Col>
-          <Col span="16">
+          {/* <Col span="16">
             <Search
               key="12312"
               size="medium"
@@ -59,12 +59,10 @@ class TopBar extends Component<Props> {
           </Col>
           <Col span="1">
             <Icon type="set" className="set" />
-          </Col>
-          <Col span="2">
-            <div className="margin-top-10 margin-left-10">
-              <SwitchLanguage></SwitchLanguage>
-            </div>
-          </Col>
+          </Col> */}
+          <div className="language-switch-container">
+            <SwitchLanguage></SwitchLanguage>
+          </div>
         </Row>
       </div>
     );

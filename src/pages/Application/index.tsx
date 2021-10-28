@@ -55,7 +55,6 @@ class Application extends Component<Props, State> {
 
   render() {
     const { applicationList, namespaceList, clusterList, dispatch } = this.props;
-    console.log('this.props',this.props)
     return (
       <div>
         <Title

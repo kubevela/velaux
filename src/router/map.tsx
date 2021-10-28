@@ -2,7 +2,13 @@ import React, { Component } from 'react';
 import PropType from 'prop-types';
 import { Router, Route, Switch, Redirect } from 'dva/router';
 
-class RouterMap extends Component {
+
+type Props = {
+  routes: Array<{ children: [], component: any, name: string, path: string }>;
+  history: any;
+}
+
+class RouterMap extends Component<Props, {}> {
   render() {
     const { routes, history } = this.props;
     const defaultRoute = <Redirect from="/" to="/application" key={'default'} exact></Redirect>;
@@ -10,7 +16,7 @@ class RouterMap extends Component {
       <Router history={history}>
         <Switch>
           {routes
-            .map((item, index) => {
+            .map((item) => {
               const children = item.children === undefined ? [] : item.children;
               const Comp = item.component;
               return (
@@ -30,8 +36,4 @@ class RouterMap extends Component {
   }
 }
 
-RouterMap.propTypes = {
-  routes: PropType.array,
-  history: PropType.object,
-};
 export default RouterMap;

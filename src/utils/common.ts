@@ -52,8 +52,8 @@ export function momentDate(time: string): string {
   return moment(time).format('YYYY/MM/DD HH:MM');
 }
 
-export const startEndNotEmpty = '^[-a-zA-Z0-9-()]+(\s+[-a-zA-Z0-9-()]+)*$';
-export const urlRegular = '/^((https?|ftp|file):\/\/)?([\da-z.-]+)\.([a-z.]{2,6})(\/\w\.-]*)*\/?/';
+export const startEndNotEmpty = /^[-a-zA-Z0-9-()]+(\s+[-a-zA-Z0-9-()]+)*$/;
+export const urlRegular = /(https|http|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g;
 export const formItemLayout = {
   labelCol: {
     fixedSpan: 6,

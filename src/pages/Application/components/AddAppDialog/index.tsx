@@ -1,7 +1,7 @@
-import React, { createRef, LegacyRef } from 'react';
-import { Button, Message, Grid, Dialog, Form, Input, Select, Field, Radio } from '@b-design/ui';
+import React from 'react';
+import { Grid, Dialog, Field, Radio } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-import { dataSourceProject, dataSourceCluster, addApp, addAppDialog } from '../../constants';
+import { addApp } from '../../constants';
 import YmalConfig from '../YmalConfig';
 import GeneralConfig from '../GeneralConfig';
 
@@ -21,7 +21,7 @@ type State = {
 };
 
 class AppDialog extends React.Component<Props, State> {
-  field: any;
+  field: Field;
   dialogRef: React.RefObject<GeneralConfig>;
   ymalConfigRef: React.RefObject<YmalConfig>;
   constructor(props: Props) {
@@ -39,8 +39,6 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   onOk = () => {
-    console.log('this.dispatch', this.props.dispatch);
-    console.log('this.dialogRef', this.dialogRef);
     if (this.dialogRef.current) {
       this.dialogRef.current.submit();
     }
@@ -52,7 +50,6 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   changeRadio = (value: string | number | boolean) => {
-    console.log('v value', value);
     this.setState({
       radioValue: value.toString(),
     });
@@ -90,28 +87,8 @@ class AppDialog extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { visible, t, setVisible, dispatch, namespaceList } = this.props;
-    const {
-      name,
-      project,
-      clusterBind,
-      describe,
-      namePlaceHold,
-      clustPlaceHold,
-      describePlaceHold,
-    } = addAppDialog;
-    const FormItem = Form.Item;
-    const formItemLayout = {
-      labelCol: {
-        fixedSpan: 6,
-      },
-      wrapperCol: {
-        span: 18,
-      },
-    };
-
     const confirm = t('Confirm').toString();
     const RadioGroup = Radio.Group;
-    const { radioValue } = this.state;
     return (
       <div>
         <Dialog
@@ -136,7 +113,7 @@ class AppDialog extends React.Component<Props, State> {
               onChange={this.changeRadio}
             >
               <Radio id="General" value="General">
-                General
+                GeneralConfig
               </Radio>
               <Radio id="YmalConfig" value="YmalConfig">
                 YmalConfig

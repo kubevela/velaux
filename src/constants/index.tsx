@@ -12,7 +12,6 @@ export const Abutment = <Translation>Abutment</Translation>;
 export const PLEASE_ENTER ='Please enter';
 export const PLEASE_CHOSE = 'Please chose';
 
-
 export const dataSourceProject = [
   { value: 10001, label: 'project1' },
   { value: 10002, label: 'project2' },

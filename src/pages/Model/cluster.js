@@ -9,6 +9,8 @@ export default {
   namespace: 'clusters',
   state: {
     clusterList: [],
+    cloudClusters: [],
+    cloudClustersTotal: 0
   },
   reducers: {
     updateCLusterList(state, { type, payload }) {
@@ -17,6 +19,15 @@ export default {
         clusterList: payload,
       };
     },
+    updateCloudClusters(state, { type, payload }) {
+      const { clusters = [], total = 0 } = payload
+      return {
+        ...state,
+        cloudClusters: clusters,
+        cloudClustersTotal: total
+      };
+    },
+
   },
   effects: {
     *getClusterList(action, { call, put }) {
@@ -35,9 +46,13 @@ export default {
     },
     *getCloudClustersList(action, { call, put }) {
       const result = yield call(getCloudClustersList, action.payload);
+      console.log('result', result)
+      yield put({ type: 'updateCloudClusters', payload: result });
     },
     *connectcloudCluster(action, { call, put }) {
-      const result = yield call(connectcloudCluster, action.payload);
+      const { params, resolve } = action.payload;
+      const result = yield call(connectcloudCluster, params);
+      resolve(result);
     },
   },
 };

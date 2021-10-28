@@ -1,4 +1,4 @@
-import React from 'react';
+import _ from 'loadsh';
 import { Link } from 'dva/router';
 import { Icon } from '@b-design/ui';
 import Translation from '../../components/Translation';
@@ -6,9 +6,7 @@ import { getLeftSider } from './menu';
 import './index.less';
 
 const LeftMenu = (data, context) => {
-  const { location } = data.props;
-  const { pathname = '' } = location || {};
-
+  const pathname = _.get(data, 'props.history.location.pathname');
   const sider = getLeftSider(pathname);
   const childrenSider = sider.map((item) => {
     let ele = [];
@@ -19,7 +17,7 @@ const LeftMenu = (data, context) => {
             <li>
               <Link
                 to={childrenItem.link}
-                className={item.className ? 'menu-item-active' : 'menu-item'}
+                className={childrenItem.className ? 'menu-item-active' : 'menu-item'}
               >
                 <div>
                   <Icon type={childrenItem.iconType} />
@@ -35,7 +33,7 @@ const LeftMenu = (data, context) => {
       ele.push(childrenArr);
     }
     return (
-      <li className="first-nav">
+      <li className="first-nav" key={item.navName}>
         <div className="padding-left-20">
           <Translation>{item.navName}</Translation>
         </div>

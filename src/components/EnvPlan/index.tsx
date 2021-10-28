@@ -1,57 +1,69 @@
-import { Component } from 'react';
-import { Input, Select, Icon, Form, Button, Dialog, Grid } from '@b-design/ui';
+import React, { Component } from 'react';
+import { Input, Select, Icon, Form, Button, Grid, Message } from '@b-design/ui';
 import _ from 'lodash';
 import './index.less';
 
-class EnvPlan extends Component {
-    constructor(props) {
+type Props = {
+    clusterList?: [];
+}
+type State = {
+    envs: {
+        [key: string]: [EnvItem]
+    }
+}
+type EnvItem = {
+    name: string;
+    cluster: string;
+    description?: string
+}
+
+class EnvPlan extends Component<Props, State> {
+    constructor(props: Props) {
         super(props);
         this.state = {
-            filters: {
+            envs: {
                 [new Date().getTime()]: [{ name: '', cluster: '', description: '' }]
             },
         }
     }
 
-    handleChangeName(key, index, val) {
+    handleChangeName(key: EnvItem, index: number, val: string) {
         key.name = val;
         this.setState({});
     }
 
-    handleSelectCluster(key, index, val) {
+    handleSelectCluster(key: EnvItem, index: number, val: string) {
         key.cluster = val;
         this.setState({});
     }
 
-    handleChangeDescription(key, index, val) {
+    handleChangeDescription(key: EnvItem, index: number, val: string) {
         key.description = val;
         this.setState({});
     }
 
     // delete one
-    handlleDeleteItem = (key, filterIndex) => {
-        let { filters } = this.state;
-        const queryKeys = Object.keys(filters);
+    handlleDeleteItem = (key: string, filterIndex: number) => {
+        let { envs } = this.state;
+        const queryKeys = Object.keys(envs);
         if (queryKeys.length === 1) {
-            return Dialog.alert({
-                title: 'Keep at least one',
-                content: 'Keep at least one'
+            return Message.show({
+                type: 'warning',
+                title: 'Warning',
+                content: ' Keep at least one',
             });
         }
-        const fields = _.get(filters, key, []);
+        const fields = _.get(envs, key, []);
         if (!fields || fields.length === 0) {
             return;
         }
-        if (filters.length === 1) {
-            filters = _.omit(filters, key);
-        } else {
-            fields.splice(filterIndex, 1);
-            delete filters[key];
-        }
+
+        fields.splice(filterIndex, 1);
+        delete envs[key];
 
         this.setState({
-            filters: {
-                ...filters
+            envs: {
+                ...envs
             }
         });
     }
@@ -60,19 +72,17 @@ class EnvPlan extends Component {
 
     renderEnv() {
         const { Row, Col } = Grid;
-        const { filters } = this.state;
+        const { envs } = this.state;
         const { clusterList } = this.props;
-        const result = [];
+        const result: any = [];
+        const dataSource = (clusterList || []).map((item: { name: string }) => ({ value: item.name, label: item.name }));
 
-        const dataSource = (clusterList || []).map(item => ({ value: item.name, label: item.name }))
-
-        console.log('filters', filters);
-        Object.keys(filters).forEach(key => {
-            if (!filters[key]) {
+        Object.keys(envs).forEach(key => {
+            if (!envs[key]) {
                 return;
             }
 
-            filters[key].forEach((item, index) => {
+            envs[key].forEach((item, index) => {
                 result.push(
                     <Row className="env-bind margin-bottom-10" key={key}>
                         <Col span='8'>
@@ -121,34 +131,34 @@ class EnvPlan extends Component {
 
     // add item
     handlleAddItem = () => {
-        const { filters } = this.state;
-        const obj = {};
-        Object.keys(filters).map((item) => {
-            filters[item] && filters[item].forEach((key) => {
-                if (!key.name || !(key.name && key.name.trim()) || !key.description || !key.description) {
+        const { envs } = this.state;
+        const obj: any = {};
+        Object.keys(envs).map((item) => {
+            envs[item] && envs[item].forEach((key: EnvItem) => {
+                if (!key.name || !(key.name && key.name.trim()) || !key.cluster || !(key.cluster && key.cluster.trim())) {
                     obj.key = {
                         name: key.name,
                         cluster: key.cluster,
-                        description: key.description,
                     };
                 }
             });
             return item;
         });
 
-
         for (const param in obj) {
-            if (!obj[param].name || !obj[param].cluster || !obj[param].description) {
-                return Dialog.alert({
-                    title: 'must enter in conditional ',
-                    content: 'You must complete the current item before you can add a new one'
+            if (!obj[param].name || !obj[param].cluster) {
+                return Message.show({
+                    type: 'warning',
+                    title: 'Warning',
+                    content: 'name and cluster  is must enter',
                 });
             }
         }
 
+
         this.setState({
-            filters: {
-                ...this.state.filters,
+            envs: {
+                ...this.state.envs,
                 [Date.now()]: [{ name: '', cluster: '', description: '' }]
             }
         });
