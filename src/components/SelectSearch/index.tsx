@@ -6,7 +6,7 @@ import './index.less';
 
 type Props = {
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   clusterList?: [];
   namespaceList?: [];
 };
@@ -62,7 +62,7 @@ class SelectSearch extends React.Component<Props, State> {
 
   handleClickSearch = () => {
     this.getApplication();
-  }
+  };
 
   getApplication = async () => {
     const { namespaceValue, clusterValue, inputValue } = this.state;
@@ -85,7 +85,10 @@ class SelectSearch extends React.Component<Props, State> {
     const appPlacehole = t('Application name, description and search').toString();
     const { namespaceValue, clusterValue, inputValue } = this.state;
     const { clusterList, namespaceList } = this.props;
-    const clusterDadasource = (clusterList || []).map((item: { name: string }) => ({ value: item.name, label: item.name }));
+    const clusterDadasource = (clusterList || []).map((item: { name: string }) => ({
+      value: item.name,
+      label: item.name,
+    }));
 
     return (
       <Row className="app-select-wraper boder-radius-8">

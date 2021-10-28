@@ -13,7 +13,7 @@ type Props = {
   clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {
@@ -46,7 +46,6 @@ class AppDialog extends React.Component<Props, State> {
     if (this.ymalConfigRef.current) {
       this.ymalConfigRef.current.submit();
     }
-
   };
 
   changeRadio = (value: string | number | boolean) => {

@@ -1,5 +1,16 @@
 import React from 'react';
-import { Button, Message, Grid, Dialog, Form, Input, Select, Upload, Field, Icon } from '@b-design/ui';
+import {
+  Button,
+  Message,
+  Grid,
+  Dialog,
+  Form,
+  Input,
+  Select,
+  Upload,
+  Field,
+  Icon,
+} from '@b-design/ui';
 import { addClust, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import defineTheme from '../../../../components/DefinitionCode/theme';
@@ -12,12 +23,10 @@ type Props = {
   pageSize?: number;
   query?: string;
   setVisible: (visible: boolean) => void;
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
-type State = {
-
-};
+type State = {};
 
 class AddClustDialog extends React.Component<Props, State> {
   field: Field;
@@ -80,16 +89,15 @@ class AddClustDialog extends React.Component<Props, State> {
     reader.onload = () => {
       console.log(reader.result);
       this.field.setValues({
-        kubeConfig: reader.result?.toString() || ''
-      })
+        kubeConfig: reader.result?.toString() || '',
+      });
     };
     return {
       file: File,
       onError: this.onError,
-      abort() { },
+      abort() {},
     };
   };
-
 
   render() {
     const { visible } = this.props;
@@ -141,7 +149,8 @@ class AddClustDialog extends React.Component<Props, State> {
                       message: 'content cannot be empty',
                     },
                   ],
-                })} />
+                })}
+              />
             </FormItem>
 
             <FormItem label={describe}>
@@ -173,7 +182,8 @@ class AddClustDialog extends React.Component<Props, State> {
             <FormItem label={kubeAPI}>
               <Upload request={this.customRequest}>
                 <Button text type="normal" className="padding-left-0">
-                  <Icon type='cloudupload' />{UPLOADYMALFILE}
+                  <Icon type="cloudupload" />
+                  {UPLOADYMALFILE}
                 </Button>
               </Upload>
 

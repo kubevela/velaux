@@ -11,7 +11,7 @@ type Props = {
   clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {};
@@ -19,8 +19,8 @@ type State = {};
 type itemObj = {
   name: string;
   cluster: string;
-  description?: string
-}
+  description?: string;
+};
 
 class GeneralConfig extends React.Component<Props, State> {
   field: Field;
@@ -87,13 +87,7 @@ class GeneralConfig extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { t, namespaceList = [], clusterList = [] } = this.props;
-    const {
-      name,
-      describe,
-      namePlaceHold,
-      describePlaceHold,
-      ENVPLACEHOLD,
-    } = addAppDialog;
+    const { name, describe, namePlaceHold, describePlaceHold, ENVPLACEHOLD } = addAppDialog;
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
@@ -112,7 +106,13 @@ class GeneralConfig extends React.Component<Props, State> {
       <div>
         <Form {...formItemLayout} field={this.field}>
           <FormItem {...formItemLayout} label={name} labelTextAlign="left" required={true}>
-            <Input htmlType="name" name="name" maxLength={32} placeholder={namePlacehold} {...init('name')} />
+            <Input
+              htmlType="name"
+              name="name"
+              maxLength={32}
+              placeholder={namePlacehold}
+              {...init('name')}
+            />
           </FormItem>
 
           <NameSpaceForm
@@ -122,10 +122,7 @@ class GeneralConfig extends React.Component<Props, State> {
           />
 
           <FormItem {...formItemLayout} label={ENVPLACEHOLD} labelTextAlign="left" required={true}>
-            <EnvPlan
-              clusterList={clusterList}
-              ref={this.envBind}
-            />
+            <EnvPlan clusterList={clusterList} ref={this.envBind} />
           </FormItem>
 
           <FormItem {...formItemLayout} label={describe} labelTextAlign="left" required={true}>

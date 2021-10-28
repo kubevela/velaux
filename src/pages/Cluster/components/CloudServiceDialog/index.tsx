@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  Button,
-  Dialog,
-  Form,
-  Input,
-  Select,
-  Field,
-  Table,
-  Message,
-} from '@b-design/ui';
+import { Button, Dialog, Form, Input, Select, Field, Table, Message } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import { If } from 'tsx-control-statements/components';
 import {
@@ -29,7 +20,7 @@ type Props = {
   setVisible: (visible: boolean) => void;
   setCloudService: (isCloudService: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {
@@ -89,7 +80,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
       });
       this.setState({ choseInput: false });
     });
-
   };
 
   resetField() {
@@ -108,7 +98,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       name,
       description,
       clusterID: id,
-      icon
+      icon,
     };
 
     new Promise((resolve, err) => {
@@ -116,23 +106,23 @@ class CloudServiceDialog extends React.Component<Props, State> {
         type: 'clusters/connectcloudCluster',
         payload: {
           params,
-          resolve
+          resolve,
         },
-      })
-    }).then(res => {
-      console.log("do something after get");
-      if (res) {
-        console.log("success", 'connect success');
-        Message.success({
-          title: 'success,connect success',
-          duration: 3000,
-        })
-      }
-    }).then(err => {
-      console.log("err", 'connect fail');
+      });
     })
-
-
+      .then((res) => {
+        console.log('do something after get');
+        if (res) {
+          console.log('success', 'connect success');
+          Message.success({
+            title: 'success,connect success',
+            duration: 3000,
+          });
+        }
+      })
+      .then((err) => {
+        console.log('err', 'connect fail');
+      });
   };
 
   // renderTable = () => {
@@ -308,7 +298,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           footerAlign="center"
         >
           <If condition={choseInput}>
-            <Form {...formItemLayout} field={this.field} className='cloud-server-wraper'>
+            <Form {...formItemLayout} field={this.field} className="cloud-server-wraper">
               <FormItem label={SUPPLIER} required={true}>
                 <Select
                   mode="single"
@@ -341,7 +331,8 @@ class CloudServiceDialog extends React.Component<Props, State> {
                         message: 'content cannot be empty',
                       },
                     ],
-                  })} />
+                  })}
+                />
               </FormItem>
 
               <FormItem label={'accessKeySecret'} required={true}>
@@ -357,9 +348,9 @@ class CloudServiceDialog extends React.Component<Props, State> {
                         message: 'content cannot be empty',
                       },
                     ],
-                  })} />
+                  })}
+                />
               </FormItem>
-
             </Form>
           </If>
 
@@ -368,12 +359,10 @@ class CloudServiceDialog extends React.Component<Props, State> {
               {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
             </Table>
           </If>
-
         </Dialog>
       </React.Fragment>
     );
   }
 }
-
 
 export default withTranslation()(CloudServiceDialog);

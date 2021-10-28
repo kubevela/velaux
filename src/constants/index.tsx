@@ -9,7 +9,7 @@ export const UPLOADYMALFILE = <Translation>Upload Yaml File</Translation>;
 export const SUPPLIER = <Translation>Supplier</Translation>;
 export const NEXTSTEP = <Translation>NextStep</Translation>;
 export const Abutment = <Translation>Abutment</Translation>;
-export const PLEASE_ENTER ='Please enter';
+export const PLEASE_ENTER = 'Please enter';
 export const PLEASE_CHOSE = 'Please chose';
 
 export const dataSourceProject = [

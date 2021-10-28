@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button, Grid, Form, Input, Field, Upload, Icon } from '@b-design/ui';
 import { addAppDialog } from '../../constants';
@@ -7,15 +6,13 @@ import NameSpaceForm from '../GeneralConfig/namespace-form';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import defineTheme from '../../../../components/DefinitionCode/theme';
 
-
 type Props = {
   visible: boolean;
   namespaceList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
-
 
 class YmalConfig extends React.Component<Props> {
   field: Field;
@@ -50,7 +47,7 @@ class YmalConfig extends React.Component<Props> {
         icon: '',
         name: name,
         namespace: namespaceParam,
-        yamlConfig: kubeConfig
+        yamlConfig: kubeConfig,
       };
       this.props.dispatch({
         type: 'application/createApplicationList',
@@ -69,13 +66,13 @@ class YmalConfig extends React.Component<Props> {
     reader.onload = () => {
       console.log(reader.result);
       this.field.setValues({
-        kubeConfig: reader.result?.toString() || ''
-      })
+        kubeConfig: reader.result?.toString() || '',
+      });
     };
     return {
       file: File,
       onError: this.onError,
-      abort() { },
+      abort() {},
     };
   };
 
@@ -91,12 +88,7 @@ class YmalConfig extends React.Component<Props> {
 
   render() {
     const { t, namespaceList = [] } = this.props;
-    const {
-      name,
-      describe,
-      namePlaceHold,
-      describePlaceHold,
-    } = addAppDialog;
+    const { name, describe, namePlaceHold, describePlaceHold } = addAppDialog;
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
@@ -118,12 +110,7 @@ class YmalConfig extends React.Component<Props> {
       <div>
         <Form {...formItemLayout} field={this.field}>
           <FormItem {...formItemLayout} label={name} labelTextAlign="left" required={true}>
-            <Input
-              htmlType="name"
-              name="name"
-              placeholder={namePlacehold}
-              {...init('name')}
-            />
+            <Input htmlType="name" name="name" placeholder={namePlacehold} {...init('name')} />
           </FormItem>
 
           <NameSpaceForm
@@ -141,14 +128,14 @@ class YmalConfig extends React.Component<Props> {
             />
           </FormItem>
 
-
           <FormItem label={kubeAPI}>
             <Upload request={this.customRequest}>
               <Button text type="normal" className="padding-left-0">
-                <Icon type='cloudupload' />{UPLOADYMALFILE}
+                <Icon type="cloudupload" />
+                {UPLOADYMALFILE}
               </Button>
             </Upload>
-            
+
             <div id="guide-code" className="guide-code">
               <DefinitionCode
                 containerId="guide-code"
@@ -160,7 +147,6 @@ class YmalConfig extends React.Component<Props> {
                 ref={this.DefinitionCodeRef}
               />
             </div>
-
           </FormItem>
         </Form>
       </div>
@@ -169,4 +155,3 @@ class YmalConfig extends React.Component<Props> {
 }
 
 export default YmalConfig;
-

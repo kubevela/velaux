@@ -7,7 +7,7 @@ import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
 
 type Props = {
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   applicationList: [];
   namespaceList: [];
   clusterList?: [];
@@ -67,11 +67,7 @@ class Application extends Component<Props, State> {
           dispatch={dispatch}
         />
 
-        <SelectSearch
-          namespaceList={namespaceList}
-          clusterList={clusterList}
-          dispatch={dispatch}
-        />
+        <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
 
         <CardContend
           appContent={applicationList}

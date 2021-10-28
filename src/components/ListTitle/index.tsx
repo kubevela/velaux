@@ -20,7 +20,7 @@ type Props = {
   page?: number;
   pageSize?: number;
   query?: string;
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 export default function (props: Props) {
   const { Row, Col } = Grid;
@@ -113,15 +113,15 @@ export default function (props: Props) {
               dispatch={dispatch}
             />
           ) : (
-              <AddClustDialog
-                page={page}
-                pageSize={pageSize}
-                query={query}
-                visible={visible}
-                setVisible={setVisible}
-                dispatch={dispatch}
-              />
-            )}
+            <AddClustDialog
+              page={page}
+              pageSize={pageSize}
+              query={query}
+              visible={visible}
+              setVisible={setVisible}
+              dispatch={dispatch}
+            />
+          )}
         </div>
       )}
     </div>

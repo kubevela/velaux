@@ -1,32 +1,29 @@
-
 import React from 'react';
 import * as monaco from 'monaco-editor';
 
-
 type Props = {
-  containerId: string,
+  containerId: string;
   value?: string;
-  readOnly?: boolean,
-  language: string,
-  fileUrl?: string,
-  defineTheme: any,
+  readOnly?: boolean;
+  language: string;
+  fileUrl?: string;
+  defineTheme: any;
   runtime?: any;
-  "data-meta"?: string;
+  'data-meta'?: string;
   id?: string;
-  onChange?: (params: any) => void,
-}
-
-type State = {
-  textModel: any
+  onChange?: (params: any) => void;
 };
 
+type State = {
+  textModel: any;
+};
 
 class DefinitionCode extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      textModel: {}
-    }
+      textModel: {},
+    };
   }
 
   componentDidMount() {
@@ -72,7 +69,11 @@ class DefinitionCode extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps: Props) {
     const { language, value, runtime } = nextProps;
-    if (language !== this.props.language || runtime !== this.props.runtime || value !== this.props.value) {
+    if (
+      language !== this.props.language ||
+      runtime !== this.props.runtime ||
+      value !== this.props.value
+    ) {
       this.state.textModel.setValue(value);
     }
   }
