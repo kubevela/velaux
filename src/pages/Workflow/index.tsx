@@ -37,8 +37,7 @@ class Workflow extends Component<Props, State> {
     };
   }
 
-  componentDidMount() {
-  }
+  componentDidMount() {}
   handleSelect = (e: string) => {
     this.props.history.push(`/workflows/${e}`, {});
     this.setState({

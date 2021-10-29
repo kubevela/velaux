@@ -22,12 +22,9 @@ class PublishDialog extends React.Component<Props, State> {
     this.props.setVisible(false);
   };
 
-  handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {
-   
-  };
+  handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
-  handleSelectCluster = (e: React.ChangeEvent<HTMLInputElement>) => {
-  };
+  handleSelectCluster = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
   render() {
     const { Row, Col } = Grid;

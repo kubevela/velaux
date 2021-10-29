@@ -78,8 +78,7 @@ class AddClustDialog extends React.Component<Props, State> {
     });
   }
 
-  onError = (r: {}) => {
-  };
+  onError = (r: {}) => {};
 
   customRequest = (option: any) => {
     let reader = new FileReader();

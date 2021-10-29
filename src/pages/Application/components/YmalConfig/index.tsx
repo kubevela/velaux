@@ -26,8 +26,7 @@ class YmalConfig extends React.Component<Props> {
     this.resetField();
   };
 
-  onError = (r: {}) => {
-  };
+  onError = (r: {}) => {};
 
   submit = () => {
     this.field.validate((error: any, values: any) => {

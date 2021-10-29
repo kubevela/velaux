@@ -64,51 +64,55 @@ export const formItemLayout = {
   },
 };
 
-export const ACKCLusterStatus = [{
-  key: 'initial',
-  value: '集群创建中',
-  color: '#98af88'
-},
-{
-  key: 'failed',
-  value: '集群创建失败',
-  color: '#ef1111',
-},
-{
-  key: 'running',
-  value: '集群运行中',
-  color: '#10e60e'
-}, {
-  key: 'updating',
-  value: '集群升级中',
-  color: '#10e60e'
-},
-{
-  key: 'updating_failed',
-  value: '集群升级失败',
-  color: '#ef1111',
-},
-{
-  key: 'scaling',
-  value: '集群伸缩中',
-  color: '#10e60e'
-},
-{
-  key: 'stopped',
-  value: '集群已经停止运行',
-  color: '#3a3e3a'
-},
-{
-  key: 'deleting',
-  value: '集群删除中',
-  color: '#fd940f'
-}, {
-  key: 'deleted',
-  value: '集群已经被删除',
-  color: '#3a3e3a'
-}, {
-  key: 'delete_failed',
-  value: '集群删除失败',
-  color: '#ef1111',
-}
-]
+export const ACKCLusterStatus = [
+  {
+    key: 'initial',
+    value: '集群创建中',
+    color: '#98af88',
+  },
+  {
+    key: 'failed',
+    value: '集群创建失败',
+    color: '#ef1111',
+  },
+  {
+    key: 'running',
+    value: '集群运行中',
+    color: '#10e60e',
+  },
+  {
+    key: 'updating',
+    value: '集群升级中',
+    color: '#10e60e',
+  },
+  {
+    key: 'updating_failed',
+    value: '集群升级失败',
+    color: '#ef1111',
+  },
+  {
+    key: 'scaling',
+    value: '集群伸缩中',
+    color: '#10e60e',
+  },
+  {
+    key: 'stopped',
+    value: '集群已经停止运行',
+    color: '#3a3e3a',
+  },
+  {
+    key: 'deleting',
+    value: '集群删除中',
+    color: '#fd940f',
+  },
+  {
+    key: 'deleted',
+    value: '集群已经被删除',
+    color: '#3a3e3a',
+  },
+  {
+    key: 'delete_failed',
+    value: '集群删除失败',
+    color: '#ef1111',
+  },
+];

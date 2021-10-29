@@ -20,7 +20,7 @@ type Props = {
   setVisible: (visible: boolean) => void;
   setCloudService: (isCloudService: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {
@@ -117,9 +117,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           });
         }
       })
-      .then((err) => {
-
-      });
+      .then((err) => {});
   };
 
   render() {
@@ -156,7 +154,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           const findArr = ACKCLusterStatus.filter((item) => {
             return item.key == v;
           });
-          return <span style={{ color: findArr[0].color || '' }}>  {v} </span>;
+          return <span style={{ color: findArr[0].color || '' }}> {v} </span>;
         },
       },
       {

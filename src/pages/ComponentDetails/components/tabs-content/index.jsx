@@ -7,8 +7,7 @@ import BasicInfo from '../basic-info';
 import './index.less';
 
 class TabsContent extends Component {
-  handleChange = (key) => {
-  };
+  handleChange = (key) => {};
   render() {
     return (
       <div>
