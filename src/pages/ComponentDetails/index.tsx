@@ -58,7 +58,6 @@ class ComponentDetails extends Component<Props, State> {
   render() {
     const { appName, componentName } = this.state;
     const { Row, Col } = Grid;
-    console.log('wdw');
     return (
       <div className="details">
         <Row className="breadcrumb-wraper">

@@ -2,11 +2,10 @@ import React, { Component } from 'react';
 import PropType from 'prop-types';
 import { Router, Route, Switch, Redirect } from 'dva/router';
 
-
 type Props = {
-  routes: Array<{ children: [], component: any, name: string, path: string }>;
+  routes: Array<{ children: []; component: any; name: string; path: string }>;
   history: any;
-}
+};
 
 class RouterMap extends Component<Props, {}> {
   render() {

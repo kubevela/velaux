@@ -1,42 +1,36 @@
-
 import React from 'react';
 import * as monaco from 'monaco-editor';
 
-
 type Props = {
-  onRef?: (params: any) => {},
-  containerId: string,
-  value?: string,
-  readOnly: boolean,
-  language: string,
-  fileUrl?: string,
-  defineTheme: any,
-  runtime?: any,
-  onChange?: (params: any) => void,
-}
-
-type State = {
-  textModel: any
+  containerId: string;
+  value?: string;
+  readOnly?: boolean;
+  language: string;
+  fileUrl?: string;
+  defineTheme: any;
+  runtime?: any;
+  'data-meta'?: string;
+  id?: string;
+  onChange?: (params: any) => void;
 };
 
+type State = {
+  textModel: any;
+};
 
 class DefinitionCode extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const { onRef } = props;
-    if (onRef) {
-      onRef(this);
-    }
     this.state = {
-      textModel: {}
-    }
+      textModel: {},
+    };
   }
 
   componentDidMount() {
     const {
       containerId,
       value = '',
-      language,
+      language = 'yaml',
       readOnly,
       onChange,
       fileUrl = `//b.txt`,
@@ -75,7 +69,11 @@ class DefinitionCode extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps: Props) {
     const { language, value, runtime } = nextProps;
-    if (language !== this.props.language || runtime !== this.props.runtime) {
+    if (
+      language !== this.props.language ||
+      runtime !== this.props.runtime ||
+      value !== this.props.value
+    ) {
       this.state.textModel.setValue(value);
     }
   }

@@ -1,9 +1,20 @@
 import React from 'react';
-import { Button, Message, Grid, Dialog, Form, Input, Select, Upload, Field } from '@b-design/ui';
-import Translation from '../../../../components/Translation';
+import {
+  Button,
+  Message,
+  Grid,
+  Dialog,
+  Form,
+  Input,
+  Select,
+  Upload,
+  Field,
+  Icon,
+} from '@b-design/ui';
 import { addClust, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import DefinitionCode from '../../../../components/DefinitionCode';
-import defineTheme from './theme';
+import defineTheme from '../../../../components/DefinitionCode/theme';
+import { startEndNotEmpty, urlRegular } from '../../../../utils/common';
 import './index.less';
 
 type Props = {
@@ -15,32 +26,29 @@ type Props = {
   dispatch: ({}) => {};
 };
 
-type State = {
-  kubeConfig: string;
-};
+type State = {};
 
 class AddClustDialog extends React.Component<Props, State> {
-  field: any;
+  field: Field;
+  DefinitionCodeRef: React.RefObject<DefinitionCode>;
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
-    this.state = {
-      kubeConfig: '',
-    };
+    this.DefinitionCodeRef = React.createRef();
   }
 
   onClose = () => {
     this.props.setVisible(false);
     this.resetField();
   };
+
   onOk = () => {
     const { page, pageSize, query = '' } = this.props;
-    const { kubeConfig } = this.state;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      const { name, description, dashboardURL } = values;
+      const { name, description, dashboardURL, kubeConfig } = values;
       const params = {
         name,
         description,
@@ -66,33 +74,26 @@ class AddClustDialog extends React.Component<Props, State> {
       name: '',
       description: '',
       dashboardURL: '',
-    });
-    this.setState({ kubeConfig: '' });
-  }
-
-  onError = (r: {}) => {
-    this.setState({
       kubeConfig: '',
     });
-  };
+  }
+
+  onError = (r: {}) => {};
 
   customRequest = (option: any) => {
     let reader = new FileReader();
     let fileselect = option.file;
     reader.readAsText(fileselect);
     reader.onload = () => {
-      console.log(reader.result);
-      this.setState({ kubeConfig: reader.result?.toString() || '' });
+      this.field.setValues({
+        kubeConfig: reader.result?.toString() || '',
+      });
     };
     return {
       file: File,
       onError: this.onError,
       abort() {},
     };
-  };
-
-  changeCode = (value: string) => {
-    this.setState({ kubeConfig: value || '' });
   };
 
   render() {
@@ -116,7 +117,8 @@ class AddClustDialog extends React.Component<Props, State> {
       },
     };
     const init = this.field.init;
-    const { kubeConfig } = this.state;
+    const values: { kubeConfig: string } = this.field.getValues();
+    const valueInfo = values.kubeConfig || '';
     return (
       <div>
         <Dialog
@@ -131,8 +133,21 @@ class AddClustDialog extends React.Component<Props, State> {
           footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>
-            <FormItem label={name}>
-              <Input htmlType="name" name="name" placeholder={namePlaceHold} {...init('name')} />
+            <FormItem label={name} required>
+              <Input
+                htmlType="name"
+                name="name"
+                placeholder={namePlaceHold}
+                {...init('name', {
+                  rules: [
+                    {
+                      required: true,
+                      pattern: startEndNotEmpty,
+                      message: 'content cannot be empty',
+                    },
+                  ],
+                })}
+              />
             </FormItem>
 
             <FormItem label={describe}>
@@ -149,26 +164,37 @@ class AddClustDialog extends React.Component<Props, State> {
                 htmlType="dashboardURL"
                 name="dashboardURL"
                 placeholder={dashboarPlaceHold}
-                {...init('dashboardURL')}
+                {...init('dashboardURL', {
+                  rules: [
+                    {
+                      required: false,
+                      pattern: urlRegular,
+                      message: 'Input according to URL specification',
+                    },
+                  ],
+                })}
               />
             </FormItem>
 
             <FormItem label={kubeAPI}>
-              <div id="guideCode" className="guideCode">
-                <DefinitionCode
-                  containerId="guideCode"
-                  language={'yaml'}
-                  readOnly={false}
-                  value={kubeConfig}
-                  defineTheme={defineTheme}
-                  onChange={this.changeCode}
-                />
-              </div>
               <Upload request={this.customRequest}>
-                <Button type="secondary" className="add-btn">
+                <Button text type="normal" className="padding-left-0">
+                  <Icon type="cloudupload" />
                   {UPLOADYMALFILE}
                 </Button>
               </Upload>
+
+              <div id="guide-code" className="guide-code">
+                <DefinitionCode
+                  containerId="guide-code"
+                  language={'yaml'}
+                  readOnly={false}
+                  defineTheme={defineTheme}
+                  {...init('kubeConfig')}
+                  value={valueInfo}
+                  ref={this.DefinitionCodeRef}
+                />
+              </div>
             </FormItem>
           </Form>
         </Dialog>

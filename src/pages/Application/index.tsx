@@ -15,7 +15,7 @@ type Props = {
 type State = {};
 
 @connect((store: any) => {
-  return { ...store.application, ...store.cluster };
+  return { ...store.application, ...store.clusters };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -63,9 +63,12 @@ class Application extends Component<Props, State> {
           btnName="Add App"
           dialogName={APPLICATION_PATH}
           namespaceList={namespaceList}
+          clusterList={clusterList}
           dispatch={dispatch}
         />
+
         <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
+
         <CardContend
           appContent={applicationList}
           path={APPLICATION_PATH}

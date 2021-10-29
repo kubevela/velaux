@@ -2,6 +2,9 @@
 @F7F7F7: #f7f7f7;
 @F9F8FF: #f9f8ff;
 
+@colorRED: red;
+@colorGREEN: green;
+@colorBLUE: blue;
 @colorFFF: #fff;
 @color333: #333;
 @color1A1A1A: #1a1a1a;
@@ -31,6 +34,7 @@
 @margin-bottom-15: 15px;
 @margin-bottom-20: 20px;
 
+@padding-left-0: 0;
 @margin-left-5: 5px;
 @margin-left-10: 10px;
 @margin-left-15: 15px;
@@ -144,6 +148,9 @@
   padding-bottom: @padding-bottom-20;
 }
 
+.padding-left-0 {
+  padding-left: @padding-left-0 !important;
+}
 .padding-left-5 {
   padding-left: @padding-left-5;
 }
@@ -278,4 +285,14 @@
 
 .next-breadcrumb .next-breadcrumb-text.activated {
   color: #666 !important;
+}
+
+.colorRed {
+  color: @colorRED;
+}
+.colorGreen {
+  color: @colorGREEN;
+}
+.colorBlue {
+  color: @colorBLUE;
 }
