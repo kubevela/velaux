@@ -8,7 +8,6 @@ import './index.less';
 
 class TabsContent extends Component {
   handleChange = (key) => {
-    console.log(key);
   };
   render() {
     return (

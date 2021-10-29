@@ -27,11 +27,9 @@ class YmalConfig extends React.Component<Props> {
   };
 
   onError = (r: {}) => {
-    console.log('onError callback');
   };
 
   submit = () => {
-    console.log('this.dispatch', this.props.dispatch);
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
@@ -64,7 +62,6 @@ class YmalConfig extends React.Component<Props> {
     let fileselect = option.file;
     reader.readAsText(fileselect);
     reader.onload = () => {
-      console.log(reader.result);
       this.field.setValues({
         kubeConfig: reader.result?.toString() || '',
       });
@@ -128,7 +125,7 @@ class YmalConfig extends React.Component<Props> {
             />
           </FormItem>
 
-          <FormItem label={kubeAPI}>
+          <FormItem label={'ApplicationYmal'} required={true}>
             <Upload request={this.customRequest}>
               <Button text type="normal" className="padding-left-0">
                 <Icon type="cloudupload" />

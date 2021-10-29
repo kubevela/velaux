@@ -38,11 +38,8 @@ class Workflow extends Component<Props, State> {
   }
 
   componentDidMount() {
-    console.log('componentDidMount', window.screen.height);
   }
   handleSelect = (e: string) => {
-    console.log('eee', e);
-    console.log('this.propss', this.props);
     this.props.history.push(`/workflows/${e}`, {});
     this.setState({
       value: e,

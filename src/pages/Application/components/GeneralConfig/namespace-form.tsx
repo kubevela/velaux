@@ -42,7 +42,7 @@ class NamespaceForm extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <If condition={namespaceList.length > 0}>
-          <FormItem {...formItemLayout} label={'namespace'} labelTextAlign="left" required={true}>
+          <FormItem {...formItemLayout} label={'Namespace'} labelTextAlign="left" required={true}>
             <If condition={!showNameSpaceInput}>
               <div className="cluster-container">
                 <Select

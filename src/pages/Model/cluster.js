@@ -45,7 +45,6 @@ export default {
     },
     *getCloudClustersList(action, { call, put }) {
       const result = yield call(getCloudClustersList, action.payload);
-      console.log('result', result);
       yield put({ type: 'updateCloudClusters', payload: result });
     },
     *connectcloudCluster(action, { call, put }) {

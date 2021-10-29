@@ -31,7 +31,6 @@ class SelectSearch extends React.Component<Props, State> {
   }
 
   handleChangeNamepace(e: string) {
-    console.log(e);
     this.setState(
       {
         namespaceValue: e,
@@ -43,7 +42,6 @@ class SelectSearch extends React.Component<Props, State> {
   }
 
   handleChangCluter(e: string) {
-    console.log(e);
     this.setState(
       {
         clusterValue: e,

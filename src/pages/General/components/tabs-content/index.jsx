@@ -43,7 +43,6 @@ class TabsContent extends Component {
     connectDropTarget: PropTypes.func.isRequired,
   };
   handleChange = (key) => {
-    console.log(key);
   };
   render() {
     const { canDrop, isOver, connectDropTarget } = this.props;

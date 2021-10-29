@@ -11,7 +11,7 @@ import {
   PLEASE_ENTER,
   PLEASE_CHOSE,
 } from '../../../../constants';
-import { startEndNotEmpty } from '../../../../utils/common';
+import { startEndNotEmpty, ACKCLusterStatus } from '../../../../utils/common';
 import './index.less';
 
 type Props = {
@@ -20,7 +20,7 @@ type Props = {
   setVisible: (visible: boolean) => void;
   setCloudService: (isCloudService: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {
@@ -64,7 +64,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
         return;
       }
 
-      console.log('cluster', values);
       const { provider, accessKeyID, accessKeySecret } = values;
       const { page, pageSize } = this.state;
       const params = {
@@ -111,9 +110,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       });
     })
       .then((res) => {
-        console.log('do something after get');
         if (res) {
-          console.log('success', 'connect success');
           Message.success({
             title: 'success,connect success',
             duration: 3000,
@@ -121,83 +118,9 @@ class CloudServiceDialog extends React.Component<Props, State> {
         }
       })
       .then((err) => {
-        console.log('err', 'connect fail');
+
       });
   };
-
-  // renderTable = () => {
-  //   const { cloudClusters } = this.props;
-  //   const { Column } = Table;
-  //   console.log('cloudClusters', cloudClusters)
-  //   const columns = [
-  //     {
-  //       key: 'name',
-  //       title: '集群名称',
-  //       dataIndex: 'name',
-  //       cell: (v: string) => {
-  //         return <span>{v}</span>;
-  //       },
-  //     },
-  //     {
-  //       key: 'status',
-  //       title: '状态',
-  //       dataIndex: 'status',
-  //       cell: (v: number) => {
-  //         return <span>{v}</span>;
-  //       },
-  //     },
-  //     {
-  //       key: 'apiServerURL',
-  //       title: 'API地址',
-  //       dataIndex: 'apiServerURL',
-  //       cell: (v: string) => {
-  //         return <span>{v}</span>;
-  //       },
-  //     },
-  //     {
-  //       key: 'type',
-  //       title: '类型',
-  //       dataIndex: 'type',
-  //       cell: (v: string) => {
-  //         return <span>{v}</span>;
-  //       },
-  //     },
-  //     {
-  //       key: 'zone',
-  //       title: '区域',
-  //       dataIndex: 'zone',
-  //       cell: (v: string) => {
-  //         return <span>{v}</span>;
-  //       },
-  //     },
-  //     {
-  //       key: 'operation',
-  //       title: '操作',
-  //       dataIndex: 'operation',
-  //       cell: (v: string, i: number, record: Record) => {
-  //         return (
-  //           <Button
-  //             text
-  //             ghost={true}
-  //             component={'a'}
-  //             onClick={() => {
-  //               this.connectcloudCluster(record);
-  //             }}
-  //           >
-  //             {Abutment}
-  //           </Button>
-  //         );
-  //       },
-  //     },
-  //   ];
-  //   return (
-  //     <div>
-  //       <Table dataSource={cloudClusters} hasBorder={false} loading={false}>
-  //         {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
-  //       </Table>
-  //     </div>
-  //   );
-  // };
 
   render() {
     const init = this.field.init;
@@ -229,8 +152,11 @@ class CloudServiceDialog extends React.Component<Props, State> {
         key: 'status',
         title: '状态',
         dataIndex: 'status',
-        cell: (v: number) => {
-          return <span>{v}</span>;
+        cell: (v: string) => {
+          const findArr = ACKCLusterStatus.filter((item) => {
+            return item.key == v;
+          });
+          return <span style={{ color: findArr[0].color || '' }}>  {v} </span>;
         },
       },
       {
@@ -318,7 +244,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
                 />
               </FormItem>
 
-              <FormItem label={'accessKey'} required={true}>
+              <FormItem label={'AccessKey'} required={true}>
                 <Input
                   htmlType="accessKeyID"
                   name="accessKeyID"
@@ -335,7 +261,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
                 />
               </FormItem>
 
-              <FormItem label={'accessKeySecret'} required={true}>
+              <FormItem label={'AccessKeySecret'} required={true}>
                 <Input
                   htmlType="accessKeySecret"
                   name="accessKeySecret"

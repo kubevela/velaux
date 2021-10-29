@@ -79,7 +79,6 @@ class AddClustDialog extends React.Component<Props, State> {
   }
 
   onError = (r: {}) => {
-    console.log('onError callback');
   };
 
   customRequest = (option: any) => {
@@ -87,7 +86,6 @@ class AddClustDialog extends React.Component<Props, State> {
     let fileselect = option.file;
     reader.readAsText(fileselect);
     reader.onload = () => {
-      console.log(reader.result);
       this.field.setValues({
         kubeConfig: reader.result?.toString() || '',
       });

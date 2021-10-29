@@ -23,11 +23,10 @@ class PublishDialog extends React.Component<Props, State> {
   };
 
   handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('chose', e);
+   
   };
 
   handleSelectCluster = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('chose', e);
   };
 
   render() {
