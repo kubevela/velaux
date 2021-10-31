@@ -13,11 +13,9 @@ const LeftMenu = (data, context) => {
     if (item.children) {
       const childrenArr = item.children.map((childrenItem) => {
         return (
-          <ul>
-            <li>
+            <li className={childrenItem.className ? 'menu-item-active' : 'menu-item'}>
               <Link
                 to={childrenItem.link}
-                className={childrenItem.className ? 'menu-item-active' : 'menu-item'}
               >
                 <div>
                   <Icon type={childrenItem.iconType} />
@@ -27,7 +25,6 @@ const LeftMenu = (data, context) => {
                 </div>
               </Link>
             </li>
-          </ul>
         );
       });
       ele.push(childrenArr);
@@ -37,7 +34,7 @@ const LeftMenu = (data, context) => {
         <div className="padding-left-20">
           <Translation>{item.navName}</Translation>
         </div>
-        {ele}
+        <ul>{ele}</ul>
       </li>
     );
   });

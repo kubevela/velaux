@@ -126,6 +126,7 @@ class SelectSearch extends React.Component<Props, State> {
             }
             placeholder={appPlacehole}
             onChange={this.handleChangName}
+            onPressEnter={this.handleClickSearch}
             value={inputValue}
             className="item"
           />

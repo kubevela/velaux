@@ -5,7 +5,7 @@ import { getDomain } from '../utils/common';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
-let url = isMock ? namespace_mock : namespace;
+const url = isMock ? namespace_mock : namespace;
 
 export function getNamespaceList(params: any) {
   return get(url, params).then((res) => res);
@@ -16,6 +16,6 @@ export function createNamespace(params: any) {
 }
 
 export function getOneNamespace(params: any) {
-  url = isMock ? `getOneNamespace_mock` : `${namespace}/${params.namespace}`;
+  const url = isMock ? `getOneNamespace_mock` : `${namespace}/${params.namespace}`;
   return get(url, params).then((res) => res);
 }

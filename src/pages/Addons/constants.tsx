@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Translation from '../../components/Translation';
-export const pluginTitle = <Translation>Plug in management</Translation>;
-export const pluginSubTitle = <Translation>Plug in extension</Translation>;
+export const pluginTitle = <Translation>Addon in management</Translation>;
+export const pluginSubTitle = <Translation>Addon in extension</Translation>;
 
 export const addClust = '新增集群';
 export const clustTitle = '集群管理';
