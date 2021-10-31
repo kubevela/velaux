@@ -3,7 +3,7 @@ export default {
   namespace: 'addons',
   state: {
     addonsList: [],
-    registryList: []
+    registryList: [],
   },
   reducers: {
     updateAddonsList(state, { type, payload }) {

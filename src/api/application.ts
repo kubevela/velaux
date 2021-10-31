@@ -32,12 +32,16 @@ export function getApplicationDetails(params: any) {
 }
 
 export function getApplicationComponents(params: any) {
-  const url = isMock ? `${getApplicationComponents_mock}` : `${application}/${params.name}/components`;
+  const url = isMock
+    ? `${getApplicationComponents_mock}`
+    : `${application}/${params.name}/components`;
   return get(url, params).then((res) => res);
 }
 
 export function createApplicationComponent(params: any) {
-  const url = isMock ? `${createApplicationComponent_mock}` : `${application}/${params.name}/components`;
+  const url = isMock
+    ? `${createApplicationComponent_mock}`
+    : `${application}/${params.name}/components`;
   return post(url, params).then((res) => res);
 }
 
@@ -71,6 +75,8 @@ export function getPolicyDetails(params: any) {
 }
 
 export function createApplicationTemplate(params: any) {
-  const url = isMock ? `${createApplicationTemplate_mock}` : `${application}/${params.name}/template`;
+  const url = isMock
+    ? `${createApplicationTemplate_mock}`
+    : `${application}/${params.name}/template`;
   return post(url, params).then((res) => res);
 }

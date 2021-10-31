@@ -12,8 +12,8 @@ type State = {
 };
 
 type Props = {
-  clusters: []
-}
+  clusters: [];
+};
 
 class CardContent extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -36,12 +36,12 @@ class CardContent extends React.Component<Props, State> {
               <a href={dashboardURL}>
                 <Card contentHeight="auto">
                   <If condition={icon}>
-                     <img src={icon} alt="app-card" />
+                    <img src={icon} alt="app-card" />
                   </If>
                   <div className="content-wraper background-F9F8FF">
                     <Row className="content-title">
                       <Col span="20" className="font-size-16 color1A1A1A">
-                        {alias? alias : name}
+                        {alias ? alias : name}
                       </Col>
                     </Row>
                     <Row className="content-main">

@@ -83,9 +83,7 @@ class Cluster extends React.Component<Props, State> {
               this.getChildCompentQuery(query);
             }}
           />
-          <CardContend
-            clusters={clusterList}
-          />
+          <CardContend clusters={clusterList} />
         </div>
       </>
     );

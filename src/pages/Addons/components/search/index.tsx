@@ -6,7 +6,7 @@ type Props = {
   t: (key: string) => {};
   dispatch: ({}) => {};
   listFunction: ({}) => {};
-  registrys?: []
+  registrys?: [];
 };
 
 type State = {
@@ -31,19 +31,19 @@ class SelectSearch extends React.Component<Props, State> {
         registryValue: e,
       },
       () => {
-        this.handleClickSearch()
+        this.handleClickSearch();
       },
     );
   }
 
   handleChangName(e: string) {
-    this.setState({inputValue: e});
+    this.setState({ inputValue: e });
   }
 
   handleClickSearch = () => {
     const { listFunction } = this.props;
     const { registryValue, inputValue } = this.state;
-    listFunction({registry: registryValue, query: inputValue});
+    listFunction({ registry: registryValue, query: inputValue });
   };
 
   render() {

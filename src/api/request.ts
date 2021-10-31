@@ -82,7 +82,6 @@ export const get = (url: string, params: any) => {
     });
 };
 
-
 export const rdelete = (url: string, params: any) => {
   return axiosInstance
     .delete(url, params)

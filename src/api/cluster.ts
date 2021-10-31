@@ -41,7 +41,9 @@ export function getCloudClustersList(params: any) {
 
 export function connectcloudCluster(params: any) {
   const { provider } = params;
-  const url = isMock ? `${connectClusterCloud_mock}` : `${cluster}/cloud-clusters/${provider}/connect`;
+  const url = isMock
+    ? `${connectClusterCloud_mock}`
+    : `${cluster}/cloud-clusters/${provider}/connect`;
   delete params.provider;
   return post(url, params).then((res) => res);
 }

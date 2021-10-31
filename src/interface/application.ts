@@ -39,7 +39,7 @@ export interface AppObj {
 
 export interface AppContent {
   name: string;
-  alias: string,
+  alias: string;
   btnContent?: string;
   status: string;
   icon: string;

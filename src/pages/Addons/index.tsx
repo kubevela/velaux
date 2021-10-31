@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import Title from '../../components/ListTitle';
 import SelectSearch from './components/search/index';
 import CardContend from './components/card-conten/index';
-import AddonDetailDialog from './components/detail/index'
+import AddonDetailDialog from './components/detail/index';
 import { ADDONS_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import Img from '../../assets/plugins.png';
 import { If } from 'tsx-control-statements/components';
@@ -15,8 +15,8 @@ type Props = {
 };
 
 type State = {
-  showAddonDetail: boolean,
-  addonName: string
+  showAddonDetail: boolean;
+  addonName: string;
 };
 
 @connect((store: any) => {
@@ -50,15 +50,15 @@ class Addons extends React.Component<Props, State> {
     });
   };
   openAddonDetail = (addonName: string) => {
-    this.setState({showAddonDetail: true, addonName: addonName})
-  }
+    this.setState({ showAddonDetail: true, addonName: addonName });
+  };
   closeAddonDetail = () => {
-    this.setState({showAddonDetail: false, addonName: ""})
-  }
+    this.setState({ showAddonDetail: false, addonName: '' });
+  };
 
   render() {
     const { addonsList = [], registryList = [], dispatch } = this.props;
-    const { showAddonDetail,  addonName} = this.state
+    const { showAddonDetail, addonName } = this.state;
     return (
       <div>
         <Title
@@ -67,7 +67,11 @@ class Addons extends React.Component<Props, State> {
           dialogName={ADDONS_PATH}
           dispatch={dispatch}
         />
-        <SelectSearch dispatch={dispatch} registrys={registryList} listFunction={this.getAddonsList} />
+        <SelectSearch
+          dispatch={dispatch}
+          registrys={registryList}
+          listFunction={this.getAddonsList}
+        />
         <CardContend
           cardImg={Img}
           addonLists={addonsList}
@@ -75,7 +79,12 @@ class Addons extends React.Component<Props, State> {
           clickAddon={this.openAddonDetail}
         />
         <If condition={showAddonDetail}>
-          <AddonDetailDialog onClose={this.closeAddonDetail} dispatch={dispatch} visible={showAddonDetail} addonName={addonName}></AddonDetailDialog>
+          <AddonDetailDialog
+            onClose={this.closeAddonDetail}
+            dispatch={dispatch}
+            visible={showAddonDetail}
+            addonName={addonName}
+          ></AddonDetailDialog>
         </If>
       </div>
     );

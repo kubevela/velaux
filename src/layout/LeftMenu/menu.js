@@ -41,7 +41,7 @@ export function getLeftSider(pathname) {
           link: '/addons',
           iconType: 'database-set',
           navName: 'Plugins Manager',
-        }
+        },
       ],
     },
   ];

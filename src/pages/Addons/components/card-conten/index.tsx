@@ -15,7 +15,7 @@ type State = {
 
 type Props = {
   clickAddon: () => void;
-  addonLists: []
+  addonLists: [];
 };
 
 class CardContent extends React.Component<any, State> {
@@ -64,7 +64,7 @@ class CardContent extends React.Component<any, State> {
                   <If condition={tags}>
                     <Row className="content-main-btn">
                       {tags.map((item: String) => {
-                        return <Tag>{item}</Tag>
+                        return <Tag>{item}</Tag>;
                       })}
                     </Row>
                   </If>

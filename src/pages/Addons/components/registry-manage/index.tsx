@@ -115,9 +115,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
           onClose={this.onClose}
           footerActions={['ok', 'cancel']}
           footerAlign="center"
-        >
-          
-        </Dialog>
+        ></Dialog>
       </div>
     );
   }

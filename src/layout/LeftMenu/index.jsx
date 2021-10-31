@@ -13,18 +13,16 @@ const LeftMenu = (data, context) => {
     if (item.children) {
       const childrenArr = item.children.map((childrenItem) => {
         return (
-            <li className={childrenItem.className ? 'menu-item-active' : 'menu-item'}>
-              <Link
-                to={childrenItem.link}
-              >
-                <div>
-                  <Icon type={childrenItem.iconType} />
-                  <span className={'menu-item-text'}>
-                    <Translation>{childrenItem.navName}</Translation>
-                  </span>
-                </div>
-              </Link>
-            </li>
+          <li className={childrenItem.className ? 'menu-item-active' : 'menu-item'}>
+            <Link to={childrenItem.link}>
+              <div>
+                <Icon type={childrenItem.iconType} />
+                <span className={'menu-item-text'}>
+                  <Translation>{childrenItem.navName}</Translation>
+                </span>
+              </div>
+            </Link>
+          </li>
         );
       });
       ele.push(childrenArr);
