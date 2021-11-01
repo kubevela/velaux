@@ -14,8 +14,9 @@ import {
 import { addClust, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import defineTheme from '../../../../components/DefinitionCode/theme';
-import { startEndNotEmpty, urlRegular } from '../../../../utils/common';
+import { checkName, urlRegular } from '../../../../utils/common';
 import './index.less';
+const { Col, Row } = Grid;
 
 type Props = {
   visible: boolean;
@@ -100,8 +101,10 @@ class AddClustDialog extends React.Component<Props, State> {
     const { visible } = this.props;
     const {
       name,
+      alias,
       describe,
       namePlaceHold,
+      aliasPlaceHold,
       describePlaceHold,
       kubeAPI,
       dashboardURL,
@@ -133,69 +136,97 @@ class AddClustDialog extends React.Component<Props, State> {
           footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>
-            <FormItem label={name} required>
-              <Input
-                htmlType="name"
-                name="name"
-                placeholder={namePlaceHold}
-                {...init('name', {
-                  rules: [
-                    {
-                      required: true,
-                      pattern: startEndNotEmpty,
-                      message: 'content cannot be empty',
-                    },
-                  ],
-                })}
-              />
-            </FormItem>
+            <Row>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={name} required>
+                  <Input
+                    htmlType="name"
+                    name="name"
+                    placeholder={namePlaceHold}
+                    {...init('name', {
+                      rules: [
+                        {
+                          required: true,
+                          pattern: checkName,
+                          message: 'Please enter a valid English name',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={alias}>
+                  <Input
+                    name="alias"
+                    placeholder={aliasPlaceHold}
+                    {...init('alias', {
+                      rules: [
+                        {
+                          minLength: 2,
+                          maxLength: 64,
+                          message: 'Enter a string of 2 to 64 characters.',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={describe}>
+                  <Input
+                    htmlType="describe"
+                    name="describe"
+                    placeholder={describePlaceHold}
+                    {...init('description')}
+                  />
+                </FormItem>
+              </Col>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={dashboardURL}>
+                  <Input
+                    htmlType="dashboardURL"
+                    name="dashboardURL"
+                    placeholder={dashboarPlaceHold}
+                    {...init('dashboardURL', {
+                      rules: [
+                        {
+                          required: false,
+                          pattern: urlRegular,
+                          message: 'Input according to URL specification',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem label={kubeAPI} labelAlign="top">
+                  <Upload request={this.customRequest}>
+                    <Button text type="normal" className="padding-left-0">
+                      <Icon type="cloudupload" />
+                      {UPLOADYMALFILE}
+                    </Button>
+                  </Upload>
 
-            <FormItem label={describe}>
-              <Input
-                htmlType="describe"
-                name="describe"
-                placeholder={describePlaceHold}
-                {...init('description')}
-              />
-            </FormItem>
-
-            <FormItem label={dashboardURL}>
-              <Input
-                htmlType="dashboardURL"
-                name="dashboardURL"
-                placeholder={dashboarPlaceHold}
-                {...init('dashboardURL', {
-                  rules: [
-                    {
-                      required: false,
-                      pattern: urlRegular,
-                      message: 'Input according to URL specification',
-                    },
-                  ],
-                })}
-              />
-            </FormItem>
-
-            <FormItem label={kubeAPI}>
-              <Upload request={this.customRequest}>
-                <Button text type="normal" className="padding-left-0">
-                  <Icon type="cloudupload" />
-                  {UPLOADYMALFILE}
-                </Button>
-              </Upload>
-
-              <div id="guide-code" className="guide-code">
-                <DefinitionCode
-                  containerId="guide-code"
-                  language={'yaml'}
-                  readOnly={false}
-                  defineTheme={defineTheme}
-                  {...init('kubeConfig')}
-                  value={valueInfo}
-                  ref={this.DefinitionCodeRef}
-                />
-              </div>
-            </FormItem>
+                  <div id="guide-code" className="guide-code">
+                    <DefinitionCode
+                      containerId="guide-code"
+                      language={'yaml'}
+                      readOnly={false}
+                      defineTheme={defineTheme}
+                      {...init('kubeConfig')}
+                      value={valueInfo}
+                      ref={this.DefinitionCodeRef}
+                    />
+                  </div>
+                </FormItem>
+              </Col>
+            </Row>
           </Form>
         </Dialog>
       </div>

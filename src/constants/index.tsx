@@ -36,7 +36,9 @@ export const clustGroup = [
 ];
 export const addClustDialog = {
   name: '集群名称',
-  namePlaceHold: '集群名称',
+  alias: '集群别名',
+  aliasPlaceHold: '请输入集群别名',
+  namePlaceHold: '请输入集群名称',
   describe: '集群说明',
   describePlaceHold: 'description',
   kubeAPI: 'KubeAPI 通信密钥',
@@ -139,3 +141,4 @@ export const appContent = [
 ];
 
 export const supplierList = [{ value: 'aliyun', label: '阿里云 ACK' }];
+export const addonDetail = <Translation>Addon Detail</Translation>;

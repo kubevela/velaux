@@ -83,12 +83,7 @@ class Cluster extends React.Component<Props, State> {
               this.getChildCompentQuery(query);
             }}
           />
-          <CardContend
-            cardImg={Img}
-            appContent={clusterList}
-            path={CLUSTERS_PATH}
-            workFlowPath={WORKFLOWS_PATH}
-          />
+          <CardContend clusters={clusterList} />
         </div>
       </>
     );

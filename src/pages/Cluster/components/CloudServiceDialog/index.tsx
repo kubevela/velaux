@@ -11,7 +11,7 @@ import {
   PLEASE_ENTER,
   PLEASE_CHOSE,
 } from '../../../../constants';
-import { startEndNotEmpty, ACKCLusterStatus } from '../../../../utils/common';
+import { checkName, ACKCLusterStatus } from '../../../../utils/common';
 import './index.less';
 
 type Props = {
@@ -234,7 +234,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        pattern: startEndNotEmpty,
                         message: 'content cannot be empty',
                       },
                     ],
@@ -251,7 +250,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        pattern: startEndNotEmpty,
                         message: 'content cannot be empty',
                       },
                     ],
@@ -268,7 +266,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        pattern: startEndNotEmpty,
                         message: 'content cannot be empty',
                       },
                     ],

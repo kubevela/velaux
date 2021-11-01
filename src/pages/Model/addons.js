@@ -1,9 +1,9 @@
-import { getAddonsList } from '../../api/addons';
-
+import { getAddonsList, getAddonRegistrysList } from '../../api/addons';
 export default {
   namespace: 'addons',
   state: {
     addonsList: [],
+    registryList: [],
   },
   reducers: {
     updateAddonsList(state, { type, payload }) {
@@ -12,12 +12,22 @@ export default {
         addonsList: payload,
       };
     },
+    updateAddonRegistrysList(state, { type, payload }) {
+      return {
+        ...state,
+        registryList: payload,
+      };
+    },
   },
   effects: {
     *getAddonsList(action, { call, put }) {
-      const result = yield call(getAddonsList);
+      const result = yield call(getAddonsList, action.payload);
       const addonsList = getAddonsCardList(result || []);
       yield put({ type: 'updateAddonsList', payload: addonsList });
+    },
+    *getAddonRegistrysList(action, { call, put }) {
+      const result = yield call(getAddonRegistrysList, action.payload);
+      yield put({ type: 'updateAddonRegistrysList', payload: result });
     },
   },
 };
@@ -34,12 +44,10 @@ function getAddonsCardList(data) {
     const href = protocol + address + componentPort;
     const addons = {
       name: item.name,
-      status: item.status,
       icon: item.icon,
+      tags: item.tags,
       description: item.description,
-      createTime: item.createTime,
-      btnContent: item.btnContent,
-      href: href,
+      version: item.version,
     };
     addonsCardContent.push(addons);
   }

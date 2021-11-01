@@ -10,19 +10,19 @@ import { getDomain } from '../utils/common';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
-let url = isMock ? workflows_mock : workflows;
+const url = isMock ? workflows_mock : workflows;
 
 export function getWorkFlowsDetails(params: any) {
-  url = isMock ? `${getWorkFlowsDetails_mock}` : `${workflows}/${params.name}`;
+  const url = isMock ? `${getWorkFlowsDetails_mock}` : `${workflows}/${params.name}`;
   return get(url, params).then((res) => res);
 }
 
 export function createWorkFlow(params: any) {
-  url = isMock ? `${createWorkFlow_mock}` : `${workflows}/${params.name}`;
+  const url = isMock ? `${createWorkFlow_mock}` : `${workflows}/${params.name}`;
   return post(url, params).then((res) => res);
 }
 
 export function getWorkFlowsRecord(params: any) {
-  url = isMock ? `${getWorkFlowsRecord_mock}` : `${workflows}/${params.name}/records`;
+  const url = isMock ? `${getWorkFlowsRecord_mock}` : `${workflows}/${params.name}/records`;
   return get(url, params).then((res) => res);
 }

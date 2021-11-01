@@ -145,7 +145,7 @@ checkBrowsers(paths.appPath, isInteractive)
         );
       }
 
-      console.log(chalk.cyan('Starting the development server...\n'));
+      console.log(chalk.cyan('Starting the development server('+HOST+':'+port+')...\n'));
       openBrowser(urls.localUrlForBrowser);
     });
 
