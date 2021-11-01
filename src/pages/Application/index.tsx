@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
-import SelectSearch from '../../components/SelectSearch';
+import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
 import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
@@ -15,7 +15,7 @@ type Props = {
 type State = {};
 
 @connect((store: any) => {
-  return { ...store.application, ...store.cluster };
+  return { ...store.application, ...store.clusters };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -45,11 +45,6 @@ class Application extends Component<Props, State> {
   getClusterList = async () => {
     this.props.dispatch({
       type: 'clusters/getClusterList',
-      payload: {
-        query: '',
-        page: 0,
-        pageSize: 20,
-      },
     });
   };
 
@@ -63,9 +58,12 @@ class Application extends Component<Props, State> {
           btnName="Add App"
           dialogName={APPLICATION_PATH}
           namespaceList={namespaceList}
+          clusterList={clusterList}
           dispatch={dispatch}
         />
+
         <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
+
         <CardContend
           appContent={applicationList}
           path={APPLICATION_PATH}

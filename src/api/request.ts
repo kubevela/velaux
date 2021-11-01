@@ -81,3 +81,18 @@ export const get = (url: string, params: any) => {
       }
     });
 };
+
+export const rdelete = (url: string, params: any) => {
+  return axiosInstance
+    .delete(url, params)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      if (err.BusinessCode) {
+        Message.error(`${err.BusinessCode}:${err.Message}`);
+      } else {
+        Message.error(getMessage(503));
+      }
+    });
+};

@@ -42,12 +42,6 @@ export function getLeftSider(pathname) {
           iconType: 'database-set',
           navName: 'Plugins Manager',
         },
-        {
-          className: isAPPStore,
-          link: '/appstores',
-          iconType: 'all-fill',
-          navName: 'App store',
-        },
       ],
     },
   ];

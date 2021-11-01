@@ -22,13 +22,9 @@ class PublishDialog extends React.Component<Props, State> {
     this.props.setVisible(false);
   };
 
-  handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('chose', e);
-  };
+  handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
-  handleSelectCluster = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('chose', e);
-  };
+  handleSelectCluster = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
   render() {
     const { Row, Col } = Grid;
@@ -50,7 +46,7 @@ class PublishDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
-          className="dialog-app-wraper"
+          className="dialog-publish-wraper"
           locale={{
             ok: confirm,
             cancel: 'no',

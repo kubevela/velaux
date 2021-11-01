@@ -1,10 +1,22 @@
 import React from 'react';
-import { Button, Message, Grid, Dialog, Form, Input, Select, Upload, Field } from '@b-design/ui';
-import Translation from '../../../../components/Translation';
+import {
+  Button,
+  Message,
+  Grid,
+  Dialog,
+  Form,
+  Input,
+  Select,
+  Upload,
+  Field,
+  Icon,
+} from '@b-design/ui';
 import { addClust, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import DefinitionCode from '../../../../components/DefinitionCode';
-import defineTheme from './theme';
+import defineTheme from '../../../../components/DefinitionCode/theme';
+import { checkName, urlRegular } from '../../../../utils/common';
 import './index.less';
+const { Col, Row } = Grid;
 
 type Props = {
   visible: boolean;
@@ -15,32 +27,29 @@ type Props = {
   dispatch: ({}) => {};
 };
 
-type State = {
-  kubeConfig: string;
-};
+type State = {};
 
 class AddClustDialog extends React.Component<Props, State> {
-  field: any;
+  field: Field;
+  DefinitionCodeRef: React.RefObject<DefinitionCode>;
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
-    this.state = {
-      kubeConfig: '',
-    };
+    this.DefinitionCodeRef = React.createRef();
   }
 
   onClose = () => {
     this.props.setVisible(false);
     this.resetField();
   };
+
   onOk = () => {
     const { page, pageSize, query = '' } = this.props;
-    const { kubeConfig } = this.state;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      const { name, description, dashboardURL } = values;
+      const { name, description, dashboardURL, kubeConfig } = values;
       const params = {
         name,
         description,
@@ -66,23 +75,20 @@ class AddClustDialog extends React.Component<Props, State> {
       name: '',
       description: '',
       dashboardURL: '',
-    });
-    this.setState({ kubeConfig: '' });
-  }
-
-  onError = (r: {}) => {
-    this.setState({
       kubeConfig: '',
     });
-  };
+  }
+
+  onError = (r: {}) => {};
 
   customRequest = (option: any) => {
     let reader = new FileReader();
     let fileselect = option.file;
     reader.readAsText(fileselect);
     reader.onload = () => {
-      console.log(reader.result);
-      this.setState({ kubeConfig: reader.result?.toString() || '' });
+      this.field.setValues({
+        kubeConfig: reader.result?.toString() || '',
+      });
     };
     return {
       file: File,
@@ -91,16 +97,14 @@ class AddClustDialog extends React.Component<Props, State> {
     };
   };
 
-  changeCode = (value: string) => {
-    this.setState({ kubeConfig: value || '' });
-  };
-
   render() {
     const { visible } = this.props;
     const {
       name,
+      alias,
       describe,
       namePlaceHold,
+      aliasPlaceHold,
       describePlaceHold,
       kubeAPI,
       dashboardURL,
@@ -116,7 +120,8 @@ class AddClustDialog extends React.Component<Props, State> {
       },
     };
     const init = this.field.init;
-    const { kubeConfig } = this.state;
+    const values: { kubeConfig: string } = this.field.getValues();
+    const valueInfo = values.kubeConfig || '';
     return (
       <div>
         <Dialog
@@ -131,45 +136,97 @@ class AddClustDialog extends React.Component<Props, State> {
           footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>
-            <FormItem label={name}>
-              <Input htmlType="name" name="name" placeholder={namePlaceHold} {...init('name')} />
-            </FormItem>
+            <Row>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={name} required>
+                  <Input
+                    htmlType="name"
+                    name="name"
+                    placeholder={namePlaceHold}
+                    {...init('name', {
+                      rules: [
+                        {
+                          required: true,
+                          pattern: checkName,
+                          message: 'Please enter a valid English name',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={alias}>
+                  <Input
+                    name="alias"
+                    placeholder={aliasPlaceHold}
+                    {...init('alias', {
+                      rules: [
+                        {
+                          minLength: 2,
+                          maxLength: 64,
+                          message: 'Enter a string of 2 to 64 characters.',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={describe}>
+                  <Input
+                    htmlType="describe"
+                    name="describe"
+                    placeholder={describePlaceHold}
+                    {...init('description')}
+                  />
+                </FormItem>
+              </Col>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={dashboardURL}>
+                  <Input
+                    htmlType="dashboardURL"
+                    name="dashboardURL"
+                    placeholder={dashboarPlaceHold}
+                    {...init('dashboardURL', {
+                      rules: [
+                        {
+                          required: false,
+                          pattern: urlRegular,
+                          message: 'Input according to URL specification',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem label={kubeAPI} labelAlign="top">
+                  <Upload request={this.customRequest}>
+                    <Button text type="normal" className="padding-left-0">
+                      <Icon type="cloudupload" />
+                      {UPLOADYMALFILE}
+                    </Button>
+                  </Upload>
 
-            <FormItem label={describe}>
-              <Input
-                htmlType="describe"
-                name="describe"
-                placeholder={describePlaceHold}
-                {...init('description')}
-              />
-            </FormItem>
-
-            <FormItem label={dashboardURL}>
-              <Input
-                htmlType="dashboardURL"
-                name="dashboardURL"
-                placeholder={dashboarPlaceHold}
-                {...init('dashboardURL')}
-              />
-            </FormItem>
-
-            <FormItem label={kubeAPI}>
-              <div id="guideCode" className="guideCode">
-                <DefinitionCode
-                  containerId="guideCode"
-                  language={'yaml'}
-                  readOnly={false}
-                  value={kubeConfig}
-                  defineTheme={defineTheme}
-                  onChange={this.changeCode}
-                />
-              </div>
-              <Upload request={this.customRequest}>
-                <Button type="secondary" className="add-btn">
-                  {UPLOADYMALFILE}
-                </Button>
-              </Upload>
-            </FormItem>
+                  <div id="guide-code" className="guide-code">
+                    <DefinitionCode
+                      containerId="guide-code"
+                      language={'yaml'}
+                      readOnly={false}
+                      defineTheme={defineTheme}
+                      {...init('kubeConfig')}
+                      value={valueInfo}
+                      ref={this.DefinitionCodeRef}
+                    />
+                  </div>
+                </FormItem>
+              </Col>
+            </Row>
           </Form>
         </Dialog>
       </div>

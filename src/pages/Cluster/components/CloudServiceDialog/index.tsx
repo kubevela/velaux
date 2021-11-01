@@ -1,57 +1,53 @@
 import React from 'react';
-import {
-  Button,
-  Message,
-  Grid,
-  Dialog,
-  Form,
-  Input,
-  Select,
-  Upload,
-  Field,
-  Table,
-} from '@b-design/ui';
-import Translation from '../../../../components/Translation';
+import { Button, Dialog, Form, Input, Select, Field, Table, Message } from '@b-design/ui';
+import { withTranslation } from 'react-i18next';
+import { If } from 'tsx-control-statements/components';
 import {
   supplierList,
   cloudServerTitle,
   SUPPLIER,
   NEXTSTEP,
   Abutment,
+  PLEASE_ENTER,
+  PLEASE_CHOSE,
 } from '../../../../constants';
+import { checkName, ACKCLusterStatus } from '../../../../utils/common';
 import './index.less';
 
 type Props = {
   visible: boolean;
+  cloudClusters: [];
   setVisible: (visible: boolean) => void;
   setCloudService: (isCloudService: boolean) => void;
+  t: (key: string) => {};
   dispatch: ({}) => {};
 };
 
 type State = {
-  supplierValue: string;
-  AKValue: string;
-  SKValue: string;
   page: number;
   pageSize: number;
   choseInput: boolean;
 };
 type Record = {
-  clusterID: string;
+  id: string;
   description: string;
   icon: string;
   name: string;
+  type: string;
+  zone: string;
+  status: string;
+  apiServerURL: string;
+  dashboardURL: string;
 };
 
 class CloudServiceDialog extends React.Component<Props, State> {
+  field: Field;
   constructor(props: Props) {
     super(props);
+    this.field = new Field(this);
     this.state = {
-      supplierValue: '',
-      AKValue: '',
-      SKValue: '',
-      page: 0,
-      pageSize: 20,
+      page: 1,
+      pageSize: 10,
       choseInput: true,
     };
   }
@@ -61,132 +57,84 @@ class CloudServiceDialog extends React.Component<Props, State> {
     this.props.setCloudService(false);
     this.resetField();
   };
-  onOk = () => {
-    const { supplierValue, AKValue, SKValue, page, pageSize } = this.state;
 
-    const params = {
-      provider: supplierValue,
-      page,
-      pageSize,
-      body: {
-        accessKeyID: AKValue,
-        accessKeySecret: SKValue,
-      },
-    };
-    this.props.dispatch({
-      type: 'clusters/getCloudClustersList',
-      payload: params,
+  onOk = () => {
+    this.field.validate((error: any, values: any) => {
+      if (error) {
+        return;
+      }
+
+      const { provider, accessKeyID, accessKeySecret } = values;
+      const { page, pageSize } = this.state;
+      const params = {
+        provider,
+        accessKeyID: accessKeyID,
+        accessKeySecret: accessKeySecret,
+        page,
+        pageSize,
+      };
+      this.props.dispatch({
+        type: 'clusters/getCloudClustersList',
+        payload: params,
+      });
+      this.setState({ choseInput: false });
     });
-    this.setState({ choseInput: false });
   };
 
   resetField() {
     this.setState({
-      supplierValue: '',
-      AKValue: '',
-      SKValue: '',
       choseInput: true,
     });
   }
 
-  handleChangeSupplier = (value: string) => {
-    this.setState({ supplierValue: value });
-  };
-
-  handleChangeAKValue = (value: string) => {
-    this.setState({ AKValue: value });
-  };
-
-  handleChangeSKValue = (value: string) => {
-    this.setState({ SKValue: value });
-  };
-
-  renderInput = () => {
-    const { Row, Col } = Grid;
-    const { supplierValue, AKValue, SKValue } = this.state;
-    return (
-      <Row>
-        <Col span="8">
-          <span className="margin-right-15"> {SUPPLIER}</span>
-          <Select
-            mode="single"
-            size="large"
-            onChange={this.handleChangeSupplier}
-            dataSource={supplierList}
-            placeholder={''}
-            className="item"
-            value={supplierValue}
-          />
-        </Col>
-        <Col span="8">
-          <span className="margin-right-15"> AK</span>
-          <Input value={AKValue} onChange={this.handleChangeAKValue} />
-        </Col>
-        <Col span="8">
-          <span className="margin-right-15"> SK</span>
-          <Input value={SKValue} onChange={this.handleChangeSKValue} />
-        </Col>
-      </Row>
-    );
-  };
-
   connectcloudCluster = (record: Record) => {
-    const { clusterID = '', description = '', icon = '', name = '' } = record;
-    const { AKValue, SKValue, supplierValue } = this.state;
+    const { id = '', description = '', icon = '', name = '' } = record;
+    const { accessKeyID, accessKeySecret, provider } = this.field.getValues();
     const params = {
-      provider: supplierValue,
-      body: {
-        accessKeyID: AKValue,
-        accessKeySecret: SKValue,
-        clusterID,
-        description,
-        icon,
-        name,
-      },
+      provider,
+      accessKeyID: accessKeyID,
+      accessKeySecret: accessKeySecret,
+      name,
+      description,
+      clusterID: id,
+      icon,
     };
-    this.props.dispatch({
-      type: 'clusters/connectcloudCluster',
-      payload: params,
-    });
+
+    new Promise((resolve, err) => {
+      this.props.dispatch({
+        type: 'clusters/connectcloudCluster',
+        payload: {
+          params,
+          resolve,
+        },
+      });
+    })
+      .then((res) => {
+        if (res) {
+          Message.success({
+            title: 'success,connect success',
+            duration: 3000,
+          });
+        }
+      })
+      .then((err) => {});
   };
 
-  renderTable = () => {
+  render() {
+    const init = this.field.init;
+    const { t, visible, cloudClusters } = this.props;
+    const { choseInput } = this.state;
     const { Column } = Table;
-    const dataSource = (i: number, j: number) => {
-      return [
-        {
-          name: '集群名称1',
-          status: 'success',
-          API: '',
-          title4: 'title4',
-          title5: 'title5',
-          date: '2021-01-01',
-        },
-        {
-          name: '集群名称2',
-          status: 'success',
-          API: '',
-          title4: 'title4',
-          title5: 'title5',
-          date: '2021-01-01',
-        },
-        {
-          name: '集群名称3',
-          status: 'fail',
-          API: '',
-          title4: 'title4',
-          title5: 'title5',
-          date: '2021-01-01',
-        },
-        {
-          name: '集群名称4',
-          status: 'success',
-          API: '',
-          title4: 'title4',
-          title5: 'title5',
-          date: '2021-01-01',
-        },
-      ];
+    const PLEASE_ENTER_PLACE_HOLD = t(PLEASE_ENTER).toString();
+    const PLEASE_CHOSE_PLACE_HOLD = t(PLEASE_CHOSE).toString();
+    const FormItem = Form.Item;
+    const formItemLayout = {
+      labelCol: {
+        fixedSpan: 6,
+      },
+      wrapperCol: {
+        span: 18,
+      },
     };
 
     const columns = [
@@ -202,30 +150,33 @@ class CloudServiceDialog extends React.Component<Props, State> {
         key: 'status',
         title: '状态',
         dataIndex: 'status',
-        cell: (v: number) => {
-          return <span>{v}</span>;
+        cell: (v: string) => {
+          const findArr = ACKCLusterStatus.filter((item) => {
+            return item.key == v;
+          });
+          return <span style={{ color: findArr[0].color || '' }}> {v} </span>;
         },
       },
       {
-        key: 'API',
+        key: 'apiServerURL',
         title: 'API地址',
-        dataIndex: 'API',
+        dataIndex: 'apiServerURL',
         cell: (v: string) => {
           return <span>{v}</span>;
         },
       },
       {
-        key: 'title4',
-        title: '标题4',
-        dataIndex: 'title4',
+        key: 'type',
+        title: '类型',
+        dataIndex: 'type',
         cell: (v: string) => {
           return <span>{v}</span>;
         },
       },
       {
-        key: 'title5',
-        title: '标题5',
-        dataIndex: 'title5',
+        key: 'zone',
+        title: '区域',
+        dataIndex: 'zone',
         cell: (v: string) => {
           return <span>{v}</span>;
         },
@@ -250,21 +201,9 @@ class CloudServiceDialog extends React.Component<Props, State> {
         },
       },
     ];
-    return (
-      <div>
-        <Table dataSource={dataSource(10, 10)} hasBorder={false} loading={false}>
-          {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
-        </Table>
-      </div>
-    );
-  };
-
-  render() {
-    const { visible } = this.props;
-    const { choseInput } = this.state;
 
     return (
-      <div>
+      <React.Fragment>
         <Dialog
           className="dialog-cluoudService-wraper"
           title={cloudServerTitle}
@@ -282,12 +221,69 @@ class CloudServiceDialog extends React.Component<Props, State> {
           }
           footerAlign="center"
         >
-          {choseInput && this.renderInput()}
-          {!choseInput && this.renderTable()}
+          <If condition={choseInput}>
+            <Form {...formItemLayout} field={this.field} className="cloud-server-wraper">
+              <FormItem label={SUPPLIER} required={true}>
+                <Select
+                  mode="single"
+                  size="large"
+                  dataSource={supplierList}
+                  placeholder={PLEASE_CHOSE_PLACE_HOLD}
+                  className="item"
+                  {...init('provider', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'content cannot be empty',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+
+              <FormItem label={'AccessKey'} required={true}>
+                <Input
+                  htmlType="accessKeyID"
+                  name="accessKeyID"
+                  placeholder={PLEASE_ENTER_PLACE_HOLD}
+                  {...init('accessKeyID', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'content cannot be empty',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+
+              <FormItem label={'AccessKeySecret'} required={true}>
+                <Input
+                  htmlType="accessKeySecret"
+                  name="accessKeySecret"
+                  placeholder={PLEASE_ENTER_PLACE_HOLD}
+                  {...init('accessKeySecret', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'content cannot be empty',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+            </Form>
+          </If>
+
+          <If condition={!choseInput}>
+            <Table dataSource={cloudClusters} hasBorder={false} loading={false}>
+              {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+            </Table>
+          </If>
         </Dialog>
-      </div>
+      </React.Fragment>
     );
   }
 }
 
-export default CloudServiceDialog;
+export default withTranslation()(CloudServiceDialog);

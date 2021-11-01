@@ -1,11 +1,14 @@
 import React from 'react';
-import {  Grid,  Form, Input, Select, Field } from '@b-design/ui';
+import { Grid, Form, Input, Select, Field } from '@b-design/ui';
 import NameSpaceForm from './namespace-form';
-import { dataSourceProject, dataSourceCluster, addApp, addAppDialog } from '../../constants';
+import EnvPlan from '../../../../components/EnvPlan';
+import { addAppDialog } from '../../constants';
 import './index.less';
+
 type Props = {
   visible: boolean;
   namespaceList?: [];
+  clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
   dispatch: ({ }) => {};
@@ -13,33 +16,55 @@ type Props = {
 
 type State = {};
 
+type itemObj = {
+  name: string;
+  cluster: string;
+  description?: string;
+};
+
 class GeneralConfig extends React.Component<Props, State> {
-  field: any;
-  constructor(props: any) {
+  field: Field;
+  envBind: React.RefObject<EnvPlan>;
+  constructor(props: Props) {
     super(props);
     this.field = new Field(this);
-    this.state = {};
+    this.envBind = React.createRef();
   }
+
   close = () => {
     this.resetField();
   };
+
   submit = () => {
-    console.log('this.dispatch', this.props.dispatch);
+    const envBindArray: any = [];
+    if (this.envBind.current) {
+      const { envs } = this.envBind.current.state;
+      Object.values(envs).forEach((key) => {
+        key.forEach((item: itemObj) => {
+          const obj: any = {};
+          obj.name = item.name;
+          obj.clusterSelector = { name: item.cluster };
+          obj.description = item.description;
+          envBindArray.push(obj);
+        });
+      });
+    }
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      const { cluster, describe, name, project, namespace } = values;
+      const { deploy = true, describe, name, project, namespace, icon = '' } = values;
       let namespaceParam = namespace;
       if (Object.prototype.toString.call(namespace) === '[object Array]') {
         namespaceParam = namespace[0];
       }
       const params = {
-        clusterList: cluster,
-        description: describe,
-        icon: '',
-        name: name,
+        icon,
+        name,
         namespace: namespaceParam,
+        deploy: true,
+        description: describe,
+        envBind: envBindArray,
       };
       this.props.dispatch({
         type: 'application/createApplicationList',
@@ -50,49 +75,30 @@ class GeneralConfig extends React.Component<Props, State> {
     this.props.setVisible(false);
     this.resetField();
   };
+
   resetField() {
     this.field.setValues({
       name: '',
-      project: '',
       cluster: [],
       describe: '',
     });
   }
-  handleSelectNameSpace = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('chose', e);
-  };
-  handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('chose', e);
-  };
-
-  handleSelectCluster = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('chose', e);
-  };
 
   render() {
     const { Row, Col } = Grid;
-    const { visible, t, namespaceList = [] } = this.props;
-    const {
-      name,
-      project,
-      clusterBind,
-      describe,
-      namePlaceHold,
-      clustPlaceHold,
-      describePlaceHold,
-    } = addAppDialog;
+    const { t, namespaceList = [], clusterList = [] } = this.props;
+    const { name, describe, namePlaceHold, describePlaceHold, ENVPLACEHOLD } = addAppDialog;
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
         fixedSpan: 6,
       },
       wrapperCol: {
-        span: 18,
+        span: 20,
       },
     };
 
     const namePlacehold = t(namePlaceHold).toString();
-    const clustPlacehold = t(clustPlaceHold).toString();
     const describePlacehold = t(describePlaceHold).toString();
     const init = this.field.init;
 
@@ -100,26 +106,23 @@ class GeneralConfig extends React.Component<Props, State> {
       <div>
         <Form {...formItemLayout} field={this.field}>
           <FormItem {...formItemLayout} label={name} labelTextAlign="left" required={true}>
-            <Input htmlType="name" name="name" placeholder={namePlacehold} {...init('name')} />
-          </FormItem>
-          <NameSpaceForm formItemLayout={formItemLayout} field={this.field} namespaceList={namespaceList} />
-          <FormItem {...formItemLayout} label={project} labelTextAlign="left" required={true}>
-            <Select
-              mode="single"
-              onChange={this.handleSelectProject}
-              {...init('project')}
-              dataSource={dataSourceProject}
+            <Input
+              htmlType="name"
+              name="name"
+              maxLength={32}
+              placeholder={namePlacehold}
+              {...init('name')}
             />
           </FormItem>
-          <FormItem {...formItemLayout} label={clusterBind} labelTextAlign="left" required={true}>
-            <Select
-              mode="tag"
-              onChange={this.handleSelectCluster}
-              dataSource={dataSourceCluster}
-              {...init('cluster')}
-              placeholder={clustPlacehold}
-              required={true}
-            />
+
+          <NameSpaceForm
+            formItemLayout={formItemLayout}
+            field={this.field}
+            namespaceList={namespaceList}
+          />
+
+          <FormItem {...formItemLayout} label={ENVPLACEHOLD} labelTextAlign="left" required={true}>
+            <EnvPlan clusterList={clusterList} ref={this.envBind} />
           </FormItem>
 
           <FormItem {...formItemLayout} label={describe} labelTextAlign="left" required={true}>

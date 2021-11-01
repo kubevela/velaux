@@ -15,6 +15,8 @@ type Props = {
   btnSubName?: string;
   dialogName: string;
   namespaceList?: [];
+  cloudClusters?: [];
+  clusterList?: [];
   page?: number;
   pageSize?: number;
   query?: string;
@@ -30,10 +32,12 @@ export default function (props: Props) {
     btnName,
     dialogName,
     namespaceList,
+    clusterList,
     btnSubName = '',
     page = 0,
     pageSize = 10,
     query = '',
+    cloudClusters = [],
     dispatch,
   } = props;
   const fetchNamespaceList = () => {
@@ -94,6 +98,7 @@ export default function (props: Props) {
           setVisible={setVisible}
           dispatch={dispatch}
           namespaceList={namespaceList}
+          clusterList={clusterList}
         />
       )}
 
@@ -104,6 +109,7 @@ export default function (props: Props) {
               visible={visible}
               setVisible={setVisible}
               setCloudService={setCloudService}
+              cloudClusters={cloudClusters}
               dispatch={dispatch}
             />
           ) : (

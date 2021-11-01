@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'dva';
 import { Button, Message, Grid, Search, Icon, Select, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-import { dataSourceProject, dataSourceCluster, dataSourceApps } from '../../constants';
 import './index.less';
 
 type Props = {
@@ -18,9 +17,6 @@ type State = {
   inputValue: string;
 };
 
-@connect((store: any) => {
-  return { ...store.application, ...store.cluster };
-})
 class SelectSearch extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -35,7 +31,6 @@ class SelectSearch extends React.Component<Props, State> {
   }
 
   handleChangeNamepace(e: string) {
-    console.log(e);
     this.setState(
       {
         namespaceValue: e,
@@ -47,7 +42,6 @@ class SelectSearch extends React.Component<Props, State> {
   }
 
   handleChangCluter(e: string) {
-    console.log(e);
     this.setState(
       {
         clusterValue: e,
@@ -59,16 +53,14 @@ class SelectSearch extends React.Component<Props, State> {
   }
 
   handleChangName(e: string) {
-    console.log(e);
-    this.setState(
-      {
-        inputValue: e,
-      },
-      () => {
-        this.getApplication();
-      },
-    );
+    this.setState({
+      inputValue: e,
+    });
   }
+
+  handleClickSearch = () => {
+    this.getApplication();
+  };
 
   getApplication = async () => {
     const { namespaceValue, clusterValue, inputValue } = this.state;
@@ -91,6 +83,10 @@ class SelectSearch extends React.Component<Props, State> {
     const appPlacehole = t('Application name, description and search').toString();
     const { namespaceValue, clusterValue, inputValue } = this.state;
     const { clusterList, namespaceList } = this.props;
+    const clusterDadasource = (clusterList || []).map((item: { name: string }) => ({
+      value: item.name,
+      label: item.name,
+    }));
 
     return (
       <Row className="app-select-wraper boder-radius-8">
@@ -111,7 +107,7 @@ class SelectSearch extends React.Component<Props, State> {
             mode="single"
             size="large"
             onChange={this.handleChangCluter}
-            dataSource={clusterList}
+            dataSource={clusterDadasource}
             placeholder={clusterPlacehole}
             className="item"
             value={clusterValue}
@@ -120,8 +116,17 @@ class SelectSearch extends React.Component<Props, State> {
 
         <Col span="6">
           <Input
+            innerAfter={
+              <Icon
+                type="search"
+                size="xs"
+                onClick={this.handleClickSearch}
+                style={{ margin: 4 }}
+              />
+            }
             placeholder={appPlacehole}
             onChange={this.handleChangName}
+            onPressEnter={this.handleClickSearch}
             value={inputValue}
             className="item"
           />

@@ -76,8 +76,6 @@ class General extends Component<Props, State> {
   };
 
   handleSelect = (e: string) => {
-    console.log('eee', e);
-    console.log('this.propss', this.props);
     this.props.history.push(`/applications/${e}`, {});
     this.setState(
       {
@@ -94,7 +92,6 @@ class General extends Component<Props, State> {
   };
 
   render() {
-    console.log('this.porps', this.props);
     const { value, visible } = this.state;
     const { Row, Col } = Grid;
     const steps = ['step1', 'step2', 'step3', 'step4', 'step5'].map((item, index) => (

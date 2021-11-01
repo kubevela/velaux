@@ -22,7 +22,6 @@ class InputSearch extends React.Component<Props, State> {
   }
 
   handleChangName = (value: string) => {
-    console.log(value);
     this.setState(
       {
         inputValue: value,

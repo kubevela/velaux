@@ -81,7 +81,7 @@ export default {
 
 function getAppCardList(data) {
   const applicationsList = data.applications;
-  if (applicationsList === null) {
+  if (!applicationsList) {
     return [];
   }
   const appContent = [];
