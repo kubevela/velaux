@@ -1,33 +1,26 @@
-
 import React from 'react';
 
-type DataSource = Array<{ label: string, value: any }>
+type DataSource = Array<{ label: string; value: any }>;
 
 type Props = {
-    secretKeys: string,
-}
-
-type State = {
-
+  secretKeys: string;
 };
 
+type State = {};
 
 class SecretKeySelect extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-        this.state = {
-            dataSource: []
-        }
-    }
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      dataSource: [],
+    };
+  }
 
-    componentDidMount = async () => {
-       
-    }
+  componentDidMount = async () => {};
 
-    render() {
-     
-        return <div></div>;
-    }
+  render() {
+    return <div></div>;
+  }
 }
 
 export default SecretKeySelect;

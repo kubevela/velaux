@@ -26,7 +26,6 @@ const LeftMenu = (data, context) => {
               </div>
             </Link>
           </li>
-
         );
       });
       ele.push(childrenArr);
@@ -36,10 +35,7 @@ const LeftMenu = (data, context) => {
         <div className="main-nav padding-left-32">
           <Translation>{item.navName}</Translation>
         </div>
-        {ele.length > 0 ? <ul className="subnav-wrapper">
-          {ele}
-        </ul> : null}
-
+        {ele.length > 0 ? <ul className="subnav-wrapper">{ele}</ul> : null}
       </li>
     );
   });

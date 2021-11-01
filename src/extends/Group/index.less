@@ -2,45 +2,40 @@
 @whiteColor: white;
 @blackColor: black;
 .group-container {
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    padding: 12px;
-    .group-title-container {
-      padding: 0 10px;
-      cursor: pointer;
-      position: relative;
-      background-color: transparent;
-      transition: border-color .12s;
-      outline: none;
-      font-size: 18px;
-      font-weight: bold;
-      
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  .group-title-container {
+    position: relative;
+    padding: 0 10px;
+    font-weight: bold;
+    font-size: 18px;
+    background-color: transparent;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.12s;
 
-      .group-title-desc {
-        font-size: 12px;
-        font-weight: normal;
-  
-      }
-      .icon {
-          position: absolute;
-          right: 10px;
-          top: 12px;
-      }
-      .next-icon-arrow-up {
-        
-        &::before {
-          font-size: 12px !important;
-        }
-      }
-  
+    .group-title-desc {
+      font-weight: normal;
+      font-size: 12px;
     }
-    .group-box {
-      padding:  20px;
-      border-radius: 5px;
-      background-color: #eee;;
-      position: relative;
-      margin-top: 10px;
-      margin-bottom: 10px;
-     
+    .icon {
+      position: absolute;
+      top: 12px;
+      right: 10px;
+    }
+    .next-icon-arrow-up {
+      &::before {
+        font-size: 12px !important;
+      }
     }
   }
+  .group-box {
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 20px;
+    background-color: #eee;
+    border-radius: 5px;
+  }
+}

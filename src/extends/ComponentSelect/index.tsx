@@ -1,32 +1,26 @@
-
 import React from 'react';
 
-type DataSource = Array<{ label: string, value: any }>
+type DataSource = Array<{ label: string; value: any }>;
 
 type Props = {
-    appName: string,
-}
-
-type State = {
-
+  appName: string;
 };
 
+type State = {};
 
 class ComponentSelect extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-        this.state = {
-            dataSource: []
-        }
-    }
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      dataSource: [],
+    };
+  }
 
-    componentDidMount = async () => {
-       
-    }
+  componentDidMount = async () => {};
 
-    render() {
-        return <div></div>;
-    }
+  render() {
+    return <div></div>;
+  }
 }
 
 export default ComponentSelect;

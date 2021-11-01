@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Form, Input, Select, Field } from '@b-design/ui';
 import NameSpaceForm from './namespace-form';
-import EnvPlan from '../../../../components/EnvPlan';
+import EnvPlan from '../../../../extends/EnvPlan';
 import { addAppDialog } from '../../constants';
 import './index.less';
 
@@ -11,7 +11,7 @@ type Props = {
   clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {};
@@ -36,19 +36,24 @@ class GeneralConfig extends React.Component<Props, State> {
   };
 
   submit = () => {
-    const envBindArray: any = [];
-    if (this.envBind.current) {
-      const { envs } = this.envBind.current.state;
-      Object.values(envs).forEach((key) => {
-        key.forEach((item: itemObj) => {
-          const obj: any = {};
-          obj.name = item.name;
-          obj.clusterSelector = { name: item.cluster };
-          obj.description = item.description;
-          envBindArray.push(obj);
-        });
-      });
+    const envBindArray = this.envBind.current?.getValues();
+    if (!envBindArray) {
+      return;
     }
+    // const envBindArray:Array<any> = [];
+    // if (this.envBind.current) {
+    //   const { envs } = this.envBind.current.state;
+    //   Object.values(envs).forEach((key) => {
+    //     key.forEach((item: itemObj) => {
+    //       const obj: any = {};
+    //       obj.name = item.name;
+    //       obj.clusterSelector = { name: item.cluster };
+    //       obj.description = item.description;
+    //       envBindArray.push(obj);
+    //     });
+    //   });
+    // }
+
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;

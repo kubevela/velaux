@@ -1,33 +1,24 @@
-
 import React from 'react';
 
-type DataSource = Array<{ label: string, value: any }>
-
 type Props = {
-    clusterName: string,
-}
-
-type State = {
-
+  clusterName: string;
 };
 
+type State = {};
 
 class EnvSelect extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-        this.state = {
-            dataSource: []
-        }
-    }
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      dataSource: [],
+    };
+  }
 
-    componentDidMount = async () => {
-       
-    }
+  componentDidMount = async () => {};
 
-    render() {
-     
-        return <div></div>;
-    }
+  render() {
+    return <div className="env-container"></div>;
+  }
 }
 
 export default EnvSelect;
