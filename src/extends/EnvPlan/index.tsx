@@ -35,20 +35,6 @@ function EnvItem(props: EnvPlanParams) {
     <div className="env-item-container">
       <div className="env-item-content">
         <div className="env-item-form-container">
-          <Form.Item required label="命名空间">
-            <Input
-              {...props.init(`${props.id}-namespace`, {
-                rules: [
-                  {
-                    required: true,
-                    message: '命名空间必填',
-                  },
-                ],
-              })}
-            />
-          </Form.Item>
-        </div>
-        <div className="env-item-form-container">
           <Form.Item required label="环境名称">
             <Input
               {...props.init(`${props.id}-name`, {
@@ -79,12 +65,22 @@ function EnvItem(props: EnvPlanParams) {
           </Form.Item>
         </div>
         <div className="env-item-form-container">
+          <Form.Item label="命名空间">
+            <Input
+              {...props.init(`${props.id}-namespace`, {
+                rules: [],
+              })}
+            />
+          </Form.Item>
+        </div>
+        <div className="env-item-form-container">
           <Form.Item label="环境描述">
             <Input
               {...props.init(`${props.id}-description`, {
                 rules: [
                   {
-                    required: false,
+                    maxLength: 128,
+                    message: 'Enter a description less than 128 characters.',
                   },
                 ],
               })}

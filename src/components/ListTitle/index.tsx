@@ -1,129 +1,46 @@
-import React, { HtmlHTMLAttributes, useEffect } from 'react';
+import React from 'react';
 import { useState } from 'react';
-import { Button, Message, Grid, Dialog, Form, Input } from '@b-design/ui';
+import { Button, Grid } from '@b-design/ui';
 import Translation from '../Translation';
-import { APPLICATION_PATH, CLUSTERS_PATH } from '../../utils/common';
-import AppDialog from '../../pages/Application/components/AddAppDialog';
-import AddClustDialog from '../../pages/Cluster/components/AddClustDialog';
-import CloudServiceDialog from '../../pages/Cluster/components/CloudServiceDialog';
 import './index.less';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   title: string;
   subTitle: string;
-  btnName?: string;
-  btnSubName?: string;
-  dialogName: string;
-  namespaceList?: [];
-  cloudClusters?: [];
-  clusterList?: [];
-  page?: number;
-  pageSize?: number;
-  query?: string;
-  dispatch: ({}) => {};
+  extButtons?: [React.ReactNode];
+  addButtonTitle?: string;
+  addButtonClick?: () => void;
 };
 export default function (props: Props) {
   const { Row, Col } = Grid;
-  const [visible, setVisible] = useState(false);
-  const [isCloudService, setCloudService] = useState(false);
-  const {
-    title,
-    subTitle,
-    btnName,
-    dialogName,
-    namespaceList,
-    clusterList,
-    btnSubName = '',
-    page = 0,
-    pageSize = 10,
-    query = '',
-    cloudClusters = [],
-    dispatch,
-  } = props;
-  const fetchNamespaceList = () => {
-    props.dispatch({
-      type: 'application/getNamespaceList',
-      payload: {},
-    });
-    setVisible(true);
-  };
-
-  const getCloudeServiceStatus = () => {
-    setCloudService(true);
-    setVisible(true);
-  };
+  const { title, subTitle, extButtons, addButtonTitle, addButtonClick } = props;
 
   return (
     <div>
       <Row className="title-wraper">
         <Col span="18">
           <span className="title font-size-20">
-            {' '}
             <Translation>{title}</Translation>
           </span>
           <span className="subTitle font-size-14">
-            {' '}
             <Translation>{subTitle}</Translation>{' '}
           </span>
         </Col>
-        {btnName && (
-          <Col span="6">
-            <div className="float-right">
-              {btnSubName && (
-                <Button
-                  type="secondary"
-                  style={{ marginRight: '15px' }}
-                  onClick={getCloudeServiceStatus}
-                >
-                  <Translation>{btnSubName}</Translation>
-                </Button>
-              )}
-
-              <Button
-                type="primary"
-                onClick={() => {
-                  fetchNamespaceList();
-                }}
-              >
-                <Translation>{btnName}</Translation>
+        <Col span="6">
+          <div className="float-right">
+            {extButtons &&
+              extButtons.map((item) => {
+                return item;
+              })}
+            <If condition={addButtonTitle}>
+              <Button type="primary" onClick={addButtonClick}>
+                <Translation>{addButtonTitle ? addButtonTitle : ''}</Translation>
               </Button>
-            </div>
-          </Col>
-        )}
+            </If>
+          </div>
+        </Col>
       </Row>
-
-      {dialogName === APPLICATION_PATH && (
-        <AppDialog
-          visible={visible}
-          setVisible={setVisible}
-          dispatch={dispatch}
-          namespaceList={namespaceList}
-          clusterList={clusterList}
-        />
-      )}
-
-      {dialogName === CLUSTERS_PATH && (
-        <div>
-          {isCloudService ? (
-            <CloudServiceDialog
-              visible={visible}
-              setVisible={setVisible}
-              setCloudService={setCloudService}
-              cloudClusters={cloudClusters}
-              dispatch={dispatch}
-            />
-          ) : (
-            <AddClustDialog
-              page={page}
-              pageSize={pageSize}
-              query={query}
-              visible={visible}
-              setVisible={setVisible}
-              dispatch={dispatch}
-            />
-          )}
-        </div>
-      )}
     </div>
   );
 }

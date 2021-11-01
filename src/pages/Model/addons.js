@@ -27,7 +27,7 @@ export default {
     },
     *getAddonRegistrysList(action, { call, put }) {
       const result = yield call(getAddonRegistrysList, action.payload);
-      yield put({ type: 'updateAddonRegistrysList', payload: result });
+      yield put({ type: 'updateAddonRegistrysList', payload: result || [] });
     },
   },
 };

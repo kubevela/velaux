@@ -4,6 +4,7 @@ import Title from '../../components/ListTitle';
 import SelectSearch from './components/search/index';
 import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
+import RegistryManageDialog from './components/registry-manage/index';
 import { ADDONS_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import Img from '../../assets/plugins.png';
 import { If } from 'tsx-control-statements/components';
@@ -17,6 +18,7 @@ type Props = {
 type State = {
   showAddonDetail: boolean;
   addonName: string;
+  showRegistryManage: boolean;
 };
 
 @connect((store: any) => {
@@ -28,6 +30,7 @@ class Addons extends React.Component<Props, State> {
     this.state = {
       showAddonDetail: false,
       addonName: '',
+      showRegistryManage: false,
     };
   }
 
@@ -58,26 +61,24 @@ class Addons extends React.Component<Props, State> {
 
   render() {
     const { addonsList = [], registryList = [], dispatch } = this.props;
-    const { showAddonDetail, addonName } = this.state;
+    console.log(registryList);
+    const { showAddonDetail, addonName, showRegistryManage } = this.state;
     return (
       <div>
         <Title
           title="Addon in management"
           subTitle="Addon in extension"
-          dialogName={ADDONS_PATH}
-          dispatch={dispatch}
+          addButtonTitle="Addon Registry Manage"
+          addButtonClick={() => {
+            this.setState({ showRegistryManage: true });
+          }}
         />
         <SelectSearch
           dispatch={dispatch}
           registrys={registryList}
           listFunction={this.getAddonsList}
         />
-        <CardContend
-          cardImg={Img}
-          addonLists={addonsList}
-          workFlowPath={WORKFLOWS_PATH}
-          clickAddon={this.openAddonDetail}
-        />
+        <CardContend cardImg={Img} addonLists={addonsList} clickAddon={this.openAddonDetail} />
         <If condition={showAddonDetail}>
           <AddonDetailDialog
             onClose={this.closeAddonDetail}
@@ -85,6 +86,18 @@ class Addons extends React.Component<Props, State> {
             visible={showAddonDetail}
             addonName={addonName}
           ></AddonDetailDialog>
+        </If>
+        <If condition={showRegistryManage}>
+          <RegistryManageDialog
+            visible={showRegistryManage}
+            onClose={() => {
+              this.getAddonsList();
+              this.setState({ showRegistryManage: false });
+            }}
+            syncRegistrys={this.getAddonRegistrysList}
+            registrys={registryList}
+            dispatch={dispatch}
+          ></RegistryManageDialog>
         </If>
       </div>
     );

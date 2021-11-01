@@ -3,7 +3,7 @@ import { Form, Input, Select, Field, Radio, Button } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 const FormItem = Form.Item;
 type Props = {
-  formItemLayout: any;
+  formItemLayout?: any;
   namespaceList: [];
   field: Field;
   handleSelectNameSpace?: () => {};

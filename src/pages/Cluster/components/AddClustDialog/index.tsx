@@ -1,33 +1,29 @@
 import React from 'react';
-import {
-  Button,
-  Message,
-  Grid,
-  Dialog,
-  Form,
-  Input,
-  Select,
-  Upload,
-  Field,
-  Icon,
-} from '@b-design/ui';
-import { addClust, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
+import { Button, Message, Grid, Dialog, Form, Input, Upload, Field, Icon } from '@b-design/ui';
+import { addCluster, editCluster, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import defineTheme from '../../../../components/DefinitionCode/theme';
-import { checkName, urlRegular } from '../../../../utils/common';
+import { checkName } from '../../../../utils/common';
+import { getClusterDetails } from '../../../../api/cluster';
 import './index.less';
+import Translation from '../../../../components/Translation';
 const { Col, Row } = Grid;
 
 type Props = {
+  editClusterName: string;
   visible: boolean;
   page?: number;
   pageSize?: number;
   query?: string;
-  setVisible: (visible: boolean) => void;
+  onOK: () => void;
+  onClose: () => void;
   dispatch: ({}) => {};
 };
 
-type State = {};
+type State = {
+  editMode: boolean;
+  cluster: {};
+};
 
 class AddClustDialog extends React.Component<Props, State> {
   field: Field;
@@ -36,38 +32,45 @@ class AddClustDialog extends React.Component<Props, State> {
     super(props);
     this.field = new Field(this);
     this.DefinitionCodeRef = React.createRef();
+    this.state = {
+      editMode: props.editClusterName !== '',
+      cluster: {},
+    };
   }
 
+  componentDidMount() {
+    this.loadClusterDetail();
+  }
+
+  loadClusterDetail = () => {
+    const { editClusterName } = this.props;
+    if (editClusterName) {
+      getClusterDetails({ clusterName: editClusterName }).then((re) => {
+        console.log(re);
+      });
+    }
+  };
+
   onClose = () => {
-    this.props.setVisible(false);
+    this.props.onClose();
     this.resetField();
   };
 
   onOk = () => {
-    const { page, pageSize, query = '' } = this.props;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      const { name, description, dashboardURL, kubeConfig } = values;
-      const params = {
-        name,
-        description,
-        dashboardURL,
-        kubeConfig,
-        icon: '',
-        page,
-        pageSize,
-        query,
-      };
       this.props.dispatch({
         type: 'clusters/createCluster',
-        payload: params,
+        payload: values,
+        callback: () => {
+          Message.success(<Translation>cluster add success</Translation>);
+          this.resetField();
+          this.props.onOK();
+        },
       });
     });
-
-    this.props.setVisible(false);
-    this.resetField();
   };
 
   resetField() {
@@ -99,6 +102,7 @@ class AddClustDialog extends React.Component<Props, State> {
 
   render() {
     const { visible } = this.props;
+    const { editMode } = this.state;
     const {
       name,
       alias,
@@ -126,7 +130,7 @@ class AddClustDialog extends React.Component<Props, State> {
       <div>
         <Dialog
           className="dialog-clust-wraper"
-          title={addClust}
+          title={editMode ? editCluster : addCluster}
           autoFocus={true}
           visible={visible}
           onOk={this.onOk}
@@ -142,6 +146,7 @@ class AddClustDialog extends React.Component<Props, State> {
                   <Input
                     htmlType="name"
                     name="name"
+                    disabled={editMode}
                     placeholder={namePlaceHold}
                     {...init('name', {
                       rules: [
@@ -194,7 +199,7 @@ class AddClustDialog extends React.Component<Props, State> {
                       rules: [
                         {
                           required: false,
-                          pattern: urlRegular,
+                          format: 'url',
                           message: 'Input according to URL specification',
                         },
                       ],

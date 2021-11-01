@@ -17,8 +17,8 @@ export function getAddonRegistrysList(params: any) {
   return get(addonRegistrys, { params: params }).then((res) => res);
 }
 
-export function createAddonRegistrysList(params: any) {
-  return post(addonRegistrys, params).then((res) => res);
+export function createAddonRegistry(params: any) {
+  return post(addonRegistrys, params);
 }
 
 export function deleteAddonRegistrysList(params: any) {

@@ -12,6 +12,7 @@ import {
   PLEASE_CHOSE,
 } from '../../../../constants';
 import { checkName, ACKCLusterStatus } from '../../../../utils/common';
+import { getCloudClustersList } from '../../../../api/cluster';
 import './index.less';
 
 type Props = {
@@ -76,8 +77,10 @@ class CloudServiceDialog extends React.Component<Props, State> {
       this.props.dispatch({
         type: 'clusters/getCloudClustersList',
         payload: params,
+        callback: () => {
+          this.setState({ choseInput: false });
+        },
       });
-      this.setState({ choseInput: false });
     });
   };
 

@@ -3,8 +3,10 @@ import { connect } from 'dva';
 import Title from '../../components/ListTitle';
 import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
+import AppDialog from './components/AddAppDialog';
 import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   dispatch: ({}) => {};
@@ -12,7 +14,9 @@ type Props = {
   namespaceList: [];
   clusterList?: [];
 };
-type State = {};
+type State = {
+  showAddApplication: boolean;
+};
 
 @connect((store: any) => {
   return { ...store.application, ...store.clusters };
@@ -20,6 +24,9 @@ type State = {};
 class Application extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.state = {
+      showAddApplication: false,
+    };
   }
 
   componentDidMount() {
@@ -50,16 +57,16 @@ class Application extends Component<Props, State> {
 
   render() {
     const { applicationList, namespaceList, clusterList, dispatch } = this.props;
+    const { showAddApplication } = this.state;
     return (
       <div>
         <Title
           title="App Manager"
           subTitle="App ManagerSubTitle"
-          btnName="Add App"
-          dialogName={APPLICATION_PATH}
-          namespaceList={namespaceList}
-          clusterList={clusterList}
-          dispatch={dispatch}
+          addButtonTitle="Add App"
+          addButtonClick={() => {
+            this.setState({ showAddApplication: true });
+          }}
         />
 
         <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
@@ -69,6 +76,17 @@ class Application extends Component<Props, State> {
           path={APPLICATION_PATH}
           workFlowPath={WORKFLOWS_PATH}
         />
+        <If condition={showAddApplication}>
+          <AppDialog
+            visible={showAddApplication}
+            setVisible={(visible) => {
+              this.setState({ showAddApplication: visible });
+            }}
+            dispatch={dispatch}
+            namespaceList={namespaceList}
+            clusterList={clusterList}
+          />
+        </If>
       </div>
     );
   }

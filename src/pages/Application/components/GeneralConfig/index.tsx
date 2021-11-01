@@ -3,7 +3,9 @@ import { Grid, Form, Input, Select, Field } from '@b-design/ui';
 import NameSpaceForm from './namespace-form';
 import EnvPlan from '../../../../extends/EnvPlan';
 import { addAppDialog } from '../../constants';
+import { checkName } from '../../../../utils/common';
 import './index.less';
+import Translation from '../../../../components/Translation';
 
 type Props = {
   visible: boolean;
@@ -110,34 +112,72 @@ class GeneralConfig extends React.Component<Props, State> {
     return (
       <div>
         <Form {...formItemLayout} field={this.field}>
-          <FormItem {...formItemLayout} label={name} labelTextAlign="left" required={true}>
-            <Input
-              htmlType="name"
-              name="name"
-              maxLength={32}
-              placeholder={namePlacehold}
-              {...init('name')}
-            />
-          </FormItem>
-
-          <NameSpaceForm
-            formItemLayout={formItemLayout}
-            field={this.field}
-            namespaceList={namespaceList}
-          />
-
-          <FormItem {...formItemLayout} label={ENVPLACEHOLD} labelTextAlign="left" required={true}>
-            <EnvPlan clusterList={clusterList} ref={this.envBind} />
-          </FormItem>
-
-          <FormItem {...formItemLayout} label={describe} labelTextAlign="left" required={true}>
-            <Input
-              htmlType="describe"
-              name="describe"
-              {...init('describe')}
-              placeholder={describePlacehold}
-            />
-          </FormItem>
+          <Row>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <FormItem label={name} labelTextAlign="left" required={true}>
+                <Input
+                  htmlType="name"
+                  name="name"
+                  maxLength={32}
+                  placeholder={namePlacehold}
+                  {...init('name', {
+                    rules: [
+                      {
+                        required: true,
+                        pattern: checkName,
+                        message: 'Please enter a valid application name',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+            </Col>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>Alias</Translation>}>
+                <Input
+                  name="alias"
+                  placeholder={'Give your app a more recognizable name'}
+                  {...init('alias', {
+                    rules: [
+                      {
+                        minLength: 2,
+                        maxLength: 64,
+                        message: 'Enter a string of 2 to 64 characters.',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <NameSpaceForm field={this.field} namespaceList={namespaceList} />
+            </Col>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <FormItem label={describe}>
+                <Input
+                  name="description"
+                  placeholder={describePlacehold}
+                  {...init('description', {
+                    rules: [
+                      {
+                        maxLength: 128,
+                        message: 'Enter a description less than 128 characters.',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <FormItem label={ENVPLACEHOLD} required={true}>
+                <EnvPlan clusterList={clusterList} ref={this.envBind} />
+              </FormItem>
+            </Col>
+          </Row>
         </Form>
       </div>
     );

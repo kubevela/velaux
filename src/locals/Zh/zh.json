@@ -55,7 +55,7 @@
   "Status components": "有状态组件",
   "Rds components": "RDS组件",
   "Cloud redis": "云Redis",
-  "Add cluster": "新增集群",
+  "Add Cluster": "新增集群",
   "Cluster management": "集群管理",
   "Introduction to cluster management": "集群管理介绍",
   "Addon in management": "插件管理",
@@ -76,5 +76,6 @@
   "Supplier": "供应商",
   "Abutment": "对接",
   "NextStep": "下一步",
-  "Upload Yaml File": "上传Yaml文件"
+  "Upload Yaml File": "上传Yaml文件",
+  "Addon Registry Manage": "插件仓库管理"
 }
