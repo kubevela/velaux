@@ -1,0 +1,41 @@
+@primaryColor: #0064c8;
+@whiteColor: white;
+@blackColor: black;
+.group-container {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  .group-title-container {
+    position: relative;
+    padding: 0 10px;
+    font-weight: bold;
+    font-size: 18px;
+    background-color: transparent;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.12s;
+
+    .group-title-desc {
+      font-weight: normal;
+      font-size: 12px;
+    }
+    .icon {
+      position: absolute;
+      top: 12px;
+      right: 10px;
+    }
+    .next-icon-arrow-up {
+      &::before {
+        font-size: 12px !important;
+      }
+    }
+  }
+  .group-box {
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 20px;
+    background-color: #eee;
+    border-radius: 5px;
+  }
+}

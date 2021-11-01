@@ -30,7 +30,7 @@ class DefinitionCode extends React.Component<Props, State> {
     const {
       containerId,
       value = '',
-      language = 'yaml',
+      language,
       readOnly,
       onChange,
       fileUrl = `//b.txt`,

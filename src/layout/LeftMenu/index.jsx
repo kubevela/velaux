@@ -13,8 +13,11 @@ const LeftMenu = (data, context) => {
     if (item.children) {
       const childrenArr = item.children.map((childrenItem) => {
         return (
-          <li className={childrenItem.className ? 'menu-item-active' : 'menu-item'}>
-            <Link to={childrenItem.link}>
+          <li className="nav-item">
+            <Link
+              to={childrenItem.link}
+              className={childrenItem.className ? 'menu-item-active' : 'menu-item'}
+            >
               <div>
                 <Icon type={childrenItem.iconType} />
                 <span className={'menu-item-text'}>
@@ -28,11 +31,11 @@ const LeftMenu = (data, context) => {
       ele.push(childrenArr);
     }
     return (
-      <li className="first-nav" key={item.navName}>
-        <div className="padding-left-20">
+      <li className="nav-container" key={item.navName}>
+        <div className="main-nav padding-left-32">
           <Translation>{item.navName}</Translation>
         </div>
-        <ul>{ele}</ul>
+        {ele.length > 0 ? <ul className="subnav-wrapper">{ele}</ul> : null}
       </li>
     );
   });
@@ -40,7 +43,7 @@ const LeftMenu = (data, context) => {
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       <div className="slide-wraper">
-        <ul className="ul-wraper margin-top-5">{childrenSider}</ul>
+        <ul className="ul-wraper">{childrenSider}</ul>
       </div>
     </div>
   );
