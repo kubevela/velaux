@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import Translation from '../components/Translation';
 
-export const addClust = <Translation>Add cluster</Translation>;
-export const clustTitle = <Translation>Cluster management</Translation>;
+export const addCluster = <Translation>Add Cluster</Translation>;
+export const editCluster = <Translation>Edit Cluster</Translation>;
+export const clustTitle = <Translation>Cluster Management</Translation>;
 export const clustSubTitle = <Translation>Introduction to cluster management</Translation>;
 export const cloudServerTitle = <Translation>Connecting clusters from cloud services</Translation>;
 export const UPLOADYMALFILE = <Translation>Upload Yaml File</Translation>;

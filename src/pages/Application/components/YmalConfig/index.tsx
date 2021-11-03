@@ -5,6 +5,9 @@ import { addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import NameSpaceForm from '../GeneralConfig/namespace-form';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import defineTheme from '../../../../components/DefinitionCode/theme';
+import { checkName } from '../../../../utils/common';
+import Translation from '../../../../components/Translation';
+const { Row, Col } = Grid;
 
 type Props = {
   visible: boolean;
@@ -105,45 +108,89 @@ class YmalConfig extends React.Component<Props> {
     return (
       <div>
         <Form {...formItemLayout} field={this.field}>
-          <FormItem {...formItemLayout} label={name} labelTextAlign="left" required={true}>
-            <Input htmlType="name" name="name" placeholder={namePlacehold} {...init('name')} />
-          </FormItem>
+          <Row>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <FormItem label={name} labelTextAlign="left" required={true}>
+                <Input
+                  htmlType="name"
+                  name="name"
+                  maxLength={32}
+                  placeholder={namePlacehold}
+                  {...init('name', {
+                    rules: [
+                      {
+                        required: true,
+                        pattern: checkName,
+                        message: 'Please enter a valid application name',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+            </Col>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>Alias</Translation>}>
+                <Input
+                  name="alias"
+                  placeholder={'Give your app a more recognizable name'}
+                  {...init('alias', {
+                    rules: [
+                      {
+                        minLength: 2,
+                        maxLength: 64,
+                        message: 'Enter a string of 2 to 64 characters.',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <NameSpaceForm field={this.field} namespaceList={namespaceList} />
+            </Col>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <FormItem label={describe}>
+                <Input
+                  name="description"
+                  placeholder={describePlacehold}
+                  {...init('description', {
+                    rules: [
+                      {
+                        maxLength: 128,
+                        message: 'Enter a description less than 128 characters.',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <FormItem label={'ApplicationYmal'} required={true}>
+                <Upload request={this.customRequest}>
+                  <Button text type="normal" className="padding-left-0">
+                    <Icon type="cloudupload" />
+                    {UPLOADYMALFILE}
+                  </Button>
+                </Upload>
 
-          <NameSpaceForm
-            formItemLayout={formItemLayout}
-            field={this.field}
-            namespaceList={namespaceList}
-          />
-
-          <FormItem {...formItemLayout} label={describe} labelTextAlign="left" required={true}>
-            <Input
-              htmlType="describe"
-              name="describe"
-              {...init('describe')}
-              placeholder={describePlacehold}
-            />
-          </FormItem>
-
-          <FormItem label={'ApplicationYmal'} required={true}>
-            <Upload request={this.customRequest}>
-              <Button text type="normal" className="padding-left-0">
-                <Icon type="cloudupload" />
-                {UPLOADYMALFILE}
-              </Button>
-            </Upload>
-
-            <div id="guide-code" className="guide-code">
-              <DefinitionCode
-                containerId="guide-code"
-                language={'yaml'}
-                readOnly={false}
-                defineTheme={defineTheme}
-                {...init('kubeConfig')}
-                value={valueInfo}
-                ref={this.DefinitionCodeRef}
-              />
-            </div>
-          </FormItem>
+                <div id="guide-code" className="guide-code">
+                  <DefinitionCode
+                    containerId="guide-code"
+                    language={'yaml'}
+                    readOnly={false}
+                    defineTheme={defineTheme}
+                    {...init('kubeConfig')}
+                    value={valueInfo}
+                    ref={this.DefinitionCodeRef}
+                  />
+                </div>
+              </FormItem>
+            </Col>
+          </Row>
         </Form>
       </div>
     );

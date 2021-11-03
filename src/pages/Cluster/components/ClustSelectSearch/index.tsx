@@ -22,12 +22,14 @@ class InputSearch extends React.Component<Props, State> {
   }
 
   handleChangName = (value: string) => {
-    this.setState(
-      {
-        inputValue: value,
-      },
-      this.props.getChildCompentQuery(value),
-    );
+    this.setState({
+      inputValue: value,
+    });
+  };
+
+  handleClickSearch = () => {
+    const { inputValue } = this.state;
+    this.props.getChildCompentQuery(inputValue);
   };
 
   render() {
@@ -39,10 +41,19 @@ class InputSearch extends React.Component<Props, State> {
       <Row className="cluster-input-wraper">
         <Col span="24">
           <Input
+            innerAfter={
+              <Icon
+                type="search"
+                size="xs"
+                onClick={this.handleClickSearch}
+                style={{ margin: 4 }}
+              />
+            }
+            placeholder={'Search by name and description'}
             onChange={this.handleChangName}
-            placeholder={clusterPlacehole}
-            className="item"
+            onPressEnter={this.handleClickSearch}
             value={inputValue}
+            className="item"
           />
         </Col>
       </Row>

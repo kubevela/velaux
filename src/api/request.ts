@@ -9,6 +9,7 @@ import { getMessage } from './status';
 import { baseURL } from './config';
 import { Message } from '@b-design/ui';
 import qs from 'qs';
+import { handleError } from '../utils/errors';
 
 export const axiosInstance: AxiosInstance = axios.create({
   baseURL: baseURL,
@@ -60,7 +61,7 @@ export const post = (url: string, params: any) => {
     })
     .catch((err) => {
       if (err.BusinessCode) {
-        Message.error(`${err.BusinessCode}:${err.Message}`);
+        handleError(err);
       } else {
         Message.error(getMessage(503));
       }

@@ -1,4 +1,4 @@
-import { post, get } from './request';
+import { post, get, rdelete } from './request';
 import {
   cluster_mock,
   getClusterDetails_mock,
@@ -23,7 +23,11 @@ export function createCluster(params: any) {
   return post(url, params).then((res) => res);
 }
 
-export function getClusterDetails(params: any) {
+export function deleteCluster(params: { clusterName: string }) {
+  return rdelete(`${cluster}/${params.clusterName}`, params);
+}
+
+export function getClusterDetails(params: { clusterName: string }) {
   const url = isMock ? `${getClusterDetails_mock}` : `${cluster}/${params.clusterName}`;
   return get(url, params).then((res) => res);
 }

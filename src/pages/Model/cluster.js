@@ -34,18 +34,17 @@ export default {
       yield put({ type: 'updateCLusterList', payload: result.clusters || [] });
     },
     *createCluster(action, { call, put }) {
-      const { page, pageSize, query } = action.payload;
-      const params = {
-        query,
-        page,
-        pageSize,
-      };
       const result = yield call(createCluster, action.payload);
-      yield put({ type: 'getClusterList', payload: params });
+      if (action.callback) {
+        action.callback(result)
+      }
     },
     *getCloudClustersList(action, { call, put }) {
       const result = yield call(getCloudClustersList, action.payload);
       yield put({ type: 'updateCloudClusters', payload: result });
+      if (action.callback) {
+        action.callback(result)
+      }
     },
     *connectcloudCluster(action, { call, put }) {
       const { params, resolve } = action.payload;
