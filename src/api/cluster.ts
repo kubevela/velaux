@@ -1,4 +1,4 @@
-import { post, get, rdelete } from './request';
+import { post, get, rdelete, put } from './request';
 import {
   cluster_mock,
   getClusterDetails_mock,
@@ -7,6 +7,7 @@ import {
 } from './devLink';
 import { cluster } from './productionLink';
 import { getDomain } from '../utils/common';
+import { CreateCluster } from '../interface/cluster';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
@@ -16,11 +17,12 @@ export function getClusterList(params: any) {
   return get(url, { params: params }).then((res) => res);
 }
 
-export function createCluster(params: any) {
-  delete params.page;
-  delete params.pageSize;
-  delete params.query;
+export function createCluster(params: CreateCluster) {
   return post(url, params).then((res) => res);
+}
+
+export function updateCluster(params: CreateCluster) {
+  return put(url + '/' + params.name, params);
 }
 
 export function deleteCluster(params: { clusterName: string }) {

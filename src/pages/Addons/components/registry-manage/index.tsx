@@ -14,7 +14,7 @@ import {
 import Translation from '../../../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import { checkName } from '../../../../utils/common';
-import { createAddonRegistry } from '../../../../api/addons';
+import { createAddonRegistry, deleteAddonRegistry } from '../../../../api/addons';
 import { handleError } from '../../../../utils/errors';
 
 const { Row, Col } = Grid;
@@ -50,9 +50,16 @@ class RegistryManageDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      createAddonRegistry(values)
-        .then((res) => {
-          console.log(res);
+      const { name, url, path, token } = values;
+      createAddonRegistry({
+        name: name,
+        git: {
+          url: url,
+          path: path,
+          token: token,
+        },
+      })
+        .then(() => {
           Message.success(<Translation>add success</Translation>);
           this.setState({ showAdd: false });
           syncRegistrys();
@@ -60,6 +67,14 @@ class RegistryManageDialog extends React.Component<Props, State> {
         .catch((err) => {
           handleError(err);
         });
+    });
+  };
+
+  onDeleteRegistry = (name: string) => {
+    const { syncRegistrys } = this.props;
+    deleteAddonRegistry({ name: name }).then((re) => {
+      Message.success(<Translation>delete success</Translation>);
+      syncRegistrys();
     });
   };
 
@@ -71,9 +86,18 @@ class RegistryManageDialog extends React.Component<Props, State> {
     const { visible, registrys } = this.props;
     const { showAdd } = this.state;
     const init = this.field.init;
-    const renderOper = () => {
+    const renderOper = (name: string) => {
       return (
-        <a onClick={() => {}}>
+        <a
+          onClick={() => {
+            Dialog.confirm({
+              content: 'Are you sure you want to delete?',
+              onOk: () => {
+                this.onDeleteRegistry(name);
+              },
+            });
+          }}
+        >
           <Translation>Remove</Translation>
         </a>
       );
@@ -129,7 +153,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     ></Input>
                   </Form.Item>
                 </Col>
-                <Col span={10} style={{ padding: '8px' }}>
+                <Col span={8} style={{ padding: '8px' }}>
                   <Form.Item
                     label={<Translation>URL</Translation>}
                     required
@@ -148,7 +172,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     ></Input>
                   </Form.Item>
                 </Col>
-                <Col span={6} style={{ padding: '8px' }}>
+                <Col span={4} style={{ padding: '8px' }}>
                   <Form.Item
                     label={<Translation>Path</Translation>}
                     help="The addon path in the repo"
@@ -165,8 +189,30 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     ></Input>
                   </Form.Item>
                 </Col>
-                <Col span={4} style={{ padding: '43px 8px 8px 8px' }}>
-                  <Button type="secondary" onClick={this.onOk}>
+                <Col span={5} style={{ padding: '8px' }}>
+                  <Form.Item
+                    label={<Translation>Token</Translation>}
+                    help="Github Personal access token"
+                  >
+                    <Input
+                      {...init('token', {
+                        rules: [
+                          {
+                            max: 128,
+                            message: 'The input string is too long',
+                          },
+                        ],
+                      })}
+                    ></Input>
+                  </Form.Item>
+                </Col>
+                <Col span={2} style={{ padding: '43px 8px 8px 8px' }}>
+                  <Button
+                    size="small"
+                    type="secondary"
+                    onClick={this.onOk}
+                    style={{ height: '36px' }}
+                  >
                     <Translation>Submit</Translation>
                   </Button>
                 </Col>

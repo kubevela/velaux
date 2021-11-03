@@ -16,7 +16,7 @@ export function getLeftSider(pathname) {
       children: [
         {
           className: isApplication,
-          link: '/applications',
+          link: '/applicationplans',
           iconType: 'layergroup-fill',
           navName: 'App Manager',
         },

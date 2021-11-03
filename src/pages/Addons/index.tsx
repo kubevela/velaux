@@ -61,7 +61,6 @@ class Addons extends React.Component<Props, State> {
 
   render() {
     const { addonsList = [], registryList = [], dispatch } = this.props;
-    console.log(registryList);
     const { showAddonDetail, addonName, showRegistryManage } = this.state;
     return (
       <div>

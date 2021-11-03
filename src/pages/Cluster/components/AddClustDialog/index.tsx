@@ -1,12 +1,24 @@
 import React from 'react';
-import { Button, Message, Grid, Dialog, Form, Input, Upload, Field, Icon } from '@b-design/ui';
+import {
+  Button,
+  Message,
+  Grid,
+  Dialog,
+  Form,
+  Input,
+  Upload,
+  Field,
+  Icon,
+  Loading,
+} from '@b-design/ui';
 import { addCluster, editCluster, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import defineTheme from '../../../../components/DefinitionCode/theme';
 import { checkName } from '../../../../utils/common';
-import { getClusterDetails } from '../../../../api/cluster';
+import { getClusterDetails, updateCluster } from '../../../../api/cluster';
 import './index.less';
 import Translation from '../../../../components/Translation';
+import { Cluster } from '../../../../interface/cluster';
 const { Col, Row } = Grid;
 
 type Props = {
@@ -22,7 +34,7 @@ type Props = {
 
 type State = {
   editMode: boolean;
-  cluster: {};
+  cluster: Cluster;
 };
 
 class AddClustDialog extends React.Component<Props, State> {
@@ -33,8 +45,11 @@ class AddClustDialog extends React.Component<Props, State> {
     this.field = new Field(this);
     this.DefinitionCodeRef = React.createRef();
     this.state = {
-      editMode: props.editClusterName !== '',
-      cluster: {},
+      editMode: false,
+      cluster: {
+        name: '',
+        kubeConfig: '',
+      },
     };
   }
 
@@ -46,7 +61,7 @@ class AddClustDialog extends React.Component<Props, State> {
     const { editClusterName } = this.props;
     if (editClusterName) {
       getClusterDetails({ clusterName: editClusterName }).then((re) => {
-        console.log(re);
+        this.setState({ cluster: re, editMode: true });
       });
     }
   };
@@ -57,19 +72,36 @@ class AddClustDialog extends React.Component<Props, State> {
   };
 
   onOk = () => {
+    const { editMode, cluster } = this.state;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      this.props.dispatch({
-        type: 'clusters/createCluster',
-        payload: values,
-        callback: () => {
-          Message.success(<Translation>cluster add success</Translation>);
+      if (editMode) {
+        updateCluster({
+          name: cluster.name,
+          alias: values.alias,
+          icon: cluster.icon,
+          description: values.description,
+          dashboardURL: values.dashboardURL,
+          kubeConfig: values.kubeConfig,
+          labels: cluster.labels,
+        }).then(() => {
+          Message.success(<Translation>cluster update success</Translation>);
           this.resetField();
           this.props.onOK();
-        },
-      });
+        });
+      } else {
+        this.props.dispatch({
+          type: 'clusters/createCluster',
+          payload: values,
+          callback: () => {
+            Message.success(<Translation>cluster add success</Translation>);
+            this.resetField();
+            this.props.onOK();
+          },
+        });
+      }
     });
   };
 
@@ -101,8 +133,8 @@ class AddClustDialog extends React.Component<Props, State> {
   };
 
   render() {
-    const { visible } = this.props;
-    const { editMode } = this.state;
+    const { visible, editClusterName } = this.props;
+    const { editMode, cluster } = this.state;
     const {
       name,
       alias,
@@ -125,7 +157,10 @@ class AddClustDialog extends React.Component<Props, State> {
     };
     const init = this.field.init;
     const values: { kubeConfig: string } = this.field.getValues();
-    const valueInfo = values.kubeConfig || '';
+    const valueInfo = cluster.kubeConfig || values.kubeConfig || '';
+    if (editClusterName && !editMode) {
+      return <Loading></Loading>;
+    }
     return (
       <div>
         <Dialog
@@ -144,11 +179,11 @@ class AddClustDialog extends React.Component<Props, State> {
               <Col span={12} style={{ padding: '0 8px' }}>
                 <FormItem label={name} required>
                   <Input
-                    htmlType="name"
                     name="name"
                     disabled={editMode}
                     placeholder={namePlaceHold}
                     {...init('name', {
+                      initValue: cluster.name,
                       rules: [
                         {
                           required: true,
@@ -166,6 +201,7 @@ class AddClustDialog extends React.Component<Props, State> {
                     name="alias"
                     placeholder={aliasPlaceHold}
                     {...init('alias', {
+                      initValue: cluster.alias,
                       rules: [
                         {
                           minLength: 2,
@@ -182,20 +218,28 @@ class AddClustDialog extends React.Component<Props, State> {
               <Col span={12} style={{ padding: '0 8px' }}>
                 <FormItem label={describe}>
                   <Input
-                    htmlType="describe"
-                    name="describe"
+                    defaultValue={cluster.description}
+                    name="description"
                     placeholder={describePlaceHold}
-                    {...init('description')}
+                    {...init('description', {
+                      initValue: cluster.description,
+                      rules: [
+                        {
+                          maxLength: 256,
+                          message: 'Enter a description that contains less than 256 characters.',
+                        },
+                      ],
+                    })}
                   />
                 </FormItem>
               </Col>
               <Col span={12} style={{ padding: '0 8px' }}>
                 <FormItem label={dashboardURL}>
                   <Input
-                    htmlType="dashboardURL"
                     name="dashboardURL"
                     placeholder={dashboarPlaceHold}
                     {...init('dashboardURL', {
+                      initValue: cluster.dashboardURL,
                       rules: [
                         {
                           required: false,
@@ -224,7 +268,9 @@ class AddClustDialog extends React.Component<Props, State> {
                       language={'yaml'}
                       readOnly={false}
                       defineTheme={defineTheme}
-                      {...init('kubeConfig')}
+                      {...init('kubeConfig', {
+                        initValue: cluster.kubeConfig,
+                      })}
                       value={valueInfo}
                       ref={this.DefinitionCodeRef}
                     />

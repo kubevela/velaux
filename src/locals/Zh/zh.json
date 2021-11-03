@@ -1,6 +1,13 @@
 {
+  "All": "全部",
+  "Submit": "提交",
   "Yes": "是",
   "No": "否",
+  "Add": "添加",
+  "Remove": "删除",
+  "Name": "名称",
+  "Path": "路径",
+  "Actions": "操作",
   "file path": "文件路径",
   "Add item": "添加项",
   "Save the configuration successfully": "保存配置成功",
@@ -77,5 +84,6 @@
   "Abutment": "对接",
   "NextStep": "下一步",
   "Upload Yaml File": "上传Yaml文件",
-  "Addon Registry Manage": "插件仓库管理"
+  "Addon Registry Manage": "插件仓库管理",
+  "Edit Cluster": "集群信息编辑"
 }

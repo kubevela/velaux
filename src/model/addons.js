@@ -1,4 +1,4 @@
-import { getAddonsList, getAddonRegistrysList } from '../../api/addons';
+import { getAddonsList, getAddonRegistrysList } from '../api/addons';
 export default {
   namespace: 'addons',
   state: {
@@ -9,30 +9,34 @@ export default {
     updateAddonsList(state, { type, payload }) {
       return {
         ...state,
-        addonsList: payload,
+        addonsList: payload || [],
       };
     },
     updateAddonRegistrysList(state, { type, payload }) {
       return {
         ...state,
-        registryList: payload,
+        registryList: payload || [],
       };
     },
   },
   effects: {
     *getAddonsList(action, { call, put }) {
       const result = yield call(getAddonsList, action.payload);
-      const addonsList = getAddonsCardList(result || []);
-      yield put({ type: 'updateAddonsList', payload: addonsList });
+      const addonsList = getAddonsCardList(result);
+      yield put({ type: 'updateAddonsList', payload: addonsList || [] });
     },
     *getAddonRegistrysList(action, { call, put }) {
       const result = yield call(getAddonRegistrysList, action.payload);
-      yield put({ type: 'updateAddonRegistrysList', payload: result || [] });
+      const registrys = result ? result.registrys : [];
+      yield put({ type: 'updateAddonRegistrysList', payload: registrys || [] });
     },
   },
 };
 
 function getAddonsCardList(data) {
+  if (!data) {
+    return [];
+  }
   const addonsList = data.addons;
   if (addonsList === null) {
     return [];
