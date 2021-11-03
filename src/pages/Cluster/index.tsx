@@ -121,12 +121,12 @@ class Cluster extends React.Component<Props, State> {
               <CloudServiceDialog
                 visible={showAddCloudCluster}
                 setVisible={(visible) => {
+                  this.getClusterList();
                   this.setState({ showAddCloudCluster: visible });
                 }}
                 setCloudService={(visible) => {
                   this.setState({ showAddCloudCluster: visible });
                 }}
-                cloudClusters={cloudClusters}
                 dispatch={dispatch}
               />
             </If>
@@ -138,11 +138,12 @@ class Cluster extends React.Component<Props, State> {
                 visible={showAddCluster}
                 editClusterName={editClusterName}
                 onClose={() => {
-                  this.setState({ showAddCluster: false });
+                  this.getClusterList();
+                  this.setState({ showAddCluster: false, editClusterName: '' });
                 }}
                 onOK={() => {
                   this.getClusterList();
-                  this.setState({ showAddCluster: false });
+                  this.setState({ showAddCluster: false, editClusterName: '' });
                 }}
                 dispatch={dispatch}
               />

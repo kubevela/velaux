@@ -52,7 +52,7 @@ class CardContent extends React.Component<any, State> {
           const { name, status, icon, description, createTime, href, btnContent } = item;
           return (
             <Col span="6" className={`card-content-wraper`} key={index}>
-              <Link to={`/applications/${name}`}>
+              <Link to={`/applicationplans/${name}`}>
                 <Card contentHeight="auto">
                   <img src={imgSrc} alt="app-card" />
                   <div className="content-wraper background-F9F8FF">

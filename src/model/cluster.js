@@ -3,7 +3,7 @@ import {
   createCluster,
   getCloudClustersList,
   connectcloudCluster,
-} from '../../api/cluster';
+} from '../api/cluster';
 
 export default {
   namespace: 'clusters',
@@ -36,14 +36,7 @@ export default {
     *createCluster(action, { call, put }) {
       const result = yield call(createCluster, action.payload);
       if (action.callback) {
-        action.callback(result)
-      }
-    },
-    *getCloudClustersList(action, { call, put }) {
-      const result = yield call(getCloudClustersList, action.payload);
-      yield put({ type: 'updateCloudClusters', payload: result });
-      if (action.callback) {
-        action.callback(result)
+        action.callback(result);
       }
     },
     *connectcloudCluster(action, { call, put }) {

@@ -60,7 +60,9 @@ export const post = (url: string, params: any) => {
       return res.data;
     })
     .catch((err) => {
-      if (err.BusinessCode) {
+      if (params.customError) {
+        Promise.reject(err);
+      } else if (err.BusinessCode) {
         handleError(err);
       } else {
         Message.error(getMessage(503));
@@ -76,7 +78,7 @@ export const get = (url: string, params: any) => {
     })
     .catch((err) => {
       if (err.BusinessCode) {
-        Message.error(`${err.BusinessCode}:${err.Message}`);
+        handleError(err);
       } else {
         Message.error(getMessage(503));
       }
@@ -91,7 +93,22 @@ export const rdelete = (url: string, params: any) => {
     })
     .catch((err) => {
       if (err.BusinessCode) {
-        Message.error(`${err.BusinessCode}:${err.Message}`);
+        handleError(err);
+      } else {
+        Message.error(getMessage(503));
+      }
+    });
+};
+
+export const put = (url: string, params: any) => {
+  return axiosInstance
+    .put(url, params)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      if (err.BusinessCode) {
+        handleError(err);
       } else {
         Message.error(getMessage(503));
       }

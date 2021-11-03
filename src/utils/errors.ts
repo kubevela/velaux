@@ -15,12 +15,13 @@ limitations under the License.
 */
 
 import { Message } from '@b-design/ui';
-
+import { useTranslation } from 'react-i18next';
 interface APIError {
-  businessCode: Number;
-  message: string;
+  BusinessCode: Number;
+  Message: string;
 }
 export function handleError(err: APIError) {
+  console.log(err);
   // TODO: Handle errors based on businessCode
-  Message.error(err.message);
+  Message.error(err.Message);
 }

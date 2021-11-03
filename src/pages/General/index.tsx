@@ -76,7 +76,7 @@ class General extends Component<Props, State> {
   };
 
   handleSelect = (e: string) => {
-    this.props.history.push(`/applications/${e}`, {});
+    this.props.history.push(`/applicationplans/${e}`, {});
     this.setState(
       {
         value: e,

@@ -61,63 +61,77 @@ class CardContent extends React.Component<Props, State> {
                       </If>
                       <If condition={!dashboardURL}>{showName}</If>
                     </Col>
-                    <Col span={4} className="dot-wraper">
-                      <Dropdown
-                        trigger={
-                          <svg
-                            className={'action'}
-                            viewBox="0 0 1024 1024"
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            p-id="3448"
-                          >
-                            <path
-                              d="M365.066 197.39c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
-                              fill="#a6a6a6"
-                              p-id="3449"
-                            ></path>
-                            <path
-                              d="M365.066 512c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
-                              fill="#a6a6a6"
-                              p-id="3450"
-                            ></path>
-                            <path
-                              d="M365.066 826.61c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
-                              fill="#a6a6a6"
-                              p-id="3451"
-                            ></path>
-                          </svg>
-                        }
+                    <If condition={name != 'local'}>
+                      <Col span={4} className="dot-wraper">
+                        <Dropdown
+                          trigger={
+                            <svg
+                              className={'action'}
+                              viewBox="0 0 1024 1024"
+                              version="1.1"
+                              xmlns="http://www.w3.org/2000/svg"
+                              p-id="3448"
+                            >
+                              <path
+                                d="M365.066 197.39c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
+                                fill="#a6a6a6"
+                                p-id="3449"
+                              ></path>
+                              <path
+                                d="M365.066 512c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
+                                fill="#a6a6a6"
+                                p-id="3450"
+                              ></path>
+                              <path
+                                d="M365.066 826.61c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
+                                fill="#a6a6a6"
+                                p-id="3451"
+                              ></path>
+                            </svg>
+                          }
+                        >
+                          <Menu>
+                            <Menu.Item
+                              onClick={() => {
+                                this.editCluster(name);
+                              }}
+                            >
+                              <Translation>Edit</Translation>
+                            </Menu.Item>
+                            <Menu.Item
+                              onClick={() => {
+                                Dialog.confirm({
+                                  type: 'confirm',
+                                  content: (
+                                    <Translation>
+                                      Unrecoverable after deletion. Are you sure you want to delete
+                                      it?
+                                    </Translation>
+                                  ),
+                                  onOk: () => {
+                                    this.onDeleteCluster(name);
+                                  },
+                                });
+                              }}
+                            >
+                              <Translation>Delete</Translation>
+                            </Menu.Item>
+                          </Menu>
+                        </Dropdown>
+                      </Col>
+                    </If>
+                    <If condition={name === 'local'}>
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          color: '#a6a6a6',
+                          textAlign: 'right',
+                          width: '100%',
+                        }}
                       >
-                        <Menu>
-                          <Menu.Item
-                            onClick={() => {
-                              this.editCluster(name);
-                            }}
-                          >
-                            <Translation>Edit</Translation>
-                          </Menu.Item>
-                          <Menu.Item
-                            onClick={() => {
-                              Dialog.confirm({
-                                type: 'confirm',
-                                content: (
-                                  <Translation>
-                                    Unrecoverable after deletion. Are you sure you want to delete
-                                    it?
-                                  </Translation>
-                                ),
-                                onOk: () => {
-                                  this.onDeleteCluster(name);
-                                },
-                              });
-                            }}
-                          >
-                            <Translation>Delete</Translation>
-                          </Menu.Item>
-                        </Menu>
-                      </Dropdown>
-                    </Col>
+                        本地集群
+                      </span>
+                    </If>
                   </Row>
                   <Row className="content-main">
                     <h4 className="color595959 font-size-14">{description}</h4>

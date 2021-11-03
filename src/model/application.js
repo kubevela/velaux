@@ -4,9 +4,9 @@ import {
   createApplicationList,
   getApplicationDetails,
   getApplicationComponents,
-} from '../../api/application';
+} from '../api/application';
 
-import { getNamespaceList } from '../../api/namespace';
+import { getNamespaceList } from '../api/namespace';
 
 export default {
   namespace: 'application',
@@ -80,7 +80,7 @@ export default {
 };
 
 function getAppCardList(data) {
-  const applicationsList = data.applications;
+  const applicationsList = data.applicationplans;
   if (!applicationsList) {
     return [];
   }

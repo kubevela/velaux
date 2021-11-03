@@ -14,10 +14,10 @@ import {
 import { checkName, ACKCLusterStatus } from '../../../../utils/common';
 import { getCloudClustersList } from '../../../../api/cluster';
 import './index.less';
+import { handleError } from '../../../../utils/errors';
 
 type Props = {
   visible: boolean;
-  cloudClusters: [];
   setVisible: (visible: boolean) => void;
   setCloudService: (isCloudService: boolean) => void;
   t: (key: string) => {};
@@ -28,6 +28,7 @@ type State = {
   page: number;
   pageSize: number;
   choseInput: boolean;
+  cloudClusters: [];
 };
 type Record = {
   id: string;
@@ -50,6 +51,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       page: 1,
       pageSize: 10,
       choseInput: true,
+      cloudClusters: [],
     };
   }
 
@@ -73,14 +75,15 @@ class CloudServiceDialog extends React.Component<Props, State> {
         accessKeySecret: accessKeySecret,
         page,
         pageSize,
+        customError: true,
       };
-      this.props.dispatch({
-        type: 'clusters/getCloudClustersList',
-        payload: params,
-        callback: () => {
-          this.setState({ choseInput: false });
-        },
-      });
+      getCloudClustersList(params)
+        .then((re) => {
+          this.setState({ choseInput: false, cloudClusters: re.clusters });
+        })
+        .catch((err) => {
+          handleError(err);
+        });
     });
   };
 
@@ -97,7 +100,8 @@ class CloudServiceDialog extends React.Component<Props, State> {
       provider,
       accessKeyID: accessKeyID,
       accessKeySecret: accessKeySecret,
-      name,
+      alias: name,
+      name: id.substring(0, 16),
       description,
       clusterID: id,
       icon,
@@ -125,8 +129,8 @@ class CloudServiceDialog extends React.Component<Props, State> {
 
   render() {
     const init = this.field.init;
-    const { t, visible, cloudClusters } = this.props;
-    const { choseInput } = this.state;
+    const { t, visible } = this.props;
+    const { choseInput, cloudClusters } = this.state;
     const { Column } = Table;
     const PLEASE_ENTER_PLACE_HOLD = t(PLEASE_ENTER).toString();
     const PLEASE_CHOSE_PLACE_HOLD = t(PLEASE_CHOSE).toString();
@@ -246,7 +250,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
 
               <FormItem label={'AccessKey'} required={true}>
                 <Input
-                  htmlType="accessKeyID"
+                  htmlType="password"
                   name="accessKeyID"
                   placeholder={PLEASE_ENTER_PLACE_HOLD}
                   {...init('accessKeyID', {
@@ -262,7 +266,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
 
               <FormItem label={'AccessKeySecret'} required={true}>
                 <Input
-                  htmlType="accessKeySecret"
+                  htmlType="password"
                   name="accessKeySecret"
                   placeholder={PLEASE_ENTER_PLACE_HOLD}
                   {...init('accessKeySecret', {
