@@ -4,22 +4,25 @@ import Title from '../../components/ListTitle';
 import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
+import NoData from '../../components/Nodata';
 import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
-import '../../common.less';
+import { Loading } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
+import '../../common.less';
 
 type Props = {
   dispatch: ({}) => {};
   applicationList: [];
   namespaceList: [];
   clusterList?: [];
+  loading: { global: Boolean };
 };
 type State = {
   showAddApplication: boolean;
 };
 
 @connect((store: any) => {
-  return { ...store.application, ...store.clusters };
+  return { ...store.application, ...store.clusters, loading: store.loading };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -56,26 +59,36 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList, namespaceList, clusterList, dispatch } = this.props;
+    const { applicationList, namespaceList, clusterList, loading, dispatch } = this.props;
     const { showAddApplication } = this.state;
+    const isLoading = loading.global ? true : false;
     return (
       <div>
         <Title
-          title="App Manager"
-          subTitle="App ManagerSubTitle"
-          addButtonTitle="Add App"
+          title="Application delivery plan management"
+          subTitle="Manage your application delivery plan"
+          addButtonTitle="New application delivery plan"
           addButtonClick={() => {
             this.setState({ showAddApplication: true });
           }}
         />
+        <Loading tip="loading..." fullScreen visible={isLoading}>
+          <SelectSearch
+            namespaceList={namespaceList}
+            clusterList={clusterList}
+            dispatch={dispatch}
+          />
+          <CardContend
+            appContent={applicationList}
+            path={APPLICATION_PATH}
+            workFlowPath={WORKFLOWS_PATH}
+          />
+        </Loading>
 
-        <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
+        <If condition={!applicationList || applicationList.length == 0}>
+          <NoData width="300px" />
+        </If>
 
-        <CardContend
-          appContent={applicationList}
-          path={APPLICATION_PATH}
-          workFlowPath={WORKFLOWS_PATH}
-        />
         <If condition={showAddApplication}>
           <AppDialog
             visible={showAddApplication}

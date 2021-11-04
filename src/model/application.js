@@ -4,6 +4,10 @@ import {
   createApplicationList,
   getApplicationDetails,
   getApplicationComponents,
+  getPolicyList,
+  getComponentdefinitions,
+  getComponentDetails,
+  deployApplication,
 } from '../api/application';
 
 import { getNamespaceList } from '../api/namespace';
@@ -17,7 +21,9 @@ export default {
     searchAppName: '',
     namespaceList: [],
     applicationDetail: {},
-    topologyData: {},
+    components: [],
+    componentDefinitions: [],
+    componentDetails: {},
   },
   reducers: {
     update(state, { type, payload }) {
@@ -38,16 +44,34 @@ export default {
         applicationDetail: payload,
       };
     },
-    updateTopology(state, { type, payload }) {
+    updateComponents(state, { type, payload }) {
       return {
         ...state,
-        topologyData: payload,
+        components: payload,
       };
     },
     updateNameSpaceList(state, { type, payload }) {
       return {
         ...state,
         namespaceList: payload,
+      };
+    },
+    updatePoliciesList(state, { type, payload }) {
+      return {
+        ...state,
+        namespaceList: payload,
+      };
+    },
+    updateComponentDefinitions(state, { type, payload }) {
+      return {
+        ...state,
+        componentDefinitions: payload,
+      };
+    },
+    updateComponentDetails(state, { type, payload }) {
+      return {
+        ...state,
+        componentDetails: payload,
       };
     },
   },
@@ -69,12 +93,24 @@ export default {
     *getApplicationDetails(action, { call, put }) {
       const { urlParam } = action.payload;
       const result = yield call(getApplicationDetails, { name: urlParam });
-      yield put({ type: 'updateApplicationDetails', payload: result });
+      yield put({ type: 'updateApplicationDetails', payload: addBasicConfigField(result) });
     },
     *getApplicationComponents(action, { call, put }) {
+      const result = yield call(getApplicationComponents, action.payload);
+      yield put({ type: 'updateComponents', payload: result && result.componentplans });
+    },
+    *getPolicies(action, { call, put }) {
       const { urlParam } = action.payload;
-      const result = yield call(getApplicationComponents, { name: urlParam });
-      yield put({ type: 'updateTopology', payload: result });
+      const result = yield call(getPolicyList, { name: urlParam });
+      yield put({ type: 'updatePoliciesList', payload: result });
+    },
+    *getComponentdefinitions(action, { call, put }) {
+      const { urlParam } = action.payload;
+      const result = yield call(getComponentdefinitions, { envName: urlParam });
+      yield put({
+        type: 'updateComponentDefinitions',
+        payload: result && result.componentDefinitions,
+      });
     },
   },
 };
@@ -116,4 +152,12 @@ function getNamespace(data) {
     list.push(namespace);
   }
   return list;
+}
+
+function addBasicConfigField(data) {
+  if (data && Array.isArray(data.envBind)) {
+    data.envBind.unshift({ name: 'basisConfig' });
+    return data;
+  }
+  return { envBind: [] };
 }

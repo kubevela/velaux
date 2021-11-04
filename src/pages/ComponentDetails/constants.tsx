@@ -2,25 +2,7 @@ import React, { Component } from 'react';
 import Translation from '../../components/Translation';
 
 export const MANAGER_TITLE = <Translation>App Manager</Translation>;
-export const MANAGER_NAME = <Translation>App Name-</Translation>;
 export const OVERVIEW = <Translation>Overview</Translation>;
-export const DEPLOYMENT_UPDATE = <Translation>Deployment update</Translation>;
-export const PUBLISH_MODEL = <Translation>Publish model</Translation>;
-export const DEPLOYED = <Translation>Deployed</Translation>;
-export const VIEW_DETAILS = <Translation>View details</Translation>;
-export const SERVER_COMPONENTS = <Translation>Server components</Translation>;
-export const JOB_COMPONENTS = <Translation>Job components</Translation>;
-export const STATUS_COMPONENTS = <Translation>Status components</Translation>;
-export const RDS_COMPONENTS = <Translation>Rds components</Translation>;
-export const CLOUD_REDIS = <Translation>Cloud redis</Translation>;
-export const publishDialog = {
-  title: <Translation>Publish as application template</Translation>,
-  name: <Translation>Template name</Translation>,
-  namePlaceHold: 'Enter template name',
-  version: <Translation>Template version</Translation>,
-  versionPlaceHold: 'Enter version overview',
-};
-
 export const COMPONENT_NAME = <Translation>Component Name-</Translation>;
 export const RUNNING_INSTANCES = <Translation>Running instances</Translation>;
 export const LOG_QUERY = <Translation>Log query</Translation>;
@@ -32,42 +14,22 @@ export const DATA_INPUT = <Translation>Data input</Translation>;
 export const DATA_OUTPUT = <Translation>Data output</Translation>;
 export const OPERATING_CHARACTERISTICS = <Translation>Operating characteristics</Translation>;
 
-export const dataSourceAppNames = [
-  { value: 'SpringCloud', label: 'SpringCloud' },
-  { value: 'SpringCloud2', label: 'SpringCloud2' },
-  { value: 'SpringCloud3', label: 'SpringCloud3' },
-];
+export const BASIC_INFOMATION = <Translation>Basic information</Translation>;
+export const DEPLOYMENT_STATUS = <Translation>Deployment Status</Translation>;
+export const ENV_DISTRUIBUTION = <Translation>Env Distribution</Translation>;
+export const UPDATE_TIME = <Translation>Update Time</Translation>;
+export const CREATION_TIME = <Translation>Creation Time</Translation>;
+export const OWNING_APPLICATION = <Translation>Owning Application</Translation>;
+export const DEPLOYMENT_VERSION = <Translation>Deployment Version</Translation>;
+export const EDIT_CONFIGURATION = <Translation>Edit Configuration</Translation>;
+export const NEW_FEATURES = <Translation>New features</Translation>;
 
-export const componentsSourceNames = [
-  { value: 'Components1', label: 'Components1' },
-  { value: 'Components2', label: 'Components2' },
-  { value: 'Components3', label: 'Components3' },
-];
-
-export const componGroups = [
-  {
-    imgSrc: '../../assets/card.png',
-    title: SERVER_COMPONENTS,
-    id: 'server',
-  },
-  {
-    imgSrc: '../../assets/card.png',
-    title: JOB_COMPONENTS,
-    id: 'job',
-  },
-  {
-    imgSrc: '../../assets/card.png',
-    title: STATUS_COMPONENTS,
-    id: 'status',
-  },
-  {
-    imgSrc: '../../assets/card.png',
-    title: RDS_COMPONENTS,
-    id: 'reds',
-  },
-  {
-    imgSrc: '../../assets/card.png',
-    title: CLOUD_REDIS,
-    id: 'cloud_redis',
-  },
-];
+export const editBasicDialog = {
+  name: '应用名称',
+  namePlaceHold: '应用名称, 限制英文和中划线, 最大32字符',
+  project: '所属项目',
+  clusterBind: '集群绑定',
+  clustPlaceHold: '多选框, 选择需要部署的集群',
+  describe: '应用备注',
+  describePlaceHold: 'description',
+};

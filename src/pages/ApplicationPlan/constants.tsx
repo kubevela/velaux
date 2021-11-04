@@ -22,6 +22,9 @@ export const managerTitle = <Translation>App Manager</Translation>;
 export const managerName = '应用名称-';
 export const managerSubTitle = <Translation>App ManagerSubTitle</Translation>;
 export const addApp = <Translation>Add App</Translation>;
+export const NEW_APPLICATION_DELIVERY_PLAN = (
+  <Translation>New application delivery plan</Translation>
+);
 export const addAppDialog = {
   name: <Translation>App Name</Translation>,
   namePlaceHold: 'App Name placehold',

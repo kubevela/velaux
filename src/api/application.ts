@@ -11,7 +11,7 @@ import {
   getPolicyDetails_mock,
   createApplicationTemplate_mock,
 } from './devLink';
-import { application } from './productionLink';
+import { application, componentdefinition } from './productionLink';
 import { getDomain } from '../utils/common';
 
 const baseURLOject = getDomain();
@@ -32,27 +32,30 @@ export function getApplicationDetails(params: any) {
 }
 
 export function getApplicationComponents(params: any) {
+  const { name, envName } = params;
   const url = isMock
     ? `${getApplicationComponents_mock}`
-    : `${application}/${params.name}/components`;
+    : `${application}/${name}/componentplans?envName=${envName}`;
   return get(url, params).then((res) => res);
 }
 
 export function createApplicationComponent(params: any) {
+  const { name, body } = params;
   const url = isMock
     ? `${createApplicationComponent_mock}`
-    : `${application}/${params.name}/components`;
-  return post(url, params).then((res) => res);
+    : `${application}/${name}/componentplans`;
+  delete params.name;
+  return post(url, body).then((res) => res);
 }
 
 export function getComponentDetails(params: any) {
   const url = isMock
     ? `${getComponentDetails_mock}`
-    : `${application}/${params.name}/components/${params.componentName}`;
+    : `${application}/${params.name}/componentplans/${params.componentName}`;
   return post(url, params).then((res) => res);
 }
 
-export function updateApplication(params: any) {
+export function deployApplication(params: any) {
   const url = isMock ? `${updateApplication_mock}` : `${application}/${params.name}/deploy`;
   return post(url, params).then((res) => res);
 }
@@ -79,4 +82,11 @@ export function createApplicationTemplate(params: any) {
     ? `${createApplicationTemplate_mock}`
     : `${application}/${params.name}/template`;
   return post(url, params).then((res) => res);
+}
+
+export function getComponentdefinitions(params: any) {
+  const url = isMock
+    ? `${getPolicyDetails_mock}`
+    : `${componentdefinition}?envName=${params.envName}`;
+  return get(url, params).then((res) => res);
 }

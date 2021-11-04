@@ -36,16 +36,6 @@ class CardContent extends React.Component<any, State> {
     const { extendDotVisible, choseIndex } = this.state;
     const { appContent, path, workFlowPath } = this.props;
     const imgSrc = this.props.cardImg || Img;
-    if (appContent.length === 0) {
-      return (
-        <Row wrap={false}>
-          <h3 className="text-align-center height-400 width-full margin-top-20">
-            <Translation>No data</Translation>
-          </h3>
-        </Row>
-      );
-    }
-
     return (
       <Row wrap={true}>
         {appContent.map((item: AppContent, index: number) => {

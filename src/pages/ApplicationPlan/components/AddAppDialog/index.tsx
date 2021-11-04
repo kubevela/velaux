@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Dialog, Field, Radio } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-import { addApp } from '../../constants';
+import { NEW_APPLICATION_DELIVERY_PLAN } from '../../constants';
 import YmalConfig from '../YmalConfig';
 import GeneralConfig from '../GeneralConfig';
 
@@ -96,7 +96,7 @@ class AppDialog extends React.Component<Props, State> {
             ok: confirm,
             cancel: 'no',
           }}
-          title={addApp}
+          title={NEW_APPLICATION_DELIVERY_PLAN}
           autoFocus={true}
           visible={visible}
           footerActions={['ok']}
