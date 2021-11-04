@@ -111,7 +111,7 @@ class TabsContent extends Component {
     const topologyDataEdges = this.transEdges(components);
 
     if ((components || []).length === 0) {
-      return <NoData width="300px" />
+      return <NoData width="300px" />;
     }
 
     const tabsItem = (envBind || []).map((item) => {

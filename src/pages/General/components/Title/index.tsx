@@ -20,7 +20,6 @@ type Props = {
   setVisible: (visible: boolean) => void;
 };
 
-
 class Title extends Component<Props> {
   handleSelect = (name: string) => {
     this.props.changeAppName(name);

@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import { Button, Message, Grid, Search, Icon, Select, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import './index.less';
+import Translation from '../../../../components/Translation';
 
 type Props = {
   t: (key: string) => {};
@@ -87,7 +88,6 @@ class SelectSearch extends React.Component<Props, State> {
       value: item.name,
       label: item.name,
     }));
-
     return (
       <Row className="app-select-wraper boder-radius-8">
         <Col span="6">
@@ -133,6 +133,25 @@ class SelectSearch extends React.Component<Props, State> {
             value={inputValue}
             className="item"
           />
+        </Col>
+        <Col span="3" style={{ paddingTop: '20px' }}>
+          <Button
+            type="secondary"
+            onClick={() => {
+              this.setState(
+                {
+                  namespaceValue: '',
+                  clusterValue: '',
+                  inputValue: '',
+                },
+                () => {
+                  this.handleClickSearch();
+                },
+              );
+            }}
+          >
+            <Translation>Clear</Translation>
+          </Button>
         </Col>
       </Row>
     );

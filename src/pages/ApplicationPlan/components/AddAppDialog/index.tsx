@@ -6,6 +6,7 @@ import YmalConfig from '../YmalConfig';
 import GeneralConfig from '../GeneralConfig';
 
 import './index.less';
+import Translation from '../../../../components/Translation';
 
 type Props = {
   visible: boolean;
@@ -112,10 +113,10 @@ class AppDialog extends React.Component<Props, State> {
               onChange={this.changeRadio}
             >
               <Radio id="General" value="General">
-                GeneralConfig
+                <Translation>GeneralConfig</Translation>
               </Radio>
               <Radio id="YmalConfig" value="YmalConfig">
-                YmalConfig
+                <Translation>YmalConfig</Translation>
               </Radio>
             </RadioGroup>
           </div>

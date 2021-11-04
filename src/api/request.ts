@@ -1,14 +1,7 @@
-import axios, {
-  AxiosPromise,
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  Method,
-} from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { getMessage } from './status';
 import { baseURL } from './config';
 import { Message } from '@b-design/ui';
-import qs from 'qs';
 import { handleError } from '../utils/errors';
 
 export const axiosInstance: AxiosInstance = axios.create({
@@ -35,11 +28,11 @@ axiosInstance.interceptors.response.use(
   },
 
   (error: any) => {
-    const { response } = error;
+    const { response, status } = error;
     if (response) {
-      return Promise.reject(response.data);
+      return Promise.reject(response);
     } else {
-      Message.error(getMessage(404));
+      Message.error(getMessage(status));
     }
   },
 );
@@ -53,6 +46,17 @@ axiosInstance.interceptors.request.use(
   },
 );
 
+const handleAPIError = (err: any, customError: boolean) => {
+  const { data, status } = err;
+  if (customError) {
+    Promise.reject(data);
+  } else if (data.BusinessCode) {
+    handleError(data);
+  } else {
+    Message.error(getMessage(status));
+  }
+};
+
 export const post = (url: string, params: any) => {
   return axiosInstance
     .post(url, params)
@@ -60,13 +64,7 @@ export const post = (url: string, params: any) => {
       return res.data;
     })
     .catch((err) => {
-      if (params.customError) {
-        Promise.reject(err);
-      } else if (err.BusinessCode) {
-        handleError(err);
-      } else {
-        Message.error(getMessage(503));
-      }
+      handleAPIError(err, params.customError);
     });
 };
 
@@ -77,11 +75,7 @@ export const get = (url: string, params: any) => {
       return res.data;
     })
     .catch((err) => {
-      if (err.BusinessCode) {
-        handleError(err);
-      } else {
-        Message.error(getMessage(503));
-      }
+      handleAPIError(err, params.customError);
     });
 };
 
@@ -92,11 +86,7 @@ export const rdelete = (url: string, params: any) => {
       return res.data;
     })
     .catch((err) => {
-      if (err.BusinessCode) {
-        handleError(err);
-      } else {
-        Message.error(getMessage(503));
-      }
+      handleAPIError(err, params.customError);
     });
 };
 
@@ -107,10 +97,6 @@ export const put = (url: string, params: any) => {
       return res.data;
     })
     .catch((err) => {
-      if (err.BusinessCode) {
-        handleError(err);
-      } else {
-        Message.error(getMessage(503));
-      }
+      handleAPIError(err, params.customError);
     });
 };

@@ -21,7 +21,6 @@ interface APIError {
   Message: string;
 }
 export function handleError(err: APIError) {
-  console.log(err);
   // TODO: Handle errors based on businessCode
   Message.error(err.Message);
 }

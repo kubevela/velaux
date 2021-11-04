@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import Translation from '../../components/Translation';
 
-export const MANAGER_TITLE = <Translation>App Manager</Translation>;
+export const MANAGER_TITLE = <Translation>AppPlan Manager</Translation>;
+export const MANAGER_NAME = <Translation>App Name-</Translation>;
 export const OVERVIEW = <Translation>Overview</Translation>;
 export const COMPONENT_NAME = <Translation>Component Name-</Translation>;
 export const RUNNING_INSTANCES = <Translation>Running instances</Translation>;

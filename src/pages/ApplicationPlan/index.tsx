@@ -1,28 +1,26 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
+import { Message } from '@b-design/ui';
 import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
-import NoData from '../../components/Nodata';
-import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
-import { Loading } from '@b-design/ui';
-import { If } from 'tsx-control-statements/components';
 import '../../common.less';
+import { If } from 'tsx-control-statements/components';
+import { deleteApplicationPlan } from '../../api/application';
 
 type Props = {
   dispatch: ({}) => {};
   applicationList: [];
   namespaceList: [];
   clusterList?: [];
-  loading: { global: Boolean };
 };
 type State = {
   showAddApplication: boolean;
 };
 
 @connect((store: any) => {
-  return { ...store.application, ...store.clusters, loading: store.loading };
+  return { ...store.application, ...store.clusters };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -33,12 +31,12 @@ class Application extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.getApplication();
+    this.getApplications();
     this.getNamespaceList();
     this.getClusterList();
   }
 
-  getApplication = async () => {
+  getApplications = async () => {
     this.props.dispatch({
       type: 'application/getApplicationList',
       payload: {},
@@ -58,37 +56,36 @@ class Application extends Component<Props, State> {
     });
   };
 
+  onDeleteAppPlan = (name: string) => {
+    deleteApplicationPlan({ name: name }).then((re) => {
+      if (re) {
+        Message.success('application plan delete success');
+        this.getApplications();
+      }
+    });
+  };
+
   render() {
-    const { applicationList, namespaceList, clusterList, loading, dispatch } = this.props;
+    const { applicationList, namespaceList, clusterList, dispatch } = this.props;
     const { showAddApplication } = this.state;
-    const isLoading = loading.global ? true : false;
     return (
       <div>
         <Title
-          title="Application delivery plan management"
-          subTitle="Manage your application delivery plan"
-          addButtonTitle="New application delivery plan"
+          title="AppPlan Manager"
+          subTitle="AppPlan ManagerSubTitle"
+          addButtonTitle="Add App"
           addButtonClick={() => {
             this.setState({ showAddApplication: true });
           }}
         />
-        <Loading tip="loading..." fullScreen visible={isLoading}>
-          <SelectSearch
-            namespaceList={namespaceList}
-            clusterList={clusterList}
-            dispatch={dispatch}
-          />
-          <CardContend
-            appContent={applicationList}
-            path={APPLICATION_PATH}
-            workFlowPath={WORKFLOWS_PATH}
-          />
-        </Loading>
 
-        <If condition={!applicationList || applicationList.length == 0}>
-          <NoData width="300px" />
-        </If>
+        <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
 
+        <CardContend
+          appPlans={applicationList}
+          editAppPlan={(name: string) => {}}
+          deleteAppPlan={this.onDeleteAppPlan}
+        />
         <If condition={showAddApplication}>
           <AppDialog
             visible={showAddApplication}
