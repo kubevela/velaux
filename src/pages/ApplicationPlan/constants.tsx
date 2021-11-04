@@ -18,9 +18,9 @@ export const dataSourceApps = [
   { value: 10003, label: 'app3' },
 ];
 
-export const managerTitle = <Translation>App Manager</Translation>;
+export const managerTitle = <Translation>AppPlan Manager</Translation>;
 export const managerName = '应用名称-';
-export const managerSubTitle = <Translation>App ManagerSubTitle</Translation>;
+export const managerSubTitle = <Translation>AppPlan ManagerSubTitle</Translation>;
 export const addApp = <Translation>Add App</Translation>;
 export const addAppDialog = {
   name: <Translation>App Name</Translation>,

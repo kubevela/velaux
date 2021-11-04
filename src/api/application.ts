@@ -1,4 +1,4 @@
-import { post, get } from './request';
+import { post, get, rdelete } from './request';
 import {
   application_mock,
   getApplicationDetails_mock,
@@ -29,6 +29,10 @@ export function createApplicationList(params: any) {
 export function getApplicationDetails(params: any) {
   const url = isMock ? `${getApplicationDetails_mock}` : `${application}/${params.name}`;
   return get(url, params).then((res) => res);
+}
+
+export function deleteApplicationPlan(params: { name: string }) {
+  return rdelete(url + '/' + params.name, params);
 }
 
 export function getApplicationComponents(params: any) {

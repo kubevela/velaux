@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
+import { Message } from '@b-design/ui';
 import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
-import { APPLICATION_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import '../../common.less';
 import { If } from 'tsx-control-statements/components';
+import { deleteApplicationPlan } from '../../api/application';
 
 type Props = {
   dispatch: ({}) => {};
@@ -30,12 +31,12 @@ class Application extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.getApplication();
+    this.getApplications();
     this.getNamespaceList();
     this.getClusterList();
   }
 
-  getApplication = async () => {
+  getApplications = async () => {
     this.props.dispatch({
       type: 'application/getApplicationList',
       payload: {},
@@ -55,14 +56,23 @@ class Application extends Component<Props, State> {
     });
   };
 
+  onDeleteAppPlan = (name: string) => {
+    deleteApplicationPlan({ name: name }).then((re) => {
+      if (re) {
+        Message.success('application plan delete success');
+        this.getApplications();
+      }
+    });
+  };
+
   render() {
     const { applicationList, namespaceList, clusterList, dispatch } = this.props;
     const { showAddApplication } = this.state;
     return (
       <div>
         <Title
-          title="App Manager"
-          subTitle="App ManagerSubTitle"
+          title="AppPlan Manager"
+          subTitle="AppPlan ManagerSubTitle"
           addButtonTitle="Add App"
           addButtonClick={() => {
             this.setState({ showAddApplication: true });
@@ -72,9 +82,9 @@ class Application extends Component<Props, State> {
         <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
 
         <CardContend
-          appContent={applicationList}
-          path={APPLICATION_PATH}
-          workFlowPath={WORKFLOWS_PATH}
+          appPlans={applicationList}
+          editAppPlan={(name: string) => {}}
+          deleteAppPlan={this.onDeleteAppPlan}
         />
         <If condition={showAddApplication}>
           <AppDialog

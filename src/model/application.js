@@ -57,9 +57,11 @@ export default {
       const appContent = getAppCardList(result || {});
       yield put({ type: 'updateApplicationList', payload: appContent });
     },
-    *createApplicationList(action, { call, put }) {
+    *createApplicationPlan(action, { call, put }) {
       const result = yield call(createApplicationList, action.payload);
-      yield put({ type: 'getApplicationList', payload: {} });
+      if (action.callback && result) {
+        action.callback(result);
+      }
     },
     *getNamespaceList(action, { call, put }) {
       const result = yield call(getNamespaceList, action.payload);
@@ -86,17 +88,14 @@ function getAppCardList(data) {
   }
   const appContent = [];
   for (const item of applicationsList) {
-    const rules = item.gatewayRule && item.gatewayRule[0];
-    const { protocol = '', address = '', componentPort = '' } = rules || {};
-    const href = protocol + address + componentPort;
     const app = {
       name: item.name,
+      alias: item.alias,
       status: item.status,
       icon: item.icon,
       description: item.description,
       createTime: item.createTime,
-      btnContent: item.btnContent,
-      href: href,
+      rules: item.rules,
     };
     appContent.push(app);
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Form, Input, Select, Field } from '@b-design/ui';
+import { Grid, Form, Input, Message, Field } from '@b-design/ui';
 import NameSpaceForm from './namespace-form';
 import EnvPlan from '../../../../extends/EnvPlan';
 import { addAppDialog } from '../../constants';
@@ -60,27 +60,25 @@ class GeneralConfig extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { deploy = true, describe, name, project, namespace, icon = '' } = values;
-      let namespaceParam = namespace;
-      if (Object.prototype.toString.call(namespace) === '[object Array]') {
-        namespaceParam = namespace[0];
-      }
+      const { description, alias, name, namespace, icon = '' } = values;
       const params = {
         icon,
         name,
-        namespace: namespaceParam,
-        deploy: true,
-        description: describe,
+        alias,
+        namespace,
+        description: description,
         envBind: envBindArray,
       };
       this.props.dispatch({
-        type: 'application/createApplicationList',
+        type: 'application/createApplicationPlan',
         payload: params,
+        callback: () => {
+          Message.success('application plan add success');
+          this.props.setVisible(false);
+          this.resetField();
+        },
       });
     });
-
-    this.props.setVisible(false);
-    this.resetField();
   };
 
   resetField() {
