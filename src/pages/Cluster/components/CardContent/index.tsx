@@ -43,7 +43,7 @@ class CardContent extends React.Component<Props, State> {
             const showName = alias ? alias : name;
             const card = (
               <Card contentHeight="auto">
-                <div className="cluster-card-top">
+                <div className="cluster-card-top flexcenter">
                   <If condition={icon && icon != 'none'}>
                     <img src={icon} />
                   </If>
@@ -114,7 +114,7 @@ class CardContent extends React.Component<Props, State> {
                                 });
                               }}
                             >
-                              <Translation>Delete</Translation>
+                              <Translation>Remove</Translation>
                             </Menu.Item>
                           </Menu>
                         </Dropdown>
@@ -134,14 +134,23 @@ class CardContent extends React.Component<Props, State> {
                     </If>
                   </Row>
                   <Row className="content-main">
-                    <h4 className="color595959 font-size-14">{description}</h4>
+                    <h4 className="color595959 font-size-14" title={description}>
+                      {description}
+                    </h4>
                   </Row>
                   <Row className="content-foot colorA6A6A6">
                     <Col span="16">
                       <span>{createTime}</span>
                     </Col>
                     <Col span="8" className="text-align-right padding-right-10">
-                      {status}
+                      <If condition={status == 'Healthy'}>
+                        <span className="circle circle-success"></span>
+                        <Translation>Healthy</Translation>
+                      </If>
+                      <If condition={status == 'Unhealthy'}>
+                        <span className="circle circle-warning"></span>
+                        <Translation>UnHealthy</Translation>
+                      </If>
                     </Col>
                   </Row>
                 </div>

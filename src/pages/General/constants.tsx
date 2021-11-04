@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Translation from '../../components/Translation';
 
-export const MANAGER_TITLE = <Translation>App Manager</Translation>;
+export const MANAGER_TITLE = <Translation>AppPlan Manager</Translation>;
 export const MANAGER_NAME = <Translation>App Name-</Translation>;
 export const OVERVIEW = <Translation>Overview</Translation>;
 export const DEPLOYMENT_UPDATE = <Translation>Deployment update</Translation>;

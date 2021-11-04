@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Grid, Form, Input, Field, Upload, Icon } from '@b-design/ui';
+import { Button, Grid, Form, Input, Field, Upload, Icon, Message } from '@b-design/ui';
 import { addAppDialog } from '../../constants';
 import { addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import NameSpaceForm from '../GeneralConfig/namespace-form';
@@ -36,27 +36,25 @@ class YmalConfig extends React.Component<Props> {
       if (error) {
         return;
       }
-      const { cluster, describe, name, project, namespace, kubeConfig } = values;
-      let namespaceParam = namespace;
-      if (Object.prototype.toString.call(namespace) === '[object Array]') {
-        namespaceParam = namespace[0];
-      }
+      const { description, name, alias, namespace, kubeConfig } = values;
       const params = {
-        clusterList: cluster,
-        description: describe,
+        description: description,
+        alias: alias,
         icon: '',
         name: name,
-        namespace: namespaceParam,
+        namespace: namespace,
         yamlConfig: kubeConfig,
       };
       this.props.dispatch({
-        type: 'application/createApplicationList',
+        type: 'application/createApplicationPlan',
         payload: params,
+        callback: () => {
+          Message.success('application plan add success');
+          this.props.setVisible(false);
+          this.resetField();
+        },
       });
     });
-
-    this.props.setVisible(false);
-    this.resetField();
   };
 
   customRequest = (option: any) => {

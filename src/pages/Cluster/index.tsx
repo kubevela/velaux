@@ -71,9 +71,11 @@ class Cluster extends React.Component<Props, State> {
   };
 
   onDeleteCluster = (name: string) => {
-    deleteCluster({ clusterName: name }).then(() => {
-      Message.success('cluster delete success');
-      this.getClusterList();
+    deleteCluster({ clusterName: name }).then((re) => {
+      if (re) {
+        Message.success('cluster delete success');
+        this.getClusterList();
+      }
     });
   };
 

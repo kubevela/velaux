@@ -18,7 +18,7 @@ export function getLeftSider(pathname) {
           className: isApplication,
           link: '/applicationplans',
           iconType: 'layergroup-fill',
-          navName: 'App Manager',
+          navName: 'AppPlan Manager',
         },
       ],
     },
