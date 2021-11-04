@@ -5,7 +5,7 @@
   "No": "否",
   "Add": "添加",
   "Remove": "删除",
-  "Edit" : "编辑",
+  "Edit": "编辑",
   "Name": "名称",
   "Path": "路径",
   "Actions": "操作",
@@ -90,5 +90,5 @@
   "Edit Cluster": "集群信息编辑",
   "Empty Data": "暂无数据",
   "GeneralConfig": "引导性创建",
-  "YmalConfig":"Yaml 创建"
+  "YmalConfig": "Yaml 创建"
 }
