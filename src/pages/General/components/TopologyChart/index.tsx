@@ -14,7 +14,7 @@ type State = {
   topologyDataEdges: [];
 };
 
-class Topology extends Component<Props, State> {
+class TopologyChart extends Component<Props, State> {
   graph: any;
   constructor(props: Props) {
     super(props);
@@ -182,4 +182,4 @@ class Topology extends Component<Props, State> {
   }
 }
 
-export default Topology;
+export default TopologyChart;

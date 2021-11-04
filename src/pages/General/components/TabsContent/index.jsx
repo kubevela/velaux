@@ -1,7 +1,7 @@
 import React, { useState, Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button, Message, Grid, Search, Icon, Select, Tab, Loading } from '@b-design/ui';
-import Topology from '../Topology';
+import TopologyChart from '../TopologyChart';
 import { DropTarget } from 'react-dnd';
 import ItemTypes from '../../types';
 import NoData from '../../../../components/Nodata';
@@ -118,7 +118,7 @@ class TabsContent extends Component {
       return (
         <Tab.Item title={item.name} key={item.name}>
           {(topologyNodes || []).length !== 0 && item.name === activeKey && (
-            <Topology
+            <TopologyChart
               name={item.name}
               topologyNodes={topologyNodes}
               topologyDataEdges={topologyDataEdges}
