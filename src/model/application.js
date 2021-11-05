@@ -117,7 +117,7 @@ export default {
   },
 };
 
-function getAppCardList(data) {
+export function getAppCardList(data) {
   const applicationsList = data.applicationplans;
   if (!applicationsList) {
     return [];
@@ -153,10 +153,13 @@ function getNamespace(data) {
   return list;
 }
 
-function addBasicConfigField(data) {
+export function addBasicConfigField(data) {
   if (data && Array.isArray(data.envBind)) {
     data.envBind.unshift({ name: 'basisConfig' });
-    return data;
+  } else if (data) {
+    data.envBind = [{ name: 'basisConfig' }];
+  } else {
+    data = { envBind: [{ name: 'basisConfig' }] };
   }
-  return { envBind: [{ name: 'basisConfig' }] };
+  return data;
 }

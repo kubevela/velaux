@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
+import {
+  getApplicationList,
+  getApplicationDetails,
+  getComponentdefinitions,
+  getApplicationComponents,
+} from '../../api/application';
 import { DragDropContext } from 'react-dnd';
 import HTMLBackend from 'react-dnd-html5-backend';
 import { Breadcrumb, Select, Grid, Button, Card, Step, Drawer, Affix, Loading } from '@b-design/ui';
@@ -13,6 +19,7 @@ import AddComponent from './components/AddComponent';
 import Title from './components/Title';
 import Policies from './components/Policies';
 import StepWorkFlow from './components/StepWorlFlow';
+import { addBasicConfigField, getAppCardList } from '../../model/application';
 import './index.less';
 
 type Props = {
@@ -39,6 +46,12 @@ type State = {
   visibleDraw: boolean;
   componentType: string;
   activeKey: string;
+  applicationList: any;
+  applicationDetail: any;
+  componentDefinitions: [];
+  workflowStatus: [];
+  components: [];
+  isLoading: boolean;
 };
 @DragDropContext(HTMLBackend)
 @connect((store: any) => {
@@ -56,49 +69,80 @@ class General extends Component<Props, State> {
       visibleDraw: false,
       componentType: '',
       activeKey: 'basisConfig',
+      applicationList: [],
+      applicationDetail: [],
+      componentDefinitions: [],
+      workflowStatus: [],
+      components: [],
+      isLoading: false,
     };
   }
 
   componentDidMount() {
-    this.getApplication();
-    this.getApplicationDetails();
-    this.getComponentdefinitions();
+    this.onGetApplication();
+    this.onGetApplicationDetails();
+    this.onGetApplicationComponents();
+    this.onGetComponentdefinitions();
   }
 
-  getApplication = async () => {
-    this.props.dispatch({
-      type: 'application/getApplicationList',
-      payload: {},
+  onGetApplication = async () => {
+    getApplicationList({}).then((res) => {
+      if (res) {
+        this.setState({
+          applicationList: getAppCardList(res || {}),
+        });
+      }
     });
   };
 
-  getApplicationDetails = async () => {
+  onGetApplicationDetails = async () => {
     const { appName } = this.state;
-    this.props.dispatch({
-      type: 'application/getApplicationDetails',
-      payload: {
-        urlParam: appName,
-      },
+    this.setState({ isLoading: true });
+    getApplicationDetails({ name: appName })
+      .then((res) => {
+        if (res) {
+          this.setState({
+            applicationDetail: addBasicConfigField(res),
+          });
+        }
+        this.setState({ isLoading: false });
+      })
+      .catch((err) => {
+        this.setState({ isLoading: false });
+      });
+  };
+
+  onGetComponentdefinitions = async () => {
+    getComponentdefinitions({}).then((res) => {
+      if (res) {
+        this.setState({
+          componentDefinitions: res && res.definitions,
+        });
+      }
     });
   };
 
-  getPolicies() {
-    const { appName } = this.state;
-    this.props.dispatch({
-      type: 'application/getPolicies',
-      payload: {
-        urlParam: appName,
-      },
-    });
-  }
-  getComponentdefinitions() {
-    this.props.dispatch({
-      type: 'application/getComponentdefinitions',
-      payload: {
-        urlParam: '',
-      },
-    });
-  }
+  onGetApplicationComponents = async () => {
+    const { appName, activeKey } = this.state;
+    const envName = activeKey === 'basisConfig' ? '' : activeKey;
+    const params = {
+      name: appName,
+      envName: envName,
+    };
+    this.setState({ isLoading: true });
+    getApplicationComponents(params)
+      .then((res) => {
+        if (res) {
+          this.setState({
+            components: res && res.componentplans,
+          });
+        }
+        this.setState({ isLoading: false });
+      })
+      .catch((err) => {
+        this.setState({ isLoading: false });
+      });
+  };
 
   setVisible = (visible: boolean) => {
     this.setState({ visible });
@@ -137,36 +181,37 @@ class General extends Component<Props, State> {
       },
       () => {
         this.props.history.push(`/applicationplans/${name}`, {});
-        this.getApplicationDetails();
-        this.getComponentdefinitions();
-        this.getComponents();
+        this.onGetApplication();
+        this.onGetApplicationDetails();
+        this.onGetApplicationComponents();
+        this.onGetComponentdefinitions();
       },
     );
   };
 
   render() {
-    const { appName, visible, componentType, activeKey } = this.state;
-    const { Row, Col } = Grid;
     const {
+      appName,
+      visible,
+      componentType,
+      activeKey,
       applicationList = [],
       applicationDetail = {},
       componentDefinitions = [],
       workflowStatus = [],
       components = [],
-      loading,
-      history,
-      dispatch,
-    } = this.props;
+      isLoading,
+    } = this.state;
+    const { Row, Col } = Grid;
+    const { history, dispatch } = this.props;
     const { status, policies, envBind = [] } = applicationDetail;
-    const isLoading = loading.global === true ? true : false;
-
     return (
       <div className="general">
         <Title
           appName={appName}
           history={history}
           applicationList={applicationList}
-          getApplicationDetails={this.getApplicationDetails}
+          getApplicationDetails={this.onGetApplicationDetails}
           changeAppName={(name) => {
             this.changeAppName(name);
           }}
@@ -194,6 +239,7 @@ class General extends Component<Props, State> {
               changeActiveKey={(activeKey: string) => {
                 this.changeActiveKey(activeKey);
               }}
+              getApplicationComponents={this.onGetApplicationComponents}
               dispatch={dispatch}
               ref={this.tabsRef}
             />

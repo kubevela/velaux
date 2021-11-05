@@ -39,10 +39,6 @@ class TabsContent extends Component {
     connectDropTarget: PropTypes.func.isRequired,
   };
 
-  componentDidMount() {
-    this.getApplicationComponents();
-  }
-
   directComponentDetail = (componentName) => {
     const { appName } = this.props;
     this.props.history.push(`/applicationplans/${appName}/components/${componentName}`, {});
@@ -85,16 +81,7 @@ class TabsContent extends Component {
   };
 
   getApplicationComponents() {
-    const { appName, activeKey } = this.props;
-    const envName = activeKey === 'basisConfig' ? '' : activeKey;
-    const params = {
-      name: appName,
-      envName: envName,
-    };
-    this.props.dispatch({
-      type: 'application/getApplicationComponents',
-      payload: params,
-    });
+    this.props.getApplicationComponents();
   }
 
   render() {
