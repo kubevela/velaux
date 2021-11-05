@@ -1,5 +1,5 @@
 .card-content-wraper {
-  padding: 20px 1.8%;
+  padding: 16px;
   padding-bottom: 0;
   border: none;
   .next-card {
@@ -8,11 +8,6 @@
   }
   .next-card-show-divider .next-card-body {
     padding: 0;
-  }
-  img {
-    display: block;
-    width: 100%;
-    height: 155px;
   }
   .content-wraper {
     padding: 20px 10px 0 10px;
@@ -106,10 +101,31 @@
     }
 
     .content-main {
-      height: 82px;
+      display: -webkit-box;
+      height: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
     }
     .content-foot {
       padding: 16px 0 24px;
     }
+  }
+}
+
+.cluster-card-top {
+  height: 120px;
+  background: #ebf0ff;
+  img {
+    width: 60px;
+  }
+}
+.dot-wraper {
+  .action {
+    float: right;
+    height: 24px;
+    color: #a6a6a6;
+    cursor: pointer;
   }
 }

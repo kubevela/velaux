@@ -29,7 +29,7 @@ type Props = {
   history: {
     push: (path: string, state: {}) => {};
   };
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {
@@ -76,7 +76,7 @@ class General extends Component<Props, State> {
   };
 
   handleSelect = (e: string) => {
-    this.props.history.push(`/applications/${e}`, {});
+    this.props.history.push(`/applicationplans/${e}`, {});
     this.setState(
       {
         value: e,
@@ -162,7 +162,7 @@ class General extends Component<Props, State> {
               <div className="nav">
                 <div className="title"> Workflow</div>
                 <div className="detail">
-                  <Link to={`/workflows/${value}`}> {VIEW_DETAILS} </Link>
+                  <Link to={`/workflowplans/${value}`}> {VIEW_DETAILS} </Link>
                 </div>
               </div>
               <Step current={1} shape="circle">

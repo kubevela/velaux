@@ -17,12 +17,12 @@ export function getAddonRegistrysList(params: any) {
   return get(addonRegistrys, { params: params }).then((res) => res);
 }
 
-export function createAddonRegistrysList(params: any) {
-  return post(addonRegistrys, params).then((res) => res);
+export function createAddonRegistry(params: any) {
+  return post(addonRegistrys, params);
 }
 
-export function deleteAddonRegistrysList(params: any) {
-  return rdelete(addonRegistrys, params).then((res) => res);
+export function deleteAddonRegistry(params: { name: string }) {
+  return rdelete(addonRegistrys + '/' + params.name, params).then((res) => res);
 }
 
 export function getAddonsList(params: any) {

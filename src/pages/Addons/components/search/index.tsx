@@ -1,6 +1,7 @@
 import React from 'react';
 import { Grid, Icon, Select, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
+import Translation from '../../../../components/Translation';
 
 type Props = {
   t: (key: string) => {};
@@ -48,6 +49,7 @@ class SelectSearch extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
+    const { Option } = Select;
     const { t, registrys } = this.props;
     const registryPlacehole = t('Registry Screening').toString();
     const queryPlacehole = t('Search by name and description.').toString();
@@ -60,11 +62,17 @@ class SelectSearch extends React.Component<Props, State> {
             mode="single"
             size="large"
             onChange={this.handleChangRegistry}
-            dataSource={registrys}
             placeholder={registryPlacehole}
             className="item"
             value={registryValue}
-          />
+          >
+            <Option value="">
+              <Translation>All</Translation>
+            </Option>
+            {registrys?.map((item: any) => {
+              return <Option value={item.name}>{item.name}</Option>;
+            })}
+          </Select>
         </Col>
 
         <Col span="6">

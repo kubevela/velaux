@@ -137,10 +137,17 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </Row>
           </div>
           <div className="next-menu-divider"></div>
-          <ReactMarkdown
-            children={addonDetailInfo.detail}
-            remarkPlugins={[remarkGfm]}
-          ></ReactMarkdown>
+          <If condition={addonDetailInfo.detail}>
+            <ReactMarkdown
+              children={addonDetailInfo.detail}
+              remarkPlugins={[remarkGfm]}
+            ></ReactMarkdown>
+          </If>
+          <If condition={!addonDetailInfo.detail}>
+            <div className="readme-empty">
+              <span>暂无Readme介绍</span>
+            </div>
+          </If>
         </Dialog>
       </div>
     );
