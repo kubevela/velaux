@@ -1,15 +1,16 @@
 import React from 'react';
-import { useState } from 'react';
 import { Button, Message, Grid, Dialog, Form, Input, Select } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-
 import { publishDialog } from '../../constants';
+import { deployApplication } from '../../../../api/application';
 import './index.less';
 
 type Props = {
+  appName: string;
   visible: boolean;
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {};
@@ -19,7 +20,16 @@ class PublishDialog extends React.Component<Props, State> {
     this.props.setVisible(false);
   };
   onOk = () => {
-    this.props.setVisible(false);
+    const { appName } = this.props;
+    const params = {
+      name: appName,
+      workflowName: 'test-123',
+      commit: 'test-123',
+      sourceType: 'test-123',
+      force: true,
+    };
+
+    deployApplication(params).then((res) => {});
   };
 
   handleSelectProject = (e: React.ChangeEvent<HTMLInputElement>) => {};

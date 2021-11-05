@@ -24,6 +24,7 @@
   },
   "include": [
     "src",
-    "./images.d.ts" //文件路径
+    "./images.d.ts",
+    "./dvaloading.d.ts"
   ]
 }
