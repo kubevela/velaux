@@ -29,7 +29,7 @@ type EnvPlanParams = {
     onChange?: () => {};
     delete?: (key: string) => void;
 };
-
+const ENVPLAN_KEY_LIST = ['namespace', 'name', 'clusterSelector', 'description'];
 function EnvItem(props: EnvPlanParams) {
     return (
         <div className="env-item-container">
@@ -125,6 +125,7 @@ class EnvPlan extends React.Component<Props, State> {
     addEnvPlanItem = () => {
         this.field.validate((error: any) => {
             if (error) {
+                console.log(error);
                 return;
             }
             const { envList } = this.state;
@@ -140,16 +141,13 @@ class EnvPlan extends React.Component<Props, State> {
 
     removeEnvPlanItem = (key: string) => {
         const { envList } = this.state;
-        envList.forEach((item, i) => {
+        envList.forEach((item, i) => { // 数据移除
             if (item.key === key) {
-                const values = this.field.getValues();
-                Object.keys(values).forEach((_key) => {
-                    if (_key.indexOf(key) !== -1) {
-                        this.field.remove(_key);
-                    };
-                });
                 envList.splice(i, 1);
             }
+        });
+        ENVPLAN_KEY_LIST.forEach((_key) => { // 移除表单校验
+            this.field.remove(`${key}-${_key}`);
         });
         this.setState({
             envList,

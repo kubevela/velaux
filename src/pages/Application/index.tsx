@@ -17,6 +17,7 @@ type State = {};
 @connect((store: any) => {
   return { ...store.application, ...store.clusters };
 })
+
 class Application extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
