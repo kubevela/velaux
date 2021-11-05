@@ -4,7 +4,7 @@ import { Button, Message, Grid, Search, Icon, Select, Tab, Loading } from '@b-de
 import TopologyChart from '../TopologyChart';
 import { DropTarget } from 'react-dnd';
 import ItemTypes from '../../types';
-import NoData from '../../../../components/Nodata';
+import Empty from '../../../../components/Empty';
 import './index.less';
 
 const style = {
@@ -106,12 +106,11 @@ class TabsContent extends Component {
     } else if (canDrop) {
       backgroundColor = 'darkkhaki';
     }
-
     const topologyNodes = this.transNodes(components);
     const topologyDataEdges = this.transEdges(components);
 
     if ((components || []).length === 0) {
-      return <NoData width="300px" />;
+      return <Empty style={{ minHeight: '400px', margin: '0 auto' }}></Empty>;
     }
 
     const tabsItem = (envBind || []).map((item) => {

@@ -111,7 +111,7 @@ export default {
       const result = yield call(getComponentdefinitions, { envName: urlParam });
       yield put({
         type: 'updateComponentDefinitions',
-        payload: result && result.componentDefinitions,
+        payload: result && result.definitions,
       });
     },
   },
@@ -158,5 +158,5 @@ function addBasicConfigField(data) {
     data.envBind.unshift({ name: 'basisConfig' });
     return data;
   }
-  return { envBind: [] };
+  return { envBind: [{ name: 'basisConfig' }] };
 }
