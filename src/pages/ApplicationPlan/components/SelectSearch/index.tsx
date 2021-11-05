@@ -98,6 +98,7 @@ class SelectSearch extends React.Component<Props, State> {
             dataSource={namespaceList}
             placeholder={projectPlacehole}
             className="item"
+            hasClear
             value={namespaceValue}
           />
         </Col>
@@ -110,6 +111,7 @@ class SelectSearch extends React.Component<Props, State> {
             dataSource={clusterDadasource}
             placeholder={clusterPlacehole}
             className="item"
+            hasClear
             value={clusterValue}
           />
         </Col>
@@ -124,6 +126,7 @@ class SelectSearch extends React.Component<Props, State> {
                 style={{ margin: 4 }}
               />
             }
+            hasClear
             placeholder={appPlacehole}
             onChange={this.handleChangName}
             onPressEnter={this.handleClickSearch}
