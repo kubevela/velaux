@@ -9,7 +9,18 @@ import {
 } from '../../api/application';
 import { DragDropContext } from 'react-dnd';
 import HTMLBackend from 'react-dnd-html5-backend';
-import { Breadcrumb, Select, Grid, Button, Card, Step, Drawer, Affix, Loading } from '@b-design/ui';
+import {
+  Breadcrumb,
+  Select,
+  Grid,
+  Button,
+  Card,
+  Step,
+  Drawer,
+  Affix,
+  Loading,
+  Icon,
+} from '@b-design/ui';
 import { NEW_COMPONENTS } from './constants';
 import { If } from 'tsx-control-statements/components';
 import TabsContent from './components/TabsContent/index';
@@ -52,6 +63,7 @@ type State = {
   workflowStatus: [];
   components: [];
   isLoading: boolean;
+  isVisibleDefinitions: boolean;
 };
 @DragDropContext(HTMLBackend)
 @connect((store: any) => {
@@ -75,6 +87,7 @@ class General extends Component<Props, State> {
       workflowStatus: [],
       components: [],
       isLoading: false,
+      isVisibleDefinitions: false,
     };
   }
 
@@ -178,6 +191,7 @@ class General extends Component<Props, State> {
     this.setState(
       {
         appName: name,
+        isVisibleDefinitions: false,
       },
       () => {
         this.props.history.push(`/applicationplans/${name}`, {});
@@ -187,6 +201,10 @@ class General extends Component<Props, State> {
         this.onGetComponentdefinitions();
       },
     );
+  };
+
+  onDefinitionsClick = () => {
+    this.setState({ isVisibleDefinitions: !this.state.isVisibleDefinitions });
   };
 
   render() {
@@ -201,6 +219,7 @@ class General extends Component<Props, State> {
       workflowStatus = [],
       components = [],
       isLoading,
+      isVisibleDefinitions,
     } = this.state;
     const { Row, Col } = Grid;
     const { history, dispatch } = this.props;
@@ -247,17 +266,44 @@ class General extends Component<Props, State> {
 
           <Row className="components-wraper">
             <If condition={activeKey === 'basisConfig'}>
-              <Affix>
-                {(componentDefinitions || []).map((item: { name: string; description: string }) => (
-                  <ComponentsGroup
-                    name={item.name}
-                    description={item.description}
-                    open={(componentType: string) => {
-                      this.onOpen(componentType);
-                    }}
-                  />
-                ))}
-              </Affix>
+              {isVisibleDefinitions ? (
+                <div></div>
+              ) : (
+                <div style={{ marginRight: '120px' }}>
+                  {(componentDefinitions || []).map(
+                    (item: { name: string; description: string }) => (
+                      <ComponentsGroup
+                        name={item.name}
+                        description={item.description}
+                        open={(componentType: string) => {
+                          this.onOpen(componentType);
+                        }}
+                      />
+                    ),
+                  )}
+                </div>
+              )}
+
+              <div>
+                <If
+                  condition={
+                    (componentDefinitions || []).length !== 0 && isVisibleDefinitions === false
+                  }
+                >
+                  <Button onClick={this.onDefinitionsClick} className="hideIcon">
+                    隐藏服务盒 <Icon type="arrow-down" />
+                  </Button>
+                </If>
+                <If
+                  condition={
+                    (componentDefinitions || []).length !== 0 && isVisibleDefinitions === true
+                  }
+                >
+                  <Button onClick={this.onDefinitionsClick} className="showIcon">
+                    展示服务盒 <Icon type="arrow-up" />
+                  </Button>
+                </If>
+              </div>
             </If>
           </Row>
         </Loading>

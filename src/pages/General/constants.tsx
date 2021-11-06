@@ -33,6 +33,7 @@ export const DEPLOYMENT_PLANS = <Translation>Deployment plans</Translation>;
 export const NOT_YEW_PLEASE_GO_AND_CREATE = (
   <Translation>Not yet, please go and create</Translation>
 );
+export const APP_POLICIES = <Translation>App policies</Translation>;
 
 export const publishDialog = {
   title: <Translation>Publish as application template</Translation>,

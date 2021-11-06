@@ -118,5 +118,7 @@
   "Edit Cluster": "集群信息编辑",
   "Empty Data": "暂无数据",
   "GeneralConfig": "引导性创建",
-  "YmalConfig": "Yaml 创建"
+  "YmalConfig": "Yaml 创建",
+  "Not yet, please go and create": "暂无,请去创建",
+  "App policies": "应用策略"
 }

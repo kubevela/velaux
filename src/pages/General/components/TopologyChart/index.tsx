@@ -104,7 +104,7 @@ class TopologyChart extends Component<Props, State> {
       return;
     }
     const width = container.scrollWidth;
-    const height = (rootEle && rootEle.clientHeight - 420) || 380;
+    const height = (rootEle && rootEle.clientHeight - 300) || 380;
     const graph = new G6.Graph({
       container: name,
       width,

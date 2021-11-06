@@ -6,11 +6,6 @@ import { Button, Balloon } from '@b-design/ui';
 import ItemTypes from '../../types';
 
 const style = {
-  border: '1px dashed gray',
-  backgroundColor: 'white',
-  padding: '0.5rem 1rem',
-  marginRight: '1.5rem',
-  marginBottom: '1.5rem',
   cursor: 'move',
   float: 'left',
 };
@@ -47,7 +42,7 @@ class Box extends React.Component {
     const { name, description } = this.props;
     const opacity = isDragging ? 0.4 : 1;
     const defaultTrigger = (
-      <Button className="btrigger" style={{ margin: '5px' }}>
+      <Button className="btrigger" style={{ margin: '5px 5px 5px 10px', background: '#96c6ef' }}>
         {name}
       </Button>
     );

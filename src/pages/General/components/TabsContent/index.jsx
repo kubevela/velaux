@@ -96,10 +96,6 @@ class TabsContent extends Component {
     const topologyNodes = this.transNodes(components);
     const topologyDataEdges = this.transEdges(components);
 
-    if ((components || []).length === 0) {
-      return <Empty style={{ minHeight: '400px', margin: '0 auto' }}></Empty>;
-    }
-
     const tabsItem = (envBind || []).map((item) => {
       return (
         <Tab.Item title={item.name} key={item.name}>
@@ -113,6 +109,9 @@ class TabsContent extends Component {
               }}
               ref={this[item.name]}
             />
+          )}
+          {(components || []).length === 0 && (
+            <Empty style={{ minHeight: '400px', margin: '0 auto' }}></Empty>
           )}
         </Tab.Item>
       );

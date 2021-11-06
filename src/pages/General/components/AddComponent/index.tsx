@@ -13,6 +13,7 @@ import {
   CREATE,
 } from '../../constants';
 import Translation from '../../../../components/Translation';
+import LabelPlan from '../LabelPlan';
 import { createApplicationComponent } from '../../../../api/application';
 import { checkName } from '../../../../utils/common';
 
@@ -29,9 +30,11 @@ type Props = {
 };
 class AddComponent extends Component<Props> {
   field: Field;
+  labelPlan: React.RefObject<LabelPlan>;
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
+    this.labelPlan = React.createRef();
   }
 
   resetField() {
@@ -46,6 +49,8 @@ class AddComponent extends Component<Props> {
   }
 
   handleClickCreate = () => {
+    //Todo Label field type need Array,now API label type is Object
+    const labelPlanArr = this.labelPlan.current?.getValues();
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
@@ -62,6 +67,7 @@ class AddComponent extends Component<Props> {
           componentType: componentType,
           dependsOn: dependsOn,
           envNames: envNames,
+          labels: {},
         },
       };
 
@@ -170,12 +176,7 @@ class AddComponent extends Component<Props> {
 
           <Row>
             <Col span="24">
-              <FormItem
-                {...formItemLayout}
-                labelAlign={'top'}
-                label={COMPONENT_DEPENDENCY}
-                required
-              >
+              <FormItem {...formItemLayout} labelAlign={'top'} label={COMPONENT_DEPENDENCY}>
                 <Select
                   className="component-dependency"
                   mode={'multiple'}
@@ -183,7 +184,7 @@ class AddComponent extends Component<Props> {
                   {...init('dependsOn', {
                     rules: [
                       {
-                        required: true,
+                        required: false,
                         message: 'Chose a service depends',
                       },
                     ],
@@ -193,39 +194,14 @@ class AddComponent extends Component<Props> {
               </FormItem>
             </Col>
           </Row>
-          {/*                 
-                    <div className="label-spane">{LABEL}</div>
-                    <Row>
-                        <Col span='11'>
-                            <FormItem
-                                {...formItemLayout}
-                                labelAlign={'top'}
-                            >
-                                <Input placeholder="Enter a key" />
-                            </FormItem>
 
-                        </Col>
-
-                        <Col span='11' className='padding-left-10'>
-                            <FormItem
-                                {...formItemLayout}
-                                labelAlign={'top'}
-                            >
-                                <Input placeholder="Enter a value" />
-                            </FormItem>
-
-                        </Col>
-
-                        <Col span='2'>
-                            <FormItem
-                                {...formItemLayout}
-                                labelAlign={'top'}
-
-                            >
-                                <Icon type='add' />
-                            </FormItem>
-                        </Col>
-                    </Row> */}
+          <Row>
+            <Col span={'24'}>
+              <FormItem label={LABEL} required={false}>
+                <LabelPlan ref={this.labelPlan} />
+              </FormItem>
+            </Col>
+          </Row>
 
           <Row>
             <Col span="24">

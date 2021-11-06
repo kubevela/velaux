@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Button } from '@b-design/ui';
-import { POLICIES } from '../../constants';
+import { APP_POLICIES } from '../../constants';
 
 type Props = {
   appName: string;
@@ -25,7 +25,7 @@ export default function Policies(props: Props) {
       </div>
       <div className="padding-left-15">
         {' '}
-        {POLICIES}:{appPolicy}
+        {APP_POLICIES}:{appPolicy}
       </div>
     </Card>
   );
