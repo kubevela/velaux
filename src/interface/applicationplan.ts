@@ -74,3 +74,17 @@ export interface UIParamValidate {
   defaultValue?: any;
   options?: Array<{ label: string; value: string }>;
 }
+
+export interface ImageInfo {
+  imageURL: string;
+  imageName: string;
+  tag: string;
+  repoHost: string;
+  namespace: string;
+  ports: Array<Number>;
+  volumes: Array<ImageVolume>;
+}
+
+export interface ImageVolume {
+  mountPath: string;
+}

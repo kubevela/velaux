@@ -17,6 +17,8 @@ import { If } from 'tsx-control-statements/components';
 import { AppPlanDetail, AppPlanBase } from '../../interface/applicationplan';
 import Topology from './components/Topology';
 import DrawerWithFooter from '../../components/Drawer';
+import Translation from '../../components/Translation';
+import AddEnvBind from './components/AddEnvBind';
 
 type Props = {
   match: {
@@ -43,6 +45,7 @@ type State = {
   workflowStatus: [];
   components: [];
   isLoading: boolean;
+  visibleEnvPlan: boolean;
 };
 @DragDropContext(HTMLBackend)
 @connect((store: any) => {
@@ -60,6 +63,7 @@ class Dashboard extends Component<Props, State> {
       workflowStatus: [],
       components: [],
       isLoading: false,
+      visibleEnvPlan: false,
     };
   }
 
@@ -176,7 +180,7 @@ class Dashboard extends Component<Props, State> {
           </Row>
           <Loading tip="loading..." visible={isLoading} style={{ width: '100%' }}>
             <Row className="tabs-wraper">
-              <Col span={24}>
+              <Col span={20}>
                 <TabsContent
                   activeKey={activeKey}
                   envBind={envBind}
@@ -186,6 +190,17 @@ class Dashboard extends Component<Props, State> {
                   }}
                   dispatch={dispatch}
                 />
+              </Col>
+              <Col span={4}>
+                <div className="action-list">
+                  <a
+                    onClick={() => {
+                      this.setState({ visibleEnvPlan: true });
+                    }}
+                  >
+                    <Translation>Add Environment</Translation>
+                  </a>
+                </div>
               </Col>
             </Row>
 
@@ -212,6 +227,18 @@ class Dashboard extends Component<Props, State> {
               }}
               onClose={this.closeAddComponent}
             />
+          </If>
+
+          <If condition={this.state.visibleEnvPlan}>
+            <AddEnvBind
+              appPlanBase={applicationPlanDetail}
+              onClose={() => {
+                this.setState({ visibleEnvPlan: false });
+              }}
+              onOK={() => {
+                this.setState({ visibleEnvPlan: false });
+              }}
+            ></AddEnvBind>
           </If>
 
           <PublishDialog

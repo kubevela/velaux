@@ -8,6 +8,7 @@ import {
   DEPLOYMENT_UPDATE,
 } from '../../constants';
 import { AppPlanBase } from '../../../../interface/applicationplan';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   applicationPlanList: Array<AppPlanBase>;
@@ -17,6 +18,7 @@ type Props = {
   };
   changeAppName: (name: string) => void;
   setVisible: (visible: boolean) => void;
+  enablePublish?: false;
 };
 
 class Header extends Component<Props> {
@@ -27,7 +29,7 @@ class Header extends Component<Props> {
   render() {
     const { Row, Col } = Grid;
     const { applicationPlanList } = this.props;
-    const { appName } = this.props;
+    const { appName, enablePublish } = this.props;
     const APPTitleSlect = applicationPlanList.map((appPlan) => {
       return { label: appPlan.alias || appPlan.name, value: appPlan.name };
     });
@@ -46,14 +48,16 @@ class Header extends Component<Props> {
         </Col>
         <Col span="7">
           <div className="title-nav-button">
-            <Button
-              type="secondary"
-              onClick={() => {
-                this.props.setVisible(true);
-              }}
-            >
-              {PUBLISH_APPLICATION_TEMPLATE}
-            </Button>
+            <If condition={enablePublish}>
+              <Button
+                type="secondary"
+                onClick={() => {
+                  this.props.setVisible(true);
+                }}
+              >
+                {PUBLISH_APPLICATION_TEMPLATE}
+              </Button>
+            </If>
             <Button type="primary" className="margin-left-15">
               {DEPLOYMENT_UPDATE}
             </Button>
