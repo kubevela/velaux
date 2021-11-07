@@ -116,7 +116,3 @@ export const ACKCLusterStatus = [
     color: '#ef1111',
   },
 ];
-
-export const transSelectConfig = function (dataSource: [], key: string) {
-  return (dataSource || []).map((item) => ({ value: item[key], label: item[key] }));
-};

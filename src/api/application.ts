@@ -89,6 +89,11 @@ export function createApplicationTemplate(params: any) {
 }
 
 export function getComponentdefinitions(params: any) {
-  const url = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}?type=component`;
-  return get(url, params).then((res) => res);
+  const url = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}`;
+  return get(url, { params: { type: 'component' } }).then((res) => res);
+}
+
+export function detailComponentDefinition(params: { name: string }) {
+  const url = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}/${params.name}`;
+  return get(url, { params: { type: 'component' } }).then((res) => res);
 }

@@ -8,3 +8,5 @@ node_modules/
 src/assets/
 .DS_Store
 public
+
+*.d.ts

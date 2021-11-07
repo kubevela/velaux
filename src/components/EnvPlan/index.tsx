@@ -177,7 +177,6 @@ class EnvPlan extends Component<Props, State> {
             name{' '}
           </Col>
           <Col span="8" className="text-align-center">
-            {' '}
             clusterSelector{' '}
           </Col>
           <Col span="8" className="text-align-center">

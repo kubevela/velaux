@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Translation from '../components/Translation';
 
-export const addCluster = <Translation>Add Cluster</Translation>;
+export const addCluster = <Translation>Cluster Join</Translation>;
 export const editCluster = <Translation>Edit Cluster</Translation>;
 export const clustTitle = <Translation>Cluster Management</Translation>;
 export const clustSubTitle = <Translation>Introduction to cluster management</Translation>;
@@ -9,7 +9,6 @@ export const cloudServerTitle = <Translation>Connecting clusters from cloud serv
 export const UPLOADYMALFILE = <Translation>Upload Yaml File</Translation>;
 export const SUPPLIER = <Translation>Supplier</Translation>;
 export const NEXTSTEP = <Translation>NextStep</Translation>;
-export const Abutment = <Translation>Abutment</Translation>;
 export const PLEASE_ENTER = 'Please enter';
 export const PLEASE_CHOSE = 'Please chose';
 

@@ -7,7 +7,6 @@ import {
   cloudServerTitle,
   SUPPLIER,
   NEXTSTEP,
-  Abutment,
   PLEASE_ENTER,
   PLEASE_CHOSE,
 } from '../../../../constants';
@@ -15,6 +14,7 @@ import { checkName, ACKCLusterStatus } from '../../../../utils/common';
 import { getCloudClustersList } from '../../../../api/cluster';
 import './index.less';
 import { handleError } from '../../../../utils/errors';
+import Translation from '../../../../components/Translation';
 
 type Props = {
   visible: boolean;
@@ -29,6 +29,7 @@ type State = {
   pageSize: number;
   choseInput: boolean;
   cloudClusters: [];
+  btnLoading: boolean;
 };
 type Record = {
   id: string;
@@ -52,6 +53,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       pageSize: 10,
       choseInput: true,
       cloudClusters: [],
+      btnLoading: false,
     };
   }
 
@@ -66,7 +68,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-
+      this.setState({ btnLoading: true });
       const { provider, accessKeyID, accessKeySecret } = values;
       const { page, pageSize } = this.state;
       const params = {
@@ -79,9 +81,10 @@ class CloudServiceDialog extends React.Component<Props, State> {
       };
       getCloudClustersList(params)
         .then((re) => {
-          this.setState({ choseInput: false, cloudClusters: re.clusters });
+          this.setState({ choseInput: false, cloudClusters: re.clusters, btnLoading: false });
         })
         .catch((err) => {
+          this.setState({ btnLoading: false });
           handleError(err);
         });
     });
@@ -130,7 +133,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
   render() {
     const init = this.field.init;
     const { t, visible } = this.props;
-    const { choseInput, cloudClusters } = this.state;
+    const { choseInput, cloudClusters, btnLoading } = this.state;
     const { Column } = Table;
     const PLEASE_ENTER_PLACE_HOLD = t(PLEASE_ENTER).toString();
     const PLEASE_CHOSE_PLACE_HOLD = t(PLEASE_CHOSE).toString();
@@ -202,7 +205,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
                 this.connectcloudCluster(record);
               }}
             >
-              {Abutment}
+              <Translation>Link</Translation>
             </Button>
           );
         },
@@ -221,7 +224,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           onClose={this.onClose}
           footer={
             choseInput && (
-              <Button type="primary" onClick={this.onOk}>
+              <Button type="primary" onClick={this.onOk} loading={btnLoading}>
                 {NEXTSTEP}
               </Button>
             )
@@ -229,6 +232,12 @@ class CloudServiceDialog extends React.Component<Props, State> {
           footerAlign="center"
         >
           <If condition={choseInput}>
+            <Message style={{ marginBottom: '16px' }}>
+              <Translation>
+                KubeVela does not save your AK/SK, but does recommend allocating the smallest
+                available permission set.
+              </Translation>
+            </Message>
             <Form {...formItemLayout} field={this.field} className="cloud-server-wraper">
               <FormItem label={SUPPLIER} required={true}>
                 <Select
