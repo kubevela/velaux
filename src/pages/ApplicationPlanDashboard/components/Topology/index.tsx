@@ -48,13 +48,14 @@ class Topology extends Component<Props, State> {
         <ul style={{ height: '100%' }}>
           {components &&
             components.map((component: ComponentBase) => {
-              return <li>{component.name}</li>;
+              return <li key={component.name}>{component.name}</li>;
             })}
         </ul>
         <If condition={showBox}>
           <div className="components-wraper">
             {(componentDefinitions || []).map((item) => (
               <ComponentsGroup
+                key={item.name}
                 name={item.name}
                 description={item.description}
                 open={(componentType: string) => {

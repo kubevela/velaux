@@ -34,12 +34,14 @@ type State = {
 
 class AddComponent extends Component<Props, State> {
   field: Field;
+  uiSchemaRef: React.RefObject<UISchema>;
   constructor(props: Props) {
     super(props);
     this.state = {
       definitionLoading: true,
     };
     this.field = new Field(this);
+    this.uiSchemaRef = React.createRef();
   }
 
   componentDidMount() {
@@ -80,7 +82,7 @@ class AddComponent extends Component<Props, State> {
       const { name, alias, description, envNames = [], dependsOn, icon = '' } = values;
       const { appName, componentType } = this.props;
       const params = {
-        name: appName,
+        appName,
         body: {
           name,
           alias,
@@ -89,14 +91,22 @@ class AddComponent extends Component<Props, State> {
           componentType: componentType,
           dependsOn: dependsOn,
           envNames: envNames,
+          properties: '{}',
         },
       };
-      // createApplicationComponent(params).then((res) => {
-      //   if (res) {
-      //     Message.success(<Translation>create service add success</Translation>);
-      //     this.props.onOK();
-      //   }
-      // });
+      this.uiSchemaRef.current?.validate((error: any, values: any) => {
+        if (error) {
+          return;
+        }
+        params.body.properties = JSON.stringify(values);
+        debugger;
+        // createApplicationComponent(params).then((res) => {
+        //   if (res) {
+        //     Message.success(<Translation>create service add success</Translation>);
+        //     this.props.onOK();
+        //   }
+        // });
+      });
     });
   };
 
@@ -224,11 +234,16 @@ class AddComponent extends Component<Props, State> {
               </Col>
             </Row>
           </Group>
-          <UISchema
-            field={this.field}
+          <Group
+            title="Deployment Parameters"
+            description="Automatically generated based on definition"
             loading={definitionLoading}
-            uiSchema={definitionDetail && definitionDetail.uiSchema}
-          ></UISchema>
+          >
+            <UISchema
+              uiSchema={definitionDetail && definitionDetail.uiSchema}
+              ref={this.uiSchemaRef}
+            ></UISchema>
+          </Group>
         </Form>
       </DrawerWithFooter>
     );

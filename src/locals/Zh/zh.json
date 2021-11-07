@@ -118,5 +118,6 @@
   "UnDeploy": "未部署",
   "Warning": "部署异常",
   "EnvironmentPlan": "环境规划",
-  "BasisConfig": "基准配置"
+  "BasisConfig": "基准配置",
+  "Add Environment": "新增环境"
 }

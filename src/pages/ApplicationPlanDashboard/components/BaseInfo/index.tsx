@@ -13,7 +13,7 @@ type Props = {
 export default function BaseInfo(props: Props) {
   const { detail, policies } = props;
   const appPolicy = (policies || []).map((item: string) => (
-    <Button type="secondary" className="btn-polices">
+    <Button key={item} type="secondary" className="btn-polices">
       {item}
     </Button>
   ));

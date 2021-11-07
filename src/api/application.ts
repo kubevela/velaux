@@ -43,12 +43,11 @@ export function getApplicationComponents(params: any) {
   return get(url, params).then((res) => res);
 }
 
-export function createApplicationComponent(params: any) {
-  const { name, body } = params;
+export function createApplicationComponent(params: { appName: string; body: {} }) {
+  const { appName, body } = params;
   const url = isMock
     ? `${createApplicationComponent_mock}`
-    : `${application}/${name}/componentplans`;
-  delete params.name;
+    : `${application}/${appName}/componentplans`;
   return post(url, body).then((res) => res);
 }
 

@@ -1,9 +1,10 @@
 import React from 'react';
 import { Input } from '@b-design/ui';
 import './index.less';
+import { ImageInfo } from '../../interface/applicationplan';
 
 type Props = {
-  url: string;
+  onUpdate?: (arg: ImageInfo) => void;
 };
 
 type State = {};
@@ -19,11 +20,7 @@ class ImageInput extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    return (
-      <div className="image-input-container">
-        <Input />
-      </div>
-    );
+    return <Input />;
   }
 }
 

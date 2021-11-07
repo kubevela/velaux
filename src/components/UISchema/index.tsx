@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { Component } from 'react';
 import Translation from '../Translation';
 import { UIParam, UIParamValidate } from '../../interface/applicationplan';
 import Group from '../../extends/Group';
 import { Form, Input, Select, Field } from '@b-design/ui';
+import { ValidateResults } from '@alifd/field';
+import ImageInput from '../../extends/ImageInput';
+import Strings from '../../extends/Strings';
+import SecretSelect from '../../extends/SecretSelect';
+import SecretKeySelect from '../../extends/SecretKeySelect';
+import Structs from '../../extends/Structs';
+import CPUNumber from '../../extends/CPUNumber';
+import MemoryNumber from '../../extends/MemoryNumber';
 
 type Props = {
-  field: Field;
-  title?: string;
-  description?: string;
   uiSchema?: Array<UIParam>;
-  className?: string | undefined;
-  loading: boolean;
-  closed?: boolean;
 };
 
 function converRule(validete: UIParamValidate) {
@@ -58,30 +60,41 @@ function converRule(validete: UIParamValidate) {
   return rules;
 }
 
-const UISchema = (props: Props) => {
-  const init = props.field.init;
-  return (
-    <Group
-      hasToggleIcon
-      description={<Translation>{props.description || ''}</Translation>}
-      title={<Translation>{props.title || ''}</Translation>}
-      loading={props.loading}
-      closed={props.closed}
-    >
-      {props.uiSchema &&
-        props.uiSchema.map((param) => {
-          if (param.subParameters && param.subParameters.length > 0) {
-            return (
-              <UISchema
-                closed={true}
-                title={param.label}
-                description={param.description}
-                field={props.field}
-                uiSchema={param.subParameters}
-                loading={props.loading}
-              ></UISchema>
-            );
-          }
+class UISchema extends Component<Props> {
+  form: Field;
+  subParamRef: Map<string, React.RefObject<UISchema>>;
+  constructor(props: Props) {
+    super(props);
+    this.form = new Field(this);
+    this.subParamRef = new Map();
+  }
+  validate = (callback?: (errors: object[], values: any) => void) => {
+    this.form.validate();
+    if (this.form.getErrors()) {
+      callback && callback(this.form.getErrors(), this.form.getValues());
+      return;
+    }
+    const allvalues = this.form.getValues();
+    this.subParamRef.forEach((item, key) => {
+      item.current?.validate((errors, values) => {
+        if (errors) {
+          callback && callback(errors, values);
+          return;
+        }
+        console.log(key, values);
+      });
+    });
+    callback && callback(this.form.getErrors(), allvalues);
+  };
+  render() {
+    const { uiSchema } = this.props;
+    const init = this.form.init;
+    if (!uiSchema) {
+      return <div></div>;
+    }
+    return (
+      <div>
+        {uiSchema.map((param) => {
           const required = param.validate && param.validate.required;
           switch (param.uiType) {
             case 'Input':
@@ -107,7 +120,12 @@ const UISchema = (props: Props) => {
                   help={param.description}
                   disabled={param.disable}
                 >
-                  <Select dataSource={param.validate && param.validate.options}></Select>
+                  <Select
+                    {...init(param.jsonKey, {
+                      rules: converRule(param.validate),
+                    })}
+                    dataSource={param.validate && param.validate.options}
+                  ></Select>
                 </Form.Item>
               );
             case 'Number':
@@ -118,14 +136,120 @@ const UISchema = (props: Props) => {
                   help={param.description}
                   disabled={param.disable}
                 >
-                  <Input htmlType="number"></Input>
+                  <Input
+                    {...init(param.jsonKey, {
+                      rules: converRule(param.validate),
+                    })}
+                    htmlType="number"
+                  ></Input>
+                </Form.Item>
+              );
+            case 'ImageInput':
+              return (
+                <Form.Item
+                  required={required}
+                  label={param.label}
+                  help={param.description}
+                  disabled={param.disable}
+                >
+                  <ImageInput></ImageInput>
+                </Form.Item>
+              );
+            case 'Strings':
+              return (
+                <Form.Item
+                  required={required}
+                  label={param.label}
+                  help={param.description}
+                  disabled={param.disable}
+                >
+                  <Strings></Strings>
+                </Form.Item>
+              );
+            case 'SecretSelect':
+              return (
+                <Form.Item
+                  required={required}
+                  label={param.label}
+                  help={param.description}
+                  disabled={param.disable}
+                >
+                  <SecretSelect></SecretSelect>
+                </Form.Item>
+              );
+            case 'SecretKeySelect':
+              return (
+                <Form.Item
+                  required={required}
+                  label={param.label}
+                  help={param.description}
+                  disabled={param.disable}
+                >
+                  <SecretKeySelect></SecretKeySelect>
                 </Form.Item>
               );
             case 'Group':
+              if (param.subParameters && param.subParameters.length > 0) {
+                const ref = React.createRef<UISchema>();
+                this.subParamRef.set(param.jsonKey, ref);
+                return (
+                  <Group
+                    hasToggleIcon
+                    description={<Translation>{param.description || ''}</Translation>}
+                    title={<Translation>{param.label || ''}</Translation>}
+                    closed={true}
+                  >
+                    <UISchema
+                      key={param.jsonKey}
+                      uiSchema={param.subParameters}
+                      ref={ref}
+                    ></UISchema>
+                  </Group>
+                );
+              }
+              return <div></div>;
+            case 'Structs':
+              if (param.subParameters && param.subParameters.length > 0) {
+                const ref = React.createRef<Structs>();
+                return <Structs key={param.jsonKey} param={param} ref={ref}></Structs>;
+              }
+              return <div></div>;
+            case 'Ignore':
+              if (param.subParameters && param.subParameters.length > 0) {
+                const ref = React.createRef<UISchema>();
+                this.subParamRef.set(param.jsonKey, ref);
+                return (
+                  <UISchema key={param.jsonKey} uiSchema={param.subParameters} ref={ref}></UISchema>
+                );
+              }
+              return <div></div>;
+            case 'CPUNumber':
+              return (
+                <Form.Item
+                  required={required}
+                  label={param.label}
+                  help={param.description}
+                  disabled={param.disable}
+                >
+                  <CPUNumber></CPUNumber>
+                </Form.Item>
+              );
+            case 'MemoryNumber':
+              return (
+                <Form.Item
+                  required={required}
+                  label={param.label}
+                  help={param.description}
+                  disabled={param.disable}
+                >
+                  <MemoryNumber></MemoryNumber>
+                </Form.Item>
+              );
           }
         })}
-    </Group>
-  );
-};
+      </div>
+    );
+  }
+}
 
 export default UISchema;
