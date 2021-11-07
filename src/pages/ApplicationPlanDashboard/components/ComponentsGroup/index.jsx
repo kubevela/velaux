@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { DragSource } from 'react-dnd';
 import { Button, Balloon } from '@b-design/ui';
 
-import ItemTypes from '../../types';
-
 const style = {
   border: '1px dashed gray',
   backgroundColor: 'white',
@@ -29,7 +27,7 @@ const boxSource = {
   },
 };
 
-@DragSource(ItemTypes.BOX, boxSource, (connect, monitor) => ({
+@DragSource("box", boxSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging(),
 }))
