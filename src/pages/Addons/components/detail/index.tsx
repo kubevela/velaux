@@ -102,7 +102,6 @@ class AddonDetailDialog extends React.Component<Props, State> {
           footerAlign="center"
         >
           <div className="basic">
-            <Loading visible={loading} />
             <Row>
               <Col span={12}>
                 <div>
@@ -137,17 +136,20 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </Row>
           </div>
           <div className="next-menu-divider"></div>
-          <If condition={addonDetailInfo.detail}>
-            <ReactMarkdown
-              children={addonDetailInfo.detail}
-              remarkPlugins={[remarkGfm]}
-            ></ReactMarkdown>
-          </If>
-          <If condition={!addonDetailInfo.detail}>
-            <div className="readme-empty">
-              <span>暂无Readme介绍</span>
-            </div>
-          </If>
+
+          <Loading visible={loading} style={{ width: '100%' }}>
+            <If condition={addonDetailInfo.detail}>
+              <ReactMarkdown
+                children={addonDetailInfo.detail}
+                remarkPlugins={[remarkGfm]}
+              ></ReactMarkdown>
+            </If>
+            <If condition={!addonDetailInfo.detail}>
+              <div className="readme-empty">
+                <span>暂无Readme介绍</span>
+              </div>
+            </If>
+          </Loading>
         </Dialog>
       </div>
     );

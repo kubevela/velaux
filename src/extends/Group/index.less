@@ -2,26 +2,27 @@
 @whiteColor: white;
 @blackColor: black;
 .group-container {
-  padding: 12px;
+  margin-bottom: 16px;
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
   .group-title-container {
     position: relative;
     padding: 0 10px;
-    font-weight: bold;
-    font-size: 18px;
+    font-size: 14px;
     background-color: transparent;
     outline: none;
     cursor: pointer;
     transition: border-color 0.12s;
 
     .group-title-desc {
+      color: #a6a6a6;
       font-weight: normal;
       font-size: 12px;
     }
     .icon {
       position: absolute;
-      top: 12px;
+      top: 8px;
       right: 10px;
     }
     .next-icon-arrow-up {
@@ -37,5 +38,9 @@
     padding: 20px;
     background-color: #eee;
     border-radius: 5px;
+    transition: height 0.3s linear;
+  }
+  .group-box.disable {
+    display: none;
   }
 }

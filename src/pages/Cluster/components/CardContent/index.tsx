@@ -104,8 +104,7 @@ class CardContent extends React.Component<Props, State> {
                                   type: 'confirm',
                                   content: (
                                     <Translation>
-                                      Unrecoverable after deletion. Are you sure you want to delete
-                                      it?
+                                      Are you sure you want the detach cluster?
                                     </Translation>
                                   ),
                                   onOk: () => {
@@ -114,7 +113,7 @@ class CardContent extends React.Component<Props, State> {
                                 });
                               }}
                             >
-                              <Translation>Remove</Translation>
+                              <Translation>Detach</Translation>
                             </Menu.Item>
                           </Menu>
                         </Dropdown>

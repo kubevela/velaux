@@ -47,11 +47,16 @@ class CardContent extends React.Component<any, State> {
               return (
                 <Col span="6" className={`card-content-wraper`} key={index}>
                   <Card contentHeight="auto">
-                    <div>
-                      <If condition={icon}>
-                        <img src={icon}></img>
-                      </If>
-                    </div>
+                    <a onClick={() => clickAddon(name)}>
+                      <div className="cluster-card-top flexcenter">
+                        <If condition={icon && icon != 'none'}>
+                          <img src={icon} />
+                        </If>
+                        <If condition={!icon || icon === 'none'}>
+                          <img></img>
+                        </If>
+                      </div>
+                    </a>
                     <div className="content-wraper background-F9F8FF">
                       <Row className="content-title">
                         <Col span="20" className="font-size-16">
