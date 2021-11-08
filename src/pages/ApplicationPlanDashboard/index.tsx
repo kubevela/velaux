@@ -207,6 +207,7 @@ class Dashboard extends Component<Props, State> {
             <Row className="topology">
               <Col span={24}>
                 <Topology
+                  appPlanDetail={applicationPlanDetail}
                   showBox={activeKey === 'basisConfig'}
                   components={components}
                   onAddComponent={this.openAddComponent}

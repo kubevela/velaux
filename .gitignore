@@ -24,3 +24,4 @@ build
 .vscode
 .eslintcache
 .env
+package-lock.json
