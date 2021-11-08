@@ -25,3 +25,4 @@ build
 .eslintcache
 .env
 package-lock.json
+yarn-error.log
