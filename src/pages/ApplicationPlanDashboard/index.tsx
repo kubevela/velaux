@@ -124,10 +124,11 @@ class Dashboard extends Component<Props, State> {
     });
   };
 
-  changeActiveKey = (activeKey: string) => {
+  changeActiveKey = (activeKey: string | number) => {
+    const key = '' + activeKey;
     this.setState(
       {
-        activeKey: activeKey,
+        activeKey: key,
       },
       () => {
         this.onGetApplicationComponents();
@@ -184,11 +185,7 @@ class Dashboard extends Component<Props, State> {
                 <TabsContent
                   activeKey={activeKey}
                   envBind={envBind}
-                  history={history}
-                  changeActiveKey={(activeKey: string) => {
-                    this.changeActiveKey(activeKey);
-                  }}
-                  dispatch={dispatch}
+                  changeActiveKey={this.changeActiveKey}
                 />
               </Col>
               <Col span={4}>

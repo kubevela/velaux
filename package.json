@@ -83,6 +83,7 @@
     "@umijs/fabric": "2.8.1",
     "bfj": "7.0.2",
     "browserslist": "4.17.6",
+    "babel-loader": "8.2.3",
     "case-sensitive-paths-webpack-plugin": "2.3.0",
     "css-loader": "5.2.7",
     "dotenv": "10.0.0",
