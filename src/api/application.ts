@@ -10,6 +10,7 @@ import {
   createPolicy_mock,
   getPolicyDetails_mock,
   createApplicationTemplate_mock,
+  createApplicationEnv_mock,
 } from './devLink';
 import { application, componentdefinition } from './productionLink';
 import { getDomain } from '../utils/common';
@@ -95,4 +96,10 @@ export function getComponentdefinitions(params: any) {
 export function detailComponentDefinition(params: { name: string }) {
   const url = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}/${params.name}`;
   return get(url, { params: { type: 'component' } }).then((res) => res);
+}
+
+export function createApplicationEnv(params: { appName?: string }) {
+  const url = isMock ? `${createApplicationEnv_mock}` : `${application}/${params.appName}/envs`;
+  delete params.appName;
+  return post(url, params).then((res) => res);
 }

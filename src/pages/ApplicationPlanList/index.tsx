@@ -11,7 +11,7 @@ import { deleteApplicationPlan } from '../../api/application';
 import { AppPlanBase } from '../../interface/applicationplan';
 
 type Props = {
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   applicationPlanList: AppPlanBase[];
   namespaceList: [];
   clusterList?: [];
@@ -84,7 +84,7 @@ class Application extends Component<Props, State> {
 
         <CardContend
           appPlans={applicationPlanList}
-          editAppPlan={(name: string) => {}}
+          editAppPlan={(name: string) => { }}
           deleteAppPlan={this.onDeleteAppPlan}
         />
         <If condition={showAddApplication}>

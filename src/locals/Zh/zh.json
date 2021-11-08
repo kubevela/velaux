@@ -119,5 +119,15 @@
   "Warning": "部署异常",
   "EnvironmentPlan": "环境规划",
   "BasisConfig": "基准配置",
-  "Add Environment": "新增环境"
+  "Add Environment": "新增环境",
+  "Not yet, please go and create": "暂无,请去创建",
+  "App policies": "应用策略",
+  "Please select a service to deploy": "请选择要部署的服务",
+  "Service deployment": "服务部署",
+  "Environment name": "环境名称",
+  "Environment alias": "环境别名",
+  "Namespace": "命名空间",
+  "Environmental notes": "环境备注",
+  "Environment Name placehold": "环境名称, 限制英文和中划线, 最大32字符",
+  "Enter description": "请输入描述"
 }

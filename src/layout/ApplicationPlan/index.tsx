@@ -12,6 +12,8 @@ class ApplicationPlanLayout extends Component<any, any> {
   componentDidMount() {
     this.onGetApplicationDetails();
     this.getApplicationPlanList();
+    this.getClusterList();
+    this.getNamespaceList();
   }
 
   componentDidUpdate(prevProps: any) {
@@ -37,6 +39,19 @@ class ApplicationPlanLayout extends Component<any, any> {
   getApplicationPlanList = async () => {
     this.props.dispatch({
       type: 'application/getApplicationPlanList',
+    });
+  };
+
+  getClusterList = async () => {
+    this.props.dispatch({
+      type: 'clusters/getClusterList',
+    });
+  };
+
+  getNamespaceList = async () => {
+    this.props.dispatch({
+      type: 'application/getNamespaceList',
+      payload: {},
     });
   };
 

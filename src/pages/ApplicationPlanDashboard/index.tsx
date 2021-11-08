@@ -29,11 +29,13 @@ type Props = {
   componentDefinitions: [];
   applicationPlanDetail: AppPlanDetail;
   applicationPlanList: Array<AppPlanBase>;
+  clusterList: [];
+  namespaceList: [];
   loading: { global: Boolean };
   history: {
     push: (path: string, state: {}) => {};
   };
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {
@@ -49,7 +51,7 @@ type State = {
 };
 @DragDropContext(HTMLBackend)
 @connect((store: any) => {
-  return { ...store.application, loading: store.loading };
+  return { ...store.application, ...store.clusters, loading: store.loading };
 })
 class Dashboard extends Component<Props, State> {
   constructor(props: Props) {
@@ -137,6 +139,7 @@ class Dashboard extends Component<Props, State> {
 
   changeAppName = (name: string) => {
     this.props.history.push(`/applicationplans/${name}`, {});
+    this.onGetApplicationComponents();
   };
 
   render() {
@@ -153,8 +156,9 @@ class Dashboard extends Component<Props, State> {
       params: { appName },
     } = this.props.match;
     const { Row, Col } = Grid;
-    const { history, dispatch, applicationPlanDetail, applicationPlanList } = this.props;
+    const { history, dispatch, applicationPlanDetail, applicationPlanList, clusterList, namespaceList } = this.props;
     const { status, policies, envBind = [] } = applicationPlanDetail;
+
     return (
       <ApplicationPlanLayout {...this.props}>
         <div className="dashboard">
@@ -231,6 +235,9 @@ class Dashboard extends Component<Props, State> {
 
           <If condition={this.state.visibleEnvPlan}>
             <AddEnvBind
+              components={components}
+              clusterList={clusterList}
+              namespaceList={namespaceList}
               appPlanBase={applicationPlanDetail}
               onClose={() => {
                 this.setState({ visibleEnvPlan: false });
