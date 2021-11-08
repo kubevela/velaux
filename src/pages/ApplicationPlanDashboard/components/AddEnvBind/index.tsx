@@ -35,11 +35,11 @@ class EnvBindPlanDialog extends Component<Props> {
     const serviceRef: any = this.serviceBind?.current;
     const componentServices = serviceRef.state && serviceRef.state.componentServices;
     const componets: string[] = [];
-    (componentServices || []).forEach((item: { checked: boolean, name: string }) => {
+    (componentServices || []).forEach((item: { checked: boolean; name: string }) => {
       if (item.checked === true) {
         componets.push(item.name);
       }
-    })
+    });
 
     this.field.validate((error: any, values: any) => {
       if (error) {
@@ -55,13 +55,12 @@ class EnvBindPlanDialog extends Component<Props> {
           namespace,
         },
         componentSelector: {
-          components: componets
+          components: componets,
         },
         description,
       };
       this.onCreateApplicationEnv(params);
     });
-
   };
 
   onCreateApplicationEnv(params: any) {
@@ -86,7 +85,10 @@ class EnvBindPlanDialog extends Component<Props> {
       },
     };
 
-    const clusterListDataSource = (clusterList || []).map((item: { name: string }) => ({ label: item.name, value: item.name }));
+    const clusterListDataSource = (clusterList || []).map((item: { name: string }) => ({
+      label: item.name,
+      value: item.name,
+    }));
 
     return (
       <Dialog
@@ -97,7 +99,6 @@ class EnvBindPlanDialog extends Component<Props> {
         onOk={this.onSubmit}
         title={<Translation>Add Environment</Translation>}
       >
-
         <Form {...formItemLayout} field={this.field}>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>

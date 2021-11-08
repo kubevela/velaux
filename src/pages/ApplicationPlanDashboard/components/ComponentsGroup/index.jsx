@@ -27,7 +27,7 @@ const boxSource = {
   },
 };
 
-@DragSource("box", boxSource, (connect, monitor) => ({
+@DragSource('box', boxSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging(),
 }))

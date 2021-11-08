@@ -107,15 +107,14 @@
   "New application delivery plan": "New application delivery plan",
   "Deployment plans": "Deployment plans",
   "Not yet, please go and create": "Not yet, please go and create",
-  "Please select a service to deploy":"Please select a service to deploy",
-  "All":"All",
-  "App policies":"App policies",
-  "Service deployment":"Service deployment",
-  "Environment name":"Environment name",
-  "Environment alias":"Environment alias",
-  "Namespace":"Namespace",
-  "Environmental notes":"Environmental notes",
+  "Please select a service to deploy": "Please select a service to deploy",
+  "All": "All",
+  "App policies": "App policies",
+  "Service deployment": "Service deployment",
+  "Environment name": "Environment name",
+  "Environment alias": "Environment alias",
+  "Namespace": "Namespace",
+  "Environmental notes": "Environmental notes",
   "Environment Name placehold": "Environmental name, limited to English and Chinese underlined, up to 32 words",
-  "Enter description":"Enter description"
+  "Enter description": "Enter description"
 }
-

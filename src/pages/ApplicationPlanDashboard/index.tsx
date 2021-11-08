@@ -35,7 +35,7 @@ type Props = {
   history: {
     push: (path: string, state: {}) => {};
   };
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {
@@ -156,7 +156,14 @@ class Dashboard extends Component<Props, State> {
       params: { appName },
     } = this.props.match;
     const { Row, Col } = Grid;
-    const { history, dispatch, applicationPlanDetail, applicationPlanList, clusterList, namespaceList } = this.props;
+    const {
+      history,
+      dispatch,
+      applicationPlanDetail,
+      applicationPlanList,
+      clusterList,
+      namespaceList,
+    } = this.props;
     const { status, policies, envBind = [] } = applicationPlanDetail;
 
     return (

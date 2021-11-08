@@ -28,4 +28,3 @@ export const getWorkFlowsRecord_mock = '/mock/getWorkFlowsRecord.json';
 export const clusterCloudList_mock = '/mock/clusterCloudList.json';
 export const connectClusterCloud_mock = '/mock/connectClusterCloud.json';
 export const createApplicationEnv_mock = '/mock/createApplicationEnv.json';
-
