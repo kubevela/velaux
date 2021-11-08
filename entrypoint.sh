@@ -1,6 +1,6 @@
-# !/bin/bash
+#!/bin/sh
 
 # rewrite nginx config
-env2file conversion -f /etc/nginx/nginx.conf
+sed -i "s/KUBEVELA_API_URL/${KUBEVELA_API_URL}/g" /etc/nginx/nginx.conf
 
 exec "$@"
