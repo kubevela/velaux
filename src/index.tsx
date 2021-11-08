@@ -12,7 +12,6 @@ const app = dva({
 });
 
 app.use(createLoading());
-
 createModel(app);
 app.router(RouterView);
 app.start('#root');
