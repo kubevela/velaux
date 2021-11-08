@@ -5,10 +5,13 @@ import ComponentsGroup from '../ComponentsGroup';
 import { getComponentdefinitions } from '../../../../api/application';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
+import { Link } from 'dva/router';
+import { AppPlanDetail } from '../../../../interface/applicationplan';
 
 const { Row } = Grid;
 
 interface Props {
+  appPlanDetail: AppPlanDetail;
   components: Array<ComponentBase>;
   showBox: boolean;
   onAddComponent: (componentType: string) => void;
@@ -41,14 +44,22 @@ class Topology extends Component<Props, State> {
   };
 
   render() {
-    const { components, showBox, onAddComponent } = this.props;
+    const { components, showBox, onAddComponent, appPlanDetail } = this.props;
     const { componentDefinitions } = this.state;
     return (
       <div className="topology-body">
         <ul style={{ height: '100%' }}>
           {components &&
             components.map((component: ComponentBase) => {
-              return <li key={component.name}>{component.name}</li>;
+              return (
+                <li key={component.name}>
+                  <Link
+                    to={`/applicationplans/${appPlanDetail.name}/componentplans/${component.name}`}
+                  >
+                    {component.name}
+                  </Link>
+                </li>
+              );
             })}
         </ul>
         <If condition={showBox}>

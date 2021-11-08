@@ -5,7 +5,7 @@ import LeftMenu from './LeftMenu';
 import TopBar from './TopBar';
 import './index.less';
 
-export default function MainLayout(props) {
+export default function MainLayout(props: any) {
   return (
     <ConfigProvider>
       <div className="layout">
@@ -15,7 +15,7 @@ export default function MainLayout(props) {
             <LeftMenu props={props} />
           </div>
           <div className="layout-content">
-            <Content data={props} />
+            <Content />
           </div>
         </div>
       </div>

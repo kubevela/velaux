@@ -17,6 +17,7 @@ type Props = {
   onClose: () => void;
   onOK: () => void;
   t: (key: string) => {};
+  dispatch: ({ }) => {};
 };
 
 class EnvBindPlanDialog extends Component<Props> {
@@ -66,8 +67,13 @@ class EnvBindPlanDialog extends Component<Props> {
   onCreateApplicationEnv(params: any) {
     createApplicationEnv(params).then((res) => {
       if (res) {
+        const { appPlanBase } = this.props;
         Message.success(<Translation>Create Service Environment Success</Translation>);
         this.props.onClose();
+        this.props.dispatch({
+          type: 'application/getApplicationPlanDetail',
+          payload: { appPlanName: appPlanBase.name },
+        });
       }
     });
   }
@@ -122,7 +128,7 @@ class EnvBindPlanDialog extends Component<Props> {
             </Col>
 
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Component alias</Translation>} required={true}>
+              <FormItem label={<Translation>Environment alias</Translation>}>
                 <Input
                   name="alias"
                   placeholder={'Give your app a more recognizable name'}

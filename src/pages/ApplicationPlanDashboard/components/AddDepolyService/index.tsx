@@ -13,6 +13,7 @@ type State = {
 
 type ComponentItem = {
   id: string;
+  alias?: string;
   name: string;
   checked: boolean;
 };
@@ -22,8 +23,8 @@ class addCheckDepolySercice extends Component<Props, State> {
     super(props);
     this.state = {
       componentServices: (props.components || []).map((item: ComponentItem) => ({
-        id: item.name,
-        name: item.name,
+        id: this.getName(item),
+        name: this.getName(item),
         checked: true,
       })),
       allChecked: true,
@@ -91,6 +92,10 @@ class addCheckDepolySercice extends Component<Props, State> {
       this.setState({ componentServices: newComponentServices, allChecked: false });
     }
   };
+
+  getName = (item: ComponentItem) => {
+    return item.alias ? item.alias : item.name;
+  }
 
   render() {
     const { Row, Col } = Grid;

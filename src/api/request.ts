@@ -50,7 +50,7 @@ const handleAPIError = (err: any, customError: boolean) => {
   const { data, status } = err;
   if (customError) {
     Promise.reject(data);
-  } else if (data.BusinessCode) {
+  } else if (data && data.BusinessCode) {
     handleError(data);
   } else {
     Message.error(getMessage(status));
