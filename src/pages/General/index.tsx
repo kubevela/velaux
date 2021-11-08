@@ -37,7 +37,7 @@ type Props = {
   history: {
     push: (path: string, state: {}) => {};
   };
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {

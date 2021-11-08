@@ -3,35 +3,24 @@ import React, { Component } from 'react';
 import './index.less';
 
 type Props = {
-    id: string,
-    data?: any
+  id: string;
+  data?: any;
 };
 
-type State = {
-
-};
+type State = {};
 
 class WorkFlowEdge extends Component<Props, State> {
-    constructor(props: any) {
-        super(props);
+  constructor(props: any) {
+    super(props);
 
-        this.state = {
+    this.state = {};
+  }
 
-        };
-    }
+  componentDidMount() {}
 
-    componentDidMount() { }
-
-
-    render() {
-       
-
-        return (
-            <div className="workflow-edge-container">
-                {/* + */}
-            </div>
-        );
-    }
+  render() {
+    return <div className="workflow-edge-container">{/* + */}</div>;
+  }
 }
 
 export default WorkFlowEdge;

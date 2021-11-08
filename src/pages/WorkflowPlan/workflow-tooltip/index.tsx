@@ -1,7 +1,7 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import { If } from "tsx-control-statements/components";
-import "./index.less";
+import { If } from 'tsx-control-statements/components';
+import './index.less';
 
 type Props = {
   id: string;
