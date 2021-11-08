@@ -80,9 +80,9 @@ class WorkFlowComponent extends Component<Props, State> {
       data.description = description;
       data.data = workflowData;
       this.props.dispatch({
-          type: 'workflow/saveWorkflow',
-          payload: data
-      })
+        type: 'workflow/saveWorkflow',
+        payload: data,
+      });
     });
   };
 

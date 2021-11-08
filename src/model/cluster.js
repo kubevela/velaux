@@ -1,9 +1,4 @@
-import {
-  getClusterList,
-  createCluster,
-  getCloudClustersList,
-  connectcloudCluster,
-} from '../api/cluster';
+import { getClusterList, createCluster, connectcloudCluster } from '../api/cluster';
 
 export default {
   namespace: 'clusters',
@@ -13,7 +8,7 @@ export default {
     cloudClustersTotal: 0,
   },
   reducers: {
-    updateCLusterList(state, { type, payload }) {
+    updateClusterList(state, { type, payload }) {
       return {
         ...state,
         clusterList: payload,
@@ -31,7 +26,7 @@ export default {
   effects: {
     *getClusterList(action, { call, put }) {
       const result = yield call(getClusterList, action.payload);
-      yield put({ type: 'updateCLusterList', payload: result.clusters || [] });
+      yield put({ type: 'updateClusterList', payload: result.clusters || [] });
     },
     *createCluster(action, { call, put }) {
       const result = yield call(createCluster, action.payload);

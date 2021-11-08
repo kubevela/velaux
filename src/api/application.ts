@@ -43,12 +43,11 @@ export function getApplicationComponents(params: any) {
   return get(url, params).then((res) => res);
 }
 
-export function createApplicationComponent(params: any) {
-  const { name, body } = params;
+export function createApplicationComponent(params: { appName: string; body: {} }) {
+  const { appName, body } = params;
   const url = isMock
     ? `${createApplicationComponent_mock}`
-    : `${application}/${name}/componentplans`;
-  delete params.name;
+    : `${application}/${appName}/componentplans`;
   return post(url, body).then((res) => res);
 }
 
@@ -89,6 +88,11 @@ export function createApplicationTemplate(params: any) {
 }
 
 export function getComponentdefinitions(params: any) {
-  const url = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}?type=component`;
-  return get(url, params).then((res) => res);
+  const url = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}`;
+  return get(url, { params: { type: 'component' } }).then((res) => res);
+}
+
+export function detailComponentDefinition(params: { name: string }) {
+  const url = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}/${params.name}`;
+  return get(url, { params: { type: 'component' } }).then((res) => res);
 }

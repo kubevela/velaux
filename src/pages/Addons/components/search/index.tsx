@@ -57,7 +57,7 @@ class SelectSearch extends React.Component<Props, State> {
 
     return (
       <Row className="app-select-wraper boder-radius-8">
-        <Col span="6">
+        <Col span="6" style={{ padding: '0 8px' }}>
           <Select
             mode="single"
             size="large"
@@ -75,7 +75,7 @@ class SelectSearch extends React.Component<Props, State> {
           </Select>
         </Col>
 
-        <Col span="6">
+        <Col span="6" style={{ padding: '0 8px' }}>
           <Input
             innerAfter={
               <Icon

@@ -27,8 +27,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  const list = [...store.application.applicationList];
-  return { ...store.clusters, ...{ applicationList: list } };
+  return { ...store.clusters };
 })
 class Cluster extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -89,7 +88,7 @@ class Cluster extends React.Component<Props, State> {
           <Title
             title="Cluster management"
             subTitle="Introduction to cluster management"
-            addButtonTitle="Add Cluster"
+            addButtonTitle="Cluster Join"
             addButtonClick={() => {
               this.setState({ showAddCluster: true });
             }}

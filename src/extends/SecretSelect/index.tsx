@@ -1,10 +1,9 @@
+import { Select } from '@b-design/ui';
 import React from 'react';
 
 type DataSource = Array<{ label: string; value: any }>;
 
-type Props = {
-  url: string;
-};
+type Props = {};
 
 type State = {};
 
@@ -19,7 +18,7 @@ class SecretSelect extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    return <div></div>;
+    return <Select></Select>;
   }
 }
 

@@ -1,9 +1,8 @@
 import React from 'react';
-
-type DataSource = Array<{ label: string; value: any }>;
+import { Select } from '@b-design/ui';
 
 type Props = {
-  secretKeys: string;
+  secretKeys?: string;
 };
 
 type State = {};
@@ -19,7 +18,7 @@ class SecretKeySelect extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    return <div></div>;
+    return <Select></Select>;
   }
 }
 
