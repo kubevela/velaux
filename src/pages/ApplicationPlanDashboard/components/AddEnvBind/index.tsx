@@ -17,7 +17,7 @@ type Props = {
   onClose: () => void;
   onOK: () => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 class EnvBindPlanDialog extends Component<Props> {

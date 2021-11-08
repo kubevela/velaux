@@ -95,7 +95,7 @@ class addCheckDepolySercice extends Component<Props, State> {
 
   getName = (item: ComponentItem) => {
     return item.alias ? item.alias : item.name;
-  }
+  };
 
   render() {
     const { Row, Col } = Grid;
