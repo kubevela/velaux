@@ -5,9 +5,9 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node --max-old-space-size=4096 scripts/build.js",
-    "docker-image": "docker build -t kubevela/velaux:1.1.0 .",
+    "docker-image": "yarn build && docker build -t kubevela/velaux:1.1.0 -f Dockerfile.local .",
     "test": "node scripts/test.js",
-    "lint": "npm run lint:js && npm run lint:style && npm run lint:prettier",
+    "lint": "yarn lint:js && yarn lint:style && yarn lint:prettier",
     "lint:js": "eslint --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
     "lint:style": "stylelint --fix \"src/**/*.less\" --syntax less",
     "lint:prettier": "prettier -c --write \"src/**/*\" --end-of-line auto",
