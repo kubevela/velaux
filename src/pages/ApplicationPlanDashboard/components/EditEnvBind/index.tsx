@@ -142,7 +142,7 @@ class EditEnvBindDialog extends Component<Props, State> {
         footerActions={['ok']}
         onClose={this.props.onClose}
         onOk={this.onSubmit}
-        title={<Translation>Edit Environment</Translation>}
+        title={<Translation>Setting environment differences</Translation>}
       >
         <Form {...formItemLayout} field={this.field}>
           <Row>

@@ -33,7 +33,7 @@ class addCheckDepolySercice extends Component<Props, State> {
 
   getInitComService() {
     const { isEdit, allComponents, componentSelectorComponents = [] } = this.props;
-    const cloneAllComponents = _.cloneDeep(allComponents);
+    const cloneAllComponents = _.cloneDeep(allComponents) || [];
     if (isEdit) {
       let allChecked = true;
       cloneAllComponents.forEach((item: any) => {
