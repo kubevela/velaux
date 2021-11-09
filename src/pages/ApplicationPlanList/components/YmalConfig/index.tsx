@@ -146,7 +146,7 @@ class YmalConfig extends React.Component<Props> {
           </Row>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <NameSpaceForm field={this.field} namespaceList={namespaceList} />
+              <NameSpaceForm field={this.field} namespaceList={namespaceList} disabled={false} />
             </Col>
             <Col span={12} style={{ padding: '0 8px' }}>
               <FormItem label={describe}>

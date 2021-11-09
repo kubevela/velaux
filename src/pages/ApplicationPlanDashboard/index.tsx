@@ -19,6 +19,7 @@ import Topology from './components/Topology';
 import DrawerWithFooter from '../../components/Drawer';
 import Translation from '../../components/Translation';
 import AddEnvBind from './components/AddEnvBind';
+import EditEnvBind from './components/EditEnvBind';
 
 type Props = {
   match: {
@@ -46,8 +47,10 @@ type State = {
   componentDefinitions: [];
   workflowStatus: [];
   components: [];
+  allComponents: [];
   isLoading: boolean;
-  visibleEnvPlan: boolean;
+  visibleAddEnvPlan: boolean;
+  visibleEditEnvPlan: boolean;
 };
 @DragDropContext(HTMLBackend)
 @connect((store: any) => {
@@ -64,8 +67,10 @@ class Dashboard extends Component<Props, State> {
       componentDefinitions: [],
       workflowStatus: [],
       components: [],
+      allComponents: [],
       isLoading: false,
-      visibleEnvPlan: false,
+      visibleAddEnvPlan: false,
+      visibleEditEnvPlan: false,
     };
   }
 
@@ -98,6 +103,10 @@ class Dashboard extends Component<Props, State> {
     getApplicationComponents(params)
       .then((res) => {
         if (res) {
+          params.envName === '' &&
+            this.setState({
+              allComponents: res && res.componentplans,
+            });
           this.setState({
             components: res && res.componentplans,
           });
@@ -143,6 +152,18 @@ class Dashboard extends Component<Props, State> {
     this.onGetApplicationComponents();
   };
 
+  changeAddEnvVisible = (visible: boolean) => {
+    this.setState({
+      visibleAddEnvPlan: visible,
+    });
+  };
+
+  changeEditEnvVisible = (visible: boolean) => {
+    this.setState({
+      visibleEditEnvPlan: visible,
+    });
+  };
+
   render() {
     const {
       visible,
@@ -151,6 +172,7 @@ class Dashboard extends Component<Props, State> {
       componentDefinitions = [],
       workflowStatus = [],
       components = [],
+      allComponents = [],
       isLoading,
     } = this.state;
     const {
@@ -192,24 +214,30 @@ class Dashboard extends Component<Props, State> {
           </Row>
           <Loading tip="loading..." visible={isLoading} style={{ width: '100%' }}>
             <Row className="tabs-wraper">
-              <Col span={20}>
+              <Col span={24}>
                 <TabsContent
                   activeKey={activeKey}
                   envBind={envBind}
                   changeActiveKey={this.changeActiveKey}
+                  changeAddEnvVisible={(visible: boolean) => {
+                    this.changeAddEnvVisible(visible);
+                  }}
+                  changeEditEnvVisible={(visible: boolean) => {
+                    this.changeEditEnvVisible(visible);
+                  }}
                 />
               </Col>
-              <Col span={4}>
+              {/* <Col span={4}>
                 <div className="action-list">
                   <a
                     onClick={() => {
-                      this.setState({ visibleEnvPlan: true });
+                      this.setState({ visibleAddEnvPlan: true });
                     }}
                   >
                     <Translation>Add Environment</Translation>
                   </a>
                 </div>
-              </Col>
+              </Col> */}
             </Row>
 
             <Row className="topology">
@@ -238,20 +266,37 @@ class Dashboard extends Component<Props, State> {
             />
           </If>
 
-          <If condition={this.state.visibleEnvPlan}>
+          <If condition={this.state.visibleAddEnvPlan}>
             <AddEnvBind
-              components={components}
+              allComponents={allComponents}
               clusterList={clusterList}
               namespaceList={namespaceList}
               appPlanBase={applicationPlanDetail}
               onClose={() => {
-                this.setState({ visibleEnvPlan: false });
+                this.changeAddEnvVisible(false);
               }}
               onOK={() => {
-                this.setState({ visibleEnvPlan: false });
+                this.changeAddEnvVisible(false);
               }}
               dispatch={dispatch}
             ></AddEnvBind>
+          </If>
+
+          <If condition={this.state.visibleEditEnvPlan}>
+            <EditEnvBind
+              activeKey={activeKey}
+              allComponents={allComponents}
+              clusterList={clusterList}
+              namespaceList={namespaceList}
+              appPlanBase={applicationPlanDetail}
+              onClose={() => {
+                this.changeEditEnvVisible(false);
+              }}
+              onOK={() => {
+                this.changeEditEnvVisible(false);
+              }}
+              dispatch={dispatch}
+            ></EditEnvBind>
           </If>
 
           <PublishDialog

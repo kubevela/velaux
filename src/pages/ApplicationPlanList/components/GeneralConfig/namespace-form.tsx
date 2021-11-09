@@ -7,6 +7,7 @@ const FormItem = Form.Item;
 type Props = {
   formItemLayout?: any;
   namespaceList: [];
+  disabled: boolean;
   field: Field;
   handleSelectNameSpace?: () => {};
 };
@@ -18,7 +19,7 @@ type State = {
 
 class NamespaceForm extends React.Component<Props, State> {
   field: any;
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       showNameSpaceInput: false,
@@ -39,7 +40,7 @@ class NamespaceForm extends React.Component<Props, State> {
   };
 
   render() {
-    const { formItemLayout, namespaceList, field } = this.props;
+    const { formItemLayout, namespaceList, field, disabled = false } = this.props;
     const { showNameSpaceInput } = this.state;
     return (
       <React.Fragment>
@@ -57,6 +58,7 @@ class NamespaceForm extends React.Component<Props, State> {
                   mode="single"
                   dataSource={namespaceList}
                   {...field.init('namespace', { initValue: 'default' })}
+                  disabled={disabled}
                   placeholder={''}
                 />
                 <Button
@@ -70,7 +72,11 @@ class NamespaceForm extends React.Component<Props, State> {
             </If>
             <If condition={showNameSpaceInput}>
               <div className="cluster-container">
-                <Input {...field.init('namespace')} className="cluster-params-input" />
+                <Input
+                  {...field.init('namespace')}
+                  disabled={disabled}
+                  className="cluster-params-input"
+                />
                 <Button
                   className="cluster-option-btn"
                   type="secondary"
@@ -84,7 +90,7 @@ class NamespaceForm extends React.Component<Props, State> {
         </If>
         <If condition={namespaceList.length === 0}>
           <FormItem {...formItemLayout} label={'namespace'} labelTextAlign="left" required={true}>
-            <Input {...field.init('namespace')} />
+            <Input {...field.init('namespace')} disabled={disabled} />
           </FormItem>
         </If>
       </React.Fragment>

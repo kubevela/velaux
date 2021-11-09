@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { Checkbox, Grid, Form } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
+import _ from 'lodash';
 import './index.less';
 
 type Props = {
-  components: [];
+  allComponents: [];
+  componentSelectorComponents?: any;
+  isEdit: boolean;
 };
 type State = {
   componentServices: [] | Array<ComponentItem>;
@@ -21,14 +24,51 @@ type ComponentItem = {
 class addCheckDepolySercice extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    const initObj = this.getInitComService();
     this.state = {
-      componentServices: (props.components || []).map((item: ComponentItem) => ({
-        id: this.getName(item),
-        name: this.getName(item),
-        checked: true,
-      })),
-      allChecked: true,
+      componentServices: initObj.componentServices,
+      allChecked: initObj.allChecked,
     };
+  }
+
+  getInitComService() {
+    const { isEdit, allComponents, componentSelectorComponents = [] } = this.props;
+    const cloneAllComponents = _.cloneDeep(allComponents);
+    if (isEdit) {
+      let allChecked = true;
+      cloneAllComponents.forEach((item: any) => {
+        if (componentSelectorComponents.includes(item.name)) {
+          item.checked = true;
+        } else {
+          item.checked = false;
+        }
+      });
+      cloneAllComponents.map((item: ComponentItem) => {
+        if (!item.checked) {
+          allChecked = false;
+        }
+      });
+
+      return {
+        componentServices: (cloneAllComponents || []).map((item: ComponentItem) => ({
+          id: item.name,
+          name: item.name,
+          alias: item.alias,
+          checked: item.checked,
+        })),
+        allChecked: allChecked,
+      };
+    } else {
+      return {
+        componentServices: (allComponents || []).map((item: ComponentItem) => ({
+          id: item.name,
+          name: item.name,
+          alias: item.alias,
+          checked: true,
+        })),
+        allChecked: true,
+      };
+    }
   }
 
   onChange = (flag: boolean, event: any) => {
@@ -42,36 +82,42 @@ class addCheckDepolySercice extends Component<Props, State> {
 
   removeChecked = (id: string) => {
     const { componentServices } = this.state;
-    componentServices.forEach((item: ComponentItem) => {
+    const cloneComponentServices = _.cloneDeep(componentServices);
+    cloneComponentServices.forEach((item: ComponentItem) => {
       if (item.id === id) {
         item.checked = false;
       }
     });
-    const notCheckedAll = componentServices.every((item: ComponentItem) => item.checked === false);
+    const notCheckedAll = cloneComponentServices.every(
+      (item: ComponentItem) => item.checked === false,
+    );
     if (notCheckedAll) {
       this.setState({
         allChecked: false,
       });
     }
-    this.setState({ componentServices: componentServices });
+    this.setState({ componentServices: cloneComponentServices });
   };
 
   addChecked = (id: string) => {
     const { componentServices } = this.state;
-    componentServices.forEach((item: ComponentItem) => {
+    const cloneComponentServices = _.cloneDeep(componentServices);
+    cloneComponentServices.forEach((item: ComponentItem) => {
       if (item.id === id) {
         item.checked = true;
       }
     });
 
-    const isCheckedAll = componentServices.every((item: ComponentItem) => item.checked === true);
+    const isCheckedAll = cloneComponentServices.every(
+      (item: ComponentItem) => item.checked === true,
+    );
     if (isCheckedAll) {
       this.setState({
         allChecked: true,
       });
     }
 
-    this.setState({ componentServices: componentServices });
+    this.setState({ componentServices: cloneComponentServices });
   };
 
   onChangeAll = (flag: boolean) => {
@@ -80,6 +126,7 @@ class addCheckDepolySercice extends Component<Props, State> {
       const newComponentServices = componentServices.map((item: ComponentItem) => ({
         id: item.name,
         name: item.name,
+        alias: item.alias,
         checked: true,
       }));
       this.setState({ componentServices: newComponentServices, allChecked: true });
@@ -87,14 +134,11 @@ class addCheckDepolySercice extends Component<Props, State> {
       const newComponentServices = componentServices.map((item: ComponentItem) => ({
         id: item.name,
         name: item.name,
+        alias: item.alias,
         checked: false,
       }));
       this.setState({ componentServices: newComponentServices, allChecked: false });
     }
-  };
-
-  getName = (item: ComponentItem) => {
-    return item.alias ? item.alias : item.name;
   };
 
   render() {
@@ -123,14 +167,14 @@ class addCheckDepolySercice extends Component<Props, State> {
           {componentServices.map((item: ComponentItem) => (
             <Col span="6">
               <Checkbox
-                id={item.name}
+                id={item.id}
                 checked={item.checked}
                 onChange={(flag, e) => {
                   this.onChange(flag, e);
                 }}
               >
-                <label htmlFor={item.name} className="next-checkbox-label">
-                  {item.name}
+                <label htmlFor={item.id} className="next-checkbox-label">
+                  {item.alias || item.name}
                 </label>
               </Checkbox>
             </Col>

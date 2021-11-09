@@ -11,7 +11,7 @@ import { checkName } from '../../../../utils/common';
 
 type Props = {
   appPlanBase: AppPlanDetail;
-  components: [];
+  allComponents: [];
   clusterList: [];
   namespaceList: [];
   onClose: () => void;
@@ -78,7 +78,7 @@ class EnvBindPlanDialog extends Component<Props> {
     });
   }
   render() {
-    const { t, components, clusterList = [], namespaceList } = this.props;
+    const { t, allComponents, clusterList = [], namespaceList } = this.props;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const init = this.field.init;
@@ -164,7 +164,7 @@ class EnvBindPlanDialog extends Component<Props> {
               </Form.Item>
             </Col>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <NameSpaceForm field={this.field} namespaceList={namespaceList} />
+              <NameSpaceForm field={this.field} namespaceList={namespaceList} disabled={false} />
             </Col>
           </Row>
 
@@ -190,7 +190,11 @@ class EnvBindPlanDialog extends Component<Props> {
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
               <FormItem label={''} required={true}>
-                <AddDepolySercice components={components} ref={this.serviceBind} />
+                <AddDepolySercice
+                  isEdit={false}
+                  allComponents={allComponents}
+                  ref={this.serviceBind}
+                />
               </FormItem>
             </Col>
           </Row>

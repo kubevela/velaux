@@ -129,5 +129,6 @@
   "Namespace": "命名空间",
   "Environmental notes": "环境备注",
   "Environment Name placehold": "环境名称, 限制英文和中划线, 最大32字符",
-  "Enter description": "请输入描述"
+  "Enter description": "请输入描述",
+  "Setting environment differences": "设置环境差异"
 }
