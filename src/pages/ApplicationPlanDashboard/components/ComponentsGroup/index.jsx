@@ -56,7 +56,7 @@ class Box extends React.Component {
     return (
       connectDragSource &&
       connectDragSource(
-        <div style={{ ...style, opacity }}>
+        <div style={{ ...style, opacity }} className="component-btn">
           <Balloon trigger={defaultTrigger} closable={false} align="t">
             {description}
           </Balloon>

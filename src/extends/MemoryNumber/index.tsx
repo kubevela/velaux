@@ -1,10 +1,10 @@
 import React from 'react';
 import { Input } from '@b-design/ui';
-import axios from 'axios';
 
-type DataSource = Array<{ label: string; value: any }>;
-
-type Props = {};
+type Props = {
+  onChange: (value: any) => void;
+  value: any;
+};
 
 type State = {};
 
@@ -16,10 +16,9 @@ class MemoryNumber extends React.Component<Props, State> {
     };
   }
 
-  componentDidMount = async () => {};
-
   render() {
-    return <Input addonTextAfter="MB" htmlType="number" />;
+    const { onChange, value } = this.props;
+    return <Input addonTextAfter="MB" htmlType="number" onChange={onChange} defaultValue={value} />;
   }
 }
 

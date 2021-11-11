@@ -74,11 +74,14 @@ export default {
       const workflow = { alias, appName, name, description };
       workflow.enable = option.enable;
       workflow.default = option.default;
-      const { nodes } = data;
+      const { nodes, edges } = data;
       const steps = Object.keys(nodes).map((key) => {
+        // 处理当前组件的依赖，遍历边
+        let dependsOn = [];
         return nodes[key].consumerData;
       });
       workflow.steps = steps;
+
       const { workflowList } = yield select((state) => state.workflow);
       workflowList.forEach((item) => {
         if ((item.name = originWorkflow.name)) {

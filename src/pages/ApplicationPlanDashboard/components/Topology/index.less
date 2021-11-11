@@ -1,3 +1,4 @@
+@primarycolor: #1b58f4;
 .topology-body {
   position: relative;
   width: 100%;
@@ -8,5 +9,13 @@
     position: absolute;
     bottom: 32px;
     height: 80px;
+    .component-btn {
+      margin-bottom: 8px;
+      cursor: pointer;
+      &:hover > button {
+        color: #fff !important;
+        background-color: @primarycolor !important;
+      }
+    }
   }
 }

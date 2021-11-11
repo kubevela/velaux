@@ -45,11 +45,7 @@ class Group extends React.Component<Props, State> {
             {title}
             <div className="group-title-desc">{description}</div>
             <If condition={hasToggleIcon}>
-              <Icon
-                className="icon"
-                style={{ top: description ? '8px' : '2px' }}
-                type={closed ? 'arrow-down' : 'arrow-up'}
-              />
+              <Icon className="icon" style={{ top: 0 }} type={closed ? 'arrow-down' : 'arrow-up'} />
             </If>
           </div>
           <If condition={!hasToggleIcon || !closed}>

@@ -24,7 +24,7 @@ class DrawerWithFooter extends Component<Props, any> {
     return (
       <Drawer
         title={title}
-        closeMode="close"
+        closeMode="mask"
         closeable="close"
         onClose={onClose}
         visible={true}

@@ -1,10 +1,11 @@
 import React from 'react';
 import { Input } from '@b-design/ui';
 import './index.less';
-import { ImageInfo } from '../../interface/applicationplan';
 
 type Props = {
-  onUpdate?: (arg: ImageInfo) => void;
+  value: any;
+  id: string;
+  onChange: (value: any) => void;
 };
 
 type State = {};
@@ -20,7 +21,8 @@ class ImageInput extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    return <Input />;
+    const { onChange, value } = this.props;
+    return <Input onChange={onChange} defaultValue={value} />;
   }
 }
 
