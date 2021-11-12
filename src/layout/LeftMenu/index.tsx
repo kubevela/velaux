@@ -1,3 +1,4 @@
+import React from 'react';
 import _ from 'lodash';
 import { Link } from 'dva/router';
 import { Icon } from '@b-design/ui';
@@ -5,8 +6,8 @@ import Translation from '../../components/Translation';
 import { getLeftSider } from './menu';
 import './index.less';
 
-const LeftMenu = (data, context) => {
-  const pathname = _.get(data, 'props.history.location.pathname');
+const LeftMenu = (props: any) => {
+  const pathname = _.get(props, 'props.history.location.pathname');
   const sider = getLeftSider(pathname);
   const childrenSider = sider.map((item) => {
     let ele = [];
