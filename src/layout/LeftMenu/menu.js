@@ -2,23 +2,28 @@ import {
   isApplicationPath,
   isClustersPath,
   isAddonsPath,
-  isAPPStorePath,
+  isDeliveryTarget,
 } from '../../utils/common';
 export function getLeftSider(pathname) {
   const isApplication = isApplicationPath(pathname);
   const isCluster = isClustersPath(pathname);
   const isAddons = isAddonsPath(pathname);
-  const isAPPStore = isAPPStorePath(pathname);
-
+  const isDeliveryTargetURL = isDeliveryTarget(pathname);
   return [
     {
       navName: 'Application Center',
       children: [
         {
           className: isApplication,
-          link: '/applicationplans',
+          link: '/applications',
           iconType: 'layergroup-fill',
-          navName: 'AppPlan Manager',
+          navName: 'Application Manager',
+        },
+        {
+          className: isDeliveryTargetURL,
+          link: '/deliveryTargets',
+          iconType: 'box',
+          navName: 'Delivery Target Manager',
         },
       ],
     },

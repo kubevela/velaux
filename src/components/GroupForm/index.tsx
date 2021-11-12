@@ -1,5 +1,5 @@
 import React from 'react';
-import { UIParam } from '../../interface/applicationplan';
+import { UIParam } from '../../interface/application';
 import UISchema from '../UISchema';
 
 type Props = {

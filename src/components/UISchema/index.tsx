@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Form, Input, Select, Field, Balloon } from '@b-design/ui';
 import Translation from '../Translation';
-import { UIParam, UIParamValidate } from '../../interface/applicationplan';
+import { UIParam, UIParamValidate } from '../../interface/application';
 import Group from '../../extends/Group';
 import GroupForm from '../GroupForm';
 import ImageInput from '../../extends/ImageInput';

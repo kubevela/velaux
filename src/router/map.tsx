@@ -10,7 +10,7 @@ type Props = {
 class RouterMap extends Component<Props, {}> {
   render() {
     const { routes, history } = this.props;
-    const defaultRoute = <Redirect from="/" to="/applicationplan" key={'default'} exact></Redirect>;
+    const defaultRoute = <Redirect from="/" to="/applications" key={'default'} exact></Redirect>;
     return (
       <Router history={history}>
         <Switch>

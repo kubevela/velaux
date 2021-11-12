@@ -1,6 +1,6 @@
 import React from 'react';
 import { Balloon } from '@b-design/ui';
-import { UIParam } from '../../interface/applicationplan';
+import { UIParam } from '../../interface/application';
 import UISchema from '../../components/UISchema';
 import './index.less';
 

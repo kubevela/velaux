@@ -11,6 +11,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './index.less';
+import Empty from '../../../../components/Empty';
 
 type Props = {
   visible: boolean;
@@ -146,7 +147,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </If>
             <If condition={!addonDetailInfo.detail}>
               <div className="readme-empty">
-                <span>暂无Readme介绍</span>
+                <Empty></Empty>
               </div>
             </If>
           </Loading>

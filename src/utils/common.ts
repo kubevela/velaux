@@ -24,7 +24,7 @@ export function getDomain(): { MOCK: string | undefined; APIBASE: string | undef
 }
 
 export function isApplicationPath(pathname: string) {
-  return (pathname || '').indexOf('/applicationplans') !== -1;
+  return (pathname || '').indexOf('/applications') !== -1;
 }
 export function isClustersPath(pathname: string) {
   return (pathname || '').indexOf('/clusters') !== -1;
@@ -41,6 +41,10 @@ export function isModelPath(pathname: string) {
 
 export function isAPPStorePath(pathname: string) {
   return (pathname || '').indexOf('/appstores') !== -1;
+}
+
+export function isDeliveryTarget(pathname: string) {
+  return (pathname || '').indexOf('/deliveryTargets') !== -1;
 }
 
 export const APPLICATION_PATH = 'applications';

@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'dva';
+import { Loading } from '@b-design/ui';
 import Title from '../../components/ListTitle';
 import SelectSearch from './components/search/index';
 import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
 import RegistryManageDialog from './components/registry-manage/index';
-import { ADDONS_PATH, WORKFLOWS_PATH } from '../../utils/common';
 import Img from '../../assets/plugins.png';
 import { If } from 'tsx-control-statements/components';
 
@@ -13,6 +13,7 @@ type Props = {
   dispatch: ({}) => {};
   addonsList: [];
   registryList: [];
+  loading: any;
 };
 
 type State = {
@@ -22,7 +23,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return store.addons;
+  return { ...store.addons, loading: store.loading };
 })
 class Addons extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -60,7 +61,9 @@ class Addons extends React.Component<Props, State> {
   };
 
   render() {
-    const { addonsList = [], registryList = [], dispatch } = this.props;
+    const { addonsList = [], registryList = [], dispatch, loading } = this.props;
+
+    const isLoading = loading.models.addons;
     const { showAddonDetail, addonName, showRegistryManage } = this.state;
     return (
       <div>
@@ -77,7 +80,9 @@ class Addons extends React.Component<Props, State> {
           registrys={registryList}
           listFunction={this.getAddonsList}
         />
-        <CardContend cardImg={Img} addonLists={addonsList} clickAddon={this.openAddonDetail} />
+        <Loading visible={isLoading} style={{ width: '100%' }}>
+          <CardContend cardImg={Img} addonLists={addonsList} clickAddon={this.openAddonDetail} />
+        </Loading>
         <If condition={showAddonDetail}>
           <AddonDetailDialog
             onClose={this.closeAddonDetail}
