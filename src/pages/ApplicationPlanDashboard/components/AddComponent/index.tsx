@@ -99,7 +99,8 @@ class AddComponent extends Component<Props, State> {
           return;
         }
         params.body.properties = JSON.stringify(values);
-        debugger;
+        console.log(params, 'params');
+
         // createApplicationComponent(params).then((res) => {
         //   if (res) {
         //     Message.success(<Translation>create service add success</Translation>);
@@ -240,6 +241,7 @@ class AddComponent extends Component<Props, State> {
             loading={definitionLoading}
           >
             <UISchema
+              _key="body.properties"
               uiSchema={definitionDetail && definitionDetail.uiSchema}
               ref={this.uiSchemaRef}
             ></UISchema>

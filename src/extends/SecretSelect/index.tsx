@@ -1,9 +1,10 @@
 import { Select } from '@b-design/ui';
 import React from 'react';
 
-type DataSource = Array<{ label: string; value: any }>;
-
-type Props = {};
+type Props = {
+  onChange: (value: any) => void;
+  value: any;
+};
 
 type State = {};
 
@@ -18,7 +19,8 @@ class SecretSelect extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    return <Select></Select>;
+    const { onChange, value } = this.props;
+    return <Select onChange={onChange} defaultValue={value}></Select>;
   }
 }
 

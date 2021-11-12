@@ -1,8 +1,10 @@
 import React from 'react';
 import { Input } from '@b-design/ui';
-type DataSource = Array<{ label: string; value: any }>;
 
-type Props = {};
+type Props = {
+  value: any;
+  onChange: (value: any) => void;
+};
 
 type State = {};
 
@@ -17,7 +19,10 @@ class CPUNumber extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    return <Input addonTextAfter="Core" htmlType="number" />;
+    const { onChange, value } = this.props;
+    return (
+      <Input addonTextAfter="Core" htmlType="number" onChange={onChange} defaultValue={value} />
+    );
   }
 }
 

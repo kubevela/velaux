@@ -31,11 +31,25 @@ type EnvPlanParams = {
   onChange?: () => {};
   delete?: (key: string) => void;
 };
-
+const ENVPLAN_KEY_LIST = ['namespace', 'name', 'clusterSelector', 'description'];
 function EnvItem(props: EnvPlanParams) {
   return (
     <div className="env-item-container">
       <div className="env-item-content">
+        <div className="env-item-form-container">
+          <Form.Item required label="命名空间">
+            <Input
+              {...props.init(`${props.id}-namespace`, {
+                rules: [
+                  {
+                    required: true,
+                    message: '命名空间必填',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        </div>
         <div className="env-item-form-container">
           <Form.Item required label="环境名称">
             <Input
@@ -67,22 +81,12 @@ function EnvItem(props: EnvPlanParams) {
           </Form.Item>
         </div>
         <div className="env-item-form-container">
-          <Form.Item label="命名空间">
-            <Input
-              {...props.init(`${props.id}-namespace`, {
-                rules: [],
-              })}
-            />
-          </Form.Item>
-        </div>
-        <div className="env-item-form-container">
           <Form.Item label="环境描述">
             <Input
               {...props.init(`${props.id}-description`, {
                 rules: [
                   {
-                    maxLength: 128,
-                    message: 'Enter a description less than 128 characters.',
+                    required: false,
                   },
                 ],
               })}
@@ -123,6 +127,7 @@ class EnvPlan extends React.Component<Props, State> {
   addEnvPlanItem = () => {
     this.field.validate((error: any) => {
       if (error) {
+        console.log(error);
         return;
       }
       const { envList } = this.state;
@@ -139,9 +144,14 @@ class EnvPlan extends React.Component<Props, State> {
   removeEnvPlanItem = (key: string) => {
     const { envList } = this.state;
     envList.forEach((item, i) => {
+      // 数据移除
       if (item.key === key) {
         envList.splice(i, 1);
       }
+    });
+    ENVPLAN_KEY_LIST.forEach((_key) => {
+      // 移除表单校验
+      this.field.remove(`${key}-${_key}`);
     });
     this.setState({
       envList,

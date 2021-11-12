@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'loadsh';
+import _ from 'lodash';
 import { Link } from 'dva/router';
 import { Icon } from '@b-design/ui';
 import Translation from '../../components/Translation';

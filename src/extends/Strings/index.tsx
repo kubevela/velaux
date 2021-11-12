@@ -5,6 +5,9 @@ import './index.less';
 
 type Props = {
   label?: string;
+  value: boolean;
+  id: string;
+  onChange: (value: any) => void;
 };
 
 type InputParams = {
@@ -19,6 +22,7 @@ type InputParams = {
 type ListParams = {
   key: string;
 };
+
 type State = {
   inputList: Array<ListParams>;
 };
@@ -48,10 +52,23 @@ class Strings extends React.Component<Props, State> {
     this.state = {
       inputList: [],
     };
-    this.field = new Field(this);
+    this.field = new Field(this, {
+      onChange: () => {
+        this.changeValues();
+      },
+    });
   }
 
   componentDidMount = async () => {};
+
+  changeValues = () => {
+    const values = this.field.getValues();
+
+    const result = Object.keys(values)
+      .map((key) => values[key])
+      .filter((item) => !!item);
+    this.props.onChange(result);
+  };
 
   addInputItem = () => {
     const { inputList } = this.state;
@@ -69,11 +86,17 @@ class Strings extends React.Component<Props, State> {
     inputList.forEach((item, i) => {
       if (item.key === key) {
         inputList.splice(i, 1);
+        this.field.remove(key);
       }
     });
-    this.setState({
-      inputList,
-    });
+    this.setState(
+      {
+        inputList,
+      },
+      () => {
+        this.changeValues();
+      },
+    );
   };
 
   render() {
@@ -82,7 +105,13 @@ class Strings extends React.Component<Props, State> {
     const { label } = this.props;
     return (
       <div>
-        <InputItem {...init('init')} isFirst label={label} />
+        <InputItem
+          {...init('init', {
+            name: 'first',
+          })}
+          isFirst
+          label={label}
+        />
         {inputList.map((item) => (
           <InputItem
             {...init(item.key)}

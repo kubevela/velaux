@@ -6,6 +6,10 @@
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  visibility: visible;
+  &:hover {
+    border: 1px solid @primaryColor;
+  }
   .group-title-container {
     position: relative;
     padding: 0 10px;
@@ -41,6 +45,10 @@
     transition: height 0.3s linear;
   }
   .group-box.disable {
-    display: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    visibility: hidden;
   }
 }

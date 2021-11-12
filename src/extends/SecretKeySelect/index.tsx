@@ -2,7 +2,8 @@ import React from 'react';
 import { Select } from '@b-design/ui';
 
 type Props = {
-  secretKeys?: string;
+  onChange: (value: any) => void;
+  value: any;
 };
 
 type State = {};
@@ -18,7 +19,8 @@ class SecretKeySelect extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    return <Select></Select>;
+    const { onChange, value } = this.props;
+    return <Select onChange={onChange} defaultValue={value}></Select>;
   }
 }
 

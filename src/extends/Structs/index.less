@@ -1,0 +1,64 @@
+.struct-plan-container {
+  .struct-plan-group {
+    .struct-item-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 10px 20px;
+      background-color: #e2e2e2;
+      border-radius: 24px;
+      .struct-item-content {
+        width: 100%;
+      }
+      .struct-item-content > .next-form {
+        display: flex !important;
+        flex: 1 1 auto;
+        align-items: center;
+        .next-form-item {
+          display: flex;
+          margin-right: 12px;
+          margin-bottom: 0;
+          .next-form-item-help {
+            display: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          &:last-child {
+            margin-right: 0;
+          }
+          .next-form-item-label {
+            flex: 0 0 55px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+          .next-form-item-control {
+            flex: 1 1 auto;
+            .next-select {
+              max-width: 120px;
+            }
+          }
+        }
+      }
+
+      .remove-option-container {
+        flex: 0 0 36px;
+        text-align: center;
+        .next-icon-ashbin {
+          cursor: pointer;
+          &::before {
+            color: #333;
+            font-size: 14px !important;
+          }
+        }
+      }
+    }
+  }
+
+  .struct-plan-option {
+    text-align: right;
+    .next-btn {
+      border-radius: 20px;
+    }
+  }
+}
