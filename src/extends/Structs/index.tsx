@@ -11,7 +11,7 @@ import {
   SplitButton,
 } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
-import { UIParam, UIParamValidate } from '../../interface/applicationplan';
+import { UIParam, UIParamValidate } from '../../interface/application';
 import UISchema from '../../components/UISchema';
 import './index.less';
 type Props = {
