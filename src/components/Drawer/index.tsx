@@ -12,6 +12,7 @@ type Props = {
   placement?: 'top' | 'right' | 'bottom' | 'left';
   enableForm?: boolean;
   children?: React.ReactNode;
+  extButtons?: React.ReactNode;
 };
 
 class DrawerWithFooter extends Component<Props, any> {
@@ -20,7 +21,7 @@ class DrawerWithFooter extends Component<Props, any> {
   }
 
   render() {
-    const { children, title, placement, width, onOk, onClose } = this.props;
+    const { children, title, placement, width, onOk, onClose, extButtons } = this.props;
     return (
       <Drawer
         title={title}
@@ -40,6 +41,8 @@ class DrawerWithFooter extends Component<Props, any> {
                 <Translation>Submit</Translation>
               </Button>
             </If>
+
+            {extButtons}
           </div>
         </div>
       </Drawer>

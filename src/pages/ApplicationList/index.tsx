@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
-import { Message } from '@b-design/ui';
+import { Message, Loading } from '@b-design/ui';
 import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
 import '../../common.less';
 import { If } from 'tsx-control-statements/components';
-import { deleteApplicationPlan } from '../../api/application';
+import { deleteApplicationPlan, getComponentdefinitions } from '../../api/application';
 import { ApplicationBase } from '../../interface/application';
 
 type Props = {
@@ -18,6 +18,8 @@ type Props = {
 };
 type State = {
   showAddApplication: boolean;
+  componentDefinitions: [];
+  isLoading: boolean;
 };
 
 @connect((store: any) => {
@@ -28,19 +30,28 @@ class Application extends Component<Props, State> {
     super(props);
     this.state = {
       showAddApplication: false,
+      componentDefinitions: [],
+      isLoading: false,
     };
   }
 
   componentDidMount() {
-    this.getApplicationPlans();
+    this.getApplicationPlans({});
     this.getNamespaceList();
     this.getClusterList();
+    this.onGetComponentdefinitions();
   }
 
-  getApplicationPlans = async () => {
+  getApplicationPlans = async (params: any) => {
+    this.setState({ isLoading: true });
     this.props.dispatch({
       type: 'application/getApplicationPlanList',
-      payload: {},
+      payload: params,
+      callback: () => {
+        this.setState({
+          isLoading: false,
+        });
+      },
     });
   };
 
@@ -61,14 +72,31 @@ class Application extends Component<Props, State> {
     deleteApplicationPlan({ name: name }).then((re) => {
       if (re) {
         Message.success('application delete success');
-        this.getApplicationPlans();
+        this.getApplicationPlans({});
       }
     });
   };
 
+  onGetComponentdefinitions = async () => {
+    getComponentdefinitions({}).then((res) => {
+      if (res) {
+        this.setState({
+          componentDefinitions: res && res.definitions,
+        });
+      }
+    });
+  };
+
+  closeAddApplication = () => {
+    this.setState({
+      showAddApplication: false,
+    });
+    this.getApplicationPlans({});
+  };
+
   render() {
     const { applicationList, namespaceList, clusterList, dispatch } = this.props;
-    const { showAddApplication } = this.state;
+    const { showAddApplication, componentDefinitions, isLoading } = this.state;
     return (
       <div>
         <Title
@@ -80,23 +108,35 @@ class Application extends Component<Props, State> {
           }}
         />
 
-        <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
-
-        <CardContend
-          applications={applicationList}
-          editAppPlan={(name: string) => {}}
-          deleteAppPlan={this.onDeleteAppPlan}
+        <SelectSearch
+          namespaceList={namespaceList}
+          clusterList={clusterList}
+          dispatch={dispatch}
+          getApplicationPlans={(params: any) => {
+            this.getApplicationPlans(params);
+          }}
         />
+
+        <Loading visible={isLoading} fullScreen>
+          <CardContend
+            applications={applicationList}
+            editAppPlan={(name: string) => {}}
+            deleteAppPlan={this.onDeleteAppPlan}
+          />
+        </Loading>
+
         <If condition={showAddApplication}>
           <AppDialog
             visible={showAddApplication}
-            setVisible={(visible) => {
-              this.getApplicationPlans();
-              this.setState({ showAddApplication: visible });
-            }}
-            dispatch={dispatch}
             namespaceList={namespaceList}
             clusterList={clusterList}
+            componentDefinitions={componentDefinitions}
+            setVisible={(visible) => {
+              this.setState({ showAddApplication: visible });
+            }}
+            onOK={this.closeAddApplication}
+            onClose={this.closeAddApplication}
+            dispatch={dispatch}
           />
         </If>
       </div>

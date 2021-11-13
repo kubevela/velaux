@@ -1,6 +1,6 @@
 import {
   getApplicationList,
-  createApplicationList,
+  createApplication,
   getApplicationDetails,
   getApplicationComponents,
   getPolicyList,
@@ -77,9 +77,12 @@ export default {
       const result = yield call(getApplicationList, action.payload);
       const appContent = getAppCardList(result || {});
       yield put({ type: 'updateApplicationList', payload: appContent });
+      if (action.callback && appContent) {
+        action.callback(appContent);
+      }
     },
     *createApplicationPlan(action, { call, put }) {
-      const result = yield call(createApplicationList, action.payload);
+      const result = yield call(createApplication, action.payload);
       if (action.callback && result) {
         action.callback(result);
       }
