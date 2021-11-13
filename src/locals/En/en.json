@@ -116,5 +116,11 @@
   "Namespace": "Namespace",
   "Environmental notes": "Environmental notes",
   "Environment Name placehold": "Environmental name, limited to English and Chinese underlined, up to 32 words",
-  "Enter description": "Enter description"
+  "Enter description": "Enter description",
+  "Apply Basic Information": "Apply Basic Information",
+  "Cancle":"Cancle",
+  "Previous":"Previous",
+  "App alias":"App alias",
+  "App descrition":"App descrition",
+  "Deployment type":"Deployment type"
 }

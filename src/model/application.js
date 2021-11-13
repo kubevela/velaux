@@ -77,6 +77,9 @@ export default {
       const result = yield call(getApplicationList, action.payload);
       const appContent = getAppCardList(result || {});
       yield put({ type: 'updateApplicationPlanList', payload: appContent });
+      if (action.callback) {
+        action.callback();
+      }
     },
     *createApplicationPlan(action, { call, put }) {
       const result = yield call(createApplicationList, action.payload);

@@ -9,11 +9,12 @@ import Translation from '../../../../components/Translation';
 
 type Props = {
   visible: boolean;
+  field: Field;
   namespaceList?: [];
   clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {};
@@ -25,64 +26,14 @@ type itemObj = {
 };
 
 class GeneralConfig extends React.Component<Props, State> {
-  field: Field;
   envBind: React.RefObject<EnvPlan>;
   constructor(props: Props) {
     super(props);
-    this.field = new Field(this);
     this.envBind = React.createRef();
   }
 
-  close = () => {
-    this.resetField();
-  };
-
-  submit = () => {
-    const envBindArray = this.envBind.current?.getValues();
-    if (!envBindArray) {
-      return;
-    }
-    // const envBindArray:Array<any> = [];
-    // if (this.envBind.current) {
-    //   const { envs } = this.envBind.current.state;
-    //   Object.values(envs).forEach((key) => {
-    //     key.forEach((item: itemObj) => {
-    //       const obj: any = {};
-    //       obj.name = item.name;
-    //       obj.clusterSelector = { name: item.cluster };
-    //       obj.description = item.description;
-    //       envBindArray.push(obj);
-    //     });
-    //   });
-    // }
-
-    this.field.validate((error: any, values: any) => {
-      if (error) {
-        return;
-      }
-      const { description, alias, name, namespace, icon = '' } = values;
-      const params = {
-        icon,
-        name,
-        alias,
-        namespace,
-        description: description,
-        envBind: envBindArray,
-      };
-      this.props.dispatch({
-        type: 'application/createApplicationPlan',
-        payload: params,
-        callback: () => {
-          Message.success('application add success');
-          this.props.setVisible(false);
-          this.resetField();
-        },
-      });
-    });
-  };
-
   resetField() {
-    this.field.setValues({
+    this.props.field.setValues({
       name: '',
       cluster: [],
       describe: '',
@@ -105,14 +56,14 @@ class GeneralConfig extends React.Component<Props, State> {
 
     const namePlacehold = t(namePlaceHold).toString();
     const describePlacehold = t(describePlaceHold).toString();
-    const init = this.field.init;
+    const init = this.props.field.init;
 
     return (
       <div>
-        <Form {...formItemLayout} field={this.field}>
+        <Form {...formItemLayout} field={this.props.field}>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={name} labelTextAlign="left" required={true}>
+              <FormItem label={<Translation>App Name</Translation>} labelTextAlign="left" required={true}>
                 <Input
                   htmlType="name"
                   name="name"
@@ -131,7 +82,7 @@ class GeneralConfig extends React.Component<Props, State> {
               </FormItem>
             </Col>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Alias</Translation>}>
+              <FormItem label={<Translation>App alias</Translation>}>
                 <Input
                   name="alias"
                   placeholder={'Give your app a more recognizable name'}
@@ -149,11 +100,8 @@ class GeneralConfig extends React.Component<Props, State> {
             </Col>
           </Row>
           <Row>
-            <Col span={12} style={{ padding: '0 8px' }}>
-              <NameSpaceForm field={this.field} namespaceList={namespaceList} />
-            </Col>
-            <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={describe}>
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>App descrition</Translation>}>
                 <Input
                   name="description"
                   placeholder={describePlacehold}
@@ -169,11 +117,10 @@ class GeneralConfig extends React.Component<Props, State> {
               </FormItem>
             </Col>
           </Row>
+
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={ENVPLACEHOLD} required={true}>
-                <EnvPlan clusterList={clusterList} ref={this.envBind} />
-              </FormItem>
+              <NameSpaceForm field={this.props.field} namespaceList={namespaceList} />
             </Col>
           </Row>
         </Form>

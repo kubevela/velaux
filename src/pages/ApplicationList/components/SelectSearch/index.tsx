@@ -7,9 +7,10 @@ import Translation from '../../../../components/Translation';
 
 type Props = {
   t: (key: string) => {};
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   clusterList?: [];
   namespaceList?: [];
+  getApplicationPlans: (params: any) => void;
 };
 
 type State = {
@@ -70,10 +71,7 @@ class SelectSearch extends React.Component<Props, State> {
       cluster: clusterValue,
       query: inputValue,
     };
-    this.props.dispatch({
-      type: 'application/getApplicationPlanList',
-      payload: params,
-    });
+    this.props.getApplicationPlans(params);
   };
 
   render() {

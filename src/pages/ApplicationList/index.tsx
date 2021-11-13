@@ -1,23 +1,25 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
-import { Message } from '@b-design/ui';
+import { Message, Loading } from '@b-design/ui';
 import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
 import '../../common.less';
 import { If } from 'tsx-control-statements/components';
-import { deleteApplicationPlan } from '../../api/application';
+import { deleteApplicationPlan, getComponentdefinitions } from '../../api/application';
 import { AppPlanBase } from '../../interface/application';
 
 type Props = {
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   applicationPlanList: AppPlanBase[];
   namespaceList: [];
   clusterList?: [];
 };
 type State = {
-  showAddApplication: boolean;
+  visibleDraw: boolean;
+  componentDefinitions: [];
+  isLoading: boolean;
 };
 
 @connect((store: any) => {
@@ -27,20 +29,29 @@ class Application extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      showAddApplication: false,
+      visibleDraw: false,
+      componentDefinitions: [],
+      isLoading: false,
     };
   }
 
   componentDidMount() {
-    this.getApplicationPlans();
+    this.getApplicationPlans({});
     this.getNamespaceList();
     this.getClusterList();
+    this.onGetComponentdefinitions();
   }
 
-  getApplicationPlans = async () => {
+  getApplicationPlans = async (params: any) => {
+    this.setState({ isLoading: true });
     this.props.dispatch({
       type: 'application/getApplicationPlanList',
-      payload: {},
+      payload: params,
+      callback: () => {
+        this.setState({
+          isLoading: false
+        })
+      }
     });
   };
 
@@ -61,14 +72,31 @@ class Application extends Component<Props, State> {
     deleteApplicationPlan({ name: name }).then((re) => {
       if (re) {
         Message.success('application delete success');
-        this.getApplicationPlans();
+        this.getApplicationPlans({});
       }
     });
   };
 
+  onGetComponentdefinitions = async () => {
+    getComponentdefinitions({}).then((res) => {
+      if (res) {
+        this.setState({
+          componentDefinitions: res && res.definitions,
+        });
+      }
+    });
+  };
+
+  closeAddApplication = () => {
+    this.setState({
+      visibleDraw: false,
+    });
+    this.getApplicationPlans({});
+  };
+
   render() {
     const { applicationPlanList, namespaceList, clusterList, dispatch } = this.props;
-    const { showAddApplication } = this.state;
+    const { visibleDraw, componentDefinitions, isLoading } = this.state;
     return (
       <div>
         <Title
@@ -76,27 +104,36 @@ class Application extends Component<Props, State> {
           subTitle="Application Manager SubTitle"
           addButtonTitle="Add App"
           addButtonClick={() => {
-            this.setState({ showAddApplication: true });
+            this.setState({ visibleDraw: true });
           }}
         />
 
-        <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
-
-        <CardContend
-          appPlans={applicationPlanList}
-          editAppPlan={(name: string) => {}}
-          deleteAppPlan={this.onDeleteAppPlan}
+        <SelectSearch
+          namespaceList={namespaceList}
+          clusterList={clusterList}
+          dispatch={dispatch}
+          getApplicationPlans={(params: any) => { this.getApplicationPlans(params) }}
         />
-        <If condition={showAddApplication}>
+        <Loading visible={isLoading} fullScreen>
+          <CardContend
+            appPlans={applicationPlanList}
+            editAppPlan={(name: string) => { }}
+            deleteAppPlan={this.onDeleteAppPlan}
+          />
+        </Loading>
+        <If condition={visibleDraw}>
           <AppDialog
-            visible={showAddApplication}
-            setVisible={(visible) => {
-              this.getApplicationPlans();
-              this.setState({ showAddApplication: visible });
-            }}
-            dispatch={dispatch}
+            visible={visibleDraw}
             namespaceList={namespaceList}
             clusterList={clusterList}
+            componentDefinitions={componentDefinitions}
+            setVisible={(visible) => {
+              this.setState({ visibleDraw: visible });
+            }}
+            onOK={this.closeAddApplication}
+            onClose={this.closeAddApplication}
+            dispatch={dispatch}
+
           />
         </If>
       </div>

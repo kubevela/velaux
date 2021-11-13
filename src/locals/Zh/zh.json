@@ -130,5 +130,13 @@
   "Enter description": "请输入描述",
   "policy-env-bindings": "多环境部署",
   "policy-health": "应用健康检查",
-  "Delivery Target Manager": "交付目标管理"
+  "Delivery Target Manager": "交付目标管理",
+  "Apply Basic Information":"应用基础信息",
+  "Cancle":"取消",
+  "Previous":"上一步",
+  "App alias":"应用别名",
+  "App descrition":"应用描述",
+  "Deployment type":"部署类型"
+  
+  
 }
