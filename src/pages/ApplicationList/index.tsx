@@ -8,11 +8,11 @@ import AppDialog from './components/AddAppDialog';
 import '../../common.less';
 import { If } from 'tsx-control-statements/components';
 import { deleteApplicationPlan } from '../../api/application';
-import { AppPlanBase } from '../../interface/application';
+import { ApplicationBase } from '../../interface/application';
 
 type Props = {
   dispatch: ({}) => {};
-  applicationPlanList: AppPlanBase[];
+  applicationList: ApplicationBase[];
   namespaceList: [];
   clusterList?: [];
 };
@@ -67,7 +67,7 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationPlanList, namespaceList, clusterList, dispatch } = this.props;
+    const { applicationList, namespaceList, clusterList, dispatch } = this.props;
     const { showAddApplication } = this.state;
     return (
       <div>
@@ -83,7 +83,7 @@ class Application extends Component<Props, State> {
         <SelectSearch namespaceList={namespaceList} clusterList={clusterList} dispatch={dispatch} />
 
         <CardContend
-          appPlans={applicationPlanList}
+          applications={applicationList}
           editAppPlan={(name: string) => {}}
           deleteAppPlan={this.onDeleteAppPlan}
         />

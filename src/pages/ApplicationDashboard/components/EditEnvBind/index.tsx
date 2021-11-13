@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Dialog } from '@b-design/ui';
-import { AppPlanDetail } from '../../../../interface/application';
+import { ApplicationDetail } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 type Props = {
-  appPlanBase: AppPlanDetail;
+  appPlanBase: ApplicationDetail;
   onClose: () => void;
   onOK: () => void;
 };

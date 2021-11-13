@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'dva';
-import ApplicationLayout from '../../layout/Application';
 
 type Props = {
   revisions: [];
   dispatch: ({}) => {};
+  match: any;
 };
 
 type State = {
@@ -47,7 +47,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
   };
 
   render() {
-    return <ApplicationLayout {...this.props}></ApplicationLayout>;
+    return <div></div>;
   }
 }
 

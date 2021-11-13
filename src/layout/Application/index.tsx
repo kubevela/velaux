@@ -1,34 +1,42 @@
-import { Loading } from '@b-design/ui';
+import { Loading, Grid } from '@b-design/ui';
 import React, { Component } from 'react';
+import { connect } from 'dva';
+import Header from './components/Header';
+import EnvTabs from './components/EnvTabs';
+import Menus from './components/Menus';
+import './index.less';
 
-class ApplicationLayout extends Component<any, any> {
+const { Row, Col } = Grid;
+
+interface Props {
+  match: any;
+  dispatch: any;
+}
+@connect((store: any) => {
+  return { ...store.application };
+})
+class ApplicationLayout extends Component<Props, any> {
   constructor(props: any) {
     super(props);
     this.state = {
-      loading: true,
+      loading: false,
     };
   }
 
   componentDidMount() {
     this.onGetApplicationDetails();
-    this.getApplicationPlanList();
+    this.getApplicationList();
     this.getClusterList();
     this.getNamespaceList();
-  }
-
-  componentDidUpdate(prevProps: any) {
-    if (this.props.match.params.appName !== prevProps.match.params.appName) {
-      this.onGetApplicationDetails();
-    }
   }
 
   onGetApplicationDetails = async () => {
     const {
       params: { appName },
     } = this.props.match;
-    this.setState({ activeName: appName });
+    this.setState({ activeName: appName, loading: true });
     this.props.dispatch({
-      type: 'application/getApplicationPlanDetail',
+      type: 'application/getApplicationDetail',
       payload: { appPlanName: appName },
       callback: () => {
         this.setState({ loading: false }, () => {});
@@ -36,9 +44,9 @@ class ApplicationLayout extends Component<any, any> {
     });
   };
 
-  getApplicationPlanList = async () => {
+  getApplicationList = async () => {
     this.props.dispatch({
-      type: 'application/getApplicationPlanList',
+      type: 'application/getApplicationList',
     });
   };
 
@@ -59,7 +67,8 @@ class ApplicationLayout extends Component<any, any> {
     const { loading, activeName } = this.state;
     const { children } = this.props;
     const {
-      params: { appName },
+      path,
+      params: { appName, envName },
     } = this.props.match;
     const loadingDom = <Loading style={{ width: '100%', minHeight: '200px' }}></Loading>;
     if (appName != activeName) {
@@ -69,7 +78,18 @@ class ApplicationLayout extends Component<any, any> {
     if (loading) {
       return loadingDom;
     }
-    return <div className="appplan">{children}</div>;
+    return (
+      <div className="applayout">
+        <Header></Header>
+        <EnvTabs activeKey={envName ? envName : 'basisConfig'}></EnvTabs>
+        <Row className="padding16 main">
+          <div className="menu">
+            <Menus currentPath={path} appName={appName} envName={envName}></Menus>
+          </div>
+          <div className="content">{children}</div>
+        </Row>
+      </div>
+    );
   }
 }
 
