@@ -14,7 +14,7 @@ type Props = {
   clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {};
@@ -63,7 +63,11 @@ class GeneralConfig extends React.Component<Props, State> {
         <Form {...formItemLayout} field={this.props.field}>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>App Name</Translation>} labelTextAlign="left" required={true}>
+              <FormItem
+                label={<Translation>App Name</Translation>}
+                labelTextAlign="left"
+                required={true}
+              >
                 <Input
                   htmlType="name"
                   name="name"

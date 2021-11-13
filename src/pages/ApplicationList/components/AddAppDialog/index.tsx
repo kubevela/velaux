@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Dialog, Field, Form, Select, Message } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-import { NEW_APPLICATION_DELIVERY_PLAN, } from '../../constants';
+import { NEW_APPLICATION_DELIVERY_PLAN } from '../../constants';
 
 import { If } from 'tsx-control-statements/components';
 import GeneralConfig from '../GeneralConfig';
@@ -14,7 +14,6 @@ import EnvPlan from '../../../../extends/EnvPlan';
 import Translation from '../../../../components/Translation';
 import './index.less';
 
-
 type Props = {
   visible: boolean;
   componentDefinitions: [];
@@ -22,7 +21,7 @@ type Props = {
   clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   onClose: () => void;
   onOK: () => void;
 };
@@ -48,7 +47,6 @@ class AppDialog extends React.Component<Props, State> {
     this.uiSchemaRef = React.createRef();
     this.basicRef = React.createRef();
     this.envBind = React.createRef();
-
   }
 
   onClose = () => {
@@ -78,8 +76,8 @@ class AppDialog extends React.Component<Props, State> {
           description,
           icon,
           name,
-          properties: {}
-        }
+          properties: {},
+        },
       };
       this.uiSchemaRef.current?.validate((error: any, values: any) => {
         if (error) {
@@ -96,7 +94,6 @@ class AppDialog extends React.Component<Props, State> {
     });
   };
 
-
   transComponentDefinitions() {
     const { componentDefinitions } = this.props;
     return (componentDefinitions || []).map((item: { name: string }) => ({
@@ -105,18 +102,16 @@ class AppDialog extends React.Component<Props, State> {
     }));
   }
 
-
   onDetailsComponeDefinition = (value: string) => {
     detailComponentDefinition({ name: value }).then((re) => {
       if (re) {
         this.setState({ definitionDetail: re, definitionLoading: false });
       }
     });
-  }
-
+  };
 
   changeStatus = (value: string) => {
-    const values: { componentType: string } = this.field.getValues()
+    const values: { componentType: string } = this.field.getValues();
     const { componentType } = values;
 
     if (value === 'isCreateComponent') {
@@ -128,18 +123,21 @@ class AppDialog extends React.Component<Props, State> {
         if (!envBindArray) {
           return;
         }
-        this.setState({
-          dialogStats: value,
-        }, () => {
-          this.onDetailsComponeDefinition(componentType);
-        });
+        this.setState(
+          {
+            dialogStats: value,
+          },
+          () => {
+            this.onDetailsComponeDefinition(componentType);
+          },
+        );
       });
     } else if (value === 'isBasic') {
       this.setState({
-        dialogStats: value
+        dialogStats: value,
       });
     }
-  }
+  };
 
   render() {
     const init = this.field.init;
@@ -161,7 +159,9 @@ class AppDialog extends React.Component<Props, State> {
         width={800}
         dialogStats={dialogStats}
         onClose={onClose}
-        changeStatus={(status: string) => { this.changeStatus(status) }}
+        changeStatus={(status: string) => {
+          this.changeStatus(status);
+        }}
         onSubmit={this.onSubmit}
       >
         <Form field={this.field}>
@@ -185,7 +185,14 @@ class AppDialog extends React.Component<Props, State> {
 
             <Row>
               <Col span={24}>
-                <FormItem label={<Translation className='font-size-14 font-weight-bold'>Deployment type</Translation>} required={true}>
+                <FormItem
+                  label={
+                    <Translation className="font-size-14 font-weight-bold">
+                      Deployment type
+                    </Translation>
+                  }
+                  required={true}
+                >
                   <Select
                     className="select"
                     {...init(`componentType`, {
@@ -205,7 +212,14 @@ class AppDialog extends React.Component<Props, State> {
 
           <Row className={dialogStats === 'isBasic' ? '' : 'hiddenEnvbind'}>
             <Col span={24}>
-              <FormItem label={<Translation className='font-size-14 font-weight-bold'>Environmental planning</Translation>} required={true}>
+              <FormItem
+                label={
+                  <Translation className="font-size-14 font-weight-bold">
+                    Environmental planning
+                  </Translation>
+                }
+                required={true}
+              >
                 <EnvPlan clusterList={clusterList} ref={this.envBind} />
               </FormItem>
             </Col>

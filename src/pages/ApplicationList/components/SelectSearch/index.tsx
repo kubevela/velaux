@@ -7,7 +7,7 @@ import Translation from '../../../../components/Translation';
 
 type Props = {
   t: (key: string) => {};
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   clusterList?: [];
   namespaceList?: [];
   getApplicationPlans: (params: any) => void;

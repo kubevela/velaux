@@ -11,7 +11,7 @@ import { deleteApplicationPlan, getComponentdefinitions } from '../../api/applic
 import { AppPlanBase } from '../../interface/application';
 
 type Props = {
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   applicationPlanList: AppPlanBase[];
   namespaceList: [];
   clusterList?: [];
@@ -49,9 +49,9 @@ class Application extends Component<Props, State> {
       payload: params,
       callback: () => {
         this.setState({
-          isLoading: false
-        })
-      }
+          isLoading: false,
+        });
+      },
     });
   };
 
@@ -112,12 +112,14 @@ class Application extends Component<Props, State> {
           namespaceList={namespaceList}
           clusterList={clusterList}
           dispatch={dispatch}
-          getApplicationPlans={(params: any) => { this.getApplicationPlans(params) }}
+          getApplicationPlans={(params: any) => {
+            this.getApplicationPlans(params);
+          }}
         />
         <Loading visible={isLoading} fullScreen>
           <CardContend
             appPlans={applicationPlanList}
-            editAppPlan={(name: string) => { }}
+            editAppPlan={(name: string) => {}}
             deleteAppPlan={this.onDeleteAppPlan}
           />
         </Loading>
@@ -133,7 +135,6 @@ class Application extends Component<Props, State> {
             onOK={this.closeAddApplication}
             onClose={this.closeAddApplication}
             dispatch={dispatch}
-
           />
         </If>
       </div>
