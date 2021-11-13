@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Tab } from '@b-design/ui';
 import './index.less';
 import Translation from '../../../../components/Translation';
-import { EnvBind } from '../../../../interface/application';
+import { EnvBinding } from '../../../../interface/application';
 
 const style = {
   width: '100%',
@@ -16,7 +16,7 @@ const style = {
 type Props = {
   changeActiveKey: (key: string | number) => void;
   activeKey: string;
-  envBind: Array<EnvBind>;
+  envBind: Array<EnvBinding>;
 };
 
 class TabsContent extends Component<Props> {

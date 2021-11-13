@@ -1,12 +1,12 @@
 import React from 'react';
 import { Card, Button } from '@b-design/ui';
 import { POLICIES } from '../../constants';
-import { AppPlanDetail } from '../../../../interface/application';
+import { ApplicationDetail } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 
 type Props = {
-  detail: AppPlanDetail;
+  detail: ApplicationDetail;
   policies?: Array<string>;
 };
 

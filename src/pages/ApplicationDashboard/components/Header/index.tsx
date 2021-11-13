@@ -7,11 +7,11 @@ import {
   PUBLISH_APPLICATION_TEMPLATE,
   DEPLOYMENT_UPDATE,
 } from '../../constants';
-import { AppPlanBase } from '../../../../interface/application';
+import { ApplicationBase } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 
 type Props = {
-  applicationPlanList: Array<AppPlanBase>;
+  applicationList: Array<ApplicationBase>;
   appName: string;
   history: {
     push: (path: string, state: {}) => {};
@@ -28,9 +28,9 @@ class Header extends Component<Props> {
 
   render() {
     const { Row, Col } = Grid;
-    const { applicationPlanList } = this.props;
+    const { applicationList } = this.props;
     const { appName, enablePublish } = this.props;
-    const APPTitleSlect = applicationPlanList.map((appPlan) => {
+    const APPTitleSlect = applicationList.map((appPlan) => {
       return { label: appPlan.alias || appPlan.name, value: appPlan.name };
     });
     return (

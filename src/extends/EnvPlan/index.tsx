@@ -2,11 +2,11 @@ import React from 'react';
 import { Input, Button, Field, Icon, Select, Form } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
-import { EnvBind } from '../../interface/application';
+import { EnvBinding } from '../../interface/application';
 
 type Props = {
   clusterList: Array<any>;
-  envList?: Array<EnvBind>;
+  envList?: Array<EnvBinding>;
 };
 
 type State = {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
+import ApplicationLayout from '../../layout/Application';
 
 type Props = {
   dispatch: ({}) => {};
@@ -17,7 +18,7 @@ type State = {
 @connect((store: any) => {
   return { ...store.application };
 })
-class ApplicationInstanceList extends React.Component<Props, State> {
+class ApplicationMonitor extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -36,4 +37,4 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   }
 }
 
-export default ApplicationInstanceList;
+export default ApplicationMonitor;

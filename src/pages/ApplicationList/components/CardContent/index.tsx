@@ -2,7 +2,7 @@ import React, { MouseEvent } from 'react';
 import './index.less';
 import { Link } from 'dva/router';
 import { Grid, Card, Menu, Dropdown, Dialog } from '@b-design/ui';
-import { AppPlanBase } from '../../../../interface/application';
+import { ApplicationBase } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 import { momentDate } from '../../../../utils/common';
 import Empty from '../../../../components/Empty';
@@ -16,7 +16,7 @@ type State = {
 };
 
 type Props = {
-  appPlans: AppPlanBase[];
+  applications: ApplicationBase[];
   editAppPlan: (name: string) => void;
   deleteAppPlan: (name: string) => void;
 };
@@ -48,20 +48,20 @@ class CardContent extends React.Component<Props, State> {
   };
   render() {
     const { Row, Col } = Grid;
-    const { appPlans } = this.props;
-    if (appPlans.length === 0) {
+    const { applications } = this.props;
+    if (applications.length === 0) {
       return <Empty style={{ minHeight: '400px' }}></Empty>;
     }
 
     return (
       <Row wrap={true}>
-        {appPlans.map((item: AppPlanBase, index: number) => {
+        {applications.map((item: ApplicationBase, index: number) => {
           const { name, alias, status, icon, description, createTime } = item;
           const showName = alias || name;
           return (
             <Col span="6" className={`card-content-wraper`} key={index}>
               <Card contentHeight="auto">
-                <Link to={`/applications/${name}/basic`}>
+                <Link to={`/applications/${name}/config`}>
                   <div className="appplan-card-top flexcenter">
                     <If condition={icon && icon != 'none'}>
                       <img src={icon} />
@@ -74,7 +74,7 @@ class CardContent extends React.Component<Props, State> {
                 <div className="content-wraper background-F9F8FF">
                   <Row className="content-title">
                     <Col span="20" className="font-size-16 color1A1A1A">
-                      <Link to={`/applications/${name}/basic`}>{showName}</Link>
+                      <Link to={`/applications/${name}/config`}>{showName}</Link>
                     </Col>
                     <Col span={4} className="dot-wraper">
                       <Dropdown

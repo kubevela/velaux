@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'dva/router';
-import { Breadcrumb, Select, Grid, Button, Card, Step } from '@b-design/ui';
-import ApplicationLayout from '../../layout/Application';
+import { Grid, Button, Card } from '@b-design/ui';
 import './index.less';
 import { connect } from 'dva';
 
@@ -25,7 +23,7 @@ type State = {
 @connect((store: any) => {
   return { ...store.application };
 })
-class ApplicationBasic extends Component<Props, State> {
+class ApplicationConfig extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     const { params } = this.props.match;
@@ -37,8 +35,8 @@ class ApplicationBasic extends Component<Props, State> {
   componentDidMount() {}
 
   render() {
-    return <ApplicationLayout {...this.props}></ApplicationLayout>;
+    return <div></div>;
   }
 }
 
-export default ApplicationBasic;
+export default ApplicationConfig;
