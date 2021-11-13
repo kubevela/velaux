@@ -6,12 +6,12 @@ import { getComponentdefinitions } from '../../../../api/application';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
 import { Link } from 'dva/router';
-import { AppPlanDetail } from '../../../../interface/application';
+import { ApplicationDetail } from '../../../../interface/application';
 
 const { Row } = Grid;
 
 interface Props {
-  appPlanDetail: AppPlanDetail;
+  appPlanDetail: ApplicationDetail;
   components: Array<ComponentBase>;
   showBox: boolean;
   onAddComponent: (componentType: string) => void;

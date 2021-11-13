@@ -12,8 +12,8 @@ import { getNamespaceList } from '../api/namespace';
 export default {
   namespace: 'application',
   state: {
-    applicationPlanList: [],
-    applicationPlanDetail: {},
+    applicationList: [],
+    applicationDetail: {},
     projectList: [],
     clusterList: [],
     searchAppName: '',
@@ -29,16 +29,16 @@ export default {
         searchAppName: payload,
       };
     },
-    updateApplicationPlanList(state, { type, payload }) {
+    updateApplicationList(state, { type, payload }) {
       return {
         ...state,
-        applicationPlanList: payload,
+        applicationList: payload,
       };
     },
-    updateApplicationPlanDetail(state, { type, payload }) {
+    updateApplicationDetail(state, { type, payload }) {
       return {
         ...state,
-        applicationPlanDetail: payload,
+        applicationDetail: payload,
       };
     },
     updateComponents(state, { type, payload }) {
@@ -76,7 +76,7 @@ export default {
     *getApplicationPlanList(action, { call, put }) {
       const result = yield call(getApplicationList, action.payload);
       const appContent = getAppCardList(result || {});
-      yield put({ type: 'updateApplicationPlanList', payload: appContent });
+      yield put({ type: 'updateApplicationList', payload: appContent });
       if (action.callback) {
         action.callback();
       }
@@ -92,10 +92,10 @@ export default {
       const namespaceList = getNamespace(result || {});
       yield put({ type: 'updateNameSpaceList', payload: namespaceList });
     },
-    *getApplicationPlanDetail(action, { call, put }) {
+    *getApplicationDetail(action, { call, put }) {
       const { appPlanName } = action.payload;
       const result = yield call(getApplicationDetails, { name: appPlanName });
-      yield put({ type: 'updateApplicationPlanDetail', payload: result });
+      yield put({ type: 'updateApplicationDetail', payload: result });
       if (action.callback && result) {
         action.callback(result);
       }

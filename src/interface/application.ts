@@ -1,4 +1,4 @@
-export interface AppPlanDetail {
+export interface ApplicationDetail {
   name: string;
   alias?: string;
   namespace: string;
@@ -13,11 +13,11 @@ export interface AppPlanDetail {
   resourceInfo: {
     componentNum: Number;
   };
-  envBind: Array<EnvBind>;
+  envBinding: Array<EnvBinding>;
   workflowStatus?: Array<WorkflowStatus>;
 }
 
-export interface EnvBind {
+export interface EnvBinding {
   name: string;
   alias?: string;
   description?: string;
@@ -36,7 +36,7 @@ export interface WorkflowStatus {
   takeTime?: string;
 }
 
-export interface AppPlanBase {
+export interface ApplicationBase {
   name: string;
   alias: string;
   btnContent?: string;

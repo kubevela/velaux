@@ -9,9 +9,9 @@ import {
 } from '../../constants';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
-import { EnvBind } from '../../../../interface/application';
+import { EnvBinding } from '../../../../interface/application';
 import Group from '../../../../extends/Group';
-import { detailComponentDefinition, createApplicationComponent } from '../../../../api/application';
+import { detailComponentDefinition } from '../../../../api/application';
 import { DefinitionDetail } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -19,7 +19,7 @@ import './index.less';
 
 type Props = {
   appName: string;
-  envBind: EnvBind[];
+  envBinding: EnvBinding[];
   componentType: string;
   componentDefinitions: [];
   components: [];
@@ -67,8 +67,8 @@ class AddComponent extends Component<Props, State> {
   }
 
   transEnvBind() {
-    const { envBind } = this.props;
-    return (envBind || []).map((item: { name: string }) => ({
+    const { envBinding } = this.props;
+    return (envBinding || []).map((item: { name: string }) => ({
       lable: item.name,
       value: item.name,
     }));

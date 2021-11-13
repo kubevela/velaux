@@ -14,10 +14,10 @@ import StepWorkFlow from './components/StepWorlFlow';
 import './index.less';
 import ApplicationLayout from '../../layout/Application';
 import { If } from 'tsx-control-statements/components';
-import { AppPlanDetail, AppPlanBase } from '../../interface/application';
+import { ApplicationDetail, ApplicationBase } from '../../interface/application';
 import Topology from './components/Topology';
 import Translation from '../../components/Translation';
-import AddEnvBind from './components/AddEnvBind';
+import AddEnvBind from '../../layout/Application/components/AddEnvBind';
 
 type Props = {
   match: {
@@ -26,8 +26,8 @@ type Props = {
     };
   };
   componentDefinitions: [];
-  applicationPlanDetail: AppPlanDetail;
-  applicationPlanList: Array<AppPlanBase>;
+  applicationDetail: ApplicationDetail;
+  applicationList: Array<ApplicationBase>;
   clusterList: [];
   namespaceList: [];
   loading: { global: Boolean };
@@ -161,15 +161,9 @@ class Dashboard extends Component<Props, State> {
       this.onGetApplicationComponents();
     }
     const { Row, Col } = Grid;
-    const {
-      history,
-      dispatch,
-      applicationPlanDetail,
-      applicationPlanList,
-      clusterList,
-      namespaceList,
-    } = this.props;
-    const { status, policies, envBind = [] } = applicationPlanDetail;
+    const { history, dispatch, applicationDetail, applicationList, clusterList, namespaceList } =
+      this.props;
+    const { status, policies, envBinding = [] } = applicationDetail;
 
     return (
       <ApplicationLayout {...this.props}>
@@ -177,7 +171,7 @@ class Dashboard extends Component<Props, State> {
           <Header
             appName={appName}
             history={history}
-            applicationPlanList={applicationPlanList}
+            applicationList={applicationList}
             changeAppName={(name) => {
               this.changeAppName(name);
             }}
@@ -188,7 +182,7 @@ class Dashboard extends Component<Props, State> {
 
           <Row className="card-content-wraper margin-top-10">
             <Col span="12">
-              <BaseInfo detail={applicationPlanDetail} policies={policies} />
+              <BaseInfo detail={applicationDetail} policies={policies} />
             </Col>
             <Col span="12">
               <StepWorkFlow appName={appName} history={history} workflowStatus={workflowStatus} />
@@ -199,7 +193,7 @@ class Dashboard extends Component<Props, State> {
               <Col span={20}>
                 <TabsContent
                   activeKey={activeKey}
-                  envBind={envBind}
+                  envBind={envBinding}
                   changeActiveKey={this.changeActiveKey}
                 />
               </Col>
@@ -219,7 +213,7 @@ class Dashboard extends Component<Props, State> {
             <Row className="topology">
               <Col span={24}>
                 <Topology
-                  appPlanDetail={applicationPlanDetail}
+                  appPlanDetail={applicationDetail}
                   showBox={activeKey === 'basisConfig'}
                   components={components}
                   onAddComponent={this.openAddComponent}
@@ -230,7 +224,7 @@ class Dashboard extends Component<Props, State> {
           <If condition={this.state.visibleDraw}>
             <AddComponent
               appName={appName}
-              envBind={envBind}
+              envBinding={envBinding}
               components={components}
               componentType={componentType}
               componentDefinitions={componentDefinitions}
@@ -240,22 +234,6 @@ class Dashboard extends Component<Props, State> {
               }}
               onClose={this.closeAddComponent}
             />
-          </If>
-
-          <If condition={this.state.visibleEnvPlan}>
-            <AddEnvBind
-              components={components}
-              clusterList={clusterList}
-              namespaceList={namespaceList}
-              appPlanBase={applicationPlanDetail}
-              onClose={() => {
-                this.setState({ visibleEnvPlan: false });
-              }}
-              onOK={() => {
-                this.setState({ visibleEnvPlan: false });
-              }}
-              dispatch={dispatch}
-            ></AddEnvBind>
           </If>
 
           <PublishDialog

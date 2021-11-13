@@ -8,16 +8,16 @@ import AppDialog from './components/AddAppDialog';
 import '../../common.less';
 import { If } from 'tsx-control-statements/components';
 import { deleteApplicationPlan, getComponentdefinitions } from '../../api/application';
-import { AppPlanBase } from '../../interface/application';
+import { ApplicationBase } from '../../interface/application';
 
 type Props = {
   dispatch: ({}) => {};
-  applicationPlanList: AppPlanBase[];
+  applicationList: ApplicationBase[];
   namespaceList: [];
   clusterList?: [];
 };
 type State = {
-  visibleDraw: boolean;
+  showAddApplication: boolean;
   componentDefinitions: [];
   isLoading: boolean;
 };
@@ -29,7 +29,7 @@ class Application extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      visibleDraw: false,
+      showAddApplication: false,
       componentDefinitions: [],
       isLoading: false,
     };
@@ -89,14 +89,14 @@ class Application extends Component<Props, State> {
 
   closeAddApplication = () => {
     this.setState({
-      visibleDraw: false,
+      showAddApplication: false,
     });
     this.getApplicationPlans({});
   };
 
   render() {
-    const { applicationPlanList, namespaceList, clusterList, dispatch } = this.props;
-    const { visibleDraw, componentDefinitions, isLoading } = this.state;
+    const { applicationList, namespaceList, clusterList, dispatch } = this.props;
+    const { showAddApplication, componentDefinitions, isLoading } = this.state;
     return (
       <div>
         <Title
@@ -104,7 +104,7 @@ class Application extends Component<Props, State> {
           subTitle="Application Manager SubTitle"
           addButtonTitle="Add App"
           addButtonClick={() => {
-            this.setState({ visibleDraw: true });
+            this.setState({ showAddApplication: true });
           }}
         />
 
@@ -116,21 +116,23 @@ class Application extends Component<Props, State> {
             this.getApplicationPlans(params);
           }}
         />
+
         <Loading visible={isLoading} fullScreen>
           <CardContend
-            appPlans={applicationPlanList}
+            applications={applicationList}
             editAppPlan={(name: string) => {}}
             deleteAppPlan={this.onDeleteAppPlan}
           />
         </Loading>
-        <If condition={visibleDraw}>
+
+        <If condition={showAddApplication}>
           <AppDialog
-            visible={visibleDraw}
+            visible={showAddApplication}
             namespaceList={namespaceList}
             clusterList={clusterList}
             componentDefinitions={componentDefinitions}
             setVisible={(visible) => {
-              this.setState({ visibleDraw: visible });
+              this.setState({ showAddApplication: visible });
             }}
             onOK={this.closeAddApplication}
             onClose={this.closeAddApplication}
