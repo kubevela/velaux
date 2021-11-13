@@ -130,9 +130,6 @@ class AddComponent extends Component<Props, State> {
         width={600}
         onClose={onClose}
         onOk={this.onSubmit}
-        dialogStats={''}
-        changeStatus={(status: string) => {}}
-        onSubmit={this.onSubmit}
       >
         <Form field={this.field}>
           <Group

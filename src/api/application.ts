@@ -23,7 +23,7 @@ export function getApplicationList(params: any) {
   return get(url, { params: params }).then((res) => res);
 }
 
-export function createApplicationList(params: any) {
+export function createApplication(params: any) {
   return post(url, params).then((res) => res);
 }
 

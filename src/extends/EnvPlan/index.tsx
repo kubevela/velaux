@@ -3,6 +3,7 @@ import { Input, Button, Field, Icon, Select, Form } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
 import { EnvBinding } from '../../interface/application';
+import Translation from '../../components/Translation';
 
 type Props = {
   clusterList: Array<any>;
@@ -16,9 +17,9 @@ type ClusterItem = {
   name: string;
 };
 type EnvItemType = {
-  namespace: string;
   name: string;
-  clusterSelector: ClusterItem;
+  alias: string;
+  targetNames: [];
   description?: string;
 };
 
@@ -31,33 +32,19 @@ type EnvPlanParams = {
   onChange?: () => {};
   delete?: (key: string) => void;
 };
-const ENVPLAN_KEY_LIST = ['namespace', 'name', 'clusterSelector', 'description'];
+const ENVPLAN_KEY_LIST = ['name', 'alias', 'targetNames', 'description'];
 function EnvItem(props: EnvPlanParams) {
   return (
     <div className="env-item-container">
       <div className="env-item-content">
         <div className="env-item-form-container">
-          <Form.Item required label="命名空间">
-            <Input
-              {...props.init(`${props.id}-namespace`, {
-                rules: [
-                  {
-                    required: true,
-                    message: '命名空间必填',
-                  },
-                ],
-              })}
-            />
-          </Form.Item>
-        </div>
-        <div className="env-item-form-container">
-          <Form.Item required label="环境名称">
+          <Form.Item required label={<Translation>Name</Translation>}>
             <Input
               {...props.init(`${props.id}-name`, {
                 rules: [
                   {
                     required: true,
-                    message: '环境名必填',
+                    message: 'Enter Env name',
                   },
                 ],
               })}
@@ -65,14 +52,28 @@ function EnvItem(props: EnvPlanParams) {
           </Form.Item>
         </div>
         <div className="env-item-form-container">
-          <Form.Item required label="集群">
-            <Select
-              className="select"
-              {...props.init(`${props.id}-clusterSelector`, {
+          <Form.Item required label={<Translation>Alias</Translation>}>
+            <Input
+              {...props.init(`${props.id}-alias`, {
                 rules: [
                   {
                     required: true,
-                    message: '请选择集群',
+                    message: 'Enter Env alias',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        </div>
+        <div className="env-item-form-container">
+          <Form.Item required label={<Translation>Target Names</Translation>}>
+            <Select
+              className="select"
+              {...props.init(`${props.id}-targetNames`, {
+                rules: [
+                  {
+                    required: true,
+                    message: 'Please chose',
                   },
                 ],
               })}
@@ -80,8 +81,9 @@ function EnvItem(props: EnvPlanParams) {
             />
           </Form.Item>
         </div>
+
         <div className="env-item-form-container">
-          <Form.Item label="环境描述">
+          <Form.Item label={<Translation>Description</Translation>}>
             <Input
               {...props.init(`${props.id}-description`, {
                 rules: [
@@ -183,8 +185,8 @@ class EnvPlan extends React.Component<Props, State> {
         if (!keyMap[keyId]) {
           keyMap[keyId] = {};
         }
-        if (keyName === 'clusterSelector') {
-          keyMap[keyId][keyName] = { name: values[key] };
+        if (keyName === 'targetNames') {
+          keyMap[keyId][keyName] = [values[key]];
         } else {
           keyMap[keyId][keyName] = values[key];
         }

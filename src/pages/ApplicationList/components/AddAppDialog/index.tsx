@@ -1,12 +1,12 @@
 import React from 'react';
-import { Grid, Dialog, Field, Form, Select, Message } from '@b-design/ui';
+import { Grid, Dialog, Field, Form, Select, Message, Button } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import { NEW_APPLICATION_DELIVERY_PLAN } from '../../constants';
 
 import { If } from 'tsx-control-statements/components';
 import GeneralConfig from '../GeneralConfig';
 import Group from '../../../../extends/Group';
-import { detailComponentDefinition, createApplicationList } from '../../../../api/application';
+import { detailComponentDefinition, createApplication } from '../../../../api/application';
 import { DefinitionDetail } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -84,7 +84,7 @@ class AppDialog extends React.Component<Props, State> {
           return;
         }
         params.component.properties = JSON.stringify(values);
-        createApplicationList(params).then((res) => {
+        createApplication(params).then((res) => {
           if (res) {
             Message.success(<Translation>create application success</Translation>);
             this.props.onOK();
@@ -139,6 +139,55 @@ class AppDialog extends React.Component<Props, State> {
     }
   };
 
+  extButtonList = () => {
+    const { dialogStats } = this.state;
+    const {
+      visible,
+      onClose,
+      t,
+      setVisible,
+      dispatch,
+      namespaceList,
+      clusterList = [],
+    } = this.props;
+    if (dialogStats === 'isBasic') {
+      return (
+        <div>
+          <Button type="secondary" onClick={onClose} className="margin-right-10">
+            <Translation>Cancle</Translation>
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              this.changeStatus('isCreateComponent');
+            }}
+          >
+            <Translation>NextStep</Translation>
+          </Button>
+        </div>
+      );
+    } else if (dialogStats === 'isCreateComponent') {
+      return (
+        <div>
+          <Button
+            type="secondary"
+            onClick={() => {
+              this.changeStatus('isBasic');
+            }}
+            className="margin-right-10"
+          >
+            <Translation>Previous</Translation>
+          </Button>
+          <Button type="primary" onClick={this.onSubmit}>
+            <Translation>Create</Translation>
+          </Button>
+        </div>
+      );
+    } else {
+      return <div></div>;
+    }
+  };
+
   render() {
     const init = this.field.init;
     const FormItem = Form.Item;
@@ -157,12 +206,8 @@ class AppDialog extends React.Component<Props, State> {
         title={NEW_APPLICATION_DELIVERY_PLAN}
         placement="right"
         width={800}
-        dialogStats={dialogStats}
         onClose={onClose}
-        changeStatus={(status: string) => {
-          this.changeStatus(status);
-        }}
-        onSubmit={this.onSubmit}
+        extButtons={this.extButtonList()}
       >
         <Form field={this.field}>
           <If condition={dialogStats === 'isBasic'}>

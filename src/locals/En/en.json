@@ -122,5 +122,8 @@
   "Previous": "Previous",
   "App alias": "App alias",
   "App descrition": "App descrition",
-  "Deployment type": "Deployment type"
+  "Deployment type": "Deployment type",
+  "Alias": "Alias",
+  "Target Names": "Target Names",
+  "Description": "Description"
 }
