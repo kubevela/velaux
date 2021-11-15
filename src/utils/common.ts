@@ -52,7 +52,10 @@ export const CLUSTERS_PATH = 'clusters';
 export const ADDONS_PATH = 'addons';
 export const WORKFLOWS_PATH = 'workflows';
 
-export function momentDate(time: string): string {
+export function momentDate(time: undefined | string): string {
+  if (!time) {
+    return '';
+  }
   return moment(time).format('YYYY/MM/DD HH:MM');
 }
 

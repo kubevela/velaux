@@ -59,7 +59,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
         this.props.dispatch &&
           this.props.dispatch({
             type: 'application/getApplicationDetail',
-            payload: { appPlanName: applicationDetail && applicationDetail.name },
+            payload: { appName: applicationDetail && applicationDetail.name },
           });
       }
     });

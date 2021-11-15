@@ -2,6 +2,7 @@ import {
   getApplicationList,
   createApplication,
   getApplicationDetails,
+  getApplicationStatus,
   getApplicationComponents,
   getPolicyList,
   getComponentdefinitions,
@@ -14,6 +15,7 @@ export default {
   state: {
     applicationList: [],
     applicationDetail: {},
+    applicationStatus: {},
     projectList: [],
     clusterList: [],
     searchAppName: '',
@@ -39,6 +41,12 @@ export default {
       return {
         ...state,
         applicationDetail: payload,
+      };
+    },
+    updateApplicationStatus(state, { type, payload }) {
+      return {
+        ...state,
+        applicationStatus: payload,
       };
     },
     updateComponents(state, { type, payload }) {
@@ -93,16 +101,24 @@ export default {
       yield put({ type: 'updateNameSpaceList', payload: namespaceList });
     },
     *getApplicationDetail(action, { call, put }) {
-      const { appPlanName } = action.payload;
-      const result = yield call(getApplicationDetails, { name: appPlanName });
+      const { appName } = action.payload;
+      const result = yield call(getApplicationDetails, { name: appName });
       yield put({ type: 'updateApplicationDetail', payload: result });
+      if (action.callback && result) {
+        action.callback(result);
+      }
+    },
+    *getApplicationStatus(action, { call, put }) {
+      const { appName } = action.payload;
+      const result = yield call(getApplicationStatus, { name: appName });
+      yield put({ type: 'updateApplicationStatus', payload: result });
       if (action.callback && result) {
         action.callback(result);
       }
     },
     *getApplicationComponents(action, { call, put }) {
       const result = yield call(getApplicationComponents, action.payload);
-      yield put({ type: 'updateComponents', payload: result && result.componentplans });
+      yield put({ type: 'updateComponents', payload: result && result.components });
     },
     *getPolicies(action, { call, put }) {
       const { urlParam } = action.payload;

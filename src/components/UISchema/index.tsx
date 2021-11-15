@@ -354,7 +354,6 @@ class UISchema extends Component<Props> {
                   />
                 </Form.Item>
               );
-
             case 'CPUNumber':
               return (
                 <Form.Item

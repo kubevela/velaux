@@ -7,7 +7,7 @@ import { If } from 'tsx-control-statements/components';
 import GeneralConfig from '../GeneralConfig';
 import Group from '../../../../extends/Group';
 import { detailComponentDefinition, createApplication } from '../../../../api/application';
-import { DefinitionDetail } from '../../../../interface/application';
+import { DefinitionDetail, EnvBinding } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import EnvPlan from '../../../../extends/EnvPlan';
@@ -30,6 +30,7 @@ type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
   dialogStats: string;
+  envBinding: Array<EnvBinding>;
 };
 
 class AppDialog extends React.Component<Props, State> {
@@ -42,6 +43,7 @@ class AppDialog extends React.Component<Props, State> {
     this.state = {
       definitionLoading: true,
       dialogStats: 'isBasic',
+      envBinding: [],
     };
     this.field = new Field(this);
     this.uiSchemaRef = React.createRef();
@@ -54,10 +56,8 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   onSubmit = () => {
-    const envBindArray = this.envBind.current?.getValues();
-    if (!envBindArray) {
-      return;
-    }
+    const { envBinding } = this.state;
+    debugger;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
@@ -69,14 +69,14 @@ class AppDialog extends React.Component<Props, State> {
         name,
         description,
         namespace,
-        envBinding: envBindArray,
+        envBinding: envBinding,
         component: {
           alias,
           componentType,
           description,
           icon,
           name,
-          properties: {},
+          properties: '',
         },
       };
       this.uiSchemaRef.current?.validate((error: any, values: any) => {
@@ -119,12 +119,13 @@ class AppDialog extends React.Component<Props, State> {
         if (error) {
           return;
         }
-        const envBindArray = this.envBind.current?.getValues();
-        if (!envBindArray) {
+        const envBinding = this.envBind.current?.getValues();
+        if (!envBinding || envBinding.length < 1) {
           return;
         }
         this.setState(
           {
+            envBinding: envBinding,
             dialogStats: value,
           },
           () => {
@@ -141,15 +142,7 @@ class AppDialog extends React.Component<Props, State> {
 
   extButtonList = () => {
     const { dialogStats } = this.state;
-    const {
-      visible,
-      onClose,
-      t,
-      setVisible,
-      dispatch,
-      namespaceList,
-      clusterList = [],
-    } = this.props;
+    const { onClose } = this.props;
     if (dialogStats === 'isBasic') {
       return (
         <div>
@@ -192,14 +185,11 @@ class AppDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const formItemLayout = {
-      labelCol: { fixedSpan: 4 },
-    };
 
     const { onClose } = this.props;
     const { visible, t, setVisible, dispatch, namespaceList, clusterList = [] } = this.props;
 
-    const { definitionLoading, definitionDetail, dialogStats } = this.state;
+    const { envBinding, definitionDetail, dialogStats } = this.state;
 
     return (
       <DrawerWithFooter
@@ -211,25 +201,19 @@ class AppDialog extends React.Component<Props, State> {
       >
         <Form field={this.field}>
           <If condition={dialogStats === 'isBasic'}>
-            <Group
-              title={<Translation>Apply Basic Information</Translation>}
-              description={<Translation>Set the basic properties of the service</Translation>}
-              hasToggleIcon
-            >
-              <GeneralConfig
-                t={t}
-                visible={visible}
-                setVisible={setVisible}
-                dispatch={dispatch}
-                namespaceList={namespaceList}
-                clusterList={clusterList}
-                field={this.field}
-                ref={this.basicRef}
-              />
-            </Group>
+            <GeneralConfig
+              t={t}
+              visible={visible}
+              setVisible={setVisible}
+              dispatch={dispatch}
+              namespaceList={namespaceList}
+              clusterList={clusterList}
+              field={this.field}
+              ref={this.basicRef}
+            />
 
             <Row>
-              <Col span={24}>
+              <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem
                   label={
                     <Translation className="font-size-14 font-weight-bold">
@@ -241,6 +225,7 @@ class AppDialog extends React.Component<Props, State> {
                   <Select
                     className="select"
                     {...init(`componentType`, {
+                      initValue: 'webservice',
                       rules: [
                         {
                           required: true,
@@ -253,35 +238,32 @@ class AppDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem
+                  label={
+                    <Translation className="font-size-14 font-weight-bold">
+                      Environmental planning
+                    </Translation>
+                  }
+                  required={true}
+                >
+                  <EnvPlan
+                    value={envBinding}
+                    targetList={[{ name: 'default', alias: 'default' }]}
+                    ref={this.envBind}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
           </If>
 
-          <Row className={dialogStats === 'isBasic' ? '' : 'hiddenEnvbind'}>
-            <Col span={24}>
-              <FormItem
-                label={
-                  <Translation className="font-size-14 font-weight-bold">
-                    Environmental planning
-                  </Translation>
-                }
-                required={true}
-              >
-                <EnvPlan clusterList={clusterList} ref={this.envBind} />
-              </FormItem>
-            </Col>
-          </Row>
-
           <If condition={dialogStats === 'isCreateComponent'}>
-            <Group
-              title="Deployment Parameters"
-              description="Automatically generated based on definition"
-              loading={definitionLoading}
-            >
-              <UISchema
-                _key="body.properties"
-                uiSchema={definitionDetail && definitionDetail.uiSchema}
-                ref={this.uiSchemaRef}
-              ></UISchema>
-            </Group>
+            <UISchema
+              _key="body.properties"
+              uiSchema={definitionDetail && definitionDetail.uiSchema}
+              ref={this.uiSchemaRef}
+            ></UISchema>
           </If>
         </Form>
       </DrawerWithFooter>
