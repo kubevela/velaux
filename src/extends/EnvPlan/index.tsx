@@ -1,21 +1,23 @@
 import React from 'react';
-import { Input, Button, Field, Icon, Select, Form } from '@b-design/ui';
+import { Input, Button, Field, Icon, Select, Form, Grid } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
 import { EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
+import { checkName } from '../../utils/common';
+
+const { Col, Row } = Grid;
 
 type Props = {
-  clusterList: Array<any>;
+  value: Array<EnvBinding>;
+  targetList: Array<any>;
   envList?: Array<EnvBinding>;
 };
 
 type State = {
   envList: Array<any>;
 };
-type ClusterItem = {
-  name: string;
-};
+
 type EnvItemType = {
   name: string;
   alias: string;
@@ -28,7 +30,8 @@ type EnvPlanParams = {
   id: string;
   itemLength: number;
   init: any;
-  clusterList: Array<{ label: string; value: string }>;
+  value?: EnvBinding;
+  targetList: Array<{ label: string; value: string }>;
   onChange?: () => {};
   delete?: (key: string) => void;
 };
@@ -36,40 +39,48 @@ const ENVPLAN_KEY_LIST = ['name', 'alias', 'targetNames', 'description'];
 function EnvItem(props: EnvPlanParams) {
   return (
     <div className="env-item-container">
-      <div className="env-item-content">
-        <div className="env-item-form-container">
+      <Row>
+        <Col span={5} style={{ padding: '0 8px' }}>
           <Form.Item required label={<Translation>Name</Translation>}>
             <Input
               {...props.init(`${props.id}-name`, {
+                initValue: props.value?.name,
                 rules: [
                   {
                     required: true,
                     message: 'Enter Env name',
                   },
-                ],
-              })}
-            />
-          </Form.Item>
-        </div>
-        <div className="env-item-form-container">
-          <Form.Item required label={<Translation>Alias</Translation>}>
-            <Input
-              {...props.init(`${props.id}-alias`, {
-                rules: [
                   {
                     required: true,
-                    message: 'Enter Env alias',
+                    pattern: checkName,
+                    message: 'Please enter a valid envbing name',
                   },
                 ],
               })}
             />
           </Form.Item>
-        </div>
-        <div className="env-item-form-container">
+        </Col>
+        <Col span={6} style={{ padding: '0 8px' }}>
+          <Form.Item label={<Translation>Alias</Translation>}>
+            <Input
+              {...props.init(`${props.id}-alias`, {
+                initValue: props.value?.alias,
+                rules: [
+                  {
+                    max: 64,
+                    message: 'Enter a description less than 64 characters.',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        </Col>
+        <Col span={6} style={{ padding: '0 8px' }}>
           <Form.Item required label={<Translation>Target Names</Translation>}>
             <Select
               className="select"
               {...props.init(`${props.id}-targetNames`, {
+                initValue: props.value?.targetNames && props.value?.targetNames[0],
                 rules: [
                   {
                     required: true,
@@ -77,35 +88,36 @@ function EnvItem(props: EnvPlanParams) {
                   },
                 ],
               })}
-              dataSource={props.clusterList}
+              dataSource={props.targetList}
             />
           </Form.Item>
-        </div>
-
-        <div className="env-item-form-container">
+        </Col>
+        <Col span={6} style={{ padding: '0 8px' }}>
           <Form.Item label={<Translation>Description</Translation>}>
             <Input
               {...props.init(`${props.id}-description`, {
+                initValue: props.value?.description,
                 rules: [
                   {
-                    required: false,
+                    max: 128,
+                    message: 'Enter a description less than 128 characters.',
                   },
                 ],
               })}
             />
           </Form.Item>
-        </div>
-      </div>
-      <div className="remove-option-container">
-        <If condition={props.itemLength !== 1}>
-          <Icon
-            type="ashbin"
-            onClick={() => {
-              props.delete && props.delete(props.id);
-            }}
-          />
-        </If>
-      </div>
+        </Col>
+        <Col span={1} style={{ padding: '0 8px', display: 'flex', alignItems: 'center' }}>
+          <If condition={props.itemLength !== 1}>
+            <Icon
+              type="ashbin"
+              onClick={() => {
+                props.delete && props.delete(props.id);
+              }}
+            />
+          </If>
+        </Col>
+      </Row>
     </div>
   );
 }
@@ -114,12 +126,16 @@ class EnvPlan extends React.Component<Props, State> {
   field: any;
   constructor(props: Props) {
     super(props);
+    let initValues: any[] = [];
+    if (props.value && props.value.length > 0) {
+      props.value.map((item) => {
+        initValues.push({ key: Date.now().toString(), value: item });
+      });
+    } else {
+      initValues.push({ key: Date.now().toString(), value: { name: 'local', alias: '本地环境' } });
+    }
     this.state = {
-      envList: [
-        {
-          key: Date.now().toString(),
-        },
-      ],
+      envList: initValues,
     };
     this.field = new Field(this);
   }
@@ -198,10 +214,10 @@ class EnvPlan extends React.Component<Props, State> {
 
   render() {
     const { envList } = this.state;
-    const { clusterList } = this.props;
-    const dataSource = (clusterList || []).map((item: { name: string }) => ({
+    const { targetList } = this.props;
+    const dataSource = (targetList || []).map((item: { name: string; alias: string }) => ({
       value: item.name,
-      label: item.name,
+      label: item.alias,
     }));
     const { init } = this.field;
     return (
@@ -214,8 +230,9 @@ class EnvPlan extends React.Component<Props, State> {
                 id={env.key}
                 key={env.key}
                 init={init}
+                value={env.value}
                 itemLength={envList.length}
-                clusterList={dataSource}
+                targetList={dataSource}
               />
             ))}
           </Form>

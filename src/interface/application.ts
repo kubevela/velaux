@@ -9,7 +9,6 @@ export interface ApplicationDetail {
   labels?: {};
   gatewayRule: null;
   policies: Array<string>;
-  status: string;
   resourceInfo: {
     componentNum: Number;
   };
@@ -21,10 +20,7 @@ export interface EnvBinding {
   name: string;
   alias?: string;
   description?: string;
-  clusterSelector?: {
-    name: string;
-    namespace?: string;
-  };
+  targetNames: Array<string>;
   componentSelector?: {
     components: Array<string>;
   };
@@ -40,7 +36,6 @@ export interface ApplicationBase {
   name: string;
   alias: string;
   btnContent?: string;
-  status: string;
   icon: string;
   description: string;
   createTime: string;
@@ -59,9 +54,14 @@ export interface UIParam {
   sort: Number;
   uiType: string;
   disable?: boolean;
-  subParameterGroupOption?: Array<Array<string>>;
+  subParameterGroupOption?: Array<GroupOption>;
   subParameters?: Array<UIParam>;
   validate: UIParamValidate;
+}
+
+export interface GroupOption {
+  label: string;
+  keys: Array<string>;
 }
 
 export interface UIParamValidate {
@@ -87,4 +87,68 @@ export interface ImageInfo {
 
 export interface ImageVolume {
   mountPath: string;
+}
+
+export interface ApplicationDeployRequest {
+  appName: string;
+  workflowName?: string;
+  note?: string;
+  triggerType: 'web';
+  force: boolean;
+}
+
+export interface ApplicationStatus {
+  conditions: Array<Condition>;
+  status: string;
+  workflow: WorkflowStatus;
+  latestRevision: {
+    name: string;
+    revision: number;
+    revisionHash: string;
+  };
+  components?: Array<{
+    kind: string;
+    namespace: string;
+    name: string;
+    apiVersion: string;
+  }>;
+  services?: Array<{
+    name: string;
+    env?: string;
+    healthy: string;
+    message: string;
+    traits: Array<{
+      type: string;
+      healthy: string;
+      message: string;
+    }>;
+  }>;
+}
+
+export interface Condition {
+  type: string;
+  status: string;
+  lastTransitionTime: string;
+  reason: string;
+}
+
+export interface WorkflowStatus {
+  appRevision: string;
+  mode: string;
+  suspend: boolean;
+  terminated: boolean;
+  finished: boolean;
+  steps: Array<WorkflowStepStatus>;
+  startTime?: string;
+}
+
+export interface WorkflowStepStatus {
+  id: string;
+  name: string;
+  type: string;
+  phase: string;
+  message: string;
+  reason: string;
+  firstExecuteTime?: string;
+  lastExecuteTime?: string;
 }

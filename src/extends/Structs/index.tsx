@@ -11,12 +11,12 @@ import {
   SplitButton,
 } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
-import { UIParam, UIParamValidate } from '../../interface/application';
+import { UIParam, GroupOption } from '../../interface/application';
 import UISchema from '../../components/UISchema';
 import './index.less';
 type Props = {
   _key?: string;
-  parameterGroupOption: string[][] | undefined;
+  parameterGroupOption: GroupOption[] | undefined;
   param: Array<UIParam> | undefined;
   onChange?: (params: any) => void;
   value: any;
@@ -46,7 +46,7 @@ type StructPlanParams = {
 function StructItem(props: StructPlanParams) {
   const { option, param, id, init } = props;
   let uiSchemas = param;
-  if (option.length > 0) {
+  if (option && option.length > 0) {
     const paramMap =
       param &&
       param.reduce((pre: any, next) => {
@@ -96,7 +96,7 @@ class Structs extends React.Component<Props, State> {
     const structList = [
       {
         key: Date.now().toString(),
-        option: parameterGroupOption[0] || [],
+        option: parameterGroupOption[0]?.keys || [],
       },
     ];
     this.setState({
@@ -113,7 +113,7 @@ class Structs extends React.Component<Props, State> {
     onChange && onChange(result);
   };
 
-  addStructPlanItem = (option?: any) => {
+  addStructPlanItem = (option?: GroupOption) => {
     this.field.validate((error: any) => {
       if (error) {
         return;
@@ -123,7 +123,7 @@ class Structs extends React.Component<Props, State> {
       if (key) {
         structList.push({
           key,
-          option,
+          option: option?.keys,
         });
       } else {
         console.log(key);
@@ -212,16 +212,23 @@ class Structs extends React.Component<Props, State> {
         </div>
         <div className="struct-plan-option">
           <If condition={parameterGroupOption.length === 0}>
-            <Button onClick={this.addStructPlanItem} type="secondary">
-              {' '}
+            <Button
+              onClick={() => {
+                this.addStructPlanItem();
+              }}
+              type="secondary"
+            >
               Add
             </Button>
           </If>
           <If condition={parameterGroupOption.length > 0}>
             <SplitButton label=" Add" className="workflow-more" type="secondary" autoWidth={false}>
               {parameterGroupOption?.map((item, i) => (
-                <SplitButton.Item key={item.join(',')} onClick={() => this.addStructPlanItem(item)}>
-                  {item.join(':')}
+                <SplitButton.Item
+                  key={item.keys.join(',')}
+                  onClick={() => this.addStructPlanItem(item)}
+                >
+                  {item.label || item.keys.join(':')}
                 </SplitButton.Item>
               ))}
             </SplitButton>

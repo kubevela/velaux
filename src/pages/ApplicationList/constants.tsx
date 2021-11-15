@@ -21,7 +21,7 @@ export const dataSourceApps = [
 export const managerTitle = <Translation>AppPlan Manager</Translation>;
 export const managerName = '应用名称-';
 export const managerSubTitle = <Translation>AppPlan ManagerSubTitle</Translation>;
-export const addApp = <Translation>Add App</Translation>;
+export const addApp = <Translation>New Application</Translation>;
 export const NEW_APPLICATION_DELIVERY_PLAN = <Translation>New Application</Translation>;
 export const addAppDialog = {
   name: <Translation>App Name</Translation>,

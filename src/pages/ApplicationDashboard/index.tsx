@@ -4,9 +4,7 @@ import { getComponentdefinitions, getApplicationComponents } from '../../api/app
 import { DragDropContext } from 'react-dnd';
 import HTMLBackend from 'react-dnd-html5-backend';
 import { Grid, Loading, Field } from '@b-design/ui';
-import { NEW_COMPONENTS } from './constants';
 import TabsContent from './components/TabsContent/index';
-import PublishDialog from './components/PublishDialog';
 import AddComponent from './components/AddComponent';
 import Header from './components/Header';
 import BaseInfo from './components/BaseInfo';
@@ -17,7 +15,6 @@ import { If } from 'tsx-control-statements/components';
 import { ApplicationDetail, ApplicationBase } from '../../interface/application';
 import Topology from './components/Topology';
 import Translation from '../../components/Translation';
-import AddEnvBind from '../../layout/Application/components/AddEnvBind';
 
 type Props = {
   match: {
@@ -92,7 +89,7 @@ class Dashboard extends Component<Props, State> {
     const { activeKey } = this.state;
     const envName = activeKey === 'basisConfig' ? '' : activeKey;
     const params = {
-      name: appName,
+      appName: appName,
       envName: envName,
     };
     this.setState({ isLoading: true, appPlanName: appName });
@@ -163,7 +160,7 @@ class Dashboard extends Component<Props, State> {
     const { Row, Col } = Grid;
     const { history, dispatch, applicationDetail, applicationList, clusterList, namespaceList } =
       this.props;
-    const { status, policies, envBinding = [] } = applicationDetail;
+    const { policies, envBinding = [] } = applicationDetail;
 
     return (
       <ApplicationLayout {...this.props}>
@@ -235,15 +232,6 @@ class Dashboard extends Component<Props, State> {
               onClose={this.closeAddComponent}
             />
           </If>
-
-          <PublishDialog
-            appName={appName}
-            visible={visible}
-            setVisible={(visible) => {
-              this.setVisible(visible);
-            }}
-            dispatch={dispatch}
-          />
         </div>
       </ApplicationLayout>
     );

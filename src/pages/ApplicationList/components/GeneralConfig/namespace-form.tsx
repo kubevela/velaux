@@ -2,6 +2,7 @@ import React, { createRef, LegacyRef } from 'react';
 import { Form, Input, Select, Field, Radio, Button } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
+import { checkName } from '../../../../utils/common';
 
 const FormItem = Form.Item;
 type Props = {
@@ -46,7 +47,7 @@ class NamespaceForm extends React.Component<Props, State> {
         <If condition={namespaceList.length > 0}>
           <FormItem
             {...formItemLayout}
-            label={<Translation>Namespace</Translation>}
+            label={<Translation>Project</Translation>}
             labelTextAlign="left"
             required={true}
           >
@@ -70,7 +71,15 @@ class NamespaceForm extends React.Component<Props, State> {
             </If>
             <If condition={showNameSpaceInput}>
               <div className="cluster-container">
-                <Input {...field.init('namespace')} className="cluster-params-input" />
+                <Input
+                  {...field.init('namespace', {
+                    rules: [
+                      { required: true },
+                      { pattern: checkName, message: 'Please enter a valid project name' },
+                    ],
+                  })}
+                  className="cluster-params-input"
+                />
                 <Button
                   className="cluster-option-btn"
                   type="secondary"
