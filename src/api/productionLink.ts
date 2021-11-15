@@ -6,4 +6,3 @@ export const cluster = '/api/v1/clusters';
 export const workflows = '/api/v1/workflows';
 export const namespace = `/api/v1/namespaces`;
 export const deliveryTarget = `/api/v1/deliveryTargets`;
-

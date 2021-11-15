@@ -1,7 +1,5 @@
 import { post, get, rdelete, put } from './request';
-import {
-  getDeliveryTarget_mock,
-} from './devLink';
+import { getDeliveryTarget_mock } from './devLink';
 import { deliveryTarget } from './productionLink';
 import { getDomain } from '../utils/common';
 
@@ -19,14 +17,11 @@ export function createDeliveryTarget(params: any) {
 }
 
 export function deleteDeliveryTarget(params: any) {
-  const url = isMock ? getDeliveryTarget_mock : `${deliveryTarget}/${params.name}`;;
+  const url = isMock ? getDeliveryTarget_mock : `${deliveryTarget}/${params.name}`;
   return rdelete(url, params);
 }
 
 export function updateDeliveryTarget(params: any) {
-  const url = isMock ? getDeliveryTarget_mock : `${deliveryTarget}/${params.name}`;;
+  const url = isMock ? getDeliveryTarget_mock : `${deliveryTarget}/${params.name}`;
   return put(url, params);
 }
-
-
-

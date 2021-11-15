@@ -1,20 +1,11 @@
 import React from 'react';
-import {
-  Message,
-  Grid,
-  Dialog,
-  Form,
-  Input,
-  Field,
-  Select,
-} from '@b-design/ui';
+import { Message, Grid, Dialog, Form, Input, Field, Select } from '@b-design/ui';
 import { addDeliveryTargetList, editDeliveryTargetList } from '../../../../constants';
 import Group from '../../../../extends/Group';
 import NameSpaceForm from '../../../ApplicationList/components/GeneralConfig/namespace-form';
 import { checkName } from '../../../../utils/common';
 import { createDeliveryTarget, updateDeliveryTarget } from '../../../../api/deliveryTarget';
 import Translation from '../../../../components/Translation';
-
 
 type Props = {
   isEdit: boolean;
@@ -23,12 +14,11 @@ type Props = {
   namespaceList?: [];
   onOK: () => void;
   onClose: () => void;
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   t: (key: string) => {};
 };
 
-type State = {
-};
+type State = {};
 
 class DeliveryDialog extends React.Component<Props, State> {
   field: Field;
@@ -49,8 +39,19 @@ class DeliveryDialog extends React.Component<Props, State> {
         return;
       }
       const { isEdit } = this.props;
-      const { name, alias, project, description, clusterName, namespace, providerName, region, zone, vpcID } = this.field.getValues();
-      console.log('pppparams', this.field.getValues())
+      const {
+        name,
+        alias,
+        project,
+        description,
+        clusterName,
+        namespace,
+        providerName,
+        region,
+        zone,
+        vpcID,
+      } = this.field.getValues();
+      console.log('pppparams', this.field.getValues());
       const params = {
         name,
         alias,
@@ -64,9 +65,9 @@ class DeliveryDialog extends React.Component<Props, State> {
           providerName,
           region,
           zone,
-          vpcID
-        }
-      }
+          vpcID,
+        },
+      };
 
       if (isEdit) {
         updateDeliveryTarget(params).then((res) => {
@@ -85,7 +86,6 @@ class DeliveryDialog extends React.Component<Props, State> {
           }
         });
       }
-
     });
   };
 
@@ -110,10 +110,9 @@ class DeliveryDialog extends React.Component<Props, State> {
       lable: item.name,
       value: item.name,
     }));
-  }
+  };
 
   render() {
-
     const { Col, Row } = Grid;
     const FormItem = Form.Item;
     const init = this.field.init;
@@ -127,7 +126,7 @@ class DeliveryDialog extends React.Component<Props, State> {
     };
 
     const { t, visible, isEdit, namespaceList = [] } = this.props;
-    console.log(' isEdit:false', isEdit)
+    console.log(' isEdit:false', isEdit);
     return (
       <div>
         <Dialog
@@ -151,7 +150,6 @@ class DeliveryDialog extends React.Component<Props, State> {
                     disabled={isEdit}
                     placeholder={t('Please enter').toString()}
                     {...init('name', {
-
                       rules: [
                         {
                           required: true,
@@ -188,7 +186,6 @@ class DeliveryDialog extends React.Component<Props, State> {
                     name="project"
                     placeholder={t('Please enter').toString()}
                     {...init('project', {
-
                       rules: [
                         {
                           maxLength: 256,
@@ -206,7 +203,6 @@ class DeliveryDialog extends React.Component<Props, State> {
                     name="description"
                     placeholder={t('Please enter').toString()}
                     {...init('description', {
-
                       rules: [
                         {
                           maxLength: 256,
@@ -218,10 +214,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
-            <Group
-              title={`Kubernetes ${t('Clusters Info')}`}
-              hasToggleIcon
-            >
+            <Group title={`Kubernetes ${t('Clusters Info')}`} hasToggleIcon>
               <Row>
                 <Col span={12} style={{ padding: '0 8px' }}>
                   <FormItem label={<Translation>Cluster Screening</Translation>} required>
@@ -255,7 +248,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                   <FormItem label={<Translation>Cloud Service Provider</Translation>} required>
                     <Select
                       className="select"
-                      defaultValue='alibaba'
+                      defaultValue="alibaba"
                       placeholder={t('Please chose').toString()}
                       disabled
                       {...init(`providerName`, {
@@ -277,7 +270,6 @@ class DeliveryDialog extends React.Component<Props, State> {
                       name="region"
                       placeholder={t('Please enter').toString()}
                       {...init('region', {
-
                         rules: [
                           {
                             maxLength: 256,
@@ -297,7 +289,6 @@ class DeliveryDialog extends React.Component<Props, State> {
                       name="zone"
                       placeholder={t('Please enter').toString()}
                       {...init('zone', {
-
                         rules: [
                           {
                             maxLength: 256,
@@ -310,12 +301,11 @@ class DeliveryDialog extends React.Component<Props, State> {
                 </Col>
 
                 <Col span={12} style={{ padding: '0 8px' }}>
-                  <FormItem label={"VPC"}>
+                  <FormItem label={'VPC'}>
                     <Input
                       name="vpcID"
                       placeholder={t('Please enter').toString()}
                       {...init('vpcID', {
-
                         rules: [
                           {
                             maxLength: 256,

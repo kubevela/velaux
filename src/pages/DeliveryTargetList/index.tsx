@@ -10,7 +10,7 @@ type Props = {
   total?: number;
   clusterList?: [];
   namespaceList?: [];
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   t: (key: string) => {};
 };
 
@@ -21,7 +21,7 @@ type State = {
   showAddTarget: boolean;
   editTargetName: string;
   visibleDelivery: boolean;
-  isEdit: boolean,
+  isEdit: boolean;
 };
 
 @connect((store: any) => {
@@ -75,14 +75,17 @@ class DeliveryTargetList extends React.Component<Props, State> {
   };
 
   updateDeliveryTargetList = () => {
-    this.setState({
-      query: '',
-      page: 0,
-      pageSize: 10,
-    }, () => {
-      this.getDeliveryTargetList();
-    })
-  }
+    this.setState(
+      {
+        query: '',
+        page: 0,
+        pageSize: 10,
+      },
+      () => {
+        this.getDeliveryTargetList();
+      },
+    );
+  };
 
   changeISEdit = (isEdit: boolean, record: any) => {
     this.setState({
@@ -101,20 +104,19 @@ class DeliveryTargetList extends React.Component<Props, State> {
       region: cloud.region,
       zone: cloud.zone,
       vpcID: cloud.vpcID,
-    })
-
-  }
+    });
+  };
 
   onClose = () => {
-    this.setState({ visibleDelivery: false,  isEdit:false })
-  }
+    this.setState({ visibleDelivery: false, isEdit: false });
+  };
 
   onOk = () => {
     this.getDeliveryTargetList();
     this.setState({
-      isEdit:false
-    })
-  }
+      isEdit: false,
+    });
+  };
 
   render() {
     const { t, clusterList, deliveryTargets, total, namespaceList, dispatch } = this.props;
@@ -125,18 +127,22 @@ class DeliveryTargetList extends React.Component<Props, State> {
         <ListTitle
           title="Delivery Target Manager"
           subTitle="Define the delivery target of the application"
-          addButtonTitle='Add DeliveryTarget'
-          addButtonClick={() => { this.setState({ visibleDelivery: true }) }}
+          addButtonTitle="Add DeliveryTarget"
+          addButtonClick={() => {
+            this.setState({ visibleDelivery: true });
+          }}
         />
 
         <TableList
           list={deliveryTargets}
           updateDeliveryTargetList={this.updateDeliveryTargetList}
-          changeISEdit={(isEdit: boolean, record: any) => { this.changeISEdit(isEdit, record) }}
+          changeISEdit={(isEdit: boolean, record: any) => {
+            this.changeISEdit(isEdit, record);
+          }}
         />
 
         <DeliveryDialog
-          t = {t}
+          t={t}
           visible={visibleDelivery}
           clusterList={clusterList}
           namespaceList={namespaceList}
@@ -151,6 +157,4 @@ class DeliveryTargetList extends React.Component<Props, State> {
   }
 }
 
-
 export default withTranslation()(DeliveryTargetList);
-
