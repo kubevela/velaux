@@ -1,43 +1,15 @@
 import { getDeliveryTarget, createDeliveryTarget } from '../api/deliveryTarget';
-
-const namespace = 'deliveryTarget';
-export const namespace_clusters = namespace;
-
-type State = {
-  deliveryTagetList: [];
-  deliveryTagetListTotal: number;
-};
-
-interface ModelsType {
-  namespace: typeof namespace;
-  state: State;
-  effects: {};
-  reducers: {};
-}
-
-export interface ResponseGenerator {
-  config?: any;
-  data?: any;
-  headers?: any;
-  request?: any;
-  status?: number;
-  error?: any;
-  statusText?: string;
-  records?: any;
-  pageNum?: any;
-  deliveryTagetList?: any;
-  deliveryTagetListTotal?: any;
-}
+import { ModelsType, ResponseGenerator, DeliveryTargetState } from '../interface/deliveryTarget';
 
 const DeliveryTargets: ModelsType = {
-  namespace,
+  namespace: 'deliveryTarget',
   state: {
     deliveryTagetList: [],
     deliveryTagetListTotal: 0,
   },
   reducers: {
     updateDeliveryTargets(
-      state: State,
+      state: DeliveryTargetState,
       { payload }: { payload: { deliveryTargets: {}; total: number } },
     ) {
       const { deliveryTargets = [], total = 0 } = payload;

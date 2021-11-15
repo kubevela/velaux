@@ -128,7 +128,7 @@
   "Description": "Description",
   "Add DeliveryTarget": "Add delivery target",
   "Edit DeliveryTarget": "Edit delivery target",
-  "Define the delivery target of the application": "Define the delivery target of the application, which includes the information of the delivered target cluster or target cloud service provider",
+  "Define the delivery target for an application": "Define the delivery target for an application, which includes the information of the delivered target cluster or target cloud service provider",
   "Clusters": "Clusters",
   "Cloud Service Provider": "Cloud Service Provider",
   "Region": "Region",
