@@ -6,7 +6,7 @@ import Translation from '../../../../components/Translation';
 import { ApplicationDetail } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import AddEnvBind from '../AddEnvBind';
-import { Link } from 'react-router-dom';
+import { Link } from 'dva/router';
 
 const { Row, Col } = Grid;
 type Props = {
@@ -54,9 +54,11 @@ class TabsContent extends Component<Props, State> {
                     <Tab.Item
                       title={
                         <Link
-                          to={`/applications/${applicationDetail?.name}/envbinding/${item.name}`}
+                          to={`/applications/${applicationDetail?.name}/envbinding/${item.name}/instances`}
                         >
-                          {item.alias ? item.alias : item.name}
+                          <span title={item.description}>
+                            {item.alias ? item.alias : item.name}
+                          </span>
                         </Link>
                       }
                       key={item.name}

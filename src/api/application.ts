@@ -14,6 +14,7 @@ import {
 } from './devLink';
 import { application, componentdefinition } from './productionLink';
 import { getDomain } from '../utils/common';
+import { ApplicationDeployRequest } from '../interface/application';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
@@ -32,15 +33,20 @@ export function getApplicationDetails(params: any) {
   return get(url, params).then((res) => res);
 }
 
+export function getApplicationStatus(params: any) {
+  const url = isMock ? `${getApplicationDetails_mock}` : `${application}/${params.name}/status`;
+  return get(url, params).then((res) => res);
+}
+
 export function deleteApplicationPlan(params: { name: string }) {
   return rdelete(url + '/' + params.name, params);
 }
 
-export function getApplicationComponents(params: any) {
-  const { name, envName } = params;
+export function getApplicationComponents(params: { appName: string; envName: string }) {
+  const { appName, envName } = params;
   const url = isMock
     ? `${getApplicationComponents_mock}`
-    : `${application}/${name}/componentplans?envName=${envName}`;
+    : `${application}/${appName}/components?envName=${envName}`;
   return get(url, params).then((res) => res);
 }
 
@@ -59,8 +65,8 @@ export function getComponentDetails(params: any) {
   return post(url, params).then((res) => res);
 }
 
-export function deployApplication(params: any) {
-  const url = isMock ? `${updateApplication_mock}` : `${application}/${params.name}/deploy`;
+export function deployApplication(params: ApplicationDeployRequest) {
+  const url = isMock ? `${updateApplication_mock}` : `${application}/${params.appName}/deploy`;
   return post(url, params).then((res) => res);
 }
 

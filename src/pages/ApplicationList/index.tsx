@@ -102,7 +102,7 @@ class Application extends Component<Props, State> {
         <Title
           title="Application Manager"
           subTitle="Application Manager SubTitle"
-          addButtonTitle="Add App"
+          addButtonTitle="New Application"
           addButtonClick={() => {
             this.setState({ showAddApplication: true });
           }}

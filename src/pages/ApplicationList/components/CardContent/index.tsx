@@ -56,7 +56,7 @@ class CardContent extends React.Component<Props, State> {
     return (
       <Row wrap={true}>
         {applications.map((item: ApplicationBase, index: number) => {
-          const { name, alias, status, icon, description, createTime } = item;
+          const { name, alias, icon, description, createTime } = item;
           const showName = alias || name;
           return (
             <Col span="6" className={`card-content-wraper`} key={index}>
@@ -144,20 +144,6 @@ class CardContent extends React.Component<Props, State> {
                   <Row className="content-foot colorA6A6A6">
                     <Col span="16">
                       <span>{createTime && momentDate(createTime)}</span>
-                    </Col>
-                    <Col span="8" className="text-align-right padding-right-10">
-                      <If condition={status == 'deployed'}>
-                        <span className="circle circle-success"></span>
-                        <Translation>Deployed</Translation>
-                      </If>
-                      <If condition={!status || status == 'undeploy'}>
-                        <span className="circle"></span>
-                        <Translation>UnDeploy</Translation>
-                      </If>
-                      <If condition={status == 'warning'}>
-                        <span className="circle circle-warning"></span>
-                        <Translation>Warning</Translation>
-                      </If>
                     </Col>
                   </Row>
                 </div>

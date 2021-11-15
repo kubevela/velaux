@@ -20,13 +20,13 @@ class ApplicationLayout extends Component<Props, any> {
     super(props);
     this.state = {
       loading: false,
+      activeName: '',
     };
   }
 
   componentDidMount() {
     this.onGetApplicationDetails();
     this.getApplicationList();
-    this.getClusterList();
     this.getNamespaceList();
   }
 
@@ -37,9 +37,12 @@ class ApplicationLayout extends Component<Props, any> {
     this.setState({ activeName: appName, loading: true });
     this.props.dispatch({
       type: 'application/getApplicationDetail',
-      payload: { appPlanName: appName },
+      payload: { appName: appName },
       callback: () => {
-        this.setState({ loading: false }, () => {});
+        this.setState({ loading: false }, () => {
+          this.loadApplicationStatus();
+          this.loadApplicationComponents();
+        });
       },
     });
   };
@@ -50,16 +53,30 @@ class ApplicationLayout extends Component<Props, any> {
     });
   };
 
-  getClusterList = async () => {
-    this.props.dispatch({
-      type: 'clusters/getClusterList',
-    });
-  };
-
   getNamespaceList = async () => {
     this.props.dispatch({
       type: 'application/getNamespaceList',
       payload: {},
+    });
+  };
+
+  loadApplicationStatus = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationStatus',
+      payload: { appName: appName },
+    });
+  };
+
+  loadApplicationComponents = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationComponents',
+      payload: { appName: appName },
     });
   };
 
@@ -71,7 +88,7 @@ class ApplicationLayout extends Component<Props, any> {
       params: { appName, envName },
     } = this.props.match;
     const loadingDom = <Loading style={{ width: '100%', minHeight: '200px' }}></Loading>;
-    if (appName != activeName) {
+    if (activeName !== '' && appName != activeName) {
       this.onGetApplicationDetails();
       return loadingDom;
     }
@@ -80,7 +97,7 @@ class ApplicationLayout extends Component<Props, any> {
     }
     return (
       <div className="applayout">
-        <Header></Header>
+        <Header currentPath={path}></Header>
         <EnvTabs activeKey={envName ? envName : 'basisConfig'}></EnvTabs>
         <Row className="padding16 main">
           <div className="menu">

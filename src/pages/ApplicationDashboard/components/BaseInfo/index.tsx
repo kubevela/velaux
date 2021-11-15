@@ -18,28 +18,5 @@ export default function BaseInfo(props: Props) {
     </Button>
   ));
 
-  return (
-    <Card>
-      <div className="card-content">
-        <div className="title">{detail.alias ? detail.alias : detail.name}</div>
-        <div className="deployment">
-          <If condition={detail.status == 'deployed'}>
-            <span className="circle circle-success"></span>
-            <Translation>Deployed</Translation>
-          </If>
-          <If condition={!detail.status || detail.status == 'undeploy'}>
-            <span className="circle"></span>
-            <Translation>UnDeploy</Translation>
-          </If>
-          <If condition={detail.status == 'warning'}>
-            <span className="circle circle-warning"></span>
-            <Translation>Warning</Translation>
-          </If>
-        </div>
-      </div>
-      <div className="padding-left-15">
-        <span style={{ color: '#a6a6a6' }}>{POLICIES}:</span> {appPolicy}
-      </div>
-    </Card>
-  );
+  return <Card></Card>;
 }
