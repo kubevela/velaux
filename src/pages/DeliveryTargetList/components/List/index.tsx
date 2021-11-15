@@ -67,21 +67,25 @@ class TableList extends Component<Props, State> {
         },
       },
       {
-        key: 'clusterName',
-        title: <Translation>Clusters</Translation>,
-        dataIndex: 'clusterName',
+        key: 'clusterName/CloudProvider',
+        title: <Translation>Clusters Cloud Service Provider</Translation>,
+        dataIndex: 'clusterName/CloudProvider',
         cell: (v: string, i: number, record: Record) => {
-          const { kubernetes } = record;
-          return <span> {kubernetes && kubernetes.clusterName} </span>;
+          const { kubernetes = { clusterName: '' }, cloud = { providerName: '' } } = record;
+          return (
+            <span>
+              {' '}
+              {kubernetes.clusterName}/{cloud.providerName}{' '}
+            </span>
+          );
         },
       },
       {
-        key: 'providerName',
-        title: <Translation>Cloud Service Provider</Translation>,
-        dataIndex: 'providerName',
-        cell: (v: string, i: number, record: Record) => {
-          const { cloud } = record;
-          return <span> {cloud && cloud.providerName} </span>;
+        key: 'appNum',
+        title: <Translation>App Number</Translation>,
+        dataIndex: 'appNum',
+        cell: (v: string) => {
+          return <span>{v || 0}</span>;
         },
       },
       {
@@ -90,24 +94,6 @@ class TableList extends Component<Props, State> {
         dataIndex: 'description',
         cell: (v: string) => {
           return <span>{v}</span>;
-        },
-      },
-      {
-        key: 'region',
-        title: <Translation>Region</Translation>,
-        dataIndex: 'region',
-        cell: (v: string, i: number, record: Record) => {
-          const { cloud } = record;
-          return <span> {cloud && cloud.region} </span>;
-        },
-      },
-      {
-        key: 'zone',
-        title: <Translation>Zone</Translation>,
-        dataIndex: 'zone',
-        cell: (v: string, i: number, record: Record) => {
-          const { cloud } = record;
-          return <span> {cloud && cloud.zone} </span>;
         },
       },
       {
