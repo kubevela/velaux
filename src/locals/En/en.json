@@ -125,5 +125,15 @@
   "Deployment type": "Deployment type",
   "Alias": "Alias",
   "Target Names": "Target Names",
-  "Description": "Description"
+  "Description": "Description",
+  "Add DeliveryTarget":"Add delivery target",
+  "Edit DeliveryTarget":"Edit delivery target",
+  "Define the delivery target of the application":"Define the delivery target of the application, which includes the information of the delivered target cluster or target cloud service provider",
+  "Clusters":"Clusters",
+  "Cloud Service Provider":"Cloud Service Provider",
+  "Region":"Region",
+  "Zone":"Zone",
+  "Cloud Service Provider Information":"Cloud Service Provider Information",
+  "Clusters Info":"Clusters Info"
+
 }
