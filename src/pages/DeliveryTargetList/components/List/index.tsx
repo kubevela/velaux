@@ -36,7 +36,7 @@ class TableList extends Component<Props, State> {
   }
 
   onDelete = (record: Record) => {
-    deleteDeliveryTarget({ name: record.name }).then((re) => {
+    deleteDeliveryTarget({ name: record.name || '' }).then((re) => {
       if (re) {
         Message.success('DeliveryTarget delete success');
         this.props.updateDeliveryTargetList();

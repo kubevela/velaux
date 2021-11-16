@@ -2,7 +2,8 @@ import { post, get, rdelete, put } from './request';
 import { getDeliveryTarget_mock } from './devLink';
 import { deliveryTarget } from './productionLink';
 import { getDomain } from '../utils/common';
-import { DeliveryTarget, QueryDeliveryTarget } from '../interface/deliveryTarget';
+import { DeliveryTarget } from '../interface/deliveryTarget';
+import { QueryDeliveryTarget } from '../model/deliveryTarget';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
@@ -17,7 +18,7 @@ export function createDeliveryTarget(params: DeliveryTarget) {
   return post(url, params);
 }
 
-export function deleteDeliveryTarget(params: DeliveryTarget) {
+export function deleteDeliveryTarget(params: { name: string }) {
   const url = isMock ? getDeliveryTarget_mock : `${deliveryTarget}/${params.name}`;
   return rdelete(url, params);
 }
