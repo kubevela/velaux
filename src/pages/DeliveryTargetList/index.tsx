@@ -1,9 +1,12 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
+import { Pagination } from '@b-design/ui';
 import ListTitle from '../../components/ListTitle';
 import TableList from './components/List';
 import DeliveryDialog from './components/DeliveryDialog';
+import { DeliveryTarget } from '../../interface/deliveryTarget';
+import './index.less';
 
 type Props = {
   deliveryTargets?: [];
@@ -22,13 +25,13 @@ type State = {
   editTargetName: string;
   visibleDelivery: boolean;
   isEdit: boolean;
+  deliveryTargetItem: DeliveryTarget;
 };
 
 @connect((store: any) => {
   return { ...store.deliveryTarget, ...store.application, ...store.clusters };
 })
 class DeliveryTargetList extends React.Component<Props, State> {
-  deliveryDialogRef: React.RefObject<DeliveryDialog>;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -39,8 +42,8 @@ class DeliveryTargetList extends React.Component<Props, State> {
       editTargetName: '',
       visibleDelivery: false,
       isEdit: false,
+      deliveryTargetItem: {},
     };
-    this.deliveryDialogRef = React.createRef();
   }
 
   componentDidMount() {
@@ -87,23 +90,11 @@ class DeliveryTargetList extends React.Component<Props, State> {
     );
   };
 
-  changeISEdit = (isEdit: boolean, record: any) => {
+  changeISEdit = (isEdit: boolean, record: DeliveryTarget) => {
     this.setState({
       isEdit,
       visibleDelivery: true,
-    });
-    const { name, alias, description, namespace, kubernetes, cloud } = record;
-    this.deliveryDialogRef.current?.field.setValues({
-      name,
-      alias,
-      description,
-      project: namespace,
-      clusterName: kubernetes.clusterName,
-      namespace: kubernetes.namespace,
-      providerName: cloud.providerName,
-      region: cloud.region,
-      zone: cloud.zone,
-      vpcID: cloud.vpcID,
+      deliveryTargetItem: record,
     });
   };
 
@@ -118,10 +109,17 @@ class DeliveryTargetList extends React.Component<Props, State> {
     });
   };
 
+  handleChange = (page: number) => {
+    this.setState({
+      page,
+      pageSize: 10,
+    });
+  };
+
   render() {
     const { t, clusterList, deliveryTargets, total, namespaceList, dispatch } = this.props;
-    const { visibleDelivery, isEdit } = this.state;
-
+    const { visibleDelivery, isEdit, deliveryTargetItem } = this.state;
+    console.log('this.total', total);
     return (
       <div>
         <ListTitle
@@ -129,16 +127,24 @@ class DeliveryTargetList extends React.Component<Props, State> {
           subTitle="Define the delivery target for an application"
           addButtonTitle="Add DeliveryTarget"
           addButtonClick={() => {
-            this.setState({ visibleDelivery: true });
+            this.setState({ visibleDelivery: true, deliveryTargetItem: {} });
           }}
         />
 
         <TableList
           list={deliveryTargets}
           updateDeliveryTargetList={this.updateDeliveryTargetList}
-          changeISEdit={(isEdit: boolean, record: any) => {
+          changeISEdit={(isEdit: boolean, record: DeliveryTarget) => {
             this.changeISEdit(isEdit, record);
           }}
+        />
+
+        <Pagination
+          className="delivery-target-pagenation"
+          total={total}
+          pageSize={this.state.pageSize}
+          current={this.state.page}
+          onChange={this.handleChange}
         />
 
         <DeliveryDialog
@@ -147,10 +153,10 @@ class DeliveryTargetList extends React.Component<Props, State> {
           clusterList={clusterList}
           namespaceList={namespaceList}
           isEdit={isEdit}
+          deliveryTargetItem={deliveryTargetItem}
           onClose={this.onClose}
           onOK={this.onOk}
           dispatch={dispatch}
-          ref={this.deliveryDialogRef}
         />
       </div>
     );

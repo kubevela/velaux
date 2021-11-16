@@ -1,5 +1,10 @@
 import { getDeliveryTarget, createDeliveryTarget } from '../api/deliveryTarget';
-import { ModelsType, ResponseGenerator, DeliveryTargetState } from '../interface/deliveryTarget';
+import {
+  ModelsType,
+  ResponseGenerator,
+  DeliveryTargetState,
+  QueryDeliveryTarget,
+} from '../interface/deliveryTarget';
 
 const DeliveryTargets: ModelsType = {
   namespace: 'deliveryTarget',
@@ -22,12 +27,15 @@ const DeliveryTargets: ModelsType = {
   },
 
   effects: {
-    *listDeliveryTarget(action: { payload: {} }, { call, put }: { call: any; put: any }) {
+    *listDeliveryTarget(
+      action: { payload: QueryDeliveryTarget },
+      { call, put }: { call: any; put: any },
+    ) {
       const result: ResponseGenerator = yield call(getDeliveryTarget, action.payload);
       yield put({ type: 'updateDeliveryTargets', payload: result || {} });
     },
     *createDeliveryTarget(
-      action: { payload: {}; callback: (parasm: any) => void },
+      action: { payload: QueryDeliveryTarget; callback: (parasm: any) => void },
       { call, put }: { call: any; put: any },
     ) {
       const result: ResponseGenerator = yield call(createDeliveryTarget, action.payload);

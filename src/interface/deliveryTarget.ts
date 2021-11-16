@@ -16,6 +16,12 @@ export type DeliveryTarget = {
   };
 };
 
+export interface QueryDeliveryTarget {
+  query?: string;
+  page?: number;
+  pageSize?: number;
+}
+
 export interface DeliveryTargetState {
   deliveryTagetList: [];
   deliveryTagetListTotal: number;

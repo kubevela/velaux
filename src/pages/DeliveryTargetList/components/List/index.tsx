@@ -129,7 +129,6 @@ class TableList extends Component<Props, State> {
     const { Column } = Table;
     const columns = this.getCloumns();
     const { list } = this.props;
-    console.log('list', list);
     return (
       <div className="table-delivery-list margin-top-20">
         <Table dataSource={list} hasBorder={false} loading={false}>

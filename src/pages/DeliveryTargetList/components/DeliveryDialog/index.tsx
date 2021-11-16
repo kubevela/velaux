@@ -5,6 +5,7 @@ import Group from '../../../../extends/Group';
 import NameSpaceForm from '../../../ApplicationList/components/GeneralConfig/namespace-form';
 import { checkName } from '../../../../utils/common';
 import { createDeliveryTarget, updateDeliveryTarget } from '../../../../api/deliveryTarget';
+import { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import Translation from '../../../../components/Translation';
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
   visible: boolean;
   clusterList?: [];
   namespaceList?: [];
+  deliveryTargetItem?: DeliveryTarget;
   onOK: () => void;
   onClose: () => void;
   dispatch: ({}) => {};
@@ -26,6 +28,31 @@ class DeliveryDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
+  }
+
+  componentWillReceiveProps(nextProps: any) {
+    if (nextProps.isEdit && nextProps.deliveryTargetItem !== this.props.deliveryTargetItem) {
+      const {
+        name,
+        alias,
+        description,
+        namespace,
+        kubernetes = { clusterName: '', namespace: '' },
+        cloud = { providerName: '', region: '', zone: '', vpcID: '' },
+      } = nextProps.deliveryTargetItem;
+      this.field.setValues({
+        name,
+        alias,
+        description,
+        project: namespace,
+        clusterName: kubernetes.clusterName,
+        namespace: kubernetes.namespace,
+        providerName: cloud.providerName,
+        region: cloud.region,
+        zone: cloud.zone,
+        vpcID: cloud.vpcID,
+      });
+    }
   }
 
   onClose = () => {
@@ -51,7 +78,7 @@ class DeliveryDialog extends React.Component<Props, State> {
         zone,
         vpcID,
       } = this.field.getValues();
-      console.log('pppparams', this.field.getValues());
+
       const params = {
         name,
         alias,
@@ -126,7 +153,7 @@ class DeliveryDialog extends React.Component<Props, State> {
     };
 
     const { t, visible, isEdit, namespaceList = [] } = this.props;
-    console.log(' isEdit:false', isEdit);
+
     return (
       <div>
         <Dialog

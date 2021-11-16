@@ -2,12 +2,12 @@ import { post, get, rdelete, put } from './request';
 import { getDeliveryTarget_mock } from './devLink';
 import { deliveryTarget } from './productionLink';
 import { getDomain } from '../utils/common';
-import { DeliveryTarget } from '../interface/deliveryTarget';
+import { DeliveryTarget, QueryDeliveryTarget } from '../interface/deliveryTarget';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
 
-export function getDeliveryTarget(params: DeliveryTarget) {
+export function getDeliveryTarget(params: QueryDeliveryTarget) {
   const url = isMock ? getDeliveryTarget_mock : deliveryTarget;
   return get(url, { params: params }).then((res) => res);
 }
