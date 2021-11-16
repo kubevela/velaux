@@ -142,3 +142,5 @@ export const appContent = [
 
 export const supplierList = [{ value: 'aliyun', label: '阿里云 ACK' }];
 export const addonDetail = <Translation>Addon Detail</Translation>;
+export const addDeliveryTargetList = <Translation>Add DeliveryTarget</Translation>;
+export const editDeliveryTargetList = <Translation>Edit DeliveryTarget</Translation>;

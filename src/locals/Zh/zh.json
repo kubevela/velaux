@@ -137,5 +137,16 @@
   "Deployment type": "部署类型",
   "Alias": "别名",
   "Target Names": "交付目标",
-  "Description": "描述"
+  "Description": "描述",
+  "Add DeliveryTarget": "新增交付目标",
+  "Edit DeliveryTarget": "编辑交付目标",
+  "Define the delivery target for an application": "定义应用的交付目标, 其包括了交付的目标集群或目标云服务提供商信息",
+  "Clusters": "集群",
+  "Cloud Service Provider": "云服务商",
+  "Region": "区域",
+  "Zone": "可用区",
+  "Cloud Service Provider Information": "云服务商信息",
+  "Clusters Info": "集群信息",
+  "Clusters Cloud Service Provider": "集群/云服务商",
+  "App Number": "应用数量"
 }
