@@ -1,8 +1,10 @@
 import React from 'react';
 
-import { Icon, Loading } from '@b-design/ui';
+import { Icon, Loading, Grid, Switch } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
+
+const { Col, Row } = Grid;
 
 type Props = {
   title: string | React.ReactNode;
@@ -11,10 +13,12 @@ type Props = {
   closed?: boolean;
   loading?: boolean;
   hasToggleIcon?: boolean;
+  required?: boolean;
 };
 
 type State = {
   closed: boolean | undefined;
+  enable?: boolean;
 };
 
 class Group extends React.Component<Props, State> {
@@ -23,6 +27,7 @@ class Group extends React.Component<Props, State> {
     super(props);
     this.state = {
       closed: props.closed,
+      enable: props.required,
     };
   }
 
@@ -33,25 +38,40 @@ class Group extends React.Component<Props, State> {
     });
   };
   render() {
-    const { title, description, children, hasToggleIcon, loading } = this.props;
-    const { closed } = this.state;
+    const { title, description, children, hasToggleIcon, loading, required } = this.props;
+    const { closed, enable } = this.state;
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
         <div className="group-container">
-          <div
-            className="group-title-container"
-            onClick={hasToggleIcon ? this.toggleShowClass : () => {}}
-          >
-            {title}
-            <div className="group-title-desc">{description}</div>
-            <If condition={hasToggleIcon}>
-              <Icon className="icon" style={{ top: 0 }} type={closed ? 'arrow-down' : 'arrow-up'} />
-            </If>
+          <div className="group-title-container">
+            <Row>
+              <Col span={21}>
+                {title}
+                <div className="group-title-desc">{description}</div>
+              </Col>
+              <Col span={3} className="flexcenter">
+                <If condition={!required}>
+                  <Switch
+                    size="small"
+                    onChange={(event: boolean) => {
+                      this.setState({ enable: event, closed: false });
+                    }}
+                  ></Switch>
+                </If>
+                <If condition={enable && hasToggleIcon}>
+                  <Icon
+                    onClick={this.toggleShowClass}
+                    className="icon"
+                    type={closed ? 'arrow-down' : 'arrow-up'}
+                  />
+                </If>
+              </Col>
+            </Row>
           </div>
-          <If condition={!hasToggleIcon || !closed}>
+          <If condition={enable && (!hasToggleIcon || !closed)}>
             <div className="group-box">{children}</div>
           </If>
-          <If condition={closed}>
+          <If condition={closed && enable}>
             <div className="group-box disable">{children}</div>
           </If>
         </div>

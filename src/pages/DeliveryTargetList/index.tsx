@@ -25,7 +25,7 @@ type State = {
   editTargetName: string;
   visibleDelivery: boolean;
   isEdit: boolean;
-  deliveryTargetItem: DeliveryTarget;
+  deliveryTargetItem?: DeliveryTarget;
 };
 
 @connect((store: any) => {
@@ -42,7 +42,6 @@ class DeliveryTargetList extends React.Component<Props, State> {
       editTargetName: '',
       visibleDelivery: false,
       isEdit: false,
-      deliveryTargetItem: {},
     };
   }
 
@@ -127,7 +126,7 @@ class DeliveryTargetList extends React.Component<Props, State> {
           subTitle="Define the delivery target for an application"
           addButtonTitle="Add DeliveryTarget"
           addButtonClick={() => {
-            this.setState({ visibleDelivery: true, deliveryTargetItem: {} });
+            this.setState({ visibleDelivery: true, deliveryTargetItem: undefined });
           }}
         />
 

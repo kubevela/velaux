@@ -6,6 +6,8 @@ import { ApplicationDetail } from '../../../../interface/application';
 import { createApplicationEnv } from '../../../../api/application';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
+import { getDeliveryTarget } from '../../../../api/deliveryTarget';
+import { DeliveryTarget } from '../../../../interface/deliveryTarget';
 
 interface Props {
   onClose: () => void;
@@ -16,6 +18,7 @@ interface Props {
 
 interface State {
   loading: boolean;
+  targetList?: Array<DeliveryTarget>;
 }
 
 @connect((store: any) => {
@@ -30,6 +33,19 @@ class EnvBindPlanDialog extends Component<Props, State> {
       loading: false,
     };
   }
+
+  componentDidMount() {
+    this.loadDeliveryTargets();
+  }
+
+  loadDeliveryTargets = async () => {
+    const { applicationDetail } = this.props;
+    if (applicationDetail) {
+      getDeliveryTarget({ namespace: applicationDetail?.namespace }).then((re) => {
+        this.setState({ targetList: re.deliveryTargets });
+      });
+    }
+  };
 
   onSubmit = () => {
     const { applicationDetail } = this.props;
@@ -65,7 +81,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
     });
   }
   render() {
-    const { loading } = this.state;
+    const { loading, targetList } = this.state;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const init = this.field.init;
@@ -164,7 +180,13 @@ class EnvBindPlanDialog extends Component<Props, State> {
                     ],
                   })}
                 >
-                  <Select.Option value="default">default</Select.Option>
+                  {targetList?.map((target) => {
+                    return (
+                      <Select.Option value={target.name}>
+                        {target.alias || target.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </FormItem>
             </Col>

@@ -5,12 +5,14 @@ import './index.less';
 import { EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
 import { checkName } from '../../utils/common';
+import { DeliveryTarget } from '../../interface/deliveryTarget';
+import { string } from 'prop-types';
 
 const { Col, Row } = Grid;
 
 type Props = {
   value: Array<EnvBinding>;
-  targetList: Array<any>;
+  targetList?: Array<DeliveryTarget>;
   envList?: Array<EnvBinding>;
 };
 
@@ -132,7 +134,7 @@ class EnvPlan extends React.Component<Props, State> {
         initValues.push({ key: Date.now().toString(), value: item });
       });
     } else {
-      initValues.push({ key: Date.now().toString(), value: { name: 'local', alias: '本地环境' } });
+      initValues.push({ key: Date.now().toString(), value: { name: 'dev', alias: '开发环境' } });
     }
     this.state = {
       envList: initValues,
@@ -215,9 +217,9 @@ class EnvPlan extends React.Component<Props, State> {
   render() {
     const { envList } = this.state;
     const { targetList } = this.props;
-    const dataSource = (targetList || []).map((item: { name: string; alias: string }) => ({
+    const dataSource = (targetList || []).map((item: DeliveryTarget) => ({
       value: item.name,
-      label: item.alias,
+      label: item.alias || item.name,
     }));
     const { init } = this.field;
     return (

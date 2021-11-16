@@ -1,19 +1,10 @@
 import React from 'react';
-import {
-  Form,
-  Input,
-  Select,
-  Icon,
-  Field,
-  Button,
-  Dropdown,
-  Menu,
-  SplitButton,
-} from '@b-design/ui';
+import { Form, Icon, Field, Button, SplitButton } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import { UIParam, GroupOption } from '../../interface/application';
 import UISchema from '../../components/UISchema';
 import './index.less';
+
 type Props = {
   _key?: string;
   parameterGroupOption: GroupOption[] | undefined;
@@ -24,12 +15,6 @@ type Props = {
 
 type State = {
   structList: Array<any>;
-};
-
-type StructItemType = {
-  namespace: string;
-  name: string;
-  description?: string;
 };
 
 type StructPlanParams = {
@@ -56,20 +41,20 @@ function StructItem(props: StructPlanParams) {
     uiSchemas = option.map((key: string) => paramMap[key]);
   }
 
+  const ref: React.RefObject<UISchema> = React.createRef();
+
   return (
     <div className="struct-item-container">
       <div className="struct-item-content">
-        <UISchema uiSchema={uiSchemas} inline _key={id} {...init(`struct${id}`)} />
+        <UISchema ref={ref} uiSchema={uiSchemas} inline _key={id} {...init(`struct${id}`)} />
       </div>
       <div className="remove-option-container">
-        <If condition={props.itemLength !== 1}>
-          <Icon
-            type="ashbin"
-            onClick={() => {
-              props.delete && props.delete(props.id);
-            }}
-          />
-        </If>
+        <Icon
+          type="ashbin"
+          onClick={() => {
+            props.delete && props.delete(props.id);
+          }}
+        />
       </div>
     </div>
   );
@@ -79,8 +64,6 @@ class Structs extends React.Component<Props, State> {
   field: any;
   constructor(props: Props) {
     super(props);
-    const { parameterGroupOption = [] } = props;
-
     this.state = {
       structList: [],
     };
@@ -91,18 +74,7 @@ class Structs extends React.Component<Props, State> {
     });
   }
 
-  componentDidMount = async () => {
-    const { parameterGroupOption = [] } = this.props;
-    const structList = [
-      {
-        key: Date.now().toString(),
-        option: parameterGroupOption[0]?.keys || [],
-      },
-    ];
-    this.setState({
-      structList,
-    });
-  };
+  componentDidMount = async () => {};
 
   setValues = () => {
     const values = this.field.getValues();
@@ -111,6 +83,16 @@ class Structs extends React.Component<Props, State> {
       return values[key];
     });
     onChange && onChange(result);
+  };
+
+  validate = (callback: (error?: string) => void) => {
+    this.field.validate((errors: any, values: any) => {
+      if (errors) {
+        callback('structs validate failure');
+        return;
+      }
+      callback();
+    });
   };
 
   addStructPlanItem = (option?: GroupOption) => {
@@ -152,42 +134,6 @@ class Structs extends React.Component<Props, State> {
     });
   };
 
-  getValues = (): Array<StructItemType> | null => {
-    let hasError = false;
-    this.field.validate();
-    const errors = this.field.getErrors();
-    Object.keys(errors).forEach((key) => {
-      if (errors[key]) {
-        hasError = true;
-      }
-    });
-    if (hasError) {
-      return null;
-    } else {
-      let allValues: Array<StructItemType> = [];
-      // const values = this.field.getValues();
-      // const { structList } = this.state;
-      // const keyMap = structList.reduce((preObj, item) => {
-      //   preObj[item.key] = {};
-      //   return preObj;
-      // }, {});
-
-      // Object.keys(values).forEach((key) => {
-      //   const [keyId, keyName] = key.split('-');
-      //   if (!keyMap[keyId]) {
-      //     keyMap[keyId] = {};
-      //   }
-      //   if (keyName === 'clusterSelector') {
-      //     keyMap[keyId][keyName] = { name: values[key] };
-      //   } else {
-      //     keyMap[keyId][keyName] = values[key];
-      //   }
-      // });
-      // allValues = Object.keys(keyMap).map((key) => keyMap[key]);
-      return allValues;
-    }
-  };
-
   render() {
     const { structList } = this.state;
     const { param, parameterGroupOption = [] } = this.props;
@@ -221,8 +167,8 @@ class Structs extends React.Component<Props, State> {
               Add
             </Button>
           </If>
-          <If condition={parameterGroupOption.length > 0}>
-            <SplitButton label=" Add" className="workflow-more" type="secondary" autoWidth={false}>
+          <If condition={parameterGroupOption.length !== 0}>
+            <SplitButton label="Add" type="secondary" autoWidth={false}>
               {parameterGroupOption?.map((item, i) => (
                 <SplitButton.Item
                   key={item.keys.join(',')}

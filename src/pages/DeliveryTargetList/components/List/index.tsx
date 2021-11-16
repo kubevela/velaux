@@ -3,39 +3,22 @@ import { Table, Message } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import { deleteDeliveryTarget } from '../../../../api/deliveryTarget';
 import './index.less';
+import { DeliveryTarget } from '../../../../interface/deliveryTarget';
 
 type Props = {
   list?: [];
   updateDeliveryTargetList: () => void;
-  changeISEdit: (pararms: boolean, record: Record) => void;
+  changeISEdit: (pararms: boolean, record: DeliveryTarget) => void;
 };
 
 type State = {};
-
-export type Record = {
-  id?: string;
-  name?: string;
-  alias?: string;
-  namespace?: string;
-  description?: string;
-  kubernetes?: {
-    clusterName?: string;
-    namespace?: string;
-  };
-  cloud?: {
-    providerName?: string;
-    region?: string;
-    zone?: string;
-    vpcID?: string;
-  };
-};
 
 class TableList extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
   }
 
-  onDelete = (record: Record) => {
+  onDelete = (record: DeliveryTarget) => {
     deleteDeliveryTarget({ name: record.name || '' }).then((re) => {
       if (re) {
         Message.success('DeliveryTarget delete success');
@@ -44,7 +27,7 @@ class TableList extends Component<Props, State> {
     });
   };
 
-  onEdlt = (record: Record) => {
+  onEdlt = (record: DeliveryTarget) => {
     this.props.changeISEdit(true, record);
   };
 
@@ -67,17 +50,27 @@ class TableList extends Component<Props, State> {
         },
       },
       {
+        key: 'namespace',
+        title: <Translation>Project</Translation>,
+        dataIndex: 'namespace',
+        cell: (v: string) => {
+          return <span>{v}</span>;
+        },
+      },
+      {
         key: 'clusterName/CloudProvider',
         title: <Translation>Clusters Cloud Service Provider</Translation>,
         dataIndex: 'clusterName/CloudProvider',
-        cell: (v: string, i: number, record: Record) => {
-          const { kubernetes = { clusterName: '' }, cloud = { providerName: '' } } = record;
-          return (
-            <span>
-              {' '}
-              {kubernetes.clusterName}/{cloud.providerName}{' '}
-            </span>
-          );
+        cell: (v: string, i: number, record: DeliveryTarget) => {
+          if (record?.variable?.providerName) {
+            return (
+              <span>
+                {record?.cluster?.clusterName}/{record?.variable?.providerName}
+              </span>
+            );
+          } else {
+            return <span>{record?.cluster?.clusterName}</span>;
+          }
         },
       },
       {
@@ -100,7 +93,7 @@ class TableList extends Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: (v: string, i: number, record: Record) => {
+        cell: (v: string, i: number, record: DeliveryTarget) => {
           return (
             <div>
               <a

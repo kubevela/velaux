@@ -41,7 +41,9 @@ class ApplicationHeader extends Component<Props, State> {
         triggerType: 'web',
         force: force,
       }).then((re) => {
-        Message.success('deploy application success');
+        if (re) {
+          Message.success('deploy application success');
+        }
       });
     } else {
       Message.warning('Please wait');

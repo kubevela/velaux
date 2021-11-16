@@ -11,19 +11,13 @@ type Props = {
   visible: boolean;
   field: Field;
   namespaceList?: [];
-  clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
   dispatch: ({}) => {};
+  namespaceChange?: (namespace: string) => void;
 };
 
 type State = {};
-
-type itemObj = {
-  name: string;
-  cluster: string;
-  description?: string;
-};
 
 class GeneralConfig extends React.Component<Props, State> {
   envBind: React.RefObject<EnvPlan>;
@@ -42,8 +36,8 @@ class GeneralConfig extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { t, namespaceList = [], clusterList = [] } = this.props;
-    const { name, describe, namePlaceHold, describePlaceHold, ENVPLACEHOLD } = addAppDialog;
+    const { t, namespaceList = [] } = this.props;
+    const { namePlaceHold, describePlaceHold } = addAppDialog;
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
@@ -124,7 +118,12 @@ class GeneralConfig extends React.Component<Props, State> {
 
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <NameSpaceForm field={this.props.field} namespaceList={namespaceList} />
+              <NameSpaceForm
+                onChange={this.props.namespaceChange}
+                field={this.props.field}
+                namespaceList={namespaceList}
+                disableNew={true}
+              />
             </Col>
           </Row>
         </Form>

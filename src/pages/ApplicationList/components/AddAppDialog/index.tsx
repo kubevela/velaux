@@ -2,10 +2,10 @@ import React from 'react';
 import { Grid, Dialog, Field, Form, Select, Message, Button } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import { NEW_APPLICATION_DELIVERY_PLAN } from '../../constants';
-
+import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
 import GeneralConfig from '../GeneralConfig';
-import Group from '../../../../extends/Group';
+import { Rule } from '@alifd/field';
 import { detailComponentDefinition, createApplication } from '../../../../api/application';
 import { DefinitionDetail, EnvBinding } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
@@ -13,17 +13,18 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import EnvPlan from '../../../../extends/EnvPlan';
 import Translation from '../../../../components/Translation';
 import './index.less';
+import { getDeliveryTarget } from '../../../../api/deliveryTarget';
+import { DeliveryTarget } from '../../../../interface/deliveryTarget';
 
 type Props = {
   visible: boolean;
   componentDefinitions: [];
   namespaceList?: [];
-  clusterList?: [];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
   dispatch: ({}) => {};
   onClose: () => void;
-  onOK: () => void;
+  onOK: (name: string) => void;
 };
 
 type State = {
@@ -31,6 +32,7 @@ type State = {
   definitionLoading: boolean;
   dialogStats: string;
   envBinding: Array<EnvBinding>;
+  deliveryTargets?: Array<DeliveryTarget>;
 };
 
 class AppDialog extends React.Component<Props, State> {
@@ -45,7 +47,13 @@ class AppDialog extends React.Component<Props, State> {
       dialogStats: 'isBasic',
       envBinding: [],
     };
-    this.field = new Field(this);
+    this.field = new Field(this, {
+      onChange: (name: string, value: string) => {
+        if (name === 'namespace') {
+          this.loadDeliveryTarget(value);
+        }
+      },
+    });
     this.uiSchemaRef = React.createRef();
     this.basicRef = React.createRef();
     this.envBind = React.createRef();
@@ -57,12 +65,11 @@ class AppDialog extends React.Component<Props, State> {
 
   onSubmit = () => {
     const { envBinding } = this.state;
-    debugger;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      const { description, alias, name, namespace, icon = '', componentType } = values;
+      const { description, alias, name, namespace, icon = '', componentType, properties } = values;
       const params = {
         alias,
         icon,
@@ -76,21 +83,23 @@ class AppDialog extends React.Component<Props, State> {
           description,
           icon,
           name,
-          properties: '',
+          properties: JSON.stringify(properties),
         },
       };
-      this.uiSchemaRef.current?.validate((error: any, values: any) => {
-        if (error) {
-          return;
+      createApplication(params).then((res) => {
+        if (res) {
+          Message.success(<Translation>create application success</Translation>);
+          this.props.onOK(name);
         }
-        params.component.properties = JSON.stringify(values);
-        createApplication(params).then((res) => {
-          if (res) {
-            Message.success(<Translation>create application success</Translation>);
-            this.props.onOK();
-          }
-        });
       });
+    });
+  };
+
+  loadDeliveryTarget = (namespace: string) => {
+    getDeliveryTarget({ namespace: namespace }).then((res) => {
+      if (res) {
+        this.setState({ deliveryTargets: res.deliveryTargets });
+      }
     });
   };
 
@@ -115,24 +124,28 @@ class AppDialog extends React.Component<Props, State> {
     const { componentType } = values;
 
     if (value === 'isCreateComponent') {
-      this.field.validate((error: any, values: any) => {
-        if (error) {
-          return;
-        }
-        const envBinding = this.envBind.current?.getValues();
-        if (!envBinding || envBinding.length < 1) {
-          return;
-        }
-        this.setState(
-          {
-            envBinding: envBinding,
-            dialogStats: value,
-          },
-          () => {
-            this.onDetailsComponeDefinition(componentType);
-          },
-        );
-      });
+      this.field.validateCallback(
+        ['name', 'alias', 'description', 'namespace', 'componentType'],
+        (error: any, values: any) => {
+          if (error) {
+            debugger;
+            return;
+          }
+          const envBinding = this.envBind.current?.getValues();
+          if (!envBinding || envBinding.length < 1) {
+            return;
+          }
+          this.setState(
+            {
+              envBinding: envBinding,
+              dialogStats: value,
+            },
+            () => {
+              this.onDetailsComponeDefinition(componentType);
+            },
+          );
+        },
+      );
     } else if (value === 'isBasic') {
       this.setState({
         dialogStats: value,
@@ -187,10 +200,12 @@ class AppDialog extends React.Component<Props, State> {
     const { Row, Col } = Grid;
 
     const { onClose } = this.props;
-    const { visible, t, setVisible, dispatch, namespaceList, clusterList = [] } = this.props;
+    const { visible, t, setVisible, dispatch, namespaceList } = this.props;
 
-    const { envBinding, definitionDetail, dialogStats } = this.state;
-
+    const { envBinding, definitionDetail, dialogStats, deliveryTargets } = this.state;
+    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+      this.uiSchemaRef.current?.validate(callback);
+    };
     return (
       <DrawerWithFooter
         title={NEW_APPLICATION_DELIVERY_PLAN}
@@ -207,7 +222,6 @@ class AppDialog extends React.Component<Props, State> {
               setVisible={setVisible}
               dispatch={dispatch}
               namespaceList={namespaceList}
-              clusterList={clusterList}
               field={this.field}
               ref={this.basicRef}
             />
@@ -221,6 +235,11 @@ class AppDialog extends React.Component<Props, State> {
                     </Translation>
                   }
                   required={true}
+                  help={
+                    <span>
+                      Get more deployment type? <Link to="/addons">Go to enable addon</Link>
+                    </span>
+                  }
                 >
                   <Select
                     className="select"
@@ -248,22 +267,27 @@ class AppDialog extends React.Component<Props, State> {
                   }
                   required={true}
                 >
-                  <EnvPlan
-                    value={envBinding}
-                    targetList={[{ name: 'default', alias: 'default' }]}
-                    ref={this.envBind}
-                  />
+                  <EnvPlan value={envBinding} targetList={deliveryTargets} ref={this.envBind} />
                 </FormItem>
               </Col>
             </Row>
           </If>
 
           <If condition={dialogStats === 'isCreateComponent'}>
-            <UISchema
-              _key="body.properties"
-              uiSchema={definitionDetail && definitionDetail.uiSchema}
-              ref={this.uiSchemaRef}
-            ></UISchema>
+            <FormItem required={true}>
+              <UISchema
+                {...init(`properties`, {
+                  rules: [
+                    {
+                      validator: validator,
+                      message: 'Please check app deploy properties',
+                    },
+                  ],
+                })}
+                uiSchema={definitionDetail && definitionDetail.uiSchema}
+                ref={this.uiSchemaRef}
+              ></UISchema>
+            </FormItem>
           </If>
         </Form>
       </DrawerWithFooter>

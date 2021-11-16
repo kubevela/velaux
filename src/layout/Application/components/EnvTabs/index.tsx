@@ -33,7 +33,7 @@ class TabsContent extends Component<Props, State> {
   handleChange = (key: string | number) => {};
 
   render() {
-    const { activeKey, applicationDetail, dispatch } = this.props;
+    const { activeKey, applicationDetail } = this.props;
     const { visibleEnvPlan } = this.state;
     return (
       <div className="padding16">
