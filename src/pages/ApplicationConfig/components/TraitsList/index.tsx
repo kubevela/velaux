@@ -2,11 +2,15 @@ import React, { Component } from 'react';
 import { Card, Grid, Icon, Dialog } from '@b-design/ui';
 import { Trait } from '../../../../interface/application';
 import './index.less';
+import { If } from 'tsx-control-statements/components';
+import Empty from '../../../../components/Empty';
+import Translation from '../../../../components/Translation';
 
 type Props = {
   traits: Array<Trait>;
   changeTraitStats: (visible: boolean, item: Trait) => void;
   onDeleteTrait: (traitType: string) => void;
+  onAdd: () => void;
 };
 class TraitsList extends Component<Props> {
   handleDelete = (traitType: string) => {
@@ -21,7 +25,7 @@ class TraitsList extends Component<Props> {
 
   render() {
     const { Row, Col } = Grid;
-    const { traits, changeTraitStats } = this.props;
+    const { traits, changeTraitStats, onAdd } = this.props;
     return (
       <div className="traits-list-warper">
         <Row wrap={true}>
@@ -54,6 +58,18 @@ class TraitsList extends Component<Props> {
               </Card>
             </Col>
           ))}
+          <If condition={!traits || traits.length == 0}>
+            <Empty
+              message={
+                <span>
+                  <Translation>No Trait ,</Translation>
+                  <a onClick={onAdd}>
+                    <Translation>Go add</Translation>
+                  </a>
+                </span>
+              }
+            ></Empty>
+          </If>
         </Row>
       </div>
     );

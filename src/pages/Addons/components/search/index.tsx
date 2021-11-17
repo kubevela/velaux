@@ -70,7 +70,11 @@ class SelectSearch extends React.Component<Props, State> {
               <Translation>All</Translation>
             </Option>
             {registrys?.map((item: any) => {
-              return <Option value={item.name}>{item.name}</Option>;
+              return (
+                <Option key={item.name} value={item.name}>
+                  {item.name}
+                </Option>
+              );
             })}
           </Select>
         </Col>

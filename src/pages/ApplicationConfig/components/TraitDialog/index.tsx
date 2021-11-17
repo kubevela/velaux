@@ -75,7 +75,7 @@ class TraitDialog extends React.Component<Props, State> {
       };
       createTrait(params, query).then((res) => {
         if (res) {
-          Message.success(<Translation>create application success</Translation>);
+          Message.success(<Translation>create application trait success</Translation>);
           this.props.onOK();
         }
       });
@@ -200,22 +200,33 @@ class TraitDialog extends React.Component<Props, State> {
               </FormItem>
             </Col>
           </Row>
-          <If condition={definitionDetail && definitionDetail.uiSchema}>
-            <FormItem required={true}>
-              <UISchema
-                {...init(`properties`, {
-                  rules: [
-                    {
-                      validator: validator,
-                      message: 'Please check trait deploy properties',
-                    },
-                  ],
-                })}
-                uiSchema={definitionDetail && definitionDetail.uiSchema}
-                ref={this.uiSchemaRef}
-              ></UISchema>
-            </FormItem>
-          </If>
+          <Row>
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <Group
+                title="Trait Properties"
+                description="Set the configuration parameters for the Trait."
+                closed={false}
+                required={true}
+              >
+                <If condition={definitionDetail && definitionDetail.uiSchema}>
+                  <FormItem required={true}>
+                    <UISchema
+                      {...init(`properties`, {
+                        rules: [
+                          {
+                            validator: validator,
+                            message: 'Please check trait deploy properties',
+                          },
+                        ],
+                      })}
+                      uiSchema={definitionDetail && definitionDetail.uiSchema}
+                      ref={this.uiSchemaRef}
+                    ></UISchema>
+                  </FormItem>
+                </If>
+              </Group>
+            </Col>
+          </Row>
         </Form>
       </DrawerWithFooter>
     );
