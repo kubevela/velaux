@@ -136,5 +136,8 @@
   "Cloud Service Provider Information": "Cloud Service Provider Information",
   "Clusters Info": "Clusters Info",
   "Clusters Cloud Service Provider": "Clusters/Cloud Service Provider",
-  "App Number": "App Number"
+  "App Number": "App Number",
+  "Add Trait": "Add Trait",
+  "Edit Trait": "Edit Trait",
+  "Trait Type": "Trait Type"
 }

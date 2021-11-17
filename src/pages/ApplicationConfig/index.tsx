@@ -2,10 +2,14 @@ import React, { Component } from 'react';
 import { Grid, Button, Card, Message, Progress } from '@b-design/ui';
 import './index.less';
 import { connect } from 'dva';
+import { If } from 'tsx-control-statements/components';
+import { getTraitDefinitions, getAppliationConfigDetails, deleteTrait } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
 import Item from '../../components/Item';
-import { ApplicationDetail } from '../../interface/application';
+import TraitDialog from './components/TraitDialog';
+import TraitsList from './components/TraitsList';
+import { ApplicationDetail, Trait, ApplicationConfigBase } from '../../interface/application';
 import { momentDate } from '../../utils/common';
 
 const { Row, Col } = Grid;
@@ -14,19 +18,24 @@ type Props = {
   match: {
     params: {
       appName: string;
-      componentName: string;
     };
   };
   history: {
     push: (path: string, state: {}) => {};
   };
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   applicationDetail?: ApplicationDetail;
+  components?: []
 };
 
 type State = {
   appName: string;
   componentName: string;
+  visibleTrait: boolean;
+  isEditTrait: boolean;
+  traitDefinitions: [];
+  configDetail: ApplicationConfigBase;
+  traitItem: Trait
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -34,16 +43,94 @@ type State = {
 class ApplicationConfig extends Component<Props, State> {
   constructor(props: any) {
     super(props);
-    const { params } = this.props.match;
+    const { params } = props.match;
     this.state = {
       appName: params.appName,
-      componentName: params.componentName,
+      componentName: '',
+      isEditTrait: false,
+      visibleTrait: false,
+      traitDefinitions: [],
+      configDetail: {},
+      traitItem: {}
     };
   }
-  componentDidMount() {}
+
+  componentDidMount() {
+    this.onGetTraitdefinitions();
+  }
+
+  componentWillReceiveProps(nextProps: any) {
+    if (nextProps.components !== this.props.components) {
+      const componentName = nextProps.components && nextProps.components[0] && nextProps.components[0].name || '';
+      this.setState({ componentName }, () => {
+        this.onGetAppliationConfigDetails()
+      });
+    }
+  }
+
+  onGetAppliationConfigDetails() {
+    const { appName, componentName } = this.state;
+    const params = {
+      appName,
+      componentName
+    }
+    getAppliationConfigDetails(params).then((res) => {
+      if (res) {
+        this.setState({
+          configDetail: res,
+        });
+      }
+    });
+  }
+
+  onGetTraitdefinitions = async () => {
+    getTraitDefinitions().then((res) => {
+      if (res) {
+        this.setState({
+          traitDefinitions: res && res.definitions,
+        });
+      }
+    });
+  };
+
+  onDeleteTrait = async (traitType: string) => {
+    const { appName, componentName } = this.state;
+    const params = {
+      appName,
+      componentName,
+      traitType
+    };
+    deleteTrait(params).then((res) => {
+      if (res) {
+        this.onGetAppliationConfigDetails();
+      }
+    });
+  }
+
+  onClose = () => {
+    this.setState({ visibleTrait: false, isEditTrait: false });
+  };
+
+  onOk = () => {
+    this.onGetAppliationConfigDetails();
+    this.setState({
+      isEditTrait: false,
+      visibleTrait: false,
+    });
+  };
+
+  changeTraitStats = (isEditTrait: boolean, traitItem: Trait) => {
+    this.setState({
+      visibleTrait: true,
+      isEditTrait,
+      traitItem,
+    })
+  }
+
 
   render() {
-    const { applicationDetail } = this.props;
+    const { applicationDetail, components } = this.props;
+    const { visibleTrait, isEditTrait, traitDefinitions, appName = '', componentName = '', configDetail = {}, traitItem } = this.state;
     return (
       <div>
         <Row>
@@ -77,13 +164,13 @@ class ApplicationConfig extends Component<Props, State> {
                 <Col span={12}>
                   <Item
                     label="createTime"
-                    value={momentDate(applicationDetail && applicationDetail.createTime)}
+                    value={momentDate(applicationDetail && applicationDetail.createTime || '')}
                   ></Item>
                 </Col>
                 <Col span={12}>
                   <Item
                     label="updateTime"
-                    value={momentDate(applicationDetail && applicationDetail.updateTime)}
+                    value={momentDate(applicationDetail && applicationDetail.updateTime || '')}
                   ></Item>
                 </Col>
               </Row>
@@ -106,7 +193,7 @@ class ApplicationConfig extends Component<Props, State> {
           <Col span={24} className="padding16">
             <Title
               actions={[
-                <a>
+                <a onClick={() => { this.setState({ visibleTrait: true, traitItem: {}, isEditTrait: false }) }}>
                   <Translation>Add Trait</Translation>
                 </a>,
               ]}
@@ -114,17 +201,26 @@ class ApplicationConfig extends Component<Props, State> {
             ></Title>
           </Col>
         </Row>
-        <Row>
-          <Col span={8} className="padding16">
-            <Card></Card>
-          </Col>
-          <Col span={8} className="padding16">
-            <Card></Card>
-          </Col>
-          <Col span={8} className="padding16">
-            <Card></Card>
-          </Col>
-        </Row>
+
+        <TraitsList
+          traits={configDetail.traits || []}
+          changeTraitStats={(isEditTrait: boolean, traitItem: Trait) => { this.changeTraitStats(isEditTrait, traitItem) }}
+          onDeleteTrait={(traitType: string) => { this.onDeleteTrait(traitType) }}
+        />
+
+        <If condition={visibleTrait}>
+          <TraitDialog
+            visible={visibleTrait}
+            appName={appName}
+            componentName={componentName}
+            isEditTrait={isEditTrait}
+            traitItem={traitItem}
+            traitDefinitions={traitDefinitions}
+            onClose={this.onClose}
+            onOK={this.onOk}
+          />
+        </If>
+
       </div>
     );
   }

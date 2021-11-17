@@ -29,3 +29,7 @@ export const clusterCloudList_mock = '/mock/clusterCloudList.json';
 export const connectClusterCloud_mock = '/mock/connectClusterCloud.json';
 export const createApplicationEnv_mock = '/mock/createApplicationEnv.json';
 export const getDeliveryTarget_mock = '/mock/getDeliveryTarget.json';
+
+export const getTraitDefinitionsDetails_mock = '/mock/getTraitDefinitionsDetails.json';
+export const getTraitDefinitions_mock = '/mock/getTraitDefinitions.json';
+export const getTrait_mock = '/mock/getTrait.json';
