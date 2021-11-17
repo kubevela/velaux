@@ -21,8 +21,8 @@ import { ApplicationDeployRequest, Trait } from '../interface/application';
 
 interface TraitQuery {
   appName?: string;
-  componentName?: string
-  traitType?: string
+  componentName?: string;
+  traitType?: string;
 }
 
 const baseURLOject = getDomain();
@@ -125,30 +125,38 @@ export function getTraitDefinitions() {
 }
 
 export function detailTraitDefinition(params: { name: string }) {
-  const url = isMock ? `${getTraitDefinitionsDetails_mock}` : `${componentdefinition}/${params.name}`;
+  const url = isMock
+    ? `${getTraitDefinitionsDetails_mock}`
+    : `${componentdefinition}/${params.name}`;
   return get(url, { params: { type: 'trait' } }).then((res) => res);
 }
 
 export function getAppliationConfigDetails(query: TraitQuery) {
   const { appName, componentName } = query;
-  const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/components/${componentName}`;;
+  const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/components/${componentName}`;
   return get(url, {}).then((res) => res);
 }
 
 export function createTrait(params: Trait, query: TraitQuery) {
   const { appName, componentName } = query;
-  const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/components/${componentName}/traits`;;
+  const url = isMock
+    ? `${getTrait_mock}`
+    : `${application}/${appName}/components/${componentName}/traits`;
   return post(url, params).then((res) => res);
 }
 
 export function updateTrait(params: Trait, query: TraitQuery) {
   const { appName, componentName, traitType } = query;
-  const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
+  const url = isMock
+    ? `${getTrait_mock}`
+    : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
   return put(url, params).then((res) => res);
 }
 
 export function deleteTrait(query: TraitQuery) {
   const { appName, componentName, traitType } = query;
-  const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
+  const url = isMock
+    ? `${getTrait_mock}`
+    : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
   return rdelete(url, {}).then((res) => res);
 }

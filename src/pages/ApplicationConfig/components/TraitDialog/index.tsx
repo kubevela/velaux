@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Grid, Field, Form, Select, Message, Button, Input, Loading } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
@@ -19,7 +18,7 @@ type Props = {
   componentName?: string;
   onOK: () => void;
   onClose: () => void;
-  dispatch?: ({ }) => {};
+  dispatch?: ({}) => {};
   t: (key: string) => {};
 };
 
@@ -97,21 +96,23 @@ class TraitDialog extends React.Component<Props, State> {
   }
 
   onDetailsComponeDefinition = (value: string, callback?: () => void) => {
-    this.setState({ definitionLoading: true })
-    detailTraitDefinition({ name: value }).then((re) => {
-      if (re) {
-        this.setState({ definitionDetail: re, definitionLoading: false });
-        if (callback) {
-          callback();
+    this.setState({ definitionLoading: true });
+    detailTraitDefinition({ name: value })
+      .then((re) => {
+        if (re) {
+          this.setState({ definitionDetail: re, definitionLoading: false });
+          if (callback) {
+            callback();
+          }
         }
-      }
-    }).catch(err => this.setState({ definitionLoading: false }));
+      })
+      .catch((err) => this.setState({ definitionLoading: false }));
   };
 
   handleChang = (value: string) => {
     this.onDetailsComponeDefinition(value);
-    this.field.setValues({ type: value })
-  }
+    this.field.setValues({ type: value });
+  };
 
   extButtonList = () => {
     const { onClose } = this.props;
@@ -161,7 +162,6 @@ class TraitDialog extends React.Component<Props, State> {
                   })}
                   dataSource={this.transTraitDefinitions()}
                   onChange={this.handleChang}
-
                 />
               </FormItem>
             </Col>
@@ -203,11 +203,7 @@ class TraitDialog extends React.Component<Props, State> {
             </Col>
           </Row>
           <If condition={definitionDetail && definitionDetail.uiSchema}>
-            <Group
-              title=""
-              description=""
-              loading={definitionLoading}
-            >
+            <Group title="" description="" loading={definitionLoading}>
               <UISchema
                 _key="body.properties"
                 uiSchema={definitionDetail && definitionDetail.uiSchema}
@@ -222,5 +218,3 @@ class TraitDialog extends React.Component<Props, State> {
 }
 
 export default withTranslation()(TraitDialog);
-
-

@@ -153,23 +153,23 @@ export interface WorkflowStepStatus {
   lastExecuteTime?: string;
 }
 
-export interface Trait{
-  alias?:string;
-  description?:string;
-  name?:string;
-  properties?:any;
-  type?:string;
-  date?:string;
+export interface Trait {
+  alias?: string;
+  description?: string;
+  name?: string;
+  properties?: any;
+  type?: string;
+  date?: string;
 }
 
 export interface ApplicationConfigBase {
-  alias?:string;
-  appPrimaryKey?:string;
-  createTime?:string;
-  creator?:string;
-  name?:string;
-  properties?:any;
-  traits?:Array<Trait>,
-  type?:string;
-  updateTime?:string;
+  alias?: string;
+  appPrimaryKey?: string;
+  createTime?: string;
+  creator?: string;
+  name?: string;
+  properties?: any;
+  traits?: Array<Trait>;
+  type?: string;
+  updateTime?: string;
 }

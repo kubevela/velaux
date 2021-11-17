@@ -3,7 +3,11 @@ import { Grid, Button, Card, Message, Progress } from '@b-design/ui';
 import './index.less';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
-import { getTraitDefinitions, getAppliationConfigDetails, deleteTrait } from '../../api/application';
+import {
+  getTraitDefinitions,
+  getAppliationConfigDetails,
+  deleteTrait,
+} from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
 import Item from '../../components/Item';
@@ -23,9 +27,9 @@ type Props = {
   history: {
     push: (path: string, state: {}) => {};
   };
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   applicationDetail?: ApplicationDetail;
-  components?: []
+  components?: [];
 };
 
 type State = {
@@ -35,7 +39,7 @@ type State = {
   isEditTrait: boolean;
   traitDefinitions: [];
   configDetail: ApplicationConfigBase;
-  traitItem: Trait
+  traitItem: Trait;
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -51,7 +55,7 @@ class ApplicationConfig extends Component<Props, State> {
       visibleTrait: false,
       traitDefinitions: [],
       configDetail: {},
-      traitItem: {}
+      traitItem: {},
     };
   }
 
@@ -61,9 +65,10 @@ class ApplicationConfig extends Component<Props, State> {
 
   componentWillReceiveProps(nextProps: any) {
     if (nextProps.components !== this.props.components) {
-      const componentName = nextProps.components && nextProps.components[0] && nextProps.components[0].name || '';
+      const componentName =
+        (nextProps.components && nextProps.components[0] && nextProps.components[0].name) || '';
       this.setState({ componentName }, () => {
-        this.onGetAppliationConfigDetails()
+        this.onGetAppliationConfigDetails();
       });
     }
   }
@@ -72,8 +77,8 @@ class ApplicationConfig extends Component<Props, State> {
     const { appName, componentName } = this.state;
     const params = {
       appName,
-      componentName
-    }
+      componentName,
+    };
     getAppliationConfigDetails(params).then((res) => {
       if (res) {
         this.setState({
@@ -98,14 +103,14 @@ class ApplicationConfig extends Component<Props, State> {
     const params = {
       appName,
       componentName,
-      traitType
+      traitType,
     };
     deleteTrait(params).then((res) => {
       if (res) {
         this.onGetAppliationConfigDetails();
       }
     });
-  }
+  };
 
   onClose = () => {
     this.setState({ visibleTrait: false, isEditTrait: false });
@@ -124,13 +129,20 @@ class ApplicationConfig extends Component<Props, State> {
       visibleTrait: true,
       isEditTrait,
       traitItem,
-    })
-  }
-
+    });
+  };
 
   render() {
     const { applicationDetail, components } = this.props;
-    const { visibleTrait, isEditTrait, traitDefinitions, appName = '', componentName = '', configDetail = {}, traitItem } = this.state;
+    const {
+      visibleTrait,
+      isEditTrait,
+      traitDefinitions,
+      appName = '',
+      componentName = '',
+      configDetail = {},
+      traitItem,
+    } = this.state;
     return (
       <div>
         <Row>
@@ -164,13 +176,13 @@ class ApplicationConfig extends Component<Props, State> {
                 <Col span={12}>
                   <Item
                     label="createTime"
-                    value={momentDate(applicationDetail && applicationDetail.createTime || '')}
+                    value={momentDate((applicationDetail && applicationDetail.createTime) || '')}
                   ></Item>
                 </Col>
                 <Col span={12}>
                   <Item
                     label="updateTime"
-                    value={momentDate(applicationDetail && applicationDetail.updateTime || '')}
+                    value={momentDate((applicationDetail && applicationDetail.updateTime) || '')}
                   ></Item>
                 </Col>
               </Row>
@@ -193,7 +205,11 @@ class ApplicationConfig extends Component<Props, State> {
           <Col span={24} className="padding16">
             <Title
               actions={[
-                <a onClick={() => { this.setState({ visibleTrait: true, traitItem: {}, isEditTrait: false }) }}>
+                <a
+                  onClick={() => {
+                    this.setState({ visibleTrait: true, traitItem: {}, isEditTrait: false });
+                  }}
+                >
                   <Translation>Add Trait</Translation>
                 </a>,
               ]}
@@ -204,8 +220,12 @@ class ApplicationConfig extends Component<Props, State> {
 
         <TraitsList
           traits={configDetail.traits || []}
-          changeTraitStats={(isEditTrait: boolean, traitItem: Trait) => { this.changeTraitStats(isEditTrait, traitItem) }}
-          onDeleteTrait={(traitType: string) => { this.onDeleteTrait(traitType) }}
+          changeTraitStats={(isEditTrait: boolean, traitItem: Trait) => {
+            this.changeTraitStats(isEditTrait, traitItem);
+          }}
+          onDeleteTrait={(traitType: string) => {
+            this.onDeleteTrait(traitType);
+          }}
         />
 
         <If condition={visibleTrait}>
@@ -220,7 +240,6 @@ class ApplicationConfig extends Component<Props, State> {
             onOK={this.onOk}
           />
         </If>
-
       </div>
     );
   }
