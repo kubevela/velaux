@@ -8,11 +8,10 @@ import { ApplicationDetail, EnvBinding, Revisions } from '../../interface/applic
 import { statusList } from './constants';
 import './index.less';
 
-
 type Props = {
   revisions: [];
   applicationDetail?: ApplicationDetail;
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   match: {
     params: {
       appName: string;
@@ -44,7 +43,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
       envName: '',
       status: '',
       revisionsList: [],
-      revisionsListTotal: 0
+      revisionsListTotal: 0,
     };
   }
 
@@ -72,19 +71,22 @@ class ApplicationRevisionList extends React.Component<Props, State> {
     });
   };
 
-  updateQuery = (updateQuery: { isChangeEnv?: boolean, isChangeStatus?: boolean; value: string }) => {
+  updateQuery = (updateQuery: {
+    isChangeEnv?: boolean;
+    isChangeStatus?: boolean;
+    value: string;
+  }) => {
     const { isChangeEnv, isChangeStatus, value } = updateQuery;
     if (isChangeEnv) {
       this.setState({ envName: value }, () => {
         this.getRevisionList();
-      })
+      });
     } else if (isChangeStatus) {
       this.setState({ status: value }, () => {
         this.getRevisionList();
-      })
+      });
     }
-  }
-
+  };
 
   handleChange = (page: number) => {
     this.setState({
@@ -103,12 +105,15 @@ class ApplicationRevisionList extends React.Component<Props, State> {
         <Header
           envBinding={envBinding}
           statusList={statusList}
-          updateQuery={(params: { isChangeEnv?: boolean, isChangeStatus?: boolean; value: string }) => { this.updateQuery(params) }}
+          updateQuery={(params: {
+            isChangeEnv?: boolean;
+            isChangeStatus?: boolean;
+            value: string;
+          }) => {
+            this.updateQuery(params);
+          }}
         />
-        <TableList
-          list={revisionsList}
-          getRevisionList={this.getRevisionList}
-        />
+        <TableList list={revisionsList} getRevisionList={this.getRevisionList} />
         <Pagination
           className="revison-pagenation"
           hideOnlyOnePage={true}

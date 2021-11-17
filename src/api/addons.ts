@@ -43,10 +43,9 @@ export function disableAddon(params: any) {
   return post(url, params).then((res) => res);
 }
 
-export function enableAddon(params: any) {
+export function enableAddon(params: { name: string; properties: any }) {
   const url = isMock ? `${enableAddonsCluster_mock}` : `${addons}/${params.name}/enable`;
-
-  return post(url, params).then((res) => res);
+  return post(url, { args: params.properties }).then((res) => res);
 }
 
 export function getAddonsStatus(params: any) {

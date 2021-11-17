@@ -1,9 +1,7 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { Button, Message, Grid, Search, Icon, Select, Input } from '@b-design/ui';
-import { ApplicationDetail, EnvBinding, Trait, ApplicationComponent } from '../../../../interface/application';
-import './index.less';
-import Translation from '../../../../components/Translation';
+import { EnvBinding } from '../../../../interface/application';
 
 interface Label {
   label: string;
@@ -12,12 +10,12 @@ interface Label {
 
 type Props = {
   statusList: Array<Label>;
-  envBinding: Array<EnvBinding>
+  envBinding: Array<EnvBinding>;
   clusterList?: [];
   namespaceList?: [];
-  updateQuery: (params: { isChangeEnv?: boolean, isChangeStatus?: boolean; value: string }) => void;
+  updateQuery: (params: { isChangeEnv?: boolean; isChangeStatus?: boolean; value: string }) => void;
   t: (key: string) => {};
-  dispatch?: ({ }) => {};
+  dispatch?: ({}) => {};
 };
 
 type State = {
@@ -37,18 +35,18 @@ class Hearder extends React.Component<Props, State> {
   }
 
   handleChangeEnv(value: string) {
-    this.setState({ envValue: value })
+    this.setState({ envValue: value });
     this.props.updateQuery({ isChangeEnv: true, value: value });
   }
 
   handleChangeStatus(value: string) {
-    this.setState({ statusValue: value })
+    this.setState({ statusValue: value });
     this.props.updateQuery({ isChangeStatus: true, value: value });
   }
 
   transEnvBind = () => {
     const { envBinding } = this.props;
-  }
+  };
   render() {
     const { Row, Col } = Grid;
     const { t } = this.props;
@@ -87,7 +85,6 @@ class Hearder extends React.Component<Props, State> {
             value={statusValue}
           />
         </Col>
-
       </Row>
     );
   }

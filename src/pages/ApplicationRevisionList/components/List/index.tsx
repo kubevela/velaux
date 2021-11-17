@@ -2,11 +2,10 @@ import React, { Component } from 'react';
 import { Table, Message } from '@b-design/ui';
 import Empty from '../Empty';
 import Translation from '../../../../components/Translation';
-import { Revisions, } from '../../../../interface/application';
+import { Revisions } from '../../../../interface/application';
 import { statusList } from '../../constants';
 import { momentDate } from '../../../../utils/common';
 import './index.less';
-
 
 type Props = {
   list: Array<Revisions>;
@@ -21,10 +20,7 @@ class TableList extends Component<Props, State> {
   }
 
   //Todo
-  onRollback = (record: Revisions) => {
-
-  };
-
+  onRollback = (record: Revisions) => {};
 
   getCloumns = () => {
     return [
@@ -41,7 +37,7 @@ class TableList extends Component<Props, State> {
         title: <Translation>Publish Status</Translation>,
         dataIndex: 'status',
         cell: (v: string) => {
-          const findObj = statusList.find(item => item.value === v)
+          const findObj = statusList.find((item) => item.value === v);
           return <span>{findObj && findObj.label}</span>;
         },
       },
@@ -86,15 +82,10 @@ class TableList extends Component<Props, State> {
     const { Column } = Table;
     const columns = this.getCloumns();
     const { list } = this.props;
-    console.log('list', list)
+    console.log('list', list);
     return (
       <div className="table-version-list  margin-top-20">
-        <Table
-          dataSource={list}
-          hasBorder={false}
-          loading={false}
-          emptyContent={<Empty />}
-        >
+        <Table dataSource={list} hasBorder={false} loading={false} emptyContent={<Empty />}>
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
       </div>

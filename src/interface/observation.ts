@@ -15,30 +15,25 @@ export interface Container {
     limits?: {
       cpu: string;
       memory: string;
-    }
+    };
     requests?: {
       cpu: string;
       memory: string;
-    }
+    };
   };
   status?: Podstatus;
   usageResource?: {
     cpu: string;
     memory: string;
   };
-};
+}
 
-export interface Podstatus{
+export interface Podstatus {
   restartCount: number;
   state: {
-    running?: {
-    },
-    terminated?:{
-
-    },
-    waiting?:{
-
-    }
+    running?: {};
+    terminated?: {};
+    waiting?: {};
   };
 }
 
@@ -47,13 +42,12 @@ export interface PodDetailBase {
   events: Array<Event>;
 }
 
-
 export interface Event {
   TypeMeta: {};
   count?: number;
   action?: string;
   eventTime?: string | null;
-  firstTimestamp?: string | null
+  firstTimestamp?: string | null;
   involvedObject?: {
     apiVersion?: string;
     fieldPath?: string;
@@ -62,7 +56,7 @@ export interface Event {
     namespace?: string;
     resourceVersion?: string;
     uid?: string;
-  },
+  };
   lastTimestamp?: string | null;
   message: string;
   metadata?: Metadata;
@@ -71,14 +65,14 @@ export interface Event {
   reportingInstance?: string;
   source?: {
     component: string;
-    host?: string
+    host?: string;
   };
   type: string;
 }
 
 export interface Metadata {
   creationTimestamp?: string;
-  managedFields?: Array<ManagedFields>
+  managedFields?: Array<ManagedFields>;
   name: string;
   namespace: string;
   resourceVersion: string;
