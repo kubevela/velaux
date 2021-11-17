@@ -90,12 +90,7 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
         </Row>
         <Row>
-          <Col span={4} className="padding16">
-            <Card>
-              <Translation>{status}</Translation>
-            </Card>
-          </Col>
-          <Col span={20} className="padding16">
+          <Col span={24} className="padding16">
             <Card>todo:workflow-status</Card>
           </Col>
         </Row>

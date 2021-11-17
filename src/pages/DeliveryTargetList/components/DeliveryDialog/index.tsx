@@ -157,6 +157,7 @@ class DeliveryDialog extends React.Component<Props, State> {
       <div>
         <Dialog
           style={{ width: '800px' }}
+          height="auto"
           title={isEdit ? editDeliveryTargetList : addDeliveryTargetList}
           autoFocus={true}
           visible={visible}

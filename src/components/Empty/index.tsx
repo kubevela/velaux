@@ -4,7 +4,7 @@ import Translation from '../Translation';
 import './index.less';
 
 type Props = {
-  message?: string;
+  message?: string | React.ReactNode;
   style?: {};
   iconWidth?: string;
 };

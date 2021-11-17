@@ -6,11 +6,12 @@ import Translation from '../Translation';
 
 type Props = {
   onOk?: () => void;
+  onOkButtonText?: string;
+  onOkButtonLoading?: boolean;
   onClose: () => void;
   width?: number | string;
   title: string | React.ReactNode;
   placement?: 'top' | 'right' | 'bottom' | 'left';
-  enableForm?: boolean;
   children?: React.ReactNode;
   extButtons?: React.ReactNode;
 };
@@ -21,11 +22,21 @@ class DrawerWithFooter extends Component<Props, any> {
   }
 
   render() {
-    const { children, title, placement, width, onOk, onClose, extButtons } = this.props;
+    const {
+      children,
+      title,
+      placement,
+      width,
+      onOk,
+      onClose,
+      extButtons,
+      onOkButtonText,
+      onOkButtonLoading,
+    } = this.props;
     return (
       <Drawer
         title={title}
-        closeMode="mask"
+        closeMode="close"
         closeable="close"
         onClose={onClose}
         visible={true}
@@ -36,13 +47,12 @@ class DrawerWithFooter extends Component<Props, any> {
         <div style={{ paddingBottom: '60px' }}>
           {children}
           <div className="drawer-footer">
+            {extButtons}
             <If condition={onOk}>
-              <Button type="primary" onClick={onOk}>
-                <Translation>Submit</Translation>
+              <Button loading={onOkButtonLoading} type="primary" onClick={onOk}>
+                <Translation>{onOkButtonText ? onOkButtonText : 'Submit'}</Translation>
               </Button>
             </If>
-
-            {extButtons}
           </div>
         </div>
       </Drawer>

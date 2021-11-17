@@ -1,6 +1,7 @@
 import React from 'react';
-import { Dialog, Grid, Button, Loading } from '@b-design/ui';
+import { Form, Button, Loading, Field, Card, Dialog } from '@b-design/ui';
 import { addonDetail } from '../../../../constants';
+import { Rule } from '@alifd/field';
 import { If } from 'tsx-control-statements/components';
 import {
   getAddonsDetails,
@@ -12,36 +13,41 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './index.less';
 import Empty from '../../../../components/Empty';
+import DrawerWithFooter from '../../../../components/Drawer';
+import Group from '../../../../extends/Group';
+import Translation from '../../../../components/Translation';
+import UISchema from '../../../../components/UISchema';
+import { Addon } from '../../../../interface/addon';
 
 type Props = {
-  visible: boolean;
   addonName: string;
   onClose: () => void;
   dispatch: ({}) => {};
+  showAddon?: (name: string) => void;
 };
 
 type State = {
-  addonDetailInfo: {
-    name: string;
-    detail: string;
-  };
+  addonDetailInfo: Addon;
   loading: boolean;
   status: 'disabled' | 'enabled' | '';
   statusLoading: boolean;
 };
 
 class AddonDetailDialog extends React.Component<Props, State> {
+  form: Field;
+  uiSchemaRef: React.RefObject<UISchema>;
   constructor(props: Props) {
     super(props);
     this.state = {
       addonDetailInfo: {
         name: '',
-        detail: '',
       },
       status: '',
       loading: true,
       statusLoading: false,
     };
+    this.form = new Field(this);
+    this.uiSchemaRef = React.createRef();
   }
 
   componentDidMount() {
@@ -67,9 +73,28 @@ class AddonDetailDialog extends React.Component<Props, State> {
     });
   };
 
-  enableAddon = async () => {
+  handleSubmit = () => {
+    const { status } = this.state;
+    if (status === 'enabled') {
+      Dialog.confirm({
+        content:
+          'Are you sure you want to disable the addon? After the function is disabled, related resources are reclaimed.',
+        onOk: this.disableAddon,
+      });
+      return;
+    }
+    if (status === 'disabled') {
+      this.form.validate((errors: any, values: any) => {
+        if (errors) {
+          return;
+        }
+        this.enableAddon(values.properties);
+      });
+    }
+  };
+  enableAddon = async (properties: any) => {
     this.setState({ statusLoading: true }, () => {
-      enableAddon({ name: this.props.addonName }).then((res) => {
+      enableAddon({ name: this.props.addonName, properties: properties }).then((res) => {
         this.loadAddonStatus();
       });
     });
@@ -88,70 +113,95 @@ class AddonDetailDialog extends React.Component<Props, State> {
   };
 
   render() {
-    const { visible } = this.props;
     const { loading, addonDetailInfo, status, statusLoading } = this.state;
-    const { Row, Col } = Grid;
+    const { showAddon } = this.props;
+    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+      this.uiSchemaRef.current?.validate(callback);
+    };
+    let showName = addonDetailInfo.name ? addonDetailInfo.name : addonDetail;
+    const statusShow = status === 'enabled' && <Translation>Enabled</Translation>;
+    if (statusShow) {
+      showName = showName + `(${statusShow})`;
+    }
     return (
       <div className="basic">
-        <Dialog
-          className="dialog-detail-addon"
-          title={addonDetailInfo.name ? addonDetailInfo.name : addonDetail}
-          visible={visible}
-          onCancel={this.onClose}
+        <DrawerWithFooter
+          title={showName}
           onClose={this.onClose}
-          footerActions={[]}
-          footerAlign="center"
+          onOkButtonText={status === 'enabled' ? 'Disable' : 'Enable'}
+          onOkButtonLoading={statusLoading || loading}
+          onOk={this.handleSubmit}
+          extButtons={[
+            <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
+              取消
+            </Button>,
+          ]}
         >
-          <div className="basic">
-            <Row>
-              <Col span={12}>
-                <div>
-                  <span>启用状态：</span>
-                  <span>{status}</span>
-                </div>
-              </Col>
-              <Col span={12}>
-                <If condition={status === 'disabled'}>
-                  <Button
-                    loading={statusLoading}
-                    style={{ float: 'right' }}
-                    size="small"
-                    type="secondary"
-                    onClick={this.enableAddon}
-                  >
-                    启用
-                  </Button>
-                </If>
-                <If condition={status == 'enabled'}>
-                  <Button
-                    loading={statusLoading}
-                    style={{ float: 'right' }}
-                    size="small"
-                    type="secondary"
-                    onClick={this.disableAddon}
-                  >
-                    禁用
-                  </Button>
-                </If>
-              </Col>
-            </Row>
-          </div>
-          <div className="next-menu-divider"></div>
-
           <Loading visible={loading} style={{ width: '100%' }}>
-            <If condition={addonDetailInfo.detail}>
-              <ReactMarkdown
-                children={addonDetailInfo.detail}
-                remarkPlugins={[remarkGfm]}
-              ></ReactMarkdown>
+            <If condition={addonDetailInfo.uiSchema}>
+              <Group
+                title={<Translation>Properties</Translation>}
+                description={<Translation>Set the addon configuration parameters</Translation>}
+                required={true}
+                closed={status === 'enabled'}
+              >
+                <Form field={this.form}>
+                  <UISchema
+                    {...this.form.init('properties', {
+                      rules: [
+                        {
+                          validator: validator,
+                          message: 'Please check addon properties',
+                        },
+                      ],
+                    })}
+                    ref={this.uiSchemaRef}
+                    uiSchema={addonDetailInfo.uiSchema}
+                  ></UISchema>
+                </Form>
+              </Group>
             </If>
-            <If condition={!addonDetailInfo.detail}>
-              <div className="readme-empty">
-                <Empty></Empty>
-              </div>
-            </If>
+            <Card contentHeight="auto" title={<Translation>Dependences</Translation>}>
+              <ul>
+                {addonDetailInfo.dependencies?.map((item) => {
+                  return (
+                    <li className="dependen-item" key={item.name}>
+                      <a
+                        onClick={() => {
+                          showAddon && showAddon(item.name);
+                        }}
+                      >
+                        {item.name}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Card>
+            <Card
+              contentHeight="auto"
+              title={<Translation>Definitions</Translation>}
+              style={{ marginTop: '16px' }}
+            ></Card>
+            <Card
+              contentHeight="auto"
+              title={<Translation>Readme</Translation>}
+              style={{ marginTop: '16px' }}
+            >
+              <If condition={addonDetailInfo.detail}>
+                <ReactMarkdown
+                  children={addonDetailInfo.detail || ''}
+                  remarkPlugins={[remarkGfm]}
+                ></ReactMarkdown>
+              </If>
+              <If condition={!addonDetailInfo.detail}>
+                <div className="readme-empty">
+                  <Empty></Empty>
+                </div>
+              </If>
+            </Card>
           </Loading>
-        </Dialog>
+        </DrawerWithFooter>
       </div>
     );
   }

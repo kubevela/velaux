@@ -45,7 +45,7 @@ class CardContent extends React.Component<any, State> {
             {addonLists.map((item: Addon, index: number) => {
               const { name, icon, version, description, tags } = item;
               return (
-                <Col span="6" className={`card-content-wraper`} key={index}>
+                <Col span="6" className={`card-content-wraper`} key={name}>
                   <Card contentHeight="auto">
                     <a onClick={() => clickAddon(name)}>
                       <div className="cluster-card-top flexcenter">
@@ -70,8 +70,8 @@ class CardContent extends React.Component<any, State> {
                       </Row>
                       <If condition={tags}>
                         <Row className="content-main-btn">
-                          {tags.map((item: String) => {
-                            return <Tag>{item}</Tag>;
+                          {tags?.map((item: string) => {
+                            return <Tag key={item}>{item}</Tag>;
                           })}
                         </Row>
                       </If>
