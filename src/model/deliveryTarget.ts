@@ -4,6 +4,7 @@ export interface QueryDeliveryTarget {
   query?: string;
   page?: number;
   pageSize?: number;
+  namespace?: string;
 }
 
 interface DeliveryTargetState {

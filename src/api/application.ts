@@ -42,8 +42,10 @@ export function getApplicationDetails(params: any) {
   return get(url, params).then((res) => res);
 }
 
-export function getApplicationStatus(params: any) {
-  const url = isMock ? `${getApplicationDetails_mock}` : `${application}/${params.name}/status`;
+export function getApplicationStatus(params: { name: string; envName: string }) {
+  const url = isMock
+    ? `${getApplicationDetails_mock}`
+    : `${application}/${params.name}/envs/${params.envName}/status`;
   return get(url, params).then((res) => res);
 }
 

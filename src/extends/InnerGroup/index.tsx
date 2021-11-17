@@ -18,9 +18,11 @@ type State = {};
 
 class InnerGroup extends React.Component<Props, State> {
   dom: any;
+  ref: React.RefObject<UISchema>;
   constructor(props: Props) {
     super(props);
     this.state = {};
+    this.ref = React.createRef();
   }
 
   render() {
@@ -28,12 +30,7 @@ class InnerGroup extends React.Component<Props, State> {
 
     return (
       <div className="group-inner-container">
-        <div>
-          <Balloon trigger={title} align="t">
-            <div>{description}</div>
-          </Balloon>
-        </div>
-        <UISchema uiSchema={uiSchema} inline onChange={onChange} _key={_key} />
+        <UISchema ref={this.ref} uiSchema={uiSchema} inline onChange={onChange} _key={_key} />
       </div>
     );
   }

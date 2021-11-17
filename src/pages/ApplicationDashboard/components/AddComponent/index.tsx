@@ -94,20 +94,6 @@ class AddComponent extends Component<Props, State> {
           properties: '{}',
         },
       };
-      this.uiSchemaRef.current?.validate((error: any, values: any) => {
-        if (error) {
-          return;
-        }
-        params.body.properties = JSON.stringify(values);
-        console.log(params, 'params');
-
-        // createApplicationComponent(params).then((res) => {
-        //   if (res) {
-        //     Message.success(<Translation>create service add success</Translation>);
-        //     this.props.onOK();
-        //   }
-        // });
-      });
     });
   };
 
