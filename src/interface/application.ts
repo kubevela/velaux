@@ -152,3 +152,25 @@ export interface WorkflowStepStatus {
   firstExecuteTime?: string;
   lastExecuteTime?: string;
 }
+
+export interface Trait {
+  alias?: string;
+  description?: string;
+  name?: string;
+  properties?: any;
+  type: string;
+  createTime?: string;
+  updateTime?: string;
+}
+
+export interface ApplicationComponent {
+  alias?: string;
+  appPrimaryKey?: string;
+  createTime?: string;
+  creator?: string;
+  name?: string;
+  properties?: any;
+  traits?: Array<Trait>;
+  type?: string;
+  updateTime?: string;
+}

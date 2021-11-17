@@ -1,4 +1,4 @@
-import { post, get, rdelete } from './request';
+import { post, get, rdelete, put } from './request';
 import {
   application_mock,
   getApplicationDetails_mock,
@@ -11,10 +11,19 @@ import {
   getPolicyDetails_mock,
   createApplicationTemplate_mock,
   createApplicationEnv_mock,
+  getTraitDefinitionsDetails_mock,
+  getTraitDefinitions_mock,
+  getTrait_mock,
 } from './devLink';
 import { application, componentdefinition } from './productionLink';
 import { getDomain } from '../utils/common';
-import { ApplicationDeployRequest } from '../interface/application';
+import { ApplicationDeployRequest, Trait } from '../interface/application';
+
+interface TraitQuery {
+  appName?: string;
+  componentName?: string;
+  traitType?: string;
+}
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
@@ -110,4 +119,46 @@ export function createApplicationEnv(params: { appName?: string }) {
   const url = isMock ? `${createApplicationEnv_mock}` : `${application}/${params.appName}/envs`;
   delete params.appName;
   return post(url, params).then((res) => res);
+}
+
+export function getTraitDefinitions() {
+  const url = isMock ? `${getTraitDefinitions_mock}` : `${componentdefinition}`;
+  return get(url, { params: { type: 'trait' } }).then((res) => res);
+}
+
+export function detailTraitDefinition(params: { name: string }) {
+  const url = isMock
+    ? `${getTraitDefinitionsDetails_mock}`
+    : `${componentdefinition}/${params.name}`;
+  return get(url, { params: { type: 'trait' } }).then((res) => res);
+}
+
+export function getAppliationComponent(query: TraitQuery) {
+  const { appName, componentName } = query;
+  const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/components/${componentName}`;
+  return get(url, {}).then((res) => res);
+}
+
+export function createTrait(params: Trait, query: TraitQuery) {
+  const { appName, componentName } = query;
+  const url = isMock
+    ? `${getTrait_mock}`
+    : `${application}/${appName}/components/${componentName}/traits`;
+  return post(url, params).then((res) => res);
+}
+
+export function updateTrait(params: Trait, query: TraitQuery) {
+  const { appName, componentName, traitType } = query;
+  const url = isMock
+    ? `${getTrait_mock}`
+    : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
+  return put(url, params).then((res) => res);
+}
+
+export function deleteTrait(query: TraitQuery) {
+  const { appName, componentName, traitType } = query;
+  const url = isMock
+    ? `${getTrait_mock}`
+    : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
+  return rdelete(url, {}).then((res) => res);
 }
