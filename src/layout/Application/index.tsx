@@ -40,7 +40,6 @@ class ApplicationLayout extends Component<Props, any> {
       payload: { appName: appName },
       callback: () => {
         this.setState({ loading: false }, () => {
-          this.loadApplicationStatus();
           this.loadApplicationComponents();
         });
       },
@@ -62,12 +61,14 @@ class ApplicationLayout extends Component<Props, any> {
 
   loadApplicationStatus = async () => {
     const {
-      params: { appName },
+      params: { appName, envName },
     } = this.props.match;
-    this.props.dispatch({
-      type: 'application/getApplicationStatus',
-      payload: { appName: appName },
-    });
+    if (envName) {
+      this.props.dispatch({
+        type: 'application/getApplicationStatus',
+        payload: { appName: appName, envName: envName },
+      });
+    }
   };
 
   loadApplicationComponents = async () => {

@@ -37,20 +37,20 @@ class DeliveryDialog extends React.Component<Props, State> {
         alias,
         description,
         namespace,
-        kubernetes = { clusterName: '', namespace: '' },
-        cloud = { providerName: '', region: '', zone: '', vpcID: '' },
+        cluster = { clusterName: '', namespace: '' },
+        variable = { providerName: '', region: '', zone: '', vpcID: '' },
       } = nextProps.deliveryTargetItem;
       this.field.setValues({
         name,
         alias,
         description,
         project: namespace,
-        clusterName: kubernetes.clusterName,
-        namespace: kubernetes.namespace,
-        providerName: cloud.providerName,
-        region: cloud.region,
-        zone: cloud.zone,
-        vpcID: cloud.vpcID,
+        clusterName: cluster.clusterName,
+        namespace: cluster.namespace,
+        var_providerName: variable.providerName,
+        var_region: variable.region,
+        var_zone: variable.zone,
+        var_vpcID: variable.vpcID,
       });
     }
   }
@@ -69,30 +69,29 @@ class DeliveryDialog extends React.Component<Props, State> {
       const {
         name,
         alias,
-        project,
         description,
         clusterName,
         namespace,
-        providerName,
-        region,
-        zone,
-        vpcID,
+        runtimeNamespace,
+        var_providerName,
+        var_region,
+        var_zone,
+        var_vpcID,
       } = this.field.getValues();
-
       const params = {
         name,
         alias,
         description,
-        namespace: project,
-        kubernetes: {
+        namespace,
+        cluster: {
           clusterName,
-          namespace,
+          namespace: runtimeNamespace,
         },
-        cloud: {
-          providerName,
-          region,
-          zone,
-          vpcID,
+        variable: {
+          providerName: var_providerName,
+          region: var_region,
+          zone: var_zone,
+          vpcID: var_vpcID,
         },
       };
 
@@ -158,7 +157,6 @@ class DeliveryDialog extends React.Component<Props, State> {
       <div>
         <Dialog
           style={{ width: '800px' }}
-          className="add-delivery-wraper"
           title={isEdit ? editDeliveryTargetList : addDeliveryTargetList}
           autoFocus={true}
           visible={visible}
@@ -207,24 +205,12 @@ class DeliveryDialog extends React.Component<Props, State> {
               </Col>
             </Row>
             <Row>
-              <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Project</Translation>}>
-                  <Input
-                    name="project"
-                    placeholder={t('Please enter').toString()}
-                    {...init('project', {
-                      rules: [
-                        {
-                          maxLength: 256,
-                          message: 'Enter a description that contains less than 256 characters.',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <NameSpaceForm field={this.field} namespaceList={namespaceList} />
               </Col>
-
-              <Col span={12} style={{ padding: '0 8px' }}>
+            </Row>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Description</Translation>}>
                   <Input
                     name="description"
@@ -241,110 +227,129 @@ class DeliveryDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
-            <Group title={`Kubernetes ${t('Clusters Info')}`} hasToggleIcon>
-              <Row>
-                <Col span={12} style={{ padding: '0 8px' }}>
-                  <FormItem label={<Translation>Cluster Screening</Translation>} required>
-                    <Select
-                      className="select"
-                      placeholder={t('Please chose').toString()}
-                      {...init(`clusterName`, {
-                        rules: [
-                          {
-                            required: true,
-                            message: 'Please chose',
-                          },
-                        ],
-                      })}
-                      dataSource={this.transCluster()}
-                    />
-                  </FormItem>
-                </Col>
-                <Col span={12} style={{ padding: '0 8px' }}>
-                  <NameSpaceForm field={this.field} namespaceList={namespaceList} />
-                </Col>
-              </Row>
-            </Group>
+            <Row>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={<Translation>Cluster Screening</Translation>} required>
+                  <Select
+                    className="select"
+                    placeholder={t('Please chose').toString()}
+                    {...init(`clusterName`, {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please chose',
+                        },
+                      ],
+                    })}
+                    dataSource={this.transCluster()}
+                  />
+                </FormItem>
+              </Col>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem
+                  label={<Translation>Cluster Namesapce</Translation>}
+                  help="If left blank, the namespace is automatically created"
+                >
+                  <Input
+                    name="runtimeNamespace"
+                    placeholder={t('Please enter').toString()}
+                    {...init('runtimeNamespace', {
+                      rules: [
+                        {
+                          maxLength: 256,
+                          message: 'Specify a correct namespace in the cluster',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <Group
+                  title={<Translation>Shared Variables</Translation>}
+                  required={false}
+                  description={'You can define parameters such as region and zone.'}
+                  hasToggleIcon
+                >
+                  <Row>
+                    <Col span={12} style={{ padding: '0 8px' }}>
+                      <FormItem label={<Translation>Cloud Service Provider</Translation>} required>
+                        <Select
+                          className="select"
+                          defaultValue="alibaba"
+                          placeholder={t('Please chose').toString()}
+                          disabled
+                          {...init(`var_providerName`, {
+                            initValue: 'alibaba',
+                            rules: [
+                              {
+                                required: true,
+                                message: 'Please chose',
+                              },
+                            ],
+                          })}
+                          dataSource={[]}
+                        />
+                      </FormItem>
+                    </Col>
+                    <Col span={12} style={{ padding: '0 8px' }}>
+                      <FormItem label={<Translation>Region</Translation>}>
+                        <Input
+                          name="var_region"
+                          placeholder={t('Please enter').toString()}
+                          {...init('var_region', {
+                            rules: [
+                              {
+                                maxLength: 256,
+                                message: 'Enter a Region.',
+                              },
+                            ],
+                          })}
+                        />
+                      </FormItem>
+                    </Col>
+                  </Row>
 
-            <Group
-              title={<Translation>Cloud Service Provider Information</Translation>}
-              hasToggleIcon
-            >
-              <Row>
-                <Col span={12} style={{ padding: '0 8px' }}>
-                  <FormItem label={<Translation>Cloud Service Provider</Translation>} required>
-                    <Select
-                      className="select"
-                      defaultValue="alibaba"
-                      placeholder={t('Please chose').toString()}
-                      disabled
-                      {...init(`providerName`, {
-                        initValue: 'alibaba',
-                        rules: [
-                          {
-                            required: true,
-                            message: 'Please chose',
-                          },
-                        ],
-                      })}
-                      dataSource={[]}
-                    />
-                  </FormItem>
-                </Col>
-                <Col span={12} style={{ padding: '0 8px' }}>
-                  <FormItem label={<Translation>Region</Translation>}>
-                    <Input
-                      name="region"
-                      placeholder={t('Please enter').toString()}
-                      {...init('region', {
-                        rules: [
-                          {
-                            maxLength: 256,
-                            message: 'Enter a Region.',
-                          },
-                        ],
-                      })}
-                    />
-                  </FormItem>
-                </Col>
-              </Row>
+                  <Row>
+                    <Col span={12} style={{ padding: '0 8px' }}>
+                      <FormItem label={<Translation>Zone</Translation>}>
+                        <Input
+                          name="var_zone"
+                          placeholder={t('Please enter').toString()}
+                          {...init('var_zone', {
+                            rules: [
+                              {
+                                maxLength: 256,
+                                message: 'Enter a Zone.',
+                              },
+                            ],
+                          })}
+                        />
+                      </FormItem>
+                    </Col>
 
-              <Row>
-                <Col span={12} style={{ padding: '0 8px' }}>
-                  <FormItem label={<Translation>Zone</Translation>}>
-                    <Input
-                      name="zone"
-                      placeholder={t('Please enter').toString()}
-                      {...init('zone', {
-                        rules: [
-                          {
-                            maxLength: 256,
-                            message: 'Enter a Zone.',
-                          },
-                        ],
-                      })}
-                    />
-                  </FormItem>
-                </Col>
-
-                <Col span={12} style={{ padding: '0 8px' }}>
-                  <FormItem label={'VPC'}>
-                    <Input
-                      name="vpcID"
-                      placeholder={t('Please enter').toString()}
-                      {...init('vpcID', {
-                        rules: [
-                          {
-                            maxLength: 256,
-                            message: 'Enter a VPC',
-                          },
-                        ],
-                      })}
-                    />
-                  </FormItem>
-                </Col>
-              </Row>
-            </Group>
+                    <Col span={12} style={{ padding: '0 8px' }}>
+                      <FormItem label={'VPC'}>
+                        <Input
+                          name="var_vpcID"
+                          placeholder={t('Please enter').toString()}
+                          {...init('var_vpcID', {
+                            rules: [
+                              {
+                                maxLength: 256,
+                                message: 'Enter a VPC',
+                              },
+                            ],
+                          })}
+                        />
+                      </FormItem>
+                    </Col>
+                  </Row>
+                </Group>
+              </Col>
+            </Row>
           </Form>
         </Dialog>
       </div>

@@ -2,11 +2,13 @@ import React from 'react';
 import { Input } from '@b-design/ui';
 import './index.less';
 
-type Props = {
+import { InputProps } from '@alifd/next/types/input';
+
+interface Props extends InputProps {
   value: any;
   id: string;
   onChange: (value: any) => void;
-};
+}
 
 type State = {};
 
@@ -21,8 +23,8 @@ class ImageInput extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    const { onChange, value } = this.props;
-    return <Input onChange={onChange} defaultValue={value} />;
+    const { value } = this.props;
+    return <Input {...this.props} defaultValue={value} />;
   }
 }
 

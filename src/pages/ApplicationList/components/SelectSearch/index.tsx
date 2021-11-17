@@ -10,7 +10,7 @@ type Props = {
   dispatch: ({}) => {};
   clusterList?: [];
   namespaceList?: [];
-  getApplicationPlans: (params: any) => void;
+  getApplications: (params: any) => void;
 };
 
 type State = {
@@ -38,7 +38,7 @@ class SelectSearch extends React.Component<Props, State> {
         namespaceValue: e,
       },
       () => {
-        this.getApplicationPlans();
+        this.getApplications();
       },
     );
   }
@@ -49,7 +49,7 @@ class SelectSearch extends React.Component<Props, State> {
         clusterValue: e,
       },
       () => {
-        this.getApplicationPlans();
+        this.getApplications();
       },
     );
   }
@@ -61,17 +61,17 @@ class SelectSearch extends React.Component<Props, State> {
   }
 
   handleClickSearch = () => {
-    this.getApplicationPlans();
+    this.getApplications();
   };
 
-  getApplicationPlans = async () => {
+  getApplications = async () => {
     const { namespaceValue, clusterValue, inputValue } = this.state;
     const params = {
       namespace: namespaceValue,
       cluster: clusterValue,
       query: inputValue,
     };
-    this.props.getApplicationPlans(params);
+    this.props.getApplications(params);
   };
 
   render() {

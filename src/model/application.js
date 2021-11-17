@@ -81,7 +81,7 @@ export default {
     },
   },
   effects: {
-    *getApplicationPlanList(action, { call, put }) {
+    *getApplicationList(action, { call, put }) {
       const result = yield call(getApplicationList, action.payload);
       const appContent = getAppCardList(result || {});
       yield put({ type: 'updateApplicationList', payload: appContent });
@@ -109,8 +109,8 @@ export default {
       }
     },
     *getApplicationStatus(action, { call, put }) {
-      const { appName } = action.payload;
-      const result = yield call(getApplicationStatus, { name: appName });
+      const { appName, envName } = action.payload;
+      const result = yield call(getApplicationStatus, { name: appName, envName: envName });
       yield put({ type: 'updateApplicationStatus', payload: result });
       if (action.callback && result) {
         action.callback(result);

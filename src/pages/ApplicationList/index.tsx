@@ -15,6 +15,7 @@ type Props = {
   applicationList: ApplicationBase[];
   namespaceList: [];
   clusterList?: [];
+  history: any;
 };
 type State = {
   showAddApplication: boolean;
@@ -36,16 +37,16 @@ class Application extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.getApplicationPlans({});
+    this.getApplications({});
     this.getNamespaceList();
     this.getClusterList();
     this.onGetComponentdefinitions();
   }
 
-  getApplicationPlans = async (params: any) => {
+  getApplications = async (params: any) => {
     this.setState({ isLoading: true });
     this.props.dispatch({
-      type: 'application/getApplicationPlanList',
+      type: 'application/getApplicationList',
       payload: params,
       callback: () => {
         this.setState({
@@ -72,7 +73,7 @@ class Application extends Component<Props, State> {
     deleteApplicationPlan({ name: name }).then((re) => {
       if (re) {
         Message.success('application delete success');
-        this.getApplicationPlans({});
+        this.getApplications({});
       }
     });
   };
@@ -91,7 +92,7 @@ class Application extends Component<Props, State> {
     this.setState({
       showAddApplication: false,
     });
-    this.getApplicationPlans({});
+    this.getApplications({});
   };
 
   render() {
@@ -112,8 +113,8 @@ class Application extends Component<Props, State> {
           namespaceList={namespaceList}
           clusterList={clusterList}
           dispatch={dispatch}
-          getApplicationPlans={(params: any) => {
-            this.getApplicationPlans(params);
+          getApplications={(params: any) => {
+            this.getApplications(params);
           }}
         />
 
@@ -129,12 +130,13 @@ class Application extends Component<Props, State> {
           <AppDialog
             visible={showAddApplication}
             namespaceList={namespaceList}
-            clusterList={clusterList}
             componentDefinitions={componentDefinitions}
             setVisible={(visible) => {
               this.setState({ showAddApplication: visible });
             }}
-            onOK={this.closeAddApplication}
+            onOK={(name: string) => {
+              this.props.history.push(`/applications/${name}/config`);
+            }}
             onClose={this.closeAddApplication}
             dispatch={dispatch}
           />

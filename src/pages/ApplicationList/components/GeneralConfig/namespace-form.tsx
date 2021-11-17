@@ -1,5 +1,5 @@
-import React, { createRef, LegacyRef } from 'react';
-import { Form, Input, Select, Field, Radio, Button } from '@b-design/ui';
+import React from 'react';
+import { Form, Input, Select, Field, Button } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
@@ -10,6 +10,8 @@ type Props = {
   namespaceList: [];
   field: Field;
   handleSelectNameSpace?: () => {};
+  onChange?: (namespace: string) => void;
+  disableNew?: boolean;
 };
 
 type State = {
@@ -18,7 +20,6 @@ type State = {
 };
 
 class NamespaceForm extends React.Component<Props, State> {
-  field: any;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -40,7 +41,7 @@ class NamespaceForm extends React.Component<Props, State> {
   };
 
   render() {
-    const { formItemLayout, namespaceList, field } = this.props;
+    const { formItemLayout, namespaceList, field, disableNew } = this.props;
     const { showNameSpaceInput } = this.state;
     return (
       <React.Fragment>
@@ -57,16 +58,18 @@ class NamespaceForm extends React.Component<Props, State> {
                   className="cluster-params-input"
                   mode="single"
                   dataSource={namespaceList}
-                  {...field.init('namespace', { initValue: 'default' })}
+                  {...field.init('namespace', { initValue: '' })}
                   placeholder={''}
                 />
-                <Button
-                  className="cluster-option-btn"
-                  type="secondary"
-                  onClick={this.openNamespaceInput}
-                >
-                  新建
-                </Button>
+                <If condition={!disableNew}>
+                  <Button
+                    className="cluster-option-btn"
+                    type="secondary"
+                    onClick={this.openNamespaceInput}
+                  >
+                    新建
+                  </Button>
+                </If>
               </div>
             </If>
             <If condition={showNameSpaceInput}>
