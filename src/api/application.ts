@@ -133,7 +133,7 @@ export function detailTraitDefinition(params: { name: string }) {
   return get(url, { params: { type: 'trait' } }).then((res) => res);
 }
 
-export function getAppliationConfigDetails(query: TraitQuery) {
+export function getAppliationComponent(query: TraitQuery) {
   const { appName, componentName } = query;
   const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/components/${componentName}`;
   return get(url, {}).then((res) => res);

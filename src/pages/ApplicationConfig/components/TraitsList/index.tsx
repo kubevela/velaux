@@ -50,7 +50,7 @@ class TraitsList extends Component<Props> {
                   </div>
                 </div>
                 <div className="traits-list-content">{item.description}</div>
-                <div className="traits-list-date">{item.date}</div>
+                <div className="traits-list-date">{item.createTime}</div>
               </Card>
             </Col>
           ))}

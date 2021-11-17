@@ -1,5 +1,6 @@
 import React from 'react';
 import { Grid, Field, Form, Select, Message, Button, Input, Loading } from '@b-design/ui';
+import { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
@@ -64,25 +65,19 @@ class TraitDialog extends React.Component<Props, State> {
       }
       const { appName = '', componentName = '' } = this.props;
       debugger;
-      const { alias = '', type = '', description = '', properties = '' } = values;
+      const { alias = '', type = '', description = '', properties } = values;
       const query = { appName, componentName };
       const params: Trait = {
         alias,
         type,
         description,
-        properties,
+        properties: JSON.stringify(properties),
       };
-      this.uiSchemaRef.current?.validate((error: any, values: any) => {
-        if (error) {
-          return;
+      createTrait(params, query).then((res) => {
+        if (res) {
+          Message.success(<Translation>create application success</Translation>);
+          this.props.onOK();
         }
-        params.properties = JSON.stringify(values);
-        createTrait(params, query).then((res) => {
-          if (res) {
-            Message.success(<Translation>create application success</Translation>);
-            this.props.onOK();
-          }
-        });
       });
     });
   };
@@ -136,6 +131,9 @@ class TraitDialog extends React.Component<Props, State> {
     const { onClose } = this.props;
     const { t, isEditTrait } = this.props;
     const { definitionDetail, definitionLoading } = this.state;
+    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+      this.uiSchemaRef.current?.validate(callback);
+    };
 
     return (
       <DrawerWithFooter
@@ -203,13 +201,20 @@ class TraitDialog extends React.Component<Props, State> {
             </Col>
           </Row>
           <If condition={definitionDetail && definitionDetail.uiSchema}>
-            <Group title="" description="" loading={definitionLoading}>
+            <FormItem required={true}>
               <UISchema
-                _key="body.properties"
+                {...init(`properties`, {
+                  rules: [
+                    {
+                      validator: validator,
+                      message: 'Please check trait deploy properties',
+                    },
+                  ],
+                })}
                 uiSchema={definitionDetail && definitionDetail.uiSchema}
                 ref={this.uiSchemaRef}
               ></UISchema>
-            </Group>
+            </FormItem>
           </If>
         </Form>
       </DrawerWithFooter>

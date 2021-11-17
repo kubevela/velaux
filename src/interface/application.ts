@@ -158,11 +158,12 @@ export interface Trait {
   description?: string;
   name?: string;
   properties?: any;
-  type?: string;
-  date?: string;
+  type: string;
+  createTime?: string;
+  updateTime?: string;
 }
 
-export interface ApplicationConfigBase {
+export interface ApplicationComponent {
   alias?: string;
   appPrimaryKey?: string;
   createTime?: string;

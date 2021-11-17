@@ -3,17 +3,13 @@ import { Grid, Button, Card, Message, Progress } from '@b-design/ui';
 import './index.less';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
-import {
-  getTraitDefinitions,
-  getAppliationConfigDetails,
-  deleteTrait,
-} from '../../api/application';
+import { getTraitDefinitions, getAppliationComponent, deleteTrait } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
 import Item from '../../components/Item';
 import TraitDialog from './components/TraitDialog';
 import TraitsList from './components/TraitsList';
-import { ApplicationDetail, Trait, ApplicationConfigBase } from '../../interface/application';
+import { ApplicationDetail, Trait, ApplicationComponent } from '../../interface/application';
 import { momentDate } from '../../utils/common';
 
 const { Row, Col } = Grid;
@@ -38,7 +34,7 @@ type State = {
   visibleTrait: boolean;
   isEditTrait: boolean;
   traitDefinitions: [];
-  configDetail: ApplicationConfigBase;
+  configDetail: ApplicationComponent;
   traitItem: Trait;
 };
 @connect((store: any) => {
@@ -55,7 +51,7 @@ class ApplicationConfig extends Component<Props, State> {
       visibleTrait: false,
       traitDefinitions: [],
       configDetail: {},
-      traitItem: {},
+      traitItem: { type: '' },
     };
   }
 
@@ -68,18 +64,18 @@ class ApplicationConfig extends Component<Props, State> {
       const componentName =
         (nextProps.components && nextProps.components[0] && nextProps.components[0].name) || '';
       this.setState({ componentName }, () => {
-        this.onGetAppliationConfigDetails();
+        this.onGetAppliationComponent();
       });
     }
   }
 
-  onGetAppliationConfigDetails() {
+  onGetAppliationComponent() {
     const { appName, componentName } = this.state;
     const params = {
       appName,
       componentName,
     };
-    getAppliationConfigDetails(params).then((res) => {
+    getAppliationComponent(params).then((res) => {
       if (res) {
         this.setState({
           configDetail: res,
@@ -107,7 +103,7 @@ class ApplicationConfig extends Component<Props, State> {
     };
     deleteTrait(params).then((res) => {
       if (res) {
-        this.onGetAppliationConfigDetails();
+        this.onGetAppliationComponent();
       }
     });
   };
@@ -117,7 +113,7 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   onOk = () => {
-    this.onGetAppliationConfigDetails();
+    this.onGetAppliationComponent();
     this.setState({
       isEditTrait: false,
       visibleTrait: false,
@@ -207,7 +203,11 @@ class ApplicationConfig extends Component<Props, State> {
               actions={[
                 <a
                   onClick={() => {
-                    this.setState({ visibleTrait: true, traitItem: {}, isEditTrait: false });
+                    this.setState({
+                      visibleTrait: true,
+                      traitItem: { type: '' },
+                      isEditTrait: false,
+                    });
                   }}
                 >
                   <Translation>Add Trait</Translation>
