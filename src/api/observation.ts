@@ -12,11 +12,10 @@ export function listApplicationPods(params: {
   }
   return get('/api/v1/query', {
     params: {
-      velaql: urlParams
+      velaql: urlParams,
     },
   });
 }
-
 
 export function listApplicationPodsDetails(params: {
   namespace: string;
@@ -29,8 +28,7 @@ export function listApplicationPodsDetails(params: {
   }
   return get('/api/v1/query', {
     params: {
-      velaql: urlParams
+      velaql: urlParams,
     },
   });
 }
-

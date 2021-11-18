@@ -174,5 +174,5 @@ export function deleteTrait(query: TraitQuery) {
 export function listRevisions(query: listRevisionsQuery) {
   const { appName } = query;
   const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/revisions`;
-  return get(url, {params:query}).then((res) => res);
+  return get(url, { params: query }).then((res) => res);
 }

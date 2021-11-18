@@ -1,18 +1,16 @@
 import React from 'react';
 import { connect } from 'dva';
 import { Table, Button, Message } from '@b-design/ui';
-import { listApplicationPods, listApplicationPodsDetails, } from '../../api/observation';
-import { ApplicationDetail, EnvBinding, } from '../../interface/application';
+import { listApplicationPods, listApplicationPodsDetails } from '../../api/observation';
+import { ApplicationDetail, EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
 import { PodBase, Container, Event } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
 import Header from './components/Hearder';
 const { Column } = Table;
 
-
-
 type Props = {
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   match: {
     params: {
       envName: string;
@@ -29,8 +27,6 @@ type State = {
   containers?: Array<Container>;
   events?: Array<Event>;
 };
-
-
 
 @connect((store: any) => {
   return { ...store.application };
@@ -56,19 +52,18 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       const cluster = this.getInitCluster(params.envName);
       this.setState({ envName: params.envName, cluster: cluster }, () => {
         this.loadAppPods();
-      })
+      });
     }
   }
-
 
   getInitCluster(envName: string) {
     const { applicationDetail = { envBinding: [] } } = this.props;
     const envBinding: Array<EnvBinding> = applicationDetail.envBinding;
     if (Array.isArray(envBinding) && envBinding.length !== 0) {
-      const find = envBinding.find(item => item.name === envName);
-      return find && find.targetNames && find.targetNames[0] || '';
+      const find = envBinding.find((item) => item.name === envName);
+      return (find && find.targetNames && find.targetNames[0]) || '';
     }
-    return ''
+    return '';
   }
 
   loadAppPods = async () => {
@@ -79,7 +74,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         appName: applicationDetail.name,
         namespace: applicationDetail.namespace,
         componentName: applicationDetail.name,
-        cluster: this.state.cluster || "",
+        cluster: this.state.cluster || '',
       })
         .then((re) => {
           if (re && re.error) {
@@ -150,21 +145,20 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   updateQuery = (cluster: string) => {
     this.setState({ cluster }, () => {
       this.loadAppPods();
-    })
-  }
-
+    });
+  };
 
   getTargetName = () => {
     const { envName } = this.state;
     const { applicationDetail } = this.props;
     const { envBinding } = applicationDetail || {};
     if (Array.isArray(envBinding) && envBinding.length !== 0) {
-      const find = envBinding.find(item => item.name === envName);
-      return find && find.targetNames || []
+      const find = envBinding.find((item) => item.name === envName);
+      return (find && find.targetNames) || [];
     } else {
-      return []
+      return [];
     }
-  }
+  };
 
   onRowOpen = (openRowKeys: any, currentRowKey: string, expanded: boolean, currentRecord: any) => {
     if (expanded && currentRecord) {
@@ -174,29 +168,32 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         name: podName || '',
         namespace: namespace || '',
         cluster: clusterName || '',
-      }).then((re) => {
-        if (re && re.error) {
-          Message.warning(re.error);
-        } else if (re) {
-          this.setState({
-            containers: re.containers,
-            events: re.events
-          });
-        }
       })
+        .then((re) => {
+          if (re && re.error) {
+            Message.warning(re.error);
+          } else if (re) {
+            this.setState({
+              containers: re.containers,
+              events: re.events,
+            });
+          }
+        })
         .finally(() => {
           this.setState({ loading: false });
         });
     }
-  }
+  };
 
   render() {
     const { podList, loading, cluster, containers = [], events = [] } = this.state;
     const columns = this.getCloumns();
     const expandedRowRender = (record: PodBase, index: number) => {
-      return <div>
-        <PodDetail pod={record} podContainer={containers} podEvent={events} />
-      </div>
+      return (
+        <div>
+          <PodDetail pod={record} podContainer={containers} podEvent={events} />
+        </div>
+      );
     };
 
     return (
@@ -204,15 +201,24 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         <Header
           cluster={cluster}
           targetNames={this.getTargetName()}
-          updateQuery={(cluster: string) => { this.updateQuery(cluster) }}
+          updateQuery={(cluster: string) => {
+            this.updateQuery(cluster);
+          }}
         />
         <Table
-          className='podlist-table-wraper'
+          className="podlist-table-wraper"
           size="medium"
           loading={loading}
           dataSource={podList}
           expandedRowRender={expandedRowRender}
-          onRowOpen={(openRowKeys: any, currentRowKey: string, expanded: boolean, currentRecord: any) => { this.onRowOpen(openRowKeys, currentRowKey, expanded, currentRecord) }}
+          onRowOpen={(
+            openRowKeys: any,
+            currentRowKey: string,
+            expanded: boolean,
+            currentRecord: any,
+          ) => {
+            this.onRowOpen(openRowKeys, currentRowKey, expanded, currentRecord);
+          }}
         >
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
