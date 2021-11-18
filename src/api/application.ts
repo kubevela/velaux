@@ -25,6 +25,14 @@ interface TraitQuery {
   traitType?: string;
 }
 
+interface listRevisionsQuery {
+  appName?: string;
+  envName?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}
+
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
 const url = isMock ? application_mock : application;
@@ -161,4 +169,10 @@ export function deleteTrait(query: TraitQuery) {
     ? `${getTrait_mock}`
     : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
   return rdelete(url, {}).then((res) => res);
+}
+
+export function listRevisions(query: listRevisionsQuery) {
+  const { appName } = query;
+  const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/revisions`;
+  return get(url, {params:query}).then((res) => res);
 }

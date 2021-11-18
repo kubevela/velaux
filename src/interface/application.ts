@@ -174,3 +174,14 @@ export interface ApplicationComponent {
   type?: string;
   updateTime?: string;
 }
+
+export interface Revisions{
+  createTime?:string;
+  deployUser?:string;
+  envName?:string;
+  note?:string;
+  reason?:string;
+  status?:string;
+  triggerType?:string;
+  version:string;
+}
