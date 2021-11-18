@@ -96,7 +96,7 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   loadDeliveryTarget = (namespace: string) => {
-    getDeliveryTarget({ namespace: namespace }).then((res) => {
+    getDeliveryTarget({ namespace: namespace, page: 0 }).then((res) => {
       if (res) {
         this.setState({ deliveryTargets: res.deliveryTargets });
       }

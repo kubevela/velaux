@@ -74,14 +74,6 @@ class TableList extends Component<Props, State> {
         },
       },
       {
-        key: 'appNum',
-        title: <Translation>App Number</Translation>,
-        dataIndex: 'appNum',
-        cell: (v: string) => {
-          return <span>{v || 0}</span>;
-        },
-      },
-      {
         key: 'description',
         title: <Translation>Description</Translation>,
         dataIndex: 'description',

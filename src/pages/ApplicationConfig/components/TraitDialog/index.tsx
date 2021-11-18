@@ -9,6 +9,7 @@ import { DefinitionDetail, Trait } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
+import { Link } from 'dva/router';
 
 type Props = {
   isEditTrait: boolean;
@@ -146,7 +147,15 @@ class TraitDialog extends React.Component<Props, State> {
         <Form field={this.field}>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Trait Type</Translation>} required>
+              <FormItem
+                label={<Translation>Trait Type</Translation>}
+                required
+                help={
+                  <span>
+                    Get more trait type? <Link to="/addons">Go to enable addon</Link>
+                  </span>
+                }
+              >
                 <Select
                   className="select"
                   placeholder={t('Please chose').toString()}
@@ -166,7 +175,7 @@ class TraitDialog extends React.Component<Props, State> {
           </Row>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Alias</Translation>} required>
+              <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
                   placeholder={t('Please enter').toString()}
@@ -184,7 +193,7 @@ class TraitDialog extends React.Component<Props, State> {
             </Col>
 
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Description</Translation>} required>
+              <FormItem label={<Translation>Description</Translation>}>
                 <Input
                   name="description"
                   placeholder={t('Please enter').toString()}
