@@ -75,7 +75,7 @@ class ApplicationConfig extends Component<Props, State> {
       appName,
       componentName,
     };
-    getAppliationComponent(params).then((res) => {
+    getAppliationComponent(params).then((res: any) => {
       if (res) {
         this.setState({
           configDetail: res,
@@ -85,7 +85,7 @@ class ApplicationConfig extends Component<Props, State> {
   }
 
   onGetTraitdefinitions = async () => {
-    getTraitDefinitions().then((res) => {
+    getTraitDefinitions().then((res: any) => {
       if (res) {
         this.setState({
           traitDefinitions: res && res.definitions,
@@ -101,7 +101,7 @@ class ApplicationConfig extends Component<Props, State> {
       componentName,
       traitType,
     };
-    deleteTrait(params).then((res) => {
+    deleteTrait(params).then((res: any) => {
       if (res) {
         this.onGetAppliationComponent();
       }
@@ -117,6 +117,14 @@ class ApplicationConfig extends Component<Props, State> {
     this.setState({
       isEditTrait: false,
       visibleTrait: false,
+    });
+  };
+
+  onAddTrait = () => {
+    this.setState({
+      visibleTrait: true,
+      traitItem: { type: '' },
+      isEditTrait: false,
     });
   };
 
@@ -201,15 +209,7 @@ class ApplicationConfig extends Component<Props, State> {
           <Col span={24} className="padding16">
             <Title
               actions={[
-                <a
-                  onClick={() => {
-                    this.setState({
-                      visibleTrait: true,
-                      traitItem: { type: '' },
-                      isEditTrait: false,
-                    });
-                  }}
-                >
+                <a onClick={this.onAddTrait}>
                   <Translation>Add Trait</Translation>
                 </a>,
               ]}
@@ -226,6 +226,7 @@ class ApplicationConfig extends Component<Props, State> {
           onDeleteTrait={(traitType: string) => {
             this.onDeleteTrait(traitType);
           }}
+          onAdd={this.onAddTrait}
         />
 
         <If condition={visibleTrait}>

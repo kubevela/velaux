@@ -141,7 +141,7 @@ class DeliveryTargetList extends React.Component<Props, State> {
         <Pagination
           className="delivery-target-pagenation"
           total={total}
-          size="small"
+          size="medium"
           pageSize={this.state.pageSize}
           current={this.state.page}
           onChange={this.handleChange}

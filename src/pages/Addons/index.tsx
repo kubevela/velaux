@@ -60,6 +60,17 @@ class Addons extends React.Component<Props, State> {
     this.setState({ showAddonDetail: false, addonName: '' });
   };
 
+  onShowAddon = (addonName: string) => {
+    const { addonsList = [] } = this.props;
+    addonsList.map((item: any) => {
+      if (item.name == addonName) {
+        this.setState({ showAddonDetail: false, addonName: '' }, () => {
+          this.openAddonDetail(addonName);
+        });
+      }
+    });
+  };
+
   render() {
     const { addonsList = [], registryList = [], dispatch, loading } = this.props;
 
@@ -86,8 +97,8 @@ class Addons extends React.Component<Props, State> {
         <If condition={showAddonDetail}>
           <AddonDetailDialog
             onClose={this.closeAddonDetail}
+            showAddon={this.onShowAddon}
             dispatch={dispatch}
-            visible={showAddonDetail}
             addonName={addonName}
           ></AddonDetailDialog>
         </If>
