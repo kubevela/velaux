@@ -2,9 +2,15 @@ import { Grid, Card, Breadcrumb, Button, Message } from '@b-design/ui';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 import Translation from '../../../../components/Translation';
-import { deployApplication } from '../../../../api/application';
-import { ApplicationDetail, ApplicationStatus } from '../../../../interface/application';
+import { deployApplication, getApplicationStatistics } from '../../../../api/application';
+import {
+  ApplicationDetail,
+  ApplicationStatus,
+  ApplicationStatistics,
+} from '../../../../interface/application';
+import NumItem from '../../../../components/NumItem';
 import { Link } from 'dva/router';
+
 const { Row, Col } = Grid;
 
 interface Props {
@@ -17,6 +23,7 @@ interface State {
   loading: boolean;
   force: boolean;
   workflowName?: string;
+  statistics?: ApplicationStatistics;
 }
 
 @connect((store: any) => {
@@ -50,10 +57,26 @@ class ApplicationHeader extends Component<Props, State> {
     }
   };
 
-  componentDidMount() {}
+  loadAppStatistics = async () => {
+    const { applicationDetail } = this.props;
+    if (applicationDetail?.name) {
+      getApplicationStatistics({ appName: applicationDetail?.name }).then(
+        (re: ApplicationStatistics) => {
+          if (re) {
+            this.setState({ statistics: re });
+          }
+        },
+      );
+    }
+  };
+
+  componentDidMount() {
+    this.loadAppStatistics();
+  }
 
   render() {
     const { applicationDetail, applicationStatus, currentPath } = this.props;
+    const { statistics } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     const item = <Translation>{`app-${activeKey}`}</Translation>;
     let status = '';
@@ -90,7 +113,28 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
         </Row>
         <Row>
-          <Col span={24} className="padding16">
+          <Col span={12} className="padding16">
+            <Card>
+              <Row>
+                <Col span={6} style={{ padding: '22px 0' }}>
+                  <NumItem number={statistics?.envNumber} title={'Env Number'}></NumItem>
+                </Col>
+                <Col span={6} style={{ padding: '22px 0' }}>
+                  <NumItem
+                    number={statistics?.deliveryTargetNumber}
+                    title={'DeliveryTarget Number'}
+                  ></NumItem>
+                </Col>
+                <Col span={6} style={{ padding: '22px 0' }}>
+                  <NumItem number={statistics?.revisonNumber} title={'Revision Number'}></NumItem>
+                </Col>
+                <Col span={6} style={{ padding: '22px 0' }}>
+                  <NumItem number={statistics?.workflowNumber} title={'Workflow Number'}></NumItem>
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+          <Col span={12} className="padding16">
             <Card>todo:workflow-status</Card>
           </Col>
         </Row>

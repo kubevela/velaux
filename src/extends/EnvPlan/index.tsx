@@ -81,8 +81,9 @@ function EnvItem(props: EnvPlanParams) {
           <Form.Item required label={<Translation>Target Names</Translation>}>
             <Select
               className="select"
+              multiple
               {...props.init(`${props.id}-targetNames`, {
-                initValue: props.value?.targetNames && props.value?.targetNames[0],
+                initValue: props.value?.targetNames && props.value?.targetNames,
                 rules: [
                   {
                     required: true,

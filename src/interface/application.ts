@@ -12,7 +12,7 @@ export interface ApplicationDetail {
   resourceInfo: {
     componentNum: Number;
   };
-  envBinding: Array<EnvBinding>;
+  envBinding?: Array<EnvBinding>;
   workflowStatus?: Array<WorkflowStatus>;
 }
 
@@ -184,4 +184,11 @@ export interface Revisions {
   status?: string;
   triggerType?: string;
   version: string;
+}
+
+export interface ApplicationStatistics {
+  envNumber: number;
+  deliveryTargetNumber: number;
+  revisonNumber: number;
+  workflowNumber: number;
 }

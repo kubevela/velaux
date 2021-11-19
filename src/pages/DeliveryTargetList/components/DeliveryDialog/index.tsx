@@ -7,11 +7,12 @@ import { checkName } from '../../../../utils/common';
 import { createDeliveryTarget, updateDeliveryTarget } from '../../../../api/deliveryTarget';
 import { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import Translation from '../../../../components/Translation';
+import { Cluster } from '../../../../interface/cluster';
 
 type Props = {
   isEdit: boolean;
   visible: boolean;
-  clusterList?: [];
+  clusterList?: Array<Cluster>;
   namespaceList?: [];
   deliveryTargetItem?: DeliveryTarget;
   onOK: () => void;
@@ -27,7 +28,21 @@ class DeliveryDialog extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.field = new Field(this);
+    this.field = new Field(this, {
+      onChange: (name: string, value: any) => {
+        if (name == 'clusterName') {
+          props.clusterList?.map((cluster) => {
+            if ((cluster.name == value, cluster.providerInfo)) {
+              this.field.setValues({
+                var_region: cluster.providerInfo.regionID,
+                var_zone: cluster.providerInfo.zoneID,
+                var_vpcID: cluster.providerInfo.vpcID,
+              });
+            }
+          });
+        }
+      },
+    });
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -276,21 +291,12 @@ class DeliveryDialog extends React.Component<Props, State> {
                 >
                   <Row>
                     <Col span={12} style={{ padding: '0 8px' }}>
-                      <FormItem label={<Translation>Cloud Service Provider</Translation>} required>
+                      <FormItem label={<Translation>Cloud Service Provider</Translation>}>
                         <Select
                           className="select"
                           defaultValue="alibaba"
                           placeholder={t('Please chose').toString()}
-                          disabled
-                          {...init(`var_providerName`, {
-                            initValue: 'alibaba',
-                            rules: [
-                              {
-                                required: true,
-                                message: 'Please chose',
-                              },
-                            ],
-                          })}
+                          {...init(`var_providerName`)}
                           dataSource={[]}
                         />
                       </FormItem>

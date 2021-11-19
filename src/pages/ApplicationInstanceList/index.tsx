@@ -58,7 +58,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
 
   getInitCluster(envName: string) {
     const { applicationDetail = { envBinding: [] } } = this.props;
-    const envBinding: Array<EnvBinding> = applicationDetail.envBinding;
+    const envBinding: Array<EnvBinding> = applicationDetail?.envBinding || [];
+
     if (Array.isArray(envBinding) && envBinding.length !== 0) {
       const find = envBinding.find((item) => item.name === envName);
       return (find && find.targetNames && find.targetNames[0]) || '';

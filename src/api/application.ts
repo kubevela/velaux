@@ -176,3 +176,7 @@ export function listRevisions(query: listRevisionsQuery) {
   const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/revisions`;
   return get(url, { params: query }).then((res) => res);
 }
+
+export function getApplicationStatistics(params: { appName: string }) {
+  return get(`${application}/${params.appName}/statistics`, params).then((res) => res);
+}
