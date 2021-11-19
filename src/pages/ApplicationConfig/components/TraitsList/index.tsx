@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Card, Grid, Icon, Dialog } from '@b-design/ui';
 import { Trait } from '../../../../interface/application';
+import { momentDate } from '../../../../utils/common';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
@@ -54,7 +55,7 @@ class TraitsList extends Component<Props> {
                   </div>
                 </div>
                 <div className="traits-list-content">{item.description}</div>
-                <div className="traits-list-date">{item.createTime}</div>
+                <div className="traits-list-date">{momentDate(item.createTime)}</div>
               </Card>
             </Col>
           ))}
