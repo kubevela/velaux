@@ -7,11 +7,12 @@ import TableList from './components/List';
 import DeliveryDialog from './components/DeliveryDialog';
 import { DeliveryTarget } from '../../interface/deliveryTarget';
 import './index.less';
+import { Cluster } from '../../interface/cluster';
 
 type Props = {
   deliveryTargets?: [];
   total?: number;
-  clusterList?: [];
+  clusterList?: Array<Cluster>;
   namespaceList?: [];
   dispatch: ({}) => {};
   t: (key: string) => {};

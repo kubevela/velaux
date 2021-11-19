@@ -162,3 +162,7 @@ export function deleteTrait(query: TraitQuery) {
     : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
   return rdelete(url, {}).then((res) => res);
 }
+
+export function getApplicationStatistics(params: { appName: string }) {
+  return get(`${application}/${params.appName}/statistics`, params).then((res) => res);
+}

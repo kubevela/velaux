@@ -8,6 +8,14 @@ export interface Cluster {
   createTime?: string;
   dashboardURL?: string;
   labels?: {};
+  providerInfo?: {
+    provider: string;
+    clusterID: string;
+    clusterName?: string;
+    regionID?: string;
+    vpcID?: string;
+    zoneID?: string;
+  };
 }
 
 export interface CreateCluster {

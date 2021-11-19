@@ -172,6 +172,7 @@ class AddClustDialog extends React.Component<Props, State> {
           onCancel={this.onClose}
           onClose={this.onClose}
           footerActions={['ok', 'cancel']}
+          height="auto"
           footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>

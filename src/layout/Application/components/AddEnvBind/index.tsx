@@ -41,7 +41,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
   loadDeliveryTargets = async () => {
     const { applicationDetail } = this.props;
     if (applicationDetail) {
-      getDeliveryTarget({ namespace: applicationDetail?.namespace }).then((re) => {
+      getDeliveryTarget({ namespace: applicationDetail?.namespace, page: 0 }).then((re) => {
         this.setState({ targetList: re.deliveryTargets });
       });
     }
@@ -59,7 +59,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
         appName: applicationDetail && applicationDetail.name,
         name,
         alias,
-        targetNames: [targetNames], //TODO: after support multiple, must change it
+        targetNames,
         description,
       };
       this.onCreateApplicationEnv(params);
@@ -171,6 +171,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
               <FormItem label={<Translation>Delivery Target</Translation>} required>
                 <Select
                   name="targetNames"
+                  multiple
                   placeholder={'Select the delivery target corresponding to the environment.'}
                   {...init('targetNames', {
                     rules: [
