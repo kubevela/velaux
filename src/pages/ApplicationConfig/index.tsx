@@ -191,9 +191,10 @@ class ApplicationConfig extends Component<Props, State> {
                 </Col>
               </Row>
               <Row>
-                <Col span={12}>
+                <Col span={24}>
                   <Item
                     label="description"
+                    labelSpan={4}
                     value={applicationDetail && applicationDetail.description}
                   ></Item>
                 </Col>

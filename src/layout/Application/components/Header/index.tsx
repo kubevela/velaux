@@ -117,19 +117,19 @@ class ApplicationHeader extends Component<Props, State> {
             <Card>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.envNumber} title={'Env Number'}></NumItem>
+                  <NumItem number={statistics?.envCount} title={'Env Number'}></NumItem>
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
-                    number={statistics?.deliveryTargetNumber}
+                    number={statistics?.deliveryTargetCount}
                     title={'DeliveryTarget Number'}
                   ></NumItem>
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.revisonNumber} title={'Revision Number'}></NumItem>
+                  <NumItem number={statistics?.revisonCount} title={'Revision Number'}></NumItem>
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.workflowNumber} title={'Workflow Number'}></NumItem>
+                  <NumItem number={statistics?.workflowCount} title={'Workflow Number'}></NumItem>
                 </Col>
               </Row>
             </Card>

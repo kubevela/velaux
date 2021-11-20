@@ -81,78 +81,8 @@ class Workflow extends Component<Props, State> {
     });
   };
 
-  transData = (workflowList: Array<WorkFlowData>) => {
-    if (workflowList && workflowList.length != 0) {
-      const nodes: any = {};
-      const edges: any = {};
-      let position = 50;
-      workflowList.forEach((key: WorkFlowData) => {
-        key.steps &&
-          key.steps.forEach((item, index, array) => {
-            position += 200;
-            edges[item.name] = {};
-            edges[item.name]['dest'] = key.steps && key.steps[index].name;
-            edges[item.name]['dest'] = key.steps && key.steps[index].name;
-            edges[item.name]['diagramMakerData'] = {
-              selected: false,
-            };
-            edges[item.name]['id'] = item.name;
-            edges[item.name]['src'] =
-              key.steps && key.steps[index - 1] && key.steps[index - 1].name;
-
-            nodes[item.name] = {};
-            nodes[item.name]['id'] = item.name;
-            nodes[item.name]['typeId'] = item.type;
-            nodes[item.name]['consumerData'] = {
-              name: item.name,
-              type: item.type,
-            };
-            nodes[item.name]['diagramMakerData'] = {
-              position: {
-                x: position,
-                y: 100,
-              },
-              size: {
-                width: 120,
-                height: 40,
-              },
-              selected: false,
-            };
-          });
-
-        key['data'] = {
-          edges: edges,
-          nodes: nodes,
-        };
-      });
-
-      // const pp = [{
-      //   "appName": "web2",
-      //   "name": "app1",
-      //   "alias": "app1",
-      //   "description": "app description",
-      //   "option": {
-      //       "enable": true,
-      //       "default": true,
-      //       "edit": true
-      //   },
-      //   data:{
-      //     edges:edges,
-      //     nodes:nodes
-      //   }
-      // }]
-
-      // console.log('nodes', nodes);
-      // console.log('edges', edges)
-      // console.log('pp',pp)
-      // return pp;
-    }
-  };
-
   render() {
     const { workflowList, dispatch } = this.props;
-    console.log('workflowList', workflowList);
-    console.log('workFlowDefinitions', this.state.workFlowDefinitions);
 
     return (
       <div style={{ height: '100%' }} className="workflow-wraper">

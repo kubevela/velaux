@@ -232,7 +232,7 @@ class WorkflowForm extends Component<Props, State> {
             <Translation>Cancle</Translation>
           </Button>
           <Button type="primary" onClick={this.onSubmit}>
-            <Translation>Create</Translation>
+            <Translation>Confirm</Translation>
           </Button>
         </div>
       </div>

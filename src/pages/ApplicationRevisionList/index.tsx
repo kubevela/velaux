@@ -11,6 +11,7 @@ import './index.less';
 type Props = {
   revisions: [];
   applicationDetail?: ApplicationDetail;
+  envbinding?: Array<EnvBinding>;
   dispatch: ({}) => {};
   match: {
     params: {
@@ -97,13 +98,12 @@ class ApplicationRevisionList extends React.Component<Props, State> {
 
   render() {
     const { revisionsList } = this.state;
-    const { applicationDetail } = this.props;
-    const envBinding: Array<EnvBinding> = applicationDetail?.envBinding || [];
+    const { envbinding } = this.props;
 
     return (
       <div>
         <Header
-          envBinding={envBinding}
+          envBinding={envbinding}
           statusList={statusList}
           updateQuery={(params: {
             isChangeEnv?: boolean;
