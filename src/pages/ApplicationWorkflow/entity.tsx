@@ -45,16 +45,36 @@ export type WorkFlowOption = {
 };
 
 export type WorkFlowData = {
-  appName: string;
+  appName?: string;
   name: string;
   alias: string;
   description: string;
-  option: WorkFlowOption;
-  data: EdgesAndNodes;
+  option?: WorkFlowOption;
+  data?: EdgesAndNodes;
+  edit?: boolean;
+  enable?: boolean;
+  default?: boolean;
+  envName?: string;
+  createTime?: string;
+  updateTime?: string;
+  steps?: Array<Step>;
+  workflowRecord?: any;
 };
+
+export interface Step {
+  name: string;
+  alias?: string;
+  type: string;
+  description?: string;
+  dependsOn?: any;
+  properties?: string;
+  x?: number;
+  y?: number;
+}
 
 export interface WorkFlowNodeType {
   // Based on use case or leave empty
+  type: string;
 }
 
 export interface WorkFlowEdgeType {

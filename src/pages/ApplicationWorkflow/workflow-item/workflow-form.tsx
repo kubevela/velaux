@@ -1,29 +1,53 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Form, Field, Input, Button } from '@b-design/ui';
 import { DiagramMakerNode } from 'diagram-maker';
-import Group from '../../../extends/Group';
 import { WorkFlowNodeType } from '../entity';
+
+import { Grid, Field, Form, Select, Message, Button, Input, Loading } from '@b-design/ui';
+import { Rule } from '@alifd/field';
+import { withTranslation } from 'react-i18next';
+import Group from '../../../extends/Group';
+import { If } from 'tsx-control-statements/components';
+import { detailWorkFLowDefinition } from '../../../api/workflows';
+import { DefinitionDetail } from '../../../interface/application';
+import UISchema from '../../../components/UISchema';
+import Translation from '../../../components/Translation';
+import { checkName } from '../../../utils/common';
+
 import './index.less';
 
 type Props = {
   createOrUpdateNode: (data: any) => void;
   data: DiagramMakerNode<WorkFlowNodeType>;
+  workFlowDefinitions: [];
+  appName?: string;
+  componentName?: string;
+  closeDrawer?: () => void;
+  dispatch?: ({}) => {};
+  t: (key: string) => {};
 };
 
-type State = {};
+type State = {
+  definitionDetail?: DefinitionDetail;
+  definitionLoading: boolean;
+};
 
 class WorkflowForm extends Component<Props, State> {
-  field;
-
-  constructor(props: any) {
+  field: Field;
+  uiSchemaRef: React.RefObject<UISchema>;
+  constructor(props: Props) {
     super(props);
+    this.state = {
+      definitionLoading: false,
+    };
     this.field = new Field(this);
+    this.uiSchemaRef = React.createRef();
   }
 
   componentDidMount = () => {
     const { consumerData } = this.props.data;
     this.field.setValues(consumerData);
+    this.onDetailsComponeDefinition((consumerData && consumerData.type) || '');
   };
 
   submit = () => {
@@ -42,52 +66,173 @@ class WorkflowForm extends Component<Props, State> {
     }
   };
 
+  onSubmit = () => {
+    this.field.validate((error, values) => {
+      if (error) {
+        return;
+      }
+      this.props.createOrUpdateNode(values);
+    });
+  };
+
+  transDefinitions() {
+    const { workFlowDefinitions } = this.props;
+    return (workFlowDefinitions || []).map((item: { name: string }) => ({
+      lable: item.name,
+      value: item.name,
+    }));
+  }
+
+  onDetailsComponeDefinition = (value: string, callback?: () => void) => {
+    this.setState({ definitionLoading: true });
+    detailWorkFLowDefinition({ name: value })
+      .then((re) => {
+        if (re) {
+          this.setState({ definitionDetail: re, definitionLoading: false });
+          if (callback) {
+            callback();
+          }
+        }
+      })
+      .catch((err) => this.setState({ definitionLoading: false }));
+  };
+
+  handleChang = (value: string) => {
+    this.onDetailsComponeDefinition(value);
+    this.field.setValues({ type: value });
+  };
+
   render() {
     const { init } = this.field;
+    const { Row, Col } = Grid;
+    const FormItem = Form.Item;
+    const { t } = this.props;
+    const { definitionDetail, definitionLoading } = this.state;
+    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+      this.uiSchemaRef.current?.validate(callback);
+    };
+
     return (
-      <div className="workflow-form-container">
-        <div className="form-content">
-          <Form field={this.field}>
-            <Group title="节点基本信息" description="">
-              <Form.Item label="节点名称" required>
+      <div>
+        <Form field={this.field}>
+          <Row>
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>Workflow Type</Translation>} required>
+                <Select
+                  className="select"
+                  placeholder={t('Please chose').toString()}
+                  {...init(`type`, {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please chose',
+                      },
+                    ],
+                  })}
+                  dataSource={this.transDefinitions()}
+                  onChange={this.handleChang}
+                />
+              </FormItem>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <FormItem
+                label={<Translation>Name</Translation>}
+                labelTextAlign="left"
+                required={true}
+              >
                 <Input
+                  htmlType="name"
+                  name="name"
+                  maxLength={32}
+                  placeholder={t('Please enter').toString()}
                   {...init('name', {
                     rules: [
                       {
                         required: true,
+                        pattern: checkName,
+                        message: 'Please enter a valid application name',
                       },
                     ],
                   })}
                 />
-              </Form.Item>
-              <Form.Item label="节点类型" required>
-                <Input {...init('type')} />
-              </Form.Item>
-              <Form.Item label="节点别名">
-                <Input {...init('alias')} />
-              </Form.Item>
-              <Form.Item label="节点描述">
-                <Input {...init('description')} />
-              </Form.Item>
-            </Group>
-            {/* <Group title="节点关系" description="">
-                            <Form.Item label="节点依赖" required>
+              </FormItem>
+            </Col>
 
-                                <Input {...init('dependsOn')} />
-                            </Form.Item>
-                            <Form.Item label="节点输入" required>
-                                <Input {...init('inputs')} />
-                            </Form.Item>
-                            <Form.Item label="节点输出">
-                                <Input {...init('alias')} />
-                            </Form.Item>
-                        </Group> */}
-            <Group title="节点属性" description=""></Group>
-          </Form>
-        </div>
-        <div className="workflow-form-bottom">
-          <Button type="primary" onClick={this.submit}>
-            确定
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>Alias</Translation>}>
+                <Input
+                  name="alias"
+                  placeholder={t('Please enter').toString()}
+                  {...init('alias', {
+                    rules: [
+                      {
+                        minLength: 2,
+                        maxLength: 64,
+                        message: 'Enter a string of 2 to 64 characters.',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>Description</Translation>}>
+                <Input
+                  name="description"
+                  placeholder={t('Please enter').toString()}
+                  {...init('description', {
+                    rules: [
+                      {
+                        maxLength: 256,
+                        message: 'Enter a description that contains less than 256 characters.',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <Group
+                title="Workflow Properties"
+                description="Set the configuration parameters for the Workflow."
+                closed={false}
+                required={true}
+              >
+                <If condition={definitionDetail && definitionDetail.uiSchema}>
+                  <FormItem required={true}>
+                    <UISchema
+                      {...init(`properties`, {
+                        rules: [
+                          {
+                            validator: validator,
+                            message: 'Please check workflow deploy properties',
+                          },
+                        ],
+                      })}
+                      uiSchema={definitionDetail && definitionDetail.uiSchema}
+                      ref={this.uiSchemaRef}
+                    ></UISchema>
+                  </FormItem>
+                </If>
+              </Group>
+            </Col>
+          </Row>
+        </Form>
+
+        <div style={{ display: 'flex', justifyContent: 'end' }}>
+          <Button type="secondary" onClick={this.props.closeDrawer} className="margin-right-10">
+            <Translation>Cancle</Translation>
+          </Button>
+          <Button type="primary" onClick={this.onSubmit}>
+            <Translation>Confirm</Translation>
           </Button>
         </div>
       </div>
@@ -95,4 +240,4 @@ class WorkflowForm extends Component<Props, State> {
   }
 }
 
-export default WorkflowForm;
+export default withTranslation()(WorkflowForm);

@@ -5,6 +5,7 @@ import { Button } from '@b-design/ui';
 import { connect } from 'dva';
 import WrokflowComponent from './workflow-component';
 import { WorkFlowData } from './entity';
+import { getWorkFlowDefinitions } from '../../api/workflows';
 
 import './index.less';
 
@@ -13,7 +14,7 @@ type Props = {
   dispatch: ({}) => {};
   match: {
     params: {
-      workflowName: string;
+      appName: string;
     };
   };
   history: {
@@ -22,7 +23,8 @@ type Props = {
 };
 
 type State = {
-  value: string;
+  appName: string;
+  workFlowDefinitions: [];
 };
 
 @connect((store: any) => {
@@ -33,15 +35,39 @@ class Workflow extends Component<Props, State> {
     super(props);
     const { params } = this.props.match;
     this.state = {
-      value: params.workflowName,
+      appName: params.appName || '',
+      workFlowDefinitions: [],
     };
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.onGetWorkflow();
+    this.onGetWorkFlowdefinitions();
+  }
+
+  onGetWorkflow = () => {
+    this.props.dispatch({
+      type: 'workflow/getWrokflowList',
+      payload: {
+        appName: this.state.appName,
+      },
+    });
+  };
+
+  onGetWorkFlowdefinitions = async () => {
+    getWorkFlowDefinitions().then((res: any) => {
+      if (res) {
+        this.setState({
+          workFlowDefinitions: res && res.definitions,
+        });
+      }
+    });
+  };
+
   handleSelect = (e: string) => {
     this.props.history.push(`/workflows/${e}`, {});
     this.setState({
-      value: e,
+      appName: e,
     });
   };
 
@@ -57,6 +83,7 @@ class Workflow extends Component<Props, State> {
 
   render() {
     const { workflowList, dispatch } = this.props;
+
     return (
       <div style={{ height: '100%' }} className="workflow-wraper">
         <If condition={workflowList.length === 0}>
@@ -70,7 +97,14 @@ class Workflow extends Component<Props, State> {
         <If condition={workflowList.length > 0}>
           <React.Fragment>
             {workflowList.map((workflow: WorkFlowData) => (
-              <WrokflowComponent key={workflow.appName} data={workflow} dispatch={dispatch} />
+              <WrokflowComponent
+                key={workflow.name}
+                appName={this.state.appName}
+                data={workflow}
+                workFlowDefinitions={this.state.workFlowDefinitions}
+                getWorkflow={this.onGetWorkflow}
+                dispatch={dispatch}
+              />
             ))}
           </React.Fragment>
         </If>

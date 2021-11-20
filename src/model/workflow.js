@@ -1,4 +1,6 @@
 import _ from 'lodash';
+import { listWorkFlow, createWorkFlow, updateWorkFlow } from '../api/workflows';
+
 const WORKFLOW_TEMPLATE = {
   appName: '',
   name: '',
@@ -30,7 +32,13 @@ export default {
   },
   effects: {
     *getWrokflowList(action, { call, put }) {
-      yield put({ type: 'getWorkflowList', payload: [] });
+      const result = yield call(listWorkFlow, action.payload);
+      yield put({
+        type: 'updateWorkflow',
+        payload: {
+          workflowList: transData(result && result.workflows),
+        },
+      });
     },
 
     *removeWorkflow(action, { call, put, select }) {
@@ -41,13 +49,14 @@ export default {
     },
 
     *setEditView(action, { call, put, select }) {
-      const { name, edit } = action.payload;
+      const { name, edit, workFlowDefinitions } = action.payload;
 
       let { workflowList } = yield select((state) => state.workflow);
 
       workflowList = workflowList.map((workflow) => {
         if (workflow.name === name) {
           workflow.option.edit = edit;
+          workflow.workFlowDefinitions = workFlowDefinitions;
         }
         return workflow;
       });
@@ -69,26 +78,87 @@ export default {
 
     *saveWorkflow(action, { call, put, select }) {
       const originWorkflow = action.payload;
-      originWorkflow.option.edit = false;
-      const { alias, appName, name, description, option, data } = originWorkflow;
-      const workflow = { alias, appName, name, description };
+      (originWorkflow.option || {}).edit = false;
+      const {
+        alias,
+        appName,
+        name,
+        description,
+        envName = 'pod',
+        option = {},
+        data,
+      } = originWorkflow;
+      const workflow = { alias, appName, name, description, envName };
       workflow.enable = option.enable;
       workflow.default = option.default;
       const { nodes, edges } = data;
       const steps = Object.keys(nodes).map((key) => {
-        // 处理当前组件的依赖，遍历边
         let dependsOn = [];
         return nodes[key].consumerData;
       });
       workflow.steps = steps;
-
-      const { workflowList } = yield select((state) => state.workflow);
-      workflowList.forEach((item) => {
-        if ((item.name = originWorkflow.name)) {
-          item = originWorkflow;
-        }
-      });
-      yield put({ type: 'updateWorkflow', payload: { workflowList } });
+      yield call(createWorkFlow, workflow);
+      if (action.callback) {
+        action.callback();
+      }
     },
   },
 };
+
+function transData(workflowList = []) {
+  const newData = _.cloneDeep(workflowList);
+  if (newData && newData.length != 0) {
+    newData.forEach((key) => {
+      const nodes = {};
+      const edges = {};
+      let position = 50;
+      key.steps &&
+        key.steps.forEach((item, index, array) => {
+          position += 200;
+          edges[item.name] = {};
+          edges[item.name]['dest'] = key.steps && key.steps[index + 1] && key.steps[index + 1].name;
+          edges[item.name]['diagramMakerData'] = {
+            selected: false,
+          };
+          edges[item.name]['id'] = item.name;
+          edges[item.name]['src'] = key.steps && key.steps[index] && key.steps[index].name;
+
+          nodes[item.name] = {};
+          nodes[item.name]['id'] = item.name;
+          nodes[item.name]['typeId'] = item.type;
+          nodes[item.name]['consumerData'] = {
+            alias: item.alias || '',
+            dependsOn: null,
+            description: item.description || '',
+            name: item.name || '',
+            properties: item.properties || '',
+            type: item.type || '',
+          };
+          nodes[item.name]['diagramMakerData'] = {
+            position: {
+              x: position,
+              y: 100,
+            },
+            size: {
+              width: 120,
+              height: 40,
+            },
+            selected: false,
+          };
+        });
+      key['envName'] = key.envName;
+      key['option'] = {
+        edit: false,
+        enable: false,
+        default: key.default,
+      };
+      key['data'] = {
+        edges: edges,
+        nodes: nodes,
+      };
+    });
+    return newData;
+  } else {
+    return [];
+  }
+}

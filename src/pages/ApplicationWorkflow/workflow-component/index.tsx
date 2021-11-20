@@ -3,13 +3,17 @@ import { Dialog, Dropdown, Icon, Input, Menu, Form, Field, Message } from '@b-de
 import { If } from 'tsx-control-statements/components';
 import WorkFlowItem from '../workflow-item';
 import { checkName } from '../../../utils/common';
-import { WorkFlowData } from '../entity';
+import { WorkFlowData, WorkFlowOption } from '../entity';
+import { deleteWorkFlow } from '../../../api/workflows';
 import './index.less';
 
 type Props = {
+  getWorkflow: () => void;
   dispatch: ({}) => {};
   key: string;
+  appName: string;
   data: WorkFlowData;
+  workFlowDefinitions: [];
 };
 
 type State = {
@@ -36,6 +40,7 @@ class WorkFlowComponent extends Component<Props, State> {
       payload: {
         name,
         edit,
+        workFlowDefinitions: this.props.workFlowDefinitions,
       },
     });
   };
@@ -44,11 +49,11 @@ class WorkFlowComponent extends Component<Props, State> {
     Dialog.confirm({
       content: `确定删除${name}?`,
       onOk: () => {
-        this.props.dispatch({
-          type: 'workflow/removeWorkflow',
-          payload: {
-            name,
-          },
+        deleteWorkFlow({ name: name, appName: this.props.appName || '' }).then((re) => {
+          if (re) {
+            Message.success('delete success');
+            this.props.getWorkflow();
+          }
         });
       },
     });
@@ -75,25 +80,31 @@ class WorkFlowComponent extends Component<Props, State> {
         return;
       }
       const { name, alias, description } = values;
+      data.appName = data.appName || this.props.appName;
       data.name = name;
       data.alias = alias;
       data.description = description;
       data.data = workflowData;
+      debugger;
       this.props.dispatch({
         type: 'workflow/saveWorkflow',
         payload: data,
+        callback: () => {
+          this.props.getWorkflow();
+        },
       });
     });
   };
 
   render() {
-    const { data } = this.props;
+    const { data, workFlowDefinitions } = this.props;
     const { errorFocus } = this.state;
+    const option: WorkFlowOption = data.option || { default: true, edit: true, enable: true };
     const menu = (
       <Menu>
         <Menu.Item>查看历史记录</Menu.Item>
         <Menu.Item>设置为默认</Menu.Item>
-        <If condition={data.option.enable}>
+        <If condition={option.enable}>
           <Menu.Item
             onClick={() => {
               this.setWorkflowState(data.name, false);
@@ -102,7 +113,7 @@ class WorkFlowComponent extends Component<Props, State> {
             禁用
           </Menu.Item>
         </If>
-        <If condition={!data.option.enable}>
+        <If condition={!option.enable}>
           <Menu.Item
             onClick={() => {
               this.setWorkflowState(data.name, true);
@@ -124,11 +135,11 @@ class WorkFlowComponent extends Component<Props, State> {
       >
         <div className="workflow-component-title-container">
           <div className="workflow-component-title-content">
-            <If condition={!data.option.edit}>
+            <If condition={!option.edit}>
               <div className="workflow-title">{data.alias || data.name}</div>
               <div className="workflow-description">{data.description}</div>
             </If>
-            <If condition={data.option.edit}>
+            <If condition={option.edit}>
               <div className="workflow-description">
                 <Form field={this.field} inline>
                   <Form.Item required label="工作流名称">
@@ -160,7 +171,7 @@ class WorkFlowComponent extends Component<Props, State> {
             </If>
           </div>
           <div className="workflow-component-tips-container">
-            <If condition={!data.option.edit}>
+            <If condition={!option.edit}>
               <div
                 className="option-item"
                 onClick={() => {
@@ -170,7 +181,7 @@ class WorkFlowComponent extends Component<Props, State> {
                 编辑
               </div>
             </If>
-            <If condition={data.option.edit}>
+            <If condition={option.edit}>
               <div
                 className="option-item"
                 onClick={() => {
@@ -194,9 +205,10 @@ class WorkFlowComponent extends Component<Props, State> {
         <div className="workflow-detail-container">
           <WorkFlowItem
             ref={(ref) => (this.workflowItem = ref)}
-            data={data.data}
-            workflowId={data.appName}
-            edit={data.option.edit}
+            data={data.data || { nodes: {}, edges: {} }}
+            workflowId={data.appName || ''}
+            workFlowDefinitions={workFlowDefinitions}
+            edit={option.edit}
           />
         </div>
       </div>
