@@ -33,3 +33,6 @@ export const getDeliveryTarget_mock = '/mock/getDeliveryTarget.json';
 export const getTraitDefinitionsDetails_mock = '/mock/getTraitDefinitionsDetails.json';
 export const getTraitDefinitions_mock = '/mock/getTraitDefinitions.json';
 export const getTrait_mock = '/mock/getTrait.json';
+
+export const listWorkFlowDefintion_mock = '/mock/listWorkFlowDefintion.json';
+export const listWorkFlowDetailsDefintion_mock = '/mock/listWorkFlowDetailsDefintion.json';

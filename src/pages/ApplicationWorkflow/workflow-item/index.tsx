@@ -31,6 +31,7 @@ type WorkFlowItemProps = {
   workflowId: string;
   edit?: boolean;
   data: EdgesAndNodes;
+  workFlowDefinitions: [];
 };
 
 type State = {
@@ -305,6 +306,8 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
 
   render() {
     const { visible, currentSelectedNodeData } = this.state;
+    const { workFlowDefinitions } = this.props;
+
     return (
       <div>
         <div
@@ -316,11 +319,14 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
           title="编辑表单"
           placement="right"
           visible={visible}
+          width={800}
           onClose={() => this.closeDrawer()}
         >
           <WorkflowForm
             createOrUpdateNode={this.createOrUpdateNode}
             data={currentSelectedNodeData}
+            workFlowDefinitions={workFlowDefinitions}
+            closeDrawer={this.closeDrawer}
           />
         </Drawer>
       </div>

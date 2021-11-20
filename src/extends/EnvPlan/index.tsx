@@ -205,7 +205,7 @@ class EnvPlan extends React.Component<Props, State> {
           keyMap[keyId] = {};
         }
         if (keyName === 'targetNames') {
-          keyMap[keyId][keyName] = [values[key]];
+          keyMap[keyId][keyName] = values[key];
         } else {
           keyMap[keyId][keyName] = values[key];
         }
