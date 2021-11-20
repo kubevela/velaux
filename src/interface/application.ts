@@ -1,3 +1,5 @@
+import { DeliveryTarget } from './deliveryTarget';
+
 export interface ApplicationDetail {
   name: string;
   alias?: string;
@@ -12,7 +14,6 @@ export interface ApplicationDetail {
   resourceInfo: {
     componentNum: Number;
   };
-  envBinding?: Array<EnvBinding>;
   workflowStatus?: Array<WorkflowStatus>;
 }
 
@@ -21,9 +22,13 @@ export interface EnvBinding {
   alias?: string;
   description?: string;
   targetNames: Array<string>;
+  deliveryTargets?: Array<DeliveryTarget>;
   componentSelector?: {
     components: Array<string>;
   };
+  createTime?: string;
+  updateTime?: string;
+  appDeployName?: string;
 }
 
 export interface WorkflowStatus {
@@ -187,8 +192,8 @@ export interface Revisions {
 }
 
 export interface ApplicationStatistics {
-  envNumber: number;
-  deliveryTargetNumber: number;
-  revisonNumber: number;
-  workflowNumber: number;
+  envCount: number;
+  deliveryTargetCount: number;
+  revisonCount: number;
+  workflowCount: number;
 }

@@ -58,19 +58,15 @@ class TableList extends Component<Props, State> {
         },
       },
       {
-        key: 'clusterName/CloudProvider',
-        title: <Translation>Clusters Cloud Service Provider</Translation>,
+        key: 'clusterName/namespace',
+        title: <Translation>Cluster/Namespace</Translation>,
         dataIndex: 'clusterName/CloudProvider',
         cell: (v: string, i: number, record: DeliveryTarget) => {
-          if (record?.variable?.providerName) {
-            return (
-              <span>
-                {record?.cluster?.clusterName}/{record?.variable?.providerName}
-              </span>
-            );
-          } else {
-            return <span>{record?.cluster?.clusterName}</span>;
-          }
+          return (
+            <span>
+              {record?.cluster?.clusterName}/{record?.cluster?.namespace}
+            </span>
+          );
         },
       },
       {

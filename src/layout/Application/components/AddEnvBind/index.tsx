@@ -13,7 +13,6 @@ interface Props {
   onClose: () => void;
   onOK: () => void;
   applicationDetail?: ApplicationDetail;
-  dispatch?: ({}) => {};
 }
 
 interface State {
@@ -67,18 +66,17 @@ class EnvBindPlanDialog extends Component<Props, State> {
   };
 
   onCreateApplicationEnv(params: any) {
-    createApplicationEnv(params).then((res) => {
-      if (res) {
-        const { applicationDetail } = this.props;
-        Message.success(<Translation>Create Envbinding Success</Translation>);
-        this.props.onClose();
-        this.props.dispatch &&
-          this.props.dispatch({
-            type: 'application/getApplicationDetail',
-            payload: { appName: applicationDetail && applicationDetail.name },
-          });
-      }
-    });
+    createApplicationEnv(params)
+      .then((res) => {
+        if (res) {
+          const { applicationDetail } = this.props;
+          Message.success(<Translation>Create Envbinding Success</Translation>);
+          this.props.onOK();
+        }
+      })
+      .finally(() => {
+        this.setState({ loading: false });
+      });
   }
   render() {
     const { loading, targetList } = this.state;
