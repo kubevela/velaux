@@ -53,3 +53,8 @@ export function connectcloudCluster(params: any) {
   delete params.provider;
   return post(url, params).then((res) => res);
 }
+
+export function createClusterNamespace(params: { cluster: string; namespace: string }) {
+  const url = `${cluster}/${params.cluster}/namespaces`;
+  return post(url, { namespace: params.namespace }).then((res) => res);
+}

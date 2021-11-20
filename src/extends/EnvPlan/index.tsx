@@ -204,11 +204,7 @@ class EnvPlan extends React.Component<Props, State> {
         if (!keyMap[keyId]) {
           keyMap[keyId] = {};
         }
-        if (keyName === 'targetNames') {
-          keyMap[keyId][keyName] = [values[key]];
-        } else {
-          keyMap[keyId][keyName] = values[key];
-        }
+        keyMap[keyId][keyName] = values[key];
       });
       allValues = Object.keys(keyMap).map((key) => keyMap[key]);
       return allValues;

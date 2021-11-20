@@ -6,6 +6,7 @@ import {
   getApplicationComponents,
   getPolicyList,
   getComponentdefinitions,
+  getApplicationEnvbinding,
 } from '../api/application';
 
 import { getNamespaceList } from '../api/namespace';
@@ -23,6 +24,7 @@ export default {
     components: [],
     componentDefinitions: [],
     componentDetails: {},
+    envbinding: [],
   },
   reducers: {
     update(state, { type, payload }) {
@@ -43,10 +45,16 @@ export default {
         applicationDetail: payload,
       };
     },
+    updateApplicationEnvbinding(state, { type, payload }) {
+      return {
+        ...state,
+        envbinding: payload.envBindings || [],
+      };
+    },
     updateApplicationStatus(state, { type, payload }) {
       return {
         ...state,
-        applicationStatus: payload,
+        applicationStatus: payload.status,
       };
     },
     updateComponents(state, { type, payload }) {
@@ -108,11 +116,19 @@ export default {
         action.callback(result);
       }
     },
+    *getApplicationEnvbinding(action, { call, put }) {
+      const { appName } = action.payload;
+      const result = yield call(getApplicationEnvbinding, { appName: appName });
+      yield put({ type: 'updateApplicationEnvbinding', payload: result });
+      if (action.callback && result) {
+        action.callback(result);
+      }
+    },
     *getApplicationStatus(action, { call, put }) {
       const { appName, envName } = action.payload;
       const result = yield call(getApplicationStatus, { name: appName, envName: envName });
       yield put({ type: 'updateApplicationStatus', payload: result });
-      if (action.callback && result) {
+      if (action.callback) {
         action.callback(result);
       }
     },

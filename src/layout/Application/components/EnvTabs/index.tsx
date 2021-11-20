@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import { Tab, Grid } from '@b-design/ui';
 import './index.less';
 import Translation from '../../../../components/Translation';
-import { ApplicationDetail } from '../../../../interface/application';
+import { ApplicationDetail, EnvBinding } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import AddEnvBind from '../AddEnvBind';
 import { Link } from 'dva/router';
@@ -12,7 +12,8 @@ const { Row, Col } = Grid;
 type Props = {
   activeKey: string;
   applicationDetail?: ApplicationDetail;
-  dispatch?: () => {};
+  dispatch: ({}) => {};
+  envbinding?: Array<EnvBinding>;
 };
 
 type State = {
@@ -31,9 +32,17 @@ class TabsContent extends Component<Props, State> {
   }
 
   handleChange = (key: string | number) => {};
-
+  loadEnvbinding = async () => {
+    const { applicationDetail } = this.props;
+    if (applicationDetail) {
+      this.props.dispatch({
+        type: 'application/getApplicationEnvbinding',
+        payload: { appName: applicationDetail.name },
+      });
+    }
+  };
   render() {
-    const { activeKey, applicationDetail } = this.props;
+    const { activeKey, applicationDetail, envbinding } = this.props;
     const { visibleEnvPlan } = this.state;
     return (
       <div className="padding16">
@@ -49,7 +58,7 @@ class TabsContent extends Component<Props, State> {
                   }
                   key={'basisConfig'}
                 ></Tab.Item>
-                {((applicationDetail && applicationDetail.envBinding) || []).map((item) => {
+                {envbinding?.map((item) => {
                   return (
                     <Tab.Item
                       title={
@@ -86,6 +95,7 @@ class TabsContent extends Component<Props, State> {
               this.setState({ visibleEnvPlan: false });
             }}
             onOK={() => {
+              this.loadEnvbinding();
               this.setState({ visibleEnvPlan: false });
             }}
           ></AddEnvBind>

@@ -26,7 +26,7 @@ class ApplicationLayout extends Component<Props, any> {
 
   componentDidMount() {
     this.onGetApplicationDetails();
-    this.getApplicationList();
+    this.loadApplicationEnvbinding();
     this.getNamespaceList();
   }
 
@@ -46,12 +46,6 @@ class ApplicationLayout extends Component<Props, any> {
     });
   };
 
-  getApplicationList = async () => {
-    this.props.dispatch({
-      type: 'application/getApplicationList',
-    });
-  };
-
   getNamespaceList = async () => {
     this.props.dispatch({
       type: 'application/getNamespaceList',
@@ -59,14 +53,14 @@ class ApplicationLayout extends Component<Props, any> {
     });
   };
 
-  loadApplicationStatus = async () => {
+  loadApplicationEnvbinding = async () => {
     const {
-      params: { appName, envName },
+      params: { appName },
     } = this.props.match;
-    if (envName) {
+    if (appName) {
       this.props.dispatch({
-        type: 'application/getApplicationStatus',
-        payload: { appName: appName, envName: envName },
+        type: 'application/getApplicationEnvbinding',
+        payload: { appName: appName },
       });
     }
   };
@@ -83,7 +77,7 @@ class ApplicationLayout extends Component<Props, any> {
 
   render() {
     const { loading, activeName } = this.state;
-    const { children } = this.props;
+    const { children, dispatch } = this.props;
     const {
       path,
       params: { appName, envName },
@@ -99,7 +93,7 @@ class ApplicationLayout extends Component<Props, any> {
     return (
       <div className="applayout">
         <Header currentPath={path}></Header>
-        <EnvTabs activeKey={envName ? envName : 'basisConfig'}></EnvTabs>
+        <EnvTabs dispatch={dispatch} activeKey={envName ? envName : 'basisConfig'}></EnvTabs>
         <Row className="padding16 main">
           <div className="menu">
             <Menus currentPath={path} appName={appName} envName={envName}></Menus>

@@ -2,11 +2,13 @@ import React from 'react';
 import { connect } from 'dva';
 import { Table, Button, Message } from '@b-design/ui';
 import { listApplicationPods, listApplicationPodsDetails } from '../../api/observation';
-import { ApplicationDetail, EnvBinding } from '../../interface/application';
+import { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
 import { PodBase, Container, Event } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
 import Header from './components/Hearder';
+import { DeliveryTarget } from '../../interface/deliveryTarget';
+import { Link } from 'dva/router';
 const { Column } = Table;
 
 type Props = {
@@ -14,16 +16,19 @@ type Props = {
   match: {
     params: {
       envName: string;
+      appName: string;
     };
   };
   applicationDetail?: ApplicationDetail;
+  applicationStatus?: ApplicationStatus;
+  envbinding: Array<EnvBinding>;
 };
 
 type State = {
   podList?: Array<PodBase>;
   envName: string;
   loading: boolean;
-  cluster: string;
+  target?: DeliveryTarget;
   containers?: Array<Container>;
   events?: Array<Event>;
 };
@@ -38,58 +43,96 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     this.state = {
       envName: params.envName,
       loading: true,
-      cluster: this.getInitCluster(params.envName),
     };
   }
 
   componentDidMount() {
-    this.loadAppPods();
+    this.loadApplicationStatus();
   }
 
   componentWillReceiveProps(nextProps: any) {
     const { params } = nextProps.match;
     if (params.envName !== this.state.envName) {
-      const cluster = this.getInitCluster(params.envName);
-      this.setState({ envName: params.envName, cluster: cluster }, () => {
-        this.loadAppPods();
+      this.setState({ envName: params.envName }, () => {
+        this.loadApplicationStatus();
       });
     }
   }
 
-  getInitCluster(envName: string) {
-    const { applicationDetail = { envBinding: [] } } = this.props;
-    const envBinding: Array<EnvBinding> = applicationDetail?.envBinding || [];
-
-    if (Array.isArray(envBinding) && envBinding.length !== 0) {
-      const find = envBinding.find((item) => item.name === envName);
-      return (find && find.targetNames && find.targetNames[0]) || '';
+  loadApplicationStatus = async () => {
+    const {
+      params: { appName, envName },
+    } = this.props.match;
+    if (envName) {
+      this.props.dispatch({
+        type: 'application/getApplicationStatus',
+        payload: { appName: appName, envName: envName },
+        callback: () => {
+          this.setState({ podList: [] });
+          this.loadAppPods();
+        },
+      });
     }
-    return '';
-  }
+  };
+
+  loadApplicationEnvbinding = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    if (appName) {
+      this.props.dispatch({
+        type: 'application/getApplicationEnvbinding',
+        payload: { appName: appName },
+      });
+    }
+  };
 
   loadAppPods = async () => {
-    const { applicationDetail } = this.props;
-    if (applicationDetail && applicationDetail.name) {
+    const { applicationDetail, envbinding, applicationStatus } = this.props;
+    const {
+      params: { appName, envName },
+    } = this.props.match;
+    const { target } = this.state;
+    const envs = envbinding.filter((item) => item.name == envName);
+    if (
+      applicationDetail &&
+      applicationDetail.name &&
+      envs.length > 0 &&
+      applicationStatus &&
+      applicationStatus.services?.length
+    ) {
+      const conponentName = applicationStatus.services[0].name;
       this.setState({ loading: true });
-      listApplicationPods({
-        appName: applicationDetail.name,
+      const param = {
+        appName: envs[0].appDeployName || appName + '-' + envName,
         namespace: applicationDetail.namespace,
-        componentName: applicationDetail.name,
-        cluster: this.state.cluster || '',
-      })
+        componentName: conponentName,
+        cluster: '',
+      };
+      if (target) {
+        param.cluster = target.cluster?.clusterName || '';
+      }
+      listApplicationPods(param)
         .then((re) => {
-          if (re && re.error) {
-            Message.warning(re.error);
-          } else if (re && re.podList) {
+          if (re && re.podList) {
             this.setState({ podList: re.podList });
           }
         })
         .finally(() => {
           this.setState({ loading: false });
         });
+    } else {
+      this.setState({ loading: false });
     }
   };
   getCloumns = () => {
+    const { applicationDetail } = this.props;
+    const getColor = (status: string) => {
+      switch (status) {
+        case 'Running':
+          return '#28a745';
+      }
+    };
     return [
       {
         key: 'podName',
@@ -109,7 +152,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         title: <Translation>Status</Translation>,
         dataIndex: 'status',
         cell: (v: string) => {
-          return <span>{v}</span>;
+          return <span style={{ color: getColor(v) }}>{v}</span>;
         },
       },
       {
@@ -117,7 +160,11 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         title: <Translation>Revision</Translation>,
         dataIndex: 'publishVersion',
         cell: (v: string) => {
-          return <span>{v}</span>;
+          return (
+            <span>
+              <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
+            </span>
+          );
         },
       },
       {
@@ -143,28 +190,27 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     ];
   };
 
-  updateQuery = (cluster: string) => {
-    this.setState({ cluster }, () => {
-      this.loadAppPods();
-    });
+  updateQuery = (targetName: string) => {
+    const targets = this.getTargets()?.filter((item) => item.name == targetName);
+    if (targets?.length) {
+      this.setState({ target: targets[0] }, () => {
+        this.loadAppPods();
+      });
+    }
   };
 
-  getTargetName = () => {
-    const { envName } = this.state;
-    const { applicationDetail } = this.props;
-    const { envBinding } = applicationDetail || {};
-    if (Array.isArray(envBinding) && envBinding.length !== 0) {
-      const find = envBinding.find((item) => item.name === envName);
-      return (find && find.targetNames) || [];
-    } else {
-      return [];
+  getTargets = () => {
+    const { envbinding, match } = this.props;
+    const env = envbinding.filter((item) => item.name == match.params.envName);
+    if (env.length > 0) {
+      return env[0].deliveryTargets;
     }
+    return [];
   };
 
   onRowOpen = (openRowKeys: any, currentRowKey: string, expanded: boolean, currentRecord: any) => {
     if (expanded && currentRecord) {
-      const { podName, clusterName } = currentRecord;
-      const namespace = this.props.applicationDetail && this.props.applicationDetail.namespace;
+      const { podName, clusterName, namespace } = currentRecord;
       listApplicationPodsDetails({
         name: podName || '',
         namespace: namespace || '',
@@ -187,7 +233,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   };
 
   render() {
-    const { podList, loading, cluster, containers = [], events = [] } = this.state;
+    const { applicationStatus, applicationDetail } = this.props;
+    const { podList, loading, containers = [], events = [] } = this.state;
     const columns = this.getCloumns();
     const expandedRowRender = (record: PodBase, index: number) => {
       return (
@@ -196,14 +243,19 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         </div>
       );
     };
-
+    const {
+      params: { envName },
+    } = this.props.match;
     return (
       <div>
         <Header
-          cluster={cluster}
-          targetNames={this.getTargetName()}
-          updateQuery={(cluster: string) => {
-            this.updateQuery(cluster);
+          targets={this.getTargets()}
+          envName={envName}
+          loadApplicationEnvbinding={this.loadApplicationEnvbinding}
+          applicationDetail={applicationDetail}
+          applicationStatus={applicationStatus}
+          updateQuery={(targetName: string) => {
+            this.updateQuery(targetName);
           }}
         />
         <Table

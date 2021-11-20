@@ -10,9 +10,7 @@ interface Label {
 
 type Props = {
   statusList: Array<Label>;
-  envBinding: Array<EnvBinding>;
-  clusterList?: [];
-  namespaceList?: [];
+  envBinding?: Array<EnvBinding>;
   updateQuery: (params: { isChangeEnv?: boolean; isChangeStatus?: boolean; value: string }) => void;
   t: (key: string) => {};
   dispatch?: ({}) => {};

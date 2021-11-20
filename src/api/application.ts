@@ -129,6 +129,20 @@ export function createApplicationEnv(params: { appName?: string }) {
   return post(url, params).then((res) => res);
 }
 
+export function getApplicationEnvbinding(params: { appName: string }) {
+  return get(`${application}/${params.appName}/envs`, params).then((res) => res);
+}
+
+export function deleteApplicationEnvbinding(params: { appName: string; envName: string }) {
+  return rdelete(`${application}/${params.appName}/envs/${params.envName}`, {}).then((res) => res);
+}
+
+export function recycleApplicationEnvbinding(params: { appName: string; envName: string }) {
+  return post(`${application}/${params.appName}/envs/${params.envName}/recycle`, {}).then(
+    (res) => res,
+  );
+}
+
 export function getTraitDefinitions() {
   const url = isMock ? `${getTraitDefinitions_mock}` : `${componentdefinition}`;
   return get(url, { params: { type: 'trait' } }).then((res) => res);

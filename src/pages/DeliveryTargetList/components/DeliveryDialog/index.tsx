@@ -2,12 +2,15 @@ import React from 'react';
 import { Message, Grid, Dialog, Form, Input, Field, Select } from '@b-design/ui';
 import { addDeliveryTargetList, editDeliveryTargetList } from '../../../../constants';
 import Group from '../../../../extends/Group';
-import NameSpaceForm from '../../../ApplicationList/components/GeneralConfig/namespace-form';
+import Namespace from '../Namespace';
+import { NamespaceItem } from '../Namespace';
 import { checkName } from '../../../../utils/common';
 import { createDeliveryTarget, updateDeliveryTarget } from '../../../../api/deliveryTarget';
 import { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import Translation from '../../../../components/Translation';
 import { Cluster } from '../../../../interface/cluster';
+import { listNamespaces } from '../../../../api/observation';
+import NameSpaceForm from '../../../ApplicationList/components/GeneralConfig/namespace-form';
 
 type Props = {
   isEdit: boolean;
@@ -21,7 +24,10 @@ type Props = {
   t: (key: string) => {};
 };
 
-type State = {};
+type State = {
+  cluster?: string;
+  namespaces: Array<NamespaceItem>;
+};
 
 class DeliveryDialog extends React.Component<Props, State> {
   field: Field;
@@ -31,6 +37,10 @@ class DeliveryDialog extends React.Component<Props, State> {
     this.field = new Field(this, {
       onChange: (name: string, value: any) => {
         if (name == 'clusterName') {
+          this.setState({ namespaces: [] }, () => {
+            this.loadNamespaces(value);
+          });
+          this.field.setValue('runtimeNamespace', '');
           props.clusterList?.map((cluster) => {
             if ((cluster.name == value, cluster.providerInfo)) {
               this.field.setValues({
@@ -43,6 +53,9 @@ class DeliveryDialog extends React.Component<Props, State> {
         }
       },
     });
+    this.state = {
+      namespaces: [],
+    };
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -59,14 +72,15 @@ class DeliveryDialog extends React.Component<Props, State> {
         name,
         alias,
         description,
-        project: namespace,
+        namespace: namespace,
         clusterName: cluster.clusterName,
-        namespace: cluster.namespace,
+        runtimeNamespace: cluster.namespace,
         var_providerName: variable.providerName,
         var_region: variable.region,
         var_zone: variable.zone,
         var_vpcID: variable.vpcID,
       });
+      this.loadNamespaces(cluster.clusterName);
     }
   }
 
@@ -147,10 +161,23 @@ class DeliveryDialog extends React.Component<Props, State> {
 
   transCluster = () => {
     const { clusterList } = this.props;
-    return (clusterList || []).map((item: { name: string }) => ({
-      lable: item.name,
+    return (clusterList || []).map((item) => ({
+      label: item.alias || item.name,
       value: item.name,
     }));
+  };
+
+  loadNamespaces = async (cluster: string) => {
+    if (cluster) {
+      listNamespaces({ cluster: cluster }).then((re) => {
+        if (re && re.list) {
+          const namespaces = re.list.map((item: any) => {
+            return { label: item.metadata.name, value: item.metadata.name };
+          });
+          this.setState({ namespaces: namespaces });
+        }
+      });
+    }
   };
 
   render() {
@@ -167,7 +194,8 @@ class DeliveryDialog extends React.Component<Props, State> {
     };
 
     const { t, visible, isEdit, namespaceList = [] } = this.props;
-
+    const { namespaces } = this.state;
+    const cluster: string = this.field.getValue('clusterName');
     return (
       <div>
         <Dialog
@@ -245,15 +273,15 @@ class DeliveryDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Cluster Screening</Translation>} required>
+                <FormItem label={<Translation>Cluster Selector</Translation>} required>
                   <Select
                     className="select"
-                    placeholder={t('Please chose').toString()}
+                    placeholder={t('Please select').toString()}
                     {...init(`clusterName`, {
                       rules: [
                         {
                           required: true,
-                          message: 'Please chose',
+                          message: 'Please select',
                         },
                       ],
                     })}
@@ -262,22 +290,20 @@ class DeliveryDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={<Translation>Cluster Namesapce</Translation>}
-                  help="If left blank, the namespace is automatically created"
-                >
-                  <Input
-                    name="runtimeNamespace"
-                    placeholder={t('Please enter').toString()}
-                    {...init('runtimeNamespace', {
+                <FormItem label={<Translation>Namespace Selector</Translation>} required>
+                  <Namespace
+                    {...init(`runtimeNamespace`, {
                       rules: [
                         {
-                          maxLength: 256,
-                          message: 'Specify a correct namespace in the cluster',
+                          required: true,
+                          message: 'Please select namesapce',
                         },
                       ],
                     })}
-                  />
+                    namespaces={namespaces}
+                    loadNamespaces={this.loadNamespaces}
+                    cluster={cluster}
+                  ></Namespace>
                 </FormItem>
               </Col>
             </Row>
