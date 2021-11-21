@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Drawer } from '@b-design/ui';
+import { Drawer, Message } from '@b-design/ui';
 import {
   DiagramMaker,
   DiagramMakerData,
@@ -89,6 +89,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
         },
         renderCallbacks: {
           node: (node: DiagramMakerNode<{}>, container: HTMLElement) => {
+            console.log(node);
             ReactDOM.render(
               <WorkFlowNode
                 id={node.id}
@@ -101,6 +102,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
             );
           },
           edge: (edge: DiagramMakerEdge<{}>, container: HTMLElement) => {
+            console.log(edge);
             ReactDOM.render(<WorkFlowEdge id={edge.id} data={edge.consumerData} />, container);
           },
           destroy: (container: HTMLElement) => {
@@ -141,6 +143,24 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
             connectorPlacementOverride: ConnectorPlacement.LEFT_RIGHT,
             visibleConnectorTypes: VisibleConnectorTypes.NONE,
           },
+        },
+        actionInterceptor: (action: any, dispatch, getState) => {
+          const { edges } = getState();
+          if (action.type == 'EDGE_CREATE' && action.payload) {
+            if (action.payload.src && edges[action.payload.src] && edges[action.payload.src].dest) {
+              Message.warning('Process forking is not supported 1');
+              return;
+            }
+            if (action.payload.dest) {
+              for (var key in edges) {
+                if (edges[key].dest == action.payload.dest) {
+                  Message.warning('Process forking is not supported 2');
+                  return;
+                }
+              }
+            }
+          }
+          dispatch(action);
         },
       },
       {
@@ -213,6 +233,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     state: DiagramMakerData<WorkFlowNodeType, WorkFlowEdgeType>,
     diagramMakerContainer: HTMLElement,
   ) => {
+    const { workFlowDefinitions } = this.props;
     let parentContainer = diagramMakerContainer.parentElement;
     if (parentContainer) {
       parentContainer.style.display = 'block';
@@ -221,7 +242,11 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
       parentContainer.style.display = 'none';
     }
     ReactDOM.render(
-      <WorkFlowPannel id={panel.id} workflowId={this.props.workflowId} />,
+      <WorkFlowPannel
+        definitions={workFlowDefinitions}
+        id={panel.id}
+        workflowId={this.props.workflowId}
+      />,
       diagramMakerContainer,
     );
   };

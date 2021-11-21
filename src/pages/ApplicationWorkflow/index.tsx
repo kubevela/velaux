@@ -64,22 +64,7 @@ class Workflow extends Component<Props, State> {
     });
   };
 
-  handleSelect = (e: string) => {
-    this.props.history.push(`/workflows/${e}`, {});
-    this.setState({
-      appName: e,
-    });
-  };
-
-  addWrokflow = () => {
-    const appName = _.get(this, 'props.match.params.workflowName', ''); // 获取appName
-    this.props.dispatch({
-      type: 'workflow/addWrokflow',
-      payload: {
-        appName,
-      },
-    });
-  };
+  addWrokflow = () => {};
 
   render() {
     const { workflowList, dispatch } = this.props;

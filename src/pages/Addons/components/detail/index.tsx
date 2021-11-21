@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button, Loading, Field, Card, Dialog } from '@b-design/ui';
+import { Form, Button, Loading, Field, Card, Dialog, Table, Message } from '@b-design/ui';
 import { addonDetail } from '../../../../constants';
 import { Rule } from '@alifd/field';
 import { If } from 'tsx-control-statements/components';
@@ -161,28 +161,62 @@ class AddonDetailDialog extends React.Component<Props, State> {
                 </Form>
               </Group>
             </If>
-            <Card contentHeight="auto" title={<Translation>Dependences</Translation>}>
-              <ul>
-                {addonDetailInfo.dependencies?.map((item) => {
-                  return (
-                    <li className="dependen-item" key={item.name}>
-                      <a
-                        onClick={() => {
-                          showAddon && showAddon(item.name);
-                        }}
-                      >
-                        {item.name}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </Card>
-            <Card
-              contentHeight="auto"
-              title={<Translation>Definitions</Translation>}
-              style={{ marginTop: '16px' }}
-            ></Card>
+            <If condition={addonDetailInfo.dependencies}>
+              <Card contentHeight="auto" title={<Translation>Dependences</Translation>}>
+                <Message type="notice" style={{ marginBottom: '16px' }}>
+                  <Translation>Ensure that dependent addon are enabled first.</Translation>
+                </Message>
+                <ul>
+                  {addonDetailInfo.dependencies?.map((item) => {
+                    return (
+                      <li className="dependen-item" key={item.name}>
+                        <a
+                          onClick={() => {
+                            showAddon && showAddon(item.name);
+                          }}
+                        >
+                          {item.name}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Card>
+            </If>
+            <If condition={addonDetailInfo.definitions}>
+              <Card
+                contentHeight="auto"
+                title={<Translation>Definitions</Translation>}
+                style={{ marginTop: '16px' }}
+              >
+                <Message type="notice" style={{ marginBottom: '16px' }}>
+                  <Translation>
+                    Enable the addon to obtain the following extension capabilities.
+                  </Translation>
+                </Message>
+                <Table dataSource={addonDetailInfo.definitions}>
+                  <Table.Column
+                    dataIndex="name"
+                    align="left"
+                    title={<Translation>Name</Translation>}
+                  ></Table.Column>
+                  <Table.Column
+                    dataIndex="type"
+                    align="left"
+                    width="100px"
+                    cell={(v: string) => {
+                      return <Translation>{v}</Translation>;
+                    }}
+                    title={<Translation>Type</Translation>}
+                  ></Table.Column>
+                  <Table.Column
+                    dataIndex="description"
+                    align="left"
+                    title={<Translation>Description</Translation>}
+                  ></Table.Column>
+                </Table>
+              </Card>
+            </If>
             <Card
               contentHeight="auto"
               title={<Translation>Readme</Translation>}
