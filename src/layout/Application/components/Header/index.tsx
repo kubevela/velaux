@@ -1,15 +1,32 @@
-import { Grid, Card, Breadcrumb, Button, Message } from '@b-design/ui';
+import {
+  Grid,
+  Card,
+  Breadcrumb,
+  Button,
+  Message,
+  Icon,
+  Dropdown,
+  Menu,
+  Dialog,
+} from '@b-design/ui';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 import Translation from '../../../../components/Translation';
-import { deployApplication, getApplicationStatistics } from '../../../../api/application';
+import {
+  deployApplication,
+  getApplicationStatistics,
+  getApplicationWorkflowRecord,
+} from '../../../../api/application';
 import {
   ApplicationDetail,
   ApplicationStatus,
   ApplicationStatistics,
+  Workflow,
+  WorkflowStatus,
 } from '../../../../interface/application';
 import NumItem from '../../../../components/NumItem';
 import { Link } from 'dva/router';
+import { handleError, APIError } from '../../../../utils/errors';
 
 const { Row, Col } = Grid;
 
@@ -17,13 +34,13 @@ interface Props {
   currentPath: string;
   applicationDetail?: ApplicationDetail;
   applicationStatus?: { status?: ApplicationStatus };
+  workflows?: Array<Workflow>;
 }
 
 interface State {
   loading: boolean;
-  force: boolean;
-  workflowName?: string;
   statistics?: ApplicationStatistics;
+  records?: Array<WorkflowStatus>;
 }
 
 @connect((store: any) => {
@@ -34,24 +51,38 @@ class ApplicationHeader extends Component<Props, State> {
     super(props);
     this.state = {
       loading: true,
-      force: false,
     };
   }
 
-  onDeploy = () => {
+  onDeploy = (workflowName?: string, force?: boolean) => {
     const { applicationDetail } = this.props;
-    const { force, workflowName } = this.state;
     if (applicationDetail) {
-      deployApplication({
-        appName: applicationDetail.name,
-        workflowName: workflowName,
-        triggerType: 'web',
-        force: force,
-      }).then((re) => {
-        if (re) {
-          Message.success('deploy application success');
-        }
-      });
+      deployApplication(
+        {
+          appName: applicationDetail.name,
+          workflowName: workflowName,
+          triggerType: 'web',
+          force: force || false,
+        },
+        true,
+      )
+        .then((re) => {
+          if (re) {
+            Message.success('deploy application success');
+          }
+        })
+        .catch((err: APIError) => {
+          if (err.BusinessCode === 10004) {
+            Dialog.confirm({
+              content: 'Workflow is executing. Do you want to force a restart?',
+              onOk: () => {
+                this.onDeploy(workflowName, true);
+              },
+            });
+          } else {
+            handleError(err);
+          }
+        });
     } else {
       Message.warning('Please wait');
     }
@@ -70,22 +101,27 @@ class ApplicationHeader extends Component<Props, State> {
     }
   };
 
+  loadworkflowRecord = async () => {
+    const { applicationDetail } = this.props;
+    if (applicationDetail && applicationDetail.name) {
+      getApplicationWorkflowRecord({ appName: applicationDetail?.name }).then((re) => {
+        if (re) {
+          this.setState({ records: re.records });
+        }
+      });
+    }
+  };
+
   componentDidMount() {
     this.loadAppStatistics();
+    this.loadworkflowRecord();
   }
 
   render() {
-    const { applicationDetail, applicationStatus, currentPath } = this.props;
-    const { statistics } = this.state;
+    const { applicationDetail, currentPath, workflows } = this.props;
+    const { statistics, records } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     const item = <Translation>{`app-${activeKey}`}</Translation>;
-    let status = '';
-    if (applicationStatus && !applicationStatus.status) {
-      status = 'UnDeploy';
-    }
-    if (applicationStatus && applicationStatus.status) {
-      status = applicationStatus.status.status;
-    }
     return (
       <div>
         <Row>
@@ -107,9 +143,31 @@ class ApplicationHeader extends Component<Props, State> {
               type="notice"
               title="Application configuration changes take effect only after deploy."
             ></Message>
-            <Button style={{ marginLeft: '16px' }} type="primary" onClick={this.onDeploy}>
+            <Button style={{ marginLeft: '16px' }} type="primary" onClick={() => this.onDeploy()}>
               <Translation>Deploy</Translation>
             </Button>
+            <Dropdown
+              trigger={
+                <Button type="primary">
+                  <Icon type="ellipsis-vertical" />
+                </Button>
+              }
+            >
+              <Menu>
+                {workflows?.map((item) => {
+                  return (
+                    <Menu.Item
+                      onClick={() => {
+                        this.onDeploy(item.name);
+                      }}
+                      key={item.name}
+                    >
+                      <Translation>Execute Workflow</Translation> {item.alias || item.name}
+                    </Menu.Item>
+                  );
+                })}
+              </Menu>
+            </Dropdown>
           </Col>
         </Row>
         <Row>
@@ -117,25 +175,31 @@ class ApplicationHeader extends Component<Props, State> {
             <Card>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.envCount} title={'Env Number'}></NumItem>
+                  <NumItem number={statistics?.envCount} title={'Env Count'}></NumItem>
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
                     number={statistics?.deliveryTargetCount}
-                    title={'DeliveryTarget Number'}
+                    title={'DeliveryTarget Count'}
                   ></NumItem>
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.revisonCount} title={'Revision Number'}></NumItem>
+                  <NumItem number={statistics?.revisonCount} title={'Revision Count'}></NumItem>
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.workflowCount} title={'Workflow Number'}></NumItem>
+                  <NumItem number={statistics?.workflowCount} title={'Workflow Count'}></NumItem>
                 </Col>
               </Row>
             </Card>
           </Col>
           <Col span={12} className="padding16">
-            <Card>todo:workflow-status</Card>
+            <Card>
+              {records?.map((record) => {
+                record.steps.map((step) => {
+                  return <span>{step.name || step.type}</span>;
+                });
+              })}
+            </Card>
           </Col>
         </Row>
       </div>

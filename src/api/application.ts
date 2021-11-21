@@ -17,7 +17,11 @@ import {
 } from './devLink';
 import { application, componentdefinition } from './productionLink';
 import { getDomain } from '../utils/common';
-import { ApplicationDeployRequest, Trait } from '../interface/application';
+import {
+  ApplicationDeployRequest,
+  Trait,
+  UpdateComponentProperties,
+} from '../interface/application';
 
 interface TraitQuery {
   appName?: string;
@@ -73,20 +77,20 @@ export function createApplicationComponent(params: { appName: string; body: {} }
   const { appName, body } = params;
   const url = isMock
     ? `${createApplicationComponent_mock}`
-    : `${application}/${appName}/componentplans`;
+    : `${application}/${appName}/components`;
   return post(url, body).then((res) => res);
 }
 
 export function getComponentDetails(params: any) {
   const url = isMock
     ? `${getComponentDetails_mock}`
-    : `${application}/${params.name}/componentplans/${params.componentName}`;
+    : `${application}/${params.name}/components/${params.componentName}`;
   return post(url, params).then((res) => res);
 }
 
-export function deployApplication(params: ApplicationDeployRequest) {
+export function deployApplication(params: ApplicationDeployRequest, customError?: boolean) {
   const url = isMock ? `${updateApplication_mock}` : `${application}/${params.appName}/deploy`;
-  return post(url, params).then((res) => res);
+  return post(url, params, customError);
 }
 
 export function getPolicyList(params: any) {
@@ -193,4 +197,17 @@ export function listRevisions(query: listRevisionsQuery) {
 
 export function getApplicationStatistics(params: { appName: string }) {
   return get(`${application}/${params.appName}/statistics`, params).then((res) => res);
+}
+
+export function getApplicationWorkflowRecord(params: { appName: string }) {
+  return get(`${application}/${params.appName}/records`, params).then((res) => res);
+}
+
+export function updateComponentProperties(params: UpdateComponentProperties) {
+  const url = isMock
+    ? `${getComponentDetails_mock}`
+    : `${application}/${params.appName}/components/${params.componentName}`;
+  delete params.appName;
+  delete params.componentName;
+  return put(url, params).then((res) => res);
 }

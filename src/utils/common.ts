@@ -56,7 +56,7 @@ export function momentDate(time: undefined | string): string {
   if (!time) {
     return '';
   }
-  return moment(time).format('YYYY/MM/DD HH:MM');
+  return moment(time).format('YYYY/MM/DD HH:mm:ss');
 }
 
 export const checkName = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/;

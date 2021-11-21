@@ -15,7 +15,6 @@ import InnerGroup from '../../extends/InnerGroup';
 import { Rule } from '@alifd/field';
 import KV from '../../extends/KV';
 import './index.less';
-import { If } from 'tsx-control-statements/components';
 
 type Props = {
   _key?: string;
@@ -293,18 +292,7 @@ export function ParseParam(param: UIParam, inline: boolean | undefined, init: an
       return (
         <Form.Item
           required={required}
-          label={
-            inline ? (
-              <Balloon trigger={param.label} align="t">
-                <div>
-                  <div style={{ fontWeight: 'bold' }}>{param.label}</div>
-                  <div>{param.description}</div>
-                </div>
-              </Balloon>
-            ) : (
-              param.label
-            )
-          }
+          label={param.label}
           help={param.description}
           disabled={param.disable}
         >
@@ -409,7 +397,9 @@ class UISchema extends Component<Props> {
     super(props);
     this.form = new Field(this, {
       onChange: () => {
-        this.setValues();
+        const values = this.form.getValues();
+        const { onChange } = this.props;
+        if (onChange) onChange(values);
       },
     });
   }
@@ -419,6 +409,10 @@ class UISchema extends Component<Props> {
   };
 
   setValues = () => {
+    const { value } = this.props;
+    if (value) {
+      this.form.setValues(value);
+    }
     const values = this.form.getValues();
     const { onChange } = this.props;
     if (onChange) onChange(values);

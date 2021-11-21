@@ -42,7 +42,7 @@ function EnvItem(props: EnvPlanParams) {
   return (
     <div className="env-item-container">
       <Row>
-        <Col span={5} style={{ padding: '0 8px' }}>
+        <Col span={3} style={{ padding: '0 8px' }}>
           <Form.Item required label={<Translation>Name</Translation>}>
             <Input
               {...props.init(`${props.id}-name`, {
@@ -62,7 +62,7 @@ function EnvItem(props: EnvPlanParams) {
             />
           </Form.Item>
         </Col>
-        <Col span={6} style={{ padding: '0 8px' }}>
+        <Col span={4} style={{ padding: '0 8px' }}>
           <Form.Item label={<Translation>Alias</Translation>}>
             <Input
               {...props.init(`${props.id}-alias`, {
@@ -77,7 +77,7 @@ function EnvItem(props: EnvPlanParams) {
             />
           </Form.Item>
         </Col>
-        <Col span={6} style={{ padding: '0 8px' }}>
+        <Col span={10} style={{ padding: '0 8px' }}>
           <Form.Item required label={<Translation>Target Names</Translation>}>
             <Select
               className="select"

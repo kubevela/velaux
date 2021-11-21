@@ -1,19 +1,28 @@
 import React from 'react';
-import { Grid, Table, Progress, Icon } from '@b-design/ui';
+import { Grid, Table, Progress, Icon, Message } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import { PodBase, Container, Event } from '../../../../interface/observation';
+import { listApplicationPodsDetails } from '../../../../api/observation';
 import moment from 'moment';
 import '../../index.less';
 
 export type Props = {
   pod: PodBase;
-  podContainer: Array<Container>;
-  podEvent: Array<Event>;
 };
 
-class PodDetail extends React.Component<Props> {
+export type State = {
+  containers?: Array<Container>;
+  events?: Array<Event>;
+  loading: boolean;
+};
+class PodDetail extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.state = { loading: true };
+  }
+
+  componentDidMount() {
+    this.loadPodDetail();
   }
 
   showStatus = (statu: string) => {
@@ -35,6 +44,28 @@ class PodDetail extends React.Component<Props> {
       const date = (new Date().getTime() - moment(firstTimestamp).valueOf()) / 60000;
       return date.toFixed(2);
     }
+  };
+
+  loadPodDetail = async () => {
+    const { podName, clusterName, podNs } = this.props.pod;
+    listApplicationPodsDetails({
+      name: podName || '',
+      namespace: podNs || '',
+      cluster: clusterName || '',
+    })
+      .then((re) => {
+        if (re && re.error) {
+          Message.warning(re.error);
+        } else if (re) {
+          this.setState({
+            containers: re.containers,
+            events: re.events,
+          });
+        }
+      })
+      .finally(() => {
+        this.setState({ loading: false });
+      });
   };
 
   getContainerCloumns = () => {
@@ -140,14 +171,14 @@ class PodDetail extends React.Component<Props> {
     const { Column } = Table;
     const containerColumns = this.getContainerCloumns();
     const eventCloumns = this.getEventCloumns();
-    const { podContainer = [], podEvent = [] } = this.props;
+    const { events, containers, loading } = this.state;
     return (
       <div className="table-podDetails-list  margin-top-20">
         <Table
           className="container-table-wraper margin-top-20"
-          dataSource={podContainer}
+          dataSource={containers}
           hasBorder={false}
-          loading={false}
+          loading={loading}
         >
           {containerColumns &&
             containerColumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
@@ -155,9 +186,9 @@ class PodDetail extends React.Component<Props> {
 
         <Table
           className="event-table-wraper margin-top-20"
-          dataSource={podEvent}
+          dataSource={events}
           hasBorder={false}
-          loading={false}
+          loading={loading}
         >
           {eventCloumns &&
             eventCloumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}

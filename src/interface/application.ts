@@ -173,10 +173,10 @@ export interface ApplicationComponent {
   appPrimaryKey?: string;
   createTime?: string;
   creator?: string;
-  name?: string;
+  name: string;
   properties?: any;
   traits?: Array<Trait>;
-  type?: string;
+  type: string;
   updateTime?: string;
 }
 
@@ -196,4 +196,19 @@ export interface ApplicationStatistics {
   deliveryTargetCount: number;
   revisonCount: number;
   workflowCount: number;
+}
+
+export interface Workflow {
+  alias?: string;
+  name: string;
+  envName: string;
+  description?: string;
+  default: boolean;
+  createTime?: string;
+}
+
+export interface UpdateComponentProperties {
+  appName?: string;
+  componentName?: string;
+  properties: string;
 }

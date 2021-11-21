@@ -9,6 +9,8 @@ import {
   getApplicationEnvbinding,
 } from '../api/application';
 
+import { listWorkFlow } from '../api/workflows';
+
 import { getNamespaceList } from '../api/namespace';
 
 export default {
@@ -25,6 +27,7 @@ export default {
     componentDefinitions: [],
     componentDetails: {},
     envbinding: [],
+    workflows: [],
   },
   reducers: {
     update(state, { type, payload }) {
@@ -87,6 +90,12 @@ export default {
         componentDetails: payload,
       };
     },
+    updateWorkflow(state, { type, payload }) {
+      return {
+        ...state,
+        workflows: payload || [],
+      };
+    },
   },
   effects: {
     *getApplicationList(action, { call, put }) {
@@ -147,6 +156,13 @@ export default {
       yield put({
         type: 'updateComponentDefinitions',
         payload: result && result.definitions,
+      });
+    },
+    *getApplicationWorkflows(action, { call, put }) {
+      const result = yield call(listWorkFlow, action.payload);
+      yield put({
+        type: 'updateWorkflow',
+        payload: result.workflows,
       });
     },
   },
