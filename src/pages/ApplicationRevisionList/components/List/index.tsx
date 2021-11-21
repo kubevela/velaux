@@ -7,6 +7,7 @@ import { statusList } from '../../constants';
 import { momentDate } from '../../../../utils/common';
 import { Link } from 'dva/router';
 import './index.less';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   list: Array<Revisions>;
@@ -77,13 +78,15 @@ class TableList extends Component<Props, State> {
         cell: (v: string, i: number, record: Revisions) => {
           return (
             <div>
-              <a
-                onClick={() => {
-                  this.onRollback(record);
-                }}
-              >
-                <Translation>Rollback</Translation>
-              </a>
+              <If condition={record.status === 'complete'}>
+                <a
+                  onClick={() => {
+                    this.onRollback(record);
+                  }}
+                >
+                  <Translation>Rollback</Translation>
+                </a>
+              </If>
             </div>
           );
         },
@@ -95,10 +98,17 @@ class TableList extends Component<Props, State> {
     const { Column } = Table;
     const columns = this.getCloumns();
     const { list } = this.props;
-    console.log('list', list);
     return (
       <div className="table-version-list  margin-top-20">
-        <Table dataSource={list} hasBorder={false} loading={false} emptyContent={<Empty />}>
+        <Table
+          primaryKey={'version'}
+          className="customTable"
+          rowHeight={40}
+          dataSource={list}
+          hasBorder={false}
+          loading={false}
+          emptyContent={<Empty />}
+        >
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
       </div>

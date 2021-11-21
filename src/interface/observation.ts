@@ -4,7 +4,7 @@ export interface PodBase {
   nodeName: string;
   podIP: string;
   podName: string;
-  namespace: string;
+  podNs: string;
   revision: string;
   status: string;
 }

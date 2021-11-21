@@ -41,6 +41,7 @@ class ApplicationLayout extends Component<Props, any> {
       callback: () => {
         this.setState({ loading: false }, () => {
           this.loadApplicationComponents();
+          this.loadApplicationWorkflows();
         });
       },
     });
@@ -71,6 +72,16 @@ class ApplicationLayout extends Component<Props, any> {
     } = this.props.match;
     this.props.dispatch({
       type: 'application/getApplicationComponents',
+      payload: { appName: appName },
+    });
+  };
+
+  loadApplicationWorkflows = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationWorkflows',
       payload: { appName: appName },
     });
   };

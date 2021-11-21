@@ -11,6 +11,7 @@ import TraitDialog from './components/TraitDialog';
 import TraitsList from './components/TraitsList';
 import { ApplicationDetail, Trait, ApplicationComponent } from '../../interface/application';
 import { momentDate } from '../../utils/common';
+import EditProperties from './components/EditProperties';
 
 const { Row, Col } = Grid;
 
@@ -25,7 +26,7 @@ type Props = {
   };
   dispatch: ({}) => {};
   applicationDetail?: ApplicationDetail;
-  components?: [];
+  components?: Array<ApplicationComponent>;
 };
 
 type State = {
@@ -34,8 +35,9 @@ type State = {
   visibleTrait: boolean;
   isEditTrait: boolean;
   traitDefinitions: [];
-  configDetail: ApplicationComponent;
+  mainComponent?: ApplicationComponent;
   traitItem: Trait;
+  visibleEditComponentProperties: boolean;
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -50,13 +52,18 @@ class ApplicationConfig extends Component<Props, State> {
       isEditTrait: false,
       visibleTrait: false,
       traitDefinitions: [],
-      configDetail: {},
       traitItem: { type: '' },
+      visibleEditComponentProperties: false,
     };
   }
 
   componentDidMount() {
     this.onGetTraitdefinitions();
+    const { components } = this.props;
+    const componentName = (components && components.length > 0 && components[0].name) || '';
+    this.setState({ componentName }, () => {
+      this.onGetAppliationComponent();
+    });
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -78,7 +85,7 @@ class ApplicationConfig extends Component<Props, State> {
     getAppliationComponent(params).then((res: any) => {
       if (res) {
         this.setState({
-          configDetail: res,
+          mainComponent: res,
         });
       }
     });
@@ -127,7 +134,9 @@ class ApplicationConfig extends Component<Props, State> {
       isEditTrait: false,
     });
   };
-
+  onEditParamter = () => {
+    this.setState({ visibleEditComponentProperties: true });
+  };
   changeTraitStats = (isEditTrait: boolean, traitItem: Trait) => {
     this.setState({
       visibleTrait: true,
@@ -137,15 +146,16 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   render() {
-    const { applicationDetail, components } = this.props;
+    const { applicationDetail, dispatch } = this.props;
     const {
       visibleTrait,
       isEditTrait,
       traitDefinitions,
       appName = '',
       componentName = '',
-      configDetail = {},
+      mainComponent,
       traitItem,
+      visibleEditComponentProperties,
     } = this.state;
     return (
       <div>
@@ -157,8 +167,8 @@ class ApplicationConfig extends Component<Props, State> {
             ></Message>
           </Col>
           <Col span={12} className="padding16 flexright">
-            <Button type="secondary">
-              <Translation>Edit Parameter</Translation>
+            <Button onClick={this.onEditParamter} type="secondary">
+              <Translation>Edit Properties</Translation>
             </Button>
           </Col>
         </Row>
@@ -220,7 +230,7 @@ class ApplicationConfig extends Component<Props, State> {
         </Row>
 
         <TraitsList
-          traits={configDetail.traits || []}
+          traits={mainComponent?.traits || []}
           changeTraitStats={(isEditTrait: boolean, traitItem: Trait) => {
             this.changeTraitStats(isEditTrait, traitItem);
           }}
@@ -241,6 +251,20 @@ class ApplicationConfig extends Component<Props, State> {
             onClose={this.onClose}
             onOK={this.onOk}
           />
+        </If>
+
+        <If condition={visibleEditComponentProperties && mainComponent}>
+          <EditProperties
+            onOK={() => {
+              this.setState({ visibleEditComponentProperties: false });
+            }}
+            onClose={() => {
+              this.setState({ visibleEditComponentProperties: false });
+            }}
+            applicationDetail={applicationDetail}
+            component={mainComponent}
+            dispatch={dispatch}
+          ></EditProperties>
         </If>
       </div>
     );

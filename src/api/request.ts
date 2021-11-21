@@ -49,7 +49,7 @@ axiosInstance.interceptors.request.use(
 const handleAPIError = (err: any, customError: boolean) => {
   const { data, status } = err;
   if (customError) {
-    Promise.reject(data);
+    throw data;
   } else if (data && data.BusinessCode) {
     handleError(data);
   } else {
@@ -57,14 +57,14 @@ const handleAPIError = (err: any, customError: boolean) => {
   }
 };
 
-export const post = (url: string, params: any) => {
+export const post = (url: string, params: any, customError?: boolean) => {
   return axiosInstance
     .post(url, params)
     .then((res) => {
       return res.data;
     })
     .catch((err) => {
-      handleAPIError(err, params.customError);
+      handleAPIError(err, params.customError || customError);
     });
 };
 

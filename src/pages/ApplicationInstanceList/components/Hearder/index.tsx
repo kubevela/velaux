@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
-import { Grid, Select, Button, Dialog, Message } from '@b-design/ui';
+import { Grid, Select, Button, Dialog, Message, Icon } from '@b-design/ui';
 import { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import Translation from '../../../../components/Translation';
 import {
@@ -9,6 +9,7 @@ import {
 } from '../../../../api/application';
 import { ApplicationDetail, ApplicationStatus } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
+import Item from '../../../../components/Item';
 
 type Props = {
   targets?: Array<DeliveryTarget>;
@@ -17,12 +18,14 @@ type Props = {
   envName: string;
   updateQuery: (targetName: string) => void;
   loadApplicationEnvbinding: () => void;
+  refresh: () => void;
   t: (key: string) => {};
 };
 
 type State = {
   recycleLoading: boolean;
   deleteLoading: boolean;
+  refreshLoading: boolean;
 };
 
 class Hearder extends Component<Props, State> {
@@ -31,9 +34,10 @@ class Hearder extends Component<Props, State> {
     this.state = {
       recycleLoading: false,
       deleteLoading: false,
+      refreshLoading: false,
     };
   }
-
+  componentDidMount() {}
   handleChange = (value: string) => {
     this.props.updateQuery(value);
   };
@@ -73,10 +77,14 @@ class Hearder extends Component<Props, State> {
     });
   };
 
+  refresh = async () => {
+    this.props.refresh();
+  };
+
   render() {
     const { Row, Col } = Grid;
     const { t } = this.props;
-    const { recycleLoading, deleteLoading } = this.state;
+    const { recycleLoading, deleteLoading, refreshLoading } = this.state;
     const clusterPlacehole = t('Delivery Target Selector').toString();
     const { targets, applicationStatus } = this.props;
     const clusterList = (targets || []).map((item: DeliveryTarget) => ({
@@ -95,9 +103,15 @@ class Hearder extends Component<Props, State> {
             hasClear
           />
         </Col>
-        <Col span="18" className="flexright" style={{ marginBottom: '16px' }}>
+        <Col span={4} style={{ padding: 8 }}>
+          <Item label="status" value={applicationStatus?.status}></Item>
+        </Col>
+        <Col span="14" className="flexright" style={{ marginBottom: '16px' }}>
+          <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
+            <Icon type="refresh" />
+          </Button>
           <If condition={!applicationStatus || !applicationStatus.status}>
-            <Button loading={deleteLoading} onClick={this.deleteEnv}>
+            <Button style={{ marginLeft: '16px' }} loading={deleteLoading} onClick={this.deleteEnv}>
               <Translation>Delete</Translation>
             </Button>
           </If>

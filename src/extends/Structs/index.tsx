@@ -10,6 +10,7 @@ type Props = {
   parameterGroupOption: GroupOption[] | undefined;
   param: Array<UIParam> | undefined;
   onChange?: (params: any) => void;
+  id: string;
   value: any;
 };
 
@@ -42,7 +43,6 @@ function StructItem(props: StructPlanParams) {
   }
 
   const ref: React.RefObject<UISchema> = React.createRef();
-
   return (
     <div className="struct-item-container">
       <div className="struct-item-content">
@@ -61,7 +61,7 @@ function StructItem(props: StructPlanParams) {
 }
 
 class Structs extends React.Component<Props, State> {
-  field: any;
+  field: Field;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -74,10 +74,34 @@ class Structs extends React.Component<Props, State> {
     });
   }
 
-  componentDidMount = async () => {};
+  componentDidMount = async () => {
+    const { value, parameterGroupOption } = this.props;
+    if (value && parameterGroupOption) {
+      const keyMap = new Map();
+      parameterGroupOption.map((item) => {
+        keyMap.set(item.keys.sort().join(), item);
+      });
+      const structList = Array<any>();
+      value.map((item: object) => {
+        const key = Date.now().toString();
+        const valueKeys = [];
+        for (const itemkey in item) {
+          valueKeys.push(itemkey);
+        }
+        const option = keyMap.get(valueKeys.sort().join());
+        structList.push({
+          key,
+          option: option.keys,
+          value: value,
+        });
+        this.field.setValue('struct' + key, item);
+      });
+      this.setState({ structList });
+    }
+  };
 
   setValues = () => {
-    const values = this.field.getValues();
+    const values: any = this.field.getValues();
     const { onChange } = this.props;
     const result = Object.keys(values).map((key) => {
       return values[key];
@@ -95,22 +119,18 @@ class Structs extends React.Component<Props, State> {
     });
   };
 
-  addStructPlanItem = (option?: GroupOption) => {
+  addStructPlanItem = (option?: GroupOption, value?: any) => {
     this.field.validate((error: any) => {
       if (error) {
         return;
       }
       const { structList } = this.state;
       const key = Date.now().toString();
-      if (key) {
-        structList.push({
-          key,
-          option: option?.keys,
-        });
-      } else {
-        console.log(key);
-      }
-
+      structList.push({
+        key,
+        option: option?.keys,
+        value: value,
+      });
       this.setState({
         structList,
       });
@@ -120,15 +140,10 @@ class Structs extends React.Component<Props, State> {
   removeStructPlanItem = (key: string) => {
     const { structList } = this.state;
     structList.forEach((item, i) => {
-      // 数据移除
       if (item.key === key) {
         structList.splice(i, 1);
       }
     });
-    // StructPLAN_KEY_LIST.forEach((_key) => {
-    //   // 移除表单校验
-    //   this.field.remove(`${key}-${_key}`);
-    // });
     this.setState({
       structList,
     });
@@ -138,7 +153,6 @@ class Structs extends React.Component<Props, State> {
     const { structList } = this.state;
     const { param, parameterGroupOption = [] } = this.props;
     const { init } = this.field;
-
     return (
       <div className="struct-plan-container">
         <div className="struct-plan-group">

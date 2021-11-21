@@ -1,16 +1,17 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Table, Button, Message } from '@b-design/ui';
-import { listApplicationPods, listApplicationPodsDetails } from '../../api/observation';
+import { Table } from '@b-design/ui';
+import { listApplicationPods } from '../../api/observation';
 import { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
-import { PodBase, Container, Event } from '../../interface/observation';
+import { PodBase } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
 import Header from './components/Hearder';
 import { DeliveryTarget } from '../../interface/deliveryTarget';
 import { Link } from 'dva/router';
-const { Column } = Table;
+import { momentDate } from '../../utils/common';
 
+const { Column } = Table;
 type Props = {
   dispatch: ({}) => {};
   match: {
@@ -29,8 +30,7 @@ type State = {
   envName: string;
   loading: boolean;
   target?: DeliveryTarget;
-  containers?: Array<Container>;
-  events?: Array<Event>;
+  openRowKeys: [];
 };
 
 @connect((store: any) => {
@@ -43,6 +43,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     this.state = {
       envName: params.envName,
       loading: true,
+      openRowKeys: [],
     };
   }
 
@@ -105,17 +106,21 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       this.setState({ loading: true });
       const param = {
         appName: envs[0].appDeployName || appName + '-' + envName,
-        namespace: applicationDetail.namespace,
-        componentName: conponentName,
+        appNs: applicationDetail.namespace,
+        name: conponentName,
         cluster: '',
+        clusterNs: '',
       };
       if (target) {
         param.cluster = target.cluster?.clusterName || '';
+        param.clusterNs = target.cluster?.namespace || '';
       }
       listApplicationPods(param)
         .then((re) => {
           if (re && re.podList) {
             this.setState({ podList: re.podList });
+          } else {
+            this.setState({ podList: [] });
           }
         })
         .finally(() => {
@@ -133,6 +138,14 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           return '#28a745';
       }
     };
+    const targets = this.getTargets();
+    const targetMap = new Map<string, DeliveryTarget>();
+    targets?.map((item) => {
+      targetMap.set(item.cluster?.clusterName + '-' + item.cluster?.namespace, item);
+    });
+    const getTarget = (key: string) => {
+      return targetMap.get(key);
+    };
     return [
       {
         key: 'podName',
@@ -148,6 +161,15 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         },
       },
       {
+        key: 'clusterName',
+        title: <Translation>Delivery Target</Translation>,
+        dataIndex: 'clusterName',
+        cell: (v: string, index: number, record: PodBase) => {
+          const target = getTarget(record.clusterName + '-' + record.podNs);
+          return <span>{target?.alias || target?.name}</span>;
+        },
+      },
+      {
         key: 'status',
         title: <Translation>Status</Translation>,
         dataIndex: 'status',
@@ -156,15 +178,31 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         },
       },
       {
-        key: 'publishVersion',
+        key: 'createTime',
+        title: <Translation>CreateTime</Translation>,
+        dataIndex: 'creationTime',
+        cell: (v: string) => {
+          return <span>{momentDate(v)}</span>;
+        },
+      },
+      {
+        key: 'deployVersion',
         title: <Translation>Revision</Translation>,
-        dataIndex: 'publishVersion',
+        dataIndex: 'deployVersion',
         cell: (v: string) => {
           return (
             <span>
               <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
             </span>
           );
+        },
+      },
+      {
+        key: 'workload',
+        title: <Translation>Workload Type</Translation>,
+        dataIndex: 'workload.kind',
+        cell: (v: string) => {
+          return <span>{v}</span>;
         },
       },
       {
@@ -191,6 +229,12 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   };
 
   updateQuery = (targetName: string) => {
+    if (!targetName) {
+      this.setState({ target: undefined }, () => {
+        this.loadAppPods();
+      });
+      return;
+    }
     const targets = this.getTargets()?.filter((item) => item.name == targetName);
     if (targets?.length) {
       this.setState({ target: targets[0] }, () => {
@@ -209,37 +253,17 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   };
 
   onRowOpen = (openRowKeys: any, currentRowKey: string, expanded: boolean, currentRecord: any) => {
-    if (expanded && currentRecord) {
-      const { podName, clusterName, namespace } = currentRecord;
-      listApplicationPodsDetails({
-        name: podName || '',
-        namespace: namespace || '',
-        cluster: clusterName || '',
-      })
-        .then((re) => {
-          if (re && re.error) {
-            Message.warning(re.error);
-          } else if (re) {
-            this.setState({
-              containers: re.containers,
-              events: re.events,
-            });
-          }
-        })
-        .finally(() => {
-          this.setState({ loading: false });
-        });
-    }
+    this.setState({ openRowKeys });
   };
 
   render() {
     const { applicationStatus, applicationDetail } = this.props;
-    const { podList, loading, containers = [], events = [] } = this.state;
+    const { podList, loading } = this.state;
     const columns = this.getCloumns();
     const expandedRowRender = (record: PodBase, index: number) => {
       return (
-        <div>
-          <PodDetail pod={record} podContainer={containers} podEvent={events} />
+        <div style={{ margin: '16px 0' }}>
+          <PodDetail pod={record} />
         </div>
       );
     };
@@ -257,13 +281,20 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           updateQuery={(targetName: string) => {
             this.updateQuery(targetName);
           }}
+          refresh={() => {
+            this.loadAppPods();
+            this.loadApplicationStatus();
+          }}
         />
         <Table
           className="podlist-table-wraper"
           size="medium"
+          primaryKey={'podName'}
           loading={loading}
           dataSource={podList}
+          expandedIndexSimulate
           expandedRowRender={expandedRowRender}
+          openRowKeys={this.state.openRowKeys}
           onRowOpen={(
             openRowKeys: any,
             currentRowKey: string,

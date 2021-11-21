@@ -112,7 +112,13 @@ class TableList extends Component<Props, State> {
     const { list } = this.props;
     return (
       <div className="table-delivery-list margin-top-20">
-        <Table size="medium" dataSource={list} hasBorder={false} loading={false}>
+        <Table
+          className="customTable"
+          size="medium"
+          dataSource={list}
+          hasBorder={false}
+          loading={false}
+        >
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
       </div>

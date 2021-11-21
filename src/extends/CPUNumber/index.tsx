@@ -3,6 +3,7 @@ import { Input } from '@b-design/ui';
 
 type Props = {
   value: any;
+  id: string;
   onChange: (value: any) => void;
 };
 
@@ -18,10 +19,28 @@ class CPUNumber extends React.Component<Props, State> {
 
   componentDidMount = async () => {};
 
+  onChange = (value: string) => {
+    const { onChange } = this.props;
+    if (onChange) {
+      onChange(`${value}`);
+    }
+  };
+
   render() {
-    const { onChange, value } = this.props;
+    const { value, id } = this.props;
+    let initValue = undefined;
+    if (value) {
+      initValue = parseFloat(value);
+    }
+
     return (
-      <Input addonTextAfter="Core" htmlType="number" onChange={onChange} defaultValue={value} />
+      <Input
+        id={id}
+        addonTextAfter="Core"
+        htmlType="number"
+        onChange={this.onChange}
+        value={initValue && initValue}
+      />
     );
   }
 }
