@@ -168,5 +168,8 @@
   "CPU usageResource": "CPU消耗",
   "Event Type": "事件类型",
   "Detaile information": "详细信息",
-  "Time": "时间"
+  "Time": "时间",
+  "ComponentDefinition": "部署类型",
+  "TraitDefinition": "运维特征",
+  "WorkflowStepDefinition": "工作流步骤类型"
 }

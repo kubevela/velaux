@@ -10,7 +10,14 @@ export interface Addon {
   createTime?: string;
   deploy_to?: { control_plane: boolean; runtime_cluster: boolean };
   dependencies?: Array<{ name: string }>;
+  definitions?: Array<Definition>;
   uiSchema?: Array<UIParam>;
+}
+
+export interface Definition {
+  name: string;
+  type: string;
+  description: string;
 }
 
 export interface RegistryGitSource {

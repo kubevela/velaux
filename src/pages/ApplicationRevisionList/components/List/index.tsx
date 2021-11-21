@@ -2,14 +2,16 @@ import React, { Component } from 'react';
 import { Table, Message } from '@b-design/ui';
 import Empty from '../Empty';
 import Translation from '../../../../components/Translation';
-import { Revisions } from '../../../../interface/application';
+import { ApplicationDetail, Revisions } from '../../../../interface/application';
 import { statusList } from '../../constants';
 import { momentDate } from '../../../../utils/common';
+import { Link } from 'dva/router';
 import './index.less';
 
 type Props = {
   list: Array<Revisions>;
   getRevisionList: () => void;
+  applicationDetail?: ApplicationDetail;
 };
 
 type State = {};
@@ -23,6 +25,7 @@ class TableList extends Component<Props, State> {
   onRollback = (record: Revisions) => {};
 
   getCloumns = () => {
+    const { applicationDetail } = this.props;
     return [
       {
         key: 'version',
@@ -54,7 +57,17 @@ class TableList extends Component<Props, State> {
         title: <Translation>Publish Environment</Translation>,
         dataIndex: 'envName',
         cell: (v: string) => {
-          return <span>{v}</span>;
+          return (
+            <span>
+              <Link
+                to={`/applications/${
+                  applicationDetail && applicationDetail.name
+                }/envbinding/${v}/instances`}
+              >
+                {v}
+              </Link>
+            </span>
+          );
         },
       },
       {

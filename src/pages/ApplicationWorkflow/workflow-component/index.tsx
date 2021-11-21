@@ -144,7 +144,6 @@ class WorkFlowComponent extends Component<Props, State> {
                 <Form field={this.field} inline>
                   <Form.Item required label="工作流名称">
                     <Input
-                      className="input"
                       {...init('name', {
                         initValue: data.name,
                         rules: [
@@ -158,13 +157,10 @@ class WorkFlowComponent extends Component<Props, State> {
                     />
                   </Form.Item>
                   <Form.Item label="工作流别名">
-                    <Input className="input" {...init('alias', { initValue: data.alias })} />
+                    <Input {...init('alias', { initValue: data.alias })} />
                   </Form.Item>
                   <Form.Item label="描述">
-                    <Input
-                      className="input"
-                      {...init('description', { initValue: data.description })}
-                    />
+                    <Input {...init('description', { initValue: data.description })} />
                   </Form.Item>
                 </Form>
               </div>

@@ -52,7 +52,6 @@ export type WorkFlowData = {
   option?: WorkFlowOption;
   data?: EdgesAndNodes;
   edit?: boolean;
-  enable?: boolean;
   default?: boolean;
   envName?: string;
   createTime?: string;

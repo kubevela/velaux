@@ -98,7 +98,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
 
   render() {
     const { revisionsList } = this.state;
-    const { envbinding } = this.props;
+    const { envbinding, applicationDetail } = this.props;
 
     return (
       <div>
@@ -113,7 +113,11 @@ class ApplicationRevisionList extends React.Component<Props, State> {
             this.updateQuery(params);
           }}
         />
-        <TableList list={revisionsList} getRevisionList={this.getRevisionList} />
+        <TableList
+          applicationDetail={applicationDetail}
+          list={revisionsList}
+          getRevisionList={this.getRevisionList}
+        />
         <Pagination
           className="revison-pagenation"
           hideOnlyOnePage={true}
