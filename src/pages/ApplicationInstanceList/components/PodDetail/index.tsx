@@ -47,11 +47,10 @@ class PodDetail extends React.Component<Props, State> {
   };
 
   loadPodDetail = async () => {
-    const { podName, clusterName, podNs } = this.props.pod;
     listApplicationPodsDetails({
-      name: podName || '',
-      namespace: podNs || '',
-      cluster: clusterName || '',
+      name: this.props.pod.metadata.name || '',
+      namespace: this.props.pod.metadata.namespace || '',
+      cluster: this.props.pod.cluster || '',
     })
       .then((re) => {
         if (re && re.error) {
@@ -101,7 +100,7 @@ class PodDetail extends React.Component<Props, State> {
         title: <Translation>Memory usageResource</Translation>,
         dataIndex: 'memory',
         cell: (v: string, i: number, record: Container) => {
-          return <span>{record.usageResource?.memory}</span>;
+          return <span>{record.resources?.usage?.memory}</span>;
         },
       },
       {
@@ -109,7 +108,7 @@ class PodDetail extends React.Component<Props, State> {
         title: <Translation>CPU usageResource</Translation>,
         dataIndex: 'cpu',
         cell: (v: string, i: number, record: Container) => {
-          return <span>{record.usageResource?.cpu}</span>;
+          return <span>{record.resources?.usage?.cpu}</span>;
         },
       },
       {
