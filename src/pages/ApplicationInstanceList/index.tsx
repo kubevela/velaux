@@ -118,6 +118,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       listApplicationPods(param)
         .then((re) => {
           if (re && re.podList) {
+            re.podList.map((item: any) => {
+              item.primaryKey = item.metadata.name;
+            });
             this.setState({ podList: re.podList });
           } else {
             this.setState({ podList: [] });
@@ -217,7 +220,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
             </div>
           );
         },
-      }
+      },
     ];
   };
 
@@ -282,7 +285,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         <Table
           className="podlist-table-wraper"
           size="medium"
-          primaryKey={'podName'}
+          primaryKey={'primaryKey'}
           loading={loading}
           dataSource={podList}
           expandedIndexSimulate

@@ -27,6 +27,7 @@ type Props = {
   dispatch: ({}) => {};
   applicationDetail?: ApplicationDetail;
   components?: Array<ApplicationComponent>;
+  componentsApp?: string;
 };
 
 type State = {
@@ -59,13 +60,14 @@ class ApplicationConfig extends Component<Props, State> {
 
   componentDidMount() {
     this.onGetTraitdefinitions();
-    const { components } = this.props;
+    const { components, componentsApp } = this.props;
     const { appName } = this.state;
-    if (components && components.length > 0 && components[0].appPrimaryKey == appName) {
+    if (components && components.length > 0 && componentsApp == appName) {
       const componentName = components[0].name || '';
       this.setState({ componentName }, () => {
         this.onGetAppliationComponent();
       });
+      console.log(componentName);
     }
   }
 

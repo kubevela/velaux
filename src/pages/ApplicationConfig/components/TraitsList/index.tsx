@@ -31,7 +31,7 @@ class TraitsList extends Component<Props> {
       <div className="traits-list-warper">
         <Row wrap={true}>
           {(traits || []).map((item: Trait) => (
-            <Col span={8} className="padding16">
+            <Col span={8} key={item.type} className="padding16">
               <Card>
                 <div className="traits-list-nav">
                   <div className="traits-list-title">

@@ -1,25 +1,25 @@
 export interface PodBase {
   cluster: string;
   metadata: {
-    creationTime: string
-    name: string
-    namespace: string
+    creationTime: string;
+    name: string;
+    namespace: string;
     version: {
-      deployVersion: string
-      publishVersion: string
-      revision: string
-    }
-  }
+      deployVersion: string;
+      publishVersion: string;
+      revision: string;
+    };
+  };
   status: {
-    phase: string
-    podIP?: string
-    hostIP?: string
-    nodeName?: string
-  }
+    phase: string;
+    podIP?: string;
+    hostIP?: string;
+    nodeName?: string;
+  };
   workload: {
-    apiVersion: string
-    kind: string
-  }
+    apiVersion: string;
+    kind: string;
+  };
 }
 
 export interface Container {
