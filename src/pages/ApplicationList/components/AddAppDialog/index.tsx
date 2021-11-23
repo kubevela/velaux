@@ -1,20 +1,20 @@
 import React from 'react';
-import { Grid, Dialog, Field, Form, Select, Message, Button } from '@b-design/ui';
+import { Grid, Field, Form, Select, Message, Button } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import { NEW_APPLICATION_DELIVERY_PLAN } from '../../constants';
 import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
 import GeneralConfig from '../GeneralConfig';
-import { Rule } from '@alifd/field';
+import type { Rule } from '@alifd/field';
 import { detailComponentDefinition, createApplication } from '../../../../api/application';
-import { DefinitionDetail, EnvBinding } from '../../../../interface/application';
+import type { DefinitionDetail, EnvBinding } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import EnvPlan from '../../../../extends/EnvPlan';
 import Translation from '../../../../components/Translation';
 import './index.less';
 import { getDeliveryTarget } from '../../../../api/deliveryTarget';
-import { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 
 type Props = {
   visible: boolean;
@@ -31,8 +31,8 @@ type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
   dialogStats: string;
-  envBinding: Array<EnvBinding>;
-  deliveryTargets?: Array<DeliveryTarget>;
+  envBinding: EnvBinding[];
+  deliveryTargets?: DeliveryTarget[];
 };
 
 class AppDialog extends React.Component<Props, State> {
@@ -126,7 +126,7 @@ class AppDialog extends React.Component<Props, State> {
     if (value === 'isCreateComponent') {
       this.field.validateCallback(
         ['name', 'alias', 'description', 'namespace', 'componentType'],
-        (error: any, values: any) => {
+        (error: any) => {
           if (error) {
             debugger;
             return;
@@ -190,7 +190,7 @@ class AppDialog extends React.Component<Props, State> {
         </div>
       );
     } else {
-      return <div></div>;
+      return <div />;
     }
   };
 
@@ -286,7 +286,7 @@ class AppDialog extends React.Component<Props, State> {
                 })}
                 uiSchema={definitionDetail && definitionDetail.uiSchema}
                 ref={this.uiSchemaRef}
-              ></UISchema>
+              />
             </FormItem>
           </If>
         </Form>

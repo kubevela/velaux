@@ -26,7 +26,7 @@ type ListParams = {
 };
 
 type State = {
-  inputList: Array<ListParams>;
+  inputList: ListParams[];
 };
 
 function InputItem(props: InputParams) {
@@ -57,7 +57,7 @@ class Strings extends React.Component<Props, State> {
   field: any;
   constructor(props: Props) {
     super(props);
-    const inputList: Array<ListParams> = [];
+    const inputList: ListParams[] = [];
     if (props.value) {
       props.value.map((v: any) => {
         const key = Date.now().toString();
@@ -120,7 +120,7 @@ class Strings extends React.Component<Props, State> {
   render() {
     const { inputList } = this.state;
     const { init } = this.field;
-    const { label, value } = this.props;
+    const { label } = this.props;
     return (
       <div className="strings-container">
         {inputList.map((item) => (

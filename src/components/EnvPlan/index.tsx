@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Input, Select, Icon, Form, Button, Grid, Message } from '@b-design/ui';
+import { Input, Select, Icon, Grid, Message } from '@b-design/ui';
 import _ from 'lodash';
 import './index.less';
 
@@ -7,9 +7,7 @@ type Props = {
   clusterList?: [];
 };
 type State = {
-  envs: {
-    [key: string]: [EnvItem];
-  };
+  envs: Record<string, [EnvItem]>;
 };
 type EnvItem = {
   name: string;
@@ -44,7 +42,7 @@ class EnvPlan extends Component<Props, State> {
 
   // delete one
   handlleDeleteItem = (key: string, filterIndex: number) => {
-    let { envs } = this.state;
+    const { envs } = this.state;
     const queryKeys = Object.keys(envs);
     if (queryKeys.length === 1) {
       return Message.show({
@@ -133,7 +131,7 @@ class EnvPlan extends Component<Props, State> {
     const { envs } = this.state;
     const obj: any = {};
     Object.keys(envs).map((item) => {
-      envs[item] &&
+      if (envs[item]) {
         envs[item].forEach((key: EnvItem) => {
           if (
             !key.name ||
@@ -147,7 +145,8 @@ class EnvPlan extends Component<Props, State> {
             };
           }
         });
-      return item;
+        return item;
+      }
     });
 
     for (const param in obj) {

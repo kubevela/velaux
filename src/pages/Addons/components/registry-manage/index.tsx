@@ -1,16 +1,5 @@
 import React from 'react';
-import {
-  Button,
-  Message,
-  Grid,
-  Dialog,
-  Form,
-  Input,
-  Select,
-  Table,
-  Field,
-  Icon,
-} from '@b-design/ui';
+import { Button, Message, Grid, Dialog, Form, Input, Table, Field } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import { checkName } from '../../../../utils/common';
@@ -73,8 +62,10 @@ class RegistryManageDialog extends React.Component<Props, State> {
   onDeleteRegistry = (name: string) => {
     const { syncRegistrys } = this.props;
     deleteAddonRegistry({ name: name }).then((re) => {
-      Message.success(<Translation>delete success</Translation>);
-      syncRegistrys();
+      if (re) {
+        Message.success(<Translation>delete success</Translation>);
+        syncRegistrys();
+      }
     });
   };
 
@@ -150,7 +141,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                           },
                         ],
                       })}
-                    ></Input>
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={8} style={{ padding: '8px' }}>
@@ -169,7 +160,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                           },
                         ],
                       })}
-                    ></Input>
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={4} style={{ padding: '8px' }}>
@@ -186,7 +177,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                           },
                         ],
                       })}
-                    ></Input>
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={5} style={{ padding: '8px' }}>
@@ -203,7 +194,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                           },
                         ],
                       })}
-                    ></Input>
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={2} style={{ padding: '43px 8px 8px 8px' }}>

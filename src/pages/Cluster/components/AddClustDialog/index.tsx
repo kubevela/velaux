@@ -18,7 +18,7 @@ import { checkName } from '../../../../utils/common';
 import { getClusterDetails, updateCluster } from '../../../../api/cluster';
 import './index.less';
 import Translation from '../../../../components/Translation';
-import { Cluster } from '../../../../interface/cluster';
+import type { Cluster } from '../../../../interface/cluster';
 const { Col, Row } = Grid;
 
 type Props = {
@@ -114,11 +114,11 @@ class AddClustDialog extends React.Component<Props, State> {
     });
   }
 
-  onError = (r: {}) => {};
+  onError = () => {};
 
   customRequest = (option: any) => {
-    let reader = new FileReader();
-    let fileselect = option.file;
+    const reader = new FileReader();
+    const fileselect = option.file;
     reader.readAsText(fileselect);
     reader.onload = () => {
       this.field.setValues({
@@ -159,7 +159,7 @@ class AddClustDialog extends React.Component<Props, State> {
     const values: { kubeConfig: string } = this.field.getValues();
     const valueInfo = cluster.kubeConfig || values.kubeConfig || '';
     if (editClusterName && !editMode) {
-      return <Loading></Loading>;
+      return <Loading />;
     }
     return (
       <div>

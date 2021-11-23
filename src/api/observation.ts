@@ -23,7 +23,7 @@ export function listApplicationPodsDetails(params: {
   name: string;
   cluster: string;
 }) {
-  let urlParams = `pod-view{namespace=${params.namespace},name=${params.name},cluster=${params.cluster}}.status`;
+  const urlParams = `pod-view{namespace=${params.namespace},name=${params.name},cluster=${params.cluster}}.status`;
   return get('/api/v1/query', {
     params: {
       velaql: urlParams,
@@ -32,7 +32,7 @@ export function listApplicationPodsDetails(params: {
 }
 
 export function listNamespaces(params: { cluster: string }) {
-  let urlParams = `resource-view{type=ns,cluster=${params.cluster}}.status`;
+  const urlParams = `resource-view{type=ns,cluster=${params.cluster}}.status`;
   return get('/api/v1/query', {
     params: {
       velaql: urlParams,

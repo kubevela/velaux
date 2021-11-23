@@ -17,10 +17,6 @@ type Props = {
 };
 
 class DrawerWithFooter extends Component<Props, any> {
-  constructor(props: Props) {
-    super(props);
-  }
-
   render() {
     const {
       children,

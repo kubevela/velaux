@@ -15,10 +15,9 @@ limitations under the License.
 */
 
 import { Message } from '@b-design/ui';
-import { useTranslation } from 'react-i18next';
 
 export interface APIError {
-  BusinessCode: Number;
+  BusinessCode: number;
   Message: string;
 }
 export function handleError(err: APIError) {

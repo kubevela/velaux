@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Message, Grid, Search, Icon, Input } from '@b-design/ui';
+import { Grid, Icon, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import './index.less';
 
@@ -34,9 +34,7 @@ class InputSearch extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { t } = this.props;
     const { inputValue } = this.state;
-    const clusterPlacehole = t('CLuster search query').toString();
     return (
       <Row className="cluster-input-wraper">
         <Col span="24">

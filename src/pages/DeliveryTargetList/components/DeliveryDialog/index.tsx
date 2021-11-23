@@ -3,19 +3,19 @@ import { Message, Grid, Dialog, Form, Input, Field, Select } from '@b-design/ui'
 import { addDeliveryTargetList, editDeliveryTargetList } from '../../../../constants';
 import Group from '../../../../extends/Group';
 import Namespace from '../Namespace';
-import { NamespaceItem } from '../Namespace';
+import type { NamespaceItem } from '../Namespace';
 import { checkName } from '../../../../utils/common';
 import { createDeliveryTarget, updateDeliveryTarget } from '../../../../api/deliveryTarget';
-import { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import Translation from '../../../../components/Translation';
-import { Cluster } from '../../../../interface/cluster';
+import type { Cluster } from '../../../../interface/cluster';
 import { listNamespaces } from '../../../../api/observation';
 import NameSpaceForm from '../../../ApplicationList/components/GeneralConfig/namespace-form';
 
 type Props = {
   isEdit: boolean;
   visible: boolean;
-  clusterList?: Array<Cluster>;
+  clusterList?: Cluster[];
   namespaceList?: [];
   deliveryTargetItem?: DeliveryTarget;
   onOK: () => void;
@@ -26,7 +26,7 @@ type Props = {
 
 type State = {
   cluster?: string;
-  namespaces: Array<NamespaceItem>;
+  namespaces: NamespaceItem[];
 };
 
 class DeliveryDialog extends React.Component<Props, State> {
@@ -106,7 +106,7 @@ class DeliveryDialog extends React.Component<Props, State> {
         var_region,
         var_zone,
         var_vpcID,
-      } = this.field.getValues();
+      } = values;
       const params = {
         name,
         alias,
@@ -303,7 +303,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                     namespaces={namespaces}
                     loadNamespaces={this.loadNamespaces}
                     cluster={cluster}
-                  ></Namespace>
+                  />
                 </FormItem>
               </Col>
             </Row>

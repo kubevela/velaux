@@ -3,7 +3,7 @@ import React from 'react';
 
 type Props = {
   onChange: (value: any) => void;
-  setKeys: (keys: Array<string>) => void;
+  setKeys: (keys: string[]) => void;
   value: any;
   id: string;
 };
@@ -20,7 +20,7 @@ class SecretSelect extends React.Component<Props, State> {
 
   componentDidMount = async () => {};
   getSecretKeys = (name: string) => {
-    return ['key1', 'key2'];
+    return [name, 'key2'];
   };
   onChange = (value: string) => {
     const { onChange, setKeys } = this.props;

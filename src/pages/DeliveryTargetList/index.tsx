@@ -5,14 +5,14 @@ import { Pagination } from '@b-design/ui';
 import ListTitle from '../../components/ListTitle';
 import TableList from './components/List';
 import DeliveryDialog from './components/DeliveryDialog';
-import { DeliveryTarget } from '../../interface/deliveryTarget';
+import type { DeliveryTarget } from '../../interface/deliveryTarget';
 import './index.less';
-import { Cluster } from '../../interface/cluster';
+import type { Cluster } from '../../interface/cluster';
 
 type Props = {
   deliveryTargets?: [];
   total?: number;
-  clusterList?: Array<Cluster>;
+  clusterList?: Cluster[];
   namespaceList?: [];
   dispatch: ({}) => {};
   t: (key: string) => {};
@@ -134,8 +134,8 @@ class DeliveryTargetList extends React.Component<Props, State> {
         <TableList
           list={deliveryTargets}
           updateDeliveryTargetList={this.updateDeliveryTargetList}
-          changeISEdit={(isEdit: boolean, record: DeliveryTarget) => {
-            this.changeISEdit(isEdit, record);
+          changeISEdit={(is: boolean, record: DeliveryTarget) => {
+            this.changeISEdit(is, record);
           }}
         />
 

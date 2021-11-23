@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'dva';
-import ApplicationLayout from '../../layout/Application';
 
 type Props = {
   dispatch: ({}) => {};
@@ -33,7 +32,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
   componentDidMount() {}
 
   render() {
-    return <div></div>;
+    return <div />;
   }
 }
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Button, Card, Message, Progress } from '@b-design/ui';
+import { Grid, Button, Card, Message } from '@b-design/ui';
 import './index.less';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
@@ -9,7 +9,7 @@ import Title from '../../components/Title';
 import Item from '../../components/Item';
 import TraitDialog from './components/TraitDialog';
 import TraitsList from './components/TraitsList';
-import { ApplicationDetail, Trait, ApplicationComponent } from '../../interface/application';
+import type { ApplicationDetail, Trait, ApplicationComponent } from '../../interface/application';
 import { momentDate } from '../../utils/common';
 import EditProperties from './components/EditProperties';
 
@@ -26,7 +26,7 @@ type Props = {
   };
   dispatch: ({}) => {};
   applicationDetail?: ApplicationDetail;
-  components?: Array<ApplicationComponent>;
+  components?: ApplicationComponent[];
   componentsApp?: string;
 };
 
@@ -169,7 +169,7 @@ class ApplicationConfig extends Component<Props, State> {
             <Message
               type="notice"
               title="Note that benchmark configuration changes will be applied to all environments"
-            ></Message>
+            />
           </Col>
           <Col span={12} className="padding16 flexright">
             <Button onClick={this.onEditParamter} type="secondary">
@@ -182,13 +182,10 @@ class ApplicationConfig extends Component<Props, State> {
             <Card>
               <Row>
                 <Col span={12}>
-                  <Item label="alias" value={applicationDetail && applicationDetail.alias}></Item>
+                  <Item label="alias" value={applicationDetail && applicationDetail.alias} />
                 </Col>
                 <Col span={12}>
-                  <Item
-                    label="project"
-                    value={applicationDetail && applicationDetail.namespace}
-                  ></Item>
+                  <Item label="project" value={applicationDetail && applicationDetail.namespace} />
                 </Col>
               </Row>
               <Row>
@@ -196,13 +193,13 @@ class ApplicationConfig extends Component<Props, State> {
                   <Item
                     label="createTime"
                     value={momentDate((applicationDetail && applicationDetail.createTime) || '')}
-                  ></Item>
+                  />
                 </Col>
                 <Col span={12}>
                   <Item
                     label="updateTime"
                     value={momentDate((applicationDetail && applicationDetail.updateTime) || '')}
-                  ></Item>
+                  />
                 </Col>
               </Row>
               <Row>
@@ -211,13 +208,13 @@ class ApplicationConfig extends Component<Props, State> {
                     label="description"
                     labelSpan={4}
                     value={applicationDetail && applicationDetail.description}
-                  ></Item>
+                  />
                 </Col>
               </Row>
             </Card>
           </Col>
           <Col span={12} className="padding16">
-            <Card></Card>
+            <Card />
           </Col>
         </Row>
 
@@ -230,14 +227,14 @@ class ApplicationConfig extends Component<Props, State> {
                 </a>,
               ]}
               title={<Translation>Traits</Translation>}
-            ></Title>
+            />
           </Col>
         </Row>
 
         <TraitsList
           traits={mainComponent?.traits || []}
-          changeTraitStats={(isEditTrait: boolean, traitItem: Trait) => {
-            this.changeTraitStats(isEditTrait, traitItem);
+          changeTraitStats={(is: boolean, trait: Trait) => {
+            this.changeTraitStats(is, trait);
           }}
           onDeleteTrait={(traitType: string) => {
             this.onDeleteTrait(traitType);
@@ -270,7 +267,7 @@ class ApplicationConfig extends Component<Props, State> {
             applicationDetail={applicationDetail}
             component={mainComponent}
             dispatch={dispatch}
-          ></EditProperties>
+          />
         </If>
       </div>
     );

@@ -2,12 +2,12 @@ import React from 'react';
 import { connect } from 'dva';
 import { Table } from '@b-design/ui';
 import { listApplicationPods } from '../../api/observation';
-import { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
+import type { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
-import { PodBase } from '../../interface/observation';
+import type { PodBase } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
 import Header from './components/Hearder';
-import { DeliveryTarget } from '../../interface/deliveryTarget';
+import type { DeliveryTarget } from '../../interface/deliveryTarget';
 import { Link } from 'dva/router';
 import { momentDate } from '../../utils/common';
 
@@ -22,11 +22,11 @@ type Props = {
   };
   applicationDetail?: ApplicationDetail;
   applicationStatus?: ApplicationStatus;
-  envbinding: Array<EnvBinding>;
+  envbinding: EnvBinding[];
 };
 
 type State = {
-  podList?: Array<PodBase>;
+  podList?: PodBase[];
   envName: string;
   loading: boolean;
   target?: DeliveryTarget;
@@ -248,7 +248,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     return [];
   };
 
-  onRowOpen = (openRowKeys: any, currentRowKey: string, expanded: boolean, currentRecord: any) => {
+  onRowOpen = (openRowKeys: any) => {
     this.setState({ openRowKeys });
   };
 
@@ -256,7 +256,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const { applicationStatus, applicationDetail } = this.props;
     const { podList, loading } = this.state;
     const columns = this.getCloumns();
-    const expandedRowRender = (record: PodBase, index: number) => {
+    const expandedRowRender = (record: PodBase) => {
       return (
         <div style={{ margin: '16px 0' }}>
           <PodDetail pod={record} />
@@ -291,13 +291,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           expandedIndexSimulate
           expandedRowRender={expandedRowRender}
           openRowKeys={this.state.openRowKeys}
-          onRowOpen={(
-            openRowKeys: any,
-            currentRowKey: string,
-            expanded: boolean,
-            currentRecord: any,
-          ) => {
-            this.onRowOpen(openRowKeys, currentRowKey, expanded, currentRecord);
+          onRowOpen={(openRowKeys: any) => {
+            this.onRowOpen(openRowKeys);
           }}
         >
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}

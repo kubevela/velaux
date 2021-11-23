@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { Grid, Select, Button, Dialog, Message, Icon } from '@b-design/ui';
-import { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import Translation from '../../../../components/Translation';
 import {
   recycleApplicationEnvbinding,
   deleteApplicationEnvbinding,
 } from '../../../../api/application';
-import { ApplicationDetail, ApplicationStatus } from '../../../../interface/application';
+import type { ApplicationDetail, ApplicationStatus } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import Item from '../../../../components/Item';
 
 type Props = {
-  targets?: Array<DeliveryTarget>;
+  targets?: DeliveryTarget[];
   applicationStatus?: ApplicationStatus;
   applicationDetail?: ApplicationDetail;
   envName: string;
@@ -104,7 +104,7 @@ class Hearder extends Component<Props, State> {
           />
         </Col>
         <Col span={4} style={{ padding: 8 }}>
-          <Item label="status" value={applicationStatus?.status}></Item>
+          <Item label="status" value={applicationStatus?.status} />
         </Col>
         <Col span="14" className="flexright" style={{ marginBottom: '16px' }}>
           <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>

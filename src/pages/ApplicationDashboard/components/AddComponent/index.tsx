@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Form, Input, Select, Field, Message } from '@b-design/ui';
+import { Grid, Form, Input, Select, Field } from '@b-design/ui';
 import {
   COMPONENT_NAME,
   COMPONENT_ALIAS,
@@ -9,10 +9,10 @@ import {
 } from '../../constants';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
-import { EnvBinding } from '../../../../interface/application';
+import type { EnvBinding } from '../../../../interface/application';
 import Group from '../../../../extends/Group';
 import { detailComponentDefinition } from '../../../../api/application';
-import { DefinitionDetail } from '../../../../interface/application';
+import type { DefinitionDetail } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import './index.less';
@@ -94,6 +94,7 @@ class AddComponent extends Component<Props, State> {
           properties: '{}',
         },
       };
+      console.log(params);
     });
   };
 
@@ -230,7 +231,7 @@ class AddComponent extends Component<Props, State> {
               _key="body.properties"
               uiSchema={definitionDetail && definitionDetail.uiSchema}
               ref={this.uiSchemaRef}
-            ></UISchema>
+            />
           </Group>
         </Form>
       </DrawerWithFooter>

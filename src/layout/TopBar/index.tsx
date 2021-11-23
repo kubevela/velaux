@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './index.less';
-import { Button, Message, Grid, Search, Icon } from '@b-design/ui';
+import { Grid } from '@b-design/ui';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { withTranslation } from 'react-i18next';
 
@@ -35,33 +35,15 @@ class TopBar extends Component<Props> {
 
   render() {
     const { Row, Col } = Grid;
-    const { t } = this.props;
     return (
       <div className="layout-topbar" id="layout-topbar">
         <Row className="nav-wraper">
           <Col span="4">
             <img src={logo} className="logo" />
-            <span className="text">Kubevala</span>
+            <span className="text">KubeVela</span>
           </Col>
-          {/* <Col span="16">
-            <Search
-              key="12312"
-              size="medium"
-              shape="simple"
-              onSearch={() => {}}
-              className="search"
-              placeholder={t('Please enter').toString()}
-            />
-          </Col>
-
-          <Col span="1">
-            <Icon type="atm" className="atm" />
-          </Col>
-          <Col span="1">
-            <Icon type="set" className="set" />
-          </Col> */}
           <div className="language-switch-container">
-            <SwitchLanguage></SwitchLanguage>
+            <SwitchLanguage />
           </div>
         </Row>
       </div>

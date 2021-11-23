@@ -17,7 +17,7 @@ import {
 } from './devLink';
 import { application, componentdefinition } from './productionLink';
 import { getDomain } from '../utils/common';
-import {
+import type {
   ApplicationDeployRequest,
   Trait,
   UpdateComponentProperties,
@@ -50,15 +50,15 @@ export function createApplication(params: any) {
 }
 
 export function getApplicationDetails(params: any) {
-  const url = isMock ? `${getApplicationDetails_mock}` : `${application}/${params.name}`;
-  return get(url, params).then((res) => res);
+  const gurl = isMock ? `${getApplicationDetails_mock}` : `${application}/${params.name}`;
+  return get(gurl, params).then((res) => res);
 }
 
 export function getApplicationStatus(params: { name: string; envName: string }) {
-  const url = isMock
+  const gurl = isMock
     ? `${getApplicationDetails_mock}`
     : `${application}/${params.name}/envs/${params.envName}/status`;
-  return get(url, params).then((res) => res);
+  return get(gurl, params).then((res) => res);
 }
 
 export function deleteApplicationPlan(params: { name: string }) {
@@ -67,70 +67,70 @@ export function deleteApplicationPlan(params: { name: string }) {
 
 export function getApplicationComponents(params: { appName: string; envName: string }) {
   const { appName, envName } = params;
-  const url = isMock
+  const gurl = isMock
     ? `${getApplicationComponents_mock}`
     : `${application}/${appName}/components?envName=${envName}`;
-  return get(url, params).then((res) => res);
+  return get(gurl, params).then((res) => res);
 }
 
 export function createApplicationComponent(params: { appName: string; body: {} }) {
   const { appName, body } = params;
-  const url = isMock
+  const gurl = isMock
     ? `${createApplicationComponent_mock}`
     : `${application}/${appName}/components`;
-  return post(url, body).then((res) => res);
+  return post(gurl, body).then((res) => res);
 }
 
 export function getComponentDetails(params: any) {
-  const url = isMock
+  const gurl = isMock
     ? `${getComponentDetails_mock}`
     : `${application}/${params.name}/components/${params.componentName}`;
-  return post(url, params).then((res) => res);
+  return post(gurl, params).then((res) => res);
 }
 
 export function deployApplication(params: ApplicationDeployRequest, customError?: boolean) {
-  const url = isMock ? `${updateApplication_mock}` : `${application}/${params.appName}/deploy`;
-  return post(url, params, customError);
+  const gurl = isMock ? `${updateApplication_mock}` : `${application}/${params.appName}/deploy`;
+  return post(gurl, params, customError);
 }
 
 export function getPolicyList(params: any) {
-  const url = isMock ? `${getPolicyList_mock}` : `${application}/${params.name}/policies`;
-  return get(url, params).then((res) => res);
+  const gurl = isMock ? `${getPolicyList_mock}` : `${application}/${params.name}/policies`;
+  return get(gurl, params).then((res) => res);
 }
 
 export function createPolicy(params: any) {
-  const url = isMock ? `${createPolicy_mock}` : `${application}/${params.name}/policies`;
-  return post(url, params).then((res) => res);
+  const gurl = isMock ? `${createPolicy_mock}` : `${application}/${params.name}/policies`;
+  return post(gurl, params).then((res) => res);
 }
 
 export function getPolicyDetails(params: any) {
-  const url = isMock
+  const gurl = isMock
     ? `${getPolicyDetails_mock}`
     : `${application}/${params.name}/policies/${params.policyName}`;
-  return get(url, params).then((res) => res);
+  return get(gurl, params).then((res) => res);
 }
 
 export function createApplicationTemplate(params: any) {
-  const url = isMock
+  const gurl = isMock
     ? `${createApplicationTemplate_mock}`
     : `${application}/${params.name}/template`;
-  return post(url, params).then((res) => res);
+  return post(gurl, params).then((res) => res);
 }
 
-export function getComponentdefinitions(params: any) {
-  const url = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}`;
-  return get(url, { params: { type: 'component' } }).then((res) => res);
+export function getComponentdefinitions() {
+  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}`;
+  return get(gurl, { params: { type: 'component' } }).then((res) => res);
 }
 
 export function detailComponentDefinition(params: { name: string }) {
-  const url = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}/${params.name}`;
-  return get(url, { params: { type: 'component' } }).then((res) => res);
+  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}/${params.name}`;
+  return get(gurl, { params: { type: 'component' } }).then((res) => res);
 }
 
 export function createApplicationEnv(params: { appName?: string }) {
-  const url = isMock ? `${createApplicationEnv_mock}` : `${application}/${params.appName}/envs`;
+  const gurl = isMock ? `${createApplicationEnv_mock}` : `${application}/${params.appName}/envs`;
   delete params.appName;
-  return post(url, params).then((res) => res);
+  return post(gurl, params).then((res) => res);
 }
 
 export function getApplicationEnvbinding(params: { appName: string }) {
@@ -148,51 +148,53 @@ export function recycleApplicationEnvbinding(params: { appName: string; envName:
 }
 
 export function getTraitDefinitions() {
-  const url = isMock ? `${getTraitDefinitions_mock}` : `${componentdefinition}`;
-  return get(url, { params: { type: 'trait' } }).then((res) => res);
+  const gurl = isMock ? `${getTraitDefinitions_mock}` : `${componentdefinition}`;
+  return get(gurl, { params: { type: 'trait' } }).then((res) => res);
 }
 
 export function detailTraitDefinition(params: { name: string }) {
-  const url = isMock
+  const gurl = isMock
     ? `${getTraitDefinitionsDetails_mock}`
     : `${componentdefinition}/${params.name}`;
-  return get(url, { params: { type: 'trait' } }).then((res) => res);
+  return get(gurl, { params: { type: 'trait' } }).then((res) => res);
 }
 
 export function getAppliationComponent(query: TraitQuery) {
   const { appName, componentName } = query;
-  const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/components/${componentName}`;
-  return get(url, {}).then((res) => res);
+  const gurl = isMock
+    ? `${getTrait_mock}`
+    : `${application}/${appName}/components/${componentName}`;
+  return get(gurl, {}).then((res) => res);
 }
 
 export function createTrait(params: Trait, query: TraitQuery) {
   const { appName, componentName } = query;
-  const url = isMock
+  const gurl = isMock
     ? `${getTrait_mock}`
     : `${application}/${appName}/components/${componentName}/traits`;
-  return post(url, params).then((res) => res);
+  return post(gurl, params).then((res) => res);
 }
 
 export function updateTrait(params: Trait, query: TraitQuery) {
   const { appName, componentName, traitType } = query;
-  const url = isMock
+  const gurl = isMock
     ? `${getTrait_mock}`
     : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
-  return put(url, params).then((res) => res);
+  return put(gurl, params).then((res) => res);
 }
 
 export function deleteTrait(query: TraitQuery) {
   const { appName, componentName, traitType } = query;
-  const url = isMock
+  const gurl = isMock
     ? `${getTrait_mock}`
     : `${application}/${appName}/components/${componentName}/traits/${traitType}`;
-  return rdelete(url, {}).then((res) => res);
+  return rdelete(gurl, {}).then((res) => res);
 }
 
 export function listRevisions(query: listRevisionsQuery) {
   const { appName } = query;
-  const url = isMock ? `${getTrait_mock}` : `${application}/${appName}/revisions`;
-  return get(url, { params: query }).then((res) => res);
+  const gurl = isMock ? `${getTrait_mock}` : `${application}/${appName}/revisions`;
+  return get(gurl, { params: query }).then((res) => res);
 }
 
 export function getApplicationStatistics(params: { appName: string }) {
@@ -204,10 +206,10 @@ export function getApplicationWorkflowRecord(params: { appName: string }) {
 }
 
 export function updateComponentProperties(params: UpdateComponentProperties) {
-  const url = isMock
+  const gurl = isMock
     ? `${getComponentDetails_mock}`
     : `${application}/${params.appName}/components/${params.componentName}`;
   delete params.appName;
   delete params.componentName;
-  return put(url, params).then((res) => res);
+  return put(gurl, params).then((res) => res);
 }

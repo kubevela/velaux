@@ -63,7 +63,7 @@ const DeliveryTargets: ModelsType = {
     },
     *createDeliveryTarget(
       action: { payload: QueryDeliveryTarget; callback: (parasm: any) => void },
-      { call, put }: { call: any; put: any },
+      { call }: { call: any; put: any },
     ) {
       const result: ResponseGenerator = yield call(createDeliveryTarget, action.payload);
       if (action.callback) {

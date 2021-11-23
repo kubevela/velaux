@@ -1,4 +1,4 @@
-import { DeliveryTarget } from './deliveryTarget';
+import type { DeliveryTarget } from './deliveryTarget';
 
 export interface ApplicationDetail {
   name: string;
@@ -10,21 +10,21 @@ export interface ApplicationDetail {
   icon?: string;
   labels?: {};
   gatewayRule: null;
-  policies: Array<string>;
+  policies: string[];
   resourceInfo: {
-    componentNum: Number;
+    componentNum: number;
   };
-  workflowStatus?: Array<WorkflowStatus>;
+  workflowStatus?: WorkflowStatus[];
 }
 
 export interface EnvBinding {
   name: string;
   alias?: string;
   description?: string;
-  targetNames: Array<string>;
-  deliveryTargets?: Array<DeliveryTarget>;
+  targetNames: string[];
+  deliveryTargets?: DeliveryTarget[];
   componentSelector?: {
-    components: Array<string>;
+    components: string[];
   };
   createTime?: string;
   updateTime?: string;
@@ -49,35 +49,35 @@ export interface ApplicationBase {
 }
 
 export interface DefinitionDetail {
-  uiSchema: Array<UIParam>;
+  uiSchema: UIParam[];
 }
 
 export interface UIParam {
   description?: string;
   jsonKey: string;
   label: string;
-  sort: Number;
+  sort: number;
   uiType: string;
   disable?: boolean;
-  subParameterGroupOption?: Array<GroupOption>;
-  subParameters?: Array<UIParam>;
+  subParameterGroupOption?: GroupOption[];
+  subParameters?: UIParam[];
   validate: UIParamValidate;
 }
 
 export interface GroupOption {
   label: string;
-  keys: Array<string>;
+  keys: string[];
 }
 
 export interface UIParamValidate {
   required?: boolean;
-  min?: Number;
-  max?: Number;
-  maxLength?: Number;
-  minLength?: Number;
+  min?: number;
+  max?: number;
+  maxLength?: number;
+  minLength?: number;
   pattern?: string;
   defaultValue?: any;
-  options?: Array<{ label: string; value: string }>;
+  options?: { label: string; value: string }[];
 }
 
 export interface ImageInfo {
@@ -86,8 +86,8 @@ export interface ImageInfo {
   tag: string;
   repoHost: string;
   namespace: string;
-  ports: Array<Number>;
-  volumes: Array<ImageVolume>;
+  ports: number[];
+  volumes: ImageVolume[];
 }
 
 export interface ImageVolume {
@@ -103,7 +103,7 @@ export interface ApplicationDeployRequest {
 }
 
 export interface ApplicationStatus {
-  conditions: Array<Condition>;
+  conditions: Condition[];
   status: string;
   workflow: WorkflowStatus;
   latestRevision: {
@@ -111,23 +111,23 @@ export interface ApplicationStatus {
     revision: number;
     revisionHash: string;
   };
-  components?: Array<{
+  components?: {
     kind: string;
     namespace: string;
     name: string;
     apiVersion: string;
-  }>;
-  services?: Array<{
+  }[];
+  services?: {
     name: string;
     env?: string;
     healthy: string;
     message: string;
-    traits: Array<{
+    traits: {
       type: string;
       healthy: string;
       message: string;
-    }>;
-  }>;
+    }[];
+  }[];
 }
 
 export interface Condition {
@@ -143,7 +143,7 @@ export interface WorkflowStatus {
   suspend: boolean;
   terminated: boolean;
   finished: boolean;
-  steps: Array<WorkflowStepStatus>;
+  steps: WorkflowStepStatus[];
   startTime?: string;
 }
 
@@ -175,7 +175,7 @@ export interface ApplicationComponent {
   creator?: string;
   name: string;
   properties?: any;
-  traits?: Array<Trait>;
+  traits?: Trait[];
   type: string;
   updateTime?: string;
 }

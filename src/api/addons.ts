@@ -34,21 +34,21 @@ export function createAddons(params: any) {
 }
 
 export function getAddonsDetails(params: any) {
-  const url = isMock ? `${addonsDetails_mock}` : `${addons}/${params.name}`;
-  return get(url, params).then((res) => res);
+  const gurl = isMock ? `${addonsDetails_mock}` : `${addons}/${params.name}`;
+  return get(gurl, params).then((res) => res);
 }
 
 export function disableAddon(params: any) {
-  const url = isMock ? `${disabletAddonsCluster_mock}` : `${addons}/${params.name}/disable`;
-  return post(url, params).then((res) => res);
+  const gurl = isMock ? `${disabletAddonsCluster_mock}` : `${addons}/${params.name}/disable`;
+  return post(gurl, params).then((res) => res);
 }
 
 export function enableAddon(params: { name: string; properties: any }) {
-  const url = isMock ? `${enableAddonsCluster_mock}` : `${addons}/${params.name}/enable`;
-  return post(url, { args: params.properties }).then((res) => res);
+  const gurl = isMock ? `${enableAddonsCluster_mock}` : `${addons}/${params.name}/enable`;
+  return post(gurl, { args: params.properties }).then((res) => res);
 }
 
 export function getAddonsStatus(params: any) {
-  const url = isMock ? `${addonsStatus_mock}` : `${addons}/${params.name}/status`;
-  return get(url, params).then((res) => res);
+  const gurl = isMock ? `${addonsStatus_mock}` : `${addons}/${params.name}/status`;
+  return get(gurl, params).then((res) => res);
 }

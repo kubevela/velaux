@@ -1,18 +1,16 @@
 import React, { Component } from 'react';
 import { DiagramMakerComponents } from 'diagram-maker';
 import './index.less';
-import { Definition } from '../../../interface/addon';
+import type { Definition } from '../../../interface/addon';
 
 type Props = {
   id: string;
   workflowId: string;
   data?: any;
-  definitions: Array<Definition>;
+  definitions: Definition[];
 };
 
-type State = {};
-
-class WorkFlowPannel extends Component<Props, State> {
+class WorkFlowPannel extends Component<Props> {
   constructor(props: any) {
     super(props);
 

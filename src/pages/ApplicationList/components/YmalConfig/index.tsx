@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Grid, Form, Input, Field, Upload, Icon, Message } from '@b-design/ui';
 import { addAppDialog } from '../../constants';
-import { addClustDialog, UPLOADYMALFILE } from '../../../../constants';
+import { UPLOADYMALFILE } from '../../../../constants';
 import NameSpaceForm from '../GeneralConfig/namespace-form';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import defineTheme from '../../../../components/DefinitionCode/theme';
@@ -29,7 +29,7 @@ class YmalConfig extends React.Component<Props> {
     this.resetField();
   };
 
-  onError = (r: {}) => {};
+  onError = () => {};
 
   submit = () => {
     this.field.validate((error: any, values: any) => {
@@ -58,8 +58,8 @@ class YmalConfig extends React.Component<Props> {
   };
 
   customRequest = (option: any) => {
-    let reader = new FileReader();
-    let fileselect = option.file;
+    const reader = new FileReader();
+    const fileselect = option.file;
     reader.readAsText(fileselect);
     reader.onload = () => {
       this.field.setValues({
@@ -96,7 +96,6 @@ class YmalConfig extends React.Component<Props> {
       },
     };
 
-    const { kubeAPI } = addClustDialog;
     const namePlacehold = t(namePlaceHold).toString();
     const describePlacehold = t(describePlaceHold).toString();
     const init = this.field.init;

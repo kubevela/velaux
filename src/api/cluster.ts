@@ -7,7 +7,7 @@ import {
 } from './devLink';
 import { cluster } from './productionLink';
 import { getDomain } from '../utils/common';
-import { CreateCluster } from '../interface/cluster';
+import type { CreateCluster } from '../interface/cluster';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
@@ -30,31 +30,31 @@ export function deleteCluster(params: { clusterName: string }) {
 }
 
 export function getClusterDetails(params: { clusterName: string }) {
-  const url = isMock ? `${getClusterDetails_mock}` : `${cluster}/${params.clusterName}`;
-  return get(url, params).then((res) => res);
+  const gurl = isMock ? `${getClusterDetails_mock}` : `${cluster}/${params.clusterName}`;
+  return get(gurl, params).then((res) => res);
 }
 
 export function getCloudClustersList(params: any) {
   const { provider, page, pageSize } = params;
-  const url = isMock
+  const gurl = isMock
     ? `${clusterCloudList_mock}`
     : `${cluster}/cloud-clusters/${provider}?page=${page}&pageSize=${pageSize}`;
   delete params.page;
   delete params.pageSize;
   delete params.provider;
-  return post(url, params).then((res) => res);
+  return post(gurl, params).then((res) => res);
 }
 
 export function connectcloudCluster(params: any) {
   const { provider } = params;
-  const url = isMock
+  const gurl = isMock
     ? `${connectClusterCloud_mock}`
     : `${cluster}/cloud-clusters/${provider}/connect`;
   delete params.provider;
-  return post(url, params).then((res) => res);
+  return post(gurl, params).then((res) => res);
 }
 
 export function createClusterNamespace(params: { cluster: string; namespace: string }) {
-  const url = `${cluster}/${params.cluster}/namespaces`;
-  return post(url, { namespace: params.namespace }).then((res) => res);
+  const gurl = `${cluster}/${params.cluster}/namespaces`;
+  return post(gurl, { namespace: params.namespace }).then((res) => res);
 }

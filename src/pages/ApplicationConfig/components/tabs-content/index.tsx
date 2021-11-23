@@ -1,7 +1,6 @@
-import React, { useState, Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
-import { Button, Message, Grid, Search, Icon, Select, Tab } from '@b-design/ui';
+import { Tab } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import BasicInfo from '../basic-info';
 import './index.less';

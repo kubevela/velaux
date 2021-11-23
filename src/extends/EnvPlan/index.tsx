@@ -2,22 +2,21 @@ import React from 'react';
 import { Input, Button, Field, Icon, Select, Form, Grid } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
-import { EnvBinding } from '../../interface/application';
+import type { EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
 import { checkName } from '../../utils/common';
-import { DeliveryTarget } from '../../interface/deliveryTarget';
-import { string } from 'prop-types';
+import type { DeliveryTarget } from '../../interface/deliveryTarget';
 
 const { Col, Row } = Grid;
 
 type Props = {
-  value: Array<EnvBinding>;
-  targetList?: Array<DeliveryTarget>;
-  envList?: Array<EnvBinding>;
+  value: EnvBinding[];
+  targetList?: DeliveryTarget[];
+  envList?: EnvBinding[];
 };
 
 type State = {
-  envList: Array<any>;
+  envList: any[];
 };
 
 type EnvItemType = {
@@ -33,7 +32,7 @@ type EnvPlanParams = {
   itemLength: number;
   init: any;
   value?: EnvBinding;
-  targetList: Array<{ label: string; value: string }>;
+  targetList: { label: string; value: string }[];
   onChange?: () => {};
   delete?: (key: string) => void;
 };
@@ -115,7 +114,9 @@ function EnvItem(props: EnvPlanParams) {
             <Icon
               type="ashbin"
               onClick={() => {
-                props.delete && props.delete(props.id);
+                if (props.delete) {
+                  props.delete(props.id);
+                }
               }}
             />
           </If>
@@ -129,7 +130,7 @@ class EnvPlan extends React.Component<Props, State> {
   field: any;
   constructor(props: Props) {
     super(props);
-    let initValues: any[] = [];
+    const initValues: any[] = [];
     if (props.value && props.value.length > 0) {
       props.value.map((item) => {
         initValues.push({ key: Date.now().toString(), value: item });
@@ -179,7 +180,7 @@ class EnvPlan extends React.Component<Props, State> {
     });
   };
 
-  getValues = (): Array<EnvItemType> | null => {
+  getValues = (): EnvItemType[] | null => {
     let hasError = false;
     this.field.validate();
     const errors = this.field.getErrors();
@@ -191,7 +192,7 @@ class EnvPlan extends React.Component<Props, State> {
     if (hasError) {
       return null;
     } else {
-      let allValues: Array<EnvItemType> = [];
+      let allValues: EnvItemType[] = [];
       const values = this.field.getValues();
       const { envList } = this.state;
       const keyMap = envList.reduce((preObj, item) => {

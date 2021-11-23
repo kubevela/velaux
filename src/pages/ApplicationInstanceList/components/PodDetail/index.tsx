@@ -1,7 +1,7 @@
 import React from 'react';
-import { Grid, Table, Progress, Icon, Message } from '@b-design/ui';
+import { Table, Progress, Icon, Message } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
-import { PodBase, Container, Event } from '../../../../interface/observation';
+import type { PodBase, Container, Event } from '../../../../interface/observation';
 import { listApplicationPodsDetails } from '../../../../api/observation';
 import moment from 'moment';
 import '../../index.less';
@@ -12,8 +12,8 @@ export type Props = {
 };
 
 export type State = {
-  containers?: Array<Container>;
-  events?: Array<Event>;
+  containers?: Container[];
+  events?: Event[];
   loading: boolean;
 };
 class PodDetail extends React.Component<Props, State> {
@@ -32,7 +32,7 @@ class PodDetail extends React.Component<Props, State> {
       { name: 'terminated', value: <div style={{ color: 'red' }}>terminated</div> },
       { name: 'waiting', value: <div style={{ color: '#e17518' }}>waiting</div> },
     ];
-    const findStatus = statsuInfo.find((item) => item.name === statu) || { value: <div></div> };
+    const findStatus = statsuInfo.find((item) => item.name === statu) || { value: <div /> };
     return findStatus && findStatus.value;
   };
 
@@ -105,7 +105,7 @@ class PodDetail extends React.Component<Props, State> {
             const requestMemory = quantityToScalar(record.resources?.requests?.memory);
             const useMemory = quantityToScalar(record.resources?.usage?.memory);
             const percent = Number(useMemory).valueOf() / Number(requestMemory).valueOf();
-            return <Progress size="small" percent={percent * 100}></Progress>;
+            return <Progress size="small" percent={percent * 100} />;
           }
           return <span>{record.resources?.usage?.memory}</span>;
         },
@@ -119,7 +119,7 @@ class PodDetail extends React.Component<Props, State> {
             const requestcpu = quantityToScalar(record.resources?.requests?.cpu);
             const usecpu = quantityToScalar(record.resources?.usage?.cpu);
             const percent = Number(usecpu).valueOf() / Number(requestcpu).valueOf();
-            return <Progress size="small" percent={percent * 100}></Progress>;
+            return <Progress size="small" percent={percent * 100} />;
           }
           return <span>{record.resources?.usage?.cpu}</span>;
         },
@@ -128,7 +128,7 @@ class PodDetail extends React.Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: (v: string, i: number, record: Container) => {
+        cell: () => {
           return (
             <div>
               <a>

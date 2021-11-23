@@ -1,11 +1,11 @@
 import React from 'react';
-import { Grid, Field, Form, Select, Message, Button, Input, Loading } from '@b-design/ui';
-import { Rule } from '@alifd/field';
+import { Grid, Field, Form, Select, Message, Button, Input } from '@b-design/ui';
+import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
 import { createTrait, detailTraitDefinition, updateTrait } from '../../../../api/application';
-import { DefinitionDetail, Trait } from '../../../../interface/application';
+import type { DefinitionDetail, Trait } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
@@ -113,7 +113,7 @@ class TraitDialog extends React.Component<Props, State> {
           }
         }
       })
-      .catch((err) => this.setState({ definitionLoading: false }));
+      .catch(() => this.setState({ definitionLoading: false }));
   };
 
   handleChang = (value: string) => {
@@ -241,7 +241,7 @@ class TraitDialog extends React.Component<Props, State> {
                       })}
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
                       ref={this.uiSchemaRef}
-                    ></UISchema>
+                    />
                   </FormItem>
                 </If>
                 <If condition={!definitionDetail}>

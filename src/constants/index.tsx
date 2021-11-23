@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Translation from '../components/Translation';
 
 export const addCluster = <Translation>Cluster Join</Translation>;

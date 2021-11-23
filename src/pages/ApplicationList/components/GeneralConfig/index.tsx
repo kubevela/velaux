@@ -1,7 +1,8 @@
 import React from 'react';
-import { Grid, Form, Input, Message, Field } from '@b-design/ui';
+import type { Field } from '@b-design/ui';
+import { Grid, Form, Input } from '@b-design/ui';
 import NameSpaceForm from './namespace-form';
-import EnvPlan from '../../../../extends/EnvPlan';
+import type EnvPlan from '../../../../extends/EnvPlan';
 import { addAppDialog } from '../../constants';
 import { checkName } from '../../../../utils/common';
 import './index.less';

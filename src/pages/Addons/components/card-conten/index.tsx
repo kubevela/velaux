@@ -1,9 +1,9 @@
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import './index.less';
 
-import { Grid, Card, Button, Tag } from '@b-design/ui';
-import { Addon } from '../../../../interface/addon';
-import Translation from '../../../../components/Translation';
+import { Grid, Card, Tag } from '@b-design/ui';
+import type { Addon } from '../../../../interface/addon';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 
@@ -42,7 +42,7 @@ class CardContent extends React.Component<any, State> {
       <div>
         <If condition={addonLists}>
           <Row wrap={true}>
-            {addonLists.map((item: Addon, index: number) => {
+            {addonLists.map((item: Addon) => {
               const { name, icon, version, description, tags } = item;
               return (
                 <Col span="6" className={`card-content-wraper`} key={name}>
@@ -53,7 +53,7 @@ class CardContent extends React.Component<any, State> {
                           <img src={icon} />
                         </If>
                         <If condition={!icon || icon === 'none'}>
-                          <img></img>
+                          <img />
                         </If>
                       </div>
                     </a>
@@ -70,8 +70,8 @@ class CardContent extends React.Component<any, State> {
                       </Row>
                       <If condition={tags}>
                         <Row className="content-main-btn">
-                          {tags?.map((item: string) => {
-                            return <Tag key={item}>{item}</Tag>;
+                          {tags?.map((tag: string) => {
+                            return <Tag key={tag}>{tag}</Tag>;
                           })}
                         </Row>
                       </If>
@@ -89,7 +89,7 @@ class CardContent extends React.Component<any, State> {
           </Row>
         </If>
         <If condition={!addonLists || addonLists.length == 0}>
-          <Empty style={{ minHeight: '400px' }}></Empty>
+          <Empty style={{ minHeight: '400px' }} />
         </If>
       </div>
     );

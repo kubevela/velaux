@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { getClusterList, createCluster, connectcloudCluster } from '../api/cluster';
 
 export default {

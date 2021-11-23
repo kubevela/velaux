@@ -1,7 +1,5 @@
 import React from 'react';
 
-type DataSource = Array<{ label: string; value: any }>;
-
 type Props = {
   clusterName: string;
   namespace: string;
@@ -20,7 +18,7 @@ class PVCSelect extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    return <div></div>;
+    return <div />;
   }
 }
 

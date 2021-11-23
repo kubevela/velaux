@@ -3,7 +3,7 @@ import { Table, Message } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import { deleteDeliveryTarget } from '../../../../api/deliveryTarget';
 import './index.less';
-import { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 
 type Props = {
   list?: [];
@@ -11,13 +11,7 @@ type Props = {
   changeISEdit: (pararms: boolean, record: DeliveryTarget) => void;
 };
 
-type State = {};
-
-class TableList extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-  }
-
+class TableList extends Component<Props> {
   onDelete = (record: DeliveryTarget) => {
     deleteDeliveryTarget({ name: record.name || '' }).then((re) => {
       if (re) {

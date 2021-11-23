@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import { Tab, Grid } from '@b-design/ui';
 import './index.less';
 import Translation from '../../../../components/Translation';
-import { ApplicationDetail, EnvBinding } from '../../../../interface/application';
+import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import AddEnvBind from '../AddEnvBind';
 import { Link } from 'dva/router';
@@ -13,7 +13,7 @@ type Props = {
   activeKey: string;
   applicationDetail?: ApplicationDetail;
   dispatch: ({}) => {};
-  envbinding?: Array<EnvBinding>;
+  envbinding?: EnvBinding[];
 };
 
 type State = {
@@ -31,7 +31,7 @@ class TabsContent extends Component<Props, State> {
     };
   }
 
-  handleChange = (key: string | number) => {};
+  handleChange = () => {};
   loadEnvbinding = async () => {
     const { applicationDetail } = this.props;
     if (applicationDetail) {
@@ -57,7 +57,7 @@ class TabsContent extends Component<Props, State> {
                     </Link>
                   }
                   key={'basisConfig'}
-                ></Tab.Item>
+                />
                 {envbinding?.map((item) => {
                   return (
                     <Tab.Item
@@ -71,7 +71,7 @@ class TabsContent extends Component<Props, State> {
                         </Link>
                       }
                       key={item.name}
-                    ></Tab.Item>
+                    />
                   );
                 })}
               </Tab>
@@ -98,7 +98,7 @@ class TabsContent extends Component<Props, State> {
               this.loadEnvbinding();
               this.setState({ visibleEnvPlan: false });
             }}
-          ></AddEnvBind>
+          />
         </If>
       </div>
     );

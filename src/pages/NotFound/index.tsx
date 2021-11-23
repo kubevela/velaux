@@ -3,7 +3,7 @@ import Group from '../../extends/Group';
 export default function NotFound() {
   return (
     <div>
-      <Group title="envplan" description="envplan"></Group>
+      <Group title="envplan" description="envplan" />
     </div>
   );
 }

@@ -79,7 +79,7 @@ class Cluster extends React.Component<Props, State> {
   };
 
   render() {
-    const { clusterList = [], cloudClusters = [], dispatch } = this.props;
+    const { clusterList = [], dispatch } = this.props;
     const { page, pageSize, query, showAddCluster, showAddCloudCluster, editClusterName } =
       this.state;
     return (
@@ -106,8 +106,8 @@ class Cluster extends React.Component<Props, State> {
           />
           <SelectSearch
             dispatch={dispatch}
-            getChildCompentQuery={(query: string): any => {
-              this.getChildCompentQuery(query);
+            getChildCompentQuery={(q: string): any => {
+              this.getChildCompentQuery(q);
             }}
           />
           <CardContend

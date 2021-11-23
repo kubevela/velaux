@@ -1,12 +1,12 @@
 import React from 'react';
-import { Form, Input, Select, Button, Message } from '@b-design/ui';
+import { Input, Select, Button, Message } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
 import { createClusterNamespace } from '../../../../api/cluster';
 
 type Props = {
   cluster?: string;
-  namespaces?: Array<NamespaceItem>;
+  namespaces?: NamespaceItem[];
   onChange?: (namespace: string) => void;
   value?: any;
   loadNamespaces: (cluster: string) => void;
@@ -98,7 +98,7 @@ class Namespace extends React.Component<Props, State> {
         <If condition={showNameSpaceInput}>
           <div className="cluster-container">
             <Input
-              onChange={(value) => this.setState({ createNamespace: value })}
+              onChange={(v) => this.setState({ createNamespace: v })}
               className="cluster-params-input"
             />
             <Button

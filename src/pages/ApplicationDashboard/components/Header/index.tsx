@@ -7,11 +7,11 @@ import {
   PUBLISH_APPLICATION_TEMPLATE,
   DEPLOYMENT_UPDATE,
 } from '../../constants';
-import { ApplicationBase } from '../../../../interface/application';
+import type { ApplicationBase } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 
 type Props = {
-  applicationList: Array<ApplicationBase>;
+  applicationList: ApplicationBase[];
   appName: string;
   history: {
     push: (path: string, state: {}) => {};

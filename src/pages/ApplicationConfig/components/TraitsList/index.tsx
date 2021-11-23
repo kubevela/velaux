@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Card, Grid, Icon, Dialog } from '@b-design/ui';
-import { Trait } from '../../../../interface/application';
+import type { Trait } from '../../../../interface/application';
 import { momentDate } from '../../../../utils/common';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
@@ -8,7 +8,7 @@ import Empty from '../../../../components/Empty';
 import Translation from '../../../../components/Translation';
 
 type Props = {
-  traits: Array<Trait>;
+  traits: Trait[];
   changeTraitStats: (visible: boolean, item: Trait) => void;
   onDeleteTrait: (traitType: string) => void;
   onAdd: () => void;
@@ -71,7 +71,7 @@ class TraitsList extends Component<Props> {
                   </a>
                 </span>
               }
-            ></Empty>
+            />
           </If>
         </Row>
       </div>

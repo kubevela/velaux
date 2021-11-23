@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Breadcrumb, Select, Grid, Button, Card, Step, Drawer } from '@b-design/ui';
+import { Button, Card, Step } from '@b-design/ui';
 import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
 import { VIEW_DETAILS, DEPLOYMENT_PLANS, NOT_YEW_PLEASE_GO_AND_CREATE } from '../../constants';
@@ -15,10 +15,6 @@ type Props = {
 type State = {};
 
 class StepWorkFlow extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-  }
-
   handleClick = () => {
     const { appName } = this.props;
     this.props.history.push(`/workflowplans/${appName}`, {});

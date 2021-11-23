@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Translation from '../../components/Translation';
 export const pluginTitle = <Translation>Addon in management</Translation>;
 export const pluginSubTitle = <Translation>Addon in extension</Translation>;

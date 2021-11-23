@@ -6,7 +6,7 @@ import EnvTabs from './components/EnvTabs';
 import Menus from './components/Menus';
 import './index.less';
 
-const { Row, Col } = Grid;
+const { Row } = Grid;
 
 interface Props {
   match: any;
@@ -93,7 +93,7 @@ class ApplicationLayout extends Component<Props, any> {
       path,
       params: { appName, envName },
     } = this.props.match;
-    const loadingDom = <Loading style={{ width: '100%', minHeight: '200px' }}></Loading>;
+    const loadingDom = <Loading style={{ width: '100%', minHeight: '200px' }} />;
     if (activeName !== '' && appName != activeName) {
       this.onGetApplicationDetails();
       return loadingDom;
@@ -103,11 +103,11 @@ class ApplicationLayout extends Component<Props, any> {
     }
     return (
       <div className="applayout">
-        <Header appName={appName} currentPath={path}></Header>
-        <EnvTabs dispatch={dispatch} activeKey={envName ? envName : 'basisConfig'}></EnvTabs>
+        <Header appName={appName} currentPath={path} />
+        <EnvTabs dispatch={dispatch} activeKey={envName ? envName : 'basisConfig'} />
         <Row className="padding16 main">
           <div className="menu">
-            <Menus currentPath={path} appName={appName} envName={envName}></Menus>
+            <Menus currentPath={path} appName={appName} envName={envName} />
           </div>
           <div className="content">{children}</div>
         </Row>

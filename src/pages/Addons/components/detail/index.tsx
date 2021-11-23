@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, Button, Loading, Field, Card, Dialog, Table, Message } from '@b-design/ui';
 import { addonDetail } from '../../../../constants';
-import { Rule } from '@alifd/field';
+import type { Rule } from '@alifd/field';
 import { If } from 'tsx-control-statements/components';
 import {
   getAddonsDetails,
@@ -17,7 +17,7 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import Group from '../../../../extends/Group';
 import Translation from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
-import { Addon } from '../../../../interface/addon';
+import type { Addon } from '../../../../interface/addon';
 
 type Props = {
   addonName: string;
@@ -94,7 +94,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
   };
   enableAddon = async (properties: any) => {
     this.setState({ statusLoading: true }, () => {
-      enableAddon({ name: this.props.addonName, properties: properties }).then((res) => {
+      enableAddon({ name: this.props.addonName, properties: properties }).then(() => {
         this.loadAddonStatus();
       });
     });
@@ -102,7 +102,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
 
   disableAddon = async () => {
     this.setState({ statusLoading: true }, () => {
-      disableAddon({ name: this.props.addonName }).then((res) => {
+      disableAddon({ name: this.props.addonName }).then(() => {
         this.loadAddonStatus();
       });
     });
@@ -157,7 +157,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     })}
                     ref={this.uiSchemaRef}
                     uiSchema={addonDetailInfo.uiSchema}
-                  ></UISchema>
+                  />
                 </Form>
               </Group>
             </If>
@@ -172,7 +172,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
                       <li className="dependen-item" key={item.name}>
                         <a
                           onClick={() => {
-                            showAddon && showAddon(item.name);
+                            if (showAddon) {
+                              showAddon(item.name);
+                            }
                           }}
                         >
                           {item.name}
@@ -199,7 +201,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     dataIndex="name"
                     align="left"
                     title={<Translation>Name</Translation>}
-                  ></Table.Column>
+                  />
                   <Table.Column
                     dataIndex="type"
                     align="left"
@@ -208,12 +210,12 @@ class AddonDetailDialog extends React.Component<Props, State> {
                       return <Translation>{v}</Translation>;
                     }}
                     title={<Translation>Type</Translation>}
-                  ></Table.Column>
+                  />
                   <Table.Column
                     dataIndex="description"
                     align="left"
                     title={<Translation>Description</Translation>}
-                  ></Table.Column>
+                  />
                 </Table>
               </Card>
             </If>
@@ -226,11 +228,11 @@ class AddonDetailDialog extends React.Component<Props, State> {
                 <ReactMarkdown
                   children={addonDetailInfo.detail || ''}
                   remarkPlugins={[remarkGfm]}
-                ></ReactMarkdown>
+                />
               </If>
               <If condition={!addonDetailInfo.detail}>
                 <div className="readme-empty">
-                  <Empty></Empty>
+                  <Empty />
                 </div>
               </If>
             </Card>

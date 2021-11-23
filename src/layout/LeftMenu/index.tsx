@@ -10,7 +10,7 @@ const LeftMenu = (props: any) => {
   const pathname = _.get(props, 'props.history.location.pathname');
   const sider = getLeftSider(pathname);
   const childrenSider = sider.map((item) => {
-    let ele = [];
+    const ele = [];
     if (item.children) {
       const childrenArr = item.children.map((childrenItem) => {
         return (
