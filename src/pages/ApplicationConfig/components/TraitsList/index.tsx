@@ -34,19 +34,21 @@ class TraitsList extends Component<Props> {
             <Col span={8} className="padding16">
               <Card>
                 <div className="traits-list-nav">
-                  <div className="traits-list-title">{item.type}</div>
+                  <div className="traits-list-title">
+                    {item.alias}({item.type})
+                  </div>
                   <div className="traits-list-operation">
                     <Icon
-                      type="wind-minus"
-                      size="small"
-                      className="margin-right-5 cursor-pointer"
+                      type="ashbin1"
+                      size="medium"
+                      className="margin-right-16 cursor-pointer"
                       onClick={() => {
                         this.handleDelete(item.type || '');
                       }}
                     />
                     <Icon
                       type="set"
-                      size="small"
+                      size="medium"
                       className="cursor-pointer"
                       onClick={() => {
                         changeTraitStats(true, item);

@@ -119,9 +119,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
       this.uiSchemaRef.current?.validate(callback);
     };
     let showName = addonDetailInfo.name ? addonDetailInfo.name : addonDetail;
-    const statusShow = status === 'enabled' && <Translation>Enabled</Translation>;
+    const statusShow = status === 'enabled' ? 'Enabled' : undefined;
     if (statusShow) {
-      showName = showName + `(${statusShow})`;
+      showName = `${showName}(${statusShow})`;
     }
     return (
       <div className="basic">

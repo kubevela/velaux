@@ -169,7 +169,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
               <FormItem label={<Translation>Delivery Target</Translation>} required>
                 <Select
                   name="targetNames"
-                  multiple
+                  mode="multiple"
                   placeholder={'Select the delivery target corresponding to the environment.'}
                   {...init('targetNames', {
                     rules: [

@@ -3,7 +3,9 @@ import { Select } from '@b-design/ui';
 
 type Props = {
   onChange: (value: any) => void;
+  secretKeys?: Array<string>;
   value: any;
+  id: string;
 };
 
 type State = {};
@@ -19,8 +21,18 @@ class SecretKeySelect extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   render() {
-    const { onChange, value } = this.props;
-    return <Select onChange={onChange} defaultValue={value}></Select>;
+    const { onChange, value, secretKeys, id } = this.props;
+    return (
+      <Select onChange={onChange} defaultValue={value} id={id}>
+        {secretKeys?.map((item) => {
+          return (
+            <Select.Option key={item} value={item}>
+              {item}
+            </Select.Option>
+          );
+        })}
+      </Select>
+    );
   }
 }
 

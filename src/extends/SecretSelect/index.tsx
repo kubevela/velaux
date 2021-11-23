@@ -3,7 +3,9 @@ import React from 'react';
 
 type Props = {
   onChange: (value: any) => void;
+  setKeys: (keys: Array<string>) => void;
   value: any;
+  id: string;
 };
 
 type State = {};
@@ -17,10 +19,23 @@ class SecretSelect extends React.Component<Props, State> {
   }
 
   componentDidMount = async () => {};
-
+  getSecretKeys = (name: string) => {
+    return ['key1', 'key2'];
+  };
+  onChange = (value: string) => {
+    const { onChange, setKeys } = this.props;
+    const keys = this.getSecretKeys(value);
+    onChange(value);
+    setKeys(keys);
+  };
   render() {
-    const { onChange, value } = this.props;
-    return <Select onChange={onChange} defaultValue={value}></Select>;
+    const { value, id } = this.props;
+    return (
+      <Select onChange={this.onChange} value={value} id={id}>
+        <Select.Option value="secret1">secret1</Select.Option>
+        <Select.Option value="secret2">secret2</Select.Option>
+      </Select>
+    );
   }
 }
 
