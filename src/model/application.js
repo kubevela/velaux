@@ -63,7 +63,8 @@ export default {
     updateComponents(state, { type, payload }) {
       return {
         ...state,
-        components: payload,
+        components: payload.components,
+        componentsApp: payload.componentsApp,
       };
     },
     updateNameSpaceList(state, { type, payload }) {
@@ -143,7 +144,10 @@ export default {
     },
     *getApplicationComponents(action, { call, put }) {
       const result = yield call(getApplicationComponents, action.payload);
-      yield put({ type: 'updateComponents', payload: result && result.components });
+      yield put({
+        type: 'updateComponents',
+        payload: { components: result && result.components, componentsApp: action.payload.appName },
+      });
     },
     *getPolicies(action, { call, put }) {
       const { urlParam } = action.payload;

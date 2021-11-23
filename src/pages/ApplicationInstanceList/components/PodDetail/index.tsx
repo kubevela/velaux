@@ -5,6 +5,7 @@ import { PodBase, Container, Event } from '../../../../interface/observation';
 import { listApplicationPodsDetails } from '../../../../api/observation';
 import moment from 'moment';
 import '../../index.less';
+import { quantityToScalar } from '../../../../utils/utils';
 
 export type Props = {
   pod: PodBase;
@@ -100,6 +101,12 @@ class PodDetail extends React.Component<Props, State> {
         title: <Translation>Memory usageResource</Translation>,
         dataIndex: 'memory',
         cell: (v: string, i: number, record: Container) => {
+          if (record.resources?.requests?.memory && record.resources?.usage?.memory) {
+            const requestMemory = quantityToScalar(record.resources?.requests?.memory);
+            const useMemory = quantityToScalar(record.resources?.usage?.memory);
+            const percent = Number(useMemory).valueOf() / Number(requestMemory).valueOf();
+            return <Progress size="small" percent={percent * 100}></Progress>;
+          }
           return <span>{record.resources?.usage?.memory}</span>;
         },
       },
@@ -108,6 +115,12 @@ class PodDetail extends React.Component<Props, State> {
         title: <Translation>CPU usageResource</Translation>,
         dataIndex: 'cpu',
         cell: (v: string, i: number, record: Container) => {
+          if (record.resources?.requests?.cpu && record.resources?.usage?.cpu) {
+            const requestcpu = quantityToScalar(record.resources?.requests?.cpu);
+            const usecpu = quantityToScalar(record.resources?.usage?.cpu);
+            const percent = Number(usecpu).valueOf() / Number(requestcpu).valueOf();
+            return <Progress size="small" percent={percent * 100}></Progress>;
+          }
           return <span>{record.resources?.usage?.cpu}</span>;
         },
       },
@@ -177,6 +190,7 @@ class PodDetail extends React.Component<Props, State> {
           className="container-table-wraper margin-top-20"
           dataSource={containers}
           hasBorder={false}
+          primaryKey="name"
           loading={loading}
         >
           {containerColumns &&
@@ -188,6 +202,7 @@ class PodDetail extends React.Component<Props, State> {
           dataSource={events}
           hasBorder={false}
           loading={loading}
+          primaryKey="time"
         >
           {eventCloumns &&
             eventCloumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
