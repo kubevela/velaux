@@ -3,6 +3,7 @@ import { Form, Icon, Field, Button, SplitButton } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import { UIParam, GroupOption } from '../../interface/application';
 import UISchema from '../../components/UISchema';
+import { Rule } from '@alifd/field';
 import './index.less';
 
 type Props = {
@@ -18,46 +19,66 @@ type State = {
   structList: Array<any>;
 };
 
-type StructPlanParams = {
-  key: string;
+type StructItemProps = {
+  option: Array<string>;
+  param?: Array<UIParam>;
   id: string;
-  itemLength: number;
   init: any;
-  option: any;
-  param: Array<UIParam> | undefined;
-  onChange?: () => {};
-  delete?: (key: string) => void;
+  delete: (id: string) => void;
 };
-
-function StructItem(props: StructPlanParams) {
-  const { option, param, id, init } = props;
-  let uiSchemas = param;
-  if (option && option.length > 0) {
-    const paramMap =
-      param &&
-      param.reduce((pre: any, next) => {
-        pre[next.jsonKey] = next;
-        return pre;
-      }, {});
-    uiSchemas = option.map((key: string) => paramMap[key]);
+class StructItem extends React.Component<StructItemProps> {
+  uiRef: React.RefObject<UISchema>;
+  constructor(props: StructItemProps) {
+    super(props);
+    this.state = {
+      structList: [],
+    };
+    this.uiRef = React.createRef();
   }
+  validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+    this.uiRef.current?.validate(callback);
+  };
+  render() {
+    const { option, param, id, init } = this.props;
+    let uiSchemas = param;
+    if (option && option.length > 0) {
+      const paramMap =
+        param &&
+        param.reduce((pre: any, next) => {
+          pre[next.jsonKey] = next;
+          return pre;
+        }, {});
+      uiSchemas = option.map((key: string) => paramMap[key]);
+    }
 
-  const ref: React.RefObject<UISchema> = React.createRef();
-  return (
-    <div className="struct-item-container">
-      <div className="struct-item-content">
-        <UISchema ref={ref} uiSchema={uiSchemas} inline _key={id} {...init(`struct${id}`)} />
+    return (
+      <div className="struct-item-container">
+        <div className="struct-item-content">
+          <UISchema
+            {...init(`struct${id}`, {
+              rules: [
+                {
+                  validator: this.validator,
+                  message: 'please check config item',
+                },
+              ],
+            })}
+            uiSchema={uiSchemas}
+            inline
+            ref={this.uiRef}
+          />
+        </div>
+        <div className="remove-option-container">
+          <Icon
+            type="ashbin"
+            onClick={() => {
+              this.props.delete && this.props.delete(this.props.id);
+            }}
+          />
+        </div>
       </div>
-      <div className="remove-option-container">
-        <Icon
-          type="ashbin"
-          onClick={() => {
-            props.delete && props.delete(props.id);
-          }}
-        />
-      </div>
-    </div>
-  );
+    );
+  }
 }
 
 class Structs extends React.Component<Props, State> {
@@ -79,7 +100,9 @@ class Structs extends React.Component<Props, State> {
     if (value && parameterGroupOption) {
       const keyMap = new Map();
       parameterGroupOption.map((item) => {
-        keyMap.set(item.keys.sort().join(), item);
+        if (item && item.keys) {
+          keyMap.set(item.keys.sort().join(), item);
+        }
       });
       const structList = Array<any>();
       value.map((item: object) => {
@@ -89,12 +112,14 @@ class Structs extends React.Component<Props, State> {
           valueKeys.push(itemkey);
         }
         const option = keyMap.get(valueKeys.sort().join());
-        structList.push({
-          key,
-          option: option.keys,
-          value: value,
-        });
-        this.field.setValue('struct' + key, item);
+        if (option) {
+          structList.push({
+            key,
+            option: option.keys,
+            value: value,
+          });
+          this.field.setValue('struct' + key, item);
+        }
       });
       this.setState({ structList });
     }
@@ -165,7 +190,6 @@ class Structs extends React.Component<Props, State> {
                 init={init}
                 option={struct.option}
                 param={param}
-                itemLength={structList.length}
               />
             ))}
           </Form>

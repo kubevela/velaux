@@ -4,7 +4,7 @@ import { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
-import { createTrait, detailTraitDefinition } from '../../../../api/application';
+import { createTrait, detailTraitDefinition, updateTrait } from '../../../../api/application';
 import { DefinitionDetail, Trait } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -42,16 +42,18 @@ class TraitDialog extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const { isEditTrait, traitItem, traitDefinitions = [] } = this.props;
+    const { isEditTrait, traitItem } = this.props;
     if (isEditTrait && traitItem) {
-      const { name, alias, type = '', description, properties } = traitItem;
+      const { alias, type, description, properties } = traitItem;
       this.field.setValues({
-        name,
         alias,
         type,
         description,
         properties,
       });
+      if (type) {
+        this.onDetailsComponeDefinition(type);
+      }
     }
   }
 
@@ -65,21 +67,30 @@ class TraitDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', componentName = '' } = this.props;
-      debugger;
       const { alias = '', type = '', description = '', properties } = values;
-      const query = { appName, componentName };
+      const query = { appName, componentName, traitType: type };
       const params: Trait = {
         alias,
         type,
         description,
         properties: JSON.stringify(properties),
       };
-      createTrait(params, query).then((res) => {
-        if (res) {
-          Message.success(<Translation>create application trait success</Translation>);
-          this.props.onOK();
-        }
-      });
+      const { isEditTrait } = this.props;
+      if (isEditTrait) {
+        updateTrait(params, query).then((res) => {
+          if (res) {
+            Message.success(<Translation>update application trait success</Translation>);
+            this.props.onOK();
+          }
+        });
+      } else {
+        createTrait(params, query).then((res) => {
+          if (res) {
+            Message.success(<Translation>create application trait success</Translation>);
+            this.props.onOK();
+          }
+        });
+      }
     });
   };
 
@@ -111,14 +122,14 @@ class TraitDialog extends React.Component<Props, State> {
   };
 
   extButtonList = () => {
-    const { onClose } = this.props;
+    const { onClose, isEditTrait } = this.props;
     return (
       <div>
         <Button type="secondary" onClick={onClose} className="margin-right-10">
           <Translation>Cancle</Translation>
         </Button>
         <Button type="primary" onClick={this.onSubmit}>
-          <Translation>Create</Translation>
+          <Translation>{isEditTrait ? 'Update' : 'Create'}</Translation>
         </Button>
       </div>
     );
@@ -131,7 +142,7 @@ class TraitDialog extends React.Component<Props, State> {
 
     const { onClose } = this.props;
     const { t, isEditTrait } = this.props;
-    const { definitionDetail, definitionLoading } = this.state;
+    const { definitionDetail } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -232,6 +243,11 @@ class TraitDialog extends React.Component<Props, State> {
                       ref={this.uiSchemaRef}
                     ></UISchema>
                   </FormItem>
+                </If>
+                <If condition={!definitionDetail}>
+                  <Message type="notice">
+                    <Translation>Please select trait type first.</Translation>
+                  </Message>
                 </If>
               </Group>
             </Col>

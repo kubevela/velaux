@@ -26,7 +26,6 @@ class ApplicationLayout extends Component<Props, any> {
 
   componentDidMount() {
     this.onGetApplicationDetails();
-    this.loadApplicationEnvbinding();
     this.getNamespaceList();
   }
 
@@ -41,6 +40,7 @@ class ApplicationLayout extends Component<Props, any> {
       callback: () => {
         this.setState({ loading: false }, () => {
           this.loadApplicationComponents();
+          this.loadApplicationEnvbinding();
           this.loadApplicationWorkflows();
         });
       },
@@ -103,7 +103,7 @@ class ApplicationLayout extends Component<Props, any> {
     }
     return (
       <div className="applayout">
-        <Header currentPath={path}></Header>
+        <Header appName={appName} currentPath={path}></Header>
         <EnvTabs dispatch={dispatch} activeKey={envName ? envName : 'basisConfig'}></EnvTabs>
         <Row className="padding16 main">
           <div className="menu">

@@ -60,10 +60,13 @@ class ApplicationConfig extends Component<Props, State> {
   componentDidMount() {
     this.onGetTraitdefinitions();
     const { components } = this.props;
-    const componentName = (components && components.length > 0 && components[0].name) || '';
-    this.setState({ componentName }, () => {
-      this.onGetAppliationComponent();
-    });
+    const { appName } = this.state;
+    if (components && components.length > 0 && components[0].appPrimaryKey == appName) {
+      const componentName = components[0].name || '';
+      this.setState({ componentName }, () => {
+        this.onGetAppliationComponent();
+      });
+    }
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -256,6 +259,7 @@ class ApplicationConfig extends Component<Props, State> {
         <If condition={visibleEditComponentProperties && mainComponent}>
           <EditProperties
             onOK={() => {
+              this.onGetAppliationComponent();
               this.setState({ visibleEditComponentProperties: false });
             }}
             onClose={() => {
