@@ -32,6 +32,7 @@ const { Row, Col } = Grid;
 
 interface Props {
   currentPath: string;
+  appName: string;
   applicationDetail?: ApplicationDetail;
   applicationStatus?: { status?: ApplicationStatus };
   workflows?: Array<Workflow>;
@@ -89,22 +90,20 @@ class ApplicationHeader extends Component<Props, State> {
   };
 
   loadAppStatistics = async () => {
-    const { applicationDetail } = this.props;
-    if (applicationDetail?.name) {
-      getApplicationStatistics({ appName: applicationDetail?.name }).then(
-        (re: ApplicationStatistics) => {
-          if (re) {
-            this.setState({ statistics: re });
-          }
-        },
-      );
+    const { appName } = this.props;
+    if (appName) {
+      getApplicationStatistics({ appName: appName }).then((re: ApplicationStatistics) => {
+        if (re) {
+          this.setState({ statistics: re });
+        }
+      });
     }
   };
 
   loadworkflowRecord = async () => {
-    const { applicationDetail } = this.props;
-    if (applicationDetail && applicationDetail.name) {
-      getApplicationWorkflowRecord({ appName: applicationDetail?.name }).then((re) => {
+    const { appName } = this.props;
+    if (appName) {
+      getApplicationWorkflowRecord({ appName: appName }).then((re) => {
         if (re) {
           this.setState({ records: re.records });
         }

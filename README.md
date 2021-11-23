@@ -9,8 +9,14 @@ The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Dashboa
 ## Quickstart
 
 ```shell
-npm install
-npm run start
+yarn install
+yarn start
+```
+
+Configure the API server address locally.
+
+```shell
+echo "BASE_DOMAIN='http://127.0.0.1:8000'" > .env
 ```
 
 ## Community

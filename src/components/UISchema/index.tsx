@@ -15,6 +15,7 @@ import InnerGroup from '../../extends/InnerGroup';
 import { Rule } from '@alifd/field';
 import KV from '../../extends/KV';
 import './index.less';
+import { checkImageName } from '../../utils/common';
 
 type Props = {
   _key?: string;
@@ -70,328 +71,11 @@ function converRule(validete: UIParamValidate) {
   return rules;
 }
 
-export function ParseParam(param: UIParam, inline: boolean | undefined, init: any) {
-  const required = param.validate && param.validate.required;
-  switch (param.uiType) {
-    case 'Switch':
-      return (
-        <Form.Item
-          className="switch-container"
-          required={required}
-          labelAlign={inline ? 'inset' : 'left'}
-          label={
-            inline ? (
-              <Balloon trigger={param.label} align="t">
-                <div>
-                  <div style={{ fontWeight: 'bold' }}>{param.label}</div>
-                  <div>{param.description}</div>
-                </div>
-              </Balloon>
-            ) : (
-              param.label
-            )
-          }
-          help={param.description}
-          disabled={param.disable}
-        >
-          <SwitchComponent
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-          />
-        </Form.Item>
-      );
-    case 'Input':
-      return (
-        <Form.Item
-          required={required}
-          labelAlign={inline ? 'inset' : 'left'}
-          label={param.label}
-          help={param.description}
-          disabled={param.disable}
-        >
-          <Input
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-          ></Input>
-        </Form.Item>
-      );
-    case 'Select':
-      return (
-        <Form.Item
-          required={required}
-          labelAlign={inline ? 'inset' : 'left'}
-          label={
-            inline ? (
-              <Balloon trigger={param.label} align="t">
-                <div>
-                  <div style={{ fontWeight: 'bold' }}>{param.label}</div>
-                  <div>{param.description}</div>
-                </div>
-              </Balloon>
-            ) : (
-              param.label
-            )
-          }
-          help={param.description}
-          disabled={param.disable}
-        >
-          <Select
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-            dataSource={param.validate && param.validate.options}
-          ></Select>
-        </Form.Item>
-      );
-    case 'Number':
-      return (
-        <Form.Item
-          required={required}
-          label={
-            inline ? (
-              <Balloon trigger={param.label} align="t">
-                <div>
-                  <div style={{ fontWeight: 'bold' }}>{param.label}</div>
-                  <div>{param.description}</div>
-                </div>
-              </Balloon>
-            ) : (
-              param.label
-            )
-          }
-          help={param.description}
-          disabled={param.disable}
-        >
-          <Input
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-            htmlType="number"
-          ></Input>
-        </Form.Item>
-      );
-    case 'ImageInput':
-      return (
-        <Form.Item
-          required={required}
-          label={param.label}
-          help={param.description}
-          disabled={param.disable}
-        >
-          <ImageInput
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-          />
-        </Form.Item>
-      );
-    case 'KV':
-      return (
-        <Group
-          hasToggleIcon
-          description={<Translation>{param.description || ''}</Translation>}
-          title={<Translation>{param.label || ''}</Translation>}
-          closed={true}
-        >
-          <Form.Item>
-            <UISchema
-              uiSchema={param.subParameters}
-              {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
-                rules: converRule(param.validate),
-              })}
-            />
-          </Form.Item>
-        </Group>
-      );
-    case 'Strings':
-      return (
-        <Group
-          hasToggleIcon
-          description={<Translation>{param.description || ''}</Translation>}
-          title={<Translation>{param.label || ''}</Translation>}
-          closed={true}
-        >
-          <Strings
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-          />
-        </Group>
-      );
-    case 'SecretSelect':
-      return (
-        <Form.Item
-          labelAlign={inline ? 'inset' : 'left'}
-          required={required}
-          label={param.label}
-          help={param.description}
-          disabled={param.disable}
-        >
-          <SecretSelect
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-          />
-        </Form.Item>
-      );
-    case 'SecretKeySelect':
-      return (
-        <Form.Item
-          required={required}
-          labelAlign={inline ? 'inset' : 'left'}
-          label={param.label}
-          help={param.description}
-          disabled={param.disable}
-        >
-          <SecretKeySelect
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-          />
-        </Form.Item>
-      );
-    case 'CPUNumber':
-      return (
-        <Form.Item
-          required={required}
-          label={
-            inline ? (
-              <Balloon trigger={param.label} align="t">
-                <div>
-                  <div style={{ fontWeight: 'bold' }}>{param.label}</div>
-                  <div>{param.description}</div>
-                </div>
-              </Balloon>
-            ) : (
-              param.label
-            )
-          }
-          help={param.description}
-          disabled={param.disable}
-        >
-          <CPUNumber
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-          />
-        </Form.Item>
-      );
-    case 'MemoryNumber':
-      return (
-        <Form.Item
-          required={required}
-          label={param.label}
-          help={param.description}
-          disabled={param.disable}
-        >
-          <MemoryNumber
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-          />
-        </Form.Item>
-      );
-    case 'Group':
-      if (param.subParameters && param.subParameters.length > 0) {
-        return (
-          <Group
-            hasToggleIcon
-            description={<Translation>{param.description || ''}</Translation>}
-            title={<Translation>{param.label || ''}</Translation>}
-            closed={true}
-            required={param.validate && param.validate.required}
-          >
-            <UISchema
-              {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
-                rules: converRule(param.validate),
-              })}
-              uiSchema={param.subParameters}
-              _key={param.jsonKey}
-            />
-          </Group>
-        );
-      }
-      return <div></div>;
-    case 'InnerGroup':
-      return (
-        <InnerGroup
-          _key={param.jsonKey}
-          uiSchema={param.subParameters}
-          title={param.label}
-          description={param.description}
-          {...init(param.jsonKey, {
-            initValue: param.validate.defaultValue,
-            rules: converRule(param.validate),
-          })}
-        />
-      );
-    case 'Structs':
-      if (param.subParameters && param.subParameters.length > 0) {
-        const ref: React.RefObject<Structs> = React.createRef();
-        const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
-          ref.current?.validate(callback);
-        };
-        return (
-          <Group
-            hasToggleIcon
-            description={<Translation>{param.description || ''}</Translation>}
-            title={<Translation>{param.label || ''}</Translation>}
-            closed={true}
-          >
-            <Form.Item>
-              <Structs
-                ref={ref}
-                _key={param.jsonKey}
-                param={param.subParameters}
-                parameterGroupOption={param.subParameterGroupOption}
-                {...init(param.jsonKey, {
-                  initValue: param.validate.defaultValue,
-                  rules: [
-                    // {
-                    //   validator: validator,
-                    //   message: `Please check ${param.label} config`,
-                    // },
-                  ],
-                })}
-              />
-            </Form.Item>
-          </Group>
-        );
-      }
-      return <div></div>;
-    case 'Ignore':
-      if (param.subParameters && param.subParameters.length > 0) {
-        return (
-          <UISchema
-            _key={param.jsonKey}
-            uiSchema={param.subParameters}
-            inline={inline}
-            {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
-              rules: converRule(param.validate),
-            })}
-          />
-        );
-      }
-      return <div></div>;
-  }
-}
+type State = {
+  secretKeys?: Array<string>;
+};
 
-class UISchema extends Component<Props> {
+class UISchema extends Component<Props, State> {
   form: Field;
   constructor(props: Props) {
     super(props);
@@ -402,6 +86,9 @@ class UISchema extends Component<Props> {
         if (onChange) onChange(values);
       },
     });
+    this.state = {
+      secretKeys: [],
+    };
   }
 
   componentDidMount = () => {
@@ -428,15 +115,347 @@ class UISchema extends Component<Props> {
     });
   };
 
+  ParseParam = (param: UIParam, inline: boolean | undefined) => {
+    let init = this.form.init;
+    const required = param.validate && param.validate.required;
+    if (param.disable) {
+      return;
+    }
+    switch (param.uiType) {
+      case 'Switch':
+        return (
+          <Form.Item
+            className="switch-container"
+            required={required}
+            key={param.jsonKey}
+            labelAlign={inline ? 'inset' : 'left'}
+            label={param.label}
+            help={param.description}
+            disabled={param.disable}
+          >
+            <SwitchComponent
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: converRule(param.validate),
+              })}
+            />
+          </Form.Item>
+        );
+      case 'Input':
+        return (
+          <Form.Item
+            required={required}
+            labelAlign={inline ? 'inset' : 'left'}
+            label={param.label}
+            key={param.jsonKey}
+            help={param.description}
+            disabled={param.disable}
+          >
+            <Input
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: converRule(param.validate),
+              })}
+            ></Input>
+          </Form.Item>
+        );
+      case 'Select':
+        return (
+          <Form.Item
+            required={required}
+            labelAlign={inline ? 'inset' : 'left'}
+            label={param.label}
+            key={param.jsonKey}
+            help={param.description}
+            disabled={param.disable}
+          >
+            <Select
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: converRule(param.validate),
+              })}
+              dataSource={param.validate && param.validate.options}
+            ></Select>
+          </Form.Item>
+        );
+      case 'Number':
+        return (
+          <Form.Item
+            required={required}
+            label={param.label}
+            key={param.jsonKey}
+            help={param.description}
+            disabled={param.disable}
+          >
+            <Input
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: converRule(param.validate),
+              })}
+              htmlType="number"
+            ></Input>
+          </Form.Item>
+        );
+      case 'ImageInput':
+        return (
+          <Form.Item
+            required={required}
+            label={param.label}
+            help={param.description}
+            disabled={param.disable}
+            key={param.jsonKey}
+          >
+            <ImageInput
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: [
+                  {
+                    required: true,
+                    pattern: checkImageName,
+                    message: 'Please enter a valid image name',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        );
+      case 'KV':
+        return (
+          <Group
+            hasToggleIcon
+            description={<Translation>{param.description || ''}</Translation>}
+            title={<Translation>{param.label || ''}</Translation>}
+            closed={true}
+            key={param.jsonKey}
+          >
+            <Form.Item required={required} disabled={param.disable} key={param.jsonKey}>
+              <KV
+                {...init(param.jsonKey, {
+                  initValue: param.validate.defaultValue,
+                  rules: converRule(param.validate),
+                })}
+              />
+            </Form.Item>
+          </Group>
+        );
+      case 'Strings':
+        return (
+          <Group
+            hasToggleIcon
+            description={<Translation>{param.description || ''}</Translation>}
+            title={<Translation>{param.label || ''}</Translation>}
+            closed={true}
+            key={param.jsonKey}
+          >
+            <Form.Item required={required} disabled={param.disable} key={param.jsonKey}>
+              <Strings
+                {...init(param.jsonKey, {
+                  initValue: param.validate.defaultValue,
+                  rules: converRule(param.validate),
+                })}
+              />
+            </Form.Item>
+          </Group>
+        );
+      case 'SecretSelect':
+        return (
+          <Form.Item
+            labelAlign={inline ? 'inset' : 'left'}
+            required={required}
+            label={param.label}
+            help={param.description}
+            disabled={param.disable}
+            key={param.jsonKey}
+          >
+            <SecretSelect
+              setKeys={(keys: Array<string>) => {
+                this.setState({ secretKeys: keys });
+              }}
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: converRule(param.validate),
+              })}
+            />
+          </Form.Item>
+        );
+      case 'SecretKeySelect':
+        return (
+          <Form.Item
+            required={required}
+            labelAlign={inline ? 'inset' : 'left'}
+            label={param.label}
+            help={param.description}
+            disabled={param.disable}
+            key={param.jsonKey}
+          >
+            <SecretKeySelect
+              secretKeys={this.state.secretKeys}
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: converRule(param.validate),
+              })}
+            />
+          </Form.Item>
+        );
+      case 'CPUNumber':
+        return (
+          <Form.Item
+            required={required}
+            label={param.label}
+            help={param.description}
+            disabled={param.disable}
+            key={param.jsonKey}
+          >
+            <CPUNumber
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: [
+                  {
+                    required: param.validate.required,
+                    min: 0,
+                    message: 'Please enter a valid cpu request number',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        );
+      case 'MemoryNumber':
+        return (
+          <Form.Item
+            required={required}
+            label={param.label}
+            help={param.description}
+            disabled={param.disable}
+            key={param.jsonKey}
+          >
+            <MemoryNumber
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: [
+                  {
+                    required: param.validate.required,
+                    min: 0,
+                    message: 'Please enter a valid memory request number',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        );
+      case 'Group':
+        if (param.subParameters && param.subParameters.length > 0) {
+          const ref: React.RefObject<UISchema> = React.createRef();
+          const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+            ref.current?.validate(callback);
+          };
+          return (
+            <Group
+              hasToggleIcon
+              description={<Translation>{param.description || ''}</Translation>}
+              title={<Translation>{param.label || ''}</Translation>}
+              closed={true}
+              required={param.validate && param.validate.required}
+            >
+              <UISchema
+                {...init(param.jsonKey, {
+                  initValue: param.validate.defaultValue,
+                  rules: [
+                    // {
+                    //   validator: validator,
+                    //   message: `Please check ${param.label} config`,
+                    // },
+                  ],
+                })}
+                uiSchema={param.subParameters}
+                ref={ref}
+              />
+            </Group>
+          );
+        }
+        return <div></div>;
+      case 'InnerGroup':
+        return (
+          <InnerGroup
+            key={param.jsonKey}
+            uiSchema={param.subParameters}
+            title={param.label}
+            description={param.description}
+            {...init(param.jsonKey, {
+              initValue: param.validate.defaultValue,
+              rules: converRule(param.validate),
+            })}
+          />
+        );
+      case 'Structs':
+        if (param.subParameters && param.subParameters.length > 0) {
+          const ref: React.RefObject<Structs> = React.createRef();
+          const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+            ref.current?.validate(callback);
+          };
+          return (
+            <Group
+              hasToggleIcon
+              description={<Translation>{param.description || ''}</Translation>}
+              title={<Translation>{param.label || ''}</Translation>}
+              closed={true}
+            >
+              <Form.Item>
+                <Structs
+                  ref={ref}
+                  param={param.subParameters}
+                  parameterGroupOption={param.subParameterGroupOption}
+                  {...init(param.jsonKey, {
+                    initValue: param.validate.defaultValue,
+                    // rules: [
+                    //   {
+                    //     validator: validator,
+                    //     message: `Please check ${param.label} config`,
+                    //   },
+                    // ],
+                  })}
+                />
+              </Form.Item>
+            </Group>
+          );
+        }
+        return <div></div>;
+      case 'Ignore':
+        if (param.subParameters && param.subParameters.length > 0) {
+          const ref: React.RefObject<UISchema> = React.createRef();
+          const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+            ref.current?.validate(callback);
+          };
+          return (
+            <UISchema
+              ref={ref}
+              key={param.jsonKey}
+              uiSchema={param.subParameters}
+              inline={inline}
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: [
+                  {
+                    validator: validator,
+                    message: `Please check ${param.label} config`,
+                  },
+                ],
+              })}
+            />
+          );
+        }
+        return <div></div>;
+    }
+  };
+
   render() {
     const { uiSchema, inline } = this.props;
-    let init = this.form.init;
     if (!uiSchema) {
       return <div></div>;
     }
 
     const items = uiSchema.map((param) => {
-      return ParseParam(param, inline, init);
+      return this.ParseParam(param, inline);
     });
     return (
       <Form field={this.form} className="ui-schema-container">

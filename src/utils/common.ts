@@ -62,6 +62,8 @@ export function momentDate(time: undefined | string): string {
 export const checkName = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/;
 export const urlRegular =
   /(https|http|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g;
+export const checkImageName = /^[^\u4e00-\u9fa5 ]{0,512}$/;
+
 export const formItemLayout = {
   labelCol: {
     fixedSpan: 6,

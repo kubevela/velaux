@@ -5,7 +5,7 @@ import './index.less';
 
 type Props = {
   label?: string;
-  value: boolean;
+  value: any;
   id: string;
   onChange: (value: any) => void;
 };
@@ -15,12 +15,14 @@ type InputParams = {
   id: string;
   isFirst?: boolean;
   label?: boolean;
+  value?: string;
   onChange: () => {};
   delete: (key: string) => {};
 };
 
 type ListParams = {
   key: string;
+  value?: any;
 };
 
 type State = {
@@ -30,7 +32,13 @@ type State = {
 function InputItem(props: InputParams) {
   return (
     <div className="string-container">
-      <Input htmlType="text" onChange={props.onChange} addonBefore={''} className="input" />
+      <Input
+        htmlType="text"
+        onChange={props.onChange}
+        addonBefore={''}
+        className="input"
+        value={props.value}
+      />
       <div className="remove-option-container">
         <If condition={!props.isFirst}>
           <Icon
@@ -49,8 +57,18 @@ class Strings extends React.Component<Props, State> {
   field: any;
   constructor(props: Props) {
     super(props);
+    const inputList: Array<ListParams> = [];
+    if (props.value) {
+      props.value.map((v: any) => {
+        const key = Date.now().toString();
+        inputList.push({
+          key,
+          value: v,
+        });
+      });
+    }
     this.state = {
-      inputList: [],
+      inputList,
     };
     this.field = new Field(this, {
       onChange: () => {
@@ -102,27 +120,21 @@ class Strings extends React.Component<Props, State> {
   render() {
     const { inputList } = this.state;
     const { init } = this.field;
-    const { label } = this.props;
+    const { label, value } = this.props;
     return (
-      <div>
-        <InputItem
-          {...init('init', {
-            name: 'first',
-          })}
-          isFirst
-          label={label}
-        />
+      <div className="strings-container">
         {inputList.map((item) => (
           <InputItem
             {...init(item.key)}
             key={item.key}
+            value={item.value}
             delete={(id) => this.removeInputItem(id)}
             id={item.key}
             label={label}
           />
         ))}
         <div className="add-btn-container">
-          <Button onClick={this.addInputItem} ghost="light">
+          <Button size="small" onClick={this.addInputItem} ghost="light">
             添加
           </Button>
         </div>
