@@ -52,8 +52,8 @@ export interface Podstatus {
 }
 
 export interface PodDetailBase {
-  containers: Array<Container>;
-  events: Array<Event>;
+  containers: Container[];
+  events: Event[];
 }
 
 export interface Event {
@@ -86,7 +86,7 @@ export interface Event {
 
 export interface Metadata {
   creationTimestamp?: string;
-  managedFields?: Array<ManagedFields>;
+  managedFields?: ManagedFields[];
   name: string;
   namespace: string;
   resourceVersion: string;

@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import _ from 'lodash';
-import { listWorkFlow, createWorkFlow, updateWorkFlow } from '../api/workflows';
+import { listWorkFlow, createWorkFlow } from '../api/workflows';
 
 const WORKFLOW_TEMPLATE = {
   appName: '',
@@ -112,21 +113,21 @@ function transData(workflowList = []) {
       const nodes = {};
       const edges = {};
       let position = 50;
-      key.steps &&
+      if (key.steps) {
         key.steps.forEach((item, index, array) => {
           position += 200;
           edges[item.name] = {};
-          edges[item.name]['dest'] = key.steps && key.steps[index + 1] && key.steps[index + 1].name;
-          edges[item.name]['diagramMakerData'] = {
+          edges[item.name].dest = key.steps && key.steps[index + 1] && key.steps[index + 1].name;
+          edges[item.name].diagramMakerData = {
             selected: false,
           };
-          edges[item.name]['id'] = item.name;
-          edges[item.name]['src'] = key.steps && key.steps[index] && key.steps[index].name;
+          edges[item.name].id = item.name;
+          edges[item.name].src = key.steps && key.steps[index] && key.steps[index].name;
 
           nodes[item.name] = {};
-          nodes[item.name]['id'] = item.name;
-          nodes[item.name]['typeId'] = item.type;
-          nodes[item.name]['consumerData'] = {
+          nodes[item.name].id = item.name;
+          nodes[item.name].typeId = item.type;
+          nodes[item.name].consumerData = {
             alias: item.alias || '',
             dependsOn: null,
             description: item.description || '',
@@ -134,7 +135,7 @@ function transData(workflowList = []) {
             properties: item.properties || '',
             type: item.type || '',
           };
-          nodes[item.name]['diagramMakerData'] = {
+          nodes[item.name].diagramMakerData = {
             position: {
               x: position,
               y: 100,
@@ -146,13 +147,14 @@ function transData(workflowList = []) {
             selected: false,
           };
         });
-      key['envName'] = key.envName;
-      key['option'] = {
+      }
+      key.envName = key.envName;
+      key.option = {
         edit: false,
         enable: false,
         default: key.default,
       };
-      key['data'] = {
+      key.data = {
         edges: edges,
         nodes: nodes,
       };

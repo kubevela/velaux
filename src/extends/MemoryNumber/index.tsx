@@ -15,7 +15,7 @@ class MemoryNumber extends React.Component<Props, State> {
     this.state = {};
   }
 
-  onChange = (value: string, e: any) => {
+  onChange = (value: string) => {
     const { onChange } = this.props;
     if (onChange) {
       onChange(value + 'Mi');

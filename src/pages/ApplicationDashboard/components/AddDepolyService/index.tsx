@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Checkbox, Grid, Form } from '@b-design/ui';
+import { Checkbox, Grid } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import './index.less';
 
@@ -7,7 +7,7 @@ type Props = {
   components: [];
 };
 type State = {
-  componentServices: [] | Array<ComponentItem>;
+  componentServices?: ComponentItem[];
   allChecked: boolean;
 };
 
@@ -42,12 +42,12 @@ class addCheckDepolySercice extends Component<Props, State> {
 
   removeChecked = (id: string) => {
     const { componentServices } = this.state;
-    componentServices.forEach((item: ComponentItem) => {
+    componentServices?.forEach((item: ComponentItem) => {
       if (item.id === id) {
         item.checked = false;
       }
     });
-    const notCheckedAll = componentServices.every((item: ComponentItem) => item.checked === false);
+    const notCheckedAll = componentServices?.every((item: ComponentItem) => item.checked === false);
     if (notCheckedAll) {
       this.setState({
         allChecked: false,
@@ -58,13 +58,13 @@ class addCheckDepolySercice extends Component<Props, State> {
 
   addChecked = (id: string) => {
     const { componentServices } = this.state;
-    componentServices.forEach((item: ComponentItem) => {
+    componentServices?.forEach((item: ComponentItem) => {
       if (item.id === id) {
         item.checked = true;
       }
     });
 
-    const isCheckedAll = componentServices.every((item: ComponentItem) => item.checked === true);
+    const isCheckedAll = componentServices?.every((item: ComponentItem) => item.checked === true);
     if (isCheckedAll) {
       this.setState({
         allChecked: true,
@@ -77,14 +77,14 @@ class addCheckDepolySercice extends Component<Props, State> {
   onChangeAll = (flag: boolean) => {
     const { componentServices } = this.state;
     if (flag) {
-      const newComponentServices = componentServices.map((item: ComponentItem) => ({
+      const newComponentServices = componentServices?.map((item: ComponentItem) => ({
         id: item.name,
         name: item.name,
         checked: true,
       }));
       this.setState({ componentServices: newComponentServices, allChecked: true });
     } else {
-      const newComponentServices = componentServices.map((item: ComponentItem) => ({
+      const newComponentServices = componentServices?.map((item: ComponentItem) => ({
         id: item.name,
         name: item.name,
         checked: false,
@@ -120,7 +120,7 @@ class addCheckDepolySercice extends Component<Props, State> {
           </Col>
         </Row>
         <Row wrap={true} className="checkoubox-content">
-          {componentServices.map((item: ComponentItem) => (
+          {componentServices?.map((item: ComponentItem) => (
             <Col span="6">
               <Checkbox
                 id={item.name}

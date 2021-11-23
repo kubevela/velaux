@@ -3,7 +3,7 @@ import { Select } from '@b-design/ui';
 
 type Props = {
   onChange: (value: any) => void;
-  secretKeys?: Array<string>;
+  secretKeys?: string[];
   value: any;
   id: string;
 };

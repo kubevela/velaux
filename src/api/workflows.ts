@@ -2,18 +2,16 @@ import { post, get, rdelete, put } from './request';
 import {
   workflows_mock,
   getWorkFlowsDetails_mock,
-  createWorkFlow_mock,
   getWorkFlowsRecord_mock,
   listWorkFlowDefintion_mock,
   listWorkFlowDetailsDefintion_mock,
 } from './devLink';
 import { workflows, componentdefinition } from './productionLink';
 import { getDomain } from '../utils/common';
-import { WorkFlowData } from '../pages/ApplicationWorkflow/entity';
+import type { WorkFlowData } from '../pages/ApplicationWorkflow/entity';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
-const url = isMock ? workflows_mock : workflows;
 
 export function listWorkFlow(params: { appName: string }) {
   const url = isMock ? `${workflows_mock}` : `${workflows}/${params.appName}/workflows`;

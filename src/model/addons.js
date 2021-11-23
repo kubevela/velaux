@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { getAddonsList, getAddonRegistrysList } from '../api/addons';
 export default {
   namespace: 'addons',

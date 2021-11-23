@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Drawer, Message } from '@b-design/ui';
-import {
-  DiagramMaker,
+import type {
   DiagramMakerData,
   DiagramMakerNode,
   DiagramMakerEdge,
+  DiagramMakerPanel,
+} from 'diagram-maker';
+import {
+  DiagramMaker,
   ConnectorPlacement,
   EditorMode,
   VisibleConnectorTypes,
-  DiagramMakerPanel,
   Layout,
   WorkflowLayoutDirection,
 } from 'diagram-maker';
@@ -17,12 +19,8 @@ import WorkFlowNode from '../workflow-node';
 import WorkFlowEdge from '../workflow-edge';
 import WorkFlowPannel from '../workflow-panel';
 import WorkFlowToolTip from '../workflow-tooltip';
-import {
-  EdgesAndNodes,
-  WorkFlowNodeType,
-  WorkFlowEdgeType,
-  WORKFLOW_COMMON_PANNEL,
-} from '../entity';
+import type { EdgesAndNodes, WorkFlowNodeType, WorkFlowEdgeType } from '../entity';
+import { WORKFLOW_COMMON_PANNEL } from '../entity';
 import WorkflowForm from './workflow-form';
 import 'diagram-maker/dist/diagramMaker.css';
 import './index.less';
@@ -152,7 +150,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
               return;
             }
             if (action.payload.dest) {
-              for (var key in edges) {
+              for (const key in edges) {
                 if (edges[key].dest == action.payload.dest) {
                   Message.warning('Process forking is not supported 2');
                   return;
@@ -178,7 +176,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
               return state;
           }
         },
-        eventListener: (e) => {},
+        eventListener: () => {},
       },
     );
 
@@ -234,7 +232,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     diagramMakerContainer: HTMLElement,
   ) => {
     const { workFlowDefinitions } = this.props;
-    let parentContainer = diagramMakerContainer.parentElement;
+    const parentContainer = diagramMakerContainer.parentElement;
     if (parentContainer) {
       parentContainer.style.display = 'block';
     }
@@ -272,7 +270,9 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
   };
 
   componentWillUnmount = () => {
-    this.diagramMaker && this.diagramMaker.destroy();
+    if (this.diagramMaker) {
+      this.diagramMaker.destroy();
+    }
   };
 
   componentWillReceiveProps = (nextProps: WorkFlowItemProps) => {
@@ -308,7 +308,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     const { nodes } = this.diagramMaker.store.getState();
     const { currentSelectedNodeData } = this.state;
     let consumerData = nodes[currentSelectedNodeData.id];
-    let diagramMakerData = Object.assign({}, consumerData.diagramMakerData, { selected: false });
+    const diagramMakerData = Object.assign({}, consumerData.diagramMakerData, { selected: false });
     consumerData = Object.assign({}, consumerData, { diagramMakerData });
     this.diagramMaker.store.dispatch({
       type: 'UPDATENODE',

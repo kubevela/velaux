@@ -3,7 +3,7 @@ import { Dialog, Dropdown, Icon, Input, Menu, Form, Field, Message } from '@b-de
 import { If } from 'tsx-control-statements/components';
 import WorkFlowItem from '../workflow-item';
 import { checkName } from '../../../utils/common';
-import { WorkFlowData, WorkFlowOption } from '../entity';
+import type { WorkFlowData, WorkFlowOption } from '../entity';
 import { deleteWorkFlow } from '../../../api/workflows';
 import './index.less';
 
@@ -59,9 +59,9 @@ class WorkFlowComponent extends Component<Props, State> {
     });
   };
 
-  setWorkflowState = (name: string, enable: boolean) => {};
+  setWorkflowState = () => {};
 
-  saveWorkflow = (name: string) => {
+  saveWorkflow = () => {
     this.setState({
       errorFocus: false,
     });
@@ -104,24 +104,6 @@ class WorkFlowComponent extends Component<Props, State> {
       <Menu>
         <Menu.Item>查看历史记录</Menu.Item>
         <Menu.Item>设置为默认</Menu.Item>
-        <If condition={option.enable}>
-          <Menu.Item
-            onClick={() => {
-              this.setWorkflowState(data.name, false);
-            }}
-          >
-            禁用
-          </Menu.Item>
-        </If>
-        <If condition={!option.enable}>
-          <Menu.Item
-            onClick={() => {
-              this.setWorkflowState(data.name, true);
-            }}
-          >
-            启用
-          </Menu.Item>
-        </If>
         <Menu.Item onClick={() => this.deleteWorkflow(data.name)}>删除</Menu.Item>
       </Menu>
     );
@@ -181,7 +163,7 @@ class WorkFlowComponent extends Component<Props, State> {
               <div
                 className="option-item"
                 onClick={() => {
-                  this.saveWorkflow(data.name);
+                  this.saveWorkflow();
                 }}
               >
                 保存

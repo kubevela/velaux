@@ -1,5 +1,4 @@
 import React from 'react';
-import { useState } from 'react';
 import { Button, Grid } from '@b-design/ui';
 import Translation from '../Translation';
 import './index.less';

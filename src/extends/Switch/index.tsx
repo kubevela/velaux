@@ -24,7 +24,7 @@ class SwitchComponent extends React.Component<Props, State> {
         unCheckedChildren="off"
         defaultChecked={value}
         id={id}
-        onChange={(value) => onChange(value)}
+        onChange={(v) => onChange(v)}
       />
     );
   }

@@ -1,15 +1,4 @@
-import {
-  DiagramMaker,
-  DiagramMakerData,
-  DiagramMakerNode,
-  DiagramMakerEdge,
-  ConnectorPlacement,
-  DiagramMakerNodes,
-  DiagramMakerEdges,
-  EditorMode,
-  VisibleConnectorTypes,
-  DiagramMakerPanel,
-} from 'diagram-maker';
+import type { DiagramMakerNodes, DiagramMakerEdges } from 'diagram-maker';
 
 export const WORFLOW_NODE_WIDTH = 120;
 
@@ -56,7 +45,7 @@ export type WorkFlowData = {
   envName?: string;
   createTime?: string;
   updateTime?: string;
-  steps?: Array<Step>;
+  steps?: Step[];
   workflowRecord?: any;
 };
 

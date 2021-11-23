@@ -1,27 +1,27 @@
 import React from 'react';
 import { Form, Icon, Field, Button, SplitButton } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
-import { UIParam, GroupOption } from '../../interface/application';
+import type { UIParam, GroupOption } from '../../interface/application';
 import UISchema from '../../components/UISchema';
-import { Rule } from '@alifd/field';
+import type { Rule } from '@alifd/field';
 import './index.less';
 
 type Props = {
   _key?: string;
   parameterGroupOption: GroupOption[] | undefined;
-  param: Array<UIParam> | undefined;
+  param: UIParam[] | undefined;
   onChange?: (params: any) => void;
   id: string;
   value: any;
 };
 
 type State = {
-  structList: Array<any>;
+  structList: any[];
 };
 
 type StructItemProps = {
-  option: Array<string>;
-  param?: Array<UIParam>;
+  option: string[];
+  param?: UIParam[];
   id: string;
   init: any;
   delete: (id: string) => void;
@@ -72,7 +72,9 @@ class StructItem extends React.Component<StructItemProps> {
           <Icon
             type="ashbin"
             onClick={() => {
-              this.props.delete && this.props.delete(this.props.id);
+              if (this.props.delete) {
+                this.props.delete(this.props.id);
+              }
             }}
           />
         </div>
@@ -131,11 +133,13 @@ class Structs extends React.Component<Props, State> {
     const result = Object.keys(values).map((key) => {
       return values[key];
     });
-    onChange && onChange(result);
+    if (onChange) {
+      onChange(result);
+    }
   };
 
   validate = (callback: (error?: string) => void) => {
-    this.field.validate((errors: any, values: any) => {
+    this.field.validate((errors: any) => {
       if (errors) {
         callback('structs validate failure');
         return;
@@ -207,7 +211,7 @@ class Structs extends React.Component<Props, State> {
           </If>
           <If condition={parameterGroupOption.length !== 0}>
             <SplitButton label="Add" type="secondary" autoWidth={false}>
-              {parameterGroupOption?.map((item, i) => (
+              {parameterGroupOption?.map((item) => (
                 <SplitButton.Item
                   key={item.keys.join(',')}
                   onClick={() => this.addStructPlanItem(item)}

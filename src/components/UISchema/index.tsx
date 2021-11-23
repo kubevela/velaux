@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Form, Input, Select, Field, Balloon } from '@b-design/ui';
+import { Form, Input, Select, Field } from '@b-design/ui';
 import Translation from '../Translation';
-import { UIParam, UIParamValidate } from '../../interface/application';
+import type { UIParam, UIParamValidate } from '../../interface/application';
 import Group from '../../extends/Group';
 import ImageInput from '../../extends/ImageInput';
 import Strings from '../../extends/Strings';
@@ -12,7 +12,7 @@ import CPUNumber from '../../extends/CPUNumber';
 import MemoryNumber from '../../extends/MemoryNumber';
 import SwitchComponent from '../../extends/Switch';
 import InnerGroup from '../../extends/InnerGroup';
-import { Rule } from '@alifd/field';
+import type { Rule } from '@alifd/field';
 import KV from '../../extends/KV';
 import './index.less';
 import { checkImageName } from '../../utils/common';
@@ -22,7 +22,7 @@ type Props = {
   inline?: boolean;
   id?: string;
   value?: any;
-  uiSchema?: Array<UIParam>;
+  uiSchema?: UIParam[];
   onChange?: (params: any) => void;
   ref: any;
 };
@@ -72,7 +72,7 @@ function converRule(validete: UIParamValidate) {
 }
 
 type State = {
-  secretKeys?: Array<string>;
+  secretKeys?: string[];
 };
 
 class UISchema extends Component<Props, State> {
@@ -106,7 +106,7 @@ class UISchema extends Component<Props, State> {
   };
 
   validate = (callback: (error?: string) => void) => {
-    this.form.validate((errors, values) => {
+    this.form.validate((errors) => {
       if (errors) {
         callback('ui schema validate failure');
         return;
@@ -116,7 +116,7 @@ class UISchema extends Component<Props, State> {
   };
 
   ParseParam = (param: UIParam, inline: boolean | undefined) => {
-    let init = this.form.init;
+    const init = this.form.init;
     const required = param.validate && param.validate.required;
     if (param.disable) {
       return;
@@ -156,7 +156,7 @@ class UISchema extends Component<Props, State> {
                 initValue: param.validate.defaultValue,
                 rules: converRule(param.validate),
               })}
-            ></Input>
+            />
           </Form.Item>
         );
       case 'Select':
@@ -175,7 +175,7 @@ class UISchema extends Component<Props, State> {
                 rules: converRule(param.validate),
               })}
               dataSource={param.validate && param.validate.options}
-            ></Select>
+            />
           </Form.Item>
         );
       case 'Number':
@@ -193,7 +193,7 @@ class UISchema extends Component<Props, State> {
                 rules: converRule(param.validate),
               })}
               htmlType="number"
-            ></Input>
+            />
           </Form.Item>
         );
       case 'ImageInput':
@@ -268,7 +268,7 @@ class UISchema extends Component<Props, State> {
             key={param.jsonKey}
           >
             <SecretSelect
-              setKeys={(keys: Array<string>) => {
+              setKeys={(keys: string[]) => {
                 this.setState({ secretKeys: keys });
               }}
               {...init(param.jsonKey, {
@@ -346,9 +346,9 @@ class UISchema extends Component<Props, State> {
       case 'Group':
         if (param.subParameters && param.subParameters.length > 0) {
           const ref: React.RefObject<UISchema> = React.createRef();
-          const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
-            ref.current?.validate(callback);
-          };
+          // const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+          //   ref.current?.validate(callback);
+          // };
           return (
             <Group
               hasToggleIcon
@@ -373,7 +373,7 @@ class UISchema extends Component<Props, State> {
             </Group>
           );
         }
-        return <div></div>;
+        return <div />;
       case 'InnerGroup':
         return (
           <InnerGroup
@@ -390,9 +390,9 @@ class UISchema extends Component<Props, State> {
       case 'Structs':
         if (param.subParameters && param.subParameters.length > 0) {
           const ref: React.RefObject<Structs> = React.createRef();
-          const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
-            ref.current?.validate(callback);
-          };
+          // const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+          //   ref.current?.validate(callback);
+          // };
           return (
             <Group
               hasToggleIcon
@@ -419,7 +419,7 @@ class UISchema extends Component<Props, State> {
             </Group>
           );
         }
-        return <div></div>;
+        return <div />;
       case 'Ignore':
         if (param.subParameters && param.subParameters.length > 0) {
           const ref: React.RefObject<UISchema> = React.createRef();
@@ -444,14 +444,14 @@ class UISchema extends Component<Props, State> {
             />
           );
         }
-        return <div></div>;
+        return <div />;
     }
   };
 
   render() {
     const { uiSchema, inline } = this.props;
     if (!uiSchema) {
-      return <div></div>;
+      return <div />;
     }
 
     const items = uiSchema.map((param) => {

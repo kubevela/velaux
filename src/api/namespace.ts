@@ -1,5 +1,5 @@
 import { post, get } from './request';
-import { namespace_mock, getOneNamespace_mock } from './devLink';
+import { namespace_mock } from './devLink';
 import { namespace } from './productionLink';
 import { getDomain } from '../utils/common';
 
@@ -16,6 +16,6 @@ export function createNamespace(params: any) {
 }
 
 export function getOneNamespace(params: any) {
-  const url = isMock ? `getOneNamespace_mock` : `${namespace}/${params.namespace}`;
-  return get(url, params).then((res) => res);
+  const gurl = `${namespace}/${params.namespace}`;
+  return get(gurl, params).then((res) => res);
 }

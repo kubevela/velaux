@@ -1,6 +1,5 @@
 import React from 'react';
-import { connect } from 'dva';
-import { Button, Message, Grid, Search, Icon, Select, Input } from '@b-design/ui';
+import { Button, Grid, Icon, Select, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import './index.less';
 import Translation from '../../../../components/Translation';

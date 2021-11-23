@@ -10,7 +10,7 @@ import {
   PLEASE_ENTER,
   PLEASE_CHOSE,
 } from '../../../../constants';
-import { checkName, ACKCLusterStatus } from '../../../../utils/common';
+import { ACKCLusterStatus } from '../../../../utils/common';
 import { getCloudClustersList } from '../../../../api/cluster';
 import './index.less';
 import { handleError } from '../../../../utils/errors';
@@ -110,7 +110,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       icon,
     };
 
-    new Promise((resolve, err) => {
+    new Promise((resolve) => {
       this.props.dispatch({
         type: 'clusters/connectcloudCluster',
         payload: {
@@ -127,7 +127,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           });
         }
       })
-      .then((err) => {});
+      .then(() => {});
   };
 
   render() {

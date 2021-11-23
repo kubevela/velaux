@@ -17,7 +17,7 @@ import {
   getApplicationStatistics,
   getApplicationWorkflowRecord,
 } from '../../../../api/application';
-import {
+import type {
   ApplicationDetail,
   ApplicationStatus,
   ApplicationStatistics,
@@ -26,7 +26,8 @@ import {
 } from '../../../../interface/application';
 import NumItem from '../../../../components/NumItem';
 import { Link } from 'dva/router';
-import { handleError, APIError } from '../../../../utils/errors';
+import type { APIError } from '../../../../utils/errors';
+import { handleError } from '../../../../utils/errors';
 
 const { Row, Col } = Grid;
 
@@ -35,13 +36,13 @@ interface Props {
   appName: string;
   applicationDetail?: ApplicationDetail;
   applicationStatus?: { status?: ApplicationStatus };
-  workflows?: Array<Workflow>;
+  workflows?: Workflow[];
 }
 
 interface State {
   loading: boolean;
   statistics?: ApplicationStatistics;
-  records?: Array<WorkflowStatus>;
+  records?: WorkflowStatus[];
 }
 
 @connect((store: any) => {
@@ -141,7 +142,7 @@ class ApplicationHeader extends Component<Props, State> {
             <Message
               type="notice"
               title="Application configuration changes take effect only after deploy."
-            ></Message>
+            />
             <Button style={{ marginLeft: '16px' }} type="primary" onClick={() => this.onDeploy()}>
               <Translation>Deploy</Translation>
             </Button>
@@ -153,15 +154,15 @@ class ApplicationHeader extends Component<Props, State> {
               }
             >
               <Menu>
-                {workflows?.map((item) => {
+                {workflows?.map((workflow) => {
                   return (
                     <Menu.Item
                       onClick={() => {
-                        this.onDeploy(item.name);
+                        this.onDeploy(workflow.name);
                       }}
-                      key={item.name}
+                      key={workflow.name}
                     >
-                      <Translation>Execute Workflow</Translation> {item.alias || item.name}
+                      <Translation>Execute Workflow</Translation> {workflow.alias || workflow.name}
                     </Menu.Item>
                   );
                 })}
@@ -174,19 +175,19 @@ class ApplicationHeader extends Component<Props, State> {
             <Card>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.envCount} title={'Env Count'}></NumItem>
+                  <NumItem number={statistics?.envCount} title={'Env Count'} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
                     number={statistics?.deliveryTargetCount}
                     title={'DeliveryTarget Count'}
-                  ></NumItem>
+                  />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.revisonCount} title={'Revision Count'}></NumItem>
+                  <NumItem number={statistics?.revisonCount} title={'Revision Count'} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.workflowCount} title={'Workflow Count'}></NumItem>
+                  <NumItem number={statistics?.workflowCount} title={'Workflow Count'} />
                 </Col>
               </Row>
             </Card>

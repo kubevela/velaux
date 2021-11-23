@@ -1,16 +1,15 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
 import { If } from 'tsx-control-statements/components';
 import { Button } from '@b-design/ui';
 import { connect } from 'dva';
 import WrokflowComponent from './workflow-component';
-import { WorkFlowData } from './entity';
+import type { WorkFlowData } from './entity';
 import { getWorkFlowDefinitions } from '../../api/workflows';
 
 import './index.less';
 
 type Props = {
-  workflowList: Array<WorkFlowData>;
+  workflowList: WorkFlowData[];
   dispatch: ({}) => {};
   match: {
     params: {

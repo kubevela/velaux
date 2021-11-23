@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
 import { Dialog, Field, Form, Grid, Input, Message, Select, Button } from '@b-design/ui';
-import { ApplicationDetail } from '../../../../interface/application';
+import type { ApplicationDetail } from '../../../../interface/application';
 import { createApplicationEnv } from '../../../../api/application';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
 import { getDeliveryTarget } from '../../../../api/deliveryTarget';
-import { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 
 interface Props {
   onClose: () => void;
@@ -17,7 +17,7 @@ interface Props {
 
 interface State {
   loading: boolean;
-  targetList?: Array<DeliveryTarget>;
+  targetList?: DeliveryTarget[];
 }
 
 @connect((store: any) => {
@@ -69,7 +69,6 @@ class EnvBindPlanDialog extends Component<Props, State> {
     createApplicationEnv(params)
       .then((res) => {
         if (res) {
-          const { applicationDetail } = this.props;
           Message.success(<Translation>Create Envbinding Success</Translation>);
           this.props.onOK();
         }

@@ -8,7 +8,7 @@ import AppDialog from './components/AddAppDialog';
 import '../../common.less';
 import { If } from 'tsx-control-statements/components';
 import { deleteApplicationPlan, getComponentdefinitions } from '../../api/application';
-import { ApplicationBase } from '../../interface/application';
+import type { ApplicationBase } from '../../interface/application';
 
 type Props = {
   dispatch: ({}) => {};
@@ -79,7 +79,7 @@ class Application extends Component<Props, State> {
   };
 
   onGetComponentdefinitions = async () => {
-    getComponentdefinitions({}).then((res) => {
+    getComponentdefinitions().then((res) => {
       if (res) {
         this.setState({
           componentDefinitions: res && res.definitions,
@@ -121,7 +121,7 @@ class Application extends Component<Props, State> {
         <Loading visible={isLoading} fullScreen>
           <CardContend
             applications={applicationList}
-            editAppPlan={(name: string) => {}}
+            editAppPlan={() => {}}
             deleteAppPlan={this.onDeleteAppPlan}
           />
         </Loading>

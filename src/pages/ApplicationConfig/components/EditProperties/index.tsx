@@ -1,10 +1,10 @@
 import React from 'react';
 import { Grid, Field, Form, Button, Message } from '@b-design/ui';
-import { Rule } from '@alifd/field';
+import type { Rule } from '@alifd/field';
 import Group from '../../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
 import { detailComponentDefinition, updateComponentProperties } from '../../../../api/application';
-import {
+import type {
   ApplicationDetail,
   DefinitionDetail,
   UpdateComponentProperties,
@@ -83,7 +83,7 @@ class EditProperties extends React.Component<Props, State> {
             this.setState({ definitionDetail: re, definitionLoading: false });
           }
         })
-        .catch((err) => this.setState({ definitionLoading: false }));
+        .catch(() => this.setState({ definitionLoading: false }));
     }
   };
 
@@ -143,7 +143,7 @@ class EditProperties extends React.Component<Props, State> {
                       })}
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
                       ref={this.uiSchemaRef}
-                    ></UISchema>
+                    />
                   </FormItem>
                 </If>
               </Group>

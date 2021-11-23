@@ -1,6 +1,5 @@
 import React from 'react';
-import { Balloon } from '@b-design/ui';
-import { UIParam } from '../../interface/application';
+import type { UIParam } from '../../interface/application';
 import UISchema from '../../components/UISchema';
 import './index.less';
 
@@ -9,7 +8,7 @@ type Props = {
   title: string | React.ReactNode;
   description?: string | React.ReactNode;
   children?: React.ReactNode;
-  uiSchema: Array<UIParam> | undefined;
+  uiSchema: UIParam[] | undefined;
   onChange?: (params: any) => void;
   value: any;
 };
@@ -26,7 +25,7 @@ class InnerGroup extends React.Component<Props, State> {
   }
 
   render() {
-    const { title, description, uiSchema, onChange, _key } = this.props;
+    const { uiSchema, onChange, _key } = this.props;
 
     return (
       <div className="group-inner-container">

@@ -1,4 +1,4 @@
-import { UIParam } from './application';
+import type { UIParam } from './application';
 
 export interface Addon {
   name: string;
@@ -6,12 +6,12 @@ export interface Addon {
   icon?: string;
   description?: string;
   detail?: string;
-  tags?: Array<string>;
+  tags?: string[];
   createTime?: string;
   deploy_to?: { control_plane: boolean; runtime_cluster: boolean };
-  dependencies?: Array<{ name: string }>;
-  definitions?: Array<Definition>;
-  uiSchema?: Array<UIParam>;
+  dependencies?: { name: string }[];
+  definitions?: Definition[];
+  uiSchema?: UIParam[];
 }
 
 export interface Definition {

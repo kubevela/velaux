@@ -1,7 +1,7 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
-import { Button, Message, Grid, Search, Icon, Select, Input } from '@b-design/ui';
-import { EnvBinding } from '../../../../interface/application';
+import { Grid, Select } from '@b-design/ui';
+import type { EnvBinding } from '../../../../interface/application';
 
 interface Label {
   label: string;
@@ -9,8 +9,8 @@ interface Label {
 }
 
 type Props = {
-  statusList: Array<Label>;
-  envBinding?: Array<EnvBinding>;
+  statusList: Label[];
+  envBinding?: EnvBinding[];
   updateQuery: (params: { isChangeEnv?: boolean; isChangeStatus?: boolean; value: string }) => void;
   t: (key: string) => {};
   dispatch?: ({}) => {};
@@ -42,9 +42,7 @@ class Hearder extends React.Component<Props, State> {
     this.props.updateQuery({ isChangeStatus: true, value: value });
   }
 
-  transEnvBind = () => {
-    const { envBinding } = this.props;
-  };
+  transEnvBind = () => {};
   render() {
     const { Row, Col } = Grid;
     const { t } = this.props;

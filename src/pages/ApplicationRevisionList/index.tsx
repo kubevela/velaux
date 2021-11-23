@@ -4,14 +4,14 @@ import { Pagination } from '@b-design/ui';
 import { listRevisions } from '../../api/application';
 import Header from './components/Hearder';
 import TableList from './components/List';
-import { ApplicationDetail, EnvBinding, Revisions } from '../../interface/application';
+import type { ApplicationDetail, EnvBinding, Revisions } from '../../interface/application';
 import { statusList } from './constants';
 import './index.less';
 
 type Props = {
   revisions: [];
   applicationDetail?: ApplicationDetail;
-  envbinding?: Array<EnvBinding>;
+  envbinding?: EnvBinding[];
   dispatch: ({}) => {};
   match: {
     params: {
@@ -26,7 +26,7 @@ type State = {
   pageSize: number;
   envName: string;
   status: string;
-  revisionsList: Array<Revisions>;
+  revisionsList: Revisions[];
   revisionsListTotal: number;
 };
 

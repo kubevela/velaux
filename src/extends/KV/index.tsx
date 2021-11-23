@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Grid, Button, Icon, Form, Input, Radio } from '@b-design/ui';
+import { Grid, Button, Icon, Form, Input } from '@b-design/ui';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import _ from 'lodash';
 
 const { Row, Col } = Grid;
@@ -11,7 +12,7 @@ type Props = {
 };
 
 type State = {
-  items: Array<Item>;
+  items: Item[];
 };
 
 type Item = {
@@ -55,7 +56,7 @@ class KV extends Component<Props, State> {
     if (field == 'value') {
       items[index].value = v;
     }
-    let obj = Object.create(null);
+    const obj = Object.create(null);
     items.map((item) => {
       if (item.key) {
         obj[item.key] = item.value;

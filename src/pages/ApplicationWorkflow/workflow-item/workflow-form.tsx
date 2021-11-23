@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import _ from 'lodash';
-import { DiagramMakerNode } from 'diagram-maker';
-import { WorkFlowNodeType } from '../entity';
+import type { DiagramMakerNode } from 'diagram-maker';
+import type { WorkFlowNodeType } from '../entity';
 
-import { Grid, Field, Form, Select, Message, Button, Input, Loading } from '@b-design/ui';
-import { Rule } from '@alifd/field';
+import { Grid, Field, Form, Select, Button, Input } from '@b-design/ui';
+import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
 import { detailWorkFLowDefinition } from '../../../api/workflows';
-import { DefinitionDetail } from '../../../interface/application';
+import type { DefinitionDetail } from '../../../interface/application';
 import UISchema from '../../../components/UISchema';
 import Translation from '../../../components/Translation';
 import { checkName } from '../../../utils/common';
@@ -94,7 +95,7 @@ class WorkflowForm extends Component<Props, State> {
           }
         }
       })
-      .catch((err) => this.setState({ definitionLoading: false }));
+      .catch(() => this.setState({ definitionLoading: false }));
   };
 
   handleChang = (value: string) => {
@@ -107,7 +108,7 @@ class WorkflowForm extends Component<Props, State> {
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const { t } = this.props;
-    const { definitionDetail, definitionLoading } = this.state;
+    const { definitionDetail } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -219,7 +220,7 @@ class WorkflowForm extends Component<Props, State> {
                       })}
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
                       ref={this.uiSchemaRef}
-                    ></UISchema>
+                    />
                   </FormItem>
                 </If>
               </Group>

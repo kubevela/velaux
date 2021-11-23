@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Table, Message } from '@b-design/ui';
+import { Table } from '@b-design/ui';
 import Empty from '../Empty';
 import Translation from '../../../../components/Translation';
-import { ApplicationDetail, Revisions } from '../../../../interface/application';
+import type { ApplicationDetail, Revisions } from '../../../../interface/application';
 import { statusList } from '../../constants';
 import { momentDate } from '../../../../utils/common';
 import { Link } from 'dva/router';
@@ -10,7 +10,7 @@ import './index.less';
 import { If } from 'tsx-control-statements/components';
 
 type Props = {
-  list: Array<Revisions>;
+  list: Revisions[];
   getRevisionList: () => void;
   applicationDetail?: ApplicationDetail;
 };
@@ -18,12 +18,10 @@ type Props = {
 type State = {};
 
 class TableList extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-  }
-
   //Todo
-  onRollback = (record: Revisions) => {};
+  onRollback = (record: Revisions) => {
+    console.log(record);
+  };
 
   getCloumns = () => {
     const { applicationDetail } = this.props;

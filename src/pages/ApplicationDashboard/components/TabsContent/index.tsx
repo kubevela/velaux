@@ -1,22 +1,13 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Tab } from '@b-design/ui';
 import './index.less';
 import Translation from '../../../../components/Translation';
-import { EnvBinding } from '../../../../interface/application';
-
-const style = {
-  width: '100%',
-  color: 'white',
-  fontSize: '1rem',
-  lineHeight: 'normal',
-  float: 'left',
-};
+import type { EnvBinding } from '../../../../interface/application';
 
 type Props = {
   changeActiveKey: (key: string | number) => void;
   activeKey: string;
-  envBind: Array<EnvBinding>;
+  envBind: EnvBinding[];
 };
 
 class TabsContent extends Component<Props> {
@@ -39,11 +30,9 @@ class TabsContent extends Component<Props> {
       <div>
         <div className="tabs-content">
           <Tab shape="wrapped" size="small" activeKey={activeKey} onChange={this.handleChange}>
-            <Tab.Item title={<Translation>BasisConfig</Translation>} key={'basisConfig'}></Tab.Item>
+            <Tab.Item title={<Translation>BasisConfig</Translation>} key={'basisConfig'} />
             {(envBind || []).map((item) => {
-              return (
-                <Tab.Item title={item.alias ? item.alias : item.name} key={item.name}></Tab.Item>
-              );
+              return <Tab.Item title={item.alias ? item.alias : item.name} key={item.name} />;
             })}
           </Tab>
         </div>
