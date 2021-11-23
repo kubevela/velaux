@@ -1,18 +1,31 @@
 export interface PodBase {
-  clusterName: string;
-  hostIP: string;
-  nodeName: string;
-  podIP: string;
-  podName: string;
-  podNs: string;
-  revision: string;
-  status: string;
+  cluster: string;
+  metadata: {
+    creationTime: string
+    name: string
+    namespace: string
+    version: {
+      deployVersion: string
+      publishVersion: string
+      revision: string
+    }
+  }
+  status: {
+    phase: string
+    podIP?: string
+    hostIP?: string
+    nodeName?: string
+  }
+  workload: {
+    apiVersion: string
+    kind: string
+  }
 }
 
 export interface Container {
   image: string;
   name: string;
-  resource?: {
+  resources?: {
     limits?: {
       cpu: string;
       memory: string;
@@ -21,12 +34,12 @@ export interface Container {
       cpu: string;
       memory: string;
     };
+    usage?: {
+      cpu: string;
+      memory: string;
+    };
   };
   status?: Podstatus;
-  usageResource?: {
-    cpu: string;
-    memory: string;
-  };
 }
 
 export interface Podstatus {

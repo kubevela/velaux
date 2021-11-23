@@ -150,12 +150,12 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       {
         key: 'podName',
         title: <Translation>Pod Name</Translation>,
-        dataIndex: 'podName',
+        dataIndex: 'metadata.name',
         cell: (v: string, index: number, record: PodBase) => {
           return (
             <div>
-              <div>{record.podName}</div>
-              <div>{record.podIP}</div>
+              <div>{record.metadata.name}</div>
+              <div>{record.status.podIP}</div>
             </div>
           );
         },
@@ -163,16 +163,16 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       {
         key: 'clusterName',
         title: <Translation>Delivery Target</Translation>,
-        dataIndex: 'clusterName',
+        dataIndex: 'cluster',
         cell: (v: string, index: number, record: PodBase) => {
-          const target = getTarget(record.clusterName + '-' + record.podNs);
+          const target = getTarget(record.cluster + '-' + record.metadata.namespace);
           return <span>{target?.alias || target?.name}</span>;
         },
       },
       {
         key: 'status',
         title: <Translation>Status</Translation>,
-        dataIndex: 'status',
+        dataIndex: 'status.phase',
         cell: (v: string) => {
           return <span style={{ color: getColor(v) }}>{v}</span>;
         },
@@ -180,7 +180,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       {
         key: 'createTime',
         title: <Translation>CreateTime</Translation>,
-        dataIndex: 'creationTime',
+        dataIndex: 'metadata.creationTime',
         cell: (v: string) => {
           return <span>{momentDate(v)}</span>;
         },
@@ -188,7 +188,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       {
         key: 'deployVersion',
         title: <Translation>Revision</Translation>,
-        dataIndex: 'deployVersion',
+        dataIndex: 'metadata.version.deployVersion',
         cell: (v: string) => {
           return (
             <span>
@@ -208,23 +208,16 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       {
         key: 'nodeName',
         title: <Translation>Node</Translation>,
-        dataIndex: 'nodeName',
+        dataIndex: 'status.nodeName',
         cell: (v: string, index: number, record: PodBase) => {
           return (
             <div>
-              <div>{record.nodeName}</div>
-              <div>{record.hostIP}</div>
+              <div>{record.status.nodeName}</div>
+              <div>{record.status.hostIP}</div>
             </div>
           );
         },
-      },
-      {
-        key: 'nodeName',
-        dataIndex: 'nodeName',
-        cell: (v: string, index: number, record: PodBase) => {
-          return <span></span>;
-        },
-      },
+      }
     ];
   };
 
