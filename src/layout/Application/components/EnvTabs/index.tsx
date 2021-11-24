@@ -12,6 +12,7 @@ const { Row, Col } = Grid;
 type Props = {
   activeKey: string;
   applicationDetail?: ApplicationDetail;
+  appName: string;
   dispatch: ({}) => {};
   envbinding?: EnvBinding[];
 };
@@ -40,6 +41,13 @@ class TabsContent extends Component<Props, State> {
         payload: { appName: applicationDetail.name },
       });
     }
+  };
+  loadApplicationWorkflows = async () => {
+    const { appName } = this.props;
+    this.props.dispatch({
+      type: 'application/getApplicationWorkflows',
+      payload: { appName: appName },
+    });
   };
   render() {
     const { activeKey, applicationDetail, envbinding } = this.props;
@@ -96,6 +104,7 @@ class TabsContent extends Component<Props, State> {
             }}
             onOK={() => {
               this.loadEnvbinding();
+              this.loadApplicationWorkflows();
               this.setState({ visibleEnvPlan: false });
             }}
           />

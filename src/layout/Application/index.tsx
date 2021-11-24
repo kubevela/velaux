@@ -104,7 +104,11 @@ class ApplicationLayout extends Component<Props, any> {
     return (
       <div className="applayout">
         <Header appName={appName} currentPath={path} />
-        <EnvTabs dispatch={dispatch} activeKey={envName ? envName : 'basisConfig'} />
+        <EnvTabs
+          dispatch={dispatch}
+          appName={appName}
+          activeKey={envName ? envName : 'basisConfig'}
+        />
         <Row className="padding16 main">
           <div className="menu">
             <Menus currentPath={path} appName={appName} envName={envName} />

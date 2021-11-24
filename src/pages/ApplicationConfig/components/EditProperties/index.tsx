@@ -67,7 +67,11 @@ class EditProperties extends React.Component<Props, State> {
       };
       updateComponentProperties(params).then((re) => {
         if (re) {
-          Message.success('component properties update success');
+          Message.success({
+            duration: 4000,
+            title: 'Component properties update success.',
+            content: 'You need to re-execute the workflow for it to take effect.',
+          });
           onOK();
         }
       });

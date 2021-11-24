@@ -128,11 +128,19 @@ export interface ApplicationStatus {
       message: string;
     }[];
   }[];
+  appliedResources: Resource[];
 }
 
+export interface Resource {
+  apiVersion: string;
+  cluster: string;
+  kind: string;
+  name: string;
+  namespace: string;
+}
 export interface Condition {
   type: string;
-  status: string;
+  status: 'True' | 'False';
   lastTransitionTime: string;
   reason: string;
 }

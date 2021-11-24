@@ -100,7 +100,7 @@ class Addons extends React.Component<Props, State> {
             showAddon={this.onShowAddon}
             dispatch={dispatch}
             addonName={addonName}
-          ></AddonDetailDialog>
+          />
         </If>
         <If condition={showRegistryManage}>
           <RegistryManageDialog
@@ -112,7 +112,7 @@ class Addons extends React.Component<Props, State> {
             syncRegistrys={this.getAddonRegistrysList}
             registrys={registryList}
             dispatch={dispatch}
-          ></RegistryManageDialog>
+          />
         </If>
       </div>
     );

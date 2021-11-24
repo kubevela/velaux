@@ -1,7 +1,8 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Table } from '@b-design/ui';
+import { Table, Button, Message, Dialog } from '@b-design/ui';
 import { listApplicationPods } from '../../api/observation';
+import { deployApplication } from '../../api/application';
 import type { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
 import type { PodBase } from '../../interface/observation';
@@ -10,10 +11,14 @@ import Header from './components/Hearder';
 import type { DeliveryTarget } from '../../interface/deliveryTarget';
 import { Link } from 'dva/router';
 import { momentDate } from '../../utils/common';
+import { If } from 'tsx-control-statements/components';
+import type { APIError } from '../../utils/errors';
+import { handleError } from '../../utils/errors';
+import StatusShow from './components/StatusShow';
 
 const { Column } = Table;
 type Props = {
-  dispatch: ({}) => {};
+  dispatch: ({}) => void;
   match: {
     params: {
       envName: string;
@@ -31,6 +36,7 @@ type State = {
   loading: boolean;
   target?: DeliveryTarget;
   openRowKeys: [];
+  showStatus: boolean;
 };
 
 @connect((store: any) => {
@@ -44,6 +50,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       envName: params.envName,
       loading: true,
       openRowKeys: [],
+      showStatus: false,
     };
   }
 
@@ -76,6 +83,15 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     }
   };
 
+  loadApplicationWorkflows = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationWorkflows',
+      payload: { appName: appName },
+    });
+  };
   loadApplicationEnvbinding = async () => {
     const {
       params: { appName },
@@ -251,10 +267,46 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   onRowOpen = (openRowKeys: any) => {
     this.setState({ openRowKeys });
   };
-
+  onDeploy = (force?: boolean) => {
+    const { envbinding } = this.props;
+    const {
+      params: { appName, envName },
+    } = this.props.match;
+    const envs = envbinding.filter((item) => item.name == envName);
+    if (envs) {
+      deployApplication(
+        {
+          appName: appName,
+          workflowName: 'workflow-' + envs[0].name,
+          triggerType: 'web',
+          force: force || false,
+        },
+        true,
+      )
+        .then((re) => {
+          if (re) {
+            Message.success('deploy application success');
+          }
+        })
+        .catch((err: APIError) => {
+          if (err.BusinessCode === 10004) {
+            Dialog.confirm({
+              content: 'Workflow is executing. Do you want to force a restart?',
+              onOk: () => {
+                this.onDeploy(true);
+              },
+            });
+          } else {
+            handleError(err);
+          }
+        });
+    } else {
+      Message.warning('Please wait');
+    }
+  };
   render() {
     const { applicationStatus, applicationDetail } = this.props;
-    const { podList, loading } = this.state;
+    const { podList, loading, showStatus } = this.state;
     const columns = this.getCloumns();
     const expandedRowRender = (record: PodBase) => {
       return (
@@ -264,14 +316,20 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       );
     };
     const {
-      params: { envName },
+      params: { envName, appName },
     } = this.props.match;
     return (
       <div>
         <Header
           targets={this.getTargets()}
           envName={envName}
-          loadApplicationEnvbinding={this.loadApplicationEnvbinding}
+          updateEnvs={() => {
+            this.loadApplicationEnvbinding();
+            this.loadApplicationWorkflows();
+          }}
+          updateStatusShow={(show: boolean) => {
+            this.setState({ showStatus: show });
+          }}
           applicationDetail={applicationDetail}
           applicationStatus={applicationStatus}
           updateQuery={(targetName: string) => {
@@ -282,21 +340,50 @@ class ApplicationInstanceList extends React.Component<Props, State> {
             this.loadApplicationStatus();
           }}
         />
-        <Table
-          className="podlist-table-wraper"
-          size="medium"
-          primaryKey={'primaryKey'}
-          loading={loading}
-          dataSource={podList}
-          expandedIndexSimulate
-          expandedRowRender={expandedRowRender}
-          openRowKeys={this.state.openRowKeys}
-          onRowOpen={(openRowKeys: any) => {
-            this.onRowOpen(openRowKeys);
-          }}
-        >
-          {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
-        </Table>
+        <If condition={applicationStatus}>
+          <Table
+            className="podlist-table-wraper"
+            size="medium"
+            primaryKey={'primaryKey'}
+            loading={loading}
+            dataSource={podList}
+            expandedIndexSimulate
+            expandedRowRender={expandedRowRender}
+            openRowKeys={this.state.openRowKeys}
+            onRowOpen={(openRowKeys: any) => {
+              this.onRowOpen(openRowKeys);
+            }}
+          >
+            {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
+          </Table>
+        </If>
+        <If condition={!applicationStatus}>
+          <div className="deployNotice">
+            <div className="noticeBox">
+              <h2>
+                <Translation>Not Deploy</Translation>
+              </h2>
+              <div className="desc">
+                <Translation>The current environment has not been deployed.</Translation>
+              </div>
+              <div className="noticeAction">
+                <Button onClick={() => this.onDeploy()} type="primary">
+                  <Translation>Immediately Deploy</Translation>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </If>
+        <If condition={showStatus}>
+          <StatusShow
+            envName={envName}
+            appName={appName}
+            dispatch={this.props.dispatch}
+            onClose={() => {
+              this.setState({ showStatus: false });
+            }}
+          />
+        </If>
       </div>
     );
   }

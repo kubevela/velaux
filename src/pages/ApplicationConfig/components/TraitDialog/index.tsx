@@ -52,7 +52,7 @@ class TraitDialog extends React.Component<Props, State> {
         properties,
       });
       if (type) {
-        this.onDetailsComponeDefinition(type);
+        this.onDetailsTraitDefinition(type);
       }
     }
   }
@@ -79,14 +79,22 @@ class TraitDialog extends React.Component<Props, State> {
       if (isEditTrait) {
         updateTrait(params, query).then((res) => {
           if (res) {
-            Message.success(<Translation>update application trait success</Translation>);
+            Message.success({
+              duration: 4000,
+              title: 'Trait properties update success.',
+              content: 'You need to re-execute the workflow for it to take effect.',
+            });
             this.props.onOK();
           }
         });
       } else {
         createTrait(params, query).then((res) => {
           if (res) {
-            Message.success(<Translation>create application trait success</Translation>);
+            Message.success({
+              duration: 4000,
+              title: 'Trait create success.',
+              content: 'You need to re-execute the workflow for it to take effect.',
+            });
             this.props.onOK();
           }
         });
@@ -102,7 +110,7 @@ class TraitDialog extends React.Component<Props, State> {
     }));
   }
 
-  onDetailsComponeDefinition = (value: string, callback?: () => void) => {
+  onDetailsTraitDefinition = (value: string, callback?: () => void) => {
     this.setState({ definitionLoading: true });
     detailTraitDefinition({ name: value })
       .then((re) => {
@@ -117,7 +125,7 @@ class TraitDialog extends React.Component<Props, State> {
   };
 
   handleChang = (value: string) => {
-    this.onDetailsComponeDefinition(value);
+    this.onDetailsTraitDefinition(value);
     this.field.setValues({ type: value });
   };
 
@@ -142,7 +150,7 @@ class TraitDialog extends React.Component<Props, State> {
 
     const { onClose } = this.props;
     const { t, isEditTrait } = this.props;
-    const { definitionDetail } = this.state;
+    const { definitionDetail, definitionLoading } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -226,6 +234,7 @@ class TraitDialog extends React.Component<Props, State> {
                 title="Trait Properties"
                 description="Set the configuration parameters for the Trait."
                 closed={false}
+                loading={definitionLoading}
                 required={true}
               >
                 <If condition={definitionDetail && definitionDetail.uiSchema}>

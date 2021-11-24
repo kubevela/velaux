@@ -178,7 +178,7 @@ class ApplicationConfig extends Component<Props, State> {
           </Col>
         </Row>
         <Row>
-          <Col span={12} className="padding16">
+          <Col span={24} className="padding16">
             <Card>
               <Row>
                 <Col span={12}>
@@ -212,9 +212,6 @@ class ApplicationConfig extends Component<Props, State> {
                 </Col>
               </Row>
             </Card>
-          </Col>
-          <Col span={12} className="padding16">
-            <Card />
           </Col>
         </Row>
 
