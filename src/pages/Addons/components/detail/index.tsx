@@ -34,6 +34,8 @@ type State = {
 };
 
 class AddonDetailDialog extends React.Component<Props, State> {
+  timer?: number;
+  readonly refreshTime = 1000;
   form: Field;
   uiSchemaRef: React.RefObject<UISchema>;
   constructor(props: Props) {
@@ -52,7 +54,17 @@ class AddonDetailDialog extends React.Component<Props, State> {
 
   componentDidMount() {
     this.loadAddonDetail();
-    this.loadAddonStatus();
+    this.loadAddonStatus().then(() => {
+      this.timer = window.setInterval(() => {
+        this.loadAddonStatus(false);
+      }, this.refreshTime);
+    });
+  }
+
+  componentWillUnmount() {
+    if (this.timer) {
+      window.clearInterval(this.timer);
+    }
   }
 
   loadAddonDetail = async () => {
@@ -65,12 +77,15 @@ class AddonDetailDialog extends React.Component<Props, State> {
       });
   };
 
-  loadAddonStatus = async () => {
-    getAddonsStatus({ name: this.props.addonName }).then((res) => {
-      if (res) {
-        this.setState({ status: res.phase, statusLoading: false });
-      }
-    });
+  loadAddonStatus = async (resetLoading = true) => {
+    const res = await getAddonsStatus({ name: this.props.addonName });
+    if (!res) return;
+
+    if (resetLoading) {
+      this.setState({ status: res.phase, statusLoading: false });
+    } else {
+      this.setState({ status: res.phase });
+    }
   };
 
   handleSubmit = () => {
@@ -128,12 +143,17 @@ class AddonDetailDialog extends React.Component<Props, State> {
         <DrawerWithFooter
           title={showName}
           onClose={this.onClose}
-          onOkButtonText={status === 'enabled' ? 'Disable' : 'Enable'}
-          onOkButtonLoading={statusLoading || loading}
-          onOk={this.handleSubmit}
           extButtons={[
             <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
-              取消
+              <Translation>Cancel</Translation>
+            </Button>,
+            <Button
+              type="primary"
+              onClick={this.handleSubmit}
+              loading={statusLoading || loading}
+              disabled={status == 'enabled'}
+            >
+              <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
             </Button>,
           ]}
         >

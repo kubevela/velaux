@@ -126,7 +126,7 @@ class TraitDialog extends React.Component<Props, State> {
     return (
       <div>
         <Button type="secondary" onClick={onClose} className="margin-right-10">
-          <Translation>Cancle</Translation>
+          <Translation>Cancel</Translation>
         </Button>
         <Button type="primary" onClick={this.onSubmit}>
           <Translation>{isEditTrait ? 'Update' : 'Create'}</Translation>

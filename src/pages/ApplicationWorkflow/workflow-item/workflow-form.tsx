@@ -230,7 +230,7 @@ class WorkflowForm extends Component<Props, State> {
 
         <div style={{ display: 'flex', justifyContent: 'end' }}>
           <Button type="secondary" onClick={this.props.closeDrawer} className="margin-right-10">
-            <Translation>Cancle</Translation>
+            <Translation>Cancel</Translation>
           </Button>
           <Button type="primary" onClick={this.onSubmit}>
             <Translation>Confirm</Translation>
