@@ -28,6 +28,7 @@ import NumItem from '../../../../components/NumItem';
 import { Link } from 'dva/router';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
+import './index.less';
 
 const { Row, Col } = Grid;
 

@@ -95,6 +95,10 @@ export default {
       const { nodes, edges } = data;
       const steps = Object.keys(nodes).map((key) => {
         let dependsOn = [];
+        const consumerData = nodes[key].consumerData || {};
+        if (consumerData.properties && typeof consumerData.properties != 'string') {
+          nodes[key].consumerData.properties = JSON.stringify(nodes[key].consumerData.properties);
+        }
         return nodes[key].consumerData;
       });
       workflow.steps = steps;

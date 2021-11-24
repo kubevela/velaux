@@ -4,7 +4,7 @@ import _ from 'lodash';
 import type { DiagramMakerNode } from 'diagram-maker';
 import type { WorkFlowNodeType } from '../entity';
 
-import { Grid, Field, Form, Select, Button, Input } from '@b-design/ui';
+import { Grid, Field, Form, Select, Button, Input, Message } from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../extends/Group';
@@ -47,7 +47,10 @@ class WorkflowForm extends Component<Props, State> {
 
   componentDidMount = () => {
     const { consumerData } = this.props.data;
-    this.field.setValues(consumerData);
+    this.field.setValues(consumerData || '');
+    const properties =
+      consumerData && consumerData.properties && JSON.parse(consumerData.properties);
+    this.field.setValues({ properties: properties });
     this.onDetailsComponeDefinition((consumerData && consumerData.type) || '');
   };
 
@@ -73,6 +76,7 @@ class WorkflowForm extends Component<Props, State> {
         return;
       }
       this.props.createOrUpdateNode(values);
+      Message.warning('please click the save button in the upper right, corner to save the data ');
     });
   };
 
