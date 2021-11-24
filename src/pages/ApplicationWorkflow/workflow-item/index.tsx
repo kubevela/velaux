@@ -270,12 +270,6 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     );
   };
 
-  // componentWillUnmount = () => {
-  //   if (this.diagramMaker) {
-  //     this.diagramMaker.destroy();
-  //   }
-  // };
-
   componentWillReceiveProps = (nextProps: WorkFlowItemProps) => {
     if (nextProps.edit !== this.props.edit) {
       if (nextProps.edit) {

@@ -165,7 +165,7 @@ class WorkFlowComponent extends Component<Props, State> {
                       })}
                     />
                   </Form.Item>
-                  <Form.Item label={<Translation>Workflow alias</Translation>}>
+                  <Form.Item label={<Translation>Workflow Alias</Translation>}>
                     <Input {...init('alias', { initValue: data.alias })} />
                   </Form.Item>
                   <Form.Item label="描述">
@@ -193,7 +193,7 @@ class WorkFlowComponent extends Component<Props, State> {
                   this.saveWorkflow();
                 }}
               >
-                <Translation>Save to Server</Translation>
+                <Translation>Save</Translation>
               </div>
             </If>
             <div className="option-item">

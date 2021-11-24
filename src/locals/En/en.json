@@ -157,8 +157,9 @@
   "Detaile information": "Detaile information",
   "Time": "Time",
   "Save to Server": "Save to Server",
-  "Workflow alias": "Workflow alias",
+  "Workflow Alias": "Workflow Alias",
   "Workflow Name": "Workflow Name",
   "View history": "View history",
-  "Set as default": "Set as default"
+  "Set as default": "Set as default",
+  "Save": "Save"
 }
