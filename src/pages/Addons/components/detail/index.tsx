@@ -58,7 +58,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
       this.timer = window.setInterval(() => {
         this.loadAddonStatus(false);
       }, this.refreshTime);
-    })
+    });
   }
 
   componentWillUnmount() {
@@ -141,12 +141,17 @@ class AddonDetailDialog extends React.Component<Props, State> {
         <DrawerWithFooter
           title={showName}
           onClose={this.onClose}
-          onOkButtonText={status === 'enabled' ? 'Disable' : 'Enable'}
-          onOkButtonLoading={statusLoading || loading}
-          onOk={this.handleSubmit}
           extButtons={[
             <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
-              取消
+              <Translation>Cancel</Translation>
+            </Button>,
+            <Button
+              type="primary"
+              onClick={this.handleSubmit}
+              loading={statusLoading || loading}
+              disabled={status == 'enabled'}
+            >
+              <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
             </Button>,
           ]}
         >
