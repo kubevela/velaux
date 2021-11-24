@@ -2,7 +2,7 @@ import React from 'react';
 import './index.less';
 
 import { Dropdown, Menu, Grid, Card, Dialog } from '@b-design/ui';
-import { Cluster } from '../../../../interface/cluster';
+import type { Cluster } from '../../../../interface/cluster';
 import Translation from '../../../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import kubernetesSvg from '../../../../assets/kubernetes.svg';
@@ -48,7 +48,7 @@ class CardContent extends React.Component<Props, State> {
                     <img src={icon} />
                   </If>
                   <If condition={!icon || icon === 'none'}>
-                    <img src={kubernetesSvg}></img>
+                    <img src={kubernetesSvg} />
                   </If>
                 </div>
                 <div className="content-wraper background-F9F8FF">
@@ -76,17 +76,17 @@ class CardContent extends React.Component<Props, State> {
                                 d="M365.066 197.39c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
                                 fill="#a6a6a6"
                                 p-id="3449"
-                              ></path>
+                              />
                               <path
                                 d="M365.066 512c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
                                 fill="#a6a6a6"
                                 p-id="3450"
-                              ></path>
+                              />
                               <path
                                 d="M365.066 826.61c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
                                 fill="#a6a6a6"
                                 p-id="3451"
-                              ></path>
+                              />
                             </svg>
                           }
                         >
@@ -128,7 +128,7 @@ class CardContent extends React.Component<Props, State> {
                           width: '100%',
                         }}
                       >
-                        本地集群
+                        <Translation>Local Cluster</Translation>
                       </span>
                     </If>
                   </Row>
@@ -143,11 +143,11 @@ class CardContent extends React.Component<Props, State> {
                     </Col>
                     <Col span="8" className="text-align-right padding-right-10">
                       <If condition={status == 'Healthy'}>
-                        <span className="circle circle-success"></span>
+                        <span className="circle circle-success" />
                         <Translation>Healthy</Translation>
                       </If>
                       <If condition={status == 'Unhealthy'}>
-                        <span className="circle circle-warning"></span>
+                        <span className="circle circle-warning" />
                         <Translation>UnHealthy</Translation>
                       </If>
                     </Col>
