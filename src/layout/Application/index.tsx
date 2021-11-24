@@ -11,6 +11,7 @@ const { Row } = Grid;
 interface Props {
   match: any;
   dispatch: any;
+  location:any;
 }
 @connect((store: any) => {
   return { ...store.application };
@@ -23,6 +24,10 @@ class ApplicationLayout extends Component<Props, any> {
       activeName: '',
     };
   }
+
+  shouldComponentUpdate(nextProps: any) {
+    return nextProps.location !== this.props.location;
+}
 
   componentDidMount() {
     this.onGetApplicationDetails();
