@@ -24,16 +24,16 @@ type State = {
 type NodeItem = {
   consumerData: {
     alias?: string;
-    dependsOn?: null,
-    description?: string
+    dependsOn?: null;
+    description?: string;
     name: string;
     properties: string;
     type: string;
-  },
-  diagramMakerData: {}
+  };
+  diagramMakerData: {};
   id: string;
   typeId: string;
-}
+};
 
 class WorkFlowComponent extends Component<Props, State> {
   field;
@@ -95,11 +95,11 @@ class WorkFlowComponent extends Component<Props, State> {
         return;
       }
 
-      const nodeArr: Array<NodeItem> = Object.values(nodes)
-      const find = nodeArr.find(item => !item.consumerData);
+      const nodeArr: NodeItem[] = Object.values(nodes);
+      const find = nodeArr.find((item) => !item.consumerData);
 
       if (find) {
-        return  Message.error('please enter node name and enter node type');
+        return Message.error('please enter node name and enter node type');
       }
       const { name, alias, description } = values;
       data.appName = data.appName || this.props.appName;
@@ -123,9 +123,15 @@ class WorkFlowComponent extends Component<Props, State> {
     const option: WorkFlowOption = data.option || { default: true, edit: true, enable: true };
     const menu = (
       <Menu>
-        <Menu.Item><Translation>View history</Translation></Menu.Item>
-        <Menu.Item><Translation>Set as default</Translation></Menu.Item>
-        <Menu.Item onClick={() => this.deleteWorkflow(data.name)}><Translation>Remove</Translation></Menu.Item>
+        <Menu.Item>
+          <Translation>View history</Translation>
+        </Menu.Item>
+        <Menu.Item>
+          <Translation>Set as default</Translation>
+        </Menu.Item>
+        <Menu.Item onClick={() => this.deleteWorkflow(data.name)}>
+          <Translation>Remove</Translation>
+        </Menu.Item>
       </Menu>
     );
     const { init } = this.field;
@@ -187,7 +193,7 @@ class WorkFlowComponent extends Component<Props, State> {
                   this.saveWorkflow();
                 }}
               >
-                 <Translation>Save to Server</Translation>
+                <Translation>Save to Server</Translation>
               </div>
             </If>
             <div className="option-item">

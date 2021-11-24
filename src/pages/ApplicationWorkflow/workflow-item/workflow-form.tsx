@@ -24,7 +24,7 @@ type Props = {
   appName?: string;
   componentName?: string;
   closeDrawer?: () => void;
-  dispatch?: ({ }) => {};
+  dispatch?: ({}) => {};
   t: (key: string) => {};
 };
 
@@ -47,8 +47,9 @@ class WorkflowForm extends Component<Props, State> {
 
   componentDidMount = () => {
     const { consumerData } = this.props.data;
-    consumerData && this.field.setValues(consumerData);
-    const properties = consumerData && consumerData.properties && JSON.parse(consumerData.properties);
+    this.field.setValues(consumerData || '');
+    const properties =
+      consumerData && consumerData.properties && JSON.parse(consumerData.properties);
     this.field.setValues({ properties: properties });
     this.onDetailsComponeDefinition((consumerData && consumerData.type) || '');
   };

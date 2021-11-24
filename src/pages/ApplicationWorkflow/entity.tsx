@@ -64,7 +64,7 @@ export interface WorkFlowNodeType {
   // Based on use case or leave empty
   type: string;
   alias?: string;
-  dependsOn?: null
+  dependsOn?: null;
   description?: string;
   name: string;
   properties?: string;
