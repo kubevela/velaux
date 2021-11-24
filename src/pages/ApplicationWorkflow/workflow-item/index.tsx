@@ -48,6 +48,9 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     };
   }
   componentDidMount() {
+    if (this.diagramMaker) {
+      this.diagramMaker.destroy();
+    }
     const platformWidth = this.container.clientWidth;
     const platformHeight = 300;
     const { data, edit } = this.props;
@@ -87,7 +90,6 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
         },
         renderCallbacks: {
           node: (node: DiagramMakerNode<{}>, container: HTMLElement) => {
-            console.log(node);
             ReactDOM.render(
               <WorkFlowNode
                 id={node.id}
@@ -100,7 +102,6 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
             );
           },
           edge: (edge: DiagramMakerEdge<{}>, container: HTMLElement) => {
-            console.log(edge);
             ReactDOM.render(<WorkFlowEdge id={edge.id} data={edge.consumerData} />, container);
           },
           destroy: (container: HTMLElement) => {
@@ -269,11 +270,11 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     );
   };
 
-  componentWillUnmount = () => {
-    if (this.diagramMaker) {
-      this.diagramMaker.destroy();
-    }
-  };
+  // componentWillUnmount = () => {
+  //   if (this.diagramMaker) {
+  //     this.diagramMaker.destroy();
+  //   }
+  // };
 
   componentWillReceiveProps = (nextProps: WorkFlowItemProps) => {
     if (nextProps.edit !== this.props.edit) {

@@ -11,7 +11,7 @@ const { Row } = Grid;
 interface Props {
   match: any;
   dispatch: any;
-  location:any;
+  location: any;
 }
 @connect((store: any) => {
   return { ...store.application };
@@ -25,13 +25,13 @@ class ApplicationLayout extends Component<Props, any> {
     };
   }
 
-  shouldComponentUpdate(nextProps: any) {
-    return nextProps.location !== this.props.location;
-}
-
   componentDidMount() {
     this.onGetApplicationDetails();
     this.getNamespaceList();
+  }
+
+  shouldComponentUpdate(nextProps: any) {
+    return nextProps.location !== this.props.location;
   }
 
   onGetApplicationDetails = async () => {

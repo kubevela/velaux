@@ -213,3 +213,18 @@ export function updateComponentProperties(params: UpdateComponentProperties) {
   delete params.componentName;
   return put(gurl, params).then((res) => res);
 }
+
+export function resumeApplicationWorkflowRecord(params: { appName: string,workflowName:string,recordName:string }) {
+  const {appName,workflowName, recordName} = params;
+  return get(`${application}/${appName}/workflows/${workflowName}records/${recordName}/resume`, {}).then((res) => res);
+}
+
+export function rollbackApplicationWorkflowRecord(params: { appName: string,workflowName:string,recordName:string}) {
+  const {appName,workflowName, recordName} = params;
+  return get(`${application}/${appName}/workflows/${workflowName}records/${recordName}/rollback`, {}).then((res) => res);
+}
+
+export function terminateApplicationWorkflowRecord(params: { appName: string,workflowName:string,recordName:string}) {
+  const {appName,workflowName, recordName} = params;
+  return get(`${application}/${appName}/workflows/${workflowName}records/${recordName}/terminate`, {}).then((res) => res);
+}

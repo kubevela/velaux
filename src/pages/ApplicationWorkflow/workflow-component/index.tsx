@@ -5,6 +5,7 @@ import WorkFlowItem from '../workflow-item';
 import { checkName } from '../../../utils/common';
 import type { WorkFlowData, WorkFlowOption } from '../entity';
 import { deleteWorkFlow } from '../../../api/workflows';
+import Translation from '../../../components/Translation';
 import './index.less';
 
 type Props = {
@@ -19,6 +20,20 @@ type Props = {
 type State = {
   errorFocus: boolean;
 };
+
+type NodeItem = {
+  consumerData: {
+    alias?: string;
+    dependsOn?: null,
+    description?: string
+    name: string;
+    properties: string;
+    type: string;
+  },
+  diagramMakerData: {}
+  id: string;
+  typeId: string;
+}
 
 class WorkFlowComponent extends Component<Props, State> {
   field;
@@ -79,13 +94,19 @@ class WorkFlowComponent extends Component<Props, State> {
         });
         return;
       }
+
+      const nodeArr: Array<NodeItem> = Object.values(nodes)
+      const find = nodeArr.find(item => !item.consumerData);
+
+      if (find) {
+        return  Message.error('please enter node name and enter node type');
+      }
       const { name, alias, description } = values;
       data.appName = data.appName || this.props.appName;
       data.name = name;
       data.alias = alias;
       data.description = description;
       data.data = workflowData;
-      debugger;
       this.props.dispatch({
         type: 'workflow/saveWorkflow',
         payload: data,
@@ -102,9 +123,9 @@ class WorkFlowComponent extends Component<Props, State> {
     const option: WorkFlowOption = data.option || { default: true, edit: true, enable: true };
     const menu = (
       <Menu>
-        <Menu.Item>查看历史记录</Menu.Item>
-        <Menu.Item>设置为默认</Menu.Item>
-        <Menu.Item onClick={() => this.deleteWorkflow(data.name)}>删除</Menu.Item>
+        <Menu.Item><Translation>View history</Translation></Menu.Item>
+        <Menu.Item><Translation>Set as default</Translation></Menu.Item>
+        <Menu.Item onClick={() => this.deleteWorkflow(data.name)}><Translation>Remove</Translation></Menu.Item>
       </Menu>
     );
     const { init } = this.field;
@@ -124,7 +145,7 @@ class WorkFlowComponent extends Component<Props, State> {
             <If condition={option.edit}>
               <div className="workflow-description">
                 <Form field={this.field} inline>
-                  <Form.Item required label="工作流名称">
+                  <Form.Item required label={<Translation>Workflow Name</Translation>}>
                     <Input
                       {...init('name', {
                         initValue: data.name,
@@ -138,7 +159,7 @@ class WorkFlowComponent extends Component<Props, State> {
                       })}
                     />
                   </Form.Item>
-                  <Form.Item label="工作流别名">
+                  <Form.Item label={<Translation>Workflow alias</Translation>}>
                     <Input {...init('alias', { initValue: data.alias })} />
                   </Form.Item>
                   <Form.Item label="描述">
@@ -156,7 +177,7 @@ class WorkFlowComponent extends Component<Props, State> {
                   this.setEditView(data.name, true);
                 }}
               >
-                编辑
+                <Translation>Edit</Translation>
               </div>
             </If>
             <If condition={option.edit}>
@@ -166,7 +187,7 @@ class WorkFlowComponent extends Component<Props, State> {
                   this.saveWorkflow();
                 }}
               >
-                保存
+                 <Translation>Save to Server</Translation>
               </div>
             </If>
             <div className="option-item">

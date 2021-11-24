@@ -171,5 +171,10 @@
   "Time": "时间",
   "ComponentDefinition": "部署类型",
   "TraitDefinition": "运维特征",
-  "WorkflowStepDefinition": "工作流步骤类型"
+  "WorkflowStepDefinition": "工作流步骤类型",
+  "Save to Server":"保存到服务器",
+  "Workflow alias":"工作流别名",
+  "Workflow Name":"工作流名称",
+  "View history":"查看历史记录",
+  "Set as default":"设置为默认"
 }
