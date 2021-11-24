@@ -62,7 +62,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    this.timer && window.clearInterval(this.timer);
+    if (this.timer) {
+      window.clearInterval(this.timer);
+    }
   }
 
   loadAddonDetail = async () => {
