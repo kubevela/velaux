@@ -199,7 +199,7 @@ class DeliveryDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
-          style={{ width: '800px' }}
+          className={'commonDialog'}
           height="auto"
           title={isEdit ? editDeliveryTargetList : addDeliveryTargetList}
           autoFocus={true}

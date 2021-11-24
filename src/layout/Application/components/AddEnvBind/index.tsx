@@ -94,6 +94,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
     return (
       <Dialog
         visible={true}
+        className={'commonDialog'}
         style={{ width: '800px' }}
         footerActions={['ok']}
         onClose={this.props.onClose}

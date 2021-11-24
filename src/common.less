@@ -360,13 +360,20 @@ a {
 
 .commonDialog {
   width: 800px;
+  height: auto;
   min-height: 400px;
   .next-dialog-footer {
-    width: 280px !important;
-    margin: 0 auto;
+    display: flex;
+    justify-content: center !important;
+    .next-btn {
+      display: block;
+      flex: none !important;
+      width: 100px !important;
+    }
   }
   .next-dialog-body {
     width: 100% !important;
+    max-height: none !important;
   }
   .basic {
     width: 100%;
@@ -406,10 +413,6 @@ a {
   width: 100%;
 }
 
-.next-dialog-footer {
-  width: 280px !important;
-  margin: 0 auto;
-}
 .next-dialog-body {
   width: 100% !important;
 }
@@ -419,4 +422,8 @@ a {
 
 .customTable.next-table-medium .next-table-cell .next-table-cell-wrapper {
   padding: 16px !important;
+}
+
+.monaco-editor {
+  min-height: 400px;
 }

@@ -164,7 +164,7 @@ class AddClustDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
-          className="dialog-clust-wraper"
+          className={'commonDialog'}
           title={editMode ? editCluster : addCluster}
           autoFocus={true}
           visible={visible}
@@ -172,7 +172,7 @@ class AddClustDialog extends React.Component<Props, State> {
           onCancel={this.onClose}
           onClose={this.onClose}
           footerActions={['ok', 'cancel']}
-          height="auto"
+          height="800px"
           footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>

@@ -56,7 +56,7 @@ class Group extends React.Component<Props, State> {
                     onChange={(event: boolean) => {
                       this.setState({ enable: event, closed: false });
                     }}
-                  ></Switch>
+                  />
                 </If>
                 <If condition={enable && hasToggleIcon}>
                   <Icon
