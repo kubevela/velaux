@@ -29,7 +29,7 @@ type Props = {
 type State = {
   addonDetailInfo: Addon;
   loading: boolean;
-  status: 'disabled' | 'enabled' | '';
+  status: 'disabled' | 'enabled' | 'enabling' | '';
   statusLoading: boolean;
 };
 
@@ -151,7 +151,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
               type="primary"
               onClick={this.handleSubmit}
               loading={statusLoading || loading}
-              disabled={status == 'enabled'}
+              disabled={status == 'enabling'}
             >
               <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
             </Button>,

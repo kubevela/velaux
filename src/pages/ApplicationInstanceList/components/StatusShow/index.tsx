@@ -48,12 +48,26 @@ class StatusShow extends React.Component<Props, State> {
   render() {
     const { applicationStatus, onClose } = this.props;
     const { loading } = this.state;
+    const allConditions: Condition[] = [
+      { type: 'Parsed', status: 'False' },
+      { type: 'Revision', status: 'False' },
+      { type: 'Render', status: 'False' },
+      { type: 'WorkflowFinished', status: 'False' },
+      { type: 'Ready', status: 'False' },
+    ];
     const getCurrent = (conditions?: Condition[]) => {
       let index = 0;
       conditions?.map((condition: Condition, i: number) => {
         if (condition.status == 'False') {
           index = i;
         }
+        allConditions.map((c) => {
+          if (c.type == condition.type) {
+            c.status = condition.status;
+            c.lastTransitionTime = condition.lastTransitionTime;
+            c.reason = condition.reason;
+          }
+        });
       });
       if (index == 0 && conditions) {
         return conditions.length;
@@ -74,7 +88,7 @@ class StatusShow extends React.Component<Props, State> {
               <Translation>Close</Translation>
             </Button>
             <Button type="primary" onClick={this.loadApplicationStatus}>
-              <Translation>Update</Translation>
+              <Translation>Refresh</Translation>
             </Button>
           </div>
         }
@@ -94,10 +108,53 @@ class StatusShow extends React.Component<Props, State> {
           <If condition={applicationStatus?.conditions}>
             <Card style={{ marginTop: '8px' }} title={<Translation>Deploy Progress</Translation>}>
               <Step current={getCurrent(applicationStatus?.conditions)}>
-                {applicationStatus?.conditions.map((condition) => {
+                {allConditions.map((condition) => {
                   return <Step.Item title={condition.type} content={condition.reason} />;
                 })}
               </Step>
+            </Card>
+          </If>
+          <If condition={applicationStatus?.services}>
+            <Card
+              style={{ marginTop: '8px', marginBottom: '16px' }}
+              contentHeight="auto"
+              title={<Translation>Deploy Component Status</Translation>}
+            >
+              <Table className="customTable" dataSource={applicationStatus?.services}>
+                <Table.Column
+                  align="left"
+                  dataIndex="name"
+                  width="150px"
+                  title={<Translation>Name</Translation>}
+                />
+                <Table.Column
+                  align="left"
+                  dataIndex="healthy"
+                  width="100px"
+                  cell={(v: boolean) => {
+                    if (v) {
+                      return (
+                        <div>
+                          <span className="circle circle-success" />
+                          <span>Healthy</span>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div>
+                        <span className="circle circle-warning" />
+                        <span>UnHealthy</span>
+                      </div>
+                    );
+                  }}
+                  title={<Translation>Healthy</Translation>}
+                />
+                <Table.Column
+                  align="center"
+                  dataIndex="message"
+                  title={<Translation>Message</Translation>}
+                />
+              </Table>
             </Card>
           </If>
         </Loading>

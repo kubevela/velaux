@@ -141,8 +141,8 @@ export interface Resource {
 export interface Condition {
   type: string;
   status: 'True' | 'False';
-  lastTransitionTime: string;
-  reason: string;
+  lastTransitionTime?: string;
+  reason?: string;
 }
 
 export interface WorkflowStatus {

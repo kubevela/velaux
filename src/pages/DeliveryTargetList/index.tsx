@@ -119,7 +119,6 @@ class DeliveryTargetList extends React.Component<Props, State> {
   render() {
     const { t, clusterList, deliveryTargets, total, namespaceList, dispatch } = this.props;
     const { visibleDelivery, isEdit, deliveryTargetItem } = this.state;
-    console.log('this.total', total);
     return (
       <div>
         <ListTitle

@@ -37,7 +37,7 @@ export default {
       yield put({
         type: 'updateWorkflow',
         payload: {
-          workflowList: transData(result && result.workflows),
+          workflowList: transData(result && result.workflows, action.payload.appName),
         },
       });
     },
@@ -110,8 +110,10 @@ export default {
   },
 };
 
-function transData(workflowList = []) {
+function transData(workflowList = [], appName) {
   const newData = _.cloneDeep(workflowList);
+  const nodeWidth = 200;
+  const nodeInterval = 80;
   if (newData && newData.length != 0) {
     newData.forEach((key) => {
       const nodes = {};
@@ -119,7 +121,7 @@ function transData(workflowList = []) {
       let position = 50;
       if (key.steps) {
         key.steps.forEach((item, index, array) => {
-          position += 200;
+          position += nodeWidth + nodeInterval;
           edges[item.name] = {};
           edges[item.name].dest = key.steps && key.steps[index + 1] && key.steps[index + 1].name;
           edges[item.name].diagramMakerData = {
@@ -145,7 +147,7 @@ function transData(workflowList = []) {
               y: 100,
             },
             size: {
-              width: 120,
+              width: nodeWidth,
               height: 40,
             },
             selected: false,
@@ -153,6 +155,7 @@ function transData(workflowList = []) {
         });
       }
       key.envName = key.envName;
+      key.appName = appName;
       key.option = {
         edit: false,
         enable: false,

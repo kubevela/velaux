@@ -7,6 +7,7 @@ import type { WorkFlowData } from './entity';
 import { getWorkFlowDefinitions } from '../../api/workflows';
 
 import './index.less';
+import Translation from '../../components/Translation';
 
 type Props = {
   workflowList: WorkFlowData[];
@@ -67,14 +68,16 @@ class Workflow extends Component<Props, State> {
 
   render() {
     const { workflowList, dispatch } = this.props;
-
+    const { params } = this.props.match;
     return (
       <div style={{ height: '100%' }} className="workflow-wraper">
         <If condition={workflowList.length === 0}>
           <div className="empty-container">
-            <div className="empty-word">您还没有创建流水线，请先创建</div>
+            <div className="empty-word">
+              <Translation>Please create workflow</Translation>
+            </div>
             <Button type="primary" onClick={this.addWrokflow}>
-              新增部署流水线
+              <Translation>New Workflow</Translation>
             </Button>
           </div>
         </If>
@@ -82,8 +85,8 @@ class Workflow extends Component<Props, State> {
           <React.Fragment>
             {workflowList.map((workflow: WorkFlowData) => (
               <WrokflowComponent
-                key={workflow.name}
-                appName={this.state.appName}
+                key={workflow.name + params.appName}
+                appName={params.appName}
                 data={workflow}
                 workFlowDefinitions={this.state.workFlowDefinitions}
                 getWorkflow={this.onGetWorkflow}

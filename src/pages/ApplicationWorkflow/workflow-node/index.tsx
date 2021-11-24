@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { DiagramMakerComponents } from 'diagram-maker';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
+import Translation from '../../../components/Translation';
 type Props = {
   id: string;
   typeId?: string;
@@ -31,7 +32,7 @@ class WorkFlowNode extends Component<Props, State> {
             id={id}
             workflow-id={workflowId}
           >
-            {data.alias || data.name || '点击编辑'}
+            {data.alias || data.name || <Translation>Click Edit</Translation>}
             <div
               data-event-target="true"
               data-dropzone="true"
@@ -55,9 +56,10 @@ class WorkFlowNode extends Component<Props, State> {
             }
             id={id}
             workflow-id={workflowId}
+            title={data.text}
           >
             <div className="rhombus-container" />
-            <div className="content"> {data.text || '点击编辑'}</div>
+            <div className="content"> {data.text || <Translation>Click Edit</Translation>}</div>
             <div
               className="start-connector"
               data-event-target="true"
