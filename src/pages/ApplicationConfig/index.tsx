@@ -67,7 +67,6 @@ class ApplicationConfig extends Component<Props, State> {
       this.setState({ componentName }, () => {
         this.onGetAppliationComponent();
       });
-      console.log(componentName);
     }
   }
 

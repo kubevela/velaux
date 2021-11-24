@@ -24,6 +24,7 @@ import { WORKFLOW_COMMON_PANNEL } from '../entity';
 import WorkflowForm from './workflow-form';
 import 'diagram-maker/dist/diagramMaker.css';
 import './index.less';
+import Translation from '../../../components/Translation';
 
 type WorkFlowItemProps = {
   workflowId: string;
@@ -336,7 +337,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
           id={this.props.workflowId}
         />
         <Drawer
-          title="编辑表单"
+          title={<Translation>Edit workflow step</Translation>}
           placement="right"
           visible={visible}
           width={800}

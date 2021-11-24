@@ -111,6 +111,7 @@ class WorkFlowComponent extends Component<Props, State> {
         type: 'workflow/saveWorkflow',
         payload: data,
         callback: () => {
+          Message.success('save workflow success');
           this.props.getWorkflow();
         },
       });
@@ -209,9 +210,10 @@ class WorkFlowComponent extends Component<Props, State> {
         </div>
         <div className="workflow-detail-container">
           <WorkFlowItem
+            key={data.name + data.appName}
             ref={(ref) => (this.workflowItem = ref)}
             data={data.data || { nodes: {}, edges: {} }}
-            workflowId={data.appName || ''}
+            workflowId={data.appName + data.name || ''}
             workFlowDefinitions={workFlowDefinitions}
             edit={option.edit}
           />
