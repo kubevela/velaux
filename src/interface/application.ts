@@ -220,3 +220,21 @@ export interface UpdateComponentProperties {
   componentName?: string;
   properties: string;
 }
+
+export interface WorkflowBase {
+  name: string;
+  namespace: string;
+  workflowName: string;
+  startTime?: string;
+  status?: string;
+  steps?: WorkflowStepItem[];
+}
+
+export interface WorkflowStepItem {
+  id: string;
+  name: string;
+  type: string;
+  phase: string;
+  firstExecuteTime?: string;
+  lastExecuteTime?: string;
+}

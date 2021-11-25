@@ -8,6 +8,7 @@ import {
   Dropdown,
   Menu,
   Dialog,
+  Loading,
 } from '@b-design/ui';
 import { connect } from 'dva';
 import React, { Component } from 'react';
@@ -22,13 +23,13 @@ import type {
   ApplicationStatus,
   ApplicationStatistics,
   Workflow,
-  WorkflowStatus,
+  WorkflowBase,
 } from '../../../../interface/application';
 import NumItem from '../../../../components/NumItem';
 import { Link } from 'dva/router';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
-import './index.less';
+import SilderWorkflow from '../Slider';
 
 const { Row, Col } = Grid;
 
@@ -43,7 +44,7 @@ interface Props {
 interface State {
   loading: boolean;
   statistics?: ApplicationStatistics;
-  records?: WorkflowStatus[];
+  records?: WorkflowBase[];
 }
 
 @connect((store: any) => {
@@ -53,7 +54,7 @@ class ApplicationHeader extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      loading: true,
+      loading: false,
     };
   }
 
@@ -105,11 +106,16 @@ class ApplicationHeader extends Component<Props, State> {
   loadworkflowRecord = async () => {
     const { appName } = this.props;
     if (appName) {
-      getApplicationWorkflowRecord({ appName: appName }).then((re) => {
-        if (re) {
-          this.setState({ records: re.records });
-        }
-      });
+      this.setState({ loading: true });
+      getApplicationWorkflowRecord({ appName: appName })
+        .then((re) => {
+          if (re) {
+            this.setState({ records: re.records, loading: false });
+          }
+        })
+        .finally(() => {
+          this.setState({ loading: false });
+        });
     }
   };
 
@@ -119,8 +125,8 @@ class ApplicationHeader extends Component<Props, State> {
   }
 
   render() {
-    const { applicationDetail, currentPath, workflows } = this.props;
-    const { statistics, records } = this.state;
+    const { applicationDetail, currentPath, workflows, appName } = this.props;
+    const { statistics, records, loading } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     const item = <Translation>{`app-${activeKey}`}</Translation>;
     return (
@@ -195,11 +201,13 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
           <Col span={12} className="padding16">
             <Card>
-              {records?.map((record) => {
-                record.steps.map((step) => {
-                  return <span>{step.name || step.type}</span>;
-                });
-              })}
+              <Loading visible={loading} style={{ display: 'block' }}>
+                <SilderWorkflow
+                  appName={appName}
+                  records={records || []}
+                  loadworkflowRecord={this.loadworkflowRecord}
+                />
+              </Loading>
             </Card>
           </Col>
         </Row>

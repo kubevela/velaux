@@ -161,5 +161,9 @@
   "Workflow Name": "Workflow Name",
   "View history": "View history",
   "Set as default": "Set as default",
-  "Save": "Save"
+  "Save": "Save",
+  "Needs review before continuing": "Needs review before continuing",
+  "Please select the action you want to perform": "Please select the action you want to perform?",
+  "Continue": "Continue",
+  "Termination": "Termination"
 }

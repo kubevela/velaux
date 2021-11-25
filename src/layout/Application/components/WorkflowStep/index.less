@@ -1,0 +1,149 @@
+.workflow-step-wraper {
+  .title-long-hidden {
+    display: block;
+    width: 88%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+
+  .succeeded {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    text-align: center;
+    background: green;
+    border: 1px dashed green;
+    border-radius: 20%;
+  }
+
+  .succeeded span,
+  .succeeded i {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    transform: translateY(-50%);
+  }
+
+  .failed {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    text-align: center;
+    background: red;
+    border: 1px dashed red;
+    border-radius: 20%;
+  }
+
+  .failed span,
+  .succeeded i {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    transform: translateY(-50%);
+  }
+
+  .running {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    text-align: center;
+    background: #00c1de;
+    border: 1px dashed #00c1de;
+    border-radius: 20%;
+  }
+
+  .running span,
+  .running i {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    transform: translateY(-50%);
+  }
+
+  .stopped {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    text-align: center;
+    background: #ccc;
+    border: 1px dashed #ccc;
+    border-radius: 20%;
+  }
+
+  .stopped span,
+  .stopped i {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    transform: translateY(-50%);
+  }
+
+  .default {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    text-align: center;
+    background: #00c1de;
+    border: 1px dashed #00c1de;
+    border-radius: 20%;
+  }
+
+  .default span,
+  .default i {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    transform: translateY(-50%);
+  }
+}
+
+.confirm-wraper::after {
+  width: 0;
+  height: 0;
+  border-color: transparent transparent #694446 transparent;
+  border-style: solid;
+  border-width: 0 21px 21px 21px;
+}
+
+.shanshan {
+  -webkit-animation: twinkling 1s infinite ease-in-out;
+}
+.animated {
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+@-webkit-keyframes twinkling {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes twinkling {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
