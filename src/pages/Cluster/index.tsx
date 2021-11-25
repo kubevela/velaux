@@ -83,75 +83,73 @@ class Cluster extends React.Component<Props, State> {
     const { page, pageSize, query, showAddCluster, showAddCloudCluster, editClusterName } =
       this.state;
     return (
-      <>
+      <div>
+        <Title
+          title="Cluster management"
+          subTitle="Introduction to cluster management"
+          addButtonTitle="Cluster Join"
+          addButtonClick={() => {
+            this.setState({ showAddCluster: true });
+          }}
+          extButtons={[
+            <Button
+              type="secondary"
+              style={{ marginRight: '16px' }}
+              onClick={() => {
+                this.setState({ showAddCloudCluster: true });
+              }}
+            >
+              <Translation>Add from cloud service</Translation>
+            </Button>,
+          ]}
+        />
+        <SelectSearch
+          dispatch={dispatch}
+          getChildCompentQuery={(q: string): any => {
+            this.getChildCompentQuery(q);
+          }}
+        />
+        <CardContend
+          editCluster={(name: string) => {
+            this.setState({ showAddCluster: true, editClusterName: name });
+          }}
+          deleteCluster={this.onDeleteCluster}
+          clusters={clusterList}
+        />
         <div>
-          <Title
-            title="Cluster management"
-            subTitle="Introduction to cluster management"
-            addButtonTitle="Cluster Join"
-            addButtonClick={() => {
-              this.setState({ showAddCluster: true });
-            }}
-            extButtons={[
-              <Button
-                type="secondary"
-                style={{ marginRight: '16px' }}
-                onClick={() => {
-                  this.setState({ showAddCloudCluster: true });
-                }}
-              >
-                <Translation>Add from cloud service</Translation>
-              </Button>,
-            ]}
-          />
-          <SelectSearch
-            dispatch={dispatch}
-            getChildCompentQuery={(q: string): any => {
-              this.getChildCompentQuery(q);
-            }}
-          />
-          <CardContend
-            editCluster={(name: string) => {
-              this.setState({ showAddCluster: true, editClusterName: name });
-            }}
-            deleteCluster={this.onDeleteCluster}
-            clusters={clusterList}
-          />
-          <div>
-            <If condition={showAddCloudCluster}>
-              <CloudServiceDialog
-                visible={showAddCloudCluster}
-                setVisible={(visible) => {
-                  this.getClusterList();
-                  this.setState({ showAddCloudCluster: visible });
-                }}
-                setCloudService={(visible) => {
-                  this.setState({ showAddCloudCluster: visible });
-                }}
-                dispatch={dispatch}
-              />
-            </If>
-            <If condition={showAddCluster}>
-              <AddClustDialog
-                page={page}
-                pageSize={pageSize}
-                query={query}
-                visible={showAddCluster}
-                editClusterName={editClusterName}
-                onClose={() => {
-                  this.getClusterList();
-                  this.setState({ showAddCluster: false, editClusterName: '' });
-                }}
-                onOK={() => {
-                  this.getClusterList();
-                  this.setState({ showAddCluster: false, editClusterName: '' });
-                }}
-                dispatch={dispatch}
-              />
-            </If>
-          </div>
+          <If condition={showAddCloudCluster}>
+            <CloudServiceDialog
+              visible={showAddCloudCluster}
+              setVisible={(visible) => {
+                this.getClusterList();
+                this.setState({ showAddCloudCluster: visible });
+              }}
+              setCloudService={(visible) => {
+                this.setState({ showAddCloudCluster: visible });
+              }}
+              dispatch={dispatch}
+            />
+          </If>
+          <If condition={showAddCluster}>
+            <AddClustDialog
+              page={page}
+              pageSize={pageSize}
+              query={query}
+              visible={showAddCluster}
+              editClusterName={editClusterName}
+              onClose={() => {
+                this.getClusterList();
+                this.setState({ showAddCluster: false, editClusterName: '' });
+              }}
+              onOK={() => {
+                this.getClusterList();
+                this.setState({ showAddCluster: false, editClusterName: '' });
+              }}
+              dispatch={dispatch}
+            />
+          </If>
         </div>
-      </>
+      </div>
     );
   }
 }

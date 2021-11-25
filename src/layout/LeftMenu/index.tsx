@@ -14,7 +14,7 @@ const LeftMenu = (props: any) => {
     if (item.children) {
       const childrenArr = item.children.map((childrenItem) => {
         return (
-          <li className="nav-item">
+          <li className="nav-item" key={childrenItem.navName}>
             <Link
               to={childrenItem.link}
               className={childrenItem.className ? 'menu-item-active' : 'menu-item'}

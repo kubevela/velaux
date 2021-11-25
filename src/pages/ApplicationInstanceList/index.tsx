@@ -286,6 +286,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         .then((re) => {
           if (re) {
             Message.success('deploy application success');
+            this.loadApplicationStatus();
           }
         })
         .catch((err: APIError) => {

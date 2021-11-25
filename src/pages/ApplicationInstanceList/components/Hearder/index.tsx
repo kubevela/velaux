@@ -47,12 +47,13 @@ class Hearder extends Component<Props, State> {
     Dialog.confirm({
       content: 'Are you sure you want to reclaim the current environment?',
       onOk: () => {
-        const { applicationDetail, envName } = this.props;
+        const { applicationDetail, envName, refresh } = this.props;
         if (applicationDetail) {
           recycleApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then(
             (re) => {
               if (re) {
                 Message.success('recycle applicationn env success');
+                refresh();
               }
             },
           );
