@@ -1,4 +1,3 @@
-// eslint react/prefer-stateless-function: 'off'
 export default {
   base: 'vs-dark',
   inherit: true,

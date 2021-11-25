@@ -13,7 +13,6 @@ import {
 } from '@b-design/ui';
 import { addCluster, editCluster, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import DefinitionCode from '../../../../components/DefinitionCode';
-import defineTheme from '../../../../components/DefinitionCode/theme';
 import { checkName } from '../../../../utils/common';
 import { getClusterDetails, updateCluster } from '../../../../api/cluster';
 import './index.less';
@@ -158,23 +157,20 @@ class AddClustDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const values: { kubeConfig: string } = this.field.getValues();
     const valueInfo = cluster.kubeConfig || values.kubeConfig || '';
-    if (editClusterName && !editMode) {
-      return <Loading />;
-    }
     return (
-      <div>
-        <Dialog
-          className={'commonDialog'}
-          title={editMode ? editCluster : addCluster}
-          autoFocus={true}
-          visible={visible}
-          onOk={this.onOk}
-          onCancel={this.onClose}
-          onClose={this.onClose}
-          footerActions={['ok', 'cancel']}
-          height="800px"
-          footerAlign="center"
-        >
+      <Dialog
+        className={'commonDialog'}
+        title={editMode ? editCluster : addCluster}
+        autoFocus={true}
+        visible={visible}
+        onOk={this.onOk}
+        onCancel={this.onClose}
+        onClose={this.onClose}
+        footerActions={['ok', 'cancel']}
+        height="800px"
+        footerAlign="center"
+      >
+        <Loading visible={editClusterName && !editMode ? true : false} style={{ width: '100%' }}>
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
@@ -268,7 +264,6 @@ class AddClustDialog extends React.Component<Props, State> {
                       containerId="guide-code"
                       language={'yaml'}
                       readOnly={false}
-                      defineTheme={defineTheme}
                       {...init('kubeConfig', {
                         initValue: cluster.kubeConfig,
                       })}
@@ -280,8 +275,8 @@ class AddClustDialog extends React.Component<Props, State> {
               </Col>
             </Row>
           </Form>
-        </Dialog>
-      </div>
+        </Loading>
+      </Dialog>
     );
   }
 }

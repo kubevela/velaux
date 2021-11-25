@@ -218,7 +218,7 @@ class ApplicationConfig extends Component<Props, State> {
           <Col span={24} className="padding16">
             <Title
               actions={[
-                <a onClick={this.onAddTrait}>
+                <a key={'add'} onClick={this.onAddTrait}>
                   <Translation>Add Trait</Translation>
                 </a>,
               ]}
