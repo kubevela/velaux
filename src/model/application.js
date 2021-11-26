@@ -14,6 +14,8 @@ import { listWorkFlow } from '../api/workflows';
 
 import { getNamespaceList } from '../api/namespace';
 
+import { getDeliveryTarget } from '../api/deliveryTarget';
+
 export default {
   namespace: 'application',
   state: {
@@ -29,6 +31,7 @@ export default {
     componentDetails: {},
     envbinding: [],
     workflows: [],
+    deliveryTargetList:[],
   },
   reducers: {
     update(state, { type, payload }) {
@@ -72,6 +75,12 @@ export default {
       return {
         ...state,
         namespaceList: payload,
+      };
+    },
+    updateDeliveryTargetList(state, { type, payload }) {
+      return {
+        ...state,
+        deliveryTargetList: payload,
       };
     },
     updatePoliciesList(state, { type, payload }) {
@@ -118,6 +127,11 @@ export default {
       const result = yield call(getNamespaceList, action.payload);
       const namespaceList = getNamespace(result || {});
       yield put({ type: 'updateNameSpaceList', payload: namespaceList });
+    },
+    *getDeliveryTarget(action, { call, put }) {
+      const result = yield call(getDeliveryTarget, action.payload);
+      const deliveryTargetList = getDeliveryTargetList(result);
+      yield put({ type: 'updateDeliveryTargetList', payload: deliveryTargetList || [] });
     },
     *getApplicationDetail(action, { call, put }) {
       const { appName } = action.payload;
@@ -205,6 +219,22 @@ function getNamespace(data) {
     namespace.value = item.name;
     namespace.label = item.name;
     list.push(namespace);
+  }
+  return list;
+}
+
+function getDeliveryTargetList(data) {
+  const deliveryTargets = data.deliveryTargets;
+  if (!deliveryTargets) {
+    return [];
+  }
+  const list = [];
+  for (const item of deliveryTargets) {
+    const deliveryTarget = {
+      value: item.name,
+      label: item.alias || item.name,
+    };
+    list.push(deliveryTarget);
   }
   return list;
 }

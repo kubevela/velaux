@@ -14,7 +14,7 @@ type Props = {
   dispatch: ({}) => {};
   applicationList: ApplicationBase[];
   namespaceList: [];
-  clusterList?: [];
+  deliveryTargetList?: [];
   history: any;
 };
 type State = {
@@ -24,7 +24,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.application, ...store.clusters };
+  return { ...store.application};
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -39,7 +39,7 @@ class Application extends Component<Props, State> {
   componentDidMount() {
     this.getApplications({});
     this.getNamespaceList();
-    this.getClusterList();
+    this.getDeliveryTarget();
     this.onGetComponentdefinitions();
   }
 
@@ -63,9 +63,11 @@ class Application extends Component<Props, State> {
     });
   };
 
-  getClusterList = async () => {
+  // 这个请求不知道有没有问题
+  getDeliveryTarget = async () => {
     this.props.dispatch({
-      type: 'clusters/getClusterList',
+      type: 'application/getDeliveryTarget',
+      payload: {},
     });
   };
 
@@ -96,7 +98,7 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList, namespaceList, clusterList, dispatch } = this.props;
+    const { applicationList, namespaceList, deliveryTargetList:deliveryTargetList, dispatch } = this.props;
     const { showAddApplication, componentDefinitions, isLoading } = this.state;
     return (
       <div>
@@ -111,7 +113,8 @@ class Application extends Component<Props, State> {
 
         <SelectSearch
           namespaceList={namespaceList}
-          clusterList={clusterList}
+          // clusterList={clusterList}
+          deliveryTargetList={ deliveryTargetList}
           dispatch={dispatch}
           getApplications={(params: any) => {
             this.getApplications(params);
