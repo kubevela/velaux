@@ -31,6 +31,7 @@ type State = {
   loading: boolean;
   status: 'disabled' | 'enabled' | 'enabling' | '';
   statusLoading: boolean;
+  args?: any;
 };
 
 class AddonDetailDialog extends React.Component<Props, State> {
@@ -54,11 +55,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
 
   componentDidMount() {
     this.loadAddonDetail();
-    this.loadAddonStatus().then(() => {
-      this.timer = window.setInterval(() => {
-        this.loadAddonStatus(false);
-      }, this.refreshTime);
-    });
+    this.loadAddonStatus();
   }
 
   componentWillUnmount() {
@@ -77,15 +74,19 @@ class AddonDetailDialog extends React.Component<Props, State> {
       });
   };
 
-  loadAddonStatus = async (resetLoading = true) => {
-    const res = await getAddonsStatus({ name: this.props.addonName });
-    if (!res) return;
-
-    if (resetLoading) {
-      this.setState({ status: res.phase, statusLoading: false });
-    } else {
-      this.setState({ status: res.phase });
-    }
+  loadAddonStatus = () => {
+    getAddonsStatus({ name: this.props.addonName }).then((res) => {
+      if (!res) return;
+      this.setState({ status: res.phase, args: res.args, statusLoading: false });
+      if (res.phase == 'enabling') {
+        setTimeout(() => {
+          this.loadAddonStatus();
+        }, 3000);
+      }
+      if (res.args) {
+        this.form.setValue('properties', res.args);
+      }
+    });
   };
 
   handleSubmit = () => {

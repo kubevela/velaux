@@ -107,8 +107,8 @@ class Structs extends React.Component<Props, State> {
         }
       });
       const structList = Array<any>();
-      value.map((item: object) => {
-        const key = Date.now().toString();
+      value.map((item: any, index: number) => {
+        const key = Date.now().toString() + index;
         const valueKeys = [];
         for (const itemkey in item) {
           valueKeys.push(itemkey);
@@ -151,6 +151,7 @@ class Structs extends React.Component<Props, State> {
   addStructPlanItem = (option?: GroupOption, value?: any) => {
     this.field.validate((error: any) => {
       if (error) {
+        console.log(error);
         return;
       }
       const { structList } = this.state;
@@ -173,6 +174,8 @@ class Structs extends React.Component<Props, State> {
         structList.splice(i, 1);
       }
     });
+    this.field.remove('struct' + key);
+    this.setValues();
     this.setState({
       structList,
     });

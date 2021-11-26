@@ -60,6 +60,8 @@ export interface UIParam {
   uiType: string;
   disable?: boolean;
   subParameterGroupOption?: GroupOption[];
+  additional?: boolean;
+  additionalParameter?: UIParam;
   subParameters?: UIParam[];
   validate: UIParamValidate;
 }
