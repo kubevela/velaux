@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
-import { Grid, Button, Icon, Form, Input } from '@b-design/ui';
+import { Grid, Button, Icon, Form, Input, Field } from '@b-design/ui';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import _ from 'lodash';
+import type { UIParam } from '../../interface/application';
 
 const { Row, Col } = Grid;
 
 type Props = {
-  value?: object;
+  value?: any;
   onChange?: (value: any) => void;
+  additional?: boolean;
+  additionalParameter?: UIParam;
+  subParameters?: UIParam[];
   id: string;
 };
 
@@ -17,30 +21,50 @@ type State = {
 
 type Item = {
   key: string;
+  label: string;
   value?: any;
 };
 
 function getEmptyItem() {
   return {
-    key: '',
+    key: Date.now().toString(),
+    label: '',
     value: '',
   };
 }
 
 class KV extends Component<Props, State> {
+  form: Field;
   constructor(props: any) {
     super(props);
-    const { value } = props;
-    const items = [];
+    this.state = {
+      items: [],
+    };
+    this.form = new Field(this, {
+      onChange: () => {
+        this.submit();
+      },
+    });
+  }
+
+  componentDidMount() {
+    this.setValues();
+  }
+
+  setValues = () => {
+    const { value } = this.props;
+    const { items } = this.state;
+    const newItems = [...items];
     if (value) {
-      for (const key in value) {
-        items.push({ key: key, value: value[key] });
+      for (const label in value) {
+        const key = Date.now().toString() + label;
+        newItems.push({ key: key, label: label, value: value[label] });
+        this.form.setValue('envKey-' + key, label);
+        this.form.setValue('envValue-' + key, value[label]);
       }
     }
-    this.state = {
-      items,
-    };
-  }
+    this.setState({ items: newItems });
+  };
 
   addItem() {
     const { items } = this.state;
@@ -48,53 +72,68 @@ class KV extends Component<Props, State> {
     this.setState({ items: [...items] });
   }
 
-  onItemChanged(index: number, field: any, v: any) {
-    const { items } = this.state;
-    if (field == 'key') {
-      items[index].key = v;
-    }
-    if (field == 'value') {
-      items[index].value = v;
-    }
-    const obj = Object.create(null);
-    items.map((item) => {
-      if (item.key) {
-        obj[item.key] = item.value;
+  submit() {
+    const values: any = this.form.getValues();
+    const items: Map<string, Item> = new Map();
+    Object.keys(values).map((key) => {
+      if (key.startsWith('envKey-')) {
+        const index = key.replace('envKey-', '');
+        let item = items.get(index);
+        if (!item) {
+          item = { key: '', label: '' };
+        }
+        item.label = values[key];
+        items.set(index, item);
+      }
+
+      if (key.startsWith('envValue-')) {
+        const index = key.replace('envValue-', '');
+        let item = items.get(index);
+        if (!item) {
+          item = { key: '', label: '' };
+        }
+        item.value = values[key];
+        items.set(index, item);
       }
     });
-
-    this.submit(obj);
-  }
-
-  submit(items: any) {
+    const obj = Object.create(null);
+    items.forEach((item: Item) => {
+      obj[item.label] = item.value;
+    });
     const { onChange } = this.props;
     if (onChange) {
-      onChange(items);
+      onChange(obj);
     }
   }
 
-  remove(index: any) {
+  remove(key: any) {
     const { items } = this.state;
-    items.splice(index, 1);
-    this.setState({ items: [...items] });
-    this.submit([...items]);
+    items.forEach((item, i) => {
+      if (item.key === key) {
+        items.splice(i, 1);
+      }
+    });
+    this.form.remove('envKey-' + key);
+    this.form.remove('envValue-' + key);
+    this.setState({ items: items });
+    this.submit();
   }
 
   render() {
     const { items } = this.state;
+    const { id } = this.props;
+    const { init } = this.form;
     return (
-      <div>
-        {items.map((item, index) => {
+      <div id={id}>
+        {items.map((item) => {
           return (
-            <Row key={index} gutter="20">
+            <Row key={item.key} gutter="20">
               <Col span={10}>
-                <Form.Item required>
+                <Form.Item>
                   <Input
-                    name={`envKey${index}`}
+                    {...init(`envKey-${item.key}`)}
                     label={'Key'}
                     className="full-width"
-                    value={item.key}
-                    onChange={(value) => this.onItemChanged(index, 'key', value)}
                     placeholder={''}
                   />
                 </Form.Item>
@@ -102,18 +141,16 @@ class KV extends Component<Props, State> {
               <Col span={10}>
                 <Form.Item>
                   <Input
-                    name={`envValue${index}`}
+                    {...init(`envValue-${item.key}`)}
                     label={'Value'}
                     className="full-width"
-                    value={item.value}
-                    onChange={(value) => this.onItemChanged(index, 'value', value)}
                     placeholder={''}
                   />
                 </Form.Item>
               </Col>
               <Col span={1}>
                 <div className="mt-5" style={{ padding: '8px 0' }}>
-                  <Icon type="ashbin" size="small" onClick={() => this.remove(index)} />
+                  <Icon type="ashbin" size="small" onClick={() => this.remove(item.key)} />
                 </div>
               </Col>
             </Row>

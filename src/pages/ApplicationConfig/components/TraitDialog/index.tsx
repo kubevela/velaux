@@ -124,9 +124,9 @@ class TraitDialog extends React.Component<Props, State> {
       .catch(() => this.setState({ definitionLoading: false }));
   };
 
-  handleChang = (value: string) => {
-    this.onDetailsTraitDefinition(value);
+  handleChange = (value: string) => {
     this.field.setValues({ type: value });
+    this.onDetailsTraitDefinition(value);
   };
 
   extButtonList = () => {
@@ -147,14 +147,12 @@ class TraitDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-
     const { onClose } = this.props;
     const { t, isEditTrait } = this.props;
     const { definitionDetail, definitionLoading } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
-
     return (
       <DrawerWithFooter
         title={isEditTrait ? t('Edit Trait') : t('Add Trait')}
@@ -187,7 +185,7 @@ class TraitDialog extends React.Component<Props, State> {
                     ],
                   })}
                   dataSource={this.transTraitDefinitions()}
-                  onChange={this.handleChang}
+                  onChange={this.handleChange}
                 />
               </FormItem>
             </Col>
