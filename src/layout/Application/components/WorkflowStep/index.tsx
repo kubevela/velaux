@@ -16,7 +16,7 @@ type Props = {
   appName: string;
   workflowName: string;
   recordName: string;
-  loadworkflowRecord: () => {};
+  records: WorkflowBase[];
 };
 
 const { Item: StepItem } = Step;
@@ -31,7 +31,6 @@ class WorkflowStep extends Component<Props> {
     resumeApplicationWorkflowRecord(params).then((re) => {
       if (re) {
         Message.success('operation success');
-        this.props.loadworkflowRecord();
       }
     });
   };
@@ -46,7 +45,6 @@ class WorkflowStep extends Component<Props> {
     rollbackApplicationWorkflowRecord(params).then((re) => {
       if (re) {
         Message.success('operation success');
-        this.props.loadworkflowRecord();
       }
     });
   };
@@ -66,35 +64,53 @@ class WorkflowStep extends Component<Props> {
     });
   };
 
-  itemRender = (index: number, status: string) => {
+  itemRender = (index: number) => {
     const { recordItem } = this.props;
-    const steps = recordItem.steps || [{ phase: '' }];
+    const steps = recordItem.steps || [{ phase: '', type: '' }];
     const stepStatus = [
-      { name: 'succeeded', value: 'succeeded' },
-      { name: 'failed', value: 'failed' },
-      { name: 'stopped', value: 'stopped' },
-      { name: 'running', value: 'running' },
+      { name: 'succeeded', value: 'succeeded', iconType: 'success' },
+      { name: 'failed', value: 'failed', iconType: 'error' },
+      { name: 'stopped', value: 'stopped', iconType: 'warning' },
+      { name: 'running', value: 'running', iconType: '' },
     ];
-    const find = stepStatus.find((item) => item.name === steps[index]['phase']) || {
+    const find = stepStatus.find((item) => {
+      if (item.name === steps[index]['phase'] && steps[index]['type'] !== 'suspend') {
+        return item;
+      }
+    }) || {
       value: 'default',
+      iconType: '',
     };
+
+    const isAnimate = find && find.value === 'succeeded' ? '' : 'shanshan';
+
     return (
-      <div className={`${find.value} shanshan`}>
-        {status === 'finish' ? <Icon type="success" /> : <span>{index + 1}</span>}
+      <div className={`${find.value} ${isAnimate}`}>
+        {find.iconType && steps[index].type !== 'suspend' ? (
+          <Icon type={find.iconType} />
+        ) : (
+          <span>{index + 1}</span>
+        )}
       </div>
     );
   };
 
   renderTitle(data: WorkflowStepItem) {
-    const { name } = data;
-    if (typeof name === 'string' && name.length > 20) {
+    const { name, alias } = data;
+    if (
+      (typeof alias === 'string' && alias.length > 10) ||
+      (typeof name === 'string' && name.length > 10)
+    ) {
       return (
-        <Balloon trigger={<div className="title-long-hidden"> {name}</div>} closable={false}>
-          {name}
+        <Balloon
+          trigger={<div className="title-long-hidden"> {alias || name}</div>}
+          closable={false}
+        >
+          {alias || name}
         </Balloon>
       );
     } else {
-      return <div>{name}</div>;
+      return <div className="margin-right-20 clolor-333">{alias || name}</div>;
     }
   }
 
@@ -102,10 +118,11 @@ class WorkflowStep extends Component<Props> {
     const { activeValue, indexValue } = this.props;
     const currentWorkFlow = activeValue === indexValue ? true : false;
     const isSuspend = data.type === 'suspend' ? true : false;
+    const isFailed = data.phase === 'failed' ? true : false;
     if (isSuspend && currentWorkFlow) {
       return (
         <Balloon
-          className="confirm-wraper"
+          className="step-confirm-wraper margin-right-20"
           popupStyle={{ background: '#fff', color: '#000' }}
           visible={isSuspend}
           cache={true}
@@ -113,31 +130,59 @@ class WorkflowStep extends Component<Props> {
           closable={false}
           align="b"
         >
-          <div>
-            <h5>
+          <div className="step-confirm-content">
+            <div className="step-confirm-title">
               <Translation>Needs review before continuing</Translation>
-            </h5>
+            </div>
             <hr />
-            <div className="margin-bottom-10">
+            <div className="step-confirm-main">
               <Translation>Please select the action you want to perform</Translation>
             </div>
-            <Button size="small" onClick={this.onRollbackApplicationWorkflowRecord}>
-              <Translation>Rollback</Translation>
-            </Button>
-            <Button
-              size="small"
-              className="margin-left-8"
-              onClick={this.onResumeApplicationWorkflowRecord}
-            >
-              <Translation>Continue</Translation>
-            </Button>
-            <Button
-              size="small"
-              className="margin-left-8"
-              onClick={this.onTerminateApplicationWorkflowRecord}
-            >
-              <Translation>Termination</Translation>
-            </Button>
+            <div className="step-confirm-footer">
+              <Button
+                type="secondary"
+                size="small"
+                className="margin-top-5 margin-left-8"
+                onClick={this.onRollbackApplicationWorkflowRecord}
+              >
+                <Translation>Rollback</Translation>
+              </Button>
+
+              <Button
+                type="secondary"
+                size="small"
+                className="margin-top-5 margin-left-8"
+                onClick={this.onTerminateApplicationWorkflowRecord}
+              >
+                <Translation>Termination</Translation>
+              </Button>
+
+              <Button
+                type="primary"
+                size="small"
+                className="margin-top-5 margin-left-8"
+                onClick={this.onResumeApplicationWorkflowRecord}
+              >
+                <Translation>Continue</Translation>
+              </Button>
+            </div>
+          </div>
+        </Balloon>
+      );
+    } else if (isFailed && currentWorkFlow) {
+      return (
+        <Balloon
+          className="step-confirm-wraper"
+          style={{ width: '200px' }}
+          popupStyle={{ background: '#fff', color: '#000' }}
+          visible={isFailed}
+          cache={true}
+          trigger={<div>{this.renderTitle(data)}</div>}
+          closable={false}
+          align="b"
+        >
+          <div className="step-confirm-content">
+            <span style={{ color: 'red' }}>{data.message} </span>
           </div>
         </Balloon>
       );
@@ -163,8 +208,14 @@ class WorkflowStep extends Component<Props> {
     );
   }
 
+  onHiddenSlide() {
+    const { records = [] } = this.props;
+    return records.length === 0 ? 'hiHiddenSlide' : '';
+  }
+
   render() {
-    return <div className="workflow-step-wraper">{this.getWorkFlowStep()}</div>;
+    const isHiddenSlide = this.onHiddenSlide();
+    return <div className={`workflow-step-wraper ${isHiddenSlide}`}>{this.getWorkFlowStep()}</div>;
   }
 }
 

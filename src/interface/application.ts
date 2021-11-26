@@ -227,14 +227,17 @@ export interface WorkflowBase {
   workflowName: string;
   startTime?: string;
   status?: string;
+  version?: string;
   steps?: WorkflowStepItem[];
 }
 
 export interface WorkflowStepItem {
   id: string;
   name: string;
+  alias?: string;
   type: string;
   phase: string;
+  message?: string;
   firstExecuteTime?: string;
   lastExecuteTime?: string;
 }

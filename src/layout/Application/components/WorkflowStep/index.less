@@ -1,11 +1,21 @@
 .workflow-step-wraper {
+  .next-step-item-title {
+    margin-left: 20px;
+  }
   .title-long-hidden {
     display: block;
-    width: 88%;
+    width: 60px;
     overflow: hidden;
+    color: #333;
     white-space: nowrap;
+    text-align: center;
     text-overflow: ellipsis;
     cursor: pointer;
+    // word-break: break-all;
+    // width: 80px;
+    // margin-left:10px;
+    // margin-right:10px;
+    // color: #333;
   }
 
   .succeeded {
@@ -114,12 +124,32 @@
   }
 }
 
-.confirm-wraper::after {
-  width: 0;
-  height: 0;
-  border-color: transparent transparent #694446 transparent;
-  border-style: solid;
-  border-width: 0 21px 21px 21px;
+.hiHiddenSlide {
+  margin: 0 -20px;
+}
+
+.step-confirm-wraper {
+  width: 200px;
+  background: rgb(255, 255, 255);
+  .step-confirm-title {
+    color: rgb(0, 0, 0);
+    font-size: 14px;
+  }
+  .step-confirm-main {
+    margin-top: 10px;
+    color: #595959;
+    font-size: 14px;
+  }
+  .step-confirm-footer {
+    margin: 20px 0 5px 0;
+  }
+}
+
+.step-confirm-wraper::after {
+  background-color: #fff !important;
+  border: 1px solid #ebebeb !important;
+  border-right: none !important;
+  border-bottom: none !important;
 }
 
 .shanshan {
@@ -146,4 +176,8 @@
   100% {
     opacity: 1;
   }
+}
+
+.margin-left-8 {
+  margin-left: 8px;
 }
