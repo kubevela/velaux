@@ -9,6 +9,7 @@ export interface QueryDeliveryTarget {
 
 interface DeliveryTargetState {
   deliveryTargetList: [];
+  deliveryTargets: [];
   deliveryTargetListTotal: number;
 }
 
@@ -33,30 +34,28 @@ interface ResponseGenerator {
   deliveryTargetListTotal?: any;
 }
 
-// type DeliveryTargetType = {
-//   value: string;
-//   label: string;
-// }
-// function getDeliveryTargetList(data: any) {
-//   const deliveryTargets = data.deliveryTargets;
-//   if (!deliveryTargets) {
-//     return [];
-//   }
-//   const list = [];
-//   for (const item of deliveryTargets) {
-//     const deliveryTarget: DeliveryTargetType = {
-//       value : item.name,
-//       label : item.alias || item.name,
-//     };
-//     list.push(deliveryTarget);
-//   }
-//   return list;
-// }
+
+function getDeliveryTargetList(data: any) {
+  const deliveryTargets = data.deliveryTargets;
+  if (!deliveryTargets) {
+    return [];
+  }
+  const list = [];
+  for (const item of deliveryTargets) {
+    const deliveryTarget = {
+      value: item.name,
+      label: item.alias || item.name,
+    };
+    list.push(deliveryTarget);
+  }
+  return list;
+}
 
 const DeliveryTargets: ModelsType = {
   namespace: 'deliveryTarget',
   state: {
     deliveryTargetList: [],
+    deliveryTargets:[],
     deliveryTargetListTotal: 0,
   },
   reducers: {
@@ -71,6 +70,13 @@ const DeliveryTargets: ModelsType = {
         total,
       };
     },
+
+    updateDeliveryTargetList(state: any, { payload }: { payload: {deliveryTargetList: []}}) {
+      return {
+        ...state,
+        deliveryTargets: payload,
+      };
+    },
   },
 
   effects: {
@@ -79,9 +85,15 @@ const DeliveryTargets: ModelsType = {
       { call, put }: { call: any; put: any },
     ) {
       const result: ResponseGenerator = yield call(getDeliveryTarget, action.payload);
-      // const deliveryTargetList = getDeliveryTargetList(result)
       yield put({ type: 'updateDeliveryTargets', payload: result || {} });
     },
+
+    *listTargets(action: any, { call, put }: { call: any; put: any }) {
+      const result: ResponseGenerator = yield call(getDeliveryTarget, action.payload);
+      const deliveryTargetList = getDeliveryTargetList(result);
+      yield put({ type: 'updateDeliveryTargetList', payload: deliveryTargetList || [] });
+    },
+
     *createDeliveryTarget(
       action: { payload: QueryDeliveryTarget; callback: (parasm: any) => void },
       { call }: { call: any; put: any },

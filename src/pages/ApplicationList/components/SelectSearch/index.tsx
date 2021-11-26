@@ -9,7 +9,7 @@ const { Row, Col } = Grid;
 type Props = {
   t: (key: string) => {};
   dispatch: ({}) => {};
-  deliveryTargetList?: []; // 交付目标列表deliveryTargetList
+  deliveryTargetList?: []; 
   namespaceList?: [];
   getApplications: (params: any) => void;
 };

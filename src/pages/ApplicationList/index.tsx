@@ -24,7 +24,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.application};
+  return { ...store.application,...store.deliveryTarget};
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -63,10 +63,9 @@ class Application extends Component<Props, State> {
     });
   };
 
-  // 这个请求不知道有没有问题
   getDeliveryTarget = async () => {
     this.props.dispatch({
-      type: 'application/getDeliveryTarget',
+      type: 'deliveryTarget/listTargets',
       payload: {},
     });
   };

@@ -77,12 +77,6 @@ export default {
         namespaceList: payload,
       };
     },
-    updateDeliveryTargetList(state, { type, payload }) {
-      return {
-        ...state,
-        deliveryTargetList: payload,
-      };
-    },
     updatePoliciesList(state, { type, payload }) {
       return {
         ...state,
@@ -128,11 +122,7 @@ export default {
       const namespaceList = getNamespace(result || {});
       yield put({ type: 'updateNameSpaceList', payload: namespaceList });
     },
-    *getDeliveryTarget(action, { call, put }) {
-      const result = yield call(getDeliveryTarget, action.payload);
-      const deliveryTargetList = getDeliveryTargetList(result);
-      yield put({ type: 'updateDeliveryTargetList', payload: deliveryTargetList || [] });
-    },
+    
     *getApplicationDetail(action, { call, put }) {
       const { appName } = action.payload;
       const result = yield call(getApplicationDetails, { name: appName });
@@ -223,18 +213,4 @@ function getNamespace(data) {
   return list;
 }
 
-function getDeliveryTargetList(data) {
-  const deliveryTargets = data.deliveryTargets;
-  if (!deliveryTargets) {
-    return [];
-  }
-  const list = [];
-  for (const item of deliveryTargets) {
-    const deliveryTarget = {
-      value: item.name,
-      label: item.alias || item.name,
-    };
-    list.push(deliveryTarget);
-  }
-  return list;
-}
+
