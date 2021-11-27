@@ -14,7 +14,6 @@ import { listWorkFlow } from '../api/workflows';
 
 import { getNamespaceList } from '../api/namespace';
 
-import { getDeliveryTarget } from '../api/deliveryTarget';
 
 export default {
   namespace: 'application',
@@ -31,7 +30,6 @@ export default {
     componentDetails: {},
     envbinding: [],
     workflows: [],
-    deliveryTargetList:[],
   },
   reducers: {
     update(state, { type, payload }) {
@@ -122,7 +120,7 @@ export default {
       const namespaceList = getNamespace(result || {});
       yield put({ type: 'updateNameSpaceList', payload: namespaceList });
     },
-    
+
     *getApplicationDetail(action, { call, put }) {
       const { appName } = action.payload;
       const result = yield call(getApplicationDetails, { name: appName });
