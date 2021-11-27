@@ -69,7 +69,7 @@ class SelectSearch extends React.Component<Props, State> {
     const { namespaceValue, deliveryTargetValue, inputValue } = this.state;
     const params = {
       namespace: namespaceValue,
-      cluster: deliveryTargetValue,
+      targetName: deliveryTargetValue,
       query: inputValue,
     };
     this.props.getApplications(params);
