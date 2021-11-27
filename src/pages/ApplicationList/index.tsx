@@ -11,10 +11,10 @@ import { deleteApplicationPlan, getComponentdefinitions } from '../../api/applic
 import type { ApplicationBase } from '../../interface/application';
 
 type Props = {
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   applicationList: ApplicationBase[];
   namespaceList: [];
-  deliveryTargetList?: [];
+  deliveryTargets?: [];
   history: any;
 };
 type State = {
@@ -24,7 +24,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.application,...store.deliveryTarget};
+  return { ...store.application, ...store.deliveryTarget };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -97,7 +97,7 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList, namespaceList, deliveryTargetList:deliveryTargetList, dispatch } = this.props;
+    const { applicationList, namespaceList, deliveryTargets, dispatch } = this.props;
     const { showAddApplication, componentDefinitions, isLoading } = this.state;
     return (
       <div>
@@ -112,8 +112,7 @@ class Application extends Component<Props, State> {
 
         <SelectSearch
           namespaceList={namespaceList}
-          // clusterList={clusterList}
-          deliveryTargetList={ deliveryTargetList}
+          deliveryTargetList={deliveryTargets}
           dispatch={dispatch}
           getApplications={(params: any) => {
             this.getApplications(params);
@@ -123,7 +122,7 @@ class Application extends Component<Props, State> {
         <Loading visible={isLoading} fullScreen>
           <CardContend
             applications={applicationList}
-            editAppPlan={() => {}}
+            editAppPlan={() => { }}
             deleteAppPlan={this.onDeleteAppPlan}
           />
         </Loading>
