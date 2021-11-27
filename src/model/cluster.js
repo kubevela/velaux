@@ -27,7 +27,9 @@ export default {
   effects: {
     *getClusterList(action, { call, put }) {
       const result = yield call(getClusterList, action.payload);
-      yield put({ type: 'updateClusterList', payload: result.clusters || [] });
+      if (result) {
+        yield put({ type: 'updateClusterList', payload: result.clusters || [] });
+      }
     },
     *createCluster(action, { call, put }) {
       const result = yield call(createCluster, action.payload);

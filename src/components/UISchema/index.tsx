@@ -12,6 +12,7 @@ import CPUNumber from '../../extends/CPUNumber';
 import MemoryNumber from '../../extends/MemoryNumber';
 import SwitchComponent from '../../extends/Switch';
 import InnerGroup from '../../extends/InnerGroup';
+import K8sObjectsCode from '../../extends/K8sObjectsCode';
 import type { Rule } from '@alifd/field';
 import KV from '../../extends/KV';
 import './index.less';
@@ -445,6 +446,28 @@ class UISchema extends Component<Props, State> {
           );
         }
         return <div />;
+      case 'K8sObjectsCode':
+        return (
+          <Form.Item
+            required={required}
+            label={param.label}
+            help={param.description}
+            disabled={param.disable}
+            key={param.jsonKey}
+          >
+            <K8sObjectsCode
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: [
+                  {
+                    required: param.validate.required,
+                    message: 'Please enter a valid kubernetes resource yaml code',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        );
     }
   };
 

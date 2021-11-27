@@ -81,7 +81,9 @@ class CloudServiceDialog extends React.Component<Props, State> {
       };
       getCloudClustersList(params)
         .then((re) => {
-          this.setState({ choseInput: false, cloudClusters: re.clusters, btnLoading: false });
+          if (re) {
+            this.setState({ choseInput: false, cloudClusters: re.clusters, btnLoading: false });
+          }
         })
         .catch((err) => {
           this.setState({ btnLoading: false });

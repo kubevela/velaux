@@ -4,7 +4,6 @@ import { addAppDialog } from '../../constants';
 import { UPLOADYMALFILE } from '../../../../constants';
 import NameSpaceForm from '../GeneralConfig/namespace-form';
 import DefinitionCode from '../../../../components/DefinitionCode';
-import defineTheme from '../../../../components/DefinitionCode/theme';
 import { checkName } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 const { Row, Col } = Grid;
@@ -179,7 +178,6 @@ class YmalConfig extends React.Component<Props> {
                     containerId="guide-code"
                     language={'yaml'}
                     readOnly={false}
-                    defineTheme={defineTheme}
                     {...init('kubeConfig')}
                     value={valueInfo}
                     ref={this.DefinitionCodeRef}
