@@ -55,9 +55,9 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     if (this.diagramMaker) {
       this.diagramMaker.destroy();
     }
-    const platformWidth = this.container.clientWidth;
-    const platformHeight = 300;
     const { data, edit } = this.props;
+    const containerWidth = this.container.clientWidth;
+    const nodeWidth = Object.keys(data.nodes).length * 200 + 300;
     const basicePlatformConfig = {
       panels: WORKFLOW_COMMON_PANNEL,
       workspace: {
@@ -67,12 +67,12 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
         },
         scale: 1,
         canvasSize: {
-          width: Object.keys(data.nodes).length * 240 + 100,
-          height: platformHeight,
+          width: containerWidth > nodeWidth ? containerWidth : nodeWidth,
+          height: 300,
         },
         viewContainerSize: {
-          width: platformWidth,
-          height: platformHeight,
+          width: containerWidth > nodeWidth ? containerWidth : nodeWidth,
+          height: 300,
         },
       },
       editor: {
