@@ -40,7 +40,10 @@ class TableList extends Component<Props, State> {
         dataIndex: 'status',
         cell: (v: string) => {
           const findObj = statusList.find((item) => item.value === v);
-          return <span>{findObj && findObj.label}</span>;
+          if (findObj) {
+            return <Translation>{findObj.label}</Translation>;
+          }
+          return '';
         },
       },
       {
@@ -107,7 +110,7 @@ class TableList extends Component<Props, State> {
           loading={false}
           emptyContent={<Empty />}
         >
-          {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+          {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
         </Table>
       </div>
     );

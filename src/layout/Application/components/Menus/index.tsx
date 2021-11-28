@@ -27,29 +27,29 @@ class Menu extends Component<Props, any> {
       configPage: [
         {
           key: 'config',
-          lable: <Translation>Application Config</Translation>,
+          lable: <Translation>Properties&Traits</Translation>,
           to: `/applications/${appName}/config`,
         },
         {
           key: 'workflows',
-          lable: <Translation>Application Workflow</Translation>,
+          lable: <Translation>Workflows</Translation>,
           to: `/applications/${appName}/workflows`,
         },
         {
           key: 'revisions',
-          lable: <Translation>Application Revision</Translation>,
+          lable: <Translation>Revisions</Translation>,
           to: `/applications/${appName}/revisions`,
         },
       ],
       envPage: [
         {
           key: 'instances',
-          lable: <Translation>Application Instances</Translation>,
+          lable: <Translation>Instances</Translation>,
           to: `/applications/${appName}/envbinding/${envName}/instances`,
         },
         {
           key: 'monitor',
-          lable: <Translation>Application Monitor</Translation>,
+          lable: <Translation>Monitor</Translation>,
           to: `/applications/${appName}/envbinding/${envName}/monitor`,
         },
       ],

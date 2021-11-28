@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Grid, Form, Input, Field, Upload, Icon, Message } from '@b-design/ui';
-import { addAppDialog } from '../../constants';
 import { UPLOADYMALFILE } from '../../../../constants';
 import NameSpaceForm from '../GeneralConfig/namespace-form';
 import DefinitionCode from '../../../../components/DefinitionCode';
@@ -83,8 +82,7 @@ class YmalConfig extends React.Component<Props> {
   }
 
   render() {
-    const { t, namespaceList = [] } = this.props;
-    const { name, describe, namePlaceHold, describePlaceHold } = addAppDialog;
+    const { namespaceList = [] } = this.props;
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
@@ -94,9 +92,6 @@ class YmalConfig extends React.Component<Props> {
         span: 20,
       },
     };
-
-    const namePlacehold = t(namePlaceHold).toString();
-    const describePlacehold = t(describePlaceHold).toString();
     const init = this.field.init;
     const values: { kubeConfig: string } = this.field.getValues();
     const valueInfo = values.kubeConfig || '';
@@ -106,12 +101,15 @@ class YmalConfig extends React.Component<Props> {
         <Form {...formItemLayout} field={this.field}>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={name} labelTextAlign="left" required={true}>
+              <FormItem
+                label={<Translation>Name</Translation>}
+                labelTextAlign="left"
+                required={true}
+              >
                 <Input
                   htmlType="name"
                   name="name"
                   maxLength={32}
-                  placeholder={namePlacehold}
                   {...init('name', {
                     rules: [
                       {
@@ -147,10 +145,9 @@ class YmalConfig extends React.Component<Props> {
               <NameSpaceForm field={this.field} namespaceList={namespaceList} />
             </Col>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={describe}>
+              <FormItem label={<Translation>Description</Translation>}>
                 <Input
                   name="description"
-                  placeholder={describePlacehold}
                   {...init('description', {
                     rules: [
                       {

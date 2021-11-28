@@ -12,11 +12,11 @@ export const clustGroup = [
   { value: 'cluster3', label: 'cluster3' },
 ];
 export const addClustDialog = {
-  name: '集群名称',
-  namePlaceHold: '集群名称',
-  describe: '集群说明',
-  describePlaceHold: 'description',
-  kubeAPI: 'KubeAPI 通信密钥',
+  name: <Translation>Name</Translation>,
+  namePlaceHold: <Translation>Input Cluster Name</Translation>,
+  describe: <Translation>Description</Translation>,
+  describePlaceHold: <Translation>Input Cluster Description</Translation>,
+  kubeAPI: <Translation>KubeConfig</Translation>,
 };
 
 export const workflowSet = 'Workflow设置';

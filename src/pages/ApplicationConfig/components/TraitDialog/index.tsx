@@ -175,12 +175,12 @@ class TraitDialog extends React.Component<Props, State> {
               >
                 <Select
                   className="select"
-                  placeholder={t('Please chose').toString()}
+                  placeholder={t('Please select').toString()}
                   {...init(`type`, {
                     rules: [
                       {
                         required: true,
-                        message: 'Please chose',
+                        message: 'Please select',
                       },
                     ],
                   })}

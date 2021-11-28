@@ -76,9 +76,9 @@ class SelectSearch extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { t } = this.props;
-    const projectPlacehole = t('Project Screening').toString();
-    const clusterPlacehole = t('Cluster Screening').toString();
-    const appPlacehole = t('Application name, description and search').toString();
+    const projectPlacehole = t('Filter by project.').toString();
+    const clusterPlacehole = t('Filter by target.').toString();
+    const appPlacehole = t('Filter by name, description').toString();
     const { namespaceValue, clusterValue, inputValue } = this.state;
     const { clusterList, namespaceList } = this.props;
     const clusterDadasource = (clusterList || []).map((item: { name: string }) => ({

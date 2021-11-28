@@ -1,7 +1,6 @@
 import React from 'react';
 import { Grid, Field, Form, Select, Message, Button } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-import { NEW_APPLICATION_DELIVERY_PLAN } from '../../constants';
 import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
 import GeneralConfig from '../GeneralConfig';
@@ -208,7 +207,7 @@ class AppDialog extends React.Component<Props, State> {
     };
     return (
       <DrawerWithFooter
-        title={NEW_APPLICATION_DELIVERY_PLAN}
+        title={<Translation>New Application</Translation>}
         placement="right"
         width={800}
         onClose={onClose}
@@ -231,7 +230,7 @@ class AppDialog extends React.Component<Props, State> {
                 <FormItem
                   label={
                     <Translation className="font-size-14 font-weight-bold">
-                      Deployment type
+                      Deployment Type
                     </Translation>
                   }
                   required={true}
@@ -248,7 +247,7 @@ class AppDialog extends React.Component<Props, State> {
                       rules: [
                         {
                           required: true,
-                          message: 'Please chose',
+                          message: 'Please select',
                         },
                       ],
                     })}
@@ -262,7 +261,7 @@ class AppDialog extends React.Component<Props, State> {
                 <FormItem
                   label={
                     <Translation className="font-size-14 font-weight-bold">
-                      Environmental planning
+                      Environment Plan
                     </Translation>
                   }
                   required={true}

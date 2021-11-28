@@ -122,9 +122,9 @@ class DeliveryTargetList extends React.Component<Props, State> {
     return (
       <div>
         <ListTitle
-          title="Delivery Target Manager"
+          title="Targets"
           subTitle="Define the delivery target for an application"
-          addButtonTitle="Add DeliveryTarget"
+          addButtonTitle="New Target"
           addButtonClick={() => {
             this.setState({ visibleDelivery: true, deliveryTargetItem: undefined });
           }}

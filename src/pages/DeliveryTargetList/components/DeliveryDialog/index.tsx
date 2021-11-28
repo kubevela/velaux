@@ -321,7 +321,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                         <Select
                           className="select"
                           defaultValue="alibaba"
-                          placeholder={t('Please chose').toString()}
+                          placeholder={t('Please select').toString()}
                           {...init(`var_providerName`)}
                           dataSource={[]}
                         />

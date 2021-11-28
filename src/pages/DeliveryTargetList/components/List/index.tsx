@@ -113,7 +113,7 @@ class TableList extends Component<Props> {
           hasBorder={false}
           loading={false}
         >
-          {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+          {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
         </Table>
       </div>
     );

@@ -130,7 +130,7 @@ class ApplicationHeader extends Component<Props, State> {
             <Breadcrumb separator="/">
               <Breadcrumb.Item>
                 <Link to="/applications">
-                  <Translation>Application Manager</Translation>
+                  <Translation>Applications</Translation>
                 </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
