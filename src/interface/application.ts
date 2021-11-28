@@ -9,7 +9,7 @@ export interface ApplicationDetail {
   updateTime?: string;
   icon?: string;
   labels?: {};
-  gatewayRule: null;
+  applicationType: 'cloud' | 'common';
   policies: string[];
   resourceInfo: {
     componentNum: number;

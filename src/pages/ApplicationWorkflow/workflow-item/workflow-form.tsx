@@ -127,7 +127,7 @@ class WorkflowForm extends Component<Props, State> {
     const { init } = this.field;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
-    const { t, closeDrawer } = this.props;
+    const { t, closeDrawer, data } = this.props;
     const { definitionDetail } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
@@ -158,7 +158,7 @@ class WorkflowForm extends Component<Props, State> {
         <Form field={this.field}>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Workflow Type</Translation>} required>
+              <FormItem label={<Translation>Workflow Type</Translation>} required disabled>
                 <Select
                   className="select"
                   placeholder={t('Please select').toString()}
@@ -189,6 +189,7 @@ class WorkflowForm extends Component<Props, State> {
                   maxLength={32}
                   placeholder={t('Please enter').toString()}
                   {...init('name', {
+                    initValue: data.consumerData?.type,
                     rules: [
                       {
                         required: true,

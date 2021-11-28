@@ -133,7 +133,8 @@ function transData(workflowList = [], appName) {
 }
 
 export function convertWorkflowStep(workflowStep, appName, initPosition = 32) {
-  const nodeWidth = 200;
+  const nodeWidth = 140;
+  const nodeHeight = 40;
   const nodeInterval = 80;
   const nodes = {};
   const edges = {};
@@ -164,11 +165,11 @@ export function convertWorkflowStep(workflowStep, appName, initPosition = 32) {
       nodes[item.name].diagramMakerData = {
         position: {
           x: position,
-          y: 120,
+          y: 130,
         },
         size: {
           width: nodeWidth,
-          height: 40,
+          height: nodeHeight,
         },
         selected: false,
       };

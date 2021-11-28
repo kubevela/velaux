@@ -6,7 +6,7 @@ export const WORKFLOW_COMMON_PANNEL = {
   p1: {
     id: 'p1',
     position: {
-      x: 1220,
+      x: 10,
       y: 10,
     },
     size: {

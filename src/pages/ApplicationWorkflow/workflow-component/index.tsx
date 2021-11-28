@@ -141,7 +141,7 @@ class WorkFlowComponent extends Component<Props, State> {
     );
     const { init } = this.field;
     const newData = _.cloneDeep(data);
-    convertWorkflowStep(newData, data.appName, option.edit ? 300 : 32);
+    convertWorkflowStep(newData, data.appName, option.edit ? 250 : 32);
     const workflowData = newData.data || { nodes: {}, edges: {} };
     return (
       <div

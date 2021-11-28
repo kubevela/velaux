@@ -36,7 +36,7 @@ class WorkFlowPannel extends Component<Props> {
                 data-event-target={true}
                 data-draggable={true}
                 data-type={DiagramMakerComponents.POTENTIAL_NODE}
-                data-id={'both'}
+                data-id={item.name}
               >
                 {item.name}
               </div>

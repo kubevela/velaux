@@ -8,6 +8,7 @@ type Props = {
   envName: string;
   appName: string;
   currentPath: string;
+  applicationType?: 'cloud' | 'common';
 };
 
 class Menu extends Component<Props, any> {
@@ -21,7 +22,7 @@ class Menu extends Component<Props, any> {
   componentDidMount() {}
 
   render() {
-    const { envName, appName, currentPath } = this.props;
+    const { envName, appName, currentPath, applicationType } = this.props;
     const isEnvPage = envName != undefined;
     const menuItems = {
       configPage: [
@@ -47,13 +48,15 @@ class Menu extends Component<Props, any> {
           lable: <Translation>Instances</Translation>,
           to: `/applications/${appName}/envbinding/${envName}/instances`,
         },
-        {
-          key: 'monitor',
-          lable: <Translation>Monitor</Translation>,
-          to: `/applications/${appName}/envbinding/${envName}/monitor`,
-        },
       ],
     };
+    if (applicationType == 'common') {
+      menuItems.envPage.push({
+        key: 'monitor',
+        lable: <Translation>Monitor</Translation>,
+        to: `/applications/${appName}/envbinding/${envName}/monitor`,
+      });
+    }
     let activeItems = menuItems.configPage;
     if (isEnvPage) {
       activeItems = menuItems.envPage;

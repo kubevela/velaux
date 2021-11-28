@@ -5,6 +5,7 @@ import Header from './components/Header';
 import EnvTabs from './components/EnvTabs';
 import Menus from './components/Menus';
 import './index.less';
+import type { ApplicationDetail } from '../../interface/application';
 
 const { Row } = Grid;
 
@@ -12,6 +13,7 @@ interface Props {
   match: any;
   dispatch: any;
   location: any;
+  applicationDetail?: ApplicationDetail;
 }
 @connect((store: any) => {
   return { ...store.application };
@@ -93,7 +95,7 @@ class ApplicationLayout extends Component<Props, any> {
 
   render() {
     const { loading, activeName } = this.state;
-    const { children, dispatch } = this.props;
+    const { children, dispatch, applicationDetail } = this.props;
     const {
       path,
       params: { appName, envName },
@@ -116,7 +118,12 @@ class ApplicationLayout extends Component<Props, any> {
         />
         <Row className="padding16 main">
           <div className="menu">
-            <Menus currentPath={path} appName={appName} envName={envName} />
+            <Menus
+              currentPath={path}
+              applicationType={applicationDetail?.applicationType}
+              appName={appName}
+              envName={envName}
+            />
           </div>
           <div className="content">{children}</div>
         </Row>

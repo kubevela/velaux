@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Message } from '@b-design/ui';
-import _ from 'lodash';
 import type {
   DiagramMakerData,
   DiagramMakerNode,
@@ -15,6 +14,7 @@ import {
   VisibleConnectorTypes,
   Layout,
   WorkflowLayoutDirection,
+  NodeActions,
 } from 'diagram-maker';
 import WorkFlowNode from '../workflow-node';
 import WorkFlowEdge from '../workflow-edge';
@@ -27,6 +27,7 @@ import 'diagram-maker/dist/diagramMaker.css';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import type { NodeItem } from '../workflow-component';
+import type { Definition } from '../../../interface/addon';
 
 type WorkFlowItemProps = {
   workflowId: string;
@@ -66,7 +67,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
         },
         scale: 1,
         canvasSize: {
-          width: Object.keys(data.nodes).length * 280 + 100,
+          width: Object.keys(data.nodes).length * 240 + 100,
           height: platformHeight,
         },
         viewContainerSize: {
@@ -78,12 +79,23 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
         mode: edit ? EditorMode.DRAG : EditorMode.READ_ONLY,
       },
     };
-
     const initialData: DiagramMakerData<WorkFlowNodeType, WorkFlowEdgeType> = Object.assign(
       {},
       data,
       basicePlatformConfig,
     );
+    const { workFlowDefinitions } = this.props;
+    const nodeTypeConfigs: any = {};
+    workFlowDefinitions.map((definition: Definition) => {
+      nodeTypeConfigs[definition.name] = {
+        size: {
+          width: 140,
+          height: 40,
+        },
+        definition: definition,
+        visibleConnectorTypes: VisibleConnectorTypes.BOTH,
+      };
+    });
     this.diagramMaker = new DiagramMaker(
       this.container,
       {
@@ -115,37 +127,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
             p2: this.renderTopPannel,
           },
         },
-        nodeTypeConfig: {
-          both: {
-            size: {
-              width: 120,
-              height: 40,
-            },
-            visibleConnectorTypes: VisibleConnectorTypes.BOTH,
-          },
-          start: {
-            size: {
-              width: 120,
-              height: 40,
-            },
-            visibleConnectorTypes: VisibleConnectorTypes.OUTPUT_ONLY,
-          },
-          end: {
-            size: {
-              width: 120,
-              height: 40,
-            },
-            visibleConnectorTypes: VisibleConnectorTypes.INPUT_ONLY,
-          },
-          switch: {
-            size: {
-              width: 80,
-              height: 80,
-            },
-            connectorPlacementOverride: ConnectorPlacement.LEFT_RIGHT,
-            visibleConnectorTypes: VisibleConnectorTypes.NONE,
-          },
-        },
+        nodeTypeConfig: nodeTypeConfigs,
         actionInterceptor: (action: any, dispatch, getState) => {
           const { edges } = getState();
           if (action.type == 'EDGE_CREATE' && action.payload) {
@@ -165,7 +147,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
           dispatch(action);
           if (action.type == 'NODE_CREATE') {
             this.setState({
-              currentSelectedNodeData: action.payload,
+              currentSelectedNodeData: { consumerData: { type: action.payload.typeId } },
               visible: true,
             });
           }
@@ -181,21 +163,6 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
               const newNodes = Object.assign({}, state.nodes, newNode);
               const newState = Object.assign({}, state, { nodes: newNodes });
               return newState;
-            case 'DELETENODE':
-              const { edges } = state;
-              const items: string[] = [];
-              Object.keys(edges).forEach((key) => {
-                const obj = edges[key];
-                if (obj.dest == action.payload.id || obj.src == action.payload.id) {
-                  items.push(key);
-                }
-              });
-              const newstate = Object.assign({}, state, {
-                nodes: _.omit(state.nodes, action.payload.id),
-                edges: _.omit(state.edges, items),
-              });
-
-              return newstate;
             default:
               return state;
           }
@@ -354,7 +321,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
 
   onDelete = (values: NodeItem) => {
     this.diagramMaker.store.dispatch({
-      type: 'DELETENODE',
+      type: NodeActions.NODE_DELETE,
       payload: {
         id: values.id,
       },
