@@ -25,7 +25,7 @@
   "register": "注册",
   "Configuration saving, please wait": "配置保存中，请稍后",
   "Application Center": "应用中心",
-  "Resource Integration": "资源集成",
+  "Integration Center": "资源集成",
   "Capability Center": "能力中心",
   "Applications": "应用管理",
   "Clusters": "集群管理",
@@ -56,7 +56,7 @@
   "Deployment update": "部署/更新",
   "Deployed": "已部署",
   "View details": "查看详情",
-  "Join New Cluster": "连接新集群",
+  "Connect Existing Cluster": "连接已有集群",
   "Detach": "分离集群",
   "Addon in management": "插件管理",
   "Addon in extension": "统一管理服务类型扩展、集群治理能力扩展和系统插件扩展等插件, 用户可获取社区丰富的扩展能力",
@@ -137,7 +137,7 @@
   "Description": "描述",
   "Add DeliveryTarget": "新增交付目标",
   "Edit DeliveryTarget": "编辑交付目标",
-  "Define the delivery target for an application": "定义应用的交付目标, 其包括了交付的目标集群或目标云服务提供商信息",
+  "Define the targets that applications would deliver to": "定义应用的交付目标, 其包括了交付的目标集群或目标云服务提供商信息",
   "Cluster": "集群",
   "Cloud Service Provider": "云服务商",
   "Region": "区域",
@@ -175,5 +175,5 @@
   "View history": "查看历史记录",
   "Set as default": "设置为默认",
   "Save": "保存",
-  "Centrally deliver and manage your applications.": "统一交付和管理您的应用。"
+  "Deploy and manage all your applications": "统一交付和管理您的应用。"
 }

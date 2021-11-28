@@ -152,7 +152,7 @@ class AddClustDialog extends React.Component<Props, State> {
           editMode ? (
             <Translation>Edit Cluster Config</Translation>
           ) : (
-            <Translation>Join New Cluster</Translation>
+            <Translation>Connect Existing Cluster</Translation>
           )
         }
         autoFocus={true}

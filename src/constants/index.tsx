@@ -1,7 +1,7 @@
 import React from 'react';
 import Translation from '../components/Translation';
 
-export const addCluster = <Translation>Join New Cluster</Translation>;
+export const addCluster = <Translation>Connect Existing Cluster</Translation>;
 export const editCluster = <Translation>Edit Cluster</Translation>;
 export const clustTitle = <Translation>Cluster Management</Translation>;
 export const clustSubTitle = <Translation>Introduction to cluster management</Translation>;
