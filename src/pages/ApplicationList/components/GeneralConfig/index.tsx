@@ -3,7 +3,6 @@ import type { Field } from '@b-design/ui';
 import { Grid, Form, Input } from '@b-design/ui';
 import NameSpaceForm from './namespace-form';
 import type EnvPlan from '../../../../extends/EnvPlan';
-import { addAppDialog } from '../../constants';
 import { checkName } from '../../../../utils/common';
 import './index.less';
 import Translation from '../../../../components/Translation';
@@ -37,8 +36,7 @@ class GeneralConfig extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { t, namespaceList = [] } = this.props;
-    const { namePlaceHold, describePlaceHold } = addAppDialog;
+    const { namespaceList = [] } = this.props;
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
@@ -48,9 +46,6 @@ class GeneralConfig extends React.Component<Props, State> {
         span: 20,
       },
     };
-
-    const namePlacehold = t(namePlaceHold).toString();
-    const describePlacehold = t(describePlaceHold).toString();
     const init = this.props.field.init;
 
     return (
@@ -59,7 +54,7 @@ class GeneralConfig extends React.Component<Props, State> {
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
               <FormItem
-                label={<Translation>App Name</Translation>}
+                label={<Translation>Application Name</Translation>}
                 labelTextAlign="left"
                 required={true}
               >
@@ -67,7 +62,6 @@ class GeneralConfig extends React.Component<Props, State> {
                   htmlType="name"
                   name="name"
                   maxLength={32}
-                  placeholder={namePlacehold}
                   {...init('name', {
                     rules: [
                       {
@@ -81,7 +75,7 @@ class GeneralConfig extends React.Component<Props, State> {
               </FormItem>
             </Col>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>App alias</Translation>}>
+              <FormItem label={<Translation>Application Alias</Translation>}>
                 <Input
                   name="alias"
                   placeholder={'Give your app a more recognizable name'}
@@ -100,10 +94,9 @@ class GeneralConfig extends React.Component<Props, State> {
           </Row>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>App descrition</Translation>}>
+              <FormItem label={<Translation>Application Description</Translation>}>
                 <Input
                   name="description"
-                  placeholder={describePlacehold}
                   {...init('description', {
                     rules: [
                       {

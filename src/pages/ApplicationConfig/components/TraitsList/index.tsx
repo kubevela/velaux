@@ -65,9 +65,9 @@ class TraitsList extends Component<Props> {
             <Empty
               message={
                 <span>
-                  <Translation>No Trait ,</Translation>
+                  <Translation>No Traits, </Translation>
                   <a onClick={onAdd}>
-                    <Translation>Go add</Translation>
+                    <Translation>New</Translation>
                   </a>
                 </span>
               }

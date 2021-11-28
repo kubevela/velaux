@@ -11,7 +11,6 @@ import {
   Icon,
   Loading,
 } from '@b-design/ui';
-import { addCluster, editCluster, addClustDialog, UPLOADYMALFILE } from '../../../../constants';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import { checkName } from '../../../../utils/common';
 import { getClusterDetails, updateCluster } from '../../../../api/cluster';
@@ -134,17 +133,6 @@ class AddClustDialog extends React.Component<Props, State> {
   render() {
     const { visible, editClusterName } = this.props;
     const { editMode, cluster } = this.state;
-    const {
-      name,
-      alias,
-      describe,
-      namePlaceHold,
-      aliasPlaceHold,
-      describePlaceHold,
-      kubeAPI,
-      dashboardURL,
-      dashboarPlaceHold,
-    } = addClustDialog;
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
@@ -160,7 +148,13 @@ class AddClustDialog extends React.Component<Props, State> {
     return (
       <Dialog
         className={'commonDialog'}
-        title={editMode ? editCluster : addCluster}
+        title={
+          editMode ? (
+            <Translation>Edit Cluster Config</Translation>
+          ) : (
+            <Translation>Join New Cluster</Translation>
+          )
+        }
         autoFocus={true}
         visible={visible}
         onOk={this.onOk}
@@ -174,11 +168,10 @@ class AddClustDialog extends React.Component<Props, State> {
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={name} required>
+                <FormItem label={<Translation>Name</Translation>} required>
                   <Input
                     name="name"
                     disabled={editMode}
-                    placeholder={namePlaceHold}
                     {...init('name', {
                       initValue: cluster.name,
                       rules: [
@@ -193,10 +186,9 @@ class AddClustDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={alias}>
+                <FormItem label={<Translation>Alias</Translation>}>
                   <Input
                     name="alias"
-                    placeholder={aliasPlaceHold}
                     {...init('alias', {
                       initValue: cluster.alias,
                       rules: [
@@ -213,11 +205,10 @@ class AddClustDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={describe}>
+                <FormItem label={<Translation>Description</Translation>}>
                   <Input
                     defaultValue={cluster.description}
                     name="description"
-                    placeholder={describePlaceHold}
                     {...init('description', {
                       initValue: cluster.description,
                       rules: [
@@ -231,10 +222,9 @@ class AddClustDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={dashboardURL}>
+                <FormItem label={<Translation>Dashboard URL</Translation>}>
                   <Input
                     name="dashboardURL"
-                    placeholder={dashboarPlaceHold}
                     {...init('dashboardURL', {
                       initValue: cluster.dashboardURL,
                       rules: [
@@ -251,11 +241,11 @@ class AddClustDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={kubeAPI} labelAlign="top">
+                <FormItem label={<Translation>KubeConfig</Translation>} labelAlign="top" required>
                   <Upload request={this.customRequest}>
                     <Button text type="normal" className="padding-left-0">
                       <Icon type="cloudupload" />
-                      {UPLOADYMALFILE}
+                      <Translation>Upload Config File</Translation>
                     </Button>
                   </Upload>
 
@@ -266,6 +256,12 @@ class AddClustDialog extends React.Component<Props, State> {
                       readOnly={false}
                       {...init('kubeConfig', {
                         initValue: cluster.kubeConfig,
+                        rules: [
+                          {
+                            required: true,
+                            message: <Translation>Please upload or edit kube config</Translation>,
+                          },
+                        ],
                       })}
                       value={valueInfo}
                       ref={this.DefinitionCodeRef}

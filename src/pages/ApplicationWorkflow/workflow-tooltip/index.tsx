@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import { If } from 'tsx-control-statements/components';
+import Translation from '../../../components/Translation';
 import './index.less';
 
 type Props = {
@@ -34,22 +35,22 @@ class WorkFlowToolTip extends Component<Props, State> {
         <If condition={edit}>
           <div className="tip-btn-container">
             <div className="tip-btn" onClick={zoomOut}>
-              缩小
+              <Translation>ZoomOut</Translation>
             </div>
             <div className="tip-btn" onClick={zoomIn}>
-              放大
+              <Translation>ZoomIn</Translation>
             </div>
             <div className="tip-btn" onClick={fit}>
-              恢复缩放
+              <Translation>RestoreZoom</Translation>
             </div>
             <div className="tip-btn" onClick={autoLayout}>
-              自动布局
+              <Translation>AutoLayout</Translation>
             </div>
             <div className="tip-btn" onClick={undo}>
-              撤销
+              <Translation>Revoke</Translation>
             </div>
             <div className="tip-btn" onClick={redo}>
-              重做
+              <Translation>Redo</Translation>
             </div>
           </div>
         </If>

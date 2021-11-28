@@ -85,9 +85,9 @@ class Cluster extends React.Component<Props, State> {
     return (
       <div>
         <Title
-          title="Cluster management"
-          subTitle="Introduction to cluster management"
-          addButtonTitle="Cluster Join"
+          title="Clusters"
+          subTitle="Join the Kubernetes cluster, which can be self-built or provided by a cloud vendor."
+          addButtonTitle="Join New Cluster"
           addButtonClick={() => {
             this.setState({ showAddCluster: true });
           }}
@@ -99,7 +99,7 @@ class Cluster extends React.Component<Props, State> {
                 this.setState({ showAddCloudCluster: true });
               }}
             >
-              <Translation>Add from cloud service</Translation>
+              <Translation>New From Cloud</Translation>
             </Button>,
           ]}
         />

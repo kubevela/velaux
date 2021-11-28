@@ -77,7 +77,7 @@ function EnvItem(props: EnvPlanParams) {
           </Form.Item>
         </Col>
         <Col span={10} style={{ padding: '0 8px' }}>
-          <Form.Item required label={<Translation>Target Names</Translation>}>
+          <Form.Item required label={<Translation>Targets</Translation>}>
             <Select
               className="select"
               mode="multiple"
@@ -86,7 +86,7 @@ function EnvItem(props: EnvPlanParams) {
                 rules: [
                   {
                     required: true,
-                    message: 'Please chose',
+                    message: 'Please select',
                   },
                 ],
               })}
@@ -136,7 +136,10 @@ class EnvPlan extends React.Component<Props, State> {
         initValues.push({ key: Date.now().toString(), value: item });
       });
     } else {
-      initValues.push({ key: Date.now().toString(), value: { name: 'dev', alias: '开发环境' } });
+      initValues.push({
+        key: Date.now().toString(),
+        value: { name: 'dev', alias: 'Development Environment' },
+      });
     }
     this.state = {
       envList: initValues,
@@ -166,13 +169,11 @@ class EnvPlan extends React.Component<Props, State> {
   removeEnvPlanItem = (key: string) => {
     const { envList } = this.state;
     envList.forEach((item, i) => {
-      // 数据移除
       if (item.key === key) {
         envList.splice(i, 1);
       }
     });
     ENVPLAN_KEY_LIST.forEach((_key) => {
-      // 移除表单校验
       this.field.remove(`${key}-${_key}`);
     });
     this.setState({
@@ -239,7 +240,7 @@ class EnvPlan extends React.Component<Props, State> {
         </div>
         <div className="env-plan-option">
           <Button onClick={this.addEnvPlanItem} type="secondary">
-            添加环境规划
+            <Translation>New Environment Plan</Translation>
           </Button>
         </div>
       </div>

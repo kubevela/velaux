@@ -91,7 +91,7 @@ class TabsContent extends Component<Props, State> {
                     this.setState({ visibleEnvPlan: true });
                   }}
                 >
-                  <Translation>Add Environment</Translation>
+                  <Translation>New Environment</Translation>
                 </a>
               </div>
             </Col>

@@ -181,11 +181,18 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       },
       {
         key: 'clusterName',
-        title: <Translation>Delivery Target</Translation>,
+        title: <Translation>Target</Translation>,
         dataIndex: 'cluster',
         cell: (v: string, index: number, record: PodBase) => {
           const target = getTarget(record.cluster + '-' + record.metadata.namespace);
-          return <span>{target?.alias || target?.name}</span>;
+          if (target) {
+            return <span>{target?.alias || target?.name}</span>;
+          }
+          return (
+            <span>
+              {record.cluster}/{record.metadata.namespace}
+            </span>
+          );
         },
       },
       {
@@ -337,7 +344,6 @@ class ApplicationInstanceList extends React.Component<Props, State> {
             this.updateQuery(targetName);
           }}
           refresh={() => {
-            this.loadAppPods();
             this.loadApplicationStatus();
           }}
         />

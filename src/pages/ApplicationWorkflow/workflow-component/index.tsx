@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dialog, Dropdown, Icon, Input, Menu, Form, Field, Message } from '@b-design/ui';
+import { Dialog, Dropdown, Icon, Input, Menu, Form, Field, Message, Grid } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import WorkFlowItem from '../workflow-item';
 import { checkName } from '../../../utils/common';
@@ -7,6 +7,8 @@ import type { WorkFlowData, WorkFlowOption } from '../entity';
 import { deleteWorkFlow } from '../../../api/workflows';
 import Translation from '../../../components/Translation';
 import './index.less';
+
+const { Col, Row } = Grid;
 
 type Props = {
   getWorkflow: () => void;
@@ -125,10 +127,10 @@ class WorkFlowComponent extends Component<Props, State> {
     const menu = (
       <Menu>
         <Menu.Item>
-          <Translation>View history</Translation>
+          <Translation>View History</Translation>
         </Menu.Item>
         <Menu.Item>
-          <Translation>Set as default</Translation>
+          <Translation>Set as Default</Translation>
         </Menu.Item>
         <Menu.Item onClick={() => this.deleteWorkflow(data.name)}>
           <Translation>Remove</Translation>
@@ -152,26 +154,34 @@ class WorkFlowComponent extends Component<Props, State> {
             <If condition={option.edit}>
               <div className="workflow-description">
                 <Form field={this.field} inline>
-                  <Form.Item required label={<Translation>Workflow Name</Translation>}>
-                    <Input
-                      {...init('name', {
-                        initValue: data.name,
-                        rules: [
-                          {
-                            required: true,
-                            pattern: checkName,
-                            message: 'Please enter a valid workflow name',
-                          },
-                        ],
-                      })}
-                    />
-                  </Form.Item>
-                  <Form.Item label={<Translation>Workflow Alias</Translation>}>
-                    <Input {...init('alias', { initValue: data.alias })} />
-                  </Form.Item>
-                  <Form.Item label="描述">
-                    <Input {...init('description', { initValue: data.description })} />
-                  </Form.Item>
+                  <Row>
+                    <Col span={6}>
+                      <Form.Item labelAlign="left" required label={<Translation>Name</Translation>}>
+                        <Input
+                          {...init('name', {
+                            initValue: data.name,
+                            rules: [
+                              {
+                                required: true,
+                                pattern: checkName,
+                                message: 'Please enter a valid workflow name',
+                              },
+                            ],
+                          })}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item labelAlign="left" label={<Translation>Alias</Translation>}>
+                        <Input {...init('alias', { initValue: data.alias })} />
+                      </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                      <Form.Item labelAlign="left" label={<Translation>Description</Translation>}>
+                        <Input {...init('description', { initValue: data.description })} />
+                      </Form.Item>
+                    </Col>
+                  </Row>
                 </Form>
               </div>
             </If>

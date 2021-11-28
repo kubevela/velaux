@@ -181,22 +181,28 @@ class ApplicationConfig extends Component<Props, State> {
             <Card>
               <Row>
                 <Col span={12}>
-                  <Item label="alias" value={applicationDetail && applicationDetail.alias} />
+                  <Item
+                    label={<Translation>Alias</Translation>}
+                    value={applicationDetail && applicationDetail.alias}
+                  />
                 </Col>
                 <Col span={12}>
-                  <Item label="project" value={applicationDetail && applicationDetail.namespace} />
+                  <Item
+                    label={<Translation>Project</Translation>}
+                    value={applicationDetail && applicationDetail.namespace}
+                  />
                 </Col>
               </Row>
               <Row>
                 <Col span={12}>
                   <Item
-                    label="createTime"
+                    label={<Translation>Create Time</Translation>}
                     value={momentDate((applicationDetail && applicationDetail.createTime) || '')}
                   />
                 </Col>
                 <Col span={12}>
                   <Item
-                    label="updateTime"
+                    label={<Translation>Update Time</Translation>}
                     value={momentDate((applicationDetail && applicationDetail.updateTime) || '')}
                   />
                 </Col>
@@ -204,7 +210,7 @@ class ApplicationConfig extends Component<Props, State> {
               <Row>
                 <Col span={24}>
                   <Item
-                    label="description"
+                    label={<Translation>Description</Translation>}
                     labelSpan={4}
                     value={applicationDetail && applicationDetail.description}
                   />
@@ -219,7 +225,7 @@ class ApplicationConfig extends Component<Props, State> {
             <Title
               actions={[
                 <a key={'add'} onClick={this.onAddTrait}>
-                  <Translation>Add Trait</Translation>
+                  <Translation>New Trait</Translation>
                 </a>,
               ]}
               title={<Translation>Traits</Translation>}

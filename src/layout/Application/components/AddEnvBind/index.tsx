@@ -103,17 +103,16 @@ class EnvBindPlanDialog extends Component<Props, State> {
             <Translation>Submit</Translation>
           </Button>
         }
-        title={<Translation>Add Environment</Translation>}
+        title={<Translation>New Environment</Translation>}
       >
         <Form {...formItemLayout} field={this.field}>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Environment name</Translation>} required={true}>
+              <FormItem label={<Translation>Environment Name</Translation>} required={true}>
                 <Input
                   htmlType="name"
                   name="name"
                   maxLength={32}
-                  placeholder={'environment name'}
                   {...init('name', {
                     rules: [
                       {
@@ -128,10 +127,9 @@ class EnvBindPlanDialog extends Component<Props, State> {
             </Col>
 
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Environment alias</Translation>}>
+              <FormItem label={<Translation>Environment Alias</Translation>}>
                 <Input
                   name="alias"
-                  placeholder={'environment alias, you can type Chinese'}
                   {...init('alias', {
                     rules: [
                       {
@@ -166,7 +164,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
           </Row>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Delivery Target</Translation>} required>
+              <FormItem label={<Translation>Targets</Translation>} required>
                 <Select
                   name="targetNames"
                   mode="multiple"

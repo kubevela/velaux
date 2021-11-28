@@ -1,7 +1,7 @@
 import React from 'react';
 import Translation from '../components/Translation';
 
-export const addCluster = <Translation>Cluster Join</Translation>;
+export const addCluster = <Translation>Join New Cluster</Translation>;
 export const editCluster = <Translation>Edit Cluster</Translation>;
 export const clustTitle = <Translation>Cluster Management</Translation>;
 export const clustSubTitle = <Translation>Introduction to cluster management</Translation>;
@@ -10,7 +10,7 @@ export const UPLOADYMALFILE = <Translation>Upload Yaml File</Translation>;
 export const SUPPLIER = <Translation>Supplier</Translation>;
 export const NEXTSTEP = <Translation>NextStep</Translation>;
 export const PLEASE_ENTER = 'Please enter';
-export const PLEASE_CHOSE = 'Please chose';
+export const PLEASE_CHOSE = 'Please select';
 
 export const dataSourceProject = [
   { value: 10001, label: 'project1' },

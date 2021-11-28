@@ -90,7 +90,7 @@ class Namespace extends React.Component<Props, State> {
                 type="secondary"
                 onClick={this.openNamespaceInput}
               >
-                新建
+                <Translation>New</Translation>
               </Button>
             </If>
           </div>
