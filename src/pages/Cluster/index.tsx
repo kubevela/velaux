@@ -86,8 +86,8 @@ class Cluster extends React.Component<Props, State> {
       <div>
         <Title
           title="Clusters"
-          subTitle="Join the Kubernetes cluster, which can be self-built or provided by a cloud vendor."
-          addButtonTitle="Join New Cluster"
+          subTitle="Setup Kubernetes clusters by adding an existing one or creating a new one."
+          addButtonTitle="Connect Existing Cluster"
           addButtonClick={() => {
             this.setState({ showAddCluster: true });
           }}

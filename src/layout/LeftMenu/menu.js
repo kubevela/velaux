@@ -28,7 +28,7 @@ export function getLeftSider(pathname) {
       ],
     },
     {
-      navName: 'Resource Integration',
+      navName: 'Integration Center',
       children: [
         {
           className: isCluster,

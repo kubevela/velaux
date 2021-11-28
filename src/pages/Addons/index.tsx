@@ -80,8 +80,8 @@ class Addons extends React.Component<Props, State> {
       <div>
         <Title
           title="Addons"
-          subTitle="Addon provide the ability to extend the platform."
-          addButtonTitle="Registry Management"
+          subTitle="Manages and extends platform capabilities"
+          addButtonTitle="Addon Registries"
           addButtonClick={() => {
             this.setState({ showRegistryManage: true });
           }}

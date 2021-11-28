@@ -102,7 +102,7 @@ class Application extends Component<Props, State> {
       <div>
         <Title
           title="Applications"
-          subTitle="Centrally deliver and manage your applications."
+          subTitle="Deploy and manage all your applications"
           addButtonTitle="New Application"
           addButtonClick={() => {
             this.setState({ showAddApplication: true });

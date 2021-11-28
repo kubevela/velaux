@@ -123,7 +123,7 @@ class DeliveryTargetList extends React.Component<Props, State> {
       <div>
         <ListTitle
           title="Targets"
-          subTitle="Define the delivery target for an application"
+          subTitle="Define the targets that applications would deliver to"
           addButtonTitle="New Target"
           addButtonClick={() => {
             this.setState({ visibleDelivery: true, deliveryTargetItem: undefined });
