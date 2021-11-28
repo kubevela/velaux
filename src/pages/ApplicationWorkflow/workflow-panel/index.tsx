@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { DiagramMakerComponents } from 'diagram-maker';
 import './index.less';
 import type { Definition } from '../../../interface/addon';
+import Translation from '../../../components/Translation';
 
 type Props = {
   id: string;
@@ -23,7 +24,9 @@ class WorkFlowPannel extends Component<Props> {
     const { definitions } = this.props;
     return (
       <div className="workflow-pannel-container">
-        <div className="hl">步骤类型</div>
+        <div className="hl">
+          <Translation>Workflow Step Type</Translation>
+        </div>
         <div className="node-container">
           {definitions.map((item) => {
             return (

@@ -28,7 +28,6 @@ export const WORKFLOW_COMMON_PANNEL = {
 };
 
 export type WorkFlowOption = {
-  enable: boolean;
   default: boolean;
   edit: boolean;
 };

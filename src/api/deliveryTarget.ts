@@ -2,8 +2,8 @@ import { post, get, rdelete, put } from './request';
 import { getDeliveryTarget_mock } from './devLink';
 import { deliveryTarget } from './productionLink';
 import { getDomain } from '../utils/common';
-import { DeliveryTarget } from '../interface/deliveryTarget';
-import { QueryDeliveryTarget } from '../model/deliveryTarget';
+import type { DeliveryTarget } from '../interface/deliveryTarget';
+import type { QueryDeliveryTarget } from '../model/deliveryTarget';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;

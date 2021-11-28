@@ -2,6 +2,7 @@ FROM node:16-alpine as builder
 WORKDIR /app/velaux
 ADD . .
 RUN yarn install && yarn build
+RUN rm -rf /app/velaux/build/mock
 
 FROM nginx:1.21
 

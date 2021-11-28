@@ -4,7 +4,7 @@ import _ from 'lodash';
 import type { DiagramMakerNode } from 'diagram-maker';
 import type { WorkFlowNodeType } from '../entity';
 
-import { Grid, Field, Form, Select, Button, Input, Message } from '@b-design/ui';
+import { Grid, Field, Form, Select, Input, Message, Button } from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../extends/Group';
@@ -16,6 +16,7 @@ import Translation from '../../../components/Translation';
 import { checkName } from '../../../utils/common';
 
 import './index.less';
+import DrawerWithFooter from '../../../components/Drawer';
 
 type Props = {
   createOrUpdateNode: (data: any) => void;
@@ -23,7 +24,8 @@ type Props = {
   workFlowDefinitions: [];
   appName?: string;
   componentName?: string;
-  closeDrawer?: () => void;
+  closeDrawer: () => void;
+  onDelete: () => void;
   dispatch?: ({}) => {};
   t: (key: string) => {};
 };
@@ -41,7 +43,13 @@ class WorkflowForm extends Component<Props, State> {
     this.state = {
       definitionLoading: false,
     };
-    this.field = new Field(this);
+    this.field = new Field(this, {
+      onChange: (name: string, value: string) => {
+        if (name == 'type') {
+          this.field.setValue('name', value);
+        }
+      },
+    });
     this.uiSchemaRef = React.createRef();
   }
 
@@ -76,8 +84,15 @@ class WorkflowForm extends Component<Props, State> {
         return;
       }
       this.props.createOrUpdateNode(values);
-      Message.warning('please click the save button in the upper right, corner to save the data ');
+      Message.success('It takes effect after being saved.');
     });
+  };
+
+  onDelete = () => {
+    const { onDelete } = this.props;
+    if (onDelete) {
+      onDelete();
+    }
   };
 
   transDefinitions() {
@@ -85,6 +100,7 @@ class WorkflowForm extends Component<Props, State> {
     return (workFlowDefinitions || []).map((item: { name: string }) => ({
       lable: item.name,
       value: item.name,
+      key: item.name,
     }));
   }
 
@@ -111,14 +127,34 @@ class WorkflowForm extends Component<Props, State> {
     const { init } = this.field;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
-    const { t } = this.props;
+    const { t, closeDrawer } = this.props;
     const { definitionDetail } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
 
     return (
-      <div>
+      <DrawerWithFooter
+        title={<Translation>Edit workflow step</Translation>}
+        placement="right"
+        width={800}
+        onClose={closeDrawer}
+        onOk={this.onSubmit}
+        extButtons={[
+          <Button style={{ marginRight: '16px' }} onClick={closeDrawer}>
+            Cancel
+          </Button>,
+          <Button
+            style={{ marginRight: '16px' }}
+            onClick={() => {
+              this.onDelete();
+            }}
+            title="Delete this step"
+          >
+            Delete
+          </Button>,
+        ]}
+      >
         <Form field={this.field}>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
@@ -231,16 +267,7 @@ class WorkflowForm extends Component<Props, State> {
             </Col>
           </Row>
         </Form>
-
-        <div style={{ display: 'flex', justifyContent: 'end' }}>
-          <Button type="secondary" onClick={this.props.closeDrawer} className="margin-right-10">
-            <Translation>Cancel</Translation>
-          </Button>
-          <Button type="primary" onClick={this.onSubmit}>
-            <Translation>Confirm</Translation>
-          </Button>
-        </div>
-      </div>
+      </DrawerWithFooter>
     );
   }
 }
