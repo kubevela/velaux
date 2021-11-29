@@ -147,7 +147,9 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
           dispatch(action);
           if (action.type == 'NODE_CREATE') {
             this.setState({
-              currentSelectedNodeData: { consumerData: { type: action.payload.typeId } },
+              currentSelectedNodeData: Object.assign(action.payload, {
+                consumerData: { type: action.payload.typeId },
+              }),
               visible: true,
             });
           }
