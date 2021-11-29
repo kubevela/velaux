@@ -28,7 +28,7 @@ class WorkFlowToolTip extends Component<Props, State> {
   componentDidMount() {}
 
   render() {
-    const { edit, fit, redo, undo, zoomIn, zoomOut, autoLayout } = this.props;
+    const { edit, fit, redo, undo, zoomIn, zoomOut } = this.props;
 
     return (
       <div className="workflow-tooltip-container">
@@ -43,9 +43,9 @@ class WorkFlowToolTip extends Component<Props, State> {
             <div className="tip-btn" onClick={fit}>
               <Translation>RestoreZoom</Translation>
             </div>
-            <div className="tip-btn" onClick={autoLayout}>
+            {/* <div className="tip-btn" onClick={autoLayout}>
               <Translation>AutoLayout</Translation>
-            </div>
+            </div> */}
             <div className="tip-btn" onClick={undo}>
               <Translation>Revoke</Translation>
             </div>

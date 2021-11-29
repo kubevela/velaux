@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { DiagramMakerComponents } from 'diagram-maker';
+import { Icon } from '@b-design/ui';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../../components/Translation';
@@ -59,7 +60,10 @@ class WorkFlowNode extends Component<Props, State> {
             title={data.text}
           >
             <div className="rhombus-container" />
-            <div className="content"> {data.text || <Translation>Click Edit</Translation>}</div>
+            <div className="content">
+              {data.text || <Translation>Click Edit</Translation>}
+              <Icon type="ashbin1" />
+            </div>
             <div
               className="start-connector"
               data-event-target="true"

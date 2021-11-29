@@ -6,7 +6,7 @@ export const WORKFLOW_COMMON_PANNEL = {
   p1: {
     id: 'p1',
     position: {
-      x: 1220,
+      x: 10,
       y: 10,
     },
     size: {
@@ -28,7 +28,6 @@ export const WORKFLOW_COMMON_PANNEL = {
 };
 
 export type WorkFlowOption = {
-  enable: boolean;
   default: boolean;
   edit: boolean;
 };

@@ -68,11 +68,11 @@ export default {
       let { workflowList } = yield select((state) => state.workflow);
       const { appName } = action.payload;
       const newData = _.cloneDeepWith(WORKFLOW_TEMPLATE);
-      const name = `app${workflowList.length + 1}`;
+      const name = `workflow${workflowList.length + 1}`;
       newData.appName = appName;
       newData.name = name;
       newData.alias = name;
-      newData.description = 'app description';
+      newData.description = 'workflow description';
       workflowList = workflowList.concat([newData]);
       yield put({ type: 'updateWorkflow', payload: { workflowList } });
     },
@@ -93,13 +93,23 @@ export default {
       workflow.enable = option.enable;
       workflow.default = option.default;
       const { nodes, edges } = data;
+      const nodeIndex = {};
+      let index = 0;
       const steps = Object.keys(nodes).map((key) => {
-        let dependsOn = [];
-        const consumerData = nodes[key].consumerData || {};
-        if (consumerData.properties && typeof consumerData.properties != 'string') {
-          nodes[key].consumerData.properties = JSON.stringify(nodes[key].consumerData.properties);
-        }
+        nodeIndex[nodes[key].id] = index;
+        index++;
         return nodes[key].consumerData;
+      });
+      Object.keys(edges).map((key) => {
+        const edge = edges[key];
+        if (nodeIndex[edge.src] > nodeIndex[edge.dest]) {
+          const i = steps[nodeIndex[edge.src]];
+          const oldIndex = nodeIndex[edge.src];
+          steps[nodeIndex[edge.src]] = steps[nodeIndex[edge.dest]];
+          steps[nodeIndex[edge.dest]] = i;
+          nodeIndex[edge.src] = nodeIndex[edge.dest];
+          nodeIndex[edge.dest] = oldIndex;
+        }
       });
       workflow.steps = steps;
       yield call(createWorkFlow, workflow);
@@ -112,62 +122,69 @@ export default {
 
 function transData(workflowList = [], appName) {
   const newData = _.cloneDeep(workflowList);
-  const nodeWidth = 200;
-  const nodeInterval = 80;
   if (newData && newData.length != 0) {
     newData.forEach((key) => {
-      const nodes = {};
-      const edges = {};
-      let position = 50;
-      if (key.steps) {
-        key.steps.forEach((item, index, array) => {
-          position += nodeWidth + nodeInterval;
-          edges[item.name] = {};
-          edges[item.name].dest = key.steps && key.steps[index + 1] && key.steps[index + 1].name;
-          edges[item.name].diagramMakerData = {
-            selected: false,
-          };
-          edges[item.name].id = item.name;
-          edges[item.name].src = key.steps && key.steps[index] && key.steps[index].name;
-
-          nodes[item.name] = {};
-          nodes[item.name].id = item.name;
-          nodes[item.name].typeId = item.type;
-          nodes[item.name].consumerData = {
-            alias: item.alias || '',
-            dependsOn: null,
-            description: item.description || '',
-            name: item.name || '',
-            properties: item.properties || '',
-            type: item.type || '',
-          };
-          nodes[item.name].diagramMakerData = {
-            position: {
-              x: position,
-              y: 100,
-            },
-            size: {
-              width: nodeWidth,
-              height: 40,
-            },
-            selected: false,
-          };
-        });
-      }
-      key.envName = key.envName;
-      key.appName = appName;
-      key.option = {
-        edit: false,
-        enable: false,
-        default: key.default,
-      };
-      key.data = {
-        edges: edges,
-        nodes: nodes,
-      };
+      convertWorkflowStep(key, appName, 32);
     });
     return newData;
   } else {
     return [];
   }
+}
+
+export function convertWorkflowStep(workflowStep, appName, initPosition = 32) {
+  const nodeWidth = 140;
+  const nodeHeight = 40;
+  const nodeInterval = 80;
+  const nodes = {};
+  const edges = {};
+  let position = initPosition;
+  if (workflowStep.steps) {
+    workflowStep.steps.forEach((item, index, array) => {
+      edges[item.name] = {};
+      edges[item.name].dest =
+        workflowStep.steps && workflowStep.steps[index + 1] && workflowStep.steps[index + 1].name;
+      edges[item.name].diagramMakerData = {
+        selected: false,
+      };
+      edges[item.name].id = item.name;
+      edges[item.name].src =
+        workflowStep.steps && workflowStep.steps[index] && workflowStep.steps[index].name;
+
+      nodes[item.name] = {};
+      nodes[item.name].id = item.name;
+      nodes[item.name].typeId = item.type;
+      nodes[item.name].consumerData = {
+        alias: item.alias || '',
+        dependsOn: null,
+        description: item.description || '',
+        name: item.name || '',
+        properties: item.properties || '',
+        type: item.type || '',
+      };
+      nodes[item.name].diagramMakerData = {
+        position: {
+          x: position,
+          y: 130,
+        },
+        size: {
+          width: nodeWidth,
+          height: nodeHeight,
+        },
+        selected: false,
+      };
+      position += nodeWidth + nodeInterval;
+    });
+  }
+
+  workflowStep.appName = appName;
+  workflowStep.option = {
+    edit: false,
+    enable: false,
+    default: workflowStep.default,
+  };
+  workflowStep.data = {
+    edges: edges,
+    nodes: nodes,
+  };
 }

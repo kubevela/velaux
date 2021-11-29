@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Drawer, Message } from '@b-design/ui';
+import { Message } from '@b-design/ui';
 import type {
   DiagramMakerData,
   DiagramMakerNode,
@@ -14,6 +14,7 @@ import {
   VisibleConnectorTypes,
   Layout,
   WorkflowLayoutDirection,
+  NodeActions,
 } from 'diagram-maker';
 import WorkFlowNode from '../workflow-node';
 import WorkFlowEdge from '../workflow-edge';
@@ -24,7 +25,9 @@ import { WORKFLOW_COMMON_PANNEL } from '../entity';
 import WorkflowForm from './workflow-form';
 import 'diagram-maker/dist/diagramMaker.css';
 import './index.less';
-import Translation from '../../../components/Translation';
+import { If } from 'tsx-control-statements/components';
+import type { NodeItem } from '../workflow-component';
+import type { Definition } from '../../../interface/addon';
 
 type WorkFlowItemProps = {
   workflowId: string;
@@ -52,9 +55,9 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     if (this.diagramMaker) {
       this.diagramMaker.destroy();
     }
-    const platformWidth = this.container.clientWidth;
-    const platformHeight = 300;
     const { data, edit } = this.props;
+    const containerWidth = this.container.clientWidth;
+    const nodeWidth = Object.keys(data.nodes).length * 200 + 300;
     const basicePlatformConfig = {
       panels: WORKFLOW_COMMON_PANNEL,
       workspace: {
@@ -64,24 +67,35 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
         },
         scale: 1,
         canvasSize: {
-          width: platformWidth,
-          height: platformHeight,
+          width: containerWidth > nodeWidth ? containerWidth : nodeWidth,
+          height: 300,
         },
         viewContainerSize: {
-          width: platformWidth,
-          height: platformHeight,
+          width: containerWidth > nodeWidth ? containerWidth : nodeWidth,
+          height: 300,
         },
       },
       editor: {
         mode: edit ? EditorMode.DRAG : EditorMode.READ_ONLY,
       },
     };
-
     const initialData: DiagramMakerData<WorkFlowNodeType, WorkFlowEdgeType> = Object.assign(
       {},
       data,
       basicePlatformConfig,
     );
+    const { workFlowDefinitions } = this.props;
+    const nodeTypeConfigs: any = {};
+    workFlowDefinitions.map((definition: Definition) => {
+      nodeTypeConfigs[definition.name] = {
+        size: {
+          width: 140,
+          height: 40,
+        },
+        definition: definition,
+        visibleConnectorTypes: VisibleConnectorTypes.BOTH,
+      };
+    });
     this.diagramMaker = new DiagramMaker(
       this.container,
       {
@@ -109,58 +123,34 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
             ReactDOM.unmountComponentAtNode(container);
           },
           panels: {
-            p1: this.renderTopPannel,
-            p2: this.renderRightPannel,
+            p1: this.renderLeftPannel,
+            p2: this.renderTopPannel,
           },
         },
-        nodeTypeConfig: {
-          both: {
-            size: {
-              width: 120,
-              height: 40,
-            },
-            visibleConnectorTypes: VisibleConnectorTypes.BOTH,
-          },
-          start: {
-            size: {
-              width: 120,
-              height: 40,
-            },
-            visibleConnectorTypes: VisibleConnectorTypes.OUTPUT_ONLY,
-          },
-          end: {
-            size: {
-              width: 120,
-              height: 40,
-            },
-            visibleConnectorTypes: VisibleConnectorTypes.INPUT_ONLY,
-          },
-          switch: {
-            size: {
-              width: 80,
-              height: 80,
-            },
-            connectorPlacementOverride: ConnectorPlacement.LEFT_RIGHT,
-            visibleConnectorTypes: VisibleConnectorTypes.NONE,
-          },
-        },
+        nodeTypeConfig: nodeTypeConfigs,
         actionInterceptor: (action: any, dispatch, getState) => {
           const { edges } = getState();
           if (action.type == 'EDGE_CREATE' && action.payload) {
             if (action.payload.src && edges[action.payload.src] && edges[action.payload.src].dest) {
-              Message.warning('Process forking is not supported 1');
+              Message.warning('Process forking is not supported');
               return;
             }
             if (action.payload.dest) {
               for (const key in edges) {
                 if (edges[key].dest == action.payload.dest) {
-                  Message.warning('Process forking is not supported 2');
+                  Message.warning('Process forking is not supported');
                   return;
                 }
               }
             }
           }
           dispatch(action);
+          if (action.type == 'NODE_CREATE') {
+            this.setState({
+              currentSelectedNodeData: { consumerData: { type: action.payload.typeId } },
+              visible: true,
+            });
+          }
         },
       },
       {
@@ -173,7 +163,6 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
               const newNodes = Object.assign({}, state.nodes, newNode);
               const newState = Object.assign({}, state, { nodes: newNodes });
               return newState;
-
             default:
               return state;
           }
@@ -187,7 +176,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
       let currentNode: any = null;
       Object.keys(nodes).forEach((key) => {
         const obj = nodes[key];
-        if (obj.diagramMakerData && obj.diagramMakerData.selected) {
+        if (obj && obj.diagramMakerData && obj.diagramMakerData.selected) {
           currentNode = obj;
         }
       });
@@ -228,18 +217,19 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     this.diagramMaker.api.zoomOut();
   };
 
-  renderTopPannel = (
+  renderLeftPannel = (
     panel: DiagramMakerPanel,
     state: DiagramMakerData<WorkFlowNodeType, WorkFlowEdgeType>,
     diagramMakerContainer: HTMLElement,
   ) => {
-    const { workFlowDefinitions } = this.props;
+    const { workFlowDefinitions, edit } = this.props;
     const parentContainer = diagramMakerContainer.parentElement;
     if (parentContainer) {
       parentContainer.style.display = 'block';
     }
-    if (!this.props.edit && parentContainer) {
+    if (!edit && parentContainer) {
       parentContainer.style.display = 'none';
+      return;
     }
     ReactDOM.render(
       <WorkFlowPannel
@@ -251,7 +241,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     );
   };
 
-  renderRightPannel = (
+  renderTopPannel = (
     panel: DiagramMakerPanel,
     state: DiagramMakerData<WorkFlowNodeType, WorkFlowEdgeType>,
     diagramMakerContainer: HTMLElement,
@@ -304,12 +294,16 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     const { nodes } = this.diagramMaker.store.getState();
     const { currentSelectedNodeData } = this.state;
     let consumerData = nodes[currentSelectedNodeData.id];
-    const diagramMakerData = Object.assign({}, consumerData.diagramMakerData, { selected: false });
-    consumerData = Object.assign({}, consumerData, { diagramMakerData });
-    this.diagramMaker.store.dispatch({
-      type: 'UPDATENODE',
-      payload: consumerData,
-    });
+    if (consumerData) {
+      const diagramMakerData = Object.assign({}, consumerData.diagramMakerData, {
+        selected: false,
+      });
+      consumerData = Object.assign({}, consumerData, { diagramMakerData });
+      this.diagramMaker.store.dispatch({
+        type: 'UPDATENODE',
+        payload: consumerData,
+      });
+    }
   };
 
   createOrUpdateNode = (values: any) => {
@@ -325,6 +319,16 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     this.closeDrawer();
   };
 
+  onDelete = (values: NodeItem) => {
+    this.diagramMaker.store.dispatch({
+      type: NodeActions.NODE_DELETE,
+      payload: {
+        id: values.id,
+      },
+    });
+    this.closeDrawer();
+  };
+
   render() {
     const { visible, currentSelectedNodeData } = this.state;
     const { workFlowDefinitions } = this.props;
@@ -336,20 +340,15 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
           className="workflow-item-container"
           id={this.props.workflowId}
         />
-        <Drawer
-          title={<Translation>Edit workflow step</Translation>}
-          placement="right"
-          visible={visible}
-          width={800}
-          onClose={() => this.closeDrawer()}
-        >
+        <If condition={visible}>
           <WorkflowForm
+            onDelete={() => this.onDelete(currentSelectedNodeData)}
             createOrUpdateNode={this.createOrUpdateNode}
             data={currentSelectedNodeData}
             workFlowDefinitions={workFlowDefinitions}
             closeDrawer={this.closeDrawer}
           />
-        </Drawer>
+        </If>
       </div>
     );
   }

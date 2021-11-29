@@ -85,7 +85,7 @@ class Workflow extends Component<Props, State> {
           <React.Fragment>
             {workflowList.map((workflow: WorkFlowData) => (
               <WrokflowComponent
-                key={workflow.name + params.appName}
+                key={workflow.name + params.appName + workflow.steps}
                 appName={params.appName}
                 data={workflow}
                 workFlowDefinitions={this.state.workFlowDefinitions}
