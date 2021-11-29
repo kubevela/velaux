@@ -39,5 +39,4 @@ jobs:
         context: ./
         file: ./Dockerfile
         push: false
-        tags: kubevela/velaux:1.1.0
-    
+        tags: oamdev/velaux:1.2.0
