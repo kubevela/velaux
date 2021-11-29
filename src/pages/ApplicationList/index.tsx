@@ -102,8 +102,8 @@ class Application extends Component<Props, State> {
     return (
       <div>
         <Title
-          title="Application Manager"
-          subTitle="Application Manager SubTitle"
+          title="Applications"
+          subTitle="Deploy and manage all your applications"
           addButtonTitle="New Application"
           addButtonClick={() => {
             this.setState({ showAddApplication: true });

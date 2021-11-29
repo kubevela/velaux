@@ -4,7 +4,7 @@ import { Grid } from '@b-design/ui';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { withTranslation } from 'react-i18next';
 
-import logo from '../../assets/kubevela-log.png';
+import logo from '../../assets/KubeVela.png';
 
 type Props = {
   t: (key: string) => {};
@@ -39,8 +39,7 @@ class TopBar extends Component<Props> {
       <div className="layout-topbar" id="layout-topbar">
         <Row className="nav-wraper">
           <Col span="4">
-            <img src={logo} className="logo" />
-            <span className="text">KubeVela</span>
+            <img src={logo} className="logo" title={'Make shipping applications more enjoyable.'} />
           </Col>
           <div className="language-switch-container">
             <SwitchLanguage />

@@ -53,7 +53,7 @@ class CardContent extends React.Component<Props, State> {
                 </div>
                 <div className="content-wraper background-F9F8FF">
                   <Row className="content-title">
-                    <Col span={20} className="font-size-16 color1A1A1A">
+                    <Col span={16} className="font-size-16 color1A1A1A">
                       <If condition={dashboardURL}>
                         <a target="_blank" href={dashboardURL}>
                           {showName}
@@ -62,7 +62,7 @@ class CardContent extends React.Component<Props, State> {
                       <If condition={!dashboardURL}>{showName}</If>
                     </Col>
                     <If condition={name != 'local'}>
-                      <Col span={4} className="dot-wraper">
+                      <Col span={8} className="dot-wraper">
                         <Dropdown
                           trigger={
                             <svg
@@ -120,16 +120,20 @@ class CardContent extends React.Component<Props, State> {
                       </Col>
                     </If>
                     <If condition={name === 'local'}>
-                      <span
-                        style={{
-                          fontSize: '12px',
-                          color: '#a6a6a6',
-                          textAlign: 'right',
-                          width: '100%',
-                        }}
-                      >
-                        <Translation>Local Cluster</Translation>
-                      </span>
+                      <Col span={8}>
+                        <span
+                          style={{
+                            color: '#a6a6a6',
+                            fontSize: '12px',
+                            textAlign: 'right',
+                            display: 'block',
+                            width: '100%',
+                            lineHeight: '24px',
+                          }}
+                        >
+                          <Translation>Local</Translation>
+                        </span>
+                      </Col>
                     </If>
                   </Row>
                   <Row className="content-main">

@@ -79,9 +79,9 @@ class Addons extends React.Component<Props, State> {
     return (
       <div>
         <Title
-          title="Addon in management"
-          subTitle="Addon in extension"
-          addButtonTitle="Addon Registry Manage"
+          title="Addons"
+          subTitle="Manages and extends platform capabilities"
+          addButtonTitle="Addon Registries"
           addButtonClick={() => {
             this.setState({ showRegistryManage: true });
           }}

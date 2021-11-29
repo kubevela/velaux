@@ -97,7 +97,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
       <div>
         <Dialog
           className="commonDialog"
-          title={<Translation>Addon Registry Manage</Translation>}
+          title={<Translation>Registry Management</Translation>}
           autoFocus={true}
           visible={visible}
           onOk={this.onOk}
@@ -110,7 +110,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
             <Col>
               <div className="tableButton">
                 <Button type="secondary" onClick={this.showAddRegistry}>
-                  <Translation>Add</Translation>
+                  <Translation>New</Translation>
                 </Button>
               </div>
             </Col>

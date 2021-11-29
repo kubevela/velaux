@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form, Input, Select, Field, Button } from '@b-design/ui';
+import type { Field } from '@b-design/ui';
+import { Form, Input, Select, Button } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
@@ -67,7 +68,7 @@ class NamespaceForm extends React.Component<Props, State> {
                     type="secondary"
                     onClick={this.openNamespaceInput}
                   >
-                    新建
+                    <Translation>New</Translation>
                   </Button>
                 </If>
               </div>
