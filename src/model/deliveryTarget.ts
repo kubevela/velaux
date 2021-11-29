@@ -8,8 +8,9 @@ export interface QueryDeliveryTarget {
 }
 
 interface DeliveryTargetState {
-  deliveryTagetList: [];
-  deliveryTagetListTotal: number;
+  deliveryTargetList: [];
+  deliveryTargets: [];
+  deliveryTargetListTotal: number;
 }
 
 interface ModelsType {
@@ -29,15 +30,33 @@ interface ResponseGenerator {
   statusText?: string;
   records?: any;
   pageNum?: any;
-  deliveryTagetList?: any;
-  deliveryTagetListTotal?: any;
+  deliveryTargetList?: any;
+  deliveryTargetListTotal?: any;
+}
+
+
+function getDeliveryTargetList(data: any) {
+  const deliveryTargets = data.deliveryTargets;
+  if (!deliveryTargets) {
+    return [];
+  }
+  const list = [];
+  for (const item of deliveryTargets) {
+    const deliveryTarget = {
+      value: item.name,
+      label: item.alias || item.name,
+    };
+    list.push(deliveryTarget);
+  }
+  return list;
 }
 
 const DeliveryTargets: ModelsType = {
   namespace: 'deliveryTarget',
   state: {
-    deliveryTagetList: [],
-    deliveryTagetListTotal: 0,
+    deliveryTargetList: [],
+    deliveryTargets:[],
+    deliveryTargetListTotal: 0,
   },
   reducers: {
     updateDeliveryTargets(
@@ -51,6 +70,13 @@ const DeliveryTargets: ModelsType = {
         total,
       };
     },
+
+    updateDeliveryTargetList(state: any, { payload }: { payload: {deliveryTargetList: []}}) {
+      return {
+        ...state,
+        deliveryTargets: payload,
+      };
+    },
   },
 
   effects: {
@@ -61,6 +87,13 @@ const DeliveryTargets: ModelsType = {
       const result: ResponseGenerator = yield call(getDeliveryTarget, action.payload);
       yield put({ type: 'updateDeliveryTargets', payload: result || {} });
     },
+
+    *listTargets(action: any, { call, put }: { call: any; put: any }) {
+      const result: ResponseGenerator = yield call(getDeliveryTarget, action.payload);
+      const deliveryTargetList = getDeliveryTargetList(result);
+      yield put({ type: 'updateDeliveryTargetList', payload: deliveryTargetList || [] });
+    },
+
     *createDeliveryTarget(
       action: { payload: QueryDeliveryTarget; callback: (parasm: any) => void },
       { call }: { call: any; put: any },
@@ -72,5 +105,7 @@ const DeliveryTargets: ModelsType = {
     },
   },
 };
+
+
 
 export default DeliveryTargets;

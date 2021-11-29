@@ -4,17 +4,19 @@ import { withTranslation } from 'react-i18next';
 import './index.less';
 import Translation from '../../../../components/Translation';
 
+const { Row, Col } = Grid;
+
 type Props = {
   t: (key: string) => {};
   dispatch: ({}) => {};
-  clusterList?: [];
+  deliveryTargetList?: []; 
   namespaceList?: [];
   getApplications: (params: any) => void;
 };
 
 type State = {
   namespaceValue: string;
-  clusterValue: string;
+  deliveryTargetValue: string;
   inputValue: string;
 };
 
@@ -23,11 +25,11 @@ class SelectSearch extends React.Component<Props, State> {
     super(props);
     this.state = {
       namespaceValue: '',
-      clusterValue: '',
+      deliveryTargetValue: '',
       inputValue: '',
     };
     this.handleChangeNamepace = this.handleChangeNamepace.bind(this);
-    this.handleChangCluter = this.handleChangCluter.bind(this);
+    this.handleChangDeliveryTarget = this.handleChangDeliveryTarget.bind(this);
     this.handleChangName = this.handleChangName.bind(this);
   }
 
@@ -42,10 +44,10 @@ class SelectSearch extends React.Component<Props, State> {
     );
   }
 
-  handleChangCluter(e: string) {
+  handleChangDeliveryTarget(e: string) {
     this.setState(
       {
-        clusterValue: e,
+        deliveryTargetValue: e,
       },
       () => {
         this.getApplications();
@@ -64,27 +66,23 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   getApplications = async () => {
-    const { namespaceValue, clusterValue, inputValue } = this.state;
+    const { namespaceValue, deliveryTargetValue, inputValue } = this.state;
     const params = {
       namespace: namespaceValue,
-      cluster: clusterValue,
+      targetName: deliveryTargetValue,
       query: inputValue,
     };
     this.props.getApplications(params);
   };
 
   render() {
-    const { Row, Col } = Grid;
-    const { t } = this.props;
-    const projectPlacehole = t('Filter by project.').toString();
-    const clusterPlacehole = t('Filter by target.').toString();
-    const appPlacehole = t('Filter by name, description').toString();
-    const { namespaceValue, clusterValue, inputValue } = this.state;
-    const { clusterList, namespaceList } = this.props;
-    const clusterDadasource = (clusterList || []).map((item: { name: string }) => ({
-      value: item.name,
-      label: item.name,
-    }));
+    const { deliveryTargetList, namespaceList,t } = this.props;
+    const { namespaceValue, deliveryTargetValue, inputValue } = this.state;
+
+    const projectPlacehole = t('Project Screening').toString();
+    const deliveryTargetPlacehole = t('Delivery Target Screening').toString();
+    const appPlacehole = t('Application name, description and search').toString();
+
     return (
       <Row className="app-select-wraper boder-radius-8">
         <Col span="6" style={{ padding: '0 8px' }}>
@@ -104,12 +102,12 @@ class SelectSearch extends React.Component<Props, State> {
           <Select
             mode="single"
             size="large"
-            onChange={this.handleChangCluter}
-            dataSource={clusterDadasource}
-            placeholder={clusterPlacehole}
+            onChange={this.handleChangDeliveryTarget}
+            dataSource={deliveryTargetList}
+            placeholder={deliveryTargetPlacehole}
             className="item"
             hasClear
-            value={clusterValue}
+            value={deliveryTargetValue}
           />
         </Col>
 
@@ -138,7 +136,7 @@ class SelectSearch extends React.Component<Props, State> {
               this.setState(
                 {
                   namespaceValue: '',
-                  clusterValue: '',
+                  deliveryTargetValue: '',
                   inputValue: '',
                 },
                 () => {

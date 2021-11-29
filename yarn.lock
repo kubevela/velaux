@@ -9800,10 +9800,10 @@ rax@^1.1.0:
     rax-create-factory "^1.0.0"
     rax-is-valid-element "^1.0.0"
 
-react-dev-utils@11.0.4:
+react-dev-utils@^11.0.4:
   version "11.0.4"
-  resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-11.0.4.tgz#a7ccb60257a1ca2e0efe7a83e38e6700d17aa37a"
-  integrity sha512-dx0LvIGHcOPtKbeiSUM4jqpBl3TcY7CDjZdfOIcKeznE7BWr9dg0iPG90G5yfVQ+p/rGNMXdbfStvzQZEVEi4A==
+  resolved "https://registry.npmmirror.com/react-dev-utils/download/react-dev-utils-11.0.4.tgz#a7ccb60257a1ca2e0efe7a83e38e6700d17aa37a"
+  integrity sha1-p8y2Alehyi4O/nqD445nANF6o3o=
   dependencies:
     "@babel/code-frame" "7.10.4"
     address "1.1.2"

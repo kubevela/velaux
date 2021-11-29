@@ -11,10 +11,10 @@ import { deleteApplicationPlan, getComponentdefinitions } from '../../api/applic
 import type { ApplicationBase } from '../../interface/application';
 
 type Props = {
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   applicationList: ApplicationBase[];
   namespaceList: [];
-  clusterList?: [];
+  deliveryTargets?: [];
   history: any;
 };
 type State = {
@@ -24,7 +24,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.application, ...store.clusters };
+  return { ...store.application, ...store.deliveryTarget };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -39,7 +39,7 @@ class Application extends Component<Props, State> {
   componentDidMount() {
     this.getApplications({});
     this.getNamespaceList();
-    this.getClusterList();
+    this.getDeliveryTarget();
     this.onGetComponentdefinitions();
   }
 
@@ -63,9 +63,10 @@ class Application extends Component<Props, State> {
     });
   };
 
-  getClusterList = async () => {
+  getDeliveryTarget = async () => {
     this.props.dispatch({
-      type: 'clusters/getClusterList',
+      type: 'deliveryTarget/listTargets',
+      payload: {},
     });
   };
 
@@ -96,7 +97,7 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList, namespaceList, clusterList, dispatch } = this.props;
+    const { applicationList, namespaceList, deliveryTargets, dispatch } = this.props;
     const { showAddApplication, componentDefinitions, isLoading } = this.state;
     return (
       <div>
@@ -111,7 +112,7 @@ class Application extends Component<Props, State> {
 
         <SelectSearch
           namespaceList={namespaceList}
-          clusterList={clusterList}
+          deliveryTargetList={deliveryTargets}
           dispatch={dispatch}
           getApplications={(params: any) => {
             this.getApplications(params);
@@ -121,7 +122,7 @@ class Application extends Component<Props, State> {
         <Loading visible={isLoading} fullScreen>
           <CardContend
             applications={applicationList}
-            editAppPlan={() => {}}
+            editAppPlan={() => { }}
             deleteAppPlan={this.onDeleteAppPlan}
           />
         </Loading>

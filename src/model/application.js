@@ -14,6 +14,7 @@ import { listWorkFlow } from '../api/workflows';
 
 import { getNamespaceList } from '../api/namespace';
 
+
 export default {
   namespace: 'application',
   state: {
@@ -119,6 +120,7 @@ export default {
       const namespaceList = getNamespace(result || {});
       yield put({ type: 'updateNameSpaceList', payload: namespaceList });
     },
+
     *getApplicationDetail(action, { call, put }) {
       const { appName } = action.payload;
       const result = yield call(getApplicationDetails, { name: appName });
@@ -208,3 +210,5 @@ function getNamespace(data) {
   }
   return list;
 }
+
+
