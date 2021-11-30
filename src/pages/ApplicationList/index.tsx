@@ -11,7 +11,7 @@ import { deleteApplicationPlan, getComponentdefinitions } from '../../api/applic
 import type { ApplicationBase } from '../../interface/application';
 
 type Props = {
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   applicationList: ApplicationBase[];
   namespaceList: [];
   deliveryTargets?: [];
@@ -122,7 +122,7 @@ class Application extends Component<Props, State> {
         <Loading visible={isLoading} fullScreen>
           <CardContend
             applications={applicationList}
-            editAppPlan={() => { }}
+            editAppPlan={() => {}}
             deleteAppPlan={this.onDeleteAppPlan}
           />
         </Loading>

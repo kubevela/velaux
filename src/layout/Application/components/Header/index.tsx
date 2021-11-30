@@ -22,13 +22,15 @@ import type {
   ApplicationStatus,
   ApplicationStatistics,
   Workflow,
-  WorkflowStatus,
+  WorkflowBase,
 } from '../../../../interface/application';
 import NumItem from '../../../../components/NumItem';
 import { Link } from 'dva/router';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
-import './index.less';
+import WorkflowSilder from '../WorkflowSilder';
+import { If } from 'tsx-control-statements/components';
+import Empty from '../../../../components/Empty';
 
 const { Row, Col } = Grid;
 
@@ -43,13 +45,14 @@ interface Props {
 interface State {
   loading: boolean;
   statistics?: ApplicationStatistics;
-  records?: WorkflowStatus[];
+  records?: WorkflowBase[];
 }
 
 @connect((store: any) => {
   return { ...store.application };
 })
 class ApplicationHeader extends Component<Props, State> {
+  interval: any;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -105,11 +108,17 @@ class ApplicationHeader extends Component<Props, State> {
   loadworkflowRecord = async () => {
     const { appName } = this.props;
     if (appName) {
-      getApplicationWorkflowRecord({ appName: appName }).then((re) => {
-        if (re) {
-          this.setState({ records: re.records });
-        }
-      });
+      getApplicationWorkflowRecord({ appName: appName })
+        .then((re) => {
+          if (re) {
+            this.setState({ records: re.records });
+          }
+        })
+        .finally(() => {
+          this.interval = setTimeout(() => {
+            this.loadworkflowRecord();
+          }, 3000);
+        });
     }
   };
 
@@ -118,8 +127,12 @@ class ApplicationHeader extends Component<Props, State> {
     this.loadworkflowRecord();
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.interval);
+  }
+
   render() {
-    const { applicationDetail, currentPath, workflows } = this.props;
+    const { applicationDetail, currentPath, workflows, appName } = this.props;
     const { statistics, records } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     const item = <Translation>{`app-${activeKey}`}</Translation>;
@@ -194,13 +207,14 @@ class ApplicationHeader extends Component<Props, State> {
             </Card>
           </Col>
           <Col span={12} className="padding16">
-            <Card>
-              {records?.map((record) => {
-                record.steps.map((step) => {
-                  return <span>{step.name || step.type}</span>;
-                });
-              })}
-            </Card>
+            <If condition={!records || (Array.isArray(records) && records.length === 0)}>
+              <Card>
+                <Empty iconWidth={'30px'} />
+              </Card>
+            </If>
+            <If condition={Array.isArray(records) && records.length > 0}>
+              <WorkflowSilder appName={appName} records={records || []} />
+            </If>
           </Col>
         </Row>
       </div>
