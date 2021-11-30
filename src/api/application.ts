@@ -221,7 +221,7 @@ export function resumeApplicationWorkflowRecord(params: {
 }) {
   const { appName, workflowName, recordName } = params;
   return get(
-    `${application}/${appName}/workflows/${workflowName}records/${recordName}/resume`,
+    `${application}/${appName}/workflows/${workflowName}/records/${recordName}/resume`,
     {},
   ).then((res) => res);
 }
@@ -233,7 +233,7 @@ export function rollbackApplicationWorkflowRecord(params: {
 }) {
   const { appName, workflowName, recordName } = params;
   return get(
-    `${application}/${appName}/workflows/${workflowName}records/${recordName}/rollback`,
+    `${application}/${appName}/workflows/${workflowName}/records/${recordName}/rollback`,
     {},
   ).then((res) => res);
 }
@@ -245,7 +245,7 @@ export function terminateApplicationWorkflowRecord(params: {
 }) {
   const { appName, workflowName, recordName } = params;
   return get(
-    `${application}/${appName}/workflows/${workflowName}records/${recordName}/terminate`,
+    `${application}/${appName}/workflows/${workflowName}/records/${recordName}/terminate`,
     {},
   ).then((res) => res);
 }
