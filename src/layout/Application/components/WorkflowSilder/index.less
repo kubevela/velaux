@@ -1,0 +1,47 @@
+.slide--workflow-wraper {
+  height: 146px;
+  padding: 10px;
+  background: rgb(255, 255, 255);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 10%);
+  transition: box-shadow var(--active-transition);
+  .slide-hearder {
+    display: flex;
+    justify-content: space-between;
+    .slide-hearder-name {
+      color: #000;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .slide-hearder-version {
+      color: #a6a6a6;
+      font-size: 14px;
+    }
+  }
+}
+
+.slide-icon-wraper {
+  position: relative;
+  .arrow-left {
+    position: absolute;
+    left: -15px;
+    cursor: pointer;
+  }
+  .arrow-left::before {
+    color: #d9d5d5 !important;
+  }
+  .arrow-right {
+    position: absolute;
+    right: -15px;
+    color: '#d9d5d5';
+    cursor: pointer;
+  }
+  .arrow-right::before {
+    color: #d9d5d5 !important;
+  }
+}
+
+.next-slick-container {
+  .large {
+    z-index: 999999 !important;
+  }
+}

@@ -222,3 +222,24 @@ export interface UpdateComponentProperties {
   componentName?: string;
   properties: string;
 }
+export interface WorkflowBase {
+  name: string;
+  namespace: string;
+  workflowAlias?: string;
+  workflowName: string;
+  startTime?: string;
+  status?: string;
+  applicationRevision?: string;
+  steps?: WorkflowStepItem[];
+}
+export interface WorkflowStepItem {
+  id: string;
+  name: string;
+  alias?: string;
+  type: string;
+  phase?: string;
+  message?: string;
+  reason?: string;
+  firstExecuteTime?: string;
+  lastExecuteTime?: string;
+}

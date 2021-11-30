@@ -14,7 +14,6 @@ import { listWorkFlow } from '../api/workflows';
 
 import { getNamespaceList } from '../api/namespace';
 
-
 export default {
   namespace: 'application',
   state: {
@@ -210,5 +209,3 @@ function getNamespace(data) {
   }
   return list;
 }
-
-

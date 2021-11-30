@@ -34,7 +34,6 @@ interface ResponseGenerator {
   deliveryTargetListTotal?: any;
 }
 
-
 function getDeliveryTargetList(data: any) {
   const deliveryTargets = data.deliveryTargets;
   if (!deliveryTargets) {
@@ -55,7 +54,7 @@ const DeliveryTargets: ModelsType = {
   namespace: 'deliveryTarget',
   state: {
     deliveryTargetList: [],
-    deliveryTargets:[],
+    deliveryTargets: [],
     deliveryTargetListTotal: 0,
   },
   reducers: {
@@ -71,7 +70,7 @@ const DeliveryTargets: ModelsType = {
       };
     },
 
-    updateDeliveryTargetList(state: any, { payload }: { payload: {deliveryTargetList: []}}) {
+    updateDeliveryTargetList(state: any, { payload }: { payload: { deliveryTargetList: [] } }) {
       return {
         ...state,
         deliveryTargets: payload,
@@ -105,7 +104,5 @@ const DeliveryTargets: ModelsType = {
     },
   },
 };
-
-
 
 export default DeliveryTargets;

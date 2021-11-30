@@ -37,7 +37,7 @@
   "Reset": "重置",
   "Please enter": "请输入",
   "Project Screening": "所属项目筛选",
-  "Delivery Target Screening":"交付目标筛选",
+  "Delivery Target Screening": "交付目标筛选",
   "Application name, description and search": "名称、描述模糊搜索",
   "App Name": "应用名称",
   "App Name-": "应用名称-",
@@ -175,5 +175,9 @@
   "View history": "查看历史记录",
   "Set as default": "设置为默认",
   "Save": "保存",
-  "Deploy and manage all your applications": "统一交付和管理您的应用。"
+  "Deploy and manage all your applications": "统一交付和管理您的应用。",
+  "Needs review before continuing": "需求审核后才能继续执行",
+  "Please select the action you want to perform": "请选择您期望的动作执行?",
+  "Continue": "继续",
+  "Termination": "终止"
 }

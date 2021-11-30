@@ -9,7 +9,7 @@ const { Row, Col } = Grid;
 type Props = {
   t: (key: string) => {};
   dispatch: ({}) => {};
-  deliveryTargetList?: []; 
+  deliveryTargetList?: [];
   namespaceList?: [];
   getApplications: (params: any) => void;
 };
@@ -76,7 +76,7 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { deliveryTargetList, namespaceList,t } = this.props;
+    const { deliveryTargetList, namespaceList, t } = this.props;
     const { namespaceValue, deliveryTargetValue, inputValue } = this.state;
 
     const projectPlacehole = t('Project Screening').toString();
