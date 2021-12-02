@@ -173,7 +173,7 @@ class WorkflowStep extends Component<Props, State> {
               className="margin-top-5 margin-left-8"
               onClick={this.onTerminateApplicationWorkflowRecord}
             >
-              <Translation>Termination</Translation>
+              <Translation>Terminate</Translation>
             </Button>
 
             <Button
