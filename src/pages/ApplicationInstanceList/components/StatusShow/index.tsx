@@ -51,6 +51,7 @@ class StatusShow extends React.Component<Props, State> {
     const allConditions: Condition[] = [
       { type: 'Parsed', status: 'False' },
       { type: 'Revision', status: 'False' },
+      { type: 'Policy', status: 'False' },
       { type: 'Render', status: 'False' },
       { type: 'WorkflowFinished', status: 'False' },
       { type: 'Ready', status: 'False' },
