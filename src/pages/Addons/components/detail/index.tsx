@@ -7,6 +7,7 @@ import {
   getAddonsStatus,
   disableAddon,
   enableAddon,
+  upgradeAddon,
 } from '../../../../api/addons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -30,6 +31,7 @@ type State = {
   loading: boolean;
   status: 'disabled' | 'enabled' | 'enabling' | '';
   statusLoading: boolean;
+  upgradeLoading: boolean;
   args?: any;
 };
 
@@ -46,7 +48,8 @@ class AddonDetailDialog extends React.Component<Props, State> {
       },
       status: '',
       loading: true,
-      statusLoading: false,
+      statusLoading: true,
+      upgradeLoading: false,
     };
     this.form = new Field(this);
     this.uiSchemaRef = React.createRef();
@@ -74,18 +77,23 @@ class AddonDetailDialog extends React.Component<Props, State> {
   };
 
   loadAddonStatus = () => {
-    getAddonsStatus({ name: this.props.addonName }).then((res) => {
-      if (!res) return;
-      this.setState({ status: res.phase, args: res.args, statusLoading: false });
-      if (res.phase == 'enabling') {
-        setTimeout(() => {
-          this.loadAddonStatus();
-        }, 3000);
-      }
-      if (res.args) {
-        this.form.setValue('properties', res.args);
-      }
-    });
+    getAddonsStatus({ name: this.props.addonName })
+      .then((res) => {
+        if (!res) return;
+        if (res.phase == 'enabling') {
+          setTimeout(() => {
+            this.loadAddonStatus();
+          }, 3000);
+        }
+        if (res.args) {
+          this.form.setValue('properties', res.args);
+        }
+        this.setState({ status: res.phase, args: res.args, statusLoading: false });
+      })
+      .catch(() => {
+        debugger;
+        this.setState({ statusLoading: false });
+      });
   };
 
   handleSubmit = () => {
@@ -106,6 +114,18 @@ class AddonDetailDialog extends React.Component<Props, State> {
         this.enableAddon(values.properties);
       });
     }
+  };
+  onUpgrade = () => {
+    this.form.validate((errors: any, values: any) => {
+      if (errors) {
+        return;
+      }
+      this.setState({ upgradeLoading: true });
+      upgradeAddon({ name: this.props.addonName, properties: values.properties }).then(() => {
+        this.loadAddonStatus();
+        this.setState({ upgradeLoading: false });
+      });
+    });
   };
   enableAddon = async (properties: any) => {
     this.setState({ statusLoading: true }, () => {
@@ -128,42 +148,59 @@ class AddonDetailDialog extends React.Component<Props, State> {
   };
 
   render() {
-    const { loading, addonDetailInfo, status, statusLoading } = this.state;
+    const { loading, addonDetailInfo, status, statusLoading, upgradeLoading } = this.state;
     const { showAddon } = this.props;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
     let showName = addonDetailInfo.name ? addonDetailInfo.name : 'Addon Detail';
     showName = `${showName}(${status})`;
+    addonDetailInfo.uiSchema?.map((item) => {
+      if (item.jsonKey.indexOf('SECRET_KEY') != -1) {
+        item.uiType = 'Password';
+      }
+      if (item.jsonKey.indexOf('ACCESS_KEY') != -1) {
+        item.uiType = 'Password';
+      }
+    });
+    const buttons = [
+      <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
+        <Translation>Cancel</Translation>
+      </Button>,
+      <Button
+        type="primary"
+        onClick={this.handleSubmit}
+        warning={status === 'enabled'}
+        title={status}
+        style={{ backgroundColor: status === 'enabled' ? 'red' : '' }}
+        loading={statusLoading || loading || status == 'enabling'}
+        disabled={status == 'enabling'}
+      >
+        <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
+      </Button>,
+    ];
+    if (status == 'enabled') {
+      buttons.push(
+        <Button
+          loading={upgradeLoading}
+          type="primary"
+          onClick={this.onUpgrade}
+          style={{ marginLeft: '16px' }}
+        >
+          <Translation>Upgrade</Translation>
+        </Button>,
+      );
+    }
     return (
       <div className="basic">
-        <DrawerWithFooter
-          title={showName}
-          onClose={this.onClose}
-          extButtons={[
-            <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
-              <Translation>Cancel</Translation>
-            </Button>,
-            <Button
-              type="primary"
-              onClick={this.handleSubmit}
-              warning={status === 'enabled'}
-              title={status}
-              style={{ backgroundColor: status === 'enabled' ? 'red' : '' }}
-              loading={statusLoading || loading || status == 'enabling'}
-              disabled={status == 'enabling'}
-            >
-              <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
-            </Button>,
-          ]}
-        >
+        <DrawerWithFooter title={showName} onClose={this.onClose} extButtons={buttons}>
           <If condition={status == 'enabling'}>
             <Message style={{ marginBottom: '16px' }} type="warning">
               <Translation>Addon is enabling</Translation>
             </Message>
           </If>
           <Loading visible={loading} style={{ width: '100%' }}>
-            <If condition={addonDetailInfo.uiSchema}>
+            <If condition={addonDetailInfo.uiSchema && !statusLoading}>
               <Group
                 title={<Translation>Properties</Translation>}
                 description={<Translation>Set the addon configuration parameters</Translation>}
@@ -225,12 +262,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
                   <Table.Column
                     dataIndex="name"
                     align="left"
+                    width="120px"
                     title={<Translation>Name</Translation>}
                   />
                   <Table.Column
                     dataIndex="type"
                     align="left"
-                    width="100px"
+                    width="180px"
                     cell={(v: string) => {
                       return <Translation>{v}</Translation>;
                     }}
