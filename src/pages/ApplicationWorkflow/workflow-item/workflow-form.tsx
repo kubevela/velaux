@@ -158,7 +158,11 @@ class WorkflowForm extends Component<Props, State> {
         <Form field={this.field}>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Workflow Type</Translation>} required disabled>
+              <FormItem
+                label={<Translation>Workflow Type</Translation>}
+                required
+                disabled={this.field.getValue('type')}
+              >
                 <Select
                   className="select"
                   placeholder={t('Please select').toString()}

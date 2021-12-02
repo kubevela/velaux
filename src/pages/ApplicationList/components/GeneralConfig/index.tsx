@@ -2,30 +2,24 @@ import React from 'react';
 import type { Field } from '@b-design/ui';
 import { Grid, Form, Input } from '@b-design/ui';
 import NameSpaceForm from './namespace-form';
-import type EnvPlan from '../../../../extends/EnvPlan';
 import { checkName } from '../../../../utils/common';
 import './index.less';
 import Translation from '../../../../components/Translation';
+import type { Project } from '../../../../interface/project';
 
 type Props = {
   visible: boolean;
   field: Field;
-  namespaceList?: [];
+  projects?: Project[];
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
-  dispatch: ({}) => {};
+  dispatch: ({}) => void;
   namespaceChange?: (namespace: string) => void;
 };
 
 type State = {};
 
 class GeneralConfig extends React.Component<Props, State> {
-  envBind: React.RefObject<EnvPlan>;
-  constructor(props: Props) {
-    super(props);
-    this.envBind = React.createRef();
-  }
-
   resetField() {
     this.props.field.setValues({
       name: '',
@@ -36,7 +30,13 @@ class GeneralConfig extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { namespaceList = [] } = this.props;
+    const { projects } = this.props;
+    const namespaceList = projects?.map((item) => {
+      return {
+        label: item.name,
+        value: item.name,
+      };
+    });
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {

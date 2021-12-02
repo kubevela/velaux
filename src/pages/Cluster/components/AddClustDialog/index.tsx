@@ -60,6 +60,7 @@ class AddClustDialog extends React.Component<Props, State> {
     if (editClusterName) {
       getClusterDetails({ clusterName: editClusterName }).then((re) => {
         this.setState({ cluster: re, editMode: true });
+        this.field.setValues(re);
       });
     }
   };

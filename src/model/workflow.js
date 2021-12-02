@@ -96,9 +96,15 @@ export default {
       const nodeIndex = {};
       let index = 0;
       const steps = Object.keys(nodes).map((key) => {
-        nodeIndex[nodes[key].id] = index;
-        index++;
-        return nodes[key].consumerData;
+        if (nodes[key]) {
+          nodeIndex[nodes[key].id] = index;
+          index++;
+          const nodeConfig = nodes[key].consumerData;
+          if (nodeConfig && nodeConfig.properties && typeof nodeConfig.properties != 'string') {
+            return Object.assign(nodeConfig, { properties: JSON.stringify(nodeConfig.properties) });
+          }
+          return nodeConfig;
+        }
       });
       Object.keys(edges).map((key) => {
         const edge = edges[key];

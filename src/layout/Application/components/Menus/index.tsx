@@ -51,11 +51,11 @@ class Menu extends Component<Props, any> {
       ],
     };
     if (applicationType == 'common') {
-      menuItems.envPage.push({
-        key: 'monitor',
-        lable: <Translation>Monitor</Translation>,
-        to: `/applications/${appName}/envbinding/${envName}/monitor`,
-      });
+      // menuItems.envPage.push({
+      //   key: 'monitor',
+      //   lable: <Translation>Monitor</Translation>,
+      //   to: `/applications/${appName}/envbinding/${envName}/monitor`,
+      // });
     }
     let activeItems = menuItems.configPage;
     if (isEnvPage) {

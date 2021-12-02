@@ -80,13 +80,13 @@ class TableList extends Component<Props, State> {
           return (
             <div>
               <If condition={record.status === 'complete'}>
-                <a
+                {/* <a
                   onClick={() => {
                     this.onRollback(record);
                   }}
                 >
                   <Translation>Rollback</Translation>
-                </a>
+                </a> */}
               </If>
             </div>
           );

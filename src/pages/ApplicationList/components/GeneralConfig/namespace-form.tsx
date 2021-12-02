@@ -8,7 +8,7 @@ import { checkName } from '../../../../utils/common';
 const FormItem = Form.Item;
 type Props = {
   formItemLayout?: any;
-  namespaceList: [];
+  namespaceList?: { label: string; value: string }[];
   field: Field;
   handleSelectNameSpace?: () => {};
   onChange?: (namespace: string) => void;
@@ -46,7 +46,7 @@ class NamespaceForm extends React.Component<Props, State> {
     const { showNameSpaceInput } = this.state;
     return (
       <React.Fragment>
-        <If condition={namespaceList.length > 0}>
+        <If condition={namespaceList && namespaceList.length > 0}>
           <FormItem
             {...formItemLayout}
             label={<Translation>Project</Translation>}
@@ -95,8 +95,13 @@ class NamespaceForm extends React.Component<Props, State> {
             </If>
           </FormItem>
         </If>
-        <If condition={namespaceList.length === 0}>
-          <FormItem {...formItemLayout} label={'namespace'} labelTextAlign="left" required={true}>
+        <If condition={!namespaceList || namespaceList.length === 0}>
+          <FormItem
+            {...formItemLayout}
+            label={<Translation>Project</Translation>}
+            labelTextAlign="left"
+            required={true}
+          >
             <Input {...field.init('namespace')} />
           </FormItem>
         </If>

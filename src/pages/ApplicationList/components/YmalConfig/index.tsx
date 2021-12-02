@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Grid, Form, Input, Field, Upload, Icon, Message } from '@b-design/ui';
-import { UPLOADYMALFILE } from '../../../../constants';
 import NameSpaceForm from '../GeneralConfig/namespace-form';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import { checkName } from '../../../../utils/common';
@@ -166,7 +165,7 @@ class YmalConfig extends React.Component<Props> {
                 <Upload request={this.customRequest}>
                   <Button text type="normal" className="padding-left-0">
                     <Icon type="cloudupload" />
-                    {UPLOADYMALFILE}
+                    <Translation>Upload Yaml File</Translation>
                   </Button>
                 </Upload>
 

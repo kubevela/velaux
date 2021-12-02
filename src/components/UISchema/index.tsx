@@ -98,6 +98,7 @@ class UISchema extends Component<Props, State> {
 
   setValues = () => {
     const { value } = this.props;
+    console.log(value);
     if (value) {
       this.form.setValues(value);
     }

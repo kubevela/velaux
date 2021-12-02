@@ -3,6 +3,7 @@ import { Button, Grid, Icon, Select, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import './index.less';
 import Translation from '../../../../components/Translation';
+import type { Project } from '../../../../interface/project';
 
 const { Row, Col } = Grid;
 
@@ -10,7 +11,7 @@ type Props = {
   t: (key: string) => {};
   dispatch: ({}) => {};
   deliveryTargetList?: [];
-  namespaceList?: [];
+  projects?: Project[];
   getApplications: (params: any) => void;
 };
 
@@ -76,13 +77,18 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { deliveryTargetList, namespaceList, t } = this.props;
+    const { deliveryTargetList, projects, t } = this.props;
     const { namespaceValue, deliveryTargetValue, inputValue } = this.state;
 
     const projectPlacehole = t('Project Screening').toString();
     const deliveryTargetPlacehole = t('Delivery Target Screening').toString();
     const appPlacehole = t('Application name, description and search').toString();
-
+    const projectSource = projects?.map((item) => {
+      return {
+        label: item.name,
+        value: item.name,
+      };
+    });
     return (
       <Row className="app-select-wraper boder-radius-8">
         <Col span="6" style={{ padding: '0 8px' }}>
@@ -90,7 +96,7 @@ class SelectSearch extends React.Component<Props, State> {
             mode="single"
             size="large"
             onChange={this.handleChangeNamepace}
-            dataSource={namespaceList}
+            dataSource={projectSource}
             placeholder={projectPlacehole}
             className="item"
             hasClear

@@ -4,7 +4,7 @@ import { connect } from 'dva';
 import { Pagination } from '@b-design/ui';
 import ListTitle from '../../components/ListTitle';
 import TableList from './components/List';
-import DeliveryDialog from './components/DeliveryDialog';
+import DeliveryDialog from './components/TargetDialog';
 import type { DeliveryTarget } from '../../interface/deliveryTarget';
 import './index.less';
 import type { Cluster } from '../../interface/cluster';
@@ -13,9 +13,9 @@ type Props = {
   deliveryTargets?: [];
   total?: number;
   clusterList?: Cluster[];
-  namespaceList?: [];
-  dispatch: ({}) => {};
-  t: (key: string) => {};
+  projects?: [];
+  dispatch: ({}) => void;
+  t: (key: string) => string;
 };
 
 type State = {
@@ -49,7 +49,7 @@ class DeliveryTargetList extends React.Component<Props, State> {
   componentDidMount() {
     this.getDeliveryTargetList();
     this.getClusterList();
-    this.getNamespaceList();
+    this.getProjectList();
   }
 
   getDeliveryTargetList = async () => {
@@ -70,9 +70,9 @@ class DeliveryTargetList extends React.Component<Props, State> {
     });
   };
 
-  getNamespaceList = async () => {
+  getProjectList = async () => {
     this.props.dispatch({
-      type: 'application/getNamespaceList',
+      type: 'application/getProjectList',
       payload: {},
     });
   };
@@ -117,7 +117,7 @@ class DeliveryTargetList extends React.Component<Props, State> {
   };
 
   render() {
-    const { t, clusterList, deliveryTargets, total, namespaceList, dispatch } = this.props;
+    const { t, clusterList, deliveryTargets, total, projects } = this.props;
     const { visibleDelivery, isEdit, deliveryTargetItem } = this.state;
     return (
       <div>
@@ -150,13 +150,12 @@ class DeliveryTargetList extends React.Component<Props, State> {
         <DeliveryDialog
           t={t}
           visible={visibleDelivery}
-          clusterList={clusterList}
-          namespaceList={namespaceList}
+          clusterList={clusterList || []}
+          projects={projects || []}
           isEdit={isEdit}
           deliveryTargetItem={deliveryTargetItem}
           onClose={this.onClose}
           onOK={this.onOk}
-          dispatch={dispatch}
         />
       </div>
     );

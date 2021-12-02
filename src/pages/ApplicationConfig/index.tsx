@@ -220,29 +220,30 @@ class ApplicationConfig extends Component<Props, State> {
           </Col>
         </Row>
 
-        <Row>
-          <Col span={24} className="padding16">
-            <Title
-              actions={[
-                <a key={'add'} onClick={this.onAddTrait}>
-                  <Translation>New Trait</Translation>
-                </a>,
-              ]}
-              title={<Translation>Traits</Translation>}
-            />
-          </Col>
-        </Row>
-
-        <TraitsList
-          traits={mainComponent?.traits || []}
-          changeTraitStats={(is: boolean, trait: Trait) => {
-            this.changeTraitStats(is, trait);
-          }}
-          onDeleteTrait={(traitType: string) => {
-            this.onDeleteTrait(traitType);
-          }}
-          onAdd={this.onAddTrait}
-        />
+        <If condition={applicationDetail?.applicationType == 'common'}>
+          <Row>
+            <Col span={24} className="padding16">
+              <Title
+                actions={[
+                  <a key={'add'} onClick={this.onAddTrait}>
+                    <Translation>New Trait</Translation>
+                  </a>,
+                ]}
+                title={<Translation>Traits</Translation>}
+              />
+            </Col>
+          </Row>
+          <TraitsList
+            traits={mainComponent?.traits || []}
+            changeTraitStats={(is: boolean, trait: Trait) => {
+              this.changeTraitStats(is, trait);
+            }}
+            onDeleteTrait={(traitType: string) => {
+              this.onDeleteTrait(traitType);
+            }}
+            onAdd={this.onAddTrait}
+          />
+        </If>
 
         <If condition={visibleTrait}>
           <TraitDialog

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Message, Grid, Dialog, Form, Input, Field, Select } from '@b-design/ui';
-import { addDeliveryTargetList, editDeliveryTargetList } from '../../../../constants';
 import Group from '../../../../extends/Group';
 import Namespace from '../Namespace';
 import type { NamespaceItem } from '../Namespace';
@@ -11,17 +10,18 @@ import Translation from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
 import { listNamespaces } from '../../../../api/observation';
 import NameSpaceForm from '../../../ApplicationList/components/GeneralConfig/namespace-form';
+import type { Project } from '../../../../interface/project';
 
 type Props = {
-  isEdit: boolean;
+  project?: string;
+  isEdit?: boolean;
   visible: boolean;
-  clusterList?: Cluster[];
-  namespaceList?: [];
+  clusterList: Cluster[];
+  projects: Project[];
   deliveryTargetItem?: DeliveryTarget;
   onOK: () => void;
   onClose: () => void;
-  dispatch: ({}) => {};
-  t: (key: string) => {};
+  t: (key: string) => string;
 };
 
 type State = {
@@ -42,12 +42,15 @@ class DeliveryDialog extends React.Component<Props, State> {
           });
           this.field.setValue('runtimeNamespace', '');
           props.clusterList?.map((cluster) => {
-            if ((cluster.name == value, cluster.providerInfo)) {
+            if (cluster.name == value && cluster.providerInfo) {
               this.field.setValues({
                 var_region: cluster.providerInfo.regionID,
                 var_zone: cluster.providerInfo.zoneID,
                 var_vpcID: cluster.providerInfo.vpcID,
               });
+              if (cluster.providerInfo.provider == 'aliyun') {
+                this.field.setValue('var_providerName', 'default');
+              }
             }
           });
         }
@@ -81,6 +84,13 @@ class DeliveryDialog extends React.Component<Props, State> {
         var_vpcID: variable.vpcID,
       });
       this.loadNamespaces(cluster.clusterName);
+    }
+  }
+
+  componentDidMount() {
+    const { project } = this.props;
+    if (project) {
+      this.field.setValue('namespace', project);
     }
   }
 
@@ -193,15 +203,23 @@ class DeliveryDialog extends React.Component<Props, State> {
       },
     };
 
-    const { t, visible, isEdit, namespaceList = [] } = this.props;
+    const { t, visible, isEdit, projects } = this.props;
     const { namespaces } = this.state;
     const cluster: string = this.field.getValue('clusterName');
+    const dataSource = projects.map((project) => {
+      return {
+        label: project.name,
+        value: project.name,
+      };
+    });
     return (
       <div>
         <Dialog
           className={'commonDialog'}
           height="auto"
-          title={isEdit ? editDeliveryTargetList : addDeliveryTargetList}
+          title={
+            isEdit ? <Translation>Edit Target</Translation> : <Translation>New Target</Translation>
+          }
           autoFocus={true}
           visible={visible}
           onOk={this.onOk}
@@ -250,7 +268,7 @@ class DeliveryDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <NameSpaceForm field={this.field} namespaceList={namespaceList} />
+                <NameSpaceForm field={this.field} namespaceList={dataSource} />
               </Col>
             </Row>
             <Row>
@@ -318,13 +336,18 @@ class DeliveryDialog extends React.Component<Props, State> {
                   <Row>
                     <Col span={12} style={{ padding: '0 8px' }}>
                       <FormItem label={<Translation>Cloud Service Provider</Translation>}>
-                        <Select
+                        {/* <Select
                           className="select"
-                          defaultValue="alibaba"
                           placeholder={t('Please select').toString()}
                           {...init(`var_providerName`)}
                           dataSource={[]}
-                        />
+                        /> */}
+                        {
+                          <Input
+                            placeholder={t('Please input terraform provider name').toString()}
+                            {...init(`var_providerName`)}
+                          />
+                        }
                       </FormItem>
                     </Col>
                     <Col span={12} style={{ padding: '0 8px' }}>

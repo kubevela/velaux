@@ -2,14 +2,6 @@ import React from 'react';
 import { Button, Dialog, Form, Input, Select, Field, Table, Message } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import { If } from 'tsx-control-statements/components';
-import {
-  supplierList,
-  cloudServerTitle,
-  SUPPLIER,
-  NEXTSTEP,
-  PLEASE_ENTER,
-  PLEASE_CHOSE,
-} from '../../../../constants';
 import { ACKCLusterStatus } from '../../../../utils/common';
 import { getCloudClustersList } from '../../../../api/cluster';
 import './index.less';
@@ -20,8 +12,8 @@ type Props = {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   setCloudService: (isCloudService: boolean) => void;
-  t: (key: string) => {};
-  dispatch: ({}) => {};
+  t: (key: string) => string;
+  dispatch: ({}) => void;
 };
 
 type State = {
@@ -134,25 +126,23 @@ class CloudServiceDialog extends React.Component<Props, State> {
 
   render() {
     const init = this.field.init;
-    const { t, visible } = this.props;
+    const { visible } = this.props;
     const { choseInput, cloudClusters, btnLoading } = this.state;
     const { Column } = Table;
-    const PLEASE_ENTER_PLACE_HOLD = t(PLEASE_ENTER).toString();
-    const PLEASE_CHOSE_PLACE_HOLD = t(PLEASE_CHOSE).toString();
     const FormItem = Form.Item;
     const formItemLayout = {
       labelCol: {
-        fixedSpan: 6,
+        fixedSpan: 8,
       },
       wrapperCol: {
-        span: 18,
+        span: 16,
       },
     };
 
     const columns = [
       {
         key: 'name',
-        title: '集群名称',
+        title: <Translation>Cluster Name</Translation>,
         dataIndex: 'name',
         cell: (v: string) => {
           return <span>{v}</span>;
@@ -160,7 +150,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       },
       {
         key: 'status',
-        title: '状态',
+        title: <Translation>Cluster Status</Translation>,
         dataIndex: 'status',
         cell: (v: string) => {
           const findArr = ACKCLusterStatus.filter((item) => {
@@ -171,7 +161,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       },
       {
         key: 'apiServerURL',
-        title: 'API地址',
+        title: <Translation>API Address</Translation>,
         dataIndex: 'apiServerURL',
         cell: (v: string) => {
           return <span>{v}</span>;
@@ -179,7 +169,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       },
       {
         key: 'type',
-        title: '类型',
+        title: <Translation>Type</Translation>,
         dataIndex: 'type',
         cell: (v: string) => {
           return <span>{v}</span>;
@@ -187,7 +177,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       },
       {
         key: 'zone',
-        title: '区域',
+        title: <Translation>Zone</Translation>,
         dataIndex: 'zone',
         cell: (v: string) => {
           return <span>{v}</span>;
@@ -195,7 +185,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       },
       {
         key: 'operation',
-        title: '操作',
+        title: <Translation>Operations</Translation>,
         dataIndex: 'operation',
         cell: (v: string, i: number, record: Record) => {
           return (
@@ -207,18 +197,20 @@ class CloudServiceDialog extends React.Component<Props, State> {
                 this.connectcloudCluster(record);
               }}
             >
-              <Translation>Link</Translation>
+              <Translation>Connect</Translation>
             </Button>
           );
         },
       },
     ];
 
+    const providerList = [{ value: 'aliyun', label: 'Aliyun ACK' }];
+
     return (
       <React.Fragment>
         <Dialog
           className="dialog-cluoudService-wraper"
-          title={cloudServerTitle}
+          title={<Translation>Connect Kubernetes Cluster From Cloud</Translation>}
           autoFocus={true}
           visible={visible}
           onOk={this.onOk}
@@ -227,7 +219,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           footer={
             choseInput && (
               <Button type="primary" onClick={this.onOk} loading={btnLoading}>
-                {NEXTSTEP}
+                <Translation>Next Step</Translation>
               </Button>
             )
           }
@@ -241,12 +233,11 @@ class CloudServiceDialog extends React.Component<Props, State> {
               </Translation>
             </Message>
             <Form {...formItemLayout} field={this.field} className="cloud-server-wraper">
-              <FormItem label={SUPPLIER} required={true}>
+              <FormItem label={<Translation>Provider</Translation>} required={true}>
                 <Select
                   mode="single"
                   size="large"
-                  dataSource={supplierList}
-                  placeholder={PLEASE_CHOSE_PLACE_HOLD}
+                  dataSource={providerList}
                   className="item"
                   {...init('provider', {
                     rules: [
@@ -263,7 +254,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
                 <Input
                   htmlType="password"
                   name="accessKeyID"
-                  placeholder={PLEASE_ENTER_PLACE_HOLD}
                   {...init('accessKeyID', {
                     rules: [
                       {
@@ -279,7 +269,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
                 <Input
                   htmlType="password"
                   name="accessKeySecret"
-                  placeholder={PLEASE_ENTER_PLACE_HOLD}
                   {...init('accessKeySecret', {
                     rules: [
                       {

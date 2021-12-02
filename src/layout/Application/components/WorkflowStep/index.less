@@ -2,7 +2,6 @@
   margin-top: 20px;
   padding: 0 30px;
   .next-step {
-    width: 550px;
     padding-left: 20px;
     overflow-x: scroll;
     .next-step-item {
@@ -18,10 +17,6 @@
   .next-step-circle .next-step-item-last .next-step-item-tail {
     display: none !important;
   }
-
-  .failedTitle {
-    margin-top: 14px;
-  }
   .title-long-hidden {
     display: block;
     width: 120px;
@@ -31,6 +26,11 @@
     text-align: center;
     text-overflow: ellipsis;
     cursor: pointer;
+  }
+
+  .failedTitle {
+    margin-top: 14px;
+    color: red;
   }
 
   .longTitle {
@@ -149,29 +149,35 @@
 
 .step-confirm-wraper {
   position: relative;
-  left: -60px;
-  z-index: 999999;
-  width: 240px;
+  // width/2 - 120/2
+  left: -90px;
+  z-index: 1000;
+  width: 300px;
   background: rgb(255, 255, 255);
   border: 1px solid #f5efef;
   border-radius: 4px;
   .step-confirm-title {
     margin-top: -10px;
+    padding: 4px 16px;
     color: rgb(0, 0, 0);
     font-size: 14px;
+    i {
+      float: right;
+    }
   }
   .step-confirm-main {
     margin-top: 20px;
+    padding: 4px 16px;
     color: #595959;
     font-size: 14px;
   }
   .step-confirm-footer {
     display: flex;
     justify-content: center;
-    margin: 10px 0 12px 0;
+    padding: 16px;
   }
   .error-message-content {
-    padding: 10px;
+    padding: 16px;
     color: red;
   }
 }
@@ -236,4 +242,8 @@
 
 .margin-right-30 {
   margin-right: 30px;
+}
+
+.confirm-box {
+  background: #fff !important;
 }
