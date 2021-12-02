@@ -1,6 +1,6 @@
 import React from 'react';
 import { Field } from '@b-design/ui';
-import { Upload, Button, Icon } from '@b-design/ui';
+import { Upload, Button, Icon, Message } from '@b-design/ui';
 import DefinitionCode from '../../components/DefinitionCode';
 import Translation from '../../components/Translation';
 import * as yaml from 'js-yaml';
@@ -14,6 +14,7 @@ type Props = {
 
 type State = {
   message: string;
+  containerId: string;
 };
 
 class K8sObjectsCode extends React.Component<Props, State> {
@@ -22,6 +23,7 @@ class K8sObjectsCode extends React.Component<Props, State> {
     super(props);
     this.state = {
       message: '',
+      containerId: Date.now().toString(),
     };
     this.form = new Field(this, {
       onChange: () => {
@@ -97,9 +99,9 @@ class K8sObjectsCode extends React.Component<Props, State> {
   render() {
     const { id } = this.props;
     const { init } = this.form;
-    const { message } = this.state;
+    const { message, containerId } = this.state;
     return (
-      <div>
+      <div id={id}>
         <If condition={message}>
           <span style={{ color: 'red' }}>{message}</span>
         </If>
@@ -110,9 +112,20 @@ class K8sObjectsCode extends React.Component<Props, State> {
           </Button>
         </Upload>
 
-        <div id={id} className="guide-code">
-          <DefinitionCode containerId={id} language={'yaml'} readOnly={false} {...init('code')} />
+        <div id={containerId} className="guide-code">
+          <DefinitionCode
+            containerId={containerId}
+            language={'yaml'}
+            readOnly={false}
+            {...init('code')}
+          />
         </div>
+        <Message type="notice" style={{ marginTop: '16px' }}>
+          <Translation>
+            The input data will be automatically formatted. Ensure that the input data is a valid
+            k8s resource YAML.
+          </Translation>
+        </Message>
       </div>
     );
   }

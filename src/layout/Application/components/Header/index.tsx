@@ -53,11 +53,13 @@ interface State {
 })
 class ApplicationHeader extends Component<Props, State> {
   interval: any;
+  sync: boolean;
   constructor(props: any) {
     super(props);
     this.state = {
       loading: true,
     };
+    this.sync = true;
   }
 
   onDeploy = (workflowName?: string, force?: boolean) => {
@@ -115,9 +117,11 @@ class ApplicationHeader extends Component<Props, State> {
           }
         })
         .finally(() => {
-          this.interval = setTimeout(() => {
-            this.loadworkflowRecord();
-          }, 3000);
+          if (this.sync) {
+            this.interval = setTimeout(() => {
+              this.loadworkflowRecord();
+            }, 3000);
+          }
         });
     }
   };
@@ -129,6 +133,7 @@ class ApplicationHeader extends Component<Props, State> {
 
   componentWillUnmount() {
     clearTimeout(this.interval);
+    this.sync = false;
   }
 
   render() {
@@ -209,7 +214,10 @@ class ApplicationHeader extends Component<Props, State> {
           <Col span={12} className="padding16">
             <If condition={!records || (Array.isArray(records) && records.length === 0)}>
               <Card>
-                <Empty iconWidth={'30px'} />
+                <Empty
+                  message={<Translation>There is no running workflow</Translation>}
+                  iconWidth={'30px'}
+                />
               </Card>
             </If>
             <If condition={Array.isArray(records) && records.length > 0}>

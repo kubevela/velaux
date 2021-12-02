@@ -22,7 +22,7 @@ const SwitchLanguage = () => {
       >
         EN
       </Button>
-      <Button
+      {/* <Button
         className={`chinese-part ${isEnglish ? 'null' : 'is-english'}`}
         onClick={() => {
           i18n.changeLanguage('zh');
@@ -31,8 +31,8 @@ const SwitchLanguage = () => {
           setIsEnglish(false);
         }}
       >
-        中
-      </Button>
+        中文
+      </Button> */}
     </div>
   );
 };

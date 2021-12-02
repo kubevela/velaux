@@ -1,6 +1,5 @@
 import React from 'react';
 import { Form, Button, Loading, Field, Card, Dialog, Table, Message } from '@b-design/ui';
-import { addonDetail } from '../../../../constants';
 import type { Rule } from '@alifd/field';
 import { If } from 'tsx-control-statements/components';
 import {
@@ -94,7 +93,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
     if (status === 'enabled') {
       Dialog.confirm({
         content:
-          'Are you sure you want to disable the addon? After the function is disabled, related resources are reclaimed.',
+          'Are you sure you want to disable the addon? After the addon is disabled, related resources are reclaimed.',
         onOk: this.disableAddon,
       });
       return;
@@ -134,11 +133,8 @@ class AddonDetailDialog extends React.Component<Props, State> {
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
-    let showName = addonDetailInfo.name ? addonDetailInfo.name : addonDetail;
-    const statusShow = status === 'enabled' ? 'Enabled' : undefined;
-    if (statusShow) {
-      showName = `${showName}(${statusShow})`;
-    }
+    let showName = addonDetailInfo.name ? addonDetailInfo.name : 'Addon Detail';
+    showName = `${showName}(${status})`;
     return (
       <div className="basic">
         <DrawerWithFooter
@@ -151,13 +147,21 @@ class AddonDetailDialog extends React.Component<Props, State> {
             <Button
               type="primary"
               onClick={this.handleSubmit}
-              loading={statusLoading || loading}
+              warning={status === 'enabled'}
+              title={status}
+              style={{ backgroundColor: status === 'enabled' ? 'red' : '' }}
+              loading={statusLoading || loading || status == 'enabling'}
               disabled={status == 'enabling'}
             >
               <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
             </Button>,
           ]}
         >
+          <If condition={status == 'enabling'}>
+            <Message style={{ marginBottom: '16px' }} type="warning">
+              <Translation>Addon is enabling</Translation>
+            </Message>
+          </If>
           <Loading visible={loading} style={{ width: '100%' }}>
             <If condition={addonDetailInfo.uiSchema}>
               <Group

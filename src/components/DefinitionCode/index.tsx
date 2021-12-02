@@ -70,13 +70,18 @@ class DefinitionCode extends React.Component<Props> {
       }
     }
   }
-  componentWillUnmount() {}
+  componentWillUnmount() {
+    if (this.editor) {
+      this.editor.dispose();
+    }
+  }
   shouldComponentUpdate() {
     return false;
   }
 
   render() {
-    return <div />;
+    const { id } = this.props;
+    return <div id={id} />;
   }
 }
 

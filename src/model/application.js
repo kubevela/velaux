@@ -23,7 +23,7 @@ export default {
     projectList: [],
     clusterList: [],
     searchAppName: '',
-    namespaceList: [],
+    projects: [],
     components: [],
     componentDefinitions: [],
     componentDetails: {},
@@ -68,10 +68,10 @@ export default {
         componentsApp: payload.componentsApp,
       };
     },
-    updateNameSpaceList(state, { type, payload }) {
+    updateProjectList(state, { type, payload }) {
       return {
         ...state,
-        namespaceList: payload,
+        projects: payload,
       };
     },
     updatePoliciesList(state, { type, payload }) {
@@ -114,10 +114,12 @@ export default {
         action.callback(result);
       }
     },
-    *getNamespaceList(action, { call, put }) {
+    *getProjectList(action, { call, put }) {
+      // use namespace data as projects
       const result = yield call(getNamespaceList, action.payload);
-      const namespaceList = getNamespace(result || {});
-      yield put({ type: 'updateNameSpaceList', payload: namespaceList });
+      if (result) {
+        yield put({ type: 'updateProjectList', payload: result.namespaces });
+      }
     },
 
     *getApplicationDetail(action, { call, put }) {
@@ -193,19 +195,4 @@ export function getAppCardList(data) {
     appContent.push(app);
   }
   return appContent;
-}
-
-function getNamespace(data) {
-  const namespacesList = data.namespaces;
-  if (!namespacesList) {
-    return [];
-  }
-  const list = [];
-  for (const item of namespacesList) {
-    const namespace = {};
-    namespace.value = item.name;
-    namespace.label = item.name;
-    list.push(namespace);
-  }
-  return list;
 }

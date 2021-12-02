@@ -102,3 +102,45 @@ export interface ManagedFields {
   operation: string;
   time: string;
 }
+
+export interface CloudResource {
+  name: string;
+  region: string;
+  url: string;
+  status: string;
+}
+
+export interface Configuration {
+  apiVersion: string;
+  kind: string;
+  metadata: {
+    annotations: any;
+    labels: any;
+  };
+  spec: {
+    region: string;
+    providerRef: {
+      name: string;
+      namespace: string;
+    };
+  };
+  status?: {
+    apply?: {
+      outputs?: any;
+      state?: string;
+      message?: string;
+    };
+  };
+}
+
+export interface Secret {
+  apiVersion: string;
+  kind: string;
+  metadata: {
+    name: string;
+    namespace: string;
+    annotations: any;
+    labels: any;
+  };
+  data: any;
+}

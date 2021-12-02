@@ -1,201 +1,285 @@
-import React, { Component } from 'react';
-import { Input, Select, Icon, Grid, Message } from '@b-design/ui';
-import _ from 'lodash';
+import React from 'react';
+import { Input, Button, Field, Icon, Select, Form, Grid } from '@b-design/ui';
+import { If } from 'tsx-control-statements/components';
 import './index.less';
+import type { EnvBinding } from '../../interface/application';
+import Translation from '../Translation';
+import { checkName } from '../../utils/common';
+import type { DeliveryTarget } from '../../interface/deliveryTarget';
+import TargetDialog from '../../pages/DeliveryTargetList/components/TargetDialog';
+import type { Project } from '../../interface/project';
+import type { Cluster } from '../../interface/cluster';
+
+const { Col, Row } = Grid;
 
 type Props = {
-  clusterList?: [];
+  project?: string;
+  value: EnvBinding[];
+  targetList?: DeliveryTarget[];
+  envList?: EnvBinding[];
+  t: (key: string) => string;
+  onUpdateTarget: () => void;
+  projects: Project[];
+  clusterList: Cluster[];
 };
+
 type State = {
-  envs: Record<string, [EnvItem]>;
+  envList: any[];
+  showAddTarget: boolean;
 };
-type EnvItem = {
+
+type EnvItemType = {
   name: string;
-  cluster: string;
+  alias: string;
+  targetNames: [];
   description?: string;
 };
 
-class EnvPlan extends Component<Props, State> {
+type EnvPlanParams = {
+  key: string;
+  id: string;
+  itemLength: number;
+  init: any;
+  value?: EnvBinding;
+  targetList: { label: string; value: string }[];
+  onChange?: () => {};
+  delete?: (key: string) => void;
+};
+const ENVPLAN_KEY_LIST = ['name', 'alias', 'targetNames', 'description'];
+function EnvItem(props: EnvPlanParams) {
+  return (
+    <div className="env-item-container">
+      <Row>
+        <Col span={3} style={{ padding: '0 8px' }}>
+          <Form.Item required label={<Translation>Name</Translation>}>
+            <Input
+              {...props.init(`${props.id}-name`, {
+                initValue: props.value?.name,
+                rules: [
+                  {
+                    required: true,
+                    message: 'Enter Env name',
+                  },
+                  {
+                    required: true,
+                    pattern: checkName,
+                    message: 'Please enter a valid envbing name',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        </Col>
+        <Col span={4} style={{ padding: '0 8px' }}>
+          <Form.Item label={<Translation>Alias</Translation>}>
+            <Input
+              {...props.init(`${props.id}-alias`, {
+                initValue: props.value?.alias,
+                rules: [
+                  {
+                    max: 64,
+                    message: 'Enter a description less than 64 characters.',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        </Col>
+        <Col span={10} style={{ padding: '0 8px' }}>
+          <Form.Item required label={<Translation>Targets</Translation>}>
+            <Select
+              className="select"
+              mode="multiple"
+              {...props.init(`${props.id}-targetNames`, {
+                initValue: props.value?.targetNames && props.value?.targetNames,
+                rules: [
+                  {
+                    required: true,
+                    message: 'Please select',
+                  },
+                ],
+              })}
+              dataSource={props.targetList}
+            />
+          </Form.Item>
+        </Col>
+        <Col span={6} style={{ padding: '0 8px' }}>
+          <Form.Item label={<Translation>Description</Translation>}>
+            <Input
+              {...props.init(`${props.id}-description`, {
+                initValue: props.value?.description,
+                rules: [
+                  {
+                    max: 128,
+                    message: 'Enter a description less than 128 characters.',
+                  },
+                ],
+              })}
+            />
+          </Form.Item>
+        </Col>
+        <Col span={1} style={{ padding: '0 8px', display: 'flex', alignItems: 'center' }}>
+          <If condition={props.itemLength !== 1}>
+            <Icon
+              type="ashbin"
+              onClick={() => {
+                if (props.delete) {
+                  props.delete(props.id);
+                }
+              }}
+            />
+          </If>
+        </Col>
+      </Row>
+    </div>
+  );
+}
+
+export default class EnvPlan extends React.Component<Props, State> {
+  field: any;
   constructor(props: Props) {
     super(props);
-    this.state = {
-      envs: {
-        [new Date().getTime()]: [{ name: '', cluster: '', description: '' }],
-      },
-    };
-  }
-
-  handleChangeName(key: EnvItem, index: number, val: string) {
-    key.name = val;
-    this.setState({});
-  }
-
-  handleSelectCluster(key: EnvItem, index: number, val: string) {
-    key.cluster = val;
-    this.setState({});
-  }
-
-  handleChangeDescription(key: EnvItem, index: number, val: string) {
-    key.description = val;
-    this.setState({});
-  }
-
-  // delete one
-  handlleDeleteItem = (key: string, filterIndex: number) => {
-    const { envs } = this.state;
-    const queryKeys = Object.keys(envs);
-    if (queryKeys.length === 1) {
-      return Message.show({
-        type: 'warning',
-        title: 'Warning',
-        content: ' Keep at least one',
+    const initValues: any[] = [];
+    if (props.value && props.value.length > 0) {
+      props.value.map((item) => {
+        initValues.push({ key: Date.now().toString(), value: item });
+      });
+    } else {
+      initValues.push({
+        key: Date.now().toString(),
+        value: { name: 'dev', alias: 'Development Environment' },
       });
     }
-    const fields = _.get(envs, key, []);
-    if (!fields || fields.length === 0) {
-      return;
-    }
+    this.state = {
+      envList: initValues,
+      showAddTarget: false,
+    };
+    this.field = new Field(this);
+  }
 
-    fields.splice(filterIndex, 1);
-    delete envs[key];
+  componentDidMount = async () => {};
 
-    this.setState({
-      envs: {
-        ...envs,
-      },
+  addEnvPlanItem = () => {
+    this.field.validate((error: any) => {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      const { envList } = this.state;
+      const key = Date.now().toString();
+      envList.push({
+        key,
+      });
+      this.setState({
+        envList,
+      });
     });
   };
 
-  renderEnv() {
-    const { Row, Col } = Grid;
-    const { envs } = this.state;
-    const { clusterList } = this.props;
-    const result: any = [];
-    const dataSource = (clusterList || []).map((item: { name: string }) => ({
-      value: item.name,
-      label: item.name,
-    }));
-
-    Object.keys(envs).forEach((key) => {
-      if (!envs[key]) {
-        return;
-      }
-
-      envs[key].forEach((item, index) => {
-        result.push(
-          <Row className="env-bind margin-bottom-10" key={key}>
-            <Col span="8">
-              <Input
-                required
-                className="input-name"
-                value={item.name}
-                onChange={(val) => this.handleChangeName(item, index, val)}
-              />
-            </Col>
-
-            <Col span="8">
-              <Select
-                className="slect-cluster"
-                value={item.cluster}
-                dataSource={dataSource}
-                onChange={(val) => this.handleSelectCluster(item, index, val)}
-              />
-            </Col>
-
-            <Col span="8" className="item_span_15">
-              <Input
-                className="input-description"
-                value={item.description}
-                onChange={(val) => this.handleChangeDescription(item, index, val)}
-              />
-
-              <span
-                className="margin-left-4"
-                onClick={() => {
-                  this.handlleDeleteItem(key, index);
-                }}
-              >
-                <Icon type="minus-circle" size="medium" />
-              </span>
-            </Col>
-          </Row>,
-        );
-      });
-    });
-
-    return <div>{result}</div>;
-  }
-
-  // add item
-  handlleAddItem = () => {
-    const { envs } = this.state;
-    const obj: any = {};
-    Object.keys(envs).map((item) => {
-      if (envs[item]) {
-        envs[item].forEach((key: EnvItem) => {
-          if (
-            !key.name ||
-            !(key.name && key.name.trim()) ||
-            !key.cluster ||
-            !(key.cluster && key.cluster.trim())
-          ) {
-            obj.key = {
-              name: key.name,
-              cluster: key.cluster,
-            };
-          }
-        });
-        return item;
+  removeEnvPlanItem = (key: string) => {
+    const { envList } = this.state;
+    envList.forEach((item, i) => {
+      if (item.key === key) {
+        envList.splice(i, 1);
       }
     });
-
-    for (const param in obj) {
-      if (!obj[param].name || !obj[param].cluster) {
-        return Message.show({
-          type: 'warning',
-          title: 'Warning',
-          content: 'name and cluster  is must enter',
-        });
-      }
-    }
-
+    ENVPLAN_KEY_LIST.forEach((_key) => {
+      this.field.remove(`${key}-${_key}`);
+    });
     this.setState({
-      envs: {
-        ...this.state.envs,
-        [Date.now()]: [{ name: '', cluster: '', description: '' }],
-      },
+      envList,
     });
+  };
+
+  getValues = (): EnvItemType[] | null => {
+    let hasError = false;
+    this.field.validate();
+    const errors = this.field.getErrors();
+    Object.keys(errors).forEach((key) => {
+      if (errors[key]) {
+        hasError = true;
+      }
+    });
+    if (hasError) {
+      return null;
+    } else {
+      let allValues: EnvItemType[] = [];
+      const values = this.field.getValues();
+      const { envList } = this.state;
+      const keyMap = envList.reduce((preObj, item) => {
+        preObj[item.key] = {};
+        return preObj;
+      }, {});
+
+      Object.keys(values).forEach((key) => {
+        const [keyId, keyName] = key.split('-');
+        if (!keyMap[keyId]) {
+          keyMap[keyId] = {};
+        }
+        keyMap[keyId][keyName] = values[key];
+      });
+      allValues = Object.keys(keyMap).map((key) => keyMap[key]);
+      return allValues;
+    }
+  };
+
+  showNewTarget = () => {
+    this.setState({ showAddTarget: true });
   };
 
   render() {
-    const { Row, Col } = Grid;
+    const { envList, showAddTarget } = this.state;
+    const { targetList, project, projects, clusterList } = this.props;
+    const dataSource = (targetList || []).map((item: DeliveryTarget) => ({
+      value: item.name,
+      label: item.alias || item.name,
+    }));
+    const { init } = this.field;
     return (
-      <div className="env-bind-wraper">
-        <Row>
-          <Col span="8" className="text-align-center">
-            name{' '}
-          </Col>
-          <Col span="8" className="text-align-center">
-            clusterSelector{' '}
-          </Col>
-          <Col span="8" className="text-align-center">
-            <div>
-              <span className="add-description">description</span>
-              <span
-                className="margin-left-4"
-                onClick={() => {
-                  this.handlleAddItem();
-                }}
-              >
-                <Icon type="plus-circle" size="medium" />
-              </span>
-            </div>
-          </Col>
-        </Row>
-        {this.renderEnv()}
+      <div className="env-plan-container">
+        <div className="env-plan-group">
+          <Form field={this.field}>
+            {envList.map((env) => (
+              <EnvItem
+                delete={this.removeEnvPlanItem}
+                id={env.key}
+                key={env.key}
+                init={init}
+                value={env.value}
+                itemLength={envList.length}
+                targetList={dataSource}
+              />
+            ))}
+          </Form>
+          <If condition={!targetList || targetList.length == 0}>
+            <span>
+              <Translation>There is no target in current project.</Translation>{' '}
+              <a onClick={this.showNewTarget}>New Target</a>
+            </span>
+          </If>
+        </div>
+        <div className="env-plan-option">
+          <Button onClick={this.addEnvPlanItem} type="secondary">
+            <Translation>New Environment Plan</Translation>
+          </Button>
+        </div>
+        <If condition={showAddTarget}>
+          <TargetDialog
+            onOK={() => {
+              this.props.onUpdateTarget();
+              this.setState({ showAddTarget: false });
+            }}
+            projects={projects || []}
+            clusterList={clusterList || []}
+            project={project}
+            onClose={() => {
+              this.setState({ showAddTarget: false });
+            }}
+            t={this.props.t}
+            visible={showAddTarget}
+          />
+        </If>
       </div>
     );
   }
 }
-
-export default EnvPlan;

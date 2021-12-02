@@ -153,7 +153,10 @@ class WorkFlowComponent extends Component<Props, State> {
         <div className="workflow-component-title-container">
           <div className="workflow-component-title-content">
             <If condition={!option.edit}>
-              <div className="workflow-title">{data.alias || data.name}</div>
+              <div className="workflow-title">
+                {data.alias || data.name}
+                {data.option?.default && '(Default)'}
+              </div>
               <div className="workflow-description">{data.description}</div>
             </If>
             <If condition={option.edit}>

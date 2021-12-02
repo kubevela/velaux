@@ -9,6 +9,7 @@ import type { WorkflowBase, WorkflowStepItem } from '../../../../interface/appli
 import _ from 'lodash';
 import Translation from '../../../../components/Translation';
 import './index.less';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   recordItem: WorkflowBase;
@@ -21,7 +22,18 @@ type Props = {
 };
 
 const { Item: StepItem } = Step;
-class WorkflowStep extends Component<Props> {
+
+type State = {
+  hiddenConfirm: boolean;
+};
+class WorkflowStep extends Component<Props, State> {
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      hiddenConfirm: false,
+    };
+  }
+
   componentDidMount() {
     const ele = document.getElementById('stepWorkflow');
     const { recordItem } = this.props;
@@ -88,7 +100,7 @@ class WorkflowStep extends Component<Props> {
       { name: 'running', value: 'running', iconType: '' },
     ];
     const find = stepStatus.find((item) => {
-      if (item.name === steps[index]['phase'] && steps[index]['type'] !== 'suspend') {
+      if (item.name === steps[index].phase) {
         return item;
       }
     }) || {
@@ -100,18 +112,14 @@ class WorkflowStep extends Component<Props> {
 
     return (
       <div className={`${find.value} ${isAnimate}`}>
-        {find.iconType && steps[index].type !== 'suspend' ? (
-          <Icon type={find.iconType} />
-        ) : (
-          <span>{index + 1}</span>
-        )}
+        {find.iconType ? <Icon type={find.iconType} /> : <span>{index + 1}</span>}
       </div>
     );
   };
 
   renderStepItemTitle(data: WorkflowStepItem) {
     const isFailedClassName = data.phase === 'failed' ? 'failedTitle' : '';
-
+    const isFailed = data.phase === 'failed' ? true : false;
     const { name, alias } = data;
     if (
       (typeof alias === 'string' && alias.length >= 10) ||
@@ -120,9 +128,10 @@ class WorkflowStep extends Component<Props> {
       return (
         <Balloon
           trigger={<div className={`title-long-hidden ${isFailedClassName}`}> {alias || name}</div>}
-          closable={false}
+          closable={true}
         >
-          {alias || name}
+          <If condition={isFailed}>{data.message}</If>
+          <If condition={!isFailed}>{alias || name}</If>
         </Balloon>
       );
     } else {
@@ -130,19 +139,23 @@ class WorkflowStep extends Component<Props> {
     }
   }
 
-  renderContent(data: WorkflowStepItem) {
+  renderContent(data: WorkflowStepItem, currentStep: boolean) {
+    const { hiddenConfirm } = this.state;
     const isSuspend = data.type === 'suspend' ? true : false;
-    const isFailed = data.phase === 'failed' ? true : false;
-    const isPhase = data.phase || '';
-    if (isSuspend && isPhase) {
+    if (isSuspend && currentStep && !hiddenConfirm) {
       return (
         <div className="step-confirm-wraper">
           <div className="step-confirm-title">
             <Translation>Needs review before continuing</Translation>
+            <Icon
+              style={{ cursor: 'pointer' }}
+              onClick={() => this.setState({ hiddenConfirm: true })}
+              type="close"
+            />
           </div>
           <hr />
           <div className="step-confirm-main">
-            <Translation>Please select the action you want to perform</Translation>
+            <Translation>Please select the action you want to perform.</Translation>
           </div>
           <div className="step-confirm-footer">
             <Button
@@ -174,15 +187,8 @@ class WorkflowStep extends Component<Props> {
           </div>
         </div>
       );
-    } else if (isFailed && isPhase) {
-      return (
-        <div className="step-confirm-wraper">
-          <div className="error-message-content">{data.message} </div>
-        </div>
-      );
-    } else {
-      return <div></div>;
     }
+    return <span />;
   }
 
   changeFirstClassName(steps: WorkflowStepItem[] | undefined) {
@@ -209,30 +215,39 @@ class WorkflowStep extends Component<Props> {
   getWorkFlowStep() {
     const { recordItem } = this.props;
     const steps: WorkflowStepItem[] | undefined = recordItem.steps;
-    const successStep = (steps || []).filter(
-      (item: WorkflowStepItem) => item.phase === 'succeeded',
-    );
-    const stepItem = (steps || []).map((item: WorkflowStepItem) => (
-      <StepItem
-        key={item.id}
-        title={this.renderStepItemTitle(item)}
-        content={this.renderContent(item)}
-      />
-    ));
+    if (steps) {
+      let currentStep = steps.length;
+      (steps || []).map((item: WorkflowStepItem, i: number) => {
+        if (item.phase != 'succeeded') {
+          if (i < currentStep) {
+            currentStep = i;
+          }
+        }
+      });
+      const stepItem = (steps || []).map((item: WorkflowStepItem, index: number) => (
+        <StepItem
+          key={item.id}
+          onClick={() => {
+            this.setState({ hiddenConfirm: false });
+          }}
+          title={this.renderStepItemTitle(item)}
+          content={this.renderContent(item, index == currentStep - 1)}
+        />
+      ));
+      const changeStepClassName = this.changeFirstClassName(steps);
 
-    const changeStepClassName = this.changeFirstClassName(steps);
-
-    return (
-      <Step
-        current={successStep.length}
-        animation={false}
-        itemRender={this.itemRender}
-        className={`${changeStepClassName}`}
-        id="stepWorkflow"
-      >
-        {stepItem}
-      </Step>
-    );
+      return (
+        <Step
+          current={currentStep}
+          animation={false}
+          itemRender={this.itemRender}
+          className={`${changeStepClassName}`}
+          id="stepWorkflow"
+        >
+          {stepItem}
+        </Step>
+      );
+    }
   }
 
   onHiddenSlide() {
@@ -242,7 +257,11 @@ class WorkflowStep extends Component<Props> {
 
   render() {
     const isHiddenSlide = this.onHiddenSlide();
-    return <div className={`workflow-step-wraper ${isHiddenSlide}`}>{this.getWorkFlowStep()}</div>;
+    return (
+      <div id="workflowStatus" className={`workflow-step-wraper ${isHiddenSlide}`}>
+        {this.getWorkFlowStep()}
+      </div>
+    );
   }
 }
 

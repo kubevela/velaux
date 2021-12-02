@@ -47,6 +47,21 @@ class EditProperties extends React.Component<Props, State> {
       });
       this.onDetailComponentDefinition(component.type);
     }
+    this.setUISchemaContext();
+  }
+
+  setUISchemaContext() {
+    const { dispatch, applicationDetail } = this.props;
+    if (dispatch) {
+      dispatch({
+        type: 'uischema/setAppName',
+        payload: applicationDetail?.name,
+      });
+      dispatch({
+        type: 'uischema/setAppNamespace',
+        payload: applicationDetail?.namespace,
+      });
+    }
   }
 
   onClose = () => {

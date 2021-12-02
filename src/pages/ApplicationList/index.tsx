@@ -9,11 +9,12 @@ import '../../common.less';
 import { If } from 'tsx-control-statements/components';
 import { deleteApplicationPlan, getComponentdefinitions } from '../../api/application';
 import type { ApplicationBase } from '../../interface/application';
+import type { Project } from '../../interface/project';
 
 type Props = {
   dispatch: ({}) => {};
   applicationList: ApplicationBase[];
-  namespaceList: [];
+  projects?: Project[];
   deliveryTargets?: [];
   history: any;
 };
@@ -24,7 +25,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.application, ...store.deliveryTarget };
+  return { ...store.application, ...store.deliveryTarget, ...store.clusters };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -38,7 +39,7 @@ class Application extends Component<Props, State> {
 
   componentDidMount() {
     this.getApplications({});
-    this.getNamespaceList();
+    this.getProjectList();
     this.getDeliveryTarget();
     this.onGetComponentdefinitions();
   }
@@ -56,9 +57,9 @@ class Application extends Component<Props, State> {
     });
   };
 
-  getNamespaceList = async () => {
+  getProjectList = async () => {
     this.props.dispatch({
-      type: 'application/getNamespaceList',
+      type: 'application/getProjectList',
       payload: {},
     });
   };
@@ -97,7 +98,7 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList, namespaceList, deliveryTargets, dispatch } = this.props;
+    const { applicationList, projects, deliveryTargets, dispatch } = this.props;
     const { showAddApplication, componentDefinitions, isLoading } = this.state;
     return (
       <div>
@@ -111,7 +112,7 @@ class Application extends Component<Props, State> {
         />
 
         <SelectSearch
-          namespaceList={namespaceList}
+          projects={projects}
           deliveryTargetList={deliveryTargets}
           dispatch={dispatch}
           getApplications={(params: any) => {
@@ -130,7 +131,7 @@ class Application extends Component<Props, State> {
         <If condition={showAddApplication}>
           <AppDialog
             visible={showAddApplication}
-            namespaceList={namespaceList}
+            projects={projects}
             componentDefinitions={componentDefinitions}
             setVisible={(visible) => {
               this.setState({ showAddApplication: visible });

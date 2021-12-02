@@ -25,11 +25,17 @@ class InnerGroup extends React.Component<Props, State> {
   }
 
   render() {
-    const { uiSchema, onChange, _key } = this.props;
-
+    const { uiSchema, onChange, value } = this.props;
     return (
       <div className="group-inner-container">
-        <UISchema ref={this.ref} uiSchema={uiSchema} inline onChange={onChange} _key={_key} />
+        <UISchema
+          key={value}
+          ref={this.ref}
+          uiSchema={uiSchema}
+          value={value}
+          inline
+          onChange={onChange}
+        />
       </div>
     );
   }

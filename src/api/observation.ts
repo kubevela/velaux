@@ -39,3 +39,24 @@ export function listNamespaces(params: { cluster: string }) {
     },
   });
 }
+
+export function listCloudResources(params: { appNs: string; appName: string }) {
+  const urlParams = `cloud-resource-view{appNs=${params.appNs},appName=${params.appName}}`;
+  return get('/api/v1/query', {
+    params: {
+      velaql: urlParams,
+    },
+  });
+}
+
+export function listCloudResourceSecrets(params: { appNs: string; appName?: string }) {
+  let urlParams = `cloud-resource-secret-view{appNs=${params.appNs}}`;
+  if (params.appName) {
+    urlParams = `cloud-resource-secret-view{appNs=${params.appNs},appName=${params.appName}}`;
+  }
+  return get('/api/v1/query', {
+    params: {
+      velaql: urlParams,
+    },
+  });
+}

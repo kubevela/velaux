@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'dva';
 import { Table, Button, Message, Dialog } from '@b-design/ui';
-import { listApplicationPods } from '../../api/observation';
+import { listApplicationPods, listCloudResources } from '../../api/observation';
 import { deployApplication } from '../../api/application';
 import type { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
-import type { PodBase } from '../../interface/observation';
+import type { PodBase, CloudResource, Configuration } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
 import Header from './components/Hearder';
 import type { DeliveryTarget } from '../../interface/deliveryTarget';
@@ -32,11 +32,22 @@ type Props = {
 
 type State = {
   podList?: PodBase[];
+  cloudResourceList?: CloudResource[];
   envName: string;
   loading: boolean;
   target?: DeliveryTarget;
   openRowKeys: [];
+  cloudInstance?: CloudInstance[];
   showStatus: boolean;
+};
+
+type CloudInstance = {
+  instanceName: string;
+  status: string;
+  region: string;
+  message?: string;
+  url?: string;
+  type?: string;
 };
 
 @connect((store: any) => {
@@ -48,7 +59,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const { params } = props.match;
     this.state = {
       envName: params.envName,
-      loading: true,
+      loading: false,
       openRowKeys: [],
       showStatus: false,
     };
@@ -76,8 +87,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         type: 'application/getApplicationStatus',
         payload: { appName: appName, envName: envName },
         callback: () => {
-          this.setState({ podList: [] });
-          this.loadAppPods();
+          this.loadAppInstances();
         },
       });
     }
@@ -104,7 +114,46 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     }
   };
 
-  loadAppPods = async () => {
+  convertCloudInstance = (configurations: Configuration[]) => {
+    const instances: CloudInstance[] = [];
+    if (Array.isArray(configurations) && configurations.length > 0) {
+      configurations.map((configuration) => {
+        let url = configuration.metadata.annotations['cloud-resource/console-url'];
+        const identifierKey = configuration.metadata.annotations['cloud-resource/identifier'];
+        const outputs = configuration.status?.apply?.outputs;
+        let instanceName = '';
+        if (outputs) {
+          instanceName = outputs[identifierKey].value;
+          if (url) {
+            const params = url.match(/\{(.+?)\}/g);
+            if (Array.isArray(params) && params.length > 0) {
+              params.map((param) => {
+                const paramKey = param.replace('{', '').replace('}', '');
+                if (paramKey.toLowerCase() == 'region' && configuration.spec.region) {
+                  url = url.replace(param, configuration.spec.region);
+                }
+                if (outputs[paramKey]) {
+                  url = url.replace(param, outputs[paramKey].value);
+                }
+              });
+            }
+          }
+        }
+        instances.push({
+          instanceName: instanceName,
+          status: configuration.status?.apply?.state || 'initing',
+          url: url,
+          region: configuration.spec.region,
+          message: configuration.status?.apply?.message,
+          type: configuration.metadata.labels['workload.oam.dev/type'],
+        });
+      });
+    }
+    this.setState({ cloudInstance: instances });
+  };
+
+  loadAppInstances = async () => {
+    this.setState({ podList: [] });
     const { applicationDetail, envbinding, applicationStatus } = this.props;
     const {
       params: { appName, envName },
@@ -119,34 +168,55 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       applicationStatus.services?.length
     ) {
       const conponentName = applicationStatus.services[0].name;
-      this.setState({ loading: true });
-      const param = {
-        appName: envs[0].appDeployName || appName + '-' + envName,
-        appNs: applicationDetail.namespace,
-        name: conponentName,
-        cluster: '',
-        clusterNs: '',
-      };
-      if (target) {
-        param.cluster = target.cluster?.clusterName || '';
-        param.clusterNs = target.cluster?.namespace || '';
+      if (applicationDetail.applicationType == 'common') {
+        const param = {
+          appName: envs[0].appDeployName || appName + '-' + envName,
+          appNs: applicationDetail.namespace,
+          name: conponentName,
+          cluster: '',
+          clusterNs: '',
+        };
+        if (target) {
+          param.cluster = target.cluster?.clusterName || '';
+          param.clusterNs = target.cluster?.namespace || '';
+        }
+        this.setState({ loading: true });
+        listApplicationPods(param)
+          .then((re) => {
+            if (re && re.podList) {
+              re.podList.map((item: any) => {
+                item.primaryKey = item.metadata.name;
+              });
+              this.setState({ podList: re.podList });
+            } else {
+              this.setState({ podList: [] });
+            }
+          })
+          .finally(() => {
+            this.setState({ loading: false });
+          });
+      } else if (applicationDetail?.applicationType == 'cloud') {
+        const param = {
+          appName: envs[0].appDeployName || appName + '-' + envName,
+          appNs: applicationDetail.namespace,
+        };
+        this.setState({ loading: true });
+        listCloudResources(param)
+          .then((cloudResources) => {
+            if (cloudResources) {
+              this.convertCloudInstance(cloudResources['cloud-resources']);
+            }
+          })
+          .finally(() => {
+            this.setState({ loading: false });
+          });
+      } else {
+        this.setState({ loading: false });
       }
-      listApplicationPods(param)
-        .then((re) => {
-          if (re && re.podList) {
-            re.podList.map((item: any) => {
-              item.primaryKey = item.metadata.name;
-            });
-            this.setState({ podList: re.podList });
-          } else {
-            this.setState({ podList: [] });
-          }
-        })
-        .finally(() => {
-          this.setState({ loading: false });
-        });
     } else {
-      this.setState({ loading: false });
+      setTimeout(() => {
+        this.loadAppInstances();
+      }, 1000);
     }
   };
   getCloumns = () => {
@@ -250,14 +320,14 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   updateQuery = (targetName: string) => {
     if (!targetName) {
       this.setState({ target: undefined }, () => {
-        this.loadAppPods();
+        this.loadAppInstances();
       });
       return;
     }
     const targets = this.getTargets()?.filter((item) => item.name == targetName);
     if (targets?.length) {
       this.setState({ target: targets[0] }, () => {
-        this.loadAppPods();
+        this.loadAppInstances();
       });
     }
   };
@@ -314,7 +384,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   };
   render() {
     const { applicationStatus, applicationDetail } = this.props;
-    const { podList, loading, showStatus } = this.state;
+    const { podList, loading, showStatus, cloudInstance } = this.state;
     const columns = this.getCloumns();
     const expandedRowRender = (record: PodBase) => {
       return (
@@ -348,21 +418,57 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           }}
         />
         <If condition={applicationStatus}>
-          <Table
-            className="podlist-table-wraper"
-            size="medium"
-            primaryKey={'primaryKey'}
-            loading={loading}
-            dataSource={podList}
-            expandedIndexSimulate
-            expandedRowRender={expandedRowRender}
-            openRowKeys={this.state.openRowKeys}
-            onRowOpen={(openRowKeys: any) => {
-              this.onRowOpen(openRowKeys);
-            }}
-          >
-            {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
-          </Table>
+          <If condition={applicationDetail?.applicationType == 'common'}>
+            <Table
+              className="podlist-table-wraper"
+              size="medium"
+              primaryKey={'primaryKey'}
+              loading={loading}
+              dataSource={podList}
+              expandedIndexSimulate
+              expandedRowRender={expandedRowRender}
+              openRowKeys={this.state.openRowKeys}
+              onRowOpen={(openRowKeys: any) => {
+                this.onRowOpen(openRowKeys);
+              }}
+            >
+              {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
+            </Table>
+          </If>
+          <If condition={applicationDetail?.applicationType == 'cloud'}>
+            <Table
+              size="medium"
+              className="customTable"
+              dataSource={cloudInstance}
+              primaryKey={'instanceName'}
+              loading={loading}
+            >
+              <Column
+                align="left"
+                title={<Translation>Name</Translation>}
+                dataIndex="instanceName"
+              />
+              <Column align="left" title={<Translation>Status</Translation>} dataIndex="status" />
+              <Column
+                align="left"
+                title={<Translation>Resource Type</Translation>}
+                dataIndex="type"
+              />
+              <Column align="left" title={<Translation>Region</Translation>} dataIndex="region" />
+              <Column
+                align="left"
+                title={<Translation>Operation</Translation>}
+                dataIndex="url"
+                cell={(value: string) => {
+                  return (
+                    <a target="_blank" href={value}>
+                      <Translation>Console</Translation>
+                    </a>
+                  );
+                }}
+              />
+            </Table>
+          </If>
         </If>
         <If condition={!applicationStatus}>
           <div className="deployNotice">
@@ -375,7 +481,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
               </div>
               <div className="noticeAction">
                 <Button onClick={() => this.onDeploy()} type="primary">
-                  <Translation>Immediately Deploy</Translation>
+                  <Translation>Deploy</Translation>
                 </Button>
               </div>
             </div>

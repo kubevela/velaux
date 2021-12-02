@@ -9,19 +9,23 @@ import { detailComponentDefinition, createApplication } from '../../../../api/ap
 import type { DefinitionDetail, EnvBinding } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
-import EnvPlan from '../../../../extends/EnvPlan';
+import EnvPlan from '../../../../components/EnvPlan';
 import Translation from '../../../../components/Translation';
 import './index.less';
 import { getDeliveryTarget } from '../../../../api/deliveryTarget';
 import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import type { Project } from '../../../../interface/project';
+import type { Cluster } from '../../../../interface/cluster';
+import { connect } from 'dva';
 
 type Props = {
   visible: boolean;
   componentDefinitions: [];
-  namespaceList?: [];
+  projects?: Project[];
+  clusterList?: Cluster[];
   setVisible: (visible: boolean) => void;
-  t: (key: string) => {};
-  dispatch: ({}) => {};
+  t: (key: string) => string;
+  dispatch: ({}) => void;
   onClose: () => void;
   onOK: (name: string) => void;
 };
@@ -32,12 +36,16 @@ type State = {
   dialogStats: string;
   envBinding: EnvBinding[];
   deliveryTargets?: DeliveryTarget[];
+  project?: string;
 };
 
+@connect((store: any) => {
+  return { ...store.clusters };
+})
 class AppDialog extends React.Component<Props, State> {
   field: Field;
   basicRef: React.RefObject<GeneralConfig>;
-  envBind: React.RefObject<EnvPlan>;
+  envBind: React.RefObject<any>;
   uiSchemaRef: React.RefObject<UISchema>;
   constructor(props: Props) {
     super(props);
@@ -49,7 +57,9 @@ class AppDialog extends React.Component<Props, State> {
     this.field = new Field(this, {
       onChange: (name: string, value: string) => {
         if (name === 'namespace') {
-          this.loadDeliveryTarget(value);
+          this.setState({ project: value }, () => {
+            this.loadDeliveryTarget();
+          });
         }
       },
     });
@@ -58,8 +68,25 @@ class AppDialog extends React.Component<Props, State> {
     this.envBind = React.createRef();
   }
 
+  componentDidMount() {
+    const { projects } = this.props;
+    if (projects && projects.length > 0) {
+      this.field.setValue('namespace', projects[0].name);
+      this.setState({ project: projects[0].name }, () => {
+        this.loadDeliveryTarget();
+      });
+    }
+    this.getClusterList();
+  }
+
   onClose = () => {
     this.props.setVisible(false);
+  };
+
+  getClusterList = async () => {
+    this.props.dispatch({
+      type: 'clusters/getClusterList',
+    });
   };
 
   onSubmit = () => {
@@ -94,12 +121,14 @@ class AppDialog extends React.Component<Props, State> {
     });
   };
 
-  loadDeliveryTarget = (namespace: string) => {
-    getDeliveryTarget({ namespace: namespace, page: 0 }).then((res) => {
-      if (res) {
-        this.setState({ deliveryTargets: res.deliveryTargets });
-      }
-    });
+  loadDeliveryTarget = () => {
+    if (this.state.project) {
+      getDeliveryTarget({ namespace: this.state.project, page: 0 }).then((res) => {
+        if (res) {
+          this.setState({ deliveryTargets: res.deliveryTargets });
+        }
+      });
+    }
   };
 
   transComponentDefinitions() {
@@ -121,13 +150,11 @@ class AppDialog extends React.Component<Props, State> {
   changeStatus = (value: string) => {
     const values: { componentType: string } = this.field.getValues();
     const { componentType } = values;
-
     if (value === 'isCreateComponent') {
       this.field.validateCallback(
         ['name', 'alias', 'description', 'namespace', 'componentType'],
         (error: any) => {
           if (error) {
-            debugger;
             return;
           }
           const envBinding = this.envBind.current?.getValues();
@@ -167,7 +194,7 @@ class AppDialog extends React.Component<Props, State> {
               this.changeStatus('isCreateComponent');
             }}
           >
-            <Translation>NextStep</Translation>
+            <Translation>Next Step</Translation>
           </Button>
         </div>
       );
@@ -199,7 +226,7 @@ class AppDialog extends React.Component<Props, State> {
     const { Row, Col } = Grid;
 
     const { onClose } = this.props;
-    const { visible, t, setVisible, dispatch, namespaceList } = this.props;
+    const { visible, t, setVisible, dispatch, projects, clusterList } = this.props;
 
     const { envBinding, definitionDetail, dialogStats, deliveryTargets } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -220,7 +247,7 @@ class AppDialog extends React.Component<Props, State> {
               visible={visible}
               setVisible={setVisible}
               dispatch={dispatch}
-              namespaceList={namespaceList}
+              projects={projects}
               field={this.field}
               ref={this.basicRef}
             />
@@ -266,7 +293,16 @@ class AppDialog extends React.Component<Props, State> {
                   }
                   required={true}
                 >
-                  <EnvPlan value={envBinding} targetList={deliveryTargets} ref={this.envBind} />
+                  <EnvPlan
+                    t={this.props.t}
+                    value={envBinding}
+                    projects={projects || []}
+                    clusterList={clusterList || []}
+                    onUpdateTarget={this.loadDeliveryTarget}
+                    targetList={deliveryTargets}
+                    project={this.state.project}
+                    ref={this.envBind}
+                  />
                 </FormItem>
               </Col>
             </Row>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Progress, Icon, Message } from '@b-design/ui';
+import { Table, Progress, Message } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import type { PodBase, Container, Event } from '../../../../interface/observation';
 import { listApplicationPodsDetails } from '../../../../api/observation';
@@ -131,13 +131,13 @@ class PodDetail extends React.Component<Props, State> {
         cell: () => {
           return (
             <div>
-              <a>
+              {/* <a>
                 <Icon type="cloud-machine" />
               </a>
 
               <a className="margin-left-5">
                 <Icon type="monitoring" />
-              </a>
+              </a> */}
             </div>
           );
         },
