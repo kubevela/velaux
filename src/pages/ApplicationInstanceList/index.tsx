@@ -45,6 +45,7 @@ type CloudInstance = {
   instanceName: string;
   status: string;
   region: string;
+  createTime: string;
   message?: string;
   url?: string;
   type?: string;
@@ -141,8 +142,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         }
         instances.push({
           instanceName: instanceName,
-          status: configuration.status?.apply?.state || 'initing',
+          status: configuration.status?.apply?.state || 'Initing',
           url: url,
+          createTime: configuration.metadata.creationTimestamp,
           region: configuration.spec.region,
           message: configuration.status?.apply?.message,
           type: configuration.metadata.labels['workload.oam.dev/type'],
@@ -447,6 +449,16 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                 align="left"
                 title={<Translation>Name</Translation>}
                 dataIndex="instanceName"
+                cell={(value: string, index: number, record: CloudInstance) => {
+                  if (record.url) {
+                    return (
+                      <a target="_blank" href={record.url}>
+                        {value}
+                      </a>
+                    );
+                  }
+                  return value;
+                }}
               />
               <Column align="left" title={<Translation>Status</Translation>} dataIndex="status" />
               <Column
@@ -454,17 +466,27 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                 title={<Translation>Resource Type</Translation>}
                 dataIndex="type"
               />
+              <Column
+                align="left"
+                title={<Translation>Create Time</Translation>}
+                dataIndex="createTime"
+                cell={(v: string) => {
+                  return <span>{momentDate(v)}</span>;
+                }}
+              />
               <Column align="left" title={<Translation>Region</Translation>} dataIndex="region" />
               <Column
                 align="left"
-                title={<Translation>Operation</Translation>}
+                title={<Translation>Actions</Translation>}
                 dataIndex="url"
-                cell={(value: string) => {
-                  return (
-                    <a target="_blank" href={value}>
-                      <Translation>Console</Translation>
-                    </a>
-                  );
+                cell={(value: string, index: number, record: CloudInstance) => {
+                  if (record.instanceName) {
+                    return (
+                      <a target="_blank" href={value}>
+                        <Translation>Console</Translation>
+                      </a>
+                    );
+                  }
                 }}
               />
             </Table>

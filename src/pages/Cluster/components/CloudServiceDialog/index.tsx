@@ -185,7 +185,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       },
       {
         key: 'operation',
-        title: <Translation>Operations</Translation>,
+        title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
         cell: (v: string, i: number, record: Record) => {
           return (
