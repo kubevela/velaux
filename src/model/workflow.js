@@ -117,6 +117,17 @@ export default {
           nodeIndex[edge.dest] = oldIndex;
         }
       });
+      Object.keys(edges).map((key) => {
+        const edge = edges[key];
+        if (nodeIndex[edge.src] > nodeIndex[edge.dest]) {
+          const i = steps[nodeIndex[edge.src]];
+          const oldIndex = nodeIndex[edge.src];
+          steps[nodeIndex[edge.src]] = steps[nodeIndex[edge.dest]];
+          steps[nodeIndex[edge.dest]] = i;
+          nodeIndex[edge.src] = nodeIndex[edge.dest];
+          nodeIndex[edge.dest] = oldIndex;
+        }
+      });
       workflow.steps = steps;
       yield call(createWorkFlow, workflow);
       if (action.callback) {

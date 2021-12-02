@@ -14,6 +14,7 @@ import {
   getTraitDefinitionsDetails_mock,
   getTraitDefinitions_mock,
   getTrait_mock,
+  updateApplicationEnv_mock,
 } from './devLink';
 import { application, componentdefinition } from './productionLink';
 import { getDomain } from '../utils/common';
@@ -131,6 +132,13 @@ export function createApplicationEnv(params: { appName?: string }) {
   const gurl = isMock ? `${createApplicationEnv_mock}` : `${application}/${params.appName}/envs`;
   delete params.appName;
   return post(gurl, params).then((res) => res);
+}
+
+export function updateApplicationEnv(params: { appName?: string, name: string }) {
+  const gurl = isMock
+    ? `${updateApplicationEnv_mock}`
+    : `${application}/${params.appName}/envs/${name}`;
+  return put(gurl, params).then((res) => res);
 }
 
 export function getApplicationEnvbinding(params: { appName: string }) {

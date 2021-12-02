@@ -202,7 +202,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         };
         this.setState({ loading: true });
         listCloudResources(param)
-          .then((cloudResources) => {
+          .then((cloudResources: any) => {
             if (cloudResources) {
               this.convertCloudInstance(cloudResources['cloud-resources']);
             }
@@ -382,6 +382,11 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       Message.warning('Please wait');
     }
   };
+  getEnvbindingByName = () => {
+    const { envbinding } = this.props;
+    const { params:{ envName }} = this.props.match;
+    return envbinding.find(env => env.name === envName)
+  }
   render() {
     const { applicationStatus, applicationDetail } = this.props;
     const { podList, loading, showStatus, cloudInstance } = this.state;
@@ -396,11 +401,14 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const {
       params: { envName, appName },
     } = this.props.match;
+    const envbinding = this.getEnvbindingByName();
     return (
       <div>
         <Header
+          envbinding = {envbinding}
           targets={this.getTargets()}
           envName={envName}
+          appName={ appName}
           updateEnvs={() => {
             this.loadApplicationEnvbinding();
             this.loadApplicationWorkflows();
@@ -416,6 +424,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           refresh={() => {
             this.loadApplicationStatus();
           }}
+          dispatch={ this.props.dispatch}
         />
         <If condition={applicationStatus}>
           <If condition={applicationDetail?.applicationType == 'common'}>
