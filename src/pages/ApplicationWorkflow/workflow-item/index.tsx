@@ -347,6 +347,16 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
             onDelete={() => this.onDelete(currentSelectedNodeData)}
             createOrUpdateNode={this.createOrUpdateNode}
             data={currentSelectedNodeData}
+            checkStepName={(name: string) => {
+              const { nodes } = this.diagramMaker.store.getState();
+              let exist = false;
+              Object.keys(nodes).map((key) => {
+                if (nodes[key].consumerData && nodes[key].consumerData.name == name) {
+                  exist = true;
+                }
+              });
+              return exist;
+            }}
             workFlowDefinitions={workFlowDefinitions}
             closeDrawer={this.closeDrawer}
           />

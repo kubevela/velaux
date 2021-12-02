@@ -1,6 +1,17 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Dialog, Dropdown, Icon, Input, Menu, Form, Field, Message, Grid } from '@b-design/ui';
+import {
+  Dialog,
+  Dropdown,
+  Icon,
+  Input,
+  Menu,
+  Form,
+  Field,
+  Message,
+  Grid,
+  Loading,
+} from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import WorkFlowItem from '../workflow-item';
 import { checkName } from '../../../utils/common';
@@ -23,6 +34,7 @@ type Props = {
 
 type State = {
   errorFocus: boolean;
+  loading: boolean;
 };
 
 export type NodeItem = {
@@ -47,6 +59,7 @@ class WorkFlowComponent extends Component<Props, State> {
 
     this.state = {
       errorFocus: false,
+      loading: false,
     };
     this.field = new Field(this);
   }
@@ -105,6 +118,7 @@ class WorkFlowComponent extends Component<Props, State> {
       if (find) {
         return Message.error('please enter workflow step name and type');
       }
+      this.setState({ loading: true });
       const { name, alias, description } = values;
       data.appName = data.appName || this.props.appName;
       data.name = name;
@@ -117,23 +131,33 @@ class WorkFlowComponent extends Component<Props, State> {
         callback: () => {
           Message.success('save workflow success');
           this.props.getWorkflow();
+          this.setState({ loading: false });
         },
       });
     });
   };
 
+  changeDefault = (name: string, isDefault: boolean) => {
+    this.props.dispatch({
+      type: 'workflow/setDefaultView',
+      payload: {
+        name,
+        isDefault,
+      },
+    });
+  };
+
   render() {
     const { data, workFlowDefinitions } = this.props;
-    const { errorFocus } = this.state;
-    const option: WorkFlowOption = data.option || { default: true, edit: true };
+    const { errorFocus, loading } = this.state;
+    const option: WorkFlowOption = data.option || { default: false, edit: false };
     const menu = (
       <Menu>
-        <Menu.Item>
-          <Translation>View History</Translation>
-        </Menu.Item>
-        <Menu.Item>
-          <Translation>Set as Default</Translation>
-        </Menu.Item>
+        <If condition={option.edit}>
+          <Menu.Item onClick={() => this.changeDefault(data.name, !option.default)}>
+            <Translation>{option.default ? 'Cancel Default' : 'Set As Default'}</Translation>
+          </Menu.Item>
+        </If>
         <Menu.Item onClick={() => this.deleteWorkflow(data.name)}>
           <Translation>Remove</Translation>
         </Menu.Item>
@@ -144,112 +168,114 @@ class WorkFlowComponent extends Component<Props, State> {
     convertWorkflowStep(newData, data.appName, option.edit ? 250 : 32);
     const workflowData = newData.data || { nodes: {}, edges: {} };
     return (
-      <div
-        className={
-          errorFocus ? 'workflow-component-container error' : 'workflow-component-container'
-        }
-        id={data.name}
-      >
-        <div className="workflow-component-title-container">
-          <div className="workflow-component-title-content">
-            <If condition={!option.edit}>
-              <div className="workflow-title">
-                {data.alias || data.name}
-                {data.option?.default && '(Default)'}
+      <Loading visible={loading} style={{ width: '100%' }}>
+        <div
+          className={
+            errorFocus ? 'workflow-component-container error' : 'workflow-component-container'
+          }
+          id={data.name}
+        >
+          <div className="workflow-component-title-container">
+            <div className="workflow-component-title-content">
+              <If condition={!option.edit}>
+                <div className="workflow-title">
+                  {data.alias || data.name}
+                  {data.option?.default && '(Default)'}
+                </div>
+                <div className="workflow-description">{data.description}</div>
+              </If>
+              <If condition={option.edit}>
+                <div className="workflow-description">
+                  <Form field={this.field} inline>
+                    <Row>
+                      <Col span={6}>
+                        <Form.Item
+                          labelAlign="left"
+                          disabled
+                          required
+                          label={<Translation>Name</Translation>}
+                        >
+                          <Input
+                            {...init('name', {
+                              initValue: data.name,
+                              rules: [
+                                {
+                                  required: true,
+                                  pattern: checkName,
+                                  message: 'Please enter a valid workflow name',
+                                },
+                              ],
+                            })}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={6}>
+                        <Form.Item labelAlign="left" label={<Translation>Alias</Translation>}>
+                          <Input {...init('alias', { initValue: data.alias })} />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item labelAlign="left" label={<Translation>Description</Translation>}>
+                          <Input {...init('description', { initValue: data.description })} />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Form>
+                </div>
+              </If>
+            </div>
+            <div className="workflow-component-tips-container">
+              <If condition={!option.edit}>
+                <a
+                  className="option-item"
+                  onClick={() => {
+                    this.setEditView(data.name, true);
+                  }}
+                >
+                  <Translation>Edit</Translation>
+                </a>
+              </If>
+              <If condition={option.edit}>
+                <a
+                  className="option-item"
+                  onClick={() => {
+                    this.setEditView(data.name, false);
+                  }}
+                >
+                  <Translation>Cancel</Translation>
+                </a>
+                <a
+                  className="option-item"
+                  onClick={() => {
+                    this.saveWorkflow();
+                  }}
+                >
+                  <Translation>Save</Translation>
+                </a>
+              </If>
+              <div className="option-item">
+                <Dropdown
+                  trigger={<Icon type="ellipsis" className="options-icon" />}
+                  triggerType={['click']}
+                  className="workflow-more"
+                >
+                  {menu}
+                </Dropdown>
               </div>
-              <div className="workflow-description">{data.description}</div>
-            </If>
-            <If condition={option.edit}>
-              <div className="workflow-description">
-                <Form field={this.field} inline>
-                  <Row>
-                    <Col span={6}>
-                      <Form.Item
-                        labelAlign="left"
-                        disabled
-                        required
-                        label={<Translation>Name</Translation>}
-                      >
-                        <Input
-                          {...init('name', {
-                            initValue: data.name,
-                            rules: [
-                              {
-                                required: true,
-                                pattern: checkName,
-                                message: 'Please enter a valid workflow name',
-                              },
-                            ],
-                          })}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={6}>
-                      <Form.Item labelAlign="left" label={<Translation>Alias</Translation>}>
-                        <Input {...init('alias', { initValue: data.alias })} />
-                      </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                      <Form.Item labelAlign="left" label={<Translation>Description</Translation>}>
-                        <Input {...init('description', { initValue: data.description })} />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Form>
-              </div>
-            </If>
-          </div>
-          <div className="workflow-component-tips-container">
-            <If condition={!option.edit}>
-              <a
-                className="option-item"
-                onClick={() => {
-                  this.setEditView(data.name, true);
-                }}
-              >
-                <Translation>Edit</Translation>
-              </a>
-            </If>
-            <If condition={option.edit}>
-              <a
-                className="option-item"
-                onClick={() => {
-                  this.setEditView(data.name, false);
-                }}
-              >
-                <Translation>Cancel</Translation>
-              </a>
-              <a
-                className="option-item"
-                onClick={() => {
-                  this.saveWorkflow();
-                }}
-              >
-                <Translation>Save</Translation>
-              </a>
-            </If>
-            <div className="option-item">
-              <Dropdown
-                trigger={<Icon type="ellipsis" className="options-icon" />}
-                triggerType={['click']}
-                className="workflow-more"
-              >
-                {menu}
-              </Dropdown>
             </div>
           </div>
+          <div className="workflow-detail-container">
+            <WorkFlowItem
+              key={data.name + data.appName + option.edit}
+              ref={(ref) => (this.workflowItem = ref)}
+              data={workflowData}
+              workflowId={data.appName + data.name || ''}
+              workFlowDefinitions={workFlowDefinitions}
+              edit={option.edit}
+            />
+          </div>
         </div>
-        <div className="workflow-detail-container">
-          <WorkFlowItem
-            key={data.name + data.appName + option.edit}
-            ref={(ref) => (this.workflowItem = ref)}
-            data={workflowData}
-            workflowId={data.appName + data.name || ''}
-            workFlowDefinitions={workFlowDefinitions}
-            edit={option.edit}
-          />
-        </div>
-      </div>
+      </Loading>
     );
   }
 }

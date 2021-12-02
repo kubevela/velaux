@@ -139,9 +139,9 @@ class WorkflowStep extends Component<Props, State> {
     }
   }
 
-  renderContent(data: WorkflowStepItem, currentStep: boolean) {
+  renderContent(workflow: WorkflowBase, data: WorkflowStepItem, currentStep: boolean) {
     const { hiddenConfirm } = this.state;
-    const isSuspend = data.type === 'suspend' ? true : false;
+    const isSuspend = workflow.status == 'running' && data.type === 'suspend' ? true : false;
     if (isSuspend && currentStep && !hiddenConfirm) {
       return (
         <div className="step-confirm-wraper">
@@ -173,7 +173,7 @@ class WorkflowStep extends Component<Props, State> {
               className="margin-top-5 margin-left-8"
               onClick={this.onTerminateApplicationWorkflowRecord}
             >
-              <Translation>Termination</Translation>
+              <Translation>Terminate</Translation>
             </Button>
 
             <Button
@@ -231,7 +231,7 @@ class WorkflowStep extends Component<Props, State> {
             this.setState({ hiddenConfirm: false });
           }}
           title={this.renderStepItemTitle(item)}
-          content={this.renderContent(item, index == currentStep - 1)}
+          content={this.renderContent(recordItem, item, index == currentStep - 1)}
         />
       ));
       const changeStepClassName = this.changeFirstClassName(steps);
