@@ -98,7 +98,6 @@ class UISchema extends Component<Props, State> {
 
   setValues = () => {
     const { value } = this.props;
-    console.log(value);
     if (value) {
       this.form.setValues(value);
     }
@@ -154,6 +153,25 @@ class UISchema extends Component<Props, State> {
             disabled={param.disable}
           >
             <Input
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                rules: converRule(param.validate),
+              })}
+            />
+          </Form.Item>
+        );
+      case 'Password':
+        return (
+          <Form.Item
+            required={required}
+            labelAlign={inline ? 'inset' : 'left'}
+            label={param.label}
+            key={param.jsonKey}
+            help={param.description}
+            disabled={param.disable}
+          >
+            <Input
+              htmlType="password"
               {...init(param.jsonKey, {
                 initValue: param.validate.defaultValue,
                 rules: converRule(param.validate),

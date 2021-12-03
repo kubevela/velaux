@@ -1,4 +1,4 @@
-import { post, get, rdelete } from './request';
+import { post, get, rdelete, put } from './request';
 import {
   addons_mock,
   addonsDetails_mock,
@@ -46,6 +46,11 @@ export function disableAddon(params: any) {
 export function enableAddon(params: { name: string; properties: any }) {
   const gurl = isMock ? `${enableAddonsCluster_mock}` : `${addons}/${params.name}/enable`;
   return post(gurl, { args: params.properties }).then((res) => res);
+}
+
+export function upgradeAddon(params: { name: string; properties: any }) {
+  const gurl = isMock ? `${enableAddonsCluster_mock}` : `${addons}/${params.name}/update`;
+  return put(gurl, { args: params.properties }).then((res) => res);
 }
 
 export function getAddonsStatus(params: any) {
