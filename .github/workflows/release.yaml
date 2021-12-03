@@ -15,7 +15,7 @@ jobs:
       id: get_version
       run: |
         VERSION=${GITHUB_REF#refs/tags/}
-        if [[ ${GITHUB_REF} == "refs/heads/master" ]]; then
+        if [[ ${GITHUB_REF} == "refs/heads/main" ]]; then
           VERSION=latest
         fi
         echo ::set-output name=VERSION::${VERSION}
