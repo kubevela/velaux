@@ -20,7 +20,7 @@ type State = {
 };
 
 type StructItemProps = {
-  option: string[];
+  option?: string[];
   param?: UIParam[];
   id: string;
   init: any;
@@ -97,15 +97,21 @@ class Structs extends React.Component<Props, State> {
     });
   }
 
-  componentDidMount = async () => {
+  componentDidMount = () => {
+    this.initValue();
+  };
+
+  initValue = () => {
     const { value, parameterGroupOption } = this.props;
-    if (value && parameterGroupOption) {
+    if (value) {
       const keyMap = new Map();
-      parameterGroupOption.map((item) => {
-        if (item && item.keys) {
-          keyMap.set(item.keys.sort().join(), item);
-        }
-      });
+      if (parameterGroupOption) {
+        parameterGroupOption.map((item) => {
+          if (item && item.keys) {
+            keyMap.set(item.keys.sort().join(), item);
+          }
+        });
+      }
       const structList = Array<any>();
       value.map((item: any, index: number) => {
         const key = Date.now().toString() + index;
@@ -114,14 +120,12 @@ class Structs extends React.Component<Props, State> {
           valueKeys.push(itemkey);
         }
         const option = keyMap.get(valueKeys.sort().join());
-        if (option) {
-          structList.push({
-            key,
-            option: option.keys,
-            value: value,
-          });
-          this.field.setValue('struct' + key, item);
-        }
+        structList.push({
+          key,
+          option: option?.keys,
+          value: value,
+        });
+        this.field.setValue('struct' + key, item);
       });
       this.setState({ structList });
     }

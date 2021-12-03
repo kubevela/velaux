@@ -91,7 +91,6 @@ class AddonDetailDialog extends React.Component<Props, State> {
         this.setState({ status: res.phase, args: res.args, statusLoading: false });
       })
       .catch(() => {
-        debugger;
         this.setState({ statusLoading: false });
       });
   };

@@ -147,3 +147,30 @@ export interface Secret {
   };
   data: any;
 }
+
+export interface Service {
+  apiVersion: string;
+  kind: string;
+  metadata: {
+    name: string;
+    namespace: string;
+    annotations: any;
+    labels: any;
+  };
+  spec: {
+    type: string;
+    ports?: [
+      {
+        nodePort: number;
+        port: number;
+        protocol: string;
+        targetPort: number;
+      },
+    ];
+  };
+  status?: {
+    loadBalancer?: {
+      ingress?: [{ ip: string }];
+    };
+  };
+}

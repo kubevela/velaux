@@ -107,7 +107,7 @@ class StatusShow extends React.Component<Props, State> {
             </Table>
           </Card>
           <If condition={applicationStatus?.conditions}>
-            <Card style={{ marginTop: '8px' }} title={<Translation>Deploy Progress</Translation>}>
+            <Card style={{ marginTop: '8px' }} title={<Translation>Progress</Translation>}>
               <Step current={getCurrent(applicationStatus?.conditions)}>
                 {allConditions.map((condition) => {
                   return <Step.Item title={condition.type} content={condition.reason} />;
@@ -119,7 +119,7 @@ class StatusShow extends React.Component<Props, State> {
             <Card
               style={{ marginTop: '8px', marginBottom: '16px' }}
               contentHeight="auto"
-              title={<Translation>Deploy Component Status</Translation>}
+              title={<Translation>Component Status</Translation>}
             >
               <Table className="customTable" dataSource={applicationStatus?.services}>
                 <Table.Column
