@@ -39,7 +39,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
 
   componentDidMount() {
     this.loadDeliveryTargets();
-    this.getIsEdit();
+    this.setFields();
   }
 
   loadDeliveryTargets = async () => {
@@ -51,21 +51,16 @@ class EnvBindPlanDialog extends Component<Props, State> {
     }
   };
 
-  getIsEdit = () => {
-    if (this.props.editEnvBinding?.name) {
-      this.setState({ isEdit: true }, this.setFields);
-    }
-    return;
-  };
-
   setFields = () => {
-    if (this.state.isEdit) {
-      const { name, alias, description, targetNames } = this.props.editEnvBinding || {};
-      this.field.setValues({
-        name,
-        alias,
-        description,
-        targetNames,
+    if (this.props.editEnvBinding?.name) {
+      this.setState({ isEdit: true }, () => {
+        const { name, alias, description, targetNames } = this.props.editEnvBinding || {};
+        this.field.setValues({
+          name,
+          alias,
+          description,
+          targetNames,
+        });
       });
     }
     return;
