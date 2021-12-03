@@ -11,19 +11,19 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
+    - name: Get the version
+      id: get_version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        if [[ ${GITHUB_REF} == "refs/heads/main" ]]; then
+          VERSION=latest
+        fi
+        echo ::set-output name=VERSION::${VERSION}
     - name: Login to DockerHub
       uses: docker/login-action@v1 
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Build docker image
-      id: docker_build
-      uses: docker/build-push-action@v2
-      with:
-        context: ./
-        file: ./Dockerfile
-        push: true
-        tags: oamdev/velaux:1.2.0
     
     - name: Login to Aliyun Container Registry (ACR)
       uses: docker/login-action@v1 
@@ -38,4 +38,8 @@ jobs:
         context: ./
         file: ./Dockerfile
         push: true
-        tags: acr.kubevela.net/oamdev/velaux:1.2.0
+        build-args: |
+          GITVERSION=git-${{ steps.vars.outputs.git_revision }}
+        tags: |-
+          acr.kubevela.net/oamdev/velaux:${{ steps.get_version.outputs.VERSION }}
+          oamdev/velaux:${{ steps.get_version.outputs.VERSION }}

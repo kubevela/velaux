@@ -1,11 +1,15 @@
 import React from 'react';
 import { connect } from 'dva';
 import { Table, Button, Message, Dialog } from '@b-design/ui';
-import { listApplicationPods, listCloudResources } from '../../api/observation';
+import {
+  listApplicationPods,
+  listCloudResources,
+  listApplicationService,
+} from '../../api/observation';
 import { deployApplication } from '../../api/application';
 import type { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
-import type { PodBase, CloudResource, Configuration } from '../../interface/observation';
+import type { PodBase, CloudResource, Configuration, Service } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
 import Header from './components/Hearder';
 import type { DeliveryTarget } from '../../interface/deliveryTarget';
@@ -39,6 +43,7 @@ type State = {
   openRowKeys: [];
   cloudInstance?: CloudInstance[];
   showStatus: boolean;
+  services?: Service[];
 };
 
 type CloudInstance = {
@@ -87,10 +92,65 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       this.props.dispatch({
         type: 'application/getApplicationStatus',
         payload: { appName: appName, envName: envName },
-        callback: () => {
+        callback: (re: any) => {
           this.loadAppInstances();
+          if (re) {
+            const status: ApplicationStatus = re.status;
+            if (status && status.appliedResources) {
+              const services = status.appliedResources.filter(
+                (resource) => resource.kind == 'Service',
+              );
+              if (services) {
+                this.loadApplicationService();
+              }
+            }
+          }
         },
       });
+    }
+  };
+
+  loadApplicationService = async () => {
+    const { applicationDetail, envbinding, applicationStatus } = this.props;
+    const {
+      params: { appName, envName },
+    } = this.props.match;
+    const { target } = this.state;
+    const envs = envbinding.filter((item) => item.name == envName);
+    if (
+      applicationDetail &&
+      applicationDetail.name &&
+      envs.length > 0 &&
+      applicationStatus &&
+      applicationStatus.services?.length
+    ) {
+      const conponentName = applicationStatus.services[0].name;
+      const param = {
+        appName: envs[0].appDeployName || appName + '-' + envName,
+        appNs: applicationDetail.namespace,
+        name: conponentName,
+        cluster: '',
+        clusterNs: '',
+      };
+      if (target) {
+        param.cluster = target.cluster?.clusterName || '';
+        param.clusterNs = target.cluster?.namespace || '';
+      }
+      this.setState({ loading: true });
+      listApplicationService(param)
+        .then((re) => {
+          if (re && re.services) {
+            re.services.map((item: any) => {
+              item.primaryKey = item.metadata.name;
+            });
+            this.setState({ services: re.services });
+          } else {
+            this.setState({ services: [] });
+          }
+        })
+        .finally(() => {
+          this.setState({ loading: false });
+        });
     }
   };
 
@@ -323,6 +383,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     if (!targetName) {
       this.setState({ target: undefined }, () => {
         this.loadAppInstances();
+        this.loadApplicationService();
       });
       return;
     }
@@ -330,6 +391,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     if (targets?.length) {
       this.setState({ target: targets[0] }, () => {
         this.loadAppInstances();
+        this.loadApplicationService();
       });
     }
   };
@@ -391,7 +453,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   }
   render() {
     const { applicationStatus, applicationDetail } = this.props;
-    const { podList, loading, showStatus, cloudInstance } = this.state;
+    const { podList, loading, showStatus, cloudInstance, services } = this.state;
     const columns = this.getCloumns();
     const expandedRowRender = (record: PodBase) => {
       return (
@@ -400,6 +462,24 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         </div>
       );
     };
+    const gatewayIPs: any = services?.map((service) => {
+      const ingress = service.status?.loadBalancer?.ingress;
+      if (ingress && Array.isArray(ingress) && ingress.length > 0) {
+        const item = {
+          ip: ingress[0].ip,
+          name: service.metadata.name,
+          port: 80,
+        };
+        if (
+          service.spec.ports &&
+          Array.isArray(service.spec.ports) &&
+          service.spec.ports.length > 0
+        ) {
+          item.port = service.spec.ports[0].port;
+        }
+        return item;
+      }
+    });
     const {
       params: { envName, appName },
     } = this.props.match;
@@ -411,6 +491,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           targets={this.getTargets()}
           envName={envName}
           appName={ appName}
+          gatewayIPs={gatewayIPs}
           updateEnvs={() => {
             this.loadApplicationEnvbinding();
             this.loadApplicationWorkflows();

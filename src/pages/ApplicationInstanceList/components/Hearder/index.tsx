@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
-import { Grid, Select, Button, Dialog, Message, Icon } from '@b-design/ui';
+import { Grid, Select, Button, Dialog, Message, Icon, Menu, Dropdown } from '@b-design/ui';
 import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import Translation from '../../../../components/Translation';
 import {
@@ -11,6 +11,11 @@ import type { ApplicationDetail, ApplicationStatus,EnvBinding} from '../../../..
 import { If } from 'tsx-control-statements/components';
 import AddAndEditEnvBind from '../../../../layout/Application/components/AddAndEditEnvBind';
 
+export type GatewayIP = {
+  ip: string;
+  name: string;
+  port: number;
+};
 type Props = {
   targets?: DeliveryTarget[];
   applicationStatus?: ApplicationStatus;
@@ -18,6 +23,7 @@ type Props = {
   envName: string;
   appName: string;
   envbinding?: EnvBinding;
+  gatewayIPs?: GatewayIP[];
   updateQuery: (targetName: string) => void;
   updateEnvs: () => void;
   updateStatusShow: (show: boolean) => void;
@@ -115,7 +121,7 @@ class Hearder extends Component<Props, State> {
     const { t, updateStatusShow } = this.props;
     const { recycleLoading, deleteLoading, refreshLoading,visibleEnvEditPlan} = this.state;
     const clusterPlacehole = t('Delivery Target Selector').toString();
-    const { targets, applicationStatus } = this.props;
+    const { targets, applicationStatus, gatewayIPs } = this.props;
     const clusterList = (targets || []).map((item: DeliveryTarget) => ({
       label: item.alias,
       value: item.name,
@@ -162,14 +168,27 @@ class Hearder extends Component<Props, State> {
               </Message>
             </If>
           </Col>
-          <Col span="10" className="flexright" style={{ marginBottom: '16px' }}>\
-             <If condition={!applicationStatus || !applicationStatus.status}>
-              <Button
-                style={{ marginLeft: '16px' }}
-                onClick={this.deleteEnv}
+          <Col span="10" className="flexright" style={{ marginBottom: '16px' }}>
+            <If condition={gatewayIPs && gatewayIPs.length > 0}>
+              <Dropdown
+                trigger={
+                  <Button style={{ marginRight: '16px' }} type="secondary">
+                    Access Address
+                  </Button>
+                }
               >
-                <Translation>Edit</Translation>
-              </Button>
+                <Menu>
+                  {gatewayIPs?.map((item) => {
+                    if (item) {
+                      <Menu.Item key={item.ip}>
+                        <a target="_blank" href={`http://${item.ip}:${item.port}`}>
+                          {item.ip}:{item.port}
+                        </a>
+                      </Menu.Item>;
+                    }
+                  })}
+                </Menu>
+              </Dropdown>
             </If>
             <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
               <Icon type="refresh" />

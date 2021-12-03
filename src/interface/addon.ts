@@ -26,7 +26,13 @@ export interface RegistryGitSource {
   token: string;
 }
 
+export interface RegistryOssSource {
+  end_point: string;
+  bucket: string;
+}
+
 export interface AddonRegistry {
   name: string;
   git: RegistryGitSource;
+  oss: RegistryOssSource;
 }

@@ -291,7 +291,7 @@ class DeliveryDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Cluster Selector</Translation>} required>
+                <FormItem label={<Translation>Cluster</Translation>} required>
                   <Select
                     className="select"
                     placeholder={t('Please select').toString()}
@@ -308,7 +308,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Namespace Selector</Translation>} required>
+                <FormItem label={<Translation>Namespace</Translation>} required>
                   <Namespace
                     {...init(`runtimeNamespace`, {
                       rules: [

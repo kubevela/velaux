@@ -25,12 +25,18 @@ const { Item: StepItem } = Step;
 
 type State = {
   hiddenConfirm: boolean;
+  rollbackLoading: boolean;
+  terminateLoading: boolean;
+  resumeLoading: boolean;
 };
 class WorkflowStep extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
       hiddenConfirm: false,
+      rollbackLoading: false,
+      terminateLoading: false,
+      resumeLoading: false,
     };
   }
 
@@ -54,11 +60,17 @@ class WorkflowStep extends Component<Props, State> {
       workflowName,
       recordName,
     };
-    resumeApplicationWorkflowRecord(params).then((re) => {
-      if (re) {
-        Message.success('operation success');
-      }
-    });
+    this.setState({ resumeLoading: true });
+    resumeApplicationWorkflowRecord(params)
+      .then((re) => {
+        if (re) {
+          Message.success('resume the workflow success');
+          this.setState({ hiddenConfirm: true });
+        }
+      })
+      .finally(() => {
+        this.setState({ resumeLoading: false });
+      });
   };
 
   onRollbackApplicationWorkflowRecord = () => {
@@ -68,11 +80,17 @@ class WorkflowStep extends Component<Props, State> {
       workflowName,
       recordName,
     };
-    rollbackApplicationWorkflowRecord(params).then((re) => {
-      if (re) {
-        Message.success('operation success');
-      }
-    });
+    this.setState({ rollbackLoading: true });
+    rollbackApplicationWorkflowRecord(params)
+      .then((re) => {
+        if (re) {
+          Message.success('rollback the workflow success');
+          this.setState({ hiddenConfirm: true });
+        }
+      })
+      .finally(() => {
+        this.setState({ rollbackLoading: false });
+      });
   };
 
   onTerminateApplicationWorkflowRecord = () => {
@@ -82,12 +100,17 @@ class WorkflowStep extends Component<Props, State> {
       workflowName,
       recordName,
     };
-
-    terminateApplicationWorkflowRecord(params).then((re) => {
-      if (re) {
-        Message.success('operation success');
-      }
-    });
+    this.setState({ terminateLoading: true });
+    terminateApplicationWorkflowRecord(params)
+      .then((re) => {
+        if (re) {
+          Message.success('stop the workflow success');
+          this.setState({ hiddenConfirm: true });
+        }
+      })
+      .finally(() => {
+        this.setState({ terminateLoading: false });
+      });
   };
 
   itemRender = (index: number) => {
@@ -143,6 +166,7 @@ class WorkflowStep extends Component<Props, State> {
     const { hiddenConfirm } = this.state;
     const isSuspend = workflow.status == 'running' && data.type === 'suspend' ? true : false;
     if (isSuspend && currentStep && !hiddenConfirm) {
+      const { rollbackLoading, terminateLoading, resumeLoading } = this.state;
       return (
         <div className="step-confirm-wraper">
           <div className="step-confirm-title">
@@ -161,6 +185,7 @@ class WorkflowStep extends Component<Props, State> {
             <Button
               type="secondary"
               size="small"
+              loading={rollbackLoading}
               className="margin-top-5 margin-left-8"
               onClick={this.onRollbackApplicationWorkflowRecord}
             >
@@ -170,6 +195,7 @@ class WorkflowStep extends Component<Props, State> {
             <Button
               type="secondary"
               size="small"
+              loading={terminateLoading}
               className="margin-top-5 margin-left-8"
               onClick={this.onTerminateApplicationWorkflowRecord}
             >
@@ -179,6 +205,7 @@ class WorkflowStep extends Component<Props, State> {
             <Button
               type="primary"
               size="small"
+              loading={resumeLoading}
               className="margin-top-5 margin-left-8"
               onClick={this.onResumeApplicationWorkflowRecord}
             >
