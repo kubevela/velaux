@@ -114,6 +114,9 @@ export interface Configuration {
   apiVersion: string;
   kind: string;
   metadata: {
+    name: string;
+    namespace: string;
+    creationTimestamp: string;
     annotations: any;
     labels: any;
   };

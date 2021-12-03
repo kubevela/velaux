@@ -25,6 +25,7 @@ type Props = {
   appName?: string;
   componentName?: string;
   closeDrawer: () => void;
+  checkStepName: (name: string) => boolean;
   onDelete: () => void;
   dispatch?: ({}) => {};
   t: (key: string) => {};
@@ -127,15 +128,22 @@ class WorkflowForm extends Component<Props, State> {
     const { init } = this.field;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
-    const { t, closeDrawer, data } = this.props;
+    const { t, closeDrawer, data, checkStepName } = this.props;
     const { definitionDetail } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
 
+    const checkWorkflowStepName = (rule: Rule, value: any, callback: (error?: string) => void) => {
+      if (checkStepName(value)) {
+        callback('name is exist');
+      }
+      callback();
+    };
+
     return (
       <DrawerWithFooter
-        title={<Translation>Edit workflow step</Translation>}
+        title={<Translation>Edit Workflow Step</Translation>}
         placement="right"
         width={800}
         onClose={closeDrawer}
@@ -198,7 +206,11 @@ class WorkflowForm extends Component<Props, State> {
                       {
                         required: true,
                         pattern: checkName,
-                        message: 'Please enter a valid application name',
+                        message: 'Please enter a valid workflow step name',
+                      },
+                      {
+                        validator: checkWorkflowStepName,
+                        message: 'The name already exists. Please change it.',
                       },
                     ],
                   })}

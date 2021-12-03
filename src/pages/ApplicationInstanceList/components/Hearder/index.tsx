@@ -154,7 +154,7 @@ class Hearder extends Component<Props, State> {
                 style={{ marginLeft: '16px', padding: '8px' }}
               >
                 <Translation>{`Application is ${
-                  applicationStatus?.status || 'initing'
+                  applicationStatus?.status || 'Initing'
                 }`}</Translation>{' '}
                 <a onClick={() => updateStatusShow(true)}>
                   <Translation>Check the details</Translation>
