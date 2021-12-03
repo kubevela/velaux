@@ -108,7 +108,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
         <Form {...formItemLayout} field={this.field}>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Environment Name</Translation>} required={true}>
+              <FormItem label={<Translation>Name</Translation>} required={true}>
                 <Input
                   htmlType="name"
                   name="name"
@@ -127,7 +127,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
             </Col>
 
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Environment Alias</Translation>}>
+              <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
                   {...init('alias', {

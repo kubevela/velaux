@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Input, Select, Field } from '@b-design/ui';
+import { Form, Input, Select, Field, Switch } from '@b-design/ui';
 import Translation from '../Translation';
 import type { UIParam, UIParamValidate } from '../../interface/application';
 import Group from '../../extends/Group';
@@ -10,7 +10,6 @@ import SecretKeySelect from '../../extends/SecretKeySelect';
 import Structs from '../../extends/Structs';
 import CPUNumber from '../../extends/CPUNumber';
 import MemoryNumber from '../../extends/MemoryNumber';
-import SwitchComponent from '../../extends/Switch';
 import InnerGroup from '../../extends/InnerGroup';
 import K8sObjectsCode from '../../extends/K8sObjectsCode';
 import type { Rule } from '@alifd/field';
@@ -124,21 +123,23 @@ class UISchema extends Component<Props, State> {
     }
     switch (param.uiType) {
       case 'Switch':
+        const switchResult = init(param.jsonKey, {
+          initValue: param.validate.defaultValue,
+          rules: converRule(param.validate),
+        });
         return (
           <Form.Item
             className="switch-container"
             required={required}
             key={param.jsonKey}
-            labelAlign={inline ? 'inset' : 'left'}
-            label={param.label}
+            label={<span title={param.description}>{param.label}</span>}
             help={param.description}
             disabled={param.disable}
           >
-            <SwitchComponent
-              {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
-                rules: converRule(param.validate),
-              })}
+            <Switch
+              id={switchResult.id}
+              onChange={switchResult.onChange}
+              checked={switchResult.value ? true : false}
             />
           </Form.Item>
         );

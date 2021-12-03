@@ -148,8 +148,8 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   changeStatus = (value: string) => {
-    const values: { componentType: string } = this.field.getValues();
-    const { componentType } = values;
+    const values: { componentType: string; namespace: string } = this.field.getValues();
+    const { componentType, namespace } = values;
     if (value === 'isCreateComponent') {
       this.field.validateCallback(
         ['name', 'alias', 'description', 'namespace', 'componentType'],
@@ -160,6 +160,13 @@ class AppDialog extends React.Component<Props, State> {
           const envBinding = this.envBind.current?.getValues();
           if (!envBinding || envBinding.length < 1) {
             return;
+          }
+          const { dispatch } = this.props;
+          if (dispatch) {
+            dispatch({
+              type: 'uischema/setAppNamespace',
+              payload: namespace,
+            });
           }
           this.setState(
             {
@@ -255,15 +262,11 @@ class AppDialog extends React.Component<Props, State> {
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem
-                  label={
-                    <Translation className="font-size-14 font-weight-bold">
-                      Deployment Type
-                    </Translation>
-                  }
+                  label={<Translation className="font-size-14 font-weight-bold">Type</Translation>}
                   required={true}
                   help={
                     <span>
-                      Get more deployment type? <Link to="/addons">Go to enable addon</Link>
+                      Get more component type? <Link to="/addons">Go to enable addon</Link>
                     </span>
                   }
                 >
@@ -288,7 +291,7 @@ class AppDialog extends React.Component<Props, State> {
                 <FormItem
                   label={
                     <Translation className="font-size-14 font-weight-bold">
-                      Environment Plan
+                      Environments
                     </Translation>
                   }
                   required={true}

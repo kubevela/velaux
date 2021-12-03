@@ -32,7 +32,7 @@ class SecretSelect extends React.Component<Props, State> {
     const { secrets } = this.state;
     let keys: string[] = [];
     secrets?.map((secret) => {
-      if (secret.metadata.name == name && 'data' in secret) {
+      if (secret.metadata.labels['app.oam.dev/sync-alias'] == name && 'data' in secret) {
         keys = Object.keys(secret.data);
       }
     });
@@ -56,12 +56,16 @@ class SecretSelect extends React.Component<Props, State> {
   render() {
     const { value, id } = this.props;
     const { secrets } = this.state;
+    const filters = secrets?.filter((secret) => secret.metadata.labels['app.oam.dev/sync-alias']);
     return (
       <Select onChange={this.onChange} value={value} id={id}>
-        {secrets?.map((secret) => {
+        {filters?.map((secret) => {
           return (
-            <Select.Option key={secret.metadata.name} value={secret.metadata.name}>
-              {secret.metadata.name}
+            <Select.Option
+              key={secret.metadata.name}
+              value={secret.metadata.labels['app.oam.dev/sync-alias']}
+            >
+              {secret.metadata.labels['app.oam.dev/sync-alias']}
             </Select.Option>
           );
         })}

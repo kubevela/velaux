@@ -54,7 +54,7 @@ class GeneralConfig extends React.Component<Props, State> {
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
               <FormItem
-                label={<Translation>Application Name</Translation>}
+                label={<Translation>Name</Translation>}
                 labelTextAlign="left"
                 required={true}
               >
@@ -75,7 +75,7 @@ class GeneralConfig extends React.Component<Props, State> {
               </FormItem>
             </Col>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Application Alias</Translation>}>
+              <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
                   placeholder={'Give your app a more recognizable name'}
@@ -94,7 +94,7 @@ class GeneralConfig extends React.Component<Props, State> {
           </Row>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Application Description</Translation>}>
+              <FormItem label={<Translation>Description</Translation>}>
                 <Input
                   name="description"
                   {...init('description', {

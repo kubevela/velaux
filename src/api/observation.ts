@@ -60,3 +60,20 @@ export function listCloudResourceSecrets(params: { appNs: string; appName?: stri
     },
   });
 }
+
+export function listApplicationService(params: {
+  appNs: string;
+  appName?: string;
+  cluster?: string;
+  clusterNs?: string;
+}) {
+  let urlParams = `service-view{appNs=${params.appNs}, appName=${params.appName}}`;
+  if (params.cluster) {
+    urlParams = `service-view{appNs=${params.appNs}, appName=${params.appName}, cluster=${params.cluster},clusterNs=${params.clusterNs}}`;
+  }
+  return get('/api/v1/query', {
+    params: {
+      velaql: urlParams,
+    },
+  });
+}

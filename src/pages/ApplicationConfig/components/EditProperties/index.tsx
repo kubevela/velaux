@@ -1,7 +1,6 @@
 import React from 'react';
-import { Grid, Field, Form, Button, Message } from '@b-design/ui';
+import { Grid, Field, Form, Button, Message, Loading } from '@b-design/ui';
 import type { Rule } from '@alifd/field';
-import Group from '../../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
 import { detailComponentDefinition, updateComponentProperties } from '../../../../api/application';
 import type {
@@ -142,13 +141,7 @@ class EditProperties extends React.Component<Props, State> {
         <Form field={this.field}>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <Group
-                title="Component Properties"
-                description="Set the configuration parameters for the Component."
-                closed={false}
-                loading={definitionLoading}
-                required={true}
-              >
+              <Loading visible={definitionLoading} style={{ width: '100%' }}>
                 <If condition={definitionDetail && definitionDetail.uiSchema}>
                   <FormItem required={true}>
                     <UISchema
@@ -165,7 +158,7 @@ class EditProperties extends React.Component<Props, State> {
                     />
                   </FormItem>
                 </If>
-              </Group>
+              </Loading>
             </Col>
           </Row>
         </Form>
