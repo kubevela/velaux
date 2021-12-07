@@ -8,6 +8,7 @@ import { momentDate } from '../../../../utils/common';
 import { Link } from 'dva/router';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
+import locale from '../../../../utils/locale';
 
 type Props = {
   list: Revisions[];
@@ -36,7 +37,7 @@ class TableList extends Component<Props, State> {
       },
       {
         key: 'status',
-        title: <Translation>Publish Status</Translation>,
+        title: <Translation>Status</Translation>,
         dataIndex: 'status',
         cell: (v: string) => {
           const findObj = statusList.find((item) => item.value === v);
@@ -56,7 +57,7 @@ class TableList extends Component<Props, State> {
       },
       {
         key: 'envName',
-        title: <Translation>Publish Environment</Translation>,
+        title: <Translation>Environment</Translation>,
         dataIndex: 'envName',
         cell: (v: string) => {
           return (
@@ -102,6 +103,7 @@ class TableList extends Component<Props, State> {
     return (
       <div className="table-version-list  margin-top-20">
         <Table
+          locale={locale.Table}
           primaryKey={'version'}
           className="customTable"
           rowHeight={40}

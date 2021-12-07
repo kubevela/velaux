@@ -6,6 +6,7 @@ import './index.less';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import Translation from '../../../../components/Translation';
+import locale from '../../../../utils/locale';
 
 type Props = {
   traits: Trait[];
@@ -21,6 +22,7 @@ class TraitsList extends Component<Props> {
         this.props.onDeleteTrait(traitType || '');
       },
       onClose: () => {},
+      locale: locale.Dialog,
     });
   };
 
@@ -32,7 +34,7 @@ class TraitsList extends Component<Props> {
         <Row wrap={true}>
           {(traits || []).map((item: Trait) => (
             <Col span={8} key={item.type} className="padding16">
-              <Card>
+              <Card locale={locale.Card}>
                 <div className="traits-list-nav">
                   <div className="traits-list-title">
                     {item.alias}({item.type})

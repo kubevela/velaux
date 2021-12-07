@@ -3,6 +3,7 @@ import { Input, Select, Button, Message } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
 import { createClusterNamespace } from '../../../../api/cluster';
+import locale from '../../../../utils/locale';
 
 type Props = {
   cluster?: string;
@@ -77,6 +78,7 @@ class Namespace extends React.Component<Props, State> {
         <If condition={!showNameSpaceInput}>
           <div className="cluster-container">
             <Select
+              locale={locale.Select}
               className="cluster-params-input"
               mode="single"
               dataSource={namespaces}

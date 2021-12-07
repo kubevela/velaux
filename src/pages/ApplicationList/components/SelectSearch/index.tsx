@@ -4,6 +4,7 @@ import { withTranslation } from 'react-i18next';
 import './index.less';
 import Translation from '../../../../components/Translation';
 import type { Project } from '../../../../interface/project';
+import locale from '../../../../utils/locale';
 
 const { Row, Col } = Grid;
 
@@ -80,9 +81,9 @@ class SelectSearch extends React.Component<Props, State> {
     const { deliveryTargetList, projects, t } = this.props;
     const { namespaceValue, deliveryTargetValue, inputValue } = this.state;
 
-    const projectPlacehole = t('Project Screening').toString();
-    const deliveryTargetPlacehole = t('Delivery Target Screening').toString();
-    const appPlacehole = t('Application name, description and search').toString();
+    const projectPlacehole = t('Search by project').toString();
+    const deliveryTargetPlacehole = t('Search by target').toString();
+    const appPlacehole = t('Search by application name and description').toString();
     const projectSource = projects?.map((item) => {
       return {
         label: item.name,
@@ -93,6 +94,7 @@ class SelectSearch extends React.Component<Props, State> {
       <Row className="app-select-wraper boder-radius-8">
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
+            locale={locale.Select}
             mode="single"
             size="large"
             onChange={this.handleChangeNamepace}
@@ -106,6 +108,7 @@ class SelectSearch extends React.Component<Props, State> {
 
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
+            locale={locale.Select}
             mode="single"
             size="large"
             onChange={this.handleChangDeliveryTarget}

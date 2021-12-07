@@ -31,6 +31,7 @@ import { handleError } from '../../../../utils/errors';
 import WorkflowSilder from '../WorkflowSilder';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
+import locale from '../../../../utils/locale';
 
 const { Row, Col } = Grid;
 
@@ -86,6 +87,7 @@ class ApplicationHeader extends Component<Props, State> {
               onOk: () => {
                 this.onDeploy(workflowName, true);
               },
+              locale: locale.Dialog,
             });
           } else {
             handleError(err);
@@ -191,7 +193,7 @@ class ApplicationHeader extends Component<Props, State> {
         </Row>
         <Row>
           <Col span={12} className="padding16">
-            <Card>
+            <Card locale={locale.Card}>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem number={statistics?.envCount} title={'Env Count'} />
@@ -213,7 +215,7 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
           <Col span={12} className="padding16">
             <If condition={!records || (Array.isArray(records) && records.length === 0)}>
-              <Card>
+              <Card locale={locale.Card}>
                 <Empty
                   message={<Translation>There is no running workflow</Translation>}
                   iconWidth={'30px'}

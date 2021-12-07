@@ -11,6 +11,7 @@ import type { Cluster } from '../../../../interface/cluster';
 import { listNamespaces } from '../../../../api/observation';
 import NameSpaceForm from '../../../ApplicationList/components/GeneralConfig/namespace-form';
 import type { Project } from '../../../../interface/project';
+import locale from '../../../../utils/locale';
 
 type Props = {
   project?: string;
@@ -215,6 +216,7 @@ class DeliveryDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
+          locale={locale.Dialog}
           className={'commonDialog'}
           height="auto"
           title={
@@ -225,7 +227,7 @@ class DeliveryDialog extends React.Component<Props, State> {
           onOk={this.onOk}
           onCancel={this.onClose}
           onClose={this.onClose}
-          footerActions={['ok', 'cancel']}
+          footerActions={['cancel', 'ok']}
           footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>
@@ -293,6 +295,7 @@ class DeliveryDialog extends React.Component<Props, State> {
               <Col span={12} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Cluster</Translation>} required>
                   <Select
+                    locale={locale.Select}
                     className="select"
                     placeholder={t('Please select').toString()}
                     {...init(`clusterName`, {

@@ -6,6 +6,7 @@ import { Grid, Card, Tag } from '@b-design/ui';
 import type { Addon } from '../../../../interface/addon';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
+import locale from '../../../../utils/locale';
 
 type State = {
   extendDotVisible: boolean;
@@ -46,7 +47,7 @@ class CardContent extends React.Component<any, State> {
               const { name, icon, version, description, tags } = item;
               return (
                 <Col span="6" className={`card-content-wraper`} key={name}>
-                  <Card contentHeight="auto">
+                  <Card locale={locale.Card} contentHeight="auto">
                     <a onClick={() => clickAddon(name)}>
                       <div className="cluster-card-top flexcenter">
                         <If condition={icon && icon != 'none'}>

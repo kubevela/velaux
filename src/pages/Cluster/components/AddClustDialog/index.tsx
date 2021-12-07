@@ -17,6 +17,7 @@ import { getClusterDetails, updateCluster } from '../../../../api/cluster';
 import './index.less';
 import Translation from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
+import locale from '../../../../utils/locale';
 const { Col, Row } = Grid;
 
 type Props = {
@@ -148,6 +149,7 @@ class AddClustDialog extends React.Component<Props, State> {
     const valueInfo = cluster.kubeConfig || values.kubeConfig || '';
     return (
       <Dialog
+        locale={locale.Dialog}
         className={'commonDialog'}
         title={
           editMode ? (

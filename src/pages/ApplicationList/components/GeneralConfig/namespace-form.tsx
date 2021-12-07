@@ -4,6 +4,7 @@ import { Form, Input, Select, Button } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
+import locale from '../../../../utils/locale';
 
 const FormItem = Form.Item;
 type Props = {
@@ -56,6 +57,7 @@ class NamespaceForm extends React.Component<Props, State> {
             <If condition={!showNameSpaceInput}>
               <div className="cluster-container">
                 <Select
+                  locale={locale.Select}
                   className="cluster-params-input"
                   mode="single"
                   dataSource={namespaceList}

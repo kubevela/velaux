@@ -8,6 +8,7 @@ import DeliveryDialog from './components/TargetDialog';
 import type { DeliveryTarget } from '../../interface/deliveryTarget';
 import './index.less';
 import type { Cluster } from '../../interface/cluster';
+import locale from '../../utils/locale';
 
 type Props = {
   deliveryTargets?: [];
@@ -141,6 +142,7 @@ class DeliveryTargetList extends React.Component<Props, State> {
         <Pagination
           className="delivery-target-pagenation"
           total={total}
+          locale={locale.Pagination}
           size="medium"
           pageSize={this.state.pageSize}
           current={this.state.page}

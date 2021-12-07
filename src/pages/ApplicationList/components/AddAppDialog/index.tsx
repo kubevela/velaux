@@ -17,6 +17,7 @@ import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import type { Project } from '../../../../interface/project';
 import type { Cluster } from '../../../../interface/cluster';
 import { connect } from 'dva';
+import locale from '../../../../utils/locale';
 
 type Props = {
   visible: boolean;
@@ -271,6 +272,7 @@ class AppDialog extends React.Component<Props, State> {
                   }
                 >
                   <Select
+                    locale={locale.Select}
                     className="select"
                     {...init(`componentType`, {
                       initValue: 'webservice',
