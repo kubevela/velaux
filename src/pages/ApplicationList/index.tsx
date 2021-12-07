@@ -15,7 +15,6 @@ type Props = {
   dispatch: ({}) => {};
   applicationList: ApplicationBase[];
   projects?: Project[];
-  namespaceList: [];
   deliveryTargets?: [];
   history: any;
 };
