@@ -116,6 +116,10 @@ class Hearder extends Component<Props, State> {
     this.setState({ showStatus: true });
   };
 
+  showEditDialog = () => {
+    this.setState({visibleEnvEditPlan: true})
+  }
+
   render() {
     const { Row, Col } = Grid;
     const { t, updateStatusShow } = this.props;
@@ -189,6 +193,15 @@ class Hearder extends Component<Props, State> {
                   })}
                 </Menu>
               </Dropdown>
+            </If>
+            <If condition={applicationStatus && applicationStatus.status}>
+              <Button
+                onClick={this.showEditDialog}
+                type="primary"
+                style={{ marginLeft: '16px' }}
+              >
+                <Translation>Edit</Translation>
+              </Button>
             </If>
             <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
               <Icon type="refresh" />
