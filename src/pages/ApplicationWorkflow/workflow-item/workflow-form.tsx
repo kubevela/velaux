@@ -17,6 +17,7 @@ import { checkName } from '../../../utils/common';
 
 import './index.less';
 import DrawerWithFooter from '../../../components/Drawer';
+import locale from '../../../utils/locale';
 
 type Props = {
   createOrUpdateNode: (data: any) => void;
@@ -172,6 +173,7 @@ class WorkflowForm extends Component<Props, State> {
                 disabled={this.field.getValue('type')}
               >
                 <Select
+                  locale={locale.Select}
                   className="select"
                   placeholder={t('Please select').toString()}
                   {...init(`type`, {

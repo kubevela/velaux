@@ -4,6 +4,7 @@ import Translation from '../../../../components/Translation';
 import { deleteDeliveryTarget } from '../../../../api/deliveryTarget';
 import './index.less';
 import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import locale from '../../../../utils/locale';
 
 type Props = {
   list?: [];
@@ -107,6 +108,7 @@ class TableList extends Component<Props> {
     return (
       <div className="table-delivery-list margin-top-20">
         <Table
+          locale={locale.Table}
           className="customTable"
           size="medium"
           dataSource={list}

@@ -9,6 +9,7 @@ import type { DeliveryTarget } from '../../interface/deliveryTarget';
 import TargetDialog from '../../pages/DeliveryTargetList/components/TargetDialog';
 import type { Project } from '../../interface/project';
 import type { Cluster } from '../../interface/cluster';
+import locale from '../../utils/locale';
 
 const { Col, Row } = Grid;
 
@@ -90,6 +91,7 @@ function EnvItem(props: EnvPlanParams) {
             <Select
               className="select"
               mode="multiple"
+              locale={locale.Select}
               {...props.init(`${props.id}-targetNames`, {
                 initValue: props.value?.targetNames && props.value?.targetNames,
                 rules: [

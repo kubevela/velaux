@@ -11,7 +11,7 @@ export function getLeftSider(pathname) {
   const isDeliveryTargetURL = isDeliveryTarget(pathname);
   return [
     {
-      navName: 'Application Center',
+      navName: 'Continuous Delivery',
       children: [
         {
           className: isApplication,
@@ -28,7 +28,7 @@ export function getLeftSider(pathname) {
       ],
     },
     {
-      navName: 'Integration Center',
+      navName: 'Integration',
       children: [
         {
           className: isCluster,
@@ -39,7 +39,7 @@ export function getLeftSider(pathname) {
       ],
     },
     {
-      navName: 'Capability Center',
+      navName: 'Extension',
       children: [
         {
           className: isAddons,

@@ -20,6 +20,7 @@ import { deleteWorkFlow } from '../../../api/workflows';
 import Translation from '../../../components/Translation';
 import './index.less';
 import { convertWorkflowStep } from '../../../model/workflow';
+import locale from '../../../utils/locale';
 
 const { Col, Row } = Grid;
 
@@ -88,6 +89,7 @@ class WorkFlowComponent extends Component<Props, State> {
           }
         });
       },
+      locale: locale.Dialog,
     });
   };
 

@@ -16,6 +16,7 @@ import type { Rule } from '@alifd/field';
 import KV from '../../extends/KV';
 import './index.less';
 import { checkImageName } from '../../utils/common';
+import locale from '../../utils/locale';
 
 type Props = {
   _key?: string;
@@ -191,6 +192,7 @@ class UISchema extends Component<Props, State> {
             disabled={param.disable}
           >
             <Select
+              locale={locale.Select}
               {...init(param.jsonKey, {
                 initValue: param.validate.defaultValue,
                 rules: converRule(param.validate),

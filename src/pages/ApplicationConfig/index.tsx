@@ -12,6 +12,7 @@ import TraitsList from './components/TraitsList';
 import type { ApplicationDetail, Trait, ApplicationComponent } from '../../interface/application';
 import { momentDate } from '../../utils/common';
 import EditProperties from './components/EditProperties';
+import locale from '../../utils/locale';
 
 const { Row, Col } = Grid;
 
@@ -178,7 +179,7 @@ class ApplicationConfig extends Component<Props, State> {
         </Row>
         <Row>
           <Col span={24} className="padding16">
-            <Card>
+            <Card locale={locale.Card}>
               <Row>
                 <Col span={12}>
                   <Item

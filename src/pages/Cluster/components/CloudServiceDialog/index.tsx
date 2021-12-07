@@ -7,6 +7,7 @@ import { getCloudClustersList } from '../../../../api/cluster';
 import './index.less';
 import { handleError } from '../../../../utils/errors';
 import Translation from '../../../../components/Translation';
+import locale from '../../../../utils/locale';
 
 type Props = {
   visible: boolean;
@@ -209,6 +210,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <Dialog
+          locale={locale.Dialog}
           className="dialog-cluoudService-wraper"
           title={<Translation>Connect Kubernetes Cluster From Cloud</Translation>}
           autoFocus={true}
@@ -235,6 +237,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
             <Form {...formItemLayout} field={this.field} className="cloud-server-wraper">
               <FormItem label={<Translation>Provider</Translation>} required={true}>
                 <Select
+                  locale={locale.Select}
                   mode="single"
                   size="large"
                   dataSource={providerList}
@@ -283,7 +286,12 @@ class CloudServiceDialog extends React.Component<Props, State> {
           </If>
 
           <If condition={!choseInput}>
-            <Table dataSource={cloudClusters} hasBorder={false} loading={false}>
+            <Table
+              locale={locale.Table}
+              dataSource={cloudClusters}
+              hasBorder={false}
+              loading={false}
+            >
               {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
             </Table>
           </If>

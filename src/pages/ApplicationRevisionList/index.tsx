@@ -7,6 +7,7 @@ import TableList from './components/List';
 import type { ApplicationDetail, EnvBinding, Revisions } from '../../interface/application';
 import { statusList } from './constants';
 import './index.less';
+import locale from '../../utils/locale';
 
 type Props = {
   revisions: [];
@@ -119,6 +120,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
           getRevisionList={this.getRevisionList}
         />
         <Pagination
+          locale={locale.Pagination}
           className="revison-pagenation"
           hideOnlyOnePage={true}
           total={this.state.revisionsListTotal}
