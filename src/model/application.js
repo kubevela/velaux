@@ -12,7 +12,7 @@ import {
 
 import { listWorkFlow } from '../api/workflows';
 
-import { getNamespaceList } from '../api/namespace';
+import { getProjectList } from '../api/project';
 
 export default {
   namespace: 'application',
@@ -108,17 +108,18 @@ export default {
         action.callback(appContent);
       }
     },
+
     *createApplicationPlan(action, { call, put }) {
       const result = yield call(createApplication, action.payload);
       if (action.callback && result) {
         action.callback(result);
       }
     },
+
     *getProjectList(action, { call, put }) {
-      // use namespace data as projects
-      const result = yield call(getNamespaceList, action.payload);
+      const result = yield call(getProjectList, action.payload);
       if (result) {
-        yield put({ type: 'updateProjectList', payload: result.namespaces });
+        yield put({ type: 'updateProjectList', payload: result.projects });
       }
     },
 

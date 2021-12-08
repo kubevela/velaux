@@ -21,6 +21,7 @@ type Props = {
   t: (key: string) => string;
   onUpdateTarget: () => void;
   projects: Project[];
+  syncProjectList: () => void;
   clusterList: Cluster[];
 };
 
@@ -271,6 +272,7 @@ export default class EnvPlan extends React.Component<Props, State> {
               this.props.onUpdateTarget();
               this.setState({ showAddTarget: false });
             }}
+            syncProjectList={this.props.syncProjectList}
             projects={projects || []}
             clusterList={clusterList || []}
             project={project}

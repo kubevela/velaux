@@ -1,10 +1,10 @@
-import { getDeliveryTarget, createDeliveryTarget } from '../api/deliveryTarget';
+import { getDeliveryTarget, createDeliveryTarget } from '../api/target';
 
 export interface QueryDeliveryTarget {
   query?: string;
   page?: number;
   pageSize?: number;
-  namespace?: string;
+  project?: string;
 }
 
 interface DeliveryTargetState {
@@ -60,12 +60,12 @@ const DeliveryTargets: ModelsType = {
   reducers: {
     updateDeliveryTargets(
       state: DeliveryTargetState,
-      { payload }: { payload: { deliveryTargets: {}; total: number } },
+      { payload }: { payload: { targets: {}; total: number } },
     ) {
-      const { deliveryTargets = [], total = 0 } = payload;
+      const { targets = [], total = 0 } = payload;
       return {
         ...state,
-        deliveryTargets,
+        deliveryTargets: targets,
         total,
       };
     },

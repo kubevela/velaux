@@ -2,7 +2,7 @@ export const application_mock = '/mock/application.json';
 export const addons_mock = '/mock/addonsList.json';
 export const cluster_mock = '/mock/cluster.json';
 export const workflows_mock = '/mock/workflows.json';
-export const namespace_mock = '/mock/namespacelist.json';
+export const project_mock = '/mock/projectlist.json';
 
 export const addonsDetails_mock = '/mock/addonsDetails.json';
 export const disabletAddonsCluster_mock = '/mock/disabletAddonsCluster.json';

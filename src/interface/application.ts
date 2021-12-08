@@ -1,9 +1,10 @@
 import type { DeliveryTarget } from './deliveryTarget';
+import type { Project } from './project';
 
 export interface ApplicationDetail {
   name: string;
   alias?: string;
-  namespace: string;
+  project?: Project;
   description?: string;
   createTime?: string;
   updateTime?: string;

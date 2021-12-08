@@ -21,7 +21,7 @@ export function getLeftSider(pathname) {
         },
         {
           className: isDeliveryTargetURL,
-          link: '/deliveryTargets',
+          link: '/targets',
           iconType: 'box',
           navName: 'Targets',
         },

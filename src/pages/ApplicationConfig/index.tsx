@@ -190,7 +190,12 @@ class ApplicationConfig extends Component<Props, State> {
                 <Col span={12}>
                   <Item
                     label={<Translation>Project</Translation>}
-                    value={applicationDetail && applicationDetail.namespace}
+                    value={
+                      applicationDetail &&
+                      (applicationDetail.project?.alias
+                        ? applicationDetail.project?.alias
+                        : applicationDetail.project?.name)
+                    }
                   />
                 </Col>
               </Row>
