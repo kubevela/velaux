@@ -12,7 +12,7 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import EnvPlan from '../../../../components/EnvPlan';
 import Translation from '../../../../components/Translation';
 import './index.less';
-import { getDeliveryTarget } from '../../../../api/deliveryTarget';
+import { getDeliveryTarget } from '../../../../api/target';
 import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import type { Project } from '../../../../interface/project';
 import type { Cluster } from '../../../../interface/cluster';
@@ -23,6 +23,7 @@ type Props = {
   visible: boolean;
   componentDefinitions: [];
   projects?: Project[];
+  syncProjectList: () => void;
   clusterList?: Cluster[];
   setVisible: (visible: boolean) => void;
   t: (key: string) => string;
@@ -36,7 +37,7 @@ type State = {
   definitionLoading: boolean;
   dialogStats: string;
   envBinding: EnvBinding[];
-  deliveryTargets?: DeliveryTarget[];
+  targets?: DeliveryTarget[];
   project?: string;
 };
 
@@ -57,7 +58,7 @@ class AppDialog extends React.Component<Props, State> {
     };
     this.field = new Field(this, {
       onChange: (name: string, value: string) => {
-        if (name === 'namespace') {
+        if (name === 'project') {
           this.setState({ project: value }, () => {
             this.loadDeliveryTarget();
           });
@@ -72,7 +73,7 @@ class AppDialog extends React.Component<Props, State> {
   componentDidMount() {
     const { projects } = this.props;
     if (projects && projects.length > 0) {
-      this.field.setValue('namespace', projects[0].name);
+      this.field.setValue('project', projects[0].name);
       this.setState({ project: projects[0].name }, () => {
         this.loadDeliveryTarget();
       });
@@ -96,13 +97,13 @@ class AppDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { description, alias, name, namespace, icon = '', componentType, properties } = values;
+      const { description, alias, name, project, icon = '', componentType, properties } = values;
       const params = {
         alias,
         icon,
         name,
         description,
-        namespace,
+        project,
         envBinding: envBinding,
         component: {
           alias,
@@ -124,9 +125,9 @@ class AppDialog extends React.Component<Props, State> {
 
   loadDeliveryTarget = () => {
     if (this.state.project) {
-      getDeliveryTarget({ namespace: this.state.project, page: 0 }).then((res) => {
+      getDeliveryTarget({ project: this.state.project, page: 0 }).then((res) => {
         if (res) {
-          this.setState({ deliveryTargets: res.deliveryTargets });
+          this.setState({ targets: res.targets });
         }
       });
     }
@@ -236,7 +237,7 @@ class AppDialog extends React.Component<Props, State> {
     const { onClose } = this.props;
     const { visible, t, setVisible, dispatch, projects, clusterList } = this.props;
 
-    const { envBinding, definitionDetail, dialogStats, deliveryTargets } = this.state;
+    const { envBinding, definitionDetail, dialogStats, targets } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -256,6 +257,7 @@ class AppDialog extends React.Component<Props, State> {
               setVisible={setVisible}
               dispatch={dispatch}
               projects={projects}
+              syncProjectList={this.props.syncProjectList}
               field={this.field}
               ref={this.basicRef}
             />
@@ -302,9 +304,10 @@ class AppDialog extends React.Component<Props, State> {
                     t={this.props.t}
                     value={envBinding}
                     projects={projects || []}
+                    syncProjectList={this.props.syncProjectList}
                     clusterList={clusterList || []}
                     onUpdateTarget={this.loadDeliveryTarget}
-                    targetList={deliveryTargets}
+                    targetList={targets}
                     project={this.state.project}
                     ref={this.envBind}
                   />

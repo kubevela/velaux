@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Grid, Form, Input, Field, Upload, Icon, Message } from '@b-design/ui';
-import NameSpaceForm from '../GeneralConfig/namespace-form';
+import NameSpaceForm from '../GeneralConfig/project-form';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import { checkName } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
@@ -141,7 +141,7 @@ class YmalConfig extends React.Component<Props> {
           </Row>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <NameSpaceForm field={this.field} namespaceList={namespaceList} />
+              <NameSpaceForm field={this.field} projectList={namespaceList} />
             </Col>
             <Col span={12} style={{ padding: '0 8px' }}>
               <FormItem label={<Translation>Description</Translation>}>

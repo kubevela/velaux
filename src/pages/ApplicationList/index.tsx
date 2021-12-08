@@ -131,6 +131,7 @@ class Application extends Component<Props, State> {
         <If condition={showAddApplication}>
           <AppDialog
             visible={showAddApplication}
+            syncProjectList={this.getProjectList}
             projects={projects}
             componentDefinitions={componentDefinitions}
             setVisible={(visible) => {

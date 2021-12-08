@@ -58,7 +58,7 @@ class EditProperties extends React.Component<Props, State> {
       });
       dispatch({
         type: 'uischema/setAppNamespace',
-        payload: applicationDetail?.namespace,
+        payload: applicationDetail?.project?.namespace,
       });
     }
   }

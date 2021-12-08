@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Field } from '@b-design/ui';
 import { Grid, Form, Input } from '@b-design/ui';
-import NameSpaceForm from './namespace-form';
+import ProjectForm from './project-form';
 import { checkName } from '../../../../utils/common';
 import './index.less';
 import Translation from '../../../../components/Translation';
@@ -11,6 +11,7 @@ type Props = {
   visible: boolean;
   field: Field;
   projects?: Project[];
+  syncProjectList: () => void;
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
   dispatch: ({}) => void;
@@ -31,9 +32,9 @@ class GeneralConfig extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { projects } = this.props;
-    const namespaceList = projects?.map((item) => {
+    const projectList = projects?.map((item) => {
       return {
-        label: item.name,
+        label: item.alias || item.name,
         value: item.name,
       };
     });
@@ -59,7 +60,6 @@ class GeneralConfig extends React.Component<Props, State> {
                 required={true}
               >
                 <Input
-                  htmlType="name"
                   name="name"
                   maxLength={32}
                   {...init('name', {
@@ -112,11 +112,11 @@ class GeneralConfig extends React.Component<Props, State> {
 
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <NameSpaceForm
+              <ProjectForm
                 onChange={this.props.namespaceChange}
                 field={this.props.field}
-                namespaceList={namespaceList}
-                disableNew={true}
+                projectList={projectList}
+                syncProjectList={this.props.syncProjectList}
               />
             </Col>
           </Row>

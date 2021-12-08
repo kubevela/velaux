@@ -4,12 +4,12 @@ import Group from '../../../../extends/Group';
 import Namespace from '../Namespace';
 import type { NamespaceItem } from '../Namespace';
 import { checkName } from '../../../../utils/common';
-import { createDeliveryTarget, updateDeliveryTarget } from '../../../../api/deliveryTarget';
+import { createDeliveryTarget, updateDeliveryTarget } from '../../../../api/target';
 import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import Translation from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
 import { listNamespaces } from '../../../../api/observation';
-import NameSpaceForm from '../../../ApplicationList/components/GeneralConfig/namespace-form';
+import ProjectForm from '../../../ApplicationList/components/GeneralConfig/project-form';
 import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
 
@@ -19,6 +19,7 @@ type Props = {
   visible: boolean;
   clusterList: Cluster[];
   projects: Project[];
+  syncProjectList: () => void;
   deliveryTargetItem?: DeliveryTarget;
   onOK: () => void;
   onClose: () => void;
@@ -62,21 +63,24 @@ class DeliveryDialog extends React.Component<Props, State> {
     };
   }
 
-  componentWillReceiveProps(nextProps: any) {
-    if (nextProps.isEdit && nextProps.deliveryTargetItem !== this.props.deliveryTargetItem) {
+  componentDidMount() {
+    const { project, deliveryTargetItem, isEdit } = this.props;
+    if (project && !isEdit) {
+      this.field.setValue('project', project);
+    }
+    if (deliveryTargetItem) {
       const {
         name,
         alias,
         description,
-        namespace,
         cluster = { clusterName: '', namespace: '' },
         variable = { providerName: '', region: '', zone: '', vpcID: '' },
-      } = nextProps.deliveryTargetItem;
+      } = deliveryTargetItem;
       this.field.setValues({
         name,
         alias,
         description,
-        namespace: namespace,
+        project: deliveryTargetItem.project ? deliveryTargetItem.project.name : '',
         clusterName: cluster.clusterName,
         runtimeNamespace: cluster.namespace,
         var_providerName: variable.providerName,
@@ -84,14 +88,9 @@ class DeliveryDialog extends React.Component<Props, State> {
         var_zone: variable.zone,
         var_vpcID: variable.vpcID,
       });
-      this.loadNamespaces(cluster.clusterName);
-    }
-  }
-
-  componentDidMount() {
-    const { project } = this.props;
-    if (project) {
-      this.field.setValue('namespace', project);
+      if (cluster) {
+        this.loadNamespaces(cluster.clusterName);
+      }
     }
   }
 
@@ -111,7 +110,7 @@ class DeliveryDialog extends React.Component<Props, State> {
         alias,
         description,
         clusterName,
-        namespace,
+        project,
         runtimeNamespace,
         var_providerName,
         var_region,
@@ -122,7 +121,7 @@ class DeliveryDialog extends React.Component<Props, State> {
         name,
         alias,
         description,
-        namespace,
+        project,
         cluster: {
           clusterName,
           namespace: runtimeNamespace,
@@ -178,7 +177,7 @@ class DeliveryDialog extends React.Component<Props, State> {
     }));
   };
 
-  loadNamespaces = async (cluster: string) => {
+  loadNamespaces = async (cluster: string | undefined) => {
     if (cluster) {
       listNamespaces({ cluster: cluster }).then((re) => {
         if (re && re.list) {
@@ -209,7 +208,7 @@ class DeliveryDialog extends React.Component<Props, State> {
     const cluster: string = this.field.getValue('clusterName');
     const dataSource = projects.map((project) => {
       return {
-        label: project.name,
+        label: project.alias || project.name,
         value: project.name,
       };
     });
@@ -270,7 +269,12 @@ class DeliveryDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <NameSpaceForm field={this.field} namespaceList={dataSource} />
+                <ProjectForm
+                  disable={isEdit}
+                  syncProjectList={this.props.syncProjectList}
+                  field={this.field}
+                  projectList={dataSource}
+                />
               </Col>
             </Row>
             <Row>

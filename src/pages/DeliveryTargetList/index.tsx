@@ -153,6 +153,7 @@ class DeliveryTargetList extends React.Component<Props, State> {
           t={t}
           visible={visibleDelivery}
           clusterList={clusterList || []}
+          syncProjectList={this.getProjectList}
           projects={projects || []}
           isEdit={isEdit}
           deliveryTargetItem={deliveryTargetItem}

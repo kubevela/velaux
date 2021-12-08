@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { Table, Message } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
-import { deleteDeliveryTarget } from '../../../../api/deliveryTarget';
+import { deleteDeliveryTarget } from '../../../../api/target';
 import './index.less';
 import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import locale from '../../../../utils/locale';
+import type { Project } from '../../../../interface/project';
 
 type Props = {
   list?: [];
@@ -45,11 +46,14 @@ class TableList extends Component<Props> {
         },
       },
       {
-        key: 'namespace',
+        key: 'project',
         title: <Translation>Project</Translation>,
-        dataIndex: 'namespace',
-        cell: (v: string) => {
-          return <span>{v}</span>;
+        dataIndex: 'project',
+        cell: (v: Project | undefined) => {
+          if (v) {
+            return <span>{v.alias || v.name}</span>;
+          }
+          return '';
         },
       },
       {

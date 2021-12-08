@@ -1,8 +1,10 @@
+import type { Project } from './project';
+
 export type DeliveryTarget = {
   id?: string;
   name: string;
   alias?: string;
-  namespace?: string;
+  project?: Project;
   description?: string;
   cluster?: {
     clusterName?: string;

@@ -1,6 +1,8 @@
 export interface Project {
   name: string;
-  description: string;
+  alias?: string;
+  description?: string;
+  namespace: string;
   createTime?: string;
   updateTime?: string;
 }
