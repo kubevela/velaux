@@ -19,6 +19,7 @@ import { If } from 'tsx-control-statements/components';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import StatusShow from './components/StatusShow';
+import locale from '../../utils/locale';
 
 const { Column } = Table;
 type Props = {
@@ -437,6 +438,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
               onOk: () => {
                 this.onDeploy(true);
               },
+              locale: locale.Dialog,
             });
           } else {
             handleError(err);
@@ -512,6 +514,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         <If condition={applicationStatus}>
           <If condition={applicationDetail?.applicationType == 'common'}>
             <Table
+              locale={locale.Table}
               className="podlist-table-wraper"
               size="medium"
               primaryKey={'primaryKey'}
@@ -530,6 +533,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           <If condition={applicationDetail?.applicationType == 'cloud'}>
             <Table
               size="medium"
+              locale={locale.Table}
               className="customTable"
               dataSource={cloudInstance}
               primaryKey={'instanceName'}

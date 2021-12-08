@@ -4,6 +4,7 @@ import { connect } from 'dva';
 import type { ApplicationStatus, Condition } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 import { If } from 'tsx-control-statements/components';
+import locale from '../../../../utils/locale';
 
 type Props = {
   applicationStatus?: ApplicationStatus;
@@ -77,6 +78,7 @@ class StatusShow extends React.Component<Props, State> {
     };
     return (
       <Dialog
+        locale={locale.Dialog}
         visible={true}
         className={'commonDialog'}
         title={<Translation>Application Status</Translation>}
@@ -97,8 +99,12 @@ class StatusShow extends React.Component<Props, State> {
         footerAlign="center"
       >
         <Loading visible={loading} style={{ width: '100%' }}>
-          <Card contentHeight="200px" title={<Translation>Applied Resources</Translation>}>
-            <Table dataSource={applicationStatus?.appliedResources}>
+          <Card
+            locale={locale.Card}
+            contentHeight="200px"
+            title={<Translation>Applied Resources</Translation>}
+          >
+            <Table locale={locale.Table} dataSource={applicationStatus?.appliedResources}>
               <Table.Column dataIndex="kind" title={<Translation>Kind</Translation>} />
               <Table.Column dataIndex="apiVersion" title={<Translation>APIVersion</Translation>} />
               <Table.Column dataIndex="cluster" title={<Translation>Cluster</Translation>} />
@@ -107,7 +113,11 @@ class StatusShow extends React.Component<Props, State> {
             </Table>
           </Card>
           <If condition={applicationStatus?.conditions}>
-            <Card style={{ marginTop: '8px' }} title={<Translation>Progress</Translation>}>
+            <Card
+              locale={locale.Card}
+              style={{ marginTop: '8px' }}
+              title={<Translation>Progress</Translation>}
+            >
               <Step current={getCurrent(applicationStatus?.conditions)}>
                 {allConditions.map((condition) => {
                   return <Step.Item title={condition.type} content={condition.reason} />;
@@ -117,11 +127,16 @@ class StatusShow extends React.Component<Props, State> {
           </If>
           <If condition={applicationStatus?.services}>
             <Card
+              locale={locale.Card}
               style={{ marginTop: '8px', marginBottom: '16px' }}
               contentHeight="auto"
               title={<Translation>Component Status</Translation>}
             >
-              <Table className="customTable" dataSource={applicationStatus?.services}>
+              <Table
+                locale={locale.Table}
+                className="customTable"
+                dataSource={applicationStatus?.services}
+              >
                 <Table.Column
                   align="left"
                   dataIndex="name"

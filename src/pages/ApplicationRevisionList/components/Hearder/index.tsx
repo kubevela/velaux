@@ -2,6 +2,7 @@ import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { Grid, Select } from '@b-design/ui';
 import type { EnvBinding } from '../../../../interface/application';
+import locale from '../../../../utils/locale';
 
 interface Label {
   label: string;
@@ -58,6 +59,7 @@ class Hearder extends React.Component<Props, State> {
       <Row className="boder-radius-8">
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
+            locale={locale.Select}
             mode="single"
             size="small"
             onChange={this.handleChangeEnv}
@@ -71,6 +73,7 @@ class Hearder extends React.Component<Props, State> {
 
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
+            locale={locale.Select}
             mode="single"
             size="small"
             onChange={this.handleChangeStatus}

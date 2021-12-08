@@ -6,6 +6,7 @@ import type { Cluster } from '../../../../interface/cluster';
 import Translation from '../../../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import kubernetesSvg from '../../../../assets/kubernetes.svg';
+import locale from '../../../../utils/locale';
 
 type State = {
   extendDotVisible: boolean;
@@ -42,7 +43,7 @@ class CardContent extends React.Component<Props, State> {
             const { name, alias, status, icon, description, createTime, dashboardURL = '#' } = item;
             const showName = alias ? alias : name;
             const card = (
-              <Card contentHeight="auto">
+              <Card locale={locale} contentHeight="auto">
                 <div className="cluster-card-top flexcenter">
                   <If condition={icon && icon != 'none'}>
                     <img src={icon} />
@@ -110,6 +111,7 @@ class CardContent extends React.Component<Props, State> {
                                   onOk: () => {
                                     this.onDeleteCluster(name);
                                   },
+                                  locale: locale.Dialog,
                                 });
                               }}
                             >

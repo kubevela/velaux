@@ -6,6 +6,7 @@ import { listApplicationPodsDetails } from '../../../../api/observation';
 import moment from 'moment';
 import '../../index.less';
 import { quantityToScalar } from '../../../../utils/utils';
+import locale from '../../../../utils/locale';
 
 export type Props = {
   pod: PodBase;
@@ -72,7 +73,7 @@ class PodDetail extends React.Component<Props, State> {
     return [
       {
         key: 'name',
-        title: <Translation>Container name</Translation>,
+        title: <Translation>Container Name</Translation>,
         dataIndex: 'name',
         cell: (v: string) => {
           return <span>{v}</span>;
@@ -80,7 +81,7 @@ class PodDetail extends React.Component<Props, State> {
       },
       {
         key: 'status',
-        title: <Translation>Running state</Translation>,
+        title: <Translation>Status</Translation>,
         dataIndex: 'status',
         cell: (v: string, i: number, record: Container) => {
           const { state = {} } = record.status || {};
@@ -90,7 +91,7 @@ class PodDetail extends React.Component<Props, State> {
       },
       {
         key: 'image',
-        title: <Translation>Mirror name</Translation>,
+        title: <Translation>Image</Translation>,
         dataIndex: 'image',
         cell: (v: string) => {
           return <span>{v}</span>;
@@ -98,7 +99,7 @@ class PodDetail extends React.Component<Props, State> {
       },
       {
         key: 'memory',
-        title: <Translation>Memory usageResource</Translation>,
+        title: <Translation>Memory</Translation>,
         dataIndex: 'memory',
         cell: (v: string, i: number, record: Container) => {
           if (record.resources?.requests?.memory && record.resources?.usage?.memory) {
@@ -112,7 +113,7 @@ class PodDetail extends React.Component<Props, State> {
       },
       {
         key: 'cpu',
-        title: <Translation>CPU usageResource</Translation>,
+        title: <Translation>CPU</Translation>,
         dataIndex: 'cpu',
         cell: (v: string, i: number, record: Container) => {
           if (record.resources?.requests?.cpu && record.resources?.usage?.cpu) {
@@ -170,7 +171,7 @@ class PodDetail extends React.Component<Props, State> {
       },
       {
         key: 'message',
-        title: <Translation>Detaile information</Translation>,
+        title: <Translation>Message</Translation>,
         dataIndex: 'message',
         cell: (v: string) => {
           return <span>{v}</span>;
@@ -192,6 +193,7 @@ class PodDetail extends React.Component<Props, State> {
           hasBorder={false}
           primaryKey="name"
           loading={loading}
+          locale={locale.Table}
         >
           {containerColumns &&
             containerColumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
@@ -203,6 +205,7 @@ class PodDetail extends React.Component<Props, State> {
           hasBorder={false}
           loading={loading}
           primaryKey="time"
+          locale={locale.Table}
         >
           {eventCloumns &&
             eventCloumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}

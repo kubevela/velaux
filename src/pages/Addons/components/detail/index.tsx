@@ -18,6 +18,7 @@ import Group from '../../../../extends/Group';
 import Translation from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import type { Addon } from '../../../../interface/addon';
+import locale from '../../../../utils/locale';
 
 type Props = {
   addonName: string;
@@ -102,6 +103,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
         content:
           'Are you sure you want to disable the addon? After the addon is disabled, related resources are reclaimed.',
         onOk: this.disableAddon,
+        locale: locale.Dialog,
       });
       return;
     }
@@ -223,7 +225,11 @@ class AddonDetailDialog extends React.Component<Props, State> {
               </Group>
             </If>
             <If condition={addonDetailInfo.dependencies}>
-              <Card contentHeight="auto" title={<Translation>Dependences</Translation>}>
+              <Card
+                locale={locale.Card}
+                contentHeight="auto"
+                title={<Translation>Dependences</Translation>}
+              >
                 <Message type="notice" style={{ marginBottom: '16px' }}>
                   <Translation>Ensure that dependent addon are enabled first.</Translation>
                 </Message>
@@ -249,6 +255,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             <If condition={addonDetailInfo.definitions}>
               <Card
                 contentHeight="auto"
+                locale={locale.Card}
                 title={<Translation>Definitions</Translation>}
                 style={{ marginTop: '16px' }}
               >
@@ -257,7 +264,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     Enable the addon to obtain the following extension capabilities.
                   </Translation>
                 </Message>
-                <Table dataSource={addonDetailInfo.definitions}>
+                <Table locale={locale.Table} dataSource={addonDetailInfo.definitions}>
                   <Table.Column
                     dataIndex="name"
                     align="left"
@@ -283,6 +290,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </If>
             <Card
               contentHeight="auto"
+              locale={locale.Card}
               title={<Translation>Readme</Translation>}
               style={{ marginTop: '16px' }}
             >

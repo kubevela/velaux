@@ -9,6 +9,7 @@ import { checkName } from '../../../../utils/common';
 import { getDeliveryTarget } from '../../../../api/deliveryTarget';
 import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import type { EnvBinding } from '../../../../interface/application';
+import locale from '../../../../utils/locale';
 
 interface Props {
   onClose: () => void;
@@ -131,6 +132,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
     return (
       <Dialog
         visible={true}
+        locale={locale.Dialog}
         className={'commonDialog'}
         style={{ width: '800px' }}
         footerActions={['ok']}
@@ -204,6 +206,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
             <Col span={24} style={{ padding: '0 8px' }}>
               <FormItem label={<Translation>Targets</Translation>} required>
                 <Select
+                  locale={locale.Select}
                   name="targetNames"
                   mode="multiple"
                   placeholder={'Select the delivery target corresponding to the environment.'}

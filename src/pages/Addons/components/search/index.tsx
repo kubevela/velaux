@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid, Icon, Select, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import Translation from '../../../../components/Translation';
+import locale from '../../../../utils/locale';
 
 type Props = {
   t: (key: string) => {};
@@ -51,7 +52,6 @@ class SelectSearch extends React.Component<Props, State> {
     const { Row, Col } = Grid;
     const { Option } = Select;
     const { t, registrys } = this.props;
-    const registryPlacehole = t('Registry Screening').toString();
     const queryPlacehole = t('Search by name and description.').toString();
     const { registryValue, inputValue } = this.state;
 
@@ -59,10 +59,10 @@ class SelectSearch extends React.Component<Props, State> {
       <Row className="app-select-wraper boder-radius-8">
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
+            locale={locale.Select}
             mode="single"
             size="large"
             onChange={this.handleChangRegistry}
-            placeholder={registryPlacehole}
             className="item"
             value={registryValue}
           >

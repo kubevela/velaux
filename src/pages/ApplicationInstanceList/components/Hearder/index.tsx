@@ -10,6 +10,7 @@ import {
 import type { ApplicationDetail, ApplicationStatus,EnvBinding} from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import AddAndEditEnvBind from '../../../../layout/Application/components/AddAndEditEnvBind';
+import locale from '../../../../utils/locale';
 
 export type GatewayIP = {
   ip: string;
@@ -87,6 +88,7 @@ class Hearder extends Component<Props, State> {
           );
         }
       },
+      locale: locale.Dialog,
     });
   };
   deleteEnv = async () => {
@@ -105,6 +107,7 @@ class Hearder extends Component<Props, State> {
           );
         }
       },
+      locale: locale.Dialog,
     });
   };
 
@@ -149,6 +152,7 @@ class Hearder extends Component<Props, State> {
         <Row className="boder-radius-8">
           <Col span="6" style={{ marginBottom: '16px' }}>
             <Select
+              locale={locale.Select}
               mode="single"
               onChange={this.handleChange}
               dataSource={clusterList}
@@ -177,7 +181,7 @@ class Hearder extends Component<Props, State> {
               <Dropdown
                 trigger={
                   <Button style={{ marginRight: '16px' }} type="secondary">
-                    Access Address
+                    Service Endpoint
                   </Button>
                 }
               >

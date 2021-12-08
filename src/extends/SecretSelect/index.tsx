@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import React from 'react';
 import { listCloudResourceSecrets } from '../../api/observation';
 import type { Secret } from '../../interface/observation';
+import locale from '../../utils/locale';
 
 type Props = {
   onChange: (value: any) => void;
@@ -58,7 +59,7 @@ class SecretSelect extends React.Component<Props, State> {
     const { secrets } = this.state;
     const filters = secrets?.filter((secret) => secret.metadata.labels['app.oam.dev/sync-alias']);
     return (
-      <Select onChange={this.onChange} value={value} id={id}>
+      <Select locale={locale.Select} onChange={this.onChange} value={value} id={id}>
         {filters?.map((secret) => {
           return (
             <Select.Option

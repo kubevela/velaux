@@ -2,6 +2,7 @@ import React from 'react';
 import { Input, Button, Field, Icon } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
+import Translation from '../../components/Translation';
 
 type Props = {
   label?: string;
@@ -135,7 +136,7 @@ class Strings extends React.Component<Props, State> {
         ))}
         <div className="add-btn-container">
           <Button size="small" onClick={this.addInputItem} ghost="light">
-            添加
+            <Translation>Add</Translation>
           </Button>
         </div>
       </div>

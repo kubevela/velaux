@@ -6,6 +6,7 @@ import { checkName } from '../../../../utils/common';
 import { createAddonRegistry, deleteAddonRegistry } from '../../../../api/addons';
 import { handleError } from '../../../../utils/errors';
 import type { AddonRegistry } from '../../../../interface/addon';
+import locale from '../../../../utils/locale';
 
 const { Row, Col } = Grid;
 
@@ -107,6 +108,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
               onOk: () => {
                 this.onDeleteRegistry(name);
               },
+              locale: locale.Dialog,
             });
           }}
         >
@@ -136,6 +138,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
+          locale={locale.Dialog}
           className="commonDialog"
           title={<Translation>Registry Management</Translation>}
           autoFocus={true}
@@ -156,7 +159,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
               </div>
             </Col>
           </Row>
-          <Table dataSource={registryDataSorce}>
+          <Table locale={locale.Table} dataSource={registryDataSorce}>
             <Table.Column width="100px" title={<Translation>Name</Translation>} dataIndex="name" />
             <Table.Column width="60px" title={<Translation>Type</Translation>} dataIndex="type" />
             <Table.Column title={<Translation>URL</Translation>} dataIndex="url" />
@@ -194,6 +197,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                 <Col span={3} style={{ padding: '8px' }}>
                   <Form.Item label={<Translation>Type</Translation>} help="The addon registry type">
                     <Select
+                      locale={locale.Select}
                       {...init('type', {
                         rules: [
                           {

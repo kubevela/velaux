@@ -1,14 +1,16 @@
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import './index.less';
 import { Link } from 'dva/router';
 import { Grid, Card, Menu, Dropdown, Dialog } from '@b-design/ui';
-import { ApplicationBase } from '../../../../interface/application';
+import type { ApplicationBase } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 import { momentDate } from '../../../../utils/common';
 import Empty from '../../../../components/Empty';
 import { If } from 'tsx-control-statements/components';
 
 import appSvg from '../../../../assets/application.svg';
+import locale from '../../../../utils/locale';
 
 type State = {
   extendDotVisible: boolean;
@@ -50,7 +52,7 @@ class CardContent extends React.Component<Props, State> {
     const { Row, Col } = Grid;
     const { applications } = this.props;
     if (applications.length === 0) {
-      return <Empty style={{ minHeight: '400px' }}></Empty>;
+      return <Empty style={{ minHeight: '400px' }} />;
     }
 
     return (
@@ -60,14 +62,14 @@ class CardContent extends React.Component<Props, State> {
           const showName = alias || name;
           return (
             <Col span="6" className={`card-content-wraper`} key={index}>
-              <Card contentHeight="auto">
+              <Card locale={locale.Card} contentHeight="auto">
                 <Link to={`/applications/${name}/config`}>
                   <div className="appplan-card-top flexcenter">
                     <If condition={icon && icon != 'none'}>
                       <img src={icon} />
                     </If>
                     <If condition={!icon || icon === 'none'}>
-                      <img src={appSvg}></img>
+                      <img src={appSvg} />
                     </If>
                   </div>
                 </Link>
@@ -90,17 +92,17 @@ class CardContent extends React.Component<Props, State> {
                               d="M365.066 197.39c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
                               fill="#a6a6a6"
                               p-id="3449"
-                            ></path>
+                            />
                             <path
                               d="M365.066 512c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
                               fill="#a6a6a6"
                               p-id="3450"
-                            ></path>
+                            />
                             <path
                               d="M365.066 826.61c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
                               fill="#a6a6a6"
                               p-id="3451"
-                            ></path>
+                            />
                           </svg>
                         }
                       >
@@ -126,6 +128,7 @@ class CardContent extends React.Component<Props, State> {
                                 onOk: () => {
                                   this.onDeleteAppPlan(name);
                                 },
+                                locale: locale.Dialog,
                               });
                             }}
                           >

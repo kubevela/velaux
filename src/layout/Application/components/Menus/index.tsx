@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import Translation from '../../../../components/Translation';
 import './index.less';
 import { Link } from 'dva/router';
+import locale from '../../../../utils/locale';
 
 type Props = {
   envName: string;
@@ -28,7 +29,7 @@ class Menu extends Component<Props, any> {
       configPage: [
         {
           key: 'config',
-          lable: <Translation>Properties&Traits</Translation>,
+          lable: <Translation>Properties</Translation>,
           to: `/applications/${appName}/config`,
         },
         {
@@ -63,7 +64,7 @@ class Menu extends Component<Props, any> {
     }
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     return (
-      <Card contentHeight="100px" className="app-menu">
+      <Card locale={locale.Card} contentHeight="100px" className="app-menu">
         {activeItems.map((item) => {
           return (
             <Link

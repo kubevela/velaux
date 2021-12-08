@@ -99,7 +99,7 @@ class Cluster extends React.Component<Props, State> {
                 this.setState({ showAddCloudCluster: true });
               }}
             >
-              <Translation>New From Cloud</Translation>
+              <Translation>Connect From Cloud</Translation>
             </Button>,
           ]}
         />
