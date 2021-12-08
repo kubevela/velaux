@@ -58,7 +58,7 @@ class AppDialog extends React.Component<Props, State> {
     };
     this.field = new Field(this, {
       onChange: (name: string, value: string) => {
-        if (name === 'namespace') {
+        if (name === 'project') {
           this.setState({ project: value }, () => {
             this.loadDeliveryTarget();
           });
