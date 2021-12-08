@@ -257,6 +257,8 @@ class UISchema extends Component<Props, State> {
                   initValue: param.validate.defaultValue,
                   rules: converRule(param.validate),
                 })}
+                additional={param.additional}
+                additionalParameter={param.additionalParameter}
               />
             </Form.Item>
           </Group>
