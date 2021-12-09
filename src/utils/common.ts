@@ -45,7 +45,7 @@ export function isAPPStorePath(pathname: string) {
 }
 
 export function isDeliveryTarget(pathname: string) {
-  return (pathname || '').indexOf('/deliveryTargets') !== -1;
+  return (pathname || '').indexOf('/targets') !== -1;
 }
 
 export const APPLICATION_PATH = 'applications';

@@ -164,7 +164,6 @@ class AddClustDialog extends React.Component<Props, State> {
         onCancel={this.onClose}
         onClose={this.onClose}
         footerActions={['ok', 'cancel']}
-        height="800px"
         footerAlign="center"
       >
         <Loading visible={editClusterName && !editMode ? true : false} style={{ width: '100%' }}>

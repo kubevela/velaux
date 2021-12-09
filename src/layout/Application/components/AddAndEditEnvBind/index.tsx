@@ -6,7 +6,7 @@ import type { ApplicationDetail } from '../../../../interface/application';
 import { createApplicationEnv, updateApplicationEnv } from '../../../../api/application';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
-import { getDeliveryTarget } from '../../../../api/deliveryTarget';
+import { getDeliveryTarget } from '../../../../api/target';
 import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import type { EnvBinding } from '../../../../interface/application';
 import locale from '../../../../utils/locale';
@@ -46,8 +46,8 @@ class EnvBindPlanDialog extends Component<Props, State> {
   loadDeliveryTargets = async () => {
     const { applicationDetail } = this.props;
     if (applicationDetail) {
-      getDeliveryTarget({ namespace: applicationDetail?.namespace, page: 0 }).then((re) => {
-        this.setState({ targetList: re.deliveryTargets });
+      getDeliveryTarget({ project: applicationDetail?.project?.name, page: 0 }).then((re) => {
+        this.setState({ targetList: re.targets });
       });
     }
   };

@@ -17,7 +17,7 @@ type Props = {
 };
 
 type State = {
-  namespaceValue: string;
+  projectValue: string;
   deliveryTargetValue: string;
   inputValue: string;
 };
@@ -26,19 +26,19 @@ class SelectSearch extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      namespaceValue: '',
+      projectValue: '',
       deliveryTargetValue: '',
       inputValue: '',
     };
-    this.handleChangeNamepace = this.handleChangeNamepace.bind(this);
+    this.handleChangeProject = this.handleChangeProject.bind(this);
     this.handleChangDeliveryTarget = this.handleChangDeliveryTarget.bind(this);
     this.handleChangName = this.handleChangName.bind(this);
   }
 
-  handleChangeNamepace(e: string) {
+  handleChangeProject(e: string) {
     this.setState(
       {
-        namespaceValue: e,
+        projectValue: e,
       },
       () => {
         this.getApplications();
@@ -68,9 +68,9 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   getApplications = async () => {
-    const { namespaceValue, deliveryTargetValue, inputValue } = this.state;
+    const { projectValue, deliveryTargetValue, inputValue } = this.state;
     const params = {
-      namespace: namespaceValue,
+      project: projectValue,
       targetName: deliveryTargetValue,
       query: inputValue,
     };
@@ -79,14 +79,14 @@ class SelectSearch extends React.Component<Props, State> {
 
   render() {
     const { deliveryTargetList, projects, t } = this.props;
-    const { namespaceValue, deliveryTargetValue, inputValue } = this.state;
+    const { projectValue, deliveryTargetValue, inputValue } = this.state;
 
     const projectPlacehole = t('Search by project').toString();
     const deliveryTargetPlacehole = t('Search by target').toString();
     const appPlacehole = t('Search by application name and description').toString();
     const projectSource = projects?.map((item) => {
       return {
-        label: item.name,
+        label: item.alias || item.name,
         value: item.name,
       };
     });
@@ -97,12 +97,12 @@ class SelectSearch extends React.Component<Props, State> {
             locale={locale.Select}
             mode="single"
             size="large"
-            onChange={this.handleChangeNamepace}
+            onChange={this.handleChangeProject}
             dataSource={projectSource}
             placeholder={projectPlacehole}
             className="item"
             hasClear
-            value={namespaceValue}
+            value={projectValue}
           />
         </Col>
 
@@ -144,7 +144,7 @@ class SelectSearch extends React.Component<Props, State> {
             onClick={() => {
               this.setState(
                 {
-                  namespaceValue: '',
+                  projectValue: '',
                   deliveryTargetValue: '',
                   inputValue: '',
                 },

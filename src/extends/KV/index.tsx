@@ -121,8 +121,13 @@ class KV extends Component<Props, State> {
 
   render() {
     const { items } = this.state;
-    const { id } = this.props;
+    const { id, additional, additionalParameter } = this.props;
     const { init } = this.form;
+    let valueTypeNumber = false;
+    if (additional && additionalParameter) {
+      // TODO: current only support one parameter
+      valueTypeNumber = additionalParameter.uiType == 'Number';
+    }
     return (
       <div id={id}>
         {items.map((item) => {
@@ -141,6 +146,7 @@ class KV extends Component<Props, State> {
               <Col span={10}>
                 <Form.Item>
                   <Input
+                    htmlType={valueTypeNumber ? 'number' : ''}
                     {...init(`envValue-${item.key}`)}
                     label={'Value'}
                     className="full-width"

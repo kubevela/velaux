@@ -19,7 +19,7 @@ export default function Content() {
         exact
         path="/"
         render={() => {
-          return <Redirect to="/applications"></Redirect>;
+          return <Redirect to="/applications" />;
         }}
       />
       <Route exact path="/applications" component={Application} />
@@ -27,7 +27,7 @@ export default function Content() {
         exact
         path="/applications/:appName"
         render={(props: any) => {
-          return <Redirect to={`/applications/${props.match.params.appName}/config`}></Redirect>;
+          return <Redirect to={`/applications/${props.match.params.appName}/config`} />;
         }}
       />
       <Route
@@ -36,7 +36,7 @@ export default function Content() {
         render={(props: any) => {
           return (
             <ApplicationLayout {...props}>
-              <ApplicationConfig {...props}></ApplicationConfig>
+              <ApplicationConfig {...props} />
             </ApplicationLayout>
           );
         }}
@@ -47,7 +47,7 @@ export default function Content() {
         render={(props: any) => {
           return (
             <ApplicationLayout {...props}>
-              <ApplicationWorkflow {...props}></ApplicationWorkflow>
+              <ApplicationWorkflow {...props} />
             </ApplicationLayout>
           );
         }}
@@ -58,7 +58,7 @@ export default function Content() {
         render={(props: any) => {
           return (
             <ApplicationLayout {...props}>
-              <ApplicationRevisionList {...props}></ApplicationRevisionList>
+              <ApplicationRevisionList {...props} />
             </ApplicationLayout>
           );
         }}
@@ -70,7 +70,7 @@ export default function Content() {
           return (
             <Redirect
               to={`/applications/${props.match.params.appName}/envbinding/${props.match.params.envName}/instances`}
-            ></Redirect>
+            />
           );
         }}
       />
@@ -80,7 +80,7 @@ export default function Content() {
         render={(props: any) => {
           return (
             <ApplicationLayout {...props}>
-              <ApplicationInstanceList {...props}></ApplicationInstanceList>
+              <ApplicationInstanceList {...props} />
             </ApplicationLayout>
           );
         }}
@@ -91,12 +91,12 @@ export default function Content() {
         render={(props: any) => {
           return (
             <ApplicationLayout {...props}>
-              <ApplicationMonitor {...props}></ApplicationMonitor>
+              <ApplicationMonitor {...props} />
             </ApplicationLayout>
           );
         }}
       />
-      <Route path="/deliveryTargets" component={DeliveryTargetList} />
+      <Route path="/targets" component={DeliveryTargetList} />
       <Route path="/clusters" component={Clusters} />
       <Route path="/addons" component={Addons} />
       <Route path="/notFound" component={NotFound} />
