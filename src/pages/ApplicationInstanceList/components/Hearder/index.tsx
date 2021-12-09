@@ -201,7 +201,7 @@ class Hearder extends Component<Props, State> {
             <If condition={applicationStatus && applicationStatus.status}>
               <Button
                 onClick={this.showEditDialog}
-                type="primary"
+                type="secondary"
                 style={{ marginLeft: '16px' }}
               >
                 <Translation>Edit</Translation>

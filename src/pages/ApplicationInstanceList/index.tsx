@@ -450,9 +450,11 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   };
   getEnvbindingByName = () => {
     const { envbinding } = this.props;
-    const { params:{ envName }} = this.props.match;
-    return envbinding.find(env => env.name === envName)
-  }
+    const {
+      params: { envName },
+    } = this.props.match;
+    return envbinding.find((env) => env.name === envName);
+  };
   render() {
     const { applicationStatus, applicationDetail } = this.props;
     const { podList, loading, showStatus, cloudInstance, services } = this.state;
@@ -489,10 +491,10 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     return (
       <div>
         <Header
-          envbinding = {envbinding}
+          envbinding={envbinding}
           targets={this.getTargets()}
           envName={envName}
-          appName={ appName}
+          appName={appName}
           gatewayIPs={gatewayIPs}
           updateEnvs={() => {
             this.loadApplicationEnvbinding();
@@ -509,7 +511,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           refresh={() => {
             this.loadApplicationStatus();
           }}
-          dispatch={ this.props.dispatch}
+          dispatch={this.props.dispatch}
         />
         <If condition={applicationStatus}>
           <If condition={applicationDetail?.applicationType == 'common'}>
