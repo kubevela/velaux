@@ -7,7 +7,11 @@ import {
   recycleApplicationEnvbinding,
   deleteApplicationEnvbinding,
 } from '../../../../api/application';
-import type { ApplicationDetail, ApplicationStatus,EnvBinding} from '../../../../interface/application';
+import type {
+  ApplicationDetail,
+  ApplicationStatus,
+  EnvBinding,
+} from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import AddAndEditEnvBind from '../../../../layout/Application/components/AddAndEditEnvBind';
 import locale from '../../../../utils/locale';
@@ -52,11 +56,11 @@ class Hearder extends Component<Props, State> {
       visibleEnvEditPlan: false,
     };
   }
-  componentDidMount() { }
+  componentDidMount() {}
   loadEnvbinding = async () => {
     const { applicationDetail } = this.props;
     if (applicationDetail) {
-       this.props.dispatch({
+      this.props.dispatch({
         type: 'application/getApplicationEnvbinding',
         payload: { appName: applicationDetail.name },
       });
@@ -120,13 +124,13 @@ class Hearder extends Component<Props, State> {
   };
 
   showEditDialog = () => {
-    this.setState({visibleEnvEditPlan: true})
-  }
+    this.setState({ visibleEnvEditPlan: true });
+  };
 
   render() {
     const { Row, Col } = Grid;
     const { t, updateStatusShow } = this.props;
-    const { recycleLoading, deleteLoading, refreshLoading,visibleEnvEditPlan} = this.state;
+    const { recycleLoading, deleteLoading, refreshLoading, visibleEnvEditPlan } = this.state;
     const clusterPlacehole = t('Delivery Target Selector').toString();
     const { targets, applicationStatus, gatewayIPs } = this.props;
     const clusterList = (targets || []).map((item: DeliveryTarget) => ({
@@ -198,15 +202,9 @@ class Hearder extends Component<Props, State> {
                 </Menu>
               </Dropdown>
             </If>
-            <If condition={applicationStatus && applicationStatus.status}>
-              <Button
-                onClick={this.showEditDialog}
-                type="secondary"
-                style={{ marginLeft: '16px' }}
-              >
-                <Translation>Edit</Translation>
-              </Button>
-            </If>
+            <Button onClick={this.showEditDialog} type="secondary" style={{ marginLeft: '16px' }}>
+              <Translation>Edit</Translation>
+            </Button>
             <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
               <Icon type="refresh" />
             </Button>
@@ -242,7 +240,7 @@ class Hearder extends Component<Props, State> {
               this.setState({ visibleEnvEditPlan: false });
             }}
             editEnvBinding={this.props.envbinding}
-            key={"EditEnvBind"}
+            key={'EditEnvBind'}
           />
         </If>
       </div>
