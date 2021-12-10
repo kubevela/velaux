@@ -13,6 +13,7 @@
                     "name": "string",
                     "reason": "string",
                     "status": "string"
+
                 }
             ],
             "createTime": "2020.03.24.10.44",
@@ -37,6 +38,7 @@
             "namespace": "string",
             "status": "已部署",
             "updateTime": "2021-10-14T06:53:00.477Z"
+            
         },
         {
             "clusterList": [

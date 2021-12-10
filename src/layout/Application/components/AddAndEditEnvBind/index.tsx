@@ -3,22 +3,25 @@ import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
 import { Dialog, Field, Form, Grid, Input, Message, Select, Button } from '@b-design/ui';
 import type { ApplicationDetail } from '../../../../interface/application';
-import { createApplicationEnv } from '../../../../api/application';
+import { createApplicationEnv, updateApplicationEnv } from '../../../../api/application';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
 import { getDeliveryTarget } from '../../../../api/target';
 import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import type { EnvBinding } from '../../../../interface/application';
 import locale from '../../../../utils/locale';
 
 interface Props {
   onClose: () => void;
   onOK: () => void;
   applicationDetail?: ApplicationDetail;
+  editEnvBinding?: EnvBinding;
 }
 
 interface State {
   loading: boolean;
   targetList?: DeliveryTarget[];
+  isEdit: boolean;
 }
 
 @connect((store: any) => {
@@ -31,11 +34,13 @@ class EnvBindPlanDialog extends Component<Props, State> {
     this.field = new Field(this);
     this.state = {
       loading: false,
+      isEdit: false,
     };
   }
 
   componentDidMount() {
     this.loadDeliveryTargets();
+    this.setFields();
   }
 
   loadDeliveryTargets = async () => {
@@ -47,8 +52,24 @@ class EnvBindPlanDialog extends Component<Props, State> {
     }
   };
 
+  setFields = () => {
+    if (this.props.editEnvBinding?.name) {
+      this.setState({ isEdit: true }, () => {
+        const { name, alias, description, targetNames } = this.props.editEnvBinding || {};
+        this.field.setValues({
+          name,
+          alias,
+          description,
+          targetNames,
+        });
+      });
+    }
+    return;
+  };
+
   onSubmit = () => {
     const { applicationDetail } = this.props;
+    const { isEdit } = this.state;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
@@ -62,6 +83,10 @@ class EnvBindPlanDialog extends Component<Props, State> {
         targetNames,
         description,
       };
+      if (isEdit) {
+        this.onUpdateApplicationEnv(params);
+        return;
+      }
       this.onCreateApplicationEnv(params);
     });
   };
@@ -78,8 +103,21 @@ class EnvBindPlanDialog extends Component<Props, State> {
         this.setState({ loading: false });
       });
   }
+
+  onUpdateApplicationEnv(params: any) {
+    updateApplicationEnv(params)
+      .then((res) => {
+        if (res) {
+          Message.success(<Translation>Save Envbinding Success</Translation>);
+          this.props.onOK();
+        }
+      })
+      .finally(() => {
+        this.setState({ loading: false });
+      });
+  }
   render() {
-    const { loading, targetList } = this.state;
+    const { loading, targetList, isEdit } = this.state;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const init = this.field.init;
@@ -91,7 +129,6 @@ class EnvBindPlanDialog extends Component<Props, State> {
         span: 20,
       },
     };
-
     return (
       <Dialog
         visible={true}
@@ -102,7 +139,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
         onClose={this.props.onClose}
         footer={
           <Button type="primary" onClick={this.onSubmit} loading={loading}>
-            <Translation>Submit</Translation>
+            {!isEdit ? <Translation>Submit</Translation> : <Translation>Save</Translation>}
           </Button>
         }
         title={<Translation>New Environment</Translation>}
@@ -114,6 +151,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
                 <Input
                   htmlType="name"
                   name="name"
+                  disabled={isEdit ? true : false}
                   maxLength={32}
                   {...init('name', {
                     rules: [

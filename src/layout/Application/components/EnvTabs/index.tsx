@@ -5,7 +5,7 @@ import './index.less';
 import Translation from '../../../../components/Translation';
 import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
-import AddEnvBind from '../AddEnvBind';
+import AddAndEditEnvBind from '../AddAndEditEnvBind';
 import { Link } from 'dva/router';
 
 const { Row, Col } = Grid;
@@ -98,7 +98,7 @@ class TabsContent extends Component<Props, State> {
           </Row>
         </div>
         <If condition={visibleEnvPlan}>
-          <AddEnvBind
+          <AddAndEditEnvBind
             onClose={() => {
               this.setState({ visibleEnvPlan: false });
             }}

@@ -7,8 +7,13 @@ import {
   recycleApplicationEnvbinding,
   deleteApplicationEnvbinding,
 } from '../../../../api/application';
-import type { ApplicationDetail, ApplicationStatus } from '../../../../interface/application';
+import type {
+  ApplicationDetail,
+  ApplicationStatus,
+  EnvBinding,
+} from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
+import AddAndEditEnvBind from '../../../../layout/Application/components/AddAndEditEnvBind';
 import locale from '../../../../utils/locale';
 
 export type GatewayIP = {
@@ -21,11 +26,14 @@ type Props = {
   applicationStatus?: ApplicationStatus;
   applicationDetail?: ApplicationDetail;
   envName: string;
+  appName: string;
+  envbinding?: EnvBinding;
   gatewayIPs?: GatewayIP[];
   updateQuery: (targetName: string) => void;
   updateEnvs: () => void;
   updateStatusShow: (show: boolean) => void;
   refresh: () => void;
+  dispatch: ({}) => void;
   t: (key: string) => any;
 };
 
@@ -34,6 +42,7 @@ type State = {
   deleteLoading: boolean;
   refreshLoading: boolean;
   showStatus: boolean;
+  visibleEnvEditPlan: boolean;
 };
 
 class Hearder extends Component<Props, State> {
@@ -44,9 +53,26 @@ class Hearder extends Component<Props, State> {
       deleteLoading: false,
       refreshLoading: false,
       showStatus: false,
+      visibleEnvEditPlan: false,
     };
   }
   componentDidMount() {}
+  loadEnvbinding = async () => {
+    const { applicationDetail } = this.props;
+    if (applicationDetail) {
+      this.props.dispatch({
+        type: 'application/getApplicationEnvbinding',
+        payload: { appName: applicationDetail.name },
+      });
+    }
+  };
+  loadApplicationWorkflows = async () => {
+    const { appName } = this.props;
+    this.props.dispatch({
+      type: 'application/getApplicationWorkflows',
+      payload: { appName: appName },
+    });
+  };
   handleChange = (value: string) => {
     this.props.updateQuery(value);
   };
@@ -97,10 +123,14 @@ class Hearder extends Component<Props, State> {
     this.setState({ showStatus: true });
   };
 
+  showEditDialog = () => {
+    this.setState({ visibleEnvEditPlan: true });
+  };
+
   render() {
     const { Row, Col } = Grid;
     const { t, updateStatusShow } = this.props;
-    const { recycleLoading, deleteLoading, refreshLoading } = this.state;
+    const { recycleLoading, deleteLoading, refreshLoading, visibleEnvEditPlan } = this.state;
     const clusterPlacehole = t('Delivery Target Selector').toString();
     const { targets, applicationStatus, gatewayIPs } = this.props;
     const clusterList = (targets || []).map((item: DeliveryTarget) => ({
@@ -172,6 +202,9 @@ class Hearder extends Component<Props, State> {
                 </Menu>
               </Dropdown>
             </If>
+            <Button onClick={this.showEditDialog} type="secondary" style={{ marginLeft: '16px' }}>
+              <Translation>Edit</Translation>
+            </Button>
             <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
               <Icon type="refresh" />
             </Button>
@@ -196,6 +229,20 @@ class Hearder extends Component<Props, State> {
             </If>
           </Col>
         </Row>
+        <If condition={visibleEnvEditPlan}>
+          <AddAndEditEnvBind
+            onClose={() => {
+              this.setState({ visibleEnvEditPlan: false });
+            }}
+            onOK={() => {
+              this.loadEnvbinding();
+              this.loadApplicationWorkflows();
+              this.setState({ visibleEnvEditPlan: false });
+            }}
+            editEnvBinding={this.props.envbinding}
+            key={'EditEnvBind'}
+          />
+        </If>
       </div>
     );
   }

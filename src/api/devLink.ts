@@ -36,3 +36,5 @@ export const getTrait_mock = '/mock/getTrait.json';
 
 export const listWorkFlowDefintion_mock = '/mock/listWorkFlowDefintion.json';
 export const listWorkFlowDetailsDefintion_mock = '/mock/listWorkFlowDetailsDefintion.json';
+
+export const updateApplicationEnv_mock = `/mock/api/v1/applications/name/envs/envName`
