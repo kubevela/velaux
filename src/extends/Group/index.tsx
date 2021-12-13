@@ -1,11 +1,10 @@
 import React from 'react';
 
-import { Icon, Loading, Grid, Switch } from '@b-design/ui';
+import { Icon, Loading, Grid, Switch, Field } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
 
 const { Col, Row } = Grid;
-
 type Props = {
   title: string | React.ReactNode;
   description?: string | React.ReactNode;
@@ -14,6 +13,9 @@ type Props = {
   loading?: boolean;
   hasToggleIcon?: boolean;
   required?: boolean;
+  field?: Field;
+  jsonKey?: string;
+  onChange?: (values: any) => void;
 };
 
 type State = {
@@ -37,6 +39,17 @@ class Group extends React.Component<Props, State> {
       closed: !closed,
     });
   };
+
+  removeJsonKeyValue() {
+    const { jsonKey = '', onChange } = this.props;
+    const field: Field | undefined = this.props.field;
+    if (field && onChange) {
+      field.remove(jsonKey);
+      const values = field.getValues();
+      onChange(values);
+    }
+  }
+
   render() {
     const { title, description, children, hasToggleIcon, loading, required } = this.props;
     const { closed, enable } = this.state;
@@ -55,6 +68,9 @@ class Group extends React.Component<Props, State> {
                     size="small"
                     onChange={(event: boolean) => {
                       this.setState({ enable: event, closed: false });
+                      if (event === false) {
+                        this.removeJsonKeyValue();
+                      }
                     }}
                   />
                 </If>
