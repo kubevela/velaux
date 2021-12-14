@@ -383,6 +383,7 @@ class UISchema extends Component<Props, State> {
               required={param.validate && param.validate.required}
               field={this.form}
               jsonKey={param.jsonKey || ''}
+              propertyValue={this.props.value}
               onChange={(values) => {
                 if (this.props.onChange) {
                   this.props.onChange(values);
