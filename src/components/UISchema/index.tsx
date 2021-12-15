@@ -381,6 +381,14 @@ class UISchema extends Component<Props, State> {
               title={<Translation>{param.label || ''}</Translation>}
               closed={true}
               required={param.validate && param.validate.required}
+              field={this.form}
+              jsonKey={param.jsonKey || ''}
+              propertyValue={this.props.value}
+              onChange={(values) => {
+                if (this.props.onChange) {
+                  this.props.onChange(values);
+                }
+              }}
             >
               <UISchema
                 {...init(param.jsonKey, {
