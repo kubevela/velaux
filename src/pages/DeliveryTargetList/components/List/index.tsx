@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Message } from '@b-design/ui';
+import { Table, Message, Dialog } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import { deleteDeliveryTarget } from '../../../../api/target';
 import './index.less';
@@ -85,7 +85,18 @@ class TableList extends Component<Props> {
             <div>
               <a
                 onClick={() => {
-                  this.onDelete(record);
+                  Dialog.confirm({
+                    type: 'confirm',
+                    content: (
+                      <Translation>
+                        Unrecoverable after deletion. Are you sure you want to delete it?
+                      </Translation>
+                    ),
+                    onOk: () => {
+                      this.onDelete(record);
+                    },
+                    locale: locale.Dialog,
+                  });
                 }}
               >
                 <Translation>Remove</Translation>
