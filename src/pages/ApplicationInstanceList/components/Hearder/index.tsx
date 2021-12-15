@@ -202,12 +202,14 @@ class Hearder extends Component<Props, State> {
                 </Menu>
               </Dropdown>
             </If>
-            <Button onClick={this.showEditDialog} type="secondary" style={{ marginLeft: '16px' }}>
-              <Translation>Edit</Translation>
-            </Button>
             <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
               <Icon type="refresh" />
             </Button>
+
+            <Button onClick={this.showEditDialog} type="secondary" style={{ marginLeft: '16px' }}>
+              <Translation>Edit</Translation>
+            </Button>
+
             <If condition={!applicationStatus || !applicationStatus.status}>
               <Button
                 style={{ marginLeft: '16px' }}

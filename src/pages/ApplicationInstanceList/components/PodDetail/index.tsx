@@ -152,6 +152,7 @@ class PodDetail extends React.Component<Props, State> {
         key: 'type',
         title: <Translation>Event Type</Translation>,
         dataIndex: 'type',
+        width: 160,
         cell: (v: string, i: number, record: Event) => {
           const { type, reason } = record;
           return (
@@ -165,6 +166,7 @@ class PodDetail extends React.Component<Props, State> {
         key: 'time',
         title: <Translation>Time</Translation>,
         dataIndex: 'time',
+        width: 100,
         cell: (v: string, i: number, record: Event) => {
           return <span> {this.getTimes(record)}m</span>;
         },
