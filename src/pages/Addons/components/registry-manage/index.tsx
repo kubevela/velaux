@@ -142,6 +142,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
           className="commonDialog"
           title={<Translation>Registry Management</Translation>}
           autoFocus={true}
+          isFullScreen={true}
           visible={visible}
           style={{ width: '1000px' }}
           onOk={this.onOk}
