@@ -137,7 +137,7 @@ export function createApplicationEnv(params: { appName?: string }) {
 export function updateApplicationEnv(params: { appName?: string; name: string }) {
   const gurl = isMock
     ? `${updateApplicationEnv_mock}`
-    : `${application}/${params.appName}/envs/${name}`;
+    : `${application}/${params.appName}/envs/${params.name}`;
   return put(gurl, params).then((res) => res);
 }
 

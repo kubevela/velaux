@@ -106,7 +106,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
 
   onUpdateApplicationEnv(params: any) {
     updateApplicationEnv(params)
-      .then((res) => {
+      .then((res: any) => {
         if (res) {
           Message.success(<Translation>Save Envbinding Success</Translation>);
           this.props.onOK();
@@ -143,7 +143,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
             {!isEdit ? <Translation>Submit</Translation> : <Translation>Save</Translation>}
           </Button>
         }
-        title={<Translation>New Environment</Translation>}
+        title={<Translation>{!isEdit ? 'New Environment' : 'Edit Environment'}</Translation>}
       >
         <Form {...formItemLayout} field={this.field}>
           <Row>
