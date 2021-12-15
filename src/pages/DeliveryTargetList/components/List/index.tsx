@@ -63,7 +63,8 @@ class TableList extends Component<Props> {
         cell: (v: string, i: number, record: DeliveryTarget) => {
           return (
             <span>
-              {record?.cluster?.clusterName}/{record?.cluster?.namespace}
+              {record?.clusterAlias ? record?.clusterAlias : record?.cluster?.clusterName}/
+              {record?.cluster?.namespace}
             </span>
           );
         },

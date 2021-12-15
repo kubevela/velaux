@@ -6,6 +6,7 @@ export type DeliveryTarget = {
   alias?: string;
   project?: Project;
   description?: string;
+  clusterAlias?: string;
   cluster?: {
     clusterName?: string;
     namespace?: string;
