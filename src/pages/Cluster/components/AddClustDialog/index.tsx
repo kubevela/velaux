@@ -158,6 +158,7 @@ class AddClustDialog extends React.Component<Props, State> {
             <Translation>Connect Existing Cluster</Translation>
           )
         }
+        isFullScreen={true}
         autoFocus={true}
         visible={visible}
         onOk={this.onOk}
