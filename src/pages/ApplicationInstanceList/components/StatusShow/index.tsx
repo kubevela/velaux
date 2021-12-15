@@ -83,6 +83,7 @@ class StatusShow extends React.Component<Props, State> {
         className={'commonDialog'}
         title={<Translation>Application Status</Translation>}
         autoFocus={true}
+        isFullScreen={true}
         style={{ width: '800px' }}
         onClose={onClose}
         footer={

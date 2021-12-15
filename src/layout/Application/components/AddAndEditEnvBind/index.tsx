@@ -135,6 +135,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
         locale={locale.Dialog}
         className={'commonDialog'}
         style={{ width: '800px' }}
+        isFullScreen={true}
         footerActions={['ok']}
         onClose={this.props.onClose}
         footer={

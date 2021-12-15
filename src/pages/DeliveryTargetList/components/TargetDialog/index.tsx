@@ -222,6 +222,7 @@ class DeliveryDialog extends React.Component<Props, State> {
             isEdit ? <Translation>Edit Target</Translation> : <Translation>New Target</Translation>
           }
           autoFocus={true}
+          isFullScreen={true}
           visible={visible}
           onOk={this.onOk}
           onCancel={this.onClose}
