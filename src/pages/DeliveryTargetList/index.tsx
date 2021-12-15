@@ -9,6 +9,7 @@ import type { DeliveryTarget } from '../../interface/deliveryTarget';
 import './index.less';
 import type { Cluster } from '../../interface/cluster';
 import locale from '../../utils/locale';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   deliveryTargets?: [];
@@ -149,17 +150,19 @@ class DeliveryTargetList extends React.Component<Props, State> {
           onChange={this.handleChange}
         />
 
-        <DeliveryDialog
-          t={t}
-          visible={visibleDelivery}
-          clusterList={clusterList || []}
-          syncProjectList={this.getProjectList}
-          projects={projects || []}
-          isEdit={isEdit}
-          deliveryTargetItem={deliveryTargetItem}
-          onClose={this.onClose}
-          onOK={this.onOk}
-        />
+        <If condition={visibleDelivery}>
+          <DeliveryDialog
+            t={t}
+            visible={visibleDelivery}
+            clusterList={clusterList || []}
+            syncProjectList={this.getProjectList}
+            projects={projects || []}
+            isEdit={isEdit}
+            deliveryTargetItem={deliveryTargetItem}
+            onClose={this.onClose}
+            onOK={this.onOk}
+          />
+        </If>
       </div>
     );
   }
