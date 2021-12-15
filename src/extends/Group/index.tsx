@@ -18,6 +18,10 @@ type Props = {
   field?: Field;
   jsonKey?: string;
   propertyValue?: any;
+  alwaysShow?: boolean;
+  disableAddon?: boolean;
+  titleLeftGrid?: string;
+  titleRightGrid?: string;
   onChange?: (values: any) => void;
 };
 
@@ -50,9 +54,9 @@ class Group extends React.Component<Props, State> {
   }
 
   initSwitchState = () => {
-    const { jsonKey = '', propertyValue = {} } = this.props;
+    const { jsonKey = '', propertyValue = {}, alwaysShow = false } = this.props;
     const findKey = Object.keys(propertyValue).find((item) => item === jsonKey);
-    if (findKey) {
+    if (findKey || alwaysShow) {
       this.setState({ enable: true, closed: false, checked: true });
     } else {
       this.setState({ enable: false, closed: false, checked: false });
@@ -70,23 +74,35 @@ class Group extends React.Component<Props, State> {
   }
 
   render() {
-    const { title, description, children, hasToggleIcon, loading, required } = this.props;
+    const {
+      title,
+      description,
+      children,
+      hasToggleIcon,
+      loading,
+      required,
+      disableAddon = false,
+      titleLeftGrid = '21',
+      titleRightGrid = '3',
+    } = this.props;
     const { closed, enable, checked } = this.state;
+
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
         <div className="group-container">
           <div className="group-title-container">
             <Row>
-              <Col span={21}>
+              <Col span={titleLeftGrid}>
                 {title}
                 <div className="group-title-desc">{description}</div>
               </Col>
-              <Col span={3} className="flexcenter">
+              <Col span={titleRightGrid} className="flexcenter">
                 <If condition={!required}>
                   <Switch
                     size="small"
                     defaultChecked={required}
                     checked={checked}
+                    disabled={disableAddon}
                     onChange={(event: boolean) => {
                       if (event === true) {
                         this.setState({ enable: event, closed: false, checked: true });
