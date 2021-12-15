@@ -192,11 +192,13 @@ class Hearder extends Component<Props, State> {
                 <Menu>
                   {gatewayIPs?.map((item) => {
                     if (item) {
-                      <Menu.Item key={item.ip}>
-                        <a target="_blank" href={`http://${item.ip}:${item.port}`}>
-                          {item.ip}:{item.port}
-                        </a>
-                      </Menu.Item>;
+                      return (
+                        <Menu.Item key={item.ip}>
+                          <a target="_blank" href={`http://${item.ip}:${item.port}`}>
+                            {item.ip}:{item.port}
+                          </a>
+                        </Menu.Item>
+                      );
                     }
                   })}
                 </Menu>

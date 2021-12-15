@@ -466,7 +466,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         </div>
       );
     };
-    const gatewayIPs: any = services?.map((service) => {
+    const gatewayIPs: any = [];
+    services?.map((service) => {
       const ingress = service.status?.loadBalancer?.ingress;
       if (ingress && Array.isArray(ingress) && ingress.length > 0) {
         const item = {
@@ -481,7 +482,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         ) {
           item.port = service.spec.ports[0].port;
         }
-        return item;
+        gatewayIPs.push(item);
       }
     });
     const {
