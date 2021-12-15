@@ -95,8 +95,8 @@ class Group extends React.Component<Props, State> {
                           type: 'confirm',
                           content: (
                             <Translation>
-                              If Swtich is turned off, user data will be reset. Are you sure you
-                              want to do it?
+                              If Swtich is turned off, The configuration will be reset. Are you sure
+                              you want to do this?
                             </Translation>
                           ),
                           onOk: () => {
