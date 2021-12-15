@@ -249,7 +249,15 @@ class UISchema extends Component<Props, State> {
             description={<Translation>{param.description || ''}</Translation>}
             title={<Translation>{param.label || ''}</Translation>}
             closed={true}
-            key={param.jsonKey}
+            required={param.validate && param.validate.required}
+            field={this.form}
+            jsonKey={param.jsonKey || ''}
+            propertyValue={this.props.value}
+            onChange={(values) => {
+              if (this.props.onChange) {
+                this.props.onChange(values);
+              }
+            }}
           >
             <Form.Item required={required} disabled={param.disable} key={param.jsonKey}>
               <KV
@@ -270,7 +278,15 @@ class UISchema extends Component<Props, State> {
             description={<Translation>{param.description || ''}</Translation>}
             title={<Translation>{param.label || ''}</Translation>}
             closed={true}
-            key={param.jsonKey}
+            required={param.validate && param.validate.required}
+            field={this.form}
+            jsonKey={param.jsonKey || ''}
+            propertyValue={this.props.value}
+            onChange={(values) => {
+              if (this.props.onChange) {
+                this.props.onChange(values);
+              }
+            }}
           >
             <Form.Item required={required} disabled={param.disable} key={param.jsonKey}>
               <Strings
@@ -432,6 +448,15 @@ class UISchema extends Component<Props, State> {
               description={<Translation>{param.description || ''}</Translation>}
               title={<Translation>{param.label || ''}</Translation>}
               closed={true}
+              required={param.validate && param.validate.required}
+              field={this.form}
+              jsonKey={param.jsonKey || ''}
+              propertyValue={this.props.value}
+              onChange={(values) => {
+                if (this.props.onChange) {
+                  this.props.onChange(values);
+                }
+              }}
             >
               <Form.Item>
                 <Structs
