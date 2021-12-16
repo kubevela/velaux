@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { Icon, Loading, Grid, Switch, Field, Dialog } from '@b-design/ui';
+import type { Field } from '@b-design/ui';
+import { Icon, Loading, Grid, Switch, Dialog } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';

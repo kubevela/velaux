@@ -31,7 +31,7 @@ type Props = {
 type State = {
   addonDetailInfo: Addon;
   loading: boolean;
-  status: 'disabled' | 'enabled' | 'enabling' | '';
+  status: 'disabled' | 'enabled' | 'enabling' | 'suspend' | 'disabling' | '';
   statusLoading: boolean;
   upgradeLoading: boolean;
   args?: any;
@@ -112,7 +112,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
     if (status === 'enabled') {
       Dialog.confirm({
         content:
-          'Are you sure you want to disable the addon? After the addon is disabled, related resources are reclaimed.',
+          'Please make sure that the Addon is no longer in use and the related application has been recycled.',
         onOk: this.disableAddon,
         locale: locale.Dialog,
       });
@@ -201,13 +201,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
         warning={status === 'enabled'}
         title={status}
         style={{ backgroundColor: status === 'enabled' ? 'red' : '' }}
-        loading={statusLoading || loading || status == 'enabling'}
-        disabled={status == 'enabling'}
+        loading={statusLoading || loading || status == 'enabling' || status == 'disabling'}
+        disabled={status == 'enabling' || status == 'disabling'}
       >
         <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
       </Button>,
     ];
-    if (status == 'enabled') {
+    if (status == 'enabled' || status == 'suspend') {
       buttons.push(
         <Button
           loading={upgradeLoading}
@@ -246,7 +246,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
         >
           <If condition={status == 'enabling'}>
             <Message style={{ marginBottom: '16px' }} type="warning">
-              <Translation>Addon is enabling</Translation>
+              <Translation>Addon app status is enabling</Translation>
             </Message>
           </If>
           <Loading visible={loading} style={{ width: '100%' }}>
@@ -256,9 +256,11 @@ class AddonDetailDialog extends React.Component<Props, State> {
                 size="medium"
                 style={{ padding: '8px', marginBottom: '10px' }}
               >
-                <Translation>{`Addon is ${addonsStatus?.status || 'Initing'}`}</Translation>{' '}
+                <Translation>{`Addon app status is ${
+                  addonsStatus?.status || 'Initing'
+                }`}</Translation>{' '}
                 <a onClick={() => this.updateStatusShow(true)}>
-                  <Translation>Check the details ?</Translation>
+                  <Translation>check the details</Translation>
                 </a>
               </Message>
             </If>
@@ -347,7 +349,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                   />
                   <Table.Column
                     dataIndex="description"
-                    align="left"
+                    align="center"
                     title={<Translation>Description</Translation>}
                   />
                 </Table>

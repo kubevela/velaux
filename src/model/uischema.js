@@ -7,13 +7,13 @@ export default {
     appName: '',
   },
   reducers: {
-    setAppName(state, { type, payload }) {
+    updateAppName(state, { type, payload }) {
       return {
         ...state,
         appName: payload,
       };
     },
-    setAppNamespace(state, { type, payload }) {
+    updateAppNamespace(state, { type, payload }) {
       return {
         ...state,
         appNamespace: payload,
@@ -22,13 +22,13 @@ export default {
   },
   effects: {
     *setAppName(action, { call, put }) {
-      if (result) {
-        yield put({ type: 'setAppName', payload: action.payload || [] });
+      if (action.payload) {
+        yield put({ type: 'updateAppName', payload: action.payload || '' });
       }
     },
     *setAppNamespace(action, { call, put }) {
-      if (result) {
-        yield put({ type: 'setAppNamespace', payload: action.payload || [] });
+      if (action.payload) {
+        yield put({ type: 'updateAppNamespace', payload: action.payload || '' });
       }
     },
   },
