@@ -20,8 +20,6 @@ type Props = {
   propertyValue?: any;
   alwaysShow?: boolean;
   disableAddon?: boolean;
-  titleLeftGrid?: string;
-  titleRightGrid?: string;
   onChange?: (values: any) => void;
 };
 
@@ -54,9 +52,9 @@ class Group extends React.Component<Props, State> {
   }
 
   initSwitchState = () => {
-    const { jsonKey = '', propertyValue = {}, alwaysShow = false } = this.props;
+    const { jsonKey = '', propertyValue = {}, alwaysShow = false, required } = this.props;
     const findKey = Object.keys(propertyValue).find((item) => item === jsonKey);
-    if (findKey || alwaysShow) {
+    if (findKey || alwaysShow || required) {
       this.setState({ enable: true, closed: false, checked: true });
     } else {
       this.setState({ enable: false, closed: false, checked: false });
@@ -82,8 +80,6 @@ class Group extends React.Component<Props, State> {
       loading,
       required,
       disableAddon = false,
-      titleLeftGrid = '21',
-      titleRightGrid = '3',
     } = this.props;
     const { closed, enable, checked } = this.state;
 
@@ -92,11 +88,11 @@ class Group extends React.Component<Props, State> {
         <div className="group-container">
           <div className="group-title-container">
             <Row>
-              <Col span={titleLeftGrid}>
+              <Col span={'21'}>
                 {title}
                 <div className="group-title-desc">{description}</div>
               </Col>
-              <Col span={titleRightGrid} className="flexcenter">
+              <Col span={'3'} className="flexcenter">
                 <If condition={!required}>
                   <Switch
                     size="small"

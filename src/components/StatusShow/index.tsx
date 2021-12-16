@@ -1,54 +1,20 @@
 import React from 'react';
 import { Dialog, Table, Card, Step, Loading, Button } from '@b-design/ui';
-import { connect } from 'dva';
-import type { ApplicationStatus, Condition } from '../../../../interface/application';
-import Translation from '../../../../components/Translation';
+import type { ApplicationStatus, Condition } from '../../interface/application';
+import Translation from '../../components/Translation';
 import { If } from 'tsx-control-statements/components';
-import locale from '../../../../utils/locale';
+import locale from '../../utils/locale';
 
 type Props = {
+  loading: boolean;
   applicationStatus?: ApplicationStatus;
   onClose: () => void;
-  dispatch: ({}) => void;
-  appName: string;
-  envName: string;
+  loadStatusDetail: () => void;
 };
 
-type State = {
-  loading: boolean;
-};
-
-@connect((store: any) => {
-  return { ...store.application };
-})
-class StatusShow extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      loading: false,
-    };
-  }
-  componentDidMount = async () => {
-    this.loadApplicationStatus();
-  };
-
-  loadApplicationStatus = async () => {
-    const { appName, envName } = this.props;
-    if (envName) {
-      this.setState({ loading: true });
-      this.props.dispatch({
-        type: 'application/getApplicationStatus',
-        payload: { appName: appName, envName: envName },
-        callback: () => {
-          this.setState({ loading: false });
-        },
-      });
-    }
-  };
-
+class StatusShow extends React.Component<Props> {
   render() {
-    const { applicationStatus, onClose } = this.props;
-    const { loading } = this.state;
+    const { applicationStatus, onClose, loading } = this.props;
     const allConditions: Condition[] = [
       { type: 'Parsed', status: 'False' },
       { type: 'Revision', status: 'False' },
@@ -91,7 +57,7 @@ class StatusShow extends React.Component<Props, State> {
             <Button onClick={onClose}>
               <Translation>Close</Translation>
             </Button>
-            <Button type="primary" onClick={this.loadApplicationStatus}>
+            <Button type="primary" onClick={this.props.loadStatusDetail}>
               <Translation>Refresh</Translation>
             </Button>
           </div>

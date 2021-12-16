@@ -265,6 +265,7 @@ class WorkflowForm extends Component<Props, State> {
                 description="Set the configuration parameters for the Workflow."
                 closed={false}
                 required={true}
+                hasToggleIcon={true}
               >
                 <If condition={definitionDetail && definitionDetail.uiSchema}>
                   <FormItem required={true}>
