@@ -60,7 +60,7 @@ class Strings extends React.Component<Props, State> {
     super(props);
     const inputList: ListParams[] = [];
     if (props.value) {
-      props.value.map((v: any,index:number) => {
+      props.value.map((v: any, index: number) => {
         const key = Date.now().toString() + index;
         inputList.push({
           key,
@@ -78,22 +78,21 @@ class Strings extends React.Component<Props, State> {
     });
   }
 
-  componentDidMount = async () => { };
+  componentDidMount = async () => {};
 
   changeValues = () => {
     const values = this.field.getValues();
-    const inputList: ListParams[]  = this.state.inputList;
-    Object.keys(values)
-      .map((key) => {
-         if(Array.isArray(inputList)){
-          inputList.forEach(item=> {
-            if(item.key === key){
-               item.value = values[key];
-            }
-          })
-         }
-      });
-    const valuesInfo = inputList.map((item:ListParams) => item.value)
+    const inputList: ListParams[] = this.state.inputList;
+    Object.keys(values).map((key) => {
+      if (Array.isArray(inputList)) {
+        inputList.forEach((item) => {
+          if (item.key === key) {
+            item.value = values[key];
+          }
+        });
+      }
+    });
+    const valuesInfo = inputList.map((item: ListParams) => item.value);
     this.props.onChange(valuesInfo);
   };
 
