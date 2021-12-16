@@ -234,6 +234,7 @@ class TraitDialog extends React.Component<Props, State> {
                 closed={false}
                 loading={definitionLoading}
                 required={true}
+                hasToggleIcon={true}
               >
                 <If condition={definitionDetail && definitionDetail.uiSchema}>
                   <FormItem required={true}>

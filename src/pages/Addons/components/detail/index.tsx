@@ -19,6 +19,7 @@ import Translation from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import type { Addon } from '../../../../interface/addon';
 import locale from '../../../../utils/locale';
+import StatusShow from '../../../../components/StatusShow';
 
 type Props = {
   addonName: string;
@@ -34,6 +35,8 @@ type State = {
   statusLoading: boolean;
   upgradeLoading: boolean;
   args?: any;
+  addonsStatus: any;
+  showStatusVisible: boolean;
 };
 
 class AddonDetailDialog extends React.Component<Props, State> {
@@ -51,6 +54,8 @@ class AddonDetailDialog extends React.Component<Props, State> {
       loading: true,
       statusLoading: true,
       upgradeLoading: false,
+      addonsStatus: {},
+      showStatusVisible: false,
     };
     this.form = new Field(this);
     this.uiSchemaRef = React.createRef();
@@ -78,6 +83,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
   };
 
   loadAddonStatus = () => {
+    this.setState({ statusLoading: true });
     getAddonsStatus({ name: this.props.addonName })
       .then((res) => {
         if (!res) return;
@@ -89,7 +95,12 @@ class AddonDetailDialog extends React.Component<Props, State> {
         if (res.args) {
           this.form.setValue('properties', res.args);
         }
-        this.setState({ status: res.phase, args: res.args, statusLoading: false });
+        this.setState({
+          status: res.phase,
+          args: res.args,
+          statusLoading: false,
+          addonsStatus: res.appStatus,
+        });
       })
       .catch(() => {
         this.setState({ statusLoading: false });
@@ -148,8 +159,24 @@ class AddonDetailDialog extends React.Component<Props, State> {
     this.props.onClose();
   };
 
+  updateStatusShow = (show: boolean) => {
+    this.setState({ showStatusVisible: show });
+  };
+
+  onStatusClose = () => {
+    this.setState({ showStatusVisible: false });
+  };
+
   render() {
-    const { loading, addonDetailInfo, status, statusLoading, upgradeLoading } = this.state;
+    const {
+      loading,
+      addonDetailInfo,
+      status,
+      statusLoading,
+      upgradeLoading,
+      addonsStatus,
+      showStatusVisible,
+    } = this.state;
     const { showAddon } = this.props;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
@@ -192,21 +219,59 @@ class AddonDetailDialog extends React.Component<Props, State> {
         </Button>,
       );
     }
+
+    const getAppStatusShowType = (statusInfo: string | undefined) => {
+      if (!statusInfo) {
+        return 'notice';
+      }
+      switch (statusInfo) {
+        case 'running':
+          return 'success';
+        case 'workflowFinished':
+          return 'success';
+        case 'unhealthy':
+          return 'error';
+      }
+      return 'warning';
+    };
+
     return (
       <div className="basic">
-        <DrawerWithFooter title={showName} onClose={this.onClose} extButtons={buttons}>
+        <DrawerWithFooter
+          title={showName}
+          width={800}
+          placement="right"
+          onClose={this.onClose}
+          extButtons={buttons}
+        >
           <If condition={status == 'enabling'}>
             <Message style={{ marginBottom: '16px' }} type="warning">
               <Translation>Addon is enabling</Translation>
             </Message>
           </If>
           <Loading visible={loading} style={{ width: '100%' }}>
+            <If condition={addonsStatus}>
+              <Message
+                type={getAppStatusShowType(addonsStatus?.status)}
+                size="medium"
+                style={{ padding: '8px', marginBottom: '10px' }}
+              >
+                <Translation>{`Addon is ${addonsStatus?.status || 'Initing'}`}</Translation>{' '}
+                <a onClick={() => this.updateStatusShow(true)}>
+                  <Translation>Check the details ?</Translation>
+                </a>
+              </Message>
+            </If>
+
             <If condition={addonDetailInfo.uiSchema && !statusLoading}>
               <Group
                 title={<Translation>Properties</Translation>}
                 description={<Translation>Set the addon configuration parameters</Translation>}
                 required={true}
                 closed={status === 'enabled'}
+                alwaysShow={true}
+                disableAddon={true}
+                hasToggleIcon={true}
               >
                 <Form field={this.form}>
                   <UISchema
@@ -308,6 +373,15 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </Card>
           </Loading>
         </DrawerWithFooter>
+
+        <If condition={showStatusVisible}>
+          <StatusShow
+            loading={statusLoading}
+            applicationStatus={addonsStatus}
+            loadStatusDetail={this.loadAddonStatus}
+            onClose={this.onStatusClose}
+          />
+        </If>
       </div>
     );
   }

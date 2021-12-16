@@ -18,7 +18,7 @@ import { momentDate } from '../../utils/common';
 import { If } from 'tsx-control-statements/components';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
-import StatusShow from './components/StatusShow';
+import StatusShow from '../../components/StatusShow';
 import locale from '../../utils/locale';
 
 const { Column } = Table;
@@ -455,6 +455,27 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     } = this.props.match;
     return envbinding.find((env) => env.name === envName);
   };
+
+  loadStatusDetail = async () => {
+    const {
+      params: { appName, envName },
+    } = this.props.match;
+    if (envName) {
+      this.setState({ loading: true });
+      this.props.dispatch({
+        type: 'application/getApplicationStatus',
+        payload: { appName: appName, envName: envName },
+        callback: () => {
+          this.setState({ loading: false });
+        },
+      });
+    }
+  };
+
+  onStatusClose = () => {
+    this.setState({ showStatus: false });
+  };
+
   render() {
     const { applicationStatus, applicationDetail } = this.props;
     const { podList, loading, showStatus, cloudInstance, services } = this.state;
@@ -608,12 +629,10 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         </If>
         <If condition={showStatus}>
           <StatusShow
-            envName={envName}
-            appName={appName}
-            dispatch={this.props.dispatch}
-            onClose={() => {
-              this.setState({ showStatus: false });
-            }}
+            loading={loading}
+            applicationStatus={applicationStatus}
+            loadStatusDetail={this.loadStatusDetail}
+            onClose={this.onStatusClose}
           />
         </If>
       </div>
