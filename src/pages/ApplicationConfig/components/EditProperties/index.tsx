@@ -51,7 +51,6 @@ class EditProperties extends React.Component<Props, State> {
 
   setUISchemaContext() {
     const { dispatch, applicationDetail } = this.props;
-    console.log('setUISchemaContext');
     if (dispatch) {
       dispatch({
         type: 'uischema/setAppName',
