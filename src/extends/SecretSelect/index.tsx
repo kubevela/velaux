@@ -49,7 +49,10 @@ class SecretSelect extends React.Component<Props, State> {
     if (this.props.appNamespace) {
       listCloudResourceSecrets({ appNs: this.props.appNamespace }).then((res) => {
         if (res) {
-          this.setState({ secrets: res.secrets });
+          this.setState({ secrets: res.secrets }, () => {
+            const keys = this.getSecretKeys(this.props.value);
+            this.props.setKeys(keys);
+          });
         }
       });
     }

@@ -313,7 +313,7 @@ class UISchema extends Component<Props, State> {
                 this.setState({ secretKeys: keys });
               }}
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: param.validate.defaultValue || this.props.value?.name,
                 rules: converRule(param.validate),
               })}
             />
@@ -332,7 +332,7 @@ class UISchema extends Component<Props, State> {
             <SecretKeySelect
               secretKeys={this.state.secretKeys}
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: param.validate.defaultValue || this.props.value?.key,
                 rules: converRule(param.validate),
               })}
             />
