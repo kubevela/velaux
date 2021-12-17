@@ -244,11 +244,6 @@ class AddonDetailDialog extends React.Component<Props, State> {
           onClose={this.onClose}
           extButtons={buttons}
         >
-          <If condition={status == 'enabling'}>
-            <Message style={{ marginBottom: '16px' }} type="warning">
-              <Translation>Addon app status is enabling</Translation>
-            </Message>
-          </If>
           <Loading visible={loading} style={{ width: '100%' }}>
             <If condition={addonsStatus}>
               <Message

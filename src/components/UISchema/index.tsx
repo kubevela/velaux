@@ -17,6 +17,7 @@ import KV from '../../extends/KV';
 import './index.less';
 import { checkImageName } from '../../utils/common';
 import locale from '../../utils/locale';
+import HelmValues from '../../extends/HelmValues';
 
 type Props = {
   _key?: string;
@@ -122,6 +123,29 @@ class UISchema extends Component<Props, State> {
     if (param.disable) {
       return;
     }
+    const getGroup = (children: React.ReactNode) => {
+      return (
+        <Group
+          hasToggleIcon
+          description={<Translation>{param.description || ''}</Translation>}
+          title={<Translation>{param.label || ''}</Translation>}
+          closed={true}
+          required={param.validate && param.validate.required}
+          field={this.form}
+          jsonKey={param.jsonKey || ''}
+          propertyValue={this.props.value}
+          onChange={(values) => {
+            if (this.props.onChange) {
+              this.props.onChange(values);
+            }
+          }}
+        >
+          <Form.Item required={required} disabled={param.disable} key={param.jsonKey}>
+            {children}
+          </Form.Item>
+        </Group>
+      );
+    };
     switch (param.uiType) {
       case 'Switch':
         const switchResult = init(param.jsonKey, {
@@ -243,62 +267,39 @@ class UISchema extends Component<Props, State> {
           </Form.Item>
         );
       case 'KV':
-        return (
-          <Group
-            hasToggleIcon
-            description={<Translation>{param.description || ''}</Translation>}
-            title={<Translation>{param.label || ''}</Translation>}
-            closed={true}
-            required={param.validate && param.validate.required}
-            field={this.form}
-            jsonKey={param.jsonKey || ''}
-            propertyValue={this.props.value}
-            onChange={(values) => {
-              if (this.props.onChange) {
-                this.props.onChange(values);
-              }
-            }}
-          >
-            <Form.Item required={required} disabled={param.disable} key={param.jsonKey}>
-              <KV
-                {...init(param.jsonKey, {
-                  initValue: param.validate.defaultValue,
-                  rules: converRule(param.validate),
-                })}
-                additional={param.additional}
-                additionalParameter={param.additionalParameter}
-              />
-            </Form.Item>
-          </Group>
+        const children = (
+          <KV
+            {...init(param.jsonKey, {
+              initValue: param.validate.defaultValue,
+              rules: converRule(param.validate),
+            })}
+            additional={param.additional}
+            additionalParameter={param.additionalParameter}
+          />
+        );
+        return getGroup(children);
+      case 'HelmValues':
+        return getGroup(
+          <HelmValues
+            {...init(param.jsonKey, {
+              initValue: param.validate.defaultValue,
+              rules: converRule(param.validate),
+            })}
+            additional={param.additional}
+            additionalParameter={param.additionalParameter}
+          />,
         );
       case 'Strings':
-        return (
-          <Group
-            hasToggleIcon
-            description={<Translation>{param.description || ''}</Translation>}
-            title={<Translation>{param.label || ''}</Translation>}
-            closed={true}
-            required={param.validate && param.validate.required}
-            field={this.form}
-            jsonKey={param.jsonKey || ''}
-            propertyValue={this.props.value}
-            onChange={(values) => {
-              if (this.props.onChange) {
-                this.props.onChange(values);
-              }
-            }}
-          >
-            <Form.Item required={required} disabled={param.disable} key={param.jsonKey}>
-              <Strings
-                {...init(param.jsonKey, {
-                  initValue: param.validate.defaultValue,
-                  rules: converRule(param.validate),
-                })}
-              />
-            </Form.Item>
-          </Group>
+        return getGroup(
+          <Strings
+            {...init(param.jsonKey, {
+              initValue: param.validate.defaultValue,
+              rules: converRule(param.validate),
+            })}
+          />,
         );
       case 'SecretSelect':
+        console.log(this.props.value);
         return (
           <Form.Item
             labelAlign={inline ? 'inset' : 'left'}
@@ -390,6 +391,7 @@ class UISchema extends Component<Props, State> {
           // const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
           //   ref.current?.validate(callback);
           // };
+
           return (
             <Group
               hasToggleIcon
@@ -442,39 +444,21 @@ class UISchema extends Component<Props, State> {
           // const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
           //   ref.current?.validate(callback);
           // };
-          return (
-            <Group
-              hasToggleIcon
-              description={<Translation>{param.description || ''}</Translation>}
-              title={<Translation>{param.label || ''}</Translation>}
-              closed={true}
-              required={param.validate && param.validate.required}
-              field={this.form}
-              jsonKey={param.jsonKey || ''}
-              propertyValue={this.props.value}
-              onChange={(values) => {
-                if (this.props.onChange) {
-                  this.props.onChange(values);
-                }
-              }}
-            >
-              <Form.Item>
-                <Structs
-                  ref={ref}
-                  param={param.subParameters}
-                  parameterGroupOption={param.subParameterGroupOption}
-                  {...init(param.jsonKey, {
-                    initValue: param.validate.defaultValue,
-                    // rules: [
-                    //   {
-                    //     validator: validator,
-                    //     message: `Please check ${param.label} config`,
-                    //   },
-                    // ],
-                  })}
-                />
-              </Form.Item>
-            </Group>
+          return getGroup(
+            <Structs
+              ref={ref}
+              param={param.subParameters}
+              parameterGroupOption={param.subParameterGroupOption}
+              {...init(param.jsonKey, {
+                initValue: param.validate.defaultValue,
+                // rules: [
+                //   {
+                //     validator: validator,
+                //     message: `Please check ${param.label} config`,
+                //   },
+                // ],
+              })}
+            />,
           );
         }
         return <div />;

@@ -221,7 +221,13 @@ class Hearder extends Component<Props, State> {
                 <Translation>Delete</Translation>
               </Button>
             </If>
-            <If condition={applicationStatus && applicationStatus.status}>
+            <If
+              condition={
+                applicationStatus &&
+                applicationStatus.status &&
+                applicationStatus.status != 'deleting'
+              }
+            >
               <Button
                 loading={recycleLoading}
                 onClick={this.recycleEnv}

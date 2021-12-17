@@ -150,11 +150,11 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   changeStatus = (value: string) => {
-    const values: { componentType: string; namespace: string } = this.field.getValues();
-    const { componentType, namespace } = values;
+    const values: { componentType: string; project: string } = this.field.getValues();
+    const { componentType, project } = values;
     if (value === 'isCreateComponent') {
       this.field.validateCallback(
-        ['name', 'alias', 'description', 'namespace', 'componentType'],
+        ['name', 'alias', 'description', 'project', 'componentType'],
         (error: any) => {
           if (error) {
             return;
@@ -165,6 +165,13 @@ class AppDialog extends React.Component<Props, State> {
           }
           const { dispatch } = this.props;
           if (dispatch) {
+            const { projects } = this.props;
+            let namespace = '';
+            projects?.map((p) => {
+              if (p.name == project) {
+                namespace = p.namespace;
+              }
+            });
             dispatch({
               type: 'uischema/setAppNamespace',
               payload: namespace,

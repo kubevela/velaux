@@ -22,5 +22,7 @@ export interface APIError {
 }
 export function handleError(err: APIError) {
   // TODO: Handle errors based on businessCode
-  Message.error(err.Message);
+  if (err) {
+    Message.error(err.Message);
+  }
 }
