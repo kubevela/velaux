@@ -1,5 +1,6 @@
 import React from 'react';
 import { Select } from '@b-design/ui';
+import locale from '../../utils/locale';
 
 type Props = {
   onChange: (value: any) => void;
@@ -23,7 +24,7 @@ class SecretKeySelect extends React.Component<Props, State> {
   render() {
     const { onChange, value, secretKeys, id } = this.props;
     return (
-      <Select onChange={onChange} defaultValue={value} id={id}>
+      <Select locale={locale.Select} onChange={onChange} defaultValue={value} id={id} value={value}>
         {secretKeys?.map((item) => {
           return (
             <Select.Option key={item} value={item}>
