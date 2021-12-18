@@ -131,7 +131,7 @@ class Hearder extends Component<Props, State> {
     const { Row, Col } = Grid;
     const { t, updateStatusShow } = this.props;
     const { recycleLoading, deleteLoading, refreshLoading, visibleEnvEditPlan } = this.state;
-    const clusterPlacehole = t('Delivery Target Selector').toString();
+    const clusterPlacehole = t('Target Selector').toString();
     const { targets, applicationStatus, gatewayIPs } = this.props;
     const clusterList = (targets || []).map((item: DeliveryTarget) => ({
       label: item.alias,
@@ -221,7 +221,13 @@ class Hearder extends Component<Props, State> {
                 <Translation>Delete</Translation>
               </Button>
             </If>
-            <If condition={applicationStatus && applicationStatus.status}>
+            <If
+              condition={
+                applicationStatus &&
+                applicationStatus.status &&
+                applicationStatus.status != 'deleting'
+              }
+            >
               <Button
                 loading={recycleLoading}
                 onClick={this.recycleEnv}

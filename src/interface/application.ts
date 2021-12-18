@@ -146,6 +146,7 @@ export interface Condition {
   status: 'True' | 'False';
   lastTransitionTime?: string;
   reason?: string;
+  message?: string;
 }
 
 export interface WorkflowStatus {

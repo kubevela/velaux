@@ -38,7 +38,7 @@ export function getCloudClustersList(params: any) {
   const { provider, page, pageSize } = params;
   const gurl = isMock
     ? `${clusterCloudList_mock}`
-    : `${cluster}/cloud-clusters/${provider}?page=${page}&pageSize=${pageSize}`;
+    : `${cluster}/cloud_clusters/${provider}?page=${page}&pageSize=${pageSize}`;
   delete params.page;
   delete params.pageSize;
   delete params.provider;
@@ -49,7 +49,7 @@ export function connectcloudCluster(params: any) {
   const { provider } = params;
   const gurl = isMock
     ? `${connectClusterCloud_mock}`
-    : `${cluster}/cloud-clusters/${provider}/connect`;
+    : `${cluster}/cloud_clusters/${provider}/connect`;
   delete params.provider;
   return post(gurl, params).then((res) => res);
 }

@@ -1,9 +1,10 @@
 import React from 'react';
-import { Dialog, Table, Card, Step, Loading, Button } from '@b-design/ui';
+import { Dialog, Table, Card, Step, Loading, Button, Balloon } from '@b-design/ui';
 import type { ApplicationStatus, Condition } from '../../interface/application';
 import Translation from '../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import locale from '../../utils/locale';
+import { Link } from 'dva/router';
 
 type Props = {
   loading: boolean;
@@ -34,8 +35,12 @@ class StatusShow extends React.Component<Props> {
             c.status = condition.status;
             c.lastTransitionTime = condition.lastTransitionTime;
             c.reason = condition.reason;
+            c.message = condition.message;
           }
         });
+        if (condition.type == 'Deleting') {
+          allConditions.push(condition);
+        }
       });
       if (index == 0 && conditions) {
         return conditions.length;
@@ -72,11 +77,29 @@ class StatusShow extends React.Component<Props> {
             title={<Translation>Applied Resources</Translation>}
           >
             <Table locale={locale.Table} dataSource={applicationStatus?.appliedResources}>
-              <Table.Column dataIndex="kind" title={<Translation>Kind</Translation>} />
+              <Table.Column
+                width="150px"
+                dataIndex="kind"
+                title={<Translation>Kind</Translation>}
+              />
               <Table.Column dataIndex="apiVersion" title={<Translation>APIVersion</Translation>} />
-              <Table.Column dataIndex="cluster" title={<Translation>Cluster</Translation>} />
+              <Table.Column
+                dataIndex="cluster"
+                title={<Translation>Cluster</Translation>}
+                width="150px"
+                cell={(v: string) => {
+                  if (!v) {
+                    return <Link to="/clusters">Local</Link>;
+                  }
+                  return <Link to="/clusters">{v}</Link>;
+                }}
+              />
               <Table.Column dataIndex="name" title={<Translation>Name</Translation>} />
-              <Table.Column dataIndex="namespace" title={<Translation>Namespace</Translation>} />
+              <Table.Column
+                width="100px"
+                dataIndex="namespace"
+                title={<Translation>Namespace</Translation>}
+              />
             </Table>
           </Card>
           <If condition={applicationStatus?.conditions}>
@@ -87,7 +110,20 @@ class StatusShow extends React.Component<Props> {
             >
               <Step current={getCurrent(applicationStatus?.conditions)}>
                 {allConditions.map((condition) => {
-                  return <Step.Item title={condition.type} content={condition.reason} />;
+                  const content = condition.message ? (
+                    <Balloon
+                      trigger={
+                        <span style={{ cursor: 'pointer', color: '#1b58f4' }}>
+                          {condition.reason}
+                        </span>
+                      }
+                    >
+                      {condition.message}
+                    </Balloon>
+                  ) : (
+                    condition.reason
+                  );
+                  return <Step.Item title={condition.type} content={content} />;
                 })}
               </Step>
             </Card>
@@ -107,7 +143,7 @@ class StatusShow extends React.Component<Props> {
                 <Table.Column
                   align="left"
                   dataIndex="name"
-                  width="150px"
+                  width="200px"
                   title={<Translation>Name</Translation>}
                 />
                 <Table.Column
