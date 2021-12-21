@@ -28,8 +28,8 @@ export default {
     },
     *getAddonRegistrysList(action, { call, put }) {
       const result = yield call(getAddonRegistrysList, action.payload);
-      const registrys = result ? result.registrys : [];
-      yield put({ type: 'updateAddonRegistrysList', payload: registrys || [] });
+      const registries = result ? result.registries : [];
+      yield put({ type: 'updateAddonRegistrysList', payload: registries || [] });
     },
   },
 };

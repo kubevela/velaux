@@ -8,7 +8,7 @@ type Props = {
   t: (key: string) => {};
   dispatch: ({}) => {};
   listFunction: ({}) => {};
-  registrys?: [];
+  registries?: [];
 };
 
 type State = {
@@ -51,7 +51,7 @@ class SelectSearch extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { Option } = Select;
-    const { t, registrys } = this.props;
+    const { t, registries } = this.props;
     const queryPlacehole = t('Search by name and description.').toString();
     const { registryValue, inputValue } = this.state;
 
@@ -69,7 +69,7 @@ class SelectSearch extends React.Component<Props, State> {
             <Option value="">
               <Translation>All</Translation>
             </Option>
-            {registrys?.map((item: any) => {
+            {registries?.map((item: any) => {
               return (
                 <Option key={item.name} value={item.name}>
                   {item.name}
