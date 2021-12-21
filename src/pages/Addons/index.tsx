@@ -88,7 +88,7 @@ class Addons extends React.Component<Props, State> {
         />
         <SelectSearch
           dispatch={dispatch}
-          registrys={registryList}
+          registries={registryList}
           listFunction={this.getAddonsList}
         />
         <Loading visible={isLoading} style={{ width: '100%' }}>
@@ -110,7 +110,7 @@ class Addons extends React.Component<Props, State> {
               this.setState({ showRegistryManage: false });
             }}
             syncRegistrys={this.getAddonRegistrysList}
-            registrys={registryList}
+            registries={registryList}
             dispatch={dispatch}
           />
         </If>

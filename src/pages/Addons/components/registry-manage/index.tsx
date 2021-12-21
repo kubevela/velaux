@@ -14,7 +14,7 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   syncRegistrys: () => void;
-  registrys: [];
+  registries: [];
   dispatch: ({}) => {};
 };
 
@@ -96,7 +96,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
   };
 
   render() {
-    const { visible, registrys } = this.props;
+    const { visible, registries } = this.props;
     const { showAdd, selectType } = this.state;
     const init = this.field.init;
     const renderOper = (name: string) => {
@@ -116,7 +116,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
         </a>
       );
     };
-    const registryDataSorce = registrys.map((item: AddonRegistry) => {
+    const registryDataSorce = registries.map((item: AddonRegistry) => {
       const reitem = {
         name: item.name,
         url: '',
