@@ -257,3 +257,8 @@ export function terminateApplicationWorkflowRecord(params: {
     {},
   ).then((res) => res);
 }
+
+export function updateApplication(params: any) {
+  const _url = isMock ? `${updateApplicationEnv_mock}` : `${application}/${params.name}`;
+  return put(_url, params).then((res) => res);
+}

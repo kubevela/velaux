@@ -5,8 +5,17 @@ import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
 import GeneralConfig from '../GeneralConfig';
 import type { Rule } from '@alifd/field';
-import { detailComponentDefinition, createApplication } from '../../../../api/application';
-import type { DefinitionDetail, EnvBinding } from '../../../../interface/application';
+import {
+  detailComponentDefinition,
+  createApplication,
+  updateApplication,
+} from '../../../../api/application';
+import type {
+  DefinitionDetail,
+  EnvBinding,
+  ApplicationBase,
+  ApplicationComponent,
+} from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import EnvPlan from '../../../../components/EnvPlan';
@@ -21,6 +30,10 @@ import locale from '../../../../utils/locale';
 
 type Props = {
   visible: boolean;
+  isEdit: boolean;
+  editItem: ApplicationBase;
+  editEnvbinding: EnvBinding[];
+  editComponents: ApplicationComponent | undefined;
   componentDefinitions: [];
   projects?: Project[];
   syncProjectList: () => void;
@@ -71,13 +84,36 @@ class AppDialog extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const { projects } = this.props;
+    const {
+      projects,
+      isEdit,
+      editItem,
+      editEnvbinding = [],
+      editComponents = { type: '', properties: '' },
+    } = this.props;
     if (projects && projects.length > 0) {
       this.field.setValue('project', projects[0].name);
       this.setState({ project: projects[0].name }, () => {
         this.loadDeliveryTarget();
       });
     }
+
+    if (isEdit && editItem) {
+      const { name = '', alias = '', description = '' } = editItem;
+      this.field.setValues({
+        name,
+        alias,
+        description,
+        project: editItem.project?.alias || editItem.project?.name,
+        componentType: editComponents.type,
+        properties: editComponents.properties,
+      });
+
+      this.setState({
+        envBinding: editEnvbinding || [],
+      });
+    }
+
     this.getClusterList();
   }
 
@@ -114,12 +150,22 @@ class AppDialog extends React.Component<Props, State> {
           properties: JSON.stringify(properties),
         },
       };
-      createApplication(params).then((res) => {
-        if (res) {
-          Message.success(<Translation>create application success</Translation>);
-          this.props.onOK(name);
-        }
-      });
+      const { isEdit } = this.props;
+      if (isEdit) {
+        updateApplication(params).then((res) => {
+          if (res) {
+            Message.success(<Translation>update application success</Translation>);
+            this.props.onOK(name);
+          }
+        });
+      } else {
+        createApplication(params).then((res) => {
+          if (res) {
+            Message.success(<Translation>create application success</Translation>);
+            this.props.onOK(name);
+          }
+        });
+      }
     });
   };
 
@@ -241,16 +287,18 @@ class AppDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
 
-    const { onClose } = this.props;
+    const { onClose, isEdit } = this.props;
     const { visible, t, setVisible, dispatch, projects, clusterList } = this.props;
 
     const { envBinding, definitionDetail, dialogStats, targets } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
+
+    const title = isEdit ? 'Edit Application' : 'New Application';
     return (
       <DrawerWithFooter
-        title={<Translation>New Application</Translation>}
+        title={<Translation>{title}</Translation>}
         placement="right"
         width={800}
         onClose={onClose}
@@ -260,6 +308,7 @@ class AppDialog extends React.Component<Props, State> {
           <If condition={dialogStats === 'isBasic'}>
             <GeneralConfig
               t={t}
+              isEdit={isEdit}
               visible={visible}
               setVisible={setVisible}
               dispatch={dispatch}

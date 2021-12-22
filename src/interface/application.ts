@@ -47,6 +47,7 @@ export interface ApplicationBase {
   createTime: string;
   href?: string;
   dashboardURL?: string;
+  project: Project;
 }
 
 export interface DefinitionDetail {

@@ -192,6 +192,7 @@ export function getAppCardList(data) {
       description: item.description,
       createTime: item.createTime,
       rules: item.rules,
+      project: item.project,
     };
     appContent.push(app);
   }

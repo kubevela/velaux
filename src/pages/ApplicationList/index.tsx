@@ -7,8 +7,18 @@ import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
 import '../../common.less';
 import { If } from 'tsx-control-statements/components';
-import { deleteApplicationPlan, getComponentdefinitions } from '../../api/application';
-import type { ApplicationBase } from '../../interface/application';
+import {
+  deleteApplicationPlan,
+  getComponentdefinitions,
+  getAppliationComponent,
+  getApplicationEnvbinding,
+  getApplicationComponents,
+} from '../../api/application';
+import type {
+  ApplicationBase,
+  ApplicationComponent,
+  EnvBinding,
+} from '../../interface/application';
 import type { Project } from '../../interface/project';
 
 type Props = {
@@ -22,6 +32,10 @@ type State = {
   showAddApplication: boolean;
   componentDefinitions: [];
   isLoading: boolean;
+  isEdit: boolean;
+  editItem: ApplicationBase;
+  editComponents?: ApplicationComponent;
+  envbinding: EnvBinding[];
 };
 
 @connect((store: any) => {
@@ -34,6 +48,17 @@ class Application extends Component<Props, State> {
       showAddApplication: false,
       componentDefinitions: [],
       isLoading: false,
+      isEdit: false,
+      editItem: {
+        name: '',
+        alias: '',
+        icon: '',
+        description: '',
+        createTime: '',
+        project: { name: '', namespace: '' },
+      },
+      editComponents: { name: '', type: '', properties: '' },
+      envbinding: [],
     };
   }
 
@@ -42,6 +67,43 @@ class Application extends Component<Props, State> {
     this.getProjectList();
     this.getDeliveryTarget();
     this.onGetComponentdefinitions();
+  }
+
+  loadApplicationEnvbinding = async (appName: string) => {
+    if (appName) {
+      getApplicationEnvbinding({ appName }).then((res) => {
+        if (res) {
+          this.setState({
+            envbinding: res && res.envBindings,
+          });
+        }
+      });
+    }
+  };
+
+  loadApplicationComponents = async (appName: string) => {
+    getApplicationComponents({ appName, envName: '' }).then((res) => {
+      if (res) {
+        const componentName = (Array.isArray(res.components) && res.components[0]?.name) || '';
+        this.onGetAppliationComponent(appName, componentName);
+      }
+    });
+  };
+
+  onGetAppliationComponent(appName: string, componentName: string) {
+    const params = {
+      appName,
+      componentName,
+    };
+    getAppliationComponent(params).then((res: any) => {
+      if (res) {
+        this.setState({
+          showAddApplication: true,
+          isEdit: true,
+          editComponents: res,
+        });
+      }
+    });
   }
 
   getApplications = async (params: any) => {
@@ -93,13 +155,24 @@ class Application extends Component<Props, State> {
   closeAddApplication = () => {
     this.setState({
       showAddApplication: false,
+      isEdit: false,
     });
     this.getApplications({});
   };
 
+  editAppPlan = (editItem: ApplicationBase) => {
+    this.loadApplicationEnvbinding(editItem.name);
+    this.loadApplicationComponents(editItem.name);
+    this.setState({
+      editItem,
+    });
+  };
+
   render() {
     const { applicationList, projects, deliveryTargets, dispatch } = this.props;
-    const { showAddApplication, componentDefinitions, isLoading } = this.state;
+    const { showAddApplication, componentDefinitions, isLoading, envbinding, editComponents } =
+      this.state;
+
     return (
       <div>
         <Title
@@ -123,7 +196,9 @@ class Application extends Component<Props, State> {
         <Loading visible={isLoading} fullScreen>
           <CardContend
             applications={applicationList}
-            editAppPlan={() => {}}
+            editAppPlan={(item) => {
+              this.editAppPlan(item);
+            }}
             deleteAppPlan={this.onDeleteAppPlan}
           />
         </Loading>
@@ -131,6 +206,10 @@ class Application extends Component<Props, State> {
         <If condition={showAddApplication}>
           <AppDialog
             visible={showAddApplication}
+            isEdit={this.state.isEdit}
+            editItem={this.state.editItem}
+            editEnvbinding={envbinding}
+            editComponents={editComponents}
             syncProjectList={this.getProjectList}
             projects={projects}
             componentDefinitions={componentDefinitions}

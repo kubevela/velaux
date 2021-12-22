@@ -19,7 +19,7 @@ type State = {
 
 type Props = {
   applications: ApplicationBase[];
-  editAppPlan: (name: string) => void;
+  editAppPlan: (item: ApplicationBase) => void;
   deleteAppPlan: (name: string) => void;
 };
 
@@ -45,8 +45,8 @@ class CardContent extends React.Component<Props, State> {
     this.props.deleteAppPlan(name);
   };
 
-  onEditAppPlan = (name: string) => {
-    this.props.editAppPlan(name);
+  onEditAppPlan = (item: ApplicationBase) => {
+    this.props.editAppPlan(item);
   };
   render() {
     const { Row, Col } = Grid;
@@ -108,9 +108,8 @@ class CardContent extends React.Component<Props, State> {
                       >
                         <Menu>
                           <Menu.Item
-                            disabled
                             onClick={() => {
-                              this.onEditAppPlan(name);
+                              this.onEditAppPlan(item);
                             }}
                           >
                             <Translation>Edit</Translation>

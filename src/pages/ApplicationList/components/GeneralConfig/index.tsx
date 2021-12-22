@@ -9,6 +9,7 @@ import type { Project } from '../../../../interface/project';
 
 type Props = {
   visible: boolean;
+  isEdit: boolean;
   field: Field;
   projects?: Project[];
   syncProjectList: () => void;
@@ -62,6 +63,7 @@ class GeneralConfig extends React.Component<Props, State> {
                 <Input
                   name="name"
                   maxLength={32}
+                  disabled={this.props.isEdit || false}
                   {...init('name', {
                     rules: [
                       {
