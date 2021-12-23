@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Icon, Field, Button, SplitButton } from '@b-design/ui';
+import { Form, Icon, Field, Button } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import type { UIParam, GroupOption } from '../../interface/application';
 import UISchema from '../../components/UISchema';
@@ -216,17 +216,19 @@ class Structs extends React.Component<Props, State> {
               Add
             </Button>
           </If>
+
           <If condition={parameterGroupOption.length !== 0}>
-            <SplitButton label="Add" type="secondary" autoWidth={false}>
+            <Button.Group>
               {parameterGroupOption?.map((item) => (
-                <SplitButton.Item
+                <Button
+                  type="secondary"
                   key={item.keys.join(',')}
                   onClick={() => this.addStructPlanItem(item)}
                 >
                   {item.label || item.keys.join(':')}
-                </SplitButton.Item>
+                </Button>
               ))}
-            </SplitButton>
+            </Button.Group>
           </If>
         </div>
       </div>
