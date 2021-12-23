@@ -91,26 +91,33 @@ class AppDialog extends React.Component<Props, State> {
       editEnvbinding = [],
       editComponents = { type: '', properties: '' },
     } = this.props;
-    if (projects && projects.length > 0) {
-      this.field.setValue('project', projects[0].name);
-      this.setState({ project: projects[0].name }, () => {
-        this.loadDeliveryTarget();
-      });
-    }
 
     if (isEdit && editItem) {
-      const { name = '', alias = '', description = '' } = editItem;
+      const {
+        name = '',
+        alias = '',
+        description = '',
+        project = { alias: '', name: '' },
+      } = editItem;
       this.field.setValues({
         name,
         alias,
         description,
-        project: editItem.project?.alias || editItem.project?.name,
+        project: project.alias || project.name,
         componentType: editComponents.type,
         properties: editComponents.properties,
       });
 
       this.setState({
         envBinding: editEnvbinding || [],
+      });
+      this.setState({ project: project.name }, () => {
+        this.loadDeliveryTarget();
+      });
+    } else if (projects && projects.length > 0) {
+      this.field.setValue('project', projects[0].name);
+      this.setState({ project: projects[0].name }, () => {
+        this.loadDeliveryTarget();
       });
     }
 
