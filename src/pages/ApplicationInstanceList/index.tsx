@@ -630,6 +630,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         <If condition={showStatus}>
           <StatusShow
             loading={loading}
+            title={<Translation>Application Status</Translation>}
             applicationStatus={applicationStatus}
             loadStatusDetail={this.loadStatusDetail}
             onClose={this.onStatusClose}
