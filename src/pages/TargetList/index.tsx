@@ -4,18 +4,17 @@ import { connect } from 'dva';
 import { Pagination } from '@b-design/ui';
 import ListTitle from '../../components/ListTitle';
 import TableList from './components/List';
-import DeliveryDialog from './components/TargetDialog';
-import type { DeliveryTarget } from '../../interface/deliveryTarget';
+import TargetDialog from './components/TargetDialog';
+import type { Target } from '../../interface/target';
 import './index.less';
 import type { Cluster } from '../../interface/cluster';
 import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 
 type Props = {
-  deliveryTargets?: [];
+  targets?: [];
   total?: number;
   clusterList?: Cluster[];
-  projects?: [];
   dispatch: ({}) => void;
   t: (key: string) => string;
 };
@@ -28,13 +27,13 @@ type State = {
   editTargetName: string;
   visibleDelivery: boolean;
   isEdit: boolean;
-  deliveryTargetItem?: DeliveryTarget;
+  targetItem?: Target;
 };
 
 @connect((store: any) => {
-  return { ...store.deliveryTarget, ...store.application, ...store.clusters };
+  return { ...store.target, ...store.clusters };
 })
-class DeliveryTargetList extends React.Component<Props, State> {
+class targetList extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -49,15 +48,15 @@ class DeliveryTargetList extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.getDeliveryTargetList();
+    this.getTargetList();
     this.getClusterList();
     this.getProjectList();
   }
 
-  getDeliveryTargetList = async () => {
+  getTargetList = async () => {
     const { page, pageSize, query } = this.state;
     this.props.dispatch({
-      type: 'deliveryTarget/listDeliveryTarget',
+      type: 'target/listTargets',
       payload: {
         query,
         page,
@@ -79,7 +78,7 @@ class DeliveryTargetList extends React.Component<Props, State> {
     });
   };
 
-  updateDeliveryTargetList = () => {
+  updatetargetList = () => {
     this.setState(
       {
         query: '',
@@ -87,16 +86,16 @@ class DeliveryTargetList extends React.Component<Props, State> {
         pageSize: 10,
       },
       () => {
-        this.getDeliveryTargetList();
+        this.getTargetList();
       },
     );
   };
 
-  changeISEdit = (isEdit: boolean, record: DeliveryTarget) => {
+  changeISEdit = (isEdit: boolean, record: Target) => {
     this.setState({
       isEdit,
       visibleDelivery: true,
-      deliveryTargetItem: record,
+      targetItem: record,
     });
   };
 
@@ -105,7 +104,7 @@ class DeliveryTargetList extends React.Component<Props, State> {
   };
 
   onOk = () => {
-    this.getDeliveryTargetList();
+    this.getTargetList();
     this.setState({
       isEdit: false,
     });
@@ -119,8 +118,8 @@ class DeliveryTargetList extends React.Component<Props, State> {
   };
 
   render() {
-    const { t, clusterList, deliveryTargets, total, projects } = this.props;
-    const { visibleDelivery, isEdit, deliveryTargetItem } = this.state;
+    const { t, clusterList, targets, total } = this.props;
+    const { visibleDelivery, isEdit, targetItem } = this.state;
     return (
       <div>
         <ListTitle
@@ -128,14 +127,14 @@ class DeliveryTargetList extends React.Component<Props, State> {
           subTitle="Define the targets that applications would deliver to"
           addButtonTitle="New Target"
           addButtonClick={() => {
-            this.setState({ visibleDelivery: true, deliveryTargetItem: undefined });
+            this.setState({ visibleDelivery: true, targetItem: undefined });
           }}
         />
 
         <TableList
-          list={deliveryTargets}
-          updateDeliveryTargetList={this.updateDeliveryTargetList}
-          changeISEdit={(is: boolean, record: DeliveryTarget) => {
+          list={targets}
+          updatetargetList={this.updatetargetList}
+          changeISEdit={(is: boolean, record: Target) => {
             this.changeISEdit(is, record);
           }}
         />
@@ -151,14 +150,12 @@ class DeliveryTargetList extends React.Component<Props, State> {
         />
 
         <If condition={visibleDelivery}>
-          <DeliveryDialog
+          <TargetDialog
             t={t}
             visible={visibleDelivery}
             clusterList={clusterList || []}
-            syncProjectList={this.getProjectList}
-            projects={projects || []}
             isEdit={isEdit}
-            deliveryTargetItem={deliveryTargetItem}
+            targetItem={targetItem}
             onClose={this.onClose}
             onOK={this.onOk}
           />
@@ -168,4 +165,4 @@ class DeliveryTargetList extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(DeliveryTargetList);
+export default withTranslation()(targetList);

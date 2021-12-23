@@ -5,4 +5,5 @@ export const addonRegistrys = `/api/v1/addon_registries`;
 export const cluster = '/api/v1/clusters';
 export const workflows = '/api/v1/applications';
 export const project = `/api/v1/projects`;
-export const target = `/api/v1/targets`;
+export const targetURL = `/api/v1/targets`;
+export const envURL = `/api/v1/envs`;

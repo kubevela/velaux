@@ -199,10 +199,7 @@ class ApplicationHeader extends Component<Props, State> {
                   <NumItem number={statistics?.envCount} title={'Env Count'} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem
-                    number={statistics?.deliveryTargetCount}
-                    title={'DeliveryTarget Count'}
-                  />
+                  <NumItem number={statistics?.targetCount} title={'target Count'} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem number={statistics?.revisonCount} title={'Revision Count'} />

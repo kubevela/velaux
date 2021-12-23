@@ -20,6 +20,7 @@ import UISchema from '../../../../components/UISchema';
 import type { Addon } from '../../../../interface/addon';
 import locale from '../../../../utils/locale';
 import StatusShow from '../../../../components/StatusShow';
+import type { ApplicationStatus } from '../../../../interface/application';
 
 type Props = {
   addonName: string;
@@ -35,7 +36,7 @@ type State = {
   statusLoading: boolean;
   upgradeLoading: boolean;
   args?: any;
-  addonsStatus: any;
+  addonsStatus?: ApplicationStatus;
   showStatusVisible: boolean;
 };
 
@@ -54,7 +55,6 @@ class AddonDetailDialog extends React.Component<Props, State> {
       loading: true,
       statusLoading: true,
       upgradeLoading: false,
-      addonsStatus: {},
       showStatusVisible: false,
     };
     this.form = new Field(this);
@@ -245,7 +245,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
           extButtons={buttons}
         >
           <Loading visible={loading} style={{ width: '100%' }}>
-            <If condition={addonsStatus}>
+            <If condition={addonsStatus && addonsStatus.status}>
               <Message
                 type={getAppStatusShowType(addonsStatus?.status)}
                 size="medium"

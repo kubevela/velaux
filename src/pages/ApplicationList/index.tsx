@@ -15,7 +15,8 @@ type Props = {
   dispatch: ({}) => {};
   applicationList: ApplicationBase[];
   projects?: Project[];
-  deliveryTargets?: [];
+  targets?: [];
+  envs?: [];
   history: any;
 };
 type State = {
@@ -25,7 +26,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.application, ...store.deliveryTarget, ...store.clusters };
+  return { ...store.application, ...store.target, ...store.clusters, ...store.env };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -40,7 +41,8 @@ class Application extends Component<Props, State> {
   componentDidMount() {
     this.getApplications({});
     this.getProjectList();
-    this.getDeliveryTarget();
+    this.getTargets();
+    this.getEnvs();
     this.onGetComponentdefinitions();
   }
 
@@ -64,9 +66,16 @@ class Application extends Component<Props, State> {
     });
   };
 
-  getDeliveryTarget = async () => {
+  getTargets = async () => {
     this.props.dispatch({
-      type: 'deliveryTarget/listTargets',
+      type: 'target/listTargets',
+      payload: {},
+    });
+  };
+
+  getEnvs = async () => {
+    this.props.dispatch({
+      type: 'env/listEnvs',
       payload: {},
     });
   };
@@ -98,7 +107,7 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList, projects, deliveryTargets, dispatch } = this.props;
+    const { applicationList, projects, targets, dispatch, envs } = this.props;
     const { showAddApplication, componentDefinitions, isLoading } = this.state;
     return (
       <div>
@@ -113,8 +122,9 @@ class Application extends Component<Props, State> {
 
         <SelectSearch
           projects={projects}
-          deliveryTargetList={deliveryTargets}
+          targetList={targets}
           dispatch={dispatch}
+          envs={envs}
           getApplications={(params: any) => {
             this.getApplications(params);
           }}

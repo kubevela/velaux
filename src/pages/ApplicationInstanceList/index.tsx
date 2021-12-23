@@ -12,7 +12,7 @@ import Translation from '../../components/Translation';
 import type { PodBase, CloudResource, Configuration, Service } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
 import Header from './components/Hearder';
-import type { DeliveryTarget } from '../../interface/deliveryTarget';
+import type { Target } from '../../interface/target';
 import { Link } from 'dva/router';
 import { momentDate } from '../../utils/common';
 import { If } from 'tsx-control-statements/components';
@@ -40,7 +40,7 @@ type State = {
   cloudResourceList?: CloudResource[];
   envName: string;
   loading: boolean;
-  target?: DeliveryTarget;
+  target?: Target;
   openRowKeys: [];
   cloudInstance?: CloudInstance[];
   showStatus: boolean;
@@ -291,7 +291,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       }
     };
     const targets = this.getTargets();
-    const targetMap = new Map<string, DeliveryTarget>();
+    const targetMap = new Map<string, Target>();
     targets?.map((item) => {
       targetMap.set(item.cluster?.clusterName + '-' + item.cluster?.namespace, item);
     });
@@ -401,7 +401,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const { envbinding, match } = this.props;
     const env = envbinding.filter((item) => item.name == match.params.envName);
     if (env.length > 0) {
-      return env[0].deliveryTargets;
+      return env[0].targets;
     }
     return [];
   };

@@ -299,7 +299,6 @@ class UISchema extends Component<Props, State> {
           />,
         );
       case 'SecretSelect':
-        console.log(this.props.value);
         return (
           <Form.Item
             labelAlign={inline ? 'inset' : 'left'}
