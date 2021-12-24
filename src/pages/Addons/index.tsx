@@ -6,8 +6,9 @@ import SelectSearch from './components/search/index';
 import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
 import RegistryManageDialog from './components/registry-manage/index';
-import Img from '../../assets/plugins.png';
 import { If } from 'tsx-control-statements/components';
+import { getEnabledAddons } from '../../api/addons';
+import type { AddonBaseStatus } from '../../interface/addon';
 
 type Props = {
   dispatch: ({}) => {};
@@ -20,6 +21,7 @@ type State = {
   showAddonDetail: boolean;
   addonName: string;
   showRegistryManage: boolean;
+  enabledAddons?: AddonBaseStatus[];
 };
 
 @connect((store: any) => {
@@ -38,12 +40,21 @@ class Addons extends React.Component<Props, State> {
   componentDidMount() {
     this.getAddonsList();
     this.getAddonRegistrysList();
+    this.getEnabledAddon();
   }
 
   getAddonsList = async (params = {}) => {
     this.props.dispatch({
       type: 'addons/getAddonsList',
       payload: params,
+    });
+  };
+
+  getEnabledAddon = async () => {
+    getEnabledAddons({}).then((res) => {
+      if (res) {
+        this.setState({ enabledAddons: res.enabledAddons });
+      }
     });
   };
 
@@ -75,7 +86,7 @@ class Addons extends React.Component<Props, State> {
     const { addonsList = [], registryList = [], dispatch, loading } = this.props;
 
     const isLoading = loading.models.addons;
-    const { showAddonDetail, addonName, showRegistryManage } = this.state;
+    const { showAddonDetail, addonName, showRegistryManage, enabledAddons } = this.state;
     return (
       <div>
         <Title
@@ -92,7 +103,11 @@ class Addons extends React.Component<Props, State> {
           listFunction={this.getAddonsList}
         />
         <Loading visible={isLoading} style={{ width: '100%' }}>
-          <CardContend cardImg={Img} addonLists={addonsList} clickAddon={this.openAddonDetail} />
+          <CardContend
+            addonLists={addonsList}
+            enabledAddons={enabledAddons}
+            clickAddon={this.openAddonDetail}
+          />
         </Loading>
         <If condition={showAddonDetail}>
           <AddonDetailDialog

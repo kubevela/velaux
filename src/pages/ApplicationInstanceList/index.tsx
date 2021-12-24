@@ -127,8 +127,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     ) {
       const conponentName = applicationStatus.services[0].name;
       const param = {
-        appName: envs[0].appDeployName || appName + '-' + envName,
-        appNs: applicationDetail.project?.namespace || '',
+        appName: envs[0].appDeployName || appName,
+        appNs: envs[0].appDeployNamespace,
         name: conponentName,
         cluster: '',
         clusterNs: '',
@@ -233,8 +233,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       const conponentName = applicationStatus.services[0].name;
       if (applicationDetail.applicationType == 'common') {
         const param = {
-          appName: envs[0].appDeployName || appName + '-' + envName,
-          appNs: applicationDetail.project?.namespace || '',
+          appName: envs[0].appDeployName || appName,
+          appNs: envs[0].appDeployNamespace,
           name: conponentName,
           cluster: '',
           clusterNs: '',
@@ -260,8 +260,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           });
       } else if (applicationDetail?.applicationType == 'cloud') {
         const param = {
-          appName: envs[0].appDeployName || appName + '-' + envName,
-          appNs: applicationDetail.project?.namespace || '',
+          appName: envs[0].appDeployName || appName,
+          appNs: envs[0].appDeployNamespace,
         };
         this.setState({ loading: true });
         listCloudResources(param)

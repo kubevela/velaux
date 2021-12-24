@@ -176,10 +176,7 @@ class DeliveryDialog extends React.Component<Props, State> {
         if (re && re.list) {
           const namespaces: NamespaceItem[] = [];
           re.list.map((item: any) => {
-            if (
-              item.metadata.annotations &&
-              item.metadata.annotations['namespace.oam.dev/target']
-            ) {
+            if (item.metadata.labels && item.metadata.labels['namespace.oam.dev/target']) {
               return;
             }
             namespaces.push({ label: item.metadata.name, value: item.metadata.name });

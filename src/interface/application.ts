@@ -26,7 +26,8 @@ export interface EnvBinding {
   targets?: Target[];
   createTime?: string;
   updateTime?: string;
-  appDeployName?: string;
+  appDeployName: string;
+  appDeployNamespace: string;
 }
 
 export interface WorkflowStatus {

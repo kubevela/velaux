@@ -63,7 +63,7 @@ export function listCloudResourceSecrets(params: { appNs: string; appName?: stri
 
 export function listApplicationService(params: {
   appNs: string;
-  appName?: string;
+  appName: string;
   cluster?: string;
   clusterNs?: string;
 }) {

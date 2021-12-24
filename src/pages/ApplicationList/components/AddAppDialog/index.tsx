@@ -157,22 +157,22 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   changeStatus = (value: string) => {
-    const values: { componentType: string; project: string } = this.field.getValues();
-    const { componentType, project } = values;
+    const values: { componentType: string; envBindings: string[] } = this.field.getValues();
+    const { componentType, envBindings } = values;
     if (value === 'isCreateComponent') {
       this.field.validateCallback(
-        ['name', 'alias', 'description', 'project', 'componentType'],
+        ['name', 'alias', 'description', 'project', 'componentType', 'envBindings'],
         (error: any) => {
           if (error) {
             return;
           }
           const { dispatch } = this.props;
-          if (dispatch) {
-            const { projects } = this.props;
+          if (Array.isArray(envBindings) && envBindings.length > 0) {
+            const { envs } = this.state;
             let namespace = '';
-            projects?.map((p) => {
-              if (p.name == project) {
-                namespace = p.namespace;
+            envs?.map((env: Env) => {
+              if ((envBindings[0] = env.name)) {
+                namespace = env.namespace;
               }
             });
             dispatch({

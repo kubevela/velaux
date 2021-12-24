@@ -36,3 +36,8 @@ export interface AddonRegistry {
   git: RegistryGitSource;
   oss: RegistryOssSource;
 }
+
+export interface AddonBaseStatus {
+  name: string;
+  phase: 'disabled' | 'enabled' | 'enabling' | 'suspend' | 'disabling';
+}

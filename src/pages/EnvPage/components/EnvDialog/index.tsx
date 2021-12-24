@@ -210,7 +210,6 @@ class EnvDialog extends React.Component<Props, State> {
                     {...init('namespace', {
                       rules: [
                         {
-                          required: true,
                           pattern: checkName,
                           message: 'Please enter a valid English name',
                         },

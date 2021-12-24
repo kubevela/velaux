@@ -44,6 +44,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
   timer?: number;
   readonly refreshTime = 1000;
   form: Field;
+  statusLoop: boolean;
   uiSchemaRef: React.RefObject<UISchema>;
   constructor(props: Props) {
     super(props);
@@ -59,6 +60,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
     };
     this.form = new Field(this);
     this.uiSchemaRef = React.createRef();
+    this.statusLoop = false;
   }
 
   componentDidMount() {
@@ -87,8 +89,10 @@ class AddonDetailDialog extends React.Component<Props, State> {
     getAddonsStatus({ name: this.props.addonName })
       .then((res) => {
         if (!res) return;
-        if (res.phase == 'enabling') {
+        if (res.phase == 'enabling' && !this.statusLoop) {
+          this.statusLoop = true;
           setTimeout(() => {
+            this.statusLoop = false;
             this.loadAddonStatus();
           }, 3000);
         }
