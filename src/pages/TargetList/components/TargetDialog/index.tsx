@@ -174,8 +174,15 @@ class DeliveryDialog extends React.Component<Props, State> {
     if (cluster) {
       listNamespaces({ cluster: cluster }).then((re) => {
         if (re && re.list) {
-          const namespaces = re.list.map((item: any) => {
-            return { label: item.metadata.name, value: item.metadata.name };
+          const namespaces: NamespaceItem[] = [];
+          re.list.map((item: any) => {
+            if (
+              item.metadata.annotations &&
+              item.metadata.annotations['namespace.oam.dev/target']
+            ) {
+              return;
+            }
+            namespaces.push({ label: item.metadata.name, value: item.metadata.name });
           });
           this.setState({ namespaces: namespaces });
         }
@@ -279,6 +286,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                   <Select
                     locale={locale.Select}
                     className="select"
+                    disabled={isEdit}
                     placeholder={t('Please select').toString()}
                     {...init(`clusterName`, {
                       rules: [
@@ -303,6 +311,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
+                    disabled={isEdit}
                     namespaces={namespaces}
                     loadNamespaces={this.loadNamespaces}
                     cluster={cluster}

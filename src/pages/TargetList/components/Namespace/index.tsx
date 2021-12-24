@@ -12,6 +12,7 @@ type Props = {
   value?: any;
   loadNamespaces: (cluster: string) => void;
   disableNew?: boolean;
+  disabled?: boolean;
 };
 
 export interface NamespaceItem {
@@ -71,7 +72,7 @@ class Namespace extends React.Component<Props, State> {
   };
 
   render() {
-    const { disableNew, onChange, namespaces, value } = this.props;
+    const { disableNew, onChange, namespaces, value, disabled } = this.props;
     const { showNameSpaceInput, loading } = this.state;
     return (
       <div>
@@ -81,6 +82,7 @@ class Namespace extends React.Component<Props, State> {
               locale={locale.Select}
               className="cluster-params-input"
               mode="single"
+              disabled={disabled}
               dataSource={namespaces}
               onChange={onChange}
               placeholder={''}
@@ -90,6 +92,7 @@ class Namespace extends React.Component<Props, State> {
               <Button
                 className="cluster-option-btn"
                 type="secondary"
+                disabled={disabled}
                 onClick={this.openNamespaceInput}
               >
                 <Translation>New</Translation>
