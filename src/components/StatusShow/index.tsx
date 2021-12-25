@@ -8,6 +8,7 @@ import { Link } from 'dva/router';
 
 type Props = {
   loading: boolean;
+  title: JSX.Element;
   applicationStatus?: ApplicationStatus;
   onClose: () => void;
   loadStatusDetail: () => void;
@@ -15,7 +16,7 @@ type Props = {
 
 class StatusShow extends React.Component<Props> {
   render() {
-    const { applicationStatus, onClose, loading } = this.props;
+    const { applicationStatus, onClose, loading, title } = this.props;
     const allConditions: Condition[] = [
       { type: 'Parsed', status: 'False' },
       { type: 'Revision', status: 'False' },
@@ -52,7 +53,7 @@ class StatusShow extends React.Component<Props> {
         locale={locale.Dialog}
         visible={true}
         className={'commonDialog'}
-        title={<Translation>Application Status</Translation>}
+        title={title}
         autoFocus={true}
         isFullScreen={true}
         style={{ width: '800px' }}

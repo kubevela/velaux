@@ -378,6 +378,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
         <If condition={showStatusVisible}>
           <StatusShow
             loading={statusLoading}
+            title={<Translation>Addon Status</Translation>}
             applicationStatus={addonsStatus}
             loadStatusDetail={this.loadAddonStatus}
             onClose={this.onStatusClose}
