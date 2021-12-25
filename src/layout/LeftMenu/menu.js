@@ -2,13 +2,15 @@ import {
   isApplicationPath,
   isClustersPath,
   isAddonsPath,
-  isDeliveryTarget,
+  isTargetURL,
+  isEnvPath,
 } from '../../utils/common';
 export function getLeftSider(pathname) {
   const isApplication = isApplicationPath(pathname);
   const isCluster = isClustersPath(pathname);
   const isAddons = isAddonsPath(pathname);
-  const isDeliveryTargetURL = isDeliveryTarget(pathname);
+  const isTarget = isTargetURL(pathname);
+  const isEnv = isEnvPath(pathname);
   return [
     {
       navName: 'Continuous Delivery',
@@ -20,21 +22,27 @@ export function getLeftSider(pathname) {
           navName: 'Applications',
         },
         {
-          className: isDeliveryTargetURL,
-          link: '/targets',
-          iconType: 'box',
-          navName: 'Targets',
+          className: isEnv,
+          link: '/envs',
+          iconType: 'Directory-tree',
+          navName: 'Envs',
         },
       ],
     },
     {
-      navName: 'Integration',
+      navName: 'Resources',
       children: [
         {
           className: isCluster,
           link: '/clusters',
-          iconType: 'Directory-tree',
+          iconType: 'clouddownload',
           navName: 'Clusters',
+        },
+        {
+          className: isTarget,
+          link: '/targets',
+          iconType: 'box',
+          navName: 'Targets',
         },
       ],
     },

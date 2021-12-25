@@ -5,8 +5,8 @@ import './index.less';
 import type { EnvBinding } from '../../interface/application';
 import Translation from '../Translation';
 import { checkName } from '../../utils/common';
-import type { DeliveryTarget } from '../../interface/deliveryTarget';
-import TargetDialog from '../../pages/DeliveryTargetList/components/TargetDialog';
+import type { Target } from '../../interface/target';
+import TargetDialog from '../../pages/TargetList/components/TargetDialog';
 import type { Project } from '../../interface/project';
 import type { Cluster } from '../../interface/cluster';
 import locale from '../../utils/locale';
@@ -16,7 +16,7 @@ const { Col, Row } = Grid;
 type Props = {
   project?: string;
   value: EnvBinding[];
-  targetList?: DeliveryTarget[];
+  targetList?: Target[];
   envList?: EnvBinding[];
   t: (key: string) => string;
   onUpdateTarget: () => void;
@@ -232,8 +232,8 @@ export default class EnvPlan extends React.Component<Props, State> {
 
   render() {
     const { envList, showAddTarget } = this.state;
-    const { targetList, project, projects, clusterList } = this.props;
-    const dataSource = (targetList || []).map((item: DeliveryTarget) => ({
+    const { targetList, project, clusterList } = this.props;
+    const dataSource = (targetList || []).map((item: Target) => ({
       value: item.name,
       label: item.alias || item.name,
     }));
@@ -263,7 +263,7 @@ export default class EnvPlan extends React.Component<Props, State> {
         </div>
         <div className="env-plan-option">
           <Button onClick={this.addEnvPlanItem} type="secondary">
-            <Translation>New Environment</Translation>
+            <Translation>New Envbinding</Translation>
           </Button>
         </div>
         <If condition={showAddTarget}>
@@ -272,8 +272,6 @@ export default class EnvPlan extends React.Component<Props, State> {
               this.props.onUpdateTarget();
               this.setState({ showAddTarget: false });
             }}
-            syncProjectList={this.props.syncProjectList}
-            projects={projects || []}
             clusterList={clusterList || []}
             project={project}
             onClose={() => {

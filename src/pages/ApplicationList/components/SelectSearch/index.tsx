@@ -1,25 +1,28 @@
 import React from 'react';
-import { Button, Grid, Icon, Select, Input } from '@b-design/ui';
+import { Grid, Icon, Select, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import './index.less';
-import Translation from '../../../../components/Translation';
 import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
+import type { Target } from '../../../../interface/target';
+import type { Env } from '../../../../interface/env';
 
 const { Row, Col } = Grid;
 
 type Props = {
   t: (key: string) => {};
   dispatch: ({}) => {};
-  deliveryTargetList?: [];
+  targetList?: Target[];
   projects?: Project[];
+  envs?: Env[];
   getApplications: (params: any) => void;
 };
 
 type State = {
   projectValue: string;
-  deliveryTargetValue: string;
+  targetValue: string;
   inputValue: string;
+  envValue: string;
 };
 
 class SelectSearch extends React.Component<Props, State> {
@@ -27,15 +30,16 @@ class SelectSearch extends React.Component<Props, State> {
     super(props);
     this.state = {
       projectValue: '',
-      deliveryTargetValue: '',
+      targetValue: '',
+      envValue: '',
       inputValue: '',
     };
-    this.handleChangeProject = this.handleChangeProject.bind(this);
-    this.handleChangDeliveryTarget = this.handleChangDeliveryTarget.bind(this);
+    this.onChangeProject = this.onChangeProject.bind(this);
+    this.onChangeTarget = this.onChangeTarget.bind(this);
     this.handleChangName = this.handleChangName.bind(this);
   }
 
-  handleChangeProject(e: string) {
+  onChangeProject(e: string) {
     this.setState(
       {
         projectValue: e,
@@ -46,10 +50,10 @@ class SelectSearch extends React.Component<Props, State> {
     );
   }
 
-  handleChangDeliveryTarget(e: string) {
+  onChangeTarget(e: string) {
     this.setState(
       {
-        deliveryTargetValue: e,
+        targetValue: e,
       },
       () => {
         this.getApplications();
@@ -63,31 +67,58 @@ class SelectSearch extends React.Component<Props, State> {
     });
   }
 
+  onChangeEnv = (e: string) => {
+    this.setState(
+      {
+        envValue: e,
+      },
+      () => {
+        this.getApplications();
+      },
+    );
+  };
+
   handleClickSearch = () => {
     this.getApplications();
   };
 
   getApplications = async () => {
-    const { projectValue, deliveryTargetValue, inputValue } = this.state;
+    const { projectValue, targetValue, inputValue, envValue } = this.state;
     const params = {
       project: projectValue,
-      targetName: deliveryTargetValue,
+      targetName: targetValue,
       query: inputValue,
+      env: envValue,
     };
     this.props.getApplications(params);
   };
 
   render() {
-    const { deliveryTargetList, projects, t } = this.props;
-    const { projectValue, deliveryTargetValue, inputValue } = this.state;
+    const { targetList, projects, t, envs } = this.props;
+    const { projectValue, targetValue, inputValue, envValue } = this.state;
 
     const projectPlacehole = t('Search by project').toString();
-    const deliveryTargetPlacehole = t('Search by target').toString();
+    const targetPlacehole = t('Search by target').toString();
     const appPlacehole = t('Search by application name and description').toString();
+    const envPlacehole = t('Search by env').toString();
     const projectSource = projects?.map((item) => {
       return {
         label: item.alias || item.name,
         value: item.name,
+      };
+    });
+
+    const targetSource = targetList?.map((item) => {
+      return {
+        label: item.alias || item.name,
+        value: item.name,
+      };
+    });
+
+    const envSource = envs?.map((env) => {
+      return {
+        label: env.alias || env.name,
+        value: env.name,
       };
     });
     return (
@@ -97,7 +128,7 @@ class SelectSearch extends React.Component<Props, State> {
             locale={locale.Select}
             mode="single"
             size="large"
-            onChange={this.handleChangeProject}
+            onChange={this.onChangeProject}
             dataSource={projectSource}
             placeholder={projectPlacehole}
             className="item"
@@ -105,18 +136,30 @@ class SelectSearch extends React.Component<Props, State> {
             value={projectValue}
           />
         </Col>
-
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
             locale={locale.Select}
             mode="single"
             size="large"
-            onChange={this.handleChangDeliveryTarget}
-            dataSource={deliveryTargetList}
-            placeholder={deliveryTargetPlacehole}
+            onChange={this.onChangeEnv}
+            dataSource={envSource}
+            placeholder={envPlacehole}
             className="item"
             hasClear
-            value={deliveryTargetValue}
+            value={envValue}
+          />
+        </Col>
+        <Col span="6" style={{ padding: '0 8px' }}>
+          <Select
+            locale={locale.Select}
+            mode="single"
+            size="large"
+            onChange={this.onChangeTarget}
+            dataSource={targetSource}
+            placeholder={targetPlacehole}
+            className="item"
+            hasClear
+            value={targetValue}
           />
         </Col>
 
@@ -137,25 +180,6 @@ class SelectSearch extends React.Component<Props, State> {
             value={inputValue}
             className="item"
           />
-        </Col>
-        <Col span="3" style={{ paddingTop: '20px' }}>
-          <Button
-            type="secondary"
-            onClick={() => {
-              this.setState(
-                {
-                  projectValue: '',
-                  deliveryTargetValue: '',
-                  inputValue: '',
-                },
-                () => {
-                  this.handleClickSearch();
-                },
-              );
-            }}
-          >
-            <Translation>Clear</Translation>
-          </Button>
         </Col>
       </Row>
     );

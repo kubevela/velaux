@@ -91,7 +91,7 @@ class TabsContent extends Component<Props, State> {
                     this.setState({ visibleEnvPlan: true });
                   }}
                 >
-                  <Translation>New Environment</Translation>
+                  <Translation>New Envbinding</Translation>
                 </a>
               </div>
             </Col>
@@ -99,6 +99,7 @@ class TabsContent extends Component<Props, State> {
         </div>
         <If condition={visibleEnvPlan}>
           <AddAndEditEnvBind
+            envbinding={envbinding}
             onClose={() => {
               this.setState({ visibleEnvPlan: false });
             }}
