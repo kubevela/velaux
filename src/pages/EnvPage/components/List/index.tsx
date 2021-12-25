@@ -1,30 +1,34 @@
 import React, { Component } from 'react';
-import { Table, Message, Dialog } from '@b-design/ui';
+import { Table, Message, Dialog, Tag } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
-import { deleteDeliveryTarget } from '../../../../api/target';
 import './index.less';
-import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import locale from '../../../../utils/locale';
-import type { Project } from '../../../../interface/project';
+import type { Env, NameAlias } from '../../../../interface/env';
+import { deleteEnv } from '../../../../api/env';
+import { Link } from 'dva/router';
+const { Group: TagGroup } = Tag;
 
 type Props = {
-  list?: [];
-  updateDeliveryTargetList: () => void;
-  changeISEdit: (pararms: boolean, record: DeliveryTarget) => void;
+  list?: Env[];
+  updateEnvList: () => void;
+  changeISEdit: (pararms: boolean, record: Env) => void;
 };
 
 class TableList extends Component<Props> {
-  onDelete = (record: DeliveryTarget) => {
-    deleteDeliveryTarget({ name: record.name || '' }).then((re) => {
+  onDelete = (record: Env) => {
+    deleteEnv({ name: record.name || '' }).then((re) => {
       if (re) {
-        Message.success('DeliveryTarget delete success');
-        this.props.updateDeliveryTargetList();
+        Message.success('env delete success');
+        this.props.updateEnvList();
       }
     });
   };
-
-  onEdlt = (record: DeliveryTarget) => {
+  onEdit = (record: Env) => {
     this.props.changeISEdit(true, record);
+  };
+
+  showEnvAppList = (envName: string) => {
+    this.setState({ showEnvAppList: true, envName: envName });
   };
 
   getCloumns = () => {
@@ -34,7 +38,15 @@ class TableList extends Component<Props> {
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
         cell: (v: string) => {
-          return <span>{v}</span>;
+          return (
+            <a
+              onClick={() => {
+                this.showEnvAppList(v);
+              }}
+            >
+              {v}
+            </a>
+          );
         },
       },
       {
@@ -46,27 +58,19 @@ class TableList extends Component<Props> {
         },
       },
       {
-        key: 'project',
-        title: <Translation>Project</Translation>,
-        dataIndex: 'project',
-        cell: (v: Project | undefined) => {
-          if (v) {
-            return <span>{v.alias || v.name}</span>;
-          }
-          return '';
+        key: 'namespace',
+        title: <Translation>Namespace</Translation>,
+        dataIndex: 'namespace',
+        cell: (v: string) => {
+          return <span>{v}</span>;
         },
       },
       {
-        key: 'clusterName/namespace',
-        title: <Translation>Cluster/Namespace</Translation>,
-        dataIndex: 'clusterName/CloudProvider',
-        cell: (v: string, i: number, record: DeliveryTarget) => {
-          return (
-            <span>
-              {record?.clusterAlias ? record?.clusterAlias : record?.cluster?.clusterName}/
-              {record?.cluster?.namespace}
-            </span>
-          );
+        key: 'project',
+        title: <Translation>Project</Translation>,
+        dataIndex: 'project',
+        cell: (v: NameAlias) => {
+          return <span>{v.alias || v.name}</span>;
         },
       },
       {
@@ -78,10 +82,28 @@ class TableList extends Component<Props> {
         },
       },
       {
+        key: 'targets',
+        title: <Translation>Targets</Translation>,
+        dataIndex: 'targets',
+        cell: (v: NameAlias[]) => {
+          return (
+            <TagGroup>
+              {v.map((target: NameAlias) => {
+                return (
+                  <Tag color="green">
+                    <Link to="/targets"> {target.alias ? target.alias : target.name}</Link>
+                  </Tag>
+                );
+              })}
+            </TagGroup>
+          );
+        },
+      },
+      {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: (v: string, i: number, record: DeliveryTarget) => {
+        cell: (v: string, i: number, record: Env) => {
           return (
             <div>
               <a
@@ -90,7 +112,7 @@ class TableList extends Component<Props> {
                     type: 'confirm',
                     content: (
                       <Translation>
-                        Unrecoverable after deletion. Are you sure you want to delete it?
+                        Unrecoverable after deletion, are you sure you want to delete it?
                       </Translation>
                     ),
                     onOk: () => {
@@ -105,7 +127,7 @@ class TableList extends Component<Props> {
               <a
                 className="margin-left-10"
                 onClick={() => {
-                  this.onEdlt(record);
+                  this.onEdit(record);
                 }}
               >
                 <Translation>Edit</Translation>

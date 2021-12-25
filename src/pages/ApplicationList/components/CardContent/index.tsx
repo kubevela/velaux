@@ -52,7 +52,12 @@ class CardContent extends React.Component<Props, State> {
     const { Row, Col } = Grid;
     const { applications } = this.props;
     if (applications.length === 0) {
-      return <Empty style={{ minHeight: '400px' }} />;
+      return (
+        <Empty
+          message={<Translation>There is no applications</Translation>}
+          style={{ minHeight: '400px' }}
+        />
+      );
     }
 
     return (
@@ -121,7 +126,7 @@ class CardContent extends React.Component<Props, State> {
                                 type: 'confirm',
                                 content: (
                                   <Translation>
-                                    Unrecoverable after deletion. Are you sure you want to delete
+                                    Unrecoverable after deletion, are you sure you want to delete
                                     it?
                                   </Translation>
                                 ),

@@ -1,59 +1,54 @@
 import { post, get, rdelete, put } from './request';
-import {
-  addons_mock,
-  addonsDetails_mock,
-  disabletAddonsCluster_mock,
-  enableAddonsCluster_mock,
-  addonsStatus_mock,
-} from './devLink';
-import { addons, addonRegistrys } from './productionLink';
+import { addons, addonRegistrys, enabledAddon } from './productionLink';
 import { getDomain } from '../utils/common';
 
 const baseURLOject = getDomain();
-const isMock = baseURLOject.MOCK;
-const url = isMock ? addons_mock : addons;
+const base = baseURLOject.MOCK || baseURLOject.APIBASE;
 
 export function getAddonRegistrysList(params: any) {
-  return get(addonRegistrys, { params: params }).then((res) => res);
+  return get(base + addonRegistrys, { params: params }).then((res) => res);
 }
 
 export function createAddonRegistry(params: any) {
-  return post(addonRegistrys, params);
+  return post(base + addonRegistrys, params);
 }
 
 export function deleteAddonRegistry(params: { name: string }) {
-  return rdelete(addonRegistrys + '/' + params.name, params).then((res) => res);
+  return rdelete(base + addonRegistrys + '/' + params.name, params).then((res) => res);
 }
 
 export function getAddonsList(params: any) {
-  return get(url, { params: params }).then((res) => res);
+  return get(base + addons, { params: params }).then((res) => res);
 }
 
 export function createAddons(params: any) {
-  return post(url, params).then((res) => res);
+  return post(base + addons, params).then((res) => res);
 }
 
 export function getAddonsDetails(params: any) {
-  const gurl = isMock ? `${addonsDetails_mock}` : `${addons}/${params.name}`;
+  const gurl = `${base + addons}/${params.name}`;
   return get(gurl, params).then((res) => res);
 }
 
 export function disableAddon(params: any) {
-  const gurl = isMock ? `${disabletAddonsCluster_mock}` : `${addons}/${params.name}/disable`;
+  const gurl = `${base + addons}/${params.name}/disable`;
   return post(gurl, params).then((res) => res);
 }
 
 export function enableAddon(params: { name: string; properties: any }) {
-  const gurl = isMock ? `${enableAddonsCluster_mock}` : `${addons}/${params.name}/enable`;
+  const gurl = `${base + addons}/${params.name}/enable`;
   return post(gurl, { args: params.properties }).then((res) => res);
 }
-
 export function upgradeAddon(params: { name: string; properties: any }) {
-  const gurl = isMock ? `${enableAddonsCluster_mock}` : `${addons}/${params.name}/update`;
+  const gurl = `${base + addons}/${params.name}/update`;
   return put(gurl, { args: params.properties }).then((res) => res);
 }
 
 export function getAddonsStatus(params: any) {
-  const gurl = isMock ? `${addonsStatus_mock}` : `${addons}/${params.name}/status`;
+  const gurl = `${base + addons}/${params.name}/status`;
   return get(gurl, params).then((res) => res);
+}
+
+export function getEnabledAddons(params: any) {
+  return get(base + enabledAddon, params);
 }

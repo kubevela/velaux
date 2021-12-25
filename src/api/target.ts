@@ -1,29 +1,29 @@
 import { post, get, rdelete, put } from './request';
-import { getDeliveryTarget_mock } from './devLink';
-import { target } from './productionLink';
+import { gettarget_mock } from './devLink';
+import { targetURL } from './productionLink';
 import { getDomain } from '../utils/common';
-import type { DeliveryTarget } from '../interface/deliveryTarget';
-import type { QueryDeliveryTarget } from '../model/deliveryTarget';
+import type { Target } from '../interface/target';
+import type { Querytarget } from '../model/target';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
 
-export function getDeliveryTarget(params: QueryDeliveryTarget) {
-  const url = isMock ? getDeliveryTarget_mock : target;
+export function getTarget(params: Querytarget) {
+  const url = isMock ? gettarget_mock : targetURL;
   return get(url, { params: params }).then((res) => res);
 }
 
-export function createDeliveryTarget(params: DeliveryTarget) {
-  const url = isMock ? getDeliveryTarget_mock : target;
+export function createTarget(params: Target) {
+  const url = isMock ? gettarget_mock : targetURL;
   return post(url, params);
 }
 
-export function deleteDeliveryTarget(params: { name: string }) {
-  const url = isMock ? getDeliveryTarget_mock : `${target}/${params.name}`;
+export function deleteTarget(params: { name: string }) {
+  const url = isMock ? gettarget_mock : `${targetURL}/${params.name}`;
   return rdelete(url, params);
 }
 
-export function updateDeliveryTarget(params: DeliveryTarget) {
-  const url = isMock ? getDeliveryTarget_mock : `${target}/${params.name}`;
+export function updateTarget(params: Target) {
+  const url = isMock ? gettarget_mock : `${targetURL}/${params.name}`;
   return put(url, params);
 }

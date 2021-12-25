@@ -20,6 +20,7 @@ import UISchema from '../../../../components/UISchema';
 import type { Addon } from '../../../../interface/addon';
 import locale from '../../../../utils/locale';
 import StatusShow from '../../../../components/StatusShow';
+import type { ApplicationStatus } from '../../../../interface/application';
 
 type Props = {
   addonName: string;
@@ -35,7 +36,7 @@ type State = {
   statusLoading: boolean;
   upgradeLoading: boolean;
   args?: any;
-  addonsStatus: any;
+  addonsStatus?: ApplicationStatus;
   showStatusVisible: boolean;
 };
 
@@ -43,6 +44,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
   timer?: number;
   readonly refreshTime = 1000;
   form: Field;
+  statusLoop: boolean;
   uiSchemaRef: React.RefObject<UISchema>;
   constructor(props: Props) {
     super(props);
@@ -54,11 +56,11 @@ class AddonDetailDialog extends React.Component<Props, State> {
       loading: true,
       statusLoading: true,
       upgradeLoading: false,
-      addonsStatus: {},
       showStatusVisible: false,
     };
     this.form = new Field(this);
     this.uiSchemaRef = React.createRef();
+    this.statusLoop = false;
   }
 
   componentDidMount() {
@@ -87,8 +89,10 @@ class AddonDetailDialog extends React.Component<Props, State> {
     getAddonsStatus({ name: this.props.addonName })
       .then((res) => {
         if (!res) return;
-        if (res.phase == 'enabling') {
+        if (res.phase == 'enabling' && !this.statusLoop) {
+          this.statusLoop = true;
           setTimeout(() => {
+            this.statusLoop = false;
             this.loadAddonStatus();
           }, 3000);
         }
@@ -245,7 +249,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
           extButtons={buttons}
         >
           <Loading visible={loading} style={{ width: '100%' }}>
-            <If condition={addonsStatus}>
+            <If condition={addonsStatus && addonsStatus.status}>
               <Message
                 type={getAppStatusShowType(addonsStatus?.status)}
                 size="medium"

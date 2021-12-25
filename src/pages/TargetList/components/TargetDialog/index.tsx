@@ -4,13 +4,11 @@ import Group from '../../../../extends/Group';
 import Namespace from '../Namespace';
 import type { NamespaceItem } from '../Namespace';
 import { checkName } from '../../../../utils/common';
-import { createDeliveryTarget, updateDeliveryTarget } from '../../../../api/target';
-import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import { createTarget, updateTarget } from '../../../../api/target';
+import type { Target } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
 import { listNamespaces } from '../../../../api/observation';
-import ProjectForm from '../../../ApplicationList/components/GeneralConfig/project-form';
-import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
 
 type Props = {
@@ -18,9 +16,7 @@ type Props = {
   isEdit?: boolean;
   visible: boolean;
   clusterList: Cluster[];
-  projects: Project[];
-  syncProjectList: () => void;
-  deliveryTargetItem?: DeliveryTarget;
+  targetItem?: Target;
   onOK: () => void;
   onClose: () => void;
   t: (key: string) => string;
@@ -64,23 +60,22 @@ class DeliveryDialog extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const { project, deliveryTargetItem, isEdit } = this.props;
+    const { project, targetItem, isEdit } = this.props;
     if (project && !isEdit) {
       this.field.setValue('project', project);
     }
-    if (deliveryTargetItem) {
+    if (targetItem) {
       const {
         name,
         alias,
         description,
         cluster = { clusterName: '', namespace: '' },
         variable = { providerName: '', region: '', zone: '', vpcID: '' },
-      } = deliveryTargetItem;
+      } = targetItem;
       this.field.setValues({
         name,
         alias,
         description,
-        project: deliveryTargetItem.project ? deliveryTargetItem.project.name : '',
         clusterName: cluster.clusterName,
         runtimeNamespace: cluster.namespace,
         var_providerName: variable.providerName,
@@ -110,7 +105,6 @@ class DeliveryDialog extends React.Component<Props, State> {
         alias,
         description,
         clusterName,
-        project,
         runtimeNamespace,
         var_providerName,
         var_region,
@@ -121,7 +115,6 @@ class DeliveryDialog extends React.Component<Props, State> {
         name,
         alias,
         description,
-        project,
         cluster: {
           clusterName,
           namespace: runtimeNamespace,
@@ -135,17 +128,17 @@ class DeliveryDialog extends React.Component<Props, State> {
       };
 
       if (isEdit) {
-        updateDeliveryTarget(params).then((res) => {
+        updateTarget(params).then((res) => {
           if (res) {
-            Message.success(<Translation>Update DeliveryTargetList Success</Translation>);
+            Message.success(<Translation>Update target Success</Translation>);
             this.props.onOK();
             this.onClose();
           }
         });
       } else {
-        createDeliveryTarget(params).then((res) => {
+        createTarget(params).then((res) => {
           if (res) {
-            Message.success(<Translation>Create DeliveryTargetList Success</Translation>);
+            Message.success(<Translation>Create target Success</Translation>);
             this.props.onOK();
             this.onClose();
           }
@@ -181,8 +174,12 @@ class DeliveryDialog extends React.Component<Props, State> {
     if (cluster) {
       listNamespaces({ cluster: cluster }).then((re) => {
         if (re && re.list) {
-          const namespaces = re.list.map((item: any) => {
-            return { label: item.metadata.name, value: item.metadata.name };
+          const namespaces: NamespaceItem[] = [];
+          re.list.map((item: any) => {
+            if (item.metadata.labels && item.metadata.labels['namespace.oam.dev/target']) {
+              return;
+            }
+            namespaces.push({ label: item.metadata.name, value: item.metadata.name });
           });
           this.setState({ namespaces: namespaces });
         }
@@ -203,15 +200,9 @@ class DeliveryDialog extends React.Component<Props, State> {
       },
     };
 
-    const { t, visible, isEdit, projects } = this.props;
+    const { t, visible, isEdit } = this.props;
     const { namespaces } = this.state;
     const cluster: string = this.field.getValue('clusterName');
-    const dataSource = projects.map((project) => {
-      return {
-        label: project.alias || project.name,
-        value: project.name,
-      };
-    });
     return (
       <div>
         <Dialog
@@ -270,16 +261,6 @@ class DeliveryDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <ProjectForm
-                  disable={isEdit}
-                  syncProjectList={this.props.syncProjectList}
-                  field={this.field}
-                  projectList={dataSource}
-                />
-              </Col>
-            </Row>
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Description</Translation>}>
                   <Input
                     name="description"
@@ -302,6 +283,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                   <Select
                     locale={locale.Select}
                     className="select"
+                    disabled={isEdit}
                     placeholder={t('Please select').toString()}
                     {...init(`clusterName`, {
                       rules: [
@@ -326,6 +308,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
+                    disabled={isEdit}
                     namespaces={namespaces}
                     loadNamespaces={this.loadNamespaces}
                     cluster={cluster}

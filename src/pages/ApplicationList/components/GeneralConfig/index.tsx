@@ -15,7 +15,6 @@ type Props = {
   setVisible: (visible: boolean) => void;
   t: (key: string) => {};
   dispatch: ({}) => void;
-  namespaceChange?: (namespace: string) => void;
 };
 
 type State = {};
@@ -113,7 +112,6 @@ class GeneralConfig extends React.Component<Props, State> {
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
               <ProjectForm
-                onChange={this.props.namespaceChange}
                 field={this.props.field}
                 projectList={projectList}
                 syncProjectList={this.props.syncProjectList}

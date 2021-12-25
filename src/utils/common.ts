@@ -44,8 +44,12 @@ export function isAPPStorePath(pathname: string) {
   return (pathname || '').indexOf('/appstores') !== -1;
 }
 
-export function isDeliveryTarget(pathname: string) {
+export function isTargetURL(pathname: string) {
   return (pathname || '').indexOf('/targets') !== -1;
+}
+
+export function isEnvPath(pathname: string) {
+  return (pathname || '').indexOf('/envs') !== -1;
 }
 
 export const APPLICATION_PATH = 'applications';

@@ -58,19 +58,12 @@ class WorkflowForm extends Component<Props, State> {
   componentDidMount = () => {
     const { consumerData } = this.props.data;
     this.field.setValues(consumerData || '');
-    const properties =
-      consumerData && consumerData.properties && JSON.parse(consumerData.properties);
+    let properties = consumerData && consumerData.properties;
+    if (properties && typeof properties === 'string') {
+      properties = JSON.parse(properties);
+    }
     this.field.setValues({ properties: properties });
     this.onDetailsComponeDefinition((consumerData && consumerData.type) || '');
-  };
-
-  submit = () => {
-    this.field.validate((error, values) => {
-      if (error) {
-        return;
-      }
-      this.props.createOrUpdateNode(values);
-    });
   };
 
   setValues = (values: any | null) => {
@@ -136,7 +129,12 @@ class WorkflowForm extends Component<Props, State> {
     };
 
     const checkWorkflowStepName = (rule: Rule, value: any, callback: (error?: string) => void) => {
+      const { consumerData } = this.props.data;
       if (checkStepName(value)) {
+        if (consumerData?.name && value == consumerData?.name) {
+          callback();
+          return;
+        }
         callback('name is exist');
       }
       callback();

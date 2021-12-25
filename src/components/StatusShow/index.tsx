@@ -106,7 +106,7 @@ class StatusShow extends React.Component<Props> {
             <Card
               locale={locale.Card}
               style={{ marginTop: '8px' }}
-              title={<Translation>Progress</Translation>}
+              title={<Translation>Conditions</Translation>}
             >
               <Step current={getCurrent(applicationStatus?.conditions)}>
                 {allConditions.map((condition) => {

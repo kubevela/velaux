@@ -9,7 +9,12 @@ import Title from '../../components/Title';
 import Item from '../../components/Item';
 import TraitDialog from './components/TraitDialog';
 import TraitsList from './components/TraitsList';
-import type { ApplicationDetail, Trait, ApplicationComponent } from '../../interface/application';
+import type {
+  ApplicationDetail,
+  Trait,
+  ApplicationComponent,
+  EnvBinding,
+} from '../../interface/application';
 import { momentDate } from '../../utils/common';
 import EditProperties from './components/EditProperties';
 import locale from '../../utils/locale';
@@ -29,6 +34,7 @@ type Props = {
   applicationDetail?: ApplicationDetail;
   components?: ApplicationComponent[];
   componentsApp?: string;
+  envbinding?: EnvBinding[];
 };
 
 type State = {
@@ -151,7 +157,7 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   render() {
-    const { applicationDetail, dispatch } = this.props;
+    const { applicationDetail, dispatch, envbinding } = this.props;
     const {
       visibleTrait,
       isEditTrait,
@@ -274,6 +280,9 @@ class ApplicationConfig extends Component<Props, State> {
               this.setState({ visibleEditComponentProperties: false });
             }}
             applicationDetail={applicationDetail}
+            defaultEnv={
+              Array.isArray(envbinding) && envbinding.length > 0 ? envbinding[0] : undefined
+            }
             component={mainComponent}
             dispatch={dispatch}
           />
