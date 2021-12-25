@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Loading } from '@b-design/ui';
+import { Loading, Message } from '@b-design/ui';
 import Title from '../../components/ListTitle';
 import SelectSearch from './components/search/index';
 import CardContend from './components/card-conten/index';
@@ -14,6 +14,7 @@ type Props = {
   dispatch: ({}) => {};
   addonsList: [];
   registryList: [];
+  addonListMessage: string;
   loading: any;
 };
 
@@ -83,7 +84,7 @@ class Addons extends React.Component<Props, State> {
   };
 
   render() {
-    const { addonsList = [], registryList = [], dispatch, loading } = this.props;
+    const { addonsList = [], registryList = [], dispatch, loading, addonListMessage } = this.props;
 
     const isLoading = loading.models.addons;
     const { showAddonDetail, addonName, showRegistryManage, enabledAddons } = this.state;
@@ -103,6 +104,11 @@ class Addons extends React.Component<Props, State> {
           listFunction={this.getAddonsList}
         />
         <Loading visible={isLoading} style={{ width: '100%' }}>
+          <If condition={addonListMessage}>
+            <Message style={{ marginBottom: '16px' }} type="warning">
+              {addonListMessage}
+            </Message>
+          </If>
           <CardContend
             addonLists={addonsList}
             enabledAddons={enabledAddons}

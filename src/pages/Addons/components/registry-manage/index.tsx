@@ -95,6 +95,27 @@ class RegistryManageDialog extends React.Component<Props, State> {
     this.setState({ showAdd: true });
   };
 
+  addExperimental = () => {
+    const { syncRegistrys } = this.props;
+    createAddonRegistry({
+      name: 'experimental',
+      oss: {
+        end_point: 'https://addons.kubevela.net',
+        path: 'experimental/',
+      },
+    })
+      .then((res) => {
+        if (res) {
+          Message.success(<Translation>add success</Translation>);
+          this.setState({ showAdd: false });
+          syncRegistrys();
+        }
+      })
+      .catch((err) => {
+        handleError(err);
+      });
+  };
+
   render() {
     const { visible, registries } = this.props;
     const { showAdd, selectType } = this.state;
@@ -116,7 +137,11 @@ class RegistryManageDialog extends React.Component<Props, State> {
         </a>
       );
     };
+    let existExperimental = false;
     const registryDataSorce = registries.map((item: AddonRegistry) => {
+      if (item.name == 'experimental') {
+        existExperimental = true;
+      }
       const reitem = {
         name: item.name,
         url: '',
@@ -130,7 +155,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
       }
       if (item.oss) {
         reitem.url = item.oss.end_point;
-        reitem.path = item.oss.bucket;
+        reitem.path = item.oss.bucket ? `${item.oss.bucket}/${item.oss.path}` : item.oss.path;
         reitem.type = 'OSS';
       }
       return reitem;
@@ -154,6 +179,15 @@ class RegistryManageDialog extends React.Component<Props, State> {
           <Row>
             <Col>
               <div className="tableButton">
+                <If condition={!existExperimental}>
+                  <Button
+                    type="secondary"
+                    onClick={this.addExperimental}
+                    style={{ marginRight: '16px' }}
+                  >
+                    <Translation>Add Experimental Registry</Translation>
+                  </Button>
+                </If>
                 <Button type="secondary" onClick={this.showAddRegistry}>
                   <Translation>New</Translation>
                 </Button>
@@ -161,7 +195,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
             </Col>
           </Row>
           <Table locale={locale.Table} dataSource={registryDataSorce}>
-            <Table.Column width="100px" title={<Translation>Name</Translation>} dataIndex="name" />
+            <Table.Column width="150px" title={<Translation>Name</Translation>} dataIndex="name" />
             <Table.Column width="60px" title={<Translation>Type</Translation>} dataIndex="type" />
             <Table.Column title={<Translation>URL</Translation>} dataIndex="url" />
             <Table.Column

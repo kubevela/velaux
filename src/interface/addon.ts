@@ -12,6 +12,7 @@ export interface Addon {
   dependencies?: { name: string }[];
   definitions?: Definition[];
   uiSchema?: UIParam[];
+  registryName?: string;
 }
 
 export interface Definition {
@@ -29,6 +30,7 @@ export interface RegistryGitSource {
 export interface RegistryOssSource {
   end_point: string;
   bucket: string;
+  path: string;
 }
 
 export interface AddonRegistry {

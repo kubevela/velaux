@@ -46,12 +46,12 @@ class CardContent extends React.Component<Props, State> {
         <If condition={addonLists}>
           <Row wrap={true}>
             {addonLists.map((item: Addon) => {
-              const { name, icon, version, description, tags } = item;
+              const { name, icon, version, description, tags, registryName } = item;
               const status = enabledAddons?.filter((addonStatus: AddonBaseStatus) => {
                 return addonStatus.name == name;
               });
               return (
-                <Col span="6" className={`card-content-wraper`} key={name}>
+                <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={name}>
                   <Card locale={locale.Card} contentHeight="auto">
                     <a onClick={() => clickAddon(name)}>
                       <div className="cluster-card-top flexcenter">
@@ -65,9 +65,14 @@ class CardContent extends React.Component<Props, State> {
                     </a>
                     <div className="content-wraper background-F9F8FF">
                       <Row className="content-title">
-                        <Col span="20" className="font-size-16">
+                        <Col span="16" className="font-size-16">
                           <a onClick={() => clickAddon(name)}>{name}</a>
                         </Col>
+                        <If condition={registryName}>
+                          <Col span="8" className="flexright">
+                            <Tag color="blue">{registryName}</Tag>
+                          </Col>
+                        </If>
                       </Row>
                       <Row className="content-main">
                         <h4 className="color595959 font-size-14" title={description}>
