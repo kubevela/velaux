@@ -66,7 +66,7 @@ class CardContent extends React.Component<Props, State> {
           const { name, alias, icon, description, createTime } = item;
           const showName = alias || name;
           return (
-            <Col span="6" className={`card-content-wraper`} key={index}>
+            <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={index}>
               <Card locale={locale.Card} contentHeight="auto">
                 <Link to={`/applications/${name}/config`}>
                   <div className="appplan-card-top flexcenter">

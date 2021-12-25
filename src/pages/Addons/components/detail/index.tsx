@@ -249,6 +249,12 @@ class AddonDetailDialog extends React.Component<Props, State> {
           extButtons={buttons}
         >
           <Loading visible={loading} style={{ width: '100%' }}>
+            <If condition={addonDetailInfo && addonDetailInfo.registryName == 'experimental'}>
+              <Message type="warning">
+                This addon is experimental, please don't use it in production.
+              </Message>
+            </If>
+
             <If condition={addonsStatus && addonsStatus.status}>
               <Message
                 type={getAppStatusShowType(addonsStatus?.status)}
