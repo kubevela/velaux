@@ -49,7 +49,7 @@ class EditAppDialog extends React.Component<Props> {
           <Translation>Cancel</Translation>
         </Button>
         <Button type="primary" onClick={this.onSubmit}>
-          <Translation>Create</Translation>
+          <Translation>Update</Translation>
         </Button>
       </div>
     );
