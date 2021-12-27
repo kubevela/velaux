@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Progress, Message } from '@b-design/ui';
+import { Table, Progress, Message, Icon } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import type { PodBase, Container, Event } from '../../../../interface/observation';
 import { listApplicationPodsDetails } from '../../../../api/observation';
@@ -7,15 +7,22 @@ import moment from 'moment';
 import '../../index.less';
 import { quantityToScalar } from '../../../../utils/utils';
 import locale from '../../../../utils/locale';
+import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
+import { getAddonsStatus } from '../../../../api/addons';
+import type { AddonClusterInfo, AddonStatus } from '../../../../interface/addon';
 
 export type Props = {
   pod: PodBase;
+  env?: EnvBinding;
+  clusterName: string;
+  application?: ApplicationDetail;
 };
 
 export type State = {
   containers?: Container[];
   events?: Event[];
   loading: boolean;
+  observability?: any;
 };
 class PodDetail extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -25,13 +32,14 @@ class PodDetail extends React.Component<Props, State> {
 
   componentDidMount() {
     this.loadPodDetail();
+    this.loadAddonStatus();
   }
 
   showStatus = (statu: string) => {
     const statsuInfo = [
       { name: 'running', value: <div style={{ color: 'green' }}>Running</div> },
-      { name: 'terminated', value: <div style={{ color: 'red' }}>terminated</div> },
-      { name: 'waiting', value: <div style={{ color: '#e17518' }}>waiting</div> },
+      { name: 'terminated', value: <div style={{ color: 'red' }}>Terminated</div> },
+      { name: 'waiting', value: <div style={{ color: '#e17518' }}>Waiting</div> },
     ];
     const findStatus = statsuInfo.find((item) => item.name === statu) || { value: <div /> };
     return findStatus && findStatus.value;
@@ -67,6 +75,14 @@ class PodDetail extends React.Component<Props, State> {
       .finally(() => {
         this.setState({ loading: false });
       });
+  };
+
+  loadAddonStatus = async () => {
+    getAddonsStatus({ name: 'observability' }).then((re: AddonStatus) => {
+      if (re && re.phase == 'enabled') {
+        this.setState({ observability: re.clusters });
+      }
+    });
   };
 
   getContainerCloumns = () => {
@@ -129,16 +145,46 @@ class PodDetail extends React.Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: () => {
+        cell: (v: string, i: number, record: Container) => {
+          const { observability } = this.state;
+          if (!observability) {
+            return;
+          }
+          const { clusterName, env, pod, application } = this.props;
+          let domain = '';
+          Object.keys(observability).map((key) => {
+            if (key == clusterName) {
+              const clusterInfo: AddonClusterInfo = observability[key];
+              if (clusterInfo.domain) {
+                domain = clusterInfo.domain;
+              } else if (clusterInfo.loadBalancerIP) {
+                domain = 'http://' + clusterInfo.loadBalancerIP;
+              }
+              if (domain && !domain.startsWith('http')) {
+                domain = 'http://' + domain;
+              }
+            }
+          });
+          if (!domain) {
+            return;
+          }
+          const vars = `var-envName=${env?.name}&var-clusterName=${clusterName}&var-appName=${application?.name}&var-appAlias=${application?.alias}&var-podName=${pod.metadata.name}&var-podNamespace=${pod.metadata.namespace}&var-containerName=${record.name}`;
+          const logURL = `${domain}/d/kubevela_application_logging/kubevela-application-logging-dashboard?orgId=1&refresh=10s&${vars}`;
+          const monitorURL = `${domain}/d/kubevela_core_monitoring/kubevela-core-system-monitoring-dashboard?${vars}`;
           return (
             <div>
-              {/* <a>
-                <Icon type="cloud-machine" />
+              <a title="Log" href={logURL} target="_blank" className="actionIcon">
+                <Icon type="news" />
               </a>
 
-              <a className="margin-left-5">
+              <a
+                title="Grafana Dashboard"
+                className="margin-left-5"
+                href={monitorURL}
+                target="_blank"
+              >
                 <Icon type="monitoring" />
-              </a> */}
+              </a>
             </div>
           );
         },
