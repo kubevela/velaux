@@ -9,6 +9,7 @@ import type { Env } from '../../../../interface/env';
 import ProjectForm from '../../../ApplicationList/components/GeneralConfig/project-form';
 import type { Project } from '../../../../interface/project';
 import { createEnv, updateEnv } from '../../../../api/env';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   project?: string;
@@ -64,13 +65,13 @@ class EnvDialog extends React.Component<Props, State> {
         return;
       }
       const { isEdit } = this.props;
-      const { name, alias, description, project, targets, namespace } = values;
+      const { name, alias, description, targets, namespace } = values;
       const params = {
         name,
         alias,
         description,
         namespace,
-        project,
+        project: 'default',
         targets,
       };
 
@@ -235,16 +236,18 @@ class EnvDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <ProjectForm
-                  field={this.field}
-                  disable={isEdit}
-                  projectList={projectOptions}
-                  syncProjectList={syncProjectList}
-                />
-              </Col>
-            </Row>
+            <If condition={false}>
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <ProjectForm
+                    field={this.field}
+                    disable={isEdit}
+                    projectList={projectOptions}
+                    syncProjectList={syncProjectList}
+                  />
+                </Col>
+              </Row>
+            </If>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Target</Translation>} required>
