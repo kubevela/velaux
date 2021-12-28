@@ -174,3 +174,12 @@ export interface Service {
     };
   };
 }
+
+export interface ContainerLogResponse {
+  logs: string;
+  err: string;
+  info: {
+    fromDate: string;
+    toDate: string;
+  };
+}

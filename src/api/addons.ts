@@ -21,16 +21,12 @@ export function getAddonsList(params: any) {
   return get(base + addons, { params: params }).then((res) => res);
 }
 
-export function createAddons(params: any) {
-  return post(base + addons, params).then((res) => res);
-}
-
-export function getAddonsDetails(params: any) {
+export function getAddonsDetails(params: { name: string }) {
   const gurl = `${base + addons}/${params.name}`;
   return get(gurl, params).then((res) => res);
 }
 
-export function disableAddon(params: any) {
+export function disableAddon(params: { name: string }) {
   const gurl = `${base + addons}/${params.name}/disable`;
   return post(gurl, params).then((res) => res);
 }
@@ -44,7 +40,7 @@ export function upgradeAddon(params: { name: string; properties: any }) {
   return put(gurl, { args: params.properties }).then((res) => res);
 }
 
-export function getAddonsStatus(params: any) {
+export function getAddonsStatus(params: { name: string }) {
   const gurl = `${base + addons}/${params.name}/status`;
   return get(gurl, params).then((res) => res);
 }

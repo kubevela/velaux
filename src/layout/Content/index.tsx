@@ -106,6 +106,7 @@ export default function Content() {
       />
       <Route path="/targets" component={TargetList} />
       <Route path="/clusters" component={Clusters} />
+      <Route path="/addons/:addonName" component={Addons} />
       <Route path="/addons" component={Addons} />
       <Route path="/notFound" component={NotFound} />
       <Redirect to="/notFound" />

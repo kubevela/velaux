@@ -1,37 +1,49 @@
 import React from 'react';
-import { Table, Progress, Message } from '@b-design/ui';
+import { Table, Progress, Message, Icon } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import type { PodBase, Container, Event } from '../../../../interface/observation';
 import { listApplicationPodsDetails } from '../../../../api/observation';
+import ContainerLog from '../ContainerLog';
 import moment from 'moment';
 import '../../index.less';
 import { quantityToScalar } from '../../../../utils/utils';
 import locale from '../../../../utils/locale';
+import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
+import { getAddonsStatus } from '../../../../api/addons';
+import type { AddonClusterInfo, AddonStatus } from '../../../../interface/addon';
+import { If } from 'tsx-control-statements/components';
 
 export type Props = {
   pod: PodBase;
+  env?: EnvBinding;
+  clusterName: string;
+  application?: ApplicationDetail;
 };
 
 export type State = {
   containers?: Container[];
   events?: Event[];
   loading: boolean;
+  observability?: Record<string, AddonClusterInfo>;
+  showContainerLog: boolean;
+  containerName: string;
 };
 class PodDetail extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { loading: true };
+    this.state = { loading: true, showContainerLog: false, containerName: '' };
   }
 
   componentDidMount() {
     this.loadPodDetail();
+    this.loadAddonStatus();
   }
 
   showStatus = (statu: string) => {
     const statsuInfo = [
       { name: 'running', value: <div style={{ color: 'green' }}>Running</div> },
-      { name: 'terminated', value: <div style={{ color: 'red' }}>terminated</div> },
-      { name: 'waiting', value: <div style={{ color: '#e17518' }}>waiting</div> },
+      { name: 'terminated', value: <div style={{ color: 'red' }}>Terminated</div> },
+      { name: 'waiting', value: <div style={{ color: '#e17518' }}>Waiting</div> },
     ];
     const findStatus = statsuInfo.find((item) => item.name === statu) || { value: <div /> };
     return findStatus && findStatus.value;
@@ -69,7 +81,37 @@ class PodDetail extends React.Component<Props, State> {
       });
   };
 
+  loadAddonStatus = async () => {
+    getAddonsStatus({ name: 'observability' }).then((re: AddonStatus) => {
+      if (re && re.phase == 'enabled') {
+        this.setState({ observability: re.clusters });
+      }
+    });
+  };
+
+  showContainerLog = (containerName: string) => {
+    this.setState({ showContainerLog: true, containerName: containerName });
+  };
+
   getContainerCloumns = () => {
+    const { observability } = this.state;
+    const { clusterName, env, pod, application } = this.props;
+    let domain = '';
+    if (observability) {
+      Object.keys(observability).map((key) => {
+        if (key == clusterName) {
+          const clusterInfo = observability[key];
+          if (clusterInfo.domain) {
+            domain = clusterInfo.domain;
+          } else if (clusterInfo.loadBalancerIP) {
+            domain = 'http://' + clusterInfo.loadBalancerIP;
+          }
+          if (domain && !domain.startsWith('http')) {
+            domain = 'http://' + domain;
+          }
+        }
+      });
+    }
     return [
       {
         key: 'name',
@@ -129,16 +171,36 @@ class PodDetail extends React.Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: () => {
+        cell: (v: string, i: number, record: Container) => {
+          if (!domain) {
+            return (
+              <div>
+                <a
+                  title="Log"
+                  onClick={() => this.showContainerLog(record.name)}
+                  className="actionIcon"
+                >
+                  <Icon type="news" />
+                </a>
+              </div>
+            );
+          }
+          const vars = `var-envName=${env?.name}&var-clusterName=${clusterName}&var-appName=${application?.name}&var-appAlias=${application?.alias}&var-podName=${pod.metadata.name}&var-podNamespace=${pod.metadata.namespace}&var-containerName=${record.name}`;
+          const logURL = `${domain}/d/kubevela_application_logging/kubevela-application-logging-dashboard?orgId=1&refresh=10s&${vars}`;
+          const monitorURL = `${domain}/d/kubevela_core_monitoring/kubevela-core-system-monitoring-dashboard?${vars}`;
           return (
             <div>
-              {/* <a>
-                <Icon type="cloud-machine" />
+              <a title="Log" href={logURL} target="_blank" className="actionIcon">
+                <Icon type="news" />
               </a>
-
-              <a className="margin-left-5">
+              <a
+                title="Grafana Dashboard"
+                className="margin-left-5"
+                href={monitorURL}
+                target="_blank"
+              >
                 <Icon type="monitoring" />
-              </a> */}
+              </a>
             </div>
           );
         },
@@ -186,7 +248,8 @@ class PodDetail extends React.Component<Props, State> {
     const { Column } = Table;
     const containerColumns = this.getContainerCloumns();
     const eventCloumns = this.getEventCloumns();
-    const { events, containers, loading } = this.state;
+    const { events, containers, loading, showContainerLog, containerName } = this.state;
+    const { pod, clusterName } = this.props;
     return (
       <div className="table-podDetails-list  margin-top-20">
         <Table
@@ -212,6 +275,17 @@ class PodDetail extends React.Component<Props, State> {
           {eventCloumns &&
             eventCloumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
+
+        <If condition={showContainerLog}>
+          <ContainerLog
+            onClose={() => {
+              this.setState({ showContainerLog: false, containerName: '' });
+            }}
+            pod={pod}
+            containerName={containerName}
+            clusterName={clusterName}
+          />
+        </If>
       </div>
     );
   }

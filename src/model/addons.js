@@ -27,6 +27,9 @@ export default {
       const result = yield call(getAddonsList, action.payload);
       if (result) {
         yield put({ type: 'updateAddonsList', payload: result });
+        if (action.callback) {
+          action.callback(result);
+        }
       }
     },
     *getAddonRegistrysList(action, { call, put }) {

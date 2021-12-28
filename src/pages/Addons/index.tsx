@@ -16,6 +16,7 @@ type Props = {
   registryList: [];
   addonListMessage: string;
   loading: any;
+  match?: any;
 };
 
 type State = {
@@ -48,6 +49,12 @@ class Addons extends React.Component<Props, State> {
     this.props.dispatch({
       type: 'addons/getAddonsList',
       payload: params,
+      callback: () => {
+        const { match } = this.props;
+        if (match && match.params && match.params.addonName) {
+          this.openAddonDetail(match.params.addonName);
+        }
+      },
     });
   };
 
