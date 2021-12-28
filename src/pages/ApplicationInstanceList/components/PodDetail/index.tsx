@@ -3,6 +3,7 @@ import { Table, Progress, Message, Icon } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import type { PodBase, Container, Event } from '../../../../interface/observation';
 import { listApplicationPodsDetails } from '../../../../api/observation';
+import ContainerLog from '../ContainerLog';
 import moment from 'moment';
 import '../../index.less';
 import { quantityToScalar } from '../../../../utils/utils';
@@ -10,6 +11,7 @@ import locale from '../../../../utils/locale';
 import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
 import { getAddonsStatus } from '../../../../api/addons';
 import type { AddonClusterInfo, AddonStatus } from '../../../../interface/addon';
+import { If } from 'tsx-control-statements/components';
 
 export type Props = {
   pod: PodBase;
@@ -22,12 +24,14 @@ export type State = {
   containers?: Container[];
   events?: Event[];
   loading: boolean;
-  observability?: any;
+  observability?: Record<string, AddonClusterInfo>;
+  showContainerLog: boolean;
+  containerName: string;
 };
 class PodDetail extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { loading: true };
+    this.state = { loading: true, showContainerLog: false, containerName: '' };
   }
 
   componentDidMount() {
@@ -85,7 +89,29 @@ class PodDetail extends React.Component<Props, State> {
     });
   };
 
+  showContainerLog = (containerName: string) => {
+    this.setState({ showContainerLog: true, containerName: containerName });
+  };
+
   getContainerCloumns = () => {
+    const { observability } = this.state;
+    const { clusterName, env, pod, application } = this.props;
+    let domain = '';
+    if (observability) {
+      Object.keys(observability).map((key) => {
+        if (key == clusterName) {
+          const clusterInfo = observability[key];
+          if (clusterInfo.domain) {
+            domain = clusterInfo.domain;
+          } else if (clusterInfo.loadBalancerIP) {
+            domain = 'http://' + clusterInfo.loadBalancerIP;
+          }
+          if (domain && !domain.startsWith('http')) {
+            domain = 'http://' + domain;
+          }
+        }
+      });
+    }
     return [
       {
         key: 'name',
@@ -146,27 +172,18 @@ class PodDetail extends React.Component<Props, State> {
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
         cell: (v: string, i: number, record: Container) => {
-          const { observability } = this.state;
-          if (!observability) {
-            return;
-          }
-          const { clusterName, env, pod, application } = this.props;
-          let domain = '';
-          Object.keys(observability).map((key) => {
-            if (key == clusterName) {
-              const clusterInfo: AddonClusterInfo = observability[key];
-              if (clusterInfo.domain) {
-                domain = clusterInfo.domain;
-              } else if (clusterInfo.loadBalancerIP) {
-                domain = 'http://' + clusterInfo.loadBalancerIP;
-              }
-              if (domain && !domain.startsWith('http')) {
-                domain = 'http://' + domain;
-              }
-            }
-          });
           if (!domain) {
-            return;
+            return (
+              <div>
+                <a
+                  title="Log"
+                  onClick={() => this.showContainerLog(record.name)}
+                  className="actionIcon"
+                >
+                  <Icon type="news" />
+                </a>
+              </div>
+            );
           }
           const vars = `var-envName=${env?.name}&var-clusterName=${clusterName}&var-appName=${application?.name}&var-appAlias=${application?.alias}&var-podName=${pod.metadata.name}&var-podNamespace=${pod.metadata.namespace}&var-containerName=${record.name}`;
           const logURL = `${domain}/d/kubevela_application_logging/kubevela-application-logging-dashboard?orgId=1&refresh=10s&${vars}`;
@@ -176,7 +193,6 @@ class PodDetail extends React.Component<Props, State> {
               <a title="Log" href={logURL} target="_blank" className="actionIcon">
                 <Icon type="news" />
               </a>
-
               <a
                 title="Grafana Dashboard"
                 className="margin-left-5"
@@ -232,7 +248,8 @@ class PodDetail extends React.Component<Props, State> {
     const { Column } = Table;
     const containerColumns = this.getContainerCloumns();
     const eventCloumns = this.getEventCloumns();
-    const { events, containers, loading } = this.state;
+    const { events, containers, loading, showContainerLog, containerName } = this.state;
+    const { pod, clusterName } = this.props;
     return (
       <div className="table-podDetails-list  margin-top-20">
         <Table
@@ -258,6 +275,17 @@ class PodDetail extends React.Component<Props, State> {
           {eventCloumns &&
             eventCloumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
+
+        <If condition={showContainerLog}>
+          <ContainerLog
+            onClose={() => {
+              this.setState({ showContainerLog: false, containerName: '' });
+            }}
+            pod={pod}
+            containerName={containerName}
+            clusterName={clusterName}
+          />
+        </If>
       </div>
     );
   }

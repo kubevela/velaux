@@ -20,7 +20,7 @@ export interface AddonStatus {
   phase: 'disabled' | 'enabled' | 'enabling' | 'suspend' | 'disabling' | '';
   name: string;
   appStatus: ApplicationStatus;
-  clusters?: any;
+  clusters?: Record<string, AddonClusterInfo>;
 }
 
 export interface AddonClusterInfo {
