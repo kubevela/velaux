@@ -44,8 +44,12 @@ export function isAPPStorePath(pathname: string) {
   return (pathname || '').indexOf('/appstores') !== -1;
 }
 
-export function isDeliveryTarget(pathname: string) {
+export function isTargetURL(pathname: string) {
   return (pathname || '').indexOf('/targets') !== -1;
+}
+
+export function isEnvPath(pathname: string) {
+  return (pathname || '').indexOf('/envs') !== -1;
 }
 
 export const APPLICATION_PATH = 'applications';
@@ -58,6 +62,13 @@ export function momentDate(time: undefined | string): string {
     return '';
   }
   return moment(time).format('YYYY/MM/DD HH:mm:ss');
+}
+
+export function momentShortDate(time: undefined | string): string {
+  if (!time) {
+    return '';
+  }
+  return moment(time).format('YYYY/MM/DD');
 }
 
 export const checkName = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/;

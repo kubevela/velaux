@@ -63,7 +63,7 @@ export function listCloudResourceSecrets(params: { appNs: string; appName?: stri
 
 export function listApplicationService(params: {
   appNs: string;
-  appName?: string;
+  appName: string;
   cluster?: string;
   clusterNs?: string;
 }) {
@@ -71,6 +71,23 @@ export function listApplicationService(params: {
   if (params.cluster) {
     urlParams = `service-view{appNs=${params.appNs}, appName=${params.appName}, cluster=${params.cluster},clusterNs=${params.clusterNs}}`;
   }
+  return get('/api/v1/query', {
+    params: {
+      velaql: urlParams,
+    },
+  });
+}
+
+export function listContainerLog(params: {
+  cluster: string;
+  namespace: string;
+  pod: string;
+  container: string;
+  previous: boolean;
+  timestamps: boolean;
+  tailLines: number;
+}) {
+  const urlParams = `collect-logs{cluster=${params.cluster}, namespace=${params.namespace}, pod=${params.pod}, container=${params.container}, previous=${params.previous}, timestamps=${params.timestamps}, tailLines=${params.tailLines}}`;
   return get('/api/v1/query', {
     params: {
       velaql: urlParams,

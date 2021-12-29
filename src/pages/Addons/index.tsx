@@ -1,25 +1,29 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Loading } from '@b-design/ui';
+import { Loading, Message } from '@b-design/ui';
 import Title from '../../components/ListTitle';
 import SelectSearch from './components/search/index';
 import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
 import RegistryManageDialog from './components/registry-manage/index';
-import Img from '../../assets/plugins.png';
 import { If } from 'tsx-control-statements/components';
+import { getEnabledAddons } from '../../api/addons';
+import type { AddonBaseStatus } from '../../interface/addon';
 
 type Props = {
   dispatch: ({}) => {};
   addonsList: [];
   registryList: [];
+  addonListMessage: string;
   loading: any;
+  match?: any;
 };
 
 type State = {
   showAddonDetail: boolean;
   addonName: string;
   showRegistryManage: boolean;
+  enabledAddons?: AddonBaseStatus[];
 };
 
 @connect((store: any) => {
@@ -38,12 +42,27 @@ class Addons extends React.Component<Props, State> {
   componentDidMount() {
     this.getAddonsList();
     this.getAddonRegistrysList();
+    this.getEnabledAddon();
   }
 
   getAddonsList = async (params = {}) => {
     this.props.dispatch({
       type: 'addons/getAddonsList',
       payload: params,
+      callback: () => {
+        const { match } = this.props;
+        if (match && match.params && match.params.addonName) {
+          this.openAddonDetail(match.params.addonName);
+        }
+      },
+    });
+  };
+
+  getEnabledAddon = async () => {
+    getEnabledAddons({}).then((res) => {
+      if (res) {
+        this.setState({ enabledAddons: res.enabledAddons });
+      }
     });
   };
 
@@ -72,10 +91,10 @@ class Addons extends React.Component<Props, State> {
   };
 
   render() {
-    const { addonsList = [], registryList = [], dispatch, loading } = this.props;
+    const { addonsList = [], registryList = [], dispatch, loading, addonListMessage } = this.props;
 
     const isLoading = loading.models.addons;
-    const { showAddonDetail, addonName, showRegistryManage } = this.state;
+    const { showAddonDetail, addonName, showRegistryManage, enabledAddons } = this.state;
     return (
       <div>
         <Title
@@ -92,7 +111,16 @@ class Addons extends React.Component<Props, State> {
           listFunction={this.getAddonsList}
         />
         <Loading visible={isLoading} style={{ width: '100%' }}>
-          <CardContend cardImg={Img} addonLists={addonsList} clickAddon={this.openAddonDetail} />
+          <If condition={addonListMessage}>
+            <Message style={{ marginBottom: '16px' }} type="warning">
+              {addonListMessage}
+            </Message>
+          </If>
+          <CardContend
+            addonLists={addonsList}
+            enabledAddons={enabledAddons}
+            clickAddon={this.openAddonDetail}
+          />
         </Loading>
         <If condition={showAddonDetail}>
           <AddonDetailDialog

@@ -1,26 +1,24 @@
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
-import { Dialog, Field, Form, Grid, Input, Message, Select, Button } from '@b-design/ui';
-import type { ApplicationDetail } from '../../../../interface/application';
+import { Dialog, Field, Form, Grid, Message, Select, Button } from '@b-design/ui';
+import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
 import { createApplicationEnv, updateApplicationEnv } from '../../../../api/application';
 import Translation from '../../../../components/Translation';
-import { checkName } from '../../../../utils/common';
-import { getDeliveryTarget } from '../../../../api/target';
-import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
-import type { EnvBinding } from '../../../../interface/application';
 import locale from '../../../../utils/locale';
+import { getEnvs } from '../../../../api/env';
+import type { Env } from '../../../../interface/env';
 
 interface Props {
   onClose: () => void;
   onOK: () => void;
   applicationDetail?: ApplicationDetail;
-  editEnvBinding?: EnvBinding;
+  envbinding?: EnvBinding[];
 }
 
 interface State {
   loading: boolean;
-  targetList?: DeliveryTarget[];
+  envs?: Env[];
   isEdit: boolean;
 }
 
@@ -39,32 +37,22 @@ class EnvBindPlanDialog extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.loadDeliveryTargets();
-    this.setFields();
+    this.loadEnvs();
   }
 
-  loadDeliveryTargets = async () => {
-    const { applicationDetail } = this.props;
+  loadEnvs = async () => {
+    const { applicationDetail, envbinding } = this.props;
     if (applicationDetail) {
-      getDeliveryTarget({ project: applicationDetail?.project?.name, page: 0 }).then((re) => {
-        this.setState({ targetList: re.targets });
+      getEnvs({ project: applicationDetail?.project?.name, page: 0 }).then((re) => {
+        const existEnvs =
+          envbinding?.map((eb) => {
+            return eb.name;
+          }) || [];
+        const allEnvs: [] = re.envs || [];
+        const canAdd = allEnvs.filter((env: Env) => !existEnvs.includes(env.name));
+        this.setState({ envs: canAdd });
       });
     }
-  };
-
-  setFields = () => {
-    if (this.props.editEnvBinding?.name) {
-      this.setState({ isEdit: true }, () => {
-        const { name, alias, description, targetNames } = this.props.editEnvBinding || {};
-        this.field.setValues({
-          name,
-          alias,
-          description,
-          targetNames,
-        });
-      });
-    }
-    return;
   };
 
   onSubmit = () => {
@@ -117,7 +105,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
       });
   }
   render() {
-    const { loading, targetList, isEdit } = this.state;
+    const { loading, isEdit, envs } = this.state;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const init = this.field.init;
@@ -129,12 +117,18 @@ class EnvBindPlanDialog extends Component<Props, State> {
         span: 20,
       },
     };
+    const envOption = envs?.map((env) => {
+      return {
+        label: env.alias ? `${env.alias}(${env.name})` : env.name,
+        value: env.name,
+      };
+    });
     return (
       <Dialog
         visible={true}
         locale={locale.Dialog}
         className={'commonDialog'}
-        style={{ width: '800px' }}
+        style={{ width: '600px' }}
         isFullScreen={true}
         footerActions={['ok']}
         onClose={this.props.onClose}
@@ -143,90 +137,27 @@ class EnvBindPlanDialog extends Component<Props, State> {
             {!isEdit ? <Translation>Submit</Translation> : <Translation>Save</Translation>}
           </Button>
         }
-        title={<Translation>{!isEdit ? 'New Environment' : 'Edit Environment'}</Translation>}
+        title={<Translation>{!isEdit ? 'New Envbinding' : 'Edit Envbinding'}</Translation>}
       >
         <Form {...formItemLayout} field={this.field}>
           <Row>
-            <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Name</Translation>} required={true}>
-                <Input
-                  htmlType="name"
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>Env</Translation>} required={true}>
+                <Select
                   name="name"
+                  locale={locale.Select}
                   disabled={isEdit ? true : false}
+                  dataSource={envOption}
                   maxLength={32}
                   {...init('name', {
                     rules: [
                       {
                         required: true,
-                        pattern: checkName,
-                        message: 'Please enter a valid env name',
+                        message: 'Please select an env',
                       },
                     ],
                   })}
                 />
-              </FormItem>
-            </Col>
-
-            <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Alias</Translation>}>
-                <Input
-                  name="alias"
-                  {...init('alias', {
-                    rules: [
-                      {
-                        minLength: 2,
-                        maxLength: 64,
-                        message: 'Enter a string of 2 to 64 characters.',
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
-            </Col>
-          </Row>
-
-          <Row>
-            <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Description</Translation>}>
-                <Input
-                  name="description"
-                  placeholder={'A description of the environment.'}
-                  {...init('description', {
-                    rules: [
-                      {
-                        maxLength: 128,
-                        message: 'Enter a description less than 128 characters.',
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Targets</Translation>} required>
-                <Select
-                  locale={locale.Select}
-                  name="targetNames"
-                  mode="multiple"
-                  placeholder={'Select the delivery target corresponding to the environment.'}
-                  {...init('targetNames', {
-                    rules: [
-                      {
-                        required: true,
-                      },
-                    ],
-                  })}
-                >
-                  {targetList?.map((target) => {
-                    return (
-                      <Select.Option value={target.name}>
-                        {target.alias || target.name}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
               </FormItem>
             </Col>
           </Row>

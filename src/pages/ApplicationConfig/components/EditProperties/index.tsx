@@ -8,6 +8,7 @@ import type {
   DefinitionDetail,
   UpdateComponentProperties,
   ApplicationComponent,
+  EnvBinding,
 } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -19,6 +20,7 @@ type Props = {
   dispatch?: ({}) => {};
   component?: ApplicationComponent;
   applicationDetail?: ApplicationDetail;
+  defaultEnv?: EnvBinding;
 };
 
 type State = {
@@ -50,7 +52,7 @@ class EditProperties extends React.Component<Props, State> {
   }
 
   setUISchemaContext() {
-    const { dispatch, applicationDetail } = this.props;
+    const { dispatch, applicationDetail, defaultEnv } = this.props;
     if (dispatch) {
       dispatch({
         type: 'uischema/setAppName',
@@ -58,7 +60,7 @@ class EditProperties extends React.Component<Props, State> {
       });
       dispatch({
         type: 'uischema/setAppNamespace',
-        payload: applicationDetail?.project?.namespace,
+        payload: defaultEnv?.appDeployNamespace,
       });
     }
   }

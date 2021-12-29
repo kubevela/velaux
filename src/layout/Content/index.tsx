@@ -8,9 +8,10 @@ import ApplicationConfig from '../../pages/ApplicationConfig';
 import NotFound from '../../pages/NotFound';
 import ApplicationInstanceList from '../../pages/ApplicationInstanceList';
 import ApplicationRevisionList from '../../pages/ApplicationRevisionList';
-import DeliveryTargetList from '../../pages/DeliveryTargetList';
+import TargetList from '../../pages/TargetList';
 import ApplicationMonitor from '../../pages/ApplicationMonitor';
 import ApplicationLayout from '../Application';
+import EnvPage from '../../pages/EnvPage';
 
 export default function Content() {
   return (
@@ -96,8 +97,16 @@ export default function Content() {
           );
         }}
       />
-      <Route path="/targets" component={DeliveryTargetList} />
+      <Route
+        exact
+        path="/envs"
+        render={(props: any) => {
+          return <EnvPage {...props} />;
+        }}
+      />
+      <Route path="/targets" component={TargetList} />
       <Route path="/clusters" component={Clusters} />
+      <Route path="/addons/:addonName" component={Addons} />
       <Route path="/addons" component={Addons} />
       <Route path="/notFound" component={NotFound} />
       <Redirect to="/notFound" />

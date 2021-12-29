@@ -1,0 +1,36 @@
+.logDialog {
+  width: 900px;
+  padding-bottom: 0 !important;
+  .next-dialog-body {
+    min-height: 360px !important;
+    max-height: 540px !important;
+    margin-bottom: 0 !important;
+    padding: 0 16px !important;
+    overflow: auto;
+    color: #fff;
+    font-family: 'Roboto Mono Regular', monospace;
+    background: #000;
+    .logBox {
+      display: flex;
+      flex: 1 1 0%;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+  }
+  .next-dialog-footer {
+    align-items: flex-start;
+    justify-content: start !important;
+    padding: 16px !important;
+    font-size: 14px;
+    .logDate {
+      text-decoration: underline dotted;
+      cursor: pointer;
+    }
+    .logAction {
+      line-height: 24px;
+      .next-switch {
+        margin-top: 8px;
+      }
+    }
+  }
+}

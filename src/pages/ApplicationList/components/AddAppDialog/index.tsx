@@ -6,18 +6,17 @@ import { If } from 'tsx-control-statements/components';
 import GeneralConfig from '../GeneralConfig';
 import type { Rule } from '@alifd/field';
 import { detailComponentDefinition, createApplication } from '../../../../api/application';
-import type { DefinitionDetail, EnvBinding } from '../../../../interface/application';
+import type { DefinitionDetail } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
-import EnvPlan from '../../../../components/EnvPlan';
 import Translation from '../../../../components/Translation';
 import './index.less';
-import { getDeliveryTarget } from '../../../../api/target';
-import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
 import type { Project } from '../../../../interface/project';
 import type { Cluster } from '../../../../interface/cluster';
 import { connect } from 'dva';
 import locale from '../../../../utils/locale';
+import { getEnvs } from '../../../../api/env';
+import type { Env } from '../../../../interface/env';
 
 type Props = {
   visible: boolean;
@@ -36,8 +35,7 @@ type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
   dialogStats: string;
-  envBinding: EnvBinding[];
-  targets?: DeliveryTarget[];
+  envs?: Env[];
   project?: string;
 };
 
@@ -47,27 +45,25 @@ type State = {
 class AppDialog extends React.Component<Props, State> {
   field: Field;
   basicRef: React.RefObject<GeneralConfig>;
-  envBind: React.RefObject<any>;
   uiSchemaRef: React.RefObject<UISchema>;
   constructor(props: Props) {
     super(props);
     this.state = {
       definitionLoading: true,
       dialogStats: 'isBasic',
-      envBinding: [],
+      envs: [],
     };
     this.field = new Field(this, {
       onChange: (name: string, value: string) => {
         if (name === 'project') {
           this.setState({ project: value }, () => {
-            this.loadDeliveryTarget();
+            this.loadEnvs();
           });
         }
       },
     });
     this.uiSchemaRef = React.createRef();
     this.basicRef = React.createRef();
-    this.envBind = React.createRef();
   }
 
   componentDidMount() {
@@ -75,7 +71,7 @@ class AppDialog extends React.Component<Props, State> {
     if (projects && projects.length > 0) {
       this.field.setValue('project', projects[0].name);
       this.setState({ project: projects[0].name }, () => {
-        this.loadDeliveryTarget();
+        this.loadEnvs();
       });
     }
     this.getClusterList();
@@ -92,19 +88,29 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   onSubmit = () => {
-    const { envBinding } = this.state;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      const { description, alias, name, project, icon = '', componentType, properties } = values;
+      const {
+        description,
+        alias,
+        name,
+        icon = '',
+        componentType,
+        properties,
+        envBindings,
+      } = values;
+      const envbinding = envBindings.map((env: string) => {
+        return { name: env };
+      });
       const params = {
         alias,
         icon,
         name,
         description,
-        project,
-        envBinding: envBinding,
+        project: 'default',
+        envBinding: envbinding,
         component: {
           alias,
           componentType,
@@ -123,11 +129,11 @@ class AppDialog extends React.Component<Props, State> {
     });
   };
 
-  loadDeliveryTarget = () => {
+  loadEnvs = () => {
     if (this.state.project) {
-      getDeliveryTarget({ project: this.state.project, page: 0 }).then((res) => {
+      getEnvs({ project: this.state.project, page: 0 }).then((res) => {
         if (res) {
-          this.setState({ targets: res.targets });
+          this.setState({ envs: res.envs });
         }
       });
     }
@@ -150,26 +156,22 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   changeStatus = (value: string) => {
-    const values: { componentType: string; project: string } = this.field.getValues();
-    const { componentType, project } = values;
+    const values: { componentType: string; envBindings: string[] } = this.field.getValues();
+    const { componentType, envBindings } = values;
     if (value === 'isCreateComponent') {
       this.field.validateCallback(
-        ['name', 'alias', 'description', 'project', 'componentType'],
+        ['name', 'alias', 'description', 'project', 'componentType', 'envBindings'],
         (error: any) => {
           if (error) {
             return;
           }
-          const envBinding = this.envBind.current?.getValues();
-          if (!envBinding || envBinding.length < 1) {
-            return;
-          }
           const { dispatch } = this.props;
-          if (dispatch) {
-            const { projects } = this.props;
+          if (Array.isArray(envBindings) && envBindings.length > 0) {
+            const { envs } = this.state;
             let namespace = '';
-            projects?.map((p) => {
-              if (p.name == project) {
-                namespace = p.namespace;
+            envs?.map((env: Env) => {
+              if (envBindings[0] == env.name) {
+                namespace = env.namespace;
               }
             });
             dispatch({
@@ -179,7 +181,6 @@ class AppDialog extends React.Component<Props, State> {
           }
           this.setState(
             {
-              envBinding: envBinding,
               dialogStats: value,
             },
             () => {
@@ -242,12 +243,19 @@ class AppDialog extends React.Component<Props, State> {
     const { Row, Col } = Grid;
 
     const { onClose } = this.props;
-    const { visible, t, setVisible, dispatch, projects, clusterList } = this.props;
+    const { visible, t, setVisible, dispatch, projects } = this.props;
 
-    const { envBinding, definitionDetail, dialogStats, targets } = this.state;
+    const { definitionDetail, dialogStats, envs } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
+    const envOptions = envs?.map((env) => {
+      return {
+        label: env.alias ? `${env.alias}(${env.name})` : env.name,
+        value: env.name,
+      };
+    });
+    console.log(envOptions);
     return (
       <DrawerWithFooter
         title={<Translation>New Application</Translation>}
@@ -301,22 +309,22 @@ class AppDialog extends React.Component<Props, State> {
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem
                   label={
-                    <Translation className="font-size-14 font-weight-bold">
-                      Environments
-                    </Translation>
+                    <Translation className="font-size-14 font-weight-bold">Envbinding</Translation>
                   }
                   required={true}
                 >
-                  <EnvPlan
-                    t={this.props.t}
-                    value={envBinding}
-                    projects={projects || []}
-                    syncProjectList={this.props.syncProjectList}
-                    clusterList={clusterList || []}
-                    onUpdateTarget={this.loadDeliveryTarget}
-                    targetList={targets}
-                    project={this.state.project}
-                    ref={this.envBind}
+                  <Select
+                    {...init(`envBindings`, {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please select env',
+                        },
+                      ],
+                    })}
+                    locale={locale.Select}
+                    mode="multiple"
+                    dataSource={envOptions}
                   />
                 </FormItem>
               </Col>

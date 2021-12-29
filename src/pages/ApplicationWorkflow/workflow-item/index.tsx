@@ -182,7 +182,8 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
           currentNode = obj;
         }
       });
-      if (currentNode) {
+      const { visible } = this.state;
+      if (currentNode && !visible) {
         this.setState({
           currentSelectedNodeData: currentNode,
           visible: true,
@@ -284,28 +285,12 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
   };
 
   closeDrawer = () => {
-    this.blurCurrentNode();
     setTimeout(() => {
       this.setState({
         visible: false,
+        currentSelectedNodeData: null,
       });
     });
-  };
-
-  blurCurrentNode = () => {
-    const { nodes } = this.diagramMaker.store.getState();
-    const { currentSelectedNodeData } = this.state;
-    let consumerData = nodes[currentSelectedNodeData.id];
-    if (consumerData) {
-      const diagramMakerData = Object.assign({}, consumerData.diagramMakerData, {
-        selected: false,
-      });
-      consumerData = Object.assign({}, consumerData, { diagramMakerData });
-      this.diagramMaker.store.dispatch({
-        type: 'UPDATENODE',
-        payload: consumerData,
-      });
-    }
   };
 
   createOrUpdateNode = (values: any) => {
@@ -317,7 +302,6 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
       type: 'UPDATENODE',
       payload: consumerData,
     });
-
     this.closeDrawer();
   };
 

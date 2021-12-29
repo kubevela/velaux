@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { Grid, Select, Button, Dialog, Message, Icon, Menu, Dropdown } from '@b-design/ui';
-import type { DeliveryTarget } from '../../../../interface/deliveryTarget';
+import type { Target } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
 import {
   recycleApplicationEnvbinding,
@@ -13,7 +13,6 @@ import type {
   EnvBinding,
 } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
-import AddAndEditEnvBind from '../../../../layout/Application/components/AddAndEditEnvBind';
 import locale from '../../../../utils/locale';
 
 export type GatewayIP = {
@@ -22,7 +21,7 @@ export type GatewayIP = {
   port: number;
 };
 type Props = {
-  targets?: DeliveryTarget[];
+  targets?: Target[];
   applicationStatus?: ApplicationStatus;
   applicationDetail?: ApplicationDetail;
   envName: string;
@@ -97,7 +96,7 @@ class Hearder extends Component<Props, State> {
   };
   deleteEnv = async () => {
     Dialog.confirm({
-      content: 'Are you sure you want to delete the current environment?',
+      content: 'Are you sure you want to delete the current envbinding?',
       onOk: () => {
         const { applicationDetail, envName, updateEnvs } = this.props;
         if (applicationDetail) {
@@ -130,10 +129,10 @@ class Hearder extends Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { t, updateStatusShow } = this.props;
-    const { recycleLoading, deleteLoading, refreshLoading, visibleEnvEditPlan } = this.state;
+    const { recycleLoading, deleteLoading, refreshLoading } = this.state;
     const clusterPlacehole = t('Target Selector').toString();
     const { targets, applicationStatus, gatewayIPs } = this.props;
-    const clusterList = (targets || []).map((item: DeliveryTarget) => ({
+    const clusterList = (targets || []).map((item: Target) => ({
       label: item.alias,
       value: item.name,
     }));
@@ -208,10 +207,6 @@ class Hearder extends Component<Props, State> {
               <Icon type="refresh" />
             </Button>
 
-            <Button onClick={this.showEditDialog} type="secondary" style={{ marginLeft: '16px' }}>
-              <Translation>Edit</Translation>
-            </Button>
-
             <If condition={!applicationStatus || !applicationStatus.status}>
               <Button
                 style={{ marginLeft: '16px' }}
@@ -239,20 +234,6 @@ class Hearder extends Component<Props, State> {
             </If>
           </Col>
         </Row>
-        <If condition={visibleEnvEditPlan}>
-          <AddAndEditEnvBind
-            onClose={() => {
-              this.setState({ visibleEnvEditPlan: false });
-            }}
-            onOK={() => {
-              this.loadEnvbinding();
-              this.loadApplicationWorkflows();
-              this.setState({ visibleEnvEditPlan: false });
-            }}
-            editEnvBinding={this.props.envbinding}
-            key={'EditEnvBind'}
-          />
-        </If>
       </div>
     );
   }

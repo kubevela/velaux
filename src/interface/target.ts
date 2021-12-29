@@ -1,10 +1,7 @@
-import type { Project } from './project';
-
-export type DeliveryTarget = {
+export type Target = {
   id?: string;
   name: string;
   alias?: string;
-  project?: Project;
   description?: string;
   clusterAlias?: string;
   cluster?: {

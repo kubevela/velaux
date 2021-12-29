@@ -16,7 +16,6 @@ type Props = {
   syncProjectList?: () => void;
   field: Field;
   handleSelectNameSpace?: () => {};
-  onChange?: (namespace: string) => void;
   disableNew?: boolean;
 };
 

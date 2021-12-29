@@ -6,11 +6,12 @@ export type Props = {
   label: string | React.ReactNode;
   value: string | React.ReactNode;
   labelSpan?: number;
+  marginBottom?: string;
 };
 
 const Item: React.FC<Props> = (props) => {
   return (
-    <Row style={{ marginBottom: '16px' }}>
+    <Row style={{ marginBottom: props.marginBottom || '16px' }}>
       <Col span={props.labelSpan ? props.labelSpan : 8}>
         <span style={{ fontSize: '14px', color: '#a6a6a6' }}>{props.label}:</span>
       </Col>

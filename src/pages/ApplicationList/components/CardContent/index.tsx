@@ -52,7 +52,12 @@ class CardContent extends React.Component<Props, State> {
     const { Row, Col } = Grid;
     const { applications } = this.props;
     if (applications.length === 0) {
-      return <Empty style={{ minHeight: '400px' }} />;
+      return (
+        <Empty
+          message={<Translation>There is no applications</Translation>}
+          style={{ minHeight: '400px' }}
+        />
+      );
     }
 
     return (
@@ -61,7 +66,7 @@ class CardContent extends React.Component<Props, State> {
           const { name, alias, icon, description, createTime } = item;
           const showName = alias || name;
           return (
-            <Col span="6" className={`card-content-wraper`} key={index}>
+            <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={index}>
               <Card locale={locale.Card} contentHeight="auto">
                 <Link to={`/applications/${name}/config`}>
                   <div className="appplan-card-top flexcenter">
@@ -120,7 +125,7 @@ class CardContent extends React.Component<Props, State> {
                                 type: 'confirm',
                                 content: (
                                   <Translation>
-                                    Unrecoverable after deletion. Are you sure you want to delete
+                                    Unrecoverable after deletion, are you sure you want to delete
                                     it?
                                   </Translation>
                                 ),

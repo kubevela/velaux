@@ -5,12 +5,14 @@ export default {
   state: {
     addonsList: [],
     registryList: [],
+    addonListMessage: '',
   },
   reducers: {
     updateAddonsList(state, { type, payload }) {
       return {
         ...state,
-        addonsList: payload || [],
+        addonsList: payload.addons || [],
+        addonListMessage: payload.message,
       };
     },
     updateAddonRegistrysList(state, { type, payload }) {
@@ -23,8 +25,12 @@ export default {
   effects: {
     *getAddonsList(action, { call, put }) {
       const result = yield call(getAddonsList, action.payload);
-      const addonsList = getAddonsCardList(result);
-      yield put({ type: 'updateAddonsList', payload: addonsList || [] });
+      if (result) {
+        yield put({ type: 'updateAddonsList', payload: result });
+        if (action.callback) {
+          action.callback(result);
+        }
+      }
     },
     *getAddonRegistrysList(action, { call, put }) {
       const result = yield call(getAddonRegistrysList, action.payload);
@@ -33,28 +39,3 @@ export default {
     },
   },
 };
-
-function getAddonsCardList(data) {
-  if (!data) {
-    return [];
-  }
-  const addonsList = data.addons;
-  if (addonsList === null) {
-    return [];
-  }
-  const addonsCardContent = [];
-  for (const item of addonsList) {
-    const rules = item.gatewayRule && item.gatewayRule[0];
-    const { protocol = '', address = '', componentPort = '' } = rules || {};
-    const href = protocol + address + componentPort;
-    const addons = {
-      name: item.name,
-      icon: item.icon,
-      tags: item.tags,
-      description: item.description,
-      version: item.version,
-    };
-    addonsCardContent.push(addons);
-  }
-  return addonsCardContent;
-}

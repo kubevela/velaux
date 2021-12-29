@@ -258,6 +258,12 @@ export function terminateApplicationWorkflowRecord(params: {
   ).then((res) => res);
 }
 
+export function getAppliationTriggers(params: { appName: string }) {
+  const { appName } = params;
+  const gurl = isMock ? `${getTrait_mock}` : `${application}/${appName}/triggers`;
+  return get(gurl, {}).then((res) => res);
+}
+
 export function updateApplication(params: any) {
   const _url = isMock ? `${updateApplicationEnv_mock}` : `${application}/${params.name}`;
   return put(_url, params).then((res) => res);

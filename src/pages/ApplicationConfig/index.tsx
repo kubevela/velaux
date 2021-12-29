@@ -3,16 +3,28 @@ import { Grid, Button, Card, Message } from '@b-design/ui';
 import './index.less';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
-import { getTraitDefinitions, getAppliationComponent, deleteTrait } from '../../api/application';
+import {
+  getTraitDefinitions,
+  getAppliationComponent,
+  deleteTrait,
+  getAppliationTriggers,
+} from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
 import Item from '../../components/Item';
 import TraitDialog from './components/TraitDialog';
 import TraitsList from './components/TraitsList';
-import type { ApplicationDetail, Trait, ApplicationComponent } from '../../interface/application';
+import type {
+  ApplicationDetail,
+  Trait,
+  ApplicationComponent,
+  EnvBinding,
+  Trigger,
+} from '../../interface/application';
 import { momentDate } from '../../utils/common';
 import EditProperties from './components/EditProperties';
 import locale from '../../utils/locale';
+import TriggerList from './components/TriggerList';
 
 const { Row, Col } = Grid;
 
@@ -29,6 +41,7 @@ type Props = {
   applicationDetail?: ApplicationDetail;
   components?: ApplicationComponent[];
   componentsApp?: string;
+  envbinding?: EnvBinding[];
 };
 
 type State = {
@@ -40,6 +53,7 @@ type State = {
   mainComponent?: ApplicationComponent;
   traitItem: Trait;
   visibleEditComponentProperties: boolean;
+  triggers: Trigger[];
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -56,6 +70,7 @@ class ApplicationConfig extends Component<Props, State> {
       traitDefinitions: [],
       traitItem: { type: '' },
       visibleEditComponentProperties: false,
+      triggers: [],
     };
   }
 
@@ -69,6 +84,7 @@ class ApplicationConfig extends Component<Props, State> {
         this.onGetAppliationComponent();
       });
     }
+    this.onGetAppliationTrigger();
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -91,6 +107,20 @@ class ApplicationConfig extends Component<Props, State> {
       if (res) {
         this.setState({
           mainComponent: res,
+        });
+      }
+    });
+  }
+
+  onGetAppliationTrigger() {
+    const { appName } = this.state;
+    const params = {
+      appName,
+    };
+    getAppliationTriggers(params).then((res: any) => {
+      if (res) {
+        this.setState({
+          triggers: res.triggers || [],
         });
       }
     });
@@ -151,7 +181,7 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   render() {
-    const { applicationDetail, dispatch } = this.props;
+    const { applicationDetail, dispatch, envbinding } = this.props;
     const {
       visibleTrait,
       isEditTrait,
@@ -161,6 +191,7 @@ class ApplicationConfig extends Component<Props, State> {
       mainComponent,
       traitItem,
       visibleEditComponentProperties,
+      triggers,
     } = this.state;
     return (
       <div>
@@ -249,6 +280,14 @@ class ApplicationConfig extends Component<Props, State> {
             }}
             onAdd={this.onAddTrait}
           />
+          <If condition={triggers.length > 0}>
+            <Row>
+              <Col span={24} className="padding16">
+                <Title actions={[]} title={<Translation>Triggers</Translation>} />
+              </Col>
+            </Row>
+            <TriggerList triggers={triggers} />
+          </If>
         </If>
 
         <If condition={visibleTrait}>
@@ -274,6 +313,9 @@ class ApplicationConfig extends Component<Props, State> {
               this.setState({ visibleEditComponentProperties: false });
             }}
             applicationDetail={applicationDetail}
+            defaultEnv={
+              Array.isArray(envbinding) && envbinding.length > 0 ? envbinding[0] : undefined
+            }
             component={mainComponent}
             dispatch={dispatch}
           />

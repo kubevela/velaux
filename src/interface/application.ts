@@ -1,4 +1,4 @@
-import type { DeliveryTarget } from './deliveryTarget';
+import type { Target } from './target';
 import type { Project } from './project';
 
 export interface ApplicationDetail {
@@ -23,13 +23,11 @@ export interface EnvBinding {
   alias?: string;
   description?: string;
   targetNames: string[];
-  deliveryTargets?: DeliveryTarget[];
-  componentSelector?: {
-    components: string[];
-  };
+  targets?: Target[];
   createTime?: string;
   updateTime?: string;
-  appDeployName?: string;
+  appDeployName: string;
+  appDeployNamespace: string;
 }
 
 export interface WorkflowStatus {
@@ -205,7 +203,7 @@ export interface Revisions {
 
 export interface ApplicationStatistics {
   envCount: number;
-  deliveryTargetCount: number;
+  targetCount: number;
   revisonCount: number;
   workflowCount: number;
 }
@@ -244,4 +242,16 @@ export interface WorkflowStepItem {
   reason?: string;
   firstExecuteTime?: string;
   lastExecuteTime?: string;
+}
+
+export interface Trigger {
+  name: string;
+  alias?: string;
+  description?: string;
+  workflowName: string;
+  type: 'webhook';
+  payloadType?: 'custom' | 'dockerHub' | 'ACR' | 'harbor' | 'artifactory';
+  token: string;
+  createTime?: string;
+  updateTime?: string;
 }

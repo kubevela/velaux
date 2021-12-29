@@ -1,4 +1,4 @@
-import type { UIParam } from './application';
+import type { ApplicationStatus, UIParam } from './application';
 
 export interface Addon {
   name: string;
@@ -8,10 +8,25 @@ export interface Addon {
   detail?: string;
   tags?: string[];
   createTime?: string;
-  deploy_to?: { control_plane: boolean; runtime_cluster: boolean };
+  deployTo?: { controlPlane: boolean; runtimeCluster: boolean };
   dependencies?: { name: string }[];
   definitions?: Definition[];
   uiSchema?: UIParam[];
+  registryName?: string;
+}
+
+export interface AddonStatus {
+  args: any;
+  phase: 'disabled' | 'enabled' | 'enabling' | 'suspend' | 'disabling' | '';
+  name: string;
+  appStatus: ApplicationStatus;
+  clusters?: Record<string, AddonClusterInfo>;
+}
+
+export interface AddonClusterInfo {
+  domain: string;
+  access: string;
+  loadBalancerIP: string;
 }
 
 export interface Definition {
@@ -29,10 +44,16 @@ export interface RegistryGitSource {
 export interface RegistryOssSource {
   end_point: string;
   bucket: string;
+  path: string;
 }
 
 export interface AddonRegistry {
   name: string;
   git: RegistryGitSource;
   oss: RegistryOssSource;
+}
+
+export interface AddonBaseStatus {
+  name: string;
+  phase: 'disabled' | 'enabled' | 'enabling' | 'suspend' | 'disabling';
 }
