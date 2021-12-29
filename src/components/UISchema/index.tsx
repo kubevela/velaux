@@ -20,7 +20,6 @@ import locale from '../../utils/locale';
 import HelmValues from '../../extends/HelmValues';
 
 type Props = {
-  _key?: string;
   inline?: boolean;
   id?: string;
   value?: any;
@@ -123,6 +122,7 @@ class UISchema extends Component<Props, State> {
     if (param.disable) {
       return;
     }
+
     const getGroup = (children: React.ReactNode) => {
       return (
         <Group
@@ -146,10 +146,12 @@ class UISchema extends Component<Props, State> {
         </Group>
       );
     };
+    const { value } = this.props;
+    const initValue = param.validate.defaultValue || (value && value[param.jsonKey]);
     switch (param.uiType) {
       case 'Switch':
         const switchResult = init(param.jsonKey, {
-          initValue: param.validate.defaultValue,
+          initValue: initValue,
           rules: converRule(param.validate),
         });
         return (
@@ -180,7 +182,7 @@ class UISchema extends Component<Props, State> {
           >
             <Input
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 rules: converRule(param.validate),
               })}
             />
@@ -199,7 +201,7 @@ class UISchema extends Component<Props, State> {
             <Input
               htmlType="password"
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 rules: converRule(param.validate),
               })}
             />
@@ -218,7 +220,7 @@ class UISchema extends Component<Props, State> {
             <Select
               locale={locale.Select}
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 rules: converRule(param.validate),
               })}
               dataSource={param.validate && param.validate.options}
@@ -236,7 +238,7 @@ class UISchema extends Component<Props, State> {
           >
             <Input
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 rules: converRule(param.validate),
               })}
               htmlType="number"
@@ -254,7 +256,7 @@ class UISchema extends Component<Props, State> {
           >
             <ImageInput
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 rules: [
                   {
                     required: true,
@@ -270,7 +272,7 @@ class UISchema extends Component<Props, State> {
         const children = (
           <KV
             {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
+              initValue: initValue,
               rules: converRule(param.validate),
             })}
             additional={param.additional}
@@ -282,7 +284,7 @@ class UISchema extends Component<Props, State> {
         return getGroup(
           <HelmValues
             {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
+              initValue: initValue,
               rules: converRule(param.validate),
             })}
             additional={param.additional}
@@ -293,7 +295,7 @@ class UISchema extends Component<Props, State> {
         return getGroup(
           <Strings
             {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
+              initValue: initValue,
               rules: converRule(param.validate),
             })}
           />,
@@ -349,7 +351,7 @@ class UISchema extends Component<Props, State> {
           >
             <CPUNumber
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 rules: [
                   {
                     required: param.validate.required,
@@ -372,7 +374,7 @@ class UISchema extends Component<Props, State> {
           >
             <MemoryNumber
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 rules: [
                   {
                     required: param.validate.required,
@@ -409,7 +411,7 @@ class UISchema extends Component<Props, State> {
             >
               <UISchema
                 {...init(param.jsonKey, {
-                  initValue: param.validate.defaultValue,
+                  initValue: initValue,
                   rules: [
                     // {
                     //   validator: validator,
@@ -432,7 +434,7 @@ class UISchema extends Component<Props, State> {
             title={param.label}
             description={param.description}
             {...init(param.jsonKey, {
-              initValue: param.validate.defaultValue,
+              initValue: initValue,
               rules: converRule(param.validate),
             })}
           />
@@ -449,7 +451,7 @@ class UISchema extends Component<Props, State> {
               param={param.subParameters}
               parameterGroupOption={param.subParameterGroupOption}
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 // rules: [
                 //   {
                 //     validator: validator,
@@ -464,17 +466,16 @@ class UISchema extends Component<Props, State> {
       case 'Ignore':
         if (param.subParameters && param.subParameters.length > 0) {
           const ref: React.RefObject<UISchema> = React.createRef();
-          const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+          const validator = (rule: Rule, v: any, callback: (error?: string) => void) => {
             ref.current?.validate(callback);
           };
           return (
             <UISchema
               ref={ref}
-              key={param.jsonKey}
               uiSchema={param.subParameters}
               inline={inline}
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 rules: [
                   {
                     validator: validator,
@@ -497,7 +498,7 @@ class UISchema extends Component<Props, State> {
           >
             <K8sObjectsCode
               {...init(param.jsonKey, {
-                initValue: param.validate.defaultValue,
+                initValue: initValue,
                 rules: [
                   {
                     required: param.validate.required,

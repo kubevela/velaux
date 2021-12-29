@@ -164,7 +164,6 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
               newNode[action.payload.id] = action.payload;
               const newNodes = Object.assign({}, state.nodes, newNode);
               const newState = Object.assign({}, state, { nodes: newNodes });
-              console.log(newState);
               return newState;
             default:
               return state;

@@ -17,7 +17,7 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import Group from '../../../../extends/Group';
 import Translation from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
-import type { Addon } from '../../../../interface/addon';
+import type { Addon, AddonStatus } from '../../../../interface/addon';
 import locale from '../../../../utils/locale';
 import StatusShow from '../../../../components/StatusShow';
 import type { ApplicationStatus } from '../../../../interface/application';
@@ -87,7 +87,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
   loadAddonStatus = () => {
     this.setState({ statusLoading: true });
     getAddonsStatus({ name: this.props.addonName })
-      .then((res) => {
+      .then((res: AddonStatus) => {
         if (!res) return;
         if (res.phase == 'enabling' && !this.statusLoop) {
           this.statusLoop = true;

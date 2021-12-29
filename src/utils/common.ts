@@ -64,6 +64,13 @@ export function momentDate(time: undefined | string): string {
   return moment(time).format('YYYY/MM/DD HH:mm:ss');
 }
 
+export function momentShortDate(time: undefined | string): string {
+  if (!time) {
+    return '';
+  }
+  return moment(time).format('YYYY/MM/DD');
+}
+
 export const checkName = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/;
 export const urlRegular =
   /(https|http|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g;

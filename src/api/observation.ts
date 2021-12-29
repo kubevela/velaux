@@ -77,3 +77,20 @@ export function listApplicationService(params: {
     },
   });
 }
+
+export function listContainerLog(params: {
+  cluster: string;
+  namespace: string;
+  pod: string;
+  container: string;
+  previous: boolean;
+  timestamps: boolean;
+  tailLines: number;
+}) {
+  const urlParams = `collect-logs{cluster=${params.cluster}, namespace=${params.namespace}, pod=${params.pod}, container=${params.container}, previous=${params.previous}, timestamps=${params.timestamps}, tailLines=${params.tailLines}}`;
+  return get('/api/v1/query', {
+    params: {
+      velaql: urlParams,
+    },
+  });
+}

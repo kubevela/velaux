@@ -96,7 +96,6 @@ class AppDialog extends React.Component<Props, State> {
         description,
         alias,
         name,
-        project,
         icon = '',
         componentType,
         properties,
@@ -110,7 +109,7 @@ class AppDialog extends React.Component<Props, State> {
         icon,
         name,
         description,
-        project,
+        project: 'default',
         envBinding: envbinding,
         component: {
           alias,
@@ -171,7 +170,7 @@ class AppDialog extends React.Component<Props, State> {
             const { envs } = this.state;
             let namespace = '';
             envs?.map((env: Env) => {
-              if ((envBindings[0] = env.name)) {
+              if (envBindings[0] == env.name) {
                 namespace = env.namespace;
               }
             });
@@ -256,6 +255,7 @@ class AppDialog extends React.Component<Props, State> {
         value: env.name,
       };
     });
+    console.log(envOptions);
     return (
       <DrawerWithFooter
         title={<Translation>New Application</Translation>}

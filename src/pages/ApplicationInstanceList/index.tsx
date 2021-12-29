@@ -185,7 +185,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         const outputs = configuration.status?.apply?.outputs;
         let instanceName = '';
         if (outputs) {
-          instanceName = outputs[identifierKey].value;
+          if (outputs[identifierKey]) {
+            instanceName = outputs[identifierKey].value;
+          }
           if (url) {
             const params = url.match(/\{(.+?)\}/g);
             if (Array.isArray(params) && params.length > 0) {
@@ -480,10 +482,16 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const { applicationStatus, applicationDetail } = this.props;
     const { podList, loading, showStatus, cloudInstance, services } = this.state;
     const columns = this.getCloumns();
+    const envbinding = this.getEnvbindingByName();
     const expandedRowRender = (record: PodBase) => {
       return (
         <div style={{ margin: '16px 0' }}>
-          <PodDetail pod={record} />
+          <PodDetail
+            env={envbinding}
+            clusterName={record.cluster}
+            application={applicationDetail}
+            pod={record}
+          />
         </div>
       );
     };
@@ -509,7 +517,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const {
       params: { envName, appName },
     } = this.props.match;
-    const envbinding = this.getEnvbindingByName();
+
     return (
       <div>
         <Header

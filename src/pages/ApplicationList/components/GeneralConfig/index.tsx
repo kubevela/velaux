@@ -6,6 +6,7 @@ import { checkName } from '../../../../utils/common';
 import './index.less';
 import Translation from '../../../../components/Translation';
 import type { Project } from '../../../../interface/project';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   visible: boolean;
@@ -108,16 +109,17 @@ class GeneralConfig extends React.Component<Props, State> {
               </FormItem>
             </Col>
           </Row>
-
-          <Row>
-            <Col span={24} style={{ padding: '0 8px' }}>
-              <ProjectForm
-                field={this.props.field}
-                projectList={projectList}
-                syncProjectList={this.props.syncProjectList}
-              />
-            </Col>
-          </Row>
+          <If condition={false}>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <ProjectForm
+                  field={this.props.field}
+                  projectList={projectList}
+                  syncProjectList={this.props.syncProjectList}
+                />
+              </Col>
+            </Row>
+          </If>
         </Form>
       </div>
     );
