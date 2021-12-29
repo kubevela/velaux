@@ -96,7 +96,6 @@ class AppDialog extends React.Component<Props, State> {
         description,
         alias,
         name,
-        project,
         icon = '',
         componentType,
         properties,
@@ -110,7 +109,7 @@ class AppDialog extends React.Component<Props, State> {
         icon,
         name,
         description,
-        project,
+        project: 'default',
         envBinding: envbinding,
         component: {
           alias,
