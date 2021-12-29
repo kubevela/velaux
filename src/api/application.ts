@@ -257,3 +257,9 @@ export function terminateApplicationWorkflowRecord(params: {
     {},
   ).then((res) => res);
 }
+
+export function getAppliationTriggers(params: { appName: string }) {
+  const { appName } = params;
+  const gurl = isMock ? `${getTrait_mock}` : `${application}/${appName}/triggers`;
+  return get(gurl, {}).then((res) => res);
+}

@@ -243,3 +243,15 @@ export interface WorkflowStepItem {
   firstExecuteTime?: string;
   lastExecuteTime?: string;
 }
+
+export interface Trigger {
+  name: string;
+  alias?: string;
+  description?: string;
+  workflowName: string;
+  type: 'webhook';
+  payloadType?: 'custom' | 'dockerHub' | 'ACR' | 'harbor' | 'artifactory';
+  token: string;
+  createTime?: string;
+  updateTime?: string;
+}

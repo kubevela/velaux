@@ -17,7 +17,7 @@ type Props = {
 class TraitsList extends Component<Props> {
   handleDelete = (traitType: string) => {
     Dialog.alert({
-      content: 'Marke Sure Delete Trait',
+      content: 'Are you sure want to delete this trait?',
       onOk: () => {
         this.props.onDeleteTrait(traitType || '');
       },
@@ -33,16 +33,16 @@ class TraitsList extends Component<Props> {
       <div className="traits-list-warper">
         <Row wrap={true}>
           {(traits || []).map((item: Trait) => (
-            <Col span={8} key={item.type} className="padding16">
+            <Col xl={8} m={12} s={24} key={item.type} className="padding16">
               <Card locale={locale.Card}>
                 <div className="traits-list-nav">
                   <div className="traits-list-title">
-                    {item.alias}({item.type})
+                    {item.alias ? `${item.alias}(${item.type})` : item.type}
                   </div>
                   <div className="traits-list-operation">
                     <Icon
                       type="ashbin1"
-                      size="medium"
+                      size={14}
                       className="margin-right-16 cursor-pointer"
                       onClick={() => {
                         this.handleDelete(item.type || '');
@@ -50,7 +50,7 @@ class TraitsList extends Component<Props> {
                     />
                     <Icon
                       type="set"
-                      size="medium"
+                      size={14}
                       className="cursor-pointer"
                       onClick={() => {
                         changeTraitStats(true, item);
@@ -67,7 +67,7 @@ class TraitsList extends Component<Props> {
             <Empty
               message={
                 <span>
-                  <Translation>No Traits, </Translation>
+                  <Translation>There is no traits, </Translation>
                   <a onClick={onAdd}>
                     <Translation>New</Translation>
                   </a>
