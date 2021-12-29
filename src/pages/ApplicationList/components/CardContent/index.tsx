@@ -66,8 +66,7 @@ class CardContent extends React.Component<Props, State> {
                     setVisible(true);
                   }}
                 >
-                  {' '}
-                  Please click create applications{' '}
+                  Please click create applications
                 </Button>
               </main>
             </section>
