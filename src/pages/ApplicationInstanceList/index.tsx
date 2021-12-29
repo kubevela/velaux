@@ -185,7 +185,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         const outputs = configuration.status?.apply?.outputs;
         let instanceName = '';
         if (outputs) {
-          instanceName = outputs[identifierKey].value;
+          if (outputs[identifierKey]) {
+            instanceName = outputs[identifierKey].value;
+          }
           if (url) {
             const params = url.match(/\{(.+?)\}/g);
             if (Array.isArray(params) && params.length > 0) {
