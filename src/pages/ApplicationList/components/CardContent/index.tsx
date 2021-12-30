@@ -2,7 +2,7 @@ import type { MouseEvent } from 'react';
 import React from 'react';
 import './index.less';
 import { Link } from 'dva/router';
-import { Grid, Card, Menu, Dropdown, Dialog } from '@b-design/ui';
+import { Grid, Card, Menu, Dropdown, Dialog, Button } from '@b-design/ui';
 import type { ApplicationBase } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 import { momentDate } from '../../../../utils/common';
@@ -21,6 +21,7 @@ type Props = {
   applications: ApplicationBase[];
   editAppPlan: (name: string) => void;
   deleteAppPlan: (name: string) => void;
+  setVisible: (visible: boolean) => void;
 };
 
 class CardContent extends React.Component<Props, State> {
@@ -50,11 +51,26 @@ class CardContent extends React.Component<Props, State> {
   };
   render() {
     const { Row, Col } = Grid;
-    const { applications } = this.props;
+    const { applications, setVisible } = this.props;
     if (applications.length === 0) {
       return (
         <Empty
-          message={<Translation>There is no applications</Translation>}
+          message={
+            <section style={{ textAlign: 'center' }}>
+              <Translation>There is no applications</Translation>
+              <main>
+                <Button
+                  component="a"
+                  ghost={true}
+                  onClick={() => {
+                    setVisible(true);
+                  }}
+                >
+                  Creating first application
+                </Button>
+              </main>
+            </section>
+          }
           style={{ minHeight: '400px' }}
         />
       );

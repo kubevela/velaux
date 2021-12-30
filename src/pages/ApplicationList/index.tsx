@@ -135,6 +135,9 @@ class Application extends Component<Props, State> {
             applications={applicationList}
             editAppPlan={() => {}}
             deleteAppPlan={this.onDeleteAppPlan}
+            setVisible={(visible) => {
+              this.setState({ showAddApplication: visible });
+            }}
           />
         </Loading>
 
