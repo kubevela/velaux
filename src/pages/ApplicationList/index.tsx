@@ -10,6 +10,7 @@ import { If } from 'tsx-control-statements/components';
 import { deleteApplicationPlan, getComponentdefinitions } from '../../api/application';
 import type { ApplicationBase } from '../../interface/application';
 import type { Project } from '../../interface/project';
+import EditAppDialog from './components/EditAppDialog';
 
 type Props = {
   dispatch: ({}) => {};
@@ -23,6 +24,8 @@ type State = {
   showAddApplication: boolean;
   componentDefinitions: [];
   isLoading: boolean;
+  showEditApplication: boolean;
+  editItem: ApplicationBase;
 };
 
 @connect((store: any) => {
@@ -35,6 +38,14 @@ class Application extends Component<Props, State> {
       showAddApplication: false,
       componentDefinitions: [],
       isLoading: false,
+      showEditApplication: false,
+      editItem: {
+        name: '',
+        alias: '',
+        icon: '',
+        description: '',
+        createTime: '',
+      },
     };
   }
 
@@ -106,9 +117,24 @@ class Application extends Component<Props, State> {
     this.getApplications({});
   };
 
+  closeEditAppDialog = () => {
+    this.setState({
+      showEditApplication: false,
+    });
+    this.getApplications({});
+  };
+
+  editAppPlan = (editItem: ApplicationBase) => {
+    this.setState({
+      editItem,
+      showEditApplication: true,
+    });
+  };
+
   render() {
     const { applicationList, projects, targets, dispatch, envs } = this.props;
-    const { showAddApplication, componentDefinitions, isLoading } = this.state;
+    const { showAddApplication, componentDefinitions, isLoading, showEditApplication, editItem } =
+      this.state;
     return (
       <div>
         <Title
@@ -133,7 +159,9 @@ class Application extends Component<Props, State> {
         <Loading visible={isLoading} fullScreen>
           <CardContend
             applications={applicationList}
-            editAppPlan={() => {}}
+            editAppPlan={(item: ApplicationBase) => {
+              this.editAppPlan(item);
+            }}
             deleteAppPlan={this.onDeleteAppPlan}
             setVisible={(visible) => {
               this.setState({ showAddApplication: visible });
@@ -155,6 +183,14 @@ class Application extends Component<Props, State> {
             }}
             onClose={this.closeAddApplication}
             dispatch={dispatch}
+          />
+        </If>
+
+        <If condition={showEditApplication}>
+          <EditAppDialog
+            editItem={editItem}
+            onOK={this.closeEditAppDialog}
+            onClose={this.closeEditAppDialog}
           />
         </If>
       </div>
