@@ -65,14 +65,14 @@ class TableList extends Component<Props> {
           return <span>{v}</span>;
         },
       },
-      {
-        key: 'project',
-        title: <Translation>Project</Translation>,
-        dataIndex: 'project',
-        cell: (v: NameAlias) => {
-          return <span>{v.alias || v.name}</span>;
-        },
-      },
+      // {
+      //   key: 'project',
+      //   title: <Translation>Project</Translation>,
+      //   dataIndex: 'project',
+      //   cell: (v: NameAlias) => {
+      //     return <span>{v.alias || v.name}</span>;
+      //   },
+      // },
       {
         key: 'description',
         title: <Translation>Description</Translation>,
@@ -85,12 +85,12 @@ class TableList extends Component<Props> {
         key: 'targets',
         title: <Translation>Targets</Translation>,
         dataIndex: 'targets',
-        cell: (v: NameAlias[]) => {
+        cell: (v?: NameAlias[]) => {
           return (
             <TagGroup>
-              {v.map((target: NameAlias) => {
+              {v?.map((target: NameAlias) => {
                 return (
-                  <Tag color="green">
+                  <Tag color="green" key={target.name}>
                     <Link to="/targets"> {target.alias ? target.alias : target.name}</Link>
                   </Tag>
                 );

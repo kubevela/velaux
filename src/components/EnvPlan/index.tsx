@@ -263,7 +263,7 @@ export default class EnvPlan extends React.Component<Props, State> {
         </div>
         <div className="env-plan-option">
           <Button onClick={this.addEnvPlanItem} type="secondary">
-            <Translation>New Envbinding</Translation>
+            <Translation>Bind Environment</Translation>
           </Button>
         </div>
         <If condition={showAddTarget}>

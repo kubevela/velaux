@@ -25,7 +25,7 @@ export function getLeftSider(pathname) {
           className: isEnv,
           link: '/envs',
           iconType: 'Directory-tree',
-          navName: 'Envs',
+          navName: 'Environments',
         },
       ],
     },

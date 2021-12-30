@@ -124,9 +124,9 @@ class targetList extends React.Component<Props, State> {
     return (
       <div>
         <ListTitle
-          title="Envs"
-          subTitle="The env coordinates the matching relationship between applications and resources."
-          addButtonTitle="New Env"
+          title="Environments"
+          subTitle="The environment coordinates the matching relationship between applications and resources."
+          addButtonTitle="New Environment"
           addButtonClick={() => {
             this.setState({ visibleEnvDialog: true, envItem: undefined });
           }}
