@@ -84,7 +84,7 @@ class Hearder extends Component<Props, State> {
           recycleApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then(
             (re) => {
               if (re) {
-                Message.success('recycle applicationn env success');
+                Message.success('recycle applicationn environment success');
                 refresh();
               }
             },
@@ -96,14 +96,14 @@ class Hearder extends Component<Props, State> {
   };
   deleteEnv = async () => {
     Dialog.confirm({
-      content: 'Are you sure you want to delete the current envbinding?',
+      content: 'Are you sure you want to delete the current environment binding?',
       onOk: () => {
         const { applicationDetail, envName, updateEnvs } = this.props;
         if (applicationDetail) {
           deleteApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then(
             (re) => {
               if (re) {
-                Message.success('delete applicationn env success');
+                Message.success('delete applicationn environment binding success');
                 updateEnvs();
               }
             },

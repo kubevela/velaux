@@ -142,7 +142,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
         <Form {...formItemLayout} field={this.field}>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Env</Translation>} required={true}>
+              <FormItem label={<Translation>Environment</Translation>} required={true}>
                 <Select
                   name="name"
                   locale={locale.Select}

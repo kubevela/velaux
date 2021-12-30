@@ -255,7 +255,6 @@ class AppDialog extends React.Component<Props, State> {
         value: env.name,
       };
     });
-    console.log(envOptions);
     return (
       <DrawerWithFooter
         title={<Translation>New Application</Translation>}

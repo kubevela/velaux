@@ -296,8 +296,15 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
   createOrUpdateNode = (values: any) => {
     const { nodes } = this.diagramMaker.store.getState();
     const { currentSelectedNodeData } = this.state;
-    let consumerData = nodes[currentSelectedNodeData.id];
-    consumerData = Object.assign({}, consumerData, { consumerData: values });
+    let consumerData: NodeItem = nodes[currentSelectedNodeData.id];
+    consumerData = Object.assign({}, consumerData, {
+      consumerData: values,
+      diagramMakerData: {
+        selected: false,
+        size: consumerData.diagramMakerData.size,
+        position: consumerData.diagramMakerData.position,
+      },
+    });
     this.diagramMaker.store.dispatch({
       type: 'UPDATENODE',
       payload: consumerData,
