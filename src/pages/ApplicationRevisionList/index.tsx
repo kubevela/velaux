@@ -91,10 +91,15 @@ class ApplicationRevisionList extends React.Component<Props, State> {
   };
 
   handleChange = (page: number) => {
-    this.setState({
-      page,
-      pageSize: 10,
-    });
+    this.setState(
+      {
+        page,
+        pageSize: 10,
+      },
+      () => {
+        this.getRevisionList();
+      },
+    );
   };
 
   render() {

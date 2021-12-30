@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Card, Dialog, Grid, Message } from '@b-design/ui';
-import type { Trigger } from '../../../../interface/application';
+import type { ApplicationComponent, Trigger } from '../../../../interface/application';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { momentDate } from '../../../../utils/common';
 import './index.less';
@@ -12,6 +12,7 @@ import Item from '../../../../components/Item';
 
 type Props = {
   triggers: Trigger[];
+  component?: ApplicationComponent;
 };
 
 type State = {
@@ -31,13 +32,25 @@ class TriggerList extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { triggers } = this.props;
+    const { triggers, component } = this.props;
     const { showTrigger } = this.state;
     const domain = `${window.location.protocol}//${window.location.host}`;
     const webHookURL = `${domain}/api/v1/webhook/${showTrigger?.token}`;
     let command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL}`;
-    if (showTrigger?.payloadType == 'custom') {
-      command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL} -d '{"upgrade":{},"codeInfo":{}}'`;
+    if (showTrigger?.payloadType == 'custom' && component) {
+      const body = {
+        upgrade: {
+          [component.name]: { image: component.properties && component.properties.image },
+        },
+        codeInfo: {
+          commit: '',
+          branch: '',
+          user: '',
+        },
+      };
+      command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL} -d '${JSON.stringify(
+        body,
+      )}'`;
     }
     const copy = (
       <span style={{ lineHeight: '16px', marginLeft: '8px' }}>
@@ -69,7 +82,7 @@ class TriggerList extends Component<Props, State> {
         <Row wrap={true}>
           {(triggers || []).map((item: Trigger) => (
             <Col xl={8} m={12} s={24} key={item.type} className="padding16">
-              <Card locale={locale.Card}>
+              <Card free={true} style={{ padding: '16px' }} locale={locale.Card}>
                 <div className="traits-list-nav">
                   <div className="traits-list-title">
                     {item.alias ? `${item.alias}(${item.name})` : item.name}
@@ -111,8 +124,17 @@ class TriggerList extends Component<Props, State> {
                       />
                     </Col>
                   </Row>
+                  <Row>
+                    <Col span={24}>
+                      <Item
+                        marginBottom="8px"
+                        labelSpan={12}
+                        label={<Translation>Create Time</Translation>}
+                        value={momentDate(item.createTime)}
+                      />
+                    </Col>
+                  </Row>
                 </div>
-                <div className="traits-list-date">{momentDate(item.createTime)}</div>
               </Card>
             </Col>
           ))}
@@ -171,7 +193,7 @@ class TriggerList extends Component<Props, State> {
               </Col>
             </Row>
             <Row>
-              <Col span={24}>
+              <Col span={24} className="curlCode">
                 <h4>
                   <Translation>Curl Command</Translation>
                   <CopyToClipboard
@@ -184,6 +206,11 @@ class TriggerList extends Component<Props, State> {
                   </CopyToClipboard>
                 </h4>
                 <code>{command}</code>
+                <span>
+                  <Translation>
+                    Please set the properties that need to be changed, such as `image`
+                  </Translation>
+                </span>
               </Col>
             </Row>
           </Dialog>

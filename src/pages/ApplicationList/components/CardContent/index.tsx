@@ -66,7 +66,7 @@ class CardContent extends React.Component<Props, State> {
                     setVisible(true);
                   }}
                 >
-                  Creating first application
+                  <Translation>New Application</Translation>
                 </Button>
               </main>
             </section>

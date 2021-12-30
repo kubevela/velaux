@@ -83,7 +83,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
     createApplicationEnv(params)
       .then((res) => {
         if (res) {
-          Message.success(<Translation>Create Envbinding Success</Translation>);
+          Message.success(<Translation>Bind Environment Success</Translation>);
           this.props.onOK();
         }
       })
@@ -96,7 +96,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
     updateApplicationEnv(params)
       .then((res: any) => {
         if (res) {
-          Message.success(<Translation>Save Envbinding Success</Translation>);
+          Message.success(<Translation>Bind Environment Success</Translation>);
           this.props.onOK();
         }
       })
@@ -137,7 +137,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
             {!isEdit ? <Translation>Submit</Translation> : <Translation>Save</Translation>}
           </Button>
         }
-        title={<Translation>{!isEdit ? 'New Envbinding' : 'Edit Envbinding'}</Translation>}
+        title={<Translation>Bind Environment</Translation>}
       >
         <Form {...formItemLayout} field={this.field}>
           <Row>

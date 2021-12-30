@@ -153,7 +153,13 @@ class EnvDialog extends React.Component<Props, State> {
           locale={locale.Dialog}
           className={'commonDialog'}
           height="auto"
-          title={isEdit ? <Translation>Edit Env</Translation> : <Translation>New Env</Translation>}
+          title={
+            isEdit ? (
+              <Translation>Edit Environment</Translation>
+            ) : (
+              <Translation>New Environment</Translation>
+            )
+          }
           autoFocus={true}
           isFullScreen={true}
           visible={visible}

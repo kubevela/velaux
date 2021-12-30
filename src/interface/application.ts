@@ -199,6 +199,11 @@ export interface Revisions {
   status?: string;
   triggerType?: string;
   version: string;
+  codeInfo?: {
+    commit?: string;
+    branch?: string;
+    user?: string;
+  };
 }
 
 export interface ApplicationStatistics {

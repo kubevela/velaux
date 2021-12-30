@@ -214,19 +214,14 @@ class ApplicationConfig extends Component<Props, State> {
               <Row>
                 <Col span={12}>
                   <Item
-                    label={<Translation>Alias</Translation>}
-                    value={applicationDetail && applicationDetail.alias}
+                    label={<Translation>Name</Translation>}
+                    value={applicationDetail && applicationDetail.name}
                   />
                 </Col>
                 <Col span={12}>
                   <Item
-                    label={<Translation>Project</Translation>}
-                    value={
-                      applicationDetail &&
-                      (applicationDetail.project?.alias
-                        ? applicationDetail.project?.alias
-                        : applicationDetail.project?.name)
-                    }
+                    label={<Translation>Alias</Translation>}
+                    value={applicationDetail && applicationDetail.alias}
                   />
                 </Col>
               </Row>
@@ -286,7 +281,7 @@ class ApplicationConfig extends Component<Props, State> {
                 <Title actions={[]} title={<Translation>Triggers</Translation>} />
               </Col>
             </Row>
-            <TriggerList triggers={triggers} />
+            <TriggerList triggers={triggers} component={mainComponent} />
           </If>
         </If>
 
