@@ -148,10 +148,11 @@ class WorkflowForm extends Component<Props, State> {
         onClose={closeDrawer}
         onOk={this.onSubmit}
         extButtons={[
-          <Button style={{ marginRight: '16px' }} onClick={closeDrawer}>
+          <Button key={'cancel'} style={{ marginRight: '16px' }} onClick={closeDrawer}>
             Cancel
           </Button>,
           <Button
+            key={'delete'}
             style={{ marginRight: '16px' }}
             onClick={() => {
               this.onDelete();

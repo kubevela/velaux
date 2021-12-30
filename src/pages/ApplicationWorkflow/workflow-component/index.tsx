@@ -47,7 +47,17 @@ export type NodeItem = {
     properties: string;
     type: string;
   };
-  diagramMakerData: {};
+  diagramMakerData: {
+    selected: boolean;
+    size: {
+      width: number;
+      height: number;
+    };
+    position: {
+      x: number;
+      y: number;
+    };
+  };
   id: string;
   typeId: string;
 };

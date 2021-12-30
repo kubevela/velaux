@@ -11,6 +11,7 @@ type Props = {
   parameterGroupOption: GroupOption[] | undefined;
   param: UIParam[] | undefined;
   onChange?: (params: any) => void;
+  registerForm: (form: Field) => void;
   id: string;
   value: any;
 };
@@ -95,6 +96,7 @@ class Structs extends React.Component<Props, State> {
         this.setValues();
       },
     });
+    this.props.registerForm(this.field);
   }
 
   componentDidMount = () => {
@@ -140,16 +142,6 @@ class Structs extends React.Component<Props, State> {
     if (onChange) {
       onChange(result);
     }
-  };
-
-  validate = (callback: (error?: string) => void) => {
-    this.field.validate((errors: any) => {
-      if (errors) {
-        callback('structs validate failure');
-        return;
-      }
-      callback();
-    });
   };
 
   addStructPlanItem = (option?: GroupOption, value?: any) => {
