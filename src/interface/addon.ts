@@ -27,6 +27,7 @@ export interface AddonClusterInfo {
   domain: string;
   access: string;
   loadBalancerIP: string;
+  serviceExternalIP: string;
 }
 
 export interface Definition {

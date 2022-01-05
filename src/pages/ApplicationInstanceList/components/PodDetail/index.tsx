@@ -101,8 +101,8 @@ class PodDetail extends React.Component<Props, State> {
       Object.keys(observability).map((key) => {
         if (key == clusterName) {
           const clusterInfo = observability[key];
-          if (clusterInfo.domain) {
-            domain = clusterInfo.domain;
+          if (clusterInfo.serviceExternalIP) {
+            domain = clusterInfo.serviceExternalIP;
           } else if (clusterInfo.loadBalancerIP) {
             domain = 'http://' + clusterInfo.loadBalancerIP;
           }
@@ -185,9 +185,8 @@ class PodDetail extends React.Component<Props, State> {
               </div>
             );
           }
-          const vars = `var-envName=${env?.name}&var-clusterName=${clusterName}&var-appName=${application?.name}&var-appAlias=${application?.alias}&var-podName=${pod.metadata.name}&var-podNamespace=${pod.metadata.namespace}&var-containerName=${record.name}`;
-          const logURL = `${domain}/d/kubevela_application_logging/kubevela-application-logging-dashboard?orgId=1&refresh=10s&${vars}`;
-          const monitorURL = `${domain}/d/kubevela_core_monitoring/kubevela-core-system-monitoring-dashboard?${vars}`;
+          const logURL = `${domain}/d/kubevela_application_logging/kubevela-application-logging-dashboard?orgId=1&refresh=10s&var-envName=${env?.name}&var-clusterName=${clusterName}&var-appName=${application?.name}&var-appAlias=${application?.alias}&var-podName=${pod.metadata.name}&var-podNamespace=${pod.metadata.namespace}&var-containerName=${record.name}&var-container=${record.name}&var-pod=All&var-stream=All&var-searchable_pattern=`;
+          const monitorURL = `${domain}/d/kubevela_core_monitoring/kubevela-core-system-monitoring-dashboard?var-origin_prometheus=&var-NameSpace=${pod.metadata.namespace}&var-Container=${record.name}&var-Pod=All`;
           return (
             <div>
               <a title="Log" href={logURL} target="_blank" className="actionIcon">
