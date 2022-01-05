@@ -122,14 +122,22 @@ class WorkflowStep extends Component<Props, State> {
       { name: 'stopped', value: 'stopped', iconType: 'warning' },
       { name: 'running', value: 'running', iconType: '' },
     ];
-    const find = stepStatus.find((item) => {
-      if (item.name === steps[index].phase && steps[index].type != 'suspend') {
-        return item;
-      }
-    }) || {
-      value: 'stopped',
-      iconType: '',
-    };
+    let find;
+    if (recordItem.status === 'terminated' && steps[index].type === 'suspend') {
+      find = {
+        value: 'stopped',
+        iconType: '',
+      };
+    } else {
+      find = stepStatus.find((item) => {
+        if (item.name === steps[index].phase) {
+          return item;
+        }
+      }) || {
+        value: 'stopped',
+        iconType: '',
+      };
+    }
 
     const isAnimate = find && find.value === 'running' ? 'shanshan' : '';
 
