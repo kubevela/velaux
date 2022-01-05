@@ -359,7 +359,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                     </Col>
                   </Row>
 
-                  <Row>
+                  {/* <Row>
                     <Col span={12} style={{ padding: '0 8px' }}>
                       <FormItem label={<Translation>Zone</Translation>}>
                         <Input
@@ -393,7 +393,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                         />
                       </FormItem>
                     </Col>
-                  </Row>
+                  </Row> */}
                 </Group>
               </Col>
             </Row>
