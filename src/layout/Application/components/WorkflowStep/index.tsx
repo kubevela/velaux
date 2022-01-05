@@ -123,7 +123,7 @@ class WorkflowStep extends Component<Props, State> {
       { name: 'running', value: 'running', iconType: '' },
     ];
     const find = stepStatus.find((item) => {
-      if (item.name === steps[index].phase) {
+      if (item.name === steps[index].phase && steps[index].type != 'suspend') {
         return item;
       }
     }) || {
