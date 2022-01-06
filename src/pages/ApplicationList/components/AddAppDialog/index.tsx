@@ -17,18 +17,21 @@ import { connect } from 'dva';
 import locale from '../../../../utils/locale';
 import { getEnvs } from '../../../../api/env';
 import type { Env } from '../../../../interface/env';
+import type { Target } from '../../../../interface/target';
+import EnvDialog from '../../../EnvPage/components/EnvDialog';
 
 type Props = {
   visible: boolean;
+  targets?: Target[];
   componentDefinitions: [];
   projects?: Project[];
   syncProjectList: () => void;
   clusterList?: Cluster[];
   setVisible: (visible: boolean) => void;
-  t: (key: string) => string;
   dispatch: ({}) => void;
   onClose: () => void;
   onOK: (name: string) => void;
+  t: (key: string) => string;
 };
 
 type State = {
@@ -37,6 +40,7 @@ type State = {
   dialogStats: string;
   envs?: Env[];
   project?: string;
+  visibleEnvDialog: boolean;
 };
 
 @connect((store: any) => {
@@ -52,6 +56,7 @@ class AppDialog extends React.Component<Props, State> {
       definitionLoading: true,
       dialogStats: 'isBasic',
       envs: [],
+      visibleEnvDialog: false,
     };
     this.field = new Field(this, {
       onChange: (name: string, value: string) => {
@@ -129,11 +134,23 @@ class AppDialog extends React.Component<Props, State> {
     });
   };
 
-  loadEnvs = () => {
+  loadEnvs = (
+    cb = (envName: string) => {
+      console.log(envName);
+    },
+  ) => {
     if (this.state.project) {
-      getEnvs({ project: this.state.project, page: 0 }).then((res) => {
+      //Temporary logic
+      getEnvs({ project: 'default', page: 0 }).then((res) => {
         if (res) {
           this.setState({ envs: res.envs });
+          const envOption = (res?.envs || []).map((env: { name: string; alias: string }) => {
+            return {
+              label: env.alias ? `${env.alias}(${env.name})` : env.name,
+              value: env.name,
+            };
+          });
+          cb(envOption[0]?.value || '');
         }
       });
     }
@@ -237,15 +254,41 @@ class AppDialog extends React.Component<Props, State> {
     }
   };
 
+  onCloseEnvDialog = () => {
+    this.setState({
+      visibleEnvDialog: false,
+    });
+  };
+  onOKEnvDialog = () => {
+    this.setState(
+      {
+        visibleEnvDialog: false,
+      },
+      () => {
+        this.loadEnvs(this.setEnvValue);
+      },
+    );
+  };
+  changeEnvDialog = (visible: boolean) => {
+    this.setState({
+      visibleEnvDialog: visible,
+    });
+  };
+  setEnvValue = (envBinding: string) => {
+    const envBindings: string[] = this.field.getValue('envBindings');
+    (envBindings || []).push(envBinding);
+    this.field.setValues({ envBindings });
+  };
+
   render() {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
 
-    const { onClose } = this.props;
-    const { visible, t, setVisible, dispatch, projects } = this.props;
+    const { visible, setVisible, dispatch, projects, targets, syncProjectList, t, onClose } =
+      this.props;
 
-    const { definitionDetail, dialogStats, envs } = this.state;
+    const { definitionDetail, dialogStats, envs, visibleEnvDialog } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -256,100 +299,124 @@ class AppDialog extends React.Component<Props, State> {
       };
     });
     return (
-      <DrawerWithFooter
-        title={<Translation>New Application</Translation>}
-        placement="right"
-        width={800}
-        onClose={onClose}
-        extButtons={this.extButtonList()}
-      >
-        <Form field={this.field}>
-          <If condition={dialogStats === 'isBasic'}>
-            <GeneralConfig
-              t={t}
-              visible={visible}
-              setVisible={setVisible}
-              dispatch={dispatch}
-              projects={projects}
-              syncProjectList={this.props.syncProjectList}
-              field={this.field}
-              ref={this.basicRef}
-            />
-
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={<Translation className="font-size-14 font-weight-bold">Type</Translation>}
-                  required={true}
-                  help={
-                    <span>
-                      Get more component type? <Link to="/addons">Go to enable addon</Link>
-                    </span>
-                  }
-                >
-                  <Select
-                    locale={locale.Select}
-                    className="select"
-                    {...init(`componentType`, {
-                      initValue: 'webservice',
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Please select',
-                        },
-                      ],
-                    })}
-                    dataSource={this.transComponentDefinitions()}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={
-                    <Translation className="font-size-14 font-weight-bold">
-                      Bind Environments
-                    </Translation>
-                  }
-                  required={true}
-                >
-                  <Select
-                    {...init(`envBindings`, {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Please select env',
-                        },
-                      ],
-                    })}
-                    locale={locale.Select}
-                    mode="multiple"
-                    dataSource={envOptions}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
-          </If>
-
-          <If condition={dialogStats === 'isCreateComponent'}>
-            <FormItem required={true}>
-              <UISchema
-                {...init(`properties`, {
-                  rules: [
-                    {
-                      validator: validator,
-                      message: 'Please check app deploy properties',
-                    },
-                  ],
-                })}
-                uiSchema={definitionDetail && definitionDetail.uiSchema}
-                ref={this.uiSchemaRef}
+      <React.Fragment>
+        <DrawerWithFooter
+          title={<Translation>New Application</Translation>}
+          placement="right"
+          width={800}
+          onClose={onClose}
+          extButtons={this.extButtonList()}
+        >
+          <Form field={this.field}>
+            <If condition={dialogStats === 'isBasic'}>
+              <GeneralConfig
+                visible={visible}
+                setVisible={setVisible}
+                dispatch={dispatch}
+                projects={projects}
+                syncProjectList={syncProjectList}
+                field={this.field}
+                ref={this.basicRef}
               />
-            </FormItem>
-          </If>
-        </Form>
-      </DrawerWithFooter>
+
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <FormItem
+                    label={
+                      <Translation className="font-size-14 font-weight-bold">Type</Translation>
+                    }
+                    required={true}
+                    help={
+                      <span>
+                        Get more component type? <Link to="/addons">Go to enable addon</Link>
+                      </span>
+                    }
+                  >
+                    <Select
+                      locale={locale.Select}
+                      className="select"
+                      {...init(`componentType`, {
+                        initValue: 'webservice',
+                        rules: [
+                          {
+                            required: true,
+                            message: 'Please select',
+                          },
+                        ],
+                      })}
+                      dataSource={this.transComponentDefinitions()}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <FormItem
+                    label={
+                      <Translation className="font-size-14 font-weight-bold">
+                        Bind Environments
+                      </Translation>
+                    }
+                    help={
+                      <a
+                        onClick={() => {
+                          this.changeEnvDialog(true);
+                        }}
+                      >
+                        <Translation> Create new Environments </Translation>
+                      </a>
+                    }
+                    required={true}
+                  >
+                    <Select
+                      {...init(`envBindings`, {
+                        rules: [
+                          {
+                            required: true,
+                            message: 'Please select env',
+                          },
+                        ],
+                      })}
+                      locale={locale.Select}
+                      mode="multiple"
+                      dataSource={envOptions}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+            </If>
+
+            <If condition={dialogStats === 'isCreateComponent'}>
+              <FormItem required={true}>
+                <UISchema
+                  {...init(`properties`, {
+                    rules: [
+                      {
+                        validator: validator,
+                        message: 'Please check app deploy properties',
+                      },
+                    ],
+                  })}
+                  uiSchema={definitionDetail && definitionDetail.uiSchema}
+                  ref={this.uiSchemaRef}
+                />
+              </FormItem>
+            </If>
+          </Form>
+        </DrawerWithFooter>
+        <If condition={visibleEnvDialog}>
+          <EnvDialog
+            t={t}
+            visible={visibleEnvDialog}
+            targets={targets || []}
+            projects={projects || []}
+            syncProjectList={this.props.syncProjectList}
+            isEdit={false}
+            onClose={this.onCloseEnvDialog}
+            onOK={this.onOKEnvDialog}
+          />
+        </If>
+      </React.Fragment>
     );
   }
 }

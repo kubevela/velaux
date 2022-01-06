@@ -172,6 +172,7 @@ class Application extends Component<Props, State> {
         <If condition={showAddApplication}>
           <AppDialog
             visible={showAddApplication}
+            targets={targets}
             syncProjectList={this.getProjectList}
             projects={projects}
             componentDefinitions={componentDefinitions}
