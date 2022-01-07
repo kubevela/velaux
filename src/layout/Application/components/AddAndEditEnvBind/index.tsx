@@ -28,6 +28,8 @@ interface State {
   visibleEnvDialog: boolean;
 }
 
+type Callback = (envName: string) => void;
+
 @connect((store: any) => {
   return { ...store.application, ...store.target };
 })
@@ -48,11 +50,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
     this.getTargets();
   }
 
-  loadEnvs = async (
-    cb = (envName: string) => {
-      console.log(envName);
-    },
-  ) => {
+  loadEnvs = async (callback?: Callback) => {
     const { applicationDetail, envbinding } = this.props;
     if (applicationDetail) {
       //Temporary logic
@@ -70,7 +68,9 @@ class EnvBindPlanDialog extends Component<Props, State> {
             value: env.name,
           };
         });
-        cb(envOption[0]?.value || '');
+        if (callback) {
+          callback(envOption[0]?.value || '');
+        }
       });
     }
   };

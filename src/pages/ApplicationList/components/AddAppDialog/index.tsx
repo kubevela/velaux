@@ -43,6 +43,8 @@ type State = {
   visibleEnvDialog: boolean;
 };
 
+type Callback = (envName: string) => void;
+
 @connect((store: any) => {
   return { ...store.clusters };
 })
@@ -134,11 +136,7 @@ class AppDialog extends React.Component<Props, State> {
     });
   };
 
-  loadEnvs = (
-    cb = (envName: string) => {
-      console.log(envName);
-    },
-  ) => {
+  loadEnvs = (callback?: Callback) => {
     if (this.state.project) {
       //Temporary logic
       getEnvs({ project: 'default', page: 0 }).then((res) => {
@@ -150,7 +148,9 @@ class AppDialog extends React.Component<Props, State> {
               value: env.name,
             };
           });
-          cb(envOption[0]?.value || '');
+          if (callback) {
+            callback(envOption[0]?.value || '');
+          }
         }
       });
     }
