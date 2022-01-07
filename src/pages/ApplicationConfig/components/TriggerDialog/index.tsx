@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid, Field, Form, Select, Message, Button, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import { createTriggers } from '../../../../api/application';
+import { getPayloadType } from '../../../../api/payload';
 import type { Workflow, Trigger } from '../../../../interface/application';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
@@ -20,6 +21,7 @@ type Props = {
 
 type State = {
   loading: boolean;
+  payloadTypes: string[];
 };
 
 class TriggerDialog extends React.Component<Props, State> {
@@ -28,8 +30,26 @@ class TriggerDialog extends React.Component<Props, State> {
     super(props);
     this.state = {
       loading: false,
+      payloadTypes: ['custom', 'dockerHub', 'ACR', 'harbor', 'artifactory'],
     };
     this.field = new Field(this);
+  }
+
+  componentDidMount() {
+    const type = this.field.getValue('type');
+    if (type === 'webhook') {
+      this.onGetPayloadType();
+    }
+  }
+
+  onGetPayloadType() {
+    getPayloadType().then((res: string[]) => {
+      if (res) {
+        this.setState({
+          payloadTypes: res,
+        });
+      }
+    });
   }
 
   onClose = () => {
@@ -60,7 +80,7 @@ class TriggerDialog extends React.Component<Props, State> {
         workflowName,
         token: '',
       };
-      createTriggers(params, query).then((res) => {
+      createTriggers(params, query).then((res: any) => {
         if (res) {
           Message.success({
             duration: 4000,
@@ -87,11 +107,19 @@ class TriggerDialog extends React.Component<Props, State> {
     );
   };
 
+  changeType = (value: string) => {
+    this.field.setValue('type', value);
+    if (value === 'webhook') {
+      this.onGetPayloadType();
+    }
+  };
+
   render() {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
     const { t, workflows, onClose } = this.props;
+    const { payloadTypes } = this.state;
     const workflowOption = workflows?.map((workflow) => {
       return {
         label: workflow.alias ? `${workflow.alias}(${workflow.envName})` : workflow.name,
@@ -99,28 +127,12 @@ class TriggerDialog extends React.Component<Props, State> {
       };
     });
 
-    const payloadTypeOption = [
-      {
-        label: 'custom',
-        value: 'custom',
-      },
-      {
-        label: 'dockerHub',
-        value: 'dockerHub',
-      },
-      {
-        label: 'ACR',
-        value: 'ACR',
-      },
-      {
-        label: 'harbor',
-        value: 'harbor',
-      },
-      {
-        label: 'artifactory',
-        value: 'artifactory',
-      },
-    ];
+    const payloadTypeOption = payloadTypes?.map((type) => {
+      return {
+        label: type,
+        value: type,
+      };
+    });
 
     return (
       <DrawerWithFooter
@@ -193,15 +205,20 @@ class TriggerDialog extends React.Component<Props, State> {
                 <Select
                   name="type"
                   locale={locale.Select}
-                  dataSource={[{ label: 'On Webhook Event', value: 'webhook' }]}
+                  dataSource={[
+                    { label: 'On Webhook Event', value: 'webhook' },
+                    { label: '2', value: '2' },
+                  ]}
                   {...init('type', {
+                    initValue: 'webhook',
                     rules: [
                       {
                         required: true,
-                        message: 'Please select an type',
+                        message: 'Please select a type',
                       },
                     ],
                   })}
+                  onChange={this.changeType}
                 />
               </FormItem>
             </Col>
@@ -220,7 +237,7 @@ class TriggerDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        message: 'Please select an payloadType',
+                        message: 'Please select a payloadType',
                       },
                     ],
                   })}
@@ -231,7 +248,7 @@ class TriggerDialog extends React.Component<Props, State> {
 
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>WorkflowName</Translation>} required>
+              <FormItem label={<Translation>Execution workflow</Translation>} required>
                 <Select
                   name="workflowName"
                   locale={locale.Select}
@@ -240,7 +257,7 @@ class TriggerDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        message: 'Please select an workflowName',
+                        message: 'Please select a workflow',
                       },
                     ],
                   })}

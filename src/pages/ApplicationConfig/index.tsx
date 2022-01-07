@@ -320,7 +320,7 @@ class ApplicationConfig extends Component<Props, State> {
                 <Title
                   actions={[
                     <a key={'add'} onClick={this.onAddTrigger}>
-                      <Translation>New Triggers</Translation>
+                      <Translation>New Trigger</Translation>
                     </a>,
                   ]}
                   title={<Translation>Triggers</Translation>}
