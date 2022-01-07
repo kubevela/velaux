@@ -363,7 +363,7 @@ class AppDialog extends React.Component<Props, State> {
                           this.changeEnvDialog(true);
                         }}
                       >
-                        <Translation> Create new Environments </Translation>
+                        <Translation>Create new environment</Translation>
                       </a>
                     }
                     required={true}
