@@ -15,7 +15,7 @@ import K8sObjectsCode from '../../extends/K8sObjectsCode';
 import type { Rule } from '@alifd/field';
 import KV from '../../extends/KV';
 import './index.less';
-import { checkImageName } from '../../utils/common';
+import { checkImageName, replaceUrl } from '../../utils/common';
 import locale from '../../utils/locale';
 import HelmValues from '../../extends/HelmValues';
 
@@ -207,7 +207,9 @@ class UISchema extends Component<Props, State> {
               labelAlign={inline ? 'inset' : 'left'}
               label={param.label}
               key={param.jsonKey}
-              help={param.description}
+              help={
+                <div dangerouslySetInnerHTML={{ __html: replaceUrl(param.description || '') }} />
+              }
               disabled={param.disable}
             >
               <Input
@@ -225,7 +227,9 @@ class UISchema extends Component<Props, State> {
               labelAlign={inline ? 'inset' : 'left'}
               label={param.label}
               key={param.jsonKey}
-              help={param.description}
+              help={
+                <div dangerouslySetInnerHTML={{ __html: replaceUrl(param.description || '') }} />
+              }
               disabled={param.disable}
             >
               <Input
