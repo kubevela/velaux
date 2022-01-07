@@ -210,7 +210,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
                         this.changeEnvDialog(true);
                       }}
                     >
-                      <Translation> Create new Environment </Translation>
+                      <Translation>Create new environment</Translation>
                     </a>
                   }
                   required={true}
