@@ -103,7 +103,7 @@ class TriggerList extends Component<Props, State> {
                     <Icon
                       type="ashbin1"
                       size={14}
-                      className="margin-right-30 cursor-pointer"
+                      className="margin-right-0 cursor-pointer"
                       onClick={() => {
                         this.handleTriggerDelete(item.token || '');
                       }}

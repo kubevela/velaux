@@ -206,8 +206,7 @@ class TriggerDialog extends React.Component<Props, State> {
                   name="type"
                   locale={locale.Select}
                   dataSource={[
-                    { label: 'On Webhook Event', value: 'webhook' },
-                    { label: '2', value: '2' },
+                    { label: 'On Webhook Event', value: 'webhook' }
                   ]}
                   {...init('type', {
                     initValue: 'webhook',
