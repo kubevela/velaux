@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Field, Form, Select, Message, Button, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-import { createTriggers } from '../../../../api/application';
+import { createTriggers, detailComponentDefinition } from '../../../../api/application';
 import { getPayloadType } from '../../../../api/payload';
 import type { Workflow, Trigger } from '../../../../interface/application';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -14,7 +14,8 @@ type Props = {
   visible: boolean;
   appName?: string;
   workflows?: Workflow[];
-  onOK: () => void;
+  componentType: string;
+  onOK: (params: Trigger) => void;
   onClose: () => void;
   dispatch?: ({}) => {};
   t: (key: string) => {};
@@ -23,6 +24,7 @@ type Props = {
 type State = {
   loading: boolean;
   payloadTypes: string[];
+  hasImage: boolean;
 };
 
 class TriggerDialog extends React.Component<Props, State> {
@@ -32,14 +34,20 @@ class TriggerDialog extends React.Component<Props, State> {
     this.state = {
       loading: false,
       payloadTypes: ['custom', 'dockerHub', 'ACR', 'harbor', 'artifactory'],
+      hasImage: false,
     };
     this.field = new Field(this);
   }
 
   componentDidMount() {
+    const { componentType } = this.props;
     const type = this.field.getValue('type');
     if (type === 'webhook') {
       this.onGetPayloadType();
+    }
+
+    if (componentType) {
+      this.onDetailComponentDefinition(componentType);
     }
   }
 
@@ -52,6 +60,22 @@ class TriggerDialog extends React.Component<Props, State> {
       }
     });
   }
+
+  onDetailComponentDefinition = (value: string) => {
+    this.setState({ loading: true });
+    detailComponentDefinition({ name: value })
+      .then((res) => {
+        if (res) {
+          const uiSchemaFirstItem = res.uiSchema?.[0] || {};
+          const hasImage = uiSchemaFirstItem.jsonKey === 'image';
+          this.setState({
+            hasImage,
+            loading: false,
+          });
+        }
+      })
+      .catch(() => this.setState({ loading: false }));
+  };
 
   onClose = () => {
     this.props.onClose();
@@ -88,7 +112,7 @@ class TriggerDialog extends React.Component<Props, State> {
             title: 'Trigger create success.',
             content: 'Trigger create success.',
           });
-          this.props.onOK();
+          this.props.onOK(res);
         }
       });
     });
@@ -114,6 +138,19 @@ class TriggerDialog extends React.Component<Props, State> {
       this.onGetPayloadType();
     }
   };
+
+  isShowMessage() {
+    const { componentType } = this.props;
+    const { hasImage } = this.state;
+    const payloadType = this.field.getValue('payloadType');
+    const components = ['webservice', 'worker', 'task'];
+    const isNotInclude = !components.includes(componentType);
+    if (isNotInclude && payloadType !== 'custom' && !hasImage) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   render() {
     const init = this.field.init;
@@ -232,28 +269,11 @@ class TriggerDialog extends React.Component<Props, State> {
                     locale={locale.Select}
                     dataSource={payloadTypeOption}
                     {...init('payloadType', {
-                      rules: [
-                        {
-                          required: false,
-                          message: 'Please select a payloadType',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </If>
-
-              <If condition={this.field.getValue('type') !== 'webhook'}>
-                <FormItem label={<Translation>Execution workflow</Translation>} required>
-                  <Select
-                    name="workflowName"
-                    locale={locale.Select}
-                    dataSource={workflowOption}
-                    {...init('workflowName', {
+                      initValue: 'custom',
                       rules: [
                         {
                           required: true,
-                          message: 'Please select a workflow',
+                          message: 'Please select a payloadType',
                         },
                       ],
                     })}
@@ -265,25 +285,27 @@ class TriggerDialog extends React.Component<Props, State> {
 
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <If condition={this.field.getValue('type') === 'webhook'}>
-                <FormItem label={<Translation>Execution workflow</Translation>} required>
-                  <Select
-                    name="workflowName"
-                    locale={locale.Select}
-                    dataSource={workflowOption}
-                    {...init('workflowName', {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Please select a workflow',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </If>
+              <FormItem label={<Translation>Execution workflow</Translation>} required>
+                <Select
+                  name="workflowName"
+                  locale={locale.Select}
+                  dataSource={workflowOption}
+                  {...init('workflowName', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please select a workflow',
+                      },
+                    ],
+                  })}
+                />
+              </FormItem>
             </Col>
           </Row>
+          <Message type="warning" animation={true} visible={this.isShowMessage()} title="Warning">
+            Your component type does not support the image field, and the image update cannot be
+            performed.
+          </Message>
         </Form>
       </DrawerWithFooter>
     );

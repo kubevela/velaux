@@ -64,6 +64,7 @@ type State = {
   return { ...store.application };
 })
 class ApplicationConfig extends Component<Props, State> {
+  triggerListRef: React.RefObject<TriggerList>;
   constructor(props: any) {
     super(props);
     const { params } = props.match;
@@ -78,6 +79,7 @@ class ApplicationConfig extends Component<Props, State> {
       triggers: [],
       visibleTrigger: false,
     };
+    this.triggerListRef = React.createRef();
   }
 
   componentDidMount() {
@@ -198,11 +200,14 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
-  onTriggerOk = () => {
+  onTriggerOk = (res: Trigger) => {
     this.onGetAppliationTrigger();
     this.setState({
       visibleTrigger: false,
     });
+    if (this.triggerListRef.current) {
+      this.triggerListRef.current.showWebhook(res);
+    }
   };
 
   onDeleteTrigger = async (token: string) => {
@@ -333,6 +338,7 @@ class ApplicationConfig extends Component<Props, State> {
               onDeleteTrigger={(token: string) => {
                 this.onDeleteTrigger(token);
               }}
+              ref={this.triggerListRef}
             />
           </If>
         </If>
@@ -372,9 +378,12 @@ class ApplicationConfig extends Component<Props, State> {
           <TriggerDialog
             visible={visibleTrigger}
             appName={appName}
+            componentType={(mainComponent && mainComponent.type) || ''}
             workflows={workflows}
             onClose={this.onTriggerClose}
-            onOK={this.onTriggerOk}
+            onOK={(res: Trigger) => {
+              this.onTriggerOk(res);
+            }}
           />
         </If>
       </div>
