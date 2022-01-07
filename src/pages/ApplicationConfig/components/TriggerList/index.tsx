@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Dialog, Grid, Message } from '@b-design/ui';
+import { Card, Dialog, Grid, Message, Icon } from '@b-design/ui';
 import type { ApplicationComponent, Trigger } from '../../../../interface/application';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { momentDate } from '../../../../utils/common';
@@ -13,6 +13,7 @@ import Item from '../../../../components/Item';
 type Props = {
   triggers: Trigger[];
   component?: ApplicationComponent;
+  onDeleteTrigger: (token: string) => void;
 };
 
 type State = {
@@ -28,6 +29,17 @@ class TriggerList extends Component<Props, State> {
   };
   closeWebhook = () => {
     this.setState({ showTrigger: undefined });
+  };
+
+  handleTriggerDelete = (token: string) => {
+    Dialog.alert({
+      content: 'Are you sure want to delete this trigger?',
+      onOk: () => {
+        this.props.onDeleteTrigger(token || '');
+      },
+      onClose: () => {},
+      locale: locale.Dialog,
+    });
   };
 
   render() {
@@ -88,13 +100,14 @@ class TriggerList extends Component<Props, State> {
                     {item.alias ? `${item.alias}(${item.name})` : item.name}
                   </div>
                   <div className="traits-list-operation">
-                    <a
+                    <Icon
+                      type="ashbin1"
+                      size={14}
+                      className="margin-right-30 cursor-pointer"
                       onClick={() => {
-                        this.showWebhook(item);
+                        this.handleTriggerDelete(item.token || '');
                       }}
-                    >
-                      Manual Trigger
-                    </a>
+                    />
                   </div>
                 </div>
                 <div className="trigger-list-content">
@@ -132,6 +145,19 @@ class TriggerList extends Component<Props, State> {
                         label={<Translation>Create Time</Translation>}
                         value={momentDate(item.createTime)}
                       />
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>
+                      <div className="traits-list-operation">
+                        <a
+                          onClick={() => {
+                            this.showWebhook(item);
+                          }}
+                        >
+                          Manual Trigger
+                        </a>
+                      </div>
                     </Col>
                   </Row>
                 </div>

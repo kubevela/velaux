@@ -8,6 +8,7 @@ import {
   getAppliationComponent,
   deleteTrait,
   getAppliationTriggers,
+  deleteTriggers,
 } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
@@ -20,11 +21,13 @@ import type {
   ApplicationComponent,
   EnvBinding,
   Trigger,
+  Workflow,
 } from '../../interface/application';
 import { momentDate } from '../../utils/common';
 import EditProperties from './components/EditProperties';
 import locale from '../../utils/locale';
 import TriggerList from './components/TriggerList';
+import TriggerDialog from './components/TriggerDialog';
 
 const { Row, Col } = Grid;
 
@@ -42,6 +45,7 @@ type Props = {
   components?: ApplicationComponent[];
   componentsApp?: string;
   envbinding?: EnvBinding[];
+  workflows?: Workflow[];
 };
 
 type State = {
@@ -54,6 +58,7 @@ type State = {
   traitItem: Trait;
   visibleEditComponentProperties: boolean;
   triggers: Trigger[];
+  visibleTrigger: boolean;
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -71,6 +76,7 @@ class ApplicationConfig extends Component<Props, State> {
       traitItem: { type: '' },
       visibleEditComponentProperties: false,
       triggers: [],
+      visibleTrigger: false,
     };
   }
 
@@ -180,8 +186,40 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
+  onAddTrigger = () => {
+    this.setState({
+      visibleTrigger: true,
+    });
+  };
+
+  onTriggerClose = () => {
+    this.setState({
+      visibleTrigger: false,
+    });
+  };
+
+  onTriggerOk = () => {
+    this.onGetAppliationTrigger();
+    this.setState({
+      visibleTrigger: false,
+    });
+  };
+
+  onDeleteTrigger = async (token: string) => {
+    const { appName } = this.state;
+    const params = {
+      appName,
+      token,
+    };
+    deleteTriggers(params).then((res: any) => {
+      if (res) {
+        this.onGetAppliationTrigger();
+      }
+    });
+  };
+
   render() {
-    const { applicationDetail, dispatch, envbinding } = this.props;
+    const { applicationDetail, dispatch, envbinding, workflows } = this.props;
     const {
       visibleTrait,
       isEditTrait,
@@ -192,6 +230,7 @@ class ApplicationConfig extends Component<Props, State> {
       traitItem,
       visibleEditComponentProperties,
       triggers,
+      visibleTrigger,
     } = this.state;
     return (
       <div>
@@ -278,10 +317,23 @@ class ApplicationConfig extends Component<Props, State> {
           <If condition={triggers.length > 0}>
             <Row>
               <Col span={24} className="padding16">
-                <Title actions={[]} title={<Translation>Triggers</Translation>} />
+                <Title
+                  actions={[
+                    <a key={'add'} onClick={this.onAddTrigger}>
+                      <Translation>New Triggers</Translation>
+                    </a>,
+                  ]}
+                  title={<Translation>Triggers</Translation>}
+                />
               </Col>
             </Row>
-            <TriggerList triggers={triggers} component={mainComponent} />
+            <TriggerList
+              triggers={triggers}
+              component={mainComponent}
+              onDeleteTrigger={(token: string) => {
+                this.onDeleteTrigger(token);
+              }}
+            />
           </If>
         </If>
 
@@ -313,6 +365,16 @@ class ApplicationConfig extends Component<Props, State> {
             }
             component={mainComponent}
             dispatch={dispatch}
+          />
+        </If>
+
+        <If condition={visibleTrigger}>
+          <TriggerDialog
+            visible={visibleTrigger}
+            appName={appName}
+            workflows={workflows}
+            onClose={this.onTriggerClose}
+            onOK={this.onTriggerOk}
           />
         </If>
       </div>
