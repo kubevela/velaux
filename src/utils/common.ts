@@ -137,3 +137,11 @@ export const ACKCLusterStatus = [
     color: '#ef1111',
   },
 ];
+
+export const replaceUrl = function (text: string) {
+  const re = /(http[s]?:\/\/([\w-]+.)+([:\d+])?(\/[\w-\.\/\?%&=]*)?)/gi;
+  const str = text.replace(re, function (a) {
+    return '<a href="' + a + '" target=_blank>' + a + '</a>';
+  });
+  return str;
+};
