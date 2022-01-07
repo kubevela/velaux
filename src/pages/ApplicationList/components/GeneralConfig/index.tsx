@@ -14,7 +14,6 @@ type Props = {
   projects?: Project[];
   syncProjectList: () => void;
   setVisible: (visible: boolean) => void;
-  t: (key: string) => {};
   dispatch: ({}) => void;
 };
 

@@ -8,22 +8,30 @@ import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import { getEnvs } from '../../../../api/env';
 import type { Env } from '../../../../interface/env';
+import { If } from 'tsx-control-statements/components';
+import EnvDialog from '../../../../pages/EnvPage/components/EnvDialog';
 
 interface Props {
   onClose: () => void;
   onOK: () => void;
   applicationDetail?: ApplicationDetail;
   envbinding?: EnvBinding[];
+  targets?: [];
+  dispatch?: ({}) => {};
+  t: (key: string) => string;
 }
 
 interface State {
   loading: boolean;
   envs?: Env[];
   isEdit: boolean;
+  visibleEnvDialog: boolean;
 }
 
+type Callback = (envName: string) => void;
+
 @connect((store: any) => {
-  return { ...store.application };
+  return { ...store.application, ...store.target };
 })
 class EnvBindPlanDialog extends Component<Props, State> {
   field: Field;
@@ -33,17 +41,20 @@ class EnvBindPlanDialog extends Component<Props, State> {
     this.state = {
       loading: false,
       isEdit: false,
+      visibleEnvDialog: false,
     };
   }
 
   componentDidMount() {
     this.loadEnvs();
+    this.getTargets();
   }
 
-  loadEnvs = async () => {
+  loadEnvs = async (callback?: Callback) => {
     const { applicationDetail, envbinding } = this.props;
     if (applicationDetail) {
-      getEnvs({ project: applicationDetail?.project?.name, page: 0 }).then((re) => {
+      //Temporary logic
+      getEnvs({ project: 'default', page: 0 }).then((re) => {
         const existEnvs =
           envbinding?.map((eb) => {
             return eb.name;
@@ -51,6 +62,15 @@ class EnvBindPlanDialog extends Component<Props, State> {
         const allEnvs: [] = re.envs || [];
         const canAdd = allEnvs.filter((env: Env) => !existEnvs.includes(env.name));
         this.setState({ envs: canAdd });
+        const envOption = canAdd?.map((env: { name: string; alias: string }) => {
+          return {
+            label: env.alias ? `${env.alias}(${env.name})` : env.name,
+            value: env.name,
+          };
+        });
+        if (callback) {
+          callback(envOption[0]?.value || '');
+        }
       });
     }
   };
@@ -104,8 +124,45 @@ class EnvBindPlanDialog extends Component<Props, State> {
         this.setState({ loading: false });
       });
   }
+  getTargets = async () => {
+    this.props.dispatch?.({
+      type: 'target/listTargets',
+      payload: {},
+    });
+  };
+  getProjectList = async () => {
+    this.props?.dispatch?.({
+      type: 'application/getProjectList',
+      payload: {},
+    });
+  };
+  onCloseEnvDialog = () => {
+    this.setState({
+      visibleEnvDialog: false,
+    });
+  };
+  onOKEnvDialog = () => {
+    this.setState(
+      {
+        visibleEnvDialog: false,
+      },
+      () => {
+        this.loadEnvs(this.setEnvValue);
+      },
+    );
+  };
+  changeEnvDialog = (visible: boolean) => {
+    this.setState({
+      visibleEnvDialog: visible,
+    });
+  };
+
+  setEnvValue = (name: string) => {
+    this.field.setValues({ name });
+  };
   render() {
-    const { loading, isEdit, envs } = this.state;
+    const { loading, isEdit, envs, visibleEnvDialog } = this.state;
+    const { t } = this.props;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const init = this.field.init;
@@ -124,45 +181,73 @@ class EnvBindPlanDialog extends Component<Props, State> {
       };
     });
     return (
-      <Dialog
-        visible={true}
-        locale={locale.Dialog}
-        className={'commonDialog'}
-        style={{ width: '600px' }}
-        isFullScreen={true}
-        footerActions={['ok']}
-        onClose={this.props.onClose}
-        footer={
-          <Button type="primary" onClick={this.onSubmit} loading={loading}>
-            {!isEdit ? <Translation>Submit</Translation> : <Translation>Save</Translation>}
-          </Button>
-        }
-        title={<Translation>Bind Environment</Translation>}
-      >
-        <Form {...formItemLayout} field={this.field}>
-          <Row>
-            <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Environment</Translation>} required={true}>
-                <Select
-                  name="name"
-                  locale={locale.Select}
-                  disabled={isEdit ? true : false}
-                  dataSource={envOption}
-                  maxLength={32}
-                  {...init('name', {
-                    rules: [
-                      {
-                        required: true,
-                        message: 'Please select an env',
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
-            </Col>
-          </Row>
-        </Form>
-      </Dialog>
+      <React.Fragment>
+        <Dialog
+          visible={true}
+          locale={locale.Dialog}
+          className={'commonDialog'}
+          style={{ width: '600px' }}
+          isFullScreen={true}
+          footerActions={['ok']}
+          onClose={this.props.onClose}
+          footer={
+            <Button type="primary" onClick={this.onSubmit} loading={loading}>
+              {!isEdit ? <Translation>Submit</Translation> : <Translation>Save</Translation>}
+            </Button>
+          }
+          title={<Translation>Bind Environment</Translation>}
+        >
+          <Form {...formItemLayout} field={this.field}>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem
+                  label={
+                    <Translation className="font-size-14 font-weight-bold">Environment</Translation>
+                  }
+                  help={
+                    <a
+                      onClick={() => {
+                        this.changeEnvDialog(true);
+                      }}
+                    >
+                      <Translation>Create new environment</Translation>
+                    </a>
+                  }
+                  required={true}
+                >
+                  <Select
+                    name="name"
+                    locale={locale.Select}
+                    disabled={isEdit ? true : false}
+                    dataSource={envOption}
+                    maxLength={32}
+                    {...init('name', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please select an env',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+          </Form>
+        </Dialog>
+        <If condition={visibleEnvDialog}>
+          <EnvDialog
+            t={t}
+            visible={visibleEnvDialog}
+            targets={this.props.targets || []}
+            projects={[]}
+            syncProjectList={this.getProjectList}
+            isEdit={false}
+            onClose={this.onCloseEnvDialog}
+            onOK={this.onOKEnvDialog}
+          />
+        </If>
+      </React.Fragment>
     );
   }
 }
