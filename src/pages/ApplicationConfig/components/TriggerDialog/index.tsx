@@ -8,6 +8,7 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   visible: boolean;
@@ -205,9 +206,7 @@ class TriggerDialog extends React.Component<Props, State> {
                 <Select
                   name="type"
                   locale={locale.Select}
-                  dataSource={[
-                    { label: 'On Webhook Event', value: 'webhook' }
-                  ]}
+                  dataSource={[{ label: 'On Webhook Event', value: 'webhook' }]}
                   {...init('type', {
                     initValue: 'webhook',
                     rules: [
@@ -223,45 +222,66 @@ class TriggerDialog extends React.Component<Props, State> {
             </Col>
 
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem
-                label={<Translation>PayloadType</Translation>}
-                help={'Please select type first'}
-                required
-              >
-                <Select
-                  name="payloadType"
-                  locale={locale.Select}
-                  dataSource={payloadTypeOption}
-                  {...init('payloadType', {
-                    rules: [
-                      {
-                        required: true,
-                        message: 'Please select a payloadType',
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
+              <If condition={this.field.getValue('type') === 'webhook'}>
+                <FormItem
+                  label={<Translation>PayloadType</Translation>}
+                  help={'Please select type first'}
+                >
+                  <Select
+                    name="payloadType"
+                    locale={locale.Select}
+                    dataSource={payloadTypeOption}
+                    {...init('payloadType', {
+                      rules: [
+                        {
+                          required: false,
+                          message: 'Please select a payloadType',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </If>
+
+              <If condition={this.field.getValue('type') !== 'webhook'}>
+                <FormItem label={<Translation>Execution workflow</Translation>} required>
+                  <Select
+                    name="workflowName"
+                    locale={locale.Select}
+                    dataSource={workflowOption}
+                    {...init('workflowName', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please select a workflow',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </If>
             </Col>
           </Row>
 
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Execution workflow</Translation>} required>
-                <Select
-                  name="workflowName"
-                  locale={locale.Select}
-                  dataSource={workflowOption}
-                  {...init('workflowName', {
-                    rules: [
-                      {
-                        required: true,
-                        message: 'Please select a workflow',
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
+              <If condition={this.field.getValue('type') === 'webhook'}>
+                <FormItem label={<Translation>Execution workflow</Translation>} required>
+                  <Select
+                    name="workflowName"
+                    locale={locale.Select}
+                    dataSource={workflowOption}
+                    {...init('workflowName', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please select a workflow',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </If>
             </Col>
           </Row>
         </Form>
