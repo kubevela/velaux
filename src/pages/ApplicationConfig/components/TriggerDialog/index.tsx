@@ -3,7 +3,7 @@ import { Grid, Field, Form, Select, Message, Button, Input } from '@b-design/ui'
 import { withTranslation } from 'react-i18next';
 import { createTriggers, detailComponentDefinition } from '../../../../api/application';
 import { getPayloadType } from '../../../../api/payload';
-import type { Workflow, Trigger } from '../../../../interface/application';
+import type { Workflow, Trigger, UIParam } from '../../../../interface/application';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
@@ -66,8 +66,11 @@ class TriggerDialog extends React.Component<Props, State> {
     detailComponentDefinition({ name: value })
       .then((res) => {
         if (res) {
-          const uiSchemaFirstItem = res.uiSchema?.[0] || {};
-          const hasImage = uiSchemaFirstItem.jsonKey === 'image';
+          const findImageObj = (res.uiSchema || []).find(
+            (item: UIParam) => item.jsonKey === 'image',
+          );
+          const hasImage =
+            Object.prototype.toString.call(findImageObj) === '[object Object]' ? true : false;
           this.setState({
             hasImage,
             loading: false,
@@ -142,10 +145,11 @@ class TriggerDialog extends React.Component<Props, State> {
   isShowMessage() {
     const { componentType } = this.props;
     const { hasImage } = this.state;
+    const type = this.field.getValue('type');
     const payloadType = this.field.getValue('payloadType');
     const components = ['webservice', 'worker', 'task'];
     const isNotInclude = !components.includes(componentType);
-    if (isNotInclude && payloadType !== 'custom' && !hasImage) {
+    if (isNotInclude && payloadType !== 'custom' && !hasImage && type === 'webhook') {
       return true;
     } else {
       return false;
@@ -263,6 +267,7 @@ class TriggerDialog extends React.Component<Props, State> {
                 <FormItem
                   label={<Translation>PayloadType</Translation>}
                   help={'Please select type first'}
+                  required
                 >
                   <Select
                     name="payloadType"
