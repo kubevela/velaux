@@ -59,12 +59,12 @@ type State = {
   visibleEditComponentProperties: boolean;
   triggers: Trigger[];
   visibleTrigger: boolean;
+  createTriggerInfo: Trigger;
 };
 @connect((store: any) => {
   return { ...store.application };
 })
 class ApplicationConfig extends Component<Props, State> {
-  triggerListRef: React.RefObject<TriggerList>;
   constructor(props: any) {
     super(props);
     const { params } = props.match;
@@ -78,8 +78,8 @@ class ApplicationConfig extends Component<Props, State> {
       visibleEditComponentProperties: false,
       triggers: [],
       visibleTrigger: false,
+      createTriggerInfo: { name: '', workflowName: '', type: 'webhook', token: '' },
     };
-    this.triggerListRef = React.createRef();
   }
 
   componentDidMount() {
@@ -204,10 +204,8 @@ class ApplicationConfig extends Component<Props, State> {
     this.onGetAppliationTrigger();
     this.setState({
       visibleTrigger: false,
+      createTriggerInfo: res,
     });
-    if (this.triggerListRef.current) {
-      this.triggerListRef.current.showWebhook(res);
-    }
   };
 
   onDeleteTrigger = async (token: string) => {
@@ -236,6 +234,7 @@ class ApplicationConfig extends Component<Props, State> {
       visibleEditComponentProperties,
       triggers,
       visibleTrigger,
+      createTriggerInfo,
     } = this.state;
     return (
       <div>
@@ -338,7 +337,7 @@ class ApplicationConfig extends Component<Props, State> {
               onDeleteTrigger={(token: string) => {
                 this.onDeleteTrigger(token);
               }}
-              ref={this.triggerListRef}
+              createTriggerInfo={createTriggerInfo}
             />
           </If>
         </If>

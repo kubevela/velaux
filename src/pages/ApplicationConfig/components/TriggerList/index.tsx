@@ -12,6 +12,7 @@ import Item from '../../../../components/Item';
 
 type Props = {
   triggers: Trigger[];
+  createTriggerInfo?: Trigger;
   component?: ApplicationComponent;
   onDeleteTrigger: (token: string) => void;
 };
@@ -23,6 +24,13 @@ class TriggerList extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {};
+  }
+
+  componentWillReceiveProps(nextProps: Props) {
+    const { createTriggerInfo } = nextProps;
+    if (createTriggerInfo && createTriggerInfo !== this.props.createTriggerInfo) {
+      this.setState({ showTrigger: createTriggerInfo });
+    }
   }
   showWebhook = (trigger: Trigger) => {
     this.setState({ showTrigger: trigger });

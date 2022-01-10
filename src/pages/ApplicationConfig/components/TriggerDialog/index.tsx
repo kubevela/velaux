@@ -69,8 +69,7 @@ class TriggerDialog extends React.Component<Props, State> {
           const findImageObj = (res.uiSchema || []).find(
             (item: UIParam) => item.jsonKey === 'image',
           );
-          const hasImage =
-            Object.prototype.toString.call(findImageObj) === '[object Object]' ? true : false;
+          const hasImage = findImageObj ? true : false;
           this.setState({
             hasImage,
             loading: false,
