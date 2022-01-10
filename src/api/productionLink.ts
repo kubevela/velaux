@@ -8,3 +8,4 @@ export const workflows = '/api/v1/applications';
 export const project = `/api/v1/projects`;
 export const targetURL = `/api/v1/targets`;
 export const envURL = `/api/v1/envs`;
+export const payloadTypeURL = `/api/v1/payload_types`;

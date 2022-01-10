@@ -38,3 +38,4 @@ export const listWorkFlowDefintion_mock = '/mock/listWorkFlowDefintion.json';
 export const listWorkFlowDetailsDefintion_mock = '/mock/listWorkFlowDetailsDefintion.json';
 
 export const updateApplicationEnv_mock = `/mock/api/v1/applications/name/envs/envName`;
+export const getPayloadType_mock = `/mock/getPayloadTypes.json`;

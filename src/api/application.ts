@@ -22,6 +22,7 @@ import type {
   ApplicationDeployRequest,
   Trait,
   UpdateComponentProperties,
+  Trigger,
 } from '../interface/application';
 
 interface TraitQuery {
@@ -267,4 +268,16 @@ export function getAppliationTriggers(params: { appName: string }) {
 export function updateApplication(params: any) {
   const _url = isMock ? `${updateApplicationEnv_mock}` : `${application}/${params.name}`;
   return put(_url, params).then((res) => res);
+}
+
+export function createTriggers(params: Trigger, query: { appName: string }) {
+  const { appName } = query;
+  const gurl = isMock ? `${getTrait_mock}` : `${application}/${appName}/triggers`;
+  return post(gurl, params).then((res) => res);
+}
+
+export function deleteTriggers(params: { appName: string; token: string }) {
+  const { appName, token } = params;
+  const gurl = isMock ? `${getTrait_mock}` : `${application}/${appName}/triggers/${token}`;
+  return rdelete(gurl, {}).then((res) => res);
 }
