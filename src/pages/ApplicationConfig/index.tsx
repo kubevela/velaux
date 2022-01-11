@@ -40,7 +40,7 @@ type Props = {
   history: {
     push: (path: string, state: {}) => {};
   };
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   applicationDetail?: ApplicationDetail;
   components?: ApplicationComponent[];
   componentsApp?: string;
@@ -242,7 +242,7 @@ class ApplicationConfig extends Component<Props, State> {
           <Col span={12} className="padding16">
             <Message
               type="notice"
-              title="Note that benchmark configuration changes will be applied to all environments"
+              title="Note that baseline configuration changes will be applied to all environments"
             />
           </Col>
           <Col span={12} className="padding16 flexright">
