@@ -490,7 +490,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     }else{
       port = ':' + port;
     }
-    return protocol + '://' + host + port + '/'+ path;
+    return protocol + '://' + host + port + path;
   };
 
   render() {
