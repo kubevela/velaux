@@ -4,12 +4,12 @@ import { Table, Button, Message, Dialog } from '@b-design/ui';
 import {
   listApplicationPods,
   listCloudResources,
-  listApplicationService,
+  listApplicationServiceEndpoints,
 } from '../../api/observation';
 import { deployApplication } from '../../api/application';
 import type { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
 import Translation from '../../components/Translation';
-import type { PodBase, CloudResource, Configuration, Service } from '../../interface/observation';
+import type { PodBase, CloudResource, Configuration, Endpoint } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
 import Header from './components/Hearder';
 import type { Target } from '../../interface/target';
@@ -44,7 +44,7 @@ type State = {
   openRowKeys: [];
   cloudInstance?: CloudInstance[];
   showStatus: boolean;
-  services?: Service[];
+  endpoints?: Endpoint[];
 };
 
 type CloudInstance = {
@@ -138,15 +138,12 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         param.clusterNs = target.cluster?.namespace || '';
       }
       this.setState({ loading: true });
-      listApplicationService(param)
+      listApplicationServiceEndpoints(param)
         .then((re) => {
-          if (re && re.services) {
-            re.services.map((item: any) => {
-              item.primaryKey = item.metadata.name;
-            });
-            this.setState({ services: re.services });
+          if (re && re.endpoints) {
+            this.setState({ endpoints: re.endpoints });
           } else {
-            this.setState({ services: [] });
+            this.setState({ endpoints: [] });
           }
         })
         .finally(() => {
@@ -478,9 +475,27 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     this.setState({ showStatus: false });
   };
 
+  getLink = (endpointObj: Endpoint) => {
+    const { appProtocol, host } = endpointObj.endpoint;
+    let { port, protocol = '', path = '' } = endpointObj.endpoint;
+    protocol = protocol.toLocaleLowerCase();
+    if (appProtocol && appProtocol !== '') {
+      protocol = appProtocol;
+    }
+    if (path === '/') {
+      path = '';
+    }
+    if ((protocol === 'https' && port == 443) || (protocol === 'http' && port === 80)) {
+      port = '';
+    }else{
+      port = ':' + port;
+    }
+    return protocol + '://' + host + port + path;
+  };
+
   render() {
     const { applicationStatus, applicationDetail } = this.props;
-    const { podList, loading, showStatus, cloudInstance, services } = this.state;
+    const { podList, loading, showStatus, cloudInstance, endpoints } = this.state;
     const columns = this.getCloumns();
     const envbinding = this.getEnvbindingByName();
     const expandedRowRender = (record: PodBase) => {
@@ -496,23 +511,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       );
     };
     const gatewayIPs: any = [];
-    services?.map((service) => {
-      const ingress = service.status?.loadBalancer?.ingress;
-      if (ingress && Array.isArray(ingress) && ingress.length > 0) {
-        const item = {
-          ip: ingress[0].ip,
-          name: service.metadata.name,
-          port: 80,
-        };
-        if (
-          service.spec.ports &&
-          Array.isArray(service.spec.ports) &&
-          service.spec.ports.length > 0
-        ) {
-          item.port = service.spec.ports[0].port;
-        }
-        gatewayIPs.push(item);
-      }
+    endpoints?.map((endpointObj) => {
+      const item = this.getLink(endpointObj);
+      gatewayIPs.push(item);
     });
     const {
       params: { envName, appName },

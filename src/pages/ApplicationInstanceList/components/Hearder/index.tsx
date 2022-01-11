@@ -27,7 +27,7 @@ type Props = {
   envName: string;
   appName: string;
   envbinding?: EnvBinding;
-  gatewayIPs?: GatewayIP[];
+  gatewayIPs?: string[];
   updateQuery: (targetName: string) => void;
   updateEnvs: () => void;
   updateStatusShow: (show: boolean) => void;
@@ -192,9 +192,9 @@ class Hearder extends Component<Props, State> {
                   {gatewayIPs?.map((item) => {
                     if (item) {
                       return (
-                        <Menu.Item key={item.ip}>
-                          <a target="_blank" href={`http://${item.ip}:${item.port}`}>
-                            {item.ip}:{item.port}
+                        <Menu.Item key={item}>
+                          <a target="_blank" href={item}>
+                            {item}
                           </a>
                         </Menu.Item>
                       );

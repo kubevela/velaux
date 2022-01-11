@@ -94,3 +94,20 @@ export function listContainerLog(params: {
     },
   });
 }
+
+export function listApplicationServiceEndpoints(params: {
+  appNs: string;
+  appName: string;
+  cluster?: string;
+  clusterNs?: string;
+}) {
+  let urlParams = `service-endpoints-view{appNs=${params.appNs}, appName=${params.appName}}.status`;
+  if (params.cluster) {
+    urlParams = `service-endpoints-view{appNs=${params.appNs}, appName=${params.appName}, cluster=${params.cluster},clusterNs=${params.clusterNs}}.status`;
+  }
+  return get('/api/v1/query', {
+    params: {
+      velaql: urlParams,
+    },
+  });
+}

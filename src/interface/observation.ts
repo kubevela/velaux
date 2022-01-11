@@ -183,3 +183,20 @@ export interface ContainerLogResponse {
     toDate: string;
   };
 }
+
+export interface Endpoint {
+  endpoint: {
+    appProtocol: string;
+    host: string;
+    port: number | string;
+    protocol: string;
+    path?: string;
+  };
+  ref: {
+    kind: string;
+    name: string;
+    namespace: string;
+    resourceVersion: string;
+    uid: string;
+  };
+}
