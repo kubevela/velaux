@@ -44,7 +44,7 @@ type State = {
   openRowKeys: [];
   cloudInstance?: CloudInstance[];
   showStatus: boolean;
-  services?: Endpoint[];
+  endpoints?: Endpoint[];
 };
 
 type CloudInstance = {
@@ -141,9 +141,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       listApplicationServiceEndpoints(param)
         .then((re) => {
           if (re && re.endpoints) {
-            this.setState({ services: re.endpoints });
+            this.setState({ endpoints: re.endpoints });
           } else {
-            this.setState({ services: [] });
+            this.setState({ endpoints: [] });
           }
         })
         .finally(() => {
@@ -487,13 +487,15 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     }
     if ((protocol === 'https' && port == 443) || (protocol === 'http' && port === 80)) {
       port = '';
+    }else{
+      port = ':' + port;
     }
-    return protocol + '://' + host + port + path;
+    return protocol + '://' + host + port + '/'+ path;
   };
 
   render() {
     const { applicationStatus, applicationDetail } = this.props;
-    const { podList, loading, showStatus, cloudInstance, services } = this.state;
+    const { podList, loading, showStatus, cloudInstance, endpoints } = this.state;
     const columns = this.getCloumns();
     const envbinding = this.getEnvbindingByName();
     const expandedRowRender = (record: PodBase) => {
@@ -509,8 +511,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       );
     };
     const gatewayIPs: any = [];
-    services?.map((service) => {
-      const item = this.getLink(service);
+    endpoints?.map((endpointObj) => {
+      const item = this.getLink(endpointObj);
       gatewayIPs.push(item);
     });
     const {
