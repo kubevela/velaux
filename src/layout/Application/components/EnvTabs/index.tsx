@@ -13,7 +13,7 @@ type Props = {
   activeKey: string;
   applicationDetail?: ApplicationDetail;
   appName: string;
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
   envbinding?: EnvBinding[];
 };
 
@@ -32,7 +32,7 @@ class TabsContent extends Component<Props, State> {
     };
   }
 
-  handleChange = () => {};
+  handleChange = () => { };
   loadEnvbinding = async () => {
     const { applicationDetail } = this.props;
     if (applicationDetail) {
@@ -61,7 +61,7 @@ class TabsContent extends Component<Props, State> {
                 <Tab.Item
                   title={
                     <Link to={`/applications/${applicationDetail?.name}/config`}>
-                      <Translation>Benchmark Config</Translation>
+                      <Translation>Baseline Config</Translation>
                     </Link>
                   }
                   key={'basisConfig'}
