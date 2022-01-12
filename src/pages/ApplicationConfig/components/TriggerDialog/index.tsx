@@ -263,11 +263,7 @@ class TriggerDialog extends React.Component<Props, State> {
 
             <Col span={12} style={{ padding: '0 8px' }}>
               <If condition={this.field.getValue('type') === 'webhook'}>
-                <FormItem
-                  label={<Translation>PayloadType</Translation>}
-                  help={'Please select type first'}
-                  required
-                >
+                <FormItem label={<Translation>PayloadType</Translation>} required>
                   <Select
                     name="payloadType"
                     locale={locale.Select}
