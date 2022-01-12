@@ -13,7 +13,7 @@ type Props = {
   activeKey: string;
   applicationDetail?: ApplicationDetail;
   appName: string;
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   envbinding?: EnvBinding[];
 };
 
@@ -32,7 +32,7 @@ class TabsContent extends Component<Props, State> {
     };
   }
 
-  handleChange = () => { };
+  handleChange = () => {};
   loadEnvbinding = async () => {
     const { applicationDetail } = this.props;
     if (applicationDetail) {
@@ -57,10 +57,19 @@ class TabsContent extends Component<Props, State> {
         <div className="tabs-content">
           <Row className="tabs-wraper">
             <Col span={20}>
-              <Tab shape="wrapped" size="small" activeKey={activeKey} onChange={this.handleChange}>
+              <Tab
+                animation={true}
+                shape="wrapped"
+                size="medium"
+                activeKey={activeKey}
+                onChange={this.handleChange}
+                tabRender={(key: string, props: any) => {
+                  return props.title;
+                }}
+              >
                 <Tab.Item
                   title={
-                    <Link to={`/applications/${applicationDetail?.name}/config`}>
+                    <Link className="item" to={`/applications/${applicationDetail?.name}/config`}>
                       <Translation>Baseline Config</Translation>
                     </Link>
                   }
@@ -71,6 +80,7 @@ class TabsContent extends Component<Props, State> {
                     <Tab.Item
                       title={
                         <Link
+                          className="item"
                           to={`/applications/${applicationDetail?.name}/envbinding/${item.name}/instances`}
                         >
                           <span title={item.description}>
