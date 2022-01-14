@@ -122,8 +122,8 @@ class SelectSearch extends React.Component<Props, State> {
       };
     });
     return (
-      <Row className="app-select-wraper boder-radius-8">
-        <Col span="6" style={{ padding: '0 8px' }}>
+      <Row className="app-select-wraper boder-radius-8" wrap={true}>
+        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
             locale={locale.Select}
             mode="single"
@@ -136,7 +136,7 @@ class SelectSearch extends React.Component<Props, State> {
             value={projectValue}
           />
         </Col>
-        <Col span="6" style={{ padding: '0 8px' }}>
+        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
             locale={locale.Select}
             mode="single"
@@ -149,7 +149,7 @@ class SelectSearch extends React.Component<Props, State> {
             value={envValue}
           />
         </Col>
-        <Col span="6" style={{ padding: '0 8px' }}>
+        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
             locale={locale.Select}
             mode="single"
@@ -163,7 +163,7 @@ class SelectSearch extends React.Component<Props, State> {
           />
         </Col>
 
-        <Col span="6" style={{ padding: '0 8px' }}>
+        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
             innerAfter={
               <Icon

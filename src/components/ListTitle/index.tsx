@@ -23,7 +23,7 @@ export default function (props: Props) {
             <Translation>{title}</Translation>
           </span>
           <span className="subTitle font-size-14">
-            <Translation>{subTitle}</Translation>{' '}
+            <Translation>{subTitle}</Translation>
           </span>
         </Col>
         <Col span="10">
