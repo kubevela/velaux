@@ -191,8 +191,8 @@ class ApplicationHeader extends Component<Props, State> {
             </Dropdown>
           </Col>
         </Row>
-        <Row>
-          <Col span={12} className="padding16">
+        <Row wrap={true}>
+          <Col xl={12} m={12} s={24} className="padding16">
             <Card locale={locale.Card}>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
@@ -210,7 +210,7 @@ class ApplicationHeader extends Component<Props, State> {
               </Row>
             </Card>
           </Col>
-          <Col span={12} className="padding16">
+          <Col xl={12} m={12} s={24} className="padding16">
             <If condition={!records || (Array.isArray(records) && records.length === 0)}>
               <Card locale={locale.Card}>
                 <Empty

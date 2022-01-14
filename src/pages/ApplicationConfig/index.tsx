@@ -40,7 +40,7 @@ type Props = {
   history: {
     push: (path: string, state: {}) => {};
   };
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   applicationDetail?: ApplicationDetail;
   components?: ApplicationComponent[];
   componentsApp?: string;
@@ -253,36 +253,36 @@ class ApplicationConfig extends Component<Props, State> {
         </Row>
         <Row>
           <Col span={24} className="padding16">
-            <Card locale={locale.Card}>
-              <Row>
-                <Col span={12}>
+            <Card locale={locale.Card} contentHeight="auto">
+              <Row wrap={true}>
+                <Col m={12} xs={24}>
                   <Item
                     label={<Translation>Name</Translation>}
                     value={applicationDetail && applicationDetail.name}
                   />
                 </Col>
-                <Col span={12}>
+                <Col m={12} xs={24}>
                   <Item
                     label={<Translation>Alias</Translation>}
                     value={applicationDetail && applicationDetail.alias}
                   />
                 </Col>
               </Row>
-              <Row>
-                <Col span={12}>
+              <Row wrap={true}>
+                <Col m={12} xs={24}>
                   <Item
                     label={<Translation>Create Time</Translation>}
                     value={momentDate((applicationDetail && applicationDetail.createTime) || '')}
                   />
                 </Col>
-                <Col span={12}>
+                <Col m={12} xs={24}>
                   <Item
                     label={<Translation>Update Time</Translation>}
                     value={momentDate((applicationDetail && applicationDetail.updateTime) || '')}
                   />
                 </Col>
               </Row>
-              <Row>
+              <Row wrap={true}>
                 <Col span={24}>
                   <Item
                     label={<Translation>Description</Translation>}
