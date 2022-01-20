@@ -264,6 +264,7 @@ class UISchema extends Component<Props, State> {
         case 'Number':
           return (
             <Form.Item
+              labelAlign={inline ? 'inset' : 'left'}
               required={required}
               label={param.label}
               key={param.jsonKey}
