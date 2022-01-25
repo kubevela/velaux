@@ -196,6 +196,7 @@ class UISchema extends Component<Props, State> {
               <Switch
                 id={switchResult.id}
                 onChange={switchResult.onChange}
+                size="medium"
                 checked={switchResult.value ? true : false}
               />
             </Form.Item>

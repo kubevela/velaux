@@ -48,7 +48,7 @@ class TopBar extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.loadSystemInfo();
+    //this.loadSystemInfo();
   }
 
   loadSystemInfo = () => {
@@ -183,13 +183,13 @@ class TopBar extends Component<Props, State> {
                 <Icon size={14} type="help1" />
               </a>
             </div>
-            <div className="vela-item">
+            {/* <div className="vela-item">
               <Icon
                 onClick={this.showUserExperienceImprovementPlan}
                 size={14}
                 type="exclamation-circle"
               />
-            </div>
+            </div> */}
           </div>
         </Row>
         <Dialog
