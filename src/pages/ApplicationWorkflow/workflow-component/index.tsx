@@ -62,12 +62,11 @@ export type NodeItem = {
   typeId: string;
 };
 
-class WorkFlowComponent extends Component<Props, State> {
+class WorkflowComponent extends Component<Props, State> {
   field;
   workflowItem: any;
   constructor(props: any) {
     super(props);
-
     this.state = {
       errorFocus: false,
       loading: false,
@@ -115,33 +114,52 @@ class WorkFlowComponent extends Component<Props, State> {
       }
       const { data } = this.props;
       const workflowData = this.workflowItem.getValues();
-      const { nodes } = workflowData;
-      if (nodes && Object.keys(nodes).length === 0) {
-        Message.error('plase add workflow item');
+      const { nodes, edges } = workflowData;
+      if (edges && !edges.prev) {
+        let next = undefined;
+        Object.keys(edges).map((key) => {
+          if (edges[key].src == 'prev') {
+            next = edges[key];
+          }
+        });
+        if (!next) {
+          Message.warning('Please specify the first step');
+          return;
+        }
+      }
+      const reallyNodes: any = {};
+      Object.keys(nodes).map((nodeKey) => {
+        if (nodes[nodeKey].typeId !== 'next' && nodes[nodeKey].typeId !== 'prev') {
+          reallyNodes[nodeKey] = nodes[nodeKey];
+        }
+      });
+
+      if (reallyNodes && Object.keys(reallyNodes).length === 0) {
+        Message.warning('Please add at least one workflow step');
         this.setState({
           errorFocus: true,
         });
         return;
       }
 
-      const nodeArr: NodeItem[] = Object.values(nodes);
-      const find = nodeArr.find((item) => !item.consumerData);
-
+      const nodeArr: NodeItem[] = Object.values(reallyNodes);
+      const find = nodeArr.find((item) => !item.consumerData || item.consumerData.name == '');
       if (find) {
-        return Message.error('please enter workflow step name and type');
+        return Message.warning('Please set the workflow step name and type');
       }
+
       this.setState({ loading: true });
       const { name, alias, description } = values;
       data.appName = data.appName || this.props.appName;
       data.name = name;
       data.alias = alias;
       data.description = description;
-      data.data = workflowData;
+      data.data = Object.assign(workflowData, { nodes: reallyNodes });
       this.props.dispatch({
         type: 'workflow/saveWorkflow',
         payload: data,
         callback: () => {
-          Message.success('save workflow success');
+          Message.success('Save the workflow success');
           this.props.getWorkflow();
           this.setState({ loading: false });
         },
@@ -170,14 +188,14 @@ class WorkFlowComponent extends Component<Props, State> {
             <Translation>{option.default ? 'Cancel Default' : 'Set As Default'}</Translation>
           </Menu.Item>
         </If>
-        <Menu.Item onClick={() => this.deleteWorkflow(data.name)}>
+        {/* <Menu.Item onClick={() => this.deleteWorkflow(data.name)}>
           <Translation>Remove</Translation>
-        </Menu.Item>
+        </Menu.Item> */}
       </Menu>
     );
     const { init } = this.field;
     const newData = _.cloneDeep(data);
-    convertWorkflowStep(newData, data.appName, option.edit ? 250 : 32);
+    convertWorkflowStep(newData, data.appName, 32, option.edit);
     const workflowData = newData.data || { nodes: {}, edges: {} };
     return (
       <Loading visible={loading} style={{ width: '100%' }}>
@@ -266,13 +284,15 @@ class WorkFlowComponent extends Component<Props, State> {
                 </a>
               </If>
               <div className="option-item">
-                <Dropdown
-                  trigger={<Icon type="ellipsis" className="options-icon" />}
-                  triggerType={['click']}
-                  className="workflow-more"
-                >
-                  {menu}
-                </Dropdown>
+                <If condition={option.edit}>
+                  <Dropdown
+                    trigger={<Icon type="ellipsis" className="options-icon" />}
+                    triggerType={['click']}
+                    className="workflow-more"
+                  >
+                    {menu}
+                  </Dropdown>
+                </If>
               </div>
             </div>
           </div>
@@ -292,4 +312,4 @@ class WorkFlowComponent extends Component<Props, State> {
   }
 }
 
-export default WorkFlowComponent;
+export default WorkflowComponent;
