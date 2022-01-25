@@ -1,0 +1,52 @@
+name: Run commands when issues are labeled or comments added
+on:
+  issues:
+    types: [labeled, opened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  backport:
+    runs-on: ubuntu-18.04
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '/backport')
+    steps:
+      - name: Extract Command
+        id: command
+        uses: xt0rted/slash-command-action@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          command: backport
+          reaction: "true"
+          reaction-type: "eyes"
+          allow-edits: "false"
+          permission-level: read
+      - name: Handle Command
+        uses: actions/github-script@v4
+        env:
+          VERSION: ${{ steps.command.outputs.command-arguments }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const version = process.env.VERSION
+            let label = "backport release-" + version
+            if (version.includes("release")) {
+              label = "backport " + version
+            }
+            // Add our backport label.
+            github.issues.addLabels({
+              // Every pull request is an issue, but not every issue is a pull request.
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: [label]
+            })
+            console.log("Added '" + label + "' label.")
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Open Backport PR
+        uses: zeebe-io/backport-action@v0.0.6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_workspace: ${{ github.workspace }}
