@@ -260,3 +260,10 @@ export interface Trigger {
   createTime?: string;
   updateTime?: string;
 }
+
+export interface WorkflowStep {
+  name: string;
+  alias: string;
+  description?: string;
+  type: string;
+}

@@ -21,13 +21,12 @@ import locale from '../../../utils/locale';
 
 type Props = {
   createOrUpdateNode: (data: any) => void;
-  data: DiagramMakerNode<WorkFlowNodeType>;
+  data?: DiagramMakerNode<WorkFlowNodeType>;
   workFlowDefinitions: [];
   appName?: string;
   componentName?: string;
   closeDrawer: () => void;
   checkStepName: (name: string) => boolean;
-  onDelete: () => void;
   dispatch?: ({}) => {};
   t: (key: string) => {};
 };
@@ -56,14 +55,16 @@ class WorkflowForm extends Component<Props, State> {
   }
 
   componentDidMount = () => {
-    const { consumerData } = this.props.data;
-    this.field.setValues(consumerData || '');
-    let properties = consumerData && consumerData.properties;
-    if (properties && typeof properties === 'string') {
-      properties = JSON.parse(properties);
+    if (this.props.data) {
+      const { consumerData } = this.props.data;
+      this.field.setValues(consumerData || '');
+      let properties = consumerData && consumerData.properties;
+      if (properties && typeof properties === 'string') {
+        properties = JSON.parse(properties);
+      }
+      this.field.setValues({ properties: properties });
+      this.onDetailsComponeDefinition((consumerData && consumerData.type) || '');
     }
-    this.field.setValues({ properties: properties });
-    this.onDetailsComponeDefinition((consumerData && consumerData.type) || '');
   };
 
   setValues = (values: any | null) => {
@@ -81,13 +82,6 @@ class WorkflowForm extends Component<Props, State> {
       this.props.createOrUpdateNode(values);
       Message.success('It takes effect after being saved.');
     });
-  };
-
-  onDelete = () => {
-    const { onDelete } = this.props;
-    if (onDelete) {
-      onDelete();
-    }
   };
 
   transDefinitions() {
@@ -129,20 +123,22 @@ class WorkflowForm extends Component<Props, State> {
     };
 
     const checkWorkflowStepName = (rule: Rule, value: any, callback: (error?: string) => void) => {
-      const { consumerData } = this.props.data;
-      if (checkStepName(value)) {
-        if (consumerData?.name && value == consumerData?.name) {
-          callback();
-          return;
+      if (data) {
+        const { consumerData } = data;
+        if (checkStepName(value)) {
+          if (consumerData?.name && value == consumerData?.name) {
+            callback();
+            return;
+          }
+          callback('name is exist');
         }
-        callback('name is exist');
       }
       callback();
     };
-
+    const edit = data && data.consumerData?.name != undefined && data.consumerData?.name != '';
     return (
       <DrawerWithFooter
-        title={<Translation>Edit Workflow Step</Translation>}
+        title={<Translation>{edit ? 'Edit Workflow Step' : 'Add Workflow Step'}</Translation>}
         placement="right"
         width={800}
         onClose={closeDrawer}
@@ -151,26 +147,12 @@ class WorkflowForm extends Component<Props, State> {
           <Button key={'cancel'} style={{ marginRight: '16px' }} onClick={closeDrawer}>
             Cancel
           </Button>,
-          <Button
-            key={'delete'}
-            style={{ marginRight: '16px' }}
-            onClick={() => {
-              this.onDelete();
-            }}
-            title="Delete this step"
-          >
-            Delete
-          </Button>,
         ]}
       >
         <Form field={this.field}>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem
-                label={<Translation>Workflow Type</Translation>}
-                required
-                disabled={this.field.getValue('type')}
-              >
+              <FormItem label={<Translation>Workflow Type</Translation>} required disabled={edit}>
                 <Select
                   locale={locale.Select}
                   className="select"
@@ -202,7 +184,7 @@ class WorkflowForm extends Component<Props, State> {
                   maxLength={32}
                   placeholder={t('Please enter').toString()}
                   {...init('name', {
-                    initValue: data.consumerData?.type,
+                    initValue: data && data.consumerData?.type,
                     rules: [
                       {
                         required: true,

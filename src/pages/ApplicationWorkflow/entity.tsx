@@ -2,31 +2,6 @@ import type { DiagramMakerNodes, DiagramMakerEdges } from 'diagram-maker';
 
 export const WORFLOW_NODE_WIDTH = 120;
 
-export const WORKFLOW_COMMON_PANNEL = {
-  p1: {
-    id: 'p1',
-    position: {
-      x: 10,
-      y: 10,
-    },
-    size: {
-      width: 230,
-      height: 280,
-    },
-  },
-  p2: {
-    id: 'p2',
-    position: {
-      x: 10,
-      y: 10,
-    },
-    size: {
-      width: 420,
-      height: 40,
-    },
-  },
-};
-
 export type WorkFlowOption = {
   default: boolean;
   edit: boolean;
