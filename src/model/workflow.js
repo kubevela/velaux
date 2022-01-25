@@ -105,29 +105,34 @@ export default {
       workflow.default = option.default;
       const { nodes, edges } = data;
       const nodeIndex = {};
-      let index = 0;
-      const steps = Object.keys(nodes).map((key) => {
+      Object.keys(nodes).map((key) => {
         if (nodes[key]) {
-          nodeIndex[nodes[key].id] = index;
-          index++;
-          const nodeConfig = nodes[key].consumerData;
+          let nodeConfig = Object.assign({}, nodes[key].consumerData);
           if (nodeConfig && nodeConfig.properties && typeof nodeConfig.properties != 'string') {
-            return Object.assign(nodeConfig, { properties: JSON.stringify(nodeConfig.properties) });
+            nodeConfig = Object.assign(nodeConfig, {
+              properties: JSON.stringify(nodeConfig.properties),
+            });
           }
-          return nodeConfig;
+          nodeIndex[nodes[key].id] = nodeConfig;
         }
       });
+      let next = edges.prev;
+      let steps = [];
+      let srcMap = {};
       Object.keys(edges).map((key) => {
-        const edge = edges[key];
-        if (nodeIndex[edge.src] > nodeIndex[edge.dest]) {
-          const i = steps[nodeIndex[edge.src]];
-          const oldIndex = nodeIndex[edge.src];
-          steps[nodeIndex[edge.src]] = steps[nodeIndex[edge.dest]];
-          steps[nodeIndex[edge.dest]] = i;
-          nodeIndex[edge.src] = nodeIndex[edge.dest];
-          nodeIndex[edge.dest] = oldIndex;
+        if (edges[key].src == 'prev') {
+          next = edges[key];
         }
+        srcMap[edges[key].src] = edges[key];
       });
+      while (next != undefined) {
+        if (next.dest && next.dest != 'next') {
+          steps.push(nodeIndex[next.dest]);
+          next = srcMap[next.dest];
+        } else {
+          next = undefined;
+        }
+      }
       workflow.steps = steps;
       yield call(createWorkFlow, workflow);
       if (action.callback) {
@@ -141,7 +146,7 @@ function transData(workflowList = [], appName) {
   const newWorkflows = _.cloneDeep(workflowList);
   if (newWorkflows && newWorkflows.length != 0) {
     newWorkflows.forEach((workflow) => {
-      convertWorkflowStep(workflow, appName, 32);
+      convertWorkflowStep(workflow, appName, 0);
     });
     return newWorkflows;
   } else {
@@ -149,18 +154,39 @@ function transData(workflowList = [], appName) {
   }
 }
 
-export function convertWorkflowStep(workflow, appName, initPosition = 32) {
-  const nodeWidth = 140;
-  const nodeHeight = 40;
-  const nodeInterval = 80;
+export function convertWorkflowStep(workflow, appName, initPosition = 32, edit = false) {
+  const nodeWidth = 200;
+  const nodeHeight = 80;
+  const nodeInterval = 120;
   const nodes = {};
   const edges = {};
   let position = initPosition;
+  if (edit) {
+    nodes.prev = {
+      id: 'prev',
+      typeId: 'prev',
+      diagramMakerData: {
+        position: {
+          x: position,
+          y: 130,
+        },
+        size: {
+          width: nodeWidth,
+          height: nodeHeight,
+        },
+        selected: false,
+      },
+    };
+    position += nodeWidth + nodeInterval;
+  }
   if (workflow.steps) {
     workflow.steps.forEach((item, index, array) => {
       edges[item.name] = {};
-      edges[item.name].dest =
-        workflow.steps && workflow.steps[index + 1] && workflow.steps[index + 1].name;
+      if (workflow.steps && workflow.steps[index + 1]) {
+        edges[item.name].dest = workflow.steps[index + 1].name;
+      } else if (edit) {
+        edges[item.name].dest = 'next';
+      }
       edges[item.name].diagramMakerData = {
         selected: false,
       };
@@ -169,7 +195,7 @@ export function convertWorkflowStep(workflow, appName, initPosition = 32) {
 
       nodes[item.name] = {};
       nodes[item.name].id = item.name;
-      nodes[item.name].typeId = item.type;
+      nodes[item.name].typeId = 'common';
       nodes[item.name].consumerData = {
         alias: item.alias || '',
         dependsOn: null,
@@ -191,8 +217,32 @@ export function convertWorkflowStep(workflow, appName, initPosition = 32) {
       };
       position += nodeWidth + nodeInterval;
     });
+    edges.prev = {
+      dest: workflow.steps[0].name,
+      src: 'prev',
+      id: 'prev',
+      diagramMakerData: {
+        selected: false,
+      },
+    };
   }
-
+  if (edit) {
+    nodes.next = {
+      id: 'next',
+      typeId: 'next',
+      diagramMakerData: {
+        position: {
+          x: position,
+          y: 130,
+        },
+        size: {
+          width: nodeWidth,
+          height: nodeHeight,
+        },
+        selected: false,
+      },
+    };
+  }
   workflow.appName = appName;
   workflow.option = {
     edit: false,

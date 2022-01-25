@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
 import { If } from 'tsx-control-statements/components';
-import { Button } from '@b-design/ui';
 import { connect } from 'dva';
-import WrokflowComponent from './workflow-component';
+import WorkflowComponent from './workflow-component';
 import type { WorkFlowData } from './entity';
 import { getWorkFlowDefinitions } from '../../api/workflows';
 
 import './index.less';
-import Translation from '../../components/Translation';
 
 type Props = {
   workflowList: WorkFlowData[];
@@ -72,19 +70,19 @@ class Workflow extends Component<Props, State> {
     return (
       <div style={{ height: '100%' }} className="workflow-wraper">
         <If condition={workflowList.length === 0}>
-          <div className="empty-container">
+          {/* <div className="empty-container">
             <div className="empty-word">
               <Translation>Please create workflow</Translation>
             </div>
             <Button type="primary" onClick={this.addWrokflow}>
               <Translation>New Workflow</Translation>
             </Button>
-          </div>
+          </div> */}
         </If>
         <If condition={workflowList.length > 0}>
           <React.Fragment>
             {workflowList.map((workflow: WorkFlowData) => (
-              <WrokflowComponent
+              <WorkflowComponent
                 key={workflow.name + params.appName + workflow.steps}
                 appName={params.appName}
                 data={workflow}
