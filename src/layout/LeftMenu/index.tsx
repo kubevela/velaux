@@ -5,6 +5,7 @@ import { Icon } from '@b-design/ui';
 import Translation from '../../components/Translation';
 import { getLeftSider } from './menu';
 import './index.less';
+import { version } from '../../../package.json';
 
 const LeftMenu = (props: any) => {
   const pathname = _.get(props, 'props.history.location.pathname');
@@ -45,6 +46,9 @@ const LeftMenu = (props: any) => {
     <div style={{ position: 'relative', height: '100%' }}>
       <div className="slide-wraper">
         <ul className="ul-wraper">{childrenSider}</ul>
+      </div>
+      <div className="bottom slide-wraper">
+        <div className="nav-container">Version {version}</div>
       </div>
     </div>
   );
