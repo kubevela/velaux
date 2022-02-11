@@ -217,7 +217,7 @@ class Structs extends React.Component<Props, State> {
         <div className="struct-plan-group">
           <Form field={this.field}>
             {structList.map((struct: any) => {
-              const fieldObj:any = this.field.getValues();
+              const fieldObj: any = this.field.getValues();
               const name = fieldObj[`struct${struct.key}`]?.name || '';
               const labelTitle = `${label}:${name}`;
               return (

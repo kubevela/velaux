@@ -46,7 +46,7 @@ class SpectionGroup extends React.Component<Props, State> {
                     onClick={this.toggleShowClass}
                     className="icon-toggle"
                     type={closed ? 'arrow-down' : 'arrow-up'}
-                    style={closed ? { 'top': '-2px' } : { 'top': '0' }}
+                    style={closed ? { top: '-2px' } : { top: '0' }}
                   />
                   <Icon
                     type="delete"
