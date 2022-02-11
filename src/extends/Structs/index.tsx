@@ -3,6 +3,7 @@ import { Form, Icon, Field, Button } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import type { UIParam, GroupOption } from '../../interface/application';
 import UISchema from '../../components/UISchema';
+import SpectionGroup from '../../extends/SpectionGroup';
 import type { Rule } from '@alifd/field';
 import './index.less';
 
@@ -18,6 +19,7 @@ type Props = {
 
 type State = {
   structList: any[];
+  closed: boolean;
 };
 
 type StructItemProps = {
@@ -54,32 +56,57 @@ class StructItem extends React.Component<StructItemProps> {
 
     return (
       <div className="struct-item-container">
-        <div className="struct-item-content">
-          <UISchema
-            {...init(`struct${id}`, {
-              rules: [
-                {
-                  validator: this.validator,
-                  message: 'please check config item',
-                },
-              ],
-            })}
-            uiSchema={uiSchemas}
-            inline
-            ref={this.uiRef}
-          />
-        </div>
-        <div className="remove-option-container">
-          <Icon
-            type="ashbin"
-            onClick={() => {
-              if (this.props.delete) {
-                this.props.delete(this.props.id);
-              }
-            }}
-          />
-        </div>
-      </div>
+        <If condition={param && param.length > 3}>
+          <div className="struct-item-content">
+            <SpectionGroup
+              id={id}
+              delete={(id: string) => { this.props.delete(this.props.id) }}
+            >
+              <UISchema
+                {...init(`struct${id}`, {
+                  rules: [
+                    {
+                      validator: this.validator,
+                      message: 'please check config item',
+                    },
+                  ],
+                })}
+                uiSchema={uiSchemas}
+                inline
+                ref={this.uiRef}
+              />
+            </SpectionGroup>
+          </div>
+        </If>
+        <If condition={param && param.length <= 3}>
+          <div className="struct-item-content">
+            <UISchema
+              {...init(`struct${id}`, {
+                rules: [
+                  {
+                    validator: this.validator,
+                    message: 'please check config item',
+                  },
+                ],
+              })}
+              uiSchema={uiSchemas}
+              inline
+              ref={this.uiRef}
+            />
+          </div>
+          <div className="remove-option-container">
+            <Icon
+              type="ashbin"
+              onClick={() => {
+                if (this.props.delete) {
+                  this.props.delete(this.props.id);
+                }
+              }}
+            />
+          </div>
+        </If>
+
+      </div >
     );
   }
 }
@@ -90,6 +117,7 @@ class Structs extends React.Component<Props, State> {
     super(props);
     this.state = {
       structList: [],
+      closed: false,
     };
     this.field = new Field(this, {
       onChange: () => {
@@ -177,15 +205,42 @@ class Structs extends React.Component<Props, State> {
     });
   };
 
+  toggleShowClass = () => {
+    const { closed } = this.state;
+    this.setState({
+      closed: !closed,
+    });
+  };
+
+  getConditionStructList = () => {
+    const { structList, closed } = this.state;
+    if (closed && structList) {
+      return [structList[0]];
+    } else {
+      return structList || [];
+    }
+  }
+
   render() {
-    const { structList } = this.state;
+    const { structList, closed } = this.state;
     const { param, parameterGroupOption = [] } = this.props;
     const { init } = this.field;
+    const conditionStructList = this.getConditionStructList();
     return (
       <div className="struct-plan-container">
         <div className="struct-plan-group">
           <Form field={this.field}>
-            {structList.map((struct: any) => (
+            <If condition={structList && structList.length > 1}>
+              <div className="flexright">
+                <Icon
+                  onClick={this.toggleShowClass}
+                  size={'small'}
+                  type={closed ? 'arrow-down1' : 'arrow-up'}
+                />
+              </div>
+            </If>
+
+            {conditionStructList.map((struct: any) => (
               <StructItem
                 delete={this.removeStructPlanItem}
                 id={struct.key}
