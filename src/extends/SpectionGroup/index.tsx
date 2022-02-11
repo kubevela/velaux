@@ -1,37 +1,57 @@
 import React from 'react';
 import { Icon, Loading, Grid } from '@b-design/ui';
+import { If } from 'tsx-control-statements/components';
 import './index.less';
 
 type Props = {
   id: string;
-  title?: string;
   children?: React.ReactNode;
   loading?: boolean;
+  labelTitle: string;
   delete: (id: string) => void;
-
 };
 
-class SpectionGroup extends React.Component<Props> {
+type State = {
+  closed: boolean | undefined;
+};
+
+class SpectionGroup extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      closed: true,
+    };
+  }
+
+  toggleShowClass = () => {
+    const { closed } = this.state;
+    this.setState({
+      closed: !closed,
+    });
+  };
+
   render() {
-    const {
-      title,
-      children,
-      loading,
-    } = this.props;
+    const { children, labelTitle, loading } = this.props;
+    const { closed } = this.state;
     const { Col, Row } = Grid;
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
         <div className="spection-group-container">
           <div className="spection-group-title-container">
             <Row>
-              <Col span={'21'}>
-                {title}
-              </Col>
-              <Col span={'3'} className="">
-                <div className="flexright">
+              <Col span={'21'}>{labelTitle}</Col>
+              <Col span={'3'}>
+                <div>
+                  <Icon
+                    onClick={this.toggleShowClass}
+                    className="icon-toggle"
+                    type={closed ? 'arrow-down' : 'arrow-up'}
+                    style={closed ? { 'top': '-2px' } : { 'top': '0' }}
+                  />
                   <Icon
                     type="delete"
-                    size={'medium'}
+                    size={'small'}
+                    className="icon-delete"
                     onClick={() => {
                       if (this.props.delete) {
                         this.props.delete(this.props.id);
@@ -42,7 +62,12 @@ class SpectionGroup extends React.Component<Props> {
               </Col>
             </Row>
           </div>
-          <div className="spection-group-box">{children}</div>
+          <If condition={!closed}>
+            <div className="spection-group-box">{children}</div>
+          </If>
+          <If condition={closed}>
+            <div className="spection-group-box disable">{children}</div>
+          </If>
         </div>
       </Loading>
     );

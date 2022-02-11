@@ -15,11 +15,11 @@ type Props = {
   registerForm: (form: Field) => void;
   id: string;
   value: any;
+  label: string;
 };
 
 type State = {
   structList: any[];
-  closed: boolean;
 };
 
 type StructItemProps = {
@@ -27,8 +27,10 @@ type StructItemProps = {
   param?: UIParam[];
   id: string;
   init: any;
+  labelTitle: string;
   delete: (id: string) => void;
 };
+
 class StructItem extends React.Component<StructItemProps> {
   uiRef: React.RefObject<UISchema>;
   constructor(props: StructItemProps) {
@@ -42,7 +44,7 @@ class StructItem extends React.Component<StructItemProps> {
     this.uiRef.current?.validate(callback);
   };
   render() {
-    const { option, param, id, init } = this.props;
+    const { option, param, id, init, labelTitle } = this.props;
     let uiSchemas = param;
     if (option && option.length > 0) {
       const paramMap =
@@ -60,7 +62,10 @@ class StructItem extends React.Component<StructItemProps> {
           <div className="struct-item-content">
             <SpectionGroup
               id={id}
-              delete={(id: string) => { this.props.delete(this.props.id) }}
+              labelTitle={labelTitle}
+              delete={(structId: string) => {
+                this.props.delete(structId);
+              }}
             >
               <UISchema
                 {...init(`struct${id}`, {
@@ -105,8 +110,7 @@ class StructItem extends React.Component<StructItemProps> {
             />
           </div>
         </If>
-
-      </div >
+      </div>
     );
   }
 }
@@ -117,7 +121,6 @@ class Structs extends React.Component<Props, State> {
     super(props);
     this.state = {
       structList: [],
-      closed: false,
     };
     this.field = new Field(this, {
       onChange: () => {
@@ -205,51 +208,30 @@ class Structs extends React.Component<Props, State> {
     });
   };
 
-  toggleShowClass = () => {
-    const { closed } = this.state;
-    this.setState({
-      closed: !closed,
-    });
-  };
-
-  getConditionStructList = () => {
-    const { structList, closed } = this.state;
-    if (closed && structList) {
-      return [structList[0]];
-    } else {
-      return structList || [];
-    }
-  }
-
   render() {
-    const { structList, closed } = this.state;
-    const { param, parameterGroupOption = [] } = this.props;
+    const { structList } = this.state;
+    const { param, parameterGroupOption = [], label } = this.props;
     const { init } = this.field;
-    const conditionStructList = this.getConditionStructList();
     return (
       <div className="struct-plan-container">
         <div className="struct-plan-group">
           <Form field={this.field}>
-            <If condition={structList && structList.length > 1}>
-              <div className="flexright">
-                <Icon
-                  onClick={this.toggleShowClass}
-                  size={'small'}
-                  type={closed ? 'arrow-down1' : 'arrow-up'}
+            {structList.map((struct: any) => {
+              const fieldObj:any = this.field.getValues();
+              const name = fieldObj[`struct${struct.key}`]?.name || '';
+              const labelTitle = `${label}:${name}`;
+              return (
+                <StructItem
+                  delete={this.removeStructPlanItem}
+                  id={struct.key}
+                  key={struct.key}
+                  init={init}
+                  option={struct.option}
+                  param={param}
+                  labelTitle={labelTitle}
                 />
-              </div>
-            </If>
-
-            {conditionStructList.map((struct: any) => (
-              <StructItem
-                delete={this.removeStructPlanItem}
-                id={struct.key}
-                key={struct.key}
-                init={init}
-                option={struct.option}
-                param={param}
-              />
-            ))}
+              );
+            })}
           </Form>
         </div>
         <div className="struct-plan-option">
