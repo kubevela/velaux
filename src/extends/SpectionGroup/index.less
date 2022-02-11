@@ -1,0 +1,40 @@
+@primaryColor: #0064c8;
+@whiteColor: white;
+@blackColor: black;
+.spection-group-container {
+  margin-bottom: 16px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  visibility: visible;
+  &:hover {
+    border: 1px solid @primaryColor;
+  }
+  .spection-group-title-container {
+    position: relative;
+    padding: 0 10px;
+    font-size: 14px;
+    background-color: transparent;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.12s;
+    .icon {
+      position: absolute;
+      right: 10px;
+    }
+    .next-icon-arrow-up {
+      &::before {
+        font-size: 12px !important;
+      }
+    }
+  }
+  .spection-group-box {
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 20px;
+    background-color: #eee;
+    border-radius: 5px;
+    transition: height 0.3s linear;
+  }
+}
