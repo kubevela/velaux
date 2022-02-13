@@ -313,6 +313,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                     loadNamespaces={this.loadNamespaces}
                     cluster={cluster}
                     createNamespaceDialog={true}
+                    targetField={this.field}
                   />
                 </FormItem>
               </Col>

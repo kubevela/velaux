@@ -15,6 +15,7 @@ type Props = {
   disableNew?: boolean;
   disabled?: boolean;
   createNamespaceDialog?: boolean;
+  targetField: Field;
 };
 
 export interface NamespaceItem {
@@ -23,7 +24,6 @@ export interface NamespaceItem {
 }
 
 type State = {
-  showNameSpaceInput: boolean;
   inputNamespaceParam: string;
   loading: boolean;
   createNamespace?: string;
@@ -35,7 +35,6 @@ class Namespace extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      showNameSpaceInput: false,
       inputNamespaceParam: '',
       loading: false,
       visible: false,
@@ -46,24 +45,15 @@ class Namespace extends React.Component<Props, State> {
   openNamespaceInput = () => {
     const { createNamespaceDialog } = this.props;
     if (createNamespaceDialog) {
+      this.field.setValue('namespace', '');
       this.setState({
         visible: true,
-      });
-    } else {
-      this.setState({
-        showNameSpaceInput: true,
       });
     }
   };
 
-  closeNamespaceInput = () => {
-    this.setState({
-      showNameSpaceInput: false,
-    });
-  };
-
   createNamespace = () => {
-    const { cluster, loadNamespaces } = this.props;
+    const { cluster, loadNamespaces, targetField } = this.props;
     if (!cluster) {
       Message.warning('Please select a cluster first');
       return;
@@ -77,9 +67,9 @@ class Namespace extends React.Component<Props, State> {
           Message.success('create namespace success');
           loadNamespaces(cluster);
         }
+        targetField.setValue('runtimeNamespace', namespace);
         this.setState({
           loading: false,
-          showNameSpaceInput: false,
           visible: false,
         });
       });
@@ -94,7 +84,7 @@ class Namespace extends React.Component<Props, State> {
 
   render() {
     const { disableNew, onChange, namespaces, value, disabled } = this.props;
-    const { showNameSpaceInput, loading, visible } = this.state;
+    const { visible } = this.state;
     const { Col, Row } = Grid;
     const init = this.field.init;
     const formItemLayout = {
@@ -108,46 +98,29 @@ class Namespace extends React.Component<Props, State> {
 
     return (
       <div>
-        <If condition={!showNameSpaceInput}>
-          <div className="cluster-container">
-            <Select
-              locale={locale.Select}
-              className="cluster-params-input"
-              mode="single"
-              disabled={disabled}
-              dataSource={namespaces}
-              onChange={onChange}
-              placeholder={''}
-              value={value}
-            />
-            <If condition={!disableNew}>
-              <Button
-                className="cluster-option-btn"
-                type="secondary"
-                disabled={disabled}
-                onClick={this.openNamespaceInput}
-              >
-                <Translation>New</Translation>
-              </Button>
-            </If>
-          </div>
-        </If>
-        <If condition={showNameSpaceInput}>
-          <div className="cluster-container">
-            <Input
-              onChange={(v) => this.setState({ createNamespace: v })}
-              className="cluster-params-input"
-            />
+        <div className="cluster-container">
+          <Select
+            locale={locale.Select}
+            className="cluster-params-input"
+            mode="single"
+            disabled={disabled}
+            dataSource={namespaces}
+            onChange={onChange}
+            placeholder={''}
+            value={value}
+          />
+          <If condition={!disableNew}>
             <Button
-              loading={loading}
               className="cluster-option-btn"
               type="secondary"
-              onClick={this.createNamespace}
+              disabled={disabled}
+              onClick={this.openNamespaceInput}
             >
-              <Translation>Submit</Translation>
+              <Translation>New</Translation>
             </Button>
-          </div>
-        </If>
+          </If>
+        </div>
+
         <Dialog
           locale={locale.Dialog}
           className={'namespaceDialogWraper'}
