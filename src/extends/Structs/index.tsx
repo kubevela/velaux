@@ -3,6 +3,7 @@ import { Form, Icon, Field, Button } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import type { UIParam, GroupOption } from '../../interface/application';
 import UISchema from '../../components/UISchema';
+import SpectionGroup from '../../extends/SpectionGroup';
 import type { Rule } from '@alifd/field';
 import './index.less';
 
@@ -14,6 +15,7 @@ type Props = {
   registerForm: (form: Field) => void;
   id: string;
   value: any;
+  label: string;
 };
 
 type State = {
@@ -25,8 +27,10 @@ type StructItemProps = {
   param?: UIParam[];
   id: string;
   init: any;
+  labelTitle: string;
   delete: (id: string) => void;
 };
+
 class StructItem extends React.Component<StructItemProps> {
   uiRef: React.RefObject<UISchema>;
   constructor(props: StructItemProps) {
@@ -40,7 +44,7 @@ class StructItem extends React.Component<StructItemProps> {
     this.uiRef.current?.validate(callback);
   };
   render() {
-    const { option, param, id, init } = this.props;
+    const { option, param, id, init, labelTitle } = this.props;
     let uiSchemas = param;
     if (option && option.length > 0) {
       const paramMap =
@@ -54,31 +58,58 @@ class StructItem extends React.Component<StructItemProps> {
 
     return (
       <div className="struct-item-container">
-        <div className="struct-item-content">
-          <UISchema
-            {...init(`struct${id}`, {
-              rules: [
-                {
-                  validator: this.validator,
-                  message: 'please check config item',
-                },
-              ],
-            })}
-            uiSchema={uiSchemas}
-            inline
-            ref={this.uiRef}
-          />
-        </div>
-        <div className="remove-option-container">
-          <Icon
-            type="ashbin"
-            onClick={() => {
-              if (this.props.delete) {
-                this.props.delete(this.props.id);
-              }
-            }}
-          />
-        </div>
+        <If condition={uiSchemas && uiSchemas.length > 3}>
+          <div className="struct-item-content">
+            <SpectionGroup
+              id={id}
+              labelTitle={labelTitle}
+              delete={(structId: string) => {
+                this.props.delete(structId);
+              }}
+            >
+              <UISchema
+                {...init(`struct${id}`, {
+                  rules: [
+                    {
+                      validator: this.validator,
+                      message: 'please check config item',
+                    },
+                  ],
+                })}
+                uiSchema={uiSchemas}
+                inline
+                ref={this.uiRef}
+              />
+            </SpectionGroup>
+          </div>
+        </If>
+        <If condition={uiSchemas && uiSchemas.length <= 3}>
+          <div className="struct-item-content">
+            <UISchema
+              {...init(`struct${id}`, {
+                rules: [
+                  {
+                    validator: this.validator,
+                    message: 'please check config item',
+                  },
+                ],
+              })}
+              uiSchema={uiSchemas}
+              inline
+              ref={this.uiRef}
+            />
+          </div>
+          <div className="remove-option-container">
+            <Icon
+              type="ashbin"
+              onClick={() => {
+                if (this.props.delete) {
+                  this.props.delete(this.props.id);
+                }
+              }}
+            />
+          </div>
+        </If>
       </div>
     );
   }
@@ -179,22 +210,28 @@ class Structs extends React.Component<Props, State> {
 
   render() {
     const { structList } = this.state;
-    const { param, parameterGroupOption = [] } = this.props;
+    const { param, parameterGroupOption = [], label } = this.props;
     const { init } = this.field;
     return (
       <div className="struct-plan-container">
         <div className="struct-plan-group">
           <Form field={this.field}>
-            {structList.map((struct: any) => (
-              <StructItem
-                delete={this.removeStructPlanItem}
-                id={struct.key}
-                key={struct.key}
-                init={init}
-                option={struct.option}
-                param={param}
-              />
-            ))}
+            {structList.map((struct: any) => {
+              const fieldObj: any = this.field.getValues();
+              const name = fieldObj[`struct${struct.key}`]?.name || '';
+              const labelTitle = `${label}:${name}`;
+              return (
+                <StructItem
+                  delete={this.removeStructPlanItem}
+                  id={struct.key}
+                  key={struct.key}
+                  init={init}
+                  option={struct.option}
+                  param={param}
+                  labelTitle={labelTitle}
+                />
+              );
+            })}
           </Form>
         </div>
         <div className="struct-plan-option">
