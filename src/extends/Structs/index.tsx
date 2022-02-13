@@ -58,7 +58,7 @@ class StructItem extends React.Component<StructItemProps> {
 
     return (
       <div className="struct-item-container">
-        <If condition={param && param.length > 3}>
+        <If condition={uiSchemas && uiSchemas.length > 3}>
           <div className="struct-item-content">
             <SpectionGroup
               id={id}
@@ -83,7 +83,7 @@ class StructItem extends React.Component<StructItemProps> {
             </SpectionGroup>
           </div>
         </If>
-        <If condition={param && param.length <= 3}>
+        <If condition={uiSchemas && uiSchemas.length <= 3}>
           <div className="struct-item-content">
             <UISchema
               {...init(`struct${id}`, {
