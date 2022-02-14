@@ -312,6 +312,8 @@ class DeliveryDialog extends React.Component<Props, State> {
                     namespaces={namespaces}
                     loadNamespaces={this.loadNamespaces}
                     cluster={cluster}
+                    createNamespaceDialog={true}
+                    targetField={this.field}
                   />
                 </FormItem>
               </Col>

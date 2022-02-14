@@ -487,7 +487,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     }
     if ((protocol === 'https' && port == 443) || (protocol === 'http' && port === 80)) {
       port = '';
-    }else{
+    } else {
       port = ':' + port;
     }
     return protocol + '://' + host + port + path;
