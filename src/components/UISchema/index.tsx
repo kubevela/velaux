@@ -180,8 +180,13 @@ class UISchema extends Component<Props, State> {
       const initValue = param.validate.defaultValue || (value && value[param.jsonKey]);
       switch (param.uiType) {
         case 'Switch':
+          const getDefaultSwtichValue = (validate: any) => {
+            if (validate.required === true) {
+              return false;
+            }
+          };
           const switchResult = init(param.jsonKey, {
-            initValue: initValue,
+            initValue: initValue || getDefaultSwtichValue(param.validate),
             rules: converRule(param.validate),
           });
           return (
@@ -265,6 +270,7 @@ class UISchema extends Component<Props, State> {
         case 'Number':
           return (
             <Form.Item
+              labelAlign={inline ? 'inset' : 'left'}
               required={required}
               label={param.label}
               key={param.jsonKey}
@@ -479,6 +485,7 @@ class UISchema extends Component<Props, State> {
             return getGroup(
               <Structs
                 key={param.jsonKey}
+                label={param.label}
                 param={param.subParameters}
                 parameterGroupOption={param.subParameterGroupOption}
                 registerForm={(form: Field) => {
