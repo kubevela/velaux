@@ -28,45 +28,45 @@ type Props = {
   registerForm?: (form: Field) => void;
 };
 
-function converRule(validete: UIParamValidate) {
+function convertRule(validate: UIParamValidate) {
   const rules = [];
-  if (!validete) {
+  if (!validate) {
     return [];
   }
-  if (validete.required) {
+  if (validate.required) {
     rules.push({
       required: true,
       message: 'This field is required.',
     });
   }
-  if (validete.min) {
+  if (validate.min) {
     rules.push({
-      min: validete.min,
-      message: 'Enter a number greater than ' + validete.min,
+      min: validate.min,
+      message: 'Enter a number greater than ' + validate.min,
     });
   }
-  if (validete.max) {
+  if (validate.max) {
     rules.push({
-      max: validete.max,
-      message: 'Enter a number less than ' + validete.max,
+      max: validate.max,
+      message: 'Enter a number less than ' + validate.max,
     });
   }
-  if (validete.minLength) {
+  if (validate.minLength) {
     rules.push({
-      minLength: validete.minLength,
-      message: `Enter a minimum of ${validete.minLength} characters.`,
+      minLength: validate.minLength,
+      message: `Enter a minimum of ${validate.minLength} characters.`,
     });
   }
-  if (validete.maxLength) {
+  if (validate.maxLength) {
     rules.push({
-      maxLength: validete.maxLength,
-      message: `Enter a maximum of ${validete.maxLength} characters.`,
+      maxLength: validate.maxLength,
+      message: `Enter a maximum of ${validate.maxLength} characters.`,
     });
   }
-  if (validete.pattern) {
+  if (validate.pattern) {
     rules.push({
-      pattern: validete.pattern,
-      message: `Please enter a value that conforms to the specification. ` + validete.pattern,
+      pattern: new RegExp(validate.pattern),
+      message: `Please enter a value that conforms to the specification. ` + validate.pattern,
     });
   }
   return rules;
@@ -187,7 +187,7 @@ class UISchema extends Component<Props, State> {
           };
           const switchResult = init(param.jsonKey, {
             initValue: initValue || getDefaultSwtichValue(param.validate),
-            rules: converRule(param.validate),
+            rules: convertRule(param.validate),
           });
           return (
             <Form.Item
@@ -221,7 +221,7 @@ class UISchema extends Component<Props, State> {
               <Input
                 {...init(param.jsonKey, {
                   initValue: initValue,
-                  rules: converRule(param.validate),
+                  rules: convertRule(param.validate),
                 })}
               />
             </Form.Item>
@@ -242,7 +242,7 @@ class UISchema extends Component<Props, State> {
                 htmlType="password"
                 {...init(param.jsonKey, {
                   initValue: initValue,
-                  rules: converRule(param.validate),
+                  rules: convertRule(param.validate),
                 })}
               />
             </Form.Item>
@@ -261,7 +261,7 @@ class UISchema extends Component<Props, State> {
                 locale={locale.Select}
                 {...init(param.jsonKey, {
                   initValue: initValue,
-                  rules: converRule(param.validate),
+                  rules: convertRule(param.validate),
                 })}
                 dataSource={param.validate && param.validate.options}
               />
@@ -280,7 +280,7 @@ class UISchema extends Component<Props, State> {
               <Input
                 {...init(param.jsonKey, {
                   initValue: initValue,
-                  rules: converRule(param.validate),
+                  rules: convertRule(param.validate),
                 })}
                 htmlType="number"
               />
@@ -314,7 +314,7 @@ class UISchema extends Component<Props, State> {
             <KV
               {...init(param.jsonKey, {
                 initValue: initValue,
-                rules: converRule(param.validate),
+                rules: convertRule(param.validate),
               })}
               key={param.jsonKey}
               additional={param.additional}
@@ -327,7 +327,7 @@ class UISchema extends Component<Props, State> {
             <HelmValues
               {...init(param.jsonKey, {
                 initValue: initValue,
-                rules: converRule(param.validate),
+                rules: convertRule(param.validate),
               })}
               key={param.jsonKey}
               additional={param.additional}
@@ -340,7 +340,7 @@ class UISchema extends Component<Props, State> {
               key={param.jsonKey}
               {...init(param.jsonKey, {
                 initValue: initValue,
-                rules: converRule(param.validate),
+                rules: convertRule(param.validate),
               })}
             />,
           );
@@ -360,7 +360,7 @@ class UISchema extends Component<Props, State> {
                 }}
                 {...init(param.jsonKey, {
                   initValue: param.validate.defaultValue || this.props.value?.name,
-                  rules: converRule(param.validate),
+                  rules: convertRule(param.validate),
                 })}
               />
             </Form.Item>
@@ -379,7 +379,7 @@ class UISchema extends Component<Props, State> {
                 secretKeys={this.state.secretKeys}
                 {...init(param.jsonKey, {
                   initValue: param.validate.defaultValue || this.props.value?.key,
-                  rules: converRule(param.validate),
+                  rules: convertRule(param.validate),
                 })}
               />
             </Form.Item>
@@ -476,7 +476,7 @@ class UISchema extends Component<Props, State> {
               description={param.description}
               {...init(param.jsonKey, {
                 initValue: initValue,
-                rules: converRule(param.validate),
+                rules: convertRule(param.validate),
               })}
             />
           );
