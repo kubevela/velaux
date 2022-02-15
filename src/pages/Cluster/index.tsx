@@ -117,7 +117,6 @@ class Cluster extends React.Component<Props, State> {
     return (addonMessage || []).map((item) => {
       return (
         <span>
-          {' '}
           <a href={item.path}> {item.name} </a> 、
         </span>
       );
