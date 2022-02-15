@@ -16,7 +16,7 @@ type Props = {
   clusterList: [];
   defaultCluster: string;
   cloudClusters: [];
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {
@@ -114,14 +114,23 @@ class Cluster extends React.Component<Props, State> {
 
   showAddonMessage() {
     const { addonMessage } = this.state;
-    return (addonMessage || []).map((item) => {
+    return (addonMessage || []).map((item, index, arr) => {
+      const lastIndex = arr.length - 1;
+      const showSymbol = index === lastIndex ? '' : '、';
       return (
         <span>
-          <a href={item.path}> {item.name} </a> 、
+          <a href={item.path}>
+            {item.name}
+            {showSymbol}
+          </a>
         </span>
       );
     });
   }
+
+  handleHiddenAddonMessage = () => {
+    this.setState({ isShowAddonMessage: false });
+  };
 
   render() {
     const { clusterList = [], dispatch } = this.props;
@@ -158,7 +167,7 @@ class Cluster extends React.Component<Props, State> {
         />
 
         <If condition={isShowAddonMessage && addonMessage.length != 0}>
-          <Message type="notice">
+          <Message type="notice" closeable onClose={this.handleHiddenAddonMessage}>
             Connect Cluster Success! Please upgrade {this.showAddonMessage()} addons, make them take
             effect in the new cluster.
           </Message>
@@ -187,6 +196,9 @@ class Cluster extends React.Component<Props, State> {
               }}
               setCloudService={(visible) => {
                 this.setState({ showAddCloudCluster: visible });
+              }}
+              onPropsOK={() => {
+                this.onGetEnabledAddon();
               }}
               dispatch={dispatch}
             />
