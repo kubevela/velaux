@@ -8,11 +8,12 @@ export interface Addon {
   detail?: string;
   tags?: string[];
   createTime?: string;
-  deployTo?: { controlPlane: boolean; runtimeCluster: boolean };
+  deployTo?: { controlPlane: boolean; runtimeCluster: boolean; runtime_cluster: boolean };
   dependencies?: { name: string }[];
   definitions?: Definition[];
   uiSchema?: UIParam[];
   registryName?: string;
+  url?: string;
 }
 
 export interface AddonStatus {
