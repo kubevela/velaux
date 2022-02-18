@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, Table, Card, Step, Loading, Button, Balloon } from '@b-design/ui';
+import { Dialog, Table, Card, Loading, Button, Balloon, Icon } from '@b-design/ui';
 import type { ApplicationStatus, Condition } from '../../interface/application';
 import Translation from '../../components/Translation';
 import { If } from 'tsx-control-statements/components';
@@ -17,37 +17,6 @@ type Props = {
 class StatusShow extends React.Component<Props> {
   render() {
     const { applicationStatus, onClose, loading, title } = this.props;
-    const allConditions: Condition[] = [
-      { type: 'Parsed', status: 'False' },
-      { type: 'Revision', status: 'False' },
-      { type: 'Policy', status: 'False' },
-      { type: 'Render', status: 'False' },
-      { type: 'WorkflowFinished', status: 'False' },
-      { type: 'Ready', status: 'False' },
-    ];
-    const getCurrent = (conditions?: Condition[]) => {
-      let index = 0;
-      conditions?.map((condition: Condition, i: number) => {
-        if (condition.status == 'False') {
-          index = i;
-        }
-        allConditions.map((c) => {
-          if (c.type == condition.type) {
-            c.status = condition.status;
-            c.lastTransitionTime = condition.lastTransitionTime;
-            c.reason = condition.reason;
-            c.message = condition.message;
-          }
-        });
-        if (condition.type == 'Deleting') {
-          allConditions.push(condition);
-        }
-      });
-      if (index == 0 && conditions) {
-        return conditions.length;
-      }
-      return index;
-    };
     return (
       <Dialog
         locale={locale.Dialog}
@@ -107,26 +76,42 @@ class StatusShow extends React.Component<Props> {
             <Card
               locale={locale.Card}
               style={{ marginTop: '8px' }}
+              contentHeight="auto"
               title={<Translation>Conditions</Translation>}
             >
-              <Step current={getCurrent(applicationStatus?.conditions)}>
-                {allConditions.map((condition) => {
-                  const content = condition.message ? (
-                    <Balloon
-                      trigger={
-                        <span style={{ cursor: 'pointer', color: '#1b58f4' }}>
-                          {condition.reason}
-                        </span>
-                      }
-                    >
-                      {condition.message}
-                    </Balloon>
-                  ) : (
-                    condition.reason
-                  );
-                  return <Step.Item title={condition.type} content={content} />;
-                })}
-              </Step>
+              <Table locale={locale.Table} dataSource={applicationStatus?.conditions}>
+                <Table.Column
+                  width="150px"
+                  dataIndex="type"
+                  title={<Translation>Type</Translation>}
+                />
+                <Table.Column dataIndex="status" title={<Translation>Status</Translation>} />
+
+                <Table.Column
+                  dataIndex="lastTransitionTime"
+                  title={<Translation>LastTransitionTime</Translation>}
+                />
+                <Table.Column
+                  dataIndex="reason"
+                  title={<Translation>Reason</Translation>}
+                  cell={(v: string, index: number, row: Condition) => {
+                    if (row.message) {
+                      return (
+                        <Balloon
+                          trigger={
+                            <span style={{ color: 'red', cursor: 'pointer' }}>
+                              {v} <Icon size={'xs'} type="question-circle" />
+                            </span>
+                          }
+                        >
+                          {row.message}
+                        </Balloon>
+                      );
+                    }
+                    return <span>{v}</span>;
+                  }}
+                />
+              </Table>
             </Card>
           </If>
           <If condition={applicationStatus?.services}>
