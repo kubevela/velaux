@@ -41,6 +41,19 @@ class CardContent extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { addonLists, clickAddon, enabledAddons } = this.props;
+
+    const getTagColor = (tag: string) => {
+      switch (tag) {
+        case 'alpha':
+          return 'red';
+        case 'beta':
+          return 'red';
+        case 'GA':
+          return 'green';
+        default:
+          return '';
+      }
+    };
     return (
       <div>
         <If condition={addonLists}>
@@ -82,7 +95,15 @@ class CardContent extends React.Component<Props, State> {
                       <If condition={tags}>
                         <Row className="content-main-btn">
                           {tags?.map((tag: string) => {
-                            return <Tag key={tag}>{tag}</Tag>;
+                            return (
+                              <Tag
+                                style={{ marginRight: '8px' }}
+                                color={getTagColor(tag)}
+                                key={tag}
+                              >
+                                {tag}
+                              </Tag>
+                            );
                           })}
                         </Row>
                       </If>
