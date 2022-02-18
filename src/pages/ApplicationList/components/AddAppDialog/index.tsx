@@ -44,6 +44,10 @@ type State = {
 };
 
 type Callback = (envName: string) => void;
+type SelectGroupType = {
+  label: string;
+  children: { label: string; value: string }[];
+}[];
 
 @connect((store: any) => {
   return { ...store.clusters };
@@ -158,10 +162,44 @@ class AppDialog extends React.Component<Props, State> {
 
   transComponentDefinitions() {
     const { componentDefinitions } = this.props;
-    return (componentDefinitions || []).map((item: { name: string }) => ({
-      lable: item.name,
-      value: item.name,
-    }));
+    const defaultCoreDataSource = ['k8s-objects', 'task', 'webservice', 'worker'];
+    const cloud: SelectGroupType = [
+      {
+        label: 'Cloud',
+        children: [],
+      },
+    ];
+    const core: SelectGroupType = [
+      {
+        label: 'Core',
+        children: [],
+      },
+    ];
+    const custom: SelectGroupType = [
+      {
+        label: 'Custom',
+        children: [],
+      },
+    ];
+    (componentDefinitions || []).map((item: { name: string; workloadType: string }) => {
+      if (item.workloadType === 'configurations.terraform.core.oam.dev') {
+        cloud[0].children.push({
+          label: item.name,
+          value: item.name,
+        });
+      } else if (defaultCoreDataSource.includes(item.name)) {
+        core[0].children.push({
+          label: item.name,
+          value: item.name,
+        });
+      } else {
+        custom[0].children.push({
+          label: item.name,
+          value: item.name,
+        });
+      }
+    });
+    return [...core, ...custom, ...cloud];
   }
 
   onDetailsComponeDefinition = (value: string) => {
@@ -334,6 +372,7 @@ class AppDialog extends React.Component<Props, State> {
                   >
                     <Select
                       locale={locale.Select}
+                      showSearch
                       className="select"
                       {...init(`componentType`, {
                         initValue: 'webservice',
