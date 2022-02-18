@@ -3,7 +3,7 @@ import { Form, Icon, Field, Button } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import type { UIParam, GroupOption } from '../../interface/application';
 import UISchema from '../../components/UISchema';
-import SpectionGroup from '../../extends/SpectionGroup';
+import ArrayItemGroup from '../ArrayItemGroup';
 import type { Rule } from '@alifd/field';
 import './index.less';
 
@@ -55,12 +55,14 @@ class StructItem extends React.Component<StructItemProps> {
         }, {});
       uiSchemas = option.map((key: string) => paramMap[key]);
     }
-
+    const params = uiSchemas?.filter(
+      (p) => !p.disable && !p.subParameters && !p.additionalParameter,
+    );
     return (
       <div className="struct-item-container">
-        <If condition={uiSchemas && uiSchemas.length > 3}>
+        <If condition={params && params.length > 3}>
           <div className="struct-item-content">
-            <SpectionGroup
+            <ArrayItemGroup
               id={id}
               labelTitle={labelTitle}
               delete={(structId: string) => {
@@ -80,10 +82,10 @@ class StructItem extends React.Component<StructItemProps> {
                 inline
                 ref={this.uiRef}
               />
-            </SpectionGroup>
+            </ArrayItemGroup>
           </div>
         </If>
-        <If condition={uiSchemas && uiSchemas.length <= 3}>
+        <If condition={params && params.length <= 3}>
           <div className="struct-item-content">
             <UISchema
               {...init(`struct${id}`, {
@@ -138,9 +140,13 @@ class Structs extends React.Component<Props, State> {
     const { value, parameterGroupOption } = this.props;
     if (value) {
       const keyMap = new Map();
+      let firstOption: GroupOption | undefined = undefined;
       if (parameterGroupOption) {
         parameterGroupOption.map((item) => {
           if (item && item.keys) {
+            if (!firstOption) {
+              firstOption = item;
+            }
             keyMap.set(item.keys.sort().join(), item);
           }
         });
@@ -155,7 +161,7 @@ class Structs extends React.Component<Props, State> {
         const option = keyMap.get(valueKeys.sort().join());
         structList.push({
           key,
-          option: option?.keys,
+          option: option?.keys || firstOption?.keys,
           value: value,
         });
         this.field.setValue('struct' + key, item);
@@ -219,7 +225,10 @@ class Structs extends React.Component<Props, State> {
             {structList.map((struct: any) => {
               const fieldObj: any = this.field.getValues();
               const name = fieldObj[`struct${struct.key}`]?.name || '';
-              const labelTitle = `${label}:${name}`;
+              let labelTitle = label;
+              if (name) {
+                labelTitle = `${label}:${name}`;
+              }
               return (
                 <StructItem
                   delete={this.removeStructPlanItem}
