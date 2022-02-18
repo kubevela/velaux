@@ -43,6 +43,21 @@ class StructItem extends React.Component<StructItemProps> {
   validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
     this.uiRef.current?.validate(callback);
   };
+  getParamCount = (params: UIParam[] | undefined) => {
+    let count = 0;
+    if (!params && !Array.isArray(params)) {
+      return count;
+    }
+    params.map((p) => {
+      if (!p.disable) {
+        count += 1;
+      }
+      if (!p.disable && p.subParameters) {
+        count += this.getParamCount(p.subParameters);
+      }
+    });
+    return count;
+  };
   render() {
     const { option, param, id, init, labelTitle } = this.props;
     let uiSchemas = param;
@@ -55,12 +70,10 @@ class StructItem extends React.Component<StructItemProps> {
         }, {});
       uiSchemas = option.map((key: string) => paramMap[key]);
     }
-    const params = uiSchemas?.filter(
-      (p) => !p.disable && !p.subParameters && !p.additionalParameter,
-    );
+    const paramCount = this.getParamCount(uiSchemas);
     return (
       <div className="struct-item-container">
-        <If condition={params && params.length > 3}>
+        <If condition={paramCount > 3}>
           <div className="struct-item-content">
             <ArrayItemGroup
               id={id}
@@ -85,7 +98,7 @@ class StructItem extends React.Component<StructItemProps> {
             </ArrayItemGroup>
           </div>
         </If>
-        <If condition={params && params.length <= 3}>
+        <If condition={paramCount <= 3}>
           <div className="struct-item-content">
             <UISchema
               {...init(`struct${id}`, {
