@@ -15,7 +15,7 @@ type State = {
   closed: boolean | undefined;
 };
 
-class SpectionGroup extends React.Component<Props, State> {
+class ArrayItemGroup extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -74,4 +74,4 @@ class SpectionGroup extends React.Component<Props, State> {
   }
 }
 
-export default SpectionGroup;
+export default ArrayItemGroup;
