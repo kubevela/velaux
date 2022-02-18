@@ -14,7 +14,8 @@ type Props = {
   setVisible: (visible: boolean) => void;
   setCloudService: (isCloudService: boolean) => void;
   t: (key: string) => string;
-  dispatch: ({}) => void;
+  onPropsOK: () => void;
+  dispatch: ({ }) => void;
 };
 
 type State = {
@@ -76,6 +77,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
         .then((re) => {
           if (re) {
             this.setState({ choseInput: false, cloudClusters: re.clusters, btnLoading: false });
+            this.props.onPropsOK();
           }
         })
         .catch((err) => {
@@ -122,7 +124,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           });
         }
       })
-      .then(() => {});
+      .then(() => { });
   };
 
   render() {

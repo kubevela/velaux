@@ -9,12 +9,14 @@ import { Button, Message } from '@b-design/ui';
 import { deleteCluster } from '../../api/cluster';
 import Translation from '../../components/Translation';
 import { If } from 'tsx-control-statements/components';
+import { getEnabledAddons, getAddonsList } from '../../api/addons';
+import { Addon } from '../../interface/addon';
 
 type Props = {
   clusterList: [];
   defaultCluster: string;
   cloudClusters: [];
-  dispatch: ({}) => {};
+  dispatch: ({ }) => {};
 };
 
 type State = {
@@ -24,6 +26,8 @@ type State = {
   showAddCluster: boolean;
   showAddCloudCluster: boolean;
   editClusterName: string;
+  addonMessage: { name: string; path: string }[];
+  isShowAddonMessage: boolean;
 };
 
 @connect((store: any) => {
@@ -39,6 +43,8 @@ class Cluster extends React.Component<Props, State> {
       showAddCluster: false,
       showAddCloudCluster: false,
       editClusterName: '',
+      addonMessage: [],
+      isShowAddonMessage: false,
     };
   }
 
@@ -78,10 +84,66 @@ class Cluster extends React.Component<Props, State> {
     });
   };
 
+  onGetEnabledAddon = async () => {
+    getEnabledAddons({}).then((res) => {
+      this.onGetAddonsList(res.enabledAddons);
+    });
+  };
+
+  onGetAddonsList = async (enableAddon: { name: string; phase: boolean }[]) => {
+    getAddonsList({}).then((res) => {
+      const addonMessage: { name: string; path: string }[] = [];
+      const addonList: Addon[] = res.addons;
+      (enableAddon || []).forEach((ele: { name: string; phase: boolean }) => {
+        addonList.forEach((item: Addon) => {
+          const isMatchName = ele.name === item.name;
+          const deploy = item.deployTo || { runtimeCluster: false, runtime_cluster: false };
+          if (isMatchName && (deploy.runtimeCluster || deploy.runtime_cluster)) {
+            addonMessage.push({ name: item.name, path: item.url || '' });
+          }
+        });
+      });
+      if (addonMessage && addonMessage.length !== 0) {
+        this.setState({
+          isShowAddonMessage: true,
+          addonMessage: addonMessage,
+        });
+      }
+    });
+  };
+
+  showAddonMessage() {
+    const { addonMessage } = this.state;
+    return (addonMessage || []).map((item, index, arr) => {
+      const lastIndex = arr.length - 1;
+      const showSymbol = index === lastIndex ? '' : '、';
+      return (
+        <span>
+          <a href={item.path}>
+            {item.name}
+            {showSymbol}
+          </a>
+        </span>
+      );
+    });
+  }
+
+  handleHiddenAddonMessage = () => {
+    this.setState({ isShowAddonMessage: false });
+  };
+
   render() {
     const { clusterList = [], dispatch } = this.props;
-    const { page, pageSize, query, showAddCluster, showAddCloudCluster, editClusterName } =
-      this.state;
+    const {
+      page,
+      pageSize,
+      query,
+      showAddCluster,
+      showAddCloudCluster,
+      editClusterName,
+      isShowAddonMessage,
+      addonMessage,
+    } = this.state;
     return (
       <div>
         <Title
@@ -103,6 +165,14 @@ class Cluster extends React.Component<Props, State> {
             </Button>,
           ]}
         />
+
+        <If condition={isShowAddonMessage && addonMessage.length != 0}>
+          <Message type="notice" closeable onClose={this.handleHiddenAddonMessage}>
+            Connect Cluster Success! Please upgrade {this.showAddonMessage()} addons, make them take
+            effect in the new cluster.
+          </Message>
+        </If>
+
         <SelectSearch
           dispatch={dispatch}
           getChildCompentQuery={(q: string): any => {
@@ -127,6 +197,9 @@ class Cluster extends React.Component<Props, State> {
               setCloudService={(visible) => {
                 this.setState({ showAddCloudCluster: visible });
               }}
+              onPropsOK={() => {
+                this.onGetEnabledAddon();
+              }}
               dispatch={dispatch}
             />
           </If>
@@ -143,6 +216,7 @@ class Cluster extends React.Component<Props, State> {
               }}
               onOK={() => {
                 this.getClusterList();
+                this.onGetEnabledAddon();
                 this.setState({ showAddCluster: false, editClusterName: '' });
               }}
               dispatch={dispatch}
