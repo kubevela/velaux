@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './index.less';
 import { Button, Dialog, Grid, Icon, Message } from '@b-design/ui';
-// import SwitchLanguage from '../../components/SwitchButton/index';
+import SwitchLanguage from '../../components/SwitchButton/index';
 import { withTranslation } from 'react-i18next';
 
 import logo from '../../assets/KubeVela.png';
@@ -175,9 +175,9 @@ class TopBar extends Component<Props, State> {
           </Col>
           <div style={{ flex: '1 1 0%' }} />
           <div className="right">
-            {/* <div className="vela-item">
+            <div className="vela-item">
               <SwitchLanguage />
-            </div> */}
+            </div>
             <div className="vela-item">
               <a title="KubeVela Documents" href="https://kubevela.io" target="_blank">
                 <Icon size={14} type="help1" />
