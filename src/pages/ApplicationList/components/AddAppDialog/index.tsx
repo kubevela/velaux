@@ -438,6 +438,7 @@ class AppDialog extends React.Component<Props, State> {
                   })}
                   uiSchema={definitionDetail && definitionDetail.uiSchema}
                   ref={this.uiSchemaRef}
+                  mode="new"
                 />
               </FormItem>
             </If>

@@ -180,5 +180,7 @@
   "Needs review before continuing": "需求审核后才能继续执行",
   "Please select the action you want to perform": "请选择您期望的动作执行?",
   "Continue": "继续",
-  "Termination": "终止"
+  "Termination": "终止",
+  "Container Image": "容器镜像",
+  "Which image would you like to use for your service": "请在部署之前完成容器镜像准备并上传到镜像仓库中。"
 }

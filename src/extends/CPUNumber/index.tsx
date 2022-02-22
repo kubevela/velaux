@@ -5,6 +5,7 @@ type Props = {
   value: any;
   id: string;
   onChange: (value: any) => void;
+  disabled: boolean;
 };
 
 type State = {};
@@ -27,7 +28,7 @@ class CPUNumber extends React.Component<Props, State> {
   };
 
   render() {
-    const { value, id } = this.props;
+    const { value, id, disabled } = this.props;
     let initValue = undefined;
     if (value) {
       initValue = parseFloat(value);
@@ -36,6 +37,7 @@ class CPUNumber extends React.Component<Props, State> {
     return (
       <Input
         id={id}
+        disabled={disabled}
         addonTextAfter="Core"
         htmlType="number"
         onChange={this.onChange}

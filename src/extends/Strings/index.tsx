@@ -9,6 +9,7 @@ type Props = {
   value: any;
   id: string;
   onChange: (value: any) => void;
+  disabled: boolean;
 };
 
 type InputParams = {
@@ -19,6 +20,7 @@ type InputParams = {
   value?: string;
   onChange: () => {};
   delete: (key: string) => {};
+  disabled: boolean;
 };
 
 type ListParams = {
@@ -38,6 +40,7 @@ function InputItem(props: InputParams) {
         onChange={props.onChange}
         addonBefore={''}
         className="input"
+        disabled={props.disabled}
         value={props.value}
       />
       <div className="remove-option-container">
@@ -128,7 +131,7 @@ class Strings extends React.Component<Props, State> {
   render() {
     const { inputList } = this.state;
     const { init } = this.field;
-    const { label } = this.props;
+    const { label, disabled } = this.props;
     return (
       <div className="strings-container">
         {inputList.map((item) => (
@@ -142,7 +145,7 @@ class Strings extends React.Component<Props, State> {
           />
         ))}
         <div className="add-btn-container">
-          <Button size="small" onClick={this.addInputItem} ghost="light">
+          <Button disabled={disabled} size="small" onClick={this.addInputItem} ghost="light">
             <Translation>Add</Translation>
           </Button>
         </div>

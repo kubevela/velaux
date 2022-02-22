@@ -105,7 +105,7 @@ class TraitDialog extends React.Component<Props, State> {
   transTraitDefinitions() {
     const { traitDefinitions } = this.props;
     return (traitDefinitions || []).map((item: { name: string }) => ({
-      lable: item.name,
+      label: item.name,
       value: item.name,
     }));
   }
@@ -249,6 +249,7 @@ class TraitDialog extends React.Component<Props, State> {
                       })}
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
                       ref={this.uiSchemaRef}
+                      mode={this.props.isEditTrait ? 'edit' : 'new'}
                     />
                   </FormItem>
                 </If>

@@ -2,12 +2,13 @@ import React from 'react';
 import { Input } from '@b-design/ui';
 import './index.less';
 
-import { InputProps } from '@alifd/next/types/input';
+import type { InputProps } from '@alifd/next/types/input';
 
 interface Props extends InputProps {
   value: any;
   id: string;
   onChange: (value: any) => void;
+  disabled: boolean;
 }
 
 type State = {};
