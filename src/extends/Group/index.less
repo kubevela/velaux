@@ -18,7 +18,12 @@
     outline: none;
     cursor: pointer;
     transition: border-color 0.12s;
-
+    .group-title.required::before {
+      margin-right: 4px;
+      color: #c80000;
+      color: var(--form-error-color, #c80000);
+      content: '*';
+    }
     .group-title-desc {
       color: #a6a6a6;
       font-weight: normal;
@@ -35,10 +40,7 @@
     }
   }
   .group-box {
-    position: relative;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 20px;
+    padding: 16px;
     background-color: #fff;
     border-radius: 5px;
     transition: height 0.3s linear;

@@ -16,6 +16,7 @@ type Props = {
   id: string;
   value: any;
   label: string;
+  mode: 'new' | 'edit';
 };
 
 type State = {
@@ -27,8 +28,9 @@ type StructItemProps = {
   param?: UIParam[];
   id: string;
   init: any;
-  labelTitle: string;
+  labelTitle: string | React.ReactElement;
   delete: (id: string) => void;
+  mode: 'new' | 'edit';
 };
 
 class StructItem extends React.Component<StructItemProps> {
@@ -49,7 +51,7 @@ class StructItem extends React.Component<StructItemProps> {
       return count;
     }
     params.map((p) => {
-      if (!p.disable) {
+      if (!p.disable && p.uiType != 'Ignore' && p.uiType != 'InnerGroup') {
         count += 1;
       }
       if (!p.disable && p.subParameters) {
@@ -71,6 +73,7 @@ class StructItem extends React.Component<StructItemProps> {
       uiSchemas = option.map((key: string) => paramMap[key]);
     }
     const paramCount = this.getParamCount(uiSchemas);
+    const itemCount = uiSchemas?.filter((p) => !p.disable).length || 1;
     return (
       <div className="struct-item-container">
         <If condition={paramCount > 3}>
@@ -94,6 +97,7 @@ class StructItem extends React.Component<StructItemProps> {
                 uiSchema={uiSchemas}
                 inline
                 ref={this.uiRef}
+                mode={this.props.mode}
               />
             </ArrayItemGroup>
           </div>
@@ -110,8 +114,10 @@ class StructItem extends React.Component<StructItemProps> {
                 ],
               })}
               uiSchema={uiSchemas}
+              maxColSpan={24 / itemCount}
               inline
               ref={this.uiRef}
+              mode={this.props.mode}
             />
           </div>
           <div className="remove-option-container">
@@ -238,9 +244,13 @@ class Structs extends React.Component<Props, State> {
             {structList.map((struct: any) => {
               const fieldObj: any = this.field.getValues();
               const name = fieldObj[`struct${struct.key}`]?.name || '';
-              let labelTitle = label;
+              let labelTitle: string | React.ReactElement = label;
               if (name) {
-                labelTitle = `${label}:${name}`;
+                labelTitle = (
+                  <span>
+                    {label}: <span style={{ marginLeft: '8px' }}>{name}</span>{' '}
+                  </span>
+                );
               }
               return (
                 <StructItem
@@ -251,6 +261,7 @@ class Structs extends React.Component<Props, State> {
                   option={struct.option}
                   param={param}
                   labelTitle={labelTitle}
+                  mode={this.props.mode}
                 />
               );
             })}

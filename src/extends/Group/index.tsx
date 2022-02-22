@@ -83,14 +83,13 @@ class Group extends React.Component<Props, State> {
       disableAddon = false,
     } = this.props;
     const { closed, enable, checked } = this.state;
-
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
         <div className="group-container">
           <div className="group-title-container">
             <Row>
               <Col span={'21'}>
-                {title}
+                <span className={`group-title ${required && 'required'}`}>{title}</span>
                 <div className="group-title-desc">{description}</div>
               </Col>
               <Col span={'3'} className="flexcenter">
@@ -108,7 +107,7 @@ class Group extends React.Component<Props, State> {
                           type: 'confirm',
                           content: (
                             <Translation>
-                              If Swtich is turned off, The configuration will be reset. Are you sure
+                              If Switch is turned off, The configuration will be reset. Are you sure
                               you want to do this?
                             </Translation>
                           ),
@@ -132,11 +131,8 @@ class Group extends React.Component<Props, State> {
               </Col>
             </Row>
           </div>
-          <If condition={enable && (!hasToggleIcon || !closed)}>
-            <div className="group-box">{children}</div>
-          </If>
-          <If condition={closed && enable}>
-            <div className="group-box disable">{children}</div>
+          <If condition={enable}>
+            <div className={`group-box ${closed ? 'disable' : ''}`}>{children}</div>
           </If>
         </div>
       </Loading>

@@ -13,6 +13,7 @@ type Props = {
   additionalParameter?: UIParam;
   subParameters?: UIParam[];
   id: string;
+  disabled: boolean;
 };
 
 type State = {
@@ -136,6 +137,7 @@ class KV extends Component<Props, State> {
               <Col span={10}>
                 <Form.Item>
                   <Input
+                    disabled={this.props.disabled}
                     {...init(`envKey-${item.key}`)}
                     label={'Key'}
                     className="full-width"
@@ -146,6 +148,7 @@ class KV extends Component<Props, State> {
               <Col span={10}>
                 <Form.Item>
                   <Input
+                    disabled={this.props.disabled}
                     htmlType={valueTypeNumber ? 'number' : ''}
                     {...init(`envValue-${item.key}`)}
                     label={'Value'}
@@ -163,7 +166,12 @@ class KV extends Component<Props, State> {
           );
         })}
         <div className="mb-20 flexright">
-          <Button size="small" type="secondary" onClick={this.addItem.bind(this)}>
+          <Button
+            disabled={this.props.disabled}
+            size="small"
+            type="secondary"
+            onClick={this.addItem.bind(this)}
+          >
             Add
           </Button>
         </div>

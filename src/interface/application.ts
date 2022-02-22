@@ -57,6 +57,9 @@ export interface UIParam {
   label: string;
   sort: number;
   uiType: string;
+  style?: {
+    colSpan: number;
+  };
   disable?: boolean;
   subParameterGroupOption?: GroupOption[];
   additional?: boolean;
@@ -79,6 +82,7 @@ export interface UIParamValidate {
   pattern?: string;
   defaultValue?: any;
   options?: { label: string; value: string }[];
+  immutable?: boolean;
 }
 
 export interface ImageInfo {
@@ -209,7 +213,7 @@ export interface Revisions {
 export interface ApplicationStatistics {
   envCount: number;
   targetCount: number;
-  revisonCount: number;
+  revisionCount: number;
   workflowCount: number;
 }
 
