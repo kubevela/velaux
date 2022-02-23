@@ -157,6 +157,7 @@ class EditProperties extends React.Component<Props, State> {
                       })}
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
                       ref={this.uiSchemaRef}
+                      mode="edit"
                     />
                   </FormItem>
                 </If>

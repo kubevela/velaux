@@ -261,6 +261,7 @@ class WorkflowForm extends Component<Props, State> {
                       })}
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
                       ref={this.uiSchemaRef}
+                      mode={this.props.data ? 'edit' : 'new'}
                     />
                   </FormItem>
                 </If>

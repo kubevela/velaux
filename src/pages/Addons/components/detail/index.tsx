@@ -38,6 +38,7 @@ type State = {
   args?: any;
   addonsStatus?: ApplicationStatus;
   showStatusVisible: boolean;
+  mode: 'new' | 'edit';
 };
 
 class AddonDetailDialog extends React.Component<Props, State> {
@@ -57,6 +58,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
       statusLoading: true,
       upgradeLoading: false,
       showStatusVisible: false,
+      mode: 'new',
     };
     this.form = new Field(this);
     this.uiSchemaRef = React.createRef();
@@ -98,6 +100,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
         }
         if (res.args) {
           this.form.setValue('properties', res.args);
+          this.setState({ mode: 'edit' });
         }
         this.setState({
           status: res.phase,
@@ -292,6 +295,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     })}
                     ref={this.uiSchemaRef}
                     uiSchema={addonDetailInfo.uiSchema}
+                    mode={this.state.mode}
                   />
                 </Form>
               </Group>

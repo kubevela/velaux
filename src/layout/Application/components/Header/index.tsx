@@ -1,14 +1,4 @@
-import {
-  Grid,
-  Card,
-  Breadcrumb,
-  Button,
-  Message,
-  Icon,
-  Dropdown,
-  Menu,
-  Dialog,
-} from '@b-design/ui';
+import { Grid, Card, Breadcrumb, Button, Message, Dialog } from '@b-design/ui';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 import Translation from '../../../../components/Translation';
@@ -32,6 +22,7 @@ import WorkflowSilder from '../WorkflowSilder';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import locale from '../../../../utils/locale';
+import DeployConfig from '../DeployConfig';
 
 const { Row, Col } = Grid;
 
@@ -47,6 +38,7 @@ interface State {
   loading: boolean;
   statistics?: ApplicationStatistics;
   records?: WorkflowBase[];
+  showDeployConfig: boolean;
 }
 
 @connect((store: any) => {
@@ -59,9 +51,14 @@ class ApplicationHeader extends Component<Props, State> {
     super(props);
     this.state = {
       loading: true,
+      showDeployConfig: false,
     };
     this.sync = true;
   }
+
+  onDeployConfig = () => {
+    this.setState({ showDeployConfig: true });
+  };
 
   onDeploy = (workflowName?: string, force?: boolean) => {
     const { applicationDetail } = this.props;
@@ -140,7 +137,7 @@ class ApplicationHeader extends Component<Props, State> {
 
   render() {
     const { applicationDetail, currentPath, workflows, appName } = this.props;
-    const { statistics, records } = this.state;
+    const { statistics, records, showDeployConfig } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     const item = <Translation>{`app-${activeKey}`}</Translation>;
     return (
@@ -164,31 +161,13 @@ class ApplicationHeader extends Component<Props, State> {
               type="notice"
               title="Application configuration changes take effect only after deploy."
             />
-            <Button style={{ marginLeft: '16px' }} type="primary" onClick={() => this.onDeploy()}>
+            <Button
+              style={{ marginLeft: '16px' }}
+              type="primary"
+              onClick={() => this.onDeployConfig()}
+            >
               <Translation>Deploy</Translation>
             </Button>
-            <Dropdown
-              trigger={
-                <Button type="primary">
-                  <Icon type="ellipsis-vertical" />
-                </Button>
-              }
-            >
-              <Menu>
-                {workflows?.map((workflow) => {
-                  return (
-                    <Menu.Item
-                      onClick={() => {
-                        this.onDeploy(workflow.name);
-                      }}
-                      key={workflow.name}
-                    >
-                      <Translation>Execute Workflow</Translation> {workflow.alias || workflow.name}
-                    </Menu.Item>
-                  );
-                })}
-              </Menu>
-            </Dropdown>
           </Col>
         </Row>
         <Row wrap={true}>
@@ -199,10 +178,10 @@ class ApplicationHeader extends Component<Props, State> {
                   <NumItem number={statistics?.envCount} title={'Env Count'} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.targetCount} title={'target Count'} />
+                  <NumItem number={statistics?.targetCount} title={'Target Count'} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.revisonCount} title={'Revision Count'} />
+                  <NumItem number={statistics?.revisionCount} title={'Revision Count'} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem number={statistics?.workflowCount} title={'Workflow Count'} />
@@ -224,6 +203,15 @@ class ApplicationHeader extends Component<Props, State> {
             </If>
           </Col>
         </Row>
+        <If condition={showDeployConfig}>
+          <DeployConfig
+            onClose={() => {
+              this.setState({ showDeployConfig: false });
+            }}
+            onOK={this.onDeploy}
+            workflows={workflows}
+          />
+        </If>
       </div>
     );
   }
