@@ -23,6 +23,7 @@ import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import locale from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
+import i18n from 'i18next';
 
 const { Row, Col } = Grid;
 
@@ -175,16 +176,25 @@ class ApplicationHeader extends Component<Props, State> {
             <Card locale={locale.Card}>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.envCount} title={'Env Count'} />
+                  <NumItem number={statistics?.envCount} title={i18n.t('Env Count').toString()} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.targetCount} title={'Target Count'} />
+                  <NumItem
+                    number={statistics?.targetCount}
+                    title={i18n.t('Target Count').toString()}
+                  />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.revisionCount} title={'Revision Count'} />
+                  <NumItem
+                    number={statistics?.revisionCount}
+                    title={i18n.t('Revision Count').toString()}
+                  />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.workflowCount} title={'Workflow Count'} />
+                  <NumItem
+                    number={statistics?.workflowCount}
+                    title={i18n.t('Workflow Count').toString()}
+                  />
                 </Col>
               </Row>
             </Card>
