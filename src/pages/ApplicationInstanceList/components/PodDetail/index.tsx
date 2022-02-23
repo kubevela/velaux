@@ -150,7 +150,17 @@ class PodDetail extends React.Component<Props, State> {
             const percent = Number(useMemory).valueOf() / Number(requestMemory).valueOf();
             return <Progress size="small" percent={percent * 100} />;
           }
-          return <span>{record.resources?.usage?.memory}</span>;
+          if (record.resources?.usage?.memory) {
+            return <span>{record.resources?.usage?.memory}</span>;
+          }
+          if (record.resources?.requests?.memory) {
+            return (
+              <span>
+                <Translation>Request</Translation>: {record.resources?.requests?.memory}
+              </span>
+            );
+          }
+          return <span />;
         },
       },
       {
@@ -164,7 +174,17 @@ class PodDetail extends React.Component<Props, State> {
             const percent = Number(usecpu).valueOf() / Number(requestcpu).valueOf();
             return <Progress size="small" percent={percent * 100} />;
           }
-          return <span>{record.resources?.usage?.cpu}</span>;
+          if (record.resources?.usage?.cpu) {
+            return <span>{record.resources?.usage?.cpu}</span>;
+          }
+          if (record.resources?.requests?.cpu) {
+            return (
+              <span>
+                <Translation>Request</Translation>: {record.resources?.requests?.cpu}
+              </span>
+            );
+          }
+          return <span />;
         },
       },
       {

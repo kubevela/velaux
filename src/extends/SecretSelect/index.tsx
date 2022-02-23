@@ -4,6 +4,7 @@ import React from 'react';
 import { listCloudResourceSecrets } from '../../api/observation';
 import type { Secret } from '../../interface/observation';
 import locale from '../../utils/locale';
+import i18n from 'i18next';
 
 type Props = {
   onChange: (value: any) => void;
@@ -11,6 +12,7 @@ type Props = {
   value: any;
   id: string;
   appNamespace?: string;
+  disabled: boolean;
 };
 
 type State = {
@@ -58,11 +60,18 @@ class SecretSelect extends React.Component<Props, State> {
     }
   };
   render() {
-    const { value, id } = this.props;
+    const { value, id, disabled } = this.props;
     const { secrets } = this.state;
     const filters = secrets?.filter((secret) => secret.metadata.labels['app.oam.dev/sync-alias']);
     return (
-      <Select locale={locale.Select} onChange={this.onChange} value={value} id={id}>
+      <Select
+        locale={locale.Select}
+        onChange={this.onChange}
+        value={value}
+        id={id}
+        disabled={disabled}
+        placeholder={i18n.t('Please select the secret').toString()}
+      >
         {filters?.map((secret) => {
           return (
             <Select.Option

@@ -10,7 +10,7 @@ type Props = {
 
 type State = {};
 
-class MemoryNumber extends React.Component<Props, State> {
+class DiskNumber extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {};
@@ -19,7 +19,7 @@ class MemoryNumber extends React.Component<Props, State> {
   onChange = (value: string) => {
     const { onChange } = this.props;
     if (onChange) {
-      onChange(value + 'Mi');
+      onChange(value + 'Gi');
     }
   };
 
@@ -27,20 +27,20 @@ class MemoryNumber extends React.Component<Props, State> {
     const { value, id, disabled } = this.props;
     let initValue = undefined;
     if (value) {
-      initValue = parseInt(value.replace('Mi', ''));
+      initValue = parseInt(value.replace('Gi', ''));
     }
     return (
       <Input
         id={id}
-        min="0"
         disabled={disabled}
-        addonTextAfter="MB"
+        min="0"
+        addonTextAfter="Gi"
         htmlType="number"
         onChange={this.onChange}
-        value={initValue && initValue}
+        value={initValue}
       />
     );
   }
 }
 
-export default MemoryNumber;
+export default DiskNumber;

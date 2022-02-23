@@ -11,6 +11,7 @@ type Props = {
   additionalParameter?: UIParam;
   subParameters?: UIParam[];
   id: string;
+  disabled: boolean;
 };
 
 function setValues(target: any, value: any, key: string, keys: string[]) {
@@ -65,6 +66,7 @@ class HelmValues extends Component<Props> {
   render() {
     return (
       <KV
+        disabled={this.props.disabled}
         onChange={this.onChange}
         value={this.renderValue()}
         additional={this.props.additional}
