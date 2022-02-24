@@ -10,6 +10,7 @@ import ProjectForm from '../../../ApplicationList/components/GeneralConfig/proje
 import type { Project } from '../../../../interface/project';
 import { createEnv, updateEnv } from '../../../../api/env';
 import { If } from 'tsx-control-statements/components';
+import i18n from 'i18next';
 
 type Props = {
   project?: string;
@@ -176,13 +177,13 @@ class EnvDialog extends React.Component<Props, State> {
                   <Input
                     name="name"
                     disabled={isEdit}
-                    placeholder={t('Please enter the env name').toString()}
+                    placeholder={i18n.t('Please enter the Environment name').toString()}
                     {...init('name', {
                       rules: [
                         {
                           required: true,
                           pattern: checkName,
-                          message: 'Please enter a valid English name',
+                          message: <Translation>Please enter a valid English name</Translation>,
                         },
                       ],
                     })}
@@ -193,13 +194,13 @@ class EnvDialog extends React.Component<Props, State> {
                 <FormItem label={<Translation>Alias</Translation>}>
                   <Input
                     name="alias"
-                    placeholder={t('Please enter the env alias').toString()}
+                    placeholder={i18n.t('Please enter the Environment alias').toString()}
                     {...init('alias', {
                       rules: [
                         {
                           minLength: 2,
                           maxLength: 64,
-                          message: 'Enter a string of 2 to 64 characters.',
+                          message: <Translation>Enter a string of 2 to 64 characters</Translation>,
                         },
                       ],
                     })}
@@ -213,12 +214,12 @@ class EnvDialog extends React.Component<Props, State> {
                   <Input
                     name="namespace"
                     disabled={isEdit}
-                    placeholder={t('By default, it is the same as the env name.').toString()}
+                    placeholder={i18n.t('By default, it is the same as the Environment name').toString()}
                     {...init('namespace', {
                       rules: [
                         {
                           pattern: checkName,
-                          message: 'Please enter a valid English name',
+                          message: <Translation>please enter a valid English name</Translation>,
                         },
                       ],
                     })}
@@ -229,12 +230,12 @@ class EnvDialog extends React.Component<Props, State> {
                 <FormItem label={<Translation>Description</Translation>}>
                   <Input
                     name="description"
-                    placeholder={t('Please enter the env description').toString()}
+                    placeholder={i18n.t('Please enter the Environment description').toString()}
                     {...init('description', {
                       rules: [
                         {
                           maxLength: 256,
-                          message: 'Enter a description that contains less than 256 characters.',
+                          message: <Translation>Enter a description that contains less than 256 characters</Translation>,
                         },
                       ],
                     })}
@@ -261,7 +262,7 @@ class EnvDialog extends React.Component<Props, State> {
                     locale={locale.Select}
                     className="select"
                     mode="multiple"
-                    placeholder={t('Please select target').toString()}
+                    placeholder={i18n.t('Please select Target').toString()}
                     {...init(`targets`, {
                       rules: [
                         {

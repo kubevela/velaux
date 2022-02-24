@@ -125,7 +125,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
         <a
           onClick={() => {
             Dialog.confirm({
-              content: 'Are you sure you want to delete?',
+              content: <Translation>Are you sure to delete?</Translation>,
               onOk: () => {
                 this.onDeleteRegistry(name);
               },
@@ -230,7 +230,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                   </Form.Item>
                 </Col>
                 <Col span={3} style={{ padding: '8px' }}>
-                  <Form.Item label={<Translation>Type</Translation>} help="The addon registry type">
+                  <Form.Item label={<Translation>Type</Translation>} help={<Translation>The addon registry type</Translation>}>
                     <Select
                       locale={locale.Select}
                       {...init('type', {
@@ -251,7 +251,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                   <Form.Item
                     label={<Translation>URL</Translation>}
                     required
-                    help="Only support github repo url（master branch）"
+                    help={<Translation>Only support github repo url（master branch）</Translation>}
                   >
                     <Input
                       {...init('url', {

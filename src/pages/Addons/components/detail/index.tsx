@@ -254,7 +254,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
           <Loading visible={loading} style={{ width: '100%' }}>
             <If condition={addonDetailInfo && addonDetailInfo.registryName == 'experimental'}>
               <Message type="warning">
-                This addon is experimental, please don't use it in production.
+                <Translation>This addon is experimental, please don't use it in production</Translation>
               </Message>
             </If>
 
@@ -337,7 +337,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
               >
                 <Message type="notice" style={{ marginBottom: '16px' }}>
                   <Translation>
-                    Enable the addon to obtain the following extension capabilities.
+                    Enable the addon to obtain the following extension capabilities
                   </Translation>
                 </Message>
                 <Table locale={locale.Table} dataSource={addonDetailInfo.definitions}>

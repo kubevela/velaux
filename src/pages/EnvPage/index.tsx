@@ -125,7 +125,7 @@ class targetList extends React.Component<Props, State> {
       <div>
         <ListTitle
           title="Environments"
-          subTitle="The environment coordinates the matching relationship between applications and resources."
+          subTitle="Set up the Environments for your Application based on Target sources"
           addButtonTitle="New Environment"
           addButtonClick={() => {
             this.setState({ visibleEnvDialog: true, envItem: undefined });
