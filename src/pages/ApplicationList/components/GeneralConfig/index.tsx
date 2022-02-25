@@ -7,6 +7,7 @@ import './index.less';
 import Translation from '../../../../components/Translation';
 import type { Project } from '../../../../interface/project';
 import { If } from 'tsx-control-statements/components';
+import i18n from 'i18next';
 
 type Props = {
   visible: boolean;
@@ -66,7 +67,7 @@ class GeneralConfig extends React.Component<Props, State> {
                       {
                         required: true,
                         pattern: checkName,
-                        message: 'Please enter a valid application name',
+                        message: <Translation>Please enter a valid application name</Translation>,
                       },
                     ],
                   })}
@@ -77,7 +78,7 @@ class GeneralConfig extends React.Component<Props, State> {
               <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
-                  placeholder={'Give your app a more recognizable name'}
+                  placeholder={i18n.t('Give your app a more recognizable name').toString()}
                   {...init('alias', {
                     rules: [
                       {

@@ -169,7 +169,7 @@ class TraitDialog extends React.Component<Props, State> {
                 required
                 help={
                   <span>
-                    Get more trait type? <Link to="/addons">Go to enable addon</Link>
+                    Get more trait type? <Link to="/addons"><Translation>Go to enable addon</Translation></Link>
                   </span>
                 }
               >

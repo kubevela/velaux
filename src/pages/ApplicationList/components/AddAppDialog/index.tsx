@@ -366,7 +366,8 @@ class AppDialog extends React.Component<Props, State> {
                     required={true}
                     help={
                       <span>
-                        Get more component type? <Link to="/addons">Go to enable addon</Link>
+                        <Translation>Get more component type?</Translation>
+                         <Link to="/addons"><Translation>Go to enable addon</Translation></Link>
                       </span>
                     }
                   >
