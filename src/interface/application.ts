@@ -180,6 +180,7 @@ export interface Trait {
   type: string;
   createTime?: string;
   updateTime?: string;
+  opetationAdd?: boolean;
 }
 
 export interface ApplicationComponent {
@@ -192,6 +193,7 @@ export interface ApplicationComponent {
   traits?: Trait[];
   type: string;
   updateTime?: string;
+  description?: string;
 }
 
 export interface Revisions {
@@ -270,4 +272,13 @@ export interface WorkflowStep {
   alias: string;
   description?: string;
   type: string;
+}
+
+export interface ApplicationComponentConfig {
+  name: string;
+  alias: string;
+  description: string;
+  componentType?: string;
+  properties: any;
+  traits?: Trait[];
 }

@@ -21,8 +21,8 @@ import { getDomain } from '../utils/common';
 import type {
   ApplicationDeployRequest,
   Trait,
-  UpdateComponentProperties,
   Trigger,
+  ApplicationComponentConfig,
 } from '../interface/application';
 
 interface TraitQuery {
@@ -75,12 +75,14 @@ export function getApplicationComponents(params: { appName: string; envName: str
   return get(gurl, params).then((res) => res);
 }
 
-export function createApplicationComponent(params: { appName: string; body: {} }) {
-  const { appName, body } = params;
+export function createApplicationComponent(
+  params: ApplicationComponentConfig,
+  query: { appName: string },
+) {
   const gurl = isMock
     ? `${createApplicationComponent_mock}`
-    : `${application}/${appName}/components`;
-  return post(gurl, body).then((res) => res);
+    : `${application}/${query.appName}/components`;
+  return post(gurl, params).then((res) => res);
 }
 
 export function getComponentDetails(params: any) {
@@ -214,12 +216,13 @@ export function getApplicationWorkflowRecord(params: { appName: string }) {
   return get(`${application}/${params.appName}/records`, params).then((res) => res);
 }
 
-export function updateComponentProperties(params: UpdateComponentProperties) {
+export function updateComponentProperties(
+  params: ApplicationComponentConfig,
+  query: { appName: string; componentName: string },
+) {
   const gurl = isMock
     ? `${getComponentDetails_mock}`
-    : `${application}/${params.appName}/components/${params.componentName}`;
-  delete params.appName;
-  delete params.componentName;
+    : `${application}/${query.appName}/components/${query.componentName}`;
   return put(gurl, params).then((res) => res);
 }
 
@@ -279,5 +282,12 @@ export function createTriggers(params: Trigger, query: { appName: string }) {
 export function deleteTriggers(params: { appName: string; token: string }) {
   const { appName, token } = params;
   const gurl = isMock ? `${getTrait_mock}` : `${application}/${appName}/triggers/${token}`;
+  return rdelete(gurl, {}).then((res) => res);
+}
+
+export function deleteComponent(query: { appName: string; componentName: string }) {
+  const gurl = isMock
+    ? `${getTrait_mock}`
+    : `${application}/${query.appName}/components/${query.componentName}`;
   return rdelete(gurl, {}).then((res) => res);
 }
