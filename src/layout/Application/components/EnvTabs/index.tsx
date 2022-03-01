@@ -81,7 +81,7 @@ class TabsContent extends Component<Props, State> {
                       title={
                         <Link
                           className="item"
-                          to={`/applications/${applicationDetail?.name}/envbinding/${item.name}/instances`}
+                          to={`/applications/${applicationDetail?.name}/envbinding/${item.name}/status`}
                         >
                           <span title={item.description}>
                             {item.alias ? item.alias : item.name}
