@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Field, Form, Message, Button, Input, Divider } from '@b-design/ui';
+import { Grid, Field, Form, Message, Button, Input, Select, Divider } from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import { createApplicationComponent, updateComponentProperties } from '../../../../api/application';
@@ -15,16 +15,19 @@ import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
 import Title from '../../../../components/Title';
 import TraitsList from '../../components/TraitsList';
+import { Link } from 'dva/router';
+import locale from '../../../../utils/locale';
+import { If } from 'tsx-control-statements/components';
 import _ from 'lodash';
 import './index.less';
 
 type Props = {
   appName?: string;
   componentName?: string;
-  componentType: string;
   editComponent: any;
   isEditComponent: boolean;
   temporaryTraitList: Trait[];
+  componentDefinitions: [];
   onAddTrait: () => void;
   changeTraitStats: (is: boolean, params: any) => void;
   onDeleteTrait: (type: string) => void;
@@ -37,6 +40,11 @@ type Props = {
 type State = {
   definitionDetail?: DefinitionDetail;
 };
+
+type SelectGroupType = {
+  label: string;
+  children: { label: string; value: string }[];
+}[];
 
 class ComponentDialog extends React.Component<Props, State> {
   field: Field;
@@ -63,10 +71,8 @@ class ComponentDialog extends React.Component<Props, State> {
         this.onDetailsComponentDefinition(type);
       }
     } else {
-      const { componentType } = this.props;
-      if (componentType) {
-        this.onDetailsComponentDefinition(componentType);
-      }
+      const getInitComponentType: string = this.field.getValue('componentType') || '';
+      this.onDetailsComponentDefinition(getInitComponentType);
     }
   }
 
@@ -74,53 +80,41 @@ class ComponentDialog extends React.Component<Props, State> {
     this.props.onComponentClose();
   };
 
-  onSubmit = () => {
+  onSubmitCreate = () => {
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      const { appName = '', componentName = '', componentType, temporaryTraitList } = this.props;
-      const { name, alias = '', description = '', properties } = values;
+      const { appName = '', temporaryTraitList } = this.props;
+      const { name, alias = '', description = '', componentType = '', properties } = values;
       const params: ApplicationComponentConfig = {
         name,
         alias,
         description,
+        componentType,
         properties: JSON.stringify(properties),
       };
-      const { isEditComponent } = this.props;
-      if (isEditComponent) {
-        updateComponentProperties(params, { appName, componentName }).then((res) => {
+
+      const traitLists = _.cloneDeep(temporaryTraitList);
+      if (traitLists && traitLists.length != 0) {
+        traitLists.forEach((item) => {
+          if (item.properties) {
+            item.properties = JSON.stringify(item.properties);
+          }
+        });
+        params.name = `${appName}-${name}`;
+        params.componentType = componentType;
+        params.traits = traitLists;
+        createApplicationComponent(params, { appName }).then((res) => {
           if (res) {
             Message.success({
               duration: 4000,
               title: 'Success',
-              content: 'update Component config success.',
+              content: 'create Component config success.',
             });
             this.props.onComponentOK();
           }
         });
-      } else {
-        const traitLists = _.cloneDeep(temporaryTraitList);
-        if (traitLists && traitLists.length != 0) {
-          traitLists.forEach((item) => {
-            if (item.properties) {
-              item.properties = JSON.stringify(item.properties);
-            }
-          });
-          params.name = `${appName}-${name}`;
-          params.componentType = componentType;
-          params.traits = traitLists;
-          createApplicationComponent(params, { appName }).then((res) => {
-            if (res) {
-              Message.success({
-                duration: 4000,
-                title: 'Success',
-                content: 'create Component config success.',
-              });
-              this.props.onComponentOK();
-            }
-          });
-        }
       }
     });
   };
@@ -145,9 +139,11 @@ class ComponentDialog extends React.Component<Props, State> {
         <Button type="secondary" onClick={onComponentClose} className="margin-right-10">
           <Translation>Cancel</Translation>
         </Button>
-        <Button type="primary" onClick={this.onSubmit}>
-          <Translation>{isEditComponent ? 'Update' : 'Create'}</Translation>
-        </Button>
+        <If condition={!isEditComponent}>
+          <Button type="primary" onClick={this.onSubmitCreate}>
+            <Translation>Create</Translation>
+          </Button>
+        </If>
       </div>
     );
   };
@@ -184,10 +180,80 @@ class ComponentDialog extends React.Component<Props, State> {
   getTraitList = () => {
     const { isEditComponent, editComponent, temporaryTraitList } = this.props;
     if (isEditComponent && editComponent) {
-      return editComponent.traits || [];
+      return [...(editComponent.traits || []), { opetationAdd: true }];
     } else {
       return [...temporaryTraitList, { opetationAdd: true }];
     }
+  };
+
+  transComponentDefinitions() {
+    const { componentDefinitions } = this.props;
+    const defaultCoreDataSource = ['k8s-objects', 'task', 'webservice', 'worker'];
+    const cloud: SelectGroupType = [
+      {
+        label: 'Cloud',
+        children: [],
+      },
+    ];
+    const core: SelectGroupType = [
+      {
+        label: 'Core',
+        children: [],
+      },
+    ];
+    const custom: SelectGroupType = [
+      {
+        label: 'Custom',
+        children: [],
+      },
+    ];
+    (componentDefinitions || []).map((item: { name: string; workloadType: string }) => {
+      if (item.workloadType === 'configurations.terraform.core.oam.dev') {
+        cloud[0].children.push({
+          label: item.name,
+          value: item.name,
+        });
+      } else if (defaultCoreDataSource.includes(item.name)) {
+        core[0].children.push({
+          label: item.name,
+          value: item.name,
+        });
+      } else {
+        custom[0].children.push({
+          label: item.name,
+          value: item.name,
+        });
+      }
+    });
+    return [...core, ...custom, ...cloud];
+  }
+
+  onSumitEditCompont = () => {
+    this.field.validate((error: any, values: any) => {
+      if (error) {
+        return;
+      }
+      const { appName = '', componentName = '' } = this.props;
+      const { name, alias = '', description = '', componentType = '', properties } = values;
+      const params: ApplicationComponentConfig = {
+        name,
+        alias,
+        description,
+        componentType,
+        properties: JSON.stringify(properties),
+      };
+
+      updateComponentProperties(params, { appName, componentName }).then((res) => {
+        if (res) {
+          Message.success({
+            duration: 4000,
+            title: 'Success',
+            content: 'update Component config success.',
+          });
+          this.props.onComponentOK();
+        }
+      });
+    });
   };
 
   render() {
@@ -216,7 +282,9 @@ class ComponentDialog extends React.Component<Props, State> {
           <Row>
             <Col span={12} style={{ paddingRight: '8px' }}>
               <FormItem
-                label={<Translation>Name</Translation>}
+                label={
+                  <Translation className="font-size-14 font-weight-bold color333">Name</Translation>
+                }
                 labelTextAlign="left"
                 required={true}
               >
@@ -274,6 +342,43 @@ class ComponentDialog extends React.Component<Props, State> {
               </FormItem>
             </Col>
           </Row>
+          <Row>
+            <Col span={24}>
+              <FormItem
+                label={
+                  <Translation className="font-size-14 font-weight-bold color333">Type</Translation>
+                }
+                required={true}
+                help={
+                  <span>
+                    Get more component type? <Link to="/addons">Go to enable addon</Link>
+                  </span>
+                }
+              >
+                <Select
+                  locale={locale.Select}
+                  showSearch
+                  disabled={isEditComponent ? true : false}
+                  className="select"
+                  {...init(`componentType`, {
+                    initValue: 'webservice',
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please select',
+                      },
+                    ],
+                  })}
+                  dataSource={this.transComponentDefinitions()}
+                  onChange={(item: string) => {
+                    this.onDetailsComponentDefinition(item, () => {
+                      this.field.setValue('componentType', item);
+                    });
+                  }}
+                />
+              </FormItem>
+            </Col>
+          </Row>
           <Divider />
           <Row>
             <UISchema
@@ -290,6 +395,13 @@ class ComponentDialog extends React.Component<Props, State> {
               mode={isEditComponent ? 'edit' : 'new'}
             />
           </Row>
+          <If condition={isEditComponent}>
+            <div className="edit-component-update-btn">
+              <Button type="primary" onClick={this.onSumitEditCompont}>
+                Update
+              </Button>
+            </div>
+          </If>
         </Form>
         <div className="trait-config-wraper">
           <section className="title">

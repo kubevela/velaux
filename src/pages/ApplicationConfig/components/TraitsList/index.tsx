@@ -60,32 +60,28 @@ class TraitsList extends Component<Props> {
 
   renderAddCard = () => {
     const { Col } = Grid;
-    const { isEditComponent } = this.props;
-    if (isEditComponent) {
-      return;
-    } else {
-      return (
-        <Col xl={12} m={12} s={24} className="padding16 card-add-wraper">
-          <Card locale={locale.Card}>
-            <div className="traits-add-operation">
-              <Icon
-                type="plus-circle"
-                size={14}
-                className="margin-right-16 cursor-pointer"
-                onClick={() => {
-                  this.props.onAdd();
-                }}
-              />
-            </div>
-          </Card>
-        </Col>
-      );
-    }
+    return (
+      <Col xl={12} m={12} s={24} className="padding16 card-add-wraper">
+        <Card locale={locale.Card}>
+          <div className="traits-add-operation">
+            <Icon
+              type="plus-circle"
+              size={14}
+              className="margin-right-16 cursor-pointer"
+              onClick={() => {
+                this.props.onAdd();
+              }}
+            />
+          </div>
+        </Card>
+      </Col>
+    );
   };
 
   render() {
     const { Row } = Grid;
     const { traits } = this.props;
+    console.log('traits', traits);
     return (
       <div className="traits-list-warper margin-bottom-20">
         <Row wrap={true} className="row-list">

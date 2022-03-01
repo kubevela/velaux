@@ -25,7 +25,6 @@ class ApplicationLayout extends Component<Props, any> {
       loading: false,
       activeName: '',
     };
-    window.onGetApplicationDetails = this.onGetApplicationDetails.bind(this);
   }
 
   componentDidMount() {

@@ -10,6 +10,7 @@ import {
   getAppliationTriggers,
   deleteTriggers,
   deleteComponent,
+  getComponentdefinitions,
 } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
@@ -69,6 +70,7 @@ type State = {
   temporaryTraitList: Trait[];
   isEditComponent: boolean;
   editComponent?: ApplicationComponent;
+  componentDefinitions: [];
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -98,6 +100,7 @@ class ApplicationConfig extends Component<Props, State> {
       visibleComponent: false,
       temporaryTraitList: [],
       isEditComponent: false,
+      componentDefinitions: [],
     };
   }
 
@@ -112,6 +115,7 @@ class ApplicationConfig extends Component<Props, State> {
       });
     }
     this.onGetAppliationTrigger();
+    this.onGetComponentdefinitions();
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -174,6 +178,11 @@ class ApplicationConfig extends Component<Props, State> {
     if (isEditComponent) {
       deleteTrait(params).then((res: any) => {
         if (res) {
+          Message.success({
+            duration: 4000,
+            title: 'Success',
+            content: 'delete trait success.',
+          });
           this.onGetAppliationComponent();
         }
       });
@@ -271,7 +280,7 @@ class ApplicationConfig extends Component<Props, State> {
     this.setState({
       showEditApplication: false,
     });
-    window.onGetApplicationDetails();
+    this.onGetApplicationDetails();
   };
 
   onCloseEditAppDialog = () => {
@@ -323,7 +332,12 @@ class ApplicationConfig extends Component<Props, State> {
     };
     deleteComponent(params).then((res: any) => {
       if (res) {
-        window.onGetApplicationDetails();
+        Message.success({
+          duration: 4000,
+          title: 'Success',
+          content: 'delete Component success.',
+        });
+        this.onloadApplicationComponents();
       }
     });
   };
@@ -357,6 +371,7 @@ class ApplicationConfig extends Component<Props, State> {
   onComponentClose = () => {
     this.setState({
       visibleComponent: false,
+      temporaryTraitList: [],
     });
   };
 
@@ -364,13 +379,39 @@ class ApplicationConfig extends Component<Props, State> {
     this.setState(
       {
         visibleComponent: false,
+        temporaryTraitList: [],
       },
       () => {
-        window.onGetApplicationDetails();
+        this.onloadApplicationComponents();
       },
     );
   };
 
+  onGetComponentdefinitions = async () => {
+    getComponentdefinitions().then((res) => {
+      if (res) {
+        this.setState({
+          componentDefinitions: res && res.definitions,
+        });
+      }
+    });
+  };
+
+  onGetApplicationDetails = async () => {
+    const { appName } = this.state;
+    this.props.dispatch({
+      type: 'application/getApplicationDetail',
+      payload: { appName: appName },
+    });
+  };
+
+  onloadApplicationComponents = async () => {
+    const { appName } = this.state;
+    this.props.dispatch({
+      type: 'application/getApplicationComponents',
+      payload: { appName: appName },
+    });
+  };
   render() {
     const { applicationDetail, workflows, components } = this.props;
     const {
@@ -390,6 +431,7 @@ class ApplicationConfig extends Component<Props, State> {
       temporaryTraitList,
       isEditComponent,
       editComponent,
+      componentDefinitions,
     } = this.state;
 
     return (
@@ -563,10 +605,10 @@ class ApplicationConfig extends Component<Props, State> {
           <ComponentDialog
             appName={appName}
             componentName={componentName}
-            componentType={(mainComponent && mainComponent.type) || ''}
             editComponent={editComponent}
             isEditComponent={isEditComponent}
             temporaryTraitList={temporaryTraitList}
+            componentDefinitions={componentDefinitions}
             onComponentClose={this.onComponentClose}
             onComponentOK={this.onComponentOK}
             onAddTrait={this.onAddTrait}

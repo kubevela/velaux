@@ -4,7 +4,7 @@ import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
-import { detailTraitDefinition, updateTrait } from '../../../../api/application';
+import { detailTraitDefinition, updateTrait, createTrait } from '../../../../api/application';
 import type { DefinitionDetail, Trait } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -81,16 +81,29 @@ class TraitDialog extends React.Component<Props, State> {
       };
       const { isEditTrait, isEditComponent } = this.props;
       if (isEditComponent) {
-        updateTrait(params, query).then((res) => {
-          if (res) {
-            Message.success({
-              duration: 4000,
-              title: 'Trait properties update success.',
-              content: 'You need to re-execute the workflow for it to take effect.',
-            });
-            this.props.onOK();
-          }
-        });
+        if (isEditTrait) {
+          updateTrait(params, query).then((res) => {
+            if (res) {
+              Message.success({
+                duration: 4000,
+                title: 'Trait properties update success.',
+                content: 'You need to re-execute the workflow for it to take effect.',
+              });
+              this.props.onOK();
+            }
+          });
+        } else {
+          createTrait(params, query).then((res) => {
+            if (res) {
+              Message.success({
+                duration: 4000,
+                title: 'Trait create success.',
+                content: 'You need to re-execute the workflow for it to take effect.',
+              });
+              this.props.onOK();
+            }
+          });
+        }
       } else {
         const findSameType = temporaryTraitList.find((item) => item.type === type);
         if (!isEditTrait && !findSameType) {
@@ -170,8 +183,7 @@ class TraitDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const { onClose } = this.props;
-    const { t } = this.props;
+    const { t, onClose, isEditTrait } = this.props;
     const { definitionDetail, definitionLoading } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
@@ -198,6 +210,7 @@ class TraitDialog extends React.Component<Props, State> {
               >
                 <Select
                   className="select"
+                  disabled={isEditTrait ? true : false}
                   placeholder={t('Please select').toString()}
                   {...init(`type`, {
                     rules: [
