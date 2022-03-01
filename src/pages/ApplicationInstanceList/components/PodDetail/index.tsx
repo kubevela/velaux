@@ -188,6 +188,17 @@ class PodDetail extends React.Component<Props, State> {
         },
       },
       {
+        key: 'restarts',
+        title: <Translation>Restarts</Translation>,
+        dataIndex: 'restarts',
+        cell: (v: string, i: number, record: Container) => {
+          if (record.status?.restartCount !== undefined) {
+            return <span>{record.status?.restartCount}</span>;
+          }
+          return <span />;
+        },
+      },
+      {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
