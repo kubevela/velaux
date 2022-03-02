@@ -160,7 +160,7 @@ class ApplicationHeader extends Component<Props, State> {
           <Col span={18} className="flexright" style={{ padding: '0 16px' }}>
             <Message
               type="notice"
-              title="Application configuration changes take effect only after deploy."
+              title={i18n.t('Application configuration changes take effect only after deploy').toString()}
             />
             <Button
               style={{ marginLeft: '16px' }}
@@ -176,7 +176,7 @@ class ApplicationHeader extends Component<Props, State> {
             <Card locale={locale.Card}>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.envCount} title={i18n.t('Env Count').toString()} />
+                  <NumItem number={statistics?.envCount} title={i18n.t('Environment Count').toString()} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
