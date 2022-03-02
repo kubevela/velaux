@@ -11,7 +11,7 @@ import type { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../int
 import Translation from '../../components/Translation';
 import type { PodBase, CloudResource, Configuration, Endpoint } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
-import Header from './components/Hearder';
+import Header from './components/Header';
 import type { Target } from '../../interface/target';
 import { Link } from 'dva/router';
 import { momentDate } from '../../utils/common';
@@ -20,6 +20,7 @@ import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import StatusShow from '../../components/StatusShow';
 import locale from '../../utils/locale';
+import { getLink } from '../../utils/utils';
 
 const { Column } = Table;
 type Props = {
@@ -41,6 +42,7 @@ type State = {
   envName: string;
   loading: boolean;
   target?: Target;
+  componentName?: string;
   openRowKeys: [];
   cloudInstance?: CloudInstance[];
   showStatus: boolean;
@@ -102,7 +104,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                 (resource) => resource.kind == 'Service',
               );
               if (services) {
-                this.loadApplicationService();
+                this.loadApplicationEndpoints();
               }
             }
           }
@@ -111,25 +113,25 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     }
   };
 
-  loadApplicationService = async () => {
+  loadApplicationEndpoints = async () => {
     const { applicationDetail, envbinding, applicationStatus } = this.props;
     const {
       params: { appName, envName },
     } = this.props.match;
-    const { target } = this.state;
+    const { target, componentName } = this.state;
     const envs = envbinding.filter((item) => item.name == envName);
+    const env = this.getEnvbindingByName();
     if (
       applicationDetail &&
       applicationDetail.name &&
-      envs.length > 0 &&
+      env &&
       applicationStatus &&
       applicationStatus.services?.length
     ) {
-      const conponentName = applicationStatus.services[0].name;
       const param = {
         appName: envs[0].appDeployName || appName,
         appNs: envs[0].appDeployNamespace,
-        name: conponentName,
+        name: componentName,
         cluster: '',
         clusterNs: '',
       };
@@ -383,7 +385,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     if (!targetName) {
       this.setState({ target: undefined }, () => {
         this.loadAppInstances();
-        this.loadApplicationService();
+        this.loadApplicationEndpoints();
       });
       return;
     }
@@ -391,7 +393,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     if (targets?.length) {
       this.setState({ target: targets[0] }, () => {
         this.loadAppInstances();
-        this.loadApplicationService();
+        this.loadApplicationEndpoints();
       });
     }
   };
@@ -475,24 +477,6 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     this.setState({ showStatus: false });
   };
 
-  getLink = (endpointObj: Endpoint) => {
-    const { appProtocol, host } = endpointObj.endpoint;
-    let { port, protocol = '', path = '' } = endpointObj.endpoint;
-    protocol = protocol.toLocaleLowerCase();
-    if (appProtocol && appProtocol !== '') {
-      protocol = appProtocol;
-    }
-    if (path === '/') {
-      path = '';
-    }
-    if ((protocol === 'https' && port == 443) || (protocol === 'http' && port === 80)) {
-      port = '';
-    } else {
-      port = ':' + port;
-    }
-    return protocol + '://' + host + port + path;
-  };
-
   render() {
     const { applicationStatus, applicationDetail } = this.props;
     const { podList, loading, showStatus, cloudInstance, endpoints } = this.state;
@@ -512,7 +496,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     };
     const gatewayIPs: any = [];
     endpoints?.map((endpointObj) => {
-      const item = this.getLink(endpointObj);
+      const item = getLink(endpointObj);
       gatewayIPs.push(item);
     });
     const {
@@ -530,9 +514,6 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           updateEnvs={() => {
             this.loadApplicationEnvbinding();
             this.loadApplicationWorkflows();
-          }}
-          updateStatusShow={(show: boolean) => {
-            this.setState({ showStatus: show });
           }}
           applicationDetail={applicationDetail}
           applicationStatus={applicationStatus}

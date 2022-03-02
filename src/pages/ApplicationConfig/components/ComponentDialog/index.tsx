@@ -39,7 +39,6 @@ type Props = {
   onDeleteTrait: (type: string) => void;
   onComponentOK: () => void;
   onComponentClose: () => void;
-  t: (key: string) => {};
 };
 
 type State = {
@@ -227,7 +226,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const { t, isEditComponent, componentDefinitions, onComponentClose } = this.props;
+    const {isEditComponent, componentDefinitions, onComponentClose } = this.props;
     const { definitionDetail, isUpdateComponentLoading } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
@@ -277,7 +276,7 @@ class ComponentDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
-                  placeholder={t('Please enter').toString()}
+                  placeholder={i18n.t('Please enter').toString()}
                   {...init('alias', {
                     rules: [
                       {
@@ -296,7 +295,7 @@ class ComponentDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Description</Translation>}>
                 <Input
                   name="description"
-                  placeholder={t('Please enter').toString()}
+                  placeholder={i18n.t('Please enter').toString()}
                   {...init('description', {
                     rules: [
                       {
@@ -318,8 +317,8 @@ class ComponentDialog extends React.Component<Props, State> {
                 required={true}
                 help={
                   <span>
-                    {i18n.t('Get more component type')}?{' '}
-                    <Link to="/addons"> {i18n.t('Go to enable addon')}</Link>
+                    <Translation>Get more component type?</Translation>
+                    <Link to="/addons"> <Translation>Go to enable addon</Translation></Link>
                   </span>
                 }
               >

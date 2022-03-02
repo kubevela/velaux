@@ -1,7 +1,9 @@
+import type { Endpoint } from '../interface/observation';
 type SelectGroupType = {
   label: string;
   children: { label: string; value: string }[];
 }[];
+
 // code from https://github.com/kubernetes-client/javascript/blob/master/src/util.ts#L17
 export function findSuffix(quantity: string): string {
   let ix = quantity.length - 1;
@@ -94,5 +96,23 @@ export function transComponentDefinitions(componentDefinitions: []) {
       });
     }
   });
-  return [...core, ...custom, ...cloud];
+  return [...core, ...custom, ...cloud]
+};
+
+export function getLink(endpointObj: Endpoint) {
+  const { appProtocol, host } = endpointObj.endpoint;
+  let { port, protocol = '', path = '' } = endpointObj.endpoint;
+  protocol = protocol.toLocaleLowerCase();
+  if (appProtocol && appProtocol !== '') {
+    protocol = appProtocol;
+  }
+  if (path === '/') {
+    path = '';
+  }
+  if ((protocol === 'https' && port == 443) || (protocol === 'http' && port === 80)) {
+    port = '';
+  } else {
+    port = ':' + port;
+  }
+  return protocol + '://' + host + port + path;
 }

@@ -14,12 +14,15 @@ import type {
 } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import locale from '../../../../utils/locale';
+import { Link } from 'dva/router';
+import i18n from 'i18next';
 
 export type GatewayIP = {
   ip: string;
   name: string;
   port: number;
 };
+
 type Props = {
   targets?: Target[];
   applicationStatus?: ApplicationStatus;
@@ -27,13 +30,12 @@ type Props = {
   envName: string;
   appName: string;
   envbinding?: EnvBinding;
+  disableStatusShow?: boolean;
   gatewayIPs?: string[];
   updateQuery: (targetName: string) => void;
   updateEnvs: () => void;
-  updateStatusShow: (show: boolean) => void;
   refresh: () => void;
   dispatch: ({}) => void;
-  t: (key: string) => any;
 };
 
 type State = {
@@ -44,7 +46,7 @@ type State = {
   visibleEnvEditPlan: boolean;
 };
 
-class Hearder extends Component<Props, State> {
+class Header extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -128,10 +130,9 @@ class Hearder extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { t, updateStatusShow } = this.props;
+    const { appName, envName } = this.props;
     const { recycleLoading, deleteLoading, refreshLoading } = this.state;
-    const clusterPlacehole = t('Target Selector').toString();
-    const { targets, applicationStatus, gatewayIPs } = this.props;
+    const { targets, applicationStatus, gatewayIPs, disableStatusShow } = this.props;
     const clusterList = (targets || []).map((item: Target) => ({
       label: item.alias,
       value: item.name,
@@ -159,7 +160,7 @@ class Hearder extends Component<Props, State> {
               mode="single"
               onChange={this.handleChange}
               dataSource={clusterList}
-              placeholder={clusterPlacehole}
+              placeholder={i18n.t('Target Selector').toString()}
               hasClear
             />
           </Col>
@@ -170,12 +171,14 @@ class Hearder extends Component<Props, State> {
                 size="medium"
                 style={{ marginLeft: '16px', padding: '8px' }}
               >
-                <Translation>{`Application is ${
-                  applicationStatus?.status || 'Initing'
-                }`}</Translation>{' '}
-                <a onClick={() => updateStatusShow(true)}>
-                  <Translation>Check the details</Translation>
-                </a>
+                <Translation>{`Application is ${applicationStatus?.status || 'Init'}`}</Translation>
+                <If condition={!disableStatusShow}>
+                  <span style={{ marginLeft: '16px' }}>
+                    <Link to={`/applications/${appName}/envbinding/${envName}/status`}>
+                      <Translation>Check the details</Translation>
+                    </Link>
+                  </span>
+                </If>
               </Message>
             </If>
           </Col>
@@ -239,4 +242,4 @@ class Hearder extends Component<Props, State> {
   }
 }
 
-export default withTranslation()(Hearder);
+export default withTranslation()(Header);
