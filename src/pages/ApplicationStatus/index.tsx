@@ -281,48 +281,6 @@ class ApplicationMonitor extends React.Component<Props, State> {
                 />
               </Table>
             </Card>
-            <If condition={applicationStatus?.conditions}>
-              <Card
-                locale={locale.Card}
-                style={{ marginTop: '8px' }}
-                contentHeight="auto"
-                title={<Translation>Conditions</Translation>}
-              >
-                <Table locale={locale.Table} dataSource={applicationStatus?.conditions}>
-                  <Table.Column
-                    width="150px"
-                    dataIndex="type"
-                    title={<Translation>Type</Translation>}
-                  />
-                  <Table.Column dataIndex="status" title={<Translation>Status</Translation>} />
-
-                  <Table.Column
-                    dataIndex="lastTransitionTime"
-                    title={<Translation>LastTransitionTime</Translation>}
-                  />
-                  <Table.Column
-                    dataIndex="reason"
-                    title={<Translation>Reason</Translation>}
-                    cell={(v: string, index: number, row: Condition) => {
-                      if (row.message) {
-                        return (
-                          <Balloon
-                            trigger={
-                              <span style={{ color: 'red', cursor: 'pointer' }}>
-                                {v} <Icon size={'xs'} type="question-circle" />
-                              </span>
-                            }
-                          >
-                            {row.message}
-                          </Balloon>
-                        );
-                      }
-                      return <span>{v}</span>;
-                    }}
-                  />
-                </Table>
-              </Card>
-            </If>
             <If condition={applicationStatus?.services}>
               <Card
                 locale={locale.Card}
@@ -367,6 +325,48 @@ class ApplicationMonitor extends React.Component<Props, State> {
                     align="center"
                     dataIndex="message"
                     title={<Translation>Message</Translation>}
+                  />
+                </Table>
+              </Card>
+            </If>
+            <If condition={applicationStatus?.conditions}>
+              <Card
+                locale={locale.Card}
+                style={{ marginTop: '8px' }}
+                contentHeight="auto"
+                title={<Translation>Conditions</Translation>}
+              >
+                <Table locale={locale.Table} dataSource={applicationStatus?.conditions}>
+                  <Table.Column
+                    width="150px"
+                    dataIndex="type"
+                    title={<Translation>Type</Translation>}
+                  />
+                  <Table.Column dataIndex="status" title={<Translation>Status</Translation>} />
+
+                  <Table.Column
+                    dataIndex="lastTransitionTime"
+                    title={<Translation>LastTransitionTime</Translation>}
+                  />
+                  <Table.Column
+                    dataIndex="reason"
+                    title={<Translation>Reason</Translation>}
+                    cell={(v: string, index: number, row: Condition) => {
+                      if (row.message) {
+                        return (
+                          <Balloon
+                            trigger={
+                              <span style={{ color: 'red', cursor: 'pointer' }}>
+                                {v} <Icon size={'xs'} type="question-circle" />
+                              </span>
+                            }
+                          >
+                            {row.message}
+                          </Balloon>
+                        );
+                      }
+                      return <span>{v}</span>;
+                    }}
                   />
                 </Table>
               </Card>
