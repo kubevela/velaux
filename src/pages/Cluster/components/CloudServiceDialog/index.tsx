@@ -15,7 +15,7 @@ type Props = {
   setCloudService: (isCloudService: boolean) => void;
   t: (key: string) => string;
   onPropsOK: () => void;
-  dispatch: ({ }) => void;
+  dispatch: ({}) => void;
 };
 
 type State = {
@@ -124,7 +124,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           });
         }
       })
-      .then(() => { });
+      .then(() => {});
   };
 
   render() {

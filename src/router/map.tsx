@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Router, Route, Switch, Redirect } from 'dva/router';
 
-type Rute = { children: []; component: any; name: string; path: string };
+type RouteConfig = { children: []; component: any; name: string; path: string };
 type Props = {
-  routes: Rute[];
+  routes: RouteConfig[];
   history: any;
 };
 

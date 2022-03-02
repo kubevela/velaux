@@ -119,7 +119,7 @@ class targetList extends React.Component<Props, State> {
   };
 
   render() {
-    const { t, targets, projects, envTotal, envs } = this.props;
+    const { targets, projects, envTotal, envs } = this.props;
     const { visibleEnvDialog, isEdit, envItem } = this.state;
     return (
       <div>
@@ -152,7 +152,6 @@ class targetList extends React.Component<Props, State> {
 
         <If condition={visibleEnvDialog}>
           <EnvDialog
-            t={t}
             visible={visibleEnvDialog}
             targets={targets || []}
             projects={projects || []}

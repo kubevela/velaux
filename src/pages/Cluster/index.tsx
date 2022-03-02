@@ -16,7 +16,7 @@ type Props = {
   clusterList: [];
   defaultCluster: string;
   cloudClusters: [];
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {

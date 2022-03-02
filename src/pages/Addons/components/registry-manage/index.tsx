@@ -230,7 +230,10 @@ class RegistryManageDialog extends React.Component<Props, State> {
                   </Form.Item>
                 </Col>
                 <Col span={3} style={{ padding: '8px' }}>
-                  <Form.Item label={<Translation>Type</Translation>} help={<Translation>The addon registry type</Translation>}>
+                  <Form.Item
+                    label={<Translation>Type</Translation>}
+                    help={<Translation>The addon registry type</Translation>}
+                  >
                     <Select
                       locale={locale.Select}
                       {...init('type', {

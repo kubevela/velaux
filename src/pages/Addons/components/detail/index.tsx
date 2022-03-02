@@ -254,7 +254,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
           <Loading visible={loading} style={{ width: '100%' }}>
             <If condition={addonDetailInfo && addonDetailInfo.registryName == 'experimental'}>
               <Message type="warning">
-                <Translation>This addon is experimental, please don't use it in production</Translation>
+                <Translation>
+                  This addon is experimental, please don't use it in production
+                </Translation>
               </Message>
             </If>
 
@@ -304,7 +306,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
               <Card
                 locale={locale.Card}
                 contentHeight="auto"
-                title={<Translation>Dependences</Translation>}
+                title={<Translation>Dependencies</Translation>}
               >
                 <Message type="notice" style={{ marginBottom: '16px' }}>
                   <Translation>Ensure that dependent addon are enabled first.</Translation>

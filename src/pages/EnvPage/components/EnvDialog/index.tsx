@@ -22,7 +22,6 @@ type Props = {
   envItem?: Env;
   onOK: () => void;
   onClose: () => void;
-  t: (key: string) => string;
 };
 
 type State = {};
@@ -141,7 +140,7 @@ class EnvDialog extends React.Component<Props, State> {
       },
     };
 
-    const { t, visible, isEdit, projects, syncProjectList } = this.props;
+    const { visible, isEdit, projects, syncProjectList } = this.props;
     const projectOptions = projects.map((project) => {
       return {
         label: project.alias || project.name,
@@ -214,7 +213,9 @@ class EnvDialog extends React.Component<Props, State> {
                   <Input
                     name="namespace"
                     disabled={isEdit}
-                    placeholder={i18n.t('By default, it is the same as the Environment name').toString()}
+                    placeholder={i18n
+                      .t('By default, it is the same as the Environment name')
+                      .toString()}
                     {...init('namespace', {
                       rules: [
                         {
@@ -235,7 +236,11 @@ class EnvDialog extends React.Component<Props, State> {
                       rules: [
                         {
                           maxLength: 256,
-                          message: <Translation>Enter a description that contains less than 256 characters</Translation>,
+                          message: (
+                            <Translation>
+                              Enter a description that contains less than 256 characters
+                            </Translation>
+                          ),
                         },
                       ],
                     })}

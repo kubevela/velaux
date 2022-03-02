@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Icon, Input } from '@b-design/ui';
-import { Translation, withTranslation } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import './index.less';
 import i18n from '../../../../i18n';
 

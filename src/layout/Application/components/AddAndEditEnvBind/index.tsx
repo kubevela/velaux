@@ -18,7 +18,6 @@ interface Props {
   envbinding?: EnvBinding[];
   targets?: [];
   dispatch?: ({}) => {};
-  t: (key: string) => string;
 }
 
 interface State {
@@ -162,7 +161,6 @@ class EnvBindPlanDialog extends Component<Props, State> {
   };
   render() {
     const { loading, isEdit, envs, visibleEnvDialog } = this.state;
-    const { t } = this.props;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const init = this.field.init;
@@ -237,7 +235,6 @@ class EnvBindPlanDialog extends Component<Props, State> {
         </Dialog>
         <If condition={visibleEnvDialog}>
           <EnvDialog
-            t={t}
             visible={visibleEnvDialog}
             targets={this.props.targets || []}
             projects={[]}
