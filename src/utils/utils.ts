@@ -1,4 +1,8 @@
 import type { Endpoint } from '../interface/observation';
+type SelectGroupType = {
+  label: string;
+  children: { label: string; value: string }[];
+}[];
 
 // code from https://github.com/kubernetes-client/javascript/blob/master/src/util.ts#L17
 export function findSuffix(quantity: string): string {
@@ -52,6 +56,47 @@ export function quantityToScalar(quantity: string): number | bigint {
     default:
       throw new Error(`Unknown suffix: ${suffix}`);
   }
+}
+
+export function transComponentDefinitions(componentDefinitions: []) {
+  const defaultCoreDataSource = ['k8s-objects', 'task', 'webservice', 'worker'];
+  const cloud: SelectGroupType = [
+    {
+      label: 'Cloud',
+      children: [],
+    },
+  ];
+  const core: SelectGroupType = [
+    {
+      label: 'Core',
+      children: [],
+    },
+  ];
+  const custom: SelectGroupType = [
+    {
+      label: 'Custom',
+      children: [],
+    },
+  ];
+  (componentDefinitions || []).map((item: { name: string; workloadType: string }) => {
+    if (item.workloadType === 'configurations.terraform.core.oam.dev') {
+      cloud[0].children.push({
+        label: item.name,
+        value: item.name,
+      });
+    } else if (defaultCoreDataSource.includes(item.name)) {
+      core[0].children.push({
+        label: item.name,
+        value: item.name,
+      });
+    } else {
+      custom[0].children.push({
+        label: item.name,
+        value: item.name,
+      });
+    }
+  });
+  return [...core, ...custom, ...cloud];
 }
 
 export function getLink(endpointObj: Endpoint) {

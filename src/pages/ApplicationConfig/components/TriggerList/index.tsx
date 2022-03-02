@@ -98,16 +98,16 @@ class TriggerList extends Component<Props, State> {
       </span>
     );
     return (
-      <div className="traits-list-warper">
+      <div className="trigger-list-warper">
         <Row wrap={true}>
           {(triggers || []).map((item: Trigger) => (
             <Col xl={8} m={12} s={24} key={item.type} className="padding16">
               <Card free={true} style={{ padding: '16px' }} locale={locale.Card}>
-                <div className="traits-list-nav">
-                  <div className="traits-list-title">
+                <div className="trigger-list-nav">
+                  <div className="trigger-list-title">
                     {item.alias ? `${item.alias}(${item.name})` : item.name}
                   </div>
-                  <div className="traits-list-operation">
+                  <div className="trigger-list-operation">
                     <Icon
                       type="ashbin1"
                       size={14}
@@ -157,7 +157,7 @@ class TriggerList extends Component<Props, State> {
                   </Row>
                   <Row>
                     <Col>
-                      <div className="traits-list-operation">
+                      <div className="trigger-list-operation">
                         <a
                           onClick={() => {
                             this.showWebhook(item);

@@ -1,10 +1,10 @@
 import React from 'react';
-import { Grid, Field, Form, Select, Message, Button, Input } from '@b-design/ui';
+import { Grid, Field, Form, Select, Message, Button, Input, Icon } from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
-import { createTrait, detailTraitDefinition, updateTrait } from '../../../../api/application';
+import { detailTraitDefinition, updateTrait, createTrait } from '../../../../api/application';
 import type { DefinitionDetail, Trait } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -13,21 +13,25 @@ import { Link } from 'dva/router';
 import i18n from '../../../../i18n';
 
 type Props = {
+  isEditComponent: boolean;
   isEditTrait: boolean;
   visible: boolean;
   traitItem?: Trait;
   traitDefinitions?: [];
   appName?: string;
   componentName?: string;
+  temporaryTraitList: Trait[];
+  createTemporaryTrait: (trait: Trait) => void;
+  upDateTemporaryTrait: (trait: Trait) => void;
   onOK: () => void;
   onClose: () => void;
   dispatch?: ({}) => {};
-  t: (key: string) => {};
 };
 
 type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
+  isLoading: boolean;
 };
 
 class TraitDialog extends React.Component<Props, State> {
@@ -37,6 +41,7 @@ class TraitDialog extends React.Component<Props, State> {
     super(props);
     this.state = {
       definitionLoading: false,
+      isLoading: false,
     };
     this.field = new Field(this);
     this.uiSchemaRef = React.createRef();
@@ -67,7 +72,7 @@ class TraitDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { appName = '', componentName = '' } = this.props;
+      const { appName = '', componentName = '', temporaryTraitList = [] } = this.props;
       const { alias = '', type = '', description = '', properties } = values;
       const query = { appName, componentName, traitType: type };
       const params: Trait = {
@@ -76,29 +81,47 @@ class TraitDialog extends React.Component<Props, State> {
         description,
         properties: JSON.stringify(properties),
       };
-      const { isEditTrait } = this.props;
-      if (isEditTrait) {
-        updateTrait(params, query).then((res) => {
-          if (res) {
-            Message.success({
-              duration: 4000,
-              title: 'Trait properties update success.',
-              content: 'You need to re-execute the workflow for it to take effect.',
-            });
-            this.props.onOK();
-          }
-        });
+      const { isEditTrait, isEditComponent } = this.props;
+      this.setState({ isLoading: true });
+      if (isEditComponent) {
+        if (isEditTrait) {
+          updateTrait(params, query).then((res) => {
+            if (res) {
+              Message.success({
+                duration: 4000,
+                title: i18n.t('Trait properties update success.'),
+                content: i18n.t('You need to re-execute the workflow for it to take effect.'),
+              });
+              this.props.onOK();
+            }
+            this.setState({ isLoading: false });
+          });
+        } else {
+          createTrait(params, query).then((res) => {
+            if (res) {
+              Message.success({
+                duration: 4000,
+                title: i18n.t('Trait create success.'),
+                content: i18n.t('You need to re-execute the workflow for it to take effect.'),
+              });
+              this.props.onOK();
+            }
+            this.setState({ isLoading: false });
+          });
+        }
       } else {
-        createTrait(params, query).then((res) => {
-          if (res) {
-            Message.success({
-              duration: 4000,
-              title: 'Trait create success.',
-              content: 'You need to re-execute the workflow for it to take effect.',
-            });
-            this.props.onOK();
-          }
-        });
+        const findSameType = temporaryTraitList.find((item) => item.type === type);
+        if (!isEditTrait && !findSameType) {
+          params.properties = JSON.parse(params.properties);
+          this.props.createTemporaryTrait(params);
+        } else if (!isEditTrait && findSameType) {
+          return Message.warning(
+            i18n.t('A trait with the same trait type exists, please modify it'),
+          );
+        } else if (isEditTrait) {
+          params.properties = JSON.parse(params.properties);
+          this.props.upDateTemporaryTrait(params);
+        }
       }
     });
   };
@@ -132,31 +155,50 @@ class TraitDialog extends React.Component<Props, State> {
 
   extButtonList = () => {
     const { onClose, isEditTrait } = this.props;
+    const { isLoading } = this.state;
     return (
       <div>
         <Button type="secondary" onClick={onClose} className="margin-right-10">
           <Translation>Cancel</Translation>
         </Button>
-        <Button type="primary" onClick={this.onSubmit}>
-          <Translation>{isEditTrait ? 'Update' : 'Create'}</Translation>
+        <Button type="primary" onClick={this.onSubmit} loading={isLoading}>
+          <Translation>{isEditTrait ? i18n.t('Update') : i18n.t('Create')}</Translation>
         </Button>
       </div>
     );
+  };
+
+  showTraitTitle = () => {
+    const { isEditTrait, onClose } = this.props;
+    if (isEditTrait) {
+      return (
+        <span>
+          <Icon type="arrow-left" onClick={onClose} className="cursor-pointer" />
+          <span> {i18n.t('Edit Trait')} </span>
+        </span>
+      );
+    } else {
+      return (
+        <span>
+          <Icon type="arrow-left" onClick={onClose} className="cursor-pointer" />
+          <span> {i18n.t('Add Trait')} </span>
+        </span>
+      );
+    }
   };
 
   render() {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const { onClose } = this.props;
-    const { t, isEditTrait } = this.props;
+    const { onClose, isEditTrait } = this.props;
     const { definitionDetail, definitionLoading } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
     return (
       <DrawerWithFooter
-        title={isEditTrait ? t('Edit Trait') : t('Add Trait')}
+        title={this.showTraitTitle()}
         placement="right"
         width={800}
         onClose={onClose}
@@ -170,7 +212,7 @@ class TraitDialog extends React.Component<Props, State> {
                 required
                 help={
                   <span>
-                    <Translation>Get more trait type?</Translation>{' '}
+                    <Translation>Get more trait type?</Translation>
                     <Link to="/addons">
                       <Translation>Go to enable addon</Translation>
                     </Link>
@@ -179,12 +221,13 @@ class TraitDialog extends React.Component<Props, State> {
               >
                 <Select
                   className="select"
-                  placeholder={t('Please select').toString()}
+                  disabled={isEditTrait ? true : false}
+                  placeholder={i18n.t('Please select').toString()}
                   {...init(`type`, {
                     rules: [
                       {
                         required: true,
-                        message: 'Please select',
+                        message: i18n.t('Please select'),
                       },
                     ],
                   })}
@@ -199,7 +242,7 @@ class TraitDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
-                  placeholder={t('Please enter').toString()}
+                  placeholder={i18n.t('Please enter').toString()}
                   {...init('alias', {
                     rules: [
                       {
@@ -217,12 +260,14 @@ class TraitDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Description</Translation>}>
                 <Input
                   name="description"
-                  placeholder={t('Please enter').toString()}
+                  placeholder={i18n.t('Please enter').toString()}
                   {...init('description', {
                     rules: [
                       {
                         maxLength: 256,
-                        message: 'Enter a description that contains less than 256 characters.',
+                        message: i18n.t(
+                          'Enter a description that contains less than 256 characters.',
+                        ),
                       },
                     ],
                   })}

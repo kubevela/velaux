@@ -9,12 +9,13 @@ import {
   deleteTrait,
   getAppliationTriggers,
   deleteTriggers,
+  deleteComponent,
+  getComponentdefinitions,
 } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
 import Item from '../../components/Item';
 import TraitDialog from './components/TraitDialog';
-import TraitsList from './components/TraitsList';
 import type {
   ApplicationDetail,
   Trait,
@@ -22,12 +23,16 @@ import type {
   EnvBinding,
   Trigger,
   Workflow,
+  ApplicationBase,
 } from '../../interface/application';
+
 import { momentDate } from '../../utils/common';
-import EditProperties from './components/EditProperties';
 import locale from '../../utils/locale';
 import TriggerList from './components/TriggerList';
 import TriggerDialog from './components/TriggerDialog';
+import EditAppDialog from '../ApplicationList/components/EditAppDialog';
+import Components from './components/Components';
+import ComponentDialog from './components/ComponentDialog';
 import i18n from '../../i18n';
 
 const { Row, Col } = Grid;
@@ -57,10 +62,16 @@ type State = {
   traitDefinitions: [];
   mainComponent?: ApplicationComponent;
   traitItem: Trait;
-  visibleEditComponentProperties: boolean;
   triggers: Trigger[];
   visibleTrigger: boolean;
   createTriggerInfo: Trigger;
+  showEditApplication: boolean;
+  editItem: ApplicationBase;
+  visibleComponent: boolean;
+  temporaryTraitList: Trait[];
+  isEditComponent: boolean;
+  editComponent?: ApplicationComponent;
+  componentDefinitions: [];
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -76,10 +87,21 @@ class ApplicationConfig extends Component<Props, State> {
       visibleTrait: false,
       traitDefinitions: [],
       traitItem: { type: '' },
-      visibleEditComponentProperties: false,
       triggers: [],
       visibleTrigger: false,
       createTriggerInfo: { name: '', workflowName: '', type: 'webhook', token: '' },
+      showEditApplication: false,
+      editItem: {
+        name: '',
+        alias: '',
+        icon: '',
+        description: '',
+        createTime: '',
+      },
+      visibleComponent: false,
+      temporaryTraitList: [],
+      isEditComponent: false,
+      componentDefinitions: [],
     };
   }
 
@@ -94,10 +116,11 @@ class ApplicationConfig extends Component<Props, State> {
       });
     }
     this.onGetAppliationTrigger();
+    this.onGetComponentdefinitions();
   }
 
   componentWillReceiveProps(nextProps: any) {
-    if (nextProps.components !== this.props.components) {
+    if (nextProps.components !== this.props.components && this.props.components?.length === 0) {
       const componentName =
         (nextProps.components && nextProps.components[0] && nextProps.components[0].name) || '';
       this.setState({ componentName }, () => {
@@ -116,6 +139,7 @@ class ApplicationConfig extends Component<Props, State> {
       if (res) {
         this.setState({
           mainComponent: res,
+          editComponent: res,
         });
       }
     });
@@ -146,17 +170,29 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   onDeleteTrait = async (traitType: string) => {
-    const { appName, componentName } = this.state;
+    const { appName, componentName, isEditComponent, temporaryTraitList } = this.state;
     const params = {
       appName,
       componentName,
       traitType,
     };
-    deleteTrait(params).then((res: any) => {
-      if (res) {
-        this.onGetAppliationComponent();
-      }
-    });
+    if (isEditComponent) {
+      deleteTrait(params).then((res: any) => {
+        if (res) {
+          Message.success({
+            duration: 4000,
+            title: i18n.t('Success'),
+            content: i18n.t('Delete trait success.'),
+          });
+          this.onGetAppliationComponent();
+        }
+      });
+    } else {
+      const filterTemporaryTraitList = temporaryTraitList.filter((item) => item.type != traitType);
+      this.setState({
+        temporaryTraitList: filterTemporaryTraitList,
+      });
+    }
   };
 
   onClose = () => {
@@ -178,9 +214,7 @@ class ApplicationConfig extends Component<Props, State> {
       isEditTrait: false,
     });
   };
-  onEditParamter = () => {
-    this.setState({ visibleEditComponentProperties: true });
-  };
+
   changeTraitStats = (isEditTrait: boolean, traitItem: Trait) => {
     this.setState({
       visibleTrait: true,
@@ -222,8 +256,166 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
+  editAppPlan = () => {
+    const { applicationDetail } = this.props;
+    const {
+      alias = '',
+      description = '',
+      name = '',
+      createTime = '',
+      icon = '',
+    } = applicationDetail || {};
+    this.setState({
+      editItem: {
+        name,
+        alias,
+        description,
+        createTime,
+        icon,
+      },
+      showEditApplication: true,
+    });
+  };
+
+  onOkEditAppDialog = () => {
+    this.setState({
+      showEditApplication: false,
+    });
+    this.onGetApplicationDetails();
+  };
+
+  onCloseEditAppDialog = () => {
+    this.setState({
+      showEditApplication: false,
+    });
+  };
+
+  onGetEditComponentInfo(componentName: string, callback: () => void) {
+    const { appName } = this.state;
+    const params = {
+      appName,
+      componentName,
+    };
+    getAppliationComponent(params).then((res: any) => {
+      if (res) {
+        this.setState({
+          editComponent: res,
+        });
+      }
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  editComponentstats = (component: ApplicationComponent) => {
+    this.onGetEditComponentInfo(component.name, () => {
+      this.setState({
+        isEditComponent: true,
+        visibleComponent: true,
+        componentName: component.name,
+      });
+    });
+  };
+
+  onAddComponent = () => {
+    this.setState({
+      visibleComponent: true,
+      isEditComponent: false,
+    });
+  };
+
+  onDeleteComponent = async (componentName: string) => {
+    const { appName } = this.state;
+    const params = {
+      appName,
+      componentName,
+    };
+    deleteComponent(params).then((res: any) => {
+      if (res) {
+        Message.success({
+          duration: 4000,
+          title: i18n.t('Success'),
+          content: i18n.t('Delete component success.'),
+        });
+        this.onloadApplicationComponents();
+      }
+    });
+  };
+
+  createTemporaryTrait = (trait: Trait) => {
+    this.setState({
+      temporaryTraitList: [...this.state.temporaryTraitList, trait],
+      visibleTrait: false,
+    });
+  };
+
+  upDateTemporaryTrait = (trait: Trait) => {
+    const { temporaryTraitList } = this.state;
+    const updateTraitList: Trait[] = [];
+    (temporaryTraitList || []).map((item) => {
+      let newTraitItem: Trait = { type: '' };
+      if (item.type === trait.type) {
+        newTraitItem = trait;
+      } else {
+        newTraitItem = item;
+      }
+      updateTraitList.push(newTraitItem);
+    });
+
+    this.setState({
+      temporaryTraitList: updateTraitList,
+      visibleTrait: false,
+    });
+  };
+
+  onComponentClose = () => {
+    this.setState({
+      visibleComponent: false,
+      temporaryTraitList: [],
+    });
+  };
+
+  onComponentOK = () => {
+    const { isEditComponent } = this.state;
+    this.setState(
+      {
+        visibleComponent: isEditComponent ? true : false,
+        temporaryTraitList: [],
+      },
+      () => {
+        this.onloadApplicationComponents();
+      },
+    );
+  };
+
+  onGetComponentdefinitions = async () => {
+    getComponentdefinitions().then((res) => {
+      if (res) {
+        this.setState({
+          componentDefinitions: res && res.definitions,
+        });
+      }
+    });
+  };
+
+  onGetApplicationDetails = async () => {
+    const { appName } = this.state;
+    this.props.dispatch({
+      type: 'application/getApplicationDetail',
+      payload: { appName: appName },
+    });
+  };
+
+  onloadApplicationComponents = async () => {
+    const { appName } = this.state;
+    this.props.dispatch({
+      type: 'application/getApplicationComponents',
+      payload: { appName: appName },
+    });
+  };
   render() {
-    const { applicationDetail, dispatch, envbinding, workflows } = this.props;
+    const { applicationDetail, workflows, components } = this.props;
     const {
       visibleTrait,
       isEditTrait,
@@ -232,11 +424,18 @@ class ApplicationConfig extends Component<Props, State> {
       componentName = '',
       mainComponent,
       traitItem,
-      visibleEditComponentProperties,
       triggers,
       visibleTrigger,
       createTriggerInfo,
+      showEditApplication,
+      editItem,
+      visibleComponent,
+      temporaryTraitList,
+      isEditComponent,
+      editComponent,
+      componentDefinitions,
     } = this.state;
+
     return (
       <div>
         <Row>
@@ -249,8 +448,8 @@ class ApplicationConfig extends Component<Props, State> {
             />
           </Col>
           <Col span={12} className="padding16 flexright">
-            <Button onClick={this.onEditParamter} type="secondary">
-              <Translation>Edit Properties</Translation>
+            <Button onClick={this.editAppPlan} type="secondary">
+              <Translation>Edit</Translation>
             </Button>
           </Col>
         </Row>
@@ -302,35 +501,53 @@ class ApplicationConfig extends Component<Props, State> {
           <Row>
             <Col span={24} className="padding16">
               <Title
+                title={
+                  <span className="font-size-16 font-weight-bold">
+                    <Translation>Components</Translation>
+                  </span>
+                }
                 actions={[
-                  <a key={'add'} onClick={this.onAddTrait}>
-                    <Translation>New Trait</Translation>
+                  <a
+                    key={'add'}
+                    onClick={this.onAddComponent}
+                    className="font-size-14 font-weight-400"
+                  >
+                    <Translation>New Component</Translation>
                   </a>,
                 ]}
-                title={<Translation>Traits</Translation>}
               />
             </Col>
           </Row>
-          <TraitsList
-            traits={mainComponent?.traits || []}
-            changeTraitStats={(is: boolean, trait: Trait) => {
-              this.changeTraitStats(is, trait);
+
+          <Components
+            components={components || []}
+            editComponentstats={(component: ApplicationComponent) => {
+              this.editComponentstats(component);
             }}
-            onDeleteTrait={(traitType: string) => {
-              this.onDeleteTrait(traitType);
+            onDeleteComponent={(componenName: string) => {
+              this.onDeleteComponent(componenName);
             }}
-            onAdd={this.onAddTrait}
+            onAddComponent={this.onAddComponent}
           />
+
           <If condition={triggers.length > 0}>
             <Row>
               <Col span={24} className="padding16">
                 <Title
                   actions={[
-                    <a key={'add'} onClick={this.onAddTrigger}>
+                    <a
+                      key={'add'}
+                      className="font-size-14 font-weight-400"
+                      onClick={this.onAddTrigger}
+                    >
                       <Translation>New Trigger</Translation>
                     </a>,
                   ]}
-                  title={<Translation>Triggers</Translation>}
+                  title={
+                    <span className="font-size-16 font-weight-bold">
+                      <Translation>Triggers</Translation>
+                    </span>
+                  }
                 />
               </Col>
             </Row>
@@ -348,31 +565,21 @@ class ApplicationConfig extends Component<Props, State> {
         <If condition={visibleTrait}>
           <TraitDialog
             visible={visibleTrait}
+            isEditComponent={isEditComponent}
             appName={appName}
             componentName={componentName}
             isEditTrait={isEditTrait}
             traitItem={traitItem}
             traitDefinitions={traitDefinitions}
+            temporaryTraitList={temporaryTraitList}
             onClose={this.onClose}
             onOK={this.onOk}
-          />
-        </If>
-
-        <If condition={visibleEditComponentProperties && mainComponent}>
-          <EditProperties
-            onOK={() => {
-              this.onGetAppliationComponent();
-              this.setState({ visibleEditComponentProperties: false });
+            createTemporaryTrait={(trait: Trait) => {
+              this.createTemporaryTrait(trait);
             }}
-            onClose={() => {
-              this.setState({ visibleEditComponentProperties: false });
+            upDateTemporaryTrait={(trait: Trait) => {
+              this.upDateTemporaryTrait(trait);
             }}
-            applicationDetail={applicationDetail}
-            defaultEnv={
-              Array.isArray(envbinding) && envbinding.length > 0 ? envbinding[0] : undefined
-            }
-            component={mainComponent}
-            dispatch={dispatch}
           />
         </If>
 
@@ -385,6 +592,34 @@ class ApplicationConfig extends Component<Props, State> {
             onClose={this.onTriggerClose}
             onOK={(res: Trigger) => {
               this.onTriggerOk(res);
+            }}
+          />
+        </If>
+
+        <If condition={showEditApplication}>
+          <EditAppDialog
+            editItem={editItem}
+            onOK={this.onOkEditAppDialog}
+            onClose={this.onCloseEditAppDialog}
+          />
+        </If>
+
+        <If condition={visibleComponent}>
+          <ComponentDialog
+            appName={appName}
+            componentName={componentName}
+            editComponent={editComponent}
+            isEditComponent={isEditComponent}
+            temporaryTraitList={temporaryTraitList}
+            componentDefinitions={componentDefinitions}
+            onComponentClose={this.onComponentClose}
+            onComponentOK={this.onComponentOK}
+            onAddTrait={this.onAddTrait}
+            changeTraitStats={(is: boolean, trait: Trait) => {
+              this.changeTraitStats(is, trait);
+            }}
+            onDeleteTrait={(traitType: string) => {
+              this.onDeleteTrait(traitType);
             }}
           />
         </If>
