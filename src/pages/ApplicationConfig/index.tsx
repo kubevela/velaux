@@ -28,6 +28,7 @@ import EditProperties from './components/EditProperties';
 import locale from '../../utils/locale';
 import TriggerList from './components/TriggerList';
 import TriggerDialog from './components/TriggerDialog';
+import i18n from '../../i18n';
 
 const { Row, Col } = Grid;
 
@@ -242,7 +243,9 @@ class ApplicationConfig extends Component<Props, State> {
           <Col span={12} className="padding16">
             <Message
               type="notice"
-              title="Note that baseline configuration changes will be applied to all environments"
+              title={i18n.t(
+                'Note that baseline configuration changes will be applied to all environments',
+              )}
             />
           </Col>
           <Col span={12} className="padding16 flexright">

@@ -4,6 +4,7 @@ import NameSpaceForm from '../GeneralConfig/project-form';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import { checkName } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
+import i18n from '../../../../i18n';
 const { Row, Col } = Grid;
 
 type Props = {
@@ -114,7 +115,7 @@ class YmalConfig extends React.Component<Props> {
                       {
                         required: true,
                         pattern: checkName,
-                        message: 'Please enter a valid application name',
+                        message: <Translation>Please enter a valid application name</Translation>,
                       },
                     ],
                   })}
@@ -125,7 +126,7 @@ class YmalConfig extends React.Component<Props> {
               <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
-                  placeholder={'Give your app a more recognizable name'}
+                  placeholder={i18n.t('Give your app a more recognizable name').toString()}
                   {...init('alias', {
                     rules: [
                       {

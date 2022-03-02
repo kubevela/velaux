@@ -187,7 +187,7 @@ class Header extends Component<Props, State> {
               <Dropdown
                 trigger={
                   <Button style={{ marginRight: '16px' }} type="secondary">
-                    Service Endpoint
+                    <Translation>Service Endpoint</Translation>
                   </Button>
                 }
               >

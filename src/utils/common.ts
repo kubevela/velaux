@@ -1,15 +1,14 @@
 import moment from 'moment';
 
-// type Navigator = {
-//   language: string;
-//   userLanguage?: string;
-// };
+type Navigator = {
+  language: string;
+  userLanguage?: string;
+};
 
 export function getLanguage() {
-  // const navigator: Navigator = window.navigator;
-  // const lang = navigator.language || navigator.userLanguage || 'en';
-  // return localStorage.getItem('lang') || lang.split('-')[0];
-  return 'en';
+  const navigator: Navigator = window.navigator;
+  const lang = navigator.language || navigator.userLanguage || 'en';
+  return localStorage.getItem('lang') || lang.split('-')[0];
 }
 
 export function isMock() {

@@ -163,7 +163,7 @@ class TriggerList extends Component<Props, State> {
                             this.showWebhook(item);
                           }}
                         >
-                          Manual Trigger
+                          <Translation>Manual Trigger</Translation>
                         </a>
                       </div>
                     </Col>

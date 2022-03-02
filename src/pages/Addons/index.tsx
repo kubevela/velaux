@@ -9,6 +9,7 @@ import RegistryManageDialog from './components/registry-manage/index';
 import { If } from 'tsx-control-statements/components';
 import { getEnabledAddons } from '../../api/addons';
 import type { AddonBaseStatus } from '../../interface/addon';
+import i18n from '../../i18n';
 
 type Props = {
   dispatch: ({}) => {};
@@ -100,7 +101,7 @@ class Addons extends React.Component<Props, State> {
         <Title
           title="Addons"
           subTitle="Manages and extends platform capabilities"
-          addButtonTitle="Addon Registries"
+          addButtonTitle={i18n.t('Addon Registries').toString()}
           addButtonClick={() => {
             this.setState({ showRegistryManage: true });
           }}

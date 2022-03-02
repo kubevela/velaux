@@ -10,6 +10,7 @@ import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
 import { Link } from 'dva/router';
+import i18n from '../../../../i18n';
 
 type Props = {
   isEditTrait: boolean;
@@ -169,7 +170,10 @@ class TraitDialog extends React.Component<Props, State> {
                 required
                 help={
                   <span>
-                    Get more trait type? <Link to="/addons">Go to enable addon</Link>
+                    <Translation>Get more trait type?</Translation>{' '}
+                    <Link to="/addons">
+                      <Translation>Go to enable addon</Translation>
+                    </Link>
                   </span>
                 }
               >
@@ -229,8 +233,8 @@ class TraitDialog extends React.Component<Props, State> {
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
               <Group
-                title="Trait Properties"
-                description="Set the configuration parameters for the Trait."
+                title={i18n.t('Trait Properties')}
+                description={i18n.t('Set the configuration parameters for the Trait.')}
                 closed={false}
                 loading={definitionLoading}
                 required={true}
@@ -243,7 +247,7 @@ class TraitDialog extends React.Component<Props, State> {
                         rules: [
                           {
                             validator: validator,
-                            message: 'Please check trait deploy properties',
+                            message: i18n.t('Please check trait deploy properties'),
                           },
                         ],
                       })}

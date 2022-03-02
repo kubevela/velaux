@@ -15,7 +15,7 @@ type Props = {
   setCloudService: (isCloudService: boolean) => void;
   t: (key: string) => string;
   onPropsOK: () => void;
-  dispatch: ({ }) => void;
+  dispatch: ({}) => void;
 };
 
 type State = {
@@ -124,7 +124,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           });
         }
       })
-      .then(() => { });
+      .then(() => {});
   };
 
   render() {
@@ -232,8 +232,8 @@ class CloudServiceDialog extends React.Component<Props, State> {
           <If condition={choseInput}>
             <Message style={{ marginBottom: '16px' }}>
               <Translation>
-                KubeVela does not save your AK/SK, but does recommend allocating the smallest
-                available permission set.
+                KubeVela won't save your AK/SK and we strongly recommend allocating the smallest
+                available permission set
               </Translation>
             </Message>
             <Form {...formItemLayout} field={this.field} className="cloud-server-wraper">
@@ -248,7 +248,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        message: 'content cannot be empty',
+                        message: <Translation>content cannot be empty</Translation>,
                       },
                     ],
                   })}
@@ -263,7 +263,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        message: 'content cannot be empty',
+                        message: <Translation>content cannot be empty</Translation>,
                       },
                     ],
                   })}
@@ -278,7 +278,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        message: 'content cannot be empty',
+                        message: <Translation>content cannot be empty</Translation>,
                       },
                     ],
                   })}

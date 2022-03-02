@@ -16,7 +16,7 @@ type Props = {
   clusterList: [];
   defaultCluster: string;
   cloudClusters: [];
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
 };
 
 type State = {
@@ -148,7 +148,7 @@ class Cluster extends React.Component<Props, State> {
       <div>
         <Title
           title="Clusters"
-          subTitle="Setup Kubernetes clusters by adding an existing one or creating a new one."
+          subTitle="Setup Kubernetes clusters by adding an existing one or creating a new one via cloud provider"
           addButtonTitle="Connect Existing Cluster"
           addButtonClick={() => {
             this.setState({ showAddCluster: true });

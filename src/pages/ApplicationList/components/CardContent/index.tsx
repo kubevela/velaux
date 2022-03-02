@@ -141,8 +141,7 @@ class CardContent extends React.Component<Props, State> {
                                 type: 'confirm',
                                 content: (
                                   <Translation>
-                                    Unrecoverable after deletion, are you sure you want to delete
-                                    it?
+                                    Unrecoverable after deletion, are you sure to delete it?
                                   </Translation>
                                 ),
                                 onOk: () => {

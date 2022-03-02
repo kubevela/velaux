@@ -189,7 +189,7 @@ class TriggerDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Name</Translation>} required>
                 <Input
                   name="name"
-                  placeholder={t('Please enter the env name').toString()}
+                  placeholder={t('Please enter the name').toString()}
                   {...init('name', {
                     rules: [
                       {

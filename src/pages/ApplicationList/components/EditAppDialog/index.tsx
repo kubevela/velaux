@@ -5,6 +5,7 @@ import { updateApplication } from '../../../../api/application';
 import type { ApplicationBase } from '../../../../interface/application';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
+import i18n from 'i18next';
 
 type Props = {
   editItem: ApplicationBase;
@@ -75,7 +76,7 @@ class EditAppDialog extends React.Component<Props> {
               <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
-                  placeholder={'Give your app a more recognizable name'}
+                  placeholder={i18n.t('Give your app a more recognizable name').toString()}
                   {...init('alias', {
                     initValue: editItem.alias,
                     rules: [
