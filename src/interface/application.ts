@@ -180,7 +180,6 @@ export interface Trait {
   type: string;
   createTime?: string;
   updateTime?: string;
-  opetationAdd?: boolean;
 }
 
 export interface ApplicationComponent {
@@ -194,6 +193,7 @@ export interface ApplicationComponent {
   type: string;
   updateTime?: string;
   description?: string;
+  main: boolean;
 }
 
 export interface Revisions {

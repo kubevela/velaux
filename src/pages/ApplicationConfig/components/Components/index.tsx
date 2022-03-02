@@ -7,6 +7,7 @@ import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
+import i18n from 'i18next';
 
 type Props = {
   components: ApplicationComponent[];
@@ -18,7 +19,7 @@ type Props = {
 class ComponentsList extends Component<Props> {
   handleDelete = (name: string) => {
     Dialog.alert({
-      content: 'Are you sure want to delete this Component?',
+      content: i18n.t('Are you sure want to delete this Component?'),
       onOk: () => {
         this.props.onDeleteComponent(name || '');
       },
@@ -45,16 +46,18 @@ class ComponentsList extends Component<Props> {
                   >
                     {item.alias ? `${item.alias}(${item.name})` : item.name}
                   </div>
-                  <div className="components-list-operation">
-                    <Icon
-                      type="ashbin1"
-                      size={14}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        this.handleDelete(item.name || '');
-                      }}
-                    />
-                  </div>
+                  <If condition={item.main != true}>
+                    <div className="components-list-operation">
+                      <Icon
+                        type="ashbin1"
+                        size={14}
+                        className="cursor-pointer"
+                        onClick={() => {
+                          this.handleDelete(item.name || '');
+                        }}
+                      />
+                    </div>
+                  </If>
                 </div>
                 <div className="components-list-content">{item.description}</div>
                 <div className="components-list-date">{momentDate(item.createTime)}</div>

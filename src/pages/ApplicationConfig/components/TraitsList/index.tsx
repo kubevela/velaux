@@ -5,6 +5,7 @@ import { momentDate } from '../../../../utils/common';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import locale from '../../../../utils/locale';
+import i18n from 'i18next';
 
 type Props = {
   traits: Trait[];
@@ -13,10 +14,22 @@ type Props = {
   onDeleteTrait: (traitType: string) => void;
   onAdd: () => void;
 };
+
+type TraitTrans = {
+  alias?: string;
+  description?: string;
+  name?: string;
+  properties?: any;
+  type: string;
+  createTime?: string;
+  updateTime?: string;
+  opetationAdd?: boolean;
+};
+
 class TraitsList extends Component<Props> {
   handleDelete = (traitType: string) => {
     Dialog.alert({
-      content: 'Are you sure want to delete this trait?',
+      content: i18n.t('Are you sure want to delete this trait?'),
       onOk: () => {
         this.props.onDeleteTrait(traitType || '');
       },
@@ -25,7 +38,7 @@ class TraitsList extends Component<Props> {
     });
   };
 
-  renderCardList = (item: Trait) => {
+  renderCardList = (item: TraitTrans) => {
     const { Col } = Grid;
     const { changeTraitStats } = this.props;
     return (
@@ -78,17 +91,20 @@ class TraitsList extends Component<Props> {
     );
   };
 
+  initTraitList = () => {
+    const { traits = [] } = this.props;
+    return [...traits, { opetationAdd: true, type: '' }];
+  };
+
   render() {
     const { Row } = Grid;
-    const { traits } = this.props;
-    console.log('traits', traits);
+    const traits = this.initTraitList();
     return (
       <div className="traits-list-warper margin-bottom-20">
         <Row wrap={true} className="row-list">
-          {(traits || []).map((item: Trait) => (
+          {(traits || []).map((item: TraitTrans) => (
             <Fragment>
               <If condition={!item.opetationAdd}>{this.renderCardList(item)}</If>
-
               <If condition={item.opetationAdd}>{this.renderAddCard()}</If>
             </Fragment>
           ))}

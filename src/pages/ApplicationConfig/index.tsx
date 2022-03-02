@@ -33,6 +33,7 @@ import TriggerDialog from './components/TriggerDialog';
 import EditAppDialog from '../ApplicationList/components/EditAppDialog';
 import Components from './components/Components';
 import ComponentDialog from './components/ComponentDialog';
+import i18n from 'i18next';
 
 const { Row, Col } = Grid;
 
@@ -119,7 +120,7 @@ class ApplicationConfig extends Component<Props, State> {
   }
 
   componentWillReceiveProps(nextProps: any) {
-    if (nextProps.components !== this.props.components) {
+    if (nextProps.components !== this.props.components && this.props.components?.length === 0) {
       const componentName =
         (nextProps.components && nextProps.components[0] && nextProps.components[0].name) || '';
       this.setState({ componentName }, () => {
@@ -180,8 +181,8 @@ class ApplicationConfig extends Component<Props, State> {
         if (res) {
           Message.success({
             duration: 4000,
-            title: 'Success',
-            content: 'delete trait success.',
+            title: i18n.t('Success'),
+            content: i18n.t('Delete trait success.'),
           });
           this.onGetAppliationComponent();
         }
@@ -334,22 +335,22 @@ class ApplicationConfig extends Component<Props, State> {
       if (res) {
         Message.success({
           duration: 4000,
-          title: 'Success',
-          content: 'delete Component success.',
+          title: i18n.t('Success'),
+          content: i18n.t('Delete component success.'),
         });
         this.onloadApplicationComponents();
       }
     });
   };
 
-  createTemporaryTraitList = (trait: Trait) => {
+  createTemporaryTrait = (trait: Trait) => {
     this.setState({
       temporaryTraitList: [...this.state.temporaryTraitList, trait],
       visibleTrait: false,
     });
   };
 
-  upDateTemporaryTraitList = (trait: Trait) => {
+  upDateTemporaryTrait = (trait: Trait) => {
     const { temporaryTraitList } = this.state;
     const updateTraitList: Trait[] = [];
     (temporaryTraitList || []).map((item) => {
@@ -376,9 +377,10 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   onComponentOK = () => {
+    const { isEditComponent } = this.state;
     this.setState(
       {
-        visibleComponent: false,
+        visibleComponent: isEditComponent ? true : false,
         temporaryTraitList: [],
       },
       () => {
@@ -571,11 +573,11 @@ class ApplicationConfig extends Component<Props, State> {
             temporaryTraitList={temporaryTraitList}
             onClose={this.onClose}
             onOK={this.onOk}
-            createTemporaryTraitList={(trait: Trait) => {
-              this.createTemporaryTraitList(trait);
+            createTemporaryTrait={(trait: Trait) => {
+              this.createTemporaryTrait(trait);
             }}
-            upDateTemporaryTraitList={(trait: Trait) => {
-              this.upDateTemporaryTraitList(trait);
+            upDateTemporaryTrait={(trait: Trait) => {
+              this.upDateTemporaryTrait(trait);
             }}
           />
         </If>

@@ -10,6 +10,7 @@ import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
 import { Link } from 'dva/router';
+import i18n from 'i18next';
 
 type Props = {
   isEditComponent: boolean;
@@ -20,17 +21,17 @@ type Props = {
   appName?: string;
   componentName?: string;
   temporaryTraitList: Trait[];
-  createTemporaryTraitList: (trait: Trait) => void;
-  upDateTemporaryTraitList: (trait: Trait) => void;
+  createTemporaryTrait: (trait: Trait) => void;
+  upDateTemporaryTrait: (trait: Trait) => void;
   onOK: () => void;
   onClose: () => void;
   dispatch?: ({}) => {};
-  t: (key: string) => {};
 };
 
 type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
+  isLoading: boolean;
 };
 
 class TraitDialog extends React.Component<Props, State> {
@@ -40,6 +41,7 @@ class TraitDialog extends React.Component<Props, State> {
     super(props);
     this.state = {
       definitionLoading: false,
+      isLoading: false,
     };
     this.field = new Field(this);
     this.uiSchemaRef = React.createRef();
@@ -80,40 +82,45 @@ class TraitDialog extends React.Component<Props, State> {
         properties: JSON.stringify(properties),
       };
       const { isEditTrait, isEditComponent } = this.props;
+      this.setState({ isLoading: true });
       if (isEditComponent) {
         if (isEditTrait) {
           updateTrait(params, query).then((res) => {
             if (res) {
               Message.success({
                 duration: 4000,
-                title: 'Trait properties update success.',
-                content: 'You need to re-execute the workflow for it to take effect.',
+                title: i18n.t('Trait properties update success.'),
+                content: i18n.t('You need to re-execute the workflow for it to take effect.'),
               });
               this.props.onOK();
             }
+            this.setState({ isLoading: false });
           });
         } else {
           createTrait(params, query).then((res) => {
             if (res) {
               Message.success({
                 duration: 4000,
-                title: 'Trait create success.',
-                content: 'You need to re-execute the workflow for it to take effect.',
+                title: i18n.t('Trait create success.'),
+                content: i18n.t('You need to re-execute the workflow for it to take effect.'),
               });
               this.props.onOK();
             }
+            this.setState({ isLoading: false });
           });
         }
       } else {
         const findSameType = temporaryTraitList.find((item) => item.type === type);
         if (!isEditTrait && !findSameType) {
           params.properties = JSON.parse(params.properties);
-          this.props.createTemporaryTraitList(params);
+          this.props.createTemporaryTrait(params);
         } else if (!isEditTrait && findSameType) {
-          return Message.warning('A trait with the same trait type exists, please modify it');
+          return Message.warning(
+            i18n.t('A trait with the same trait type exists, please modify it'),
+          );
         } else if (isEditTrait) {
           params.properties = JSON.parse(params.properties);
-          this.props.upDateTemporaryTraitList(params);
+          this.props.upDateTemporaryTrait(params);
         }
       }
     });
@@ -148,32 +155,33 @@ class TraitDialog extends React.Component<Props, State> {
 
   extButtonList = () => {
     const { onClose, isEditTrait } = this.props;
+    const { isLoading } = this.state;
     return (
       <div>
         <Button type="secondary" onClick={onClose} className="margin-right-10">
           <Translation>Cancel</Translation>
         </Button>
-        <Button type="primary" onClick={this.onSubmit}>
-          <Translation>{isEditTrait ? 'Update' : 'Create'}</Translation>
+        <Button type="primary" onClick={this.onSubmit} loading={isLoading}>
+          <Translation>{isEditTrait ? i18n.t('Update') : i18n.t('Create')}</Translation>
         </Button>
       </div>
     );
   };
 
   showTraitTitle = () => {
-    const { t, isEditTrait, onClose } = this.props;
+    const { isEditTrait, onClose } = this.props;
     if (isEditTrait) {
       return (
         <span>
           <Icon type="arrow-left" onClick={onClose} className="cursor-pointer" />
-          <span> {t('Edit Trait')} </span>
+          <span> {i18n.t('Edit Trait')} </span>
         </span>
       );
     } else {
       return (
         <span>
           <Icon type="arrow-left" onClick={onClose} className="cursor-pointer" />
-          <span> {t('Add Trait')} </span>
+          <span> {i18n.t('Add Trait')} </span>
         </span>
       );
     }
@@ -183,7 +191,7 @@ class TraitDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const { t, onClose, isEditTrait } = this.props;
+    const { onClose, isEditTrait } = this.props;
     const { definitionDetail, definitionLoading } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
@@ -204,19 +212,20 @@ class TraitDialog extends React.Component<Props, State> {
                 required
                 help={
                   <span>
-                    Get more trait type? <Link to="/addons">Go to enable addon</Link>
+                    {i18n.t('Get more trait type?')}{' '}
+                    <Link to="/addons"> {i18n.t('Go to enable addon')}</Link>
                   </span>
                 }
               >
                 <Select
                   className="select"
                   disabled={isEditTrait ? true : false}
-                  placeholder={t('Please select').toString()}
+                  placeholder={i18n.t('Please select').toString()}
                   {...init(`type`, {
                     rules: [
                       {
                         required: true,
-                        message: 'Please select',
+                        message: i18n.t('Please select'),
                       },
                     ],
                   })}
@@ -231,7 +240,7 @@ class TraitDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
-                  placeholder={t('Please enter').toString()}
+                  placeholder={i18n.t('Please enter').toString()}
                   {...init('alias', {
                     rules: [
                       {
@@ -249,12 +258,14 @@ class TraitDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Description</Translation>}>
                 <Input
                   name="description"
-                  placeholder={t('Please enter').toString()}
+                  placeholder={i18n.t('Please enter').toString()}
                   {...init('description', {
                     rules: [
                       {
                         maxLength: 256,
-                        message: 'Enter a description that contains less than 256 characters.',
+                        message: i18n.t(
+                          'Enter a description that contains less than 256 characters.',
+                        ),
                       },
                     ],
                   })}
@@ -266,7 +277,7 @@ class TraitDialog extends React.Component<Props, State> {
             <Col span={24} style={{ padding: '0 8px' }}>
               <Group
                 title="Trait Properties"
-                description="Set the configuration parameters for the Trait."
+                description={i18n.t('Set the configuration parameters for the Trait.')}
                 closed={false}
                 loading={definitionLoading}
                 required={true}
@@ -279,7 +290,7 @@ class TraitDialog extends React.Component<Props, State> {
                         rules: [
                           {
                             validator: validator,
-                            message: 'Please check trait deploy properties',
+                            message: i18n.t('Please check trait deploy properties'),
                           },
                         ],
                       })}
