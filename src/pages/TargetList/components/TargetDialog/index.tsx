@@ -323,7 +323,9 @@ class DeliveryDialog extends React.Component<Props, State> {
                 <Group
                   title={<Translation>Shared Variables</Translation>}
                   required={false}
-                  description={'You can define parameters such as region and zone.'}
+                  description={
+                    <Translation>You can define parameters such as region and zone</Translation>
+                  }
                   hasToggleIcon
                 >
                   <Row>

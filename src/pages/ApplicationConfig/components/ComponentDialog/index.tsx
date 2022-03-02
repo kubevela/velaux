@@ -23,7 +23,7 @@ import { Link } from 'dva/router';
 import locale from '../../../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 import _ from 'lodash';
-import i18n from 'i18next';
+import i18n from '../../../../i18n';
 import { transComponentDefinitions } from '../../../../utils/utils';
 import './index.less';
 
@@ -226,7 +226,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const {isEditComponent, componentDefinitions, onComponentClose } = this.props;
+    const { isEditComponent, componentDefinitions, onComponentClose } = this.props;
     const { definitionDetail, isUpdateComponentLoading } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
@@ -318,7 +318,9 @@ class ComponentDialog extends React.Component<Props, State> {
                 help={
                   <span>
                     <Translation>Get more component type?</Translation>
-                    <Link to="/addons"> <Translation>Go to enable addon</Translation></Link>
+                    <Link to="/addons">
+                      <Translation>Go to enable addon</Translation>
+                    </Link>
                   </span>
                 }
               >

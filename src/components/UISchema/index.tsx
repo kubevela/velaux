@@ -175,7 +175,7 @@ class UISchema extends Component<Props, State> {
       };
 
       let description = param.description;
-      if (description) {
+      if (description && description.indexOf('http') == -1) {
         description = i18n.t(description);
       }
       let label = param.label;

@@ -52,7 +52,7 @@ class SelectSearch extends React.Component<Props, State> {
     const { Row, Col } = Grid;
     const { Option } = Select;
     const { t, registries } = this.props;
-    const queryPlacehole = t('Search by name and description.').toString();
+    const queryPlacehole = t('Search by name and description etc').toString();
     const { registryValue, inputValue } = this.state;
 
     return (

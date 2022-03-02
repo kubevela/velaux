@@ -7,7 +7,7 @@ import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
-import i18n from 'i18next';
+import i18n from '../../../../i18n';
 
 type Props = {
   components: ApplicationComponent[];

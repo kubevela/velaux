@@ -96,8 +96,8 @@ export function transComponentDefinitions(componentDefinitions: []) {
       });
     }
   });
-  return [...core, ...custom, ...cloud]
-};
+  return [...core, ...custom, ...cloud];
+}
 
 export function getLink(endpointObj: Endpoint) {
   const { appProtocol, host } = endpointObj.endpoint;

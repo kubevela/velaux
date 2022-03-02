@@ -33,7 +33,7 @@ import TriggerDialog from './components/TriggerDialog';
 import EditAppDialog from '../ApplicationList/components/EditAppDialog';
 import Components from './components/Components';
 import ComponentDialog from './components/ComponentDialog';
-import i18n from 'i18next';
+import i18n from '../../i18n';
 
 const { Row, Col } = Grid;
 
@@ -442,7 +442,9 @@ class ApplicationConfig extends Component<Props, State> {
           <Col span={12} className="padding16">
             <Message
               type="notice"
-              title="Note that baseline configuration changes will be applied to all environments"
+              title={i18n.t(
+                'Note that baseline configuration changes will be applied to all environments',
+              )}
             />
           </Col>
           <Col span={12} className="padding16 flexright">
@@ -501,7 +503,7 @@ class ApplicationConfig extends Component<Props, State> {
               <Title
                 title={
                   <span className="font-size-16 font-weight-bold">
-                    <Translation>Components</Translation>{' '}
+                    <Translation>Components</Translation>
                   </span>
                 }
                 actions={[
@@ -543,8 +545,7 @@ class ApplicationConfig extends Component<Props, State> {
                   ]}
                   title={
                     <span className="font-size-16 font-weight-bold">
-                      {' '}
-                      <Translation>Triggers</Translation>{' '}
+                      <Translation>Triggers</Translation>
                     </span>
                   }
                 />

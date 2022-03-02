@@ -5,7 +5,7 @@ import { momentDate } from '../../../../utils/common';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import locale from '../../../../utils/locale';
-import i18n from 'i18next';
+import i18n from '../../../../i18n';
 
 type Props = {
   traits: Trait[];

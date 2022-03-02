@@ -323,7 +323,7 @@ class AppDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
 
-    const { visible, setVisible, dispatch, projects, targets, syncProjectList, t, onClose } =
+    const { visible, setVisible, dispatch, projects, targets, syncProjectList, onClose } =
       this.props;
 
     const { definitionDetail, dialogStats, envs, visibleEnvDialog } = this.state;
@@ -366,7 +366,10 @@ class AppDialog extends React.Component<Props, State> {
                     required={true}
                     help={
                       <span>
-                        Get more component type? <Link to="/addons">Go to enable addon</Link>
+                        <Translation>Get more component type?</Translation>
+                        <Link to="/addons">
+                          <Translation>Go to enable addon</Translation>
+                        </Link>
                       </span>
                     }
                   >
@@ -446,7 +449,6 @@ class AppDialog extends React.Component<Props, State> {
         </DrawerWithFooter>
         <If condition={visibleEnvDialog}>
           <EnvDialog
-            t={t}
             visible={visibleEnvDialog}
             targets={targets || []}
             projects={projects || []}

@@ -119,13 +119,13 @@ class targetList extends React.Component<Props, State> {
   };
 
   render() {
-    const { t, targets, projects, envTotal, envs } = this.props;
+    const { targets, projects, envTotal, envs } = this.props;
     const { visibleEnvDialog, isEdit, envItem } = this.state;
     return (
       <div>
         <ListTitle
           title="Environments"
-          subTitle="The environment coordinates the matching relationship between applications and resources."
+          subTitle="Set up the Environments for your Application based on Target sources"
           addButtonTitle="New Environment"
           addButtonClick={() => {
             this.setState({ visibleEnvDialog: true, envItem: undefined });
@@ -152,7 +152,6 @@ class targetList extends React.Component<Props, State> {
 
         <If condition={visibleEnvDialog}>
           <EnvDialog
-            t={t}
             visible={visibleEnvDialog}
             targets={targets || []}
             projects={projects || []}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid, Icon, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import './index.less';
+import i18n from '../../../../i18n';
 
 type Props = {
   t: (key: string) => {};
@@ -47,7 +48,7 @@ class InputSearch extends React.Component<Props, State> {
                 style={{ margin: 4 }}
               />
             }
-            placeholder={'Search by name and description'}
+            placeholder={i18n.t('Search by name and description etc').toString()}
             onChange={this.handleChangName}
             onPressEnter={this.handleClickSearch}
             value={inputValue}
