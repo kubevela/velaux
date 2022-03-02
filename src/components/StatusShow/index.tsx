@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, Table, Card, Loading, Button, Balloon, Icon } from '@b-design/ui';
-import type { ApplicationStatus, Condition } from '../../interface/application';
+import type { ApplicationStatus, Condition, Resource } from '../../interface/application';
 import Translation from '../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import locale from '../../utils/locale';
@@ -48,6 +48,14 @@ class StatusShow extends React.Component<Props> {
           >
             <Table locale={locale.Table} dataSource={applicationStatus?.appliedResources}>
               <Table.Column
+                dataIndex="name"
+                width="150px"
+                title={<Translation>Namespace/Name</Translation>}
+                cell={(v: string, i: number, row: Resource) => {
+                  return `${row.namespace}/${row.name}`;
+                }}
+              />
+              <Table.Column
                 width="150px"
                 dataIndex="kind"
                 title={<Translation>Kind</Translation>}
@@ -56,19 +64,13 @@ class StatusShow extends React.Component<Props> {
               <Table.Column
                 dataIndex="cluster"
                 title={<Translation>Cluster</Translation>}
-                width="150px"
+                width="120px"
                 cell={(v: string) => {
                   if (!v) {
                     return <Link to="/clusters">Local</Link>;
                   }
                   return <Link to="/clusters">{v}</Link>;
                 }}
-              />
-              <Table.Column dataIndex="name" title={<Translation>Name</Translation>} />
-              <Table.Column
-                width="100px"
-                dataIndex="namespace"
-                title={<Translation>Namespace</Translation>}
               />
             </Table>
           </Card>

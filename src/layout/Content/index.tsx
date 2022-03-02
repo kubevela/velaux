@@ -9,7 +9,7 @@ import NotFound from '../../pages/NotFound';
 import ApplicationInstanceList from '../../pages/ApplicationInstanceList';
 import ApplicationRevisionList from '../../pages/ApplicationRevisionList';
 import TargetList from '../../pages/TargetList';
-import ApplicationMonitor from '../../pages/ApplicationMonitor';
+import ApplicationStatus from '../../pages/ApplicationStatus';
 import ApplicationLayout from '../Application';
 import EnvPage from '../../pages/EnvPage';
 
@@ -70,7 +70,7 @@ export default function Content() {
         render={(props: any) => {
           return (
             <Redirect
-              to={`/applications/${props.match.params.appName}/envbinding/${props.match.params.envName}/instances`}
+              to={`/applications/${props.match.params.appName}/envbinding/${props.match.params.envName}/status`}
             />
           );
         }}
@@ -88,11 +88,11 @@ export default function Content() {
       />
       <Route
         exact
-        path="/applications/:appName/envbinding/:envName/monitor"
+        path="/applications/:appName/envbinding/:envName/status"
         render={(props: any) => {
           return (
             <ApplicationLayout {...props}>
-              <ApplicationMonitor {...props} />
+              <ApplicationStatus {...props} />
             </ApplicationLayout>
           );
         }}

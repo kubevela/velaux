@@ -45,6 +45,11 @@ class Menu extends Component<Props, any> {
       ],
       envPage: [
         {
+          key: 'status',
+          lable: <Translation>Status</Translation>,
+          to: `/applications/${appName}/envbinding/${envName}/status`,
+        },
+        {
           key: 'instances',
           lable: <Translation>Instances</Translation>,
           to: `/applications/${appName}/envbinding/${envName}/instances`,

@@ -85,7 +85,7 @@ class TableList extends Component<Props, State> {
               <Link
                 to={`/applications/${
                   applicationDetail && applicationDetail.name
-                }/envbinding/${v}/instances`}
+                }/envbinding/${v}/status`}
               >
                 {v}
               </Link>
