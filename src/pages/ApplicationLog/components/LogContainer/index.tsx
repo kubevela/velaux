@@ -159,7 +159,7 @@ class ContainerLog extends Component<Props, State> {
             </div>
             <Row style={{ width: '100%' }} className="margin-top-15">
               <Col span={12}>
-                <span style={{ float: 'left' }}>
+                <span style={{ float: 'left', marginLeft: '16px' }}>
                   <Translation className="font-bold font-size-14">Logs Date</Translation>:
                   <span
                     style={{ marginLeft: '8px' }}
