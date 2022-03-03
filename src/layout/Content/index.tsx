@@ -12,6 +12,7 @@ import TargetList from '../../pages/TargetList';
 import ApplicationStatus from '../../pages/ApplicationStatus';
 import ApplicationLayout from '../Application';
 import EnvPage from '../../pages/EnvPage';
+import ApplicationLog from '../../pages/ApplicationLog';
 
 export default function Content() {
   return (
@@ -93,6 +94,17 @@ export default function Content() {
           return (
             <ApplicationLayout {...props}>
               <ApplicationStatus {...props} />
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/applications/:appName/envbinding/:envName/logs"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationLog {...props} />
             </ApplicationLayout>
           );
         }}

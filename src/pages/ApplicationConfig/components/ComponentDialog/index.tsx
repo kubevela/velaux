@@ -89,7 +89,7 @@ class ComponentDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { appName = '', temporaryTraitList } = this.props;
+      const { appName = '', temporaryTraitList = [] } = this.props;
       const { name, alias = '', description = '', componentType = '', properties } = values;
       const params: ApplicationComponentConfig = {
         name,
@@ -100,28 +100,26 @@ class ComponentDialog extends React.Component<Props, State> {
       };
 
       const traitLists = _.cloneDeep(temporaryTraitList);
-      if (traitLists && traitLists.length != 0) {
-        traitLists.forEach((item) => {
-          if (item.properties) {
-            item.properties = JSON.stringify(item.properties);
-          }
-        });
-        params.name = `${appName}-${name}`;
-        params.componentType = componentType;
-        params.traits = traitLists;
-        this.setState({ isCreateComponentLoading: true });
-        createApplicationComponent(params, { appName }).then((res) => {
-          if (res) {
-            Message.success({
-              duration: 4000,
-              title: i18n.t('Success'),
-              content: i18n.t('Create component success.'),
-            });
-            this.props.onComponentOK();
-          }
-          this.setState({ isCreateComponentLoading: false });
-        });
-      }
+      traitLists.forEach((item) => {
+        if (item.properties) {
+          item.properties = JSON.stringify(item.properties);
+        }
+      });
+      params.name = `${appName}-${name}`;
+      params.componentType = componentType;
+      params.traits = traitLists;
+      this.setState({ isCreateComponentLoading: true });
+      createApplicationComponent(params, { appName }).then((res) => {
+        if (res) {
+          Message.success({
+            duration: 4000,
+            title: i18n.t('Success'),
+            content: i18n.t('Create component success.'),
+          });
+          this.props.onComponentOK();
+        }
+        this.setState({ isCreateComponentLoading: false });
+      });
     });
   };
 
