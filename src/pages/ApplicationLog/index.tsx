@@ -5,6 +5,8 @@ import { listApplicationPods, listApplicationPodsDetails } from '../../api/obser
 import type { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
 import type { PodBase, Container } from '../../interface/observation';
 import LogContainer from './components/LogContainer';
+import Translation from '../../components/Translation';
+import i18n from '../../i18n';
 
 type Props = {
   match: {
@@ -186,12 +188,24 @@ class ApplicationLog extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { pod, activePodName, activeContainerName, isActiveContainerNameDisabled } = this.state;
+    const podLabel = (
+      <span>
+        <Translation>Pod</Translation>:
+      </span>
+    );
+    const containerLabel = (
+      <span>
+        <Translation>Container</Translation>:
+      </span>
+    );
+
     return (
       <Fragment>
         <Row>
           <Col span="6">
             <Select
-              placeholder="Select Pod"
+              placeholder={i18n.t('Select Pod').toString()}
+              label={podLabel}
               dataSource={this.getPodNameList()}
               value={activePodName}
               onChange={this.handlePodNameChange}
@@ -199,7 +213,8 @@ class ApplicationLog extends React.Component<Props, State> {
           </Col>
           <Col span="6" className="margin-left-10">
             <Select
-              placeholder="Select PodDetailsName"
+              placeholder={i18n.t('Select Container').toString()}
+              label={containerLabel}
               dataSource={this.getContainerNameList()}
               value={activeContainerName}
               onChange={this.handleContainerNameChange}
