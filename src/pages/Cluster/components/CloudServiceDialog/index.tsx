@@ -1,5 +1,15 @@
 import React from 'react';
-import { Button, Dialog, Form, Input, Select, Field, Table, Message } from '@b-design/ui';
+import {
+  Button,
+  Dialog,
+  Form,
+  Input,
+  Select,
+  Field,
+  Table,
+  Message,
+  Pagination,
+} from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import { If } from 'tsx-control-statements/components';
 import { ACKCLusterStatus } from '../../../../utils/common';
@@ -24,6 +34,8 @@ type State = {
   choseInput: boolean;
   cloudClusters: [];
   btnLoading: boolean;
+  tableLoading: boolean;
+  total: number;
 };
 type Record = {
   id: string;
@@ -48,6 +60,8 @@ class CloudServiceDialog extends React.Component<Props, State> {
       choseInput: true,
       cloudClusters: [],
       btnLoading: false,
+      tableLoading: false,
+      total: 0,
     };
   }
 
@@ -76,7 +90,12 @@ class CloudServiceDialog extends React.Component<Props, State> {
       getCloudClustersList(params)
         .then((re) => {
           if (re) {
-            this.setState({ choseInput: false, cloudClusters: re.clusters, btnLoading: false });
+            this.setState({
+              choseInput: false,
+              cloudClusters: re.clusters,
+              btnLoading: false,
+              total: re.total,
+            });
             this.props.onPropsOK();
           }
         })
@@ -127,10 +146,47 @@ class CloudServiceDialog extends React.Component<Props, State> {
       .then(() => {});
   };
 
+  handleChange = (pageIdx: number) => {
+    this.setState(
+      {
+        page: pageIdx,
+        pageSize: 10,
+      },
+      () => {
+        const { provider, accessKeyID, accessKeySecret } = this.field.getValues();
+        const { page, pageSize } = this.state;
+        const params = {
+          provider,
+          accessKeyID: accessKeyID,
+          accessKeySecret: accessKeySecret,
+          page,
+          pageSize,
+          customError: true,
+        };
+        this.setState({ tableLoading: true });
+        getCloudClustersList(params)
+          .then((res) => {
+            if (res) {
+              this.setState({
+                choseInput: false,
+                cloudClusters: res.clusters,
+                tableLoading: false,
+                total: res.total,
+              });
+            }
+          })
+          .catch((err) => {
+            this.setState({ tableLoading: false });
+            handleError(err);
+          });
+      },
+    );
+  };
+
   render() {
     const init = this.field.init;
     const { visible } = this.props;
-    const { choseInput, cloudClusters, btnLoading } = this.state;
+    const { choseInput, cloudClusters, btnLoading, total, tableLoading } = this.state;
     const { Column } = Table;
     const FormItem = Form.Item;
     const formItemLayout = {
@@ -292,10 +348,20 @@ class CloudServiceDialog extends React.Component<Props, State> {
               locale={locale.Table}
               dataSource={cloudClusters}
               hasBorder={false}
-              loading={false}
+              loading={tableLoading}
             >
               {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
             </Table>
+            <Pagination
+              locale={locale.Pagination}
+              hideOnlyOnePage={true}
+              total={total}
+              size="small"
+              className="cluster-cloud-pagination-wrapper"
+              pageSize={this.state.pageSize}
+              current={this.state.page}
+              onChange={this.handleChange}
+            />
           </If>
         </Dialog>
       </React.Fragment>
