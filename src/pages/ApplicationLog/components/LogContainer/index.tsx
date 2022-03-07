@@ -115,7 +115,7 @@ class ContainerLog extends Component<Props, State> {
             this.timeoutID = setTimeout(() => this.loadContainerLog(), refreshInterval);
           }
         })
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => {
           this.setState({ loading: false });
         });
@@ -133,15 +133,25 @@ class ContainerLog extends Component<Props, State> {
     }
   };
 
+  getAppMenuHeight() {
+    const ele = document.querySelector('.app-menu');
+    if (ele) {
+      return ele.clientHeight && ele.clientHeight - 44;
+    }else{
+      return '350';
+    }
+  }
+
   render() {
     const { Row, Col } = Grid;
     const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous, loading } =
       this.state;
+    const menuHeight = this.getAppMenuHeight() + 'px';
     return (
       <Fragment>
         <Loading visible={loading} inline={false}>
           <div className="application-logs-wrapper margin-top-15">
-            <div className="logBox">
+            <div className="logBox" style={{ height: menuHeight }}>
               {logs.map((line) => {
                 return (
                   <div className="logLine">
