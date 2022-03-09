@@ -133,25 +133,34 @@ class ContainerLog extends Component<Props, State> {
     }
   };
 
-  getAppMenuHeight() {
-    const ele = document.querySelector('.app-menu');
-    if (ele) {
-      return ele.clientHeight && ele.clientHeight - 44;
-    }else{
-      return '350';
-    }
-  }
-
   render() {
     const { Row, Col } = Grid;
     const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous, loading } =
       this.state;
-    const menuHeight = this.getAppMenuHeight() + 'px';
     return (
       <Fragment>
+        <div className="application-logs-actions">
+          <Checkbox checked={showTimestamps} onChange={(v) => this.setState({ showTimestamps: v })}>
+            <Translation className="font-bold font-size-14">Show timestamps</Translation>
+          </Checkbox>
+          <Checkbox checked={autoRefresh} onChange={this.setAutoRefresh}>
+            <Translation className="font-bold font-size-14">Auto-refresh</Translation>(every
+            {refreshInterval / 1000} s.)
+          </Checkbox>
+          <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
+            <Menu>
+              <Menu.Item>
+                <Checkbox checked={previous} onChange={(v) => this.setState({ previous: v })}>
+                  <Translation className="font-bold font-size-14">Show previous logs</Translation>
+                </Checkbox>
+              </Menu.Item>
+            </Menu>
+          </Dropdown>
+        </div>
+
         <Loading visible={loading} inline={false}>
           <div className="application-logs-wrapper margin-top-15">
-            <div className="logBox" style={{ height: menuHeight }}>
+            <div className="logBox">
               {logs.map((line) => {
                 return (
                   <div className="logLine">
@@ -183,34 +192,6 @@ class ContainerLog extends Component<Props, State> {
                     {momentShortDate(info?.toDate)}
                   </span>
                 </span>
-              </Col>
-              <Col span={12}>
-                <div className="logAction">
-                  <Checkbox
-                    checked={showTimestamps}
-                    onChange={(v) => this.setState({ showTimestamps: v })}
-                  >
-                    <Translation className="font-bold font-size-14">Show timestamps</Translation>
-                  </Checkbox>
-                  <Checkbox checked={autoRefresh} onChange={this.setAutoRefresh}>
-                    <Translation className="font-bold font-size-14">Auto-refresh</Translation>(every
-                    {refreshInterval / 1000} s.)
-                  </Checkbox>
-                  <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
-                    <Menu>
-                      <Menu.Item>
-                        <Checkbox
-                          checked={previous}
-                          onChange={(v) => this.setState({ previous: v })}
-                        >
-                          <Translation className="font-bold font-size-14">
-                            Show previous logs
-                          </Translation>
-                        </Checkbox>
-                      </Menu.Item>
-                    </Menu>
-                  </Dropdown>
-                </div>
               </Col>
             </Row>
           </div>
