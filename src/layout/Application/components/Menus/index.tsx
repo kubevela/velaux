@@ -54,6 +54,11 @@ class Menu extends Component<Props, any> {
           lable: <Translation>Instances</Translation>,
           to: `/applications/${appName}/envbinding/${envName}/instances`,
         },
+        {
+          key: 'logs',
+          lable: <Translation>Logs</Translation>,
+          to: `/applications/${appName}/envbinding/${envName}/logs`,
+        },
       ],
     };
     if (applicationType == 'common') {

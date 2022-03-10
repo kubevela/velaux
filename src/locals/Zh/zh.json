@@ -421,5 +421,10 @@
   "Service Endpoint": "访问地址",
   "Specifies the memory resource required for the container, If set to 0, there is no limit.": "指定容器的内存限制量，如果设置为 0 则代表不限制内存",
   "Specifies the cpu resource required for the container, If set to 0, there is no limit.": "指定容器的 CPU 限制量，如果设置为 0 则代表不限制 CPU",
-  "Restarts": "重启次数"
+  "Restarts": "重启次数",
+  "Pod": "实例",
+  "Container": "容器",
+  "Logs": "日志",
+  "Select Pod": "查询实例",
+  "Select Container": "查询容器"
 }
