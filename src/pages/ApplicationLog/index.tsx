@@ -2,7 +2,12 @@ import React, { Fragment } from 'react';
 import { connect } from 'dva';
 import { Message, Grid, Select } from '@b-design/ui';
 import { listApplicationPods, listApplicationPodsDetails } from '../../api/observation';
-import type { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
+import type {
+  ApplicationComponent,
+  ApplicationDetail,
+  ApplicationStatus,
+  EnvBinding,
+} from '../../interface/application';
 import type { PodBase, Container } from '../../interface/observation';
 import LogContainer from './components/LogContainer';
 import Translation from '../../components/Translation';
@@ -18,6 +23,7 @@ type Props = {
   applicationDetail?: ApplicationDetail;
   applicationStatus?: ApplicationStatus;
   envbinding: EnvBinding[];
+  components?: ApplicationComponent[];
   dispatch: ({}) => void;
 };
 
@@ -28,6 +34,7 @@ type State = {
   envName: string;
   containers?: Container[];
   activePodName: string;
+  activeComponentName: string;
   activeContainerName: string;
   isActiveContainerNameDisabled: boolean;
 };
@@ -43,6 +50,7 @@ class ApplicationLog extends React.Component<Props, State> {
       appName: params.appName,
       envName: params.envName,
       podList: [],
+      activeComponentName: '',
       activePodName: '',
       activeContainerName: '',
       isActiveContainerNameDisabled: true,
@@ -90,12 +98,13 @@ class ApplicationLog extends React.Component<Props, State> {
       };
       listApplicationPods(param)
         .then((res) => {
-          if (res && res.podList) {
+          if (res && res.podList && res.podList.length > 0) {
             this.setState(
               {
                 podList: res.podList,
                 pod: res.podList[0] || {},
                 activePodName: res.podList[0]?.metadata.name,
+                activeComponentName: res.podList[0]?.component,
               },
               () => {
                 this.loadPodDetail();
@@ -134,7 +143,9 @@ class ApplicationLog extends React.Component<Props, State> {
         .catch(() => {});
     }
   };
-
+  handleComponentNameChange = (value: any) => {
+    this.setState({ activeComponentName: value });
+  };
   handlePodNameChange = (value: any) => {
     const { podList } = this.state;
     const findPod: PodBase[] = (podList || []).filter((item) => item.metadata.name === value);
@@ -155,13 +166,38 @@ class ApplicationLog extends React.Component<Props, State> {
     this.setState({ activeContainerName: value });
   };
 
-  getPodNameList = () => {
+  getComponentNameList = () => {
     const { podList } = this.state;
+    const { components } = this.props;
+    const componentNameAlias: any = {};
+    components?.map((c) => {
+      componentNameAlias[c.name] = c.alias || c.name;
+    });
+    if (podList && podList.length != 0) {
+      const componentNameList: { label: string; value: string }[] = [];
+      podList.forEach((item) => {
+        if (item.component) {
+          componentNameList.push({
+            label: componentNameAlias[item.component] || item.component,
+            value: item.component,
+          });
+        }
+      });
+      return componentNameList;
+    } else {
+      return [];
+    }
+  };
+
+  getPodNameList = () => {
+    const { podList, activeComponentName } = this.state;
     if (podList && podList.length != 0) {
       const podNameList: string[] = [];
       podList.forEach((item) => {
         if (item.metadata && item.metadata.name) {
-          podNameList.push(item.metadata.name);
+          if (!activeComponentName || item.component == activeComponentName) {
+            podNameList.push(item.metadata.name);
+          }
         }
       });
       return podNameList;
@@ -187,7 +223,13 @@ class ApplicationLog extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { pod, activePodName, activeContainerName, isActiveContainerNameDisabled } = this.state;
+    const {
+      pod,
+      activePodName,
+      activeContainerName,
+      activeComponentName,
+      isActiveContainerNameDisabled,
+    } = this.state;
     const podLabel = (
       <span>
         <Translation>Pod</Translation>:
@@ -202,7 +244,16 @@ class ApplicationLog extends React.Component<Props, State> {
     return (
       <Fragment>
         <Row>
-          <Col span="6">
+          <Col span="4">
+            <Select
+              placeholder={i18n.t('Select Component').toString()}
+              label={i18n.t('Component')}
+              dataSource={this.getComponentNameList()}
+              value={activeComponentName}
+              onChange={this.handleComponentNameChange}
+            />
+          </Col>
+          <Col span="4" className="margin-left-10">
             <Select
               placeholder={i18n.t('Select Pod').toString()}
               label={podLabel}
@@ -211,7 +262,7 @@ class ApplicationLog extends React.Component<Props, State> {
               onChange={this.handlePodNameChange}
             />
           </Col>
-          <Col span="6" className="margin-left-10">
+          <Col span="4" className="margin-left-10">
             <Select
               placeholder={i18n.t('Select Container').toString()}
               label={containerLabel}

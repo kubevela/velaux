@@ -7,7 +7,7 @@ import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
 import '../../common.less';
 import { If } from 'tsx-control-statements/components';
-import { deleteApplicationPlan, getComponentdefinitions } from '../../api/application';
+import { deleteApplicationPlan, getComponentDefinitions } from '../../api/application';
 import type { ApplicationBase } from '../../interface/application';
 import type { Project } from '../../interface/project';
 import EditAppDialog from './components/EditAppDialog';
@@ -54,7 +54,7 @@ class Application extends Component<Props, State> {
     this.getProjectList();
     this.getTargets();
     this.getEnvs();
-    this.onGetComponentdefinitions();
+    this.onGetComponentDefinitions();
   }
 
   getApplications = async (params: any) => {
@@ -100,8 +100,8 @@ class Application extends Component<Props, State> {
     });
   };
 
-  onGetComponentdefinitions = async () => {
-    getComponentdefinitions().then((res) => {
+  onGetComponentDefinitions = async () => {
+    getComponentDefinitions().then((res) => {
       if (res) {
         this.setState({
           componentDefinitions: res && res.definitions,

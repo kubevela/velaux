@@ -6,7 +6,7 @@ import {
   getApplicationStatus,
   getApplicationComponents,
   getPolicyList,
-  getComponentdefinitions,
+  getComponentDefinitions,
   getApplicationEnvbinding,
 } from '../api/application';
 
@@ -159,9 +159,9 @@ export default {
       const result = yield call(getPolicyList, { name: urlParam });
       yield put({ type: 'updatePoliciesList', payload: result });
     },
-    *getComponentdefinitions(action, { call, put }) {
+    *getComponentDefinitions(action, { call, put }) {
       const { urlParam } = action.payload;
-      const result = yield call(getComponentdefinitions, { envName: urlParam });
+      const result = yield call(getComponentDefinitions, { envName: urlParam });
       yield put({
         type: 'updateComponentDefinitions',
         payload: result && result.definitions,

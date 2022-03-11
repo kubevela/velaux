@@ -7,7 +7,12 @@ import {
   listApplicationServiceEndpoints,
 } from '../../api/observation';
 import { deployApplication } from '../../api/application';
-import type { ApplicationDetail, ApplicationStatus, EnvBinding } from '../../interface/application';
+import type {
+  ApplicationComponent,
+  ApplicationDetail,
+  ApplicationStatus,
+  EnvBinding,
+} from '../../interface/application';
 import Translation from '../../components/Translation';
 import type { PodBase, CloudResource, Configuration, Endpoint } from '../../interface/observation';
 import PodDetail from './components/PodDetail';
@@ -34,6 +39,7 @@ type Props = {
   applicationDetail?: ApplicationDetail;
   applicationStatus?: ApplicationStatus;
   envbinding: EnvBinding[];
+  components?: ApplicationComponent[];
 };
 
 type State = {
@@ -114,24 +120,17 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   };
 
   loadApplicationEndpoints = async () => {
-    const { applicationDetail, envbinding, applicationStatus } = this.props;
+    const { applicationDetail } = this.props;
     const {
-      params: { appName, envName },
+      params: { appName },
     } = this.props.match;
     const { target, componentName } = this.state;
-    const envs = envbinding.filter((item) => item.name == envName);
     const env = this.getEnvbindingByName();
-    if (
-      applicationDetail &&
-      applicationDetail.name &&
-      env &&
-      applicationStatus &&
-      applicationStatus.services?.length
-    ) {
+    if (applicationDetail && applicationDetail.name && env) {
       const param = {
-        appName: envs[0].appDeployName || appName,
-        appNs: envs[0].appDeployNamespace,
-        name: componentName,
+        appName: env.appDeployName || appName,
+        appNs: env.appDeployNamespace,
+        componentName: componentName,
         cluster: '',
         clusterNs: '',
       };
@@ -222,7 +221,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const {
       params: { appName, envName },
     } = this.props.match;
-    const { target } = this.state;
+    const { target, componentName } = this.state;
     const envs = envbinding.filter((item) => item.name == envName);
     if (
       applicationDetail &&
@@ -231,12 +230,11 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       applicationStatus &&
       applicationStatus.services?.length
     ) {
-      const conponentName = applicationStatus.services[0].name;
       if (applicationDetail.applicationType == 'common') {
         const param = {
           appName: envs[0].appDeployName || appName,
           appNs: envs[0].appDeployNamespace,
-          name: conponentName,
+          componentName: componentName,
           cluster: '',
           clusterNs: '',
         };
@@ -283,8 +281,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       }, 1000);
     }
   };
-  getCloumns = () => {
-    const { applicationDetail } = this.props;
+  getColumns = () => {
+    const { applicationDetail, components } = this.props;
     const getColor = (status: string) => {
       switch (status) {
         case 'Running':
@@ -299,6 +297,10 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const getTarget = (key: string) => {
       return targetMap.get(key);
     };
+    const componentNameAlias: any = {};
+    components?.map((c) => {
+      componentNameAlias[c.name] = c.alias || c.name;
+    });
     return [
       {
         key: 'podName',
@@ -327,6 +329,14 @@ class ApplicationInstanceList extends React.Component<Props, State> {
               {record.cluster}/{record.metadata.namespace}
             </span>
           );
+        },
+      },
+      {
+        key: 'component',
+        title: <Translation>Component</Translation>,
+        dataIndex: 'component',
+        cell: (v: string) => {
+          return componentNameAlias[v];
         },
       },
       {
@@ -381,21 +391,16 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     ];
   };
 
-  updateQuery = (targetName: string) => {
-    if (!targetName) {
-      this.setState({ target: undefined }, () => {
-        this.loadAppInstances();
-        this.loadApplicationEndpoints();
-      });
-      return;
+  updateQuery = (params: { target?: string; component?: string }) => {
+    const targets = this.getTargets()?.filter((item) => item.name == params.target);
+    let target = undefined;
+    if (targets && targets.length > 0) {
+      target = targets[0];
     }
-    const targets = this.getTargets()?.filter((item) => item.name == targetName);
-    if (targets?.length) {
-      this.setState({ target: targets[0] }, () => {
-        this.loadAppInstances();
-        this.loadApplicationEndpoints();
-      });
-    }
+    this.setState({ target: target, componentName: params.component }, () => {
+      this.loadAppInstances();
+      this.loadApplicationEndpoints();
+    });
   };
 
   getTargets = () => {
@@ -478,9 +483,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   };
 
   render() {
-    const { applicationStatus, applicationDetail } = this.props;
+    const { applicationStatus, applicationDetail, components } = this.props;
     const { podList, loading, showStatus, cloudInstance, endpoints } = this.state;
-    const columns = this.getCloumns();
+    const columns = this.getColumns();
     const envbinding = this.getEnvbindingByName();
     const expandedRowRender = (record: PodBase) => {
       return (
@@ -502,12 +507,12 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const {
       params: { envName, appName },
     } = this.props.match;
-
     return (
       <div>
         <Header
           envbinding={envbinding}
           targets={this.getTargets()}
+          components={components}
           envName={envName}
           appName={appName}
           gatewayIPs={gatewayIPs}
@@ -517,8 +522,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           }}
           applicationDetail={applicationDetail}
           applicationStatus={applicationStatus}
-          updateQuery={(targetName: string) => {
-            this.updateQuery(targetName);
+          updateQuery={(params: { target?: string; component?: string }) => {
+            this.updateQuery(params);
           }}
           refresh={() => {
             this.loadApplicationStatus();

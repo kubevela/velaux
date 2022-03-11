@@ -1,5 +1,6 @@
 export interface PodBase {
   cluster: string;
+  component: string;
   metadata: {
     creationTime: string;
     name: string;

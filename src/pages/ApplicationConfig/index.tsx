@@ -5,12 +5,12 @@ import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
 import {
   getTraitDefinitions,
-  getAppliationComponent,
+  getApplicationComponent,
   deleteTrait,
-  getAppliationTriggers,
+  getApplicationTriggers,
   deleteTriggers,
   deleteComponent,
-  getComponentdefinitions,
+  getComponentDefinitions,
 } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
@@ -106,17 +106,17 @@ class ApplicationConfig extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.onGetTraitdefinitions();
+    this.onGetTraitDefinitions();
     const { components, componentsApp } = this.props;
     const { appName } = this.state;
     if (components && components.length > 0 && componentsApp == appName) {
       const componentName = components[0].name || '';
       this.setState({ componentName }, () => {
-        this.onGetAppliationComponent();
+        this.onGetApplicationComponent();
       });
     }
-    this.onGetAppliationTrigger();
-    this.onGetComponentdefinitions();
+    this.onGetApplicationTrigger();
+    this.onGetComponentDefinitions();
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -124,18 +124,18 @@ class ApplicationConfig extends Component<Props, State> {
       const componentName =
         (nextProps.components && nextProps.components[0] && nextProps.components[0].name) || '';
       this.setState({ componentName }, () => {
-        this.onGetAppliationComponent();
+        this.onGetApplicationComponent();
       });
     }
   }
 
-  onGetAppliationComponent() {
+  onGetApplicationComponent() {
     const { appName, componentName } = this.state;
     const params = {
       appName,
       componentName,
     };
-    getAppliationComponent(params).then((res: any) => {
+    getApplicationComponent(params).then((res: any) => {
       if (res) {
         this.setState({
           mainComponent: res,
@@ -145,12 +145,12 @@ class ApplicationConfig extends Component<Props, State> {
     });
   }
 
-  onGetAppliationTrigger() {
+  onGetApplicationTrigger() {
     const { appName } = this.state;
     const params = {
       appName,
     };
-    getAppliationTriggers(params).then((res: any) => {
+    getApplicationTriggers(params).then((res: any) => {
       if (res) {
         this.setState({
           triggers: res.triggers || [],
@@ -159,7 +159,7 @@ class ApplicationConfig extends Component<Props, State> {
     });
   }
 
-  onGetTraitdefinitions = async () => {
+  onGetTraitDefinitions = async () => {
     getTraitDefinitions().then((res: any) => {
       if (res) {
         this.setState({
@@ -184,7 +184,7 @@ class ApplicationConfig extends Component<Props, State> {
             title: i18n.t('Success'),
             content: i18n.t('Delete trait success.'),
           });
-          this.onGetAppliationComponent();
+          this.onGetApplicationComponent();
         }
       });
     } else {
@@ -200,7 +200,8 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   onOk = () => {
-    this.onGetAppliationComponent();
+    this.onGetApplicationComponent();
+    this.onloadApplicationComponents();
     this.setState({
       isEditTrait: false,
       visibleTrait: false,
@@ -215,11 +216,13 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
-  changeTraitStats = (isEditTrait: boolean, traitItem: Trait) => {
+  changeTraitStats = (isEditTrait: boolean, traitItem: Trait, componentName: string) => {
     this.setState({
       visibleTrait: true,
       isEditTrait,
+      isEditComponent: true,
       traitItem,
+      componentName: componentName,
     });
   };
 
@@ -233,10 +236,11 @@ class ApplicationConfig extends Component<Props, State> {
     this.setState({
       visibleTrigger: false,
     });
+    this.onloadApplicationComponents();
   };
 
   onTriggerOk = (res: Trigger) => {
-    this.onGetAppliationTrigger();
+    this.onGetApplicationTrigger();
     this.setState({
       visibleTrigger: false,
       createTriggerInfo: res,
@@ -251,7 +255,7 @@ class ApplicationConfig extends Component<Props, State> {
     };
     deleteTriggers(params).then((res: any) => {
       if (res) {
-        this.onGetAppliationTrigger();
+        this.onGetApplicationTrigger();
       }
     });
   };
@@ -296,7 +300,7 @@ class ApplicationConfig extends Component<Props, State> {
       appName,
       componentName,
     };
-    getAppliationComponent(params).then((res: any) => {
+    getApplicationComponent(params).then((res: any) => {
       if (res) {
         this.setState({
           editComponent: res,
@@ -308,7 +312,7 @@ class ApplicationConfig extends Component<Props, State> {
     });
   }
 
-  editComponentstats = (component: ApplicationComponent) => {
+  editComponent = (component: ApplicationComponent) => {
     this.onGetEditComponentInfo(component.name, () => {
       this.setState({
         isEditComponent: true,
@@ -374,6 +378,7 @@ class ApplicationConfig extends Component<Props, State> {
       visibleComponent: false,
       temporaryTraitList: [],
     });
+    this.onloadApplicationComponents();
   };
 
   onComponentOK = () => {
@@ -389,8 +394,8 @@ class ApplicationConfig extends Component<Props, State> {
     );
   };
 
-  onGetComponentdefinitions = async () => {
-    getComponentdefinitions().then((res) => {
+  onGetComponentDefinitions = async () => {
+    getComponentDefinitions().then((res) => {
       if (res) {
         this.setState({
           componentDefinitions: res && res.definitions,
@@ -521,13 +526,14 @@ class ApplicationConfig extends Component<Props, State> {
 
           <Components
             components={components || []}
-            editComponentstats={(component: ApplicationComponent) => {
-              this.editComponentstats(component);
+            editComponent={(component: ApplicationComponent) => {
+              this.editComponent(component);
             }}
-            onDeleteComponent={(componenName: string) => {
-              this.onDeleteComponent(componenName);
+            onDeleteComponent={(component: string) => {
+              this.onDeleteComponent(component);
             }}
             onAddComponent={this.onAddComponent}
+            changeTraitStats={this.changeTraitStats}
           />
 
           <If condition={triggers.length > 0}>
@@ -616,7 +622,7 @@ class ApplicationConfig extends Component<Props, State> {
             onComponentOK={this.onComponentOK}
             onAddTrait={this.onAddTrait}
             changeTraitStats={(is: boolean, trait: Trait) => {
-              this.changeTraitStats(is, trait);
+              this.changeTraitStats(is, trait, componentName);
             }}
             onDeleteTrait={(traitType: string) => {
               this.onDeleteTrait(traitType);

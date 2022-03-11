@@ -53,12 +53,14 @@ class Group extends React.Component<Props, State> {
   }
 
   initSwitchState = () => {
-    const { jsonKey = '', propertyValue = {}, alwaysShow = false, required } = this.props;
+    const { jsonKey = '', propertyValue = {}, alwaysShow = false, required, closed } = this.props;
     const findKey = Object.keys(propertyValue).find((item) => item === jsonKey);
-    if (findKey || alwaysShow || required) {
+    if (findKey || alwaysShow) {
       this.setState({ enable: true, closed: false, checked: true });
+    } else if (required) {
+      this.setState({ enable: true, closed: closed, checked: true });
     } else {
-      this.setState({ enable: false, closed: false, checked: false });
+      this.setState({ enable: false, closed: closed, checked: false });
     }
   };
 
@@ -83,6 +85,7 @@ class Group extends React.Component<Props, State> {
       disableAddon = false,
     } = this.props;
     const { closed, enable, checked } = this.state;
+    console.log(title, closed);
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
         <div className="group-container">

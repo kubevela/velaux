@@ -26,6 +26,7 @@ import _ from 'lodash';
 import i18n from '../../../../i18n';
 import { transComponentDefinitions } from '../../../../utils/utils';
 import './index.less';
+import Group from '../../../../extends/Group';
 
 type Props = {
   appName?: string;
@@ -166,7 +167,7 @@ class ComponentDialog extends React.Component<Props, State> {
     } else {
       return (
         <div>
-          <span> {i18n.t('Add Component')} </span>
+          <span> {i18n.t('New Component')} </span>
           <Divider />
         </div>
       );
@@ -191,7 +192,7 @@ class ComponentDialog extends React.Component<Props, State> {
     }
   };
 
-  onSumitEditCompont = () => {
+  onSubmitEditComponent = () => {
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
@@ -238,115 +239,124 @@ class ComponentDialog extends React.Component<Props, State> {
         onClose={onComponentClose}
         extButtons={this.extButtonList()}
       >
-        <Form field={this.field} className="basic-config-wraper">
+        <Form field={this.field} className="basic-config-wrapper">
           <section className="title">
             <Title title={i18n.t('Component Config')} actions={[]} />
           </section>
+          <Group
+            hasToggleIcon={true}
+            closed={isEditComponent ? true : false}
+            required={true}
+            title={i18n.t('Component Basic Info')}
+          >
+            <Row>
+              <Col span={12} style={{ paddingRight: '8px' }}>
+                <FormItem
+                  label={
+                    <Translation className="font-size-14 font-weight-bold color333">
+                      Name
+                    </Translation>
+                  }
+                  labelTextAlign="left"
+                  required={true}
+                >
+                  <Input
+                    name="name"
+                    maxLength={32}
+                    disabled={isEditComponent ? true : false}
+                    addonTextBefore={this.getInitName()}
+                    {...init('name', {
+                      rules: [
+                        {
+                          required: true,
+                          pattern: checkName,
+                          message: 'Please enter a valid application name',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
 
-          <Row>
-            <Col span={12} style={{ paddingRight: '8px' }}>
-              <FormItem
-                label={
-                  <Translation className="font-size-14 font-weight-bold color333">Name</Translation>
-                }
-                labelTextAlign="left"
-                required={true}
-              >
-                <Input
-                  name="name"
-                  maxLength={32}
-                  disabled={isEditComponent ? true : false}
-                  addonTextBefore={this.getInitName()}
-                  {...init('name', {
-                    rules: [
-                      {
-                        required: true,
-                        pattern: checkName,
-                        message: 'Please enter a valid application name',
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
-            </Col>
-
-            <Col span={12} style={{ paddingLeft: '8px' }}>
-              <FormItem label={<Translation>Alias</Translation>}>
-                <Input
-                  name="alias"
-                  placeholder={i18n.t('Please enter').toString()}
-                  {...init('alias', {
-                    rules: [
-                      {
-                        minLength: 2,
-                        maxLength: 64,
-                        message: 'Enter a string of 2 to 64 characters.',
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={24}>
-              <FormItem label={<Translation>Description</Translation>}>
-                <Input
-                  name="description"
-                  placeholder={i18n.t('Please enter').toString()}
-                  {...init('description', {
-                    rules: [
-                      {
-                        maxLength: 256,
-                        message: 'Enter a description that contains less than 256 characters.',
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={24}>
-              <FormItem
-                label={
-                  <Translation className="font-size-14 font-weight-bold color333">Type</Translation>
-                }
-                required={true}
-                help={
-                  <span>
-                    <Translation>Get more component type?</Translation>
-                    <Link to="/addons">
-                      <Translation>Go to enable addon</Translation>
-                    </Link>
-                  </span>
-                }
-              >
-                <Select
-                  locale={locale.Select}
-                  showSearch
-                  disabled={isEditComponent ? true : false}
-                  className="select"
-                  {...init(`componentType`, {
-                    initValue: 'webservice',
-                    rules: [
-                      {
-                        required: true,
-                        message: i18n.t('Please select'),
-                      },
-                    ],
-                  })}
-                  dataSource={transComponentDefinitions(componentDefinitions)}
-                  onChange={(item: string) => {
-                    this.onDetailsComponentDefinition(item, () => {
-                      this.field.setValue('componentType', item);
-                    });
-                  }}
-                />
-              </FormItem>
-            </Col>
-          </Row>
-          <Divider />
+              <Col span={12} style={{ paddingLeft: '8px' }}>
+                <FormItem label={<Translation>Alias</Translation>}>
+                  <Input
+                    name="alias"
+                    placeholder={i18n.t('Please enter').toString()}
+                    {...init('alias', {
+                      rules: [
+                        {
+                          minLength: 2,
+                          maxLength: 64,
+                          message: 'Enter a string of 2 to 64 characters.',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24}>
+                <FormItem label={<Translation>Description</Translation>}>
+                  <Input
+                    name="description"
+                    placeholder={i18n.t('Please enter').toString()}
+                    {...init('description', {
+                      rules: [
+                        {
+                          maxLength: 256,
+                          message: 'Enter a description that contains less than 256 characters.',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24}>
+                <FormItem
+                  label={
+                    <Translation className="font-size-14 font-weight-bold color333">
+                      Type
+                    </Translation>
+                  }
+                  required={true}
+                  help={
+                    <span>
+                      <Translation>Get more component type?</Translation>
+                      <Link to="/addons">
+                        <Translation>Go to enable addon</Translation>
+                      </Link>
+                    </span>
+                  }
+                >
+                  <Select
+                    locale={locale.Select}
+                    showSearch
+                    disabled={isEditComponent ? true : false}
+                    className="select"
+                    {...init(`componentType`, {
+                      initValue: 'webservice',
+                      rules: [
+                        {
+                          required: true,
+                          message: i18n.t('Please select'),
+                        },
+                      ],
+                    })}
+                    dataSource={transComponentDefinitions(componentDefinitions)}
+                    onChange={(item: string) => {
+                      this.onDetailsComponentDefinition(item, () => {
+                        this.field.setValue('componentType', item);
+                      });
+                    }}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+          </Group>
           <Row>
             <UISchema
               {...init(`properties`, {
@@ -366,7 +376,7 @@ class ComponentDialog extends React.Component<Props, State> {
             <div className="edit-component-update-btn">
               <Button
                 type="primary"
-                onClick={this.onSumitEditCompont}
+                onClick={this.onSubmitEditComponent}
                 loading={isUpdateComponentLoading}
               >
                 {i18n.t('Update')}
@@ -374,7 +384,7 @@ class ComponentDialog extends React.Component<Props, State> {
             </div>
           </If>
         </Form>
-        <div className="trait-config-wraper">
+        <div className="trait-config-wrapper">
           <section className="title">
             <Title title={i18n.t('Traits')} actions={[]} />
           </section>

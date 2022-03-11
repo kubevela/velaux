@@ -3,18 +3,22 @@ import { connect } from 'dva';
 
 import { Table, Card, Loading, Balloon, Icon, Button, Message, Dialog } from '@b-design/ui';
 import type {
+  ApplicationComponent,
   ApplicationDetail,
   ApplicationStatus,
   Condition,
   EnvBinding,
-  Resource,
+  AppliedResource,
 } from '../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
 import { Link } from 'dva/router';
 import Header from '../ApplicationInstanceList/components/Header';
-import { listApplicationServiceEndpoints } from '../../api/observation';
+import {
+  listApplicationServiceAppliedResources,
+  listApplicationServiceEndpoints,
+} from '../../api/observation';
 import type { Endpoint } from '../../interface/observation';
 import type { Target } from '../../interface/target';
 import { getLink } from '../../utils/utils';
@@ -33,6 +37,7 @@ type Props = {
   };
   applicationDetail?: ApplicationDetail;
   applicationStatus?: ApplicationStatus;
+  components?: ApplicationComponent[];
   envbinding: EnvBinding[];
 };
 
@@ -41,6 +46,7 @@ type State = {
   endpoints?: Endpoint[];
   target?: Target;
   componentName?: string;
+  resources?: AppliedResource[];
 };
 
 @connect((store: any) => {
@@ -69,6 +75,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
         callback: () => {
           this.setState({ loading: false });
           this.loadApplicationEndpoints();
+          this.loadApplicationAppliedResources();
         },
       });
     }
@@ -92,24 +99,17 @@ class ApplicationMonitor extends React.Component<Props, State> {
   };
 
   loadApplicationEndpoints = async () => {
-    const { applicationDetail, envbinding, applicationStatus } = this.props;
+    const { applicationDetail } = this.props;
     const {
-      params: { appName, envName },
+      params: { appName },
     } = this.props.match;
     const { target, componentName } = this.state;
-    const envs = envbinding.filter((item) => item.name == envName);
     const env = this.getEnvbindingByName();
-    if (
-      applicationDetail &&
-      applicationDetail.name &&
-      env &&
-      applicationStatus &&
-      applicationStatus.services?.length
-    ) {
+    if (applicationDetail && applicationDetail.name && env) {
       const param = {
-        appName: envs[0].appDeployName || appName,
-        appNs: envs[0].appDeployNamespace,
-        name: componentName,
+        appName: env.appDeployName || appName,
+        appNs: env.appDeployNamespace,
+        componentName: componentName,
         cluster: '',
         clusterNs: '',
       };
@@ -124,6 +124,40 @@ class ApplicationMonitor extends React.Component<Props, State> {
             this.setState({ endpoints: re.endpoints });
           } else {
             this.setState({ endpoints: [] });
+          }
+        })
+        .finally(() => {
+          this.setState({ loading: false });
+        });
+    }
+  };
+
+  loadApplicationAppliedResources = async () => {
+    const { applicationDetail } = this.props;
+    const {
+      params: { appName },
+    } = this.props.match;
+    const { target, componentName } = this.state;
+    const env = this.getEnvbindingByName();
+    if (applicationDetail && applicationDetail.name && env) {
+      const param = {
+        appName: env.appDeployName || appName,
+        appNs: env.appDeployNamespace,
+        componentName: componentName,
+        cluster: '',
+        clusterNs: '',
+      };
+      if (target) {
+        param.cluster = target.cluster?.clusterName || '';
+        param.clusterNs = target.cluster?.namespace || '';
+      }
+      this.setState({ loading: true });
+      listApplicationServiceAppliedResources(param)
+        .then((re) => {
+          if (re && re.resources) {
+            this.setState({ resources: re.resources });
+          } else {
+            this.setState({ resources: [] });
           }
         })
         .finally(() => {
@@ -154,19 +188,16 @@ class ApplicationMonitor extends React.Component<Props, State> {
     }
   };
 
-  updateQuery = (targetName: string) => {
-    if (!targetName) {
-      this.setState({ target: undefined }, () => {
-        this.loadApplicationEndpoints();
-      });
-      return;
+  updateQuery = (params: { target?: string; component?: string }) => {
+    const targets = this.getTargets()?.filter((item) => item.name == params.target);
+    let target = undefined;
+    if (targets && targets.length > 0) {
+      target = targets[0];
     }
-    const targets = this.getTargets()?.filter((item) => item.name == targetName);
-    if (targets?.length) {
-      this.setState({ target: targets[0] }, () => {
-        this.loadApplicationEndpoints();
-      });
-    }
+    this.setState({ target: target, componentName: params.component }, () => {
+      this.loadApplicationEndpoints();
+      this.loadApplicationAppliedResources();
+    });
   };
 
   onDeploy = (force?: boolean) => {
@@ -210,16 +241,20 @@ class ApplicationMonitor extends React.Component<Props, State> {
   };
 
   render() {
-    const { applicationStatus, applicationDetail } = this.props;
+    const { applicationStatus, applicationDetail, components } = this.props;
     const {
       params: { appName, envName },
     } = this.props.match;
-    const { loading, endpoints } = this.state;
+    const { loading, endpoints, resources, componentName } = this.state;
     const gatewayIPs: any = [];
     endpoints?.map((endpointObj) => {
       const item = getLink(endpointObj);
       gatewayIPs.push(item);
     });
+    let componentStatus = applicationStatus?.services;
+    if (componentName) {
+      componentStatus = componentStatus?.filter((item) => item.name == componentName);
+    }
     return (
       <div>
         <Header
@@ -231,12 +266,13 @@ class ApplicationMonitor extends React.Component<Props, State> {
           gatewayIPs={gatewayIPs}
           applicationDetail={applicationDetail}
           applicationStatus={applicationStatus}
+          components={components}
           updateEnvs={() => {
             this.loadApplicationEnvbinding();
             this.loadApplicationWorkflows();
           }}
-          updateQuery={(targetName: string) => {
-            this.updateQuery(targetName);
+          updateQuery={(params: { target?: string; component?: string }) => {
+            this.updateQuery(params);
           }}
           refresh={() => {
             this.loadApplicationStatus();
@@ -250,12 +286,12 @@ class ApplicationMonitor extends React.Component<Props, State> {
               contentHeight="200px"
               title={<Translation>Applied Resources</Translation>}
             >
-              <Table locale={locale.Table} dataSource={applicationStatus?.appliedResources}>
+              <Table locale={locale.Table} dataSource={resources}>
                 <Table.Column
                   dataIndex="name"
                   width="240px"
                   title={<Translation>Namespace/Name</Translation>}
-                  cell={(v: string, i: number, row: Resource) => {
+                  cell={(v: string, i: number, row: AppliedResource) => {
                     return `${row.namespace}/${row.name}`;
                   }}
                 />
@@ -268,6 +304,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
                   dataIndex="apiVersion"
                   title={<Translation>APIVersion</Translation>}
                 />
+                <Table.Column dataIndex="component" title={<Translation>Component</Translation>} />
                 <Table.Column
                   dataIndex="cluster"
                   title={<Translation>Cluster</Translation>}
@@ -281,18 +318,14 @@ class ApplicationMonitor extends React.Component<Props, State> {
                 />
               </Table>
             </Card>
-            <If condition={applicationStatus?.services}>
+            <If condition={componentStatus}>
               <Card
                 locale={locale.Card}
                 style={{ marginTop: '8px', marginBottom: '16px' }}
                 contentHeight="auto"
                 title={<Translation>Component Status</Translation>}
               >
-                <Table
-                  locale={locale.Table}
-                  className="customTable"
-                  dataSource={applicationStatus?.services}
-                >
+                <Table locale={locale.Table} className="customTable" dataSource={componentStatus}>
                   <Table.Column
                     align="left"
                     dataIndex="name"
