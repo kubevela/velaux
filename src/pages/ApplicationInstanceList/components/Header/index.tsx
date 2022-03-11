@@ -8,6 +8,7 @@ import {
   deleteApplicationEnvbinding,
 } from '../../../../api/application';
 import type {
+  ApplicationComponent,
   ApplicationDetail,
   ApplicationStatus,
   EnvBinding,
@@ -27,12 +28,13 @@ type Props = {
   targets?: Target[];
   applicationStatus?: ApplicationStatus;
   applicationDetail?: ApplicationDetail;
+  components?: ApplicationComponent[];
   envName: string;
   appName: string;
   envbinding?: EnvBinding;
   disableStatusShow?: boolean;
   gatewayIPs?: string[];
-  updateQuery: (targetName: string) => void;
+  updateQuery: (params: { target?: string; component?: string }) => void;
   updateEnvs: () => void;
   refresh: () => void;
   dispatch: ({}) => void;
@@ -44,6 +46,8 @@ type State = {
   refreshLoading: boolean;
   showStatus: boolean;
   visibleEnvEditPlan: boolean;
+  target?: string;
+  component?: string;
 };
 
 class Header extends Component<Props, State> {
@@ -58,6 +62,7 @@ class Header extends Component<Props, State> {
     };
   }
   componentDidMount() {}
+
   loadEnvbinding = async () => {
     const { applicationDetail } = this.props;
     if (applicationDetail) {
@@ -74,8 +79,15 @@ class Header extends Component<Props, State> {
       payload: { appName: appName },
     });
   };
-  handleChange = (value: string) => {
-    this.props.updateQuery(value);
+  handleTargetChange = (value: string) => {
+    this.setState({ target: value }, () => {
+      this.props.updateQuery({ component: this.state.component, target: this.state.target });
+    });
+  };
+  handleComponentChange = (value: string) => {
+    this.setState({ component: value }, () => {
+      this.props.updateQuery({ component: this.state.component, target: this.state.target });
+    });
   };
   recycleEnv = async () => {
     Dialog.confirm({
@@ -130,11 +142,15 @@ class Header extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { appName, envName } = this.props;
+    const { appName, envName, components } = this.props;
     const { recycleLoading, deleteLoading, refreshLoading } = this.state;
     const { targets, applicationStatus, gatewayIPs, disableStatusShow } = this.props;
-    const clusterList = (targets || []).map((item: Target) => ({
-      label: item.alias,
+    const targetOptions = (targets || []).map((item: Target) => ({
+      label: item.alias || item.name,
+      value: item.name,
+    }));
+    const componentOptions = (components || []).map((item: ApplicationComponent) => ({
+      label: item.alias || item.name,
       value: item.name,
     }));
     const getAppStatusShowType = (status: string | undefined) => {
@@ -154,17 +170,29 @@ class Header extends Component<Props, State> {
     return (
       <div>
         <Row className="boder-radius-8">
-          <Col span="6" style={{ marginBottom: '16px' }}>
+          <Col span="4" style={{ marginBottom: '16px' }}>
             <Select
               locale={locale.Select}
               mode="single"
-              onChange={this.handleChange}
-              dataSource={clusterList}
+              onChange={this.handleTargetChange}
+              dataSource={targetOptions}
+              label={i18n.t('Target')}
               placeholder={i18n.t('Target Selector').toString()}
               hasClear
             />
           </Col>
-          <Col span={8}>
+          <Col span="4" style={{ marginBottom: '16px', paddingLeft: '16px' }}>
+            <Select
+              locale={locale.Select}
+              mode="single"
+              onChange={this.handleComponentChange}
+              dataSource={componentOptions}
+              label={i18n.t('Component')}
+              placeholder={i18n.t('Component Selector').toString()}
+              hasClear
+            />
+          </Col>
+          <Col span={6}>
             <If condition={applicationStatus}>
               <Message
                 type={getAppStatusShowType(applicationStatus?.status)}

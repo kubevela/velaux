@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
 import { Card, Grid, Icon, Dialog } from '@b-design/ui';
-import type { ApplicationComponent } from '../../../../interface/application';
-import { momentDate } from '../../../../utils/common';
+import type { ApplicationComponent, Trait } from '../../../../interface/application';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import i18n from '../../../../i18n';
+import TraitIcon from '../../../../components/TraitIcon';
 
 type Props = {
   components: ApplicationComponent[];
-  editComponentstats: (item: ApplicationComponent) => void;
+  editComponent: (item: ApplicationComponent) => void;
   onDeleteComponent: (name: string) => void;
   onAddComponent: () => void;
+  changeTraitStats: (isEditTrait: boolean, traitItem: Trait, componentName: string) => void;
 };
 
 class ComponentsList extends Component<Props> {
@@ -30,18 +31,18 @@ class ComponentsList extends Component<Props> {
 
   render() {
     const { Row, Col } = Grid;
-    const { components, editComponentstats, onAddComponent } = this.props;
+    const { components, editComponent, onAddComponent } = this.props;
     return (
       <div className="components-list-warper">
         <Row wrap={true}>
           {(components || []).map((item: ApplicationComponent) => (
             <Col xl={8} m={12} s={24} key={item.type} className="padding16">
-              <Card locale={locale.Card}>
+              <Card locale={locale.Card} contentHeight="auto">
                 <div className="components-list-nav">
                   <div
                     className="components-list-title"
                     onClick={() => {
-                      editComponentstats(item);
+                      editComponent(item);
                     }}
                   >
                     {item.alias ? `${item.alias}(${item.name})` : item.name}
@@ -60,7 +61,23 @@ class ComponentsList extends Component<Props> {
                   </If>
                 </div>
                 <div className="components-list-content">{item.description}</div>
-                <div className="components-list-date">{momentDate(item.createTime)}</div>
+                <Row wrap={true}>
+                  {item.traits?.map((trait) => {
+                    const label = trait.alias ? trait.alias + '(' + trait.type + ')' : trait.type;
+                    return (
+                      <Col xs={12} l={8} key={trait.type}>
+                        <div
+                          onClick={() => this.props.changeTraitStats(true, trait, item.name)}
+                          className="trait-icon"
+                          title={trait.description || label}
+                        >
+                          <TraitIcon name={trait.type} />
+                          <div>{label}</div>
+                        </div>
+                      </Col>
+                    );
+                  })}
+                </Row>
               </Card>
             </Col>
           ))}

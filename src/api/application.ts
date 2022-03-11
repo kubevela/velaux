@@ -121,7 +121,7 @@ export function createApplicationTemplate(params: any) {
   return post(gurl, params).then((res) => res);
 }
 
-export function getComponentdefinitions() {
+export function getComponentDefinitions() {
   const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}`;
   return get(gurl, { params: { type: 'component' } }).then((res) => res);
 }
@@ -170,7 +170,7 @@ export function detailTraitDefinition(params: { name: string }) {
   return get(gurl, { params: { type: 'trait' } }).then((res) => res);
 }
 
-export function getAppliationComponent(query: TraitQuery) {
+export function getApplicationComponent(query: TraitQuery) {
   const { appName, componentName } = query;
   const gurl = isMock
     ? `${getTrait_mock}`
@@ -262,7 +262,7 @@ export function terminateApplicationWorkflowRecord(params: {
   ).then((res) => res);
 }
 
-export function getAppliationTriggers(params: { appName: string }) {
+export function getApplicationTriggers(params: { appName: string }) {
   const { appName } = params;
   const gurl = isMock ? `${getTrait_mock}` : `${application}/${appName}/triggers`;
   return get(gurl, {}).then((res) => res);

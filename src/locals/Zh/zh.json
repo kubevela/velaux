@@ -426,5 +426,11 @@
   "Container": "容器",
   "Logs": "日志",
   "Select Pod": "查询实例",
-  "Select Container": "查询容器"
+  "Select Container": "查询容器",
+  "Component Config": "组件配置",
+  "New Component": "新增组件",
+  "Components": "组件",
+  "Component": "组件",
+  "Component Selector": "根据组件筛选",
+  "Component Basic Info": "组件基础信息"
 }

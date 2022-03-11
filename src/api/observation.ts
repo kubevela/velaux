@@ -3,14 +3,18 @@ import { get } from './request';
 export function listApplicationPods(params: {
   appNs: string;
   appName: string;
-  name: string;
+  componentName?: string;
   cluster?: string;
-  clusterNs: string;
+  clusterNs?: string;
 }) {
-  let urlParams = `component-pod-view{appNs=${params.appNs},appName=${params.appName},name=${params.name}}.status`;
+  let velaQLParams = `appNs=${params.appNs}, appName=${params.appName}`;
   if (params.cluster) {
-    urlParams = `component-pod-view{appNs=${params.appNs},appName=${params.appName},name=${params.name},cluster=${params.cluster},clusterNs=${params.clusterNs}}.status`;
+    velaQLParams = `cluster=${params.cluster}, clusterNs=${params.clusterNs}, ` + velaQLParams;
   }
+  if (params.componentName) {
+    velaQLParams = `name=${params.componentName}, ` + velaQLParams;
+  }
+  const urlParams = `component-pod-view{${velaQLParams}}.status`;
   return get('/api/v1/query', {
     params: {
       velaql: urlParams,
@@ -98,13 +102,40 @@ export function listContainerLog(params: {
 export function listApplicationServiceEndpoints(params: {
   appNs: string;
   appName: string;
+  componentName?: string;
   cluster?: string;
   clusterNs?: string;
 }) {
-  let urlParams = `service-endpoints-view{appNs=${params.appNs}, appName=${params.appName}}.status`;
+  let velaQLParams = `appNs=${params.appNs}, appName=${params.appName}`;
   if (params.cluster) {
-    urlParams = `service-endpoints-view{appNs=${params.appNs}, appName=${params.appName}, cluster=${params.cluster},clusterNs=${params.clusterNs}}.status`;
+    velaQLParams = `cluster=${params.cluster}, clusterNs=${params.clusterNs}, ` + velaQLParams;
   }
+  if (params.componentName) {
+    velaQLParams = `name=${params.componentName}, ` + velaQLParams;
+  }
+  const urlParams = `service-endpoints-view{${velaQLParams}}.status`;
+  return get('/api/v1/query', {
+    params: {
+      velaql: urlParams,
+    },
+  });
+}
+
+export function listApplicationServiceAppliedResources(params: {
+  appNs: string;
+  appName: string;
+  componentName?: string;
+  cluster?: string;
+  clusterNs?: string;
+}) {
+  let velaQLParams = `appNs=${params.appNs}, appName=${params.appName}`;
+  if (params.cluster) {
+    velaQLParams = `cluster=${params.cluster}, clusterNs=${params.clusterNs}, ` + velaQLParams;
+  }
+  if (params.componentName) {
+    velaQLParams = `name=${params.componentName}, ` + velaQLParams;
+  }
+  const urlParams = `service-applied-resources-view{${velaQLParams}}.status`;
   return get('/api/v1/query', {
     params: {
       velaql: urlParams,

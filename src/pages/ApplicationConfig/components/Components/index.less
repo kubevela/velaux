@@ -3,6 +3,7 @@
     display: flex;
     justify-content: space-between;
     .components-list-title {
+      height: 24px;
       color: #1b58f4;
       font-size: 16px;
       cursor: pointer;
@@ -16,12 +17,29 @@
   }
   .components-list-content {
     display: flex;
-    min-height: 78px;
+    min-height: 48px;
     padding: 16px 0;
     color: #a6a6a6;
   }
   .components-list-date {
     display: flex;
     justify-content: flex-end;
+    height: 37px;
+    line-height: 37px;
+  }
+  .trait-icon {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    margin: 4px;
+    padding: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+    svg {
+      width: 30px;
+      height: 30px;
+      margin-right: 4px;
+    }
   }
 }

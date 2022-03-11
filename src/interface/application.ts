@@ -122,18 +122,20 @@ export interface ApplicationStatus {
     name: string;
     apiVersion: string;
   }[];
-  services?: {
-    name: string;
-    env?: string;
+  services?: ComponentStatus[];
+  appliedResources: Resource[];
+}
+
+export interface ComponentStatus {
+  name: string;
+  env?: string;
+  healthy: string;
+  message: string;
+  traits: {
+    type: string;
     healthy: string;
     message: string;
-    traits: {
-      type: string;
-      healthy: string;
-      message: string;
-    }[];
   }[];
-  appliedResources: Resource[];
 }
 
 export interface Resource {
@@ -143,6 +145,17 @@ export interface Resource {
   name: string;
   namespace: string;
 }
+
+export interface AppliedResource {
+  apiVersion: string;
+  cluster: string;
+  kind: string;
+  name: string;
+  namespace: string;
+  component: string;
+  trait?: string;
+}
+
 export interface Condition {
   type: string;
   status: 'True' | 'False';
@@ -175,7 +188,6 @@ export interface WorkflowStepStatus {
 export interface Trait {
   alias?: string;
   description?: string;
-  name?: string;
   properties?: any;
   type: string;
   createTime?: string;
