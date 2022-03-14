@@ -4,7 +4,6 @@ import './index.less';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
 import {
-  getTraitDefinitions,
   getApplicationComponent,
   deleteTrait,
   getApplicationTriggers,
@@ -59,7 +58,6 @@ type State = {
   componentName: string;
   visibleTrait: boolean;
   isEditTrait: boolean;
-  traitDefinitions: [];
   mainComponent?: ApplicationComponent;
   traitItem: Trait;
   triggers: Trigger[];
@@ -85,7 +83,6 @@ class ApplicationConfig extends Component<Props, State> {
       componentName: '',
       isEditTrait: false,
       visibleTrait: false,
-      traitDefinitions: [],
       traitItem: { type: '' },
       triggers: [],
       visibleTrigger: false,
@@ -106,7 +103,6 @@ class ApplicationConfig extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.onGetTraitDefinitions();
     const { components, componentsApp } = this.props;
     const { appName } = this.state;
     if (components && components.length > 0 && componentsApp == appName) {
@@ -158,16 +154,6 @@ class ApplicationConfig extends Component<Props, State> {
       }
     });
   }
-
-  onGetTraitDefinitions = async () => {
-    getTraitDefinitions().then((res: any) => {
-      if (res) {
-        this.setState({
-          traitDefinitions: res && res.definitions,
-        });
-      }
-    });
-  };
 
   onDeleteTrait = async (traitType: string) => {
     const { appName, componentName, isEditComponent, temporaryTraitList } = this.state;
@@ -424,7 +410,6 @@ class ApplicationConfig extends Component<Props, State> {
     const {
       visibleTrait,
       isEditTrait,
-      traitDefinitions,
       appName = '',
       componentName = '',
       mainComponent,
@@ -574,9 +559,9 @@ class ApplicationConfig extends Component<Props, State> {
             isEditComponent={isEditComponent}
             appName={appName}
             componentName={componentName}
+            component={editComponent}
             isEditTrait={isEditTrait}
             traitItem={traitItem}
-            traitDefinitions={traitDefinitions}
             temporaryTraitList={temporaryTraitList}
             onClose={this.onClose}
             onOK={this.onOk}

@@ -206,6 +206,15 @@ export interface ApplicationComponent {
   updateTime?: string;
   description?: string;
   main: boolean;
+  definition: {
+    workload: {
+      definition?: {
+        apiVersion: string;
+        kind: string;
+      };
+      type: string;
+    };
+  };
 }
 
 export interface Revisions {

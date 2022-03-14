@@ -4,8 +4,17 @@ import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
-import { detailTraitDefinition, updateTrait, createTrait } from '../../../../api/application';
-import type { DefinitionDetail, Trait } from '../../../../interface/application';
+import {
+  detailTraitDefinition,
+  updateTrait,
+  createTrait,
+  getTraitDefinitions,
+} from '../../../../api/application';
+import type {
+  ApplicationComponent,
+  DefinitionDetail,
+  Trait,
+} from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
@@ -17,9 +26,9 @@ type Props = {
   isEditTrait: boolean;
   visible: boolean;
   traitItem?: Trait;
-  traitDefinitions?: [];
   appName?: string;
   componentName?: string;
+  component?: ApplicationComponent;
   temporaryTraitList: Trait[];
   createTemporaryTrait: (trait: Trait) => void;
   upDateTemporaryTrait: (trait: Trait) => void;
@@ -32,6 +41,7 @@ type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
   isLoading: boolean;
+  traitDefinitions: [];
 };
 
 class TraitDialog extends React.Component<Props, State> {
@@ -42,12 +52,14 @@ class TraitDialog extends React.Component<Props, State> {
     this.state = {
       definitionLoading: false,
       isLoading: false,
+      traitDefinitions: [],
     };
     this.field = new Field(this);
     this.uiSchemaRef = React.createRef();
   }
 
   componentDidMount() {
+    this.onGetTraitDefinitions();
     const { isEditTrait, traitItem } = this.props;
     if (isEditTrait && traitItem) {
       const { alias, type, description, properties } = traitItem;
@@ -62,6 +74,21 @@ class TraitDialog extends React.Component<Props, State> {
       }
     }
   }
+
+  onGetTraitDefinitions = async () => {
+    const { component } = this.props;
+    if (component?.definition) {
+      getTraitDefinitions({ appliedWorkload: component?.definition.workload.type }).then(
+        (res: any) => {
+          if (res) {
+            this.setState({
+              traitDefinitions: res && res.definitions,
+            });
+          }
+        },
+      );
+    }
+  };
 
   onClose = () => {
     this.props.onClose();
@@ -127,7 +154,7 @@ class TraitDialog extends React.Component<Props, State> {
   };
 
   transTraitDefinitions() {
-    const { traitDefinitions } = this.props;
+    const { traitDefinitions } = this.state;
     return (traitDefinitions || []).map((item: { name: string }) => ({
       label: item.name,
       value: item.name,
