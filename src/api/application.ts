@@ -158,9 +158,11 @@ export function recycleApplicationEnvbinding(params: { appName: string; envName:
   );
 }
 
-export function getTraitDefinitions() {
+export function getTraitDefinitions(params: { appliedWorkload: string }) {
   const gurl = isMock ? `${getTraitDefinitions_mock}` : `${componentdefinition}`;
-  return get(gurl, { params: { type: 'trait' } }).then((res) => res);
+  return get(gurl, { params: { type: 'trait', appliedWorkload: params.appliedWorkload } }).then(
+    (res) => res,
+  );
 }
 
 export function detailTraitDefinition(params: { name: string }) {
