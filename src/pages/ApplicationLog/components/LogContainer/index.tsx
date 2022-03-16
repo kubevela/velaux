@@ -115,7 +115,7 @@ class ContainerLog extends Component<Props, State> {
             this.timeoutID = setTimeout(() => this.loadContainerLog(), refreshInterval);
           }
         })
-        .catch(() => { })
+        .catch(() => {})
         .finally(() => {
           this.setState({ loading: false });
         });

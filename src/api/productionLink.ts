@@ -9,3 +9,6 @@ export const project = `/api/v1/projects`;
 export const targetURL = `/api/v1/targets`;
 export const envURL = `/api/v1/envs`;
 export const payloadTypeURL = `/api/v1/payload_types`;
+export const users = `/api/v1/users`;
+export const integrations = `/api/v1/integrations`;
+export const projects = `/api/v1/projects`;

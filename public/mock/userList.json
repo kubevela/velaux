@@ -1,0 +1,21 @@
+{
+    "data":{
+        "list": [
+            {
+                "name": "a1",
+                "alias": "alias",
+                "email": "zhangsan@126.com",
+                "createTime": "2002-3-31 14:00:08",
+                "lastLoginTime": "2002-3-31 14:00:08"
+            },
+            {
+                "name": "b1",
+                "alias": "alias2",
+                "email": "zhangsan@126.com",
+                "createTime": "2002-3-31 14:00:08",
+                "lastLoginTime": "2002-3-31 14:00:08"
+            }
+        ],
+        "total":2
+    }
+}

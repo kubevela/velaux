@@ -13,6 +13,7 @@ import ApplicationStatus from '../../pages/ApplicationStatus';
 import ApplicationLayout from '../Application';
 import EnvPage from '../../pages/EnvPage';
 import ApplicationLog from '../../pages/ApplicationLog';
+import Users from '../../pages/Users';
 
 export default function Content() {
   return (
@@ -120,6 +121,7 @@ export default function Content() {
       <Route path="/clusters" component={Clusters} />
       <Route path="/addons/:addonName" component={Addons} />
       <Route path="/addons" component={Addons} />
+      <Route path="/users" component={Users} />
       <Route path="/notFound" component={NotFound} />
       <Redirect to="/notFound" />
     </Switch>

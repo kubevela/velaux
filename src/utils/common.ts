@@ -51,6 +51,15 @@ export function isEnvPath(pathname: string) {
   return (pathname || '').indexOf('/envs') !== -1;
 }
 
+export function isUsersPath(pathname: string) {
+  return (pathname || '').indexOf('/users') !== -1;
+}
+export function isIntegrationPath(pathname: string) {
+  return (pathname || '').indexOf('/integrations') !== -1;
+}
+export function isProjectPath(pathname: string) {
+  return (pathname || '').indexOf('/projects') !== -1;
+}
 export const APPLICATION_PATH = 'applications';
 export const CLUSTERS_PATH = 'clusters';
 export const ADDONS_PATH = 'addons';
@@ -144,3 +153,7 @@ export const replaceUrl = function (text: string) {
   });
   return str;
 };
+
+export const checkUserName = /^[a-zA-Z][a-zA-Z0-9]{3,15}$/;
+export const checkUserPassWord = /^[a-zA-Z0-9]{4,10}$/;
+export const checkUserEmail = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;

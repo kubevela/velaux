@@ -4,6 +4,9 @@ import {
   isAddonsPath,
   isTargetURL,
   isEnvPath,
+  isUsersPath,
+  isIntegrationPath,
+  isProjectPath,
 } from '../../utils/common';
 export function getLeftSider(pathname) {
   const isApplication = isApplicationPath(pathname);
@@ -11,6 +14,9 @@ export function getLeftSider(pathname) {
   const isAddons = isAddonsPath(pathname);
   const isTarget = isTargetURL(pathname);
   const isEnv = isEnvPath(pathname);
+  const isUser = isUsersPath(pathname);
+  const isIntegration = isIntegrationPath(pathname);
+  const isProject = isProjectPath(pathname);
   return [
     {
       navName: 'Continuous Delivery',
@@ -54,6 +60,29 @@ export function getLeftSider(pathname) {
           link: '/addons',
           iconType: 'database-set',
           navName: 'Addons',
+        },
+      ],
+    },
+    {
+      navName: 'Settings',
+      children: [
+        {
+          className: isUser,
+          link: '/users',
+          iconType: 'set-o',
+          navName: 'Users',
+        },
+        {
+          className: isIntegration,
+          link: '/integrations',
+          iconType: 'set-o',
+          navName: 'Integrations',
+        },
+        {
+          className: isProject,
+          link: '/projects',
+          iconType: 'set-o',
+          navName: 'Projects',
         },
       ],
     },

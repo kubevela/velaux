@@ -39,3 +39,6 @@ export const listWorkFlowDetailsDefintion_mock = '/mock/listWorkFlowDetailsDefin
 
 export const updateApplicationEnv_mock = `/mock/api/v1/applications/name/envs/envName`;
 export const getPayloadType_mock = `/mock/getPayloadTypes.json`;
+export const getUserList_mock = `/mock/userList.json`;
+export const getIntegration_mock = `/mock/integration.json`;
+export const getProjects_mock = `/mock/projects.json`;
