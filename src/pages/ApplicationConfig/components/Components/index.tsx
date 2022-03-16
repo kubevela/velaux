@@ -65,7 +65,7 @@ class ComponentsList extends Component<Props> {
                   {item.traits?.map((trait) => {
                     const label = trait.alias ? trait.alias + '(' + trait.type + ')' : trait.type;
                     return (
-                      <Col xs={12} l={8} key={trait.type}>
+                      <Col xs={24} l={12} key={trait.type}>
                         <div
                           onClick={() => this.props.changeTraitStats(true, trait, item.name)}
                           className="trait-icon"

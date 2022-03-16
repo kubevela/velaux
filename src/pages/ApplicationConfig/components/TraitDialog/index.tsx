@@ -12,6 +12,7 @@ import {
 } from '../../../../api/application';
 import type {
   ApplicationComponent,
+  DefinitionBase,
   DefinitionDetail,
   Trait,
 } from '../../../../interface/application';
@@ -41,7 +42,8 @@ type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
   isLoading: boolean;
-  traitDefinitions: [];
+  traitDefinitions?: DefinitionBase[];
+  podDisruptive?: any;
 };
 
 class TraitDialog extends React.Component<Props, State> {
@@ -79,10 +81,17 @@ class TraitDialog extends React.Component<Props, State> {
     const { component } = this.props;
     if (component?.definition) {
       getTraitDefinitions({ appliedWorkload: component?.definition.workload.type }).then(
-        (res: any) => {
+        (res: { definitions?: DefinitionBase[] }) => {
           if (res) {
+            const podDisruptive: any = {};
+            res.definitions?.map((def) => {
+              if (def.trait?.podDisruptive) {
+                podDisruptive[def.name] = true;
+              }
+            });
             this.setState({
               traitDefinitions: res && res.definitions,
+              podDisruptive: podDisruptive,
             });
           }
         },
@@ -219,10 +228,12 @@ class TraitDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
     const { onClose, isEditTrait } = this.props;
-    const { definitionDetail, definitionLoading } = this.state;
+    const { definitionDetail, definitionLoading, podDisruptive } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
+    const traitType: string = this.field.getValue('type');
+
     return (
       <DrawerWithFooter
         title={this.showTraitTitle()}
@@ -232,6 +243,18 @@ class TraitDialog extends React.Component<Props, State> {
         extButtons={this.extButtonList()}
       >
         <Form field={this.field}>
+          <If condition={podDisruptive && traitType && podDisruptive[traitType]}>
+            <Row>
+              <Col span={24}>
+                <Message
+                  type="warning"
+                  title={i18n.t(
+                    'This trait properties change will cause pod restart after the application deploy',
+                  )}
+                />
+              </Col>
+            </Row>
+          </If>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
               <FormItem
