@@ -234,7 +234,6 @@ class Users extends Component<Props, State> {
               subTitle="Provides basic management capabilities for local users, but SSO authentication is strongly recommended."
               extButtons={[
                 <Button type="primary" onClick={this.handleClickCreate}>
-                  {' '}
                   <Translation>New User</Translation>
                 </Button>,
               ]}
