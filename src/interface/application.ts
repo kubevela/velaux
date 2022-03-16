@@ -303,3 +303,15 @@ export interface ApplicationComponentConfig {
   properties: any;
   traits?: Trait[];
 }
+
+export interface DefinitionBase {
+  name: string;
+  description?: string;
+  icon?: string;
+  trait?: TraitDefinitionSpec;
+}
+
+export interface TraitDefinitionSpec {
+  podDisruptive?: boolean;
+  appliesToWorkloads?: string[];
+}

@@ -432,5 +432,6 @@
   "Components": "组件",
   "Component": "组件",
   "Component Selector": "根据组件筛选",
-  "Component Basic Info": "组件基础信息"
+  "Component Basic Info": "组件基础信息",
+  "This trait properties change will cause pod restart after the application deploy": "该类型运维特征参数变更将导致应用重新部署时重启 Pod 实例。"
 }
