@@ -85,7 +85,6 @@ class Group extends React.Component<Props, State> {
       disableAddon = false,
     } = this.props;
     const { closed, enable, checked } = this.state;
-    console.log(title, closed);
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
         <div className="group-container">

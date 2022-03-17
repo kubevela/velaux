@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Form, Input, Select, Field, Switch, Grid, Divider } from '@b-design/ui';
 import Translation from '../Translation';
-import type { UIParam, UIParamValidate } from '../../interface/application';
+import type { ParamCondition, UIParam, UIParamValidate } from '../../interface/application';
 import Group from '../../extends/Group';
 import ImageInput from '../../extends/ImageInput';
 import Strings from '../../extends/Strings';
@@ -18,8 +18,12 @@ import './index.less';
 import { checkImageName, replaceUrl } from '../../utils/common';
 import locale from '../../utils/locale';
 import HelmValues from '../../extends/HelmValues';
+import HelmChartSelect from '../../extends/HelmChartSelect';
+import HelmChartVersionSelect from '../../extends/HelmChartVersionSelect';
 import { If } from 'tsx-control-statements/components';
 import i18n from 'i18next';
+import { getValue } from '../../utils/utils';
+import HelmRepoSelect from '../../extends/HelmRepoSelect';
 
 const { Col, Row } = Grid;
 
@@ -138,6 +142,52 @@ class UISchema extends Component<Props, State> {
     });
   };
 
+  conditionAllowRender = (conditions?: ParamCondition[]) => {
+    if (!conditions || conditions.length == 0) {
+      return true;
+    }
+    const action = {
+      disable: 0,
+      enable: 0,
+    };
+    let enableConditionCount = 0;
+    conditions.map((condition) => {
+      const values = this.form.getValues();
+      const value = getValue(condition.jsonKey, values);
+      // the enable conditions count
+      if (condition.action == 'enable' || !condition.action) {
+        enableConditionCount += 1;
+      }
+      if (value == undefined) {
+        return;
+      }
+      switch (condition.op) {
+        case 'in':
+          if (Array.isArray(condition.value) && condition.value.includes(value)) {
+            action[condition.action || 'enable'] += 1;
+          }
+          break;
+        case '!=':
+          if (condition.value != value) {
+            action[condition.action || 'enable'] += 1;
+          }
+          break;
+        default:
+          if (condition.value == value) {
+            action[condition.action || 'enable'] += 1;
+          }
+      }
+    });
+    if (action.disable > 0) {
+      return false;
+    }
+    if (action.enable > 0 && action.enable == enableConditionCount) {
+      return true;
+    }
+    // all condition can not matching or not all enable conditions are matched
+    return false;
+  };
+
   render() {
     const { advanced } = this.state;
     const { uiSchema, inline, maxColSpan, disableRenderRow, value } = this.props;
@@ -152,6 +202,10 @@ class UISchema extends Component<Props, State> {
       const init = this.form.init;
       const required = param.validate && param.validate.required;
       if (param.disable) {
+        return;
+      }
+      // Determine whether to continue rendering according to conditions.
+      if (!this.conditionAllowRender(param.conditions)) {
         return;
       }
 
@@ -336,6 +390,77 @@ class UISchema extends Component<Props, State> {
                 />
               </Form.Item>
             );
+          case 'HelmChartSelect':
+            return (
+              <Form.Item
+                required={required}
+                label={label}
+                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
+                key={param.jsonKey}
+              >
+                <HelmChartSelect
+                  disabled={disableEdit}
+                  helm={this.props.value}
+                  {...init(param.jsonKey, {
+                    initValue: initValue,
+                    rules: [
+                      {
+                        required: true,
+                        pattern: checkImageName,
+                        message: 'Please select a chart',
+                      },
+                    ],
+                  })}
+                />
+              </Form.Item>
+            );
+          case 'HelmChartVersionSelect':
+            return (
+              <Form.Item
+                required={required}
+                label={label}
+                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
+                key={param.jsonKey}
+              >
+                <HelmChartVersionSelect
+                  disabled={disableEdit}
+                  helm={this.props.value}
+                  {...init(param.jsonKey, {
+                    initValue: initValue,
+                    rules: [
+                      {
+                        required: true,
+                        pattern: checkImageName,
+                        message: 'Please select a chart version',
+                      },
+                    ],
+                  })}
+                />
+              </Form.Item>
+            );
+          case 'HelmRepoSelect':
+            return (
+              <Form.Item
+                required={required}
+                label={label}
+                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
+                key={param.jsonKey}
+              >
+                <HelmRepoSelect
+                  disabled={disableEdit}
+                  {...init(param.jsonKey, {
+                    initValue: initValue,
+                    rules: [
+                      {
+                        required: true,
+                        pattern: checkImageName,
+                        message: 'Please select or input a helm repo',
+                      },
+                    ],
+                  })}
+                />
+              </Form.Item>
+            );
           case 'KV':
             const children = (
               <KV
@@ -359,6 +484,7 @@ class UISchema extends Component<Props, State> {
                   rules: convertRule(param.validate),
                 })}
                 key={param.jsonKey}
+                helm={this.props.value}
                 additional={param.additional}
                 additionalParameter={param.additionalParameter}
               />,
