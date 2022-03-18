@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import type { UIParam } from '../../interface/application';
 import KV from '../KV';
+import { getChartValues } from '../../api/repository';
+import { Loading } from '@b-design/ui';
 
 type Props = {
   value?: any;
@@ -12,6 +14,12 @@ type Props = {
   subParameters?: UIParam[];
   id: string;
   disabled: boolean;
+  helm?: {
+    url: string;
+    repoType: string;
+    chart: string;
+    version: string;
+  };
 };
 
 function setValues(target: any, value: any, key: string, keys: string[]) {
@@ -43,8 +51,36 @@ function getValues(target: any, key: string, newValues: any) {
   }
 }
 
-class HelmValues extends Component<Props> {
-  componentDidMount() {}
+type State = {
+  values?: any;
+  helm?: {
+    url: string;
+    chart: string;
+    version: string;
+  };
+  loading: boolean;
+};
+
+class HelmValues extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      loading: true,
+    };
+  }
+
+  componentDidMount() {
+    this.loadChartValues();
+  }
+
+  loadChartValues = () => {
+    const { helm } = this.props;
+    if (helm?.chart && helm.version && helm.url) {
+      getChartValues(helm).then((re) => {
+        this.setState({ values: re.BusinessCode ? undefined : re, helm: helm, loading: false });
+      });
+    }
+  };
 
   onChange = (values: any) => {
     let helmValues: any = {};
@@ -63,17 +99,32 @@ class HelmValues extends Component<Props> {
     return newValues;
   };
 
+  renderHelmKey = (params?: { url: string; chart: string; version: string }) => {
+    if (!params) {
+      return '';
+    }
+    return params.url + params.chart + params.version;
+  };
+
   render() {
+    const { helm } = this.props;
+    const { values, loading, helm: stateHelm } = this.state;
+    if (this.renderHelmKey(helm) != this.renderHelmKey(stateHelm)) {
+      this.loadChartValues();
+    }
     return (
-      <KV
-        disabled={this.props.disabled}
-        onChange={this.onChange}
-        value={this.renderValue()}
-        additional={this.props.additional}
-        additionalParameter={this.props.additionalParameter}
-        subParameters={this.props.subParameters}
-        id={this.props.id}
-      />
+      <Loading visible={loading} style={{ width: '100%' }}>
+        <KV
+          disabled={this.props.disabled}
+          onChange={this.onChange}
+          value={this.renderValue()}
+          keyOptions={values}
+          additional={this.props.additional}
+          additionalParameter={this.props.additionalParameter}
+          subParameters={this.props.subParameters}
+          id={this.props.id}
+        />
+      </Loading>
     );
   }
 }

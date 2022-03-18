@@ -6,6 +6,7 @@ import locale from '../../../../utils/locale';
 import type { Env, NameAlias } from '../../../../interface/env';
 import { deleteEnv } from '../../../../api/env';
 import { Link } from 'dva/router';
+import { If } from 'tsx-control-statements/components';
 const { Group: TagGroup } = Tag;
 
 type Props = {
@@ -106,32 +107,34 @@ class TableList extends Component<Props> {
         cell: (v: string, i: number, record: Env) => {
           return (
             <div>
-              <a
-                onClick={() => {
-                  Dialog.confirm({
-                    type: 'confirm',
-                    content: (
-                      <Translation>
-                        Unrecoverable after deletion, are you sure to delete it?
-                      </Translation>
-                    ),
-                    onOk: () => {
-                      this.onDelete(record);
-                    },
-                    locale: locale.Dialog,
-                  });
-                }}
-              >
-                <Translation>Remove</Translation>
-              </a>
-              <a
-                className="margin-left-10"
-                onClick={() => {
-                  this.onEdit(record);
-                }}
-              >
-                <Translation>Edit</Translation>
-              </a>
+              <If condition={record.targets?.length}>
+                <a
+                  onClick={() => {
+                    Dialog.confirm({
+                      type: 'confirm',
+                      content: (
+                        <Translation>
+                          Unrecoverable after deletion, are you sure to delete it?
+                        </Translation>
+                      ),
+                      onOk: () => {
+                        this.onDelete(record);
+                      },
+                      locale: locale.Dialog,
+                    });
+                  }}
+                >
+                  <Translation>Remove</Translation>
+                </a>
+                <a
+                  className="margin-left-10"
+                  onClick={() => {
+                    this.onEdit(record);
+                  }}
+                >
+                  <Translation>Edit</Translation>
+                </a>
+              </If>
             </div>
           );
         },

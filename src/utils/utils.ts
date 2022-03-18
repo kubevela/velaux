@@ -116,3 +116,15 @@ export function getLink(endpointObj: Endpoint) {
   }
   return protocol + '://' + host + port + path;
 }
+
+export function getValue(key: string, value: any): any {
+  if (key.indexOf('.') > -1) {
+    const currentKey: string = key.substring(0, key.indexOf('.'));
+    const nextKey: string = key.substring(key.indexOf('.') + 1);
+    return getValue(nextKey, value[currentKey]);
+  }
+  if (!value) {
+    return null;
+  }
+  return value[key];
+}

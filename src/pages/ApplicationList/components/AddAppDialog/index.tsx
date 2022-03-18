@@ -41,6 +41,7 @@ type State = {
   envs?: Env[];
   project?: string;
   visibleEnvDialog: boolean;
+  createLoading: boolean;
 };
 
 type Callback = (envName: string) => void;
@@ -63,6 +64,7 @@ class AppDialog extends React.Component<Props, State> {
       dialogStats: 'isBasic',
       envs: [],
       visibleEnvDialog: false,
+      createLoading: false,
     };
     this.field = new Field(this, {
       onChange: (name: string, value: string) => {
@@ -131,11 +133,13 @@ class AppDialog extends React.Component<Props, State> {
           properties: JSON.stringify(properties),
         },
       };
+      this.setState({ createLoading: true });
       createApplication(params).then((res) => {
         if (res) {
           Message.success(<Translation>create application success</Translation>);
           this.props.onOK(name);
         }
+        this.setState({ createLoading: false });
       });
     });
   };
@@ -252,7 +256,7 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   extButtonList = () => {
-    const { dialogStats } = this.state;
+    const { dialogStats, createLoading } = this.state;
     const { onClose } = this.props;
     if (dialogStats === 'isBasic') {
       return (
@@ -282,7 +286,7 @@ class AppDialog extends React.Component<Props, State> {
           >
             <Translation>Previous</Translation>
           </Button>
-          <Button type="primary" onClick={this.onSubmit}>
+          <Button loading={createLoading} type="primary" onClick={this.onSubmit}>
             <Translation>Create</Translation>
           </Button>
         </div>

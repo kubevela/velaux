@@ -61,11 +61,19 @@ export interface UIParam {
     colSpan: number;
   };
   disable?: boolean;
+  conditions?: ParamCondition[];
   subParameterGroupOption?: GroupOption[];
   additional?: boolean;
   additionalParameter?: UIParam;
   subParameters?: UIParam[];
   validate: UIParamValidate;
+}
+
+export interface ParamCondition {
+  jsonKey: string;
+  op?: '==' | 'in' | '!=';
+  value: any;
+  action?: 'disable' | 'enable';
 }
 
 export interface GroupOption {
@@ -314,4 +322,17 @@ export interface DefinitionBase {
 export interface TraitDefinitionSpec {
   podDisruptive?: boolean;
   appliesToWorkloads?: string[];
+}
+
+export interface ChartVersion {
+  name: string;
+  version: string;
+  description?: string;
+  apiVersion: string;
+  appVersion: string;
+  type?: string;
+  urls: string[];
+  created: string;
+  digest: string;
+  icon?: string;
 }

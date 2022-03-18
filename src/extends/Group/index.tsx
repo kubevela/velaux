@@ -58,7 +58,7 @@ class Group extends React.Component<Props, State> {
     if (findKey || alwaysShow) {
       this.setState({ enable: true, closed: false, checked: true });
     } else if (required) {
-      this.setState({ enable: true, closed: closed, checked: true });
+      this.setState({ enable: true, closed: false, checked: true });
     } else {
       this.setState({ enable: false, closed: closed, checked: false });
     }
@@ -85,7 +85,6 @@ class Group extends React.Component<Props, State> {
       disableAddon = false,
     } = this.props;
     const { closed, enable, checked } = this.state;
-    console.log(title, closed);
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
         <div className="group-container">

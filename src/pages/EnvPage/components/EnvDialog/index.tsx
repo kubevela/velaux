@@ -39,7 +39,7 @@ class EnvDialog extends React.Component<Props, State> {
     const { envItem, isEdit } = this.props;
     if (envItem && isEdit) {
       const { name, alias, description, targets, namespace, project } = envItem;
-      const targetNames = targets.map((target) => {
+      const targetNames = targets?.map((target) => {
         return target.name;
       });
 
