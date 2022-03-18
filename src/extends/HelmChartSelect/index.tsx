@@ -40,9 +40,13 @@ class HelmChartSelect extends Component<Props, State> {
   loadCharts = () => {
     const { helm } = this.props;
     if (helm?.url && (!this.state.loading || this.state.helm?.url != helm.url)) {
+      // Reset chart value
+      if (this.state.helm) {
+        this.props.onChange('');
+      }
       this.setState({ loading: true, helm: helm });
       getCharts(helm).then((re: string[]) => {
-        this.setState({ charts: re || [], loading: false, helm: helm });
+        this.setState({ charts: re && Array.isArray(re) ? re : [], loading: false, helm: helm });
       });
     }
   };

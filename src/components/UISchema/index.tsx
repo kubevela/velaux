@@ -448,6 +448,7 @@ class UISchema extends Component<Props, State> {
               >
                 <HelmRepoSelect
                   disabled={disableEdit}
+                  helm={this.props.value}
                   {...init(param.jsonKey, {
                     initValue: initValue,
                     rules: [

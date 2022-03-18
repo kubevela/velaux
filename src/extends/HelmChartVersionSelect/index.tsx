@@ -46,13 +46,16 @@ class HelmChartVersionSelect extends Component<Props, State> {
       helm?.url &&
       helm.chart &&
       !this.state.loading &&
-      helm.url == this.state.helm?.url &&
-      helm.chart == this.state.helm.chart
+      (helm.url != this.state.helm?.url || helm.chart != this.state.helm.chart)
     ) {
       this.setState({ loading: true, helm: helm });
+      // Reset version value
+      if (this.state.helm) {
+        this.props.onChange('');
+      }
       getChartVersions(helm).then((re: { versions: ChartVersion[] }) => {
         if (re) {
-          this.setState({ versions: re.versions, loading: false, helm: helm });
+          this.setState({ versions: re.versions || [], loading: false, helm: helm });
         }
       });
     }

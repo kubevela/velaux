@@ -77,7 +77,7 @@ class HelmValues extends Component<Props, State> {
     const { helm } = this.props;
     if (helm?.chart && helm.version && helm.url) {
       getChartValues(helm).then((re) => {
-        this.setState({ values: re, helm: helm, loading: false });
+        this.setState({ values: re.BusinessCode ? undefined : re, helm: helm, loading: false });
       });
     }
   };
@@ -99,10 +99,17 @@ class HelmValues extends Component<Props, State> {
     return newValues;
   };
 
+  renderHelmKey = (params?: { url: string; chart: string; version: string }) => {
+    if (!params) {
+      return '';
+    }
+    return params.url + params.chart + params.version;
+  };
+
   render() {
     const { helm } = this.props;
     const { values, loading, helm: stateHelm } = this.state;
-    if (helm != stateHelm) {
+    if (this.renderHelmKey(helm) != this.renderHelmKey(stateHelm)) {
       this.loadChartValues();
     }
     return (

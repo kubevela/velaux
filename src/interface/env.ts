@@ -11,7 +11,7 @@ export interface Env {
   alias?: string;
   description?: string;
   namespace: string;
-  targets: NameAlias[];
+  targets?: NameAlias[];
   project: NameAlias;
   createTime?: string;
   updateTime?: string;

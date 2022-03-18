@@ -8,6 +8,7 @@ type Props = {
   onChange: (value: any) => void;
   id: string;
   disabled: boolean;
+  helm?: { repoType: string };
 };
 
 type State = {
@@ -21,14 +22,21 @@ class HelmRepoSelect extends Component<Props, State> {
     super(props);
     this.state = {
       loading: false,
-      repos: [
-        'https://charts.bitnami.com/bitnami',
-        'https://kubevelacharts.oss-cn-hangzhou.aliyuncs.com/core',
-      ],
+      repos: [],
       inputRepo: '',
     };
   }
-  componentDidMount() {}
+  componentDidMount() {
+    if (this.props.helm?.repoType == 'helm') {
+      this.onLoadRepos();
+    }
+  }
+
+  onLoadRepos = () => {
+    this.setState({
+      repos: ['https://charts.bitnami.com/bitnami', 'https://charts.kubevela.net/core'],
+    });
+  };
 
   onSearch = (value: string) => {
     this.setState({ inputRepo: value });
@@ -39,6 +47,9 @@ class HelmRepoSelect extends Component<Props, State> {
     const dataSource = Array.from(repos);
     if (inputRepo) {
       dataSource.unshift(inputRepo);
+    }
+    if (this.props.helm?.repoType == 'helm' && dataSource.length == 0) {
+      this.onLoadRepos();
     }
     return (
       <Loading visible={loading} style={{ width: '100%' }}>
