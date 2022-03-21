@@ -64,7 +64,7 @@ type State = {
   visibleTrigger: boolean;
   createTriggerInfo: Trigger;
   showEditApplication: boolean;
-  editItem: ApplicationBase;
+  editItem?: ApplicationBase;
   visibleComponent: boolean;
   temporaryTraitList: Trait[];
   isEditComponent: boolean;
@@ -88,13 +88,6 @@ class ApplicationConfig extends Component<Props, State> {
       visibleTrigger: false,
       createTriggerInfo: { name: '', workflowName: '', type: 'webhook', token: '' },
       showEditApplication: false,
-      editItem: {
-        name: '',
-        alias: '',
-        icon: '',
-        description: '',
-        createTime: '',
-      },
       visibleComponent: false,
       temporaryTraitList: [],
       isEditComponent: false,
@@ -496,20 +489,25 @@ class ApplicationConfig extends Component<Props, State> {
                     <Translation>Components</Translation>
                   </span>
                 }
-                actions={[
-                  <a
-                    key={'add'}
-                    onClick={this.onAddComponent}
-                    className="font-size-14 font-weight-400"
-                  >
-                    <Translation>New Component</Translation>
-                  </a>,
-                ]}
+                actions={
+                  !applicationDetail?.readOnly
+                    ? [
+                        <a
+                          key={'add'}
+                          onClick={this.onAddComponent}
+                          className="font-size-14 font-weight-400"
+                        >
+                          <Translation>New Component</Translation>
+                        </a>,
+                      ]
+                    : []
+                }
               />
             </Col>
           </Row>
 
           <Components
+            application={applicationDetail}
             components={components || []}
             editComponent={(component: ApplicationComponent) => {
               this.editComponent(component);

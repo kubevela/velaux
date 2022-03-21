@@ -1,21 +1,13 @@
 import type { Target } from './target';
 import type { Project } from './project';
 
-export interface ApplicationDetail {
-  name: string;
-  alias?: string;
-  project?: Project;
-  description?: string;
-  createTime?: string;
-  updateTime?: string;
-  icon?: string;
-  labels?: {};
-  applicationType: 'cloud' | 'common';
-  policies: string[];
+export interface ApplicationDetail extends ApplicationBase {
   resourceInfo: {
     componentNum: number;
   };
-  workflowStatus?: WorkflowStatus[];
+  envBindings: string[];
+  applicationType: 'cloud' | 'common';
+  policies: string[];
 }
 
 export interface EnvBinding {
@@ -39,12 +31,13 @@ export interface WorkflowStatus {
 export interface ApplicationBase {
   name: string;
   alias: string;
-  btnContent?: string;
-  icon: string;
-  description: string;
-  createTime: string;
-  href?: string;
-  dashboardURL?: string;
+  description?: string;
+  project?: Project;
+  createTime?: string;
+  updateTime?: string;
+  readOnly?: boolean;
+  icon?: string;
+  labels?: Map<string, string>;
 }
 
 export interface DefinitionDetail {

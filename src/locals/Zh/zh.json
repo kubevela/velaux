@@ -444,5 +444,6 @@
   "ResetPassWord": "重制密码",
   "Reset User PassWord": "重制用户密码",
   "Settings": "配置",
-  "UserManager": "用户管理"
+  "UserManager": "用户管理",
+  "This application is readonly": "该应用为子读模式，不能通过 VelaUX 进行部署。"
 }

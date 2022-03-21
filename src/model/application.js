@@ -102,10 +102,9 @@ export default {
   effects: {
     *getApplicationList(action, { call, put }) {
       const result = yield call(getApplicationList, action.payload);
-      const appContent = getAppCardList(result || {});
-      yield put({ type: 'updateApplicationList', payload: appContent });
-      if (action.callback && appContent) {
-        action.callback(appContent);
+      yield put({ type: 'updateApplicationList', payload: result ? result.applications : [] });
+      if (action.callback && result) {
+        action.callback(result.applications || []);
       }
     },
 
@@ -176,24 +175,3 @@ export default {
     },
   },
 };
-
-export function getAppCardList(data) {
-  const applicationsList = data.applications;
-  if (!applicationsList) {
-    return [];
-  }
-  const appContent = [];
-  for (const item of applicationsList) {
-    const app = {
-      name: item.name,
-      alias: item.alias,
-      status: item.status,
-      icon: item.icon,
-      description: item.description,
-      createTime: item.createTime,
-      rules: item.rules,
-    };
-    appContent.push(app);
-  }
-  return appContent;
-}
