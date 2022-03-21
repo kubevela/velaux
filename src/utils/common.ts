@@ -51,6 +51,9 @@ export function isEnvPath(pathname: string) {
   return (pathname || '').indexOf('/envs') !== -1;
 }
 
+export function isUsersPath(pathname: string) {
+  return (pathname || '').indexOf('/users') !== -1;
+}
 export const APPLICATION_PATH = 'applications';
 export const CLUSTERS_PATH = 'clusters';
 export const ADDONS_PATH = 'addons';
@@ -144,3 +147,6 @@ export const replaceUrl = function (text: string) {
   });
   return str;
 };
+
+export const checkUserPassWord = /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]{8,16})$/;
+export const checkUserEmail = /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$/;

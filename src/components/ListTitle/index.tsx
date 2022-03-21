@@ -18,7 +18,7 @@ export default function (props: Props) {
   return (
     <div>
       <Row className="title-wraper">
-        <Col span="14">
+        <Col span="16">
           <span className="title font-size-20">
             <Translation>{title}</Translation>
           </span>
@@ -26,7 +26,7 @@ export default function (props: Props) {
             <Translation>{subTitle}</Translation>
           </span>
         </Col>
-        <Col span="10">
+        <Col span="8">
           <div className="float-right">
             {extButtons &&
               extButtons.map((item) => {
