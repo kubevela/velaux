@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Router, Route, Switch, Redirect } from 'dva/router';
+import { Router, Switch, Redirect } from 'dva/router';
+import AuthRoute from '../components/AuthRoute';
 
 type RouteConfig = { children: []; component: any; name: string; path: string };
 type Props = {
@@ -19,9 +20,10 @@ class RouterMap extends Component<Props, {}> {
               const children = item.children === undefined ? [] : item.children;
               const Comp = item.component;
               return (
-                <Route
+                <AuthRoute
                   key={item.name}
                   path={item.path}
+                  history={history}
                   component={() => {
                     return <Comp routes={children} history={history} />;
                   }}
