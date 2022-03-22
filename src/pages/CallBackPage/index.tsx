@@ -30,15 +30,17 @@ export default class CallBackPage extends React.Component<Props> {
   };
 
   onLogonSSO = (code: any) => {
-    loginSSO({ code })
-      .then((res: any) => {
-        if (res && res.accessToken) {
-          localStorage.setItem('token', res.accessToken);
-          localStorage.setItem('refreshToken', res.refreshToken);
-          this.props.history.push('/');
-        }
-      })
-      .catch(() => {});
+    loginSSO({ code }).then((res: any) => {
+      if (res && res.accessToken) {
+        localStorage.setItem('token', res.accessToken);
+        localStorage.setItem('refreshToken', res.refreshToken);
+        this.props.history.push('/');
+      } else if (res && res.data.BusinessCode) {
+        setTimeout(() => {
+          this.props.history.push('/login');
+        }, 3000);
+      }
+    });
   };
 
   render() {

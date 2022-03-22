@@ -50,7 +50,7 @@ axiosInstance.interceptors.response.use(
           localStorage.setItem('refreshToken', res.refreshToken);
         }
         return axiosInstance(error.config);
-      } catch (err) {
+      } catch (err: any) {
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         store.dispatch(
@@ -58,11 +58,12 @@ axiosInstance.interceptors.response.use(
             pathname: '/login',
           }),
         );
-        return Promise.reject(err);
+        return Promise.reject(err.response || err);
       }
     } else {
       localStorage.removeItem('token');
       Message.error(getMessage(status));
+      return Promise.reject(error.response || error);
     }
   },
 );
@@ -98,6 +99,7 @@ export const post = (url: string, params: any, customError?: boolean) => {
     })
     .catch((err) => {
       handleAPIError(err, params.customError || customError);
+      return err;
     });
 };
 
