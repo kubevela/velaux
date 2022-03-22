@@ -195,18 +195,35 @@ export interface Trait {
   updateTime?: string;
 }
 
-export interface ApplicationComponent {
-  alias?: string;
-  appPrimaryKey?: string;
-  createTime?: string;
-  creator?: string;
+export interface ApplicationComponentBase {
   name: string;
-  properties?: any;
-  traits?: Trait[];
-  type: string;
-  updateTime?: string;
+  alias?: string;
   description?: string;
+  labels?: Map<string, string>;
+  componentType: string;
+  creator?: string;
   main: boolean;
+  dependsOn: string[];
+  createTime?: string;
+  updateTime?: string;
+  input?: InputItem[];
+  output?: OutputItem[];
+  traits?: Trait[];
+}
+
+export interface InputItem {
+  parameterKey: string;
+  from: string;
+}
+
+export interface OutputItem {
+  valueFrom: string;
+  name: string;
+}
+
+export interface ApplicationComponent extends ApplicationComponentBase {
+  properties?: any;
+  type: string;
   definition: {
     workload: {
       definition?: {

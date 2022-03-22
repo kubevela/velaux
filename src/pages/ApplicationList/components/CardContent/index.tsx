@@ -18,7 +18,7 @@ type State = {
 };
 
 type Props = {
-  applications: ApplicationBase[];
+  applications?: ApplicationBase[];
   editAppPlan: (item: ApplicationBase) => void;
   deleteAppPlan: (name: string) => void;
   setVisible: (visible: boolean) => void;
@@ -52,7 +52,7 @@ class CardContent extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { applications, setVisible } = this.props;
-    if (applications.length === 0) {
+    if (!applications || applications.length === 0) {
       return (
         <Empty
           message={
@@ -78,8 +78,8 @@ class CardContent extends React.Component<Props, State> {
 
     return (
       <Row wrap={true}>
-        {applications.map((item: ApplicationBase, index: number) => {
-          const { name, alias, icon, description, createTime, readOnly } = item;
+        {applications?.map((item: ApplicationBase, index: number) => {
+          const { name, alias, icon, description, createTime } = item;
           const showName = alias || name;
           return (
             <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={index}>
@@ -99,65 +99,63 @@ class CardContent extends React.Component<Props, State> {
                     <Col span="20" className="font-size-16 color1A1A1A">
                       <Link to={`/applications/${name}/config`}>{showName}</Link>
                     </Col>
-                    <If condition={!readOnly}>
-                      <Col span={4} className="dot-wraper">
-                        <Dropdown
-                          trigger={
-                            <svg
-                              className={'action'}
-                              viewBox="0 0 1024 1024"
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              p-id="3448"
-                            >
-                              <path
-                                d="M365.066 197.39c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
-                                fill="#a6a6a6"
-                                p-id="3449"
-                              />
-                              <path
-                                d="M365.066 512c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
-                                fill="#a6a6a6"
-                                p-id="3450"
-                              />
-                              <path
-                                d="M365.066 826.61c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
-                                fill="#a6a6a6"
-                                p-id="3451"
-                              />
-                            </svg>
-                          }
-                        >
-                          <Menu>
-                            <Menu.Item
-                              onClick={() => {
-                                this.onEditAppPlan(item);
-                              }}
-                            >
-                              <Translation>Edit</Translation>
-                            </Menu.Item>
-                            <Menu.Item
-                              onClick={() => {
-                                Dialog.confirm({
-                                  type: 'confirm',
-                                  content: (
-                                    <Translation>
-                                      Unrecoverable after deletion, are you sure to delete it?
-                                    </Translation>
-                                  ),
-                                  onOk: () => {
-                                    this.onDeleteAppPlan(name);
-                                  },
-                                  locale: locale.Dialog,
-                                });
-                              }}
-                            >
-                              <Translation>Remove</Translation>
-                            </Menu.Item>
-                          </Menu>
-                        </Dropdown>
-                      </Col>
-                    </If>
+                    <Col span={4} className="dot-wraper">
+                      <Dropdown
+                        trigger={
+                          <svg
+                            className={'action'}
+                            viewBox="0 0 1024 1024"
+                            version="1.1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            p-id="3448"
+                          >
+                            <path
+                              d="M365.066 197.39c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
+                              fill="#a6a6a6"
+                              p-id="3449"
+                            />
+                            <path
+                              d="M365.066 512c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
+                              fill="#a6a6a6"
+                              p-id="3450"
+                            />
+                            <path
+                              d="M365.066 826.61c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
+                              fill="#a6a6a6"
+                              p-id="3451"
+                            />
+                          </svg>
+                        }
+                      >
+                        <Menu>
+                          <Menu.Item
+                            onClick={() => {
+                              this.onEditAppPlan(item);
+                            }}
+                          >
+                            <Translation>Edit</Translation>
+                          </Menu.Item>
+                          <Menu.Item
+                            onClick={() => {
+                              Dialog.confirm({
+                                type: 'confirm',
+                                content: (
+                                  <Translation>
+                                    Unrecoverable after deletion, are you sure to delete it?
+                                  </Translation>
+                                ),
+                                onOk: () => {
+                                  this.onDeleteAppPlan(name);
+                                },
+                                locale: locale.Dialog,
+                              });
+                            }}
+                          >
+                            <Translation>Remove</Translation>
+                          </Menu.Item>
+                        </Menu>
+                      </Dropdown>
+                    </Col>
                   </Row>
                   <Row className="content-main">
                     <h4 className="color595959 font-size-14" title={description}>

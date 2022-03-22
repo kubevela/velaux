@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Card, Grid, Icon, Dialog } from '@b-design/ui';
 import type {
   ApplicationBase,
-  ApplicationComponent,
+  ApplicationComponentBase,
   Trait,
 } from '../../../../interface/application';
 import './index.less';
@@ -15,8 +15,8 @@ import TraitIcon from '../../../../components/TraitIcon';
 
 type Props = {
   application?: ApplicationBase;
-  components: ApplicationComponent[];
-  editComponent: (item: ApplicationComponent) => void;
+  components: ApplicationComponentBase[];
+  editComponent: (item: ApplicationComponentBase) => void;
   onDeleteComponent: (name: string) => void;
   onAddComponent: () => void;
   changeTraitStats: (isEditTrait: boolean, traitItem: Trait, componentName: string) => void;
@@ -40,8 +40,8 @@ class ComponentsList extends Component<Props> {
     return (
       <div className="components-list-warper">
         <Row wrap={true}>
-          {(components || []).map((item: ApplicationComponent) => (
-            <Col xl={8} m={12} s={24} key={item.type} className="padding16">
+          {(components || []).map((item: ApplicationComponentBase) => (
+            <Col xl={8} m={12} s={24} key={item.name} className="padding16">
               <Card locale={locale.Card} contentHeight="auto">
                 <div className="components-list-nav">
                   <div
