@@ -433,5 +433,16 @@
   "Component": "组件",
   "Component Selector": "根据组件筛选",
   "Component Basic Info": "组件基础信息",
-  "This trait properties change will cause pod restart after the application deploy": "该类型运维特征参数变更将导致应用重新部署时重启 Pod 实例。"
+  "This trait properties change will cause pod restart after the application deploy": "该类型运维特征参数变更将导致应用重新部署时重启 Pod 实例。",
+  "Users": "用户",
+  "Email": "邮箱",
+  "Password": "密码",
+  "New User": "新增用户",
+  "Edit User": "编辑用户",
+  "Reset User": "编辑用户",
+  "Provides basic management capabilities for local users,but SSO authentication is strongly recommended.": "为用户提供基本的管理功能,但强烈建议进行SSO认证",
+  "ResetPassWord": "重制密码",
+  "Reset User PassWord": "重制用户密码",
+  "Settings": "配置",
+  "UserManager": "用户管理"
 }
