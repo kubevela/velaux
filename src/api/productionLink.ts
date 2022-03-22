@@ -15,3 +15,4 @@ export const authenticationDexConfig = `/api/v1/auth/dexConfig`;
 export const authenticationSystemInfo = `/api/v1/system_info`;
 export const authenticationLoginType = `/api/v1/auth/loginType`;
 export const authenticationRefreshToken = `/api/v1/auth/refreshToken`;
+export const users = `/api/v1/users`;

@@ -34,7 +34,7 @@ axiosInstance.interceptors.response.use(
   },
 
   async (error: any) => {
-    const { data, status } = error;
+    const { data, status } = error?.response || error;
     const refreshToken = localStorage.getItem('refreshToken');
     if (refreshToken && data.BusinessCode === '12002') {
       try {
@@ -45,8 +45,8 @@ axiosInstance.interceptors.response.use(
             Authorization: `Bearer ${refreshToken}`,
           },
         });
-        if (res.token) {
-          localStorage.setItem('token', res.token);
+        if (res && res.accessToken) {
+          localStorage.setItem('token', res.accessToken);
           localStorage.setItem('refreshToken', res.refreshToken);
         }
         return axiosInstance(error.config);

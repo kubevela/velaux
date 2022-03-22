@@ -51,6 +51,9 @@ export function isEnvPath(pathname: string) {
   return (pathname || '').indexOf('/envs') !== -1;
 }
 
+export function isUsersPath(pathname: string) {
+  return (pathname || '').indexOf('/users') !== -1;
+}
 export const APPLICATION_PATH = 'applications';
 export const CLUSTERS_PATH = 'clusters';
 export const ADDONS_PATH = 'addons';
