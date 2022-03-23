@@ -256,7 +256,7 @@ export default class EnvPlan extends React.Component<Props, State> {
           </Form>
           <If condition={!targetList || targetList.length == 0}>
             <span>
-              <Translation>There is no target in current project.</Translation>{' '}
+              <Translation>There is no target in current project.</Translation>
               <a onClick={this.showNewTarget}>New Target</a>
             </span>
           </If>

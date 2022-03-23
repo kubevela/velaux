@@ -444,5 +444,18 @@
   "ResetPassWord": "重制密码",
   "Reset User PassWord": "重制用户密码",
   "Settings": "配置",
-  "UserManager": "用户管理"
+  "UserManager": "用户管理",
+  "Projects": "项目列表",
+  "Projects are used to allocate and isolate resources": "项目用于分配和隔离资源",
+  "New Project": "新增项目",
+  "Edit Project": "编辑项目",
+  "Owner": "负责人",
+  "Are you sure you want to delete the project": "你确定想删除这个项目吗",
+  "Please enter a project name": "请输入符合规范的项目名称",
+  "Alias(Name)": "别名(名字)",
+  "Integrations": "集成",
+  "Summary": "概览",
+  "Roles": "角色",
+  "Members": "成员",
+  "General": "基本信息"
 }

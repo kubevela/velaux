@@ -5,6 +5,7 @@ import {
   isTargetURL,
   isEnvPath,
   isUsersPath,
+  isProjectPath,
 } from '../../utils/common';
 export function getLeftSider(pathname) {
   const isApplication = isApplicationPath(pathname);
@@ -13,6 +14,7 @@ export function getLeftSider(pathname) {
   const isTarget = isTargetURL(pathname);
   const isEnv = isEnvPath(pathname);
   const isUser = isUsersPath(pathname);
+  const isProject = isProjectPath(pathname);
   return [
     {
       navName: 'Continuous Delivery',
@@ -65,8 +67,14 @@ export function getLeftSider(pathname) {
         {
           className: isUser,
           link: '/users',
-          iconType: 'set',
+          iconType: 'user-group-fill',
           navName: 'UserManager',
+        },
+        {
+          className: isProject,
+          link: '/projects',
+          iconType: 'structured-data',
+          navName: 'Projects',
         },
       ],
     },

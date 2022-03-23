@@ -22,6 +22,7 @@ import EnvDialog from '../../../EnvPage/components/EnvDialog';
 
 type Props = {
   visible: boolean;
+  projectName?: string;
   targets?: Target[];
   componentDefinitions: [];
   projects?: Project[];
@@ -105,6 +106,7 @@ class AppDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
+      const { projectName = '' } = this.props;
       const {
         description,
         alias,
@@ -122,7 +124,7 @@ class AppDialog extends React.Component<Props, State> {
         icon,
         name,
         description,
-        project: 'default',
+        project: projectName || 'default',
         envBinding: envbinding,
         component: {
           alias,

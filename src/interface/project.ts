@@ -4,4 +4,10 @@ export interface Project {
   description?: string;
   createTime?: string;
   updateTime?: string;
+  owner?: Owner;
+}
+
+export interface Owner {
+  name: string;
+  alias?: string;
 }

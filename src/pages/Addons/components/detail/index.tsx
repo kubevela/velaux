@@ -268,7 +268,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
               >
                 <Translation>{`Addon app status is ${
                   addonsStatus?.status || 'Initing'
-                }`}</Translation>{' '}
+                }`}</Translation>
                 <a onClick={() => this.updateStatusShow(true)}>
                   <Translation>check the details</Translation>
                 </a>

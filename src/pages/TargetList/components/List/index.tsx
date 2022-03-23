@@ -8,7 +8,7 @@ import locale from '../../../../utils/locale';
 
 type Props = {
   list?: [];
-  updatetargetList: () => void;
+  updateTargetList: () => void;
   changeISEdit: (pararms: boolean, record: Target) => void;
 };
 
@@ -17,7 +17,7 @@ class TableList extends Component<Props> {
     deleteTarget({ name: record.name || '' }).then((re) => {
       if (re) {
         Message.success('target delete success');
-        this.props.updatetargetList();
+        this.props.updateTargetList();
       }
     });
   };

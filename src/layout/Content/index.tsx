@@ -14,6 +14,12 @@ import ApplicationLayout from '../Application';
 import EnvPage from '../../pages/EnvPage';
 import ApplicationLog from '../../pages/ApplicationLog';
 import Users from '../../pages/Users';
+import ProjectLayout from '../Project';
+import Projects from '../../pages/Projects';
+import ProjectSummary from '../../pages/ProjectSummary';
+import ProjectApplications from '../../pages/ProjectApplications';
+// import ProjectRoles from '../../pages/ProjectRoles'
+// import ProjectMembers from '../../pages/ProjectMembers'
 
 export default function Content() {
   return (
@@ -122,6 +128,63 @@ export default function Content() {
       <Route path="/addons/:addonName" component={Addons} />
       <Route path="/addons" component={Addons} />
       <Route path="/users" component={Users} />
+      <Route exact path="/projects" component={Projects} />
+      <Route
+        exact
+        path="/projects/:projectsName"
+        render={(props: any) => {
+          console.log('project router', props);
+          return <Redirect to={`/projects/${props.match.params.projectsName}/summary`} />;
+        }}
+      />
+      <Route
+        exact
+        path="/projects/:projectsName/summary"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'summary' } };
+          return (
+            <ProjectLayout {...mergeProps}>
+              <ProjectSummary {...mergeProps} />
+            </ProjectLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/projects/:projectsName/applications"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'applications' } };
+          return (
+            <ProjectLayout {...mergeProps}>
+              <ProjectApplications {...mergeProps} />
+            </ProjectLayout>
+          );
+        }}
+      />
+      {/* <Route
+        exact
+        path="/projects/:projectsName/roles"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'roles' } }
+          return (
+            <ProjectLayout {...mergeProps} >
+              <ProjectRoles {...mergeProps} />
+            </ProjectLayout>
+          )
+        }}
+      />
+      <Route
+        exact
+        path="/projects/:projectsName/members"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'members' } }
+          return (
+            <ProjectLayout {...mergeProps} >
+              <ProjectMembers {...mergeProps} />
+            </ProjectLayout>
+          )
+        }}
+      /> */}
       <Route path="/notFound" component={NotFound} />
       <Redirect to="/notFound" />
     </Switch>
