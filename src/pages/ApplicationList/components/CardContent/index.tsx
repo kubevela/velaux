@@ -78,11 +78,18 @@ class CardContent extends React.Component<Props, State> {
 
     return (
       <Row wrap={true}>
-        {applications?.map((item: ApplicationBase, index: number) => {
+        {applications?.map((item: ApplicationBase) => {
           const { name, alias, icon, description, createTime } = item;
           const showName = alias || name;
           return (
-            <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={index}>
+            <Col
+              xl={6}
+              m={8}
+              s={12}
+              xxs={24}
+              className={`card-content-wrapper`}
+              key={`${item.name}`}
+            >
               <Card locale={locale.Card} contentHeight="auto">
                 <Link to={`/applications/${name}/config`}>
                   <div className="appplan-card-top flexcenter">
@@ -94,12 +101,12 @@ class CardContent extends React.Component<Props, State> {
                     </If>
                   </div>
                 </Link>
-                <div className="content-wraper background-F9F8FF">
+                <div className="content-wrapper background-F9F8FF">
                   <Row className="content-title">
                     <Col span="20" className="font-size-16 color1A1A1A">
                       <Link to={`/applications/${name}/config`}>{showName}</Link>
                     </Col>
-                    <Col span={4} className="dot-wraper">
+                    <Col span={4} className="dot-wrapper">
                       <Dropdown
                         trigger={
                           <svg

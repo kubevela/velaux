@@ -37,7 +37,7 @@ export interface ApplicationBase {
   updateTime?: string;
   readOnly?: boolean;
   icon?: string;
-  labels?: Map<string, string>;
+  labels?: Record<string, string>;
 }
 
 export interface DefinitionDetail {
@@ -199,7 +199,7 @@ export interface ApplicationComponentBase {
   name: string;
   alias?: string;
   description?: string;
-  labels?: Map<string, string>;
+  labels?: Record<string, string>;
   componentType: string;
   creator?: string;
   main: boolean;
