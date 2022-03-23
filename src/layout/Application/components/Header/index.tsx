@@ -18,7 +18,7 @@ import NumItem from '../../../../components/NumItem';
 import { Link } from 'dva/router';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
-import WorkflowSilder from '../WorkflowSilder';
+import WorkflowSlider from '../WorkflowSlider';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import locale from '../../../../utils/locale';
@@ -107,7 +107,7 @@ class ApplicationHeader extends Component<Props, State> {
     }
   };
 
-  loadworkflowRecord = async () => {
+  loadWorkflowRecord = async () => {
     const { appName } = this.props;
     if (appName) {
       getApplicationWorkflowRecord({ appName: appName })
@@ -119,7 +119,7 @@ class ApplicationHeader extends Component<Props, State> {
         .finally(() => {
           if (this.sync) {
             this.interval = setTimeout(() => {
-              this.loadworkflowRecord();
+              this.loadWorkflowRecord();
             }, 3000);
           }
         });
@@ -128,7 +128,7 @@ class ApplicationHeader extends Component<Props, State> {
 
   componentDidMount() {
     this.loadAppStatistics();
-    this.loadworkflowRecord();
+    this.loadWorkflowRecord();
   }
 
   componentWillUnmount() {
@@ -158,15 +158,21 @@ class ApplicationHeader extends Component<Props, State> {
             </Breadcrumb>
           </Col>
           <Col span={18} className="flexright" style={{ padding: '0 16px' }}>
-            <Message
-              type="notice"
-              title={i18n
-                .t('Application configuration changes take effect only after deploy')
-                .toString()}
-            />
+            <If condition={!applicationDetail?.readOnly}>
+              <Message
+                type="notice"
+                title={i18n
+                  .t('Application configuration changes take effect only after deploy')
+                  .toString()}
+              />
+            </If>
+            <If condition={applicationDetail?.readOnly}>
+              <Message type="notice" title={i18n.t('This application is readonly').toString()} />
+            </If>
             <Button
               style={{ marginLeft: '16px' }}
               type="primary"
+              disabled={applicationDetail?.readOnly}
               onClick={() => this.onDeployConfig()}
             >
               <Translation>Deploy</Translation>
@@ -214,7 +220,7 @@ class ApplicationHeader extends Component<Props, State> {
               </Card>
             </If>
             <If condition={Array.isArray(records) && records.length > 0}>
-              <WorkflowSilder appName={appName} records={records || []} />
+              <WorkflowSlider appName={appName} records={records || []} />
             </If>
           </Col>
         </Row>

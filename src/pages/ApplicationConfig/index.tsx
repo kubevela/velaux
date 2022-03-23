@@ -23,6 +23,7 @@ import type {
   Trigger,
   Workflow,
   ApplicationBase,
+  ApplicationComponentBase,
 } from '../../interface/application';
 
 import { momentDate } from '../../utils/common';
@@ -47,7 +48,7 @@ type Props = {
   };
   dispatch: ({}) => {};
   applicationDetail?: ApplicationDetail;
-  components?: ApplicationComponent[];
+  components?: ApplicationComponentBase[];
   componentsApp?: string;
   envbinding?: EnvBinding[];
   workflows?: Workflow[];
@@ -64,7 +65,7 @@ type State = {
   visibleTrigger: boolean;
   createTriggerInfo: Trigger;
   showEditApplication: boolean;
-  editItem: ApplicationBase;
+  editItem?: ApplicationBase;
   visibleComponent: boolean;
   temporaryTraitList: Trait[];
   isEditComponent: boolean;
@@ -88,13 +89,6 @@ class ApplicationConfig extends Component<Props, State> {
       visibleTrigger: false,
       createTriggerInfo: { name: '', workflowName: '', type: 'webhook', token: '' },
       showEditApplication: false,
-      editItem: {
-        name: '',
-        alias: '',
-        icon: '',
-        description: '',
-        createTime: '',
-      },
       visibleComponent: false,
       temporaryTraitList: [],
       isEditComponent: false,
@@ -131,7 +125,7 @@ class ApplicationConfig extends Component<Props, State> {
       appName,
       componentName,
     };
-    getApplicationComponent(params).then((res: any) => {
+    getApplicationComponent(params).then((res: ApplicationComponent) => {
       if (res) {
         this.setState({
           mainComponent: res,
@@ -286,7 +280,7 @@ class ApplicationConfig extends Component<Props, State> {
       appName,
       componentName,
     };
-    getApplicationComponent(params).then((res: any) => {
+    getApplicationComponent(params).then((res: ApplicationComponent) => {
       if (res) {
         this.setState({
           editComponent: res,
@@ -298,7 +292,7 @@ class ApplicationConfig extends Component<Props, State> {
     });
   }
 
-  editComponent = (component: ApplicationComponent) => {
+  editComponent = (component: ApplicationComponentBase) => {
     this.onGetEditComponentInfo(component.name, () => {
       this.setState({
         isEditComponent: true,
@@ -496,22 +490,27 @@ class ApplicationConfig extends Component<Props, State> {
                     <Translation>Components</Translation>
                   </span>
                 }
-                actions={[
-                  <a
-                    key={'add'}
-                    onClick={this.onAddComponent}
-                    className="font-size-14 font-weight-400"
-                  >
-                    <Translation>New Component</Translation>
-                  </a>,
-                ]}
+                actions={
+                  !applicationDetail?.readOnly
+                    ? [
+                        <a
+                          key={'add'}
+                          onClick={this.onAddComponent}
+                          className="font-size-14 font-weight-400"
+                        >
+                          <Translation>New Component</Translation>
+                        </a>,
+                      ]
+                    : []
+                }
               />
             </Col>
           </Row>
 
           <Components
+            application={applicationDetail}
             components={components || []}
-            editComponent={(component: ApplicationComponent) => {
+            editComponent={(component: ApplicationComponentBase) => {
               this.editComponent(component);
             }}
             onDeleteComponent={(component: string) => {
@@ -595,7 +594,7 @@ class ApplicationConfig extends Component<Props, State> {
           />
         </If>
 
-        <If condition={visibleComponent}>
+        <If condition={visibleComponent && editComponent}>
           <ComponentDialog
             appName={appName}
             componentName={componentName}

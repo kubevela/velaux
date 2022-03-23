@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Table, Button, Pagination, Message, Dialog } from '@b-design/ui';
-import { User } from '../../interface/user';
+import type { User } from '../../interface/user';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
@@ -364,7 +364,7 @@ class Users extends Component<Props, State> {
           <section>
             <Title
               title="Users"
-              subTitle="Provides basic management capabilities for local users,but SSO authentication is strongly recommended."
+              subTitle="Provides basic management capabilities for local users, but SSO authentication is recommended"
               extButtons={[
                 <Button type="primary" onClick={this.handleClickCreate}>
                   <Translation>New User</Translation>

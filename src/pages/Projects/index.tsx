@@ -49,7 +49,8 @@ class Projects extends Component<Props, State> {
 
   listProjects = async () => {
     this.setState({ isLoading: true });
-    getProjectList({})
+    const { page, pageSize } = this.state;
+    getProjectList({ page, pageSize })
       .then((res) => {
         this.setState({
           list: res.projects || [],

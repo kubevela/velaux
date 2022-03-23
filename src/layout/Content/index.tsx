@@ -133,7 +133,6 @@ export default function Content() {
         exact
         path="/projects/:projectsName"
         render={(props: any) => {
-          console.log('project router', props);
           return <Redirect to={`/projects/${props.match.params.projectsName}/summary`} />;
         }}
       />

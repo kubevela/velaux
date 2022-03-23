@@ -21,6 +21,7 @@ import type { Addon, AddonStatus } from '../../../../interface/addon';
 import locale from '../../../../utils/locale';
 import StatusShow from '../../../../components/StatusShow';
 import type { ApplicationStatus } from '../../../../interface/application';
+import i18n from '../../../../i18n';
 
 type Props = {
   addonName: string;
@@ -266,11 +267,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
                 size="medium"
                 style={{ padding: '8px', marginBottom: '10px' }}
               >
-                <Translation>{`Addon app status is ${
-                  addonsStatus?.status || 'Initing'
-                }`}</Translation>
-                <a onClick={() => this.updateStatusShow(true)}>
-                  <Translation>check the details</Translation>
+                {`${i18n.t('Addon status is')}${addonsStatus?.status || 'Initing'}`}
+                <a style={{ marginLeft: '16px' }} onClick={() => this.updateStatusShow(true)}>
+                  <Translation>Check the details</Translation>
                 </a>
               </Message>
             </If>

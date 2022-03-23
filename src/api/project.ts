@@ -8,8 +8,8 @@ const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
 const url = isMock ? project_mock : project;
 
-export function getProjectList(params: any) {
-  return get(url, params).then((res) => res);
+export function getProjectList(params: { page?: number; pageSize?: number }) {
+  return get(url, { params: params }).then((res) => res);
 }
 
 export function createProject(params: Project) {

@@ -68,7 +68,7 @@ export function getLeftSider(pathname) {
           className: isUser,
           link: '/users',
           iconType: 'user-group-fill',
-          navName: 'UserManager',
+          navName: 'Users',
         },
         {
           className: isProject,
