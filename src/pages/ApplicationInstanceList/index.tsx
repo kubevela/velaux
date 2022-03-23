@@ -615,7 +615,11 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                 <Translation>The current environment has not been deployed.</Translation>
               </div>
               <div className="noticeAction">
-                <Button onClick={() => this.onDeploy()} type="primary">
+                <Button
+                  disabled={applicationDetail?.readOnly}
+                  onClick={() => this.onDeploy()}
+                  type="primary"
+                >
                   <Translation>Deploy</Translation>
                 </Button>
               </div>

@@ -96,13 +96,15 @@ class TabsContent extends Component<Props, State> {
             </Col>
             <Col span={4}>
               <div className="action-list">
-                <a
-                  onClick={() => {
-                    this.setState({ visibleEnvPlan: true });
-                  }}
-                >
-                  <Translation>Bind Environment</Translation>
-                </a>
+                <If condition={!applicationDetail?.readOnly}>
+                  <a
+                    onClick={() => {
+                      this.setState({ visibleEnvPlan: true });
+                    }}
+                  >
+                    <Translation>Bind Environment</Translation>
+                  </a>
+                </If>
               </div>
             </Col>
           </Row>

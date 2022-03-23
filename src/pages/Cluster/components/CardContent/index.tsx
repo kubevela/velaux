@@ -39,7 +39,7 @@ class CardContent extends React.Component<Props, State> {
     return (
       <div>
         <Row wrap={true}>
-          {clusters.map((item: Cluster, index: number) => {
+          {clusters.map((item: Cluster) => {
             const { name, alias, status, icon, description, createTime, dashboardURL = '#' } = item;
             const showName = alias ? alias : name;
             const card = (
@@ -52,7 +52,7 @@ class CardContent extends React.Component<Props, State> {
                     <img src={kubernetesSvg} />
                   </If>
                 </div>
-                <div className="content-wraper background-F9F8FF">
+                <div className="content-wrapper background-F9F8FF">
                   <Row className="content-title">
                     <Col span={16} className="font-size-16 color1A1A1A">
                       <If condition={dashboardURL}>
@@ -63,7 +63,7 @@ class CardContent extends React.Component<Props, State> {
                       <If condition={!dashboardURL}>{showName}</If>
                     </Col>
                     <If condition={name != 'local'}>
-                      <Col span={8} className="dot-wraper">
+                      <Col span={8} className="dot-wrapper">
                         <Dropdown
                           trigger={
                             <svg
@@ -162,7 +162,7 @@ class CardContent extends React.Component<Props, State> {
               </Card>
             );
             return (
-              <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={index}>
+              <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wrapper`} key={item.name}>
                 {card}
               </Col>
             );

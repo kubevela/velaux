@@ -191,6 +191,7 @@ class UISchema extends Component<Props, State> {
   render() {
     const { advanced } = this.state;
     const { uiSchema, inline, maxColSpan, disableRenderRow, value } = this.props;
+
     if (!uiSchema) {
       return <div />;
     }

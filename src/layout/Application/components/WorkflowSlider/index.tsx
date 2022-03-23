@@ -14,7 +14,7 @@ type Props = {
 type State = {
   activeValue: number;
 };
-class WorkflowSilder extends Component<Props, State> {
+class WorkflowSlider extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -95,4 +95,4 @@ class WorkflowSilder extends Component<Props, State> {
   }
 }
 
-export default WorkflowSilder;
+export default WorkflowSlider;

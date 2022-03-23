@@ -41,7 +41,7 @@ class SelectSearch extends React.Component<Props, State> {
           <Input
             innerAfter={<Icon type="search" size="xs" style={{ margin: 4 }} />}
             hasClear
-            placeholder={i18n.t('Search by Name')}
+            placeholder={i18n.t('Search by name')}
             onChange={this.handleChangName}
             value={name}
             className="item"

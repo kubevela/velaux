@@ -8,7 +8,7 @@ import Translation from '../../../../components/Translation';
 import i18n from 'i18next';
 
 type Props = {
-  editItem: ApplicationBase;
+  editItem?: ApplicationBase;
   onClose: () => void;
   onOK: () => void;
 };
@@ -26,19 +26,21 @@ class EditAppDialog extends React.Component<Props> {
         return;
       }
       const { description, alias } = values;
-      const { name } = this.props.editItem;
-      const params = {
-        name,
-        alias,
-        description,
-      };
+      const { editItem } = this.props;
+      if (editItem) {
+        const params = {
+          name: editItem.name,
+          alias,
+          description,
+        };
 
-      updateApplication(params).then((res) => {
-        if (res) {
-          Message.success(<Translation>update application success</Translation>);
-          this.props.onOK();
-        }
-      });
+        updateApplication(params).then((res) => {
+          if (res) {
+            Message.success(<Translation>update application success</Translation>);
+            this.props.onOK();
+          }
+        });
+      }
     });
   };
 
@@ -78,7 +80,7 @@ class EditAppDialog extends React.Component<Props> {
                   name="alias"
                   placeholder={i18n.t('Give your app a more recognizable name').toString()}
                   {...init('alias', {
-                    initValue: editItem.alias,
+                    initValue: editItem?.alias,
                     rules: [
                       {
                         minLength: 2,
@@ -97,7 +99,7 @@ class EditAppDialog extends React.Component<Props> {
                 <Input
                   name="description"
                   {...init('description', {
-                    initValue: editItem.description,
+                    initValue: editItem?.description,
                     rules: [
                       {
                         maxLength: 128,

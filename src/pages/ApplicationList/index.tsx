@@ -25,7 +25,7 @@ type State = {
   componentDefinitions: [];
   isLoading: boolean;
   showEditApplication: boolean;
-  editItem: ApplicationBase;
+  editItem?: ApplicationBase;
 };
 
 @connect((store: any) => {
@@ -39,13 +39,6 @@ class Application extends Component<Props, State> {
       componentDefinitions: [],
       isLoading: false,
       showEditApplication: false,
-      editItem: {
-        name: '',
-        alias: '',
-        icon: '',
-        description: '',
-        createTime: '',
-      },
     };
   }
 
@@ -187,7 +180,7 @@ class Application extends Component<Props, State> {
           />
         </If>
 
-        <If condition={showEditApplication}>
+        <If condition={showEditApplication && editItem}>
           <EditAppDialog
             editItem={editItem}
             onOK={this.closeEditAppDialog}
