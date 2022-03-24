@@ -5,9 +5,11 @@ import Namespace from '../Namespace';
 import type { NamespaceItem } from '../Namespace';
 import { checkName } from '../../../../utils/common';
 import { createTarget, updateTarget } from '../../../../api/target';
+import { getProjectList } from '../../../../api/project';
 import type { Target } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
+import type { Project } from '../../../../interface/project';
 import { listNamespaces } from '../../../../api/observation';
 import locale from '../../../../utils/locale';
 
@@ -25,6 +27,7 @@ type Props = {
 type State = {
   cluster?: string;
   namespaces: NamespaceItem[];
+  projectList: Project[];
 };
 
 class DeliveryDialog extends React.Component<Props, State> {
@@ -54,16 +57,15 @@ class DeliveryDialog extends React.Component<Props, State> {
         }
       },
     });
+
     this.state = {
       namespaces: [],
+      projectList: [{ name: '' }],
     };
   }
 
   componentDidMount() {
-    const { project, targetItem, isEdit } = this.props;
-    if (project && !isEdit) {
-      this.field.setValue('project', project);
-    }
+    const { targetItem } = this.props;
     if (targetItem) {
       const {
         name,
@@ -71,6 +73,7 @@ class DeliveryDialog extends React.Component<Props, State> {
         description,
         cluster = { clusterName: '', namespace: '' },
         variable = { providerName: '', region: '', zone: '', vpcID: '' },
+        project = { name: '', alias: '' },
       } = targetItem;
       this.field.setValues({
         name,
@@ -82,12 +85,26 @@ class DeliveryDialog extends React.Component<Props, State> {
         var_region: variable.region,
         var_zone: variable.zone,
         var_vpcID: variable.vpcID,
+        project: project.name,
       });
       if (cluster) {
         this.loadNamespaces(cluster.clusterName);
       }
     }
+    this.getProjectList();
   }
+
+  getProjectList = async () => {
+    getProjectList({}).then((res) => {
+      const projectListData = (res.projects || []).map((item: Project) => ({
+        label: item.name,
+        value: item.name,
+      }));
+      this.setState({
+        projectList: projectListData,
+      });
+    });
+  };
 
   onClose = () => {
     this.props.onClose();
@@ -110,6 +127,7 @@ class DeliveryDialog extends React.Component<Props, State> {
         var_region,
         var_zone,
         var_vpcID,
+        project,
       } = values;
       const params = {
         name,
@@ -125,6 +143,7 @@ class DeliveryDialog extends React.Component<Props, State> {
           zone: var_zone,
           vpcID: var_vpcID,
         },
+        project,
       };
 
       if (isEdit) {
@@ -201,7 +220,7 @@ class DeliveryDialog extends React.Component<Props, State> {
     };
 
     const { t, visible, isEdit } = this.props;
-    const { namespaces } = this.state;
+    const { namespaces, projectList = [] } = this.state;
     const cluster: string = this.field.getValue('clusterName');
     return (
       <div>
@@ -259,6 +278,30 @@ class DeliveryDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
+
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem label={<Translation>Project</Translation>} required>
+                  <Select.AutoComplete
+                    name="project"
+                    hasClear
+                    placeholder={t('Please select').toString()}
+                    filterLocal={true}
+                    dataSource={projectList}
+                    style={{ width: '100%' }}
+                    {...init('project', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please select project',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Description</Translation>}>

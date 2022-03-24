@@ -23,6 +23,7 @@ import type {
   Trait,
   Trigger,
   ApplicationComponentConfig,
+  ApplicationQuery,
 } from '../interface/application';
 
 interface TraitQuery {
@@ -43,7 +44,7 @@ const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
 const url = isMock ? application_mock : application;
 
-export function getApplicationList(params: any) {
+export function getApplicationList(params: ApplicationQuery) {
   return get(url, { params: params }).then((res) => res);
 }
 

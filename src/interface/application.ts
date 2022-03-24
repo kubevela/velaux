@@ -1,21 +1,13 @@
 import type { Target } from './target';
 import type { Project } from './project';
 
-export interface ApplicationDetail {
-  name: string;
-  alias?: string;
-  project?: Project;
-  description?: string;
-  createTime?: string;
-  updateTime?: string;
-  icon?: string;
-  labels?: {};
-  applicationType: 'cloud' | 'common';
-  policies: string[];
+export interface ApplicationDetail extends ApplicationBase {
   resourceInfo: {
     componentNum: number;
   };
-  workflowStatus?: WorkflowStatus[];
+  envBindings: string[];
+  applicationType: 'cloud' | 'common';
+  policies: string[];
 }
 
 export interface EnvBinding {
@@ -39,12 +31,13 @@ export interface WorkflowStatus {
 export interface ApplicationBase {
   name: string;
   alias: string;
-  btnContent?: string;
-  icon: string;
-  description: string;
-  createTime: string;
-  href?: string;
-  dashboardURL?: string;
+  description?: string;
+  project?: Project;
+  createTime?: string;
+  updateTime?: string;
+  readOnly?: boolean;
+  icon?: string;
+  labels?: Record<string, string>;
 }
 
 export interface DefinitionDetail {
@@ -202,18 +195,35 @@ export interface Trait {
   updateTime?: string;
 }
 
-export interface ApplicationComponent {
-  alias?: string;
-  appPrimaryKey?: string;
-  createTime?: string;
-  creator?: string;
+export interface ApplicationComponentBase {
   name: string;
-  properties?: any;
-  traits?: Trait[];
-  type: string;
-  updateTime?: string;
+  alias?: string;
   description?: string;
+  labels?: Record<string, string>;
+  componentType: string;
+  creator?: string;
   main: boolean;
+  dependsOn: string[];
+  createTime?: string;
+  updateTime?: string;
+  input?: InputItem[];
+  output?: OutputItem[];
+  traits?: Trait[];
+}
+
+export interface InputItem {
+  parameterKey: string;
+  from: string;
+}
+
+export interface OutputItem {
+  valueFrom: string;
+  name: string;
+}
+
+export interface ApplicationComponent extends ApplicationComponentBase {
+  properties?: any;
+  type: string;
   definition: {
     workload: {
       definition?: {
@@ -335,4 +345,11 @@ export interface ChartVersion {
   created: string;
   digest: string;
   icon?: string;
+}
+
+export interface ApplicationQuery {
+  query?: string;
+  project?: string;
+  env?: string;
+  targetName?: string;
 }

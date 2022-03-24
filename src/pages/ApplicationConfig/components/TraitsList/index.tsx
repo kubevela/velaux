@@ -23,7 +23,7 @@ type TraitTrans = {
   type: string;
   createTime?: string;
   updateTime?: string;
-  opetationAdd?: boolean;
+  operationAdd?: boolean;
 };
 
 class TraitsList extends Component<Props> {
@@ -42,7 +42,7 @@ class TraitsList extends Component<Props> {
     const { Col } = Grid;
     const { changeTraitStats } = this.props;
     return (
-      <Col xl={12} m={12} s={24} className="padding16 card-trait-wraper">
+      <Col xl={12} m={12} s={24} className="padding16 card-trait-wrapper">
         <Card locale={locale.Card}>
           <div className="traits-list-nav">
             <div
@@ -74,7 +74,7 @@ class TraitsList extends Component<Props> {
   renderAddCard = () => {
     const { Col } = Grid;
     return (
-      <Col xl={12} m={12} s={24} className="padding16 card-add-wraper">
+      <Col xl={12} m={12} s={24} className="padding16 card-add-wrapper">
         <Card locale={locale.Card}>
           <div className="traits-add-operation">
             <Icon
@@ -93,7 +93,7 @@ class TraitsList extends Component<Props> {
 
   initTraitList = () => {
     const { traits = [] } = this.props;
-    return [...traits, { opetationAdd: true, type: '' }];
+    return [...traits, { operationAdd: true, type: '' }];
   };
 
   render() {
@@ -103,9 +103,9 @@ class TraitsList extends Component<Props> {
       <div className="traits-list-warper margin-bottom-20">
         <Row wrap={true} className="row-list">
           {(traits || []).map((item: TraitTrans) => (
-            <Fragment>
-              <If condition={!item.opetationAdd}>{this.renderCardList(item)}</If>
-              <If condition={item.opetationAdd}>{this.renderAddCard()}</If>
+            <Fragment key={item.name}>
+              <If condition={!item.operationAdd}>{this.renderCardList(item)}</If>
+              <If condition={item.operationAdd}>{this.renderAddCard()}</If>
             </Fragment>
           ))}
         </Row>

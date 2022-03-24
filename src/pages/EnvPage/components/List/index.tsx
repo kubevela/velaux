@@ -7,12 +7,13 @@ import type { Env, NameAlias } from '../../../../interface/env';
 import { deleteEnv } from '../../../../api/env';
 import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
+import type { Project } from '../../../../interface/project';
 const { Group: TagGroup } = Tag;
 
 type Props = {
   list?: Env[];
   updateEnvList: () => void;
-  changeISEdit: (pararms: boolean, record: Env) => void;
+  changeISEdit: (param: boolean, record: Env) => void;
 };
 
 class TableList extends Component<Props> {
@@ -32,7 +33,7 @@ class TableList extends Component<Props> {
     this.setState({ showEnvAppList: true, envName: envName });
   };
 
-  getCloumns = () => {
+  getColumns = () => {
     return [
       {
         key: 'name',
@@ -56,6 +57,18 @@ class TableList extends Component<Props> {
         dataIndex: 'alias',
         cell: (v: string) => {
           return <span>{v}</span>;
+        },
+      },
+      {
+        key: 'project',
+        title: <Translation>Project</Translation>,
+        dataIndex: 'project',
+        cell: (v: Project) => {
+          if (v && v.name) {
+            return <Link to={`/projects/${v.name}/summary`}>{v && v.name}</Link>;
+          } else {
+            return null;
+          }
         },
       },
       {
@@ -144,7 +157,7 @@ class TableList extends Component<Props> {
 
   render() {
     const { Column } = Table;
-    const columns = this.getCloumns();
+    const columns = this.getColumns();
     const { list } = this.props;
     return (
       <div className="table-delivery-list margin-top-20">

@@ -142,7 +142,7 @@ class Header extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { appName, envName, components } = this.props;
+    const { appName, envName, components, applicationDetail } = this.props;
     const { recycleLoading, deleteLoading, refreshLoading } = this.state;
     const { targets, applicationStatus, gatewayIPs, disableStatusShow } = this.props;
     const targetOptions = (targets || []).map((item: Target) => ({
@@ -242,6 +242,7 @@ class Header extends Component<Props, State> {
               <Button
                 style={{ marginLeft: '16px' }}
                 loading={deleteLoading}
+                disabled={applicationDetail?.readOnly}
                 onClick={this.deleteEnv}
               >
                 <Translation>Delete</Translation>
@@ -257,6 +258,7 @@ class Header extends Component<Props, State> {
               <Button
                 loading={recycleLoading}
                 onClick={this.recycleEnv}
+                disabled={applicationDetail?.readOnly}
                 type="primary"
                 style={{ marginLeft: '16px' }}
               >

@@ -78,7 +78,7 @@ class targetList extends React.Component<Props, State> {
     });
   };
 
-  updatetargetList = () => {
+  updateTargetList = () => {
     this.setState(
       {
         query: '',
@@ -133,7 +133,7 @@ class targetList extends React.Component<Props, State> {
 
         <TableList
           list={targets}
-          updatetargetList={this.updatetargetList}
+          updateTargetList={this.updateTargetList}
           changeISEdit={(is: boolean, record: Target) => {
             this.changeISEdit(is, record);
           }}

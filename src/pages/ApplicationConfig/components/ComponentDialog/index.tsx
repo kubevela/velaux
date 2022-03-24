@@ -68,7 +68,7 @@ class ComponentDialog extends React.Component<Props, State> {
       this.field.setValues({
         name,
         alias,
-        type,
+        componentType: type,
         description,
         properties,
       });
@@ -230,7 +230,6 @@ class ComponentDialog extends React.Component<Props, State> {
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
-
     return (
       <DrawerWithFooter
         title={this.showComponentTitle()}
@@ -338,7 +337,7 @@ class ComponentDialog extends React.Component<Props, State> {
                     disabled={isEditComponent ? true : false}
                     className="select"
                     {...init(`componentType`, {
-                      initValue: 'webservice',
+                      initValue: isEditComponent ? '' : 'webservice',
                       rules: [
                         {
                           required: true,
@@ -358,19 +357,21 @@ class ComponentDialog extends React.Component<Props, State> {
             </Row>
           </Group>
           <Row>
-            <UISchema
-              {...init(`properties`, {
-                rules: [
-                  {
-                    validator: validator,
-                    message: i18n.t('Please check app deploy properties'),
-                  },
-                ],
-              })}
-              uiSchema={definitionDetail && definitionDetail.uiSchema}
-              ref={this.uiSchemaRef}
-              mode={isEditComponent ? 'edit' : 'new'}
-            />
+            <If condition={definitionDetail && definitionDetail.uiSchema}>
+              <UISchema
+                {...init(`properties`, {
+                  rules: [
+                    {
+                      validator: validator,
+                      message: i18n.t('Please check the component properties'),
+                    },
+                  ],
+                })}
+                uiSchema={definitionDetail && definitionDetail.uiSchema}
+                ref={this.uiSchemaRef}
+                mode={isEditComponent ? 'edit' : 'new'}
+              />
+            </If>
           </Row>
           <If condition={isEditComponent}>
             <div className="edit-component-update-btn">

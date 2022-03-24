@@ -248,7 +248,7 @@ class Structs extends React.Component<Props, State> {
               if (name) {
                 labelTitle = (
                   <span>
-                    {label}: <span style={{ marginLeft: '8px' }}>{name}</span>{' '}
+                    {label}: <span style={{ marginLeft: '8px' }}>{name}</span>
                   </span>
                 );
               }

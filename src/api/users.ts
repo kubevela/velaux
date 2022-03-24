@@ -6,8 +6,8 @@ type UserQuery = {
   name: string;
   alias?: string;
   email?: string;
-  page: number;
-  pageSize: number;
+  page?: number;
+  pageSize?: number;
 };
 
 export function getUserList(params: UserQuery) {

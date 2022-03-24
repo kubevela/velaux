@@ -14,7 +14,7 @@ type Props = {
 type State = {
   activeValue: number;
 };
-class WorkflowSilder extends Component<Props, State> {
+class WorkflowSlider extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -73,10 +73,10 @@ class WorkflowSilder extends Component<Props, State> {
         <If condition={Array.isArray(records) && records.length > 1}>
           <div className="slide-icon-wraper">
             <span onClick={this.handleLeftClick}>
-              <Icon type="arrow-left" size="xxl" className="arrow-left" />{' '}
+              <Icon type="arrow-left" size="xxl" className="arrow-left" />
             </span>
             <span onClick={this.handleRightClick}>
-              <Icon type="arrow-right" size="xxl" className="arrow-right" />{' '}
+              <Icon type="arrow-right" size="xxl" className="arrow-right" />
             </span>
           </div>
         </If>
@@ -95,4 +95,4 @@ class WorkflowSilder extends Component<Props, State> {
   }
 }
 
-export default WorkflowSilder;
+export default WorkflowSlider;
