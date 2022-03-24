@@ -1,12 +1,17 @@
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios from 'axios';
+import { routerRedux } from 'dva/router';
 import { getMessage } from './status';
 import { baseURL } from './config';
 import { Message } from '@b-design/ui';
 import { handleError } from '../utils/errors';
+import { getToken } from '../utils/storage';
+import store from '../index';
+import { authenticationRefreshToken } from './productionLink';
 
 export const axiosInstance: AxiosInstance = axios.create({
   baseURL: baseURL,
+  timeout: 5000,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -28,18 +33,52 @@ axiosInstance.interceptors.response.use(
     }
   },
 
-  (error: any) => {
-    const { response, status } = error;
-    if (response) {
-      return Promise.reject(response);
+  async (error: any) => {
+    const { data, status } = error?.response || error;
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken && data.BusinessCode === '12002') {
+      try {
+        const res: any = await axios({
+          url: `${baseURL}/${authenticationRefreshToken}`,
+          method: 'GET',
+          headers: {
+            RefreshToken: refreshToken,
+          },
+        });
+        if (res && res.accessToken) {
+          localStorage.setItem('token', res.accessToken);
+          localStorage.setItem('refreshToken', res.refreshToken);
+        } else {
+          store.dispatch(
+            routerRedux.push({
+              pathname: '/login',
+            }),
+          );
+        }
+        return axiosInstance(error.config);
+      } catch (err: any) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        store.dispatch(
+          routerRedux.push({
+            pathname: '/login',
+          }),
+        );
+        return Promise.reject(err.response || err);
+      }
     } else {
+      localStorage.removeItem('token');
       Message.error(getMessage(status));
+      return Promise.reject(error.response || error);
     }
   },
 );
 
 axiosInstance.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: any) => {
+    if (localStorage.getItem('token')) {
+      config.headers['Authorization'] = 'Bearer ' + getToken();
+    }
     return config;
   },
   (error: any) => {
@@ -66,6 +105,7 @@ export const post = (url: string, params: any, customError?: boolean) => {
     })
     .catch((err) => {
       handleAPIError(err, params.customError || customError);
+      return err;
     });
 };
 

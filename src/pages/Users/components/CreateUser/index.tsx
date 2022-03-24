@@ -55,7 +55,7 @@ class CreateUser extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { isEditUser } = this.props;
+      const { isEditUser, editUser } = this.props;
       const { name, alias, email, password } = values;
 
       const params = {
@@ -65,8 +65,11 @@ class CreateUser extends React.Component<Props, State> {
         password,
       };
 
-      if (isEditUser) {
+      if (isEditUser && editUser.email) {
         delete params.email;
+      }
+
+      if (isEditUser) {
         updateUser(params).then((res) => {
           if (res) {
             Message.success(<Translation>update user success</Translation>);
@@ -124,7 +127,6 @@ class CreateUser extends React.Component<Props, State> {
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const { isEditUser, editUser } = this.props;
-    const { email = '' } = editUser;
 
     const formItemLayout = {
       labelCol: {
@@ -214,7 +216,7 @@ class CreateUser extends React.Component<Props, State> {
                   <Input
                     name="email"
                     placeholder={i18n.t('Please enter').toString()}
-                    disabled={isEditUser && email ? true : false}
+                    disabled={isEditUser && editUser.email ? true : false}
                     {...init('email', {
                       rules: [
                         {

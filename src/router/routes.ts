@@ -1,9 +1,9 @@
-import BasicLoyout from '../layout/index';
+import BasicLayout from '../layout/index';
 
 export default [
   {
     path: '/',
     name: 'basicLayout',
-    component: BasicLoyout,
+    component: BasicLayout,
   },
 ];

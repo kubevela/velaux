@@ -7,7 +7,7 @@ import RouterView from './router';
 import './i18n';
 import '@b-design/ui/dist/index.css';
 
-const app = dva({
+const app: any = dva({
   history: createBrowserHistory(),
 });
 
@@ -15,3 +15,4 @@ app.use(createLoading());
 createModel(app);
 app.router(RouterView);
 app.start('#root');
+export default app._store;
