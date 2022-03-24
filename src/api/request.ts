@@ -67,6 +67,14 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(err.response || err);
       }
     } else {
+      switch (status) {
+        case 401:
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          store.routerRedux.push({
+            pathname: '/login',
+          });
+      }
       Message.error(getMessage(status));
       return Promise.reject(error.response || error);
     }
