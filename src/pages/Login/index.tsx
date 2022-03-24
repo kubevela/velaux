@@ -10,7 +10,6 @@ import {
 } from '../../api/authentication';
 import Logo from '../../assets/kubevela-log.png';
 import { If } from 'tsx-control-statements/components';
-import querystring from 'query-string';
 import { checkName, checkUserPassWord } from '../../utils/common';
 import './index.less';
 import i18n from '../../i18n';
@@ -84,21 +83,11 @@ export default class LoginPage extends Component<Props, State> {
       })
       .catch();
   };
+
   onUpdateSystemInfo = (type: string) => {
-    updateSystemInfo({ enableCollection: true, loginType: type })
-      .then(() => {})
-      .catch();
+    updateSystemInfo({ enableCollection: true, loginType: type });
   };
-  getCode = () => {
-    if (window.location.href.indexOf('/callback?code=') != -1) {
-      const { search } = window.location;
-      const params = querystring.parse(search);
-      const code: any = params.code;
-      if (code) {
-        this.onLogonSSO(code);
-      }
-    }
-  };
+
   onLogonSSO = (code: any) => {
     loginSSO({ code })
       .then((res: any) => {

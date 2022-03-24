@@ -42,12 +42,18 @@ axiosInstance.interceptors.response.use(
           url: `${baseURL}/${authenticationRefreshToken}`,
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${refreshToken}`,
+            ParseToken: refreshToken,
           },
         });
         if (res && res.accessToken) {
           localStorage.setItem('token', res.accessToken);
           localStorage.setItem('refreshToken', res.refreshToken);
+        } else {
+          store.dispatch(
+            routerRedux.push({
+              pathname: '/login',
+            }),
+          );
         }
         return axiosInstance(error.config);
       } catch (err: any) {
