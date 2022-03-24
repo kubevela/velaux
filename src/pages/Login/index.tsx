@@ -1,13 +1,7 @@
 import React, { Component } from 'react';
 import { Card, Button, Input, Form, Field } from '@b-design/ui';
 import Translation from '../../components/Translation';
-import {
-  getDexConfig,
-  updateSystemInfo,
-  loginLocal,
-  loginSSO,
-  getLoginType,
-} from '../../api/authentication';
+import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
 import Logo from '../../assets/kubevela-log.png';
 import { If } from 'tsx-control-statements/components';
 import { checkName, checkUserPassWord } from '../../utils/common';
@@ -84,21 +78,6 @@ export default class LoginPage extends Component<Props, State> {
       .catch();
   };
 
-  onUpdateSystemInfo = (type: string) => {
-    updateSystemInfo({ enableCollection: true, loginType: type });
-  };
-
-  onLogonSSO = (code: any) => {
-    loginSSO({ code })
-      .then((res: any) => {
-        if (res && res.accessToken) {
-          localStorage.setItem('token', res.accessToken);
-          localStorage.setItem('refreshToken', res.refreshToken);
-          this.props.history.push('/');
-        }
-      })
-      .catch(() => {});
-  };
   handleSubmit = () => {
     this.field.validate((error: any, values: any) => {
       if (error) {
@@ -109,15 +88,13 @@ export default class LoginPage extends Component<Props, State> {
         username: account,
         password,
       };
-      loginLocal(params)
-        .then((res: any) => {
-          if (res && res.accessToken) {
-            localStorage.setItem('token', res.accessToken);
-            localStorage.setItem('refreshToken', res.refreshToken);
-            this.props.history.push('/');
-          }
-        })
-        .catch();
+      loginLocal(params).then((res: any) => {
+        if (res && res.accessToken) {
+          localStorage.setItem('token', res.accessToken);
+          localStorage.setItem('refreshToken', res.refreshToken);
+          this.props.history.push('/');
+        }
+      });
     });
   };
   onGetDexCode = () => {

@@ -42,7 +42,7 @@ axiosInstance.interceptors.response.use(
           url: `${baseURL}/${authenticationRefreshToken}`,
           method: 'GET',
           headers: {
-            ParseToken: refreshToken,
+            RefreshToken: refreshToken,
           },
         });
         if (res && res.accessToken) {
