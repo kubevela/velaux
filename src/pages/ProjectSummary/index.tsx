@@ -11,7 +11,7 @@ type Props = {
   projectDetails: Project;
   match: {
     params: {
-      projectsName: string;
+      projectName: string;
     };
   };
   dispatch: ({}) => {};
@@ -52,17 +52,17 @@ class Summary extends Component<Props, State> {
   };
 
   loadProjectDetail = async () => {
-    const { params = { projectsName: '' } } = this.props.match;
+    const { params = { projectName: '' } } = this.props.match;
     this.props.dispatch({
       type: 'project/getProjectDetails',
-      payload: { projectsName: params.projectsName },
+      payload: { projectName: params.projectName },
     });
   };
 
   render() {
     const { userList } = this.state;
     const { match, projectDetails } = this.props;
-    const { params = { projectsName: '' } } = match;
+    const { params = { projectName: '' } } = match;
     return (
       <Fragment>
         <General
@@ -70,7 +70,7 @@ class Summary extends Component<Props, State> {
           userList={userList}
           loadProjectDetail={this.loadProjectDetail}
         />
-        <Targets projectsName={params.projectsName} />
+        <Targets projectName={params.projectName} />
         <Integrations />
       </Fragment>
     );

@@ -1,4 +1,4 @@
-import type { Project } from './project';
+import type { NameAlias } from './env';
 export type Target = {
   id?: string;
   name: string;
@@ -10,5 +10,5 @@ export type Target = {
     namespace?: string;
   };
   variable?: any;
-  project?: Project;
+  project?: NameAlias;
 };

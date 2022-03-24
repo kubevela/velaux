@@ -2,7 +2,8 @@ import React, { Fragment, Component } from 'react';
 import { Link } from 'dva/router';
 import { getProjectList, deleteProject } from '../../api/project';
 import { getUserList } from '../../api/users';
-import type { Project, Owner } from '../../interface/project';
+import type { Project } from '../../interface/project';
+import type { NameAlias } from '../../interface/env';
 import type { User } from '../../interface/user';
 import { Table, Button, Pagination, Dialog, Message } from '@b-design/ui';
 import Translation from '../../components/Translation';
@@ -176,7 +177,7 @@ class Projects extends Component<Props, State> {
         key: 'owner',
         title: <Translation>Owner</Translation>,
         dataIndex: 'owner',
-        cell: (v: Owner) => {
+        cell: (v: NameAlias) => {
           return <span>{v && v.name}</span>;
         },
       },

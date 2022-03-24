@@ -281,15 +281,22 @@ class DeliveryDialog extends React.Component<Props, State> {
 
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Project</Translation>}>
+                <FormItem label={<Translation>Project</Translation>} required>
                   <Select.AutoComplete
                     name="project"
                     hasClear
-                    placeholder={t('Please enter').toString()}
+                    placeholder={t('Please select').toString()}
                     filterLocal={true}
                     dataSource={projectList}
                     style={{ width: '100%' }}
-                    {...init('project')}
+                    {...init('project', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please select project',
+                        },
+                      ],
+                    })}
                   />
                 </FormItem>
               </Col>

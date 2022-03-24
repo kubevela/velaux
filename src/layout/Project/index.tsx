@@ -9,7 +9,7 @@ type Props = {
   activeId: string;
   match: {
     params: {
-      projectsName: string;
+      projectName: string;
     };
   };
   dispatch: ({}) => {};
@@ -25,10 +25,10 @@ class ProjectLayout extends Component<Props> {
   }
 
   loadProjectDetail = async () => {
-    const { params = { projectsName: '' } } = this.props.match;
+    const { params = { projectName: '' } } = this.props.match;
     this.props.dispatch({
       type: 'project/getProjectDetails',
-      payload: { projectsName: params.projectsName },
+      payload: { projectName: params.projectName },
     });
   };
 
@@ -37,29 +37,29 @@ class ProjectLayout extends Component<Props> {
   }
 
   getNavList = () => {
-    const { params = { projectsName: '' } } = this.props.match;
-    const { projectsName } = params;
+    const { params = { projectName: '' } } = this.props.match;
+    const { projectName } = params;
     const list = [
       {
         id: 'summary',
         name: <Translation>Summary</Translation>,
-        to: `/projects/${projectsName}/summary`,
+        to: `/projects/${projectName}/summary`,
       },
       {
         id: 'applications',
         name: <Translation>Applications</Translation>,
-        to: `/projects/${projectsName}/applications`,
+        to: `/projects/${projectName}/applications`,
       },
     ];
     // {
     //     id: 'roles',
     //     name: <Translation>Roles</Translation>,
-    //     to: `/projects/${projectsName}/roles`
+    //     to: `/projects/${projectName}/roles`
     // },
     // {
     //     id: 'members',
     //     name: <Translation>Members</Translation>,
-    //     to: `/projects/${projectsName}/members`
+    //     to: `/projects/${projectName}/members`
     // }];
 
     const nav = list.map((item) => {

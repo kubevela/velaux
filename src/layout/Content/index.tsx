@@ -131,14 +131,14 @@ export default function Content() {
       <Route exact path="/projects" component={Projects} />
       <Route
         exact
-        path="/projects/:projectsName"
+        path="/projects/:projectName"
         render={(props: any) => {
-          return <Redirect to={`/projects/${props.match.params.projectsName}/summary`} />;
+          return <Redirect to={`/projects/${props.match.params.projectName}/summary`} />;
         }}
       />
       <Route
         exact
-        path="/projects/:projectsName/summary"
+        path="/projects/:projectName/summary"
         render={(props: any) => {
           const mergeProps = { ...props, ...{ activeId: 'summary' } };
           return (
@@ -150,7 +150,7 @@ export default function Content() {
       />
       <Route
         exact
-        path="/projects/:projectsName/applications"
+        path="/projects/:projectName/applications"
         render={(props: any) => {
           const mergeProps = { ...props, ...{ activeId: 'applications' } };
           return (
@@ -162,7 +162,7 @@ export default function Content() {
       />
       {/* <Route
         exact
-        path="/projects/:projectsName/roles"
+        path="/projects/:projectName/roles"
         render={(props: any) => {
           const mergeProps = { ...props, ...{ activeId: 'roles' } }
           return (
@@ -174,7 +174,7 @@ export default function Content() {
       />
       <Route
         exact
-        path="/projects/:projectsName/members"
+        path="/projects/:projectName/members"
         render={(props: any) => {
           const mergeProps = { ...props, ...{ activeId: 'members' } }
           return (

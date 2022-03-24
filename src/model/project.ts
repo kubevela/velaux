@@ -1,8 +1,8 @@
 import { getProjectDetail } from '../api/project';
-import type { Project } from '../interface/project';
+import type { Project, ProjectDetail } from '../interface/project';
 
 interface projectDetailState {
-  projectDetails: {};
+  projectDetails: ProjectDetail;
 }
 
 const project: any = {
@@ -21,7 +21,7 @@ const project: any = {
 
   effects: {
     *getProjectDetails(
-      action: { payload: { projectsName: string } },
+      action: { payload: { projectName: string } },
       { call, put }: { call: any; put: any },
     ) {
       const result: Project = yield call(getProjectDetail, action.payload);

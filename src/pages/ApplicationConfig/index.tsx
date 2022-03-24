@@ -457,6 +457,21 @@ class ApplicationConfig extends Component<Props, State> {
               <Row wrap={true}>
                 <Col m={12} xs={24}>
                   <Item
+                    label={<Translation>Project</Translation>}
+                    value={(applicationDetail && applicationDetail.project?.name) || ''}
+                  />
+                </Col>
+
+                <Col m={12} xs={24}>
+                  <Item
+                    label={<Translation>Description</Translation>}
+                    value={applicationDetail && applicationDetail.description}
+                  />
+                </Col>
+              </Row>
+              <Row wrap={true}>
+                <Col m={12} xs={24}>
+                  <Item
                     label={<Translation>Create Time</Translation>}
                     value={momentDate((applicationDetail && applicationDetail.createTime) || '')}
                   />
@@ -465,15 +480,6 @@ class ApplicationConfig extends Component<Props, State> {
                   <Item
                     label={<Translation>Update Time</Translation>}
                     value={momentDate((applicationDetail && applicationDetail.updateTime) || '')}
-                  />
-                </Col>
-              </Row>
-              <Row wrap={true}>
-                <Col span={24}>
-                  <Item
-                    label={<Translation>Description</Translation>}
-                    labelSpan={4}
-                    value={applicationDetail && applicationDetail.description}
                   />
                 </Col>
               </Row>

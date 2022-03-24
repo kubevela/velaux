@@ -4,12 +4,14 @@ import Translation from '../../../../components/Translation';
 import { deleteTarget } from '../../../../api/target';
 import './index.less';
 import type { Target } from '../../../../interface/target';
+import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
+import { Link } from 'dva/router';
 
 type Props = {
   list?: [];
   updateTargetList: () => void;
-  changeISEdit: (pararms: boolean, record: Target) => void;
+  changeISEdit: (param: boolean, record: Target) => void;
 };
 
 class TableList extends Component<Props> {
@@ -22,11 +24,11 @@ class TableList extends Component<Props> {
     });
   };
 
-  onEdlt = (record: Target) => {
+  onEdit = (record: Target) => {
     this.props.changeISEdit(true, record);
   };
 
-  getCloumns = () => {
+  getColumns = () => {
     return [
       {
         key: 'name',
@@ -42,6 +44,18 @@ class TableList extends Component<Props> {
         dataIndex: 'alias',
         cell: (v: string) => {
           return <span>{v}</span>;
+        },
+      },
+      {
+        key: 'project',
+        title: <Translation>Project</Translation>,
+        dataIndex: 'project',
+        cell: (v: Project) => {
+          if (v && v.name) {
+            return <Link to={`/projects/${v.name}/summary`}>{v && v.name}</Link>;
+          } else {
+            return null;
+          }
         },
       },
       {
@@ -93,7 +107,7 @@ class TableList extends Component<Props> {
               <a
                 className="margin-left-10"
                 onClick={() => {
-                  this.onEdlt(record);
+                  this.onEdit(record);
                 }}
               >
                 <Translation>Edit</Translation>
@@ -107,7 +121,7 @@ class TableList extends Component<Props> {
 
   render() {
     const { Column } = Table;
-    const columns = this.getCloumns();
+    const columns = this.getColumns();
     const { list } = this.props;
     return (
       <div className="table-delivery-list margin-top-20">

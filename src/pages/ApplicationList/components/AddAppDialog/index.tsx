@@ -22,6 +22,7 @@ import EnvDialog from '../../../EnvPage/components/EnvDialog';
 
 type Props = {
   visible: boolean;
+  isDisableProject?: boolean;
   projectName?: string;
   targets?: Target[];
   componentDefinitions: [];
@@ -81,9 +82,11 @@ class AppDialog extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const { projects } = this.props;
+    const { projects, projectName } = this.props;
+    if (projectName) {
+      this.field.setValue('project', projectName);
+    }
     if (projects && projects.length > 0) {
-      this.field.setValue('project', projects[0].name);
       this.setState({ project: projects[0].name }, () => {
         this.loadEnvs();
       });
@@ -106,7 +109,6 @@ class AppDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { projectName = '' } = this.props;
       const {
         description,
         alias,
@@ -115,6 +117,7 @@ class AppDialog extends React.Component<Props, State> {
         componentType,
         properties,
         envBindings,
+        project,
       } = values;
       const envbinding = envBindings.map((env: string) => {
         return { name: env };
@@ -124,7 +127,7 @@ class AppDialog extends React.Component<Props, State> {
         icon,
         name,
         description,
-        project: projectName || 'default',
+        project: project || 'default',
         envBinding: envbinding,
         component: {
           alias,
@@ -329,8 +332,16 @@ class AppDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
 
-    const { visible, setVisible, dispatch, projects, targets, syncProjectList, onClose } =
-      this.props;
+    const {
+      visible,
+      setVisible,
+      dispatch,
+      projects,
+      targets,
+      syncProjectList,
+      onClose,
+      isDisableProject,
+    } = this.props;
 
     const { definitionDetail, dialogStats, envs, visibleEnvDialog } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -358,6 +369,7 @@ class AppDialog extends React.Component<Props, State> {
                 setVisible={setVisible}
                 dispatch={dispatch}
                 projects={projects}
+                isDisableProject={isDisableProject}
                 syncProjectList={syncProjectList}
                 field={this.field}
                 ref={this.basicRef}

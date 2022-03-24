@@ -346,3 +346,10 @@ export interface ChartVersion {
   digest: string;
   icon?: string;
 }
+
+export interface ApplicationQuery {
+  query?: string;
+  project?: string;
+  env?: string;
+  targetName?: string;
+}

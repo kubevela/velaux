@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'dva';
 import { Loading, Message } from '@b-design/ui';
 import CardContend from '../ApplicationList/components/CardContent';
-import { ApplicationBase } from '../../interface/application';
+import { ApplicationBase, ApplicationQuery } from '../../interface/application';
 import type { Project } from '../../interface/project';
 import {
   getApplicationList,
@@ -11,15 +11,17 @@ import {
 } from '../../api/application';
 import { getTarget } from '../../api/target';
 import { getProjectList } from '../../api/project';
+import { getEnvs } from '../../api/env';
 import { If } from 'tsx-control-statements/components';
 import EditAppDialog from '../ApplicationList/components/EditAppDialog';
 import AppDialog from '../ApplicationList/components/AddAppDialog';
+import SelectSearch from './components/SelectSearch';
 
 type Props = {
   applicationList: ApplicationBase[];
   match: {
     params: {
-      projectsName: string;
+      projectName: string;
     };
   };
   dispatch: ({}) => {};
@@ -32,6 +34,7 @@ type State = {
   editApplicationItem: ApplicationBase;
   targets?: [];
   projects?: Project[];
+  envs?: [];
   componentDefinitions: [];
   isEditApplication: boolean;
   isAddApplication: boolean;
@@ -53,6 +56,7 @@ class ProjectApplications extends Component<Props, State> {
         description: '',
         createTime: '',
       },
+      envs: [],
       projects: [{ name: '' }],
       componentDefinitions: [],
       isEditApplication: false,
@@ -63,14 +67,22 @@ class ProjectApplications extends Component<Props, State> {
   componentDidMount() {
     this.listApplication();
     this.listTargets();
+    this.listEnvs();
     this.getProjectList();
     this.onGetComponentDefinitions();
   }
 
-  listApplication = async () => {
-    const { params = { projectsName: '' } } = this.props.match;
+  listApplication = async (queryData?: ApplicationQuery) => {
+    const { params = { projectName: '' } } = this.props.match;
+    const { query = '', env = '', targetName = '' } = queryData || {};
+    const queryParams: ApplicationQuery = {
+      query,
+      env,
+      targetName,
+      project: params.projectName,
+    };
     this.setState({ isLoading: true });
-    getApplicationList({ project: params.projectsName })
+    getApplicationList(queryParams)
       .then((res) => {
         this.setState({ applicationList: res.applications || [] });
       })
@@ -83,6 +95,12 @@ class ProjectApplications extends Component<Props, State> {
   listTargets = async () => {
     getTarget({}).then((res) => {
       this.setState({ targets: res.targets || [] });
+    });
+  };
+
+  listEnvs = async () => {
+    getEnvs({}).then((res) => {
+      this.setState({ envs: res.envs || [] });
     });
   };
 
@@ -141,14 +159,25 @@ class ProjectApplications extends Component<Props, State> {
       isEditApplication,
       editApplicationItem,
       targets,
+      envs,
       projects,
       componentDefinitions,
     } = this.state;
-    const { params = { projectsName: '' } } = this.props.match;
-    const { projectsName } = params;
+    const { params = { projectName: '' } } = this.props.match;
+    const { projectName } = params;
 
     return (
       <Fragment>
+        <SelectSearch
+          targetList={targets}
+          envs={envs}
+          listApplication={(queryData: ApplicationQuery) => {
+            this.listApplication(queryData);
+          }}
+          onAddApplication={() => {
+            this.setState({ isAddApplication: true });
+          }}
+        />
         <Loading visible={isLoading} fullScreen>
           <CardContend
             applications={applicationList}
@@ -168,7 +197,8 @@ class ProjectApplications extends Component<Props, State> {
             targets={targets}
             syncProjectList={this.getProjectList}
             projects={projects}
-            projectName={projectsName}
+            isDisableProject={true}
+            projectName={projectName}
             componentDefinitions={componentDefinitions}
             setVisible={(visible) => {
               this.setState({ isAddApplication: visible });

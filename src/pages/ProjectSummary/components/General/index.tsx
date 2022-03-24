@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Grid, Card } from '@b-design/ui';
-import { Project } from '../../../../interface/project';
+import { Project, ProjectDetail } from '../../../../interface/project';
 import { User } from '../../../../interface/user';
 import Translation from '../../../../components/Translation';
 import Item from '../../../../components/Item';
@@ -10,7 +10,7 @@ import GeneralDialog from '../GeneralDialog';
 import './index.less';
 
 type Props = {
-  projectDetails: Project;
+  projectDetails: ProjectDetail;
   userList: User[];
   loadProjectDetail: () => void;
 };
@@ -23,7 +23,7 @@ class General extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      editGeneral: { name: '', alias: '', owner: { name: '' }, description: '' },
+      editGeneral: { name: '', alias: '', owner: { name: '', alias: '' }, description: '' },
       isEditGeneral: false,
     };
   }
@@ -57,7 +57,7 @@ class General extends Component<Props, State> {
         alias: '',
         createTime: '',
         description: '',
-        owner: { name: '' },
+        owner: { name: '', alias: '' },
       },
     } = this.props;
     const { isEditGeneral, editGeneral } = this.state;

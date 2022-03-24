@@ -1,13 +1,13 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Table } from '@b-design/ui';
 import { Link } from 'dva/router';
-import { getProjectDetailTargets } from '../../../../api/project';
+import { getProjectTargetList } from '../../../../api/project';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import './index.less';
 
 type Props = {
-  projectsName: string;
+  projectName: string;
 };
 
 type State = {
@@ -33,8 +33,8 @@ class Targets extends Component<Props, State> {
   }
 
   onTargets() {
-    const { projectsName } = this.props;
-    getProjectDetailTargets({ projectsName }).then((res) => {
+    const { projectName } = this.props;
+    getProjectTargetList({ projectName }).then((res) => {
       this.setState({
         list: (res && res.targets) || [],
       });

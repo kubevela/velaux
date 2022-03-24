@@ -1,5 +1,5 @@
 import { post, get, rdelete, put } from './request';
-import { Project } from '../interface/project';
+import { ProjectBaseCreate } from '../interface/project';
 import { project_mock } from './devLink';
 import { project } from './productionLink';
 import { getDomain } from '../utils/common';
@@ -12,11 +12,11 @@ export function getProjectList(params: { page?: number; pageSize?: number }) {
   return get(url, { params: params }).then((res) => res);
 }
 
-export function createProject(params: Project) {
+export function createProject(params: ProjectBaseCreate) {
   return post(url, params).then((res) => res);
 }
 
-export function updateProject(params: Project) {
+export function updateProject(params: ProjectBaseCreate) {
   const urlPath = project + `/${params.name}`;
   return put(urlPath, params).then((res) => res);
 }
@@ -26,12 +26,12 @@ export function deleteProject(params: { name: string }) {
   return rdelete(urlPath, {}).then((res) => res);
 }
 
-export function getProjectDetail(params: { projectsName: string }) {
-  const urlPath = project + `/${params.projectsName}`;
+export function getProjectDetail(params: { projectName: string }) {
+  const urlPath = project + `/${params.projectName}`;
   return get(urlPath, {}).then((res) => res);
 }
 
-export function getProjectDetailTargets(params: { projectsName: string }) {
-  const urlPath = project + `/${params.projectsName}/targets`;
+export function getProjectTargetList(params: { projectName: string }) {
+  const urlPath = project + `/${params.projectName}/targets`;
   return get(urlPath, {}).then((res) => res);
 }

@@ -1,18 +1,17 @@
 import React from 'react';
 import type { Field } from '@b-design/ui';
-import { Grid, Form, Input } from '@b-design/ui';
-import ProjectForm from './project-form';
+import { Grid, Form, Input, Select } from '@b-design/ui';
 import { checkName } from '../../../../utils/common';
 import './index.less';
 import Translation from '../../../../components/Translation';
 import type { Project } from '../../../../interface/project';
-import { If } from 'tsx-control-statements/components';
-import i18n from 'i18next';
+import i18n from '../../../../i18n';
 
 type Props = {
   visible: boolean;
   field: Field;
   projects?: Project[];
+  isDisableProject?: boolean;
   syncProjectList: () => void;
   setVisible: (visible: boolean) => void;
   dispatch: ({}) => void;
@@ -31,10 +30,10 @@ class GeneralConfig extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { projects } = this.props;
-    const projectList = projects?.map((item) => {
+    const { projects, isDisableProject } = this.props;
+    const projectList = (projects || []).map((item) => {
       return {
-        label: item.alias || item.name,
+        label: item.name,
         value: item.name,
       };
     });
@@ -109,17 +108,29 @@ class GeneralConfig extends React.Component<Props, State> {
               </FormItem>
             </Col>
           </Row>
-          <If condition={false}>
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <ProjectForm
-                  field={this.props.field}
-                  projectList={projectList}
-                  syncProjectList={this.props.syncProjectList}
+          <Row>
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>Project</Translation>} required>
+                <Select.AutoComplete
+                  name="project"
+                  hasClear
+                  placeholder={i18n.t('Please select').toString()}
+                  filterLocal={true}
+                  disabled={isDisableProject ? true : false}
+                  dataSource={projectList}
+                  style={{ width: '100%' }}
+                  {...init('project', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please select project',
+                      },
+                    ],
+                  })}
                 />
-              </Col>
-            </Row>
-          </If>
+              </FormItem>
+            </Col>
+          </Row>
         </Form>
       </div>
     );
