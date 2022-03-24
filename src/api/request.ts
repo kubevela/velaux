@@ -67,7 +67,6 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(err.response || err);
       }
     } else {
-      localStorage.removeItem('token');
       Message.error(getMessage(status));
       return Promise.reject(error.response || error);
     }
