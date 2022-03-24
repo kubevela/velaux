@@ -6,11 +6,9 @@ import Translation from '../../../../components/Translation';
 import { listNamespaces } from '../../../../api/observation';
 import locale from '../../../../utils/locale';
 import type { Env } from '../../../../interface/env';
-import ProjectForm from '../../../ApplicationList/components/GeneralConfig/project-form';
 import type { Project } from '../../../../interface/project';
 import { createEnv, updateEnv } from '../../../../api/env';
-import { If } from 'tsx-control-statements/components';
-import i18n from 'i18next';
+import i18n from '../../../../i18n';
 
 type Props = {
   project?: string;
@@ -65,13 +63,13 @@ class EnvDialog extends React.Component<Props, State> {
         return;
       }
       const { isEdit } = this.props;
-      const { name, alias, description, targets, namespace } = values;
+      const { name, alias, description, targets, namespace, project } = values;
       const params = {
         name,
         alias,
         description,
         namespace,
-        project: 'default',
+        project: project || 'default',
         targets,
       };
 
@@ -140,10 +138,10 @@ class EnvDialog extends React.Component<Props, State> {
       },
     };
 
-    const { visible, isEdit, projects, syncProjectList } = this.props;
-    const projectOptions = projects.map((project) => {
+    const { visible, isEdit, projects } = this.props;
+    const projectList = (projects || []).map((project) => {
       return {
-        label: project.alias || project.name,
+        label: project.name,
         value: project.name,
       };
     });
@@ -248,18 +246,28 @@ class EnvDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
-            <If condition={false}>
-              <Row>
-                <Col span={24} style={{ padding: '0 8px' }}>
-                  <ProjectForm
-                    field={this.field}
-                    disable={isEdit}
-                    projectList={projectOptions}
-                    syncProjectList={syncProjectList}
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem label={<Translation>Project</Translation>} required>
+                  <Select.AutoComplete
+                    name="project"
+                    hasClear
+                    placeholder={i18n.t('Please select').toString()}
+                    filterLocal={true}
+                    dataSource={projectList}
+                    style={{ width: '100%' }}
+                    {...init('project', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please select project',
+                        },
+                      ],
+                    })}
                   />
-                </Col>
-              </Row>
-            </If>
+                </FormItem>
+              </Col>
+            </Row>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Target</Translation>} required>
