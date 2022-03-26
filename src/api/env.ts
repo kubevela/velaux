@@ -12,7 +12,7 @@ export function getEnvs(params: Querytarget) {
 }
 
 export function createEnv(params: CreateEnvRequest) {
-  const url = base + envURL;
+  const url = base + envURL + '?project=' + params.project;
   return post(url, params);
 }
 

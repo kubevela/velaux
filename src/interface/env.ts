@@ -1,6 +1,7 @@
 export interface CreateEnvRequest {
   name: string;
   alias?: string;
+  project: string;
   description?: string;
   targets: string[];
   namespace?: string;
@@ -24,5 +25,5 @@ export interface EnvListResponse {
 
 export interface NameAlias {
   name: string;
-  alias: string;
+  alias?: string;
 }

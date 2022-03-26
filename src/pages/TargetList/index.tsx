@@ -10,6 +10,7 @@ import './index.less';
 import type { Cluster } from '../../interface/cluster';
 import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
+import type { LoginUserInfo } from '../../interface/user';
 
 type Props = {
   targets?: [];
@@ -17,6 +18,7 @@ type Props = {
   clusterList?: Cluster[];
   dispatch: ({}) => void;
   t: (key: string) => string;
+  userInfo?: LoginUserInfo;
 };
 
 type State = {
@@ -31,7 +33,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.target, ...store.clusters };
+  return { ...store.target, ...store.clusters, ...store.user };
 })
 class targetList extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -50,7 +52,6 @@ class targetList extends React.Component<Props, State> {
   componentDidMount() {
     this.getTargetList();
     this.getClusterList();
-    this.getProjectList();
   }
 
   getTargetList = async () => {
@@ -68,13 +69,6 @@ class targetList extends React.Component<Props, State> {
   getClusterList = async () => {
     this.props.dispatch({
       type: 'clusters/getClusterList',
-    });
-  };
-
-  getProjectList = async () => {
-    this.props.dispatch({
-      type: 'application/getProjectList',
-      payload: {},
     });
   };
 
@@ -118,7 +112,7 @@ class targetList extends React.Component<Props, State> {
   };
 
   render() {
-    const { t, clusterList, targets, total } = this.props;
+    const { t, clusterList, targets, total, userInfo } = this.props;
     const { visibleDelivery, isEdit, targetItem } = this.state;
     return (
       <div>
@@ -153,6 +147,7 @@ class targetList extends React.Component<Props, State> {
           <TargetDialog
             t={t}
             visible={visibleDelivery}
+            projects={userInfo?.projects || []}
             clusterList={clusterList || []}
             isEdit={isEdit}
             targetItem={targetItem}

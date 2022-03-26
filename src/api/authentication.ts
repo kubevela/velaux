@@ -4,6 +4,7 @@ import {
   authenticationDexConfig,
   authenticationSystemInfo,
   authenticationLoginType,
+  authenticationUserInfo,
 } from './productionLink';
 
 export function loginSSO(params: { code: string }) {
@@ -29,4 +30,9 @@ export function getLoginType() {
 export function updateSystemInfo(params: { enableCollection: true; loginType: string }) {
   const url = authenticationSystemInfo;
   return put(url, params).then((res) => res);
+}
+
+export function getLoginUserInfo() {
+  const url = authenticationUserInfo;
+  return get(url, {}).then((res) => res);
 }

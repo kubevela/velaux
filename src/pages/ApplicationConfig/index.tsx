@@ -34,6 +34,7 @@ import EditAppDialog from '../ApplicationList/components/EditAppDialog';
 import Components from './components/Components';
 import ComponentDialog from './components/ComponentDialog';
 import i18n from '../../i18n';
+import { Link } from 'dva/router';
 
 const { Row, Col } = Grid;
 
@@ -458,7 +459,13 @@ class ApplicationConfig extends Component<Props, State> {
                 <Col m={12} xs={24}>
                   <Item
                     label={<Translation>Project</Translation>}
-                    value={(applicationDetail && applicationDetail.project?.name) || ''}
+                    value={
+                      <Link to={`/projects/${applicationDetail?.project?.name}`}>
+                        {applicationDetail?.project?.alias
+                          ? applicationDetail?.project?.alias
+                          : applicationDetail?.project?.name}
+                      </Link>
+                    }
                   />
                 </Col>
 

@@ -56,7 +56,7 @@ class Hearder extends React.Component<Props, State> {
       value: item.name,
     }));
     return (
-      <Row className="boder-radius-8">
+      <Row className="border-radius-8">
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
             locale={locale.Select}

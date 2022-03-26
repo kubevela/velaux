@@ -11,7 +11,7 @@ import { authenticationRefreshToken } from './productionLink';
 
 export const axiosInstance: AxiosInstance = axios.create({
   baseURL: baseURL,
-  timeout: 5000,
+  timeout: 30000,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ axiosInstance.interceptors.response.use(
   },
 
   async (error: any) => {
-    const { data, status } = error?.response || error;
+    const { data, status } = error?.response;
     const refreshToken = localStorage.getItem('refreshToken');
     if (refreshToken && data.BusinessCode === '12002') {
       try {
@@ -84,7 +84,7 @@ axiosInstance.interceptors.response.use(
 axiosInstance.interceptors.request.use(
   (config: any) => {
     if (localStorage.getItem('token')) {
-      config.headers['Authorization'] = 'Bearer ' + getToken();
+      config.headers.Authorization = 'Bearer ' + getToken();
     }
     return config;
   },

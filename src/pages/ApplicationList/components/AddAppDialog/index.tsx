@@ -12,7 +12,6 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
 import './index.less';
 import type { Project } from '../../../../interface/project';
-import type { Cluster } from '../../../../interface/cluster';
 import { connect } from 'dva';
 import locale from '../../../../utils/locale';
 import { getEnvs } from '../../../../api/env';
@@ -27,8 +26,6 @@ type Props = {
   targets?: Target[];
   componentDefinitions: [];
   projects?: Project[];
-  syncProjectList: () => void;
-  clusterList?: Cluster[];
   setVisible: (visible: boolean) => void;
   dispatch: ({}) => void;
   onClose: () => void;
@@ -52,8 +49,8 @@ type SelectGroupType = {
   children: { label: string; value: string }[];
 }[];
 
-@connect((store: any) => {
-  return { ...store.clusters };
+@connect(() => {
+  return {};
 })
 class AppDialog extends React.Component<Props, State> {
   field: Field;
@@ -91,17 +88,10 @@ class AppDialog extends React.Component<Props, State> {
         this.loadEnvs();
       });
     }
-    this.getClusterList();
   }
 
   onClose = () => {
     this.props.setVisible(false);
-  };
-
-  getClusterList = async () => {
-    this.props.dispatch({
-      type: 'clusters/getClusterList',
-    });
   };
 
   onSubmit = () => {
@@ -140,7 +130,7 @@ class AppDialog extends React.Component<Props, State> {
       };
       this.setState({ createLoading: true });
       createApplication(params).then((res) => {
-        if (res) {
+        if (res && res.name) {
           Message.success(<Translation>create application success</Translation>);
           this.props.onOK(name);
         }
@@ -211,7 +201,7 @@ class AppDialog extends React.Component<Props, State> {
     return [...core, ...custom, ...cloud];
   }
 
-  onDetailsComponeDefinition = (value: string) => {
+  onDetailComponentDefinition = (value: string) => {
     detailComponentDefinition({ name: value }).then((re) => {
       if (re) {
         this.setState({ definitionDetail: re, definitionLoading: false });
@@ -248,7 +238,7 @@ class AppDialog extends React.Component<Props, State> {
               dialogStats: value,
             },
             () => {
-              this.onDetailsComponeDefinition(componentType);
+              this.onDetailComponentDefinition(componentType);
             },
           );
         },
@@ -332,16 +322,7 @@ class AppDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
 
-    const {
-      visible,
-      setVisible,
-      dispatch,
-      projects,
-      targets,
-      syncProjectList,
-      onClose,
-      isDisableProject,
-    } = this.props;
+    const { visible, setVisible, dispatch, projects, onClose, isDisableProject } = this.props;
 
     const { definitionDetail, dialogStats, envs, visibleEnvDialog } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -370,7 +351,6 @@ class AppDialog extends React.Component<Props, State> {
                 dispatch={dispatch}
                 projects={projects}
                 isDisableProject={isDisableProject}
-                syncProjectList={syncProjectList}
                 field={this.field}
                 ref={this.basicRef}
               />
@@ -468,9 +448,7 @@ class AppDialog extends React.Component<Props, State> {
         <If condition={visibleEnvDialog}>
           <EnvDialog
             visible={visibleEnvDialog}
-            targets={targets || []}
             projects={projects || []}
-            syncProjectList={this.props.syncProjectList}
             isEdit={false}
             onClose={this.onCloseEnvDialog}
             onOK={this.onOKEnvDialog}

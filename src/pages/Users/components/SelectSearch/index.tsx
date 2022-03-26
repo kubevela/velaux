@@ -36,7 +36,7 @@ class SelectSearch extends React.Component<Props, State> {
   render() {
     const { name, alias, email } = this.props;
     return (
-      <Row className="user-select-wrapper boder-radius-8" wrap={true}>
+      <Row className="user-select-wrapper border-radius-8" wrap={true}>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
             innerAfter={<Icon type="search" size="xs" style={{ margin: 4 }} />}

@@ -47,6 +47,7 @@ type State = {
   target?: Target;
   componentName?: string;
   resources?: AppliedResource[];
+  deployLoading: boolean;
 };
 
 @connect((store: any) => {
@@ -57,6 +58,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
     super(props);
     this.state = {
       loading: true,
+      deployLoading: false,
     };
   }
 
@@ -207,6 +209,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
     } = this.props.match;
     const envs = envbinding.filter((item) => item.name == envName);
     if (envs) {
+      this.setState({ deployLoading: true });
       deployApplication(
         {
           appName: appName,
@@ -219,6 +222,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
         .then((re) => {
           if (re) {
             Message.success(i18next.t('deploy application success'));
+            this.setState({ deployLoading: false });
             this.loadApplicationStatus();
           }
         })
@@ -228,6 +232,9 @@ class ApplicationMonitor extends React.Component<Props, State> {
               content: i18next.t('Workflow is executing. Do you want to force a restart?'),
               onOk: () => {
                 this.onDeploy(true);
+              },
+              onCancel: () => {
+                this.setState({ deployLoading: false });
               },
               locale: locale.Dialog,
             });
@@ -245,7 +252,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
     const {
       params: { appName, envName },
     } = this.props.match;
-    const { loading, endpoints, resources, componentName } = this.state;
+    const { loading, endpoints, resources, componentName, deployLoading } = this.state;
     const gatewayIPs: any = [];
     endpoints?.map((endpointObj) => {
       const item = getLink(endpointObj);
@@ -416,6 +423,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
                 </div>
                 <div className="noticeAction">
                   <Button
+                    loading={deployLoading}
                     disabled={applicationDetail?.readOnly}
                     onClick={() => this.onDeploy()}
                     type="primary"
