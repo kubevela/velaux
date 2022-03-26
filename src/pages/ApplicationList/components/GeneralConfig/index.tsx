@@ -12,7 +12,6 @@ type Props = {
   field: Field;
   projects?: Project[];
   isDisableProject?: boolean;
-  syncProjectList: () => void;
   setVisible: (visible: boolean) => void;
   dispatch: ({}) => void;
 };

@@ -2,7 +2,6 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'dva';
 import type { Project } from '../../interface/project';
 import type { User } from '../../interface/user';
-import { getUserList } from '../../api/users';
 import General from './components/General';
 import Targets from './components/Targets';
 import Integrations from './components/Integrations';
@@ -30,26 +29,7 @@ class Summary extends Component<Props, State> {
     };
   }
 
-  componentDidMount() {
-    this.listUser();
-  }
-
-  listUser = async () => {
-    const param = {
-      name: '',
-    };
-    getUserList(param).then((res) => {
-      if (res && res.users) {
-        const userListData = (res.users || []).map((item: User) => ({
-          label: item.name,
-          value: item.name,
-        }));
-        this.setState({
-          userList: userListData || [],
-        });
-      }
-    });
-  };
+  componentDidMount() {}
 
   loadProjectDetail = async () => {
     const { params = { projectName: '' } } = this.props.match;

@@ -463,5 +463,11 @@
   "LastLoginTime": "上次登录时间",
   "Search by name": "基于用户名称搜索",
   "Search by alias": "基于用户别名搜索",
-  "Search by email": "基于用户邮箱搜索"
+  "Search by email": "基于用户邮箱搜索",
+  "Sign in": "登陆",
+  "Logout": "退出登陆",
+  "Account": "账号",
+  "Please input the password": "请输入密码",
+  "Please input the username or email": "请输入用户账号或邮箱",
+  "The password should be 8-16 bits and contain at least one number and one letter": "密码必须包含至少一个数字和字母，长度在8-16位之间"
 }

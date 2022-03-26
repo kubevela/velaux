@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Card, Button, Input, Form, Field } from '@b-design/ui';
 import Translation from '../../components/Translation';
 import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
-import Logo from '../../assets/kubevela-log.png';
+import Logo from '../../assets/kubevela-logo.png';
 import { If } from 'tsx-control-statements/components';
 import { checkName, checkUserPassWord } from '../../utils/common';
 import './index.less';
@@ -116,72 +116,70 @@ export default class LoginPage extends Component<Props, State> {
     };
     const { loginType } = this.state;
     return (
-      <div className="login-wrapper">
-        <If condition={loginType === 'dex'}>
-          <div />
-        </If>
-        <If condition={loginType === 'local'}>
-          <div className="logo-img-wrapper">
-            <img src={Logo} />
-          </div>
-          <h1 className="text-align-center">
-            <Translation> Sign in to KubeVela </Translation>
-          </h1>
-          <div className="login-card-wrapper">
-            <Card>
-              <Form {...formItemLayout} field={this.field}>
-                <FormItem
-                  label={<Translation className="label-title">Account</Translation>}
-                  labelAlign="top"
-                  required
-                >
-                  <Input
-                    name="account"
-                    placeholder={i18n.t('Enter username/email').toString()}
-                    {...init('account', {
-                      rules: [
-                        {
-                          required: true,
-                          pattern: checkName,
-                          message: (
-                            <Translation>Please enter a username/email address </Translation>
-                          ),
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-                <FormItem
-                  label={<Translation className="label-title">Password</Translation>}
-                  labelAlign="top"
-                  required
-                >
-                  <Input
-                    name="password"
-                    placeholder={i18n.t('Enter password').toString()}
-                    {...init('password', {
-                      rules: [
-                        {
-                          required: true,
-                          pattern: checkUserPassWord,
-                          message: (
-                            <Translation>
-                              Password should be 8-16 bits and contain at least one number and one
-                              letter
-                            </Translation>
-                          ),
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </Form>
-              <Button type="primary" onClick={this.handleSubmit}>
-                <Translation>Sign in</Translation>
-              </Button>
-            </Card>
-          </div>
-        </If>
+      <div className="full">
+        <div className="login-wrapper">
+          <If condition={loginType === 'dex'}>
+            <div />
+          </If>
+          <If condition={loginType === 'local'}>
+            <div className="login-card-wrapper">
+              <Card contentHeight={'auto'}>
+                <div className="logo-img-wrapper">
+                  <img src={Logo} />
+                </div>
+                <Form onSubmit={this.handleSubmit} {...formItemLayout} field={this.field}>
+                  <FormItem
+                    label={<Translation className="label-title">Account</Translation>}
+                    labelAlign="top"
+                    required
+                  >
+                    <Input
+                      name="account"
+                      placeholder={i18n.t('Please input the username or email').toString()}
+                      {...init('account', {
+                        rules: [
+                          {
+                            required: true,
+                            pattern: checkName,
+                            message: <Translation>Please input the username or email</Translation>,
+                          },
+                        ],
+                      })}
+                    />
+                  </FormItem>
+                  <FormItem
+                    label={<Translation className="label-title">Password</Translation>}
+                    labelAlign="top"
+                    required
+                  >
+                    <Input
+                      name="password"
+                      htmlType="password"
+                      placeholder={i18n.t('Please input the password').toString()}
+                      {...init('password', {
+                        rules: [
+                          {
+                            required: true,
+                            pattern: checkUserPassWord,
+                            message: (
+                              <Translation>
+                                The password should be 8-16 bits and contain at least one number and
+                                one letter
+                              </Translation>
+                            ),
+                          },
+                        ],
+                      })}
+                    />
+                  </FormItem>
+                </Form>
+                <Button type="primary" onClick={this.handleSubmit}>
+                  <Translation>Sign in</Translation>
+                </Button>
+              </Card>
+            </div>
+          </If>
+        </div>
       </div>
     );
   }

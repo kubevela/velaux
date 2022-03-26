@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Grid, Card } from '@b-design/ui';
-import { Project, ProjectDetail } from '../../../../interface/project';
-import { User } from '../../../../interface/user';
+import type { Project, ProjectDetail } from '../../../../interface/project';
+import type { User } from '../../../../interface/user';
 import Translation from '../../../../components/Translation';
 import Item from '../../../../components/Item';
 import { If } from 'tsx-control-statements/components';
@@ -91,7 +91,11 @@ class General extends Component<Props, State> {
                 <Col m={12} xs={24}>
                   <Item
                     label={<Translation>Owner</Translation>}
-                    value={projectDetails.owner?.name}
+                    value={
+                      projectDetails.owner?.alias
+                        ? `${projectDetails.owner?.alias}(${projectDetails.owner?.name})`
+                        : projectDetails.owner?.name
+                    }
                   />
                 </Col>
               </Row>

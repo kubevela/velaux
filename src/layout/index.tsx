@@ -9,7 +9,7 @@ export default function MainLayout(props: any) {
   return (
     <ConfigProvider>
       <div className="layout">
-        <TopBar props={props} />
+        <TopBar {...props} />
         <div className="layout-shell">
           <div className="layout-navigation">
             <LeftMenu props={props} />

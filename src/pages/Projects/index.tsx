@@ -178,7 +178,7 @@ class Projects extends Component<Props, State> {
         title: <Translation>Owner</Translation>,
         dataIndex: 'owner',
         cell: (v: NameAlias) => {
-          return <span>{v && v.name}</span>;
+          return <span>{v && v.alias ? `${v.alias}(${v.name})` : v.name}</span>;
         },
       },
       {

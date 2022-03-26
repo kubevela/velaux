@@ -1,5 +1,5 @@
 import React from 'react';
-import { Message, Grid, Dialog, Form, Input, Field, Select } from '@b-design/ui';
+import { Message, Grid, Dialog, Form, Input, Field, Select, Loading } from '@b-design/ui';
 import { checkName } from '../../../../utils/common';
 import type { Target } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
@@ -9,28 +9,39 @@ import type { Env } from '../../../../interface/env';
 import type { Project } from '../../../../interface/project';
 import { createEnv, updateEnv } from '../../../../api/env';
 import i18n from '../../../../i18n';
+import { getProjectTargetList } from '../../../../api/project';
 
 type Props = {
   project?: string;
   isEdit?: boolean;
   visible: boolean;
-  targets: Target[];
   projects: Project[];
-  syncProjectList: () => void;
   envItem?: Env;
   onOK: () => void;
   onClose: () => void;
 };
 
-type State = {};
+type State = {
+  targets?: Target[];
+  namespaces?: { label: string; value: string }[];
+  targetLoading: boolean;
+};
 
 class EnvDialog extends React.Component<Props, State> {
   field: Field;
 
   constructor(props: Props) {
     super(props);
-    this.field = new Field(this);
-    this.state = {};
+    this.field = new Field(this, {
+      onChange: (name: string, value: string) => {
+        if (name == 'project') {
+          this.loadProjectTarget(value);
+        }
+      },
+    });
+    this.state = {
+      targetLoading: false,
+    };
   }
 
   componentDidMount() {
@@ -55,6 +66,15 @@ class EnvDialog extends React.Component<Props, State> {
   onClose = () => {
     this.props.onClose();
     this.resetField();
+  };
+
+  loadProjectTarget = async (projectName: string) => {
+    this.setState({ targetLoading: true });
+    getProjectTargetList({ projectName }).then((res) => {
+      if (res) {
+        this.setState({ targets: res.targets, targetLoading: false });
+      }
+    });
   };
 
   onOk = () => {
@@ -105,7 +125,7 @@ class EnvDialog extends React.Component<Props, State> {
   }
 
   convertTarget = () => {
-    const { targets } = this.props;
+    const { targets } = this.state;
     return (targets || []).map((target: Target) => ({
       label: target.alias || target.name,
       value: target.name,
@@ -139,9 +159,10 @@ class EnvDialog extends React.Component<Props, State> {
     };
 
     const { visible, isEdit, projects } = this.props;
+    const { targetLoading } = this.state;
     const projectList = (projects || []).map((project) => {
       return {
-        label: project.name,
+        label: project.alias ? `${project.alias}(${project.name})` : project.name,
         value: project.name,
       };
     });
@@ -270,23 +291,25 @@ class EnvDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Target</Translation>} required>
-                  <Select
-                    locale={locale.Select}
-                    className="select"
-                    mode="multiple"
-                    placeholder={i18n.t('Please select Target').toString()}
-                    {...init(`targets`, {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Please select at least one target',
-                        },
-                      ],
-                    })}
-                    dataSource={this.convertTarget()}
-                  />
-                </FormItem>
+                <Loading visible={targetLoading} style={{ width: '100%' }}>
+                  <FormItem label={<Translation>Target</Translation>} required>
+                    <Select
+                      locale={locale.Select}
+                      className="select"
+                      mode="multiple"
+                      placeholder={i18n.t('Please select a target').toString()}
+                      {...init(`targets`, {
+                        rules: [
+                          {
+                            required: true,
+                            message: 'Please select at least one target',
+                          },
+                        ],
+                      })}
+                      dataSource={this.convertTarget()}
+                    />
+                  </FormItem>
+                </Loading>
               </Col>
             </Row>
           </Form>

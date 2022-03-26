@@ -53,6 +53,7 @@ type State = {
   cloudInstance?: CloudInstance[];
   showStatus: boolean;
   endpoints?: Endpoint[];
+  deployLoading: boolean;
 };
 
 type CloudInstance = {
@@ -77,6 +78,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       loading: false,
       openRowKeys: [],
       showStatus: false,
+      deployLoading: false,
     };
   }
 
@@ -422,6 +424,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     } = this.props.match;
     const envs = envbinding.filter((item) => item.name == envName);
     if (envs) {
+      this.setState({ deployLoading: true });
       deployApplication(
         {
           appName: appName,
@@ -434,6 +437,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         .then((re) => {
           if (re) {
             Message.success('deploy application success');
+            this.setState({ deployLoading: false });
             this.loadApplicationStatus();
           }
         })
@@ -443,6 +447,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
               content: 'Workflow is executing. Do you want to force a restart?',
               onOk: () => {
                 this.onDeploy(true);
+              },
+              onCancel: () => {
+                this.setState({ deployLoading: false });
               },
               locale: locale.Dialog,
             });
@@ -484,7 +491,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
 
   render() {
     const { applicationStatus, applicationDetail, components } = this.props;
-    const { podList, loading, showStatus, cloudInstance, endpoints } = this.state;
+    const { podList, loading, showStatus, cloudInstance, endpoints, deployLoading } = this.state;
     const columns = this.getColumns();
     const envbinding = this.getEnvbindingByName();
     const expandedRowRender = (record: PodBase) => {
@@ -616,6 +623,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
               </div>
               <div className="noticeAction">
                 <Button
+                  loading={deployLoading}
                   disabled={applicationDetail?.readOnly}
                   onClick={() => this.onDeploy()}
                   type="primary"

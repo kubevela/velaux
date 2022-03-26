@@ -1,9 +1,12 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'dva';
+import { Grid, Breadcrumb } from '@b-design/ui';
 import { Link } from 'dva/router';
-import Title from '../../components/ListTitle';
 import Translation from '../../components/Translation';
 import './index.less';
+import type { ProjectDetail } from '../../interface/project';
+
+const { Row, Col } = Grid;
 
 type Props = {
   activeId: string;
@@ -13,6 +16,7 @@ type Props = {
     };
   };
   dispatch: ({}) => {};
+  projectDetails?: ProjectDetail;
   location: any;
 };
 
@@ -31,10 +35,6 @@ class ProjectLayout extends Component<Props> {
       payload: { projectName: params.projectName },
     });
   };
-
-  shouldComponentUpdate(nextProps: any) {
-    return nextProps.location !== this.props.location;
-  }
 
   getNavList = () => {
     const { params = { projectName: '' } } = this.props.match;
@@ -75,9 +75,21 @@ class ProjectLayout extends Component<Props> {
 
   render() {
     const menu = this.getNavList();
+    const { projectDetails } = this.props;
     return (
       <Fragment>
-        <Title title="Projects" subTitle="Projects are used to allocate and isolate resources" />
+        <Row>
+          <Col span={6} className="padding16">
+            <Breadcrumb separator="/">
+              <Breadcrumb.Item>
+                <Translation>Projects</Translation>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                {projectDetails && (projectDetails.alias || projectDetails.name)}
+              </Breadcrumb.Item>
+            </Breadcrumb>
+          </Col>
+        </Row>
         <nav className="project-detail-wrapper">
           <ul>{menu}</ul>
         </nav>

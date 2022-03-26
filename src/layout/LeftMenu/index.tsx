@@ -44,8 +44,8 @@ const LeftMenu = (props: any) => {
 
   return (
     <div style={{ position: 'relative', height: '100%' }}>
-      <div className="slide-wraper">
-        <ul className="ul-wraper">{childrenSider}</ul>
+      <div className="slide-wrapper">
+        <ul className="ul-wrapper">{childrenSider}</ul>
         <div className="bottom">
           <div className="nav-container">Version {version}</div>
         </div>
