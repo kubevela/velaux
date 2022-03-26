@@ -35,7 +35,7 @@ export default class CallBackPage extends React.Component<Props> {
         localStorage.setItem('token', res.accessToken);
         localStorage.setItem('refreshToken', res.refreshToken);
         this.props.history.push('/');
-      } else if (res && res.data.BusinessCode) {
+      } else if (res && res.data && res.data.BusinessCode) {
         setTimeout(() => {
           this.props.history.push('/login');
         }, 3000);

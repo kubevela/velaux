@@ -94,19 +94,19 @@ class ProjectApplications extends Component<Props, State> {
 
   listTargets = async () => {
     getTarget({}).then((res) => {
-      this.setState({ targets: res.targets || [] });
+      this.setState({ targets: (res && res.targets) || [] });
     });
   };
 
   listEnvs = async () => {
     getEnvs({}).then((res) => {
-      this.setState({ envs: res.envs || [] });
+      this.setState({ envs: (res && res.envs) || [] });
     });
   };
 
   getProjectList = async () => {
     getProjectList({}).then((res) => {
-      this.setState({ projects: res.projects || [] });
+      this.setState({ projects: (res && res.projects) || [] });
     });
   };
 

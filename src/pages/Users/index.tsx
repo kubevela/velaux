@@ -1,6 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { Table, Button, Pagination, Message, Dialog } from '@b-design/ui';
 import type { User } from '../../interface/user';
+import type { RolesBase } from '../../interface/roles';
+import type { NameAlias } from '../../interface/env';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
@@ -8,6 +10,7 @@ import Title from '../../components/ListTitle';
 import CreateUser from './components/CreateUser';
 import ResetPassWordDialog from './components/ResetPassWordDialog';
 import { getUserList, deleteUser, changeUserDisable, changeUserEnable } from '../../api/users';
+import { getRoleList } from '../../api/roles';
 import { momentDate } from '../../utils/common';
 import SelectSearch from './components/SelectSearch';
 import './index.less';
@@ -26,6 +29,7 @@ type State = {
   isUserDialogVisible: boolean;
   isEditUser: boolean;
   editUser: User;
+  rolesList: RolesBase[];
   isResetPassword: boolean;
   isResetPassWordDialog: boolean;
 };
@@ -43,6 +47,7 @@ class Users extends Component<Props, State> {
       isLoading: false,
       total: 0,
       dataSource: [],
+      rolesList: [],
       isEditUser: false,
       isResetPassword: false,
       isResetPassWordDialog: false,
@@ -56,6 +61,7 @@ class Users extends Component<Props, State> {
 
   componentDidMount() {
     this.listUser();
+    this.listRoles();
   }
 
   listUser = async () => {
@@ -75,12 +81,19 @@ class Users extends Component<Props, State> {
           total: res.total,
         });
       })
-      .catch(() => {})
       .finally(() => {
         this.setState({
           isLoading: false,
         });
       });
+  };
+
+  listRoles = async () => {
+    getRoleList({}).then((res) => {
+      this.setState({
+        rolesList: (res && res.roles) || [],
+      });
+    });
   };
 
   handleChangName = (e: string) => {
@@ -256,6 +269,16 @@ class Users extends Component<Props, State> {
         },
       },
       {
+        key: 'roles',
+        title: <Translation>Platform Roles</Translation>,
+        dataIndex: 'roles',
+        cell: (v: NameAlias[]) => {
+          return (v || []).map((item: NameAlias) => (
+            <span className="roles-permPolicies margin-right-5">{item.alias || item.name}</span>
+          ));
+        },
+      },
+      {
         key: 'email',
         title: <Translation>Email</Translation>,
         dataIndex: 'email',
@@ -357,6 +380,7 @@ class Users extends Component<Props, State> {
       isLoading,
       isResetPassWordDialog,
       isResetPassword,
+      rolesList,
     } = this.state;
     return (
       <Fragment>
@@ -416,6 +440,7 @@ class Users extends Component<Props, State> {
                 visible={isUserDialogVisible}
                 isEditUser={isEditUser}
                 editUser={editUser}
+                rolesList={rolesList}
                 onClose={this.onClose}
                 onCreate={this.onCreate}
               />

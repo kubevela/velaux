@@ -1,0 +1,252 @@
+import React, { Fragment, Component } from 'react';
+import { Table, Button, Pagination, Dialog, Message } from '@b-design/ui';
+import RolesDialog from './components/RolesDialog';
+import Title from '../../components/ListTitle';
+import { If } from 'tsx-control-statements/components';
+import { getRoleList, deleteRole } from '../../api/roles';
+import { getPermPolicies } from '../../api/permPolicies';
+import type { RolesBase } from '../../interface/roles';
+import type { PermPolicies } from '../../interface/permPolicies';
+import Translation from '../../components/Translation';
+import { momentDate } from '../../utils/common';
+import locale from '../../utils/locale';
+import './index.less';
+
+type Props = {};
+
+type State = {
+  list: RolesBase[];
+  total: number;
+  page: number;
+  pageSize: number;
+  permPolicies: PermPolicies[];
+  visible: boolean;
+  isEditRole: boolean;
+  editRoleItem: RolesBase;
+  isLoading: boolean;
+};
+
+class Roles extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      list: [],
+      total: 0,
+      page: 0,
+      pageSize: 10,
+      permPolicies: [],
+      visible: false,
+      isEditRole: false,
+      editRoleItem: { name: '' },
+      isLoading: false,
+    };
+  }
+  componentDidMount() {
+    this.listRoles();
+    this.listPermPolicies();
+  }
+
+  listRoles = async () => {
+    this.setState({ isLoading: true });
+    const { page, pageSize } = this.state;
+    getRoleList({ page, pageSize })
+      .then((res) => {
+        this.setState({
+          list: (res && res.roles) || [],
+          total: (res && res.total) || 0,
+          isLoading: false,
+        });
+      })
+      .catch(() => {
+        this.setState({ isLoading: false });
+      });
+  };
+
+  listPermPolicies = async () => {
+    getPermPolicies().then((res) => {
+      this.setState({
+        permPolicies: (res && res) || [],
+      });
+    });
+  };
+
+  onEdit = (record: RolesBase) => {
+    this.setState({
+      visible: true,
+      isEditRole: true,
+      editRoleItem: record,
+    });
+  };
+
+  onDelete = (record: RolesBase) => {
+    Dialog.confirm({
+      content: 'Are you sure you want to delete the role',
+      onOk: () => {
+        const { name } = record;
+        if (name) {
+          deleteRole({ name }).then((res) => {
+            if (res) {
+              Message.success(<Translation>Delete role success</Translation>);
+              this.listRoles();
+            }
+          });
+        }
+      },
+      locale: locale.Dialog,
+    });
+  };
+
+  onCreate = () => {
+    this.setState({ visible: false });
+    this.listRoles();
+  };
+
+  onCloseCreate = () => {
+    this.setState({ visible: false });
+  };
+
+  handleClickCreate = () => {
+    this.setState({
+      visible: true,
+      isEditRole: false,
+    });
+  };
+
+  handleChange = (page: number) => {
+    this.setState(
+      {
+        page,
+        pageSize: 10,
+      },
+      () => {
+        this.listRoles();
+      },
+    );
+  };
+
+  render() {
+    const columns = [
+      {
+        key: 'name',
+        title: <Translation>Name</Translation>,
+        dataIndex: 'name',
+        cell: (v: string) => {
+          return <span>{v}</span>;
+        },
+      },
+      {
+        key: 'alias',
+        title: <Translation>Alias</Translation>,
+        dataIndex: 'alias',
+        cell: (v: string) => {
+          return <span>{v}</span>;
+        },
+      },
+      {
+        key: 'createTime',
+        title: <Translation>Create Time</Translation>,
+        dataIndex: 'createTime',
+        cell: (v: string) => {
+          return <span>{momentDate(v)}</span>;
+        },
+      },
+      // {
+      //   key: 'permPolicies',
+      //   title: <Translation>PermPolicies</Translation>,
+      //   dataIndex: 'permPolicies',
+      //   cell: (v: any) => {
+      //     return v.map((item: any) => (<span className='roles-permPolicies margin-right-5'>{item && item.name}</span>))
+      //   },
+      // },
+      {
+        key: 'operation',
+        title: <Translation>Actions</Translation>,
+        dataIndex: 'operation',
+        cell: (v: string, i: number, record: any) => {
+          return (
+            <Fragment>
+              <Button
+                text
+                size={'medium'}
+                ghost={true}
+                component={'a'}
+                onClick={() => {
+                  this.onEdit(record);
+                }}
+              >
+                <Translation>Edit</Translation>
+              </Button>
+
+              <Button
+                text
+                size={'medium'}
+                ghost={true}
+                component={'a'}
+                onClick={() => {
+                  this.onDelete(record);
+                }}
+              >
+                <Translation>Delete</Translation>
+              </Button>
+            </Fragment>
+          );
+        },
+      },
+    ];
+
+    const { Column } = Table;
+    const {
+      list,
+      page,
+      pageSize,
+      total,
+      visible,
+      isEditRole,
+      editRoleItem,
+      permPolicies,
+      isLoading,
+    } = this.state;
+    return (
+      <Fragment>
+        <div className="roles-list-content">
+          <Title
+            title="Platform Roles"
+            subTitle=""
+            extButtons={[
+              <Button type="primary" onClick={this.handleClickCreate}>
+                <Translation>New Role</Translation>
+              </Button>,
+            ]}
+          />
+          <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>
+            {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+          </Table>
+
+          <Pagination
+            className="margin-top-20 text-align-right"
+            total={total}
+            locale={locale.Pagination}
+            hideOnlyOnePage={true}
+            size="medium"
+            pageSize={pageSize}
+            current={page}
+            onChange={this.handleChange}
+          />
+
+          <If condition={visible}>
+            <RolesDialog
+              visible={visible}
+              isEditRole={isEditRole}
+              editRoleItem={editRoleItem}
+              permPolicies={permPolicies}
+              onCreate={this.onCreate}
+              onCloseCreate={this.onCloseCreate}
+            />
+          </If>
+        </div>
+      </Fragment>
+    );
+  }
+}
+
+export default Roles;

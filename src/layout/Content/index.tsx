@@ -18,8 +18,9 @@ import ProjectLayout from '../Project';
 import Projects from '../../pages/Projects';
 import ProjectSummary from '../../pages/ProjectSummary';
 import ProjectApplications from '../../pages/ProjectApplications';
-// import ProjectRoles from '../../pages/ProjectRoles'
-// import ProjectMembers from '../../pages/ProjectMembers'
+import Roles from '../../pages/Roles';
+import ProjectRoles from '../../pages/ProjectRoles';
+import ProjectMembers from '../../pages/ProjectMembers';
 
 export default function Content() {
   return (
@@ -160,30 +161,31 @@ export default function Content() {
           );
         }}
       />
-      {/* <Route
+      <Route
         exact
         path="/projects/:projectName/roles"
         render={(props: any) => {
-          const mergeProps = { ...props, ...{ activeId: 'roles' } }
+          const mergeProps = { ...props, ...{ activeId: 'roles' } };
           return (
-            <ProjectLayout {...mergeProps} >
+            <ProjectLayout {...mergeProps}>
               <ProjectRoles {...mergeProps} />
             </ProjectLayout>
-          )
+          );
         }}
       />
       <Route
         exact
         path="/projects/:projectName/members"
         render={(props: any) => {
-          const mergeProps = { ...props, ...{ activeId: 'members' } }
+          const mergeProps = { ...props, ...{ activeId: 'members' } };
           return (
-            <ProjectLayout {...mergeProps} >
+            <ProjectLayout {...mergeProps}>
               <ProjectMembers {...mergeProps} />
             </ProjectLayout>
-          )
+          );
         }}
-      /> */}
+      />
+      <Route path="/roles" component={Roles} />
       <Route path="/notFound" component={NotFound} />
       <Redirect to="/notFound" />
     </Switch>

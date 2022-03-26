@@ -67,7 +67,14 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(err.response || err);
       }
     } else {
-      localStorage.removeItem('token');
+      switch (status) {
+        case 401:
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          store.routerRedux.push({
+            pathname: '/login',
+          });
+      }
       Message.error(getMessage(status));
       return Promise.reject(error.response || error);
     }
@@ -105,7 +112,6 @@ export const post = (url: string, params: any, customError?: boolean) => {
     })
     .catch((err) => {
       handleAPIError(err, params.customError || customError);
-      return err;
     });
 };
 

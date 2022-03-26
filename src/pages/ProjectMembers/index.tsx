@@ -1,8 +1,307 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
+import { Table, Button, Pagination, Message, Dialog } from '@b-design/ui';
+import MemberDialog from './components/MemberDialog';
+import { getProjectRoles, getProjectUsers, deleteProjectUser } from '../../api/project';
+import type { ProjectMember, ProjectRoleBase } from '../../interface/project';
+import { If } from 'tsx-control-statements/components';
+import Translation from '../../components/Translation';
+import locale from '../../utils/locale';
+import { momentDate } from '../../utils/common';
+import './index.less';
 
-class ProjectMembers extends Component {
+type Props = {
+  match: {
+    params: {
+      projectName: string;
+    };
+  };
+};
+
+type State = {
+  page: number;
+  pageSize: number;
+  isLoading: boolean;
+  memberList: ProjectMember[];
+  projectRoles: ProjectRoleBase[];
+  total: number;
+  projectName: string;
+  isMemberDialogVisible: boolean;
+  isEditMember: boolean;
+  editMember: ProjectMember;
+};
+
+class ProjectMembers extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      page: 0,
+      pageSize: 10,
+      total: 0,
+      memberList: [],
+      projectRoles: [],
+      projectName: this.getProjectName(),
+      editMember: {
+        name: '',
+        userRoles: [],
+      },
+      isLoading: false,
+      isMemberDialogVisible: false,
+      isEditMember: false,
+    };
+  }
+
+  componentDidMount() {
+    this.listMember();
+    this.listProjectRoles();
+  }
+
+  listMember = async () => {
+    const { projectName } = this.state;
+    const params = {
+      projectName,
+    };
+    this.setState({ isLoading: true });
+    getProjectUsers(params)
+      .then((res) => {
+        this.setState({
+          memberList: (res && res.users) || [],
+          total: (res && res.total) || 0,
+        });
+      })
+      .finally(() => {
+        this.setState({
+          isLoading: false,
+        });
+      });
+  };
+
+  listProjectRoles = async () => {
+    const { projectName } = this.state;
+    const params = {
+      projectName,
+    };
+    this.setState({ isLoading: true });
+    getProjectRoles(params)
+      .then((res) => {
+        this.setState({
+          projectRoles: (res && res.roles) || [],
+        });
+      })
+      .finally(() => {
+        this.setState({
+          isLoading: false,
+        });
+      });
+  };
+
+  getProjectName = () => {
+    const { params = { projectName: '' } } = this.props.match;
+    return params.projectName || '';
+  };
+
+  onEdit = (record: ProjectMember) => {
+    this.onEditMember(record);
+  };
+
+  onCreate = () => {
+    this.setState({
+      isMemberDialogVisible: false,
+    });
+    this.listMember();
+  };
+
+  onDelete = (record: ProjectMember) => {
+    Dialog.confirm({
+      content: 'Are you sure you want to delete the member',
+      onOk: () => {
+        const { name, userRoles } = record;
+        const { projectName } = this.state;
+        const query = {
+          userName: name,
+          projectName,
+        };
+
+        if (name) {
+          deleteProjectUser(query, { userRoles })
+            .then((res) => {
+              if (res) {
+                Message.success(<Translation>Delete user success</Translation>);
+                this.listMember();
+              }
+            })
+            .catch();
+        }
+      },
+      locale: locale.Dialog,
+    });
+  };
+
+  onClose = () => {
+    this.setState({
+      isMemberDialogVisible: false,
+    });
+  };
+
+  onEditMember = (editMember: ProjectMember) => {
+    this.setState({
+      editMember: editMember,
+      isEditMember: true,
+      isMemberDialogVisible: true,
+    });
+  };
+
+  handleClickCreate = () => {
+    this.setState({
+      isMemberDialogVisible: true,
+      isEditMember: false,
+    });
+  };
+
+  handleChange = (page: number) => {
+    this.setState(
+      {
+        page,
+        pageSize: 10,
+      },
+      () => {
+        this.listMember();
+      },
+    );
+  };
+
   render() {
-    return <div>ProjectMembers</div>;
+    const { Column } = Table;
+    const columns = [
+      {
+        key: 'name',
+        title: <Translation>Name</Translation>,
+        dataIndex: 'name',
+        cell: (v: string) => {
+          return <span>{v}</span>;
+        },
+      },
+      // {
+      //   key: 'alias',
+      //   title: <Translation>Alias</Translation>,
+      //   dataIndex: 'alias',
+      //   cell: (v: string) => {
+      //     return <span>{v}</span>;
+      //   },
+      // },
+      {
+        key: 'userRoles',
+        title: <Translation>UserRoles</Translation>,
+        dataIndex: 'userRoles',
+        cell: (v: string[]) => {
+          return v.map((item: string) => (
+            <span className="roles-permPolicies margin-right-5">{item}</span>
+          ));
+        },
+      },
+
+      {
+        key: 'createTime',
+        title: <Translation>CreateTime</Translation>,
+        dataIndex: 'createTime',
+        cell: (v: string) => {
+          if (v) {
+            return <span>{momentDate(v)}</span>;
+          }
+        },
+      },
+      {
+        key: 'operation',
+        title: <Translation>Actions</Translation>,
+        dataIndex: 'operation',
+        cell: (v: string, i: number, record: ProjectMember) => {
+          return (
+            <Fragment>
+              <Button
+                text
+                size={'medium'}
+                ghost={true}
+                component={'a'}
+                onClick={() => {
+                  this.onEdit(record);
+                }}
+              >
+                <Translation>Edit</Translation>
+              </Button>
+
+              <Button
+                text
+                size={'medium'}
+                ghost={true}
+                component={'a'}
+                onClick={() => {
+                  this.onDelete(record);
+                }}
+              >
+                <Translation>Delete</Translation>
+              </Button>
+            </Fragment>
+          );
+        },
+      },
+    ];
+
+    const {
+      memberList,
+      projectName,
+      isMemberDialogVisible,
+      isEditMember,
+      editMember,
+      projectRoles,
+      page,
+      pageSize,
+      total,
+      isLoading,
+    } = this.state;
+    return (
+      <Fragment>
+        <div className="member-wrapper">
+          <section className="member-create-btn">
+            <Button type="primary" onClick={this.handleClickCreate}>
+              <Translation>New Member</Translation>
+            </Button>
+          </section>
+
+          <section className="margin-top-20  member-list-wrapper">
+            <Table
+              locale={locale.Table}
+              dataSource={memberList}
+              hasBorder={false}
+              loading={isLoading}
+            >
+              {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+            </Table>
+
+            <Pagination
+              className="margin-top-20 text-align-right"
+              total={total}
+              locale={locale.Pagination}
+              hideOnlyOnePage={true}
+              size="medium"
+              pageSize={pageSize}
+              current={page}
+              onChange={this.handleChange}
+            />
+
+            <If condition={isMemberDialogVisible}>
+              <MemberDialog
+                visible={isMemberDialogVisible}
+                projectName={projectName}
+                projectRoles={projectRoles}
+                isEditMember={isEditMember}
+                editMember={editMember}
+                onClose={this.onClose}
+                onCreate={this.onCreate}
+              />
+            </If>
+          </section>
+        </div>
+      </Fragment>
+    );
   }
 }
 

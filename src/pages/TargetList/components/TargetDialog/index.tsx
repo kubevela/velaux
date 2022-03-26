@@ -96,7 +96,7 @@ class DeliveryDialog extends React.Component<Props, State> {
 
   getProjectList = async () => {
     getProjectList({}).then((res) => {
-      const projectListData = (res.projects || []).map((item: Project) => ({
+      const projectListData = ((res && res.projects) || []).map((item: Project) => ({
         label: item.name,
         value: item.name,
       }));

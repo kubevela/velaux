@@ -23,3 +23,54 @@ export interface ProjectDetail {
   updateTime?: string;
   owner?: NameAlias;
 }
+
+export interface ProjectUser {
+  name: string;
+  createTime?: string;
+  updateTime?: string;
+  userRoles: string[];
+}
+
+export interface ProjectUserCreate {
+  userName: string;
+  userRoles: string;
+}
+
+export interface ProjectName {
+  projectName: string;
+}
+
+export interface QueryProjectUser {
+  projectName: string;
+  userName: string;
+}
+
+export interface UserRoles {
+  userRoles: string[];
+}
+
+export interface QueryProjectRole {
+  projectName: string;
+  roleName: string;
+}
+
+export interface ProjectRole {
+  name: string;
+  alias?: string;
+  permPolicies: string[];
+}
+
+export interface ProjectRoleBase {
+  name: string;
+  alias?: string;
+  createTime?: string;
+  updateTime?: string;
+  permPolicies?: NameAlias[];
+}
+
+export interface ProjectMember {
+  name: string;
+  createTime?: string;
+  updateTime?: string;
+  userRoles: string[];
+}
