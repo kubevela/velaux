@@ -169,7 +169,7 @@ class Header extends Component<Props, State> {
     };
     return (
       <div>
-        <Row className="boder-radius-8">
+        <Row className="border-radius-8">
           <Col span="4" style={{ marginBottom: '16px' }}>
             <Select
               locale={locale.Select}

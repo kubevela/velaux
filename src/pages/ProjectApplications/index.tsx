@@ -2,20 +2,19 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'dva';
 import { Loading, Message } from '@b-design/ui';
 import CardContend from '../ApplicationList/components/CardContent';
-import { ApplicationBase, ApplicationQuery } from '../../interface/application';
-import type { Project } from '../../interface/project';
+import type { ApplicationBase, ApplicationQuery } from '../../interface/application';
 import {
   getApplicationList,
   deleteApplicationPlan,
   getComponentDefinitions,
 } from '../../api/application';
-import { getTarget } from '../../api/target';
-import { getProjectList } from '../../api/project';
 import { getEnvs } from '../../api/env';
 import { If } from 'tsx-control-statements/components';
 import EditAppDialog from '../ApplicationList/components/EditAppDialog';
 import AppDialog from '../ApplicationList/components/AddAppDialog';
 import SelectSearch from './components/SelectSearch';
+import type { LoginUserInfo } from '../../interface/user';
+import { getProjectTargetList } from '../../api/project';
 
 type Props = {
   applicationList: ApplicationBase[];
@@ -26,6 +25,7 @@ type Props = {
   };
   dispatch: ({}) => {};
   history: any;
+  userInfo?: LoginUserInfo;
 };
 
 type State = {
@@ -33,7 +33,6 @@ type State = {
   applicationList: ApplicationBase[];
   editApplicationItem: ApplicationBase;
   targets?: [];
-  projects?: Project[];
   envs?: [];
   componentDefinitions: [];
   isEditApplication: boolean;
@@ -41,7 +40,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store };
+  return { ...store, ...store.user };
 })
 class ProjectApplications extends Component<Props, State> {
   constructor(props: Props) {
@@ -57,7 +56,6 @@ class ProjectApplications extends Component<Props, State> {
         createTime: '',
       },
       envs: [],
-      projects: [{ name: '' }],
       componentDefinitions: [],
       isEditApplication: false,
       isAddApplication: false,
@@ -66,9 +64,8 @@ class ProjectApplications extends Component<Props, State> {
 
   componentDidMount() {
     this.listApplication();
-    this.listTargets();
+    this.listProjectTargets();
     this.listEnvs();
-    this.getProjectList();
     this.onGetComponentDefinitions();
   }
 
@@ -84,7 +81,9 @@ class ProjectApplications extends Component<Props, State> {
     this.setState({ isLoading: true });
     getApplicationList(queryParams)
       .then((res) => {
-        this.setState({ applicationList: res.applications || [] });
+        if (res) {
+          this.setState({ applicationList: res.applications || [] });
+        }
       })
       .catch(() => {})
       .finally(() => {
@@ -92,21 +91,21 @@ class ProjectApplications extends Component<Props, State> {
       });
   };
 
-  listTargets = async () => {
-    getTarget({}).then((res) => {
-      this.setState({ targets: res.targets || [] });
+  listProjectTargets = async () => {
+    const { params = { projectName: '' } } = this.props.match;
+    getProjectTargetList({ projectName: params.projectName }).then((res) => {
+      if (res) {
+        this.setState({ targets: res.targets || [] });
+      }
     });
   };
 
   listEnvs = async () => {
-    getEnvs({}).then((res) => {
-      this.setState({ envs: res.envs || [] });
-    });
-  };
-
-  getProjectList = async () => {
-    getProjectList({}).then((res) => {
-      this.setState({ projects: res.projects || [] });
+    const { params = { projectName: '' } } = this.props.match;
+    getEnvs({ project: params.projectName }).then((res) => {
+      if (res) {
+        this.setState({ envs: res.envs || [] });
+      }
     });
   };
 
@@ -151,7 +150,7 @@ class ProjectApplications extends Component<Props, State> {
   };
 
   render() {
-    const { dispatch } = this.props;
+    const { dispatch, userInfo } = this.props;
     const {
       isLoading,
       applicationList,
@@ -160,7 +159,6 @@ class ProjectApplications extends Component<Props, State> {
       editApplicationItem,
       targets,
       envs,
-      projects,
       componentDefinitions,
     } = this.state;
     const { params = { projectName: '' } } = this.props.match;
@@ -195,8 +193,7 @@ class ProjectApplications extends Component<Props, State> {
           <AppDialog
             visible={isAddApplication}
             targets={targets}
-            syncProjectList={this.getProjectList}
-            projects={projects}
+            projects={userInfo?.projects}
             isDisableProject={true}
             projectName={projectName}
             componentDefinitions={componentDefinitions}

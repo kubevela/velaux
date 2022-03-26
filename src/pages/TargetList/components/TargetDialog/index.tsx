@@ -5,7 +5,6 @@ import Namespace from '../Namespace';
 import type { NamespaceItem } from '../Namespace';
 import { checkName } from '../../../../utils/common';
 import { createTarget, updateTarget } from '../../../../api/target';
-import { getProjectList } from '../../../../api/project';
 import type { Target } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
@@ -22,12 +21,12 @@ type Props = {
   onOK: () => void;
   onClose: () => void;
   t: (key: string) => string;
+  projects: Project[];
 };
 
 type State = {
   cluster?: string;
   namespaces: NamespaceItem[];
-  projectList: Project[];
 };
 
 class DeliveryDialog extends React.Component<Props, State> {
@@ -60,7 +59,6 @@ class DeliveryDialog extends React.Component<Props, State> {
 
     this.state = {
       namespaces: [],
-      projectList: [{ name: '' }],
     };
   }
 
@@ -91,20 +89,7 @@ class DeliveryDialog extends React.Component<Props, State> {
         this.loadNamespaces(cluster.clusterName);
       }
     }
-    this.getProjectList();
   }
-
-  getProjectList = async () => {
-    getProjectList({}).then((res) => {
-      const projectListData = (res.projects || []).map((item: Project) => ({
-        label: item.name,
-        value: item.name,
-      }));
-      this.setState({
-        projectList: projectListData,
-      });
-    });
-  };
 
   onClose = () => {
     this.props.onClose();
@@ -219,9 +204,16 @@ class DeliveryDialog extends React.Component<Props, State> {
       },
     };
 
-    const { t, visible, isEdit } = this.props;
-    const { namespaces, projectList = [] } = this.state;
+    const { t, visible, isEdit, projects } = this.props;
+    const { namespaces } = this.state;
     const cluster: string = this.field.getValue('clusterName');
+
+    const projectOptions = projects.map((project) => {
+      return {
+        label: project.alias ? project.alias : project.name,
+        value: project.name,
+      };
+    });
     return (
       <div>
         <Dialog
@@ -287,7 +279,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                     hasClear
                     placeholder={t('Please select').toString()}
                     filterLocal={true}
-                    dataSource={projectList}
+                    dataSource={projectOptions}
                     style={{ width: '100%' }}
                     {...init('project', {
                       rules: [

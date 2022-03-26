@@ -1,5 +1,5 @@
 import { post, get, rdelete, put } from './request';
-import { ProjectBaseCreate } from '../interface/project';
+import type { ProjectBaseCreate } from '../interface/project';
 import { project_mock } from './devLink';
 import { project } from './productionLink';
 import { getDomain } from '../utils/common';

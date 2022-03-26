@@ -129,17 +129,13 @@ class EnvBindPlanDialog extends Component<Props, State> {
       payload: {},
     });
   };
-  getProjectList = async () => {
-    this.props?.dispatch?.({
-      type: 'application/getProjectList',
-      payload: {},
-    });
-  };
+
   onCloseEnvDialog = () => {
     this.setState({
       visibleEnvDialog: false,
     });
   };
+
   onOKEnvDialog = () => {
     this.setState(
       {
@@ -236,9 +232,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
         <If condition={visibleEnvDialog}>
           <EnvDialog
             visible={visibleEnvDialog}
-            targets={this.props.targets || []}
             projects={[]}
-            syncProjectList={this.getProjectList}
             isEdit={false}
             onClose={this.onCloseEnvDialog}
             onOK={this.onOKEnvDialog}

@@ -4,7 +4,6 @@ import { withTranslation } from 'react-i18next';
 import './index.less';
 import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
-import type { Target } from '../../../../interface/target';
 import type { Env } from '../../../../interface/env';
 
 const { Row, Col } = Grid;
@@ -12,7 +11,6 @@ const { Row, Col } = Grid;
 type Props = {
   t: (key: string) => {};
   dispatch: ({}) => {};
-  targetList?: Target[];
   projects?: Project[];
   envs?: Env[];
   getApplications: (params: any) => void;
@@ -83,10 +81,9 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   getApplications = async () => {
-    const { projectValue, targetValue, inputValue, envValue } = this.state;
+    const { projectValue, inputValue, envValue } = this.state;
     const params = {
       project: projectValue,
-      targetName: targetValue,
       query: inputValue,
       env: envValue,
     };
@@ -94,21 +91,13 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { targetList, projects, t, envs } = this.props;
-    const { projectValue, targetValue, inputValue, envValue } = this.state;
+    const { projects, t, envs } = this.props;
+    const { projectValue, inputValue, envValue } = this.state;
 
-    const projectPlacehole = t('Search by Project').toString();
-    const targetPlacehole = t('Search by Target').toString();
-    const appPlacehole = t('Search by name and description etc').toString();
-    const envPlacehole = t('Search by Environment').toString();
+    const projectPlaceholder = t('Search by Project').toString();
+    const appPlaceholder = t('Search by name and description etc').toString();
+    const envPlaceholder = t('Search by Environment').toString();
     const projectSource = projects?.map((item) => {
-      return {
-        label: item.alias || item.name,
-        value: item.name,
-      };
-    });
-
-    const targetSource = targetList?.map((item) => {
       return {
         label: item.alias || item.name,
         value: item.name,
@@ -122,7 +111,7 @@ class SelectSearch extends React.Component<Props, State> {
       };
     });
     return (
-      <Row className="app-select-wraper boder-radius-8" wrap={true}>
+      <Row className="app-select-wrapper border-radius-8" wrap={true}>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
             locale={locale.Select}
@@ -130,7 +119,7 @@ class SelectSearch extends React.Component<Props, State> {
             size="large"
             onChange={this.onChangeProject}
             dataSource={projectSource}
-            placeholder={projectPlacehole}
+            placeholder={projectPlaceholder}
             className="item"
             hasClear
             value={projectValue}
@@ -143,23 +132,10 @@ class SelectSearch extends React.Component<Props, State> {
             size="large"
             onChange={this.onChangeEnv}
             dataSource={envSource}
-            placeholder={envPlacehole}
+            placeholder={envPlaceholder}
             className="item"
             hasClear
             value={envValue}
-          />
-        </Col>
-        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
-          <Select
-            locale={locale.Select}
-            mode="single"
-            size="large"
-            onChange={this.onChangeTarget}
-            dataSource={targetSource}
-            placeholder={targetPlacehole}
-            className="item"
-            hasClear
-            value={targetValue}
           />
         </Col>
 
@@ -174,7 +150,7 @@ class SelectSearch extends React.Component<Props, State> {
               />
             }
             hasClear
-            placeholder={appPlacehole}
+            placeholder={appPlaceholder}
             onChange={this.handleChangName}
             onPressEnter={this.handleClickSearch}
             value={inputValue}

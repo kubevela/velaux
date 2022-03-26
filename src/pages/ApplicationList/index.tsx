@@ -9,16 +9,16 @@ import '../../common.less';
 import { If } from 'tsx-control-statements/components';
 import { deleteApplicationPlan, getComponentDefinitions } from '../../api/application';
 import type { ApplicationBase } from '../../interface/application';
-import type { Project } from '../../interface/project';
 import EditAppDialog from './components/EditAppDialog';
+import type { LoginUserInfo } from '../../interface/user';
 
 type Props = {
   dispatch: ({}) => {};
   applicationList: ApplicationBase[];
-  projects?: Project[];
   targets?: [];
   envs?: [];
   history: any;
+  userInfo?: LoginUserInfo;
 };
 type State = {
   showAddApplication: boolean;
@@ -29,7 +29,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.application, ...store.target, ...store.clusters, ...store.env };
+  return { ...store.application, ...store.target, ...store.clusters, ...store.env, ...store.user };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -44,8 +44,6 @@ class Application extends Component<Props, State> {
 
   componentDidMount() {
     this.getApplications({});
-    this.getProjectList();
-    this.getTargets();
     this.getEnvs();
     this.onGetComponentDefinitions();
   }
@@ -60,20 +58,6 @@ class Application extends Component<Props, State> {
           isLoading: false,
         });
       },
-    });
-  };
-
-  getProjectList = async () => {
-    this.props.dispatch({
-      type: 'application/getProjectList',
-      payload: {},
-    });
-  };
-
-  getTargets = async () => {
-    this.props.dispatch({
-      type: 'target/listTargets',
-      payload: {},
     });
   };
 
@@ -125,7 +109,7 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList, projects, targets, dispatch, envs } = this.props;
+    const { applicationList, targets, dispatch, envs, userInfo } = this.props;
     const { showAddApplication, componentDefinitions, isLoading, showEditApplication, editItem } =
       this.state;
     return (
@@ -140,8 +124,7 @@ class Application extends Component<Props, State> {
         />
 
         <SelectSearch
-          projects={projects}
-          targetList={targets}
+          projects={userInfo?.projects}
           dispatch={dispatch}
           envs={envs}
           getApplications={(params: any) => {
@@ -166,8 +149,7 @@ class Application extends Component<Props, State> {
           <AppDialog
             visible={showAddApplication}
             targets={targets}
-            syncProjectList={this.getProjectList}
-            projects={projects}
+            projects={userInfo?.projects}
             componentDefinitions={componentDefinitions}
             setVisible={(visible) => {
               this.setState({ showAddApplication: visible });

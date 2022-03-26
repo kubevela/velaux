@@ -56,7 +56,7 @@ class SelectSearch extends React.Component<Props, State> {
     const { registryValue, inputValue } = this.state;
 
     return (
-      <Row className="app-select-wraper boder-radius-8" wrap={true}>
+      <Row className="app-select-wraper border-radius-8" wrap={true}>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
             locale={locale.Select}

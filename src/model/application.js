@@ -103,8 +103,8 @@ export default {
     *getApplicationList(action, { call, put }) {
       const result = yield call(getApplicationList, action.payload);
       yield put({ type: 'updateApplicationList', payload: result ? result.applications : [] });
-      if (action.callback && result) {
-        action.callback(result.applications || []);
+      if (action.callback) {
+        action.callback((result && result.applications) || []);
       }
     },
 

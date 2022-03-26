@@ -10,17 +10,15 @@ import type { Cluster } from '../../interface/cluster';
 import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 import type { Env } from '../../interface/env';
-import type { Project } from '../../interface/project';
-import type { Target } from '../../interface/target';
+import type { LoginUserInfo } from '../../interface/user';
 
 type Props = {
-  targets?: Target[];
   envTotal?: number;
   envs: Env[];
   clusterList?: Cluster[];
-  projects: Project[];
   dispatch: ({}) => void;
   t: (key: string) => string;
+  userInfo?: LoginUserInfo;
 };
 
 type State = {
@@ -34,7 +32,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.target, ...store.application, ...store.env };
+  return { ...store.target, ...store.application, ...store.env, ...store.user };
 })
 class targetList extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -51,8 +49,6 @@ class targetList extends React.Component<Props, State> {
 
   componentDidMount() {
     this.getEnvList();
-    this.getProjectList();
-    this.getTargetList();
   }
 
   getEnvList = async () => {
@@ -63,20 +59,6 @@ class targetList extends React.Component<Props, State> {
         page,
         pageSize,
       },
-    });
-  };
-
-  getProjectList = async () => {
-    this.props.dispatch({
-      type: 'application/getProjectList',
-      payload: {},
-    });
-  };
-
-  getTargetList = async () => {
-    this.props.dispatch({
-      type: 'target/listTargets',
-      payload: {},
     });
   };
 
@@ -119,7 +101,7 @@ class targetList extends React.Component<Props, State> {
   };
 
   render() {
-    const { targets, projects, envTotal, envs } = this.props;
+    const { envTotal, envs, userInfo } = this.props;
     const { visibleEnvDialog, isEdit, envItem } = this.state;
     return (
       <div>
@@ -153,9 +135,7 @@ class targetList extends React.Component<Props, State> {
         <If condition={visibleEnvDialog}>
           <EnvDialog
             visible={visibleEnvDialog}
-            targets={targets || []}
-            projects={projects || []}
-            syncProjectList={this.getProjectList}
+            projects={userInfo?.projects || []}
             isEdit={isEdit}
             envItem={envItem}
             onClose={this.onClose}

@@ -49,7 +49,8 @@ export function getApplicationList(params: ApplicationQuery) {
 }
 
 export function createApplication(params: any) {
-  return post(url, params).then((res) => res);
+  const createURL = `${url}?project=${params.project}`;
+  return post(createURL, params).then((res) => res);
 }
 
 export function getApplicationDetails(params: any) {
