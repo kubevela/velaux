@@ -3,8 +3,8 @@ import { Grid, Dialog, Message } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import ProjectMenu from './components/Menu';
 import ProjectPermPoliciesDetail from './components/ProjectPermPoliciesDetail';
-import { getProjectRoles, getProjectPermPolicies, deleteProjectRoles } from '../../api/project';
-import type { PermPolicies } from '../../interface/permPolicies';
+import { getProjectRoles, getProjectPermissions, deleteProjectRoles } from '../../api/project';
+import type { PermissionBase } from '../../interface/user';
 import type { ProjectRoleBase } from '../../interface/project';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
@@ -20,7 +20,7 @@ type Props = {
 type State = {
   projectName: string;
   projectRoles: ProjectRoleBase[];
-  projectPermPolicies: PermPolicies[];
+  projectPermissions: PermissionBase[];
   isLoading: boolean;
   isAddRole: false;
   activeRoleName: string;
@@ -34,7 +34,7 @@ class ProjectRoles extends Component<Props, State> {
     this.state = {
       projectName: this.getProjectName(),
       projectRoles: [],
-      projectPermPolicies: [],
+      projectPermissions: [],
       activeRoleName: '',
       isLoading: false,
       isAddRole: false,
@@ -70,9 +70,9 @@ class ProjectRoles extends Component<Props, State> {
   listProjectPermPolicies = async () => {
     const { projectName } = this.state;
     const param = { projectName };
-    getProjectPermPolicies(param).then((res) => {
+    getProjectPermissions(param).then((res) => {
       this.setState({
-        projectPermPolicies: (res && res) || [],
+        projectPermissions: (res && res) || [],
       });
     });
   };
@@ -138,12 +138,12 @@ class ProjectRoles extends Component<Props, State> {
   onDeleteProjectRole = (roleName: string) => {
     const { projectName } = this.state;
     Dialog.confirm({
-      content: 'Are you sure you want to delete the role',
+      content: 'Are you sure you want to delete this role',
       onOk: () => {
         if (roleName) {
           deleteProjectRoles({ projectName, roleName }).then((res) => {
             if (res) {
-              Message.success(<Translation>Delete role success</Translation>);
+              Message.success(<Translation>Delete the role success</Translation>);
               this.listProjectRoles();
             }
           });
@@ -155,11 +155,11 @@ class ProjectRoles extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { projectName, projectRoles, isAddRole, projectPermPolicies, isCreateProjectRoles } =
+    const { projectName, projectRoles, isAddRole, projectPermissions, isCreateProjectRoles } =
       this.state;
     return (
       <Row className="project-roles-wrapper">
-        <Col span="7">
+        <Col span="6">
           <ProjectMenu
             isCreateProjectRoles={isCreateProjectRoles}
             isAddRole={isAddRole}
@@ -175,7 +175,7 @@ class ProjectRoles extends Component<Props, State> {
           />
         </Col>
 
-        <Col span="17" className="project-auth-border-left">
+        <Col span="18" className="project-auth-border-left">
           <If condition={!isAddRole}>
             <ProjectPermPoliciesDetail
               projectRoles={projectRoles}
@@ -183,7 +183,7 @@ class ProjectRoles extends Component<Props, State> {
               isCreateProjectRoles={isCreateProjectRoles}
               activeRoleName={this.getActiveRoleName()}
               activeRoleItem={this.getActiveRoleItem()}
-              projectPermPolicies={projectPermPolicies}
+              projectPermissions={projectPermissions}
               onCreate={(activeRoleName: string) => {
                 this.onCreate(activeRoleName);
               }}

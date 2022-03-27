@@ -13,7 +13,7 @@ const { Row, Col } = Grid;
 type Props = {
   visible: boolean;
   onClose: () => void;
-  syncRegistrys: () => void;
+  syncRegistries: () => void;
   registries: [];
   dispatch: ({}) => {};
 };
@@ -43,7 +43,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
   };
 
   onOk = () => {
-    const { syncRegistrys } = this.props;
+    const { syncRegistries } = this.props;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
@@ -73,7 +73,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
         .then(() => {
           Message.success(<Translation>add success</Translation>);
           this.setState({ showAdd: false });
-          syncRegistrys();
+          syncRegistries();
         })
         .catch((err) => {
           handleError(err);
@@ -82,11 +82,11 @@ class RegistryManageDialog extends React.Component<Props, State> {
   };
 
   onDeleteRegistry = (name: string) => {
-    const { syncRegistrys } = this.props;
+    const { syncRegistries } = this.props;
     deleteAddonRegistry({ name: name }).then((re) => {
       if (re) {
         Message.success(<Translation>delete success</Translation>);
-        syncRegistrys();
+        syncRegistries();
       }
     });
   };
@@ -96,7 +96,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
   };
 
   addExperimental = () => {
-    const { syncRegistrys } = this.props;
+    const { syncRegistries } = this.props;
     createAddonRegistry({
       name: 'experimental',
       oss: {
@@ -108,7 +108,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
         if (res) {
           Message.success(<Translation>add success</Translation>);
           this.setState({ showAdd: false });
-          syncRegistrys();
+          syncRegistries();
         }
       })
       .catch((err) => {

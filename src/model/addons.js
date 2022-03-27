@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { getAddonsList, getAddonRegistrysList } from '../api/addons';
+import { getAddonsList, getAddonRegistriesList } from '../api/addons';
 export default {
   namespace: 'addons',
   state: {
@@ -15,7 +15,7 @@ export default {
         addonListMessage: payload.message,
       };
     },
-    updateAddonRegistrysList(state, { type, payload }) {
+    updateAddonRegistriesList(state, { type, payload }) {
       return {
         ...state,
         registryList: payload || [],
@@ -32,10 +32,10 @@ export default {
         }
       }
     },
-    *getAddonRegistrysList(action, { call, put }) {
-      const result = yield call(getAddonRegistrysList, action.payload);
+    *getAddonRegistriesList(action, { call, put }) {
+      const result = yield call(getAddonRegistriesList, action.payload);
       const registries = result ? result.registries : [];
-      yield put({ type: 'updateAddonRegistrysList', payload: registries || [] });
+      yield put({ type: 'updateAddonRegistriesList', payload: registries || [] });
     },
   },
 };

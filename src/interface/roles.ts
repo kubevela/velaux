@@ -5,11 +5,11 @@ export interface RolesBase {
   alias?: string;
   createTime?: string;
   updateTime?: string;
-  permPolicies?: NameAlias[];
+  permissions?: NameAlias[];
 }
 
 export interface RolesCreateBase {
   name: string;
   alias?: string;
-  permPolicies: string[];
+  permissions: string[];
 }

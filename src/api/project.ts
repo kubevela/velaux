@@ -1,5 +1,5 @@
 import { post, get, rdelete, put } from './request';
-import {
+import type {
   ProjectBaseCreate,
   ProjectName,
   QueryProjectUser,
@@ -44,8 +44,8 @@ export function getProjectTargetList(params: { projectName: string }) {
   return get(urlPath, {}).then((res) => res);
 }
 
-export function getProjectPermPolicies(params: { projectName: string }) {
-  const urlPath = project + `/${params.projectName}/permPolicies`;
+export function getProjectPermissions(params: { projectName: string }) {
+  const urlPath = project + `/${params.projectName}/permissions`;
   return get(urlPath, {}).then((res) => res);
 }
 

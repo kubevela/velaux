@@ -166,56 +166,58 @@ class ProjectApplications extends Component<Props, State> {
 
     return (
       <Fragment>
-        <SelectSearch
-          targetList={targets}
-          envs={envs}
-          listApplication={(queryData: ApplicationQuery) => {
-            this.listApplication(queryData);
-          }}
-          onAddApplication={() => {
-            this.setState({ isAddApplication: true });
-          }}
-        />
-        <Loading visible={isLoading} fullScreen>
-          <CardContend
-            applications={applicationList}
-            editAppPlan={(editItem: ApplicationBase) => {
-              this.editApplicationPlan(editItem);
+        <div className="full-container">
+          <SelectSearch
+            targetList={targets}
+            envs={envs}
+            listApplication={(queryData: ApplicationQuery) => {
+              this.listApplication(queryData);
             }}
-            deleteAppPlan={this.onDeleteApplicationItem}
-            setVisible={(visible) => {
-              this.setState({ isAddApplication: visible });
+            onAddApplication={() => {
+              this.setState({ isAddApplication: true });
             }}
           />
-        </Loading>
+          <Loading visible={isLoading} fullScreen>
+            <CardContend
+              applications={applicationList}
+              editAppPlan={(editItem: ApplicationBase) => {
+                this.editApplicationPlan(editItem);
+              }}
+              deleteAppPlan={this.onDeleteApplicationItem}
+              setVisible={(visible) => {
+                this.setState({ isAddApplication: visible });
+              }}
+            />
+          </Loading>
 
-        <If condition={isAddApplication}>
-          <AppDialog
-            visible={isAddApplication}
-            targets={targets}
-            projects={userInfo?.projects}
-            isDisableProject={true}
-            projectName={projectName}
-            componentDefinitions={componentDefinitions}
-            setVisible={(visible) => {
-              this.setState({ isAddApplication: visible });
-            }}
-            onOK={() => {
-              this.setState({ isAddApplication: false });
-              this.listApplication();
-            }}
-            onClose={this.closeAddApplication}
-            dispatch={dispatch}
-          />
-        </If>
+          <If condition={isAddApplication}>
+            <AppDialog
+              visible={isAddApplication}
+              targets={targets}
+              projects={userInfo?.projects}
+              isDisableProject={true}
+              projectName={projectName}
+              componentDefinitions={componentDefinitions}
+              setVisible={(visible) => {
+                this.setState({ isAddApplication: visible });
+              }}
+              onOK={() => {
+                this.setState({ isAddApplication: false });
+                this.listApplication();
+              }}
+              onClose={this.closeAddApplication}
+              dispatch={dispatch}
+            />
+          </If>
 
-        <If condition={isEditApplication}>
-          <EditAppDialog
-            editItem={editApplicationItem}
-            onOK={this.closeEditAppDialog}
-            onClose={this.closeEditAppDialog}
-          />
-        </If>
+          <If condition={isEditApplication}>
+            <EditAppDialog
+              editItem={editApplicationItem}
+              onOK={this.closeEditAppDialog}
+              onClose={this.closeEditAppDialog}
+            />
+          </If>
+        </div>
       </Fragment>
     );
   }

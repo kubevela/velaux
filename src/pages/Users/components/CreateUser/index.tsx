@@ -5,7 +5,7 @@ import { checkUserPassWord, checkUserEmail } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import { createUser, updateUser } from '../../../../api/users';
 import { checkName } from '../../../../utils/common';
-import { User } from '../../../../interface/user';
+import type { User } from '../../../../interface/user';
 import type { RolesBase } from '../../../../interface/roles';
 import { If } from 'tsx-control-statements/components';
 import i18n from '../../../../i18n';
@@ -64,13 +64,14 @@ class CreateUser extends React.Component<Props, State> {
         return;
       }
       const { isEditUser, editUser } = this.props;
-      const { name, alias, email, password } = values;
+      const { name, alias, email, password, roles } = values;
 
       const params = {
         name,
         alias,
         email,
         password,
+        roles,
       };
 
       if (isEditUser && editUser.email) {
@@ -180,7 +181,7 @@ class CreateUser extends React.Component<Props, State> {
                 <FormItem label={<Translation>Alias</Translation>}>
                   <Input
                     name="alias"
-                    placeholder={i18n.t('Please enter').toString()}
+                    placeholder={i18n.t('Please input the alias').toString()}
                     {...init('alias', {
                       rules: [
                         {
@@ -201,7 +202,7 @@ class CreateUser extends React.Component<Props, State> {
                     <Input
                       name="password"
                       htmlType="password"
-                      placeholder={i18n.t('Please enter').toString()}
+                      placeholder={i18n.t('Please input the password').toString()}
                       {...init('password', {
                         rules: [
                           {
@@ -224,14 +225,14 @@ class CreateUser extends React.Component<Props, State> {
                 <FormItem label={<Translation>Email</Translation>} required>
                   <Input
                     name="email"
-                    placeholder={i18n.t('Please enter').toString()}
+                    placeholder={i18n.t('Please input a email').toString()}
                     disabled={isEditUser && editUser.email ? true : false}
                     {...init('email', {
                       rules: [
                         {
                           required: true,
                           pattern: checkUserEmail,
-                          message: <Translation>Please enter a valid email </Translation>,
+                          message: <Translation>Please input a valid email</Translation>,
                         },
                       ],
                     })}

@@ -57,7 +57,7 @@ export interface QueryProjectRole {
 export interface ProjectRole {
   name: string;
   alias?: string;
-  permPolicies: string[];
+  permissions: string[];
 }
 
 export interface ProjectRoleBase {
@@ -65,7 +65,7 @@ export interface ProjectRoleBase {
   alias?: string;
   createTime?: string;
   updateTime?: string;
-  permPolicies?: NameAlias[];
+  permissions?: NameAlias[];
 }
 
 export interface ProjectMember {

@@ -25,6 +25,6 @@
   "include": [
     "src",
     "./images.d.ts",
-    "./dvaloading.d.ts"
+    "./dvaloading.d.ts",
   ]
 }

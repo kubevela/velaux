@@ -1,20 +1,20 @@
 import { post, get, rdelete, put } from './request';
-import { addons, addonRegistrys, enabledAddon } from './productionLink';
+import { addons, addonRegistries, enabledAddon } from './productionLink';
 import { getDomain } from '../utils/common';
 
 const baseURLOject = getDomain();
 const base = baseURLOject.MOCK || baseURLOject.APIBASE;
 
-export function getAddonRegistrysList(params: any) {
-  return get(base + addonRegistrys, { params: params }).then((res) => res);
+export function getAddonRegistriesList(params: any) {
+  return get(base + addonRegistries, { params: params }).then((res) => res);
 }
 
 export function createAddonRegistry(params: any) {
-  return post(base + addonRegistrys, params);
+  return post(base + addonRegistries, params);
 }
 
 export function deleteAddonRegistry(params: { name: string }) {
-  return rdelete(base + addonRegistrys + '/' + params.name, params).then((res) => res);
+  return rdelete(base + addonRegistries + '/' + params.name, params).then((res) => res);
 }
 
 export function getAddonsList(params: any) {

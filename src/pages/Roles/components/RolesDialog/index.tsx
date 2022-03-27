@@ -3,19 +3,19 @@ import { Grid, Form, Input, Field, Button, Message, Select } from '@b-design/ui'
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from 'tsx-control-statements/components';
 import { createRole, updateRole } from '../../../../api/roles';
-import type { PermPolicies } from '../../../../interface/permPolicies';
 import type { RolesBase } from '../../../../interface/roles';
 import { checkName } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import { getSelectLabel } from '../../../../utils/utils';
 import i18n from '../../../../i18n';
+import type { PermissionBase } from '../../../../interface/user';
 
 type Props = {
   visible: boolean;
   isEditRole: boolean;
   editRoleItem: RolesBase;
-  permPolicies: PermPolicies[];
+  permissions: PermissionBase[];
   onCreate: () => void;
   onCloseCreate: () => void;
 };
@@ -37,14 +37,14 @@ class RolesDialog extends React.Component<Props, State> {
   componentDidMount() {
     const { isEditRole, editRoleItem } = this.props;
     if (isEditRole && editRoleItem) {
-      const { name, alias, permPolicies } = editRoleItem;
-      const permPoliciesName = permPolicies?.map((item) => {
+      const { name, alias, permissions } = editRoleItem;
+      const permissionNames = permissions?.map((item) => {
         return item.name;
       });
       this.field.setValues({
         name,
         alias,
-        permPolicies: permPoliciesName,
+        permissions: permissionNames,
       });
     }
   }
@@ -59,11 +59,11 @@ class RolesDialog extends React.Component<Props, State> {
         return;
       }
       const { isEditRole } = this.props;
-      const { name, alias, permPolicies } = values;
+      const { name, alias, permissions } = values;
       const param = {
         name,
         alias,
-        permPolicies,
+        permissions,
       };
       this.setState({ loading: true });
       if (isEditRole) {
@@ -117,7 +117,7 @@ class RolesDialog extends React.Component<Props, State> {
       },
     };
 
-    const { isEditRole, permPolicies } = this.props;
+    const { isEditRole, permissions } = this.props;
     const buttons = [
       <Button type="secondary" onClick={this.onCloseCreate} style={{ marginRight: '16px' }}>
         <Translation>Cancel</Translation>
@@ -132,7 +132,7 @@ class RolesDialog extends React.Component<Props, State> {
       </Button>,
     ];
 
-    const permPoliciesList = getSelectLabel(permPolicies);
+    const permPoliciesList = getSelectLabel(permissions);
     return (
       <React.Fragment>
         <DrawerWithFooter
@@ -187,13 +187,13 @@ class RolesDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>PermPolicies</Translation>} required={true}>
+                <FormItem label={<Translation>Permissions</Translation>} required={true}>
                   <Select
-                    {...init(`permPolicies`, {
+                    {...init(`permissions`, {
                       rules: [
                         {
                           required: true,
-                          message: 'Please select permPolicies',
+                          message: i18n.t('Please select at last one permission'),
                         },
                       ],
                     })}

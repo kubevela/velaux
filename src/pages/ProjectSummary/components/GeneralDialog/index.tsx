@@ -163,16 +163,18 @@ class GeneralDialog extends React.Component<Props, State> {
                   <Select.AutoComplete
                     name="owner"
                     hasClear
-                    placeholder={i18n.t('Please enter').toString()}
+                    placeholder={i18n.t('Please select a owner for this project').toString()}
                     filterLocal={true}
                     dataSource={userList}
                     style={{ width: '100%' }}
                     {...init('owner', {
                       rules: [
                         {
-                          required: false,
+                          required: true,
                           pattern: checkName,
-                          message: <Translation>Please enter a valid username</Translation>,
+                          message: (
+                            <Translation>Please select a owner for this project</Translation>
+                          ),
                         },
                       ],
                     })}
@@ -185,7 +187,7 @@ class GeneralDialog extends React.Component<Props, State> {
                 <FormItem label={<Translation>Description</Translation>}>
                   <Input
                     name="description"
-                    placeholder={i18n.t('Please enter').toString()}
+                    placeholder={i18n.t('Please input a description for the project').toString()}
                     {...init('description')}
                   />
                 </FormItem>

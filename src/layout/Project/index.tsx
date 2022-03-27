@@ -5,6 +5,8 @@ import { Link } from 'dva/router';
 import Translation from '../../components/Translation';
 import './index.less';
 import type { ProjectDetail } from '../../interface/project';
+import { checkPermission } from '../../utils/permission';
+import type { LoginUserInfo } from '../../interface/user';
 
 const { Row, Col } = Grid;
 
@@ -18,10 +20,11 @@ type Props = {
   dispatch: ({}) => {};
   projectDetails?: ProjectDetail;
   location: any;
+  userInfo?: LoginUserInfo;
 };
 
 @connect((store: any) => {
-  return { ...store.project };
+  return { ...store.project, ...store.user };
 })
 class ProjectLayout extends Component<Props> {
   componentDidMount() {
@@ -39,6 +42,7 @@ class ProjectLayout extends Component<Props> {
   getNavList = () => {
     const { params = { projectName: '' } } = this.props.match;
     const { projectName } = params;
+    const { userInfo } = this.props;
     const list = [
       {
         id: 'summary',
@@ -50,24 +54,41 @@ class ProjectLayout extends Component<Props> {
         name: <Translation>Applications</Translation>,
         to: `/projects/${projectName}/applications`,
       },
-      {
+    ];
+
+    if (
+      checkPermission(
+        { resource: `project:${projectName}/role:*`, action: 'list' },
+        projectName,
+        userInfo,
+      )
+    ) {
+      list.push({
         id: 'roles',
         name: <Translation>Roles</Translation>,
         to: `/projects/${projectName}/roles`,
-      },
-      {
+      });
+    }
+    if (
+      checkPermission(
+        { resource: `project:${projectName}/projectUser:*`, action: 'list' },
+        projectName,
+        userInfo,
+      )
+    ) {
+      list.push({
         id: 'members',
         name: <Translation>Members</Translation>,
         to: `/projects/${projectName}/members`,
-      },
-    ];
+      });
+    }
 
     const nav = list.map((item) => {
       const active = this.props.activeId === item.id ? 'active' : '';
       return (
-        <li className={active}>
-          <Link to={item.to}> {item.name}</Link>
-        </li>
+        <Link key={item.id} className={active} to={item.to}>
+          {item.name}
+        </Link>
       );
     });
     return nav;

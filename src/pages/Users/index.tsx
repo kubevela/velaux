@@ -76,10 +76,12 @@ class Users extends Component<Props, State> {
     this.setState({ isLoading: true });
     getUserList(params)
       .then((res) => {
-        this.setState({
-          dataSource: res.users || [],
-          total: res.total,
-        });
+        if (res) {
+          this.setState({
+            dataSource: res.users || [],
+            total: res.total,
+          });
+        }
       })
       .finally(() => {
         this.setState({

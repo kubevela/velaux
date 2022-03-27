@@ -262,7 +262,7 @@ class ProjectMembers extends Component<Props, State> {
         <div className="member-wrapper">
           <section className="member-create-btn">
             <Button type="primary" onClick={this.handleClickCreate}>
-              <Translation>New Member</Translation>
+              <Translation>Add Member</Translation>
             </Button>
           </section>
 
