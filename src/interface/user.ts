@@ -21,14 +21,14 @@ export interface LoginUserInfo {
   lastLoginTime?: string;
   disabled?: boolean;
   projects: ProjectDetail[];
-  platformPermPolicies: PermPolicyBase[];
-  projectPermPolicies: Record<string, PermPolicyBase[]>;
+  platformPermissions?: PermissionBase[];
+  projectPermissions?: Record<string, PermissionBase[]>;
 }
 
-export interface PermPolicyBase {
+export interface PermissionBase {
   name: string;
   alias?: string;
-  resources: string[];
+  resources?: string[];
   actions: string[];
   effect: string;
   createTime: string;

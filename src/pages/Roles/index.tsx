@@ -4,13 +4,13 @@ import RolesDialog from './components/RolesDialog';
 import Title from '../../components/ListTitle';
 import { If } from 'tsx-control-statements/components';
 import { getRoleList, deleteRole } from '../../api/roles';
-import { getPermPolicies } from '../../api/permPolicies';
+import { getPlatformPermissions } from '../../api/rbac';
 import type { RolesBase } from '../../interface/roles';
-import type { PermPolicies } from '../../interface/permPolicies';
 import Translation from '../../components/Translation';
 import { momentDate } from '../../utils/common';
 import locale from '../../utils/locale';
 import './index.less';
+import type { PermissionBase } from '../../interface/user';
 
 type Props = {};
 
@@ -19,7 +19,7 @@ type State = {
   total: number;
   page: number;
   pageSize: number;
-  permPolicies: PermPolicies[];
+  permissions: PermissionBase[];
   visible: boolean;
   isEditRole: boolean;
   editRoleItem: RolesBase;
@@ -34,7 +34,7 @@ class Roles extends Component<Props, State> {
       total: 0,
       page: 0,
       pageSize: 10,
-      permPolicies: [],
+      permissions: [],
       visible: false,
       isEditRole: false,
       editRoleItem: { name: '' },
@@ -43,7 +43,7 @@ class Roles extends Component<Props, State> {
   }
   componentDidMount() {
     this.listRoles();
-    this.listPermPolicies();
+    this.listPermissions();
   }
 
   listRoles = async () => {
@@ -62,10 +62,10 @@ class Roles extends Component<Props, State> {
       });
   };
 
-  listPermPolicies = async () => {
-    getPermPolicies().then((res) => {
+  listPermissions = async () => {
+    getPlatformPermissions().then((res) => {
       this.setState({
-        permPolicies: (res && res) || [],
+        permissions: (res && res) || [],
       });
     });
   };
@@ -80,13 +80,13 @@ class Roles extends Component<Props, State> {
 
   onDelete = (record: RolesBase) => {
     Dialog.confirm({
-      content: 'Are you sure you want to delete the role',
+      content: 'Are you sure you want to delete this role',
       onOk: () => {
         const { name } = record;
         if (name) {
           deleteRole({ name }).then((res) => {
             if (res) {
-              Message.success(<Translation>Delete role success</Translation>);
+              Message.success(<Translation>Delete the role success</Translation>);
               this.listRoles();
             }
           });
@@ -203,7 +203,7 @@ class Roles extends Component<Props, State> {
       visible,
       isEditRole,
       editRoleItem,
-      permPolicies,
+      permissions,
       isLoading,
     } = this.state;
     return (
@@ -211,7 +211,7 @@ class Roles extends Component<Props, State> {
         <div className="roles-list-content">
           <Title
             title="Platform Roles"
-            subTitle=""
+            subTitle="Assign permissions for resources such as clusters、targets、addons、projects and users"
             extButtons={[
               <Button type="primary" onClick={this.handleClickCreate}>
                 <Translation>New Role</Translation>
@@ -238,7 +238,7 @@ class Roles extends Component<Props, State> {
               visible={visible}
               isEditRole={isEditRole}
               editRoleItem={editRoleItem}
-              permPolicies={permPolicies}
+              permissions={permissions}
               onCreate={this.onCreate}
               onCloseCreate={this.onCloseCreate}
             />

@@ -2,7 +2,7 @@ import React from 'react';
 import { Grid, Form, Input, Field, Button, Message, Select } from '@b-design/ui';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { createProjectUsers, updateProjectUser } from '../../../../api/project';
-import { ProjectMember, ProjectRoleBase } from '../../../../interface/project';
+import type { ProjectMember, ProjectRoleBase } from '../../../../interface/project';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
@@ -88,7 +88,7 @@ class MemberDialog extends React.Component<Props, State> {
     if (isEditMember) {
       return <Translation>Edit Member</Translation>;
     } else {
-      return <Translation>New Member</Translation>;
+      return <Translation>Add Member</Translation>;
     }
   };
 

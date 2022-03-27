@@ -12,7 +12,7 @@ export default function MainLayout(props: any) {
         <TopBar {...props} />
         <div className="layout-shell">
           <div className="layout-navigation">
-            <LeftMenu props={props} />
+            <LeftMenu {...props} />
           </div>
           <div className="layout-content">
             <Content />

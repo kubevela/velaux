@@ -45,13 +45,15 @@ class Summary extends Component<Props, State> {
     const { params = { projectName: '' } } = match;
     return (
       <Fragment>
-        <General
-          projectDetails={projectDetails}
-          userList={userList}
-          loadProjectDetail={this.loadProjectDetail}
-        />
-        <Targets projectName={params.projectName} />
-        <Integrations />
+        <div className="container">
+          <General
+            projectDetails={projectDetails}
+            userList={userList}
+            loadProjectDetail={this.loadProjectDetail}
+          />
+          <Targets projectName={params.projectName} />
+          <Integrations />
+        </div>
       </Fragment>
     );
   }

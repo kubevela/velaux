@@ -42,7 +42,7 @@ class Addons extends React.Component<Props, State> {
 
   componentDidMount() {
     this.getAddonsList();
-    this.getAddonRegistrysList();
+    this.getAddonRegistriesList();
     this.getEnabledAddon();
   }
 
@@ -67,9 +67,9 @@ class Addons extends React.Component<Props, State> {
     });
   };
 
-  getAddonRegistrysList = async () => {
+  getAddonRegistriesList = async () => {
     this.props.dispatch({
-      type: 'addons/getAddonRegistrysList',
+      type: 'addons/getAddonRegistriesList',
       payload: {},
     });
   };
@@ -138,7 +138,7 @@ class Addons extends React.Component<Props, State> {
               this.getAddonsList();
               this.setState({ showRegistryManage: false });
             }}
-            syncRegistrys={this.getAddonRegistrysList}
+            syncRegistries={this.getAddonRegistriesList}
             registries={registryList}
             dispatch={dispatch}
           />

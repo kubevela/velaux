@@ -6,7 +6,7 @@
     "start": "node scripts/start.js",
     "build": "node --max-old-space-size=4096 scripts/build.js",
     "docker-image": "yarn build && docker build -t oamdev/velaux:latest -f Dockerfile.local .",
-    "test": "node scripts/test.js",
+    "test": "ts-mocha -p tsconfig.test.json src/**/**.test.ts",
     "lint": "yarn lint:js && yarn lint:style && yarn lint:prettier",
     "lint:js": "eslint --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
     "lint:style": "stylelint --fix \"src/**/*.less\" --syntax less",
@@ -25,6 +25,9 @@
   },
   "eslintConfig": {
     "parser": "@babel/eslint-parser"
+  },
+  "directories": {
+    "src": "./src"
   },
   "browserslist": {
     "production": [
@@ -82,13 +85,14 @@
     "@babel/preset-typescript": "^7.12.7",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.1",
     "@testing-library/react": "^12.1.2",
-    "@types/jest": "^26.0.24",
-    "@types/react-copy-to-clipboard": "^5.0.2",
-    "@types/react-dom": "^17.0.9",
+    "@types/chai": "^4.2.11",
     "@types/js-yaml": "^4.0.1",
     "@types/lodash": "^4.14.176",
+    "@types/mocha": "^8.2.1",
     "@types/react": "^16.3.0",
     "@types/react-cookies": "^0.1.0",
+    "@types/react-copy-to-clipboard": "^5.0.2",
+    "@types/react-dom": "^17.0.9",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^4.0.0",
     "@typescript-eslint/parser": "^4.0.0",
@@ -97,6 +101,7 @@
     "bfj": "7.0.2",
     "browserslist": "4.17.6",
     "case-sensitive-paths-webpack-plugin": "2.3.0",
+    "chai": "^4.2.0",
     "css-loader": "5.2.7",
     "dotenv": "10.0.0",
     "dotenv-expand": "5.1.0",
@@ -106,7 +111,6 @@
     "eslint-formatter-pretty": "4.0.0",
     "eslint-plugin-flowtype": "^5.2.0",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jest": "25.2.3",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.2.0",
@@ -118,6 +122,7 @@
     "less": "3.9.0",
     "less-loader": "4.1.0",
     "mini-css-extract-plugin": "0.11.3",
+    "ts-mocha": "^9.0.2",
     "optimize-css-assets-webpack-plugin": "6.0.1",
     "pnp-webpack-plugin": "1.6.4",
     "postcss": "^8.3.3",
@@ -137,57 +142,5 @@
     "webpack-dev-server": "3.11.1",
     "webpack-manifest-plugin": "2.2.0",
     "workbox-webpack-plugin": "5.1.4"
-  },
-  "jest": {
-    "roots": [
-      "<rootDir>/src"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!src/**/*.d.ts"
-    ],
-    "setupFiles": [
-      "react-app-polyfill/jsdom"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/src/setupTests.ts"
-    ],
-    "testMatch": [
-      "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
-      "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
-    ],
-    "testEnvironment": "jsdom",
-    "testRunner": "./node_modules/jest-circus/runner.js",
-    "transform": {
-      "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
-      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
-    },
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
-      "^.+\\.module\\.(css|sass|scss)$"
-    ],
-    "modulePaths": [],
-    "moduleNameMapper": {
-      "^react-native$": "react-native-web",
-      "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
-    },
-    "moduleFileExtensions": [
-      "web.js",
-      "js",
-      "web.ts",
-      "ts",
-      "web.tsx",
-      "tsx",
-      "json",
-      "web.jsx",
-      "jsx",
-      "node"
-    ],
-    "watchPlugins": [
-      "jest-watch-typeahead/filename",
-      "jest-watch-typeahead/testname"
-    ],
-    "resetMocks": true
   }
 }

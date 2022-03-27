@@ -3,12 +3,12 @@ import { Grid, Form, Input, Field, Checkbox, Button, Message } from '@b-design/u
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import { createProjectRoles, updateProjectRoles } from '../../../../api/project';
-import type { PermPolicies } from '../../../../interface/permPolicies';
-import { ProjectRoleBase } from '../../../../interface/project';
+import type { ProjectRoleBase } from '../../../../interface/project';
 import { checkName } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import './index.less';
+import type { PermissionBase } from '../../../../interface/user';
 
 type Props = {
   projectName: string;
@@ -16,7 +16,7 @@ type Props = {
   activeRoleName: string;
   activeRoleItem: ProjectRoleBase;
   isCreateProjectRoles: boolean;
-  projectPermPolicies: PermPolicies[];
+  projectPermissions: PermissionBase[];
   onCreate: (activeRoleItem: string) => void;
 };
 
@@ -24,7 +24,6 @@ type State = {
   loading: boolean;
 };
 
-type CheckBoxBase = { name: string }[];
 const { Group: CheckboxGroup } = Checkbox;
 
 class ProjectPermPoliciesDetail extends Component<Props, State> {
@@ -43,14 +42,14 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
       this.field.setValues({
         name: '',
         alias: '',
-        permPolicies: [],
+        permissions: [],
       });
     } else {
       if (nextProps.activeRoleItem !== this.props.activeRoleItem) {
         this.field.setValues({
           name: nextProps.activeRoleItem.name || '',
           alias: nextProps.activeRoleItem.alias || '',
-          permPolicies: this.initPermPoliciesStatus(nextProps.activeRoleItem),
+          permissions: this.initPermPoliciesStatus(nextProps.activeRoleItem),
         });
       }
     }
@@ -58,29 +57,9 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
 
   initPermPoliciesStatus = (activeItem: ProjectRoleBase) => {
     if (activeItem) {
-      return (activeItem.permPolicies || []).map((item: { name: string }) => item.name);
+      return (activeItem.permissions || []).map((item: { name: string }) => item.name);
     } else {
       return [];
-    }
-  };
-
-  transCheckBoxData = (data: CheckBoxBase) => {
-    return (data || []).map((item) => {
-      return {
-        value: item.name,
-        label: item.name,
-      };
-    });
-  };
-
-  listPermPolicies = () => {
-    const { activeRoleItem, isCreateProjectRoles, projectPermPolicies } = this.props;
-    if (isCreateProjectRoles) {
-      return this.transCheckBoxData(projectPermPolicies);
-    } else {
-      if (activeRoleItem && activeRoleItem.permPolicies) {
-        return this.transCheckBoxData(activeRoleItem.permPolicies);
-      }
     }
   };
 
@@ -90,7 +69,7 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
         return;
       }
       const { isCreateProjectRoles, projectName, activeRoleName } = this.props;
-      const { name, alias, permPolicies } = values;
+      const { name, alias, permissions } = values;
       const queryData = {
         projectName,
         roleName: activeRoleName,
@@ -98,7 +77,7 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
       const param = {
         name,
         alias,
-        permPolicies,
+        permissions,
       };
       this.setState({ loading: true });
       if (isCreateProjectRoles) {
@@ -141,7 +120,13 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
         span: 20,
       },
     };
-    const { projectRoles, isCreateProjectRoles } = this.props;
+    const { projectRoles, isCreateProjectRoles, projectPermissions } = this.props;
+    const permissions = projectPermissions.map((p) => {
+      return {
+        label: p.alias || p.name,
+        value: p.name,
+      };
+    });
     return (
       <Fragment>
         <If condition={projectRoles && projectRoles.length === 0 && !isCreateProjectRoles}>
@@ -162,7 +147,7 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
                   >
                     <Input
                       name="name"
-                      placeholder={i18n.t('Please enter').toString()}
+                      placeholder={i18n.t('Please input the rule name').toString()}
                       maxLength={32}
                       disabled={isCreateProjectRoles ? false : true}
                       {...init('name', {
@@ -185,7 +170,7 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
                   >
                     <Input
                       name="alias"
-                      placeholder={i18n.t('Please enter').toString()}
+                      placeholder={i18n.t('Please input the role alias').toString()}
                       {...init('alias', {
                         rules: [
                           {
@@ -202,19 +187,19 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
               <Row>
                 <Col span={24} style={{ padding: '0 16px 16px 30px' }}>
                   <FormItem
-                    label={<Translation>PermPolicies</Translation>}
+                    label={<Translation>Permissions</Translation>}
                     labelAlign="left"
                     className="font-weight-400 permPolicies-wrapper"
                     required={true}
                   >
                     <CheckboxGroup
-                      dataSource={this.listPermPolicies()}
-                      {...init('permPolicies', {
+                      dataSource={permissions}
+                      {...init('permissions', {
                         rules: [
                           {
                             required: true,
                             type: 'array',
-                            message: 'Choose one permPolicy',
+                            message: 'Please select at last on permission',
                           },
                         ],
                       })}

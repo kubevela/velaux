@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Button, Grid, Card } from '@b-design/ui';
+import { Button, Grid, Card, Message } from '@b-design/ui';
 import type { Project, ProjectDetail } from '../../../../interface/project';
 import type { User } from '../../../../interface/user';
 import Translation from '../../../../components/Translation';
@@ -8,6 +8,7 @@ import { If } from 'tsx-control-statements/components';
 import locale from '../../../../utils/locale';
 import GeneralDialog from '../GeneralDialog';
 import './index.less';
+import { momentDate } from '../../../../utils/common';
 
 type Props = {
   projectDetails: ProjectDetail;
@@ -79,15 +80,18 @@ class General extends Component<Props, State> {
               </Button>
             </section>
             <section className="card-content-wrapper">
+              <If condition={projectDetails.description}>
+                <Row style={{ marginBottom: '16px' }}>
+                  <Message type="notice">{projectDetails.description}</Message>
+                </Row>
+              </If>
               <Row wrap={true}>
                 <Col m={12} xs={24}>
-                  <Item label={<Translation>Name</Translation>} value={projectDetails.name} />
+                  <Item
+                    label={<Translation>Alias(Name)</Translation>}
+                    value={`${projectDetails.alias}(${projectDetails.name})`}
+                  />
                 </Col>
-                <Col m={12} xs={24}>
-                  <Item label={<Translation>Alias</Translation>} value={projectDetails.alias} />
-                </Col>
-              </Row>
-              <Row wrap={true}>
                 <Col m={12} xs={24}>
                   <Item
                     label={<Translation>Owner</Translation>}
@@ -100,11 +104,16 @@ class General extends Component<Props, State> {
                 </Col>
               </Row>
               <Row wrap={true}>
-                <Col span={24}>
+                <Col m={12} xs={24}>
                   <Item
-                    label={<Translation>Description</Translation>}
-                    labelSpan={4}
-                    value={projectDetails.description}
+                    label={<Translation>Create Time</Translation>}
+                    value={momentDate(projectDetails.createTime)}
+                  />
+                </Col>
+                <Col m={12} xs={24}>
+                  <Item
+                    label={<Translation>Update Time</Translation>}
+                    value={momentDate(projectDetails.updateTime)}
                   />
                 </Col>
               </Row>

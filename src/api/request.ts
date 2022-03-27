@@ -1,12 +1,10 @@
 import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios from 'axios';
-import { routerRedux } from 'dva/router';
 import { getMessage } from './status';
 import { baseURL } from './config';
 import { Message } from '@b-design/ui';
 import { handleError } from '../utils/errors';
 import { getToken } from '../utils/storage';
-import store from '../index';
 import { authenticationRefreshToken } from './productionLink';
 
 export const axiosInstance: AxiosInstance = axios.create({
@@ -49,21 +47,13 @@ axiosInstance.interceptors.response.use(
           localStorage.setItem('token', res.accessToken);
           localStorage.setItem('refreshToken', res.refreshToken);
         } else {
-          store.dispatch(
-            routerRedux.push({
-              pathname: '/login',
-            }),
-          );
+          window.location.href = '/login';
         }
         return axiosInstance(error.config);
       } catch (err: any) {
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        store.dispatch(
-          routerRedux.push({
-            pathname: '/login',
-          }),
-        );
+        window.location.href = '/login';
         return Promise.reject(err.response || err);
       }
     } else {
@@ -71,9 +61,7 @@ axiosInstance.interceptors.response.use(
         case 401:
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
-          store.routerRedux.push({
-            pathname: '/login',
-          });
+          window.location.href = '/login';
       }
       Message.error(getMessage(status));
       return Promise.reject(error.response || error);

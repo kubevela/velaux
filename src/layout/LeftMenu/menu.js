@@ -8,7 +8,7 @@ import {
   isProjectPath,
   isRolesPath,
 } from '../../utils/common';
-export function getLeftSider(pathname) {
+export function getLeftSlider(pathname) {
   const isApplication = isApplicationPath(pathname);
   const isCluster = isClustersPath(pathname);
   const isAddons = isAddonsPath(pathname);
@@ -26,12 +26,14 @@ export function getLeftSider(pathname) {
           link: '/applications',
           iconType: 'layergroup-fill',
           navName: 'Applications',
+          permission: { resource: 'project:?/application:*', action: 'list' },
         },
         {
           className: isEnv,
           link: '/envs',
           iconType: 'Directory-tree',
           navName: 'Environments',
+          permission: { resource: 'project:?/environment:*', action: 'list' },
         },
       ],
     },
@@ -43,12 +45,14 @@ export function getLeftSider(pathname) {
           link: '/clusters',
           iconType: 'clouddownload',
           navName: 'Clusters',
+          permission: { resource: 'cluster:*', action: 'list' },
         },
         {
           className: isTarget,
           link: '/targets',
           iconType: 'box',
           navName: 'Targets',
+          permission: { resource: 'target:*', action: 'list' },
         },
       ],
     },
@@ -60,6 +64,7 @@ export function getLeftSider(pathname) {
           link: '/addons',
           iconType: 'database-set',
           navName: 'Addons',
+          permission: { resource: 'addon:*', action: 'list' },
         },
       ],
     },
@@ -71,18 +76,21 @@ export function getLeftSider(pathname) {
           link: '/users',
           iconType: 'user-group-fill',
           navName: 'Users',
+          permission: { resource: 'user:*', action: 'list' },
         },
         {
           className: isRole,
           link: '/roles',
-          iconType: 'aliwangwang',
+          iconType: 'supervise',
           navName: 'Platform Roles',
+          permission: { resource: 'role:*', action: 'list' },
         },
         {
           className: isProject,
           link: '/projects',
           iconType: 'structured-data',
           navName: 'Projects',
+          permission: { resource: 'project:*', action: 'list' },
         },
       ],
     },
