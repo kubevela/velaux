@@ -50,17 +50,17 @@ class ProjectLayout extends Component<Props> {
         name: <Translation>Applications</Translation>,
         to: `/projects/${projectName}/applications`,
       },
+      {
+        id: 'roles',
+        name: <Translation>Roles</Translation>,
+        to: `/projects/${projectName}/roles`,
+      },
+      {
+        id: 'members',
+        name: <Translation>Members</Translation>,
+        to: `/projects/${projectName}/members`,
+      },
     ];
-    // {
-    //     id: 'roles',
-    //     name: <Translation>Roles</Translation>,
-    //     to: `/projects/${projectName}/roles`
-    // },
-    // {
-    //     id: 'members',
-    //     name: <Translation>Members</Translation>,
-    //     to: `/projects/${projectName}/members`
-    // }];
 
     const nav = list.map((item) => {
       const active = this.props.activeId === item.id ? 'active' : '';

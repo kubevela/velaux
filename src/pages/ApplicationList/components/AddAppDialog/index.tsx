@@ -144,7 +144,7 @@ class AppDialog extends React.Component<Props, State> {
       //Temporary logic
       getEnvs({ project: 'default', page: 0 }).then((res) => {
         if (res) {
-          this.setState({ envs: res.envs });
+          this.setState({ envs: res && res.envs });
           const envOption = (res?.envs || []).map((env: { name: string; alias: string }) => {
             return {
               label: env.alias ? `${env.alias}(${env.name})` : env.name,

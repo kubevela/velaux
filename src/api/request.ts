@@ -36,7 +36,6 @@ axiosInstance.interceptors.response.use(
   async (error: any) => {
     const { data, status } = error?.response;
     const refreshToken = localStorage.getItem('refreshToken');
-    console.log(data);
     if (refreshToken && data.BusinessCode === '12002') {
       try {
         const res: any = await axios({
@@ -113,7 +112,6 @@ export const post = (url: string, params: any, customError?: boolean) => {
     })
     .catch((err) => {
       handleAPIError(err, params.customError || customError);
-      return err;
     });
 };
 

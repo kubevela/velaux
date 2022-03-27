@@ -128,3 +128,11 @@ export function getValue(key: string, value: any): any {
   }
   return value[key];
 }
+
+export function getSelectLabel(
+  data: { name: string; alias?: string }[],
+): { label: string; value: string }[] {
+  return (data || []).map((item: { name: string; alias?: string }) => {
+    return { label: item.alias || item.name, value: item.name };
+  });
+}

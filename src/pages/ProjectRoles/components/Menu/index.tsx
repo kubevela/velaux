@@ -1,24 +1,57 @@
 import React, { Component, Fragment } from 'react';
-import { Icon } from '@b-design/ui';
+import { Icon, Message } from '@b-design/ui';
+import type { ProjectRoleBase } from '../../../../interface/project';
 import Translation from '../../../../components/Translation';
 import './index.less';
 
-class ProjectMenu extends Component {
+type Props = {
+  projectRoles: ProjectRoleBase[];
+  isAddRole: boolean;
+  isCreateProjectRoles: boolean;
+  addRole: () => void;
+  activeRoleName: string;
+  handleChangeRole: (roleName: string) => void;
+  onDeleteProjectRole: (roleName: string) => void;
+};
+
+class ProjectMenu extends Component<Props> {
+  handleChangeRole = (name: string) => {
+    const { isCreateProjectRoles } = this.props;
+    if (!isCreateProjectRoles) {
+      this.props.handleChangeRole(name);
+    } else {
+      return Message.warning(
+        <Translation>
+          When adding a project role, you cannot view the details of other project roles
+        </Translation>,
+      );
+    }
+  };
+
+  handleClick(name: string, e: any) {
+    e.preventDefault();
+    this.props.onDeleteProjectRole(name);
+  }
+
   getMenuList = () => {
-    const menuProps = [
-      { labe: '开发者', id: 'developer' },
-      { labe: '运维', id: 'devops' },
-      { labe: '观察者', id: 'watcher' },
-      { labe: 'QA', id: 'qa' },
-      { labe: '测试', id: 'tester' },
-      { labe: '管理员', id: 'manager' },
-    ];
-    const menuList = menuProps.map((item) => {
+    const { projectRoles, activeRoleName, isCreateProjectRoles } = this.props;
+    const menuList = (projectRoles || []).map((item: { name: string; alias?: string }) => {
+      const activeRole = activeRoleName === item.name && !isCreateProjectRoles ? 'active' : '';
       return (
-        <li className="menu-item">
-          <span> {item.labe} </span>
+        <li
+          className={`menu-role-item ${activeRole}`}
+          onClick={() => {
+            this.handleChangeRole(item.name);
+          }}
+        >
+          <span> {item.alias || item.name} </span>
           <span>
-            <Icon type="delete" />
+            <Icon
+              type="delete"
+              onClick={(e) => {
+                this.handleClick(item.name, e);
+              }}
+            />
           </span>
         </li>
       );
@@ -31,8 +64,8 @@ class ProjectMenu extends Component {
       <Fragment>
         <ul className="project-menu-wrapper">
           {this.getMenuList()}
-          <li className="add-roles-btn">
-            <Translation>新增角色</Translation>
+          <li className="add-roles-btn" onClick={this.props.addRole}>
+            <Translation>New Role</Translation>
           </li>
         </ul>
       </Fragment>

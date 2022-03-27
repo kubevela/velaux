@@ -24,39 +24,44 @@ export function getDomain(): { MOCK: string | undefined; APIBASE: string | undef
 }
 
 export function isApplicationPath(pathname: string) {
-  return (pathname || '').indexOf('/applications') !== -1;
+  return (pathname || '').startsWith('/applications');
 }
 export function isClustersPath(pathname: string) {
-  return (pathname || '').indexOf('/clusters') !== -1;
+  return (pathname || '').startsWith('/clusters');
 }
 export function isAddonsPath(pathname: string) {
-  return (pathname || '').indexOf('/addons') !== -1;
+  return (pathname || '').startsWith('/addons');
 }
 export function isOperationPath(pathname: string) {
-  return (pathname || '').indexOf('/operation') !== -1;
+  return (pathname || '').startsWith('/operation');
 }
 export function isModelPath(pathname: string) {
-  return (pathname || '').indexOf('/model') !== -1;
+  return (pathname || '').startsWith('/model');
 }
 
 export function isAPPStorePath(pathname: string) {
-  return (pathname || '').indexOf('/appstores') !== -1;
+  return (pathname || '').startsWith('/appstores');
 }
 
 export function isTargetURL(pathname: string) {
-  return (pathname || '').indexOf('/targets') !== -1;
+  return (pathname || '').startsWith('/targets');
 }
 
 export function isEnvPath(pathname: string) {
-  return (pathname || '').indexOf('/envs') !== -1;
+  return (pathname || '').startsWith('/envs');
 }
 
 export function isUsersPath(pathname: string) {
-  return (pathname || '').indexOf('/users') !== -1;
+  return (pathname || '').startsWith('/users');
 }
 export function isProjectPath(pathname: string) {
-  return (pathname || '').indexOf('/projects') !== -1;
+  return (pathname || '').startsWith('/projects');
 }
+
+export function isRolesPath(pathname: string) {
+  return (pathname || '').startsWith('/roles');
+}
+
 export const APPLICATION_PATH = 'applications';
 export const CLUSTERS_PATH = 'clusters';
 export const ADDONS_PATH = 'addons';

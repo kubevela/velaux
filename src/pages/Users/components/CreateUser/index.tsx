@@ -1,18 +1,22 @@
 import React from 'react';
-import { Grid, Form, Input, Field, Button, Message } from '@b-design/ui';
+import { Grid, Form, Input, Field, Button, Message, Select } from '@b-design/ui';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { checkUserPassWord, checkUserEmail } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import { createUser, updateUser } from '../../../../api/users';
 import { checkName } from '../../../../utils/common';
 import { User } from '../../../../interface/user';
+import type { RolesBase } from '../../../../interface/roles';
 import { If } from 'tsx-control-statements/components';
 import i18n from '../../../../i18n';
+import { getSelectLabel } from '../../../../utils/utils';
+import locale from '../../../../utils/locale';
 
 type Props = {
   visible: boolean;
   isEditUser: boolean;
   editUser: User;
+  rolesList: RolesBase[];
   onCreate: () => void;
   onClose: () => void;
 };
@@ -34,7 +38,10 @@ class CreateUser extends React.Component<Props, State> {
   componentDidMount() {
     const { isEditUser, editUser } = this.props;
     if (isEditUser && editUser) {
-      const { alias, createTime, email, lastLoginTime, password, name } = editUser;
+      const { alias, createTime, email, lastLoginTime, password, name, roles } = editUser;
+      const rolesName = roles?.map((item) => {
+        return item.name;
+      });
       this.field.setValues({
         name,
         alias,
@@ -42,6 +49,7 @@ class CreateUser extends React.Component<Props, State> {
         password,
         email,
         lastLoginTime,
+        roles: rolesName,
       });
     }
   }
@@ -126,7 +134,7 @@ class CreateUser extends React.Component<Props, State> {
     const init = this.field.init;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
-    const { isEditUser, editUser } = this.props;
+    const { isEditUser, editUser, rolesList } = this.props;
 
     const formItemLayout = {
       labelCol: {
@@ -136,6 +144,7 @@ class CreateUser extends React.Component<Props, State> {
         span: 20,
       },
     };
+    const rolesListSelect = getSelectLabel(rolesList);
 
     return (
       <React.Fragment>
@@ -226,6 +235,26 @@ class CreateUser extends React.Component<Props, State> {
                         },
                       ],
                     })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem label={<Translation>Roles</Translation>} labelTextAlign="left">
+                  <Select
+                    {...init(`roles`, {
+                      rules: [
+                        {
+                          required: false,
+                          message: 'Please select roles',
+                        },
+                      ],
+                    })}
+                    locale={locale.Select}
+                    mode="multiple"
+                    dataSource={rolesListSelect}
                   />
                 </FormItem>
               </Col>

@@ -17,3 +17,5 @@ export const authenticationLoginType = `/api/v1/auth/login_type`;
 export const authenticationRefreshToken = `/api/v1/auth/refresh_token`;
 export const authenticationUserInfo = `/api/v1/auth/user_info`;
 export const users = `/api/v1/users`;
+export const roles = `/api/v1/roles`;
+export const permPolicies = `/api/v1/permPolicies`;
