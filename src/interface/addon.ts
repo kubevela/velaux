@@ -1,4 +1,5 @@
 import type { ApplicationStatus, UIParam } from './application';
+import type { NameAlias } from './env';
 
 export interface Addon {
   name: string;
@@ -8,11 +9,12 @@ export interface Addon {
   detail?: string;
   tags?: string[];
   createTime?: string;
-  deployTo?: { controlPlane: boolean; runtimeCluster: boolean; runtime_cluster: boolean };
+  deployTo?: { controlPlane: boolean; runtimeCluster: boolean };
   dependencies?: { name: string }[];
   definitions?: Definition[];
   uiSchema?: UIParam[];
   registryName?: string;
+  availableVersions?: string[];
   url?: string;
 }
 
@@ -22,6 +24,8 @@ export interface AddonStatus {
   name: string;
   appStatus: ApplicationStatus;
   clusters?: Record<string, AddonClusterInfo>;
+  installedVersion: string;
+  allClusters?: NameAlias[];
 }
 
 export interface AddonClusterInfo {
@@ -49,10 +53,15 @@ export interface RegistryOssSource {
   path: string;
 }
 
+export interface RegistryHelmSource {
+  url: string;
+}
 export interface AddonRegistry {
   name: string;
   git: RegistryGitSource;
+  gitee: RegistryGitSource;
   oss: RegistryOssSource;
+  helm: RegistryHelmSource;
 }
 
 export interface AddonBaseStatus {

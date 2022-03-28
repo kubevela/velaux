@@ -69,7 +69,7 @@ export function getLeftSlider(pathname) {
       ],
     },
     {
-      navName: 'Settings',
+      navName: 'Platform',
       children: [
         {
           className: isUser,
@@ -82,7 +82,7 @@ export function getLeftSlider(pathname) {
           className: isRole,
           link: '/roles',
           iconType: 'supervise',
-          navName: 'Platform Roles',
+          navName: 'Roles',
           permission: { resource: 'role:*', action: 'list' },
         },
         {

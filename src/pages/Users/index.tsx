@@ -8,7 +8,7 @@ import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 import Title from '../../components/ListTitle';
 import CreateUser from './components/CreateUser';
-import ResetPassWordDialog from './components/ResetPassWordDialog';
+import ResetPassword from './components/ResetPassword';
 import { getUserList, deleteUser, changeUserDisable, changeUserEnable } from '../../api/users';
 import { getRoleList } from '../../api/roles';
 import { momentDate } from '../../utils/common';
@@ -31,7 +31,7 @@ type State = {
   editUser: User;
   rolesList: RolesBase[];
   isResetPassword: boolean;
-  isResetPassWordDialog: boolean;
+  isResetPasswordDialog: boolean;
 };
 
 class Users extends Component<Props, State> {
@@ -50,7 +50,7 @@ class Users extends Component<Props, State> {
       rolesList: [],
       isEditUser: false,
       isResetPassword: false,
-      isResetPassWordDialog: false,
+      isResetPasswordDialog: false,
       editUser: {
         name: '',
         email: '',
@@ -148,7 +148,7 @@ class Users extends Component<Props, State> {
 
   onResetPassWordCreat = () => {
     this.setState({
-      isResetPassWordDialog: false,
+      isResetPasswordDialog: false,
     });
     this.listUser();
   };
@@ -204,7 +204,7 @@ class Users extends Component<Props, State> {
 
   onResetPassWordClose = () => {
     this.setState({
-      isResetPassWordDialog: false,
+      isResetPasswordDialog: false,
     });
   };
 
@@ -219,7 +219,7 @@ class Users extends Component<Props, State> {
   onEditResetPasswordUser = (editUser: User) => {
     this.setState({
       editUser: editUser,
-      isResetPassWordDialog: true,
+      isResetPasswordDialog: true,
       isResetPassword: true,
     });
   };
@@ -324,7 +324,7 @@ class Users extends Component<Props, State> {
                   this.onResetPassword(record);
                 }}
               >
-                <Translation>ResetPassWord</Translation>
+                <Translation>ResetPassword</Translation>
               </Button>
 
               <Button
@@ -380,7 +380,7 @@ class Users extends Component<Props, State> {
       pageSize,
       total,
       isLoading,
-      isResetPassWordDialog,
+      isResetPasswordDialog,
       isResetPassword,
       rolesList,
     } = this.state;
@@ -448,9 +448,9 @@ class Users extends Component<Props, State> {
               />
             </If>
 
-            <If condition={isResetPassWordDialog}>
-              <ResetPassWordDialog
-                visible={isResetPassWordDialog}
+            <If condition={isResetPasswordDialog}>
+              <ResetPassword
+                visible={isResetPasswordDialog}
                 editUser={editUser}
                 isResetPassword={isResetPassword}
                 onClose={this.onResetPassWordClose}

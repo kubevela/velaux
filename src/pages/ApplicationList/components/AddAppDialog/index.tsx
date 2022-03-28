@@ -83,8 +83,18 @@ class AppDialog extends React.Component<Props, State> {
     if (projectName) {
       this.field.setValue('project', projectName);
     }
-    if (projects && projects.length > 0) {
-      this.setState({ project: projects[0].name }, () => {
+    let defaultProject = '';
+    (projects || []).map((item, i: number) => {
+      if (i == 0) {
+        defaultProject = item.name;
+      }
+      if (item.name == 'default') {
+        defaultProject = item.name;
+      }
+      return;
+    });
+    if (defaultProject != '') {
+      this.setState({ project: defaultProject }, () => {
         this.loadEnvs();
       });
     }
@@ -142,7 +152,7 @@ class AppDialog extends React.Component<Props, State> {
   loadEnvs = (callback?: Callback) => {
     if (this.state.project) {
       //Temporary logic
-      getEnvs({ project: 'default', page: 0 }).then((res) => {
+      getEnvs({ project: this.state.project, page: 0 }).then((res) => {
         if (res) {
           this.setState({ envs: res && res.envs });
           const envOption = (res?.envs || []).map((env: { name: string; alias: string }) => {

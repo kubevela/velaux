@@ -30,9 +30,16 @@ class GeneralConfig extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { projects, isDisableProject } = this.props;
-    const projectList = (projects || []).map((item) => {
+    let defaultProject = '';
+    const projectList = (projects || []).map((item, i: number) => {
+      if (i == 0) {
+        defaultProject = item.name;
+      }
+      if (item.name == 'default') {
+        defaultProject = item.name;
+      }
       return {
-        label: item.name,
+        label: item.alias || item.name,
         value: item.name,
       };
     });
@@ -110,15 +117,16 @@ class GeneralConfig extends React.Component<Props, State> {
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
               <FormItem label={<Translation>Project</Translation>} required>
-                <Select.AutoComplete
+                <Select
                   name="project"
-                  hasClear
-                  placeholder={i18n.t('Please select').toString()}
-                  filterLocal={true}
+                  placeholder={i18n.t('Please select a project').toString()}
                   disabled={isDisableProject ? true : false}
                   dataSource={projectList}
+                  filterLocal={true}
+                  hasClear={true}
                   style={{ width: '100%' }}
                   {...init('project', {
+                    initValue: defaultProject,
                     rules: [
                       {
                         required: true,

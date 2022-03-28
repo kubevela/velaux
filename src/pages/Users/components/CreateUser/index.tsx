@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Form, Input, Field, Button, Message, Select } from '@b-design/ui';
 import DrawerWithFooter from '../../../../components/Drawer';
-import { checkUserPassWord, checkUserEmail } from '../../../../utils/common';
+import { checkUserPassword, checkUserEmail } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import { createUser, updateUser } from '../../../../api/users';
 import { checkName } from '../../../../utils/common';
@@ -207,7 +207,7 @@ class CreateUser extends React.Component<Props, State> {
                         rules: [
                           {
                             required: true,
-                            pattern: checkUserPassWord,
+                            pattern: checkUserPassword,
                             message: (
                               <Translation>
                                 Password should be 8-16 bits and contain at least one number and one

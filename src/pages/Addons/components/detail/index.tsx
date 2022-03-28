@@ -1,5 +1,16 @@
 import React from 'react';
-import { Form, Button, Loading, Field, Card, Dialog, Table, Message } from '@b-design/ui';
+import {
+  Form,
+  Button,
+  Loading,
+  Field,
+  Card,
+  Dialog,
+  Table,
+  Message,
+  Select,
+  Checkbox,
+} from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { If } from 'tsx-control-statements/components';
 import {
@@ -22,6 +33,7 @@ import locale from '../../../../utils/locale';
 import StatusShow from '../../../../components/StatusShow';
 import type { ApplicationStatus } from '../../../../interface/application';
 import i18n from '../../../../i18n';
+import type { NameAlias } from '../../../../interface/env';
 
 type Props = {
   addonName: string;
@@ -31,7 +43,7 @@ type Props = {
 };
 
 type State = {
-  addonDetailInfo: Addon;
+  addonDetailInfo?: Addon;
   loading: boolean;
   status: 'disabled' | 'enabled' | 'enabling' | 'suspend' | 'disabling' | '';
   statusLoading: boolean;
@@ -40,6 +52,10 @@ type State = {
   addonsStatus?: ApplicationStatus;
   showStatusVisible: boolean;
   mode: 'new' | 'edit';
+  version?: string;
+  clusters?: string[];
+  allClusters?: NameAlias[];
+  enabledClusters?: string[];
 };
 
 class AddonDetailDialog extends React.Component<Props, State> {
@@ -78,9 +94,16 @@ class AddonDetailDialog extends React.Component<Props, State> {
   }
 
   loadAddonDetail = async () => {
-    getAddonsDetails({ name: this.props.addonName })
-      .then((res) => {
-        this.setState({ addonDetailInfo: res ? res : {}, loading: false });
+    const { version } = this.state;
+    this.setState({ loading: true });
+    getAddonsDetails({ name: this.props.addonName, version: version })
+      .then((res: Addon) => {
+        if (res) {
+          this.setState({ addonDetailInfo: res, loading: false });
+          if (!this.state.version && res.version) {
+            this.setState({ version: res.version });
+          }
+        }
       })
       .finally(() => {
         this.setState({ loading: false });
@@ -99,15 +122,32 @@ class AddonDetailDialog extends React.Component<Props, State> {
             this.loadAddonStatus();
           }, 3000);
         }
+
+        let clusters: string[] = [];
         if (res.args) {
           this.form.setValue('properties', res.args);
           this.setState({ mode: 'edit' });
+          if (res.args.clusters) {
+            clusters = res.args.clusters;
+          }
+        }
+
+        let enabledClusters: string[] = [];
+        if (res.clusters) {
+          enabledClusters = Object.keys(res.clusters);
+        }
+        if (res.clusters && (!clusters || clusters.length == 0)) {
+          clusters = enabledClusters;
         }
         this.setState({
           status: res.phase,
           args: res.args,
+          version: res.installedVersion,
+          allClusters: res.allClusters,
           statusLoading: false,
+          clusters: clusters || ['local'],
           addonsStatus: res.appStatus,
+          enabledClusters: enabledClusters,
         });
       })
       .catch(() => {
@@ -140,18 +180,45 @@ class AddonDetailDialog extends React.Component<Props, State> {
       if (errors) {
         return;
       }
+      if (!this.state.version) {
+        Message.warning(i18n.t('Please firstly select want to enable version'));
+        return;
+      }
+      if (
+        this.state.addonDetailInfo?.deployTo?.runtimeCluster &&
+        (!this.state.clusters || this.state.clusters.length == 0)
+      ) {
+        Message.warning(i18n.t('Please firstly select at least one cluster.'));
+        return;
+      }
       this.setState({ upgradeLoading: true });
-      upgradeAddon({ name: this.props.addonName, properties: values.properties }).then(() => {
+      upgradeAddon({
+        name: this.props.addonName,
+        version: this.state.version,
+        clusters: this.state.clusters,
+        properties: values.properties,
+      }).then(() => {
         this.loadAddonStatus();
         this.setState({ upgradeLoading: false });
       });
     });
   };
   enableAddon = async (properties: any) => {
+    if (!this.state.version) {
+      Message.warning(i18n.t('Please firstly select want to enable version'));
+      return;
+    }
     this.setState({ statusLoading: true }, () => {
-      enableAddon({ name: this.props.addonName, properties: properties }).then(() => {
-        this.loadAddonStatus();
-      });
+      if (this.state.version) {
+        enableAddon({
+          name: this.props.addonName,
+          version: this.state.version,
+          clusters: this.state.clusters,
+          properties: properties,
+        }).then(() => {
+          this.loadAddonStatus();
+        });
+      }
     });
   };
 
@@ -174,6 +241,19 @@ class AddonDetailDialog extends React.Component<Props, State> {
   onStatusClose = () => {
     this.setState({ showStatusVisible: false });
   };
+  changeVersion = (version: string) => {
+    this.setState({ version: version }, () => {
+      this.loadAddonDetail();
+    });
+  };
+
+  changeCluster = (values: string[]) => {
+    if (!values.includes('local')) {
+      Message.warning('The local cluster ie required');
+      values.push('local');
+    }
+    this.setState({ clusters: values });
+  };
 
   render() {
     const {
@@ -184,14 +264,18 @@ class AddonDetailDialog extends React.Component<Props, State> {
       upgradeLoading,
       addonsStatus,
       showStatusVisible,
+      version,
+      clusters,
+      allClusters,
+      enabledClusters,
     } = this.state;
     const { showAddon } = this.props;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
-    let showName = addonDetailInfo.name ? addonDetailInfo.name : 'Addon Detail';
+    let showName = addonDetailInfo?.name ? addonDetailInfo.name : 'Addon Detail';
     showName = `${showName}(${status})`;
-    addonDetailInfo.uiSchema?.map((item) => {
+    addonDetailInfo?.uiSchema?.map((item) => {
       if (item.jsonKey.indexOf('SECRET_KEY') != -1) {
         item.uiType = 'Password';
       }
@@ -210,7 +294,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
         title={status}
         style={{ backgroundColor: status === 'enabled' ? 'red' : '' }}
         loading={statusLoading || loading || status == 'enabling' || status == 'disabling'}
-        disabled={status == 'enabling' || status == 'disabling'}
+        disabled={status == 'enabling' || status == 'disabling' || version == ''}
       >
         <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
       </Button>,
@@ -243,6 +327,21 @@ class AddonDetailDialog extends React.Component<Props, State> {
       return 'warning';
     };
 
+    const clusterOptions = allClusters?.map((cluster: NameAlias) => {
+      let label: any = cluster.alias || cluster.name;
+      if (enabledClusters?.includes(cluster.name)) {
+        label = (
+          <span>
+            {label}(<span style={{ color: 'green' }}>enabled</span>)
+          </span>
+        );
+      }
+      return {
+        label: label,
+        value: cluster.name,
+      };
+    });
+
     return (
       <div className="basic">
         <DrawerWithFooter
@@ -267,14 +366,38 @@ class AddonDetailDialog extends React.Component<Props, State> {
                 size="medium"
                 style={{ padding: '8px', marginBottom: '10px' }}
               >
-                {`${i18n.t('Addon status is')}${addonsStatus?.status || 'Initing'}`}
+                {`${i18n.t('Addon status is ')}${addonsStatus?.status || 'Initing'}`}
                 <a style={{ marginLeft: '16px' }} onClick={() => this.updateStatusShow(true)}>
                   <Translation>Check the details</Translation>
                 </a>
               </Message>
             </If>
 
-            <If condition={addonDetailInfo.uiSchema && !statusLoading}>
+            {/* select the addon version */}
+            <Card title="" contentHeight={'auto'} style={{ marginBottom: '16px' }}>
+              <If condition={addonDetailInfo?.availableVersions}>
+                <Form.Item required label="Version">
+                  <Select
+                    onChange={this.changeVersion}
+                    dataSource={addonDetailInfo?.availableVersions || []}
+                    value={version}
+                  />
+                </Form.Item>
+              </If>
+
+              <If condition={addonDetailInfo?.deployTo?.runtimeCluster}>
+                <Form.Item required label="Deployed Clusters">
+                  <Checkbox.Group
+                    className="custom-cluster-checkbox"
+                    onChange={this.changeCluster}
+                    value={clusters}
+                    dataSource={clusterOptions}
+                  />
+                </Form.Item>
+              </If>
+            </Card>
+
+            <If condition={addonDetailInfo?.uiSchema && !statusLoading}>
               <Group
                 title={<Translation>Properties</Translation>}
                 description={<Translation>Set the addon configuration parameters</Translation>}
@@ -295,13 +418,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
                       ],
                     })}
                     ref={this.uiSchemaRef}
-                    uiSchema={addonDetailInfo.uiSchema}
+                    uiSchema={addonDetailInfo?.uiSchema}
                     mode={this.state.mode}
                   />
                 </Form>
               </Group>
             </If>
-            <If condition={addonDetailInfo.dependencies}>
+            <If condition={addonDetailInfo?.dependencies}>
               <Card
                 locale={locale.Card}
                 contentHeight="auto"
@@ -311,9 +434,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
                   <Translation>Ensure that dependent addon are enabled first.</Translation>
                 </Message>
                 <ul>
-                  {addonDetailInfo.dependencies?.map((item) => {
+                  {addonDetailInfo?.dependencies?.map((item) => {
                     return (
-                      <li className="dependen-item" key={item.name}>
+                      <li className="dependency-item" key={item.name}>
                         <a
                           onClick={() => {
                             if (showAddon) {
@@ -329,7 +452,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                 </ul>
               </Card>
             </If>
-            <If condition={addonDetailInfo.definitions}>
+            <If condition={addonDetailInfo?.definitions}>
               <Card
                 contentHeight="auto"
                 locale={locale.Card}
@@ -341,17 +464,17 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     Enable the addon to obtain the following extension capabilities
                   </Translation>
                 </Message>
-                <Table locale={locale.Table} dataSource={addonDetailInfo.definitions}>
+                <Table locale={locale.Table} dataSource={addonDetailInfo?.definitions}>
                   <Table.Column
                     dataIndex="name"
                     align="left"
-                    width="120px"
+                    width="140px"
                     title={<Translation>Name</Translation>}
                   />
                   <Table.Column
                     dataIndex="type"
                     align="left"
-                    width="180px"
+                    width="160px"
                     cell={(v: string) => {
                       return <Translation>{v}</Translation>;
                     }}
@@ -371,13 +494,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
               title={<Translation>Readme</Translation>}
               style={{ marginTop: '16px' }}
             >
-              <If condition={addonDetailInfo.detail}>
+              <If condition={addonDetailInfo?.detail}>
                 <ReactMarkdown
-                  children={addonDetailInfo.detail || ''}
+                  children={addonDetailInfo?.detail || ''}
                   remarkPlugins={[remarkGfm]}
                 />
               </If>
-              <If condition={!addonDetailInfo.detail}>
+              <If condition={!addonDetailInfo?.detail}>
                 <div className="readme-empty">
                   <Empty />
                 </div>
