@@ -10,7 +10,7 @@ import { deleteCluster } from '../../api/cluster';
 import Translation from '../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import { getEnabledAddons, getAddonsList } from '../../api/addons';
-import { Addon } from '../../interface/addon';
+import type { Addon } from '../../interface/addon';
 
 type Props = {
   clusterList: [];
@@ -98,7 +98,7 @@ class Cluster extends React.Component<Props, State> {
         addonList.forEach((item: Addon) => {
           const isMatchName = ele.name === item.name;
           const deploy = item.deployTo || { runtimeCluster: false, runtime_cluster: false };
-          if (isMatchName && (deploy.runtimeCluster || deploy.runtime_cluster)) {
+          if (isMatchName && deploy.runtimeCluster) {
             addonMessage.push({ name: item.name, path: item.url || '' });
           }
         });

@@ -4,7 +4,7 @@ import Translation from '../../components/Translation';
 import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
 import Logo from '../../assets/kubevela-logo.png';
 import { If } from 'tsx-control-statements/components';
-import { checkName, checkUserPassWord } from '../../utils/common';
+import { checkName, checkUserPassword } from '../../utils/common';
 import './index.less';
 import i18n from '../../i18n';
 
@@ -83,9 +83,9 @@ export default class LoginPage extends Component<Props, State> {
       if (error) {
         return;
       }
-      const { account, password } = values;
+      const { username, password } = values;
       const params = {
-        username: account,
+        username: username,
         password,
       };
       loginLocal(params).then((res: any) => {
@@ -129,19 +129,19 @@ export default class LoginPage extends Component<Props, State> {
                 </div>
                 <Form onSubmit={this.handleSubmit} {...formItemLayout} field={this.field}>
                   <FormItem
-                    label={<Translation className="label-title">Account</Translation>}
+                    label={<Translation className="label-title">Username</Translation>}
                     labelAlign="top"
                     required
                   >
                     <Input
-                      name="account"
-                      placeholder={i18n.t('Please input the username or email').toString()}
-                      {...init('account', {
+                      name="username"
+                      placeholder={i18n.t('Please input the username').toString()}
+                      {...init('username', {
                         rules: [
                           {
                             required: true,
                             pattern: checkName,
-                            message: <Translation>Please input the username or email</Translation>,
+                            message: <Translation>Please input the username</Translation>,
                           },
                         ],
                       })}
@@ -160,7 +160,7 @@ export default class LoginPage extends Component<Props, State> {
                         rules: [
                           {
                             required: true,
-                            pattern: checkUserPassWord,
+                            pattern: checkUserPassword,
                             message: (
                               <Translation>
                                 The password should be 8-16 bits and contain at least one number and
