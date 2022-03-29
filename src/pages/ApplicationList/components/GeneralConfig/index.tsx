@@ -110,9 +110,10 @@ class GeneralConfig extends React.Component<Props, State> {
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
               <FormItem label={<Translation>Project</Translation>} required>
-                <Select.AutoComplete
+                <Select
                   name="project"
                   hasClear
+                  showSearch
                   placeholder={i18n.t('Please select').toString()}
                   filterLocal={true}
                   disabled={isDisableProject ? true : false}

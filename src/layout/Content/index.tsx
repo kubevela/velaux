@@ -21,6 +21,8 @@ import ProjectApplications from '../../pages/ProjectApplications';
 import Roles from '../../pages/Roles';
 import ProjectRoles from '../../pages/ProjectRoles';
 import ProjectMembers from '../../pages/ProjectMembers';
+import IntegrationsLayout from '../Integrations';
+import Integrations from '../../pages/Integrations';
 
 export default function Content() {
   return (
@@ -185,7 +187,37 @@ export default function Content() {
           );
         }}
       />
-      <Route path="/roles" component={Roles} />
+      <Route exact path="/roles" component={Roles} />
+
+      <Route
+        exact
+        path='/integrations'
+        render={(props: any) => {
+          return (
+            <IntegrationsLayout {...props} />
+          )
+        }}
+      />
+
+      <Route
+        exact
+        path="/integrations/:configType"
+        render={(props: any) => {
+          return <Redirect to={`/integrations/${props.match.params.configType}/config`} />;
+        }}
+      />
+
+      <Route
+        exact
+        path="/integrations/:configType/config"
+        render={(props: any) => {
+          return (
+            <IntegrationsLayout {...props}>
+              <Integrations {...props} />
+            </IntegrationsLayout>
+          );
+        }}
+      />
       <Route path="/notFound" component={NotFound} />
       <Redirect to="/notFound" />
     </Switch>

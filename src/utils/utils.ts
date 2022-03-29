@@ -1,4 +1,6 @@
 import type { Endpoint } from '../interface/observation';
+import type { ComponentDefinitionsBase } from '../interface/application';
+
 type SelectGroupType = {
   label: string;
   children: { label: string; value: string }[];
@@ -58,7 +60,7 @@ export function quantityToScalar(quantity: string): number | bigint {
   }
 }
 
-export function transComponentDefinitions(componentDefinitions: []) {
+export function transComponentDefinitions(componentDefinitions: ComponentDefinitionsBase[]) {
   const defaultCoreDataSource = ['k8s-objects', 'task', 'webservice', 'worker'];
   const cloud: SelectGroupType = [
     {
@@ -78,7 +80,7 @@ export function transComponentDefinitions(componentDefinitions: []) {
       children: [],
     },
   ];
-  (componentDefinitions || []).map((item: { name: string; workloadType: string }) => {
+  (componentDefinitions || []).map((item: { name: string; workloadType?: string }) => {
     if (item.workloadType === 'configurations.terraform.core.oam.dev') {
       cloud[0].children.push({
         label: item.name,
@@ -135,4 +137,8 @@ export function getSelectLabel(
   return (data || []).map((item: { name: string; alias?: string }) => {
     return { label: item.alias || item.name, value: item.name };
   });
+}
+
+export function getMatchParamObj(match: { params: any }, name: string) {
+  return match.params && match.params[name];
 }

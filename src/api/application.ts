@@ -129,7 +129,8 @@ export function getComponentDefinitions() {
 }
 
 export function detailComponentDefinition(params: { name: string }) {
-  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}/${params.name}`;
+//  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}/${params.name}`;
+  const gurl = "http://work.zhouzhengxi.com:8000"+ `${componentdefinition}/${params.name}`;
   return get(gurl, { params: { type: 'component' } }).then((res) => res);
 }
 

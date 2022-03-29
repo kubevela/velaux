@@ -7,6 +7,7 @@ import {
   isUsersPath,
   isProjectPath,
   isRolesPath,
+  isIntegrationPath,
 } from '../../utils/common';
 export function getLeftSlider(pathname) {
   const isApplication = isApplicationPath(pathname);
@@ -17,6 +18,7 @@ export function getLeftSlider(pathname) {
   const isUser = isUsersPath(pathname);
   const isProject = isProjectPath(pathname);
   const isRole = isRolesPath(pathname);
+  const isIntegration = isIntegrationPath(pathname);
   return [
     {
       navName: 'Continuous Delivery',
@@ -91,6 +93,12 @@ export function getLeftSlider(pathname) {
           iconType: 'structured-data',
           navName: 'Projects',
           permission: { resource: 'project:*', action: 'list' },
+        },
+        {
+          className: isIntegration,
+          link: '/integrations',
+          iconType: 'indent',
+          navName: 'IntegrationsList',
         },
       ],
     },

@@ -1,24 +1,29 @@
 import React from 'react';
-import _ from 'lodash';
+import { connect } from 'dva';
 import { Link } from 'dva/router';
 import { Icon } from '@b-design/ui';
-import Translation from '../../components/Translation';
 import { getLeftSlider } from './menu';
-import './index.less';
-import { version } from '../../../package.json';
-import { connect } from 'dva';
 import type { LoginUserInfo } from '../../interface/user';
+import _ from 'lodash';
+import Translation from '../../components/Translation';
+import { version } from '../../../package.json';
 import { checkPermission } from '../../utils/permission';
+import './index.less';
 
 interface Props {
   userInfo?: LoginUserInfo;
+  history: {
+    location: {
+      pathname: string;
+    }
+  }
 }
 
 const LeftMenu = (props: Props) => {
   if (!props.userInfo) {
     return <div />;
   }
-  const pathname = _.get(props, 'props.history.location.pathname');
+  const pathname = _.get(props.history.location, 'pathname');
   const sliders = getLeftSlider(pathname);
   const childrenSlider = sliders.map((item) => {
     const ele: any = [];
@@ -72,4 +77,5 @@ const LeftMenu = (props: Props) => {
 
 export default connect((store: any) => {
   return { ...store.user };
-})(LeftMenu);
+}, undefined, undefined, { pure: false })(LeftMenu);
+
