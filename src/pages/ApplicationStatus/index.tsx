@@ -35,6 +35,7 @@ type Props = {
       appName: string;
     };
   };
+  location: { pathname: string };
   applicationDetail?: ApplicationDetail;
   applicationStatus?: ApplicationStatus;
   components?: ApplicationComponent[];
@@ -48,6 +49,7 @@ type State = {
   componentName?: string;
   resources?: AppliedResource[];
   deployLoading: boolean;
+  envName: string;
 };
 
 @connect((store: any) => {
@@ -59,11 +61,21 @@ class ApplicationMonitor extends React.Component<Props, State> {
     this.state = {
       loading: true,
       deployLoading: false,
+      envName: '',
     };
   }
 
   componentDidMount() {
     this.loadApplicationStatus();
+  }
+
+  componentWillReceiveProps(nextProps: any) {
+    const { params } = nextProps.match;
+    if (params.envName !== this.state.envName) {
+      this.setState({ envName: params.envName }, () => {
+        this.loadApplicationStatus();
+      });
+    }
   }
 
   loadApplicationStatus = async () => {

@@ -93,9 +93,18 @@ class UISchema extends Component<Props, State> {
   registerForm: Record<string, Field>;
   constructor(props: Props) {
     super(props);
+    const numberParams: string[] = [];
+    this.props.uiSchema?.map((param) => {
+      if (param.uiType == 'Number') {
+        numberParams.push(param.jsonKey);
+      }
+    });
     this.form = new Field(this, {
-      onChange: () => {
-        const values = this.form.getValues();
+      onChange: (name: string, value: any) => {
+        const values: any = this.form.getValues();
+        if (numberParams.includes(name) && value === '') {
+          delete values[name];
+        }
         const { onChange } = this.props;
         if (onChange) onChange(values);
       },

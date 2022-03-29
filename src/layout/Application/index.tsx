@@ -33,7 +33,7 @@ class ApplicationLayout extends Component<Props, any> {
   }
 
   shouldComponentUpdate(nextProps: any) {
-    return nextProps.location !== this.props.location;
+    return nextProps.location.pathname !== this.props.location.pathname;
   }
 
   onGetApplicationDetails = async () => {
@@ -109,7 +109,7 @@ class ApplicationLayout extends Component<Props, any> {
       return loadingDom;
     }
     return (
-      <div className="applayout">
+      <div className="app-layout">
         <Header appName={appName} currentPath={path} />
         <EnvTabs
           dispatch={dispatch}

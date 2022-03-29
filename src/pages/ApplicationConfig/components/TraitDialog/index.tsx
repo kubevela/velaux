@@ -9,6 +9,7 @@ import {
   updateTrait,
   createTrait,
   getTraitDefinitions,
+  getApplicationComponent,
 } from '../../../../api/application';
 import type {
   ApplicationComponent,
@@ -29,7 +30,6 @@ type Props = {
   traitItem?: Trait;
   appName?: string;
   componentName?: string;
-  component?: ApplicationComponent;
   temporaryTraitList: Trait[];
   createTemporaryTrait: (trait: Trait) => void;
   upDateTemporaryTrait: (trait: Trait) => void;
@@ -44,6 +44,7 @@ type State = {
   isLoading: boolean;
   traitDefinitions?: DefinitionBase[];
   podDisruptive?: any;
+  component?: ApplicationComponent;
 };
 
 class TraitDialog extends React.Component<Props, State> {
@@ -61,24 +62,44 @@ class TraitDialog extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.onGetTraitDefinitions();
-    const { isEditTrait, traitItem } = this.props;
-    if (isEditTrait && traitItem) {
-      const { alias, type, description, properties } = traitItem;
-      this.field.setValues({
-        alias,
-        type,
-        description,
-        properties,
-      });
-      if (type) {
-        this.onDetailsTraitDefinition(type);
+    this.onGetComponentInfo(() => {
+      this.onGetTraitDefinitions();
+      const { isEditTrait, traitItem } = this.props;
+      if (isEditTrait && traitItem) {
+        const { alias, type, description, properties } = traitItem;
+        this.field.setValues({
+          alias,
+          type,
+          description,
+          properties,
+        });
+        if (type) {
+          this.onDetailsTraitDefinition(type);
+        }
       }
-    }
+    });
+  }
+
+  onGetComponentInfo(callback: () => void) {
+    const { appName, componentName } = this.props;
+    const params = {
+      appName,
+      componentName,
+    };
+    getApplicationComponent(params).then((res: ApplicationComponent) => {
+      if (res) {
+        this.setState(
+          {
+            component: res,
+          },
+          callback,
+        );
+      }
+    });
   }
 
   onGetTraitDefinitions = async () => {
-    const { component } = this.props;
+    const { component } = this.state;
     if (component?.definition) {
       getTraitDefinitions({ appliedWorkload: component?.definition.workload.type }).then(
         (res: { definitions?: DefinitionBase[] }) => {
