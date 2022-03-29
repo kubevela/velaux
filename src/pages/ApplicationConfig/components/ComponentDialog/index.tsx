@@ -6,6 +6,7 @@ import {
   createApplicationComponent,
   updateComponentProperties,
   detailComponentDefinition,
+  getApplicationComponent,
 } from '../../../../api/application';
 import type {
   DefinitionDetail,
@@ -31,13 +32,12 @@ import Group from '../../../../extends/Group';
 type Props = {
   appName?: string;
   componentName?: string;
-  editComponent?: ApplicationComponent;
   isEditComponent: boolean;
   temporaryTraitList: Trait[];
   componentDefinitions: [];
   onAddTrait: () => void;
   changeTraitStats: (is: boolean, params: any) => void;
-  onDeleteTrait: (type: string) => void;
+  onDeleteTrait: (type: string, callback: () => void) => void;
   onComponentOK: () => void;
   onComponentClose: () => void;
 };
@@ -46,6 +46,8 @@ type State = {
   definitionDetail?: DefinitionDetail;
   isCreateComponentLoading: boolean;
   isUpdateComponentLoading: boolean;
+  editComponent?: ApplicationComponent;
+  loading: boolean;
 };
 
 class ComponentDialog extends React.Component<Props, State> {
@@ -57,28 +59,53 @@ class ComponentDialog extends React.Component<Props, State> {
     this.state = {
       isCreateComponentLoading: false,
       isUpdateComponentLoading: false,
+      loading: true,
     };
     this.uiSchemaRef = React.createRef();
   }
 
   componentDidMount() {
-    const { isEditComponent, editComponent } = this.props;
-    if (isEditComponent && editComponent) {
-      const { name, alias, type, description, properties } = editComponent;
-      this.field.setValues({
-        name,
-        alias,
-        componentType: type,
-        description,
-        properties,
+    const { isEditComponent } = this.props;
+    if (isEditComponent) {
+      this.onGetEditComponentInfo(() => {
+        if (this.state.editComponent) {
+          const { name, alias, type, description, properties } = this.state.editComponent;
+          this.field.setValues({
+            name,
+            alias,
+            componentType: type,
+            description,
+            properties,
+          });
+          if (type) {
+            this.onDetailsComponentDefinition(type);
+          }
+        }
       });
-      if (type) {
-        this.onDetailsComponentDefinition(type);
-      }
     } else {
       const getInitComponentType: string = this.field.getValue('componentType') || '';
       this.onDetailsComponentDefinition(getInitComponentType);
     }
+  }
+
+  onGetEditComponentInfo(callback?: () => void) {
+    const { appName, componentName } = this.props;
+    const params = {
+      appName,
+      componentName,
+    };
+    this.setState({ loading: true });
+    getApplicationComponent(params).then((res: ApplicationComponent) => {
+      if (res) {
+        this.setState(
+          {
+            editComponent: res,
+            loading: false,
+          },
+          callback,
+        );
+      }
+    });
   }
 
   onClose = () => {
@@ -128,7 +155,7 @@ class ComponentDialog extends React.Component<Props, State> {
     detailComponentDefinition({ name: value })
       .then((re) => {
         if (re) {
-          this.setState({ definitionDetail: re });
+          this.setState({ definitionDetail: re, loading: false });
           if (callback) {
             callback();
           }
@@ -155,7 +182,8 @@ class ComponentDialog extends React.Component<Props, State> {
   };
 
   showComponentTitle = () => {
-    const { isEditComponent, editComponent } = this.props;
+    const { isEditComponent } = this.props;
+    const { editComponent } = this.state;
     if (isEditComponent && editComponent) {
       const { name = '', alias = '' } = editComponent;
       return (
@@ -167,7 +195,7 @@ class ComponentDialog extends React.Component<Props, State> {
     } else {
       return (
         <div>
-          <span> {i18n.t('New Component')} </span>
+          <span>{i18n.t('New Component')} </span>
           <Divider />
         </div>
       );
@@ -184,7 +212,8 @@ class ComponentDialog extends React.Component<Props, State> {
   };
 
   getTraitList = () => {
-    const { isEditComponent, editComponent, temporaryTraitList } = this.props;
+    const { editComponent } = this.state;
+    const { isEditComponent, temporaryTraitList } = this.props;
     if (isEditComponent && editComponent) {
       return [...(editComponent.traits || [])];
     } else {
@@ -226,7 +255,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
     const { isEditComponent, componentDefinitions, onComponentClose } = this.props;
-    const { definitionDetail, isUpdateComponentLoading } = this.state;
+    const { definitionDetail, isUpdateComponentLoading, loading } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -244,8 +273,9 @@ class ComponentDialog extends React.Component<Props, State> {
           </section>
           <Group
             hasToggleIcon={true}
-            closed={isEditComponent ? true : false}
+            initClose={isEditComponent ? true : false}
             required={true}
+            loading={loading}
             title={i18n.t('Component Basic Info')}
           >
             <Row>
@@ -396,7 +426,9 @@ class ComponentDialog extends React.Component<Props, State> {
               this.props.changeTraitStats(is, trait);
             }}
             onDeleteTrait={(traitType: string) => {
-              this.props.onDeleteTrait(traitType || '');
+              this.props.onDeleteTrait(traitType, () => {
+                this.onGetEditComponentInfo();
+              });
             }}
             onAdd={this.props.onAddTrait}
           />

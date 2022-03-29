@@ -4,7 +4,6 @@ import './index.less';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
 import {
-  getApplicationComponent,
   deleteTrait,
   getApplicationTriggers,
   deleteTriggers,
@@ -70,7 +69,6 @@ type State = {
   visibleComponent: boolean;
   temporaryTraitList: Trait[];
   isEditComponent: boolean;
-  editComponent?: ApplicationComponent;
   componentDefinitions: [];
 };
 @connect((store: any) => {
@@ -98,42 +96,8 @@ class ApplicationConfig extends Component<Props, State> {
   }
 
   componentDidMount() {
-    const { components, componentsApp } = this.props;
-    const { appName } = this.state;
-    if (components && components.length > 0 && componentsApp == appName) {
-      const componentName = components[0].name || '';
-      this.setState({ componentName }, () => {
-        this.onGetApplicationComponent();
-      });
-    }
     this.onGetApplicationTrigger();
     this.onGetComponentDefinitions();
-  }
-
-  componentWillReceiveProps(nextProps: any) {
-    if (nextProps.components !== this.props.components && this.props.components?.length === 0) {
-      const componentName =
-        (nextProps.components && nextProps.components[0] && nextProps.components[0].name) || '';
-      this.setState({ componentName }, () => {
-        this.onGetApplicationComponent();
-      });
-    }
-  }
-
-  onGetApplicationComponent() {
-    const { appName, componentName } = this.state;
-    const params = {
-      appName,
-      componentName,
-    };
-    getApplicationComponent(params).then((res: ApplicationComponent) => {
-      if (res) {
-        this.setState({
-          mainComponent: res,
-          editComponent: res,
-        });
-      }
-    });
   }
 
   onGetApplicationTrigger() {
@@ -150,7 +114,7 @@ class ApplicationConfig extends Component<Props, State> {
     });
   }
 
-  onDeleteTrait = async (traitType: string) => {
+  onDeleteTrait = async (traitType: string, callback: () => void) => {
     const { appName, componentName, isEditComponent, temporaryTraitList } = this.state;
     const params = {
       appName,
@@ -165,14 +129,18 @@ class ApplicationConfig extends Component<Props, State> {
             title: i18n.t('Success'),
             content: i18n.t('Delete trait success.'),
           });
-          this.onGetApplicationComponent();
+          this.onLoadApplicationComponents();
+          callback();
         }
       });
     } else {
       const filterTemporaryTraitList = temporaryTraitList.filter((item) => item.type != traitType);
-      this.setState({
-        temporaryTraitList: filterTemporaryTraitList,
-      });
+      this.setState(
+        {
+          temporaryTraitList: filterTemporaryTraitList,
+        },
+        callback,
+      );
     }
   };
 
@@ -181,8 +149,7 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   onOk = () => {
-    this.onGetApplicationComponent();
-    this.onloadApplicationComponents();
+    this.onLoadApplicationComponents();
     this.setState({
       isEditTrait: false,
       visibleTrait: false,
@@ -217,7 +184,7 @@ class ApplicationConfig extends Component<Props, State> {
     this.setState({
       visibleTrigger: false,
     });
-    this.onloadApplicationComponents();
+    this.onLoadApplicationComponents();
   };
 
   onTriggerOk = (res: Trigger) => {
@@ -275,31 +242,11 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
-  onGetEditComponentInfo(componentName: string, callback: () => void) {
-    const { appName } = this.state;
-    const params = {
-      appName,
-      componentName,
-    };
-    getApplicationComponent(params).then((res: ApplicationComponent) => {
-      if (res) {
-        this.setState({
-          editComponent: res,
-        });
-      }
-      if (callback) {
-        callback();
-      }
-    });
-  }
-
   editComponent = (component: ApplicationComponentBase) => {
-    this.onGetEditComponentInfo(component.name, () => {
-      this.setState({
-        isEditComponent: true,
-        visibleComponent: true,
-        componentName: component.name,
-      });
+    this.setState({
+      isEditComponent: true,
+      visibleComponent: true,
+      componentName: component.name,
     });
   };
 
@@ -323,7 +270,7 @@ class ApplicationConfig extends Component<Props, State> {
           title: i18n.t('Success'),
           content: i18n.t('Delete component success.'),
         });
-        this.onloadApplicationComponents();
+        this.onLoadApplicationComponents();
       }
     });
   };
@@ -359,7 +306,7 @@ class ApplicationConfig extends Component<Props, State> {
       visibleComponent: false,
       temporaryTraitList: [],
     });
-    this.onloadApplicationComponents();
+    this.onLoadApplicationComponents();
   };
 
   onComponentOK = () => {
@@ -370,7 +317,7 @@ class ApplicationConfig extends Component<Props, State> {
         temporaryTraitList: [],
       },
       () => {
-        this.onloadApplicationComponents();
+        this.onLoadApplicationComponents();
       },
     );
   };
@@ -393,13 +340,14 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
-  onloadApplicationComponents = async () => {
+  onLoadApplicationComponents = async () => {
     const { appName } = this.state;
     this.props.dispatch({
       type: 'application/getApplicationComponents',
       payload: { appName: appName },
     });
   };
+
   render() {
     const { applicationDetail, workflows, components } = this.props;
     const {
@@ -417,7 +365,6 @@ class ApplicationConfig extends Component<Props, State> {
       visibleComponent,
       temporaryTraitList,
       isEditComponent,
-      editComponent,
       componentDefinitions,
     } = this.state;
 
@@ -571,7 +518,6 @@ class ApplicationConfig extends Component<Props, State> {
             isEditComponent={isEditComponent}
             appName={appName}
             componentName={componentName}
-            component={editComponent}
             isEditTrait={isEditTrait}
             traitItem={traitItem}
             temporaryTraitList={temporaryTraitList}
@@ -607,11 +553,10 @@ class ApplicationConfig extends Component<Props, State> {
           />
         </If>
 
-        <If condition={visibleComponent && editComponent}>
+        <If condition={visibleComponent}>
           <ComponentDialog
             appName={appName}
             componentName={componentName}
-            editComponent={editComponent}
             isEditComponent={isEditComponent}
             temporaryTraitList={temporaryTraitList}
             componentDefinitions={componentDefinitions}
@@ -621,8 +566,8 @@ class ApplicationConfig extends Component<Props, State> {
             changeTraitStats={(is: boolean, trait: Trait) => {
               this.changeTraitStats(is, trait, componentName);
             }}
-            onDeleteTrait={(traitType: string) => {
-              this.onDeleteTrait(traitType);
+            onDeleteTrait={(traitType: string, callback: () => void) => {
+              this.onDeleteTrait(traitType, callback);
             }}
           />
         </If>

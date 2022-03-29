@@ -12,7 +12,10 @@ type Props = {
   title: string | React.ReactNode;
   description?: string | React.ReactNode;
   children?: React.ReactNode;
+  // if required is false, this will be effective
   closed?: boolean;
+  // If set is true, in any case, the group is closed initially.
+  initClose?: boolean;
   loading?: boolean;
   hasToggleIcon?: boolean;
   required?: boolean;
@@ -53,14 +56,21 @@ class Group extends React.Component<Props, State> {
   }
 
   initSwitchState = () => {
-    const { jsonKey = '', propertyValue = {}, alwaysShow = false, required, closed } = this.props;
+    const {
+      jsonKey = '',
+      propertyValue = {},
+      alwaysShow = false,
+      required,
+      closed,
+      initClose,
+    } = this.props;
     const findKey = Object.keys(propertyValue).find((item) => item === jsonKey);
     if (findKey || alwaysShow) {
-      this.setState({ enable: true, closed: false, checked: true });
+      this.setState({ enable: true, closed: false || initClose, checked: true });
     } else if (required) {
-      this.setState({ enable: true, closed: false, checked: true });
+      this.setState({ enable: true, closed: false || initClose, checked: true });
     } else {
-      this.setState({ enable: false, closed: closed, checked: false });
+      this.setState({ enable: false, closed: closed || initClose, checked: false });
     }
   };
 

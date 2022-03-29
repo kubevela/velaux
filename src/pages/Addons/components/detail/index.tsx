@@ -404,7 +404,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
               </If>
             </Card>
 
-            <If condition={addonDetailInfo?.uiSchema && !statusLoading}>
+            <If condition={addonDetailInfo?.uiSchema}>
               <Group
                 title={<Translation>Properties</Translation>}
                 description={<Translation>Set the addon configuration parameters</Translation>}
