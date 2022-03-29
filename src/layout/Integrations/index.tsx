@@ -68,7 +68,9 @@ class IntegrationsLayout extends Component<Props, State> {
             callback: () => {
                 const { integrationsConfigTypes } = this.props;
                 const pathname = this.getIntegrationsFirstMenuName(integrationsConfigTypes);
-                initMenuRoute && initMenuRoute(pathname);
+                if (initMenuRoute) {
+                    initMenuRoute(pathname);
+                }
             },
         })
     }
@@ -89,7 +91,7 @@ class IntegrationsLayout extends Component<Props, State> {
     }
 
     changeMenuRouter = (pathname: string) => {
-        if(!pathname){
+        if (!pathname) {
             return;
         }
         const link = `/integrations/${pathname}`;
