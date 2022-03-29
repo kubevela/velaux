@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { Link } from 'dva/router';
-import { Icon } from '@b-design/ui';
+import { Balloon, Icon } from '@b-design/ui';
 import Translation from '../../components/Translation';
 import { getLeftSlider } from './menu';
 import './index.less';
@@ -9,9 +9,11 @@ import { version } from '../../../package.json';
 import { connect } from 'dva';
 import type { LoginUserInfo } from '../../interface/user';
 import { checkPermission } from '../../utils/permission';
+import type { SystemInfo } from '../../interface/system';
 
 interface Props {
   userInfo?: LoginUserInfo;
+  systemInfo?: SystemInfo;
 }
 
 const LeftMenu = (props: Props) => {
@@ -63,7 +65,17 @@ const LeftMenu = (props: Props) => {
       <div className="slide-wrapper">
         <ul className="ul-wrapper">{childrenSlider}</ul>
         <div className="bottom">
-          <div className="nav-container">Version {version}</div>
+          <Balloon
+            align="t"
+            trigger={
+              <div className="nav-container">
+                {version}-{__COMMIT_HASH__}
+              </div>
+            }
+          >
+            <p>API Server Version: {props.systemInfo?.systemVersion?.velaVersion}</p>
+            <p>API Server GitCommit: {props.systemInfo?.systemVersion?.gitVersion}</p>
+          </Balloon>
         </div>
       </div>
     </div>
