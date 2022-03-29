@@ -123,7 +123,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
           }, 3000);
         }
 
-        let clusters: string[] = [];
+        let clusters = undefined;
         if (res.args) {
           this.form.setValue('properties', res.args);
           this.setState({ mode: 'edit' });
@@ -142,7 +142,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
         this.setState({
           status: res.phase,
           args: res.args,
-          version: res.installedVersion,
+          version: res.installedVersion || this.state.version,
           allClusters: res.allClusters,
           statusLoading: false,
           clusters: clusters || ['local'],
@@ -206,6 +206,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
   enableAddon = async (properties: any) => {
     if (!this.state.version) {
       Message.warning(i18n.t('Please firstly select want to enable version'));
+      return;
+    }
+    if (
+      !this.state.addonDetailInfo?.deployTo?.runtimeCluster &&
+      (!this.state.clusters || this.state.clusters.length == 0)
+    ) {
+      Message.warning(i18n.t('Please firstly select at least one cluster.'));
       return;
     }
     this.setState({ statusLoading: true }, () => {
