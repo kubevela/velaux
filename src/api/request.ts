@@ -63,7 +63,6 @@ axiosInstance.interceptors.response.use(
           localStorage.removeItem('refreshToken');
           window.location.href = '/login';
       }
-      Message.error(getMessage(status));
       return Promise.reject(error.response || error);
     }
   },
@@ -84,7 +83,7 @@ axiosInstance.interceptors.request.use(
 const handleAPIError = (err: any, customError: boolean) => {
   const { data, status } = err;
   if (customError) {
-    throw data;
+    return Promise.reject(data);
   } else if (data && data.BusinessCode) {
     handleError(data);
   } else {
@@ -99,8 +98,7 @@ export const post = (url: string, params: any, customError?: boolean) => {
       return res.data;
     })
     .catch((err) => {
-      handleAPIError(err, params.customError || customError);
-      return Promise.reject(err.response || err);
+      return handleAPIError(err, params.customError || customError);
     });
 };
 

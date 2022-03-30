@@ -9,16 +9,12 @@ import {
 
 export function loginSSO(params: { code: string }) {
   const url = authenticationLogin;
-  return post(url, { ...params })
-    .then((res) => res)
-    .catch((err) => Promise.reject(err.data));
+  return post(url, { ...params }, true).then((res) => res);
 }
 
 export function loginLocal(params: { username: string; password: string }) {
   const url = authenticationLogin;
-  return post(url, { ...params })
-    .then((res) => res)
-    .catch((err) => Promise.reject(err.data));
+  return post(url, { ...params }, true).then((res) => res);
 }
 
 export function getDexConfig() {

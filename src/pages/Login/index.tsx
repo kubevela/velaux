@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { If } from 'tsx-control-statements/components';
 import { Card, Button, Input, Form, Field, Icon } from '@b-design/ui';
 import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
-import { getLoginBusinessCode } from '../../api/loginBusiness';
 import Translation from '../../components/Translation';
 import { checkName, checkUserPassword } from '../../utils/common';
 import Logo from '../../assets/kubevela-logo.png';
@@ -101,8 +100,14 @@ export default class LoginPage extends Component<Props, State> {
           }
         })
         .catch((err) => {
+          let customErrorMessage = '';
+          if (err.BusinessCode) {
+            customErrorMessage = `${err.Message}(${err.BusinessCode})`;
+          } else {
+            customErrorMessage = 'Please check the network or contact the administrator!';
+          }
           this.setState({
-            loginErrorMessage: getLoginBusinessCode(err.BusinessCode || ''),
+            loginErrorMessage: customErrorMessage,
           });
         });
     });
@@ -188,14 +193,7 @@ export default class LoginPage extends Component<Props, State> {
                 </Form>
                 <If condition={loginErrorMessage}>
                   <div className="logo-error-wrapper">
-                    <div>
-                      <Icon type="warning1" /> <Translation>{loginErrorMessage}</Translation>
-                    </div>
-                    <div>
-                      <Translation>
-                        Please check the network or contact the administrator!
-                      </Translation>
-                    </div>
+                    <Icon type="warning1" /> <Translation>{loginErrorMessage}</Translation>
                   </div>
                 </If>
                 <Button type="primary" onClick={this.handleSubmit}>

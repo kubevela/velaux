@@ -487,7 +487,6 @@
   "The password should be 8-16 bits and contain at least one number and one letter": "密码必须包含至少一个数字和字母，长度在8-16位之间",
   "Please firstly select a version": "请先选择一个启用的版本",
   "Please firstly select at least one cluster.": "请先至少选择一个启用的集群",
-  "Make shipping applications more enjoyable": "使应用程序更有趣",
   "Connect error!": "网络连接失败,请重试",
   "Please check the network or contact the administrator!": "请检查网络或者联系管理员",
   "The login type is not supported(12001)": "登陆类型不支持(12001)",
