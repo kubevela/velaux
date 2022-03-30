@@ -100,6 +100,7 @@ export const post = (url: string, params: any, customError?: boolean) => {
     })
     .catch((err) => {
       handleAPIError(err, params.customError || customError);
+      return Promise.reject(err.response || err);
     });
 };
 

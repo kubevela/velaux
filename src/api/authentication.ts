@@ -14,7 +14,9 @@ export function loginSSO(params: { code: string }) {
 
 export function loginLocal(params: { username: string; password: string }) {
   const url = authenticationLogin;
-  return post(url, { ...params }).then((res) => res);
+  return post(url, { ...params }).then((res) => res).catch((err) => {
+    return Promise.reject(err.data);
+  });
 }
 
 export function getDexConfig() {
@@ -27,7 +29,7 @@ export function getLoginType() {
   return get(url, {}).then((res) => res);
 }
 
-export function updateSystemInfo(params: { enableCollection: true; loginType: string }) {
+export function updateSystemInfo(params: { enableCollection: boolean; loginType: string }) {
   const url = authenticationSystemInfo;
   return put(url, params).then((res) => res);
 }

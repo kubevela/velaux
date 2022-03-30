@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Button, Input, Form, Field } from '@b-design/ui';
+import { Card, Button, Input, Form, Field, Icon } from '@b-design/ui';
 import Translation from '../../components/Translation';
 import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
 import Logo from '../../assets/kubevela-logo.png';
@@ -27,6 +27,7 @@ type State = {
     redirectURL: string;
   };
   loginType: string;
+  loginErrorMessage: string;
 };
 export default class LoginPage extends Component<Props, State> {
   field: Field;
@@ -41,6 +42,7 @@ export default class LoginPage extends Component<Props, State> {
         redirectURL: '',
       },
       loginType: '',
+      loginErrorMessage: '',
     };
   }
   componentDidMount() {
@@ -89,18 +91,25 @@ export default class LoginPage extends Component<Props, State> {
         password,
       };
       loginLocal(params).then((res: any) => {
+        debugger;
         if (res && res.accessToken) {
           localStorage.setItem('token', res.accessToken);
           localStorage.setItem('refreshToken', res.refreshToken);
           this.props.history.push('/');
         }
+        console.log('res', res)
+      }).catch((err) => {
+        this.setState({
+          loginErrorMessage: err.Message
+        })
+        console.log('loginLocalError', err);
       });
     });
   };
   onGetDexCode = () => {
     const { clientID, issuer, redirectURL } = this.state.dexConfig;
     const newRedirectURl = encodeURIComponent(redirectURL);
-    const dexClientURL = `${issuer}/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access`;
+    const dexClientURL = `${issuer}/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access&state=velaux`;
     window.location.href = dexClientURL;
   };
   render() {
@@ -114,14 +123,14 @@ export default class LoginPage extends Component<Props, State> {
         span: 20,
       },
     };
-    const { loginType } = this.state;
+    const { loginType,loginErrorMessage } = this.state;
     return (
       <div className="full">
         <div className="login-wrapper">
-          <If condition={loginType === 'dex'}>
+          {/* <If condition={loginType === 'dex'}>
             <div />
-          </If>
-          <If condition={loginType === 'local'}>
+          </If> */}
+          <If condition={true || loginType === 'local'}>
             <div className="login-card-wrapper">
               <Card contentHeight={'auto'}>
                 <div className="logo-img-wrapper">
@@ -173,6 +182,12 @@ export default class LoginPage extends Component<Props, State> {
                     />
                   </FormItem>
                 </Form>
+          
+                <If condition={loginErrorMessage}>
+                     <div className='logo-error-wrapper'>
+                         <Icon type='warning1' /> {loginErrorMessage} 
+                      </div>   
+                </If>
                 <Button type="primary" onClick={this.handleSubmit}>
                   <Translation>Sign in</Translation>
                 </Button>
