@@ -42,10 +42,11 @@ class IntegrationsLayout extends Component<Props, State> {
     }
 
     componentDidMount() {
-        this.listConfigType(this.initMenuRoute);
+        this.listConfigType();
     }
 
     componentWillReceiveProps(nextProps: Props) {
+        const { integrationsConfigTypes = [] } = nextProps;
         if (nextProps.location.pathname != this.props.location.pathname) {
             const nextPropsParams = nextProps.match.params || {};
             this.setState({
@@ -53,25 +54,18 @@ class IntegrationsLayout extends Component<Props, State> {
             })
         }
 
-        if (nextProps.match.path === '/integrations') {
-            const { integrationsConfigTypes } = nextProps
+        if (nextProps.match.path === '/integrations' && integrationsConfigTypes.length != 0) {
             const pathname = this.getIntegrationsFirstMenuName(integrationsConfigTypes);
-            this.changeMenuRouter(pathname)
+            this.initMenuRoute(pathname)
         }
 
     }
+   
 
-    listConfigType = (initMenuRoute?: (path: string) => void) => {
+    listConfigType = () => {
         this.props.dispatch({
             type: 'integrations/getConfigTypes',
             payload: {},
-            callback: () => {
-                const { integrationsConfigTypes } = this.props;
-                const pathname = this.getIntegrationsFirstMenuName(integrationsConfigTypes);
-                if (initMenuRoute) {
-                    initMenuRoute(pathname);
-                }
-            },
         })
     }
 
@@ -84,25 +78,16 @@ class IntegrationsLayout extends Component<Props, State> {
     }
 
     initMenuRoute = (pathname: string) => {
-        if (this.props.match.path === '/integrations' && pathname) {
+        if (pathname) {
             const link = `/integrations/${pathname}`;
             this.props.history.push(link)
         }
-    }
-
-    changeMenuRouter = (pathname: string) => {
-        if (!pathname) {
-            return;
-        }
-        const link = `/integrations/${pathname}`;
-        this.props.history.push(link)
     }
 
     render() {
         const { Row, Col } = Grid;
         const { integrationsConfigTypes } = this.props;
         const { activeName } = this.state;
-        console.log('activeName', activeName)
         return (
             <div className='integrations-wrapper'>
                 <Title title={'Integrations'} subTitle={'Integration with external systems and configuration management.'} />

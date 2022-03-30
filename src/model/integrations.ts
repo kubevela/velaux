@@ -17,14 +17,11 @@ const integrations: any = {
 
   effects: {
     *getConfigTypes(
-      action: { payload: { projectName: string }, callback?: () => void },
+      action: { payload: { projectName: string } },
       { call, put }: { call: any; put: any },
     ) {
       const result: IntegrationBase[] = yield call(getConfigTypes, action.payload);
       yield put({ type: 'updateIntegrationListType', payload: result || [] });
-      if (action.callback) {
-        action.callback();
-      }
     },
   },
 };
