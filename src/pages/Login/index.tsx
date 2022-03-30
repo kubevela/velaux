@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { Card, Button, Input, Form, Field, Icon } from '@b-design/ui';
-import Translation from '../../components/Translation';
-import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
-import Logo from '../../assets/kubevela-logo.png';
 import { If } from 'tsx-control-statements/components';
+import { Card, Button, Input, Form, Field, Icon } from '@b-design/ui';
+import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
+import { getLoginBusinessCode } from '../../api/loginBusiness';
+import Translation from '../../components/Translation';
 import { checkName, checkUserPassword } from '../../utils/common';
-import { getMessage } from '../../api/status';
-import './index.less';
+import Logo from '../../assets/kubevela-logo.png';
 import i18n from '../../i18n';
+import './index.less';
 
 type Props = {
   code: string;
@@ -20,6 +20,7 @@ type Props = {
     push: (path: string, state?: any) => void;
   };
 };
+
 type State = {
   dexConfig: {
     clientID: string;
@@ -91,17 +92,19 @@ export default class LoginPage extends Component<Props, State> {
         username: username,
         password,
       };
-      loginLocal(params).then((res: any) => {
-        if (res && res.accessToken) {
-          localStorage.setItem('token', res.accessToken);
-          localStorage.setItem('refreshToken', res.refreshToken);
-          this.props.history.push('/');
-        }
-      }).catch((err) => {
-        this.setState({
-          loginErrorMessage: err.Message || getMessage('')
+      loginLocal(params)
+        .then((res: any) => {
+          if (res && res.accessToken) {
+            localStorage.setItem('token', res.accessToken);
+            localStorage.setItem('refreshToken', res.refreshToken);
+            this.props.history.push('/');
+          }
         })
-      });
+        .catch((err) => {
+          this.setState({
+            loginErrorMessage: getLoginBusinessCode(err.BusinessCode || ''),
+          });
+        });
     });
   };
   onGetDexCode = () => {
@@ -134,6 +137,9 @@ export default class LoginPage extends Component<Props, State> {
                 <div className="logo-img-wrapper">
                   <img src={Logo} />
                 </div>
+                <h3 className="login-title-description">
+                  <Translation>Make shipping applications more enjoyable</Translation>
+                </h3>
                 <Form onSubmit={this.handleSubmit} {...formItemLayout} field={this.field}>
                   <FormItem
                     label={<Translation className="label-title">Username</Translation>}
@@ -180,10 +186,16 @@ export default class LoginPage extends Component<Props, State> {
                     />
                   </FormItem>
                 </Form>
-
                 <If condition={loginErrorMessage}>
-                  <div className='logo-error-wrapper'>
-                    <Icon type='warning1' /> {loginErrorMessage}
+                  <div className="logo-error-wrapper">
+                    <div>
+                      <Icon type="warning1" /> <Translation>{loginErrorMessage}</Translation>
+                    </div>
+                    <div>
+                      <Translation>
+                        Please check the network or contact the administrator!
+                      </Translation>
+                    </div>
                   </div>
                 </If>
                 <Button type="primary" onClick={this.handleSubmit}>
