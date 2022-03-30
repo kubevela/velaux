@@ -5,6 +5,7 @@ import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication
 import Logo from '../../assets/kubevela-logo.png';
 import { If } from 'tsx-control-statements/components';
 import { checkName, checkUserPassword } from '../../utils/common';
+import { getMessage } from '../../api/status';
 import './index.less';
 import i18n from '../../i18n';
 
@@ -91,18 +92,15 @@ export default class LoginPage extends Component<Props, State> {
         password,
       };
       loginLocal(params).then((res: any) => {
-        debugger;
         if (res && res.accessToken) {
           localStorage.setItem('token', res.accessToken);
           localStorage.setItem('refreshToken', res.refreshToken);
           this.props.history.push('/');
         }
-        console.log('res', res)
       }).catch((err) => {
         this.setState({
-          loginErrorMessage: err.Message
+          loginErrorMessage: err.Message || getMessage('')
         })
-        console.log('loginLocalError', err);
       });
     });
   };
@@ -123,14 +121,14 @@ export default class LoginPage extends Component<Props, State> {
         span: 20,
       },
     };
-    const { loginType,loginErrorMessage } = this.state;
+    const { loginType, loginErrorMessage } = this.state;
     return (
       <div className="full">
         <div className="login-wrapper">
-          {/* <If condition={loginType === 'dex'}>
+          <If condition={loginType === 'dex'}>
             <div />
-          </If> */}
-          <If condition={true || loginType === 'local'}>
+          </If>
+          <If condition={loginType === 'local'}>
             <div className="login-card-wrapper">
               <Card contentHeight={'auto'}>
                 <div className="logo-img-wrapper">
@@ -182,11 +180,11 @@ export default class LoginPage extends Component<Props, State> {
                     />
                   </FormItem>
                 </Form>
-          
+
                 <If condition={loginErrorMessage}>
-                     <div className='logo-error-wrapper'>
-                         <Icon type='warning1' /> {loginErrorMessage} 
-                      </div>   
+                  <div className='logo-error-wrapper'>
+                    <Icon type='warning1' /> {loginErrorMessage}
+                  </div>
                 </If>
                 <Button type="primary" onClick={this.handleSubmit}>
                   <Translation>Sign in</Translation>

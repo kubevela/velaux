@@ -36,7 +36,7 @@ export default class AuthRoute extends Component<Props> {
           } else {
             return (
               <Fragment>
-                <Route exact path="/dex/callback" component={CallBackPage} />
+                <Route exact path="/callback" component={CallBackPage} />
                 <Route exact path="/login" component={LoginPage} />
               </Fragment>
             );
