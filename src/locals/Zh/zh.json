@@ -490,12 +490,12 @@
   "Connect error!": "网络连接失败,请重试",
   "Please check the network or contact the administrator!": "请检查网络或者联系管理员",
   "The login type is not supported(12001)": "登陆类型不支持(12001)",
-  "The token is expired(12002)": "认证令牌已过期(12001)",
-  "The token is not valid yet(12003)": "认证令牌尚未生效(12001)",
-  "The token is invalid(12004)": "认证令牌无效(12001)",
-  "The token is malformed(12005)": "认证令牌格式不准确(12001)",
-  "The user is not authorized(12006)": "用户未经授权(12001)",
-  "The token is not an access token(12007)": "认证令牌无效(12001)",
-  "The login request is invalid(12008)": "登陆请求无效(12001)",
-  "The dex config is invalid(12009)": "Dex配置无效(12001)"
+  "The token is expired(12002)": "认证令牌已过期(12002)",
+  "The token is not valid yet(12003)": "认证令牌尚未生效(12003)",
+  "The token is invalid(12004)": "认证令牌无效(12004)",
+  "The token is malformed(12005)": "认证令牌格式不准确(12005)",
+  "The user is not authorized(12006)": "用户未经授权(12006)",
+  "The token is not an access token(12007)": "认证令牌无效(12007)",
+  "The login request is invalid(12008)": "登陆请求无效(12008)",
+  "The dex config is invalid(12009)": "Dex配置无效(12009)"
 }
