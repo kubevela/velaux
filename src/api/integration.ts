@@ -5,14 +5,13 @@ import { integrations } from './productionLink';
 
 const baseURLOject = getDomain();
 const base = baseURLOject.APIBASE;
-
 export function getConfigTypes() {
   const url = base + integrations;
   return get(url, {}).then((res) => res);
 }
 
 export function getConfigType(queryData: ConfigType) {
-  const url = base + integrations + `/${queryData.configType}`;
+  const url = base + integrations + `${queryData.configType}`;
   return get(url, {}).then((res) => res);
 }
 
@@ -23,7 +22,7 @@ export function createConfigType(queryData: ConfigType, params: any) {
 
 export function getConfigs(queryData: QueryConfigs) {
   const url = base + integrations + `/${queryData.configType}/configs`;
-  return get(url, {}).then((res) => res);
+  return get(url, { params: queryData }).then((res) => res);
 }
 
 export function getConfig(queryData: QueryConfig) {

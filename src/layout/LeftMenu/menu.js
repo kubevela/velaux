@@ -98,7 +98,7 @@ export function getLeftSlider(pathname) {
           className: isIntegration,
           link: '/integrations',
           iconType: 'indent',
-          navName: 'IntegrationsList',
+          navName: 'Integrations',
           permission: { resource: 'configType:*', action: 'list' },
         },
       ],

@@ -7,7 +7,7 @@ const integrations: any = {
     integrationsConfigTypes: [],
   },
   reducers: {
-    updateIntegrationListType(state: IntegrationBase, { payload }: { payload: IntegrationBase }) {
+    updateIntegrationType(state: IntegrationBase, { payload }: { payload: IntegrationBase }) {
       return {
         ...state,
         integrationsConfigTypes: payload,
@@ -21,7 +21,7 @@ const integrations: any = {
       { call, put }: { call: any; put: any },
     ) {
       const result: IntegrationBase[] = yield call(getConfigTypes, action.payload);
-      yield put({ type: 'updateIntegrationListType', payload: result || [] });
+      yield put({ type: 'updateIntegrationType', payload: result || [] });
     },
   },
 };
