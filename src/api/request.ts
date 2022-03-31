@@ -83,7 +83,7 @@ axiosInstance.interceptors.request.use(
 const handleAPIError = (err: any, customError: boolean) => {
   const { data, status } = err;
   if (customError) {
-    return Promise.reject(data);
+    throw data;
   } else if (data && data.BusinessCode) {
     handleError(data);
   } else {
@@ -98,7 +98,7 @@ export const post = (url: string, params: any, customError?: boolean) => {
       return res.data;
     })
     .catch((err) => {
-      return handleAPIError(err, params.customError || customError);
+      handleAPIError(err, params.customError || customError);
     });
 };
 
