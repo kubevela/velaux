@@ -1,22 +1,19 @@
 import React from 'react';
-import { Link } from 'dva/router';
+import { If } from 'tsx-control-statements/components';
 import { Grid, Form, Input, Field, Button, Select, Message } from '@b-design/ui';
 import DrawerWithFooter from '../../../../components/Drawer';
-import { If } from 'tsx-control-statements/components';
-import EnvDialog from '../../../EnvPage/components/EnvDialog';
 import UISchema from '../../../../components/UISchema';
+import Group from '../../../../extends/Group';
 import { detailComponentDefinition } from '../../../../api/application';
-import { getEnvs } from '../../../../api/env';
 import { createConfigType } from '../../../../api/integration';
 import type { Rule } from '@alifd/field';
 import type { ComponentDefinitionsBase } from '../../../../interface/application';
-import type { Env } from '../../../../interface/env';
 import type { Project } from '../../../../interface/project';
 import type { DefinitionDetail } from '../../../../interface/application';
 import { checkName } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
-import { transComponentDefinitions } from '../../../../utils/utils';
+import { getSelectLabel } from '../../../../utils/utils';
 import i18n from '../../../../i18n';
 
 type Props = {
@@ -29,16 +26,12 @@ type Props = {
 };
 
 type State = {
-  envs?: Env[];
   project?: string;
   loading: boolean;
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
   createLoading: boolean;
-  visibleEnvDialog: boolean;
 };
-
-type Callback = (envName: string) => void;
 
 class CreateIntegration extends React.Component<Props, State> {
   field: Field;
@@ -48,20 +41,10 @@ class CreateIntegration extends React.Component<Props, State> {
     this.field = new Field(this);
     this.state = {
       loading: false,
-      definitionLoading: true,
+      definitionLoading: false,
       createLoading: false,
-      visibleEnvDialog: false,
-      envs: [],
     };
-    this.field = new Field(this, {
-      onChange: (name: string, value: string) => {
-        if (name === 'project') {
-          this.setState({ project: value }, () => {
-            this.loadEnvs();
-          });
-        }
-      },
-    });
+    this.field = new Field(this);
     this.uiSchemaRef = React.createRef();
   }
 
@@ -76,34 +59,19 @@ class CreateIntegration extends React.Component<Props, State> {
   }
 
   onDetailsComponentDefinition = (value: string, callback?: () => void) => {
-    detailComponentDefinition({ name: value }).then((re) => {
-      if (re) {
-        this.setState({ definitionDetail: re });
-        if (callback) {
-          callback();
-        }
-      }
-    });
-  };
-
-  loadEnvs = (callback?: Callback) => {
-    const { project } = this.state;
-    if (project) {
-      getEnvs({ project, page: 0 }).then((res) => {
-        if (res) {
-          this.setState({ envs: res && res.envs });
-          const envOption = (res?.envs || []).map((env: { name: string; alias: string }) => {
-            return {
-              label: env.alias ? `${env.alias}(${env.name})` : env.name,
-              value: env.name,
-            };
-          });
+    this.setState({ definitionLoading: true });
+    detailComponentDefinition({ name: value })
+      .then((re) => {
+        if (re) {
+          this.setState({ definitionDetail: re });
           if (callback) {
-            callback(envOption[0]?.value || '');
+            callback();
           }
         }
+      })
+      .finally(() => {
+        this.setState({ definitionLoading: false });
       });
-    }
   };
 
   onClose = () => {
@@ -116,16 +84,12 @@ class CreateIntegration extends React.Component<Props, State> {
         return;
       }
       const { configType } = this.props;
-      const { name, alias, project, envBindings, description, componentType, properties } = values;
-      const envBinding = envBindings.map((env: string) => {
-        return { name: env };
-      });
+      const { name, alias, project, description, componentType, properties } = values;
       const params = {
         alias,
         name,
         description,
         project: project,
-        envBinding: envBinding,
         componentType,
         properties: JSON.stringify(properties),
       };
@@ -148,34 +112,6 @@ class CreateIntegration extends React.Component<Props, State> {
     return `New ${this.props.configType}`;
   };
 
-  setEnvValue = (envBinding: string) => {
-    const envBindings: string[] = this.field.getValue('envBindings');
-    (envBindings || []).push(envBinding);
-    this.field.setValues({ envBindings });
-  };
-
-  onCloseEnvDialog = () => {
-    this.setState({
-      visibleEnvDialog: false,
-    });
-  };
-  onOKEnvDialog = () => {
-    this.setState(
-      {
-        visibleEnvDialog: false,
-      },
-      () => {
-        this.loadEnvs(this.setEnvValue);
-      },
-    );
-  };
-
-  changeEnvDialog = (visible: boolean) => {
-    this.setState({
-      visibleEnvDialog: visible,
-    });
-  };
-
   render() {
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
@@ -188,8 +124,8 @@ class CreateIntegration extends React.Component<Props, State> {
         span: 20,
       },
     };
-    const { projects } = this.props;
-    const { createLoading, definitionDetail, envs, visibleEnvDialog } = this.state;
+    const { projects, componentDefinitions } = this.props;
+    const { createLoading, definitionDetail, definitionLoading } = this.state;
     const buttons = [
       <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
         <Translation>Cancel</Translation>
@@ -198,25 +134,9 @@ class CreateIntegration extends React.Component<Props, State> {
         <Translation>Create</Translation>
       </Button>,
     ];
-
-    const projectOptions = projects.map((project) => {
-      return {
-        label: project.alias ? project.alias : project.name,
-        value: project.name,
-      };
-    });
-
-    const envOptions = envs?.map((env) => {
-      return {
-        label: env.alias ? `${env.alias}(${env.name})` : env.name,
-        value: env.name,
-      };
-    });
-
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
-    const { componentDefinitions } = this.props;
 
     return (
       <React.Fragment>
@@ -271,19 +191,28 @@ class CreateIntegration extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Project</Translation>} required>
+                <FormItem
+                  label={<Translation>Project</Translation>}
+                  help={
+                    <span>
+                      <Translation>
+                        If this configuration is not specified, it will take effect globally
+                      </Translation>
+                    </span>
+                  }
+                >
                   <Select
                     name="project"
                     hasClear
                     showSearch
                     placeholder={i18n.t('Please select').toString()}
                     filterLocal={true}
-                    dataSource={projectOptions}
+                    dataSource={getSelectLabel(projects)}
                     style={{ width: '100%' }}
                     {...init('project', {
                       rules: [
                         {
-                          required: true,
+                          required: false,
                           message: 'Please select project',
                         },
                       ],
@@ -304,22 +233,14 @@ class CreateIntegration extends React.Component<Props, State> {
               </Col>
             </Row>
             <Row>
-              <Col span={24}>
+              <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem
                   label={
                     <Translation className="font-size-14 font-weight-bold color333">
-                      Type
+                      ConfigType
                     </Translation>
                   }
                   required={true}
-                  help={
-                    <span>
-                      <Translation>Get more component type?</Translation>
-                      <Link to="/addons">
-                        <Translation>Go to enable addon</Translation>
-                      </Link>
-                    </span>
-                  }
                 >
                   <Select
                     locale={locale.Select}
@@ -335,7 +256,7 @@ class CreateIntegration extends React.Component<Props, State> {
                         },
                       ],
                     })}
-                    dataSource={transComponentDefinitions(componentDefinitions)}
+                    dataSource={getSelectLabel(componentDefinitions)}
                     onChange={(item: string) => {
                       this.onDetailsComponentDefinition(item, () => {
                         this.field.setValue('componentType', item);
@@ -348,71 +269,38 @@ class CreateIntegration extends React.Component<Props, State> {
 
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={
-                    <Translation className="font-size-14 font-weight-bold">
-                      Bind Environments
-                    </Translation>
-                  }
-                  help={
-                    <a
-                      onClick={() => {
-                        this.changeEnvDialog(true);
-                      }}
-                    >
-                      <Translation>Create new environment</Translation>
-                    </a>
-                  }
+                <Group
+                  title={i18n.t('Component Properties')}
+                  closed={false}
+                  loading={definitionLoading}
                   required={true}
+                  hasToggleIcon={true}
                 >
-                  <Select
-                    {...init(`envBindings`, {
-                      rules: [
-                        {
-                          required: true,
-                          message: i18n.t('Please select').toString(),
-                        },
-                      ],
-                    })}
-                    locale={locale.Select}
-                    mode="multiple"
-                    dataSource={envOptions}
-                    placeholder={i18n.t('Please select').toString()}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
+                  <FormItem required={true}>
+                    <UISchema
+                      {...init(`properties`, {
+                        rules: [
+                          {
+                            validator: validator,
+                            message: i18n.t('Please check app deploy properties'),
+                          },
+                        ],
+                      })}
+                      uiSchema={definitionDetail && definitionDetail.uiSchema}
+                      ref={this.uiSchemaRef}
+                      mode="new"
+                    />
+                  </FormItem>
 
-            <Row>
-              <Col span="24">
-                <FormItem required={true}>
-                  <UISchema
-                    {...init(`properties`, {
-                      rules: [
-                        {
-                          validator: validator,
-                          message: i18n.t('Please check app deploy properties'),
-                        },
-                      ],
-                    })}
-                    uiSchema={definitionDetail && definitionDetail.uiSchema}
-                    ref={this.uiSchemaRef}
-                    mode="new"
-                  />
-                </FormItem>
+                  <If condition={!definitionDetail}>
+                    <Message type="notice">
+                      <Translation>Please select config type first.</Translation>
+                    </Message>
+                  </If>
+                </Group>
               </Col>
             </Row>
           </Form>
-
-          <If condition={visibleEnvDialog}>
-            <EnvDialog
-              visible={visibleEnvDialog}
-              projects={projects || []}
-              isEdit={false}
-              onClose={this.onCloseEnvDialog}
-              onOK={this.onOKEnvDialog}
-            />
-          </If>
         </DrawerWithFooter>
       </React.Fragment>
     );

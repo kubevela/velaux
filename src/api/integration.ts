@@ -12,7 +12,7 @@ export function getConfigTypes() {
 }
 
 export function getConfigType(queryData: ConfigType) {
-  const url = base + integrations + `${queryData.configType}`;
+  const url = base + integrations + `/${queryData.configType}`;
   return get(url, {}).then((res) => res);
 }
 

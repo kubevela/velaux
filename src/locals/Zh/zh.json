@@ -468,7 +468,7 @@
   "Platform Roles": "平台角色",
   "Assign permissions for resources such as clusters、targets、addons、projects and users": "分配集群、交付目标、插件、项目和用户等平台级资源的权限。",
   "New Role": "新增角色",
-  "Edit Roles": "编辑角色",
+  "Edit Role": "编辑角色",
   "PermPolicies": "权限策略",
   "When adding a project role, you cannot view the details of other project roles": "添加项目角色时，无法查看其他项目角色的详细信息,请在新增后，查看详情",
   "Choose one permPolicy": "请选择一种策略进行角色创建",
@@ -500,5 +500,11 @@
   "The user is not authorized(12006)": "用户未经授权(12006)",
   "The token is not an access token(12007)": "认证令牌无效(12007)",
   "The login request is invalid(12008)": "登陆请求无效(12008)",
-  "The dex config is invalid(12009)": "Dex配置无效(12009)"
+  "The dex config is invalid(12009)": "Dex配置无效(12009)",
+  "Please select at last one permission": "请至少选择一个权限",
+  "Permissions": "权限",
+  "If this configuration is not specified, it will take effect globally": "不指定该配置，将在全局生效",
+  "Please select config type first.": "请先选择配置类型",
+  "Component Properties": "组件属性",
+  "ConfigType": "配置类型"
 }
