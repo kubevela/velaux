@@ -99,6 +99,7 @@ export function getLeftSlider(pathname) {
           link: '/integrations',
           iconType: 'indent',
           navName: 'IntegrationsList',
+          permission: { resource: 'configType:*', action: 'list' },
         },
       ],
     },
