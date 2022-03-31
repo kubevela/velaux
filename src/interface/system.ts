@@ -5,5 +5,12 @@ export interface SystemInfo {
   };
   createTime: string;
   enableCollection: boolean;
+  loginType?: boolean;
   installID: string;
+}
+
+export interface UpdateSystemInfo {
+  enableCollection: boolean;
+  loginType: 'local' | 'dex';
+  velaAddress: string;
 }

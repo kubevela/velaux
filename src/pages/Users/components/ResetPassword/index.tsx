@@ -62,7 +62,7 @@ class ResetPassword extends React.Component<Props, State> {
   showTitle = () => {
     const { isResetPassword } = this.props;
     if (isResetPassword) {
-      return <Translation>Reset User PassWord</Translation>;
+      return <Translation>Reset Password</Translation>;
     }
   };
 
