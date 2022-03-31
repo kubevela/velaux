@@ -220,7 +220,8 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   changeStatus = (value: string) => {
-    const values: { componentType: string; envBindings: string[] } = this.field.getValues();
+    const values: { componentType: string; envBindings: string[]; project: string } =
+      this.field.getValues();
     const { componentType, envBindings } = values;
     if (value === 'isCreateComponent') {
       this.field.validateCallback(
@@ -241,6 +242,10 @@ class AppDialog extends React.Component<Props, State> {
             dispatch({
               type: 'uischema/setAppNamespace',
               payload: namespace,
+            });
+            dispatch({
+              type: 'uischema/setProject',
+              payload: values.project,
             });
           }
           this.setState(

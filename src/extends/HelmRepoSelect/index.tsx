@@ -13,6 +13,7 @@ type Props = {
   disabled: boolean;
   dispatch?: ({}) => {};
   helm?: { repoType: string };
+  project?: string;
 };
 
 type State = {
@@ -46,9 +47,10 @@ class HelmRepoSelect extends Component<Props, State> {
   }
 
   onLoadRepos = () => {
+    const { project } = this.props;
     const defaultRepos = [{ url: 'https://charts.bitnami.com/bitnami', type: 'helm' }];
     this.setState({ loading: true, repos: defaultRepos });
-    getChartRepos().then((res) => {
+    getChartRepos({ project: project }).then((res) => {
       let repos: HelmRepo[] = [];
       if (res && res.repos) {
         repos = repos.concat(res.repos);

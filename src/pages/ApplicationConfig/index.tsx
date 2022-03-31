@@ -514,6 +514,7 @@ class ApplicationConfig extends Component<Props, State> {
 
         <If condition={visibleTrait}>
           <TraitDialog
+            project={applicationDetail?.project?.name || ''}
             visible={visibleTrait}
             isEditComponent={isEditComponent}
             appName={appName}
@@ -555,6 +556,7 @@ class ApplicationConfig extends Component<Props, State> {
 
         <If condition={visibleComponent}>
           <ComponentDialog
+            project={applicationDetail?.project?.name || ''}
             appName={appName}
             componentName={componentName}
             isEditComponent={isEditComponent}

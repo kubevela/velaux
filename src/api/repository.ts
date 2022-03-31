@@ -38,7 +38,10 @@ export function getChartVersions(params: {
   }).then((res) => res);
 }
 
-export function getChartRepos() {
+export function getChartRepos(params: { project?: string }) {
   const url = baseURL + repository + '/chart_repos';
-  return get(url, {}).then((res) => res);
+  if (!params.project) {
+    delete params.project;
+  }
+  return get(url, { params: params }).then((res) => res);
 }
