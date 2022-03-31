@@ -442,7 +442,7 @@
   "Edit User": "编辑用户",
   "Reset User": "编辑用户",
   "Basic authorization management is provided for local users by default, but SSO authentication is strongly recommended": "默认提供的是基于本地用户登陆的管理能力，非常建议配置并开启 SSO 单点登陆",
-  "Reset PassWord": "重置密码",
+  "Reset Password": "重置密码",
   "Reset User Password": "重置用户密码",
   "UserManager": "用户管理",
   "Projects": "项目列表",
