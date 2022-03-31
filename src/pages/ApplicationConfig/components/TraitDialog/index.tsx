@@ -22,8 +22,10 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
 import { Link } from 'dva/router';
 import i18n from '../../../../i18n';
+import { connect } from 'dva';
 
 type Props = {
+  project: string;
   isEditComponent: boolean;
   isEditTrait: boolean;
   visible: boolean;
@@ -35,7 +37,7 @@ type Props = {
   upDateTemporaryTrait: (trait: Trait) => void;
   onOK: () => void;
   onClose: () => void;
-  dispatch?: ({}) => {};
+  dispatch?: any;
 };
 
 type State = {
@@ -46,7 +48,7 @@ type State = {
   podDisruptive?: any;
   component?: ApplicationComponent;
 };
-
+@connect()
 class TraitDialog extends React.Component<Props, State> {
   field: Field;
   uiSchemaRef: React.RefObject<UISchema>;
@@ -64,7 +66,7 @@ class TraitDialog extends React.Component<Props, State> {
   componentDidMount() {
     this.onGetComponentInfo(() => {
       this.onGetTraitDefinitions();
-      const { isEditTrait, traitItem } = this.props;
+      const { isEditTrait, traitItem, appName, project, dispatch } = this.props;
       if (isEditTrait && traitItem) {
         const { alias, type, description, properties } = traitItem;
         this.field.setValues({
@@ -77,6 +79,14 @@ class TraitDialog extends React.Component<Props, State> {
           this.onDetailsTraitDefinition(type);
         }
       }
+      dispatch({
+        type: 'uischema/setAppName',
+        payload: appName,
+      });
+      dispatch({
+        type: 'uischema/setProject',
+        payload: project,
+      });
     });
   }
 

@@ -28,9 +28,11 @@ import i18n from '../../../../i18n';
 import { transComponentDefinitions } from '../../../../utils/utils';
 import './index.less';
 import Group from '../../../../extends/Group';
+import { connect } from 'dva';
 
 type Props = {
   appName?: string;
+  project: string;
   componentName?: string;
   isEditComponent: boolean;
   temporaryTraitList: Trait[];
@@ -40,6 +42,7 @@ type Props = {
   onDeleteTrait: (type: string, callback: () => void) => void;
   onComponentOK: () => void;
   onComponentClose: () => void;
+  dispatch?: any;
 };
 
 type State = {
@@ -50,6 +53,7 @@ type State = {
   loading: boolean;
 };
 
+@connect()
 class ComponentDialog extends React.Component<Props, State> {
   field: Field;
   uiSchemaRef: React.RefObject<UISchema>;
@@ -65,7 +69,7 @@ class ComponentDialog extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const { isEditComponent } = this.props;
+    const { isEditComponent, dispatch, appName, project } = this.props;
     if (isEditComponent) {
       this.onGetEditComponentInfo(() => {
         if (this.state.editComponent) {
@@ -81,6 +85,14 @@ class ComponentDialog extends React.Component<Props, State> {
             this.onDetailsComponentDefinition(type);
           }
         }
+        dispatch({
+          type: 'uischema/setAppName',
+          payload: appName,
+        });
+        dispatch({
+          type: 'uischema/setProject',
+          payload: project,
+        });
       });
     } else {
       const getInitComponentType: string = this.field.getValue('componentType') || '';

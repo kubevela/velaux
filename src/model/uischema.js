@@ -5,6 +5,7 @@ export default {
   state: {
     appNamespace: '',
     appName: '',
+    project: '',
     repo: { secretName: '', url: '' },
   },
   reducers: {
@@ -26,6 +27,12 @@ export default {
         repo: payload,
       };
     },
+    updateProject(state, { type, payload }) {
+      return {
+        ...state,
+        project: payload,
+      };
+    },
   },
   effects: {
     *setAppName(action, { call, put }) {
@@ -36,6 +43,11 @@ export default {
     *setAppNamespace(action, { call, put }) {
       if (action.payload) {
         yield put({ type: 'updateAppNamespace', payload: action.payload || '' });
+      }
+    },
+    *setProject(action, { call, put }) {
+      if (action.payload) {
+        yield put({ type: 'updateProject', payload: action.payload || '' });
       }
     },
     *setHelmRepo(action, { call, put }) {
