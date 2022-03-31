@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Icon, Grid } from '@b-design/ui';
 import { Link } from 'dva/router';
-import { IntegrationBase, IntegrationBaseExtends } from '../../../../interface/integrations';
+import type { IntegrationBase, IntegrationBaseExtends } from '../../../../interface/integrations';
 import defaultIntegrationSVG from '../../../../assets/integration.svg';
 import helmImg from '../../../../assets/helm.png';
 import dockerImg from '../../../../assets/docker.png';
@@ -82,7 +82,7 @@ class Menu extends Component<Props, State> {
                 </div>
               </Col>
               <Col span="17">
-                <div className="menu-item-description">{item.name}</div>
+                <div className="menu-item-description">{item.alias || item.name}</div>
               </Col>
               <Col span="2">
                 <div className="menu-item-icon">

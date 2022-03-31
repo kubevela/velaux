@@ -4,7 +4,7 @@ import type { Project } from '../../interface/project';
 import type { User } from '../../interface/user';
 import General from './components/General';
 import Targets from './components/Targets';
-import Integrations from './components/Integrations';
+//import Integrations from './components/Integrations';
 
 type Props = {
   projectDetails: Project;
@@ -52,7 +52,7 @@ class Summary extends Component<Props, State> {
             loadProjectDetail={this.loadProjectDetail}
           />
           <Targets projectName={params.projectName} />
-          <Integrations />
+          {/* <Integrations /> */}
         </div>
       </Fragment>
     );

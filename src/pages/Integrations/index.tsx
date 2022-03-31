@@ -5,7 +5,7 @@ import { Table, Button, Dialog, Message } from '@b-design/ui';
 import CreateIntegration from './components/CreateIntegrationDialog';
 import { getConfigs, deleteConfig } from '../../api/integration';
 import type { LoginUserInfo } from '../../interface/user';
-import { IntegrationBase } from '../../interface/integrations';
+import type { IntegrationBase } from '../../interface/integrations';
 import _ from 'lodash';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
@@ -33,7 +33,7 @@ type State = {
 @connect((store: any) => {
   return { ...store.integrations, ...store.user };
 })
-class IntegrationTerraform extends Component<Props, State> {
+class Integrations extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -213,4 +213,4 @@ class IntegrationTerraform extends Component<Props, State> {
   }
 }
 
-export default IntegrationTerraform;
+export default Integrations;
