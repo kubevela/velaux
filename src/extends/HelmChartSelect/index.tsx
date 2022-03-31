@@ -3,6 +3,8 @@ import { getCharts } from '../../api/repository';
 import { Loading, Select } from '@b-design/ui';
 import i18n from '../../i18n';
 import locale from '../../utils/locale';
+import { connect } from 'dva';
+import type { HelmRepo } from '../../interface/application';
 
 type Props = {
   value?: any;
@@ -13,6 +15,7 @@ type Props = {
     url: string;
     repoType: string;
   };
+  repo?: HelmRepo;
 };
 
 type State = {
@@ -24,7 +27,9 @@ type State = {
     repoType: string;
   };
 };
-
+@connect((store: any) => {
+  return { ...store.uischema };
+})
 class HelmChartSelect extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -38,16 +43,18 @@ class HelmChartSelect extends Component<Props, State> {
   }
 
   loadCharts = () => {
-    const { helm } = this.props;
+    const { helm, repo } = this.props;
     if (helm?.url && (!this.state.loading || this.state.helm?.url != helm.url)) {
       // Reset chart value
       if (this.state.helm) {
         this.props.onChange('');
       }
       this.setState({ loading: true, helm: helm });
-      getCharts(helm).then((re: string[]) => {
-        this.setState({ charts: re && Array.isArray(re) ? re : [], loading: false, helm: helm });
-      });
+      getCharts({ url: helm.url, repoType: helm.repoType, secretName: repo?.secretName }).then(
+        (re: string[]) => {
+          this.setState({ charts: re && Array.isArray(re) ? re : [], loading: false, helm: helm });
+        },
+      );
     }
   };
 

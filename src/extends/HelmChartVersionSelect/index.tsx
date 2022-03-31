@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { getChartVersions } from '../../api/repository';
 import { Loading, Select } from '@b-design/ui';
-import type { ChartVersion } from '../../interface/application';
+import type { ChartVersion, HelmRepo } from '../../interface/application';
 import i18n from '../../i18n';
 import locale from '../../utils/locale';
+import { connect } from 'dva';
 
 type Props = {
   value?: any;
@@ -15,6 +16,7 @@ type Props = {
     repoType: string;
     chart: string;
   };
+  repo?: HelmRepo;
 };
 
 type State = {
@@ -27,7 +29,9 @@ type State = {
     chart: string;
   };
 };
-
+@connect((store: any) => {
+  return { ...store.uischema };
+})
 class HelmChartVersionSelect extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -41,7 +45,7 @@ class HelmChartVersionSelect extends Component<Props, State> {
   }
 
   loadChartVersions = () => {
-    const { helm } = this.props;
+    const { helm, repo } = this.props;
     if (
       helm?.url &&
       helm.chart &&
@@ -53,7 +57,12 @@ class HelmChartVersionSelect extends Component<Props, State> {
       if (this.state.helm) {
         this.props.onChange('');
       }
-      getChartVersions(helm).then((re: { versions: ChartVersion[] }) => {
+      getChartVersions({
+        url: helm.url,
+        repoType: helm.repoType,
+        chart: helm.chart,
+        secretName: repo?.secretName,
+      }).then((re: { versions: ChartVersion[] }) => {
         if (re) {
           this.setState({ versions: re.versions || [], loading: false, helm: helm });
         }
