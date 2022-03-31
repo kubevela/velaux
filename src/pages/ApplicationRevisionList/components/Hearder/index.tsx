@@ -47,7 +47,7 @@ class Hearder extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { t } = this.props;
-    const envPlacehole = t('Environmental select').toString();
+    const envPlacehole = t('Select Environment').toString();
     const statusPlacehole = t('Status select').toString();
     const { envValue, statusValue } = this.state;
     const { statusList, envBinding } = this.props;
