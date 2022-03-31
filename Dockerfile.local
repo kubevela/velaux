@@ -4,5 +4,6 @@ COPY build /usr/share/nginx/html
 COPY web.conf /etc/nginx/nginx.conf
 COPY entrypoint.sh /entrypoint.sh
 ENV KUBEVELA_API_URL="127.0.0.1:8000"
+ENV DEX_URL="127.0.0.1:5556"
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

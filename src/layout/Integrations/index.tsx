@@ -5,7 +5,7 @@ import { Grid } from '@b-design/ui';
 import Title from '../../components/ListTitle';
 import Menu from './components/Menu';
 import Empty from '../../components/Empty';
-import { IntegrationBase } from '../../interface/integrations';
+import type { IntegrationBase } from '../../interface/integrations';
 import { getMatchParamObj } from '../../utils/utils';
 import './index.less';
 
