@@ -1,45 +1,55 @@
-.menu-content{
-  .menu-item-wrapper{
-      margin-bottom: 10px;
-      padding-left: 16px;
-      padding-top: 6px;
-      padding-bottom: 3px;
-      border: 1px solid #979797;
-      border-radius: 5px;
-      .menu-item-img{
-          height:64px;
-      }
-      .menu-item-description{
-          display: flex;
-          height: 64px;
-          align-items: center;
-          font-size: 16px;
-          color:#333;
-          word-break: break-all;
-      }
-      .menu-item-icon{
-        display: flex;
-        height: 64px;
-        align-items: center;
-        font-size: 16px;
-        color:#333;
+.menu-content {
+  .menu-item-wrapper {
+    margin-bottom: 10px;
+    border: 1px solid #979797;
+    border-radius: 5px;
+    .menu-item-img-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+    .menu-item-img {
+      display: inline-block;
+      width: 60%;
+    }
+    .menu-item-description {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      color: #333;
+      font-size: 16px;
+      word-break: break-all;
+    }
+    .menu-item-icon {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      color: #333;
+      font-size: 16px;
     }
   }
-  .menu-item-wrapper:hover{
+  .menu-item-wrapper:hover {
+    background-image: var(--btn-pure-primary-bg-image);
+    border: 1px solid hsl(229, 83%, 55%);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
     cursor: pointer;
-    border: 1px solid #1B58F4;
-    color:#1B58F4;
-    .menu-item-icon{
-      color:#1B58F4;
-    }
+    transition: 0.3s;
   }
-  .active-menu-item{
+  .active-menu-item {
+    color: #fff;
+    background-image: var(--btn-pure-primary-bg-image);
+    border: 1px solid #1b58f4;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
     cursor: pointer;
-    border: 1px solid #1B58F4;
-    color:#1B58F4;
-    .menu-item-icon{
-      color:#1B58F4;
+    transition: 0.3s;
+    .menu-item-description {
+      color: #fff;
+    }
+    .menu-item-icon {
+      color: #fff;
     }
   }
- 
 }

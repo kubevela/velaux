@@ -365,6 +365,3 @@ export interface ComponentDefinitionsBase {
   name: string;
   workloadType?: string;
 }
-
-
-

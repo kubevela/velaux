@@ -486,5 +486,5 @@
   "Please input the username or email": "请输入用户账号或邮箱",
   "The password should be 8-16 bits and contain at least one number and one letter": "密码必须包含至少一个数字和字母，长度在8-16位之间",
   "IntegrationsList": "集成列表",
-  "Integration with external systems and configuration management.":"与外部系统和配置管理集成."
+  "Integration with external systems and configuration management.": "与外部系统和配置管理集成."
 }

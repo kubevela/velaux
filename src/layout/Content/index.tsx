@@ -191,11 +191,9 @@ export default function Content() {
 
       <Route
         exact
-        path='/integrations'
+        path="/integrations"
         render={(props: any) => {
-          return (
-            <IntegrationsLayout {...props} />
-          )
+          return <IntegrationsLayout {...props} />;
         }}
       />
 

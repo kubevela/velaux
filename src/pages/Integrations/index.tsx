@@ -14,231 +14,231 @@ import { momentDate } from '../../utils/common';
 import './index.less';
 
 type Props = {
-    userInfo?: LoginUserInfo;
-    integrationsConfigTypes: IntegrationBase[];
-    match: {
-        params: {
-            configType: string;
-        };
-    }
-}
+  userInfo?: LoginUserInfo;
+  integrationsConfigTypes: IntegrationBase[];
+  match: {
+    params: {
+      configType: string;
+    };
+  };
+};
 
 type State = {
-    configType: string;
-    list: [];
-    total: number;
-    page: number;
-    pageSize: number;
-    visible: boolean;
-    isLoading: boolean;
-}
+  configType: string;
+  list: [];
+  total: number;
+  page: number;
+  pageSize: number;
+  visible: boolean;
+  isLoading: boolean;
+};
 
 @connect((store: any) => {
-    return { ...store.integrations, ...store.user };
+  return { ...store.integrations, ...store.user };
 })
 class IntegrationTerraform extends Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-        this.state = {
-            configType: this.getConfigType(),
-            list: [],
-            total: 0,
-            page: 0,
-            pageSize: 10,
-            visible: false,
-            isLoading: false,
-        }
-    }
-    componentDidMount() {
-        this.listIntegrations();
-    }
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      configType: this.getConfigType(),
+      list: [],
+      total: 0,
+      page: 0,
+      pageSize: 10,
+      visible: false,
+      isLoading: false,
+    };
+  }
+  componentDidMount() {
+    this.listIntegrations();
+  }
 
-    componentWillReceiveProps(nextProps: Props) {
-        const nextPropsParams = nextProps.match.params || {};
-        if (nextPropsParams.configType !== this.state.configType) {
-            this.setState({
-                configType: nextPropsParams.configType
-            }, () => {
-                this.listIntegrations();
-            })
-        }
+  componentWillReceiveProps(nextProps: Props) {
+    const nextPropsParams = nextProps.match.params || {};
+    if (nextPropsParams.configType !== this.state.configType) {
+      this.setState(
+        {
+          configType: nextPropsParams.configType,
+        },
+        () => {
+          this.listIntegrations();
+        },
+      );
     }
+  }
 
-    listIntegrations() {
+  listIntegrations() {
+    const { configType } = this.state;
+    if (!configType) {
+      return;
+    }
+    this.setState({ isLoading: true });
+    getConfigs({ configType: configType })
+      .then((res) => {
+        if (res) {
+          this.setState({
+            list: res,
+          });
+        }
+      })
+      .finally(() => {
+        this.setState({ isLoading: false });
+      });
+  }
+
+  getConfigType = () => {
+    return getMatchParamObj(this.props.match, 'configType');
+  };
+
+  onDelete = (record: IntegrationBase) => {
+    Dialog.confirm({
+      content: 'Are you sure you want to delete the config',
+      onOk: () => {
+        const { name } = record;
         const { configType } = this.state;
-        if (!configType) {
-            return;
-        }
-        this.setState({ isLoading: true })
-        getConfigs({ configType: configType }).then((res) => {
+        const params = {
+          name,
+          configType,
+        };
+        if (params) {
+          deleteConfig(params).then((res) => {
             if (res) {
-                this.setState({
-                    list: res
-                })
+              Message.success(<Translation>Delete project success</Translation>);
+              this.listIntegrations();
             }
-        }).finally(() => { this.setState({ isLoading: false }) });
-    }
+          });
+        }
+      },
+      locale: locale.Dialog,
+    });
+  };
 
-    getConfigType = () => {
-        return getMatchParamObj(this.props.match, 'configType');
-    }
+  onCreate = () => {
+    this.setState({ visible: false });
+    this.listIntegrations();
+  };
 
-    onDelete = (record: IntegrationBase) => {
-        Dialog.confirm({
-            content: 'Are you sure you want to delete the config',
-            onOk: () => {
-                const { name } = record;
-                const { configType } = this.state;
-                const params = {
-                    name,
-                    configType
-                }
-                if (params) {
-                    deleteConfig(params)
-                        .then((res) => {
-                            if (res) {
-                                Message.success(<Translation>Delete project success</Translation>);
-                                this.listIntegrations();
-                            }
-                        })
-                }
-            },
-            locale: locale.Dialog,
-        });
-    };
+  onCloseCreate = () => {
+    this.setState({ visible: false });
+  };
 
-    onCreate = () => {
-        this.setState({ visible: false })
+  handleClickCreate = () => {
+    this.setState({
+      visible: true,
+    });
+  };
+
+  handleChange = (page: number) => {
+    this.setState(
+      {
+        page,
+        pageSize: 10,
+      },
+      () => {
         this.listIntegrations();
-    }
+      },
+    );
+  };
 
-    onCloseCreate = () => {
-        this.setState({ visible: false })
-    }
+  getConfigTypeDefinitions() {
+    const { integrationsConfigTypes } = this.props;
+    const { configType } = this.state;
+    const findDefinition = _.find(integrationsConfigTypes, (item) => {
+      return item.name === configType;
+    });
+    const transData = ((findDefinition && findDefinition.definitions) || []).map((item: string) => {
+      return { name: item };
+    });
+    return transData || [];
+  }
 
-    handleClickCreate = () => {
-        this.setState({
-            visible: true,
-        })
-    }
+  render() {
+    const columns = [
+      {
+        key: 'name',
+        title: <Translation>Name</Translation>,
+        dataIndex: 'name',
+        cell: (v: string) => {
+          return <span>{v}</span>;
+        },
+      },
+      {
+        key: 'project',
+        title: <Translation>Project</Translation>,
+        dataIndex: 'project',
+        cell: (v: string) => {
+          return <span>{v}</span>;
+        },
+      },
+      {
+        key: 'createTime',
+        title: <Translation>Create Time</Translation>,
+        dataIndex: 'createdTime',
+        cell: (v: string) => {
+          return <span>{momentDate(v)}</span>;
+        },
+      },
+      {
+        key: 'operation',
+        title: <Translation>Actions</Translation>,
+        dataIndex: 'operation',
+        cell: (v: string, i: number, record: IntegrationBase) => {
+          return (
+            <Fragment>
+              <Button
+                text
+                size={'medium'}
+                ghost={true}
+                component={'a'}
+                onClick={() => {
+                  this.onDelete(record);
+                }}
+              >
+                <Translation>Delete</Translation>
+              </Button>
+            </Fragment>
+          );
+        },
+      },
+    ];
 
-    handleChange = (page: number) => {
-        this.setState({
-            page,
-            pageSize: 10,
-        }, () => {
-            this.listIntegrations();
-        });
-    };
+    const { Column } = Table;
+    const { userInfo } = this.props;
+    const { list, visible, total, pageSize, page, isLoading, configType } = this.state;
+    return (
+      <div className="list-content">
+        <div className="create-btn">
+          <Button type="primary" onClick={this.handleClickCreate}>
+            <Translation>New</Translation>
+          </Button>
+        </div>
+        <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>
+          {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+        </Table>
 
-    getConfigTypeDefinitions() {
-        const { integrationsConfigTypes } = this.props;
-        const { configType } = this.state;
-        const findDefinition = _.find(integrationsConfigTypes, (item) => {
-            return item.name === configType;
-        });
-        const transData = (findDefinition && findDefinition.definitions || []).map((item: string) => { return { name: item } })
-        return transData || []
-    }
+        <Pagination
+          className="margin-top-20 text-align-right"
+          total={total}
+          locale={locale.Pagination}
+          size="medium"
+          pageSize={pageSize}
+          current={page}
+          onChange={this.handleChange}
+        />
 
-    render() {
-        const columns = [
-            {
-                key: 'name',
-                title: <Translation>Name</Translation>,
-                dataIndex: 'name',
-                cell: (v: string) => {
-                    return <span>{v}</span>;
-                },
-            },
-            {
-                key: 'project',
-                title: <Translation>Project</Translation>,
-                dataIndex: 'project',
-                cell: (v: string) => {
-                    return <span>{v}</span>;
-                },
-            },
-            {
-                key: 'createTime',
-                title: <Translation>Create Time</Translation>,
-                dataIndex: 'createdTime',
-                cell: (v: string) => {
-                    return <span>{momentDate(v)}</span>;
-                },
-            },
-            {
-                key: 'updateTime',
-                title: <Translation>Update Time</Translation>,
-                dataIndex: 'updatedTime',
-                cell: (v: string) => {
-                    return <span>{momentDate(v)}</span>;
-                },
-            },
-            {
-                key: 'operation',
-                title: <Translation>Actions</Translation>,
-                dataIndex: 'operation',
-                cell: (v: string, i: number, record: IntegrationBase) => {
-                    return (
-                        <Fragment>
-                            <Button
-                                text
-                                size={'medium'}
-                                ghost={true}
-                                component={'a'}
-                                onClick={() => {
-                                    this.onDelete(record);
-                                }}
-                            >
-                                <Translation>Delete</Translation>
-                            </Button>
-                        </Fragment>
-                    );
-                },
-            },
-        ];
-
-        const { Column } = Table;
-        const { userInfo } = this.props;
-        const { list, visible, total, pageSize, page, isLoading, configType } = this.state;
-        return (
-            <div className='list-content'>
-                <div className='create-btn'>
-                    <Button type='primary' onClick={this.handleClickCreate}><Translation>New</Translation></Button>
-                </div>
-                <Table
-                    locale={locale.Table}
-                    dataSource={list}
-                    hasBorder={false}
-                    loading={isLoading}
-                >
-                    {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
-                </Table>
-
-                <Pagination
-                    className="margin-top-20 text-align-right"
-                    total={total}
-                    locale={locale.Pagination}
-                    size="medium"
-                    pageSize={pageSize}
-                    current={page}
-                    onChange={this.handleChange}
-                />
-
-                <If condition={visible}>
-                    <CreateIntegration
-                        visible={visible}
-                        configType={configType}
-                        projects={userInfo?.projects || []}
-                        componentDefinitions={this.getConfigTypeDefinitions()}
-                        onCreate={this.onCreate}
-                        onClose={this.onCloseCreate}
-                    />
-                </If>
-
-            </div>)
-    }
+        <If condition={visible}>
+          <CreateIntegration
+            visible={visible}
+            configType={configType}
+            projects={userInfo?.projects || []}
+            componentDefinitions={this.getConfigTypeDefinitions()}
+            onCreate={this.onCreate}
+            onClose={this.onCloseCreate}
+          />
+        </If>
+      </div>
+    );
+  }
 }
 
 export default IntegrationTerraform;

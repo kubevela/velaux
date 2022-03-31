@@ -4,7 +4,7 @@ import type { IntegrationBase } from '../interface/integrations';
 const integrations: any = {
   namespace: 'integrations',
   state: {
-    integrationsConfigTypes: []
+    integrationsConfigTypes: [],
   },
   reducers: {
     updateIntegrationListType(state: IntegrationBase, { payload }: { payload: IntegrationBase }) {

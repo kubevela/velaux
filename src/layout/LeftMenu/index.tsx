@@ -15,8 +15,8 @@ interface Props {
   history: {
     location: {
       pathname: string;
-    }
-  }
+    };
+  };
 }
 
 const LeftMenu = (props: Props) => {
@@ -75,7 +75,11 @@ const LeftMenu = (props: Props) => {
   );
 };
 
-export default connect((store: any) => {
-  return { ...store.user };
-}, undefined, undefined, { pure: false })(LeftMenu);
-
+export default connect(
+  (store: any) => {
+    return { ...store.user };
+  },
+  undefined,
+  undefined,
+  { pure: false },
+)(LeftMenu);
