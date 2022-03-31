@@ -11,6 +11,8 @@ import type { SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
+import Permission from '../../components/Permission';
+import PlatformSetting from '../../components/PlatformSetting';
 
 type Props = {
   dispatch: any;
@@ -19,7 +21,7 @@ type Props = {
 };
 
 type State = {
-  visible: boolean;
+  platformSetting: boolean;
 };
 @connect((store: any) => {
   return { ...store.user };
@@ -29,7 +31,7 @@ class TopBar extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      visible: false,
+      platformSetting: false,
     };
     this.loadCount = 0;
   }
@@ -61,9 +63,14 @@ class TopBar extends Component<Props, State> {
     );
   };
 
+  showPlatformSetting = () => {
+    this.setState({ platformSetting: true });
+  };
+
   render() {
     const { Row, Col } = Grid;
-    const { userInfo } = this.props;
+    const { userInfo, systemInfo } = this.props;
+    const { platformSetting } = this.state;
     return (
       <div className="layout-topbar" id="layout-topbar">
         <Row className="nav-wrapper">
@@ -72,6 +79,11 @@ class TopBar extends Component<Props, State> {
           </Col>
           <div style={{ flex: '1 1 0%' }} />
           <div className="right">
+            <Permission request={{ resource: 'systemSetting', action: 'update' }}>
+              <div className="vela-item" onClick={this.showPlatformSetting}>
+                <Translation>Platform Setting</Translation>
+              </div>
+            </Permission>
             <div className="vela-item">
               <a title="KubeVela Documents" href="https://kubevela.io" target="_blank">
                 <Icon size={14} type="help1" />
@@ -170,6 +182,19 @@ class TopBar extends Component<Props, State> {
             </If>
           </div>
         </Row>
+        <If condition={platformSetting}>
+          {systemInfo && (
+            <PlatformSetting
+              systemInfo={systemInfo}
+              onClose={() => {
+                this.setState({ platformSetting: false });
+              }}
+              syncPlatformSetting={() => {
+                this.loadSystemInfo();
+              }}
+            />
+          )}
+        </If>
       </div>
     );
   }

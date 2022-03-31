@@ -441,9 +441,8 @@
   "New User": "新增用户",
   "Edit User": "编辑用户",
   "Reset User": "编辑用户",
-  "Provides basic management capabilities for local users, but SSO authentication is recommended": "提供基本的本地用户管理能力,但非常建议使用 SSO 认证",
-  "ResetPassWord": "重制密码",
-  "Reset User PassWord": "重制用户密码",
+  "Provides basic management capabilities for local users, but SSO authentication is recommended": "提供基本的本地用户管理能力，但非常建议使用 SSO 认证",
+  "Reset Password": "重置密码",
   "UserManager": "用户管理",
   "Projects": "项目列表",
   "Projects are used to allocate and isolate resources": "项目用于分配和隔离资源",
@@ -497,5 +496,13 @@
   "The user is not authorized(12006)": "用户未经授权(12006)",
   "The token is not an access token(12007)": "认证令牌无效(12007)",
   "The login request is invalid(12008)": "登陆请求无效(12008)",
-  "The dex config is invalid(12009)": "Dex配置无效(12009)"
+  "The dex config is invalid(12009)": "Dex配置无效(12009)",
+  "Platform Setting": "平台设置",
+  "local": "本地用户登陆",
+  "SSO by dex": "集成 Dex 单点登录",
+  "User authentication configuration": "用户认证配置",
+  "User login mode": "用户登陆方式",
+  "VelaUX address": "VelaUX 访问地址",
+  "Update the platform configuration success": "更新平台配置成功",
+  "There will auto get the domain for access the VelaUX": "平台访问地址，这里自动获取了当前访问的地址"
 }
