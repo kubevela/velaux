@@ -359,3 +359,15 @@ export interface ApplicationQuery {
   env?: string;
   targetName?: string;
 }
+
+export interface ApplicationQuery {
+  query?: string;
+  project?: string;
+  env?: string;
+  targetName?: string;
+}
+
+export interface ComponentDefinitionsBase {
+  name: string;
+  workloadType?: string;
+}

@@ -1,26 +1,31 @@
 import React from 'react';
-import _ from 'lodash';
-import { Link } from 'dva/router';
-import { Balloon, Icon } from '@b-design/ui';
-import Translation from '../../components/Translation';
-import { getLeftSlider } from './menu';
-import './index.less';
-import { version } from '../../../package.json';
 import { connect } from 'dva';
+import { Link } from 'dva/router';
+import _ from 'lodash';
+import { Balloon, Icon } from '@b-design/ui';
+import { getLeftSlider } from './menu';
 import type { LoginUserInfo } from '../../interface/user';
-import { checkPermission } from '../../utils/permission';
 import type { SystemInfo } from '../../interface/system';
+import Translation from '../../components/Translation';
+import { version } from '../../../package.json';
+import { checkPermission } from '../../utils/permission';
+import './index.less';
 
 interface Props {
   userInfo?: LoginUserInfo;
   systemInfo?: SystemInfo;
+  history: {
+    location: {
+      pathname: string;
+    };
+  };
 }
 
 const LeftMenu = (props: Props) => {
   if (!props.userInfo) {
     return <div />;
   }
-  const pathname = _.get(props, 'props.history.location.pathname');
+  const pathname = _.get(props.history.location, 'pathname');
   const sliders = getLeftSlider(pathname);
   const childrenSlider = sliders.map((item) => {
     const ele: any = [];
@@ -82,6 +87,11 @@ const LeftMenu = (props: Props) => {
   );
 };
 
-export default connect((store: any) => {
-  return { ...store.user };
-})(LeftMenu);
+export default connect(
+  (store: any) => {
+    return { ...store.user };
+  },
+  undefined,
+  undefined,
+  { pure: false },
+)(LeftMenu);

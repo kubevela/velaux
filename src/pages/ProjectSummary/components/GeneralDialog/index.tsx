@@ -160,9 +160,10 @@ class GeneralDialog extends React.Component<Props, State> {
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Owner</Translation>}>
-                  <Select.AutoComplete
+                  <Select
                     name="owner"
                     hasClear
+                    showSearch
                     placeholder={i18n.t('Please select a owner for this project').toString()}
                     filterLocal={true}
                     dataSource={userList}

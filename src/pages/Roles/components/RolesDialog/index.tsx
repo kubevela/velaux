@@ -97,9 +97,9 @@ class RolesDialog extends React.Component<Props, State> {
   getTitle = () => {
     const { isEditRole } = this.props;
     if (isEditRole) {
-      return <Translation>Edit Roles</Translation>;
+      return <Translation>Edit Role</Translation>;
     } else {
-      return <Translation>New Roles</Translation>;
+      return <Translation>New Role</Translation>;
     }
   };
 
