@@ -83,7 +83,7 @@ class CreateIntegration extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { configType } = this.props;
+      const { configType, componentDefinitions } = this.props;
       const { name, alias, project, description, componentType, properties } = values;
       const params = {
         alias,
@@ -93,6 +93,11 @@ class CreateIntegration extends React.Component<Props, State> {
         componentType,
         properties: JSON.stringify(properties),
       };
+
+      if (!componentType && componentDefinitions.length == 1) {
+        params.componentType = componentDefinitions[0].name;
+      }
+
       this.setState({ createLoading: true });
       const queryData = { configType };
       createConfigType(queryData, params)
@@ -232,40 +237,42 @@ class CreateIntegration extends React.Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={
-                    <Translation className="font-size-14 font-weight-bold color333">
-                      ConfigType
-                    </Translation>
-                  }
-                  required={true}
-                >
-                  <Select
-                    locale={locale.Select}
-                    showSearch
-                    className="select"
-                    placeholder={i18n.t('Please select').toString()}
-                    {...init(`componentType`, {
-                      initValue: '',
-                      rules: [
-                        {
-                          required: true,
-                          message: i18n.t('Please select').toString(),
-                        },
-                      ],
-                    })}
-                    dataSource={getSelectLabel(componentDefinitions)}
-                    onChange={(item: string) => {
-                      this.onDetailsComponentDefinition(item, () => {
-                        this.field.setValue('componentType', item);
-                      });
-                    }}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
+            <If condition={componentDefinitions.length > 1}>
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <FormItem
+                    label={
+                      <Translation className="font-size-14 font-weight-bold color333">
+                        ConfigType
+                      </Translation>
+                    }
+                    required={true}
+                  >
+                    <Select
+                      locale={locale.Select}
+                      showSearch
+                      className="select"
+                      placeholder={i18n.t('Please select').toString()}
+                      {...init(`componentType`, {
+                        initValue: '',
+                        rules: [
+                          {
+                            required: true,
+                            message: i18n.t('Please select').toString(),
+                          },
+                        ],
+                      })}
+                      dataSource={getSelectLabel(componentDefinitions)}
+                      onChange={(item: string) => {
+                        this.onDetailsComponentDefinition(item, () => {
+                          this.field.setValue('componentType', item);
+                        });
+                      }}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+            </If>
 
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
