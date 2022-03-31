@@ -23,9 +23,3 @@ export interface QueryConfig {
   name: string;
   configType: string;
 }
-
-export interface QueryConfigs {
-  configType: string;
-  page?: number;
-  pageSize?: number;
-}

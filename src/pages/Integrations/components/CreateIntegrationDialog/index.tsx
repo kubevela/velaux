@@ -270,7 +270,7 @@ class CreateIntegration extends React.Component<Props, State> {
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <Group
-                  title={i18n.t('Component Properties')}
+                  title={i18n.t('Config Properties')}
                   closed={false}
                   loading={definitionLoading}
                   required={true}

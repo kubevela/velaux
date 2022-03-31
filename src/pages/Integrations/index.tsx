@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
-import { Table, Button, Pagination, Dialog, Message } from '@b-design/ui';
+import { Table, Button, Dialog, Message } from '@b-design/ui';
 import CreateIntegration from './components/CreateIntegrationDialog';
 import { getConfigs, deleteConfig } from '../../api/integration';
 import type { LoginUserInfo } from '../../interface/user';
@@ -26,9 +26,6 @@ type Props = {
 type State = {
   configType: string;
   list: [];
-  total: number;
-  page: number;
-  pageSize: number;
   visible: boolean;
   isLoading: boolean;
 };
@@ -42,9 +39,6 @@ class IntegrationTerraform extends Component<Props, State> {
     this.state = {
       configType: this.getConfigType(),
       list: [],
-      total: 0,
-      page: 0,
-      pageSize: 10,
       visible: false,
       isLoading: false,
     };
@@ -68,17 +62,12 @@ class IntegrationTerraform extends Component<Props, State> {
   }
 
   listIntegrations() {
-    const { configType, page, pageSize } = this.state;
-    const params = {
-      configType,
-      page,
-      pageSize,
-    };
+    const { configType } = this.state;
     if (!configType) {
       return;
     }
     this.setState({ isLoading: true });
-    getConfigs(params)
+    getConfigs({ configType })
       .then((res) => {
         if (res) {
           this.setState({
@@ -131,18 +120,6 @@ class IntegrationTerraform extends Component<Props, State> {
     this.setState({
       visible: true,
     });
-  };
-
-  handleChange = (page: number) => {
-    this.setState(
-      {
-        page,
-        pageSize: 10,
-      },
-      () => {
-        this.listIntegrations();
-      },
-    );
   };
 
   getConfigTypeDefinitions() {
@@ -209,7 +186,7 @@ class IntegrationTerraform extends Component<Props, State> {
 
     const { Column } = Table;
     const { userInfo } = this.props;
-    const { list, visible, total, pageSize, page, isLoading, configType } = this.state;
+    const { list, visible, isLoading, configType } = this.state;
     return (
       <div className="list-content">
         <div className="create-btn">
@@ -220,17 +197,6 @@ class IntegrationTerraform extends Component<Props, State> {
         <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
-
-        <Pagination
-          className="margin-top-20 text-align-right"
-          total={total}
-          locale={locale.Pagination}
-          size="medium"
-          pageSize={pageSize}
-          current={page}
-          hideOnlyOnePage={true}
-          onChange={this.handleChange}
-        />
 
         <If condition={visible}>
           <CreateIntegration
