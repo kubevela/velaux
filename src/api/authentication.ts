@@ -9,12 +9,12 @@ import {
 
 export function loginSSO(params: { code: string }) {
   const url = authenticationLogin;
-  return post(url, { ...params }).then((res) => res);
+  return post(url, { ...params }, true).then((res) => res);
 }
 
 export function loginLocal(params: { username: string; password: string }) {
   const url = authenticationLogin;
-  return post(url, { ...params }).then((res) => res);
+  return post(url, { ...params }, true).then((res) => res);
 }
 
 export function getDexConfig() {
@@ -27,7 +27,7 @@ export function getLoginType() {
   return get(url, {}).then((res) => res);
 }
 
-export function updateSystemInfo(params: { enableCollection: true; loginType: string }) {
+export function updateSystemInfo(params: { enableCollection: boolean; loginType: string }) {
   const url = authenticationSystemInfo;
   return put(url, params).then((res) => res);
 }

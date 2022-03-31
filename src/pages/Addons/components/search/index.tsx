@@ -52,11 +52,11 @@ class SelectSearch extends React.Component<Props, State> {
     const { Row, Col } = Grid;
     const { Option } = Select;
     const { t, registries } = this.props;
-    const queryPlacehole = t('Search by name and description etc').toString();
+    const queryPlaceholder = t('Search by name and description etc').toString();
     const { registryValue, inputValue } = this.state;
 
     return (
-      <Row className="app-select-wraper border-radius-8" wrap={true}>
+      <Row className="app-select-wrapper border-radius-8" wrap={true}>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
             locale={locale.Select}
@@ -89,7 +89,7 @@ class SelectSearch extends React.Component<Props, State> {
                 style={{ margin: 4 }}
               />
             }
-            placeholder={queryPlacehole}
+            placeholder={queryPlaceholder}
             onChange={this.handleChangName}
             onPressEnter={this.handleClickSearch}
             value={inputValue}

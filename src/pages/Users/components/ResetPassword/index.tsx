@@ -1,10 +1,10 @@
 import React from 'react';
 import { Grid, Form, Input, Field, Button, Message } from '@b-design/ui';
 import DrawerWithFooter from '../../../../components/Drawer';
-import { checkUserPassWord } from '../../../../utils/common';
+import { checkUserPassword } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import { updateUser } from '../../../../api/users';
-import { User } from '../../../../interface/user';
+import type { User } from '../../../../interface/user';
 import i18n from '../../../../i18n';
 
 type Props = {
@@ -19,7 +19,7 @@ type State = {
   loading: boolean;
 };
 
-class CreateUser extends React.Component<Props, State> {
+class ResetPassword extends React.Component<Props, State> {
   field: Field;
   constructor(props: Props) {
     super(props);
@@ -112,7 +112,7 @@ class CreateUser extends React.Component<Props, State> {
                       rules: [
                         {
                           required: true,
-                          pattern: checkUserPassWord,
+                          pattern: checkUserPassword,
                           message: (
                             <Translation>
                               Password should be 8-16 bits and contain at least one number and one
@@ -133,4 +133,4 @@ class CreateUser extends React.Component<Props, State> {
   }
 }
 
-export default CreateUser;
+export default ResetPassword;

@@ -147,7 +147,7 @@ class MemberDialog extends React.Component<Props, State> {
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem
-                  label={<Translation>UserName</Translation>}
+                  label={<Translation>Username</Translation>}
                   labelTextAlign="left"
                   required
                 >

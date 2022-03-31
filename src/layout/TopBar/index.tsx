@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import './index.less';
 import { routerRedux } from 'dva/router';
-import { Dropdown, Grid, Icon, Menu, Message } from '@b-design/ui';
+import { Dropdown, Grid, Icon, Menu } from '@b-design/ui';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
 import logo from '../../assets/kubevela-logo-white.png';
-import { loadSystemInfo, updateSystemInfo } from '../../api/config';
 
 import type { SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
@@ -16,11 +15,11 @@ import Translation from '../../components/Translation';
 type Props = {
   dispatch: any;
   userInfo?: LoginUserInfo;
+  systemInfo?: SystemInfo;
 };
 
 type State = {
   visible: boolean;
-  systemInfo?: SystemInfo;
 };
 @connect((store: any) => {
   return { ...store.user };
@@ -41,27 +40,14 @@ class TopBar extends Component<Props, State> {
   }
 
   loadSystemInfo = () => {
-    loadSystemInfo().then((re: SystemInfo) => {
-      if (re) {
-        this.setState({
-          systemInfo: re,
-        });
-      }
+    this.props.dispatch({
+      type: 'user/getSystemInfo',
     });
   };
 
   loadUserInfo = () => {
     this.props.dispatch({
       type: 'user/getLoginUserInfo',
-    });
-  };
-
-  disable = (status: boolean) => {
-    updateSystemInfo({
-      enableCollection: status,
-    }).then(() => {
-      Message.success('update system config success');
-      this.loadSystemInfo();
     });
   };
 

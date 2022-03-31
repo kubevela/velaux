@@ -131,13 +131,16 @@ class CreateIntegration extends React.Component<Props, State> {
       };
       this.setState({ createLoading: true });
       const queryData = { configType };
-      createConfigType(queryData, params).then((res) => {
-        if (res) {
-          Message.success(<Translation>Create config success</Translation>);
-          this.props.onCreate();
-        }
-        this.setState({ createLoading: false });
-      });
+      createConfigType(queryData, params)
+        .then((res) => {
+          if (res) {
+            Message.success(<Translation>Create config success</Translation>);
+            this.props.onCreate();
+          }
+        })
+        .finally(() => {
+          this.setState({ createLoading: false });
+        });
     });
   };
 
@@ -186,12 +189,12 @@ class CreateIntegration extends React.Component<Props, State> {
       },
     };
     const { projects } = this.props;
-    const { loading, definitionDetail, envs, visibleEnvDialog } = this.state;
+    const { createLoading, definitionDetail, envs, visibleEnvDialog } = this.state;
     const buttons = [
       <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
         <Translation>Cancel</Translation>
       </Button>,
-      <Button type="primary" onClick={this.onCreate} loading={loading}>
+      <Button type="primary" onClick={this.onCreate} loading={createLoading}>
         <Translation>Create</Translation>
       </Button>,
     ];

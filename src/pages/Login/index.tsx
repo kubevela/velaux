@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { Card, Button, Input, Form, Field } from '@b-design/ui';
-import Translation from '../../components/Translation';
-import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
-import Logo from '../../assets/kubevela-logo.png';
 import { If } from 'tsx-control-statements/components';
-import { checkName, checkUserPassWord } from '../../utils/common';
-import './index.less';
+import { Card, Button, Input, Form, Field, Icon } from '@b-design/ui';
+import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
+import Translation from '../../components/Translation';
+import { checkName, checkUserPassword } from '../../utils/common';
+import Logo from '../../assets/kubevela-logo.png';
 import i18n from '../../i18n';
+import './index.less';
 
 type Props = {
   code: string;
@@ -19,6 +19,7 @@ type Props = {
     push: (path: string, state?: any) => void;
   };
 };
+
 type State = {
   dexConfig: {
     clientID: string;
@@ -27,6 +28,7 @@ type State = {
     redirectURL: string;
   };
   loginType: string;
+  loginErrorMessage: string;
 };
 export default class LoginPage extends Component<Props, State> {
   field: Field;
@@ -41,6 +43,7 @@ export default class LoginPage extends Component<Props, State> {
         redirectURL: '',
       },
       loginType: '',
+      loginErrorMessage: '',
     };
   }
   componentDidMount() {
@@ -83,24 +86,36 @@ export default class LoginPage extends Component<Props, State> {
       if (error) {
         return;
       }
-      const { account, password } = values;
+      const { username, password } = values;
       const params = {
-        username: account,
+        username: username,
         password,
       };
-      loginLocal(params).then((res: any) => {
-        if (res && res.accessToken) {
-          localStorage.setItem('token', res.accessToken);
-          localStorage.setItem('refreshToken', res.refreshToken);
-          this.props.history.push('/');
-        }
-      });
+      loginLocal(params)
+        .then((res: any) => {
+          if (res && res.accessToken) {
+            localStorage.setItem('token', res.accessToken);
+            localStorage.setItem('refreshToken', res.refreshToken);
+            this.props.history.push('/');
+          }
+        })
+        .catch((err) => {
+          let customErrorMessage = '';
+          if (err.BusinessCode) {
+            customErrorMessage = `${err.Message}(${err.BusinessCode})`;
+          } else {
+            customErrorMessage = 'Please check the network or contact the administrator!';
+          }
+          this.setState({
+            loginErrorMessage: customErrorMessage,
+          });
+        });
     });
   };
   onGetDexCode = () => {
     const { clientID, issuer, redirectURL } = this.state.dexConfig;
     const newRedirectURl = encodeURIComponent(redirectURL);
-    const dexClientURL = `${issuer}/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access`;
+    const dexClientURL = `${issuer}/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access&state=velaux`;
     window.location.href = dexClientURL;
   };
   render() {
@@ -114,7 +129,7 @@ export default class LoginPage extends Component<Props, State> {
         span: 20,
       },
     };
-    const { loginType } = this.state;
+    const { loginType, loginErrorMessage } = this.state;
     return (
       <div className="full">
         <div className="login-wrapper">
@@ -127,21 +142,24 @@ export default class LoginPage extends Component<Props, State> {
                 <div className="logo-img-wrapper">
                   <img src={Logo} />
                 </div>
+                <h3 className="login-title-description">
+                  <Translation>Make shipping applications more enjoyable</Translation>
+                </h3>
                 <Form onSubmit={this.handleSubmit} {...formItemLayout} field={this.field}>
                   <FormItem
-                    label={<Translation className="label-title">Account</Translation>}
+                    label={<Translation className="label-title">Username</Translation>}
                     labelAlign="top"
                     required
                   >
                     <Input
-                      name="account"
-                      placeholder={i18n.t('Please input the username or email').toString()}
-                      {...init('account', {
+                      name="username"
+                      placeholder={i18n.t('Please input the username').toString()}
+                      {...init('username', {
                         rules: [
                           {
                             required: true,
                             pattern: checkName,
-                            message: <Translation>Please input the username or email</Translation>,
+                            message: <Translation>Please input the username</Translation>,
                           },
                         ],
                       })}
@@ -160,7 +178,7 @@ export default class LoginPage extends Component<Props, State> {
                         rules: [
                           {
                             required: true,
-                            pattern: checkUserPassWord,
+                            pattern: checkUserPassword,
                             message: (
                               <Translation>
                                 The password should be 8-16 bits and contain at least one number and
@@ -173,6 +191,11 @@ export default class LoginPage extends Component<Props, State> {
                     />
                   </FormItem>
                 </Form>
+                <If condition={loginErrorMessage}>
+                  <div className="logo-error-wrapper">
+                    <Icon type="warning1" /> <Translation>{loginErrorMessage}</Translation>
+                  </div>
+                </If>
                 <Button type="primary" onClick={this.handleSubmit}>
                   <Translation>Sign in</Translation>
                 </Button>

@@ -11,7 +11,7 @@ import terraformImg from '../../../../assets/terraform.png';
 import _ from 'lodash';
 import './index.less';
 
-const staticData = [
+const imgDate = [
   {
     id: 'config-helm-repository',
     img: helmImg,
@@ -42,7 +42,7 @@ type State = {};
 
 class Menu extends Component<Props, State> {
   matchMenuData = (name: string) => {
-    return _.find(staticData, (item: { id: string; img: string }) => {
+    return _.find(imgDate, (item: { id: string; img: string }) => {
       if (name.indexOf(item.id) != -1) {
         return item;
       } else {

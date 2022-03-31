@@ -1,5 +1,5 @@
 import { post, get, rdelete } from './request';
-import { ConfigType, QueryConfig } from '../interface/integrations';
+import { ConfigType, QueryConfig, QueryConfigs } from '../interface/integrations';
 import { getDomain } from '../utils/common';
 import { integrations } from './productionLink';
 
@@ -21,7 +21,7 @@ export function createConfigType(queryData: ConfigType, params: any) {
   return post(url, params).then((res) => res);
 }
 
-export function getConfigs(queryData: ConfigType) {
+export function getConfigs(queryData: QueryConfigs) {
   const url = base + integrations + `/${queryData.configType}/configs`;
   return get(url, {}).then((res) => res);
 }

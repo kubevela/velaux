@@ -59,18 +59,8 @@ const sassRegex = /\.(scss|sass)$/;
 const sassModuleRegex = /\.module\.(scss|sass)$/;
 const lessRegex = /\.less$/;
 
-const hasJsxRuntime = (() => {
-  if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
-    return false;
-  }
-
-  try {
-    require.resolve('react/jsx-runtime');
-    return true;
-  } catch (e) {
-    return false;
-  }
-})();
+// get git info from command line
+let commitHash = require('child_process').execSync('git rev-parse --short HEAD').toString().trim();
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
@@ -667,31 +657,9 @@ module.exports = function (webpackEnv) {
           // The formatter is invoked directly in WebpackDevServerUtils during development
           formatter: isEnvProduction ? typescriptFormatter : undefined,
         }),
-      // !disableESLintPlugin &&
-      //   new ESLintPlugin({
-      //     // Plugin options
-      //     extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
-      //     formatter: require.resolve('react-dev-utils/eslintFormatter'),
-      //     eslintPath: require.resolve('eslint'),
-      //     failOnError: !(isEnvDevelopment && emitErrorsAsWarnings),
-      //     context: paths.appSrc,
-      //     cache: true,
-      //     cacheLocation: path.resolve(
-      //       paths.appNodeModules,
-      //       '.cache/.eslintcache',
-      //     ),
-      //     // ESLint class options
-      //     cwd: paths.appPath,
-      //     resolvePluginsRelativeTo: __dirname,
-      //     baseConfig: {
-      //       extends: [require.resolve('eslint-config-react-app/base')],
-      //       rules: {
-      //         ...(!hasJsxRuntime && {
-      //           'react/react-in-jsx-scope': 'error',
-      //         }),
-      //       },
-      //     },
-      //   }),
+      new webpack.DefinePlugin({
+        __COMMIT_HASH__: JSON.stringify(commitHash),
+      }),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell webpack to provide empty mocks for them so importing them works.

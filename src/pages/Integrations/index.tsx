@@ -68,12 +68,17 @@ class IntegrationTerraform extends Component<Props, State> {
   }
 
   listIntegrations() {
-    const { configType } = this.state;
+    const { configType, page, pageSize } = this.state;
+    const params = {
+      configType,
+      page,
+      pageSize,
+    };
     if (!configType) {
       return;
     }
     this.setState({ isLoading: true });
-    getConfigs({ configType: configType })
+    getConfigs(params)
       .then((res) => {
         if (res) {
           this.setState({
@@ -223,6 +228,7 @@ class IntegrationTerraform extends Component<Props, State> {
           size="medium"
           pageSize={pageSize}
           current={page}
+          hideOnlyOnePage={true}
           onChange={this.handleChange}
         />
 

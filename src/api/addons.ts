@@ -21,7 +21,7 @@ export function getAddonsList(params: any) {
   return get(base + addons, { params: params }).then((res) => res);
 }
 
-export function getAddonsDetails(params: { name: string }) {
+export function getAddonsDetails(params: { name: string; version?: string }) {
   const gurl = `${base + addons}/${params.name}`;
   return get(gurl, params).then((res) => res);
 }
@@ -31,13 +31,32 @@ export function disableAddon(params: { name: string }) {
   return post(gurl, params).then((res) => res);
 }
 
-export function enableAddon(params: { name: string; properties: any }) {
+export function enableAddon(params: {
+  name: string;
+  version: string;
+  clusters?: string[];
+  properties: any;
+}) {
   const gurl = `${base + addons}/${params.name}/enable`;
-  return post(gurl, { args: params.properties }).then((res) => res);
+  const req: any = { args: params.properties, version: params.version };
+  if (params.clusters) {
+    req.clusters = params.clusters;
+  }
+  return post(gurl, req).then((res) => res);
 }
-export function upgradeAddon(params: { name: string; properties: any }) {
+
+export function upgradeAddon(params: {
+  name: string;
+  version: string;
+  clusters?: string[];
+  properties: any;
+}) {
   const gurl = `${base + addons}/${params.name}/update`;
-  return put(gurl, { args: params.properties }).then((res) => res);
+  const req: any = { args: params.properties, version: params.version };
+  if (params.clusters) {
+    req.clusters = params.clusters;
+  }
+  return put(gurl, req).then((res) => res);
 }
 
 export function getAddonsStatus(params: { name: string }) {

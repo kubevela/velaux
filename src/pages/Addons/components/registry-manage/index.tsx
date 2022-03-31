@@ -69,6 +69,24 @@ class RegistryManageDialog extends React.Component<Props, State> {
           },
         };
       }
+      if (type == 'Gitee') {
+        params = {
+          name: name,
+          gitee: {
+            url: url,
+            path: path,
+            token: token,
+          },
+        };
+      }
+      if (type == 'Helm') {
+        params = {
+          name: name,
+          helm: {
+            url: url,
+          },
+        };
+      }
       createAddonRegistry(params)
         .then(() => {
           Message.success(<Translation>add success</Translation>);
@@ -99,9 +117,8 @@ class RegistryManageDialog extends React.Component<Props, State> {
     const { syncRegistries } = this.props;
     createAddonRegistry({
       name: 'experimental',
-      oss: {
-        end_point: 'https://addons.kubevela.net',
-        path: 'experimental/',
+      helm: {
+        url: 'https://addons.kubevela.net/experimental',
       },
     })
       .then((res) => {
@@ -120,7 +137,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
     const { visible, registries } = this.props;
     const { showAdd, selectType } = this.state;
     const init = this.field.init;
-    const renderOper = (name: string) => {
+    const renderAction = (name: string) => {
       return (
         <a
           onClick={() => {
@@ -138,28 +155,38 @@ class RegistryManageDialog extends React.Component<Props, State> {
       );
     };
     let existExperimental = false;
-    const registryDataSorce = registries.map((item: AddonRegistry) => {
+    const registryDataSource = registries.map((item: AddonRegistry) => {
       if (item.name == 'experimental') {
         existExperimental = true;
       }
-      const reitem = {
+      const reItem = {
         name: item.name,
         url: '',
         path: '',
         type: '',
       };
       if (item.git) {
-        reitem.url = item.git.url;
-        reitem.path = item.git.path;
-        reitem.type = 'Github';
+        reItem.url = item.git.url;
+        reItem.path = item.git.path;
+        reItem.type = 'Github';
+      }
+      if (item.gitee) {
+        reItem.url = item.git.url;
+        reItem.path = item.git.path;
+        reItem.type = 'Gitee';
       }
       if (item.oss) {
-        reitem.url = item.oss.end_point;
-        reitem.path = item.oss.bucket ? `${item.oss.bucket}/${item.oss.path}` : item.oss.path;
-        reitem.type = 'OSS';
+        reItem.url = item.oss.end_point;
+        reItem.path = item.oss.bucket ? `${item.oss.bucket}/${item.oss.path}` : item.oss.path;
+        reItem.type = 'OSS';
       }
-      return reitem;
+      if (item.helm) {
+        reItem.url = item.helm.url;
+        reItem.type = 'Helm';
+      }
+      return reItem;
     });
+
     return (
       <div>
         <Dialog
@@ -194,9 +221,9 @@ class RegistryManageDialog extends React.Component<Props, State> {
               </div>
             </Col>
           </Row>
-          <Table locale={locale.Table} dataSource={registryDataSorce}>
+          <Table locale={locale.Table} dataSource={registryDataSource}>
             <Table.Column width="150px" title={<Translation>Name</Translation>} dataIndex="name" />
-            <Table.Column width="60px" title={<Translation>Type</Translation>} dataIndex="type" />
+            <Table.Column width="80px" title={<Translation>Type</Translation>} dataIndex="type" />
             <Table.Column title={<Translation>URL</Translation>} dataIndex="url" />
             <Table.Column
               width="160px"
@@ -204,7 +231,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
               dataIndex="path"
             />
             <Table.Column
-              cell={renderOper}
+              cell={renderAction}
               width="100px"
               align="left"
               title={<Translation>Actions</Translation>}
@@ -229,7 +256,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     />
                   </Form.Item>
                 </Col>
-                <Col span={3} style={{ padding: '8px' }}>
+                <Col span={4} style={{ padding: '8px' }}>
                   <Form.Item
                     label={<Translation>Type</Translation>}
                     help={<Translation>The addon registry type</Translation>}
@@ -245,17 +272,15 @@ class RegistryManageDialog extends React.Component<Props, State> {
                         ],
                       })}
                     >
+                      <Select.Option value="Helm">Helm Repository</Select.Option>
                       <Select.Option value="Github">Github</Select.Option>
-                      <Select.Option value="OSS">AliyunOSS</Select.Option>
+                      <Select.Option value="Gitee">Gitee</Select.Option>
+                      <Select.Option value="OSS">Aliyun OSS</Select.Option>
                     </Select>
                   </Form.Item>
                 </Col>
                 <Col span={6} style={{ padding: '8px' }}>
-                  <Form.Item
-                    label={<Translation>URL</Translation>}
-                    required
-                    help={<Translation>Only support github repo url（master branch）</Translation>}
-                  >
+                  <Form.Item label={<Translation>URL</Translation>} required>
                     <Input
                       {...init('url', {
                         rules: [
@@ -269,7 +294,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     />
                   </Form.Item>
                 </Col>
-                <If condition={selectType === 'Github'}>
+                <If condition={selectType === 'Github' || selectType === 'Gitee'}>
                   <Col span={4} style={{ padding: '8px' }}>
                     <Form.Item
                       label={<Translation>Path</Translation>}
