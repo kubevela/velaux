@@ -8,26 +8,37 @@ const baseURL = baseURLOject.APIBASE;
 export function getChartValues(params: {
   url: string;
   repoType: string;
+  secretName?: string;
   chart: string;
   version: string;
 }) {
   const url =
     baseURL + repository + '/charts/' + params.chart + '/versions/' + params.version + '/values';
-  return get(url, { params: { repoUrl: params.url, repoType: params.repoType } }).then(
-    (res) => res,
-  );
+  return get(url, {
+    params: { repoUrl: params.url, repoType: params.repoType, secretName: params.secretName },
+  }).then((res) => res);
 }
 
-export function getCharts(params: { url: string; repoType: string }) {
+export function getCharts(params: { url: string; repoType: string; secretName?: string }) {
   const url = baseURL + repository + '/charts';
-  return get(url, { params: { repoUrl: params.url, repoType: params.repoType } }).then(
-    (res) => res,
-  );
+  return get(url, {
+    params: { repoUrl: params.url, repoType: params.repoType, secretName: params.secretName },
+  }).then((res) => res);
 }
 
-export function getChartVersions(params: { url: string; repoType: string; chart: string }) {
+export function getChartVersions(params: {
+  url: string;
+  repoType: string;
+  chart: string;
+  secretName?: string;
+}) {
   const url = baseURL + repository + '/charts/' + params.chart + '/versions';
-  return get(url, { params: { repoUrl: params.url, repoType: params.repoType } }).then(
-    (res) => res,
-  );
+  return get(url, {
+    params: { repoUrl: params.url, repoType: params.repoType, secretName: params.secretName },
+  }).then((res) => res);
+}
+
+export function getChartRepos() {
+  const url = baseURL + repository + '/chart_repos';
+  return get(url, {}).then((res) => res);
 }

@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import _ from 'lodash';
-import type { UIParam } from '../../interface/application';
+import type { HelmRepo, UIParam } from '../../interface/application';
 import KV from '../KV';
 import { getChartValues } from '../../api/repository';
 import { Loading } from '@b-design/ui';
+import { connect } from 'dva';
 
 type Props = {
   value?: any;
@@ -20,6 +21,7 @@ type Props = {
     chart: string;
     version: string;
   };
+  repo?: HelmRepo;
 };
 
 function setValues(target: any, value: any, key: string, keys: string[]) {
@@ -60,7 +62,9 @@ type State = {
   };
   loading: boolean;
 };
-
+@connect((store: any) => {
+  return { ...store.uischema };
+})
 class HelmValues extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -74,9 +78,9 @@ class HelmValues extends Component<Props, State> {
   }
 
   loadChartValues = () => {
-    const { helm } = this.props;
+    const { helm, repo } = this.props;
     if (helm?.chart && helm.version && helm.url) {
-      getChartValues(helm).then((re) => {
+      getChartValues({ ...helm, secretName: repo?.secretName }).then((re) => {
         this.setState({ values: re.BusinessCode ? undefined : re, helm: helm, loading: false });
       });
     }
