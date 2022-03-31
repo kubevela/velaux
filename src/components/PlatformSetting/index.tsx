@@ -6,7 +6,6 @@ import locale from '../../utils/locale';
 import i18n from '../../i18n';
 import type { SystemInfo } from '../../interface/system';
 import { updateSystemInfo } from '../../api/config';
-import { If } from 'tsx-control-statements/components';
 const { Col, Row } = Grid;
 
 type Props = {
@@ -35,14 +34,8 @@ class PlatformSetting extends React.Component<Props> {
       if (errs) {
         return;
       }
-      const { enableCollection, loginType, dexIssuer } = values;
-      const param = { enableCollection, loginType, issuer: dexIssuer };
-      if (!param.issuer) {
-        param.issuer = param.issuer + '/dex';
-      }
-      if (loginType != 'dex') {
-        delete param.issuer;
-      }
+      const { enableCollection, loginType, velaAddress } = values;
+      const param = { enableCollection, loginType, velaAddress };
       updateSystemInfo(param).then((res) => {
         if (res) {
           Message.success(i18n.t('Update the platform configuration success'));
@@ -105,23 +98,20 @@ class PlatformSetting extends React.Component<Props> {
                   </Radio.Group>
                 </Form.Item>
               </Col>
-              <If condition={this.field.getValue('loginType') == 'dex'}>
-                <Col span={24}>
-                  <Form.Item
-                    required={true}
-                    label={i18n.t('Dex issuer')}
-                    help="There will auto get the domain for access the dex addon"
-                  >
-                    <Input
-                      innerAfter="/dex"
-                      {...this.field.init('dexIssuer', {
-                        initValue: this.getIssuerDefaultValue(),
-                        rules: [{ required: true }],
-                      })}
-                    />
-                  </Form.Item>
-                </Col>
-              </If>
+              <Col span={24}>
+                <Form.Item
+                  required={true}
+                  label={i18n.t('VelaUX address')}
+                  help={i18n.t('There will auto get the domain for access the VelaUX')}
+                >
+                  <Input
+                    {...this.field.init('velaAddress', {
+                      initValue: this.getIssuerDefaultValue(),
+                      rules: [{ required: true }],
+                    })}
+                  />
+                </Form.Item>
+              </Col>
             </Row>
           </Card>
 

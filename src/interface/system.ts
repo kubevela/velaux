@@ -12,5 +12,5 @@ export interface SystemInfo {
 export interface UpdateSystemInfo {
   enableCollection: boolean;
   loginType: 'local' | 'dex';
-  issuer?: string;
+  velaAddress: string;
 }
