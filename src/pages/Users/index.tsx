@@ -324,9 +324,9 @@ class Users extends Component<Props, State> {
                   this.onResetPassword(record);
                 }}
               >
-                <Translation>ResetPassword</Translation>
+                <Translation>Reset Password</Translation>
               </Button>
-
+              <span className="line" />
               <Button
                 text
                 size={'medium'}
@@ -338,7 +338,7 @@ class Users extends Component<Props, State> {
               >
                 <Translation>Edit</Translation>
               </Button>
-
+              <span className="line" />
               <Button
                 text
                 size={'medium'}
@@ -350,7 +350,7 @@ class Users extends Component<Props, State> {
               >
                 {this.isDisabledShow(record)}
               </Button>
-
+              <span className="line" />
               <Button
                 text
                 size={'medium'}
