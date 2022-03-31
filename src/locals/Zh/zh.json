@@ -497,5 +497,12 @@
   "The user is not authorized(12006)": "用户未经授权(12006)",
   "The token is not an access token(12007)": "认证令牌无效(12007)",
   "The login request is invalid(12008)": "登陆请求无效(12008)",
-  "The dex config is invalid(12009)": "Dex配置无效(12009)"
+  "The dex config is invalid(12009)": "Dex配置无效(12009)",
+  "Platform Setting": "平台设置",
+  "local": "本地用户登陆",
+  "SSO by dex": "集成 Dex 单点登录",
+  "User authentication configuration": "用户认证配置",
+  "User login mode": "用户登陆方式",
+  "Dex issuer": "Dex 地址",
+  "Update the platform configuration success": "更新平台配置成功"
 }
