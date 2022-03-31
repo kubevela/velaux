@@ -369,7 +369,9 @@ class AppDialog extends React.Component<Props, State> {
                 <Col span={24} style={{ padding: '0 8px' }}>
                   <FormItem
                     label={
-                      <Translation className="font-size-14 font-weight-bold">Type</Translation>
+                      <Translation className="font-size-14 font-weight-bold">
+                        Main Component Type
+                      </Translation>
                     }
                     required={true}
                     help={

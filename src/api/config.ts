@@ -1,3 +1,4 @@
+import type { UpdateSystemInfo } from '../interface/system';
 import { getDomain } from '../utils/common';
 import { get, put } from './request';
 const domainObj = getDomain();
@@ -8,9 +9,7 @@ export function loadSystemInfo() {
   return get(url, {});
 }
 
-export function updateSystemInfo(params: { enableCollection: boolean }) {
+export function updateSystemInfo(params: UpdateSystemInfo) {
   const url = `/api/v1/system_info`;
-  return put(url, {
-    enableCollection: params.enableCollection,
-  });
+  return put(url, params);
 }

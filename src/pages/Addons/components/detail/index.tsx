@@ -383,7 +383,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             {/* select the addon version */}
             <Card title="" contentHeight={'auto'} style={{ marginBottom: '16px' }}>
               <If condition={addonDetailInfo?.availableVersions}>
-                <Form.Item required label="Version">
+                <Form.Item required label={i18n.t('Version')}>
                   <Select
                     onChange={this.changeVersion}
                     dataSource={addonDetailInfo?.availableVersions || []}
@@ -393,7 +393,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
               </If>
 
               <If condition={addonDetailInfo?.deployTo?.runtimeCluster}>
-                <Form.Item required label="Deployed Clusters">
+                <Form.Item required label={i18n.t('Deployed Clusters')}>
                   <Checkbox.Group
                     className="custom-cluster-checkbox"
                     onChange={this.changeCluster}

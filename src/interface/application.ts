@@ -347,6 +347,12 @@ export interface ChartVersion {
   icon?: string;
 }
 
+export interface HelmRepo {
+  url: string;
+  type: string;
+  secretName?: string;
+}
+
 export interface ApplicationQuery {
   query?: string;
   project?: string;
