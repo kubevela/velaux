@@ -51,7 +51,7 @@ type State = {
   args?: any;
   addonsStatus?: ApplicationStatus;
   showStatusVisible: boolean;
-  mode: 'new' | 'edit';
+  mode?: 'new' | 'edit';
   version?: string;
   clusters?: string[];
   allClusters?: NameAlias[];
@@ -75,7 +75,6 @@ class AddonDetailDialog extends React.Component<Props, State> {
       statusLoading: true,
       upgradeLoading: false,
       showStatusVisible: false,
-      mode: 'new',
     };
     this.form = new Field(this);
     this.uiSchemaRef = React.createRef();
@@ -130,6 +129,8 @@ class AddonDetailDialog extends React.Component<Props, State> {
           if (res.args.clusters) {
             clusters = res.args.clusters;
           }
+        } else {
+          this.setState({ mode: 'new' });
         }
 
         let enabledClusters: string[] = [];
@@ -415,19 +416,21 @@ class AddonDetailDialog extends React.Component<Props, State> {
                 hasToggleIcon={true}
               >
                 <Form field={this.form}>
-                  <UISchema
-                    {...this.form.init('properties', {
-                      rules: [
-                        {
-                          validator: validator,
-                          message: 'Please check addon properties',
-                        },
-                      ],
-                    })}
-                    ref={this.uiSchemaRef}
-                    uiSchema={addonDetailInfo?.uiSchema}
-                    mode={this.state.mode}
-                  />
+                  {this.state.mode && (
+                    <UISchema
+                      {...this.form.init('properties', {
+                        rules: [
+                          {
+                            validator: validator,
+                            message: 'Please check addon properties',
+                          },
+                        ],
+                      })}
+                      ref={this.uiSchemaRef}
+                      uiSchema={addonDetailInfo?.uiSchema}
+                      mode={this.state.mode}
+                    />
+                  )}
                 </Form>
               </Group>
             </If>
