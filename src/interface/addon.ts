@@ -60,6 +60,7 @@ export interface AddonRegistry {
   name: string;
   git: RegistryGitSource;
   gitee: RegistryGitSource;
+  gitlab: RegistryGitSource & { repo: string };
   oss: RegistryOssSource;
   helm: RegistryHelmSource;
 }
