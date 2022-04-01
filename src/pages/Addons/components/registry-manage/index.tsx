@@ -322,9 +322,12 @@ class RegistryManageDialog extends React.Component<Props, State> {
                   </Form.Item>
                 </Col>
                 <If condition={selectType === 'Gitlab'}>
-                  {' '}
                   <Col span={3} style={{ padding: '8px' }}>
-                    <Form.Item label={<Translation>Repository name</Translation>} required>
+                    <Form.Item
+                      label={<Translation>Repository name</Translation>}
+                      required
+                      help="Repository name in gitlab"
+                    >
                       <Input
                         {...init('repo', {
                           rules: [
