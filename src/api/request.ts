@@ -6,6 +6,11 @@ import { Message } from '@b-design/ui';
 import { handleError } from '../utils/errors';
 import { getToken } from '../utils/storage';
 import { authenticationRefreshToken } from './productionLink';
+import { resetLogin } from '../utils/common';
+
+type RetryRequests = (token: string) => void;
+let isRefreshing = false;
+let retryRequests: RetryRequests[] = [];
 
 export const axiosInstance: AxiosInstance = axios.create({
   baseURL: baseURL,
@@ -32,37 +37,44 @@ axiosInstance.interceptors.response.use(
   },
 
   async (error: any) => {
-    const { data, status } = error?.response;
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken && data.BusinessCode === '12002') {
-      try {
-        const res: any = await axios({
-          url: `${baseURL}/${authenticationRefreshToken}`,
-          method: 'GET',
-          headers: {
-            RefreshToken: refreshToken,
-          },
+    if (!error.response) {
+      return Promise.reject(error);
+    }
+    const { data, config } = error.response;
+    if (data.BusinessCode === 12002) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        return getRefreshTokenFunc()
+          .then((res: any) => {
+            const refreshData = res && res.data;
+            if (refreshData && refreshData.accessToken) {
+              localStorage.setItem('token', refreshData.accessToken);
+              localStorage.setItem('refreshToken', refreshData.refreshToken);
+              config.headers.Authorization = 'Bearer ' + getToken();
+              retryRequests.forEach((cb) => {
+                cb(getToken());
+              });
+              retryRequests = [];
+              return axiosInstance(config);
+            }
+          })
+          .catch(() => {
+            resetLogin();
+          })
+          .finally(() => {
+            isRefreshing = false;
+          });
+      } else {
+        return new Promise((resolve) => {
+          retryRequests.push((token: string) => {
+            config.headers['Authorization'] = 'Bearer ' + token;
+            resolve(axiosInstance(config));
+          });
         });
-        if (res && res.accessToken) {
-          localStorage.setItem('token', res.accessToken);
-          localStorage.setItem('refreshToken', res.refreshToken);
-        } else {
-          window.location.href = '/login';
-        }
-        return axiosInstance(error.config);
-      } catch (err: any) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        return Promise.reject(err.response || err);
       }
+    } else if (data.BusinessCode === 12888) {
+      resetLogin();
     } else {
-      switch (status) {
-        case 401:
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          window.location.href = '/login';
-      }
       return Promise.reject(error.response || error);
     }
   },
@@ -70,7 +82,7 @@ axiosInstance.interceptors.response.use(
 
 axiosInstance.interceptors.request.use(
   (config: any) => {
-    if (localStorage.getItem('token')) {
+    if (getToken()) {
       config.headers.Authorization = 'Bearer ' + getToken();
     }
     return config;
@@ -134,3 +146,14 @@ export const put = (url: string, params: any) => {
       handleAPIError(err, params.customError);
     });
 };
+
+async function getRefreshTokenFunc() {
+  const refreshToken = localStorage.getItem('refreshToken') || '';
+  return await axios({
+    url: `${baseURL}${authenticationRefreshToken}`,
+    method: 'GET',
+    headers: {
+      RefreshToken: refreshToken,
+    },
+  });
+}

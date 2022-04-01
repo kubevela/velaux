@@ -504,5 +504,7 @@
   "Update the platform configuration success": "更新平台配置成功",
   "There will auto get the domain for access the VelaUX": "平台访问地址，这里自动获取了当前访问的地址",
   "Deployed Clusters": "自定义部署集群",
-  "Config Properties": "配置属性"
+  "Config Properties": "配置属性",
+  "Authentication failed, please log in again": "身份验证失败，请重新登录",
+  "the username is not exist(14008)": "用户名不存在"
 }
