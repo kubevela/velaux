@@ -506,5 +506,6 @@
   "Deployed Clusters": "自定义部署集群",
   "Config Properties": "配置属性",
   "Authentication failed, please log in again": "身份验证失败，请重新登录",
-  "the username is not exist(14008)": "用户名不存在"
+  "the username is not exist(14008)": "用户名不存在",
+  "Repository name": "仓库名"
 }
