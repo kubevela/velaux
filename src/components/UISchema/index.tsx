@@ -199,9 +199,11 @@ class UISchema extends Component<Props, State> {
 
   render() {
     const { advanced } = this.state;
-    const { uiSchema, inline, maxColSpan, disableRenderRow, value } = this.props;
-
+    const { uiSchema, inline, maxColSpan, disableRenderRow, value, mode } = this.props;
     if (!uiSchema) {
+      return <div />;
+    }
+    if (mode == 'edit' && value === undefined) {
       return <div />;
     }
     let onlyShowRequired = false;
@@ -246,7 +248,10 @@ class UISchema extends Component<Props, State> {
       if (label) {
         label = i18n.t(label);
       }
-      const initValue = (value && value[param.jsonKey]) || param.validate.defaultValue;
+      let initValue = value && value[param.jsonKey];
+      if (initValue === undefined) {
+        initValue = param.validate.defaultValue;
+      }
       const disableEdit = (param.validate.immutable && this.props.mode == 'edit') || false;
       const getGroup = (children: React.ReactNode) => {
         return (
@@ -275,13 +280,13 @@ class UISchema extends Component<Props, State> {
       const item = () => {
         switch (param.uiType) {
           case 'Switch':
-            const getDefaultSwtichValue = (validate: any) => {
+            const getDefaultSwitchValue = (validate: any) => {
               if (validate.required === true) {
                 return false;
               }
             };
             const switchResult = init(param.jsonKey, {
-              initValue: initValue || getDefaultSwtichValue(param.validate),
+              initValue: initValue || getDefaultSwitchValue(param.validate),
               rules: convertRule(param.validate),
             });
             return (
