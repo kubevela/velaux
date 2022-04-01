@@ -504,5 +504,6 @@
   "Update the platform configuration success": "更新平台配置成功",
   "There will auto get the domain for access the VelaUX": "平台访问地址，这里自动获取了当前访问的地址",
   "Deployed Clusters": "自定义部署集群",
-  "Config Properties": "配置属性"
+  "Config Properties": "配置属性",
+  "Repository name": "仓库名"
 }

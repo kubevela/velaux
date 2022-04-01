@@ -48,7 +48,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { name, type, url, path, token } = values;
+      const { name, type, url, path, token, repo } = values;
       let params: any = {};
       if (type == 'OSS') {
         params = {
@@ -76,6 +76,17 @@ class RegistryManageDialog extends React.Component<Props, State> {
             url: url,
             path: path,
             token: token,
+          },
+        };
+      }
+      if (type == 'Gitlab') {
+        params = {
+          name: name,
+          gitlab: {
+            url: url,
+            path: path,
+            token: token,
+            repo: repo,
           },
         };
       }
@@ -164,6 +175,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
         url: '',
         path: '',
         type: '',
+        repo: '',
       };
       if (item.git) {
         reItem.url = item.git.url;
@@ -174,6 +186,12 @@ class RegistryManageDialog extends React.Component<Props, State> {
         reItem.url = item.git.url;
         reItem.path = item.git.path;
         reItem.type = 'Gitee';
+      }
+      if (item.gitlab) {
+        reItem.url = item.gitlab.url;
+        reItem.path = item.gitlab.path;
+        reItem.repo = item.gitlab.repo;
+        reItem.type = 'Gitlab';
       }
       if (item.oss) {
         reItem.url = item.oss.end_point;
@@ -225,6 +243,14 @@ class RegistryManageDialog extends React.Component<Props, State> {
             <Table.Column width="150px" title={<Translation>Name</Translation>} dataIndex="name" />
             <Table.Column width="80px" title={<Translation>Type</Translation>} dataIndex="type" />
             <Table.Column title={<Translation>URL</Translation>} dataIndex="url" />
+            <If condition={registryDataSource.find((item) => item.type === 'Gitlab')}>
+              <Table.Column
+                width="100px"
+                title={<Translation>Repository name</Translation>}
+                dataIndex="repo"
+              />
+            </If>
+
             <Table.Column
               width="160px"
               title={<Translation>Path(Bucket)</Translation>}
@@ -241,7 +267,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
           <If condition={showAdd}>
             <Form field={this.field}>
               <Row>
-                <Col span={4} style={{ padding: '8px' }}>
+                <Col span={selectType === 'Gitlab' ? 3 : 4} style={{ padding: '8px' }}>
                   <Form.Item label={<Translation>Name</Translation>} required>
                     <Input
                       {...init('name', {
@@ -256,7 +282,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     />
                   </Form.Item>
                 </Col>
-                <Col span={4} style={{ padding: '8px' }}>
+                <Col span={selectType === 'Gitlab' ? 3 : 4} style={{ padding: '8px' }}>
                   <Form.Item
                     label={<Translation>Type</Translation>}
                     help={<Translation>The addon registry type</Translation>}
@@ -275,6 +301,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                       <Select.Option value="Helm">Helm Repository</Select.Option>
                       <Select.Option value="Github">Github</Select.Option>
                       <Select.Option value="Gitee">Gitee</Select.Option>
+                      <Select.Option value="Gitlab">Gitlab</Select.Option>
                       <Select.Option value="OSS">Aliyun OSS</Select.Option>
                     </Select>
                   </Form.Item>
@@ -294,7 +321,31 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     />
                   </Form.Item>
                 </Col>
-                <If condition={selectType === 'Github' || selectType === 'Gitee'}>
+                <If condition={selectType === 'Gitlab'}>
+                  <Col span={3} style={{ padding: '8px' }}>
+                    <Form.Item
+                      label={<Translation>Repository name</Translation>}
+                      required
+                      help="Repository name in gitlab"
+                    >
+                      <Input
+                        {...init('repo', {
+                          rules: [
+                            {
+                              required: true,
+                              message: 'Please enter a repository name',
+                            },
+                          ],
+                        })}
+                      />
+                    </Form.Item>
+                  </Col>
+                </If>
+                <If
+                  condition={
+                    selectType === 'Github' || selectType === 'Gitee' || selectType === 'Gitlab'
+                  }
+                >
                   <Col span={4} style={{ padding: '8px' }}>
                     <Form.Item
                       label={<Translation>Path</Translation>}
@@ -312,7 +363,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={5} style={{ padding: '8px' }}>
+                  <Col span={selectType === 'Gitlab' ? 4 : 5} style={{ padding: '8px' }}>
                     <Form.Item
                       label={<Translation>Token</Translation>}
                       help="Github Personal access token"
