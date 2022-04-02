@@ -72,7 +72,7 @@ axiosInstance.interceptors.response.use(
           });
         });
       }
-    } else if (data.BusinessCode === 12888) {
+    } else if (data.BusinessCode === 12010) {
       resetLogin();
     } else {
       return Promise.reject(error.response || error);
