@@ -6,7 +6,7 @@ import { Message } from '@b-design/ui';
 import { handleError } from '../utils/errors';
 import { getToken } from '../utils/storage';
 import { authenticationRefreshToken } from './productionLink';
-import { resetLogin } from '../utils/common';
+import ResetLogin from '../utils/resetLogin';
 
 type RetryRequests = (token: string) => void;
 let isRefreshing = false;
@@ -59,7 +59,7 @@ axiosInstance.interceptors.response.use(
             }
           })
           .catch(() => {
-            resetLogin();
+            ResetLogin.getInstance().reset();
           })
           .finally(() => {
             isRefreshing = false;
@@ -73,7 +73,7 @@ axiosInstance.interceptors.response.use(
         });
       }
     } else if (data.BusinessCode === 12010) {
-      resetLogin();
+      ResetLogin.getInstance().reset();
     } else {
       return Promise.reject(error.response || error);
     }
@@ -107,7 +107,7 @@ export const post = (url: string, params: any, customError?: boolean) => {
   return axiosInstance
     .post(url, params)
     .then((res) => {
-      return res.data;
+      return res && res.data;
     })
     .catch((err) => {
       handleAPIError(err, params.customError || customError);
@@ -118,7 +118,7 @@ export const get = (url: string, params: any) => {
   return axiosInstance
     .get(url, params)
     .then((res) => {
-      return res.data;
+      return res && res.data;
     })
     .catch((err) => {
       handleAPIError(err, params.customError);
@@ -129,7 +129,7 @@ export const rdelete = (url: string, params: any) => {
   return axiosInstance
     .delete(url, params)
     .then((res) => {
-      return res.data;
+      return res && res.data;
     })
     .catch((err) => {
       handleAPIError(err, params.customError);
@@ -140,7 +140,7 @@ export const put = (url: string, params: any) => {
   return axiosInstance
     .put(url, params)
     .then((res) => {
-      return res.data;
+      return res && res.data;
     })
     .catch((err) => {
       handleAPIError(err, params.customError);

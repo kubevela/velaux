@@ -1,6 +1,4 @@
 import moment from 'moment';
-import { Dialog } from '@b-design/ui';
-import i18n from '../i18n';
 
 type Navigator = {
   language: string;
@@ -165,17 +163,7 @@ export const replaceUrl = function (text: string) {
 export const checkUserPassword = /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]{8,16})$/;
 export const checkUserEmail = /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$/;
 
-export function resetLogin() {
-  if (window.location.href.indexOf('/login') === -1) {
-    Dialog.confirm({
-      title: i18n.t('The token is expired(12002)'),
-      content: i18n.t('Authentication failed, please log in again'),
-      onOk: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-      },
-      onCancel: () => {},
-    });
-  }
+export function isMatchBusinessCode(businessCode: number) {
+  const tokenExpiredList = [12002, 12010];
+  return tokenExpiredList.includes(businessCode);
 }
