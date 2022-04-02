@@ -13,6 +13,7 @@ import { getUserList, deleteUser, changeUserDisable, changeUserEnable } from '..
 import { getRoleList } from '../../api/roles';
 import { momentDate } from '../../utils/common';
 import SelectSearch from './components/SelectSearch';
+import Permission from '../../components/Permission';
 import './index.less';
 
 type Props = {};
@@ -315,53 +316,61 @@ class Users extends Component<Props, State> {
         cell: (v: string, i: number, record: User) => {
           return (
             <Fragment>
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onResetPassword(record);
-                }}
-              >
-                <Translation>Reset Password</Translation>
-              </Button>
+              <Permission request={{ resource: 'user:*', action: 'reset' }} project={''}>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onResetPassword(record);
+                  }}
+                >
+                  <Translation>Reset Password</Translation>
+                </Button>
+              </Permission>
               <span className="line" />
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onEdit(record);
-                }}
-              >
-                <Translation>Edit</Translation>
-              </Button>
+              <Permission request={{ resource: 'user:*', action: 'edit' }} project={''}>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onEdit(record);
+                  }}
+                >
+                  <Translation>Edit</Translation>
+                </Button>
+              </Permission>
               <span className="line" />
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onChangeStatus(record);
-                }}
-              >
-                {this.isDisabledShow(record)}
-              </Button>
+              <Permission request={{ resource: 'user:*', action: 'disabled' }} project={''}>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onChangeStatus(record);
+                  }}
+                >
+                  {this.isDisabledShow(record)}
+                </Button>
+              </Permission>
               <span className="line" />
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onDelete(record);
-                }}
-              >
-                <Translation>Delete</Translation>
-              </Button>
+              <Permission request={{ resource: 'user:*', action: 'delete' }} project={''}>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onDelete(record);
+                  }}
+                >
+                  <Translation>Delete</Translation>
+                </Button>
+              </Permission>
             </Fragment>
           );
         },
@@ -392,9 +401,12 @@ class Users extends Component<Props, State> {
               title="Users"
               subTitle="Basic authorization management is provided for local users by default, but SSO authentication is strongly recommended"
               extButtons={[
-                <Button type="primary" onClick={this.handleClickCreate}>
-                  <Translation>New User</Translation>
-                </Button>,
+                <Permission request={{ resource: 'user:*', action: 'create' }} project={''}>
+                  <Button type="primary" onClick={this.handleClickCreate}>
+                    <Translation>New User</Translation>
+                  </Button>
+                  ,
+                </Permission>,
               ]}
             />
           </section>
