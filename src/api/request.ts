@@ -59,7 +59,7 @@ axiosInstance.interceptors.response.use(
             }
           })
           .catch(() => {
-            ResetLogin.getInstance().reset();
+            return ResetLogin.getInstance().reset;
           })
           .finally(() => {
             isRefreshing = false;
@@ -73,7 +73,7 @@ axiosInstance.interceptors.response.use(
         });
       }
     } else if (data.BusinessCode === 12010) {
-      ResetLogin.getInstance().reset();
+      return ResetLogin.getInstance().reset;
     } else {
       return Promise.reject(error.response || error);
     }
