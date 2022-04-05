@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Icon, Message } from '@b-design/ui';
 import type { ProjectRoleBase } from '../../../../interface/project';
 import Translation from '../../../../components/Translation';
+import Permission from '../../../../components/Permission';
 import './index.less';
 
 type Props = {
@@ -45,14 +46,19 @@ class ProjectMenu extends Component<Props> {
           }}
         >
           <span> {item.alias || item.name} </span>
-          <span>
-            <Icon
-              type="delete"
-              onClick={(e) => {
-                this.handleClick(item.name, e);
-              }}
-            />
-          </span>
+          <Permission
+            request={{ resource: `project/role:${item.name}`, action: 'delete' }}
+            project={''}
+          >
+            <span>
+              <Icon
+                type="delete"
+                onClick={(e) => {
+                  this.handleClick(item.name, e);
+                }}
+              />
+            </span>
+          </Permission>
         </li>
       );
     });
