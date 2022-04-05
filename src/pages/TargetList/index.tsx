@@ -1,7 +1,7 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
-import { Pagination } from '@b-design/ui';
+import { Pagination, Button } from '@b-design/ui';
 import ListTitle from '../../components/ListTitle';
 import TableList from './components/List';
 import TargetDialog from './components/TargetDialog';
@@ -11,6 +11,8 @@ import type { Cluster } from '../../interface/cluster';
 import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 import type { LoginUserInfo } from '../../interface/user';
+import Permission from '../../components/Permission';
+import Translation from '../../components/Translation';
 
 type Props = {
   targets?: [];
@@ -119,10 +121,19 @@ class targetList extends React.Component<Props, State> {
         <ListTitle
           title="Targets"
           subTitle="Define the targets that applications would deliver to"
-          addButtonTitle="New Target"
-          addButtonClick={() => {
-            this.setState({ visibleDelivery: true, targetItem: undefined });
-          }}
+          extButtons={[
+            <Permission request={{ resource: 'target:*', action: 'create' }} project={''}>
+              <Button
+                type="primary"
+                onClick={() => {
+                  this.setState({ visibleDelivery: true, targetItem: undefined });
+                }}
+              >
+                <Translation>New Target</Translation>
+              </Button>
+              ,
+            </Permission>,
+          ]}
         />
 
         <TableList

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   Form,
   Button,
@@ -34,6 +34,7 @@ import StatusShow from '../../../../components/StatusShow';
 import type { ApplicationStatus } from '../../../../interface/application';
 import i18n from '../../../../i18n';
 import type { NameAlias } from '../../../../interface/env';
+import Permission from '../../../../components/Permission';
 
 type Props = {
   addonName: string;
@@ -277,7 +278,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
       allClusters,
       enabledClusters,
     } = this.state;
-    const { showAddon } = this.props;
+    const { showAddon, addonName } = this.props;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -292,31 +293,38 @@ class AddonDetailDialog extends React.Component<Props, State> {
       }
     });
     const buttons = [
-      <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
-        <Translation>Cancel</Translation>
-      </Button>,
-      <Button
-        type="primary"
-        onClick={this.handleSubmit}
-        warning={status === 'enabled'}
-        title={status}
-        style={{ backgroundColor: status === 'enabled' ? 'red' : '' }}
-        loading={statusLoading || loading || status == 'enabling' || status == 'disabling'}
-        disabled={status == 'enabling' || status == 'disabling' || version == ''}
-      >
-        <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
-      </Button>,
+      <Fragment>
+        <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
+          <Translation>Cancel</Translation>
+        </Button>
+        ,
+        <Permission request={{ resource: `addon:${addonName}`, action: 'update' }} project={''}>
+          <Button
+            type="primary"
+            onClick={this.handleSubmit}
+            warning={status === 'enabled'}
+            title={status}
+            style={{ backgroundColor: status === 'enabled' ? 'red' : '' }}
+            loading={statusLoading || loading || status == 'enabling' || status == 'disabling'}
+            disabled={status == 'enabling' || status == 'disabling' || version == ''}
+          >
+            <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
+          </Button>
+        </Permission>
+      </Fragment>,
     ];
     if (status == 'enabled' || status == 'suspend') {
       buttons.push(
-        <Button
-          loading={upgradeLoading}
-          type="primary"
-          onClick={this.onUpgrade}
-          style={{ marginLeft: '16px' }}
-        >
-          <Translation>Upgrade</Translation>
-        </Button>,
+        <Permission request={{ resource: `addon:${addonName}`, action: 'update' }} project={''}>
+          <Button
+            loading={upgradeLoading}
+            type="primary"
+            onClick={this.onUpgrade}
+            style={{ marginLeft: '16px' }}
+          >
+            <Translation>Upgrade</Translation>
+          </Button>
+        </Permission>,
       );
     }
 

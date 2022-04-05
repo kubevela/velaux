@@ -18,6 +18,7 @@ import './index.less';
 import { handleError } from '../../../../utils/errors';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
+import Permission from '../../../../components/Permission';
 
 type Props = {
   visible: boolean;
@@ -248,16 +249,21 @@ class CloudServiceDialog extends React.Component<Props, State> {
         dataIndex: 'operation',
         cell: (v: string, i: number, record: Record) => {
           return (
-            <Button
-              text
-              ghost={true}
-              component={'a'}
-              onClick={() => {
-                this.connectcloudCluster(record);
-              }}
+            <Permission
+              request={{ resource: `cluster/namespace:${record.name}`, action: 'create' }}
+              project={''}
             >
-              <Translation>Connect</Translation>
-            </Button>
+              <Button
+                text
+                ghost={true}
+                component={'a'}
+                onClick={() => {
+                  this.connectcloudCluster(record);
+                }}
+              >
+                <Translation>Connect</Translation>
+              </Button>
+            </Permission>
           );
         },
       },

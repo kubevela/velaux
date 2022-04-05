@@ -7,6 +7,7 @@ import { createAddonRegistry, deleteAddonRegistry } from '../../../../api/addons
 import { handleError } from '../../../../utils/errors';
 import type { AddonRegistry } from '../../../../interface/addon';
 import locale from '../../../../utils/locale';
+import Permission from '../../../../components/Permission';
 
 const { Row, Col } = Grid;
 
@@ -150,19 +151,21 @@ class RegistryManageDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const renderAction = (name: string) => {
       return (
-        <a
-          onClick={() => {
-            Dialog.confirm({
-              content: <Translation>Are you sure to delete?</Translation>,
-              onOk: () => {
-                this.onDeleteRegistry(name);
-              },
-              locale: locale.Dialog,
-            });
-          }}
-        >
-          <Translation>Remove</Translation>
-        </a>
+        <Permission request={{ resource: `addonRegistry:${name}`, action: 'delete' }} project={''}>
+          <a
+            onClick={() => {
+              Dialog.confirm({
+                content: <Translation>Are you sure to delete?</Translation>,
+                onOk: () => {
+                  this.onDeleteRegistry(name);
+                },
+                locale: locale.Dialog,
+              });
+            }}
+          >
+            <Translation>Remove</Translation>
+          </a>
+        </Permission>
       );
     };
     let existExperimental = false;
@@ -233,9 +236,14 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     <Translation>Add Experimental Registry</Translation>
                   </Button>
                 </If>
-                <Button type="secondary" onClick={this.showAddRegistry}>
-                  <Translation>New</Translation>
-                </Button>
+                <Permission
+                  request={{ resource: 'addonRegistry:*', action: 'create' }}
+                  project={''}
+                >
+                  <Button type="secondary" onClick={this.showAddRegistry}>
+                    <Translation>New</Translation>
+                  </Button>
+                </Permission>
               </div>
             </Col>
           </Row>

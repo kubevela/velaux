@@ -163,10 +163,13 @@ class Roles extends Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: (v: string, i: number, record: any) => {
+        cell: (v: string, i: number, record: RolesBase) => {
           return (
             <Fragment>
-              <Permission request={{ resource: 'role:*', action: 'edit' }} project={''}>
+              <Permission
+                request={{ resource: `role:${record.name}`, action: 'update' }}
+                project={''}
+              >
                 <Button
                   text
                   size={'medium'}
@@ -180,7 +183,10 @@ class Roles extends Component<Props, State> {
                 </Button>
               </Permission>
 
-              <Permission request={{ resource: 'role:*', action: 'delete' }} project={''}>
+              <Permission
+                request={{ resource: `role:${record.name}`, action: 'delete' }}
+                project={''}
+              >
                 <Button
                   text
                   size={'medium'}

@@ -316,7 +316,10 @@ class Users extends Component<Props, State> {
         cell: (v: string, i: number, record: User) => {
           return (
             <Fragment>
-              <Permission request={{ resource: 'user:*', action: 'reset' }} project={''}>
+              <Permission
+                request={{ resource: `user:${record.name}`, action: 'update' }}
+                project={''}
+              >
                 <Button
                   text
                   size={'medium'}
@@ -330,7 +333,10 @@ class Users extends Component<Props, State> {
                 </Button>
               </Permission>
               <span className="line" />
-              <Permission request={{ resource: 'user:*', action: 'edit' }} project={''}>
+              <Permission
+                request={{ resource: `user:${record.name}`, action: 'update' }}
+                project={''}
+              >
                 <Button
                   text
                   size={'medium'}
@@ -344,7 +350,10 @@ class Users extends Component<Props, State> {
                 </Button>
               </Permission>
               <span className="line" />
-              <Permission request={{ resource: 'user:*', action: 'disabled' }} project={''}>
+              <Permission
+                request={{ resource: `user:${record.name}`, action: 'update' }}
+                project={''}
+              >
                 <Button
                   text
                   size={'medium'}
@@ -358,7 +367,10 @@ class Users extends Component<Props, State> {
                 </Button>
               </Permission>
               <span className="line" />
-              <Permission request={{ resource: 'user:*', action: 'delete' }} project={''}>
+              <Permission
+                request={{ resource: `user:${record.name}`, action: 'delete' }}
+                project={''}
+              >
                 <Button
                   text
                   size={'medium'}
