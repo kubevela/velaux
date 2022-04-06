@@ -34,6 +34,7 @@ import Components from './components/Components';
 import ComponentDialog from './components/ComponentDialog';
 import i18n from '../../i18n';
 import { Link } from 'dva/router';
+import Permission from '../../components/Permission';
 
 const { Row, Col } = Grid;
 
@@ -380,9 +381,14 @@ class ApplicationConfig extends Component<Props, State> {
             />
           </Col>
           <Col span={12} className="padding16 flexright">
-            <Button onClick={this.editAppPlan} type="secondary">
-              <Translation>Edit</Translation>
-            </Button>
+            <Permission
+              request={{ resource: `project/application/:${appName}`, action: 'update' }}
+              project={''}
+            >
+              <Button onClick={this.editAppPlan} type="secondary">
+                <Translation>Edit</Translation>
+              </Button>
+            </Permission>
           </Col>
         </Row>
         <Row>
@@ -453,13 +459,21 @@ class ApplicationConfig extends Component<Props, State> {
                 actions={
                   !applicationDetail?.readOnly
                     ? [
-                        <a
-                          key={'add'}
-                          onClick={this.onAddComponent}
-                          className="font-size-14 font-weight-400"
+                        <Permission
+                          request={{
+                            resource: `project/application/component:*`,
+                            action: 'create',
+                          }}
+                          project={''}
                         >
-                          <Translation>New Component</Translation>
-                        </a>,
+                          <a
+                            key={'add'}
+                            onClick={this.onAddComponent}
+                            className="font-size-14 font-weight-400"
+                          >
+                            <Translation>New Component</Translation>
+                          </a>
+                        </Permission>,
                       ]
                     : []
                 }
@@ -485,13 +499,18 @@ class ApplicationConfig extends Component<Props, State> {
               <Col span={24} className="padding16">
                 <Title
                   actions={[
-                    <a
-                      key={'add'}
-                      className="font-size-14 font-weight-400"
-                      onClick={this.onAddTrigger}
+                    <Permission
+                      request={{ resource: `project/application/trigger:*`, action: 'create' }}
+                      project={''}
                     >
-                      <Translation>New Trigger</Translation>
-                    </a>,
+                      <a
+                        key={'add'}
+                        className="font-size-14 font-weight-400"
+                        onClick={this.onAddTrigger}
+                      >
+                        <Translation>New Trigger</Translation>
+                      </a>
+                    </Permission>,
                   ]}
                   title={
                     <span className="font-size-16 font-weight-bold">

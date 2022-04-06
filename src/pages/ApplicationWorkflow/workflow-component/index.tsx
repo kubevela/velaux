@@ -21,6 +21,7 @@ import Translation from '../../../components/Translation';
 import './index.less';
 import { convertWorkflowStep } from '../../../model/workflow';
 import locale from '../../../utils/locale';
+import Permission from '../../../components/Permission';
 
 const { Col, Row } = Grid;
 
@@ -256,14 +257,22 @@ class WorkflowComponent extends Component<Props, State> {
             </div>
             <div className="workflow-component-tips-container">
               <If condition={!option.edit}>
-                <a
-                  className="option-item"
-                  onClick={() => {
-                    this.setEditView(data.name, true);
+                <Permission
+                  request={{
+                    resource: `project/application/workflow/record:${data.name}`,
+                    action: 'update',
                   }}
+                  project={''}
                 >
-                  <Translation>Edit</Translation>
-                </a>
+                  <a
+                    className="option-item"
+                    onClick={() => {
+                      this.setEditView(data.name, true);
+                    }}
+                  >
+                    <Translation>Edit</Translation>
+                  </a>
+                </Permission>
               </If>
               <If condition={option.edit}>
                 <a
@@ -274,14 +283,19 @@ class WorkflowComponent extends Component<Props, State> {
                 >
                   <Translation>Cancel</Translation>
                 </a>
-                <a
-                  className="option-item"
-                  onClick={() => {
-                    this.saveWorkflow();
-                  }}
+                <Permission
+                  request={{ resource: `project/application/workflow/record:*`, action: 'create' }}
+                  project={''}
                 >
-                  <Translation>Save</Translation>
-                </a>
+                  <a
+                    className="option-item"
+                    onClick={() => {
+                      this.saveWorkflow();
+                    }}
+                  >
+                    <Translation>Save</Translation>
+                  </a>
+                </Permission>
               </If>
               <div className="option-item">
                 <If condition={option.edit}>

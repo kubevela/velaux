@@ -17,6 +17,7 @@ import { If } from 'tsx-control-statements/components';
 import locale from '../../../../utils/locale';
 import { Link } from 'dva/router';
 import i18n from 'i18next';
+import Permission from '../../../../components/Permission';
 
 export type GatewayIP = {
   ip: string;
@@ -239,14 +240,22 @@ class Header extends Component<Props, State> {
             </Button>
 
             <If condition={!applicationStatus || !applicationStatus.status}>
-              <Button
-                style={{ marginLeft: '16px' }}
-                loading={deleteLoading}
-                disabled={applicationDetail?.readOnly}
-                onClick={this.deleteEnv}
+              <Permission
+                request={{
+                  resource: `project/application/envBinding:${envName}`,
+                  action: 'delete',
+                }}
+                project={''}
               >
-                <Translation>Delete</Translation>
-              </Button>
+                <Button
+                  style={{ marginLeft: '16px' }}
+                  loading={deleteLoading}
+                  disabled={applicationDetail?.readOnly}
+                  onClick={this.deleteEnv}
+                >
+                  <Translation>Delete</Translation>
+                </Button>
+              </Permission>
             </If>
             <If
               condition={
@@ -255,15 +264,23 @@ class Header extends Component<Props, State> {
                 applicationStatus.status != 'deleting'
               }
             >
-              <Button
-                loading={recycleLoading}
-                onClick={this.recycleEnv}
-                disabled={applicationDetail?.readOnly}
-                type="primary"
-                style={{ marginLeft: '16px' }}
+              <Permission
+                request={{
+                  resource: `project/application/envBinding:${envName}`,
+                  action: 'delete',
+                }}
+                project={''}
               >
-                <Translation>Recycle</Translation>
-              </Button>
+                <Button
+                  loading={recycleLoading}
+                  onClick={this.recycleEnv}
+                  disabled={applicationDetail?.readOnly}
+                  type="primary"
+                  style={{ marginLeft: '16px' }}
+                >
+                  <Translation>Recycle</Translation>
+                </Button>
+              </Permission>
             </If>
           </Col>
         </Row>

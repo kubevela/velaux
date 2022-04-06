@@ -12,6 +12,7 @@ import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import i18n from '../../../../i18n';
 import TraitIcon from '../../../../components/TraitIcon';
+import Permission from '../../../../components/Permission';
 
 type Props = {
   application?: ApplicationBase;
@@ -44,25 +45,41 @@ class ComponentsList extends Component<Props> {
             <Col xl={8} m={12} s={24} key={item.name} className="padding16">
               <Card locale={locale.Card} contentHeight="auto">
                 <div className="components-list-nav">
-                  <div
-                    className="components-list-title"
-                    onClick={() => {
-                      editComponent(item);
+                  <Permission
+                    request={{
+                      resource: `project/application/component:${item.name}`,
+                      action: 'update',
                     }}
+                    project={''}
                   >
-                    {item.alias ? `${item.alias}(${item.name})` : item.name}
-                  </div>
+                    <div
+                      className="components-list-title"
+                      onClick={() => {
+                        editComponent(item);
+                      }}
+                    >
+                      {item.alias ? `${item.alias}(${item.name})` : item.name}
+                    </div>
+                  </Permission>
                   <If condition={item.main != true}>
                     <div className="components-list-operation">
                       <If condition={!application?.readOnly}>
-                        <Icon
-                          type="ashbin1"
-                          size={14}
-                          className="cursor-pointer"
-                          onClick={() => {
-                            this.handleDelete(item.name || '');
+                        <Permission
+                          request={{
+                            resource: `project/application/component:${item.name}`,
+                            action: 'delete',
                           }}
-                        />
+                          project={''}
+                        >
+                          <Icon
+                            type="ashbin1"
+                            size={14}
+                            className="cursor-pointer"
+                            onClick={() => {
+                              this.handleDelete(item.name || '');
+                            }}
+                          />
+                        </Permission>
                       </If>
                     </div>
                   </If>

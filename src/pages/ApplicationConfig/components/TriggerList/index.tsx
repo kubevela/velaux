@@ -9,6 +9,7 @@ import Empty from '../../../../components/Empty';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import Item from '../../../../components/Item';
+import Permission from '../../../../components/Permission';
 
 type Props = {
   triggers: Trigger[];
@@ -108,14 +109,22 @@ class TriggerList extends Component<Props, State> {
                     {item.alias ? `${item.alias}(${item.name})` : item.name}
                   </div>
                   <div className="trigger-list-operation">
-                    <Icon
-                      type="ashbin1"
-                      size={14}
-                      className="margin-right-0 cursor-pointer"
-                      onClick={() => {
-                        this.handleTriggerDelete(item.token || '');
+                    <Permission
+                      request={{
+                        resource: `project/application/trigger:${item.name}`,
+                        action: 'delete',
                       }}
-                    />
+                      project={''}
+                    >
+                      <Icon
+                        type="ashbin1"
+                        size={14}
+                        className="margin-right-0 cursor-pointer"
+                        onClick={() => {
+                          this.handleTriggerDelete(item.token || '');
+                        }}
+                      />
+                    </Permission>
                   </div>
                 </div>
                 <div className="trigger-list-content">
