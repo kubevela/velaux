@@ -97,7 +97,7 @@ class Integrations extends Component<Props, State> {
         if (params) {
           deleteConfig(params).then((res) => {
             if (res) {
-              Message.success(<Translation>Delete project success</Translation>);
+              Message.success(<Translation>Delete config success</Translation>);
               this.listIntegrations();
             }
           });
@@ -150,6 +150,22 @@ class Integrations extends Component<Props, State> {
         dataIndex: 'project',
         cell: (v: string) => {
           return <span>{v}</span>;
+        },
+      },
+      {
+        key: 'status',
+        title: <Translation>Status</Translation>,
+        dataIndex: 'status',
+        cell: (v: string) => {
+          const enumStatusList = [
+            { name: 'Ready', color: 'isReadyColor' },
+            { name: 'Not ready', color: 'isNotReady' },
+          ];
+          const findStatus = _.find(enumStatusList, (item) => {
+            return item.name === v;
+          });
+          const colorClass = (findStatus && findStatus.color) || '';
+          return <span className={`${colorClass}`}>{v}</span>;
         },
       },
       {
