@@ -298,7 +298,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
           <Translation>Cancel</Translation>
         </Button>
         ,
-        <Permission request={{ resource: `addon:${addonName}`, action: 'update' }} project={''}>
+        <Permission
+          request={{
+            resource: `addon:${addonName}`,
+            action: status === 'enabled' ? 'disable' : 'enable',
+          }}
+          project={''}
+        >
           <Button
             type="primary"
             onClick={this.handleSubmit}

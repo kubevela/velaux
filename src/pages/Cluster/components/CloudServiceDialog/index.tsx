@@ -249,10 +249,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
         dataIndex: 'operation',
         cell: (v: string, i: number, record: Record) => {
           return (
-            <Permission
-              request={{ resource: `cluster/namespace:${record.name}`, action: 'create' }}
-              project={''}
-            >
+            <Permission request={{ resource: 'cluster:*', action: 'create' }} project={''}>
               <Button
                 text
                 ghost={true}

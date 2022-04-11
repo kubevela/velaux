@@ -351,7 +351,10 @@ class Users extends Component<Props, State> {
               </Permission>
               <span className="line" />
               <Permission
-                request={{ resource: `user:${record.name}`, action: 'update' }}
+                request={{
+                  resource: `user:${record.name}`,
+                  action: record.disabled ? 'enable' : 'disable',
+                }}
                 project={''}
               >
                 <Button

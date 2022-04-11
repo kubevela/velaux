@@ -103,7 +103,7 @@ class Addons extends React.Component<Props, State> {
           title="Addons"
           subTitle="Manages and extends platform capabilities"
           extButtons={[
-            <Permission request={{ resource: 'addon:*', action: 'create' }} project={''}>
+            <Permission request={{ resource: 'addonRegistry:*', action: 'create' }} project={''}>
               <Button
                 type="primary"
                 onClick={() => {

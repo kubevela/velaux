@@ -124,7 +124,7 @@ class TableList extends Component<Props> {
               <If condition={record.targets?.length}>
                 <Permission
                   request={{ resource: `environment:${record.name}`, action: 'delete' }}
-                  project={'?'}
+                  project={record.project.name}
                 >
                   <a
                     onClick={() => {
@@ -147,7 +147,7 @@ class TableList extends Component<Props> {
                 </Permission>
                 <Permission
                   request={{ resource: `environment:${record.name}`, action: 'update' }}
-                  project={'?'}
+                  project={record.project.name}
                 >
                   <a
                     className="margin-left-10"
