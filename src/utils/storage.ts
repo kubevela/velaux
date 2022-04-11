@@ -1,7 +1,7 @@
 const token_key: string = 'token';
 
 export function getToken() {
-  return localStorage.getItem(token_key);
+  return localStorage.getItem(token_key) || '';
 }
 
 export function setToken(token: string | string[]) {
