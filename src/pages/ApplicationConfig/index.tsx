@@ -383,7 +383,7 @@ class ApplicationConfig extends Component<Props, State> {
           <Col span={12} className="padding16 flexright">
             <Permission
               request={{ resource: `project/application/:${appName}`, action: 'update' }}
-              project={''}
+              project={`${applicationDetail && applicationDetail.project?.name}`}
             >
               <Button onClick={this.editAppPlan} type="secondary">
                 <Translation>Edit</Translation>
@@ -464,7 +464,7 @@ class ApplicationConfig extends Component<Props, State> {
                             resource: `project/application/component:*`,
                             action: 'create',
                           }}
-                          project={''}
+                          project={`${applicationDetail && applicationDetail.project?.name}`}
                         >
                           <a
                             key={'add'}
@@ -501,7 +501,7 @@ class ApplicationConfig extends Component<Props, State> {
                   actions={[
                     <Permission
                       request={{ resource: `project/application/trigger:*`, action: 'create' }}
-                      project={''}
+                      project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
                     >
                       <a
                         key={'add'}
@@ -527,6 +527,7 @@ class ApplicationConfig extends Component<Props, State> {
                 this.onDeleteTrigger(token);
               }}
               createTriggerInfo={createTriggerInfo}
+              applicationDetail={applicationDetail}
             />
           </If>
         </If>

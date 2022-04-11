@@ -22,6 +22,7 @@ import './index.less';
 import { convertWorkflowStep } from '../../../model/workflow';
 import locale from '../../../utils/locale';
 import Permission from '../../../components/Permission';
+import type { ApplicationDetail } from '../../../interface/application';
 
 const { Col, Row } = Grid;
 
@@ -32,6 +33,7 @@ type Props = {
   appName: string;
   data: WorkFlowData;
   workFlowDefinitions: [];
+  applicationDetail?: ApplicationDetail;
 };
 
 type State = {
@@ -179,7 +181,7 @@ class WorkflowComponent extends Component<Props, State> {
   };
 
   render() {
-    const { data, workFlowDefinitions } = this.props;
+    const { data, workFlowDefinitions, applicationDetail } = this.props;
     const { errorFocus, loading } = this.state;
     const option: WorkFlowOption = data.option || { default: false, edit: false };
     const menu = (
@@ -259,10 +261,10 @@ class WorkflowComponent extends Component<Props, State> {
               <If condition={!option.edit}>
                 <Permission
                   request={{
-                    resource: `project/application/workflow/record:${data.name}`,
+                    resource: `project/application/workflow:${data.name}`,
                     action: 'update',
                   }}
-                  project={''}
+                  project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
                 >
                   <a
                     className="option-item"
@@ -284,8 +286,8 @@ class WorkflowComponent extends Component<Props, State> {
                   <Translation>Cancel</Translation>
                 </a>
                 <Permission
-                  request={{ resource: `project/application/workflow/record:*`, action: 'create' }}
-                  project={''}
+                  request={{ resource: `project/application/workflow:*`, action: 'create' }}
+                  project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
                 >
                   <a
                     className="option-item"

@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import { Card, Dialog, Grid, Message, Icon } from '@b-design/ui';
-import type { ApplicationComponent, Trigger } from '../../../../interface/application';
+import type {
+  ApplicationComponent,
+  Trigger,
+  ApplicationDetail,
+} from '../../../../interface/application';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { momentDate } from '../../../../utils/common';
 import './index.less';
@@ -15,6 +19,7 @@ type Props = {
   triggers: Trigger[];
   createTriggerInfo?: Trigger;
   component?: ApplicationComponent;
+  applicationDetail?: ApplicationDetail;
   onDeleteTrigger: (token: string) => void;
 };
 
@@ -53,7 +58,7 @@ class TriggerList extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { triggers, component } = this.props;
+    const { triggers, component, applicationDetail } = this.props;
     const { showTrigger } = this.state;
     const domain = `${window.location.protocol}//${window.location.host}`;
     const webHookURL = `${domain}/api/v1/webhook/${showTrigger?.token}`;
@@ -114,7 +119,7 @@ class TriggerList extends Component<Props, State> {
                         resource: `project/application/trigger:${item.name}`,
                         action: 'delete',
                       }}
-                      project={''}
+                      project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
                     >
                       <Icon
                         type="ashbin1"

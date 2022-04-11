@@ -172,7 +172,7 @@ class ApplicationHeader extends Component<Props, State> {
             </If>
             <Permission
               request={{ resource: `project/application/workflow:*`, action: 'create' }}
-              project={''}
+              project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
             >
               <Button
                 style={{ marginLeft: '16px' }}

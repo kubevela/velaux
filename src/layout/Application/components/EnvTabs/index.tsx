@@ -100,7 +100,7 @@ class TabsContent extends Component<Props, State> {
                 <If condition={!applicationDetail?.readOnly}>
                   <Permission
                     request={{ resource: `project/application/envBinding:*`, action: 'create' }}
-                    project={''}
+                    project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
                   >
                     <a
                       onClick={() => {

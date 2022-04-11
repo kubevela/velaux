@@ -4,11 +4,12 @@ import { connect } from 'dva';
 import WorkflowComponent from './workflow-component';
 import type { WorkFlowData } from './entity';
 import { getWorkFlowDefinitions } from '../../api/workflows';
-
+import type { ApplicationDetail } from '../../interface/application';
 import './index.less';
 
 type Props = {
   workflowList: WorkFlowData[];
+  applicationDetail?: ApplicationDetail;
   dispatch: ({}) => {};
   match: {
     params: {
@@ -24,9 +25,8 @@ type State = {
   appName: string;
   workFlowDefinitions: [];
 };
-
 @connect((store: any) => {
-  return { ...store.workflow };
+  return { ...store.workflow, ...store.application };
 })
 class Workflow extends Component<Props, State> {
   constructor(props: any) {
@@ -65,7 +65,7 @@ class Workflow extends Component<Props, State> {
   addWrokflow = () => {};
 
   render() {
-    const { workflowList, dispatch } = this.props;
+    const { workflowList, dispatch, applicationDetail } = this.props;
     const { params } = this.props.match;
     return (
       <div style={{ height: '100%' }} className="workflow-wraper">
@@ -88,6 +88,7 @@ class Workflow extends Component<Props, State> {
                 data={workflow}
                 workFlowDefinitions={this.state.workFlowDefinitions}
                 getWorkflow={this.onGetWorkflow}
+                applicationDetail={applicationDetail}
                 dispatch={dispatch}
               />
             ))}

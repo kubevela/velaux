@@ -16,6 +16,7 @@ type Props = {
   envs?: Env[];
   listApplication: (params: any) => void;
   onAddApplication: () => void;
+  projectName?: string;
 };
 
 type State = {
@@ -88,7 +89,7 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { targetList, envs } = this.props;
+    const { targetList, envs, projectName } = this.props;
     const { targetValue, inputValue, envValue } = this.state;
     const targetSource = targetList?.map((item) => {
       return {
@@ -157,7 +158,7 @@ class SelectSearch extends React.Component<Props, State> {
           <Col span="4">
             <Permission
               request={{ resource: `project/application:*`, action: 'create' }}
-              project={''}
+              project={projectName}
             >
               <Button
                 className="create-btn-wrapper"

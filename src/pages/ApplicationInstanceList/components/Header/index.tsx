@@ -245,7 +245,7 @@ class Header extends Component<Props, State> {
                   resource: `project/application/envBinding:${envName}`,
                   action: 'delete',
                 }}
-                project={''}
+                project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
               >
                 <Button
                   style={{ marginLeft: '16px' }}
@@ -267,9 +267,9 @@ class Header extends Component<Props, State> {
               <Permission
                 request={{
                   resource: `project/application/envBinding:${envName}`,
-                  action: 'delete',
+                  action: 'recycle',
                 }}
-                project={''}
+                project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
               >
                 <Button
                   loading={recycleLoading}

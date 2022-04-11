@@ -59,7 +59,7 @@ class CardContent extends React.Component<Props, State> {
 
   isEditPermission = (item: ApplicationBase) => {
     const { userInfo } = this.props;
-    const project = '';
+    const project = item?.project?.name || '';
     const request = { resource: `project/application:${item.name}`, action: 'update' };
     if (checkPermission(request, project, userInfo)) {
       return (
@@ -78,7 +78,7 @@ class CardContent extends React.Component<Props, State> {
 
   isDeletePermission = (item: ApplicationBase) => {
     const { userInfo } = this.props;
-    const project = '';
+    const project = item?.project?.name || '';
     const request = { resource: `project/application:${item.name}`, action: 'delete' };
     if (checkPermission(request, project, userInfo)) {
       return (

@@ -172,6 +172,18 @@ class ProjectMembers extends Component<Props, State> {
 
   render() {
     const { Column } = Table;
+    const {
+      memberList,
+      projectName,
+      isMemberDialogVisible,
+      isEditMember,
+      editMember,
+      projectRoles,
+      page,
+      pageSize,
+      total,
+      isLoading,
+    } = this.state;
     const columns = [
       {
         key: 'name',
@@ -219,7 +231,7 @@ class ProjectMembers extends Component<Props, State> {
             <Fragment>
               <Permission
                 request={{ resource: `project/projectUser:${record.name}`, action: 'update' }}
-                project={''}
+                project={projectName}
               >
                 <Button
                   text
@@ -235,7 +247,7 @@ class ProjectMembers extends Component<Props, State> {
               </Permission>
               <Permission
                 request={{ resource: `project/projectUser:${record.name}`, action: 'delete' }}
-                project={''}
+                project={projectName}
               >
                 <Button
                   text
@@ -255,25 +267,13 @@ class ProjectMembers extends Component<Props, State> {
       },
     ];
 
-    const {
-      memberList,
-      projectName,
-      isMemberDialogVisible,
-      isEditMember,
-      editMember,
-      projectRoles,
-      page,
-      pageSize,
-      total,
-      isLoading,
-    } = this.state;
     return (
       <Fragment>
         <div className="member-wrapper">
           <section className="member-create-btn">
             <Permission
               request={{ resource: `project/projectUser:*`, action: 'create' }}
-              project={''}
+              project={projectName}
             >
               <Button type="primary" onClick={this.handleClickCreate}>
                 <Translation>Add Member</Translation>

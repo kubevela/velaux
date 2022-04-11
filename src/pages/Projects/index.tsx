@@ -191,7 +191,7 @@ class Projects extends Component<Props, State> {
             <Fragment>
               <Permission
                 request={{ resource: `project:${record.name}`, action: 'edit' }}
-                project={''}
+                project={`${record.name}`}
               >
                 <Button
                   text
@@ -207,7 +207,7 @@ class Projects extends Component<Props, State> {
               </Permission>
               <Permission
                 request={{ resource: `project:${record.name}`, action: 'delete' }}
-                project={''}
+                project={`${record.name}`}
               >
                 <Button
                   text

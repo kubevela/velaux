@@ -50,7 +50,7 @@ class ComponentsList extends Component<Props> {
                       resource: `project/application/component:${item.name}`,
                       action: 'update',
                     }}
-                    project={''}
+                    project={`${(application && application.project?.name) || ''}`}
                   >
                     <div
                       className="components-list-title"
@@ -69,7 +69,7 @@ class ComponentsList extends Component<Props> {
                             resource: `project/application/component:${item.name}`,
                             action: 'delete',
                           }}
-                          project={''}
+                          project={`${(application && application.project?.name) || ''}`}
                         >
                           <Icon
                             type="ashbin1"

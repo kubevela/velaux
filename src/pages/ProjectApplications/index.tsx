@@ -170,6 +170,7 @@ class ProjectApplications extends Component<Props, State> {
           <SelectSearch
             targetList={targets}
             envs={envs}
+            projectName={projectName}
             listApplication={(queryData: ApplicationQuery) => {
               this.listApplication(queryData);
             }}

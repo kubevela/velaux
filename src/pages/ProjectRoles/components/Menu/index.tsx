@@ -11,6 +11,7 @@ type Props = {
   isCreateProjectRoles: boolean;
   addRole: () => void;
   activeRoleName: string;
+  projectName: string;
   handleChangeRole: (roleName: string) => void;
   onDeleteProjectRole: (roleName: string) => void;
 };
@@ -35,7 +36,7 @@ class ProjectMenu extends Component<Props> {
   }
 
   getMenuList = () => {
-    const { projectRoles, activeRoleName, isCreateProjectRoles } = this.props;
+    const { projectRoles, activeRoleName, isCreateProjectRoles, projectName } = this.props;
     const menuList = (projectRoles || []).map((item: { name: string; alias?: string }) => {
       const activeRole = activeRoleName === item.name && !isCreateProjectRoles ? 'active' : '';
       return (
@@ -48,7 +49,7 @@ class ProjectMenu extends Component<Props> {
           <span> {item.alias || item.name} </span>
           <Permission
             request={{ resource: `project/role:${item.name}`, action: 'delete' }}
-            project={''}
+            project={projectName}
           >
             <span>
               <Icon

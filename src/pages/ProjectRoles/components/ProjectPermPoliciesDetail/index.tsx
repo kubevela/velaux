@@ -110,11 +110,14 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
   };
 
   renderSubmitButton = () => {
-    const { isCreateProjectRoles } = this.props;
+    const { isCreateProjectRoles, projectName } = this.props;
     const name = this.field.getValue('name');
     if (isCreateProjectRoles) {
       return (
-        <Permission request={{ resource: `project/role:*`, action: 'create' }} project={''}>
+        <Permission
+          request={{ resource: `project/role:*`, action: 'create' }}
+          project={projectName}
+        >
           <Button className="create-auth-btn" type="primary" onClick={this.onSubmit}>
             <Translation>{'Create'}</Translation>
           </Button>
@@ -122,7 +125,10 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
       );
     } else {
       return (
-        <Permission request={{ resource: `project/role:${name}`, action: 'update' }} project={''}>
+        <Permission
+          request={{ resource: `project/role:${name}`, action: 'update' }}
+          project={projectName}
+        >
           <Button className="create-auth-btn" type="primary" onClick={this.onSubmit}>
             <Translation>{'Update'}</Translation>
           </Button>
