@@ -5,12 +5,15 @@ import Namespace from '../Namespace';
 import type { NamespaceItem } from '../Namespace';
 import { checkName } from '../../../../utils/common';
 import { createTarget, updateTarget } from '../../../../api/target';
-import type { Target } from '../../../../interface/target';
+import { getCloudServiceProviderList } from '../../../../api/project';
+import type { Target, ProvideList } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
 import type { Project } from '../../../../interface/project';
 import { listNamespaces } from '../../../../api/observation';
 import locale from '../../../../utils/locale';
+import { getSelectLabel } from '../../../../utils/utils';
+import i18n from '../../../../i18n';
 
 type Props = {
   project?: string;
@@ -27,6 +30,7 @@ type Props = {
 type State = {
   cluster?: string;
   namespaces: NamespaceItem[];
+  providerList: ProvideList[];
 };
 
 class DeliveryDialog extends React.Component<Props, State> {
@@ -59,6 +63,7 @@ class DeliveryDialog extends React.Component<Props, State> {
 
     this.state = {
       namespaces: [],
+      providerList: [],
     };
   }
 
@@ -191,6 +196,23 @@ class DeliveryDialog extends React.Component<Props, State> {
     }
   };
 
+  getProviderList = async (projectName: string) => {
+    const params = {
+      projectName,
+      configType: 'terraform-provider',
+    };
+    getCloudServiceProviderList(params).then((res) => {
+      if (res && Array.isArray(res)) {
+        this.setState({
+          providerList: res,
+        });
+      } else {
+        this.setState({
+          providerList: [],
+        });
+      }
+    });
+  };
   render() {
     const { Col, Row } = Grid;
     const FormItem = Form.Item;
@@ -214,6 +236,8 @@ class DeliveryDialog extends React.Component<Props, State> {
         value: project.name,
       };
     });
+    const { providerList } = this.state;
+    const providerListOptions = getSelectLabel(providerList);
     return (
       <div>
         <Dialog
@@ -290,6 +314,11 @@ class DeliveryDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
+                    onChange={(item: string) => {
+                      this.field.setValue('var_providerName', '');
+                      this.field.setValue('project', item);
+                      this.getProviderList(item);
+                    }}
                   />
                 </FormItem>
               </Col>
@@ -367,18 +396,19 @@ class DeliveryDialog extends React.Component<Props, State> {
                   <Row>
                     <Col span={12} style={{ padding: '0 8px' }}>
                       <FormItem label={<Translation>Cloud Service Provider</Translation>}>
-                        {/* <Select
+                        <Select
                           className="select"
-                          placeholder={t('Please select').toString()}
-                          {...init(`var_providerName`)}
-                          dataSource={[]}
-                        /> */}
-                        {
-                          <Input
-                            placeholder={t('Please input terraform provider name').toString()}
-                            {...init(`var_providerName`)}
-                          />
-                        }
+                          placeholder={i18n.t('Please select').toString()}
+                          {...init(`var_providerName`, {
+                            rules: [
+                              {
+                                required: false,
+                                message: i18n.t('Please select terraform provider name'),
+                              },
+                            ],
+                          })}
+                          dataSource={providerListOptions}
+                        />
                       </FormItem>
                     </Col>
                     <Col span={12} style={{ padding: '0 8px' }}>

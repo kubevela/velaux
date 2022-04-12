@@ -7,6 +7,7 @@ import type {
   QueryProjectRole,
   ProjectRole,
   ProjectUserCreate,
+  QueryData,
 } from '../interface/project';
 import { project_mock } from './devLink';
 import { project } from './productionLink';
@@ -87,4 +88,8 @@ export function updateProjectUser(query: QueryProjectUser, params: UserRoles) {
 export function deleteProjectUser(query: QueryProjectUser, params: UserRoles) {
   const urlPath = project + `/${query.projectName}/users/${query.userName}`;
   return rdelete(urlPath, params).then((res) => res);
+}
+export function getCloudServiceProviderList(queryData: QueryData) {
+  const urlPath = project + `/${queryData.projectName}/configs?configType=${queryData.configType}`;
+  return get(urlPath, {}).then((res) => res);
 }
