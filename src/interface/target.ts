@@ -12,3 +12,12 @@ export type Target = {
   variable?: any;
   project?: NameAlias;
 };
+export interface ProvideList {
+  configType: string;
+  createdTime?: string;
+  description?: string;
+  identifier: string;
+  name: string;
+  project: string;
+  updatedTime?: string;
+}
