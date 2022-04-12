@@ -53,7 +53,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
     const { applicationDetail, envbinding } = this.props;
     if (applicationDetail) {
       //Temporary logic
-      getEnvs({ project: 'default', page: 0 }).then((re) => {
+      getEnvs({ project: applicationDetail.project?.name || 'default', page: 0 }).then((re) => {
         const existEnvs =
           envbinding?.map((eb) => {
             return eb.name;
