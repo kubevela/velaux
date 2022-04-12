@@ -70,6 +70,7 @@ class AppDialog extends React.Component<Props, State> {
         if (name === 'project') {
           this.setState({ project: value }, () => {
             this.loadEnvs();
+            this.field.setValue('envBindings', []);
           });
         }
       },
