@@ -171,7 +171,10 @@ class ApplicationHeader extends Component<Props, State> {
               <Message type="notice" title={i18n.t('This application is readonly').toString()} />
             </If>
             <Permission
-              request={{ resource: `project/application/workflow:*`, action: 'create' }}
+              request={{
+                resource: `project/application:${applicationDetail && applicationDetail.name}`,
+                action: 'deploy',
+              }}
               project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
             >
               <Button

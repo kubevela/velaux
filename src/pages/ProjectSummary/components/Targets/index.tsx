@@ -4,6 +4,7 @@ import { Link } from 'dva/router';
 import { getProjectTargetList } from '../../../../api/project';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
+import Permission from '../../../../components/Permission';
 import './index.less';
 
 type Props = {
@@ -77,6 +78,7 @@ class Targets extends Component<Props, State> {
 
     const { Column } = Table;
     const { list } = this.state;
+    const { projectName } = this.props;
     return (
       <Fragment>
         <div className="summary-targets-wrapper">
@@ -84,11 +86,13 @@ class Targets extends Component<Props, State> {
             <span className="card-title">
               <Translation>Targets</Translation>
             </span>
-            <Button className="card-button-wrapper">
-              <Link to="/targets" className="color-setting">
-                <Translation>Add</Translation>
-              </Link>
-            </Button>
+            <Permission request={{ resource: `target:*`, action: 'create' }} project={projectName}>
+              <Button className="card-button-wrapper">
+                <Link to="/targets" className="color-setting">
+                  <Translation>Add</Translation>
+                </Link>
+              </Button>
+            </Permission>
           </section>
           <section className="card-content-table">
             <Table locale={locale.Table} dataSource={list} hasBorder={true} loading={false}>

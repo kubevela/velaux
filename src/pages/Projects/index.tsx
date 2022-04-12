@@ -190,7 +190,7 @@ class Projects extends Component<Props, State> {
           return (
             <Fragment>
               <Permission
-                request={{ resource: `project:${record.name}`, action: 'edit' }}
+                request={{ resource: `project:${record.name}`, action: 'update' }}
                 project={`${record.name}`}
               >
                 <Button

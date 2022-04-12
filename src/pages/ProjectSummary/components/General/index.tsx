@@ -9,10 +9,12 @@ import locale from '../../../../utils/locale';
 import GeneralDialog from '../GeneralDialog';
 import './index.less';
 import { momentDate } from '../../../../utils/common';
+import Permission from '../../../../components/Permission';
 
 type Props = {
   projectDetails: ProjectDetail;
   userList: User[];
+  projectName: string;
   loadProjectDetail: () => void;
 };
 
@@ -60,6 +62,7 @@ class General extends Component<Props, State> {
         description: '',
         owner: { name: '', alias: '' },
       },
+      projectName,
     } = this.props;
     const { isEditGeneral, editGeneral } = this.state;
     return (
@@ -70,14 +73,19 @@ class General extends Component<Props, State> {
               <span className="card-title">
                 <Translation>General</Translation>
               </span>
-              <Button
-                className="card-button-wrapper"
-                onClick={() => {
-                  this.editGeneral(projectDetails);
-                }}
+              <Permission
+                request={{ resource: `project:${projectName}`, action: 'update' }}
+                project={projectName}
               >
-                <Translation>Edit</Translation>
-              </Button>
+                <Button
+                  className="card-button-wrapper"
+                  onClick={() => {
+                    this.editGeneral(projectDetails);
+                  }}
+                >
+                  <Translation>Edit</Translation>
+                </Button>
+              </Permission>
             </section>
             <section className="card-content-wrapper">
               <If condition={projectDetails.description}>
