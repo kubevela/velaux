@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
-import { Message, Loading } from '@b-design/ui';
+import { Message, Loading, Button } from '@b-design/ui';
 import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
@@ -11,6 +11,8 @@ import { deleteApplicationPlan, getComponentDefinitions } from '../../api/applic
 import type { ApplicationBase } from '../../interface/application';
 import EditAppDialog from './components/EditAppDialog';
 import type { LoginUserInfo } from '../../interface/user';
+import Permission from '../../components/Permission';
+import Translation from '../../components/Translation';
 
 type Props = {
   dispatch: ({}) => {};
@@ -117,10 +119,21 @@ class Application extends Component<Props, State> {
         <Title
           title="Applications"
           subTitle="Deploy and manage all your applications"
-          addButtonTitle="New Application"
-          addButtonClick={() => {
-            this.setState({ showAddApplication: true });
-          }}
+          extButtons={[
+            <Permission
+              request={{ resource: 'project/application:*', action: 'create' }}
+              project={'?'}
+            >
+              <Button
+                type="primary"
+                onClick={() => {
+                  this.setState({ showAddApplication: true });
+                }}
+              >
+                <Translation>New Application</Translation>
+              </Button>
+            </Permission>,
+          ]}
         />
 
         <SelectSearch

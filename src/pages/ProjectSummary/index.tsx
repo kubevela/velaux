@@ -50,6 +50,7 @@ class Summary extends Component<Props, State> {
             projectDetails={projectDetails}
             userList={userList}
             loadProjectDetail={this.loadProjectDetail}
+            projectName={params.projectName}
           />
           <Targets projectName={params.projectName} />
           {/* <Integrations /> */}

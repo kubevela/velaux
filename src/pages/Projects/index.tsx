@@ -12,6 +12,7 @@ import locale from '../../utils/locale';
 import CreateProjectDialog from './components/CreateProjectDialog';
 import Title from '../../components/ListTitle';
 import { If } from 'tsx-control-statements/components';
+import Permission from '../../components/Permission';
 import './index.less';
 
 type Props = {};
@@ -185,32 +186,41 @@ class Projects extends Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: (v: string, i: number, record: any) => {
+        cell: (v: string, i: number, record: Project) => {
           return (
             <Fragment>
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onEdit(record);
-                }}
+              <Permission
+                request={{ resource: `project:${record.name}`, action: 'update' }}
+                project={`${record.name}`}
               >
-                <Translation>Edit</Translation>
-              </Button>
-
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onDelete(record);
-                }}
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onEdit(record);
+                  }}
+                >
+                  <Translation>Edit</Translation>
+                </Button>
+              </Permission>
+              <Permission
+                request={{ resource: `project:${record.name}`, action: 'delete' }}
+                project={`${record.name}`}
               >
-                <Translation>Delete</Translation>
-              </Button>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onDelete(record);
+                  }}
+                >
+                  <Translation>Delete</Translation>
+                </Button>
+              </Permission>
             </Fragment>
           );
         },
@@ -236,9 +246,11 @@ class Projects extends Component<Props, State> {
             title="Projects"
             subTitle="Projects are used to allocate and isolate resources"
             extButtons={[
-              <Button type="primary" onClick={this.handleClickCreate}>
-                <Translation>New Project</Translation>
-              </Button>,
+              <Permission request={{ resource: 'project:*', action: 'create' }} project={''}>
+                <Button type="primary" onClick={this.handleClickCreate}>
+                  <Translation>New Project</Translation>
+                </Button>
+              </Permission>,
             ]}
           />
           <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>

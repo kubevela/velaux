@@ -24,6 +24,7 @@ import Empty from '../../../../components/Empty';
 import locale from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
 import i18n from 'i18next';
+import Permission from '../../../../components/Permission';
 
 const { Row, Col } = Grid;
 
@@ -169,14 +170,22 @@ class ApplicationHeader extends Component<Props, State> {
             <If condition={applicationDetail?.readOnly}>
               <Message type="notice" title={i18n.t('This application is readonly').toString()} />
             </If>
-            <Button
-              style={{ marginLeft: '16px' }}
-              type="primary"
-              disabled={applicationDetail?.readOnly}
-              onClick={() => this.onDeployConfig()}
+            <Permission
+              request={{
+                resource: `project/application:${applicationDetail && applicationDetail.name}`,
+                action: 'deploy',
+              }}
+              project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
             >
-              <Translation>Deploy</Translation>
-            </Button>
+              <Button
+                style={{ marginLeft: '16px' }}
+                type="primary"
+                disabled={applicationDetail?.readOnly}
+                onClick={() => this.onDeployConfig()}
+              >
+                <Translation>Deploy</Translation>
+              </Button>
+            </Permission>
           </Col>
         </Row>
         <Row wrap={true}>

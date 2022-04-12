@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Icon, Message } from '@b-design/ui';
 import type { ProjectRoleBase } from '../../../../interface/project';
 import Translation from '../../../../components/Translation';
+import Permission from '../../../../components/Permission';
 import './index.less';
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
   isCreateProjectRoles: boolean;
   addRole: () => void;
   activeRoleName: string;
+  projectName: string;
   handleChangeRole: (roleName: string) => void;
   onDeleteProjectRole: (roleName: string) => void;
 };
@@ -34,7 +36,7 @@ class ProjectMenu extends Component<Props> {
   }
 
   getMenuList = () => {
-    const { projectRoles, activeRoleName, isCreateProjectRoles } = this.props;
+    const { projectRoles, activeRoleName, isCreateProjectRoles, projectName } = this.props;
     const menuList = (projectRoles || []).map((item: { name: string; alias?: string }) => {
       const activeRole = activeRoleName === item.name && !isCreateProjectRoles ? 'active' : '';
       return (
@@ -45,14 +47,19 @@ class ProjectMenu extends Component<Props> {
           }}
         >
           <span> {item.alias || item.name} </span>
-          <span>
-            <Icon
-              type="delete"
-              onClick={(e) => {
-                this.handleClick(item.name, e);
-              }}
-            />
-          </span>
+          <Permission
+            request={{ resource: `project/role:${item.name}`, action: 'delete' }}
+            project={projectName}
+          >
+            <span>
+              <Icon
+                type="delete"
+                onClick={(e) => {
+                  this.handleClick(item.name, e);
+                }}
+              />
+            </span>
+          </Permission>
         </li>
       );
     });

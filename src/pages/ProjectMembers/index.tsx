@@ -7,6 +7,7 @@ import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
 import { momentDate } from '../../utils/common';
+import Permission from '../../components/Permission';
 import './index.less';
 
 type Props = {
@@ -171,6 +172,18 @@ class ProjectMembers extends Component<Props, State> {
 
   render() {
     const { Column } = Table;
+    const {
+      memberList,
+      projectName,
+      isMemberDialogVisible,
+      isEditMember,
+      editMember,
+      projectRoles,
+      page,
+      pageSize,
+      total,
+      isLoading,
+    } = this.state;
     const columns = [
       {
         key: 'name',
@@ -216,54 +229,56 @@ class ProjectMembers extends Component<Props, State> {
         cell: (v: string, i: number, record: ProjectMember) => {
           return (
             <Fragment>
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onEdit(record);
-                }}
+              <Permission
+                request={{ resource: `project/projectUser:${record.name}`, action: 'update' }}
+                project={projectName}
               >
-                <Translation>Edit</Translation>
-              </Button>
-
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onDelete(record);
-                }}
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onEdit(record);
+                  }}
+                >
+                  <Translation>Edit</Translation>
+                </Button>
+              </Permission>
+              <Permission
+                request={{ resource: `project/projectUser:${record.name}`, action: 'delete' }}
+                project={projectName}
               >
-                <Translation>Delete</Translation>
-              </Button>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onDelete(record);
+                  }}
+                >
+                  <Translation>Delete</Translation>
+                </Button>
+              </Permission>
             </Fragment>
           );
         },
       },
     ];
 
-    const {
-      memberList,
-      projectName,
-      isMemberDialogVisible,
-      isEditMember,
-      editMember,
-      projectRoles,
-      page,
-      pageSize,
-      total,
-      isLoading,
-    } = this.state;
     return (
       <Fragment>
         <div className="member-wrapper">
           <section className="member-create-btn">
-            <Button type="primary" onClick={this.handleClickCreate}>
-              <Translation>Add Member</Translation>
-            </Button>
+            <Permission
+              request={{ resource: `project/projectUser:*`, action: 'create' }}
+              project={projectName}
+            >
+              <Button type="primary" onClick={this.handleClickCreate}>
+                <Translation>Add Member</Translation>
+              </Button>
+            </Permission>
           </section>
 
           <section className="margin-top-20  member-list-wrapper">

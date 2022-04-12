@@ -4,11 +4,12 @@ import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import { createProjectRoles, updateProjectRoles } from '../../../../api/project';
 import type { ProjectRoleBase } from '../../../../interface/project';
+import type { PermissionBase } from '../../../../interface/user';
 import { checkName } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
+import Permission from '../../../../components/Permission';
 import './index.less';
-import type { PermissionBase } from '../../../../interface/user';
 
 type Props = {
   projectName: string;
@@ -106,6 +107,34 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
           });
       }
     });
+  };
+
+  renderSubmitButton = () => {
+    const { isCreateProjectRoles, projectName } = this.props;
+    const name = this.field.getValue('name');
+    if (isCreateProjectRoles) {
+      return (
+        <Permission
+          request={{ resource: `project/role:*`, action: 'create' }}
+          project={projectName}
+        >
+          <Button className="create-auth-btn" type="primary" onClick={this.onSubmit}>
+            <Translation>{'Create'}</Translation>
+          </Button>
+        </Permission>
+      );
+    } else {
+      return (
+        <Permission
+          request={{ resource: `project/role:${name}`, action: 'update' }}
+          project={projectName}
+        >
+          <Button className="create-auth-btn" type="primary" onClick={this.onSubmit}>
+            <Translation>{'Update'}</Translation>
+          </Button>
+        </Permission>
+      );
+    }
   };
 
   render() {
@@ -208,9 +237,7 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
                 </Col>
               </Row>
             </Form>
-            <Button className="create-auth-btn" type="primary" onClick={this.onSubmit}>
-              <Translation>{isCreateProjectRoles ? 'Create' : 'Update'}</Translation>
-            </Button>
+            {this.renderSubmitButton()}
           </div>
         </If>
       </Fragment>

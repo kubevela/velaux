@@ -7,6 +7,7 @@ import type { ApplicationDetail, EnvBinding } from '../../../../interface/applic
 import { If } from 'tsx-control-statements/components';
 import AddAndEditEnvBind from '../AddAndEditEnvBind';
 import { Link } from 'dva/router';
+import Permission from '../../../../components/Permission';
 
 const { Row, Col } = Grid;
 type Props = {
@@ -97,13 +98,18 @@ class TabsContent extends Component<Props, State> {
             <Col span={4}>
               <div className="action-list">
                 <If condition={!applicationDetail?.readOnly}>
-                  <a
-                    onClick={() => {
-                      this.setState({ visibleEnvPlan: true });
-                    }}
+                  <Permission
+                    request={{ resource: `project/application/envBinding:*`, action: 'create' }}
+                    project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
                   >
-                    <Translation>Bind Environment</Translation>
-                  </a>
+                    <a
+                      onClick={() => {
+                        this.setState({ visibleEnvPlan: true });
+                      }}
+                    >
+                      <Translation>Bind Environment</Translation>
+                    </a>
+                  </Permission>
                 </If>
               </div>
             </Col>

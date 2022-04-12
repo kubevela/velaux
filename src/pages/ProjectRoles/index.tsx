@@ -166,6 +166,7 @@ class ProjectRoles extends Component<Props, State> {
             activeRoleName={this.getActiveRoleName()}
             projectRoles={projectRoles}
             addRole={this.addRole}
+            projectName={projectName}
             handleChangeRole={(roleName: string) => {
               this.handleChangeRole(roleName);
             }}

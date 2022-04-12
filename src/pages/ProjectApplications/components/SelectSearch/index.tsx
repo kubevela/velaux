@@ -6,6 +6,7 @@ import type { Target } from '../../../../interface/target';
 import type { Env } from '../../../../interface/env';
 import i18n from '../../../../i18n';
 import Translation from '../../../../components/Translation';
+import Permission from '../../../../components/Permission';
 import './index.less';
 
 const { Row, Col } = Grid;
@@ -15,6 +16,7 @@ type Props = {
   envs?: Env[];
   listApplication: (params: any) => void;
   onAddApplication: () => void;
+  projectName?: string;
 };
 
 type State = {
@@ -87,7 +89,7 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { targetList, envs } = this.props;
+    const { targetList, envs, projectName } = this.props;
     const { targetValue, inputValue, envValue } = this.state;
     const targetSource = targetList?.map((item) => {
       return {
@@ -154,13 +156,18 @@ class SelectSearch extends React.Component<Props, State> {
             </Row>
           </Col>
           <Col span="4">
-            <Button
-              className="create-btn-wrapper"
-              type="primary"
-              onClick={this.onCreateApplication}
+            <Permission
+              request={{ resource: `project/application:*`, action: 'create' }}
+              project={projectName}
             >
-              <Translation>New Application</Translation>
-            </Button>
+              <Button
+                className="create-btn-wrapper"
+                type="primary"
+                onClick={this.onCreateApplication}
+              >
+                <Translation>New Application</Translation>
+              </Button>
+            </Permission>
           </Col>
         </Row>
       </Fragment>

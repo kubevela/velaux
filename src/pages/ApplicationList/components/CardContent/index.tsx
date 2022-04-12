@@ -1,4 +1,5 @@
 import type { MouseEvent } from 'react';
+import { connect } from 'dva';
 import React from 'react';
 import './index.less';
 import { Link } from 'dva/router';
@@ -11,6 +12,8 @@ import { If } from 'tsx-control-statements/components';
 
 import appSvg from '../../../../assets/application.svg';
 import locale from '../../../../utils/locale';
+import type { LoginUserInfo } from '../../../../interface/user';
+import { checkPermission } from '../../../../utils/permission';
 
 type State = {
   extendDotVisible: boolean;
@@ -19,11 +22,15 @@ type State = {
 
 type Props = {
   applications?: ApplicationBase[];
+  userInfo?: LoginUserInfo;
   editAppPlan: (item: ApplicationBase) => void;
   deleteAppPlan: (name: string) => void;
   setVisible: (visible: boolean) => void;
 };
 
+@connect((store: any) => {
+  return { ...store.user };
+})
 class CardContent extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
@@ -49,6 +56,54 @@ class CardContent extends React.Component<Props, State> {
   onEditAppPlan = (item: ApplicationBase) => {
     this.props.editAppPlan(item);
   };
+
+  isEditPermission = (item: ApplicationBase) => {
+    const { userInfo } = this.props;
+    const project = item?.project?.name || '';
+    const request = { resource: `project/application:${item.name}`, action: 'update' };
+    if (checkPermission(request, project, userInfo)) {
+      return (
+        <Menu.Item
+          onClick={() => {
+            this.onEditAppPlan(item);
+          }}
+        >
+          <Translation>Edit</Translation>
+        </Menu.Item>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  isDeletePermission = (item: ApplicationBase) => {
+    const { userInfo } = this.props;
+    const project = item?.project?.name || '';
+    const request = { resource: `project/application:${item.name}`, action: 'delete' };
+    if (checkPermission(request, project, userInfo)) {
+      return (
+        <Menu.Item
+          onClick={() => {
+            Dialog.confirm({
+              type: 'confirm',
+              content: (
+                <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>
+              ),
+              onOk: () => {
+                this.onDeleteAppPlan(item.name);
+              },
+              locale: locale.Dialog,
+            });
+          }}
+        >
+          <Translation>Remove</Translation>
+        </Menu.Item>
+      );
+    } else {
+      return null;
+    }
+  };
+
   render() {
     const { Row, Col } = Grid;
     const { applications, setVisible } = this.props;
@@ -135,31 +190,8 @@ class CardContent extends React.Component<Props, State> {
                         }
                       >
                         <Menu>
-                          <Menu.Item
-                            onClick={() => {
-                              this.onEditAppPlan(item);
-                            }}
-                          >
-                            <Translation>Edit</Translation>
-                          </Menu.Item>
-                          <Menu.Item
-                            onClick={() => {
-                              Dialog.confirm({
-                                type: 'confirm',
-                                content: (
-                                  <Translation>
-                                    Unrecoverable after deletion, are you sure to delete it?
-                                  </Translation>
-                                ),
-                                onOk: () => {
-                                  this.onDeleteAppPlan(name);
-                                },
-                                locale: locale.Dialog,
-                              });
-                            }}
-                          >
-                            <Translation>Remove</Translation>
-                          </Menu.Item>
+                          {this.isEditPermission(item)}
+                          {this.isDeletePermission(item)}
                         </Menu>
                       </Dropdown>
                     </Col>

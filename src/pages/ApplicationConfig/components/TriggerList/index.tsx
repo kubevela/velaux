@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import { Card, Dialog, Grid, Message, Icon } from '@b-design/ui';
-import type { ApplicationComponent, Trigger } from '../../../../interface/application';
+import type {
+  ApplicationComponent,
+  Trigger,
+  ApplicationDetail,
+} from '../../../../interface/application';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { momentDate } from '../../../../utils/common';
 import './index.less';
@@ -9,11 +13,13 @@ import Empty from '../../../../components/Empty';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import Item from '../../../../components/Item';
+import Permission from '../../../../components/Permission';
 
 type Props = {
   triggers: Trigger[];
   createTriggerInfo?: Trigger;
   component?: ApplicationComponent;
+  applicationDetail?: ApplicationDetail;
   onDeleteTrigger: (token: string) => void;
 };
 
@@ -52,7 +58,7 @@ class TriggerList extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { triggers, component } = this.props;
+    const { triggers, component, applicationDetail } = this.props;
     const { showTrigger } = this.state;
     const domain = `${window.location.protocol}//${window.location.host}`;
     const webHookURL = `${domain}/api/v1/webhook/${showTrigger?.token}`;
@@ -108,14 +114,22 @@ class TriggerList extends Component<Props, State> {
                     {item.alias ? `${item.alias}(${item.name})` : item.name}
                   </div>
                   <div className="trigger-list-operation">
-                    <Icon
-                      type="ashbin1"
-                      size={14}
-                      className="margin-right-0 cursor-pointer"
-                      onClick={() => {
-                        this.handleTriggerDelete(item.token || '');
+                    <Permission
+                      request={{
+                        resource: `project/application/trigger:${item.name}`,
+                        action: 'delete',
                       }}
-                    />
+                      project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                    >
+                      <Icon
+                        type="ashbin1"
+                        size={14}
+                        className="margin-right-0 cursor-pointer"
+                        onClick={() => {
+                          this.handleTriggerDelete(item.token || '');
+                        }}
+                      />
+                    </Permission>
                   </div>
                 </div>
                 <div className="trigger-list-content">
