@@ -7,6 +7,9 @@ import Translation from '../../../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import kubernetesSvg from '../../../../assets/kubernetes.svg';
 import locale from '../../../../utils/locale';
+import type { LoginUserInfo } from '../../../../interface/user';
+import { checkPermission } from '../../../../utils/permission';
+import { connect } from 'dva';
 
 type State = {
   extendDotVisible: boolean;
@@ -15,10 +18,14 @@ type State = {
 
 type Props = {
   clusters: [];
+  userInfo?: LoginUserInfo;
   editCluster: (name: string) => void;
   deleteCluster: (name: string) => void;
 };
 
+@connect((store: any) => {
+  return { ...store.user };
+})
 class CardContent extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -32,6 +39,51 @@ class CardContent extends React.Component<Props, State> {
   };
   onDeleteCluster = (name: string) => {
     this.props.deleteCluster(name);
+  };
+
+  isEditPermission = (item: Cluster) => {
+    const { userInfo } = this.props;
+    const project = '';
+    const request = { resource: `cluster:${item.name}`, action: 'update' };
+    if (checkPermission(request, project, userInfo)) {
+      return (
+        <Menu.Item
+          onClick={() => {
+            this.editCluster(item.name);
+          }}
+        >
+          <Translation>Edit</Translation>
+        </Menu.Item>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  isDeletePermission = (item: Cluster) => {
+    const { userInfo } = this.props;
+    const project = '';
+    const request = { resource: `cluster:${item.name}`, action: 'delete' };
+    if (checkPermission(request, project, userInfo)) {
+      return (
+        <Menu.Item
+          onClick={() => {
+            Dialog.confirm({
+              type: 'confirm',
+              content: <Translation>Are you sure you want the detach cluster?</Translation>,
+              onOk: () => {
+                this.onDeleteCluster(item.name);
+              },
+              locale: locale.Dialog,
+            });
+          }}
+        >
+          <Translation>Detach</Translation>
+        </Menu.Item>
+      );
+    } else {
+      return null;
+    }
   };
   render() {
     const { Row, Col } = Grid;
@@ -92,31 +144,8 @@ class CardContent extends React.Component<Props, State> {
                           }
                         >
                           <Menu>
-                            <Menu.Item
-                              onClick={() => {
-                                this.editCluster(name);
-                              }}
-                            >
-                              <Translation>Edit</Translation>
-                            </Menu.Item>
-                            <Menu.Item
-                              onClick={() => {
-                                Dialog.confirm({
-                                  type: 'confirm',
-                                  content: (
-                                    <Translation>
-                                      Are you sure you want the detach cluster?
-                                    </Translation>
-                                  ),
-                                  onOk: () => {
-                                    this.onDeleteCluster(name);
-                                  },
-                                  locale: locale.Dialog,
-                                });
-                              }}
-                            >
-                              <Translation>Detach</Translation>
-                            </Menu.Item>
+                            {this.isEditPermission(item)}
+                            {this.isDeletePermission(item)}
                           </Menu>
                         </Dropdown>
                       </Col>

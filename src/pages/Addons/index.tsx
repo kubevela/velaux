@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Loading, Message } from '@b-design/ui';
+import { Loading, Message, Button } from '@b-design/ui';
 import Title from '../../components/ListTitle';
 import SelectSearch from './components/search/index';
 import CardContend from './components/card-conten/index';
@@ -9,7 +9,8 @@ import RegistryManageDialog from './components/registry-manage/index';
 import { If } from 'tsx-control-statements/components';
 import { getEnabledAddons } from '../../api/addons';
 import type { AddonBaseStatus } from '../../interface/addon';
-import i18n from '../../i18n';
+import Permission from '../../components/Permission';
+import Translation from '../../components/Translation';
 
 type Props = {
   dispatch: ({}) => {};
@@ -101,10 +102,19 @@ class Addons extends React.Component<Props, State> {
         <Title
           title="Addons"
           subTitle="Manages and extends platform capabilities"
-          addButtonTitle={i18n.t('Addon Registries').toString()}
-          addButtonClick={() => {
-            this.setState({ showRegistryManage: true });
-          }}
+          extButtons={[
+            <Permission request={{ resource: 'addonRegistry:*', action: 'list' }} project={''}>
+              <Button
+                type="primary"
+                onClick={() => {
+                  this.setState({ showRegistryManage: true });
+                }}
+              >
+                <Translation>Addon Registries</Translation>
+              </Button>
+              ,
+            </Permission>,
+          ]}
         />
         <SelectSearch
           dispatch={dispatch}

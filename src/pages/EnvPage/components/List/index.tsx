@@ -8,6 +8,7 @@ import { deleteEnv } from '../../../../api/env';
 import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
 import type { Project } from '../../../../interface/project';
+import Permission from '../../../../components/Permission';
 const { Group: TagGroup } = Tag;
 
 type Props = {
@@ -121,32 +122,42 @@ class TableList extends Component<Props> {
           return (
             <div>
               <If condition={record.targets?.length}>
-                <a
-                  onClick={() => {
-                    Dialog.confirm({
-                      type: 'confirm',
-                      content: (
-                        <Translation>
-                          Unrecoverable after deletion, are you sure to delete it?
-                        </Translation>
-                      ),
-                      onOk: () => {
-                        this.onDelete(record);
-                      },
-                      locale: locale.Dialog,
-                    });
-                  }}
+                <Permission
+                  request={{ resource: `environment:${record.name}`, action: 'delete' }}
+                  project={record.project.name}
                 >
-                  <Translation>Remove</Translation>
-                </a>
-                <a
-                  className="margin-left-10"
-                  onClick={() => {
-                    this.onEdit(record);
-                  }}
+                  <a
+                    onClick={() => {
+                      Dialog.confirm({
+                        type: 'confirm',
+                        content: (
+                          <Translation>
+                            Unrecoverable after deletion, are you sure to delete it?
+                          </Translation>
+                        ),
+                        onOk: () => {
+                          this.onDelete(record);
+                        },
+                        locale: locale.Dialog,
+                      });
+                    }}
+                  >
+                    <Translation>Remove</Translation>
+                  </a>
+                </Permission>
+                <Permission
+                  request={{ resource: `environment:${record.name}`, action: 'update' }}
+                  project={record.project.name}
                 >
-                  <Translation>Edit</Translation>
-                </a>
+                  <a
+                    className="margin-left-10"
+                    onClick={() => {
+                      this.onEdit(record);
+                    }}
+                  >
+                    <Translation>Edit</Translation>
+                  </a>
+                </Permission>
               </If>
             </div>
           );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
 import SelectSearch from './components/ClustSelectSearch';
@@ -11,6 +11,7 @@ import Translation from '../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import { getEnabledAddons, getAddonsList } from '../../api/addons';
 import type { Addon } from '../../interface/addon';
+import Permission from '../../components/Permission';
 
 type Props = {
   clusterList: [];
@@ -149,20 +150,30 @@ class Cluster extends React.Component<Props, State> {
         <Title
           title="Clusters"
           subTitle="Setup Kubernetes clusters by adding an existing one or creating a new one via cloud provider"
-          addButtonTitle="Connect Existing Cluster"
-          addButtonClick={() => {
-            this.setState({ showAddCluster: true });
-          }}
           extButtons={[
-            <Button
-              type="secondary"
-              style={{ marginRight: '16px' }}
-              onClick={() => {
-                this.setState({ showAddCloudCluster: true });
-              }}
-            >
-              <Translation>Connect From Cloud</Translation>
-            </Button>,
+            <Fragment>
+              <Permission request={{ resource: 'cluster:*', action: 'create' }} project={''}>
+                <Button
+                  type="secondary"
+                  style={{ marginRight: '16px' }}
+                  onClick={() => {
+                    this.setState({ showAddCloudCluster: true });
+                  }}
+                >
+                  <Translation>Connect From Cloud</Translation>
+                </Button>
+                ,
+                <Button
+                  type="primary"
+                  style={{ marginRight: '16px' }}
+                  onClick={() => {
+                    this.setState({ showAddCluster: true });
+                  }}
+                >
+                  <Translation>Connect Existing Cluster</Translation>
+                </Button>
+              </Permission>
+            </Fragment>,
           ]}
         />
 

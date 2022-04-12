@@ -8,6 +8,7 @@ import type { LoginUserInfo } from '../../interface/user';
 import type { IntegrationBase } from '../../interface/integrations';
 import _ from 'lodash';
 import Translation from '../../components/Translation';
+import Permission from '../../components/Permission';
 import locale from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
 import { momentDate } from '../../utils/common';
@@ -183,17 +184,22 @@ class Integrations extends Component<Props, State> {
         cell: (v: string, i: number, record: IntegrationBase) => {
           return (
             <Fragment>
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onDelete(record);
-                }}
+              <Permission
+                request={{ resource: `configType/config:${record.name}`, action: 'delete' }}
+                project={''}
               >
-                <Translation>Delete</Translation>
-              </Button>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onDelete(record);
+                  }}
+                >
+                  <Translation>Delete</Translation>
+                </Button>
+              </Permission>
             </Fragment>
           );
         },
@@ -206,9 +212,11 @@ class Integrations extends Component<Props, State> {
     return (
       <div className="list-content">
         <div className="create-btn">
-          <Button type="primary" onClick={this.handleClickCreate}>
-            <Translation>New</Translation>
-          </Button>
+          <Permission request={{ resource: `configType/config:*`, action: 'create' }} project={''}>
+            <Button type="primary" onClick={this.handleClickCreate}>
+              <Translation>New</Translation>
+            </Button>
+          </Permission>
         </div>
         <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}

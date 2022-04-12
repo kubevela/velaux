@@ -1,7 +1,7 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
-import { Pagination } from '@b-design/ui';
+import { Pagination, Button } from '@b-design/ui';
 import ListTitle from '../../components/ListTitle';
 import TableList from './components/List';
 import EnvDialog from './components/EnvDialog';
@@ -11,6 +11,8 @@ import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 import type { Env } from '../../interface/env';
 import type { LoginUserInfo } from '../../interface/user';
+import Permission from '../../components/Permission';
+import Translation from '../../components/Translation';
 
 type Props = {
   envTotal?: number;
@@ -108,10 +110,19 @@ class targetList extends React.Component<Props, State> {
         <ListTitle
           title="Environments"
           subTitle="Set up the Environments for your Application based on Target sources"
-          addButtonTitle="New Environment"
-          addButtonClick={() => {
-            this.setState({ visibleEnvDialog: true, envItem: undefined });
-          }}
+          extButtons={[
+            <Permission request={{ resource: 'environment:*', action: 'create' }} project={'?'}>
+              <Button
+                type="primary"
+                onClick={() => {
+                  this.setState({ visibleEnvDialog: true, envItem: undefined });
+                }}
+              >
+                <Translation>New Environment</Translation>
+              </Button>
+              ,
+            </Permission>,
+          ]}
         />
 
         <TableList

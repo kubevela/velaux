@@ -203,7 +203,6 @@ class Structs extends React.Component<Props, State> {
   addStructPlanItem = (option?: GroupOption, value?: any) => {
     this.field.validate((error: any) => {
       if (error) {
-        console.log(error);
         return;
       }
       const { structList } = this.state;

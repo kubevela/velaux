@@ -11,6 +11,7 @@ import { momentDate } from '../../utils/common';
 import locale from '../../utils/locale';
 import './index.less';
 import type { PermissionBase } from '../../interface/user';
+import Permission from '../../components/Permission';
 
 type Props = {};
 
@@ -162,32 +163,42 @@ class Roles extends Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: (v: string, i: number, record: any) => {
+        cell: (v: string, i: number, record: RolesBase) => {
           return (
             <Fragment>
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onEdit(record);
-                }}
+              <Permission
+                request={{ resource: `role:${record.name}`, action: 'update' }}
+                project={''}
               >
-                <Translation>Edit</Translation>
-              </Button>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onEdit(record);
+                  }}
+                >
+                  <Translation>Edit</Translation>
+                </Button>
+              </Permission>
 
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.onDelete(record);
-                }}
+              <Permission
+                request={{ resource: `role:${record.name}`, action: 'delete' }}
+                project={''}
               >
-                <Translation>Delete</Translation>
-              </Button>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.onDelete(record);
+                  }}
+                >
+                  <Translation>Delete</Translation>
+                </Button>
+              </Permission>
             </Fragment>
           );
         },
@@ -213,9 +224,11 @@ class Roles extends Component<Props, State> {
             title="Platform Roles"
             subTitle="Assign permissions for resources such as clusters、targets、addons、projects and users"
             extButtons={[
-              <Button type="primary" onClick={this.handleClickCreate}>
-                <Translation>New Role</Translation>
-              </Button>,
+              <Permission request={{ resource: 'role:*', action: 'create' }} project={''}>
+                <Button type="primary" onClick={this.handleClickCreate}>
+                  <Translation>New Role</Translation>
+                </Button>
+              </Permission>,
             ]}
           />
           <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>

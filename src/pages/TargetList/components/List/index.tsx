@@ -7,6 +7,7 @@ import type { Target } from '../../../../interface/target';
 import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
 import { Link } from 'dva/router';
+import Permission from '../../../../components/Permission';
 
 type Props = {
   list?: [];
@@ -86,32 +87,42 @@ class TableList extends Component<Props> {
         cell: (v: string, i: number, record: Target) => {
           return (
             <div>
-              <a
-                onClick={() => {
-                  Dialog.confirm({
-                    type: 'confirm',
-                    content: (
-                      <Translation>
-                        Unrecoverable after deletion, are you sure to delete it?
-                      </Translation>
-                    ),
-                    onOk: () => {
-                      this.onDelete(record);
-                    },
-                    locale: locale.Dialog,
-                  });
-                }}
+              <Permission
+                request={{ resource: `target:${record.name}`, action: 'delete' }}
+                project={''}
               >
-                <Translation>Remove</Translation>
-              </a>
-              <a
-                className="margin-left-10"
-                onClick={() => {
-                  this.onEdit(record);
-                }}
+                <a
+                  onClick={() => {
+                    Dialog.confirm({
+                      type: 'confirm',
+                      content: (
+                        <Translation>
+                          Unrecoverable after deletion, are you sure to delete it?
+                        </Translation>
+                      ),
+                      onOk: () => {
+                        this.onDelete(record);
+                      },
+                      locale: locale.Dialog,
+                    });
+                  }}
+                >
+                  <Translation>Remove</Translation>
+                </a>
+              </Permission>
+              <Permission
+                request={{ resource: `target:${record.name}`, action: 'update' }}
+                project={''}
               >
-                <Translation>Edit</Translation>
-              </a>
+                <a
+                  className="margin-left-10"
+                  onClick={() => {
+                    this.onEdit(record);
+                  }}
+                >
+                  <Translation>Edit</Translation>
+                </a>
+              </Permission>
             </div>
           );
         },
