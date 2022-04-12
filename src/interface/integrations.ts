@@ -23,3 +23,13 @@ export interface QueryConfig {
   name: string;
   configType: string;
 }
+
+export interface IntegrationConfigs {
+  name: string;
+  alias?: string;
+  definitions: string[];
+  description?: string;
+  project: string;
+  status: string;
+  createdTime: string;
+}

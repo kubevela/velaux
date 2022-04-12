@@ -5,7 +5,7 @@ import { Table, Button, Dialog, Message } from '@b-design/ui';
 import CreateIntegration from './components/CreateIntegrationDialog';
 import { getConfigs, deleteConfig } from '../../api/integration';
 import type { LoginUserInfo } from '../../interface/user';
-import type { IntegrationBase } from '../../interface/integrations';
+import type { IntegrationBase, IntegrationConfigs } from '../../interface/integrations';
 import _ from 'lodash';
 import Translation from '../../components/Translation';
 import Permission from '../../components/Permission';
@@ -85,7 +85,7 @@ class Integrations extends Component<Props, State> {
     return getMatchParamObj(this.props.match, 'configType');
   };
 
-  onDelete = (record: IntegrationBase) => {
+  onDelete = (record: IntegrationConfigs) => {
     Dialog.confirm({
       content: 'Are you sure you want to delete the config',
       onOk: () => {
@@ -181,7 +181,7 @@ class Integrations extends Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: (v: string, i: number, record: IntegrationBase) => {
+        cell: (v: string, i: number, record: IntegrationConfigs) => {
           return (
             <Fragment>
               <Permission
