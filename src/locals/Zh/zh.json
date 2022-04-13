@@ -449,7 +449,7 @@
   "Members": "成员",
   "General": "基本信息",
   "Settings": "系统配置",
-  "This application is readonly": "该应用为子读模式，不能通过 VelaUX 进行部署。",
+  "This application is readonly": "该应用为只读模式，不能通过 VelaUX 进行部署。",
   "Please check the component properties": "请检查组件配置参数",
   "LastLoginTime": "上次登录时间",
   "Search by name": "基于用户名称搜索",

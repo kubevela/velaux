@@ -3,11 +3,11 @@ import { Icon, Grid } from '@b-design/ui';
 import { Link } from 'dva/router';
 import type { IntegrationBase, IntegrationBaseExtends } from '../../../../interface/integrations';
 import defaultIntegrationSVG from '../../../../assets/integration.svg';
-import helmImg from '../../../../assets/helm.png';
-import dockerImg from '../../../../assets/docker.png';
-import gitImg from '../../../../assets/git.png';
-import ssoImg from '../../../../assets/sso.png';
-import terraformImg from '../../../../assets/terraform.png';
+import helmImg from '../../../../assets/helm.svg';
+import dockerImg from '../../../../assets/docker.svg';
+import gitImg from '../../../../assets/git.svg';
+import ssoImg from '../../../../assets/sso.svg';
+import terraformImg from '../../../../assets/terraform.svg';
 import _ from 'lodash';
 import './index.less';
 
