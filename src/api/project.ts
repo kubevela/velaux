@@ -93,3 +93,8 @@ export function getCloudServiceProviderList(queryData: QueryData) {
   const urlPath = project + `/${queryData.projectName}/configs?configType=${queryData.configType}`;
   return get(urlPath, {}).then((res) => res);
 }
+
+export function getProjectConfigs(query: ProjectName) {
+  const urlPath = project + `/${query.projectName}/configs`;
+  return get(urlPath, {}).then((res) => res);
+}

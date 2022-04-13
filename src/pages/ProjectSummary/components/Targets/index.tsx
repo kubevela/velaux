@@ -13,7 +13,7 @@ type Props = {
 
 type State = {
   list: [];
-  visible: boolean;
+  isLoading: boolean;
   isEditIntegration: boolean;
   editIntegrationItem: {};
 };
@@ -23,7 +23,7 @@ class Targets extends Component<Props, State> {
     super(props);
     this.state = {
       list: [],
-      visible: false,
+      isLoading: false,
       isEditIntegration: false,
       editIntegrationItem: {},
     };
@@ -35,11 +35,20 @@ class Targets extends Component<Props, State> {
 
   onTargets() {
     const { projectName } = this.props;
-    getProjectTargetList({ projectName }).then((res) => {
-      this.setState({
-        list: (res && res.targets) || [],
-      });
+    this.setState({
+      isLoading: true,
     });
+    getProjectTargetList({ projectName })
+      .then((res) => {
+        this.setState({
+          list: (res && res.targets) || [],
+        });
+      })
+      .finally(() => {
+        this.setState({
+          isLoading: false,
+        });
+      });
   }
 
   render() {
@@ -77,7 +86,7 @@ class Targets extends Component<Props, State> {
     ];
 
     const { Column } = Table;
-    const { list } = this.state;
+    const { list, isLoading } = this.state;
     const { projectName } = this.props;
     return (
       <Fragment>
@@ -95,7 +104,7 @@ class Targets extends Component<Props, State> {
             </Permission>
           </section>
           <section className="card-content-table">
-            <Table locale={locale.Table} dataSource={list} hasBorder={true} loading={false}>
+            <Table locale={locale.Table} dataSource={list} hasBorder={true} loading={isLoading}>
               {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
             </Table>
           </section>
