@@ -61,19 +61,16 @@ class Integrations extends Component<Props, State> {
         },
       },
       {
-        key: 'project',
-        title: <Translation>Project</Translation>,
-        dataIndex: 'project',
-        cell: (v: string) => {
-          return <span>{v}</span>;
-        },
-      },
-      {
         key: 'configType',
-        title: <Translation>Type</Translation>,
+        title: <Translation>TypeAlias(TypeName)</Translation>,
         dataIndex: 'configType',
-        cell: (v: string) => {
-          return <span>{v}</span>;
+        cell: (v: string, i: number, record: IntegrationConfigs) => {
+          const { configType, configTypeAlias } = record;
+          if (!configType && !configTypeAlias) {
+            return <span>-</span>;
+          } else {
+            return <span>{`${configTypeAlias}(${configType})`}</span>;
+          }
         },
       },
       {

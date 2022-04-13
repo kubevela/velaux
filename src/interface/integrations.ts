@@ -32,4 +32,6 @@ export interface IntegrationConfigs {
   project: string;
   status: string;
   createdTime: string;
+  configType: string;
+  configTypeAlias?: string;
 }
