@@ -474,6 +474,9 @@ class UISchema extends Component<Props, State> {
                       },
                     ],
                   })}
+                  onChangeSecretRef={(secretName: string) => {
+                    this.form.setValue('secretRef', secretName);
+                  }}
                 />
               </Form.Item>
             );
