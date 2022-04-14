@@ -233,7 +233,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
       )
         .then((re) => {
           if (re) {
-            Message.success(i18next.t('deploy application success'));
+            Message.success(i18next.t('Application deployed successfully'));
             this.setState({ deployLoading: false });
             this.loadApplicationStatus();
           }

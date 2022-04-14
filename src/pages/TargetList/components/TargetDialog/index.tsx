@@ -139,7 +139,7 @@ class DeliveryDialog extends React.Component<Props, State> {
       if (isEdit) {
         updateTarget(params).then((res) => {
           if (res) {
-            Message.success(<Translation>Update target Success</Translation>);
+            Message.success(<Translation>Target updated successfully</Translation>);
             this.props.onOK();
             this.onClose();
           }
@@ -147,7 +147,7 @@ class DeliveryDialog extends React.Component<Props, State> {
       } else {
         createTarget(params).then((res) => {
           if (res) {
-            Message.success(<Translation>Create target Success</Translation>);
+            Message.success(<Translation>Target created successfully</Translation>);
             this.props.onOK();
             this.onClose();
           }

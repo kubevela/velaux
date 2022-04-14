@@ -76,7 +76,7 @@ class ApplicationHeader extends Component<Props, State> {
       )
         .then((re) => {
           if (re) {
-            Message.success('deploy application success');
+            Message.success('Application deployed successfully');
           }
         })
         .catch((err: APIError) => {

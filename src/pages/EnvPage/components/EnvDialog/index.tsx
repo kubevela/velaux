@@ -51,7 +51,9 @@ class EnvDialog extends React.Component<Props, State> {
       const targetNames = targets?.map((target) => {
         return target.name;
       });
-
+      if (project.name) {
+        this.loadProjectTarget(project.name);
+      }
       this.field.setValues({
         name,
         alias,
@@ -96,7 +98,7 @@ class EnvDialog extends React.Component<Props, State> {
       if (isEdit) {
         updateEnv(params).then((res) => {
           if (res) {
-            Message.success(<Translation>Update Env Success</Translation>);
+            Message.success(<Translation>Environment updated successfully</Translation>);
             this.props.onOK();
             this.onClose();
           }
@@ -104,7 +106,7 @@ class EnvDialog extends React.Component<Props, State> {
       } else {
         createEnv(params).then((res) => {
           if (res) {
-            Message.success(<Translation>Create Env Success</Translation>);
+            Message.success(<Translation>Environment created successfully</Translation>);
             this.props.onOK();
             this.onClose();
           }
