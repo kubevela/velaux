@@ -67,6 +67,8 @@ class PlatformSetting extends React.Component<Props, State> {
                 this.renderDexGuideDialog();
               } else if (this.state.businessGuideCode === 14010) {
                 this.renderUserGuideDialog();
+              }else{
+                Message.error(err?.Message);
               }
             },
           );
@@ -76,8 +78,8 @@ class PlatformSetting extends React.Component<Props, State> {
 
   renderUserGuideDialog = () => {
     return Dialog.alert({
-      title: i18n.t('Email address empty'),
-      content: i18n.t('Your email address is empty, need to update it'),
+      title: i18n.t('The email address of administrator is empty'),
+      content: i18n.t('Please set a email address for the administrator, it must same as the SSO account.'),
       footerActions: ['ok'],
       footer: this.getGuideUserButton(),
     });
@@ -85,8 +87,8 @@ class PlatformSetting extends React.Component<Props, State> {
 
   renderDexGuideDialog = () => {
     return Dialog.alert({
-      title: i18n.t('No dex connector'),
-      content: i18n.t('No dex connector, need to create dex  connector config '),
+      title: i18n.t('No dex connector configurations'),
+      content: i18n.t('Before enabling SSO, you must add at least one dex connector configuration.'),
       footerActions: ['ok'],
       footer: this.getGuideDexButton(),
     });
