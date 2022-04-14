@@ -15,7 +15,7 @@ import Permission from '../../components/Permission';
 import PlatformSetting from '../../components/PlatformSetting';
 
 type Props = {
-  dispatch: any;
+  dispatch: ({}) => {};
   userInfo?: LoginUserInfo;
   systemInfo?: SystemInfo;
 };
@@ -69,7 +69,7 @@ class TopBar extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { userInfo, systemInfo } = this.props;
+    const { userInfo, systemInfo, dispatch } = this.props;
     const { platformSetting } = this.state;
     return (
       <div className="layout-topbar" id="layout-topbar">
@@ -185,6 +185,7 @@ class TopBar extends Component<Props, State> {
         <If condition={platformSetting}>
           {systemInfo && (
             <PlatformSetting
+              platformSetting={platformSetting}
               systemInfo={systemInfo}
               onClose={() => {
                 this.setState({ platformSetting: false });
@@ -192,6 +193,7 @@ class TopBar extends Component<Props, State> {
               syncPlatformSetting={() => {
                 this.loadSystemInfo();
               }}
+              dispatch={dispatch}
             />
           )}
         </If>
