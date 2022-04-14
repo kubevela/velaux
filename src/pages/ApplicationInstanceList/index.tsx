@@ -26,6 +26,7 @@ import { handleError } from '../../utils/errors';
 import StatusShow from '../../components/StatusShow';
 import locale from '../../utils/locale';
 import { getLink } from '../../utils/utils';
+import i18n from '../../i18n';
 
 const { Column } = Table;
 type Props = {
@@ -436,7 +437,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       )
         .then((re) => {
           if (re) {
-            Message.success('deploy application success');
+            Message.success(i18n.t('Application deployed successfully'));
             this.setState({ deployLoading: false });
             this.loadApplicationStatus();
           }
