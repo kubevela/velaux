@@ -1,25 +1,38 @@
 import React from 'react';
+import { connect } from 'dva';
 import { Field, Grid, Radio, Input, Message } from '@b-design/ui';
 import { Dialog, Card, Button, Form } from '@b-design/ui';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
 import i18n from '../../i18n';
 import type { SystemInfo } from '../../interface/system';
+import type { LoginUserInfo } from '../../interface/user';
 import { updateSystemInfo } from '../../api/config';
+import { checkPermission } from '../../utils/permission';
 const { Col, Row } = Grid;
 
 type Props = {
   onClose: () => void;
   syncPlatformSetting: () => void;
   systemInfo: SystemInfo;
+  userInfo?: LoginUserInfo;
 };
 
-class PlatformSetting extends React.Component<Props> {
+type State = {
+  businessGuideCode: number;
+};
+@connect((store: any) => {
+  return { ...store.user };
+})
+class PlatformSetting extends React.Component<Props, State> {
   field: Field;
 
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
+    this.state = {
+      businessGuideCode: 0,
+    };
   }
 
   componentDidMount() {
@@ -36,13 +49,86 @@ class PlatformSetting extends React.Component<Props> {
       }
       const { enableCollection, loginType, velaAddress } = values;
       const param = { enableCollection, loginType, velaAddress };
-      updateSystemInfo(param).then((res) => {
-        if (res) {
-          Message.success(i18n.t('Update the platform configuration success'));
-          this.props.syncPlatformSetting();
-        }
-      });
+      updateSystemInfo(param)
+        .then((res) => {
+          if (res) {
+            Message.success(i18n.t('Update the platform configuration success'));
+            this.props.syncPlatformSetting();
+          }
+        })
+        .catch((err) => {
+          const businessGuideCode = err?.BusinessCode || 0;
+          this.setState(
+            {
+              businessGuideCode: businessGuideCode,
+            },
+            () => {
+              if (this.state.businessGuideCode === 12011) {
+                this.renderDexGuideDialog();
+              } else if (this.state.businessGuideCode === 14010) {
+                this.renderUserGuideDialog();
+              }
+            },
+          );
+        });
     });
+  };
+
+  renderUserGuideDialog = () => {
+    return Dialog.alert({
+      title: i18n.t('Email address empty'),
+      content: i18n.t('Your email address is empty, need to update it'),
+      footerActions: ['ok'],
+      footer: this.getGuideUserButton(),
+    });
+  };
+
+  renderDexGuideDialog = () => {
+    return Dialog.alert({
+      title: i18n.t('No dex connector'),
+      content: i18n.t('No dex connector, need to create dex  connector config '),
+      footerActions: ['ok'],
+      footer: this.getGuideDexButton(),
+    });
+  };
+
+  getGuideUserButton = () => {
+    const { userInfo } = this.props;
+    const request = { resource: 'user:*', action: 'list' };
+    const project = '';
+    if (checkPermission(request, project, userInfo)) {
+      return (
+        <Button type="primary" onClick={this.onOKGuide}>
+          <Translation>OK</Translation>
+        </Button>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  getGuideDexButton = () => {
+    const { userInfo } = this.props;
+    const request = { resource: 'configType:*', action: 'list' };
+    const project = '';
+    if (checkPermission(request, project, userInfo)) {
+      return (
+        <Button type="primary" onClick={this.onOKGuide}>
+          <Translation>OK</Translation>
+        </Button>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  onOKGuide = () => {
+    const { businessGuideCode } = this.state;
+    if (businessGuideCode === 12011) {
+      window.location.href = '/integrations/config-dex-connector/config';
+    } else if (businessGuideCode === 14010) {
+      window.location.href = '/users';
+    }
   };
 
   getIssuerDefaultValue = () => {
