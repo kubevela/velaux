@@ -155,6 +155,9 @@ export interface AppliedResource {
   namespace: string;
   component: string;
   trait?: string;
+  publishVersion?: string;
+  revision?: string;
+  latest: boolean;
 }
 
 export interface Condition {

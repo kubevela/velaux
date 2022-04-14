@@ -26,6 +26,8 @@ import { deployApplication } from '../../api/application';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import i18next from 'i18next';
+import { checkPermission } from '../../utils/permission';
+import type { LoginUserInfo } from '../../interface/user';
 
 type Props = {
   dispatch: ({}) => {};
@@ -40,6 +42,7 @@ type Props = {
   applicationStatus?: ApplicationStatus;
   components?: ApplicationComponent[];
   envbinding: EnvBinding[];
+  userInfo?: LoginUserInfo;
 };
 
 type State = {
@@ -53,7 +56,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.application };
+  return { ...store.application, ...store.user };
 })
 class ApplicationMonitor extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -260,7 +263,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
   };
 
   render() {
-    const { applicationStatus, applicationDetail, components } = this.props;
+    const { applicationStatus, applicationDetail, components, userInfo } = this.props;
     const {
       params: { appName, envName },
     } = this.props.match;
@@ -307,6 +310,27 @@ class ApplicationMonitor extends React.Component<Props, State> {
             >
               <Table locale={locale.Table} dataSource={resources}>
                 <Table.Column
+                  dataIndex="cluster"
+                  title={<Translation>Cluster</Translation>}
+                  width="200px"
+                  cell={(v: string) => {
+                    let clusterName = v;
+                    if (!clusterName) {
+                      clusterName = 'Local';
+                    }
+                    if (
+                      checkPermission(
+                        { resource: 'cluster:*', action: 'list' },
+                        applicationDetail?.project?.name,
+                        userInfo,
+                      )
+                    ) {
+                      return <Link to="/clusters">{v}</Link>;
+                    }
+                    return <span>{v}</span>;
+                  }}
+                />
+                <Table.Column
                   dataIndex="name"
                   width="240px"
                   title={<Translation>Namespace/Name</Translation>}
@@ -325,14 +349,20 @@ class ApplicationMonitor extends React.Component<Props, State> {
                 />
                 <Table.Column dataIndex="component" title={<Translation>Component</Translation>} />
                 <Table.Column
-                  dataIndex="cluster"
-                  title={<Translation>Cluster</Translation>}
-                  width="200px"
-                  cell={(v: string) => {
-                    if (!v) {
-                      return <Link to="/clusters">Local</Link>;
+                  dataIndex="deployVersion"
+                  title={<Translation>Revision</Translation>}
+                  cell={(v: string, i: number, row: AppliedResource) => {
+                    if (row.latest) {
+                      return (
+                        <span>
+                          <Icon style={{ color: 'green', marginRight: '8px' }} type="NEW" />
+                          <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
+                        </span>
+                      );
                     }
-                    return <Link to="/clusters">{v}</Link>;
+                    return (
+                      <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
+                    );
                   }}
                 />
               </Table>

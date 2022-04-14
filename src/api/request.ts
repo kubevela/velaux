@@ -67,12 +67,12 @@ axiosInstance.interceptors.response.use(
       } else {
         return new Promise((resolve) => {
           retryRequests.push((token: string) => {
-            config.headers['Authorization'] = 'Bearer ' + token;
+            config.headers.Authorization = 'Bearer ' + token;
             resolve(axiosInstance(config));
           });
         });
       }
-    } else if (data.BusinessCode === 12010) {
+    } else if (data.BusinessCode === 12010 || data.BusinessCode === 12004) {
       return ResetLogin.getInstance().reset;
     } else {
       return Promise.reject(error.response || error);
