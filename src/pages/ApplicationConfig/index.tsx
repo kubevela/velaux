@@ -447,89 +447,87 @@ class ApplicationConfig extends Component<Props, State> {
           </Col>
         </Row>
 
-        <If condition={applicationDetail?.applicationType == 'common'}>
+        <Row>
+          <Col span={24} className="padding16">
+            <Title
+              title={
+                <span className="font-size-16 font-weight-bold">
+                  <Translation>Components</Translation>
+                </span>
+              }
+              actions={
+                !applicationDetail?.readOnly
+                  ? [
+                      <Permission
+                        request={{
+                          resource: `project/application/component:*`,
+                          action: 'create',
+                        }}
+                        project={`${applicationDetail && applicationDetail.project?.name}`}
+                      >
+                        <a
+                          key={'add'}
+                          onClick={this.onAddComponent}
+                          className="font-size-14 font-weight-400"
+                        >
+                          <Translation>New Component</Translation>
+                        </a>
+                      </Permission>,
+                    ]
+                  : []
+              }
+            />
+          </Col>
+        </Row>
+
+        <Components
+          application={applicationDetail}
+          components={components || []}
+          editComponent={(component: ApplicationComponentBase) => {
+            this.editComponent(component);
+          }}
+          onDeleteComponent={(component: string) => {
+            this.onDeleteComponent(component);
+          }}
+          onAddComponent={this.onAddComponent}
+          changeTraitStats={this.changeTraitStats}
+        />
+
+        <If condition={triggers.length > 0}>
           <Row>
             <Col span={24} className="padding16">
               <Title
+                actions={[
+                  <Permission
+                    request={{ resource: `project/application/trigger:*`, action: 'create' }}
+                    project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                  >
+                    <a
+                      key={'add'}
+                      className="font-size-14 font-weight-400"
+                      onClick={this.onAddTrigger}
+                    >
+                      <Translation>New Trigger</Translation>
+                    </a>
+                  </Permission>,
+                ]}
                 title={
                   <span className="font-size-16 font-weight-bold">
-                    <Translation>Components</Translation>
+                    <Translation>Triggers</Translation>
                   </span>
-                }
-                actions={
-                  !applicationDetail?.readOnly
-                    ? [
-                        <Permission
-                          request={{
-                            resource: `project/application/component:*`,
-                            action: 'create',
-                          }}
-                          project={`${applicationDetail && applicationDetail.project?.name}`}
-                        >
-                          <a
-                            key={'add'}
-                            onClick={this.onAddComponent}
-                            className="font-size-14 font-weight-400"
-                          >
-                            <Translation>New Component</Translation>
-                          </a>
-                        </Permission>,
-                      ]
-                    : []
                 }
               />
             </Col>
           </Row>
-
-          <Components
-            application={applicationDetail}
-            components={components || []}
-            editComponent={(component: ApplicationComponentBase) => {
-              this.editComponent(component);
+          <TriggerList
+            triggers={triggers}
+            component={mainComponent}
+            onDeleteTrigger={(token: string) => {
+              this.onDeleteTrigger(token);
             }}
-            onDeleteComponent={(component: string) => {
-              this.onDeleteComponent(component);
-            }}
-            onAddComponent={this.onAddComponent}
-            changeTraitStats={this.changeTraitStats}
+            createTriggerInfo={createTriggerInfo}
+            applicationDetail={applicationDetail}
           />
-
-          <If condition={triggers.length > 0}>
-            <Row>
-              <Col span={24} className="padding16">
-                <Title
-                  actions={[
-                    <Permission
-                      request={{ resource: `project/application/trigger:*`, action: 'create' }}
-                      project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
-                    >
-                      <a
-                        key={'add'}
-                        className="font-size-14 font-weight-400"
-                        onClick={this.onAddTrigger}
-                      >
-                        <Translation>New Trigger</Translation>
-                      </a>
-                    </Permission>,
-                  ]}
-                  title={
-                    <span className="font-size-16 font-weight-bold">
-                      <Translation>Triggers</Translation>
-                    </span>
-                  }
-                />
-              </Col>
-            </Row>
-            <TriggerList
-              triggers={triggers}
-              component={mainComponent}
-              onDeleteTrigger={(token: string) => {
-                this.onDeleteTrigger(token);
-              }}
-              createTriggerInfo={createTriggerInfo}
-              applicationDetail={applicationDetail}
-            />
-          </If>
         </If>
 
         <If condition={visibleTrait}>
