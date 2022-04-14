@@ -5,6 +5,7 @@ import locale from '../../utils/locale';
 import { getChartRepos } from '../../api/repository';
 import type { HelmRepo } from '../../interface/application';
 import { connect } from 'dva';
+import _ from 'lodash';
 
 type Props = {
   value?: any;
@@ -14,6 +15,7 @@ type Props = {
   dispatch?: ({}) => {};
   helm?: { repoType: string };
   project?: string;
+  onChangeSecretRef: (secretName: string) => void;
 };
 
 type State = {
@@ -68,7 +70,7 @@ class HelmRepoSelect extends Component<Props, State> {
   };
 
   onChange = (value: string) => {
-    const { onChange, dispatch } = this.props;
+    const { onChange, dispatch, onChangeSecretRef } = this.props;
     this.state.repos.map((repo) => {
       if (repo.url == value && repo.secretName != '' && dispatch) {
         dispatch({
@@ -78,6 +80,16 @@ class HelmRepoSelect extends Component<Props, State> {
       }
     });
     onChange(value);
+    const secretName = this.findSecretName(value);
+    onChangeSecretRef(secretName);
+  };
+
+  findSecretName = (value: string) => {
+    const { repos = [] } = this.state;
+    const findSecretObj = _.find(repos, (item) => {
+      return item.url === value;
+    });
+    return findSecretObj?.secretName || '';
   };
 
   render() {
