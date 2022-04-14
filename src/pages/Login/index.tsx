@@ -101,7 +101,7 @@ export default class LoginPage extends Component<Props, State> {
         })
         .catch((err) => {
           let customErrorMessage = '';
-          if (err.BusinessCode) {
+          if (err && err.BusinessCode) {
             customErrorMessage = `${err.Message}(${err.BusinessCode})`;
           } else {
             customErrorMessage = 'Please check the network or contact the administrator!';

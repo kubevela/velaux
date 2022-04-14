@@ -7,6 +7,8 @@ import { handleError } from '../utils/errors';
 import { getToken } from '../utils/storage';
 import { authenticationRefreshToken } from './productionLink';
 import ResetLogin from '../utils/resetLogin';
+import RedirectUser from '../utils/redirectUserManagement';
+import RedirectConfigType from '../utils/redirectConfigTypeManagement';
 
 type RetryRequests = (token: string) => void;
 let isRefreshing = false;
@@ -74,6 +76,10 @@ axiosInstance.interceptors.response.use(
       }
     } else if (data.BusinessCode === 12010) {
       return ResetLogin.getInstance().reset;
+    } else if (data.BusinessCode === 12011) {
+      return RedirectUser.getInstance().setEmail;
+    } else if (data.BusinessCode === 14010) {
+      return RedirectConfigType.getInstance().setDexConfig;
     } else {
       return Promise.reject(error.response || error);
     }
