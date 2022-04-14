@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
+import { routerRedux } from 'dva/router';
 import { Field, Grid, Radio, Input, Message } from '@b-design/ui';
 import { Dialog, Card, Button, Form } from '@b-design/ui';
 import Translation from '../../components/Translation';
@@ -16,17 +17,24 @@ type Props = {
   syncPlatformSetting: () => void;
   systemInfo: SystemInfo;
   userInfo?: LoginUserInfo;
+  platformSetting: boolean;
+  dispatch: ({}) => {};
 };
 
 type State = {
   businessGuideCode: number;
+};
+
+type QuickShowRet = {
+  hide: () => void;
 };
 @connect((store: any) => {
   return { ...store.user };
 })
 class PlatformSetting extends React.Component<Props, State> {
   field: Field;
-
+  dialogGuideDex: QuickShowRet | undefined;
+  dialogGuideUser: QuickShowRet | undefined;
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
@@ -77,7 +85,7 @@ class PlatformSetting extends React.Component<Props, State> {
   };
 
   renderUserGuideDialog = () => {
-    return Dialog.alert({
+    this.dialogGuideUser = Dialog.alert({
       title: i18n.t('The email address of administrator is empty'),
       content: i18n.t(
         'Please set a email address for the administrator, it must same as the SSO account.',
@@ -85,10 +93,11 @@ class PlatformSetting extends React.Component<Props, State> {
       footerActions: ['ok'],
       footer: this.getGuideUserButton(),
     });
+    return this.dialogGuideUser;
   };
 
   renderDexGuideDialog = () => {
-    return Dialog.alert({
+    this.dialogGuideDex = Dialog.alert({
       title: i18n.t('No dex connector configurations'),
       content: i18n.t(
         'Before enabling SSO, you must add at least one dex connector configuration.',
@@ -96,6 +105,7 @@ class PlatformSetting extends React.Component<Props, State> {
       footerActions: ['ok'],
       footer: this.getGuideDexButton(),
     });
+    return this.dialogGuideDex;
   };
 
   getGuideUserButton = () => {
@@ -131,9 +141,21 @@ class PlatformSetting extends React.Component<Props, State> {
   onOKGuide = () => {
     const { businessGuideCode } = this.state;
     if (businessGuideCode === 12011) {
-      window.location.href = '/integrations/config-dex-connector/config';
+      this.dialogGuideDex?.hide();
+      this.props.onClose();
+      this.props.dispatch(
+        routerRedux.push({
+          pathname: '/integrations/config-dex-connector/config',
+        }),
+      );
     } else if (businessGuideCode === 14010) {
-      window.location.href = '/users';
+      this.dialogGuideUser?.hide();
+      this.props.onClose();
+      this.props.dispatch(
+        routerRedux.push({
+          pathname: '/users',
+        }),
+      );
     }
   };
 
@@ -142,11 +164,11 @@ class PlatformSetting extends React.Component<Props, State> {
     return domain;
   };
   render() {
-    const { onClose } = this.props;
+    const { onClose, platformSetting } = this.props;
     return (
       <Dialog
         locale={locale.Dialog}
-        visible={true}
+        visible={platformSetting}
         className={'commonDialog'}
         title={i18n.t('Platform Setting')}
         autoFocus={true}
