@@ -136,14 +136,14 @@ export const rdelete = (url: string, params: any) => {
     });
 };
 
-export const put = (url: string, params: any) => {
+export const put = (url: string, params: any, customError?: boolean) => {
   return axiosInstance
     .put(url, params)
     .then((res) => {
       return res && res.data;
     })
     .catch((err) => {
-      handleAPIError(err, params.customError);
+      handleAPIError(err, params.customError || customError);
     });
 };
 

@@ -65,7 +65,7 @@ class Integrations extends Component<Props, State> {
         title: <Translation>TypeAlias(TypeName)</Translation>,
         dataIndex: 'configType',
         cell: (v: string, i: number, record: IntegrationConfigs) => {
-          const { configType, configTypeAlias } = record;
+          const { configType = '', configTypeAlias = '' } = record;
           if (!configType && !configTypeAlias) {
             return <span>-</span>;
           } else {

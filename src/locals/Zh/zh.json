@@ -512,5 +512,9 @@
   "The token is expired(12010)": "认证令牌已过期(12010)",
   "Type": "类型",
   "TypeAlias(TypeName)": "类型别名(类型名称)",
-  "Application deployed successfully": "应用部署成功"
+  "Application deployed successfully": "应用部署成功",
+  "The email address of administrator is empty": "管理员的电子邮件地址为空",
+  "Please set a email address for the administrator, it must same as the SSO account.": "请为管理员设置电子邮件地址, 它必须与SSO帐户相同",
+  "No dex connector configurations": "没有dex连接器配置",
+  "Before enabling SSO, you must add at least one dex connector configuration.": "在启用SSO之前, 必须至少添加一个dex连接器配置."
 }

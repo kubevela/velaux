@@ -11,5 +11,5 @@ export function loadSystemInfo() {
 
 export function updateSystemInfo(params: UpdateSystemInfo) {
   const url = `/api/v1/system_info`;
-  return put(url, params);
+  return put(url, params, true);
 }
