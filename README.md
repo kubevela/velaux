@@ -1,6 +1,6 @@
 ![alt](docs/images/KubeVela-03.png)
 
-# Velaux
+# VelaUX
 
 ## Overview
 
@@ -22,7 +22,6 @@ echo "BASE_DOMAIN='http://127.0.0.1:8000'" > .env
 ## Community
 
 - Slack:  [CNCF Slack](https://slack.cncf.io/) #kubevela channel (*English*)
-- Gitter: [oam-dev](https://gitter.im/oam-dev/community) (*English*)
 - [DingTalk Group](https://page.dingtalk.com/wow/dingtalk/act/en-home): `23310022` (*Chinese*)
 - Wechat Group (*Chinese*) : Broker wechat to add you into the user group.
 
