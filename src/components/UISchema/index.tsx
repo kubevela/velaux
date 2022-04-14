@@ -207,9 +207,24 @@ class UISchema extends Component<Props, State> {
       return <div />;
     }
     let onlyShowRequired = false;
-    if (uiSchema.length > 5) {
+    let couldShowParamCount = 0;
+    uiSchema.map((param) => {
+      if (param.disable) {
+        return;
+      }
+      // Determine whether to continue rendering according to conditions.
+      if (!this.conditionAllowRender(param.conditions)) {
+        return;
+      }
+      couldShowParamCount += 1;
+    });
+
+    // if the param's count is small, not hide the params
+    if (couldShowParamCount > 5) {
       onlyShowRequired = true;
     }
+
+    let couldBeDisabledParamCount = 0;
     const items = uiSchema.map((param) => {
       const init = this.form.init;
       const required = param.validate && param.validate.required;
@@ -219,6 +234,10 @@ class UISchema extends Component<Props, State> {
       // Determine whether to continue rendering according to conditions.
       if (!this.conditionAllowRender(param.conditions)) {
         return;
+      }
+
+      if (!param.validate.required) {
+        couldBeDisabledParamCount += 1;
       }
 
       if (onlyShowRequired && !param.validate.required && !advanced) {
@@ -241,7 +260,7 @@ class UISchema extends Component<Props, State> {
       };
 
       let description = param.description;
-      if (description && description.indexOf('http') == -1) {
+      if (description && description.indexOf('http') == -1 && description.indexOf(':') == -1) {
         description = i18n.t(description);
       }
       let label = param.label;
@@ -749,8 +768,6 @@ class UISchema extends Component<Props, State> {
       let colSpan = 24;
       if (maxColSpan) {
         colSpan = maxColSpan;
-        if (maxColSpan * uiSchema.length < 24) {
-        }
       }
       if (param.style?.colSpan) {
         colSpan = param.style?.colSpan;
@@ -769,6 +786,8 @@ class UISchema extends Component<Props, State> {
         span: 14,
       },
     };
+
+    const showAdvancedButton = couldBeDisabledParamCount != couldShowParamCount;
     return (
       <Form field={this.form} className="ui-schema-container">
         <If condition={disableRenderRow}>{items}</If>
@@ -776,16 +795,18 @@ class UISchema extends Component<Props, State> {
           <Row wrap={true}>{items}</Row>
           <If condition={onlyShowRequired}>
             <Divider />
-            <Form {...formItemLayout} style={{ width: '100%' }} fullWidth={true}>
-              <Form.Item
-                labelAlign="left"
-                colon={true}
-                label={<Translation>Advanced Parameters</Translation>}
-                labelWidth="200px"
-              >
-                <Switch onChange={this.onChangeAdvanced} size="small" checked={advanced} />
-              </Form.Item>
-            </Form>
+            <If condition={showAdvancedButton}>
+              <Form {...formItemLayout} style={{ width: '100%' }} fullWidth={true}>
+                <Form.Item
+                  labelAlign="left"
+                  colon={true}
+                  label={<Translation>Advanced Parameters</Translation>}
+                  labelWidth="200px"
+                >
+                  <Switch onChange={this.onChangeAdvanced} size="small" checked={advanced} />
+                </Form.Item>
+              </Form>
+            </If>
           </If>
         </If>
       </Form>

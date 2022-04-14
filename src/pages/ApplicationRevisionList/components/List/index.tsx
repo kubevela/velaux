@@ -30,7 +30,7 @@ class TableList extends Component<Props, State> {
     return [
       {
         key: 'version',
-        title: <Translation>Release Number</Translation>,
+        title: <Translation>Revision</Translation>,
         dataIndex: 'version',
         cell: (v: string, i: number, record: Revisions) => {
           if (record.codeInfo) {
