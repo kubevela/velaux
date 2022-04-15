@@ -129,14 +129,17 @@ export interface ApplicationStatus {
 
 export interface ComponentStatus {
   name: string;
+  namespace: string;
   env?: string;
   healthy: string;
   message: string;
-  traits: {
-    type: string;
-    healthy: string;
-    message: string;
-  }[];
+  traits: TraitStatus[];
+}
+
+export interface TraitStatus {
+  type: string;
+  healthy: string;
+  message: string;
 }
 
 export interface Resource {

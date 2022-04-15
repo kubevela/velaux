@@ -9,6 +9,8 @@ import type {
   Condition,
   EnvBinding,
   AppliedResource,
+  TraitStatus,
+  ComponentStatus,
 } from '../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
@@ -50,6 +52,7 @@ type State = {
   resources?: AppliedResource[];
   deployLoading: boolean;
   envName: string;
+  componentStatusOpen: any[];
 };
 
 @connect((store: any) => {
@@ -62,6 +65,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
       loading: true,
       deployLoading: false,
       envName: '',
+      componentStatusOpen: [],
     };
   }
 
@@ -259,6 +263,27 @@ class ApplicationMonitor extends React.Component<Props, State> {
     }
   };
 
+  oncomponentStatusRowOpen = (keys: any) => {
+    this.setState({ componentStatusOpen: keys });
+  };
+  formatComponentSatus(componentStatus: ComponentStatus[] | undefined) {
+    return componentStatus?.map((status: ComponentStatus) => {
+      const name = status.namespace + '/' + status.name;
+      return {
+        name: name,
+        healthy: status.healthy,
+        message: status.message,
+        children: status?.traits?.map((trait: TraitStatus) => {
+          return {
+            name: trait.type,
+            healthy: trait.healthy,
+            message: trait.message,
+          };
+        }),
+      };
+    });
+  }
+
   render() {
     const { applicationStatus, applicationDetail, components } = this.props;
     const {
@@ -344,12 +369,21 @@ class ApplicationMonitor extends React.Component<Props, State> {
                 contentHeight="auto"
                 title={<Translation>Component Status</Translation>}
               >
-                <Table locale={locale.Table} className="customTable" dataSource={componentStatus}>
+                <Table
+                  locale={locale.Table}
+                  className="customTable"
+                  dataSource={this.formatComponentSatus(componentStatus)}
+                  primaryKey={'name'}
+                  isTree
+                  indent={15}
+                  openRowKeys={this.state.componentStatusOpen}
+                  onRowOpen={this.oncomponentStatusRowOpen}
+                >
                   <Table.Column
                     align="left"
                     dataIndex="name"
                     width="200px"
-                    title={<Translation>Name</Translation>}
+                    title={<Translation>Namespace/Name</Translation>}
                   />
                   <Table.Column
                     align="left"
