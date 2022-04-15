@@ -325,9 +325,9 @@ class ApplicationMonitor extends React.Component<Props, State> {
                         userInfo,
                       )
                     ) {
-                      return <Link to="/clusters">{v}</Link>;
+                      return <Link to="/clusters">{clusterName}</Link>;
                     }
-                    return <span>{v}</span>;
+                    return <span>{clusterName}</span>;
                   }}
                 />
                 <Table.Column
@@ -355,7 +355,11 @@ class ApplicationMonitor extends React.Component<Props, State> {
                     if (row.latest) {
                       return (
                         <span>
-                          <Icon style={{ color: 'green', marginRight: '8px' }} type="NEW" />
+                          <Icon
+                            style={{ color: 'green', marginRight: '8px' }}
+                            type="NEW"
+                            title="latest version resource"
+                          />
                           <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
                         </span>
                       );
