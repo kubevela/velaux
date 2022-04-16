@@ -10,9 +10,11 @@ import { If } from 'tsx-control-statements/components';
 import { deleteApplicationPlan, getComponentDefinitions } from '../../api/application';
 import type { ApplicationBase } from '../../interface/application';
 import EditAppDialog from './components/EditAppDialog';
+import EditPlatFormUserDialog from './components/EditPlatFormUserDialog';
 import type { LoginUserInfo } from '../../interface/user';
 import Permission from '../../components/Permission';
 import Translation from '../../components/Translation';
+import _ from 'lodash';
 
 type Props = {
   dispatch: ({}) => {};
@@ -28,6 +30,8 @@ type State = {
   isLoading: boolean;
   showEditApplication: boolean;
   editItem?: ApplicationBase;
+  userInfo?: LoginUserInfo;
+  isEditAdminUser: boolean;
 };
 
 @connect((store: any) => {
@@ -41,6 +45,8 @@ class Application extends Component<Props, State> {
       componentDefinitions: [],
       isLoading: false,
       showEditApplication: false,
+      isEditAdminUser: false,
+      userInfo: props.userInfo,
     };
   }
 
@@ -48,6 +54,14 @@ class Application extends Component<Props, State> {
     this.getApplications({});
     this.getEnvs();
     this.onGetComponentDefinitions();
+  }
+
+  componentWillReceiveProps(nextProps: Props) {
+    if (nextProps.userInfo !== this.props.userInfo) {
+      this.setState({ userInfo: nextProps.userInfo }, () => {
+        this.isEditPlatForm();
+      });
+    }
   }
 
   getApplications = async (params: any) => {
@@ -110,10 +124,45 @@ class Application extends Component<Props, State> {
     });
   };
 
+  isEditPlatForm = () => {
+    const { userInfo } = this.state;
+    const isAdminUser = this.isAdminUserCheck();
+    if (isAdminUser && userInfo && !userInfo.email) {
+      this.setState({
+        isEditAdminUser: true,
+      });
+    }
+  };
+
+  isAdminUserCheck = () => {
+    const { userInfo } = this.state;
+    const platformPermissions = userInfo?.platformPermissions || [];
+    const findAdminUser = _.find(platformPermissions, (item) => {
+      return item.name === 'admin';
+    });
+    if (findAdminUser) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  onCloseEditAdminUser = () => {
+    this.setState({ isEditAdminUser: false });
+  };
+
   render() {
-    const { applicationList, targets, dispatch, envs, userInfo } = this.props;
-    const { showAddApplication, componentDefinitions, isLoading, showEditApplication, editItem } =
-      this.state;
+    const { applicationList, targets, dispatch, envs } = this.props;
+    const {
+      showAddApplication,
+      componentDefinitions,
+      isLoading,
+      showEditApplication,
+      editItem,
+      isEditAdminUser,
+      userInfo,
+    } = this.state;
+
     return (
       <div>
         <Title
@@ -181,6 +230,9 @@ class Application extends Component<Props, State> {
             onOK={this.closeEditAppDialog}
             onClose={this.closeEditAppDialog}
           />
+        </If>
+        <If condition={isEditAdminUser}>
+          <EditPlatFormUserDialog userInfo={userInfo} onClose={this.onCloseEditAdminUser} />
         </If>
       </div>
     );
