@@ -390,7 +390,7 @@ class AppDialog extends React.Component<Props, State> {
                     }
                   >
                     <Select
-                      locale={locale.Select}
+                      locale={locale().Select}
                       showSearch
                       className="select"
                       {...init(`componentType`, {
@@ -435,7 +435,7 @@ class AppDialog extends React.Component<Props, State> {
                           },
                         ],
                       })}
-                      locale={locale.Select}
+                      locale={locale().Select}
                       mode="multiple"
                       dataSource={envOptions}
                     />

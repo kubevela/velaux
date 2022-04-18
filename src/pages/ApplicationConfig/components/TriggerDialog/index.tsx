@@ -245,7 +245,7 @@ class TriggerDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Type</Translation>} required>
                 <Select
                   name="type"
-                  locale={locale.Select}
+                  locale={locale().Select}
                   dataSource={[{ label: 'On Webhook Event', value: 'webhook' }]}
                   {...init('type', {
                     initValue: 'webhook',
@@ -266,7 +266,7 @@ class TriggerDialog extends React.Component<Props, State> {
                 <FormItem label={<Translation>PayloadType</Translation>} required>
                   <Select
                     name="payloadType"
-                    locale={locale.Select}
+                    locale={locale().Select}
                     dataSource={payloadTypeOption}
                     {...init('payloadType', {
                       initValue: 'custom',
@@ -288,7 +288,7 @@ class TriggerDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Execution workflow</Translation>} required>
                 <Select
                   name="workflowName"
-                  locale={locale.Select}
+                  locale={locale().Select}
                   dataSource={workflowOption}
                   {...init('workflowName', {
                     rules: [

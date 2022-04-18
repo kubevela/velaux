@@ -106,7 +106,7 @@ class Header extends Component<Props, State> {
           );
         }
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
   deleteEnv = async () => {
@@ -125,7 +125,7 @@ class Header extends Component<Props, State> {
           );
         }
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 
@@ -173,7 +173,7 @@ class Header extends Component<Props, State> {
         <Row className="border-radius-8">
           <Col span="4" style={{ marginBottom: '16px' }}>
             <Select
-              locale={locale.Select}
+              locale={locale().Select}
               mode="single"
               onChange={this.handleTargetChange}
               dataSource={targetOptions}
@@ -184,7 +184,7 @@ class Header extends Component<Props, State> {
           </Col>
           <Col span="4" style={{ marginBottom: '16px', paddingLeft: '16px' }}>
             <Select
-              locale={locale.Select}
+              locale={locale().Select}
               mode="single"
               onChange={this.handleComponentChange}
               dataSource={componentOptions}

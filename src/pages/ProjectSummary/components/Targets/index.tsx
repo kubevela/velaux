@@ -104,7 +104,7 @@ class Targets extends Component<Props, State> {
             </Permission>
           </section>
           <section className="card-content-table">
-            <Table locale={locale.Table} dataSource={list} hasBorder={true} loading={isLoading}>
+            <Table locale={locale().Table} dataSource={list} hasBorder={true} loading={isLoading}>
               {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
             </Table>
           </section>

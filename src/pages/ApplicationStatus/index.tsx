@@ -251,7 +251,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
               onCancel: () => {
                 this.setState({ deployLoading: false });
               },
-              locale: locale.Dialog,
+              locale: locale().Dialog,
             });
           } else {
             handleError(err);
@@ -304,11 +304,11 @@ class ApplicationMonitor extends React.Component<Props, State> {
         <Loading visible={loading} style={{ width: '100%' }}>
           <If condition={applicationStatus}>
             <Card
-              locale={locale.Card}
+              locale={locale().Card}
               contentHeight="200px"
               title={<Translation>Applied Resources</Translation>}
             >
-              <Table locale={locale.Table} dataSource={resources}>
+              <Table locale={locale().Table} dataSource={resources}>
                 <Table.Column
                   dataIndex="cluster"
                   title={<Translation>Cluster</Translation>}
@@ -373,12 +373,12 @@ class ApplicationMonitor extends React.Component<Props, State> {
             </Card>
             <If condition={componentStatus}>
               <Card
-                locale={locale.Card}
+                locale={locale().Card}
                 style={{ marginTop: '8px', marginBottom: '16px' }}
                 contentHeight="auto"
                 title={<Translation>Component Status</Translation>}
               >
-                <Table locale={locale.Table} className="customTable" dataSource={componentStatus}>
+                <Table locale={locale().Table} className="customTable" dataSource={componentStatus}>
                   <Table.Column
                     align="left"
                     dataIndex="name"
@@ -417,12 +417,12 @@ class ApplicationMonitor extends React.Component<Props, State> {
             </If>
             <If condition={applicationStatus?.conditions}>
               <Card
-                locale={locale.Card}
+                locale={locale().Card}
                 style={{ marginTop: '8px' }}
                 contentHeight="auto"
                 title={<Translation>Conditions</Translation>}
               >
-                <Table locale={locale.Table} dataSource={applicationStatus?.conditions}>
+                <Table locale={locale().Table} dataSource={applicationStatus?.conditions}>
                   <Table.Column
                     width="150px"
                     dataIndex="type"

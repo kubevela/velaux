@@ -136,7 +136,7 @@ class targetList extends React.Component<Props, State> {
         <Pagination
           className="delivery-target-pagenation"
           total={envTotal}
-          locale={locale.Pagination}
+          locale={locale().Pagination}
           size="medium"
           pageSize={this.state.pageSize}
           current={this.state.page}

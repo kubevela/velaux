@@ -59,7 +59,7 @@ class SelectSearch extends React.Component<Props, State> {
       <Row className="app-select-wrapper border-radius-8" wrap={true}>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
-            locale={locale.Select}
+            locale={locale().Select}
             mode="single"
             size="large"
             onChange={this.handleChangRegistry}

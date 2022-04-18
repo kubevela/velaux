@@ -153,7 +153,7 @@ class AddClustDialog extends React.Component<Props, State> {
     const valueInfo = cluster.kubeConfig || values.kubeConfig || '';
     return (
       <Dialog
-        locale={locale.Dialog}
+        locale={locale().Dialog}
         className={'commonDialog'}
         title={
           editMode ? (

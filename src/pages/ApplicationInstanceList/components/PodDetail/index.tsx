@@ -288,7 +288,7 @@ class PodDetail extends React.Component<Props, State> {
           hasBorder={false}
           primaryKey="name"
           loading={loading}
-          locale={locale.Table}
+          locale={locale().Table}
         >
           {containerColumns &&
             containerColumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
@@ -300,7 +300,7 @@ class PodDetail extends React.Component<Props, State> {
           hasBorder={false}
           loading={loading}
           primaryKey="time"
-          locale={locale.Table}
+          locale={locale().Table}
         >
           {eventCloumns &&
             eventCloumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}

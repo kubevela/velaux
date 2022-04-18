@@ -100,7 +100,7 @@ class Namespace extends React.Component<Props, State> {
       <div>
         <div className="cluster-container">
           <Select
-            locale={locale.Select}
+            locale={locale().Select}
             className="cluster-params-input"
             mode="single"
             disabled={disabled}
@@ -122,7 +122,7 @@ class Namespace extends React.Component<Props, State> {
         </div>
 
         <Dialog
-          locale={locale.Dialog}
+          locale={locale().Dialog}
           className={'namespaceDialogWraper'}
           title={<Translation>Create Namespace</Translation>}
           autoFocus={true}

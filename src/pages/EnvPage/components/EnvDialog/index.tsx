@@ -171,7 +171,7 @@ class EnvDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
-          locale={locale.Dialog}
+          locale={locale().Dialog}
           className={'commonDialog'}
           height="auto"
           title={
@@ -297,7 +297,7 @@ class EnvDialog extends React.Component<Props, State> {
                 <Loading visible={targetLoading} style={{ width: '100%' }}>
                   <FormItem label={<Translation>Target</Translation>} required>
                     <Select
-                      locale={locale.Select}
+                      locale={locale().Select}
                       className="select"
                       mode="multiple"
                       placeholder={i18n.t('Please select a target').toString()}

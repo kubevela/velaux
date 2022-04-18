@@ -149,7 +149,7 @@ class ProjectRoles extends Component<Props, State> {
           });
         }
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 

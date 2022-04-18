@@ -452,7 +452,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
               onCancel: () => {
                 this.setState({ deployLoading: false });
               },
-              locale: locale.Dialog,
+              locale: locale().Dialog,
             });
           } else {
             handleError(err);
@@ -541,7 +541,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         <If condition={applicationStatus}>
           <If condition={applicationDetail?.applicationType == 'common'}>
             <Table
-              locale={locale.Table}
+              locale={locale().Table}
               className="podlist-table-wraper"
               size="medium"
               primaryKey={'primaryKey'}
@@ -560,7 +560,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           <If condition={applicationDetail?.applicationType == 'cloud'}>
             <Table
               size="medium"
-              locale={locale.Table}
+              locale={locale().Table}
               className="customTable"
               dataSource={cloudInstance}
               primaryKey={'instanceName'}

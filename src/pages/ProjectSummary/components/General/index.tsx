@@ -68,7 +68,7 @@ class General extends Component<Props, State> {
     return (
       <Fragment>
         <div className="general-wrapper">
-          <Card locale={locale.Card} contentHeight="auto" className="card-wrapper">
+          <Card locale={locale().Card} contentHeight="auto" className="card-wrapper">
             <section className="card-title-wrapper">
               <span className="card-title">
                 <Translation>General</Translation>

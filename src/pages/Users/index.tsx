@@ -193,7 +193,7 @@ class Users extends Component<Props, State> {
             .catch();
         }
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 
@@ -445,7 +445,7 @@ class Users extends Component<Props, State> {
 
           <section className="margin-top-20  user-list-wrapper">
             <Table
-              locale={locale.Table}
+              locale={locale().Table}
               dataSource={dataSource}
               hasBorder={false}
               loading={isLoading}
@@ -456,7 +456,7 @@ class Users extends Component<Props, State> {
             <Pagination
               className="margin-top-20 text-align-right"
               total={total}
-              locale={locale.Pagination}
+              locale={locale().Pagination}
               hideOnlyOnePage={true}
               size="medium"
               pageSize={pageSize}

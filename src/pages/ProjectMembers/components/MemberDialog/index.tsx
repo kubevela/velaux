@@ -181,7 +181,7 @@ class MemberDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
-                    locale={locale.Select}
+                    locale={locale().Select}
                     mode="tag"
                     dataSource={rolesList}
                   />
