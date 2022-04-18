@@ -72,7 +72,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
     ];
   };
 
-  close = () => { };
+  close = () => {};
 
   showPasswordLabel = () => {
     return (
