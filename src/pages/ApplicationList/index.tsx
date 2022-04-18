@@ -10,7 +10,7 @@ import { If } from 'tsx-control-statements/components';
 import { deleteApplicationPlan, getComponentDefinitions } from '../../api/application';
 import type { ApplicationBase } from '../../interface/application';
 import EditAppDialog from './components/EditAppDialog';
-import EditPlatFormUserDialog from './components/EditPlatFormUserDialog';
+import EditPlatFormUserDialog from '../../layout/TopBar/components/EditPlatFormUserDialog';
 import type { LoginUserInfo } from '../../interface/user';
 import Permission from '../../components/Permission';
 import Translation from '../../components/Translation';
