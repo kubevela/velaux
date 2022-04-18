@@ -35,6 +35,7 @@ import type { ApplicationStatus } from '../../../../interface/application';
 import i18n from '../../../../i18n';
 import type { NameAlias } from '../../../../interface/env';
 import Permission from '../../../../components/Permission';
+import { getLanguage } from '../../../../utils/common';
 
 type Props = {
   addonName: string;
@@ -159,12 +160,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
 
   handleSubmit = () => {
     const { status } = this.state;
+    const language = getLanguage();
     if (status === 'enabled') {
       Dialog.confirm({
         content:
           'Please make sure that the Addon is no longer in use and the related application has been recycled.',
         onOk: this.disableAddon,
-        locale: locale.Dialog,
+        locale: locale[language as 'en' | 'zh'].Dialog,
       });
       return;
     }
@@ -364,6 +366,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
       };
     });
 
+    const language = getLanguage();
     return (
       <div className="basic">
         <DrawerWithFooter
@@ -450,7 +453,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </If>
             <If condition={addonDetailInfo?.dependencies}>
               <Card
-                locale={locale.Card}
+                locale={locale[language as 'en' | 'zh'].Card}
                 contentHeight="auto"
                 title={<Translation>Dependencies</Translation>}
               >
@@ -479,7 +482,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             <If condition={addonDetailInfo?.definitions}>
               <Card
                 contentHeight="auto"
-                locale={locale.Card}
+                locale={locale[language as 'en' | 'zh'].Card}
                 title={<Translation>Definitions</Translation>}
                 style={{ marginTop: '16px' }}
               >
@@ -488,7 +491,10 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     Enable the addon to obtain the following extension capabilities
                   </Translation>
                 </Message>
-                <Table locale={locale.Table} dataSource={addonDetailInfo?.definitions}>
+                <Table
+                  locale={locale[language as 'en' | 'zh'].Table}
+                  dataSource={addonDetailInfo?.definitions}
+                >
                   <Table.Column
                     dataIndex="name"
                     align="left"
@@ -514,7 +520,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </If>
             <Card
               contentHeight="auto"
-              locale={locale.Card}
+              locale={locale[language as 'en' | 'zh'].Card}
               title={<Translation>Readme</Translation>}
               style={{ marginTop: '16px' }}
             >

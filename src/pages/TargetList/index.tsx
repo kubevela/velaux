@@ -13,6 +13,7 @@ import { If } from 'tsx-control-statements/components';
 import type { LoginUserInfo } from '../../interface/user';
 import Permission from '../../components/Permission';
 import Translation from '../../components/Translation';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   targets?: [];
@@ -112,10 +113,10 @@ class targetList extends React.Component<Props, State> {
       pageSize: 10,
     });
   };
-
   render() {
     const { t, clusterList, targets, total, userInfo } = this.props;
     const { visibleDelivery, isEdit, targetItem } = this.state;
+    const language = getLanguage();
     return (
       <div>
         <ListTitle
@@ -147,7 +148,7 @@ class targetList extends React.Component<Props, State> {
         <Pagination
           className="delivery-target-pagenation"
           total={total}
-          locale={locale.Pagination}
+          locale={locale[language as 'en' | 'zh'].Pagination}
           size="medium"
           pageSize={this.state.pageSize}
           current={this.state.page}

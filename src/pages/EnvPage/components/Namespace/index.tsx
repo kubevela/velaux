@@ -4,6 +4,7 @@ import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
 import { createClusterNamespace } from '../../../../api/cluster';
 import locale from '../../../../utils/locale';
+import { getLanguage } from '../../../../utils/common';
 
 type Props = {
   cluster?: string;
@@ -73,12 +74,13 @@ class Namespace extends React.Component<Props, State> {
   render() {
     const { disableNew, onChange, namespaces, value } = this.props;
     const { showNameSpaceInput, loading } = this.state;
+    const language = getLanguage();
     return (
       <div>
         <If condition={!showNameSpaceInput}>
           <div className="cluster-container">
             <Select
-              locale={locale.Select}
+              locale={locale[language as 'en' | 'zh'].Select}
               className="cluster-params-input"
               mode="single"
               dataSource={namespaces}

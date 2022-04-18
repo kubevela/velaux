@@ -10,7 +10,7 @@ import locale from '../../../../utils/locale';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkPermission } from '../../../../utils/permission';
 import { connect } from 'dva';
-
+import { getLanguage } from '../../../../utils/common';
 type State = {
   extendDotVisible: boolean;
   choseIndex: number;
@@ -64,6 +64,7 @@ class CardContent extends React.Component<Props, State> {
     const { userInfo } = this.props;
     const project = '';
     const request = { resource: `cluster:${item.name}`, action: 'delete' };
+    const language = getLanguage();
     if (checkPermission(request, project, userInfo)) {
       return (
         <Menu.Item
@@ -74,7 +75,7 @@ class CardContent extends React.Component<Props, State> {
               onOk: () => {
                 this.onDeleteCluster(item.name);
               },
-              locale: locale.Dialog,
+              locale: locale[language as 'en' | 'zh'].Dialog,
             });
           }}
         >

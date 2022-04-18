@@ -14,7 +14,7 @@ import {
 } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import WorkFlowItem from '../workflow-item';
-import { checkName } from '../../../utils/common';
+import { checkName, getLanguage } from '../../../utils/common';
 import type { WorkFlowData, WorkFlowOption } from '../entity';
 import { deleteWorkFlow } from '../../../api/workflows';
 import Translation from '../../../components/Translation';
@@ -91,6 +91,7 @@ class WorkflowComponent extends Component<Props, State> {
   };
 
   deleteWorkflow = (name: string) => {
+    const language = getLanguage();
     Dialog.confirm({
       content: `Are you sure delete this workflow?`,
       onOk: () => {
@@ -101,7 +102,7 @@ class WorkflowComponent extends Component<Props, State> {
           }
         });
       },
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 

@@ -4,7 +4,7 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import { checkUserPassword, checkUserEmail } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import { createUser, updateUser } from '../../../../api/users';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import type { User } from '../../../../interface/user';
 import type { RolesBase } from '../../../../interface/roles';
 import { If } from 'tsx-control-statements/components';
@@ -146,7 +146,7 @@ class CreateUser extends React.Component<Props, State> {
       },
     };
     const rolesListSelect = getSelectLabel(rolesList);
-
+    const language = getLanguage();
     return (
       <React.Fragment>
         <DrawerWithFooter
@@ -253,7 +253,7 @@ class CreateUser extends React.Component<Props, State> {
                         },
                       ],
                     })}
-                    locale={locale.Select}
+                    locale={locale[language as 'en' | 'zh'].Select}
                     mode="multiple"
                     dataSource={rolesListSelect}
                   />

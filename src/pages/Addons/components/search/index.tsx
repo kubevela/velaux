@@ -3,6 +3,7 @@ import { Grid, Icon, Select, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
+import { getLanguage } from '../../../../utils/common';
 
 type Props = {
   t: (key: string) => {};
@@ -54,12 +55,13 @@ class SelectSearch extends React.Component<Props, State> {
     const { t, registries } = this.props;
     const queryPlaceholder = t('Search by name and description etc').toString();
     const { registryValue, inputValue } = this.state;
+    const language = getLanguage();
 
     return (
       <Row className="app-select-wrapper border-radius-8" wrap={true}>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
-            locale={locale.Select}
+            locale={locale[language as 'en' | 'zh'].Select}
             mode="single"
             size="large"
             onChange={this.handleChangRegistry}

@@ -13,7 +13,7 @@ import { detailWorkFLowDefinition } from '../../../api/workflows';
 import type { DefinitionDetail } from '../../../interface/application';
 import UISchema from '../../../components/UISchema';
 import Translation from '../../../components/Translation';
-import { checkName } from '../../../utils/common';
+import { checkName, getLanguage } from '../../../utils/common';
 
 import './index.less';
 import DrawerWithFooter from '../../../components/Drawer';
@@ -136,6 +136,7 @@ class WorkflowForm extends Component<Props, State> {
       callback();
     };
     const edit = data && data.consumerData?.name != undefined && data.consumerData?.name != '';
+    const language = getLanguage();
     return (
       <DrawerWithFooter
         title={<Translation>{edit ? 'Edit Workflow Step' : 'Add Workflow Step'}</Translation>}
@@ -154,7 +155,7 @@ class WorkflowForm extends Component<Props, State> {
             <Col span={24} style={{ padding: '0 8px' }}>
               <FormItem label={<Translation>Workflow Type</Translation>} required disabled={edit}>
                 <Select
-                  locale={locale.Select}
+                  locale={locale[language as 'en' | 'zh'].Select}
                   className="select"
                   placeholder={t('Please select').toString()}
                   {...init(`type`, {

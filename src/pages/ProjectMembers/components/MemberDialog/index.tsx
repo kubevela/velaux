@@ -4,7 +4,7 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import { createProjectUsers, updateProjectUser } from '../../../../api/project';
 import type { ProjectMember, ProjectRoleBase } from '../../../../interface/project';
 import Translation from '../../../../components/Translation';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import { getSelectLabel } from '../../../../utils/utils';
 import i18n from '../../../../i18n';
@@ -134,6 +134,7 @@ class MemberDialog extends React.Component<Props, State> {
     };
 
     const rolesList = getSelectLabel(projectRoles);
+    const language = getLanguage();
     return (
       <React.Fragment>
         <DrawerWithFooter
@@ -181,7 +182,7 @@ class MemberDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
-                    locale={locale.Select}
+                    locale={locale[language as 'en' | 'zh'].Select}
                     mode="tag"
                     dataSource={rolesList}
                   />

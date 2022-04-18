@@ -4,6 +4,7 @@ import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
 import { createClusterNamespace } from '../../../../api/cluster';
 import locale from '../../../../utils/locale';
+import { getLanguage } from '../../../../utils/common';
 import './index.less';
 
 type Props = {
@@ -95,12 +96,12 @@ class Namespace extends React.Component<Props, State> {
         span: 14,
       },
     };
-
+    const language = getLanguage();
     return (
       <div>
         <div className="cluster-container">
           <Select
-            locale={locale.Select}
+            locale={locale[language as 'en' | 'zh'].Select}
             className="cluster-params-input"
             mode="single"
             disabled={disabled}
@@ -122,7 +123,7 @@ class Namespace extends React.Component<Props, State> {
         </div>
 
         <Dialog
-          locale={locale.Dialog}
+          locale={locale[language as 'en' | 'zh'].Dialog}
           className={'namespaceDialogWraper'}
           title={<Translation>Create Namespace</Translation>}
           autoFocus={true}

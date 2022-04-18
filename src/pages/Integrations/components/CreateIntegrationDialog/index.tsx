@@ -10,7 +10,7 @@ import type { Rule } from '@alifd/field';
 import type { ComponentDefinitionsBase } from '../../../../interface/application';
 import type { Project } from '../../../../interface/project';
 import type { DefinitionDetail } from '../../../../interface/application';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import { getSelectLabel } from '../../../../utils/utils';
@@ -142,7 +142,7 @@ class CreateIntegration extends React.Component<Props, State> {
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
-
+    const language = getLanguage();
     return (
       <React.Fragment>
         <DrawerWithFooter
@@ -249,7 +249,7 @@ class CreateIntegration extends React.Component<Props, State> {
                     required={true}
                   >
                     <Select
-                      locale={locale.Select}
+                      locale={locale[language as 'en' | 'zh'].Select}
                       showSearch
                       className="select"
                       placeholder={i18n.t('Please select').toString()}

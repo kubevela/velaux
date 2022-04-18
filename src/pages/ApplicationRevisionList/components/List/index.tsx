@@ -4,7 +4,7 @@ import Empty from '../Empty';
 import Translation from '../../../../components/Translation';
 import type { ApplicationDetail, Revisions } from '../../../../interface/application';
 import { statusList } from '../../constants';
-import { momentDate } from '../../../../utils/common';
+import { momentDate, getLanguage } from '../../../../utils/common';
 import { Link } from 'dva/router';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
@@ -120,10 +120,11 @@ class TableList extends Component<Props, State> {
     const { Column } = Table;
     const columns = this.getCloumns();
     const { list } = this.props;
+    const language = getLanguage();
     return (
       <div className="table-version-list  margin-top-20">
         <Table
-          locale={locale.Table}
+          locale={locale[language as 'en' | 'zh'].Table}
           primaryKey={'version'}
           className="customTable"
           rowHeight={40}

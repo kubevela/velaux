@@ -8,7 +8,7 @@ import { If } from 'tsx-control-statements/components';
 import locale from '../../../../utils/locale';
 import GeneralDialog from '../GeneralDialog';
 import './index.less';
-import { momentDate } from '../../../../utils/common';
+import { momentDate, getLanguage } from '../../../../utils/common';
 import Permission from '../../../../components/Permission';
 
 type Props = {
@@ -65,10 +65,15 @@ class General extends Component<Props, State> {
       projectName,
     } = this.props;
     const { isEditGeneral, editGeneral } = this.state;
+    const language: string = getLanguage();
     return (
       <Fragment>
         <div className="general-wrapper">
-          <Card locale={locale.Card} contentHeight="auto" className="card-wrapper">
+          <Card
+            locale={locale[language as 'en' | 'zh'].Card}
+            contentHeight="auto"
+            className="card-wrapper"
+          >
             <section className="card-title-wrapper">
               <span className="card-title">
                 <Translation>General</Translation>

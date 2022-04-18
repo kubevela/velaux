@@ -12,7 +12,7 @@ import {
   Loading,
 } from '@b-design/ui';
 import DefinitionCode from '../../../../components/DefinitionCode';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import { getClusterDetails, updateCluster } from '../../../../api/cluster';
 import './index.less';
 import Translation from '../../../../components/Translation';
@@ -151,9 +151,10 @@ class AddClustDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const values: { kubeConfig: string } = this.field.getValues();
     const valueInfo = cluster.kubeConfig || values.kubeConfig || '';
+    const language = getLanguage();
     return (
       <Dialog
-        locale={locale.Dialog}
+        locale={locale[language as 'en' | 'zh'].Dialog}
         className={'commonDialog'}
         title={
           editMode ? (

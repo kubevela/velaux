@@ -7,7 +7,7 @@ import type { NameAlias } from '../../interface/env';
 import type { User } from '../../interface/user';
 import { Table, Button, Pagination, Dialog, Message } from '@b-design/ui';
 import Translation from '../../components/Translation';
-import { momentDate } from '../../utils/common';
+import { momentDate, getLanguage } from '../../utils/common';
 import locale from '../../utils/locale';
 import CreateProjectDialog from './components/CreateProjectDialog';
 import Title from '../../components/ListTitle';
@@ -89,6 +89,7 @@ class Projects extends Component<Props, State> {
   };
 
   onDelete = (record: Project) => {
+    const language = getLanguage();
     Dialog.confirm({
       content: 'Are you sure you want to delete the project',
       onOk: () => {
@@ -104,7 +105,7 @@ class Projects extends Component<Props, State> {
             .catch();
         }
       },
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 
@@ -239,6 +240,7 @@ class Projects extends Component<Props, State> {
       isLoading,
       userList,
     } = this.state;
+    const language = getLanguage();
     return (
       <Fragment>
         <div className="project-list-content">
@@ -253,14 +255,19 @@ class Projects extends Component<Props, State> {
               </Permission>,
             ]}
           />
-          <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>
+          <Table
+            locale={locale[language as 'en' | 'zh'].Table}
+            dataSource={list}
+            hasBorder={false}
+            loading={isLoading}
+          >
             {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
           </Table>
 
           <Pagination
             className="margin-top-20 text-align-right"
             total={total}
-            locale={locale.Pagination}
+            locale={locale[language as 'en' | 'zh'].Pagination}
             size="medium"
             pageSize={pageSize}
             current={page}

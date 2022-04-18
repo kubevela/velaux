@@ -6,6 +6,7 @@ import { getChartRepos } from '../../api/repository';
 import type { HelmRepo } from '../../interface/application';
 import { connect } from 'dva';
 import _ from 'lodash';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   value?: any;
@@ -99,6 +100,7 @@ class HelmRepoSelect extends Component<Props, State> {
     if (inputRepo) {
       dataSource.unshift(inputRepo);
     }
+    const language = getLanguage();
     return (
       <Loading visible={loading} style={{ width: '100%' }}>
         <Select
@@ -111,7 +113,7 @@ class HelmRepoSelect extends Component<Props, State> {
           followTrigger={true}
           value={value}
           dataSource={dataSource}
-          locale={locale.Select}
+          locale={locale[language as 'en' | 'zh'].Select}
         />
       </Loading>
     );

@@ -9,6 +9,7 @@ import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
 import type { Project } from '../../../../interface/project';
 import Permission from '../../../../components/Permission';
+import { getLanguage } from '../../../../utils/common';
 const { Group: TagGroup } = Tag;
 
 type Props = {
@@ -35,6 +36,7 @@ class TableList extends Component<Props> {
   };
 
   getColumns = () => {
+    const language = getLanguage();
     return [
       {
         key: 'name',
@@ -138,7 +140,7 @@ class TableList extends Component<Props> {
                         onOk: () => {
                           this.onDelete(record);
                         },
-                        locale: locale.Dialog,
+                        locale: locale[language as 'en' | 'zh'].Dialog,
                       });
                     }}
                   >
@@ -170,10 +172,11 @@ class TableList extends Component<Props> {
     const { Column } = Table;
     const columns = this.getColumns();
     const { list } = this.props;
+    const language = getLanguage();
     return (
       <div className="table-delivery-list margin-top-20">
         <Table
-          locale={locale.Table}
+          locale={locale[language as 'en' | 'zh'].Table}
           className="customTable"
           size="medium"
           dataSource={list}

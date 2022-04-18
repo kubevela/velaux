@@ -25,7 +25,7 @@ import type {
   ApplicationComponentBase,
 } from '../../interface/application';
 
-import { momentDate } from '../../utils/common';
+import { momentDate, getLanguage } from '../../utils/common';
 import locale from '../../utils/locale';
 import TriggerList from './components/TriggerList';
 import TriggerDialog from './components/TriggerDialog';
@@ -368,7 +368,7 @@ class ApplicationConfig extends Component<Props, State> {
       isEditComponent,
       componentDefinitions,
     } = this.state;
-
+    const language = getLanguage();
     return (
       <div>
         <Row>
@@ -393,7 +393,7 @@ class ApplicationConfig extends Component<Props, State> {
         </Row>
         <Row>
           <Col span={24} className="padding16">
-            <Card locale={locale.Card} contentHeight="auto">
+            <Card locale={locale[language as 'en' | 'zh'].Card} contentHeight="auto">
               <Row wrap={true}>
                 <Col m={12} xs={24}>
                   <Item

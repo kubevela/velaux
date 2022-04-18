@@ -11,7 +11,7 @@ import CreateUser from './components/CreateUser';
 import ResetPassword from './components/ResetPassword';
 import { getUserList, deleteUser, changeUserDisable, changeUserEnable } from '../../api/users';
 import { getRoleList } from '../../api/roles';
-import { momentDate } from '../../utils/common';
+import { momentDate, getLanguage } from '../../utils/common';
 import SelectSearch from './components/SelectSearch';
 import Permission from '../../components/Permission';
 import './index.less';
@@ -178,6 +178,7 @@ class Users extends Component<Props, State> {
   };
 
   onDelete = (record: User) => {
+    const language = getLanguage();
     Dialog.confirm({
       content: 'Are you sure you want to delete the user',
       onOk: () => {
@@ -193,7 +194,7 @@ class Users extends Component<Props, State> {
             .catch();
         }
       },
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 
@@ -408,6 +409,7 @@ class Users extends Component<Props, State> {
       isResetPassword,
       rolesList,
     } = this.state;
+    const language = getLanguage();
     return (
       <Fragment>
         <div className="user-wrapper">
@@ -445,7 +447,7 @@ class Users extends Component<Props, State> {
 
           <section className="margin-top-20  user-list-wrapper">
             <Table
-              locale={locale.Table}
+              locale={locale[language as 'en' | 'zh'].Table}
               dataSource={dataSource}
               hasBorder={false}
               loading={isLoading}
@@ -456,7 +458,7 @@ class Users extends Component<Props, State> {
             <Pagination
               className="margin-top-20 text-align-right"
               total={total}
-              locale={locale.Pagination}
+              locale={locale[language as 'en' | 'zh'].Pagination}
               hideOnlyOnePage={true}
               size="medium"
               pageSize={pageSize}

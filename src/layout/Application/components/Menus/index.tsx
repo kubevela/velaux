@@ -4,7 +4,7 @@ import Translation from '../../../../components/Translation';
 import './index.less';
 import { Link } from 'dva/router';
 import locale from '../../../../utils/locale';
-
+import { getLanguage } from '../../../../utils/common';
 type Props = {
   envName: string;
   appName: string;
@@ -73,8 +73,13 @@ class Menu extends Component<Props, any> {
       activeItems = menuItems.envPage;
     }
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+    const language = getLanguage();
     return (
-      <Card locale={locale.Card} contentHeight="100px" className="app-menu">
+      <Card
+        locale={locale[language as 'en' | 'zh'].Card}
+        contentHeight="100px"
+        className="app-menu"
+      >
         {activeItems.map((item) => {
           return (
             <Link

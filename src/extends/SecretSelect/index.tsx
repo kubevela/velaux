@@ -5,6 +5,7 @@ import { listCloudResourceSecrets } from '../../api/observation';
 import type { Secret } from '../../interface/observation';
 import locale from '../../utils/locale';
 import i18n from 'i18next';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   onChange: (value: any) => void;
@@ -63,9 +64,10 @@ class SecretSelect extends React.Component<Props, State> {
     const { value, id, disabled } = this.props;
     const { secrets } = this.state;
     const filters = secrets?.filter((secret) => secret.metadata.labels['app.oam.dev/sync-alias']);
+    const language = getLanguage();
     return (
       <Select
-        locale={locale.Select}
+        locale={locale[language as 'en' | 'zh'].Select}
         onChange={this.onChange}
         value={value}
         id={id}

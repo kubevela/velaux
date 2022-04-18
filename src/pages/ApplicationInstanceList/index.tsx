@@ -19,7 +19,7 @@ import PodDetail from './components/PodDetail';
 import Header from './components/Header';
 import type { Target } from '../../interface/target';
 import { Link } from 'dva/router';
-import { momentDate } from '../../utils/common';
+import { momentDate, getLanguage } from '../../utils/common';
 import { If } from 'tsx-control-statements/components';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
@@ -424,6 +424,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       params: { appName, envName },
     } = this.props.match;
     const envs = envbinding.filter((item) => item.name == envName);
+    const language = getLanguage();
     if (envs) {
       this.setState({ deployLoading: true });
       deployApplication(
@@ -452,7 +453,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
               onCancel: () => {
                 this.setState({ deployLoading: false });
               },
-              locale: locale.Dialog,
+              locale: locale[language as 'en' | 'zh'].Dialog,
             });
           } else {
             handleError(err);
@@ -515,6 +516,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const {
       params: { envName, appName },
     } = this.props.match;
+    const language = getLanguage();
     return (
       <div>
         <Header
@@ -541,7 +543,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         <If condition={applicationStatus}>
           <If condition={applicationDetail?.applicationType == 'common'}>
             <Table
-              locale={locale.Table}
+              locale={locale[language as 'en' | 'zh'].Table}
               className="podlist-table-wraper"
               size="medium"
               primaryKey={'primaryKey'}
@@ -560,7 +562,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           <If condition={applicationDetail?.applicationType == 'cloud'}>
             <Table
               size="medium"
-              locale={locale.Table}
+              locale={locale[language as 'en' | 'zh'].Table}
               className="customTable"
               dataSource={cloudInstance}
               primaryKey={'instanceName'}

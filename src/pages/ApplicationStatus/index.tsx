@@ -28,6 +28,7 @@ import { handleError } from '../../utils/errors';
 import i18next from 'i18next';
 import { checkPermission } from '../../utils/permission';
 import type { LoginUserInfo } from '../../interface/user';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   dispatch: ({}) => {};
@@ -223,6 +224,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
       params: { appName, envName },
     } = this.props.match;
     const envs = envbinding.filter((item) => item.name == envName);
+    const language = getLanguage();
     if (envs) {
       this.setState({ deployLoading: true });
       deployApplication(
@@ -251,7 +253,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
               onCancel: () => {
                 this.setState({ deployLoading: false });
               },
-              locale: locale.Dialog,
+              locale: locale[language as 'en' | 'zh'].Dialog,
             });
           } else {
             handleError(err);
@@ -277,6 +279,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
     if (componentName) {
       componentStatus = componentStatus?.filter((item) => item.name == componentName);
     }
+    const language = getLanguage();
     return (
       <div>
         <Header
@@ -304,11 +307,11 @@ class ApplicationMonitor extends React.Component<Props, State> {
         <Loading visible={loading} style={{ width: '100%' }}>
           <If condition={applicationStatus}>
             <Card
-              locale={locale.Card}
+              locale={locale[language as 'en' | 'zh'].Card}
               contentHeight="200px"
               title={<Translation>Applied Resources</Translation>}
             >
-              <Table locale={locale.Table} dataSource={resources}>
+              <Table locale={locale[language as 'en' | 'zh'].Table} dataSource={resources}>
                 <Table.Column
                   dataIndex="cluster"
                   title={<Translation>Cluster</Translation>}
@@ -373,12 +376,16 @@ class ApplicationMonitor extends React.Component<Props, State> {
             </Card>
             <If condition={componentStatus}>
               <Card
-                locale={locale.Card}
+                locale={locale[language as 'en' | 'zh'].Card}
                 style={{ marginTop: '8px', marginBottom: '16px' }}
                 contentHeight="auto"
                 title={<Translation>Component Status</Translation>}
               >
-                <Table locale={locale.Table} className="customTable" dataSource={componentStatus}>
+                <Table
+                  locale={locale[language as 'en' | 'zh'].Table}
+                  className="customTable"
+                  dataSource={componentStatus}
+                >
                   <Table.Column
                     align="left"
                     dataIndex="name"
@@ -417,12 +424,15 @@ class ApplicationMonitor extends React.Component<Props, State> {
             </If>
             <If condition={applicationStatus?.conditions}>
               <Card
-                locale={locale.Card}
+                locale={locale[language as 'en' | 'zh'].Card}
                 style={{ marginTop: '8px' }}
                 contentHeight="auto"
                 title={<Translation>Conditions</Translation>}
               >
-                <Table locale={locale.Table} dataSource={applicationStatus?.conditions}>
+                <Table
+                  locale={locale[language as 'en' | 'zh'].Table}
+                  dataSource={applicationStatus?.conditions}
+                >
                   <Table.Column
                     width="150px"
                     dataIndex="type"

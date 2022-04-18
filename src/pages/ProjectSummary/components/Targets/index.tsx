@@ -5,6 +5,7 @@ import { getProjectTargetList } from '../../../../api/project';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import Permission from '../../../../components/Permission';
+import { getLanguage } from '../../../../utils/common';
 import './index.less';
 
 type Props = {
@@ -88,6 +89,7 @@ class Targets extends Component<Props, State> {
     const { Column } = Table;
     const { list, isLoading } = this.state;
     const { projectName } = this.props;
+    const language = getLanguage();
     return (
       <Fragment>
         <div className="summary-targets-wrapper">
@@ -104,7 +106,12 @@ class Targets extends Component<Props, State> {
             </Permission>
           </section>
           <section className="card-content-table">
-            <Table locale={locale.Table} dataSource={list} hasBorder={true} loading={isLoading}>
+            <Table
+              locale={locale[language as 'en' | 'zh'].Table}
+              dataSource={list}
+              hasBorder={true}
+              loading={isLoading}
+            >
               {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
             </Table>
           </section>

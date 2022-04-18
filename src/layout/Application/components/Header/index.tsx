@@ -25,6 +25,7 @@ import locale from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
 import i18n from 'i18next';
 import Permission from '../../../../components/Permission';
+import { getLanguage } from '../../../../utils/common';
 
 const { Row, Col } = Grid;
 
@@ -64,6 +65,7 @@ class ApplicationHeader extends Component<Props, State> {
 
   onDeploy = (workflowName?: string, force?: boolean) => {
     const { applicationDetail } = this.props;
+    const language = getLanguage();
     if (applicationDetail) {
       deployApplication(
         {
@@ -86,7 +88,7 @@ class ApplicationHeader extends Component<Props, State> {
               onOk: () => {
                 this.onDeploy(workflowName, true);
               },
-              locale: locale.Dialog,
+              locale: locale[language as 'en' | 'zh'].Dialog,
             });
           } else {
             handleError(err);
@@ -142,6 +144,7 @@ class ApplicationHeader extends Component<Props, State> {
     const { statistics, records, showDeployConfig } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     const item = <Translation>{`app-${activeKey}`}</Translation>;
+    const language = getLanguage();
     return (
       <div>
         <Row>
@@ -190,7 +193,7 @@ class ApplicationHeader extends Component<Props, State> {
         </Row>
         <Row wrap={true}>
           <Col xl={12} m={12} s={24} className="padding16">
-            <Card locale={locale.Card}>
+            <Card locale={locale[language as 'en' | 'zh'].Card}>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
@@ -221,7 +224,7 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
           <Col xl={12} m={12} s={24} className="padding16">
             <If condition={!records || (Array.isArray(records) && records.length === 0)}>
-              <Card locale={locale.Card}>
+              <Card locale={locale[language as 'en' | 'zh'].Card}>
                 <Empty
                   message={<Translation>There is no running workflow</Translation>}
                   iconWidth={'30px'}

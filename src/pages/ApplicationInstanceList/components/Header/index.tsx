@@ -18,6 +18,7 @@ import locale from '../../../../utils/locale';
 import { Link } from 'dva/router';
 import i18n from 'i18next';
 import Permission from '../../../../components/Permission';
+import { getLanguage } from '../../../../utils/common';
 
 export type GatewayIP = {
   ip: string;
@@ -91,6 +92,7 @@ class Header extends Component<Props, State> {
     });
   };
   recycleEnv = async () => {
+    const language = getLanguage();
     Dialog.confirm({
       content: 'Are you sure you want to reclaim the current environment?',
       onOk: () => {
@@ -106,10 +108,11 @@ class Header extends Component<Props, State> {
           );
         }
       },
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
   deleteEnv = async () => {
+    const language = getLanguage();
     Dialog.confirm({
       content: 'Are you sure you want to delete the current environment binding?',
       onOk: () => {
@@ -125,7 +128,7 @@ class Header extends Component<Props, State> {
           );
         }
       },
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 
@@ -168,12 +171,13 @@ class Header extends Component<Props, State> {
       }
       return 'warning';
     };
+    const language = getLanguage();
     return (
       <div>
         <Row className="border-radius-8">
           <Col span="4" style={{ marginBottom: '16px' }}>
             <Select
-              locale={locale.Select}
+              locale={locale[language as 'en' | 'zh'].Select}
               mode="single"
               onChange={this.handleTargetChange}
               dataSource={targetOptions}
@@ -184,7 +188,7 @@ class Header extends Component<Props, State> {
           </Col>
           <Col span="4" style={{ marginBottom: '16px', paddingLeft: '16px' }}>
             <Select
-              locale={locale.Select}
+              locale={locale[language as 'en' | 'zh'].Select}
               mode="single"
               onChange={this.handleComponentChange}
               dataSource={componentOptions}

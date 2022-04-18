@@ -10,6 +10,8 @@ import type { SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
 import { updateSystemInfo } from '../../api/config';
 import { checkPermission } from '../../utils/permission';
+import { getLanguage } from '../../utils/common';
+
 const { Col, Row } = Grid;
 
 type Props = {
@@ -165,9 +167,10 @@ class PlatformSetting extends React.Component<Props, State> {
   };
   render() {
     const { onClose, platformSetting } = this.props;
+    const language = getLanguage();
     return (
       <Dialog
-        locale={locale.Dialog}
+        locale={locale[language as 'en' | 'zh'].Dialog}
         visible={platformSetting}
         className={'commonDialog'}
         title={i18n.t('Platform Setting')}
@@ -191,7 +194,7 @@ class PlatformSetting extends React.Component<Props, State> {
         <Form field={this.field} labelCol={{ fixedSpan: 8 }} wrapperCol={{ span: 16 }}>
           <Card
             style={{ marginBottom: '16px' }}
-            locale={locale.Card}
+            locale={locale[language as 'en' | 'zh'].Card}
             contentHeight="200px"
             title={<Translation>User authentication configuration</Translation>}
           >
@@ -231,7 +234,7 @@ class PlatformSetting extends React.Component<Props, State> {
 
           {/* <Card
             style={{ marginBottom: '16px' }}
-            locale={locale.Card}
+            locale = {locale[language as 'en' | 'zh'].Card}
             contentHeight="200px"
             title={<Translation>User experience improvement plan</Translation>}
           >

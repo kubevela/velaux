@@ -7,7 +7,7 @@ import Translation from '../../../../components/Translation';
 import './index.less';
 import { listContainerLog } from '../../../../api/observation';
 import Ansi from 'ansi-to-react';
-import { momentDate, momentShortDate } from '../../../../utils/common';
+import { momentDate, momentShortDate, getLanguage } from '../../../../utils/common';
 import { If } from 'tsx-control-statements/components';
 
 const { Row, Col } = Grid;
@@ -113,10 +113,11 @@ class ContainerLog extends Component<Props, State> {
 
   render() {
     const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous } = this.state;
+    const language = getLanguage();
     return (
       <Dialog
         className="commonDialog logDialog"
-        locale={locale.Dialog}
+        locale={locale[language as 'en' | 'zh'].Dialog}
         visible={true}
         footerActions={[]}
         onClose={this.props.onClose}

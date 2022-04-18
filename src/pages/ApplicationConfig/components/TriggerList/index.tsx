@@ -6,7 +6,7 @@ import type {
   ApplicationDetail,
 } from '../../../../interface/application';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { momentDate } from '../../../../utils/common';
+import { momentDate, getLanguage } from '../../../../utils/common';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
@@ -46,13 +46,14 @@ class TriggerList extends Component<Props, State> {
   };
 
   handleTriggerDelete = (token: string) => {
+    const language = getLanguage();
     Dialog.alert({
       content: 'Are you sure want to delete this trigger?',
       onOk: () => {
         this.props.onDeleteTrigger(token || '');
       },
       onClose: () => {},
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 
@@ -103,12 +104,17 @@ class TriggerList extends Component<Props, State> {
         </svg>
       </span>
     );
+    const language = getLanguage();
     return (
       <div className="trigger-list-warper">
         <Row wrap={true}>
           {(triggers || []).map((item: Trigger) => (
             <Col xl={8} m={12} s={24} key={item.type} className="padding16">
-              <Card free={true} style={{ padding: '16px' }} locale={locale.Card}>
+              <Card
+                free={true}
+                style={{ padding: '16px' }}
+                locale={locale[language as 'en' | 'zh'].Card}
+              >
                 <div className="trigger-list-nav">
                   <div className="trigger-list-title">
                     {item.alias ? `${item.alias}(${item.name})` : item.name}
@@ -198,7 +204,7 @@ class TriggerList extends Component<Props, State> {
         </Row>
         <If condition={showTrigger}>
           <Dialog
-            locale={locale.Dialog}
+            locale={locale[language as 'en' | 'zh'].Dialog}
             className="commonDialog"
             visible={true}
             onClose={this.closeWebhook}

@@ -5,6 +5,7 @@ import type { ChartVersion, HelmRepo } from '../../interface/application';
 import i18n from '../../i18n';
 import locale from '../../utils/locale';
 import { connect } from 'dva';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   value?: any;
@@ -90,6 +91,7 @@ class HelmChartVersionSelect extends Component<Props, State> {
     if (inputChartVersion) {
       dataSource.unshift({ label: inputChartVersion, value: inputChartVersion });
     }
+    const language = getLanguage();
     return (
       <Loading visible={loading} style={{ width: '100%' }}>
         <Select
@@ -101,7 +103,7 @@ class HelmChartVersionSelect extends Component<Props, State> {
           disabled={disabled}
           value={value}
           dataSource={dataSource}
-          locale={locale.Select}
+          locale={locale[language as 'en' | 'zh'].Select}
         />
       </Loading>
     );

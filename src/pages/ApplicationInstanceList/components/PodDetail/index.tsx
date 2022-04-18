@@ -12,6 +12,7 @@ import type { ApplicationDetail, EnvBinding } from '../../../../interface/applic
 import { getAddonsStatus } from '../../../../api/addons';
 import type { AddonClusterInfo, AddonStatus } from '../../../../interface/addon';
 import { If } from 'tsx-control-statements/components';
+import { getLanguage } from '../../../../utils/common';
 
 export type Props = {
   pod: PodBase;
@@ -280,6 +281,7 @@ class PodDetail extends React.Component<Props, State> {
     const eventCloumns = this.getEventCloumns();
     const { events, containers, loading, showContainerLog, containerName } = this.state;
     const { pod, clusterName } = this.props;
+    const language = getLanguage();
     return (
       <div className="table-podDetails-list  margin-top-20">
         <Table
@@ -288,7 +290,7 @@ class PodDetail extends React.Component<Props, State> {
           hasBorder={false}
           primaryKey="name"
           loading={loading}
-          locale={locale.Table}
+          locale={locale[language as 'en' | 'zh'].Table}
         >
           {containerColumns &&
             containerColumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
@@ -300,7 +302,7 @@ class PodDetail extends React.Component<Props, State> {
           hasBorder={false}
           loading={loading}
           primaryKey="time"
-          locale={locale.Table}
+          locale={locale[language as 'en' | 'zh'].Table}
         >
           {eventCloumns &&
             eventCloumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}

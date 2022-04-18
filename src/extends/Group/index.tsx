@@ -5,6 +5,7 @@ import { Icon, Loading, Grid, Switch, Dialog } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
+import { getLanguage } from '../../utils/common';
 import './index.less';
 
 const { Col, Row } = Grid;
@@ -95,6 +96,7 @@ class Group extends React.Component<Props, State> {
       disableAddon = false,
     } = this.props;
     const { closed, enable, checked } = this.state;
+    const language = getLanguage();
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
         <div className="group-container">
@@ -127,7 +129,7 @@ class Group extends React.Component<Props, State> {
                             this.setState({ enable: event, closed: false, checked: false });
                             this.removeJsonKeyValue();
                           },
-                          locale: locale.Dialog,
+                          locale: locale[language as 'en' | 'zh'].Dialog,
                         });
                       }
                     }}

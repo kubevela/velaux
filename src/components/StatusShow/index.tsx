@@ -5,6 +5,7 @@ import Translation from '../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import locale from '../../utils/locale';
 import { Link } from 'dva/router';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   loading: boolean;
@@ -17,9 +18,10 @@ type Props = {
 class StatusShow extends React.Component<Props> {
   render() {
     const { applicationStatus, onClose, loading, title } = this.props;
+    const language = getLanguage();
     return (
       <Dialog
-        locale={locale.Dialog}
+        locale={locale[language as 'en' | 'zh'].Dialog}
         visible={true}
         className={'commonDialog'}
         title={title}
@@ -42,11 +44,14 @@ class StatusShow extends React.Component<Props> {
       >
         <Loading visible={loading} style={{ width: '100%' }}>
           <Card
-            locale={locale.Card}
+            locale={locale[language as 'en' | 'zh'].Card}
             contentHeight="200px"
             title={<Translation>Applied Resources</Translation>}
           >
-            <Table locale={locale.Table} dataSource={applicationStatus?.appliedResources}>
+            <Table
+              locale={locale[language as 'en' | 'zh'].Table}
+              dataSource={applicationStatus?.appliedResources}
+            >
               <Table.Column
                 dataIndex="name"
                 width="150px"
@@ -76,12 +81,15 @@ class StatusShow extends React.Component<Props> {
           </Card>
           <If condition={applicationStatus?.conditions}>
             <Card
-              locale={locale.Card}
+              locale={locale[language as 'en' | 'zh'].Card}
               style={{ marginTop: '8px' }}
               contentHeight="auto"
               title={<Translation>Conditions</Translation>}
             >
-              <Table locale={locale.Table} dataSource={applicationStatus?.conditions}>
+              <Table
+                locale={locale[language as 'en' | 'zh'].Table}
+                dataSource={applicationStatus?.conditions}
+              >
                 <Table.Column
                   width="150px"
                   dataIndex="type"
@@ -118,13 +126,13 @@ class StatusShow extends React.Component<Props> {
           </If>
           <If condition={applicationStatus?.services}>
             <Card
-              locale={locale.Card}
+              locale={locale[language as 'en' | 'zh'].Card}
               style={{ marginTop: '8px', marginBottom: '16px' }}
               contentHeight="auto"
               title={<Translation>Component Status</Translation>}
             >
               <Table
-                locale={locale.Table}
+                locale={locale[language as 'en' | 'zh'].Table}
                 className="customTable"
                 dataSource={applicationStatus?.services}
               >

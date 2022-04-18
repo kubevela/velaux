@@ -5,6 +5,7 @@ import i18n from '../../i18n';
 import locale from '../../utils/locale';
 import { connect } from 'dva';
 import type { HelmRepo } from '../../interface/application';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   value?: any;
@@ -81,7 +82,7 @@ class HelmChartSelect extends Component<Props, State> {
         value: inputChart,
       });
     }
-
+    const language = getLanguage();
     return (
       <Loading visible={loading} style={{ width: '100%' }}>
         <Select
@@ -93,7 +94,7 @@ class HelmChartSelect extends Component<Props, State> {
           disabled={disabled}
           value={value}
           dataSource={dataSource}
-          locale={locale.Select}
+          locale={locale[language as 'en' | 'zh'].Select}
         />
       </Loading>
     );

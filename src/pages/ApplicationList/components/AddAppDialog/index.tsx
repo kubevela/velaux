@@ -18,6 +18,7 @@ import { getEnvs } from '../../../../api/env';
 import type { Env } from '../../../../interface/env';
 import type { Target } from '../../../../interface/target';
 import EnvDialog from '../../../EnvPage/components/EnvDialog';
+import { getLanguage } from '../../../../utils/common';
 
 type Props = {
   visible: boolean;
@@ -350,6 +351,7 @@ class AppDialog extends React.Component<Props, State> {
         value: env.name,
       };
     });
+    const language = getLanguage();
     return (
       <React.Fragment>
         <DrawerWithFooter
@@ -390,7 +392,7 @@ class AppDialog extends React.Component<Props, State> {
                     }
                   >
                     <Select
-                      locale={locale.Select}
+                      locale={locale[language as 'en' | 'zh'].Select}
                       showSearch
                       className="select"
                       {...init(`componentType`, {
@@ -435,7 +437,7 @@ class AppDialog extends React.Component<Props, State> {
                           },
                         ],
                       })}
-                      locale={locale.Select}
+                      locale={locale[language as 'en' | 'zh'].Select}
                       mode="multiple"
                       dataSource={envOptions}
                     />

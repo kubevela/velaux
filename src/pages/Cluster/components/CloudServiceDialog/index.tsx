@@ -12,7 +12,7 @@ import {
 } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import { If } from 'tsx-control-statements/components';
-import { ACKCLusterStatus } from '../../../../utils/common';
+import { ACKCLusterStatus, getLanguage } from '../../../../utils/common';
 import { getCloudClustersList } from '../../../../api/cluster';
 import './index.less';
 import { handleError } from '../../../../utils/errors';
@@ -267,11 +267,11 @@ class CloudServiceDialog extends React.Component<Props, State> {
     ];
 
     const providerList = [{ value: 'aliyun', label: 'Aliyun ACK' }];
-
+    const language = getLanguage();
     return (
       <React.Fragment>
         <Dialog
-          locale={locale.Dialog}
+          locale={locale[language as 'en' | 'zh'].Dialog}
           className="dialog-cluoudService-wraper"
           title={<Translation>Connect Kubernetes Cluster From Cloud</Translation>}
           autoFocus={true}
@@ -298,7 +298,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
             <Form {...formItemLayout} field={this.field} className="cloud-server-wraper">
               <FormItem label={<Translation>Provider</Translation>} required={true}>
                 <Select
-                  locale={locale.Select}
+                  locale={locale[language as 'en' | 'zh'].Select}
                   mode="single"
                   size="large"
                   dataSource={providerList}
@@ -348,7 +348,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
 
           <If condition={!choseInput}>
             <Table
-              locale={locale.Table}
+              locale={locale[language as 'en' | 'zh'].Table}
               dataSource={cloudClusters}
               hasBorder={false}
               loading={tableLoading}
@@ -356,7 +356,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
               {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
             </Table>
             <Pagination
-              locale={locale.Pagination}
+              locale={locale[language as 'en' | 'zh'].Pagination}
               hideOnlyOnePage={true}
               total={total}
               size="small"

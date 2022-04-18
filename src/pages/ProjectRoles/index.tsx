@@ -8,6 +8,7 @@ import type { PermissionBase } from '../../interface/user';
 import type { ProjectRoleBase } from '../../interface/project';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
+import { getLanguage } from '../../utils/common';
 import './index.less';
 
 type Props = {
@@ -137,6 +138,7 @@ class ProjectRoles extends Component<Props, State> {
 
   onDeleteProjectRole = (roleName: string) => {
     const { projectName } = this.state;
+    const language = getLanguage();
     Dialog.confirm({
       content: 'Are you sure you want to delete this role',
       onOk: () => {
@@ -149,7 +151,7 @@ class ProjectRoles extends Component<Props, State> {
           });
         }
       },
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 

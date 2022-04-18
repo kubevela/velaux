@@ -11,7 +11,7 @@ import Translation from '../../components/Translation';
 import Permission from '../../components/Permission';
 import locale from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
-import { momentDate } from '../../utils/common';
+import { momentDate, getLanguage } from '../../utils/common';
 import './index.less';
 
 type Props = {
@@ -86,6 +86,7 @@ class Integrations extends Component<Props, State> {
   };
 
   onDelete = (record: IntegrationConfigs) => {
+    const language = getLanguage();
     Dialog.confirm({
       content: 'Are you sure you want to delete the config',
       onOk: () => {
@@ -104,7 +105,7 @@ class Integrations extends Component<Props, State> {
           });
         }
       },
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 
@@ -209,6 +210,7 @@ class Integrations extends Component<Props, State> {
     const { Column } = Table;
     const { userInfo } = this.props;
     const { list, visible, isLoading, configType } = this.state;
+    const language = getLanguage();
     return (
       <div className="list-content">
         <div className="create-btn">
@@ -218,7 +220,12 @@ class Integrations extends Component<Props, State> {
             </Button>
           </Permission>
         </div>
-        <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>
+        <Table
+          locale={locale[language as 'en' | 'zh'].Table}
+          dataSource={list}
+          hasBorder={false}
+          loading={isLoading}
+        >
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
 

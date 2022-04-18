@@ -4,6 +4,7 @@ import { Dialog, Radio } from '@b-design/ui';
 import type { Workflow } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
+import { getLanguage } from '../../../../utils/common';
 import './index.less';
 
 const { Group: RadioGroup } = Radio;
@@ -50,11 +51,12 @@ class DeployConfigDialog extends Component<Props, State> {
   render() {
     const { workflows, onClose } = this.props;
     const { workflowName } = this.state;
+    const language = getLanguage();
     return (
       <React.Fragment>
         <Dialog
           visible={true}
-          locale={locale.Dialog}
+          locale={locale[language as 'en' | 'zh'].Dialog}
           className={'commonDialog deployConfig'}
           style={{ width: '600px' }}
           isFullScreen={true}

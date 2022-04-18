@@ -3,7 +3,7 @@ import { Field } from '@b-design/ui';
 import { Form, Input, Select, Button, Grid, Message } from '@b-design/ui';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import { createProject } from '../../../../api/project';
 
@@ -63,6 +63,7 @@ class ProjectForm extends React.Component<Props, State> {
   render() {
     const { formItemLayout, projectList, field, disableNew, disable } = this.props;
     const { showProjectInput } = this.state;
+    const language = getLanguage();
     return (
       <React.Fragment>
         <FormItem
@@ -75,7 +76,7 @@ class ProjectForm extends React.Component<Props, State> {
             <div className="cluster-container">
               <Select
                 disabled={disable}
-                locale={locale.Select}
+                locale={locale[language as 'en' | 'zh'].Select}
                 className="cluster-params-input"
                 mode="single"
                 dataSource={projectList}

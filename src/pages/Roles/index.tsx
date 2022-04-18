@@ -7,7 +7,7 @@ import { getRoleList, deleteRole } from '../../api/roles';
 import { getPlatformPermissions } from '../../api/rbac';
 import type { RolesBase } from '../../interface/roles';
 import Translation from '../../components/Translation';
-import { momentDate } from '../../utils/common';
+import { momentDate, getLanguage } from '../../utils/common';
 import locale from '../../utils/locale';
 import './index.less';
 import type { PermissionBase } from '../../interface/user';
@@ -80,6 +80,7 @@ class Roles extends Component<Props, State> {
   };
 
   onDelete = (record: RolesBase) => {
+    const language = getLanguage();
     Dialog.confirm({
       content: 'Are you sure you want to delete this role',
       onOk: () => {
@@ -93,7 +94,7 @@ class Roles extends Component<Props, State> {
           });
         }
       },
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 
@@ -217,6 +218,7 @@ class Roles extends Component<Props, State> {
       permissions,
       isLoading,
     } = this.state;
+    const language = getLanguage();
     return (
       <Fragment>
         <div className="roles-list-content">
@@ -231,14 +233,19 @@ class Roles extends Component<Props, State> {
               </Permission>,
             ]}
           />
-          <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>
+          <Table
+            locale={locale[language as 'en' | 'zh'].Table}
+            dataSource={list}
+            hasBorder={false}
+            loading={isLoading}
+          >
             {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
           </Table>
 
           <Pagination
             className="margin-top-20 text-align-right"
             total={total}
-            locale={locale.Pagination}
+            locale={locale[language as 'en' | 'zh'].Pagination}
             hideOnlyOnePage={true}
             size="medium"
             pageSize={pageSize}

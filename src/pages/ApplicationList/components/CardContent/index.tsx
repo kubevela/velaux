@@ -6,7 +6,7 @@ import { Link } from 'dva/router';
 import { Grid, Card, Menu, Dropdown, Dialog, Button } from '@b-design/ui';
 import type { ApplicationBase } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
-import { momentDate } from '../../../../utils/common';
+import { momentDate, getLanguage } from '../../../../utils/common';
 import Empty from '../../../../components/Empty';
 import { If } from 'tsx-control-statements/components';
 
@@ -80,6 +80,7 @@ class CardContent extends React.Component<Props, State> {
     const { userInfo } = this.props;
     const project = item?.project?.name || '';
     const request = { resource: `project/application:${item.name}`, action: 'delete' };
+    const language = getLanguage();
     if (checkPermission(request, project, userInfo)) {
       return (
         <Menu.Item
@@ -92,7 +93,7 @@ class CardContent extends React.Component<Props, State> {
               onOk: () => {
                 this.onDeleteAppPlan(item.name);
               },
-              locale: locale.Dialog,
+              locale: locale[language as 'en' | 'zh'].Dialog,
             });
           }}
         >
@@ -107,6 +108,7 @@ class CardContent extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { applications, setVisible } = this.props;
+    const language = getLanguage();
     if (!applications || applications.length === 0) {
       return (
         <Empty
@@ -145,7 +147,7 @@ class CardContent extends React.Component<Props, State> {
               className={`card-content-wrapper`}
               key={`${item.name}`}
             >
-              <Card locale={locale.Card} contentHeight="auto">
+              <Card locale={locale[language as 'en' | 'zh'].Card} contentHeight="auto">
                 <Link to={`/applications/${name}/config`}>
                   <div className="appplan-card-top flexcenter">
                     <If condition={icon && icon != 'none'}>

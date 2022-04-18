@@ -6,6 +6,7 @@ import './index.less';
 import { If } from 'tsx-control-statements/components';
 import locale from '../../../../utils/locale';
 import i18n from '../../../../i18n';
+import { getLanguage } from '../../../../utils/common';
 
 type Props = {
   traits: Trait[];
@@ -28,22 +29,24 @@ type TraitTrans = {
 
 class TraitsList extends Component<Props> {
   handleDelete = (traitType: string) => {
+    const language: string = getLanguage();
     Dialog.alert({
       content: i18n.t('Are you sure want to delete this trait?'),
       onOk: () => {
         this.props.onDeleteTrait(traitType || '');
       },
       onClose: () => {},
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 
   renderCardList = (item: TraitTrans) => {
     const { Col } = Grid;
     const { changeTraitStats } = this.props;
+    const language: string = getLanguage();
     return (
       <Col xl={12} m={12} s={24} className="padding16 card-trait-wrapper">
-        <Card locale={locale.Card}>
+        <Card locale={locale[language as 'en' | 'zh'].Card}>
           <div className="traits-list-nav">
             <div
               className="traits-list-title"
@@ -73,9 +76,10 @@ class TraitsList extends Component<Props> {
 
   renderAddCard = () => {
     const { Col } = Grid;
+    const language: string = getLanguage();
     return (
       <Col xl={12} m={12} s={24} className="padding16 card-add-wrapper">
-        <Card locale={locale.Card}>
+        <Card locale={locale[language as 'en' | 'zh'].Card}>
           <div className="traits-add-operation">
             <Icon
               type="plus-circle"

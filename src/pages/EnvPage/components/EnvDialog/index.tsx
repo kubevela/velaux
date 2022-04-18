@@ -1,6 +1,6 @@
 import React from 'react';
 import { Message, Grid, Dialog, Form, Input, Field, Select, Loading } from '@b-design/ui';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import type { Target } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
 import { listNamespaces } from '../../../../api/observation';
@@ -168,10 +168,11 @@ class EnvDialog extends React.Component<Props, State> {
         value: project.name,
       };
     });
+    const language = getLanguage();
     return (
       <div>
         <Dialog
-          locale={locale.Dialog}
+          locale={locale[language as 'en' | 'zh'].Dialog}
           className={'commonDialog'}
           height="auto"
           title={
@@ -297,7 +298,7 @@ class EnvDialog extends React.Component<Props, State> {
                 <Loading visible={targetLoading} style={{ width: '100%' }}>
                   <FormItem label={<Translation>Target</Translation>} required>
                     <Select
-                      locale={locale.Select}
+                      locale={locale[language as 'en' | 'zh'].Select}
                       className="select"
                       mode="multiple"
                       placeholder={i18n.t('Please select a target').toString()}

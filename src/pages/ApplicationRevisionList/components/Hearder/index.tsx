@@ -3,6 +3,7 @@ import { withTranslation } from 'react-i18next';
 import { Grid, Select } from '@b-design/ui';
 import type { EnvBinding } from '../../../../interface/application';
 import locale from '../../../../utils/locale';
+import { getLanguage } from '../../../../utils/common';
 
 interface Label {
   label: string;
@@ -55,11 +56,12 @@ class Hearder extends React.Component<Props, State> {
       label: item.alias || item.name,
       value: item.name,
     }));
+    const language = getLanguage();
     return (
       <Row className="border-radius-8">
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
-            locale={locale.Select}
+            locale={locale[language as 'en' | 'zh'].Select}
             mode="single"
             size="small"
             onChange={this.handleChangeEnv}
@@ -73,7 +75,7 @@ class Hearder extends React.Component<Props, State> {
 
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
-            locale={locale.Select}
+            locale={locale[language as 'en' | 'zh'].Select}
             mode="single"
             size="small"
             onChange={this.handleChangeStatus}

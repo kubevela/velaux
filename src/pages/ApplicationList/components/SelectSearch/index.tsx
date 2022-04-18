@@ -5,7 +5,7 @@ import './index.less';
 import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
 import type { Env } from '../../../../interface/env';
-
+import { getLanguage } from '../../../../utils/common';
 const { Row, Col } = Grid;
 
 type Props = {
@@ -110,11 +110,12 @@ class SelectSearch extends React.Component<Props, State> {
         value: env.name,
       };
     });
+    const language = getLanguage();
     return (
       <Row className="app-select-wrapper border-radius-8" wrap={true}>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
-            locale={locale.Select}
+            locale={locale[language as 'en' | 'zh'].Select}
             mode="single"
             size="large"
             onChange={this.onChangeProject}
@@ -127,7 +128,7 @@ class SelectSearch extends React.Component<Props, State> {
         </Col>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
-            locale={locale.Select}
+            locale={locale[language as 'en' | 'zh'].Select}
             mode="single"
             size="large"
             onChange={this.onChangeEnv}

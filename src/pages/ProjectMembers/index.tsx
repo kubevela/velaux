@@ -6,7 +6,7 @@ import type { ProjectMember, ProjectRoleBase } from '../../interface/project';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
-import { momentDate } from '../../utils/common';
+import { momentDate, getLanguage } from '../../utils/common';
 import Permission from '../../components/Permission';
 import './index.less';
 
@@ -112,6 +112,7 @@ class ProjectMembers extends Component<Props, State> {
   };
 
   onDelete = (record: ProjectMember) => {
+    const language = getLanguage();
     Dialog.confirm({
       content: 'Are you sure you want to delete the member',
       onOk: () => {
@@ -133,7 +134,7 @@ class ProjectMembers extends Component<Props, State> {
             .catch();
         }
       },
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 
@@ -266,6 +267,7 @@ class ProjectMembers extends Component<Props, State> {
         },
       },
     ];
+    const language = getLanguage();
 
     return (
       <Fragment>
@@ -283,7 +285,7 @@ class ProjectMembers extends Component<Props, State> {
 
           <section className="margin-top-20  member-list-wrapper">
             <Table
-              locale={locale.Table}
+              locale={locale[language as 'en' | 'zh'].Table}
               dataSource={memberList}
               hasBorder={false}
               loading={isLoading}
@@ -294,7 +296,7 @@ class ProjectMembers extends Component<Props, State> {
             <Pagination
               className="margin-top-20 text-align-right"
               total={total}
-              locale={locale.Pagination}
+              locale={locale[language as 'en' | 'zh'].Pagination}
               hideOnlyOnePage={true}
               size="medium"
               pageSize={pageSize}

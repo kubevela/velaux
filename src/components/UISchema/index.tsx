@@ -15,7 +15,7 @@ import K8sObjectsCode from '../../extends/K8sObjectsCode';
 import type { Rule } from '@alifd/field';
 import KV from '../../extends/KV';
 import './index.less';
-import { checkImageName, replaceUrl } from '../../utils/common';
+import { checkImageName, replaceUrl, getLanguage } from '../../utils/common';
 import locale from '../../utils/locale';
 import HelmValues from '../../extends/HelmValues';
 import HelmChartSelect from '../../extends/HelmChartSelect';
@@ -297,6 +297,7 @@ class UISchema extends Component<Props, State> {
       };
 
       const item = () => {
+        const language = getLanguage();
         switch (param.uiType) {
           case 'Switch':
             const getDefaultSwitchValue = (validate: any) => {
@@ -373,7 +374,7 @@ class UISchema extends Component<Props, State> {
               >
                 <Select
                   disabled={disableEdit}
-                  locale={locale.Select}
+                  locale={locale[language as 'en' | 'zh'].Select}
                   {...init(param.jsonKey, {
                     initValue: initValue,
                     rules: convertRule(param.validate),

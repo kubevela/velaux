@@ -4,7 +4,7 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from 'tsx-control-statements/components';
 import { createRole, updateRole } from '../../../../api/roles';
 import type { RolesBase } from '../../../../interface/roles';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import { getSelectLabel } from '../../../../utils/utils';
@@ -133,6 +133,7 @@ class RolesDialog extends React.Component<Props, State> {
     ];
 
     const permPoliciesList = getSelectLabel(permissions);
+    const language = getLanguage();
     return (
       <React.Fragment>
         <DrawerWithFooter
@@ -197,7 +198,7 @@ class RolesDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
-                    locale={locale.Select}
+                    locale={locale[language as 'en' | 'zh'].Select}
                     mode="tag"
                     dataSource={permPoliciesList}
                   />

@@ -13,6 +13,7 @@ import locale from '../../../../utils/locale';
 import i18n from '../../../../i18n';
 import TraitIcon from '../../../../components/TraitIcon';
 import Permission from '../../../../components/Permission';
+import { getLanguage } from '../../../../utils/common';
 
 type Props = {
   application?: ApplicationBase;
@@ -25,25 +26,27 @@ type Props = {
 
 class ComponentsList extends Component<Props> {
   handleDelete = (name: string) => {
+    const language = getLanguage();
     Dialog.alert({
       content: i18n.t('Are you sure want to delete this Component?'),
       onOk: () => {
         this.props.onDeleteComponent(name || '');
       },
       onClose: () => {},
-      locale: locale.Dialog,
+      locale: locale[language as 'en' | 'zh'].Dialog,
     });
   };
 
   render() {
     const { Row, Col } = Grid;
     const { components, editComponent, onAddComponent, application } = this.props;
+    const language = getLanguage();
     return (
       <div className="components-list-warper">
         <Row wrap={true}>
           {(components || []).map((item: ApplicationComponentBase) => (
             <Col xl={8} m={12} s={24} key={item.name} className="padding16">
-              <Card locale={locale.Card} contentHeight="auto">
+              <Card locale={locale[language as 'en' | 'zh'].Card} contentHeight="auto">
                 <div className="components-list-nav">
                   <Permission
                     request={{

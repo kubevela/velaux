@@ -13,6 +13,7 @@ import type { Env } from '../../interface/env';
 import type { LoginUserInfo } from '../../interface/user';
 import Permission from '../../components/Permission';
 import Translation from '../../components/Translation';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   envTotal?: number;
@@ -105,6 +106,7 @@ class targetList extends React.Component<Props, State> {
   render() {
     const { envTotal, envs, userInfo } = this.props;
     const { visibleEnvDialog, isEdit, envItem } = this.state;
+    const language = getLanguage();
     return (
       <div>
         <ListTitle
@@ -136,7 +138,7 @@ class targetList extends React.Component<Props, State> {
         <Pagination
           className="delivery-target-pagenation"
           total={envTotal}
-          locale={locale.Pagination}
+          locale={locale[language as 'en' | 'zh'].Pagination}
           size="medium"
           pageSize={this.state.pageSize}
           current={this.state.page}

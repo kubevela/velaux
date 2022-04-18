@@ -6,7 +6,7 @@ import { getPayloadType } from '../../../../api/payload';
 import type { Workflow, Trigger, UIParam } from '../../../../interface/application';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 
@@ -174,6 +174,7 @@ class TriggerDialog extends React.Component<Props, State> {
         value: type,
       };
     });
+    const language = getLanguage();
 
     return (
       <DrawerWithFooter
@@ -245,7 +246,7 @@ class TriggerDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Type</Translation>} required>
                 <Select
                   name="type"
-                  locale={locale.Select}
+                  locale={locale[language as 'en' | 'zh'].Select}
                   dataSource={[{ label: 'On Webhook Event', value: 'webhook' }]}
                   {...init('type', {
                     initValue: 'webhook',
@@ -266,7 +267,7 @@ class TriggerDialog extends React.Component<Props, State> {
                 <FormItem label={<Translation>PayloadType</Translation>} required>
                   <Select
                     name="payloadType"
-                    locale={locale.Select}
+                    locale={locale[language as 'en' | 'zh'].Select}
                     dataSource={payloadTypeOption}
                     {...init('payloadType', {
                       initValue: 'custom',
@@ -288,7 +289,7 @@ class TriggerDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Execution workflow</Translation>} required>
                 <Select
                   name="workflowName"
-                  locale={locale.Select}
+                  locale={locale[language as 'en' | 'zh'].Select}
                   dataSource={workflowOption}
                   {...init('workflowName', {
                     rules: [

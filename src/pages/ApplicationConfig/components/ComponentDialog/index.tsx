@@ -17,7 +17,7 @@ import type {
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import Title from '../../../../components/Title';
 import TraitsList from '../../components/TraitsList';
 import { Link } from 'dva/router';
@@ -270,6 +270,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
+    const language = getLanguage();
     return (
       <DrawerWithFooter
         title={this.showComponentTitle()}
@@ -373,7 +374,7 @@ class ComponentDialog extends React.Component<Props, State> {
                   }
                 >
                   <Select
-                    locale={locale.Select}
+                    locale={locale[language as 'en' | 'zh'].Select}
                     showSearch
                     disabled={isEditComponent ? true : false}
                     className="select"

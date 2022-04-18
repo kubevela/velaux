@@ -7,6 +7,7 @@ import { If } from 'tsx-control-statements/components';
 import { Switch } from '@alifd/meet-react';
 import i18n from '../../i18n';
 import locale from '../../utils/locale';
+import { getLanguage } from '../../utils/common';
 
 const { Row, Col } = Grid;
 
@@ -153,6 +154,7 @@ class KV extends Component<Props, State> {
       }
     }
     const dataSource = keyOptions ? Object.keys(keyOptions) : [];
+    const language = getLanguage();
     return (
       <div id={id}>
         {items.map((item) => {
@@ -171,7 +173,7 @@ class KV extends Component<Props, State> {
                       {...init(`envKey-${item.key}`)}
                       label={'Key'}
                       placeholder={i18n.t('Please select')}
-                      locale={locale.Select}
+                      locale={locale[language as 'en' | 'zh'].Select}
                     />
                   </If>
                   <If condition={!keyOptions}>

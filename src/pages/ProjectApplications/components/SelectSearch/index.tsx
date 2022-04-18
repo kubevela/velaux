@@ -7,6 +7,7 @@ import type { Env } from '../../../../interface/env';
 import i18n from '../../../../i18n';
 import Translation from '../../../../components/Translation';
 import Permission from '../../../../components/Permission';
+import { getLanguage } from '../../../../utils/common';
 import './index.less';
 
 const { Row, Col } = Grid;
@@ -104,6 +105,7 @@ class SelectSearch extends React.Component<Props, State> {
         value: env.name,
       };
     });
+    const language = getLanguage();
     return (
       <Fragment>
         <Row className="project-select-wrapper border-radius-8 margin-top-20">
@@ -111,7 +113,7 @@ class SelectSearch extends React.Component<Props, State> {
             <Row wrap={true}>
               <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
                 <Select
-                  locale={locale.Select}
+                  locale={locale[language as 'en' | 'zh'].Select}
                   mode="single"
                   size="large"
                   onChange={this.onChangeEnv}
@@ -124,7 +126,7 @@ class SelectSearch extends React.Component<Props, State> {
               </Col>
               <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
                 <Select
-                  locale={locale.Select}
+                  locale={locale[language as 'en' | 'zh'].Select}
                   mode="single"
                   size="large"
                   onChange={this.onChangeTarget}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Select } from '@b-design/ui';
 import locale from '../../utils/locale';
 import i18n from 'i18next';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   onChange: (value: any) => void;
@@ -25,9 +26,10 @@ class SecretKeySelect extends React.Component<Props, State> {
 
   render() {
     const { onChange, value, secretKeys, id, disabled } = this.props;
+    const language = getLanguage();
     return (
       <Select
-        locale={locale.Select}
+        locale={locale[language as 'en' | 'zh'].Select}
         onChange={onChange}
         defaultValue={value}
         id={id}

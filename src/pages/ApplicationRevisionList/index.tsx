@@ -8,6 +8,7 @@ import type { ApplicationDetail, EnvBinding, Revisions } from '../../interface/a
 import { statusList } from './constants';
 import './index.less';
 import locale from '../../utils/locale';
+import { getLanguage } from '../../utils/common';
 
 type Props = {
   revisions: [];
@@ -105,7 +106,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
   render() {
     const { revisionsList } = this.state;
     const { envbinding, applicationDetail } = this.props;
-
+    const language = getLanguage();
     return (
       <div>
         <Header
@@ -125,7 +126,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
           getRevisionList={this.getRevisionList}
         />
         <Pagination
-          locale={locale.Pagination}
+          locale={locale[language as 'en' | 'zh'].Pagination}
           className="revison-pagenation"
           hideOnlyOnePage={true}
           total={this.state.revisionsListTotal}

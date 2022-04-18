@@ -3,7 +3,7 @@ import { Message, Grid, Dialog, Form, Input, Field, Select } from '@b-design/ui'
 import Group from '../../../../extends/Group';
 import Namespace from '../Namespace';
 import type { NamespaceItem } from '../Namespace';
-import { checkName } from '../../../../utils/common';
+import { checkName, getLanguage } from '../../../../utils/common';
 import { createTarget, updateTarget } from '../../../../api/target';
 import { getCloudServiceProviderList } from '../../../../api/project';
 import type { Target, ProvideList } from '../../../../interface/target';
@@ -238,10 +238,11 @@ class DeliveryDialog extends React.Component<Props, State> {
     });
     const { providerList } = this.state;
     const providerListOptions = getSelectLabel(providerList);
+    const language = getLanguage();
     return (
       <div>
         <Dialog
-          locale={locale.Dialog}
+          locale={locale[language as 'en' | 'zh'].Dialog}
           className={'commonDialog'}
           height="auto"
           title={
@@ -346,7 +347,7 @@ class DeliveryDialog extends React.Component<Props, State> {
               <Col span={12} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Cluster</Translation>} required>
                   <Select
-                    locale={locale.Select}
+                    locale={locale[language as 'en' | 'zh'].Select}
                     className="select"
                     disabled={isEdit}
                     placeholder={t('Please select').toString()}

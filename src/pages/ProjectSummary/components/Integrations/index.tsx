@@ -7,7 +7,7 @@ import Translation from '../../../../components/Translation';
 import Permission from '../../../../components/Permission';
 import _ from 'lodash';
 import locale from '../../../../utils/locale';
-import { momentDate } from '../../../../utils/common';
+import { momentDate, getLanguage } from '../../../../utils/common';
 import './index.less';
 
 type Props = {
@@ -102,6 +102,7 @@ class Integrations extends Component<Props, State> {
     const { Column } = Table;
     const { configList, isLoading } = this.state;
     const { projectName } = this.props;
+    const language = getLanguage();
     return (
       <Fragment>
         <div className="integration-wrapper">
@@ -122,7 +123,7 @@ class Integrations extends Component<Props, State> {
           </section>
           <section className="card-content-table">
             <Table
-              locale={locale.Table}
+              locale={locale[language as 'en' | 'zh'].Table}
               dataSource={configList}
               hasBorder={true}
               loading={isLoading}

@@ -10,7 +10,7 @@ import { getEnvs } from '../../../../api/env';
 import type { Env } from '../../../../interface/env';
 import { If } from 'tsx-control-statements/components';
 import EnvDialog from '../../../../pages/EnvPage/components/EnvDialog';
-
+import { getLanguage } from '../../../../utils/common';
 interface Props {
   onClose: () => void;
   onOK: () => void;
@@ -174,11 +174,12 @@ class EnvBindPlanDialog extends Component<Props, State> {
         value: env.name,
       };
     });
+    const language = getLanguage();
     return (
       <React.Fragment>
         <Dialog
           visible={true}
-          locale={locale.Dialog}
+          locale={locale[language as 'en' | 'zh'].Dialog}
           className={'commonDialog'}
           style={{ width: '600px' }}
           isFullScreen={true}
@@ -211,7 +212,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
                 >
                   <Select
                     name="name"
-                    locale={locale.Select}
+                    locale={locale[language as 'en' | 'zh'].Select}
                     disabled={isEdit ? true : false}
                     dataSource={envOption}
                     maxLength={32}
