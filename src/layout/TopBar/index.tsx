@@ -13,6 +13,8 @@ import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
 import Permission from '../../components/Permission';
 import PlatformSetting from '../../components/PlatformSetting';
+import EditPlatFormUserDialog from './components/EditPlatFormUserDialog';
+import { isAdminUserCheck } from '../../utils/utils';
 
 type Props = {
   dispatch: ({}) => {};
@@ -22,16 +24,20 @@ type Props = {
 
 type State = {
   platformSetting: boolean;
+  isEditAdminUser: boolean;
+  userInfo?: LoginUserInfo;
 };
 @connect((store: any) => {
   return { ...store.user };
 })
 class TopBar extends Component<Props, State> {
   loadCount: number;
-  constructor(props: any) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       platformSetting: false,
+      isEditAdminUser: false,
+      userInfo: props.userInfo,
     };
     this.loadCount = 0;
   }
@@ -39,6 +45,14 @@ class TopBar extends Component<Props, State> {
   componentDidMount() {
     this.loadSystemInfo();
     this.loadUserInfo();
+  }
+
+  componentWillReceiveProps(nextProps: Props) {
+    if (nextProps.userInfo !== this.props.userInfo) {
+      this.setState({ userInfo: nextProps.userInfo }, () => {
+        this.isEditPlatForm();
+      });
+    }
   }
 
   loadSystemInfo = () => {
@@ -67,10 +81,24 @@ class TopBar extends Component<Props, State> {
     this.setState({ platformSetting: true });
   };
 
+  isEditPlatForm = () => {
+    const { userInfo } = this.state;
+    const isAdminUser = isAdminUserCheck(userInfo);
+    if (isAdminUser && userInfo && !userInfo.email) {
+      this.setState({
+        isEditAdminUser: true,
+      });
+    }
+  };
+
+  onCloseEditAdminUser = () => {
+    this.setState({ isEditAdminUser: false });
+  };
+
   render() {
     const { Row, Col } = Grid;
-    const { userInfo, systemInfo, dispatch } = this.props;
-    const { platformSetting } = this.state;
+    const { systemInfo, dispatch } = this.props;
+    const { platformSetting, isEditAdminUser, userInfo } = this.state;
     return (
       <div className="layout-topbar" id="layout-topbar">
         <Row className="nav-wrapper">
@@ -196,6 +224,9 @@ class TopBar extends Component<Props, State> {
               dispatch={dispatch}
             />
           )}
+        </If>
+        <If condition={isEditAdminUser}>
+          <EditPlatFormUserDialog userInfo={userInfo} onClose={this.onCloseEditAdminUser} />
         </If>
       </div>
     );
