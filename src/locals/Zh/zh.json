@@ -516,11 +516,9 @@
   "Please set a email address for the administrator, it must same as the SSO account.": "请为管理员设置电子邮件地址, 它必须与SSO帐户相同",
   "No dex connector configurations": "没有dex连接器配置",
   "Before enabling SSO, you must add at least one dex connector configuration.": "在启用SSO之前, 必须至少添加一个dex连接器配置.",
-  "ConfirmPassword": "确认密码",
   "Password should be 8-16 bits and contain at least one number and one letter": "密码应为8-16位, 并至少包含一个数字和一个字母",
   "Please input a valid email": "请输入有效的电子邮件地址",
   "Please input a email": "请输入电子邮箱地址",
-  "Inconsistent password entry twice": "俩次密码输入不一致",
   "User updated successfully": "用户更新成功",
   "Reset the password and email for the administrator account": "重置管理员帐户的密码和电子邮件地址"
 }

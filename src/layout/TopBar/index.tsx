@@ -37,7 +37,6 @@ class TopBar extends Component<Props, State> {
     this.state = {
       platformSetting: false,
       isEditAdminUser: false,
-      userInfo: props.userInfo,
     };
     this.loadCount = 0;
   }
@@ -45,14 +44,6 @@ class TopBar extends Component<Props, State> {
   componentDidMount() {
     this.loadSystemInfo();
     this.loadUserInfo();
-  }
-
-  componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.userInfo !== this.props.userInfo) {
-      this.setState({ userInfo: nextProps.userInfo }, () => {
-        this.isEditPlatForm();
-      });
-    }
   }
 
   loadSystemInfo = () => {
@@ -64,6 +55,13 @@ class TopBar extends Component<Props, State> {
   loadUserInfo = () => {
     this.props.dispatch({
       type: 'user/getLoginUserInfo',
+      payload: {
+        callback: (res: LoginUserInfo) => {
+          this.setState({ userInfo: res }, () => {
+            this.isEditPlatForm();
+          });
+        },
+      },
     });
   };
 
