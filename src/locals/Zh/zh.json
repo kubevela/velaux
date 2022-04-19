@@ -519,5 +519,11 @@
   "Are you sure you want to reclaim the current environment?": "您确定要回收当前环境吗?",
   "Are you sure you want to delete the current environment binding?": "是否确实要删除当前环境绑定?",
   "Recycle application environment success": "回收应用程序环境成功",
-  "Delete application environment binding success": "删除应用程序环境绑定成功"
+  "Delete application environment binding success": "删除应用程序环境绑定成功",
+  "Retry": "重试",
+  "Password should be 8-16 bits and contain at least one number and one letter": "密码应为8-16位, 并至少包含一个数字和一个字母",
+  "Please input a valid email": "请输入有效的电子邮件地址",
+  "Please input a email": "请输入电子邮箱地址",
+  "User updated successfully": "用户更新成功",
+  "Reset the password and email for the administrator account": "重置管理员帐户的密码和电子邮件地址"
 }
