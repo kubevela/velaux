@@ -75,7 +75,7 @@ class ProjectForm extends React.Component<Props, State> {
             <div className="cluster-container">
               <Select
                 disabled={disable}
-                locale={locale.Select}
+                locale={locale().Select}
                 className="cluster-params-input"
                 mode="single"
                 dataSource={projectList}

@@ -103,7 +103,7 @@ class TableList extends Component<Props> {
                       onOk: () => {
                         this.onDelete(record);
                       },
-                      locale: locale.Dialog,
+                      locale: locale().Dialog,
                     });
                   }}
                 >
@@ -137,7 +137,7 @@ class TableList extends Component<Props> {
     return (
       <div className="table-delivery-list margin-top-20">
         <Table
-          locale={locale.Table}
+          locale={locale().Table}
           className="customTable"
           size="medium"
           dataSource={list}

@@ -34,7 +34,7 @@ class TraitsList extends Component<Props> {
         this.props.onDeleteTrait(traitType || '');
       },
       onClose: () => {},
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 
@@ -43,7 +43,7 @@ class TraitsList extends Component<Props> {
     const { changeTraitStats } = this.props;
     return (
       <Col xl={12} m={12} s={24} className="padding16 card-trait-wrapper">
-        <Card locale={locale.Card}>
+        <Card locale={locale().Card}>
           <div className="traits-list-nav">
             <div
               className="traits-list-title"
@@ -75,7 +75,7 @@ class TraitsList extends Component<Props> {
     const { Col } = Grid;
     return (
       <Col xl={12} m={12} s={24} className="padding16 card-add-wrapper">
-        <Card locale={locale.Card}>
+        <Card locale={locale().Card}>
           <div className="traits-add-operation">
             <Icon
               type="plus-circle"

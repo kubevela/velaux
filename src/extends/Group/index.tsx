@@ -127,7 +127,7 @@ class Group extends React.Component<Props, State> {
                             this.setState({ enable: event, closed: false, checked: false });
                             this.removeJsonKeyValue();
                           },
-                          locale: locale.Dialog,
+                          locale: locale().Dialog,
                         });
                       }
                     }}

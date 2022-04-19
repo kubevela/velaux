@@ -122,7 +122,7 @@ class Integrations extends Component<Props, State> {
           </section>
           <section className="card-content-table">
             <Table
-              locale={locale.Table}
+              locale={locale().Table}
               dataSource={configList}
               hasBorder={true}
               loading={isLoading}

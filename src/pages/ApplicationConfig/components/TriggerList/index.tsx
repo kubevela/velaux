@@ -52,7 +52,7 @@ class TriggerList extends Component<Props, State> {
         this.props.onDeleteTrigger(token || '');
       },
       onClose: () => {},
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 
@@ -108,7 +108,7 @@ class TriggerList extends Component<Props, State> {
         <Row wrap={true}>
           {(triggers || []).map((item: Trigger) => (
             <Col xl={8} m={12} s={24} key={item.type} className="padding16">
-              <Card free={true} style={{ padding: '16px' }} locale={locale.Card}>
+              <Card free={true} style={{ padding: '16px' }} locale={locale().Card}>
                 <div className="trigger-list-nav">
                   <div className="trigger-list-title">
                     {item.alias ? `${item.alias}(${item.name})` : item.name}
@@ -198,7 +198,7 @@ class TriggerList extends Component<Props, State> {
         </Row>
         <If condition={showTrigger}>
           <Dialog
-            locale={locale.Dialog}
+            locale={locale().Dialog}
             className="commonDialog"
             visible={true}
             onClose={this.closeWebhook}

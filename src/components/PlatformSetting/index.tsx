@@ -167,7 +167,7 @@ class PlatformSetting extends React.Component<Props, State> {
     const { onClose, platformSetting } = this.props;
     return (
       <Dialog
-        locale={locale.Dialog}
+        locale={locale().Dialog}
         visible={platformSetting}
         className={'commonDialog'}
         title={i18n.t('Platform Setting')}
@@ -191,7 +191,7 @@ class PlatformSetting extends React.Component<Props, State> {
         <Form field={this.field} labelCol={{ fixedSpan: 8 }} wrapperCol={{ span: 16 }}>
           <Card
             style={{ marginBottom: '16px' }}
-            locale={locale.Card}
+            locale={locale().Card}
             contentHeight="200px"
             title={<Translation>User authentication configuration</Translation>}
           >
@@ -231,7 +231,7 @@ class PlatformSetting extends React.Component<Props, State> {
 
           {/* <Card
             style={{ marginBottom: '16px' }}
-            locale={locale.Card}
+            locale={locale().Card}
             contentHeight="200px"
             title={<Translation>User experience improvement plan</Translation>}
           >

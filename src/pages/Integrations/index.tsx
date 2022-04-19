@@ -104,7 +104,7 @@ class Integrations extends Component<Props, State> {
           });
         }
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 
@@ -218,7 +218,7 @@ class Integrations extends Component<Props, State> {
             </Button>
           </Permission>
         </div>
-        <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>
+        <Table locale={locale().Table} dataSource={list} hasBorder={false} loading={isLoading}>
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
 

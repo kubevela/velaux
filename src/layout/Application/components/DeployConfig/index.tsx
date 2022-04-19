@@ -54,7 +54,7 @@ class DeployConfigDialog extends Component<Props, State> {
       <React.Fragment>
         <Dialog
           visible={true}
-          locale={locale.Dialog}
+          locale={locale().Dialog}
           className={'commonDialog deployConfig'}
           style={{ width: '600px' }}
           isFullScreen={true}

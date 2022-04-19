@@ -27,7 +27,7 @@ class SecretKeySelect extends React.Component<Props, State> {
     const { onChange, value, secretKeys, id, disabled } = this.props;
     return (
       <Select
-        locale={locale.Select}
+        locale={locale().Select}
         onChange={onChange}
         defaultValue={value}
         id={id}

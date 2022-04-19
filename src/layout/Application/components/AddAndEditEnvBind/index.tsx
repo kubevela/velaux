@@ -178,7 +178,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
       <React.Fragment>
         <Dialog
           visible={true}
-          locale={locale.Dialog}
+          locale={locale().Dialog}
           className={'commonDialog'}
           style={{ width: '600px' }}
           isFullScreen={true}
@@ -211,7 +211,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
                 >
                   <Select
                     name="name"
-                    locale={locale.Select}
+                    locale={locale().Select}
                     disabled={isEdit ? true : false}
                     dataSource={envOption}
                     maxLength={32}

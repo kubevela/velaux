@@ -65,7 +65,7 @@ class CardContent extends React.Component<Props, State> {
               });
               return (
                 <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={name}>
-                  <Card locale={locale.Card} contentHeight="auto">
+                  <Card locale={locale().Card} contentHeight="auto">
                     <a onClick={() => clickAddon(name)}>
                       <div className="cluster-card-top flexcenter">
                         <If condition={icon && icon != 'none'}>

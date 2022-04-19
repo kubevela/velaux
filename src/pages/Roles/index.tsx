@@ -93,7 +93,7 @@ class Roles extends Component<Props, State> {
           });
         }
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 
@@ -231,14 +231,14 @@ class Roles extends Component<Props, State> {
               </Permission>,
             ]}
           />
-          <Table locale={locale.Table} dataSource={list} hasBorder={false} loading={isLoading}>
+          <Table locale={locale().Table} dataSource={list} hasBorder={false} loading={isLoading}>
             {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
           </Table>
 
           <Pagination
             className="margin-top-20 text-align-right"
             total={total}
-            locale={locale.Pagination}
+            locale={locale().Pagination}
             hideOnlyOnePage={true}
             size="medium"
             pageSize={pageSize}

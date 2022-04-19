@@ -19,7 +19,7 @@ class StatusShow extends React.Component<Props> {
     const { applicationStatus, onClose, loading, title } = this.props;
     return (
       <Dialog
-        locale={locale.Dialog}
+        locale={locale().Dialog}
         visible={true}
         className={'commonDialog'}
         title={title}
@@ -42,11 +42,11 @@ class StatusShow extends React.Component<Props> {
       >
         <Loading visible={loading} style={{ width: '100%' }}>
           <Card
-            locale={locale.Card}
+            locale={locale().Card}
             contentHeight="200px"
             title={<Translation>Applied Resources</Translation>}
           >
-            <Table locale={locale.Table} dataSource={applicationStatus?.appliedResources}>
+            <Table locale={locale().Table} dataSource={applicationStatus?.appliedResources}>
               <Table.Column
                 dataIndex="name"
                 width="150px"
@@ -76,12 +76,12 @@ class StatusShow extends React.Component<Props> {
           </Card>
           <If condition={applicationStatus?.conditions}>
             <Card
-              locale={locale.Card}
+              locale={locale().Card}
               style={{ marginTop: '8px' }}
               contentHeight="auto"
               title={<Translation>Conditions</Translation>}
             >
-              <Table locale={locale.Table} dataSource={applicationStatus?.conditions}>
+              <Table locale={locale().Table} dataSource={applicationStatus?.conditions}>
                 <Table.Column
                   width="150px"
                   dataIndex="type"
@@ -118,13 +118,13 @@ class StatusShow extends React.Component<Props> {
           </If>
           <If condition={applicationStatus?.services}>
             <Card
-              locale={locale.Card}
+              locale={locale().Card}
               style={{ marginTop: '8px', marginBottom: '16px' }}
               contentHeight="auto"
               title={<Translation>Component Status</Translation>}
             >
               <Table
-                locale={locale.Table}
+                locale={locale().Table}
                 className="customTable"
                 dataSource={applicationStatus?.services}
               >

@@ -78,7 +78,7 @@ class Namespace extends React.Component<Props, State> {
         <If condition={!showNameSpaceInput}>
           <div className="cluster-container">
             <Select
-              locale={locale.Select}
+              locale={locale().Select}
               className="cluster-params-input"
               mode="single"
               dataSource={namespaces}

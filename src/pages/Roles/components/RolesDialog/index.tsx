@@ -197,7 +197,7 @@ class RolesDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
-                    locale={locale.Select}
+                    locale={locale().Select}
                     mode="tag"
                     dataSource={permPoliciesList}
                   />
