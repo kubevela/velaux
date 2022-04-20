@@ -59,7 +59,7 @@ class Hearder extends React.Component<Props, State> {
       <Row className="border-radius-8">
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
-            locale={locale.Select}
+            locale={locale().Select}
             mode="single"
             size="small"
             onChange={this.handleChangeEnv}
@@ -73,7 +73,7 @@ class Hearder extends React.Component<Props, State> {
 
         <Col span="6" style={{ padding: '0 8px' }}>
           <Select
-            locale={locale.Select}
+            locale={locale().Select}
             mode="single"
             size="small"
             onChange={this.handleChangeStatus}

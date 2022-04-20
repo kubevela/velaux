@@ -92,7 +92,7 @@ class CardContent extends React.Component<Props, State> {
               onOk: () => {
                 this.onDeleteAppPlan(item.name);
               },
-              locale: locale.Dialog,
+              locale: locale().Dialog,
             });
           }}
         >
@@ -145,7 +145,7 @@ class CardContent extends React.Component<Props, State> {
               className={`card-content-wrapper`}
               key={`${item.name}`}
             >
-              <Card locale={locale.Card} contentHeight="auto">
+              <Card locale={locale().Card} contentHeight="auto">
                 <Link to={`/applications/${name}/config`}>
                   <div className="appplan-card-top flexcenter">
                     <If condition={icon && icon != 'none'}>

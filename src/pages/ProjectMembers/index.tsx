@@ -133,7 +133,7 @@ class ProjectMembers extends Component<Props, State> {
             .catch();
         }
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 
@@ -283,7 +283,7 @@ class ProjectMembers extends Component<Props, State> {
 
           <section className="margin-top-20  member-list-wrapper">
             <Table
-              locale={locale.Table}
+              locale={locale().Table}
               dataSource={memberList}
               hasBorder={false}
               loading={isLoading}
@@ -294,7 +294,7 @@ class ProjectMembers extends Component<Props, State> {
             <Pagination
               className="margin-top-20 text-align-right"
               total={total}
-              locale={locale.Pagination}
+              locale={locale().Pagination}
               hideOnlyOnePage={true}
               size="medium"
               pageSize={pageSize}

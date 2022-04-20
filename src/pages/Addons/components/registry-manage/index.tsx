@@ -159,7 +159,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                 onOk: () => {
                   this.onDeleteRegistry(name);
                 },
-                locale: locale.Dialog,
+                locale: locale().Dialog,
               });
             }}
           >
@@ -211,7 +211,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
-          locale={locale.Dialog}
+          locale={locale().Dialog}
           className="commonDialog"
           title={<Translation>Registry Management</Translation>}
           autoFocus={true}
@@ -247,7 +247,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
               </div>
             </Col>
           </Row>
-          <Table locale={locale.Table} dataSource={registryDataSource}>
+          <Table locale={locale().Table} dataSource={registryDataSource}>
             <Table.Column width="150px" title={<Translation>Name</Translation>} dataIndex="name" />
             <Table.Column width="80px" title={<Translation>Type</Translation>} dataIndex="type" />
             <Table.Column title={<Translation>URL</Translation>} dataIndex="url" />
@@ -296,7 +296,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     help={<Translation>The addon registry type</Translation>}
                   >
                     <Select
-                      locale={locale.Select}
+                      locale={locale().Select}
                       {...init('type', {
                         rules: [
                           {

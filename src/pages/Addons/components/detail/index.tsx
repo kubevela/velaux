@@ -164,7 +164,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
         content:
           'Please make sure that the Addon is no longer in use and the related application has been recycled.',
         onOk: this.disableAddon,
-        locale: locale.Dialog,
+        locale: locale().Dialog,
       });
       return;
     }
@@ -450,7 +450,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </If>
             <If condition={addonDetailInfo?.dependencies}>
               <Card
-                locale={locale.Card}
+                locale={locale().Card}
                 contentHeight="auto"
                 title={<Translation>Dependencies</Translation>}
               >
@@ -479,7 +479,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             <If condition={addonDetailInfo?.definitions}>
               <Card
                 contentHeight="auto"
-                locale={locale.Card}
+                locale={locale().Card}
                 title={<Translation>Definitions</Translation>}
                 style={{ marginTop: '16px' }}
               >
@@ -488,7 +488,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     Enable the addon to obtain the following extension capabilities
                   </Translation>
                 </Message>
-                <Table locale={locale.Table} dataSource={addonDetailInfo?.definitions}>
+                <Table locale={locale().Table} dataSource={addonDetailInfo?.definitions}>
                   <Table.Column
                     dataIndex="name"
                     align="left"
@@ -514,7 +514,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </If>
             <Card
               contentHeight="auto"
-              locale={locale.Card}
+              locale={locale().Card}
               title={<Translation>Readme</Translation>}
               style={{ marginTop: '16px' }}
             >

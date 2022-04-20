@@ -74,7 +74,7 @@ class Menu extends Component<Props, any> {
     }
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     return (
-      <Card locale={locale.Card} contentHeight="100px" className="app-menu">
+      <Card locale={locale().Card} contentHeight="100px" className="app-menu">
         {activeItems.map((item) => {
           return (
             <Link

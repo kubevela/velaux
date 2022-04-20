@@ -31,7 +31,7 @@ class ComponentsList extends Component<Props> {
         this.props.onDeleteComponent(name || '');
       },
       onClose: () => {},
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 
@@ -43,7 +43,7 @@ class ComponentsList extends Component<Props> {
         <Row wrap={true}>
           {(components || []).map((item: ApplicationComponentBase) => (
             <Col xl={8} m={12} s={24} key={item.name} className="padding16">
-              <Card locale={locale.Card} contentHeight="auto">
+              <Card locale={locale().Card} contentHeight="auto">
                 <div className="components-list-nav">
                   <Permission
                     request={{

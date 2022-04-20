@@ -154,7 +154,7 @@ class WorkflowForm extends Component<Props, State> {
             <Col span={24} style={{ padding: '0 8px' }}>
               <FormItem label={<Translation>Workflow Type</Translation>} required disabled={edit}>
                 <Select
-                  locale={locale.Select}
+                  locale={locale().Select}
                   className="select"
                   placeholder={t('Please select').toString()}
                   {...init(`type`, {

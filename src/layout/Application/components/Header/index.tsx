@@ -86,7 +86,7 @@ class ApplicationHeader extends Component<Props, State> {
               onOk: () => {
                 this.onDeploy(workflowName, true);
               },
-              locale: locale.Dialog,
+              locale: locale().Dialog,
             });
           } else {
             handleError(err);
@@ -190,7 +190,7 @@ class ApplicationHeader extends Component<Props, State> {
         </Row>
         <Row wrap={true}>
           <Col xl={12} m={12} s={24} className="padding16">
-            <Card locale={locale.Card}>
+            <Card locale={locale().Card}>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
@@ -221,7 +221,7 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
           <Col xl={12} m={12} s={24} className="padding16">
             <If condition={!records || (Array.isArray(records) && records.length === 0)}>
-              <Card locale={locale.Card}>
+              <Card locale={locale().Card}>
                 <Empty
                   message={<Translation>There is no running workflow</Translation>}
                   iconWidth={'30px'}

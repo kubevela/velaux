@@ -116,7 +116,7 @@ class ContainerLog extends Component<Props, State> {
     return (
       <Dialog
         className="commonDialog logDialog"
-        locale={locale.Dialog}
+        locale={locale().Dialog}
         visible={true}
         footerActions={[]}
         onClose={this.props.onClose}

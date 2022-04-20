@@ -271,7 +271,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <Dialog
-          locale={locale.Dialog}
+          locale={locale().Dialog}
           className="dialog-cluoudService-wraper"
           title={<Translation>Connect Kubernetes Cluster From Cloud</Translation>}
           autoFocus={true}
@@ -298,7 +298,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
             <Form {...formItemLayout} field={this.field} className="cloud-server-wraper">
               <FormItem label={<Translation>Provider</Translation>} required={true}>
                 <Select
-                  locale={locale.Select}
+                  locale={locale().Select}
                   mode="single"
                   size="large"
                   dataSource={providerList}
@@ -348,7 +348,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
 
           <If condition={!choseInput}>
             <Table
-              locale={locale.Table}
+              locale={locale().Table}
               dataSource={cloudClusters}
               hasBorder={false}
               loading={tableLoading}
@@ -356,7 +356,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
               {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
             </Table>
             <Pagination
-              locale={locale.Pagination}
+              locale={locale().Pagination}
               hideOnlyOnePage={true}
               total={total}
               size="small"

@@ -111,7 +111,7 @@ class HelmRepoSelect extends Component<Props, State> {
           followTrigger={true}
           value={value}
           dataSource={dataSource}
-          locale={locale.Select}
+          locale={locale().Select}
         />
       </Loading>
     );

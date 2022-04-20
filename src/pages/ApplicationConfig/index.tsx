@@ -393,7 +393,7 @@ class ApplicationConfig extends Component<Props, State> {
         </Row>
         <Row>
           <Col span={24} className="padding16">
-            <Card locale={locale.Card} contentHeight="auto">
+            <Card locale={locale().Card} contentHeight="auto">
               <Row wrap={true}>
                 <Col m={12} xs={24}>
                   <Item

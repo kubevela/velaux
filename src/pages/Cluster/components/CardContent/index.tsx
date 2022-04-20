@@ -74,7 +74,7 @@ class CardContent extends React.Component<Props, State> {
               onOk: () => {
                 this.onDeleteCluster(item.name);
               },
-              locale: locale.Dialog,
+              locale: locale().Dialog,
             });
           }}
         >
