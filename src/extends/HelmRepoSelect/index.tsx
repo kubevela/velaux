@@ -6,6 +6,7 @@ import { getChartRepos } from '../../api/repository';
 import type { HelmRepo } from '../../interface/application';
 import { connect } from 'dva';
 import _ from 'lodash';
+import { getHelmReportLabel } from '../../utils/utils';
 
 type Props = {
   value?: any;
@@ -95,10 +96,11 @@ class HelmRepoSelect extends Component<Props, State> {
   render() {
     const { disabled, value } = this.props;
     const { repos, loading, inputRepo } = this.state;
-    const dataSource = repos.map((repo) => repo.url);
+    const dataSource = repos;
     if (inputRepo) {
-      dataSource.unshift(inputRepo);
+      dataSource.unshift({ url: inputRepo, type: 'helm' });
     }
+    const transDataSource = getHelmReportLabel(dataSource);
     return (
       <Loading visible={loading} style={{ width: '100%' }}>
         <Select
@@ -110,7 +112,7 @@ class HelmRepoSelect extends Component<Props, State> {
           onSearch={this.onSearch}
           followTrigger={true}
           value={value}
-          dataSource={dataSource}
+          dataSource={transDataSource}
           locale={locale().Select}
         />
       </Loading>
