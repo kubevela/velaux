@@ -123,7 +123,7 @@ class TableList extends Component<Props, State> {
     return (
       <div className="table-version-list  margin-top-20">
         <Table
-          locale={locale.Table}
+          locale={locale().Table}
           primaryKey={'version'}
           className="customTable"
           rowHeight={40}

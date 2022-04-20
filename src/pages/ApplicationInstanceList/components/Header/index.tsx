@@ -92,40 +92,40 @@ class Header extends Component<Props, State> {
   };
   recycleEnv = async () => {
     Dialog.confirm({
-      content: 'Are you sure you want to reclaim the current environment?',
+      content: i18n.t('Are you sure you want to reclaim the current environment?'),
       onOk: () => {
         const { applicationDetail, envName, refresh } = this.props;
         if (applicationDetail) {
           recycleApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then(
             (re) => {
               if (re) {
-                Message.success('recycle applicationn environment success');
+                Message.success(i18n.t('Recycle application environment success'));
                 refresh();
               }
             },
           );
         }
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
   deleteEnv = async () => {
     Dialog.confirm({
-      content: 'Are you sure you want to delete the current environment binding?',
+      content: i18n.t('Are you sure you want to delete the current environment binding?'),
       onOk: () => {
         const { applicationDetail, envName, updateEnvs } = this.props;
         if (applicationDetail) {
           deleteApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then(
             (re) => {
               if (re) {
-                Message.success('delete applicationn environment binding success');
+                Message.success(i18n.t('Delete application environment binding success'));
                 updateEnvs();
               }
             },
           );
         }
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 
@@ -173,7 +173,7 @@ class Header extends Component<Props, State> {
         <Row className="border-radius-8">
           <Col span="4" style={{ marginBottom: '16px' }}>
             <Select
-              locale={locale.Select}
+              locale={locale().Select}
               mode="single"
               onChange={this.handleTargetChange}
               dataSource={targetOptions}
@@ -184,7 +184,7 @@ class Header extends Component<Props, State> {
           </Col>
           <Col span="4" style={{ marginBottom: '16px', paddingLeft: '16px' }}>
             <Select
-              locale={locale.Select}
+              locale={locale().Select}
               mode="single"
               onChange={this.handleComponentChange}
               dataSource={componentOptions}

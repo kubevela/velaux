@@ -253,7 +253,7 @@ class CreateUser extends React.Component<Props, State> {
                         },
                       ],
                     })}
-                    locale={locale.Select}
+                    locale={locale().Select}
                     mode="multiple"
                     dataSource={rolesListSelect}
                   />

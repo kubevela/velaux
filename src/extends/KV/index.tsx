@@ -171,7 +171,7 @@ class KV extends Component<Props, State> {
                       {...init(`envKey-${item.key}`)}
                       label={'Key'}
                       placeholder={i18n.t('Please select')}
-                      locale={locale.Select}
+                      locale={locale().Select}
                     />
                   </If>
                   <If condition={!keyOptions}>

@@ -373,7 +373,7 @@ class ComponentDialog extends React.Component<Props, State> {
                   }
                 >
                   <Select
-                    locale={locale.Select}
+                    locale={locale().Select}
                     showSearch
                     disabled={isEditComponent ? true : false}
                     className="select"

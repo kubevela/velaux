@@ -373,7 +373,7 @@ class UISchema extends Component<Props, State> {
               >
                 <Select
                   disabled={disableEdit}
-                  locale={locale.Select}
+                  locale={locale().Select}
                   {...init(param.jsonKey, {
                     initValue: initValue,
                     rules: convertRule(param.validate),

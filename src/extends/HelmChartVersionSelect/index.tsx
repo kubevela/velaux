@@ -101,7 +101,7 @@ class HelmChartVersionSelect extends Component<Props, State> {
           disabled={disabled}
           value={value}
           dataSource={dataSource}
-          locale={locale.Select}
+          locale={locale().Select}
         />
       </Loading>
     );

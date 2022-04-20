@@ -101,7 +101,7 @@ class WorkflowComponent extends Component<Props, State> {
           }
         });
       },
-      locale: locale.Dialog,
+      locale: locale().Dialog,
     });
   };
 

@@ -65,7 +65,7 @@ class SecretSelect extends React.Component<Props, State> {
     const filters = secrets?.filter((secret) => secret.metadata.labels['app.oam.dev/sync-alias']);
     return (
       <Select
-        locale={locale.Select}
+        locale={locale().Select}
         onChange={this.onChange}
         value={value}
         id={id}

@@ -241,7 +241,7 @@ class DeliveryDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
-          locale={locale.Dialog}
+          locale={locale().Dialog}
           className={'commonDialog'}
           height="auto"
           title={
@@ -346,7 +346,7 @@ class DeliveryDialog extends React.Component<Props, State> {
               <Col span={12} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Cluster</Translation>} required>
                   <Select
-                    locale={locale.Select}
+                    locale={locale().Select}
                     className="select"
                     disabled={isEdit}
                     placeholder={t('Please select').toString()}

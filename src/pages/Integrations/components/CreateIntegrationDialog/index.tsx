@@ -249,7 +249,7 @@ class CreateIntegration extends React.Component<Props, State> {
                     required={true}
                   >
                     <Select
-                      locale={locale.Select}
+                      locale={locale().Select}
                       showSearch
                       className="select"
                       placeholder={i18n.t('Please select').toString()}
