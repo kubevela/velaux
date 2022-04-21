@@ -1,6 +1,7 @@
 import React from 'react';
 import { Grid, Icon, Input } from '@b-design/ui';
 import i18n from '../../../../i18n';
+import { withTranslation } from 'react-i18next';
 import './index.less';
 
 const { Row, Col } = Grid;
@@ -74,4 +75,4 @@ class SelectSearch extends React.Component<Props, State> {
   }
 }
 
-export default SelectSearch;
+export default withTranslation()(SelectSearch);
