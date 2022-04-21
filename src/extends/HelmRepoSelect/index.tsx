@@ -6,7 +6,6 @@ import { getChartRepos } from '../../api/repository';
 import type { HelmRepo } from '../../interface/application';
 import { connect } from 'dva';
 import _ from 'lodash';
-import { getHelmReportLabel } from '../../utils/utils';
 
 type Props = {
   value?: any;
@@ -93,6 +92,16 @@ class HelmRepoSelect extends Component<Props, State> {
     return findSecretObj?.secretName || '';
   };
 
+  convertHelmRepositoryOptions(data: HelmRepo[]): { label: string; value: string }[] {
+    return (data || []).map((item: { url: string; secretName?: string }) => {
+      let label = item.url;
+      if (item.secretName) {
+        label = `(${item.secretName}) ${item.url}`;
+      }
+      return { label: label, value: item.url };
+    });
+  }
+
   render() {
     const { disabled, value } = this.props;
     const { repos, loading, inputRepo } = this.state;
@@ -100,7 +109,7 @@ class HelmRepoSelect extends Component<Props, State> {
     if (inputRepo) {
       dataSource.unshift({ url: inputRepo, type: 'helm' });
     }
-    const transDataSource = getHelmReportLabel(dataSource);
+    const transDataSource = this.convertHelmRepositoryOptions(dataSource);
     return (
       <Loading visible={loading} style={{ width: '100%' }}>
         <Select

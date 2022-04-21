@@ -156,15 +156,3 @@ export function isAdminUserCheck(userInfo: LoginUserInfo | undefined) {
     return false;
   }
 }
-
-export function getHelmReportLabel(
-  data: { url: string; secretName?: string; type: string }[],
-): { label: string; value: string }[] {
-  return (data || []).map((item: { url: string; secretName?: string }) => {
-    let label = item.url;
-    if (item.secretName) {
-      label = `(${item.secretName}) ${item.url}`;
-    }
-    return { label: label, value: item.url };
-  });
-}
