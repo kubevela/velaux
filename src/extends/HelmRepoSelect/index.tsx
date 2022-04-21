@@ -92,13 +92,24 @@ class HelmRepoSelect extends Component<Props, State> {
     return findSecretObj?.secretName || '';
   };
 
+  convertHelmRepositoryOptions(data: HelmRepo[]): { label: string; value: string }[] {
+    return (data || []).map((item: { url: string; secretName?: string }) => {
+      let label = item.url;
+      if (item.secretName) {
+        label = `(${item.secretName}) ${item.url}`;
+      }
+      return { label: label, value: item.url };
+    });
+  }
+
   render() {
     const { disabled, value } = this.props;
     const { repos, loading, inputRepo } = this.state;
-    const dataSource = repos.map((repo) => repo.url);
+    const dataSource = repos;
     if (inputRepo) {
-      dataSource.unshift(inputRepo);
+      dataSource.unshift({ url: inputRepo, type: 'helm' });
     }
+    const transDataSource = this.convertHelmRepositoryOptions(dataSource);
     return (
       <Loading visible={loading} style={{ width: '100%' }}>
         <Select
@@ -110,7 +121,7 @@ class HelmRepoSelect extends Component<Props, State> {
           onSearch={this.onSearch}
           followTrigger={true}
           value={value}
-          dataSource={dataSource}
+          dataSource={transDataSource}
           locale={locale().Select}
         />
       </Loading>

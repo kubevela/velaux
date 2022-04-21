@@ -74,6 +74,10 @@ class Integrations extends Component<Props, State> {
           this.setState({
             list: res,
           });
+        } else {
+          this.setState({
+            list: [],
+          });
         }
       })
       .finally(() => {
