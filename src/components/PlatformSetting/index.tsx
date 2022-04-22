@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Field, Grid, Radio, Input, Message } from '@b-design/ui';
+import { Field, Grid, Radio, Input, Message, Icon, Switch } from '@b-design/ui';
 import { Dialog, Card, Button, Form } from '@b-design/ui';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
@@ -10,6 +10,7 @@ import type { SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
 import { updateSystemInfo } from '../../api/config';
 import { checkPermission } from '../../utils/permission';
+import Item from '../Item';
 const { Col, Row } = Grid;
 
 type Props = {
@@ -164,7 +165,7 @@ class PlatformSetting extends React.Component<Props, State> {
     return domain;
   };
   render() {
-    const { onClose, platformSetting } = this.props;
+    const { onClose, platformSetting, systemInfo } = this.props;
     return (
       <Dialog
         locale={locale().Dialog}
@@ -229,14 +230,33 @@ class PlatformSetting extends React.Component<Props, State> {
             </Row>
           </Card>
 
-          {/* <Card
+          <Card
             style={{ marginBottom: '16px' }}
             locale={locale().Card}
             contentHeight="200px"
-            title={<Translation>User experience improvement plan</Translation>}
+            title={
+              <span>
+                <Translation>User experience improvement plan</Translation>
+                <a target="_blank" href="https://kubevela.io/docs/reference/user-improvement-plan">
+                  <Icon style={{ marginLeft: '4px' }} type="help" />
+                </a>
+              </span>
+            }
           >
-            <Form.Item />
-          </Card> */}
+            <Item
+              label={i18n.t('Contribution')}
+              value={
+                <Switch
+                  size="medium"
+                  {...this.field.init('enableCollection', {
+                    rules: [{ required: true }],
+                    initValue: systemInfo.enableCollection,
+                  })}
+                  checked={this.field.getValue('enableCollection')}
+                />
+              }
+            />
+          </Card>
         </Form>
       </Dialog>
     );
