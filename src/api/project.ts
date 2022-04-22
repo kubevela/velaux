@@ -98,3 +98,8 @@ export function getProjectConfigs(query: ProjectName) {
   const urlPath = project + `/${query.projectName}/configs`;
   return get(urlPath, {}).then((res) => res);
 }
+
+export function checkImageName(query: {image:string}) {
+  const urlPath = project + `/default/validate_image`;
+  return get(urlPath, {params:query}).then((res) => res);
+}

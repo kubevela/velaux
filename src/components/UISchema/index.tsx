@@ -421,6 +421,9 @@ class UISchema extends Component<Props, State> {
                       },
                     ],
                   })}
+                  onChangeImagePullSecretsRef={(data: string[]) => {
+                    this.form.setValue('imagePullSecrets', data);
+                  }}
                 />
               </Form.Item>
             );
