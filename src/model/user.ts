@@ -26,22 +26,24 @@ const user: any = {
 
   effects: {
     *getLoginUserInfo(
-      action: { payload: { projectName: string; callback: (data: LoginUserInfo) => void } },
+      action: { payload: Record<string, never>; callback: (data: LoginUserInfo) => void },
       { call, put }: { call: any; put: any },
     ) {
-      const { callback } = action.payload;
       const result: LoginUserInfo = yield call(getLoginUserInfo, action.payload);
       yield put({ type: 'updateUserInfo', payload: result || {} });
-      if (callback && result) {
-        callback(result);
+      if (action.callback && result) {
+        action.callback(result);
       }
     },
     *getSystemInfo(
-      action: { payload: { projectName: string } },
+      action: { payload: Record<string, never>; callback: (data: SystemInfo) => void },
       { call, put }: { call: any; put: any },
     ) {
       const result: SystemInfo = yield call(loadSystemInfo, action.payload);
       yield put({ type: 'updateSystemInfo', payload: result || {} });
+      if (result && action.callback) {
+        action.callback(result);
+      }
     },
   },
 };

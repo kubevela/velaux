@@ -156,3 +156,48 @@ export function isAdminUserCheck(userInfo: LoginUserInfo | undefined) {
     return false;
   }
 }
+
+/**
+ * Get browser name agent version
+ * return browser name version
+ * */
+export function getBrowserNameAndVersion() {
+  const agent = navigator.userAgent.toLowerCase();
+  const regStr_ie = /msie [\d.]+/gi;
+  const regStr_ff = /firefox\/[\d.]+/gi;
+  const regStr_chrome = /chrome\/[\d.]+/gi;
+  const regStr_saf = /safari\/[\d.]+/gi;
+  let browserNV: any;
+  //IE
+  if (agent.indexOf('msie') > 0) {
+    browserNV = agent.match(regStr_ie);
+  }
+  //firefox
+  if (agent.indexOf('firefox') > 0) {
+    browserNV = agent.match(regStr_ff);
+  }
+  //Chrome
+  if (agent.indexOf('chrome') > 0) {
+    browserNV = agent.match(regStr_chrome);
+  }
+  //Safari
+  if (agent.indexOf('safari') > 0 && agent.indexOf('chrome') < 0) {
+    browserNV = agent.match(regStr_saf);
+  }
+  browserNV = browserNV.toString();
+  //other
+  if ('' == browserNV) {
+    browserNV = 'Is not a standard browser';
+  }
+  //Here does not display "/"
+  if (browserNV.indexOf('firefox') != -1 || browserNV.indexOf('chrome') != -1) {
+    browserNV = browserNV.replace('/', '');
+  }
+  //Here does not display space
+  if (browserNV.indexOf('msie') != -1) {
+    //msie replace IE & trim space
+    browserNV = browserNV.replace('msie', 'ie').replace(/\s/g, '');
+  }
+  //return eg:ie9.0 firefox34.0 chrome37.0
+  return browserNV;
+}

@@ -526,5 +526,7 @@
   "Please input a email": "请输入电子邮箱地址",
   "User updated successfully": "用户更新成功",
   "Reset the password and email for the administrator account": "重置管理员帐户的密码和电子邮件地址",
-  "Please input the alias": "请输入别名"
+  "Please input the alias": "请输入别名",
+  "User experience improvement plan": "用户体验提升计划",
+  "Contribution": "贡献"
 }
