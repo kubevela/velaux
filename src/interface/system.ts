@@ -3,10 +3,20 @@ export interface SystemInfo {
     velaVersion: string;
     gitVersion: string;
   };
-  createTime: string;
+  installTime: string;
   enableCollection: boolean;
   loginType?: boolean;
-  installID: string;
+  platformID: string;
+  statisticInfo: {
+    clusterCount?: string;
+    appCount?: string;
+    enableAddonList?: Record<string, string>;
+    componentDefinitionTopList?: string[];
+    traitDefinitionTopList?: string[];
+    workflowDefinitionTopList?: string[];
+    policyDefinitionTopList?: string[];
+    updateTime: string;
+  };
 }
 
 export interface UpdateSystemInfo {
