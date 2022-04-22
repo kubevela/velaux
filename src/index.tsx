@@ -5,7 +5,7 @@ import { createModel } from './store';
 import { createBrowserHistory } from 'history';
 import RouterView from './router';
 import './i18n';
-import '@b-design/ui/dist/index.css';
+import './assets/dist/index.css';
 
 const app: any = dva({
   history: createBrowserHistory(),
