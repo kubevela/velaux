@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input } from '@b-design/ui';
-import {checkImageName} from '../../api/project';
+import { checkImageName } from '../../api/project';
 import './index.less';
 
 import type { InputProps } from '@alifd/next/types/input';
@@ -26,23 +26,23 @@ class ImageInput extends React.Component<Props, State> {
   componentDidMount = async () => {};
 
   onCheckImageName = () => {
-    const {value, onChangeImagePullSecretsRef} = this.props;
-    const imagePullSecret:string[] = [];
+    const { value, onChangeImagePullSecretsRef } = this.props;
+    const imagePullSecret: string[] = [];
     const imageData = {
-      image:value
+      image: value,
     };
-    checkImageName(imageData).then((res)=>{
-      const data = res && res.data || {};
-      if(data.existed && data.sercet ){
-          imagePullSecret.push(data.sercet); 
-          onChangeImagePullSecretsRef( imagePullSecret);
+    checkImageName(imageData).then((res) => {
+      const data = (res && res.data) || {};
+      if (data.existed && data.sercet) {
+        imagePullSecret.push(data.sercet);
+        onChangeImagePullSecretsRef(imagePullSecret);
       }
-    })
+    });
   };
 
   render() {
     const { value } = this.props;
-    return <Input {...this.props} defaultValue={value} onBlur={this.onCheckImageName}/>;
+    return <Input {...this.props} defaultValue={value} onBlur={this.onCheckImageName} />;
   }
 }
 
