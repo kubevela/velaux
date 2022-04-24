@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Grid, Form, Input, Field, Button, Message, Icon } from '@b-design/ui';
-import DrawerWithFooter from '../../../../components/Drawer';
+import { Grid, Form, Input, Field, Button, Message, Icon, Dialog } from '@b-design/ui';
 import { updateUser } from '../../../../api/users';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkUserPassword, checkUserEmail } from '../../../../utils/common';
@@ -72,21 +71,6 @@ class EditPlatFormUserDialog extends Component<Props, State> {
     ];
   };
 
-  close = () => {};
-
-  showPasswordLabel = () => {
-    return (
-      <div className="inline-block">
-        <span>
-          <Translation>Password</Translation>
-        </span>
-        <span className="cursor-pointer" onClick={this.handleClickLook}>
-          <Icon type="eye-fill"></Icon>
-        </span>
-      </div>
-    );
-  };
-
   handleClickLook = () => {
     this.setState({
       isLookPassword: !this.state.isLookPassword,
@@ -107,20 +91,29 @@ class EditPlatFormUserDialog extends Component<Props, State> {
     };
     return (
       <Fragment>
-        <DrawerWithFooter
+        <Dialog
+          visible={true}
           title={this.showTitle()}
-          placement="right"
-          width={800}
-          extButtons={this.showClickButtons()}
-          onClose={this.close}
+          style={{ width: '600px' }}
+          onOk={this.onUpdateUser}
+          footerActions={['ok']}
         >
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={this.showPasswordLabel()} required>
+                <FormItem label={<Translation>Password</Translation>} required>
                   <Input
                     name="password"
                     htmlType={this.state.isLookPassword ? 'passwordInput' : 'password'}
+                    addonTextAfter={
+                      <Icon
+                        style={{
+                          cursor: 'pointer',
+                        }}
+                        type="eye-fill"
+                        onClick={this.handleClickLook}
+                      />
+                    }
                     placeholder={i18n.t('Please input the password').toString()}
                     {...init('password', {
                       rules: [
@@ -160,7 +153,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
               </Col>
             </Row>
           </Form>
-        </DrawerWithFooter>
+        </Dialog>
       </Fragment>
     );
   }

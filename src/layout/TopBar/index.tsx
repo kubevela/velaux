@@ -6,7 +6,7 @@ import SwitchLanguage from '../../components/SwitchButton/index';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
 import logo from '../../assets/kubevela-logo-white.png';
-
+import axios from 'axios';
 import type { SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
 import { If } from 'tsx-control-statements/components';
@@ -14,7 +14,8 @@ import Translation from '../../components/Translation';
 import Permission from '../../components/Permission';
 import PlatformSetting from '../../components/PlatformSetting';
 import EditPlatFormUserDialog from './components/EditPlatFormUserDialog';
-import { isAdminUserCheck } from '../../utils/utils';
+import { getBrowserNameAndVersion, isAdminUserCheck } from '../../utils/utils';
+import { getData, setData } from '../../utils/cache';
 
 type Props = {
   dispatch: ({}) => {};
@@ -27,6 +28,9 @@ type State = {
   isEditAdminUser: boolean;
   userInfo?: LoginUserInfo;
 };
+
+const TelemetryDataCollectionKey = 'telemetryDataCollection';
+const TelemetryDataCollectionServer = 'https://telemetry.kubevela.net/collecting';
 @connect((store: any) => {
   return { ...store.user };
 })
@@ -49,18 +53,64 @@ class TopBar extends Component<Props, State> {
   loadSystemInfo = () => {
     this.props.dispatch({
       type: 'user/getSystemInfo',
+      callback: () => {
+        this.telemetryDataCollection();
+      },
     });
+  };
+
+  telemetryDataCollection = async () => {
+    const { systemInfo } = this.props;
+    if (!getData(TelemetryDataCollectionKey) && systemInfo?.enableCollection) {
+      try {
+        axios
+          .post(TelemetryDataCollectionServer, this.buildTelemetryData())
+          .catch()
+          .then(() => {
+            this.setCache();
+          });
+      } catch {}
+    }
+  };
+
+  buildTelemetryData = () => {
+    const { systemInfo } = this.props;
+    return {
+      platformID: systemInfo?.platformID,
+      installTime: systemInfo?.installTime,
+      version:
+        (systemInfo?.systemVersion?.velaVersion || '') +
+        +'/' +
+        (systemInfo?.systemVersion?.gitVersion || ''),
+      clusterCount: systemInfo?.statisticInfo.clusterCount || '',
+      appCount: systemInfo?.statisticInfo.appCount || '',
+      enableAddonList: systemInfo?.statisticInfo.enableAddonList || {},
+      componentDefinitionTopList: systemInfo?.statisticInfo.componentDefinitionTopList,
+      traitDefinitionTopList: systemInfo?.statisticInfo.traitDefinitionTopList,
+      workflowStepDefinitionTopList: systemInfo?.statisticInfo.workflowDefinitionTopList,
+      policyDefinitionTopList: systemInfo?.statisticInfo.policyDefinitionTopList,
+      browserInfo: {
+        language: navigator.language,
+        nameAndVersion: getBrowserNameAndVersion(),
+        screenWidth: window.screen.width,
+        screenHeight: window.screen.height,
+      },
+    };
+  };
+
+  setCache = () => {
+    const now = new Date();
+    now.setHours(now.getHours() + 24);
+    setData(TelemetryDataCollectionKey, 'true', now);
   };
 
   loadUserInfo = () => {
     this.props.dispatch({
       type: 'user/getLoginUserInfo',
-      payload: {
-        callback: (res: LoginUserInfo) => {
-          this.setState({ userInfo: res }, () => {
-            this.isEditPlatForm();
-          });
-        },
+      callback: (res: LoginUserInfo) => {
+        this.setState({ userInfo: res }, () => {
+          this.isEditPlatForm();
+        });
       },
     });
   };
