@@ -1,10 +1,4 @@
 @charset "UTF-8";
-/*!
- * @alife/theme-xconsole-v4@0.8.16 (https://fusion.design)
- * @alifd/next@1.22.16 (https://fusion.design)
- * Copyright 2018-present Alibaba Group,
- * Licensed under MIT (https://github.com/alibaba-fusion/next/blob/master/LICENSE)
- */
 .next-sr-only {
   position: absolute;
   top: 0;
@@ -17,7 +11,6 @@
   border: 0;
   clip: rect(0, 0, 0, 0);
 }
-/*! normalize.css v7.0.0 | MIT License | github.com/necolas/normalize.css */
 html {
   line-height: 1.15;
   -ms-text-size-adjust: 100%;
@@ -42280,7 +42273,7 @@ h6 {
   border-bottom: 1px solid #e5e5e5;
   -webkit-transform: scaleY(0.5);
   transform: scaleY(0.5);
-  content: '  ';
+  content: ' ';
 }
 .next-list.next-list-large .next-list-item-extra,
 .next-list.next-list-medium .next-list-item-extra,
