@@ -182,7 +182,7 @@ class SingletonLocal {
   public getLocal() {
     return () => {
       const language = getLanguage();
-      return this.local[language];
+      return this.local[language] ?? this.local.en;
     };
   }
 }
