@@ -109,12 +109,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           if (re) {
             const status: ApplicationStatus = re.status;
             if (status && status.appliedResources) {
-              const services = status.appliedResources.filter(
-                (resource) => resource.kind == 'Service',
-              );
-              if (services) {
-                this.loadApplicationEndpoints();
-              }
+              this.loadApplicationEndpoints();
             }
           }
         },
@@ -220,19 +215,13 @@ class ApplicationInstanceList extends React.Component<Props, State> {
 
   loadAppInstances = async () => {
     this.setState({ podList: [] });
-    const { applicationDetail, envbinding, applicationStatus } = this.props;
+    const { applicationDetail, envbinding } = this.props;
     const {
       params: { appName, envName },
     } = this.props.match;
     const { target, componentName } = this.state;
     const envs = envbinding.filter((item) => item.name == envName);
-    if (
-      applicationDetail &&
-      applicationDetail.name &&
-      envs.length > 0 &&
-      applicationStatus &&
-      applicationStatus.services?.length
-    ) {
+    if (applicationDetail && applicationDetail.name && envs.length > 0) {
       if (applicationDetail.applicationType == 'common') {
         const param = {
           appName: envs[0].appDeployName || appName,
