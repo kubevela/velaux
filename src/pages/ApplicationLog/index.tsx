@@ -61,9 +61,9 @@ class ApplicationLog extends React.Component<Props, State> {
     this.loadApplicationStatus();
   }
 
-  componentWillReceiveProps(nextProps: any) {
+  componentWillReceiveProps(nextProps: Props) {
     const { params } = nextProps.match;
-    if (params.envName !== this.state.envName) {
+    if (params.envName !== this.state.envName || this.props.envbinding != nextProps.envbinding) {
       this.setState({ envName: params.envName }, () => {
         this.loadApplicationStatus();
       });
@@ -84,15 +84,14 @@ class ApplicationLog extends React.Component<Props, State> {
   };
 
   loadPodInstance = async () => {
-    const { applicationDetail, envbinding, applicationStatus } = this.props;
-    const { appName, envName } = this.state;
+    const { envbinding } = this.props;
+    const { appName, envName, activeComponentName } = this.state;
     const envs = envbinding.filter((item) => item.name === envName);
-    if (applicationDetail?.name && applicationStatus?.services?.length && envs.length > 0) {
-      const componentName = applicationStatus.services[0].name;
+    if (envs.length > 0 && envs[0]) {
       const param = {
         appName: envs[0].appDeployName || appName,
         appNs: envs[0].appDeployNamespace,
-        name: componentName,
+        componentName: activeComponentName,
         cluster: '',
         clusterNs: '',
       };
@@ -102,12 +101,10 @@ class ApplicationLog extends React.Component<Props, State> {
             this.setState(
               {
                 podList: res.podList,
-                pod: res.podList[0] || {},
-                activePodName: res.podList[0]?.metadata.name,
-                activeComponentName: res.podList[0]?.component,
+                activePodName: '',
               },
               () => {
-                this.loadPodDetail();
+                this.handlePodNameChange(res.podList[0].metadata.name);
               },
             );
           } else {
@@ -133,18 +130,26 @@ class ApplicationLog extends React.Component<Props, State> {
             Message.warning(res.error);
           } else if (res) {
             const activeContainerName = (res.containers?.[0] && res.containers[0]?.name) || '';
-            this.setState({
-              containers: res.containers,
-              activeContainerName,
-              isActiveContainerNameDisabled: activeContainerName ? false : true,
-            });
+            this.setState(
+              {
+                containers: res.containers,
+              },
+              () => {
+                this.handleContainerNameChange(activeContainerName);
+              },
+            );
           }
         })
         .catch(() => {});
     }
   };
-  handleComponentNameChange = (value: any) => {
-    this.setState({ activeComponentName: value });
+  handleComponentNameChange = (value: string) => {
+    this.setState(
+      { activeComponentName: value, activePodName: '', activeContainerName: '' },
+      () => {
+        this.loadPodInstance();
+      },
+    );
   };
   handlePodNameChange = (value: any) => {
     const { podList } = this.state;
@@ -167,26 +172,10 @@ class ApplicationLog extends React.Component<Props, State> {
   };
 
   getComponentNameList = () => {
-    const { podList } = this.state;
     const { components } = this.props;
-    const componentNameAlias: any = {};
-    components?.map((c) => {
-      componentNameAlias[c.name] = c.alias || c.name;
+    return components?.map((c) => {
+      return { label: c.alias || c.name, value: c.name };
     });
-    if (podList && podList.length != 0) {
-      const componentNameList: { label: string; value: string }[] = [];
-      podList.forEach((item) => {
-        if (item.component) {
-          componentNameList.push({
-            label: componentNameAlias[item.component] || item.component,
-            value: item.component,
-          });
-        }
-      });
-      return componentNameList;
-    } else {
-      return [];
-    }
   };
 
   getPodNameList = () => {
