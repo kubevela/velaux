@@ -156,7 +156,7 @@ class KV extends Component<Props, State> {
     return (
       <div id={id}>
         {items.map((item) => {
-          if (item.value != undefined) {
+          if (item.value != undefined && valueType == 'string') {
             valueType = typeof item.value;
           }
           return (
