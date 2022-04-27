@@ -134,7 +134,7 @@ class TopBar extends Component<Props, State> {
     const isAdminUser = isAdminUserCheck(userInfo);
     if (isAdminUser && userInfo && !userInfo.email) {
       this.setState({
-        isEditAdminUser: true,
+        isEditAdminUser: false,
       });
     }
   };

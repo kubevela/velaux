@@ -37,6 +37,7 @@ type Props = {
   registerForm?: (form: Field) => void;
   disableRenderRow?: boolean;
   mode: 'new' | 'edit';
+  advanced?: boolean;
 };
 
 function convertRule(validate: UIParamValidate) {
@@ -115,7 +116,7 @@ class UISchema extends Component<Props, State> {
     }
     this.state = {
       secretKeys: [],
-      advanced: false,
+      advanced: props.advanced || false,
     };
   }
 
