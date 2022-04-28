@@ -529,5 +529,9 @@
   "Reset the password and email for the administrator account": "重置管理员帐户的密码和电子邮件地址",
   "Please input the alias": "请输入别名",
   "User experience improvement plan": "用户体验提升计划",
-  "Contribution": "贡献"
+  "Contribution": "贡献",
+  "This is achieved by implementing its application model as programmable entities": "这是通过将其应用程序模型实现为可编程实体来实现的",
+  "Save & Online": "保存并发布",
+  "UI Schema": "用户界面架构",
+  "There is no uiSchema definition": "没有用户界面架构定义"
 }

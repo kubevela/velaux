@@ -16,7 +16,7 @@ import {
   getTrait_mock,
   updateApplicationEnv_mock,
 } from './devLink';
-import { application, componentdefinition } from './productionLink';
+import { application, componentDefinition } from './productionLink';
 import { getDomain } from '../utils/common';
 import type {
   ApplicationDeployRequest,
@@ -124,12 +124,12 @@ export function createApplicationTemplate(params: any) {
 }
 
 export function getComponentDefinitions() {
-  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}`;
+  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentDefinition}`;
   return get(gurl, { params: { type: 'component' } }).then((res) => res);
 }
 
 export function detailComponentDefinition(params: { name: string }) {
-  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentdefinition}/${params.name}`;
+  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentDefinition}/${params.name}`;
   return get(gurl, { params: { type: 'component' } }).then((res) => res);
 }
 
@@ -161,7 +161,7 @@ export function recycleApplicationEnvbinding(params: { appName: string; envName:
 }
 
 export function getTraitDefinitions(params: { appliedWorkload: string }) {
-  const gurl = isMock ? `${getTraitDefinitions_mock}` : `${componentdefinition}`;
+  const gurl = isMock ? `${getTraitDefinitions_mock}` : `${componentDefinition}`;
   return get(gurl, { params: { type: 'trait', appliedWorkload: params.appliedWorkload } }).then(
     (res) => res,
   );
@@ -170,7 +170,7 @@ export function getTraitDefinitions(params: { appliedWorkload: string }) {
 export function detailTraitDefinition(params: { name: string }) {
   const gurl = isMock
     ? `${getTraitDefinitionsDetails_mock}`
-    : `${componentdefinition}/${params.name}`;
+    : `${componentDefinition}/${params.name}`;
   return get(gurl, { params: { type: 'trait' } }).then((res) => res);
 }
 

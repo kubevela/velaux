@@ -23,6 +23,10 @@ import ProjectRoles from '../../pages/ProjectRoles';
 import ProjectMembers from '../../pages/ProjectMembers';
 import IntegrationsLayout from '../Integrations';
 import Integrations from '../../pages/Integrations';
+import DefinitionsLayout from '../Definitions';
+import Definitions from '../../pages/Definitions';
+import DefinitionDetails from '../DefinitionDetails';
+import UiSchema from '../../pages/UiSchema';
 
 export default function Content() {
   return (
@@ -216,6 +220,48 @@ export default function Content() {
           );
         }}
       />
+
+      <Route
+        exact
+        path="/definitions"
+        render={() => {
+          return <Redirect to={`/definitions/component/config`} />;
+        }}
+      />
+
+      <Route
+        exact
+        path="/definitions/:definitionType"
+        render={(props: any) => {
+          return <Redirect to={`/definitions/${props.match.params.definitionType}/config`} />;
+        }}
+      />
+
+      <Route
+        exact
+        path="/definitions/:definitionType/config"
+        render={(props: any) => {
+          return (
+            <DefinitionsLayout {...props}>
+              <Definitions {...props} />
+            </DefinitionsLayout>
+          );
+        }}
+      />
+
+      <Route
+        exact
+        path="/definitions/:definitionType/:definitionName/ui-schema"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'uiSchema' } };
+          return (
+            <DefinitionDetails {...mergeProps}>
+              <UiSchema {...props} />
+            </DefinitionDetails>
+          );
+        }}
+      />
+
       <Route path="/notFound" component={NotFound} />
       <Redirect to="/notFound" />
     </Switch>

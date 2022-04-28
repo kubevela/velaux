@@ -1,5 +1,5 @@
 export const application = `/api/v1/applications`;
-export const componentdefinition = `/api/v1/definitions`;
+export const componentDefinition = `/api/v1/definitions`;
 export const addons = `/api/v1/addons`;
 export const enabledAddon = `/api/v1/enabled_addon`;
 export const addonRegistries = `/api/v1/addon_registries`;
