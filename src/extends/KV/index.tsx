@@ -23,6 +23,12 @@ type Props = {
 
 type State = {
   items: Item[];
+  selectValues?: {
+    [propName: string]: any;
+  };
+  changeEntryKey?: {
+    [propName: string]: any;
+  };
 };
 
 type Item = {
@@ -31,6 +37,9 @@ type Item = {
   value?: any;
 };
 
+type Objects = {
+  [propName: string]: any;
+};
 function getEmptyItem() {
   return {
     key: Date.now().toString(),
@@ -50,17 +59,20 @@ class KV extends Component<Props, State> {
       onChange: (name: string, value: string) => {
         this.submit();
         const { keyOptions } = this.props;
+        const { selectValues } = this.state;
         if (keyOptions && name.indexOf('envKey-') > -1) {
           const itemKey = name.substring(name.indexOf('-') + 1);
           this.form.setValue('envValue-' + itemKey, keyOptions[value]);
           const { items } = this.state;
+          const newSelectValues: Objects = {};
           const newItems = items.map((item) => {
             if (item.key == itemKey) {
               item.value = keyOptions[value];
+              newSelectValues[item.key] = value;
             }
             return item;
           });
-          this.setState({ items: newItems });
+          this.setState({ items: newItems, selectValues: { ...selectValues, ...newSelectValues } });
         }
       },
     });
@@ -74,15 +86,18 @@ class KV extends Component<Props, State> {
     const { value } = this.props;
     const { items } = this.state;
     const newItems = [...items];
+    const selectValues: Objects = {};
     if (value) {
       for (const label in value) {
         const key = Date.now().toString() + label;
         newItems.push({ key: key, label: label, value: value[label] });
         this.form.setValue('envKey-' + key, label);
         this.form.setValue('envValue-' + key, value[label]);
+        selectValues[key] = label;
       }
     }
-    this.setState({ items: newItems });
+
+    this.setState({ items: newItems, selectValues: selectValues });
   };
 
   addItem() {
@@ -92,6 +107,7 @@ class KV extends Component<Props, State> {
   }
 
   submit() {
+    this.updateEntryKey();
     const values: any = this.form.getValues();
     const items: Map<string, Item> = new Map();
     Object.keys(values).map((key) => {
@@ -125,6 +141,17 @@ class KV extends Component<Props, State> {
     }
   }
 
+  updateEntryKey = () => {
+    const values: Objects = this.form.getValues();
+    const { changeEntryKey } = this.state;
+    for (const key in changeEntryKey) {
+      if (`envKey-${key}` in values) {
+        this.form.remove('envKey-' + key);
+        this.form.setValue('envKey-' + key, changeEntryKey[key]);
+      }
+    }
+  };
+
   remove(key: any) {
     const { items } = this.state;
     items.forEach((item, i) => {
@@ -137,6 +164,31 @@ class KV extends Component<Props, State> {
     this.setState({ items: items });
     this.submit();
   }
+
+  onSearch = (key: string, value: string) => {
+    const { items, selectValues, changeEntryKey } = this.state;
+    const newSelectValues: Objects = {};
+    items.forEach((item) => {
+      if (item.key === key) {
+        item.value = value;
+        newSelectValues[item.key] = value;
+        this.form.remove('envValue-' + key);
+      }
+      return item;
+    });
+    const newChangeEntryKey = {
+      [key]: value,
+    };
+    this.setState({
+      selectValues: { ...selectValues, ...newSelectValues },
+      changeEntryKey: { ...changeEntryKey, ...newChangeEntryKey },
+    });
+  };
+
+  findKey = (key: string) => {
+    const { selectValues } = this.state;
+    return (selectValues && selectValues[key]) || '';
+  };
 
   render() {
     const { items } = this.state;
@@ -156,7 +208,7 @@ class KV extends Component<Props, State> {
     return (
       <div id={id}>
         {items.map((item) => {
-          if (item.value != undefined && valueType == 'string') {
+          if (item.value != undefined) {
             valueType = typeof item.value;
           }
           return (
@@ -172,6 +224,10 @@ class KV extends Component<Props, State> {
                       label={'Key'}
                       placeholder={i18n.t('Please select')}
                       locale={locale().Select}
+                      onSearch={(value: string) => {
+                        this.onSearch(item.key, value);
+                      }}
+                      value={this.findKey(item.key)}
                     />
                   </If>
                   <If condition={!keyOptions}>
