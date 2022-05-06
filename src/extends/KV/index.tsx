@@ -194,22 +194,27 @@ class KV extends Component<Props, State> {
     const { items } = this.state;
     const { id, additional, additionalParameter, keyOptions } = this.props;
     const { init } = this.form;
-    let valueType = 'string';
+    let valueTypeOutSide = 'string';
     if (additional && additionalParameter) {
       // TODO: current only support one parameter
       if (additionalParameter.uiType == 'Number') {
-        valueType = 'number';
+        valueTypeOutSide = 'number';
       }
       if (additionalParameter.uiType == 'Switch') {
-        valueType = 'boolean';
+        valueTypeOutSide = 'boolean';
       }
     }
     const dataSource = keyOptions ? Object.keys(keyOptions) : [];
     return (
       <div id={id}>
         {items.map((item) => {
-          if (item.value != undefined) {
-            valueType = typeof item.value;
+          let valueType = 'string';
+          if (valueTypeOutSide === 'number' || valueTypeOutSide === 'boolean') {
+            valueType = valueTypeOutSide;
+          } else {
+            if (item.value != undefined) {
+              valueType = typeof item.value;
+            }
           }
           return (
             <Row key={item.key} gutter="20">
