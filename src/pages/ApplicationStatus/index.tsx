@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 
-import { Table, Card, Loading, Balloon, Icon, Button, Message, Dialog } from '@b-design/ui';
+import { Table, Card, Loading, Balloon, Icon, Button, Message, Dialog, Tag } from '@b-design/ui';
 import type {
   ApplicationComponent,
   ApplicationDetail,
@@ -9,6 +9,7 @@ import type {
   Condition,
   EnvBinding,
   AppliedResource,
+  ComponentStatus,
 } from '../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
@@ -28,6 +29,7 @@ import { handleError } from '../../utils/errors';
 import i18next from 'i18next';
 import { checkPermission } from '../../utils/permission';
 import type { LoginUserInfo } from '../../interface/user';
+import './index.less';
 
 type Props = {
   dispatch: ({}) => {};
@@ -277,8 +279,9 @@ class ApplicationMonitor extends React.Component<Props, State> {
     if (componentName) {
       componentStatus = componentStatus?.filter((item) => item.name == componentName);
     }
+    const { Group: TagGroup } = Tag;
     return (
-      <div>
+      <div className="application-status-wrapper">
         <Header
           envbinding={this.getEnvbindingByName()}
           targets={this.getTargets()}
@@ -408,9 +411,60 @@ class ApplicationMonitor extends React.Component<Props, State> {
                     title={<Translation>Healthy</Translation>}
                   />
                   <Table.Column
+                    align="left"
+                    dataIndex="trait"
+                    cell={(v: boolean, i: number, record: ComponentStatus) => {
+                      const { traits } = record;
+                      const Tags = (traits || []).map((item) => {
+                        if (item.healthy) {
+                          return (
+                            <Tag type="normal" size="small">
+                              <div>
+                                <span>{item.type} </span>
+                                <span className="circle circle-success" />
+                                <span>Healthy</span>
+                              </div>
+                            </Tag>
+                          );
+                        } else {
+                          return (
+                            <Tag type="normal" size="small">
+                              <div>
+                                <span>{item.type} </span>
+                                <span className="circle circle-warning" />
+                                <span>UnHealthy</span>
+                              </div>
+                            </Tag>
+                          );
+                        }
+                      });
+                      return <TagGroup className="tags-content">{Tags}</TagGroup>;
+                    }}
+                    title={<Translation>Trait</Translation>}
+                  />
+                  <Table.Column
                     align="center"
                     dataIndex="message"
                     title={<Translation>Message</Translation>}
+                    cell={(v: string, i: number, record: ComponentStatus) => {
+                      const { message = '', traits } = record;
+                      const TraitMessages = (traits || []).map((item) => {
+                        if (item.message) {
+                          return (
+                            <div>
+                              <span>{item.type}: </span>
+                              <span>{item.message}</span>
+                            </div>
+                          );
+                        }
+                      });
+                      return (
+                        <div>
+                          <div>{message}</div>
+                          {TraitMessages}
+                        </div>
+                      );
+                    }}
                   />
                 </Table>
               </Card>
