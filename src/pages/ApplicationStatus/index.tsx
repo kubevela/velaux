@@ -420,9 +420,8 @@ class ApplicationMonitor extends React.Component<Props, State> {
                           return (
                             <Tag type="normal" size="small">
                               <div>
-                                <span>{item.type} </span>
                                 <span className="circle circle-success" />
-                                <span>Healthy</span>
+                                <span>{item.type}</span>
                               </div>
                             </Tag>
                           );
@@ -430,9 +429,8 @@ class ApplicationMonitor extends React.Component<Props, State> {
                           return (
                             <Tag type="normal" size="small">
                               <div>
-                                <span>{item.type} </span>
-                                <span className="circle circle-warning" />
-                                <span>UnHealthy</span>
+                                <span className="circle circle-failure" />
+                                <span>{item.type}</span>
                               </div>
                             </Tag>
                           );
@@ -440,7 +438,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
                       });
                       return <TagGroup className="tags-content">{Tags}</TagGroup>;
                     }}
-                    title={<Translation>Trait</Translation>}
+                    title={<Translation>Traits</Translation>}
                   />
                   <Table.Column
                     align="center"
