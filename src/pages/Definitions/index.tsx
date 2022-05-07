@@ -127,7 +127,7 @@ class Definitions extends Component<Props, State> {
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
         cell: (v: string) => {
-          return <span>{v}</span>;
+          return <Link to={`/definitions/${definitionType}/${v}/ui-schema`}>{v}</Link>;
         },
       },
       {
@@ -136,14 +136,14 @@ class Definitions extends Component<Props, State> {
         dataIndex: 'status',
         cell: (v: string) => {
           const enumStatusList = [
-            { name: 'enable', color: 'enableStatus' },
-            { name: 'disable', color: 'disableStatus' },
+            { name: 'enable', color: 'enableStatus', status: 'Enabled' },
+            { name: 'disable', color: 'disableStatus', status: 'Disabled' },
           ];
           const findStatus = _.find(enumStatusList, (item) => {
             return item.name === v;
           });
           const colorClass = (findStatus && findStatus.color) || '';
-          return <span className={`${colorClass}`}>{v}</span>;
+          return <span className={`${colorClass}`}>{findStatus && findStatus.status}</span>;
         },
       },
       // {
@@ -161,20 +161,6 @@ class Definitions extends Component<Props, State> {
         cell: (v: string, i: number, record: DefinitionBase) => {
           return (
             <Fragment>
-              <Permission
-                request={{
-                  resource: `definition:${record.name}`,
-                  action: 'update',
-                }}
-                project={''}
-              >
-                <Button text size={'medium'} ghost={true} component={'a'}>
-                  <Link to={`/definitions/${definitionType}/${record.name}/ui-schema`}>
-                    <Translation>UI Schema</Translation>
-                  </Link>
-                </Button>
-              </Permission>
-
               <Permission
                 request={{
                   resource: `definition:${record.name}`,
