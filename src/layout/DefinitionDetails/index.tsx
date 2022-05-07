@@ -3,8 +3,9 @@ import { connect } from 'dva';
 import { Grid, Breadcrumb } from '@b-design/ui';
 import { Link } from 'dva/router';
 import Translation from '../../components/Translation';
-import type { ProjectDetail } from '../../interface/project';
 import type { LoginUserInfo } from '../../interface/user';
+import type { DefinitionMenuType } from '../../interface/definitions';
+import _ from 'lodash';
 import './index.less';
 
 const { Row, Col } = Grid;
@@ -18,13 +19,12 @@ type Props = {
     };
   };
   dispatch: ({}) => {};
-  projectDetails?: ProjectDetail;
-  location: any;
   userInfo?: LoginUserInfo;
+  definitionTypes: DefinitionMenuType[];
 };
 
 @connect((store: any) => {
-  return { ...store.project, ...store.user };
+  return { ...store.definitions, ...store.user };
 })
 class DefinitionDetailsLayout extends Component<Props> {
   getNavList = () => {
@@ -49,10 +49,20 @@ class DefinitionDetailsLayout extends Component<Props> {
     return nav;
   };
 
+  matchDefinitionName = (definitionType: string) => {
+    const { definitionTypes } = this.props;
+    const matchDefinition = _.find(definitionTypes, (item) => {
+      return item.type === definitionType;
+    });
+    return (matchDefinition && matchDefinition.name) || '';
+  };
+
   render() {
     const menu = this.getNavList();
-    const { params = { definitionType: '' } } = this.props.match;
-    const { definitionType } = params;
+    const { params = { definitionType: '', definitionName: '' } } = this.props.match;
+    const { definitionType, definitionName } = params;
+    const matchDefinitionKey = this.matchDefinitionName(definitionType);
+
     return (
       <Fragment>
         <Row>
@@ -62,8 +72,9 @@ class DefinitionDetailsLayout extends Component<Props> {
                 <Translation>Definitions</Translation>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link to={`/definitions/${definitionType}/config`}>{definitionType}</Link>
+                <Link to={`/definitions/${definitionType}/config`}>{matchDefinitionKey}</Link>
               </Breadcrumb.Item>
+              <Breadcrumb.Item>{definitionName}</Breadcrumb.Item>
             </Breadcrumb>
           </Col>
         </Row>
