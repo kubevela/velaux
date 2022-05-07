@@ -179,7 +179,7 @@ class UiSchema extends Component<Props, State> {
                 />
               </Card>
             </If>
-            <If condition={uiSchema?.length != 0}>
+            <If condition={uiSchema && uiSchema.length != 0}>
               <section className="margin-top-20">
                 <Row>
                   <Col span="12" className="padding-left-10 padding-right-10">

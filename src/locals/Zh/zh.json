@@ -532,6 +532,6 @@
   "Contribution": "贡献",
   "This is achieved by implementing its application model as programmable entities": "这是通过将其应用程序模型实现为可编程实体来实现的",
   "Save & Online": "保存并发布",
-  "UI Schema": "用户界面架构",
+  "UI Schema": "UI 呈现配置",
   "There is no uiSchema definition": "没有用户界面架构定义"
 }
