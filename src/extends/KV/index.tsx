@@ -35,6 +35,7 @@ type Item = {
   key: string;
   label: string;
   value?: any;
+  valueType: any;
 };
 
 type Objects = {
@@ -45,6 +46,7 @@ function getEmptyItem() {
     key: Date.now().toString(),
     label: '',
     value: '',
+    valueType: 'string',
   };
 }
 
@@ -57,7 +59,6 @@ class KV extends Component<Props, State> {
     };
     this.form = new Field(this, {
       onChange: (name: string, value: string) => {
-        this.submit();
         const { keyOptions } = this.props;
         const { selectValues } = this.state;
         if (keyOptions && name.indexOf('envKey-') > -1) {
@@ -69,11 +70,13 @@ class KV extends Component<Props, State> {
             if (item.key == itemKey) {
               item.value = keyOptions[value];
               newSelectValues[item.key] = value;
+              item.valueType = this.getValueType(keyOptions[value]);
             }
             return item;
           });
           this.setState({ items: newItems, selectValues: { ...selectValues, ...newSelectValues } });
         }
+        this.submit();
       },
     });
   }
@@ -90,7 +93,12 @@ class KV extends Component<Props, State> {
     if (value) {
       for (const label in value) {
         const key = Date.now().toString() + label;
-        newItems.push({ key: key, label: label, value: value[label] });
+        newItems.push({
+          key: key,
+          label: label,
+          value: value[label],
+          valueType: this.getValueType(value[label]),
+        });
         this.form.setValue('envKey-' + key, label);
         this.form.setValue('envValue-' + key, value[label]);
         selectValues[key] = label;
@@ -115,7 +123,7 @@ class KV extends Component<Props, State> {
         const index = key.replace('envKey-', '');
         let item = items.get(index);
         if (!item) {
-          item = { key: '', label: '' };
+          item = { key: '', label: '', valueType: 'string' };
         }
         item.label = values[key];
         items.set(index, item);
@@ -125,7 +133,7 @@ class KV extends Component<Props, State> {
         const index = key.replace('envValue-', '');
         let item = items.get(index);
         if (!item) {
-          item = { key: '', label: '' };
+          item = { key: '', label: '', valueType: 'string' };
         }
         item.value = values[key];
         items.set(index, item);
@@ -172,6 +180,7 @@ class KV extends Component<Props, State> {
       if (item.key === key) {
         item.value = value;
         newSelectValues[item.key] = value;
+        this.form.setValue('envKey-' + key, value);
         this.form.remove('envValue-' + key);
       }
       return item;
@@ -190,32 +199,44 @@ class KV extends Component<Props, State> {
     return (selectValues && selectValues[key]) || '';
   };
 
-  render() {
-    const { items } = this.state;
-    const { id, additional, additionalParameter, keyOptions } = this.props;
-    const { init } = this.form;
-    let valueTypeOutSide = 'string';
-    if (additional && additionalParameter) {
-      // TODO: current only support one parameter
-      if (additionalParameter.uiType == 'Number') {
-        valueTypeOutSide = 'number';
-      }
-      if (additionalParameter.uiType == 'Switch') {
-        valueTypeOutSide = 'boolean';
+  getValueType = (value: any) => {
+    const findValueType = this.matchOutSideValueType();
+    const valueTypeAdditionalParam = ['number', 'boolean'];
+    if (valueTypeAdditionalParam.includes(findValueType)) {
+      return findValueType;
+    } else {
+      if (value != undefined) {
+        return typeof value;
+      } else {
+        return 'string';
       }
     }
+  };
+
+  matchOutSideValueType = () => {
+    const { additional, additionalParameter } = this.props;
+    const outSideValueType = [
+      { uiType: 'Number', valueType: 'number' },
+      { uiType: 'Switch', valueType: 'boolean' },
+    ];
+    if (additional && additionalParameter && additionalParameter.uiType) {
+      const matchValueTypeObj = _.find(outSideValueType, (item) => {
+        return item.uiType === additionalParameter.uiType;
+      });
+      return (matchValueTypeObj && matchValueTypeObj.valueType) || 'string';
+    } else {
+      return 'string';
+    }
+  };
+
+  render() {
+    const { items } = this.state;
+    const { id, keyOptions } = this.props;
+    const { init } = this.form;
     const dataSource = keyOptions ? Object.keys(keyOptions) : [];
     return (
       <div id={id}>
         {items.map((item) => {
-          let valueType = 'string';
-          if (valueTypeOutSide === 'number' || valueTypeOutSide === 'boolean') {
-            valueType = valueTypeOutSide;
-          } else {
-            if (item.value != undefined) {
-              valueType = typeof item.value;
-            }
-          }
           return (
             <Row key={item.key} gutter="20">
               <Col span={10}>
@@ -248,17 +269,17 @@ class KV extends Component<Props, State> {
               </Col>
               <Col span={10}>
                 <Form.Item>
-                  <If condition={valueType == 'number' || valueType == 'string'}>
+                  <If condition={item.valueType == 'number' || item.valueType == 'string'}>
                     <Input
                       disabled={this.props.disabled}
-                      htmlType={valueType == 'number' ? 'number' : ''}
+                      htmlType={item.valueType == 'number' ? 'number' : ''}
                       {...init(`envValue-${item.key}`)}
                       label={'Value'}
                       className="full-width"
                       placeholder={i18n.t('Please input or select key')}
                     />
                   </If>
-                  <If condition={valueType == 'boolean'}>
+                  <If condition={item.valueType == 'boolean'}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={{ lineHeight: '36px', marginRight: '16px' }}>Value:</span>
                       <Switch
