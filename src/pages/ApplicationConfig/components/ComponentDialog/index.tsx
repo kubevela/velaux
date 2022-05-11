@@ -153,8 +153,7 @@ class ComponentDialog extends React.Component<Props, State> {
         if (res) {
           Message.success({
             duration: 4000,
-            title: i18n.t('Success'),
-            content: i18n.t('Create component success.'),
+            content: i18n.t('Component created successfully'),
           });
           this.props.onComponentOK();
         }

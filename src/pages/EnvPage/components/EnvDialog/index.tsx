@@ -1,5 +1,5 @@
 import React from 'react';
-import { Message, Grid, Dialog, Form, Input, Field, Select, Loading } from '@b-design/ui';
+import { Message, Grid, Dialog, Form, Input, Field, Select, Loading, Button } from '@b-design/ui';
 import { checkName } from '../../../../utils/common';
 import type { Target } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
@@ -25,6 +25,7 @@ type State = {
   targets?: Target[];
   namespaces?: { label: string; value: string }[];
   targetLoading: boolean;
+  submitLoading: boolean;
 };
 
 class EnvDialog extends React.Component<Props, State> {
@@ -41,6 +42,7 @@ class EnvDialog extends React.Component<Props, State> {
     });
     this.state = {
       targetLoading: false,
+      submitLoading: false,
     };
   }
 
@@ -84,6 +86,7 @@ class EnvDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
+      this.setState({ submitLoading: true });
       const { isEdit } = this.props;
       const { name, alias, description, targets, namespace, project } = values;
       const params = {
@@ -97,6 +100,7 @@ class EnvDialog extends React.Component<Props, State> {
 
       if (isEdit) {
         updateEnv(params).then((res) => {
+          this.setState({ submitLoading: false });
           if (res) {
             Message.success(<Translation>Environment updated successfully</Translation>);
             this.props.onOK();
@@ -105,6 +109,7 @@ class EnvDialog extends React.Component<Props, State> {
         });
       } else {
         createEnv(params).then((res) => {
+          this.setState({ submitLoading: false });
           if (res) {
             Message.success(<Translation>Environment created successfully</Translation>);
             this.props.onOK();
@@ -161,7 +166,7 @@ class EnvDialog extends React.Component<Props, State> {
     };
 
     const { visible, isEdit, projects } = this.props;
-    const { targetLoading } = this.state;
+    const { targetLoading, submitLoading } = this.state;
     const projectList = (projects || []).map((project) => {
       return {
         label: project.alias ? `${project.alias}(${project.name})` : project.name,
@@ -188,6 +193,13 @@ class EnvDialog extends React.Component<Props, State> {
           onCancel={this.onClose}
           onClose={this.onClose}
           footerActions={['cancel', 'ok']}
+          footer={
+            <div>
+              <Button onClick={this.onOk} type="primary" loading={submitLoading}>
+                <Translation>Confirm</Translation>
+              </Button>
+            </div>
+          }
           footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>
