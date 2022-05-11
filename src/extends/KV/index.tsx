@@ -23,19 +23,30 @@ type Props = {
 
 type State = {
   items: Item[];
+  selectValues?: {
+    [propName: string]: any;
+  };
+  changeEntryKey?: {
+    [propName: string]: any;
+  };
 };
 
 type Item = {
   key: string;
   label: string;
   value?: any;
+  valueType: any;
 };
 
+type Objects = {
+  [propName: string]: any;
+};
 function getEmptyItem() {
   return {
     key: Date.now().toString(),
     label: '',
     value: '',
+    valueType: 'string',
   };
 }
 
@@ -48,20 +59,24 @@ class KV extends Component<Props, State> {
     };
     this.form = new Field(this, {
       onChange: (name: string, value: string) => {
-        this.submit();
         const { keyOptions } = this.props;
+        const { selectValues } = this.state;
         if (keyOptions && name.indexOf('envKey-') > -1) {
           const itemKey = name.substring(name.indexOf('-') + 1);
           this.form.setValue('envValue-' + itemKey, keyOptions[value]);
           const { items } = this.state;
+          const newSelectValues: Objects = {};
           const newItems = items.map((item) => {
             if (item.key == itemKey) {
               item.value = keyOptions[value];
+              newSelectValues[item.key] = value;
+              item.valueType = this.getValueType(keyOptions[value]);
             }
             return item;
           });
-          this.setState({ items: newItems });
+          this.setState({ items: newItems, selectValues: { ...selectValues, ...newSelectValues } });
         }
+        this.submit();
       },
     });
   }
@@ -74,15 +89,23 @@ class KV extends Component<Props, State> {
     const { value } = this.props;
     const { items } = this.state;
     const newItems = [...items];
+    const selectValues: Objects = {};
     if (value) {
       for (const label in value) {
         const key = Date.now().toString() + label;
-        newItems.push({ key: key, label: label, value: value[label] });
+        newItems.push({
+          key: key,
+          label: label,
+          value: value[label],
+          valueType: this.getValueType(value[label]),
+        });
         this.form.setValue('envKey-' + key, label);
         this.form.setValue('envValue-' + key, value[label]);
+        selectValues[key] = label;
       }
     }
-    this.setState({ items: newItems });
+
+    this.setState({ items: newItems, selectValues: selectValues });
   };
 
   addItem() {
@@ -92,6 +115,7 @@ class KV extends Component<Props, State> {
   }
 
   submit() {
+    this.updateEntryKey();
     const values: any = this.form.getValues();
     const items: Map<string, Item> = new Map();
     Object.keys(values).map((key) => {
@@ -99,7 +123,7 @@ class KV extends Component<Props, State> {
         const index = key.replace('envKey-', '');
         let item = items.get(index);
         if (!item) {
-          item = { key: '', label: '' };
+          item = { key: '', label: '', valueType: 'string' };
         }
         item.label = values[key];
         items.set(index, item);
@@ -109,7 +133,7 @@ class KV extends Component<Props, State> {
         const index = key.replace('envValue-', '');
         let item = items.get(index);
         if (!item) {
-          item = { key: '', label: '' };
+          item = { key: '', label: '', valueType: 'string' };
         }
         item.value = values[key];
         items.set(index, item);
@@ -125,6 +149,17 @@ class KV extends Component<Props, State> {
     }
   }
 
+  updateEntryKey = () => {
+    const values: Objects = this.form.getValues();
+    const { changeEntryKey } = this.state;
+    for (const key in changeEntryKey) {
+      if (`envKey-${key}` in values) {
+        this.form.remove('envKey-' + key);
+        this.form.setValue('envKey-' + key, changeEntryKey[key]);
+      }
+    }
+  };
+
   remove(key: any) {
     const { items } = this.state;
     items.forEach((item, i) => {
@@ -138,27 +173,70 @@ class KV extends Component<Props, State> {
     this.submit();
   }
 
-  render() {
-    const { items } = this.state;
-    const { id, additional, additionalParameter, keyOptions } = this.props;
-    const { init } = this.form;
-    let valueType = 'string';
-    if (additional && additionalParameter) {
-      // TODO: current only support one parameter
-      if (additionalParameter.uiType == 'Number') {
-        valueType = 'number';
+  onSearch = (key: string, value: string) => {
+    const { items, selectValues, changeEntryKey } = this.state;
+    const newSelectValues: Objects = {};
+    items.forEach((item) => {
+      if (item.key === key) {
+        item.value = value;
+        newSelectValues[item.key] = value;
+        this.form.setValue('envKey-' + key, value);
+        this.form.remove('envValue-' + key);
       }
-      if (additionalParameter.uiType == 'Switch') {
-        valueType = 'boolean';
+      return item;
+    });
+    const newChangeEntryKey = {
+      [key]: value,
+    };
+    this.setState({
+      selectValues: { ...selectValues, ...newSelectValues },
+      changeEntryKey: { ...changeEntryKey, ...newChangeEntryKey },
+    });
+  };
+
+  findKey = (key: string) => {
+    const { selectValues } = this.state;
+    return (selectValues && selectValues[key]) || '';
+  };
+
+  getValueType = (value: any) => {
+    const findValueType = this.matchOutSideValueType();
+    const valueTypeAdditionalParam = ['number', 'boolean'];
+    if (valueTypeAdditionalParam.includes(findValueType)) {
+      return findValueType;
+    } else {
+      if (value != undefined) {
+        return typeof value;
+      } else {
+        return 'string';
       }
     }
+  };
+
+  matchOutSideValueType = () => {
+    const { additional, additionalParameter } = this.props;
+    const outSideValueType = [
+      { uiType: 'Number', valueType: 'number' },
+      { uiType: 'Switch', valueType: 'boolean' },
+    ];
+    if (additional && additionalParameter && additionalParameter.uiType) {
+      const matchValueTypeObj = _.find(outSideValueType, (item) => {
+        return item.uiType === additionalParameter.uiType;
+      });
+      return (matchValueTypeObj && matchValueTypeObj.valueType) || 'string';
+    } else {
+      return 'string';
+    }
+  };
+
+  render() {
+    const { items } = this.state;
+    const { id, keyOptions } = this.props;
+    const { init } = this.form;
     const dataSource = keyOptions ? Object.keys(keyOptions) : [];
     return (
       <div id={id}>
         {items.map((item) => {
-          if (item.value != undefined && valueType == 'string') {
-            valueType = typeof item.value;
-          }
           return (
             <Row key={item.key} gutter="20">
               <Col span={10}>
@@ -172,6 +250,10 @@ class KV extends Component<Props, State> {
                       label={'Key'}
                       placeholder={i18n.t('Please select')}
                       locale={locale().Select}
+                      onSearch={(value: string) => {
+                        this.onSearch(item.key, value);
+                      }}
+                      value={this.findKey(item.key)}
                     />
                   </If>
                   <If condition={!keyOptions}>
@@ -187,17 +269,17 @@ class KV extends Component<Props, State> {
               </Col>
               <Col span={10}>
                 <Form.Item>
-                  <If condition={valueType == 'number' || valueType == 'string'}>
+                  <If condition={item.valueType == 'number' || item.valueType == 'string'}>
                     <Input
                       disabled={this.props.disabled}
-                      htmlType={valueType == 'number' ? 'number' : ''}
+                      htmlType={item.valueType == 'number' ? 'number' : ''}
                       {...init(`envValue-${item.key}`)}
                       label={'Value'}
                       className="full-width"
                       placeholder={i18n.t('Please input or select key')}
                     />
                   </If>
-                  <If condition={valueType == 'boolean'}>
+                  <If condition={item.valueType == 'boolean'}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={{ lineHeight: '36px', marginRight: '16px' }}>Value:</span>
                       <Switch
