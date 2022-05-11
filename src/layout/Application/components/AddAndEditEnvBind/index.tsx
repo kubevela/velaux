@@ -102,7 +102,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
     createApplicationEnv(params)
       .then((res) => {
         if (res) {
-          Message.success(<Translation>Bind Environment Success</Translation>);
+          Message.success(<Translation>Environment bound successfully</Translation>);
           this.props.onOK();
         }
       })
@@ -115,7 +115,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
     updateApplicationEnv(params)
       .then((res: any) => {
         if (res) {
-          Message.success(<Translation>Bind Environment Success</Translation>);
+          Message.success(<Translation>Environment bound successfully</Translation>);
           this.props.onOK();
         }
       })
