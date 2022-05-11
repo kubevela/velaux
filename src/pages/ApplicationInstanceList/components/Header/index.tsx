@@ -118,7 +118,7 @@ class Header extends Component<Props, State> {
           deleteApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then(
             (re) => {
               if (re) {
-                Message.success(i18n.t('Delete application environment binding success'));
+                Message.success(i18n.t('Environment binding deleted successfully'));
                 updateEnvs();
               }
             },
