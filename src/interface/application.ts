@@ -6,7 +6,6 @@ export interface ApplicationDetail extends ApplicationBase {
     componentNum: number;
   };
   envBindings: string[];
-  applicationType: 'cloud' | 'common';
   policies: string[];
 }
 
@@ -212,6 +211,13 @@ export interface ApplicationComponentBase {
   input?: InputItem[];
   output?: OutputItem[];
   traits?: Trait[];
+  workloadType?: {
+    definition?: {
+      apiVersion: string;
+      kind: string;
+    };
+    type: string;
+  };
 }
 
 export interface InputItem {
