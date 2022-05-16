@@ -179,10 +179,11 @@ class UiSchema extends Component<Props, State> {
                 />
               </Card>
             </If>
-            <If condition={uiSchema && uiSchema.length != 0}>
-              <section className="margin-top-20">
-                <Row>
-                  <Col span="12" className="padding-left-10 padding-right-10">
+
+            <section className="margin-top-20">
+              <Row>
+                <Col span="12" className="padding-left-10 padding-right-10">
+                  <If condition={uiSchema && uiSchema.length != 0}>
                     <Card
                       locale={locale().Card}
                       contentHeight="auto"
@@ -205,45 +206,46 @@ class UiSchema extends Component<Props, State> {
                         mode="edit"
                       />
                     </Card>
-                  </Col>
-                  <Col span="12" className="padding-left-10 padding-right-10">
-                    <Card
-                      locale={locale().Card}
-                      contentHeight="auto"
-                      id="yaml-code"
-                      className="yaml-code"
-                      style={{ height: yamlHeight }}
-                    >
-                      <DefinitionCode
-                        containerId="yaml-code"
-                        language={'yaml'}
-                        readOnly={false}
-                        {...init('yamlValues')}
-                        ref={this.DefinitionCodeRef}
-                        onChange={this.onChangeYaml}
-                      />
-                    </Card>
-                  </Col>
-                </Row>
-              </section>
-              <section className="margin-top-20 text-align-center">
-                <Permission
-                  request={{
-                    resource: `definition:${definitionName}`,
-                    action: 'update',
-                  }}
-                  project={''}
-                >
-                  <Button
-                    type="primary"
-                    loading={updateUISchemaLoading}
-                    onClick={this.updateUISchema}
+                  </If>
+                </Col>
+
+                <Col span="12" className="padding-left-10 padding-right-10">
+                  <Card
+                    locale={locale().Card}
+                    contentHeight="auto"
+                    id="yaml-code"
+                    className="yaml-code"
+                    style={{ height: yamlHeight }}
                   >
-                    <Translation>Save & Online</Translation>
-                  </Button>
-                </Permission>
-              </section>
-            </If>
+                    <DefinitionCode
+                      containerId="yaml-code"
+                      language={'yaml'}
+                      readOnly={false}
+                      {...init('yamlValues')}
+                      ref={this.DefinitionCodeRef}
+                      onChange={this.onChangeYaml}
+                    />
+                  </Card>
+                </Col>
+              </Row>
+            </section>
+            <section className="margin-top-20 text-align-center">
+              <Permission
+                request={{
+                  resource: `definition:${definitionName}`,
+                  action: 'update',
+                }}
+                project={''}
+              >
+                <Button
+                  type="primary"
+                  loading={updateUISchemaLoading}
+                  onClick={this.updateUISchema}
+                >
+                  <Translation>Save & Online</Translation>
+                </Button>
+              </Permission>
+            </section>
           </Loading>
         </div>
       </Fragment>
