@@ -174,7 +174,7 @@ class UiSchema extends Component<Props, State> {
             <If condition={!uiSchema || uiSchema.length === 0}>
               <Card locale={locale().Card} contentHeight={600}>
                 <Empty
-                  message={<Translation>There is no uiSchema definition</Translation>}
+                  message={<Translation>There is no ui schema definition</Translation>}
                   iconWidth={'30px'}
                 />
               </Card>

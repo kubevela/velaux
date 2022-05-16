@@ -43,7 +43,15 @@ class ComponentsList extends Component<Props> {
         <Row wrap={true}>
           {(components || []).map((item: ApplicationComponentBase) => (
             <Col xl={8} m={12} s={24} key={item.name} className="padding16">
-              <Card locale={locale().Card} contentHeight="auto">
+              <Card
+                locale={locale().Card}
+                contentHeight="auto"
+                className={
+                  item.workloadType?.type == 'configurations.terraform.core.oam.dev'
+                    ? 'cloud-component-show'
+                    : ''
+                }
+              >
                 <div className="components-list-nav">
                   <Permission
                     request={{

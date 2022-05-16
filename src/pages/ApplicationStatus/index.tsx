@@ -385,7 +385,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
                   <Table.Column
                     align="left"
                     dataIndex="name"
-                    width="200px"
+                    style={{ width: '17%' }}
                     title={<Translation>Name</Translation>}
                   />
                   <Table.Column
@@ -443,6 +443,7 @@ class ApplicationMonitor extends React.Component<Props, State> {
                   <Table.Column
                     align="center"
                     dataIndex="message"
+                    style={{ width: '50%' }}
                     title={<Translation>Message</Translation>}
                     cell={(v: string, i: number, record: ComponentStatus) => {
                       const { message = '', traits } = record;

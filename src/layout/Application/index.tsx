@@ -95,7 +95,7 @@ class ApplicationLayout extends Component<Props, any> {
 
   render() {
     const { loading, activeName } = this.state;
-    const { children, dispatch, applicationDetail } = this.props;
+    const { children, dispatch } = this.props;
     const {
       path,
       params: { appName, envName },
@@ -118,12 +118,7 @@ class ApplicationLayout extends Component<Props, any> {
         />
         <Row className="padding16 main">
           <div className="menu">
-            <Menus
-              currentPath={path}
-              applicationType={applicationDetail?.applicationType}
-              appName={appName}
-              envName={envName}
-            />
+            <Menus currentPath={path} appName={appName} envName={envName} />
           </div>
           <div className="content">{children}</div>
         </Row>

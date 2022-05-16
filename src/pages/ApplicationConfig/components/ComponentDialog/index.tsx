@@ -180,10 +180,10 @@ class ComponentDialog extends React.Component<Props, State> {
     const { isCreateComponentLoading } = this.state;
     return (
       <div>
-        <Button type="secondary" onClick={onComponentClose} className="margin-right-10">
-          {i18n.t('Cancel')}
-        </Button>
         <If condition={!isEditComponent}>
+          <Button type="secondary" onClick={onComponentClose} className="margin-right-10">
+            {i18n.t('Cancel')}
+          </Button>
           <Button type="primary" onClick={this.onSubmitCreate} loading={isCreateComponentLoading}>
             {i18n.t('Create')}
           </Button>
