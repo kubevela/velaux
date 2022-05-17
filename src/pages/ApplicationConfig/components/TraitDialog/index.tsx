@@ -216,6 +216,7 @@ class TraitDialog extends React.Component<Props, State> {
   };
 
   handleChange = (value: string) => {
+    this.removeProperties();
     this.field.setValues({ type: value });
     this.onDetailsTraitDefinition(value);
   };
@@ -252,6 +253,17 @@ class TraitDialog extends React.Component<Props, State> {
         </span>
       );
     }
+  };
+
+  removeProperties = () => {
+    const values: any = this.field.getValues();
+    const basicConfigField = ['alias', 'description'];
+    for (const key in values) {
+      if (!basicConfigField.includes(key)) {
+        this.field.remove(key);
+      }
+    }
+    this.setState({ definitionDetail: undefined });
   };
 
   render() {

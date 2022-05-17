@@ -254,6 +254,7 @@ class AppDialog extends React.Component<Props, State> {
               dialogStats: value,
             },
             () => {
+              this.removeProperties();
               this.onDetailComponentDefinition(componentType);
             },
           );
@@ -331,6 +332,17 @@ class AppDialog extends React.Component<Props, State> {
     const envBindings: string[] = this.field.getValue('envBindings');
     (envBindings || []).push(envBinding);
     this.field.setValues({ envBindings });
+  };
+
+  removeProperties = () => {
+    const values: any = this.field.getValues();
+    const basicConfigField = ['name', 'alias', 'description', 'project', 'envBindings'];
+    for (const key in values) {
+      if (!basicConfigField.includes(key)) {
+        this.field.remove(key);
+      }
+    }
+    this.setState({ definitionDetail: undefined });
   };
 
   render() {
@@ -444,7 +456,11 @@ class AppDialog extends React.Component<Props, State> {
               </Row>
             </If>
 
-            <If condition={dialogStats === 'isCreateComponent'}>
+            <If
+              condition={
+                dialogStats === 'isCreateComponent' && definitionDetail && definitionDetail.uiSchema
+              }
+            >
               <FormItem required={true}>
                 <UISchema
                   {...init(`properties`, {
