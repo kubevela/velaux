@@ -260,6 +260,17 @@ class ComponentDialog extends React.Component<Props, State> {
     });
   };
 
+  removeProperties = () => {
+    const values: any = this.field.getValues();
+    const basicConfigField = ['name', 'alias', 'description'];
+    for (const key in values) {
+      if (!basicConfigField.includes(key)) {
+        this.field.remove(key);
+      }
+    }
+    this.setState({ definitionDetail: undefined });
+  };
+
   render() {
     const init = this.field.init;
     const FormItem = Form.Item;
@@ -387,6 +398,7 @@ class ComponentDialog extends React.Component<Props, State> {
                     })}
                     dataSource={transComponentDefinitions(componentDefinitions)}
                     onChange={(item: string) => {
+                      this.removeProperties();
                       this.onDetailsComponentDefinition(item, () => {
                         this.field.setValue('componentType', item);
                       });
