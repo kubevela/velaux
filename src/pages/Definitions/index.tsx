@@ -8,6 +8,7 @@ import _ from 'lodash';
 // import { momentDate } from '../../utils/common';
 import Translation from '../../components/Translation';
 import Permission from '../../components/Permission';
+import SelectSearch from './components/SelectSearch';
 import locale from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
 import './index.less';
@@ -24,6 +25,8 @@ type State = {
   definitionType: string;
   list: DefinitionBase[];
   isLoading: boolean;
+  searchValue: string;
+  searchList: DefinitionBase[];
 };
 
 @connect((store: any) => {
@@ -36,6 +39,8 @@ class Definitions extends Component<Props, State> {
       definitionType: this.getDefinitionType(),
       list: [],
       isLoading: false,
+      searchValue: '',
+      searchList: [],
     };
   }
   componentDidMount() {
@@ -71,10 +76,14 @@ class Definitions extends Component<Props, State> {
         if (res) {
           this.setState({
             list: (res && res.definitions) || [],
+            searchList: [],
+            searchValue: '',
           });
         } else {
           this.setState({
             list: [],
+            searchList: [],
+            searchValue: '',
           });
         }
       })
@@ -119,8 +128,28 @@ class Definitions extends Component<Props, State> {
     }
   };
 
+  handleChangName = (value: string) => {
+    const { list } = this.state;
+    const newList: DefinitionBase[] = list.filter((item) => {
+      return item.name && item.name.search(value) != -1;
+    });
+    this.setState({
+      searchValue: value,
+      searchList: newList,
+    });
+  };
+
+  getDataSource = () => {
+    const { list, searchValue, searchList = [] } = this.state;
+    if (!searchValue && searchList.length === 0) {
+      return list;
+    } else {
+      return searchList;
+    }
+  };
+
   render() {
-    const { list, definitionType, isLoading } = this.state;
+    const { definitionType, isLoading, searchValue } = this.state;
     const columns = [
       {
         key: 'name',
@@ -187,17 +216,23 @@ class Definitions extends Component<Props, State> {
     ];
 
     const { Column } = Table;
-
     return (
       <div className="definitions-list-content">
+        <SelectSearch
+          searchValue={searchValue}
+          handleChangName={(value: string) => {
+            this.handleChangName(value);
+          }}
+        />
         <Table
           id="definitionTable"
           locale={locale().Table}
-          dataSource={list}
+          dataSource={this.getDataSource()}
           hasBorder={false}
           loading={isLoading}
           fixedHeader={true}
           maxBodyHeight={'calc(100vh - 100px)'}
+          className="margin-16"
         >
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
