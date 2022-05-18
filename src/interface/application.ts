@@ -58,7 +58,7 @@ export interface UIParam {
   additional?: boolean;
   additionalParameter?: UIParam;
   subParameters?: UIParam[];
-  validate: UIParamValidate;
+  validate?: UIParamValidate;
 }
 
 export interface ParamCondition {

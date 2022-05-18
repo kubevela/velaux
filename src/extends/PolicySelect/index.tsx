@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'dva';
 import { Select } from '@b-design/ui';
 import { getPolicyList } from '../../api/application';
-import { PolicyBase } from '../../interface/application';
+import type { PolicyBase } from '../../interface/application';
 import locale from '../../utils/locale';
 import i18n from '../../i18n';
 
@@ -36,28 +36,30 @@ class PolicySelect extends React.Component<Props, State> {
 
   fetchPolicyList = async () => {
     const { appName = '' } = this.props;
-    getPolicyList({
-      name: appName,
-    })
-      .then((res) => {
-        if (res && res.policies) {
-          const policyListData = (res.policies || []).map(
-            (item: PolicyBase) => `${item.name}(${item.type})`,
-          );
-          this.setState({
-            policySelectDataSource: policyListData,
-          });
-        } else {
+    if (appName) {
+      getPolicyList({
+        name: appName,
+      })
+        .then((res) => {
+          if (res && res.policies) {
+            const policyListData = (res.policies || []).map(
+              (item: PolicyBase) => `${item.name}(${item.type})`,
+            );
+            this.setState({
+              policySelectDataSource: policyListData,
+            });
+          } else {
+            this.setState({
+              policySelectDataSource: [],
+            });
+          }
+        })
+        .catch(() => {
           this.setState({
             policySelectDataSource: [],
           });
-        }
-      })
-      .catch(() => {
-        this.setState({
-          policySelectDataSource: [],
         });
-      });
+    }
   };
 
   onChange = (value: string) => {

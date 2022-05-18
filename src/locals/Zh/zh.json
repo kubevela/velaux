@@ -534,6 +534,7 @@
   "Save & Online": "保存并发布",
   "UI Schema": "UI 配置",
   "There is no ui schema definition": "UI 配置不存在",
+  "UI schema updated successfully": "成功更新自定义 UI 配置",
   "Instances of the cloud service": "云服务实例",
   "Search by definition name": "基于名称搜索",
   "Depends On": "依赖",
