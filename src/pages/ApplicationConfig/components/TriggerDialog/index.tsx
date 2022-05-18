@@ -167,7 +167,11 @@ class TriggerDialog extends React.Component<Props, State> {
     const { components = [] } = this.props;
     const componentName = components[0]?.name || '';
     this.field.setValue('payloadType', value);
-    this.field.setValue('componentName', componentName);
+    if (value && value !== 'custom') {
+      this.field.setValue('componentName', componentName);
+    } else {
+      this.field.remove('componentName');
+    }
   };
 
   render() {
