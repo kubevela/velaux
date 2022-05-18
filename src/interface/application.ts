@@ -382,3 +382,13 @@ export interface ComponentDefinitionsBase {
   name: string;
   workloadType?: string;
 }
+
+export interface PolicyBase {
+  createTime: string;
+  creator: string;
+  description: string;
+  name: string;
+  properties: {};
+  type: string;
+  updateTime: string;
+}

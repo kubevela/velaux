@@ -24,6 +24,7 @@ import { If } from 'tsx-control-statements/components';
 import i18n from 'i18next';
 import { getValue } from '../../utils/utils';
 import HelmRepoSelect from '../../extends/HelmRepoSelect';
+import PolicySelect from '../../extends/PolicySelect';
 
 const { Col, Row } = Grid;
 
@@ -760,6 +761,25 @@ class UISchema extends Component<Props, State> {
                         message: 'Please enter a valid kubernetes resource yaml code',
                       },
                     ],
+                  })}
+                />
+              </Form.Item>
+            );
+          case 'PolicySelect':
+            return (
+              <Form.Item
+                labelAlign={inline ? 'inset' : 'left'}
+                required={required}
+                label={label}
+                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
+                disabled={disableEdit}
+                key={param.jsonKey}
+              >
+                <PolicySelect
+                  disabled={disableEdit}
+                  {...init(param.jsonKey, {
+                    initValue: initValue,
+                    rules: convertRule(param.validate),
                   })}
                 />
               </Form.Item>
