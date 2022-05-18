@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Message, Field, Grid, Button, Loading, Card } from '@b-design/ui';
+import { Message, Field, Grid, Button, Loading, Card, Icon } from '@b-design/ui';
 import { detailDefinition, updateUISchema } from '../../api/definitions';
 import type { UIParam } from '../../interface/application';
 import type { Rule } from '@alifd/field';
@@ -124,7 +124,7 @@ class UiSchema extends Component<Props, State> {
   getYamlHeight = () => {
     const eleUiSchema = document.getElementById('view-ui-schema');
     if (eleUiSchema) {
-      return eleUiSchema.clientHeight + 4 + 'px';
+      return eleUiSchema.clientHeight + 'px';
     } else {
       return '600px';
     }
@@ -172,80 +172,102 @@ class UiSchema extends Component<Props, State> {
         <div className="uiSchema-wrapper">
           <Loading visible={isLoading} inline={false}>
             <If condition={!uiSchema || uiSchema.length === 0}>
-              <Card locale={locale().Card} contentHeight={600}>
+              <Card locale={locale().Card}>
                 <Empty
                   message={<Translation>There is no ui schema definition</Translation>}
                   iconWidth={'30px'}
                 />
               </Card>
             </If>
-
-            <section className="margin-top-20">
-              <Row>
-                <Col span="12" className="padding-left-10 padding-right-10">
-                  <If condition={uiSchema && uiSchema.length != 0}>
+            <If condition={!uiSchema || uiSchema.length != 0}>
+              <section
+                className="margin-top-20"
+                style={{ maxWidth: '1520px', margin: '16px auto' }}
+              >
+                <Message type="notice" style={{ margin: '0 8px 8px 16px' }}>
+                  <Translation>
+                    Custom the UI schema will preview in right, please refer to the document to get
+                    more info
+                  </Translation>
+                  <a
+                    style={{ marginLeft: '8px' }}
+                    target="_blank"
+                    href="https://kubevela.net/docs/reference/ui-schema"
+                  >
+                    <Icon size="medium" type="external-link" />
+                  </a>
+                </Message>
+                <Row>
+                  <Col span="12" className="padding-left-10 padding-right-10">
                     <Card
                       locale={locale().Card}
                       contentHeight="auto"
-                      id="view-ui-schema"
-                      className="view-ui-schema"
+                      id="yaml-code"
+                      className="yaml-code"
+                      style={{ height: yamlHeight }}
                     >
-                      <UISchema
-                        {...init(`properties`, {
-                          rules: [
-                            {
-                              validator: validator,
-                              message: 'Please check UI Schema properties',
-                            },
-                          ],
-                        })}
-                        uiSchema={this.sortUISchema(uiSchema)}
-                        ref={this.uiSchemaRef}
-                        advanced={true}
-                        value={{}}
-                        mode="edit"
+                      <DefinitionCode
+                        containerId="yaml-code"
+                        language={'yaml'}
+                        readOnly={false}
+                        {...init('yamlValues')}
+                        ref={this.DefinitionCodeRef}
+                        onChange={this.onChangeYaml}
                       />
                     </Card>
-                  </If>
-                </Col>
-
-                <Col span="12" className="padding-left-10 padding-right-10">
-                  <Card
-                    locale={locale().Card}
-                    contentHeight="auto"
-                    id="yaml-code"
-                    className="yaml-code"
-                    style={{ height: yamlHeight }}
-                  >
-                    <DefinitionCode
-                      containerId="yaml-code"
-                      language={'yaml'}
-                      readOnly={false}
-                      {...init('yamlValues')}
-                      ref={this.DefinitionCodeRef}
-                      onChange={this.onChangeYaml}
-                    />
-                  </Card>
-                </Col>
-              </Row>
-            </section>
-            <section className="margin-top-20 text-align-center">
-              <Permission
-                request={{
-                  resource: `definition:${definitionName}`,
-                  action: 'update',
-                }}
-                project={''}
-              >
-                <Button
-                  type="primary"
-                  loading={updateUISchemaLoading}
-                  onClick={this.updateUISchema}
+                  </Col>
+                  <Col span="12" className="padding-left-10 padding-right-10">
+                    <If condition={uiSchema && uiSchema.length != 0}>
+                      <div id="view-ui-schema">
+                        <div className="preview">
+                          <span>
+                            <Translation>Preview</Translation>
+                          </span>
+                        </div>
+                        <Card
+                          locale={locale().Card}
+                          contentHeight="auto"
+                          className="view-ui-schema"
+                        >
+                          <UISchema
+                            {...init(`properties`, {
+                              rules: [
+                                {
+                                  validator: validator,
+                                  message: 'Please check UI Schema properties',
+                                },
+                              ],
+                            })}
+                            uiSchema={this.sortUISchema(uiSchema)}
+                            ref={this.uiSchemaRef}
+                            advanced={true}
+                            value={{}}
+                            mode="edit"
+                          />
+                        </Card>
+                      </div>
+                    </If>
+                  </Col>
+                </Row>
+              </section>
+              <section className="margin-top-20 text-align-center">
+                <Permission
+                  request={{
+                    resource: `definition:${definitionName}`,
+                    action: 'update',
+                  }}
+                  project={''}
                 >
-                  <Translation>Save & Online</Translation>
-                </Button>
-              </Permission>
-            </section>
+                  <Button
+                    type="primary"
+                    loading={updateUISchemaLoading}
+                    onClick={this.updateUISchema}
+                  >
+                    <Translation>Save & Online</Translation>
+                  </Button>
+                </Permission>
+              </section>
+            </If>
           </Loading>
         </div>
       </Fragment>

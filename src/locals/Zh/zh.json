@@ -532,8 +532,11 @@
   "Contribution": "贡献",
   "This is achieved by implementing its application model as programmable entities": "这是通过将其应用程序模型实现为可编程实体来实现的",
   "Save & Online": "保存并发布",
-  "UI Schema": "UI 呈现配置",
-  "There is no ui schema definition": "UI 呈现配置不存在",
+  "UI Schema": "UI 配置",
+  "There is no ui schema definition": "UI 配置不存在",
   "Instances of the cloud service": "云服务实例",
-  "Depends On": "依赖"
+  "Search by definition name": "基于名称搜索",
+  "Depends On": "依赖",
+  "Preview": "预览",
+  "Custom the UI schema will preview in right, please refer to the document to get more info": "自定义 UI 配置可以在右侧预览，更多信息请参考文档"
 }
