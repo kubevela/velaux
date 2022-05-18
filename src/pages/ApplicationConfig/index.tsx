@@ -557,6 +557,7 @@ class ApplicationConfig extends Component<Props, State> {
             appName={appName}
             componentType={(mainComponent && mainComponent.type) || ''}
             workflows={workflows}
+            components={components || []}
             onClose={this.onTriggerClose}
             onOK={(res: Trigger) => {
               this.onTriggerOk(res);

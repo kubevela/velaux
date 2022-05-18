@@ -313,6 +313,7 @@ export interface Trigger {
   token: string;
   createTime?: string;
   updateTime?: string;
+  componentName?: string;
 }
 
 export interface WorkflowStep {
