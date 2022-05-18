@@ -216,6 +216,7 @@ class AppDialog extends React.Component<Props, State> {
     detailComponentDefinition({ name: value }).then((re) => {
       if (re) {
         this.setState({ definitionDetail: re, definitionLoading: false });
+        this.field.setValue('componentType', value);
       }
     });
   };

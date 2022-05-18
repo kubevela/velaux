@@ -3,7 +3,12 @@ import { Grid, Field, Form, Select, Message, Button, Input } from '@b-design/ui'
 import { withTranslation } from 'react-i18next';
 import { createTriggers, detailComponentDefinition } from '../../../../api/application';
 import { getPayloadType } from '../../../../api/payload';
-import type { Workflow, Trigger, UIParam } from '../../../../interface/application';
+import type {
+  Workflow,
+  Trigger,
+  UIParam,
+  ApplicationComponentBase,
+} from '../../../../interface/application';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
@@ -19,6 +24,7 @@ type Props = {
   onClose: () => void;
   dispatch?: ({}) => {};
   t: (key: string) => {};
+  components: ApplicationComponentBase[];
 };
 
 type State = {
@@ -96,6 +102,7 @@ class TriggerDialog extends React.Component<Props, State> {
         type = '',
         payloadType = '',
         workflowName = '',
+        componentName = '',
       } = values;
       const query = { appName };
       const params: Trigger = {
@@ -106,6 +113,7 @@ class TriggerDialog extends React.Component<Props, State> {
         payloadType,
         workflowName,
         token: '',
+        componentName,
       };
       createTriggers(params, query).then((res: any) => {
         if (res) {
@@ -155,11 +163,22 @@ class TriggerDialog extends React.Component<Props, State> {
     }
   }
 
+  changePayloadType = (value: string) => {
+    const { components = [] } = this.props;
+    const componentName = components[0]?.name || '';
+    this.field.setValue('payloadType', value);
+    if (value && value !== 'custom') {
+      this.field.setValue('componentName', componentName);
+    } else {
+      this.field.remove('componentName');
+    }
+  };
+
   render() {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const { t, workflows, onClose } = this.props;
+    const { t, workflows, onClose, components } = this.props;
     const { payloadTypes } = this.state;
     const workflowOption = workflows?.map((workflow) => {
       return {
@@ -172,6 +191,13 @@ class TriggerDialog extends React.Component<Props, State> {
       return {
         label: type,
         value: type,
+      };
+    });
+
+    const componentsOption = components?.map((component) => {
+      return {
+        label: component.alias ? `${component.alias}(${component.name})` : component.name,
+        value: component.name,
       };
     });
 
@@ -277,6 +303,7 @@ class TriggerDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
+                    onChange={this.changePayloadType}
                   />
                 </FormItem>
               </If>
@@ -300,6 +327,26 @@ class TriggerDialog extends React.Component<Props, State> {
                   })}
                 />
               </FormItem>
+            </Col>
+
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <If condition={this.field.getValue('payloadType') !== 'custom'}>
+                <FormItem label={<Translation>Component</Translation>} required>
+                  <Select
+                    name="componentName"
+                    locale={locale().Select}
+                    dataSource={componentsOption}
+                    {...init('componentName', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please select a component',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </If>
             </Col>
           </Row>
           <Message type="warning" animation={true} visible={this.isShowMessage()} title="Warning">

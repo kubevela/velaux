@@ -313,6 +313,7 @@ export interface Trigger {
   token: string;
   createTime?: string;
   updateTime?: string;
+  componentName?: string;
 }
 
 export interface WorkflowStep {
@@ -329,6 +330,7 @@ export interface ApplicationComponentConfig {
   componentType?: string;
   properties: any;
   traits?: Trait[];
+  dependsOn?: string[];
 }
 
 export interface DefinitionBase {
@@ -379,4 +381,14 @@ export interface ApplicationQuery {
 export interface ComponentDefinitionsBase {
   name: string;
   workloadType?: string;
+}
+
+export interface PolicyBase {
+  createTime: string;
+  creator: string;
+  description: string;
+  name: string;
+  properties: {};
+  type: string;
+  updateTime: string;
 }

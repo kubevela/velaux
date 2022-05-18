@@ -181,7 +181,7 @@ class WorkflowComponent extends Component<Props, State> {
   };
 
   render() {
-    const { data, workFlowDefinitions, applicationDetail } = this.props;
+    const { data, workFlowDefinitions, applicationDetail, appName } = this.props;
     const { errorFocus, loading } = this.state;
     const option: WorkFlowOption = data.option || { default: false, edit: false };
     const menu = (
@@ -320,6 +320,7 @@ class WorkflowComponent extends Component<Props, State> {
               workflowId={data.appName + data.name || ''}
               workFlowDefinitions={workFlowDefinitions}
               edit={option.edit}
+              appName={appName}
             />
           </div>
         </div>
