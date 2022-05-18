@@ -578,6 +578,7 @@ class ApplicationConfig extends Component<Props, State> {
             project={applicationDetail?.project?.name || ''}
             appName={appName}
             componentName={componentName}
+            components={components || []}
             isEditComponent={isEditComponent}
             temporaryTraitList={temporaryTraitList}
             componentDefinitions={componentDefinitions}

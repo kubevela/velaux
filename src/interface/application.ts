@@ -330,6 +330,7 @@ export interface ApplicationComponentConfig {
   componentType?: string;
   properties: any;
   traits?: Trait[];
+  dependsOn?: string[];
 }
 
 export interface DefinitionBase {
