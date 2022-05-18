@@ -117,6 +117,11 @@ class CreateIntegration extends React.Component<Props, State> {
     return `New ${this.props.configType}`;
   };
 
+  removeProperties = () => {
+    this.field.remove('properties');
+    this.setState({ definitionDetail: undefined });
+  };
+
   render() {
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
@@ -264,9 +269,9 @@ class CreateIntegration extends React.Component<Props, State> {
                       })}
                       dataSource={getSelectLabel(componentDefinitions)}
                       onChange={(item: string) => {
-                        this.onDetailsComponentDefinition(item, () => {
-                          this.field.setValue('componentType', item);
-                        });
+                        this.removeProperties();
+                        this.field.setValue('componentType', item);
+                        this.onDetailsComponentDefinition(item);
                       }}
                     />
                   </FormItem>
@@ -284,19 +289,21 @@ class CreateIntegration extends React.Component<Props, State> {
                   hasToggleIcon={true}
                 >
                   <FormItem required={true}>
-                    <UISchema
-                      {...init(`properties`, {
-                        rules: [
-                          {
-                            validator: validator,
-                            message: i18n.t('Please check app deploy properties'),
-                          },
-                        ],
-                      })}
-                      uiSchema={definitionDetail && definitionDetail.uiSchema}
-                      ref={this.uiSchemaRef}
-                      mode="new"
-                    />
+                    <If condition={definitionDetail && definitionDetail.uiSchema}>
+                      <UISchema
+                        {...init(`properties`, {
+                          rules: [
+                            {
+                              validator: validator,
+                              message: i18n.t('Please check app deploy properties'),
+                            },
+                          ],
+                        })}
+                        uiSchema={definitionDetail && definitionDetail.uiSchema}
+                        ref={this.uiSchemaRef}
+                        mode="new"
+                      />
+                    </If>
                   </FormItem>
 
                   <If condition={!definitionDetail}>

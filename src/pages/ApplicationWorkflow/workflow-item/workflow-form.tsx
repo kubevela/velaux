@@ -114,8 +114,14 @@ class WorkflowForm extends Component<Props, State> {
   };
 
   handleChang = (value: string) => {
-    this.onDetailsComponeDefinition(value);
+    this.removeProperties();
     this.field.setValues({ type: value });
+    this.onDetailsComponeDefinition(value);
+  };
+
+  removeProperties = () => {
+    this.field.remove('properties');
+    this.setState({ definitionDetail: undefined });
   };
 
   render() {

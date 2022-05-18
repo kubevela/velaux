@@ -272,6 +272,11 @@ class ComponentDialog extends React.Component<Props, State> {
     });
   };
 
+  removeProperties = () => {
+    this.field.remove('properties');
+    this.setState({ definitionDetail: undefined });
+  };
+
   getDependsOptions = () => {
     const { components } = this.props;
     const componentOptions = components?.map((component) => {
@@ -411,9 +416,9 @@ class ComponentDialog extends React.Component<Props, State> {
                     })}
                     dataSource={transComponentDefinitions(componentDefinitions)}
                     onChange={(item: string) => {
-                      this.onDetailsComponentDefinition(item, () => {
-                        this.field.setValue('componentType', item);
-                      });
+                      this.removeProperties();
+                      this.field.setValue('componentType', item);
+                      this.onDetailsComponentDefinition(item);
                     }}
                   />
                 </FormItem>
