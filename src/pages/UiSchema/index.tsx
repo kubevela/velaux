@@ -113,7 +113,7 @@ class UiSchema extends Component<Props, State> {
     updateUISchema(params)
       .then((res) => {
         if (res) {
-          Message.success(i18n.t('Update the ui schema success'));
+          Message.success(i18n.t('UI schema updated successfully'));
         }
       })
       .finally(() => {
