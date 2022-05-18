@@ -383,7 +383,7 @@ export interface ComponentDefinitionsBase {
   workloadType?: string;
 }
 
-export interface PoliciesBase {
+export interface PolicyBase {
   createTime: string;
   creator: string;
   description: string;

@@ -435,6 +435,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
             workFlowDefinitions={workFlowDefinitions}
             closeDrawer={this.closeDrawer}
             appName={appName}
+            dispatch={this.diagramMaker.store.dispatch}
           />
         </If>
       </div>

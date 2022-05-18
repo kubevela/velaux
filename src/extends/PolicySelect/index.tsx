@@ -1,7 +1,8 @@
 import React from 'react';
+import { connect } from 'dva';
 import { Select } from '@b-design/ui';
 import { getPolicyList } from '../../api/application';
-import { PoliciesBase } from '../../interface/application';
+import { PolicyBase } from '../../interface/application';
 import locale from '../../utils/locale';
 import i18n from '../../i18n';
 
@@ -11,13 +12,16 @@ type Props = {
   value: any;
   id: string;
   disabled: boolean;
-  appName: string;
+  appName?: string;
 };
 
 type State = {
-  policySelectDataSource?: PoliciesBase[];
+  policySelectDataSource?: PolicyBase[];
 };
 
+@connect((store: any) => {
+  return { ...store.uischema };
+})
 class PolicySelect extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -37,7 +41,9 @@ class PolicySelect extends React.Component<Props, State> {
     })
       .then((res) => {
         if (res && res.policies) {
-          const policyListData = (res.policies || []).map((item: PoliciesBase) => item.name);
+          const policyListData = (res.policies || []).map(
+            (item: PolicyBase) => `${item.name}(${item.type})`,
+          );
           this.setState({
             policySelectDataSource: policyListData,
           });

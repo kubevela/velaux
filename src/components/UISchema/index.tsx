@@ -39,7 +39,6 @@ type Props = {
   disableRenderRow?: boolean;
   mode: 'new' | 'edit';
   advanced?: boolean;
-  appName?: string;
 };
 
 function convertRule(validate: UIParamValidate) {
@@ -202,7 +201,7 @@ class UISchema extends Component<Props, State> {
 
   render() {
     const { advanced } = this.state;
-    const { uiSchema, inline, maxColSpan, disableRenderRow, value, mode, appName } = this.props;
+    const { uiSchema, inline, maxColSpan, disableRenderRow, value, mode } = this.props;
     if (!uiSchema) {
       return <div />;
     }
@@ -777,7 +776,6 @@ class UISchema extends Component<Props, State> {
                 key={param.jsonKey}
               >
                 <PolicySelect
-                  appName={appName || ''}
                   disabled={disableEdit}
                   {...init(param.jsonKey, {
                     initValue: initValue,

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'dva';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import _ from 'lodash';
 import type { DiagramMakerNode } from 'diagram-maker';
@@ -23,11 +24,11 @@ type Props = {
   createOrUpdateNode: (data: any) => void;
   data?: DiagramMakerNode<WorkFlowNodeType>;
   workFlowDefinitions: [];
-  appName?: string;
+  appName: string;
   componentName?: string;
   closeDrawer: () => void;
   checkStepName: (name: string) => boolean;
-  dispatch?: ({}) => {};
+  dispatch: ({}) => {};
   t: (key: string) => {};
 };
 
@@ -36,6 +37,7 @@ type State = {
   definitionLoading: boolean;
 };
 
+@connect()
 class WorkflowForm extends Component<Props, State> {
   field: Field;
   uiSchemaRef: React.RefObject<UISchema>;
@@ -64,6 +66,10 @@ class WorkflowForm extends Component<Props, State> {
       }
       this.field.setValues({ properties: properties });
       this.onDetailsComponeDefinition((consumerData && consumerData.type) || '');
+      this.props.dispatch({
+        type: 'uischema/setAppName',
+        payload: this.props.appName,
+      });
     }
   };
 
@@ -116,7 +122,7 @@ class WorkflowForm extends Component<Props, State> {
     const { init } = this.field;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
-    const { t, closeDrawer, data, checkStepName, appName } = this.props;
+    const { t, closeDrawer, data, checkStepName } = this.props;
     const { definitionDetail } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
@@ -262,7 +268,6 @@ class WorkflowForm extends Component<Props, State> {
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
                       ref={this.uiSchemaRef}
                       mode={this.props.data ? 'edit' : 'new'}
-                      appName={appName}
                     />
                   </FormItem>
                 </If>
