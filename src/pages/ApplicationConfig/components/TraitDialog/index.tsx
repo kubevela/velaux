@@ -256,13 +256,7 @@ class TraitDialog extends React.Component<Props, State> {
   };
 
   removeProperties = () => {
-    const values: any = this.field.getValues();
-    const basicConfigField = ['alias', 'description'];
-    for (const key in values) {
-      if (!basicConfigField.includes(key)) {
-        this.field.remove(key);
-      }
-    }
+    this.field.remove('properties');
     this.setState({ definitionDetail: undefined });
   };
 

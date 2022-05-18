@@ -273,13 +273,7 @@ class ComponentDialog extends React.Component<Props, State> {
   };
 
   removeProperties = () => {
-    const values: any = this.field.getValues();
-    const basicConfigField = ['name', 'alias', 'description'];
-    for (const key in values) {
-      if (!basicConfigField.includes(key)) {
-        this.field.remove(key);
-      }
-    }
+    this.field.remove('properties');
     this.setState({ definitionDetail: undefined });
   };
 
@@ -423,9 +417,8 @@ class ComponentDialog extends React.Component<Props, State> {
                     dataSource={transComponentDefinitions(componentDefinitions)}
                     onChange={(item: string) => {
                       this.removeProperties();
-                      this.onDetailsComponentDefinition(item, () => {
-                        this.field.setValue('componentType', item);
-                      });
+                      this.field.setValue('componentType', item);
+                      this.onDetailsComponentDefinition(item);
                     }}
                   />
                 </FormItem>

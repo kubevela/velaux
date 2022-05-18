@@ -216,7 +216,6 @@ class AppDialog extends React.Component<Props, State> {
     detailComponentDefinition({ name: value }).then((re) => {
       if (re) {
         this.setState({ definitionDetail: re, definitionLoading: false });
-        this.field.setValue('componentType', value);
       }
     });
   };
@@ -256,6 +255,7 @@ class AppDialog extends React.Component<Props, State> {
             },
             () => {
               this.removeProperties();
+              this.field.setValue('componentType', componentType);
               this.onDetailComponentDefinition(componentType);
             },
           );
@@ -336,13 +336,7 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   removeProperties = () => {
-    const values: any = this.field.getValues();
-    const basicConfigField = ['name', 'alias', 'description', 'project', 'envBindings'];
-    for (const key in values) {
-      if (!basicConfigField.includes(key)) {
-        this.field.remove(key);
-      }
-    }
+    this.field.remove('properties');
     this.setState({ definitionDetail: undefined });
   };
 
