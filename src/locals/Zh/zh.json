@@ -535,5 +535,6 @@
   "UI Schema": "UI 呈现配置",
   "There is no ui schema definition": "UI 呈现配置不存在",
   "Instances of the cloud service": "云服务实例",
+  "Search by TypeName": "基于类型名称搜索",
   "Depends On": "依赖"
 }
