@@ -116,7 +116,7 @@ class WorkflowForm extends Component<Props, State> {
     const { init } = this.field;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
-    const { t, closeDrawer, data, checkStepName } = this.props;
+    const { t, closeDrawer, data, checkStepName, appName } = this.props;
     const { definitionDetail } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
@@ -262,6 +262,7 @@ class WorkflowForm extends Component<Props, State> {
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
                       ref={this.uiSchemaRef}
                       mode={this.props.data ? 'edit' : 'new'}
+                      appName={appName}
                     />
                   </FormItem>
                 </If>
