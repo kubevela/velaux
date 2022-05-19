@@ -66,6 +66,10 @@ export function isIntegrationPath(pathname: string) {
   return (pathname || '').startsWith('/integration');
 }
 
+export function isDefinitionsPath(pathname: string) {
+  return (pathname || '').startsWith('/definitions');
+}
+
 export const APPLICATION_PATH = 'applications';
 export const CLUSTERS_PATH = 'clusters';
 export const ADDONS_PATH = 'addons';

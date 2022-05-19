@@ -81,7 +81,9 @@ class HelmValues extends Component<Props, State> {
     const { helm, repo } = this.props;
     if (helm?.chart && helm.version && helm.url) {
       getChartValues({ ...helm, secretName: repo?.secretName }).then((re) => {
-        this.setState({ values: re.BusinessCode ? undefined : re, helm: helm, loading: false });
+        if (re) {
+          this.setState({ values: re.BusinessCode ? undefined : re, helm: helm, loading: false });
+        }
       });
     }
   };

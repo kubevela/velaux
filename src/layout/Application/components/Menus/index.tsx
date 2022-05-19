@@ -9,7 +9,6 @@ type Props = {
   envName: string;
   appName: string;
   currentPath: string;
-  applicationType?: 'cloud' | 'common';
 };
 
 class Menu extends Component<Props, any> {
@@ -23,51 +22,44 @@ class Menu extends Component<Props, any> {
   componentDidMount() {}
 
   render() {
-    const { envName, appName, currentPath, applicationType } = this.props;
+    const { envName, appName, currentPath } = this.props;
     const isEnvPage = envName != undefined;
     const menuItems = {
       configPage: [
         {
           key: 'config',
-          lable: <Translation>Properties</Translation>,
+          label: <Translation>Properties</Translation>,
           to: `/applications/${appName}/config`,
         },
         {
           key: 'workflows',
-          lable: <Translation>Workflows</Translation>,
+          label: <Translation>Workflows</Translation>,
           to: `/applications/${appName}/workflows`,
         },
         {
           key: 'revisions',
-          lable: <Translation>Revisions</Translation>,
+          label: <Translation>Revisions</Translation>,
           to: `/applications/${appName}/revisions`,
         },
       ],
       envPage: [
         {
           key: 'status',
-          lable: <Translation>Status</Translation>,
+          label: <Translation>Status</Translation>,
           to: `/applications/${appName}/envbinding/${envName}/status`,
         },
         {
           key: 'instances',
-          lable: <Translation>Instances</Translation>,
+          label: <Translation>Instances</Translation>,
           to: `/applications/${appName}/envbinding/${envName}/instances`,
         },
         {
           key: 'logs',
-          lable: <Translation>Logs</Translation>,
+          label: <Translation>Logs</Translation>,
           to: `/applications/${appName}/envbinding/${envName}/logs`,
         },
       ],
     };
-    if (applicationType == 'common') {
-      // menuItems.envPage.push({
-      //   key: 'monitor',
-      //   lable: <Translation>Monitor</Translation>,
-      //   to: `/applications/${appName}/envbinding/${envName}/monitor`,
-      // });
-    }
     let activeItems = menuItems.configPage;
     if (isEnvPage) {
       activeItems = menuItems.envPage;
@@ -82,7 +74,7 @@ class Menu extends Component<Props, any> {
               to={item.to}
               className={item.key === activeKey ? 'menu-item-active' : 'menu-item'}
             >
-              {item.lable}
+              {item.label}
             </Link>
           );
         })}

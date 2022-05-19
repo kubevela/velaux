@@ -24,6 +24,7 @@ import { If } from 'tsx-control-statements/components';
 import i18n from 'i18next';
 import { getValue } from '../../utils/utils';
 import HelmRepoSelect from '../../extends/HelmRepoSelect';
+import PolicySelect from '../../extends/PolicySelect';
 
 const { Col, Row } = Grid;
 
@@ -37,9 +38,10 @@ type Props = {
   registerForm?: (form: Field) => void;
   disableRenderRow?: boolean;
   mode: 'new' | 'edit';
+  advanced?: boolean;
 };
 
-function convertRule(validate: UIParamValidate) {
+function convertRule(validate?: UIParamValidate) {
   const rules = [];
   if (!validate) {
     return [];
@@ -115,7 +117,7 @@ class UISchema extends Component<Props, State> {
     }
     this.state = {
       secretKeys: [],
-      advanced: false,
+      advanced: props.advanced || false,
     };
   }
 
@@ -236,11 +238,11 @@ class UISchema extends Component<Props, State> {
         return;
       }
 
-      if (!param.validate.required) {
+      if (!required) {
         couldBeDisabledParamCount += 1;
       }
 
-      if (onlyShowRequired && !param.validate.required && !advanced) {
+      if (onlyShowRequired && !required && !advanced) {
         return;
       }
 
@@ -252,7 +254,7 @@ class UISchema extends Component<Props, State> {
             }
             callback();
           });
-        } else if (param.validate.required) {
+        } else if (required) {
           callback(`param ${param.jsonKey} is required`);
         } else {
           callback();
@@ -269,9 +271,9 @@ class UISchema extends Component<Props, State> {
       }
       let initValue = value && value[param.jsonKey];
       if (initValue === undefined) {
-        initValue = param.validate.defaultValue;
+        initValue = param.validate?.defaultValue;
       }
-      const disableEdit = (param.validate.immutable && this.props.mode == 'edit') || false;
+      const disableEdit = (param.validate?.immutable && this.props.mode == 'edit') || false;
       const getGroup = (children: React.ReactNode) => {
         return (
           <Group
@@ -279,7 +281,7 @@ class UISchema extends Component<Props, State> {
             description={description}
             title={label}
             closed={true}
-            required={param.validate && param.validate.required}
+            required={required}
             field={this.form}
             jsonKey={param.jsonKey || ''}
             propertyValue={this.props.value}
@@ -557,7 +559,7 @@ class UISchema extends Component<Props, State> {
                     this.setState({ secretKeys: keys });
                   }}
                   {...init(param.jsonKey, {
-                    initValue: this.props.value?.name || param.validate.defaultValue,
+                    initValue: this.props.value?.name || param.validate?.defaultValue,
                     rules: convertRule(param.validate),
                   })}
                 />
@@ -577,7 +579,7 @@ class UISchema extends Component<Props, State> {
                   disabled={disableEdit}
                   secretKeys={this.state.secretKeys}
                   {...init(param.jsonKey, {
-                    initValue: this.props.value?.key || param.validate.defaultValue,
+                    initValue: this.props.value?.key || param.validate?.defaultValue,
                     rules: convertRule(param.validate),
                   })}
                 />
@@ -598,7 +600,7 @@ class UISchema extends Component<Props, State> {
                     initValue: initValue,
                     rules: [
                       {
-                        required: param.validate.required,
+                        required: required,
                         min: 0,
                         message: 'Please enter a valid cpu request number',
                       },
@@ -622,7 +624,7 @@ class UISchema extends Component<Props, State> {
                     initValue: initValue,
                     rules: [
                       {
-                        required: param.validate.required,
+                        required: required,
                         min: 0,
                         message: 'Please enter a valid memory request number',
                       },
@@ -646,7 +648,7 @@ class UISchema extends Component<Props, State> {
                     initValue: initValue,
                     rules: [
                       {
-                        required: param.validate.required,
+                        required: required,
                         min: 0,
                         message: 'Please enter a valid disk size',
                       },
@@ -666,7 +668,7 @@ class UISchema extends Component<Props, State> {
                   }
                   title={label}
                   closed={true}
-                  required={param.validate && param.validate.required}
+                  required={required}
                   field={this.form}
                   jsonKey={param.jsonKey || ''}
                   propertyValue={this.props.value}
@@ -758,10 +760,29 @@ class UISchema extends Component<Props, State> {
                     initValue: initValue,
                     rules: [
                       {
-                        required: param.validate.required,
+                        required: required,
                         message: 'Please enter a valid kubernetes resource yaml code',
                       },
                     ],
+                  })}
+                />
+              </Form.Item>
+            );
+          case 'PolicySelect':
+            return (
+              <Form.Item
+                labelAlign={inline ? 'inset' : 'left'}
+                required={required}
+                label={label}
+                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
+                disabled={disableEdit}
+                key={param.jsonKey}
+              >
+                <PolicySelect
+                  disabled={disableEdit}
+                  {...init(param.jsonKey, {
+                    initValue: initValue,
+                    rules: convertRule(param.validate),
                   })}
                 />
               </Form.Item>

@@ -99,6 +99,7 @@ class AppDialog extends React.Component<Props, State> {
         this.loadEnvs();
       });
     }
+    this.onDetailComponentDefinition('webservice');
   }
 
   onClose = () => {
@@ -223,7 +224,7 @@ class AppDialog extends React.Component<Props, State> {
   changeStatus = (value: string) => {
     const values: { componentType: string; envBindings: string[]; project: string } =
       this.field.getValues();
-    const { componentType, envBindings } = values;
+    const { envBindings } = values;
     if (value === 'isCreateComponent') {
       this.field.validateCallback(
         ['name', 'alias', 'description', 'project', 'componentType', 'envBindings'],
@@ -249,14 +250,9 @@ class AppDialog extends React.Component<Props, State> {
               payload: values.project,
             });
           }
-          this.setState(
-            {
-              dialogStats: value,
-            },
-            () => {
-              this.onDetailComponentDefinition(componentType);
-            },
-          );
+          this.setState({
+            dialogStats: value,
+          });
         },
       );
     } else if (value === 'isBasic') {
@@ -333,6 +329,17 @@ class AppDialog extends React.Component<Props, State> {
     this.field.setValues({ envBindings });
   };
 
+  removeProperties = () => {
+    this.field.remove('properties');
+    this.setState({ definitionDetail: undefined });
+  };
+
+  handleChange = (value: string) => {
+    this.removeProperties();
+    this.field.setValues({ componentType: value });
+    this.onDetailComponentDefinition(value);
+  };
+
   render() {
     const init = this.field.init;
     const FormItem = Form.Item;
@@ -403,6 +410,7 @@ class AppDialog extends React.Component<Props, State> {
                         ],
                       })}
                       dataSource={this.transComponentDefinitions()}
+                      onChange={this.handleChange}
                     />
                   </FormItem>
                 </Col>
@@ -444,7 +452,11 @@ class AppDialog extends React.Component<Props, State> {
               </Row>
             </If>
 
-            <If condition={dialogStats === 'isCreateComponent'}>
+            <If
+              condition={
+                dialogStats === 'isCreateComponent' && definitionDetail && definitionDetail.uiSchema
+              }
+            >
               <FormItem required={true}>
                 <UISchema
                   {...init(`properties`, {

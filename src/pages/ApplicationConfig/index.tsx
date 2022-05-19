@@ -557,6 +557,7 @@ class ApplicationConfig extends Component<Props, State> {
             appName={appName}
             componentType={(mainComponent && mainComponent.type) || ''}
             workflows={workflows}
+            components={components || []}
             onClose={this.onTriggerClose}
             onOK={(res: Trigger) => {
               this.onTriggerOk(res);
@@ -577,6 +578,7 @@ class ApplicationConfig extends Component<Props, State> {
             project={applicationDetail?.project?.name || ''}
             appName={appName}
             componentName={componentName}
+            components={components || []}
             isEditComponent={isEditComponent}
             temporaryTraitList={temporaryTraitList}
             componentDefinitions={componentDefinitions}

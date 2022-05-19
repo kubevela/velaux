@@ -6,7 +6,6 @@ export interface ApplicationDetail extends ApplicationBase {
     componentNum: number;
   };
   envBindings: string[];
-  applicationType: 'cloud' | 'common';
   policies: string[];
 }
 
@@ -59,7 +58,7 @@ export interface UIParam {
   additional?: boolean;
   additionalParameter?: UIParam;
   subParameters?: UIParam[];
-  validate: UIParamValidate;
+  validate?: UIParamValidate;
 }
 
 export interface ParamCondition {
@@ -212,6 +211,13 @@ export interface ApplicationComponentBase {
   input?: InputItem[];
   output?: OutputItem[];
   traits?: Trait[];
+  workloadType?: {
+    definition?: {
+      apiVersion: string;
+      kind: string;
+    };
+    type: string;
+  };
 }
 
 export interface InputItem {
@@ -307,6 +313,7 @@ export interface Trigger {
   token: string;
   createTime?: string;
   updateTime?: string;
+  componentName?: string;
 }
 
 export interface WorkflowStep {
@@ -323,6 +330,7 @@ export interface ApplicationComponentConfig {
   componentType?: string;
   properties: any;
   traits?: Trait[];
+  dependsOn?: string[];
 }
 
 export interface DefinitionBase {
@@ -373,4 +381,14 @@ export interface ApplicationQuery {
 export interface ComponentDefinitionsBase {
   name: string;
   workloadType?: string;
+}
+
+export interface PolicyBase {
+  createTime: string;
+  creator: string;
+  description: string;
+  name: string;
+  properties: {};
+  type: string;
+  updateTime: string;
 }

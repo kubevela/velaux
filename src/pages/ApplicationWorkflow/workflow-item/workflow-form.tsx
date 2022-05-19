@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'dva';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import _ from 'lodash';
 import type { DiagramMakerNode } from 'diagram-maker';
@@ -23,11 +24,11 @@ type Props = {
   createOrUpdateNode: (data: any) => void;
   data?: DiagramMakerNode<WorkFlowNodeType>;
   workFlowDefinitions: [];
-  appName?: string;
+  appName: string;
   componentName?: string;
   closeDrawer: () => void;
   checkStepName: (name: string) => boolean;
-  dispatch?: ({}) => {};
+  dispatch: ({}) => {};
   t: (key: string) => {};
 };
 
@@ -36,6 +37,7 @@ type State = {
   definitionLoading: boolean;
 };
 
+@connect()
 class WorkflowForm extends Component<Props, State> {
   field: Field;
   uiSchemaRef: React.RefObject<UISchema>;
@@ -64,6 +66,10 @@ class WorkflowForm extends Component<Props, State> {
       }
       this.field.setValues({ properties: properties });
       this.onDetailsComponeDefinition((consumerData && consumerData.type) || '');
+      this.props.dispatch({
+        type: 'uischema/setAppName',
+        payload: this.props.appName,
+      });
     }
   };
 
@@ -108,8 +114,14 @@ class WorkflowForm extends Component<Props, State> {
   };
 
   handleChang = (value: string) => {
-    this.onDetailsComponeDefinition(value);
+    this.removeProperties();
     this.field.setValues({ type: value });
+    this.onDetailsComponeDefinition(value);
+  };
+
+  removeProperties = () => {
+    this.field.remove('properties');
+    this.setState({ definitionDetail: undefined });
   };
 
   render() {

@@ -28,6 +28,7 @@ type WorkFlowItemProps = {
   edit?: boolean;
   data: EdgesAndNodes;
   workFlowDefinitions: [];
+  appName: string;
 };
 
 type State = {
@@ -408,7 +409,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
 
   render() {
     const { visible, currentSelectedNodeData } = this.state;
-    const { workFlowDefinitions } = this.props;
+    const { workFlowDefinitions, appName } = this.props;
 
     return (
       <div>
@@ -433,6 +434,8 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
             }}
             workFlowDefinitions={workFlowDefinitions}
             closeDrawer={this.closeDrawer}
+            appName={appName}
+            dispatch={this.diagramMaker.store.dispatch}
           />
         </If>
       </div>

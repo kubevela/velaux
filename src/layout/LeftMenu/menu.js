@@ -8,6 +8,7 @@ import {
   isProjectPath,
   isRolesPath,
   isIntegrationPath,
+  isDefinitionsPath,
 } from '../../utils/common';
 export function getLeftSlider(pathname) {
   const isApplication = isApplicationPath(pathname);
@@ -19,6 +20,7 @@ export function getLeftSlider(pathname) {
   const isProject = isProjectPath(pathname);
   const isRole = isRolesPath(pathname);
   const isIntegration = isIntegrationPath(pathname);
+  const isDefinitions = isDefinitionsPath(pathname);
   return [
     {
       navName: 'Continuous Delivery',
@@ -67,6 +69,13 @@ export function getLeftSlider(pathname) {
           iconType: 'database-set',
           navName: 'Addons',
           permission: { resource: 'addon:*', action: 'list' },
+        },
+        {
+          className: isDefinitions,
+          link: '/definitions',
+          iconType: 'database-set',
+          navName: 'Definitions',
+          permission: { resource: 'definition:*', action: 'update' },
         },
       ],
     },

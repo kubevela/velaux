@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Table, Button, Message, Dialog } from '@b-design/ui';
+import { Table, Button, Message, Dialog, Card } from '@b-design/ui';
 import {
   listApplicationPods,
   listCloudResources,
@@ -109,12 +109,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           if (re) {
             const status: ApplicationStatus = re.status;
             if (status && status.appliedResources) {
-              const services = status.appliedResources.filter(
-                (resource) => resource.kind == 'Service',
-              );
-              if (services) {
-                this.loadApplicationEndpoints();
-              }
+              this.loadApplicationEndpoints();
             }
           }
         },
@@ -220,51 +215,44 @@ class ApplicationInstanceList extends React.Component<Props, State> {
 
   loadAppInstances = async () => {
     this.setState({ podList: [] });
-    const { applicationDetail, envbinding, applicationStatus } = this.props;
+    const { applicationDetail, envbinding, components } = this.props;
     const {
       params: { appName, envName },
     } = this.props.match;
+    const cloudComponents = components?.filter(
+      (c) => c.workloadType?.type == 'configurations.terraform.core.oam.dev',
+    );
+    const showCloudInstance = cloudComponents?.length && cloudComponents?.length > 0;
     const { target, componentName } = this.state;
     const envs = envbinding.filter((item) => item.name == envName);
-    if (
-      applicationDetail &&
-      applicationDetail.name &&
-      envs.length > 0 &&
-      applicationStatus &&
-      applicationStatus.services?.length
-    ) {
-      if (applicationDetail.applicationType == 'common') {
-        const param = {
-          appName: envs[0].appDeployName || appName,
-          appNs: envs[0].appDeployNamespace,
-          componentName: componentName,
-          cluster: '',
-          clusterNs: '',
-        };
-        if (target) {
-          param.cluster = target.cluster?.clusterName || '';
-          param.clusterNs = target.cluster?.namespace || '';
-        }
-        this.setState({ loading: true });
-        listApplicationPods(param)
-          .then((re) => {
-            if (re && re.podList) {
-              re.podList.map((item: any) => {
-                item.primaryKey = item.metadata.name;
-              });
-              this.setState({ podList: re.podList });
-            } else {
-              this.setState({ podList: [] });
-            }
-          })
-          .finally(() => {
-            this.setState({ loading: false });
-          });
-      } else if (applicationDetail?.applicationType == 'cloud') {
-        const param = {
-          appName: envs[0].appDeployName || appName,
-          appNs: envs[0].appDeployNamespace,
-        };
+    if (applicationDetail && applicationDetail.name && envs.length > 0) {
+      const param = {
+        appName: envs[0].appDeployName || appName,
+        appNs: envs[0].appDeployNamespace,
+        componentName: componentName,
+        cluster: '',
+        clusterNs: '',
+      };
+      if (target) {
+        param.cluster = target.cluster?.clusterName || '';
+        param.clusterNs = target.cluster?.namespace || '';
+      }
+      this.setState({ loading: true });
+      listApplicationPods(param)
+        .then((re) => {
+          if (re && re.podList) {
+            re.podList.map((item: any) => {
+              item.primaryKey = item.metadata.name;
+            });
+            this.setState({ podList: re.podList });
+          } else {
+            this.setState({ podList: [] });
+          }
+        })
+        .finally(() => {
+          this.setState({ loading: false });
+        });
+      if (showCloudInstance) {
         this.setState({ loading: true });
         listCloudResources(param)
           .then((cloudResources: any) => {
@@ -515,6 +503,14 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const {
       params: { envName, appName },
     } = this.props.match;
+
+    const cloudComponents = components?.filter(
+      (c) => c.workloadType?.type == 'configurations.terraform.core.oam.dev',
+    );
+    const showCloudInstance = cloudComponents?.length && cloudComponents?.length > 0;
+
+    const onlyShowCloudInstance =
+      showCloudInstance && cloudComponents?.length == components?.length;
     return (
       <div>
         <Header
@@ -539,8 +535,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           dispatch={this.props.dispatch}
         />
         <If condition={applicationStatus}>
-          <If condition={applicationDetail?.applicationType == 'common'}>
+          <If condition={!onlyShowCloudInstance}>
             <Table
+              style={{ marginBottom: '32px' }}
               locale={locale().Table}
               className="podlist-table-wraper"
               size="medium"
@@ -557,60 +554,62 @@ class ApplicationInstanceList extends React.Component<Props, State> {
               {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
             </Table>
           </If>
-          <If condition={applicationDetail?.applicationType == 'cloud'}>
-            <Table
-              size="medium"
-              locale={locale().Table}
-              className="customTable"
-              dataSource={cloudInstance}
-              primaryKey={'instanceName'}
-              loading={loading}
-            >
-              <Column
-                align="left"
-                title={<Translation>Name</Translation>}
-                dataIndex="instanceName"
-                cell={(value: string, index: number, record: CloudInstance) => {
-                  if (record.url) {
-                    return (
-                      <a target="_blank" href={record.url}>
-                        {value}
-                      </a>
-                    );
-                  }
-                  return value;
-                }}
-              />
-              <Column align="left" title={<Translation>Status</Translation>} dataIndex="status" />
-              <Column
-                align="left"
-                title={<Translation>Resource Type</Translation>}
-                dataIndex="type"
-              />
-              <Column
-                align="left"
-                title={<Translation>Create Time</Translation>}
-                dataIndex="createTime"
-                cell={(v: string) => {
-                  return <span>{momentDate(v)}</span>;
-                }}
-              />
-              <Column align="left" title={<Translation>Region</Translation>} dataIndex="region" />
-              <Column
-                align="left"
-                title={<Translation>Actions</Translation>}
-                dataIndex="url"
-                cell={(value: string, index: number, record: CloudInstance) => {
-                  if (record.instanceName) {
-                    return (
-                      <a target="_blank" href={value}>
-                        <Translation>Console</Translation>
-                      </a>
-                    );
-                  }
-                }}
-              />
-            </Table>
+          <If condition={showCloudInstance}>
+            <Card title={i18n.t('Instances of the cloud service')}>
+              <Table
+                size="medium"
+                locale={locale().Table}
+                className="customTable"
+                dataSource={cloudInstance}
+                primaryKey={'instanceName'}
+                loading={loading}
+              >
+                <Column
+                  align="left"
+                  title={<Translation>Name</Translation>}
+                  dataIndex="instanceName"
+                  cell={(value: string, index: number, record: CloudInstance) => {
+                    if (record.url) {
+                      return (
+                        <a target="_blank" href={record.url}>
+                          {value}
+                        </a>
+                      );
+                    }
+                    return value;
+                  }}
+                />
+                <Column align="left" title={<Translation>Status</Translation>} dataIndex="status" />
+                <Column
+                  align="left"
+                  title={<Translation>Resource Type</Translation>}
+                  dataIndex="type"
+                />
+                <Column
+                  align="left"
+                  title={<Translation>Create Time</Translation>}
+                  dataIndex="createTime"
+                  cell={(v: string) => {
+                    return <span>{momentDate(v)}</span>;
+                  }}
+                />
+                <Column align="left" title={<Translation>Region</Translation>} dataIndex="region" />
+                <Column
+                  align="left"
+                  title={<Translation>Actions</Translation>}
+                  dataIndex="url"
+                  cell={(value: string, index: number, record: CloudInstance) => {
+                    if (record.instanceName) {
+                      return (
+                        <a target="_blank" href={value}>
+                          <Translation>Console</Translation>
+                        </a>
+                      );
+                    }
+                  }}
+                />
+              </Table>
+            </Card>
           </If>
         </If>
         <If condition={!applicationStatus}>

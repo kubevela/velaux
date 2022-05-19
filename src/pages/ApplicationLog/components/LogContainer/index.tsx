@@ -119,6 +119,8 @@ class ContainerLog extends Component<Props, State> {
         .finally(() => {
           this.setState({ loading: false });
         });
+    } else {
+      this.setState({ loading: false });
     }
   };
 

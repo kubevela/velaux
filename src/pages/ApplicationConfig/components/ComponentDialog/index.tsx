@@ -13,6 +13,7 @@ import type {
   Trait,
   ApplicationComponent,
   ApplicationComponentConfig,
+  ApplicationComponentBase,
 } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -37,6 +38,7 @@ type Props = {
   isEditComponent: boolean;
   temporaryTraitList: Trait[];
   componentDefinitions: [];
+  components: ApplicationComponentBase[];
   onAddTrait: () => void;
   changeTraitStats: (is: boolean, params: any) => void;
   onDeleteTrait: (type: string, callback: () => void) => void;
@@ -73,13 +75,15 @@ class ComponentDialog extends React.Component<Props, State> {
     if (isEditComponent) {
       this.onGetEditComponentInfo(() => {
         if (this.state.editComponent) {
-          const { name, alias, type, description, properties } = this.state.editComponent;
+          const { name, alias, type, description, properties, dependsOn } =
+            this.state.editComponent;
           this.field.setValues({
             name,
             alias,
             componentType: type,
             description,
             properties,
+            dependsOn,
           });
           if (type) {
             this.onDetailsComponentDefinition(type);
@@ -130,7 +134,14 @@ class ComponentDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', temporaryTraitList = [] } = this.props;
-      const { name, alias = '', description = '', componentType = '', properties } = values;
+      const {
+        name,
+        alias = '',
+        description = '',
+        componentType = '',
+        properties,
+        dependsOn = [],
+      } = values;
       const params: ApplicationComponentConfig = {
         name,
         alias,
@@ -148,13 +159,13 @@ class ComponentDialog extends React.Component<Props, State> {
       params.name = `${appName}-${name}`;
       params.componentType = componentType;
       params.traits = traitLists;
+      params.dependsOn = dependsOn;
       this.setState({ isCreateComponentLoading: true });
       createApplicationComponent(params, { appName }).then((res) => {
         if (res) {
           Message.success({
             duration: 4000,
-            title: i18n.t('Success'),
-            content: i18n.t('Create component success.'),
+            content: i18n.t('Component created successfully'),
           });
           this.props.onComponentOK();
         }
@@ -181,10 +192,10 @@ class ComponentDialog extends React.Component<Props, State> {
     const { isCreateComponentLoading } = this.state;
     return (
       <div>
-        <Button type="secondary" onClick={onComponentClose} className="margin-right-10">
-          {i18n.t('Cancel')}
-        </Button>
         <If condition={!isEditComponent}>
+          <Button type="secondary" onClick={onComponentClose} className="margin-right-10">
+            {i18n.t('Cancel')}
+          </Button>
           <Button type="primary" onClick={this.onSubmitCreate} loading={isCreateComponentLoading}>
             {i18n.t('Create')}
           </Button>
@@ -261,6 +272,22 @@ class ComponentDialog extends React.Component<Props, State> {
     });
   };
 
+  removeProperties = () => {
+    this.field.remove('properties');
+    this.setState({ definitionDetail: undefined });
+  };
+
+  getDependsOptions = () => {
+    const { components } = this.props;
+    const componentOptions = components?.map((component) => {
+      return {
+        label: component.alias ? `${component.alias}(${component.name})` : component.name,
+        value: component.name,
+      };
+    });
+    return componentOptions || [];
+  };
+
   render() {
     const init = this.field.init;
     const FormItem = Form.Item;
@@ -270,6 +297,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
+
     return (
       <DrawerWithFooter
         title={this.showComponentTitle()}
@@ -355,7 +383,7 @@ class ComponentDialog extends React.Component<Props, State> {
               </Col>
             </Row>
             <Row>
-              <Col span={24}>
+              <Col span={12} style={{ paddingRight: '8px' }}>
                 <FormItem
                   label={
                     <Translation className="font-size-14 font-weight-bold color333">
@@ -388,10 +416,34 @@ class ComponentDialog extends React.Component<Props, State> {
                     })}
                     dataSource={transComponentDefinitions(componentDefinitions)}
                     onChange={(item: string) => {
-                      this.onDetailsComponentDefinition(item, () => {
-                        this.field.setValue('componentType', item);
-                      });
+                      this.removeProperties();
+                      this.field.setValue('componentType', item);
+                      this.onDetailsComponentDefinition(item);
                     }}
+                  />
+                </FormItem>
+              </Col>
+
+              <Col span={12} style={{ paddingRight: '8px' }}>
+                <FormItem
+                  label={
+                    <Translation className="font-size-14 font-weight-bold color333">
+                      Depends On
+                    </Translation>
+                  }
+                >
+                  <Select
+                    {...init(`dependsOn`, {
+                      rules: [
+                        {
+                          required: false,
+                          message: i18n.t('Please select'),
+                        },
+                      ],
+                    })}
+                    locale={locale().Select}
+                    mode="multiple"
+                    dataSource={this.getDependsOptions()}
                   />
                 </FormItem>
               </Col>
