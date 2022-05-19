@@ -289,8 +289,9 @@ class ComponentDialog extends React.Component<Props, State> {
     const { components, componentName } = this.props;
     const filterComponents = (components || []).filter((component) => {
       if (
-        component.name === componentName ||
-        (component.dependsOn || []).includes(componentName || '')
+        componentName &&
+        (component.name === componentName ||
+          (component.dependsOn && component.dependsOn.includes(componentName)))
       ) {
         return false;
       } else {
