@@ -163,15 +163,16 @@ class TriggerDialog extends React.Component<Props, State> {
     }
   }
 
-  changePayloadType = (value: string) => {
-    const { components = [] } = this.props;
-    const componentName = components[0]?.name || '';
-    this.field.setValue('payloadType', value);
-    if (value && value !== 'custom') {
-      this.field.setValue('componentName', componentName);
-    } else {
-      this.field.remove('componentName');
-    }
+  changeComponentName = (value: string) => {
+    this.field.setValue('componentName', value);
+    let componentType = '';
+    const { components } = this.props;
+    components.map((c) => {
+      if (c.name == value) {
+        componentType = c.componentType;
+      }
+    });
+    this.onDetailComponentDefinition(componentType);
   };
 
   render() {
@@ -303,7 +304,6 @@ class TriggerDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
-                    onChange={this.changePayloadType}
                   />
                 </FormItem>
               </If>
@@ -330,23 +330,23 @@ class TriggerDialog extends React.Component<Props, State> {
             </Col>
 
             <Col span={12} style={{ padding: '0 8px' }}>
-              <If condition={this.field.getValue('payloadType') !== 'custom'}>
-                <FormItem label={<Translation>Component</Translation>} required>
-                  <Select
-                    name="componentName"
-                    locale={locale().Select}
-                    dataSource={componentsOption}
-                    {...init('componentName', {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Please select a component',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </If>
+              <FormItem label={<Translation>Component</Translation>} required>
+                <Select
+                  name="componentName"
+                  locale={locale().Select}
+                  dataSource={componentsOption}
+                  {...init('componentName', {
+                    initValue: components.length > 0 && components[0].name,
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please select a component',
+                      },
+                    ],
+                  })}
+                  onChange={this.changeComponentName}
+                />
+              </FormItem>
             </Col>
           </Row>
           <Message type="warning" animation={true} visible={this.isShowMessage()} title="Warning">

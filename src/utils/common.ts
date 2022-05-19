@@ -89,7 +89,7 @@ export function momentShortDate(time: undefined | string): string {
   return moment(time).format('YYYY/MM/DD');
 }
 
-export const checkName = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/;
+export const checkName = /^[a-z]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/;
 export const urlRegular =
   /(https|http|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g;
 export const checkImageName = /^[^\u4e00-\u9fa5 ]{0,512}$/;

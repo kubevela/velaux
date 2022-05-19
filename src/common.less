@@ -3,6 +3,7 @@
 @F9F8FF: #f9f8ff;
 
 @primarycolor: #1b58f4;
+@dangerColor: rgb(248, 81, 73);
 @colorRED: red;
 @colorGREEN: green;
 @colorBLUE: blue;
@@ -557,4 +558,12 @@ a {
     height: 16px !important;
     font-size: 16px !important;
   }
+}
+.next-btn.danger-btn {
+  color: @dangerColor !important;
+  border: @dangerColor 1px solid !important;
+}
+.danger-btn:hover {
+  background: @dangerColor !important;
+  color: #fff !important;
 }

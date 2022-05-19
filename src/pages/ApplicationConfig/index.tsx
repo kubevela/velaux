@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Button, Card, Message } from '@b-design/ui';
+import { Grid, Button, Card, Message, Dialog } from '@b-design/ui';
 import './index.less';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
@@ -9,9 +9,11 @@ import {
   deleteTriggers,
   deleteComponent,
   getComponentDefinitions,
+  deleteApplicationPlan,
 } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
+import { routerRedux } from 'dva/router';
 import Item from '../../components/Item';
 import TraitDialog from './components/TraitDialog';
 import type {
@@ -23,6 +25,7 @@ import type {
   Workflow,
   ApplicationBase,
   ApplicationComponentBase,
+  ApplicationPolicyBase,
 } from '../../interface/application';
 
 import { momentDate } from '../../utils/common';
@@ -35,6 +38,8 @@ import ComponentDialog from './components/ComponentDialog';
 import i18n from '../../i18n';
 import { Link } from 'dva/router';
 import Permission from '../../components/Permission';
+import PolicyList from './components/PolicyList';
+import PolicyDialog from './components/PolicyDialog';
 
 const { Row, Col } = Grid;
 
@@ -50,6 +55,7 @@ type Props = {
   dispatch: ({}) => {};
   applicationDetail?: ApplicationDetail;
   components?: ApplicationComponentBase[];
+  policies?: ApplicationPolicyBase[];
   componentsApp?: string;
   envbinding?: EnvBinding[];
   workflows?: Workflow[];
@@ -71,6 +77,8 @@ type State = {
   temporaryTraitList: Trait[];
   isEditComponent: boolean;
   componentDefinitions: [];
+  visiblePolicy: boolean;
+  showPolicyName?: string;
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -93,6 +101,7 @@ class ApplicationConfig extends Component<Props, State> {
       temporaryTraitList: [],
       isEditComponent: false,
       componentDefinitions: [],
+      visiblePolicy: false,
     };
   }
 
@@ -157,11 +166,13 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
-  onAddTrait = () => {
+  onAddTrait = (componentName?: string, isEditComponent?: boolean) => {
     this.setState({
       visibleTrait: true,
       traitItem: { type: '' },
       isEditTrait: false,
+      componentName: componentName || '',
+      isEditComponent: isEditComponent || false,
     });
   };
 
@@ -311,10 +322,9 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   onComponentOK = () => {
-    const { isEditComponent } = this.state;
     this.setState(
       {
-        visibleComponent: isEditComponent ? true : false,
+        visibleComponent: false,
         temporaryTraitList: [],
       },
       () => {
@@ -349,8 +359,25 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
+  onDeleteApplication = () => {
+    const { appName } = this.state;
+    Dialog.confirm({
+      type: 'confirm',
+      content: <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>,
+      onOk: () => {
+        deleteApplicationPlan({ name: appName }).then((re) => {
+          if (re) {
+            Message.success('Application deleted successfully');
+            this.props.dispatch(routerRedux.push('/applications'));
+          }
+        });
+      },
+      locale: locale().Dialog,
+    });
+  };
+
   render() {
-    const { applicationDetail, workflows, components } = this.props;
+    const { applicationDetail, workflows, components, policies, envbinding } = this.props;
     const {
       visibleTrait,
       isEditTrait,
@@ -367,12 +394,14 @@ class ApplicationConfig extends Component<Props, State> {
       temporaryTraitList,
       isEditComponent,
       componentDefinitions,
+      visiblePolicy,
+      showPolicyName,
     } = this.state;
 
     return (
       <div>
-        <Row>
-          <Col span={12} className="padding16">
+        <Row wrap={true}>
+          <Col xl={12} xs={24} style={{ padding: '0 16px' }}>
             <Message
               type="notice"
               title={i18n.t(
@@ -380,7 +409,20 @@ class ApplicationConfig extends Component<Props, State> {
               )}
             />
           </Col>
-          <Col span={12} className="padding16 flexright">
+          <Col xl={12} xs={24} style={{ padding: '0 16px' }} className="flexright">
+            <Permission
+              request={{ resource: `project/application/:${appName}`, action: 'delete' }}
+              project={`${applicationDetail && applicationDetail.project?.name}`}
+            >
+              <Button
+                className="danger-btn"
+                style={{ marginRight: '16px' }}
+                onClick={this.onDeleteApplication}
+                type="secondary"
+              >
+                <Translation>Remove</Translation>
+              </Button>
+            </Permission>
             <Permission
               request={{ resource: `project/application/:${appName}`, action: 'update' }}
               project={`${applicationDetail && applicationDetail.project?.name}`}
@@ -447,88 +489,140 @@ class ApplicationConfig extends Component<Props, State> {
           </Col>
         </Row>
 
-        <Row>
-          <Col span={24} className="padding16">
-            <Title
-              title={
-                <span className="font-size-16 font-weight-bold">
-                  <Translation>Components</Translation>
-                </span>
-              }
-              actions={
-                !applicationDetail?.readOnly
-                  ? [
-                      <Permission
-                        request={{
-                          resource: `project/application/component:*`,
-                          action: 'create',
-                        }}
-                        project={`${applicationDetail && applicationDetail.project?.name}`}
+        <Row wrap={true}>
+          <Col xl={8} xs={24}>
+            <Row>
+              <Col span={24} className="padding16">
+                <Title
+                  title={
+                    <span className="font-size-16 font-weight-bold">
+                      <Translation>Components</Translation>
+                    </span>
+                  }
+                  actions={
+                    !applicationDetail?.readOnly
+                      ? [
+                          <Permission
+                            request={{
+                              resource: `project/application/component:*`,
+                              action: 'create',
+                            }}
+                            project={`${applicationDetail && applicationDetail.project?.name}`}
+                          >
+                            <a
+                              key={'add'}
+                              onClick={this.onAddComponent}
+                              className="font-size-14 font-weight-400"
+                            >
+                              <Translation>New Component</Translation>
+                            </a>
+                          </Permission>,
+                        ]
+                      : []
+                  }
+                />
+              </Col>
+            </Row>
+
+            <Components
+              application={applicationDetail}
+              components={components || []}
+              editComponent={(component: ApplicationComponentBase) => {
+                this.editComponent(component);
+              }}
+              onDeleteComponent={(component: string) => {
+                this.onDeleteComponent(component);
+              }}
+              onAddTrait={(name: string) => {
+                this.onAddTrait(name, true);
+              }}
+              onAddComponent={this.onAddComponent}
+              changeTraitStats={this.changeTraitStats}
+            />
+          </Col>
+          <Col xl={8} xs={24}>
+            <Row>
+              <Col span={24} className="padding16">
+                <Title
+                  title={
+                    <span className="font-size-16 font-weight-bold">
+                      <Translation>Policies</Translation>
+                    </span>
+                  }
+                  actions={[]}
+                  // actions={
+                  //   !applicationDetail?.readOnly
+                  //     ? [
+                  //         <Permission
+                  //           request={{
+                  //             resource: `project/application/policy:*`,
+                  //             action: 'create',
+                  //           }}
+                  //           project={`${applicationDetail && applicationDetail.project?.name}`}
+                  //         >
+                  //           <a
+                  //             key={'add'}
+                  //             onClick={this.onAddComponent}
+                  //             className="font-size-14 font-weight-400"
+                  //           >
+                  //             <Translation>New Policy</Translation>
+                  //           </a>
+                  //         </Permission>,
+                  //       ]
+                  //     : []
+                  // }
+                />
+              </Col>
+            </Row>
+            <PolicyList
+              policies={policies}
+              envbinding={envbinding}
+              onDeletePolicy={(name: string) => {
+                console.log(name);
+              }}
+              onShowPolicy={(name: string) => {
+                console.log(name);
+              }}
+            />
+          </Col>
+          <Col xl={8} xs={24}>
+            <Row>
+              <Col span={24} className="padding16">
+                <Title
+                  actions={[
+                    <Permission
+                      request={{ resource: `project/application/trigger:*`, action: 'create' }}
+                      project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                    >
+                      <a
+                        key={'add'}
+                        className="font-size-14 font-weight-400"
+                        onClick={this.onAddTrigger}
                       >
-                        <a
-                          key={'add'}
-                          onClick={this.onAddComponent}
-                          className="font-size-14 font-weight-400"
-                        >
-                          <Translation>New Component</Translation>
-                        </a>
-                      </Permission>,
-                    ]
-                  : []
-              }
+                        <Translation>New Trigger</Translation>
+                      </a>
+                    </Permission>,
+                  ]}
+                  title={
+                    <span className="font-size-16 font-weight-bold">
+                      <Translation>Triggers</Translation>
+                    </span>
+                  }
+                />
+              </Col>
+            </Row>
+            <TriggerList
+              appName={appName}
+              triggers={triggers}
+              components={components || []}
+              onDeleteTrigger={(token: string) => {
+                this.onDeleteTrigger(token);
+              }}
+              createTriggerInfo={createTriggerInfo}
+              applicationDetail={applicationDetail}
             />
           </Col>
         </Row>
-
-        <Components
-          application={applicationDetail}
-          components={components || []}
-          editComponent={(component: ApplicationComponentBase) => {
-            this.editComponent(component);
-          }}
-          onDeleteComponent={(component: string) => {
-            this.onDeleteComponent(component);
-          }}
-          onAddComponent={this.onAddComponent}
-          changeTraitStats={this.changeTraitStats}
-        />
-
-        <If condition={triggers.length > 0}>
-          <Row>
-            <Col span={24} className="padding16">
-              <Title
-                actions={[
-                  <Permission
-                    request={{ resource: `project/application/trigger:*`, action: 'create' }}
-                    project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
-                  >
-                    <a
-                      key={'add'}
-                      className="font-size-14 font-weight-400"
-                      onClick={this.onAddTrigger}
-                    >
-                      <Translation>New Trigger</Translation>
-                    </a>
-                  </Permission>,
-                ]}
-                title={
-                  <span className="font-size-16 font-weight-bold">
-                    <Translation>Triggers</Translation>
-                  </span>
-                }
-              />
-            </Col>
-          </Row>
-          <TriggerList
-            triggers={triggers}
-            component={mainComponent}
-            onDeleteTrigger={(token: string) => {
-              this.onDeleteTrigger(token);
-            }}
-            createTriggerInfo={createTriggerInfo}
-            applicationDetail={applicationDetail}
-          />
-        </If>
 
         <If condition={visibleTrait}>
           <TraitDialog
@@ -584,12 +678,15 @@ class ApplicationConfig extends Component<Props, State> {
             componentDefinitions={componentDefinitions}
             onComponentClose={this.onComponentClose}
             onComponentOK={this.onComponentOK}
-            onAddTrait={this.onAddTrait}
-            changeTraitStats={(is: boolean, trait: Trait) => {
-              this.changeTraitStats(is, trait, componentName);
-            }}
-            onDeleteTrait={(traitType: string, callback: () => void) => {
-              this.onDeleteTrait(traitType, callback);
+          />
+        </If>
+        <If condition={visiblePolicy}>
+          <PolicyDialog
+            project={applicationDetail?.project?.name || ''}
+            appName={appName}
+            policyName={showPolicyName}
+            onClose={() => {
+              this.setState({ visiblePolicy: false });
             }}
           />
         </If>

@@ -73,7 +73,7 @@ class Application extends Component<Props, State> {
   onDeleteAppPlan = (name: string) => {
     deleteApplicationPlan({ name: name }).then((re) => {
       if (re) {
-        Message.success('application delete success');
+        Message.success('Application deleted successfully');
         this.getApplications({});
       }
     });

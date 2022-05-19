@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Card, Dialog, Grid, Message, Icon } from '@b-design/ui';
+import type { ApplicationComponentBase } from '../../../../interface/application';
 import type {
   ApplicationComponent,
   Trigger,
@@ -14,17 +15,20 @@ import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import Item from '../../../../components/Item';
 import Permission from '../../../../components/Permission';
+import { getApplicationComponent } from '../../../../api/application';
 
 type Props = {
+  appName: string;
   triggers: Trigger[];
   createTriggerInfo?: Trigger;
-  component?: ApplicationComponent;
+  components: ApplicationComponentBase[];
   applicationDetail?: ApplicationDetail;
   onDeleteTrigger: (token: string) => void;
 };
 
 type State = {
   showTrigger?: Trigger;
+  component?: ApplicationComponent;
 };
 class TriggerList extends Component<Props, State> {
   constructor(props: Props) {
@@ -35,11 +39,33 @@ class TriggerList extends Component<Props, State> {
   componentWillReceiveProps(nextProps: Props) {
     const { createTriggerInfo } = nextProps;
     if (createTriggerInfo && createTriggerInfo !== this.props.createTriggerInfo) {
-      this.setState({ showTrigger: createTriggerInfo });
+      this.showWebhook(createTriggerInfo);
     }
   }
   showWebhook = (trigger: Trigger) => {
+    const { components } = this.props;
+    this.loadComponentDetail(
+      trigger.componentName || (components.length > 0 ? components[0].name : ''),
+    );
     this.setState({ showTrigger: trigger });
+  };
+
+  loadComponentDetail = (componentName: string) => {
+    if (!componentName) {
+      return;
+    }
+    const { appName } = this.props;
+    const params = {
+      appName,
+      componentName,
+    };
+    getApplicationComponent(params).then((res: ApplicationComponent) => {
+      if (res) {
+        this.setState({
+          component: res,
+        });
+      }
+    });
   };
   closeWebhook = () => {
     this.setState({ showTrigger: undefined });
@@ -58,15 +84,20 @@ class TriggerList extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { triggers, component, applicationDetail } = this.props;
-    const { showTrigger } = this.state;
+    const { triggers, applicationDetail } = this.props;
+
+    const { showTrigger, component } = this.state;
+
     const domain = `${window.location.protocol}//${window.location.host}`;
     const webHookURL = `${domain}/api/v1/webhook/${showTrigger?.token}`;
     let command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL}`;
+
     if (showTrigger?.payloadType == 'custom' && component) {
       const body = {
         upgrade: {
-          [component.name]: { image: component.properties && component.properties.image },
+          [component.name]: {
+            image: component.properties && component.properties.image,
+          },
         },
         codeInfo: {
           commit: '',
@@ -104,90 +135,93 @@ class TriggerList extends Component<Props, State> {
       </span>
     );
     return (
-      <div className="trigger-list-warper">
-        <Row wrap={true}>
+      <div className="list-warper">
+        <div className="box">
           {(triggers || []).map((item: Trigger) => (
-            <Col xl={8} m={12} s={24} key={item.type} className="padding16">
-              <Card free={true} style={{ padding: '16px' }} locale={locale().Card}>
-                <div className="trigger-list-nav">
-                  <div className="trigger-list-title">
-                    {item.alias ? `${item.alias}(${item.name})` : item.name}
-                  </div>
-                  <div className="trigger-list-operation">
-                    <Permission
-                      request={{
-                        resource: `project/application/trigger:${item.name}`,
-                        action: 'delete',
-                      }}
-                      project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
-                    >
-                      <Icon
-                        type="ashbin1"
-                        size={14}
-                        className="margin-right-0 cursor-pointer"
-                        onClick={() => {
-                          this.handleTriggerDelete(item.token || '');
+            <Row wrap={true} className="box-item">
+              <Col span={24} key={item.type}>
+                <Card free={true} style={{ padding: '16px' }} locale={locale().Card}>
+                  <div className="trigger-list-nav">
+                    <div className="trigger-list-title">
+                      {item.alias ? `${item.alias}(${item.name})` : item.name}
+                    </div>
+                    <div className="trigger-list-operation">
+                      <Permission
+                        request={{
+                          resource: `project/application/trigger:${item.name}`,
+                          action: 'delete',
                         }}
-                      />
-                    </Permission>
-                  </div>
-                </div>
-                <div className="trigger-list-content">
-                  <Row>
-                    <Col span={24}>
-                      <Item
-                        marginBottom="8px"
-                        labelSpan={12}
-                        label={<Translation>Type</Translation>}
-                        value={
-                          item.type == 'webhook' ? (
-                            <Translation>On Webhook Event</Translation>
-                          ) : (
-                            item.type
-                          )
-                        }
-                      />
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={24}>
-                      <Item
-                        marginBottom="8px"
-                        labelSpan={12}
-                        label={<Translation>Execute Workflow</Translation>}
-                        value={item.workflowName}
-                      />
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={24}>
-                      <Item
-                        marginBottom="8px"
-                        labelSpan={12}
-                        label={<Translation>Create Time</Translation>}
-                        value={momentDate(item.createTime)}
-                      />
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <div className="trigger-list-operation">
-                        <a
+                        project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                      >
+                        <Icon
+                          type="ashbin1"
+                          size={14}
+                          className="margin-right-0 cursor-pointer"
                           onClick={() => {
-                            this.showWebhook(item);
+                            this.handleTriggerDelete(item.token || '');
                           }}
-                        >
-                          <Translation>Manual Trigger</Translation>
-                        </a>
-                      </div>
-                    </Col>
-                  </Row>
-                </div>
-              </Card>
-            </Col>
+                        />
+                      </Permission>
+                    </div>
+                  </div>
+                  <div className="trigger-list-content">
+                    <Row>
+                      <Col span={24}>
+                        <Item
+                          marginBottom="8px"
+                          labelSpan={12}
+                          label={<Translation>Type</Translation>}
+                          value={
+                            item.type == 'webhook' ? (
+                              <Translation>On Webhook Event</Translation>
+                            ) : (
+                              item.type
+                            )
+                          }
+                        />
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col span={24}>
+                        <Item
+                          marginBottom="8px"
+                          labelSpan={12}
+                          label={<Translation>Execute Workflow</Translation>}
+                          value={item.workflowName}
+                        />
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col span={24}>
+                        <Item
+                          marginBottom="8px"
+                          labelSpan={12}
+                          label={<Translation>Create Time</Translation>}
+                          value={momentDate(item.createTime)}
+                        />
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col>
+                        <div className="trigger-list-operation">
+                          <a
+                            onClick={() => {
+                              this.showWebhook(item);
+                            }}
+                          >
+                            <Translation>Manual Trigger</Translation>
+                          </a>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </Card>
+              </Col>
+            </Row>
           ))}
           <If condition={!triggers || triggers.length == 0}>
             <Empty
+              style={{ minHeight: '400px' }}
               message={
                 <span>
                   <Translation>There is no triggers</Translation>
@@ -195,7 +229,7 @@ class TriggerList extends Component<Props, State> {
               }
             />
           </If>
-        </Row>
+        </div>
         <If condition={showTrigger}>
           <Dialog
             locale={locale().Dialog}

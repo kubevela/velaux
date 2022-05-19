@@ -3,10 +3,10 @@ import {
   workflows_mock,
   getWorkFlowsDetails_mock,
   getWorkFlowsRecord_mock,
-  listWorkFlowDefintion_mock,
-  listWorkFlowDetailsDefintion_mock,
+  listWorkflowDefinition_mock,
+  listWorkflowDetailsDefinition_mock,
 } from './devLink';
-import { workflows, componentDefinition } from './productionLink';
+import { workflows, definition } from './productionLink';
 import { getDomain } from '../utils/common';
 import type { WorkFlowData } from '../pages/ApplicationWorkflow/entity';
 
@@ -41,13 +41,11 @@ export function deleteWorkFlow(params: { appName: string; name: string }) {
 }
 
 export function getWorkFlowDefinitions() {
-  const url = isMock ? `${listWorkFlowDefintion_mock}` : `${componentDefinition}`;
+  const url = isMock ? `${listWorkflowDefinition_mock}` : `${definition}`;
   return get(url, { params: { type: 'workflowstep' } }).then((res) => res);
 }
 
 export function detailWorkFLowDefinition(params: { name: string }) {
-  const url = isMock
-    ? `${listWorkFlowDetailsDefintion_mock}`
-    : `${componentDefinition}/${params.name}`;
+  const url = isMock ? `${listWorkflowDetailsDefinition_mock}` : `${definition}/${params.name}`;
   return get(url, { params: { type: 'workflowstep' } }).then((res) => res);
 }

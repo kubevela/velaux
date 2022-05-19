@@ -1,15 +1,17 @@
-.components-list-warper {
+
   .cloud-component-show {
     border-top: #1b58f4 2px solid;
   }
   .components-list-nav {
     display: flex;
     justify-content: space-between;
+    padding: 4px 0;
     .components-list-title {
       height: 24px;
       color: #1b58f4;
       font-size: 16px;
       cursor: pointer;
+      display: flex;
     }
   }
   .components-list-operation {
@@ -34,7 +36,7 @@
     display: flex;
     align-items: center;
     justify-content: start;
-    margin: 4px;
+    margin: 4px 4px 0 0;
     padding: 8px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
@@ -46,4 +48,11 @@
       margin-right: 4px;
     }
   }
-}
+  .trait-icon:hover {
+    border: #1b58f4 solid 1px;
+  }
+  .component-icon {
+    width: 20px;
+    margin-right: 4px;
+  }
+
