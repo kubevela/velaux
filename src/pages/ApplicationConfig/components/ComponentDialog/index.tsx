@@ -250,13 +250,21 @@ class ComponentDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', componentName = '' } = this.props;
-      const { name, alias = '', description = '', componentType = '', properties } = values;
+      const {
+        name,
+        alias = '',
+        description = '',
+        componentType = '',
+        properties,
+        dependsOn = [],
+      } = values;
       const params: ApplicationComponentConfig = {
         name,
         alias,
         description,
         componentType,
         properties: JSON.stringify(properties),
+        dependsOn,
       };
       this.setState({ isUpdateComponentLoading: true });
       updateComponentProperties(params, { appName, componentName }).then((res) => {
@@ -278,8 +286,19 @@ class ComponentDialog extends React.Component<Props, State> {
   };
 
   getDependsOptions = () => {
-    const { components } = this.props;
-    const componentOptions = components?.map((component) => {
+    const { components, componentName } = this.props;
+    const filterComponents = (components || []).filter((component) => {
+      if (
+        componentName &&
+        (component.name === componentName ||
+          (component.dependsOn && component.dependsOn.includes(componentName)))
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+    const componentOptions = filterComponents?.map((component) => {
       return {
         label: component.alias ? `${component.alias}(${component.name})` : component.name,
         value: component.name,
