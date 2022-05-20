@@ -212,10 +212,14 @@ class Header extends Component<Props, State> {
             </If>
           </Col>
           <Col span="10" className="flexright" style={{ marginBottom: '16px' }}>
+            <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
+              <Icon type="refresh" />
+            </Button>
+
             <If condition={gatewayIPs && gatewayIPs.length > 0}>
               <Dropdown
                 trigger={
-                  <Button style={{ marginRight: '16px' }} type="secondary">
+                  <Button style={{ marginLeft: '16px' }} type="secondary">
                     <Translation>Service Endpoint</Translation>
                   </Button>
                 }
@@ -235,9 +239,6 @@ class Header extends Component<Props, State> {
                 </Menu>
               </Dropdown>
             </If>
-            <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
-              <Icon type="refresh" />
-            </Button>
 
             <If condition={!applicationStatus || !applicationStatus.status}>
               <Permission
@@ -251,6 +252,7 @@ class Header extends Component<Props, State> {
                   style={{ marginLeft: '16px' }}
                   loading={deleteLoading}
                   disabled={applicationDetail?.readOnly}
+                  className="danger-btn"
                   onClick={this.deleteEnv}
                 >
                   <Translation>Delete</Translation>
@@ -275,7 +277,7 @@ class Header extends Component<Props, State> {
                   loading={recycleLoading}
                   onClick={this.recycleEnv}
                   disabled={applicationDetail?.readOnly}
-                  type="primary"
+                  className="danger-btn"
                   style={{ marginLeft: '16px' }}
                 >
                   <Translation>Recycle</Translation>

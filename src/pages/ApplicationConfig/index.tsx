@@ -39,7 +39,6 @@ import i18n from '../../i18n';
 import { Link } from 'dva/router';
 import Permission from '../../components/Permission';
 import PolicyList from './components/PolicyList';
-import PolicyDialog from './components/PolicyDialog';
 
 const { Row, Col } = Grid;
 
@@ -124,34 +123,29 @@ class ApplicationConfig extends Component<Props, State> {
     });
   }
 
-  onDeleteTrait = async (traitType: string, callback: () => void) => {
-    const { appName, componentName, isEditComponent, temporaryTraitList } = this.state;
+  onDeleteTrait = async (componentName: string, traitType: string) => {
+    const { appName } = this.state;
     const params = {
       appName,
       componentName,
       traitType,
     };
-    if (isEditComponent) {
-      deleteTrait(params).then((res: any) => {
-        if (res) {
-          Message.success({
-            duration: 4000,
-            title: i18n.t('Success'),
-            content: i18n.t('Delete trait success.'),
-          });
-          this.onLoadApplicationComponents();
-          callback();
-        }
-      });
-    } else {
-      const filterTemporaryTraitList = temporaryTraitList.filter((item) => item.type != traitType);
-      this.setState(
-        {
-          temporaryTraitList: filterTemporaryTraitList,
-        },
-        callback,
-      );
-    }
+    Dialog.confirm({
+      type: 'confirm',
+      content: <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>,
+      onOk: () => {
+        deleteTrait(params).then((res: any) => {
+          if (res) {
+            Message.success({
+              duration: 4000,
+              content: i18n.t('Trait deleted successfully'),
+            });
+            this.onLoadApplicationComponents();
+          }
+        });
+      },
+      locale: locale().Dialog,
+    });
   };
 
   onClose = () => {
@@ -394,8 +388,6 @@ class ApplicationConfig extends Component<Props, State> {
       temporaryTraitList,
       isEditComponent,
       componentDefinitions,
-      visiblePolicy,
-      showPolicyName,
     } = this.state;
 
     return (
@@ -533,6 +525,7 @@ class ApplicationConfig extends Component<Props, State> {
               onDeleteComponent={(component: string) => {
                 this.onDeleteComponent(component);
               }}
+              onDeleteTrait={this.onDeleteTrait}
               onAddTrait={(name: string) => {
                 this.onAddTrait(name, true);
               }}
@@ -550,27 +543,6 @@ class ApplicationConfig extends Component<Props, State> {
                     </span>
                   }
                   actions={[]}
-                  // actions={
-                  //   !applicationDetail?.readOnly
-                  //     ? [
-                  //         <Permission
-                  //           request={{
-                  //             resource: `project/application/policy:*`,
-                  //             action: 'create',
-                  //           }}
-                  //           project={`${applicationDetail && applicationDetail.project?.name}`}
-                  //         >
-                  //           <a
-                  //             key={'add'}
-                  //             onClick={this.onAddComponent}
-                  //             className="font-size-14 font-weight-400"
-                  //           >
-                  //             <Translation>New Policy</Translation>
-                  //           </a>
-                  //         </Permission>,
-                  //       ]
-                  //     : []
-                  // }
                 />
               </Col>
             </Row>
@@ -678,16 +650,6 @@ class ApplicationConfig extends Component<Props, State> {
             componentDefinitions={componentDefinitions}
             onComponentClose={this.onComponentClose}
             onComponentOK={this.onComponentOK}
-          />
-        </If>
-        <If condition={visiblePolicy}>
-          <PolicyDialog
-            project={applicationDetail?.project?.name || ''}
-            appName={appName}
-            policyName={showPolicyName}
-            onClose={() => {
-              this.setState({ visiblePolicy: false });
-            }}
           />
         </If>
       </div>

@@ -23,6 +23,7 @@ type Props = {
   onDeleteComponent: (name: string) => void;
   onAddComponent: () => void;
   onAddTrait: (componentName: string) => void;
+  onDeleteTrait: (componentName: string, traitName: string) => void;
   changeTraitStats: (isEditTrait: boolean, traitItem: Trait, componentName: string) => void;
 };
 
@@ -81,7 +82,7 @@ class ComponentsList extends Component<Props> {
                             <Icon
                               type="ashbin1"
                               size={14}
-                              className="cursor-pointer"
+                              className="cursor-pointer danger-icon"
                               onClick={() => {
                                 this.handleDelete(item.name || '');
                               }}
@@ -105,6 +106,17 @@ class ComponentsList extends Component<Props> {
                           title={trait.description || label}
                         >
                           <div>{label}</div>
+                          <div className="trait-actions">
+                            <Icon
+                              onClick={(event: React.MouseEvent<HTMLElement>) => {
+                                event.stopPropagation();
+                                this.props.onDeleteTrait(item.name, trait.type);
+                              }}
+                              size={14}
+                              className="danger-icon"
+                              type="ashbin1"
+                            />
+                          </div>
                         </div>
                       );
                     })}

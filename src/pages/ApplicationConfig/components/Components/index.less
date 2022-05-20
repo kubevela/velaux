@@ -41,15 +41,24 @@
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     cursor: pointer;
-    svg {
-      width: 30px;
-      min-width: 30px;
-      height: 30px;
-      margin-right: 4px;
+    position: relative;
+    .trait-actions {
+      background: rgba(166, 166, 166, 0.9);
+      display:none;
+      color: #1b58f4;
+      position: absolute;
+      right: 0;
+      padding: 9.5px;
+      width: 40px;
+      text-align: center;
+      border-radius: 0 4px 4px 0;
     }
   }
   .trait-icon:hover {
     border: #1b58f4 solid 1px;
+    .trait-actions {
+      display: block;
+    }
   }
   .component-icon {
     width: 20px;
