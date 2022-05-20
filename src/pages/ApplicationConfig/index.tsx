@@ -377,7 +377,6 @@ class ApplicationConfig extends Component<Props, State> {
       isEditTrait,
       appName = '',
       componentName = '',
-      mainComponent,
       traitItem,
       triggers,
       visibleTrigger,
@@ -621,7 +620,6 @@ class ApplicationConfig extends Component<Props, State> {
           <TriggerDialog
             visible={visibleTrigger}
             appName={appName}
-            componentType={(mainComponent && mainComponent.type) || ''}
             workflows={workflows}
             components={components || []}
             onClose={this.onTriggerClose}

@@ -548,5 +548,9 @@
   "There is no components": "暂无组件",
   "Manual Scaler": "手动伸缩",
   "HTTP Route": "HTTP 路由",
-  "HTTPs Route": "HTTPs 路由"
+  "HTTPs Route": "HTTPs 路由",
+  "Your component type does not support the image field, and the image update cannot be performed": "选择的组件不存在 image 字段，无法进行镜像更新",
+  "Please select a component": "请选择一个组件",
+  "Please select a workflow": "请选择一个工作流",
+  "Please select a payloadType": "请选择请求体类型，不同的外部系统请求参数类型具有差异"
 }
