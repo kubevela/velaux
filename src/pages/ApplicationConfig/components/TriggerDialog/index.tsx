@@ -14,16 +14,15 @@ import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import { If } from 'tsx-control-statements/components';
+import i18n from '../../../../i18n';
 
 type Props = {
   visible: boolean;
   appName?: string;
   workflows?: Workflow[];
-  componentType: string;
   onOK: (params: Trigger) => void;
   onClose: () => void;
   dispatch?: ({}) => {};
-  t: (key: string) => {};
   components: ApplicationComponentBase[];
 };
 
@@ -31,6 +30,7 @@ type State = {
   loading: boolean;
   payloadTypes: string[];
   hasImage: boolean;
+  component?: ApplicationComponentBase;
 };
 
 class TriggerDialog extends React.Component<Props, State> {
@@ -46,14 +46,13 @@ class TriggerDialog extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const { componentType } = this.props;
     const type = this.field.getValue('type');
     if (type === 'webhook') {
       this.onGetPayloadType();
     }
-
-    if (componentType) {
-      this.onDetailComponentDefinition(componentType);
+    const { components } = this.props;
+    if (components && components.length > 0) {
+      this.changeComponentName(components[0].name);
     }
   }
 
@@ -150,12 +149,11 @@ class TriggerDialog extends React.Component<Props, State> {
   };
 
   isShowMessage() {
-    const { componentType } = this.props;
-    const { hasImage } = this.state;
+    const { hasImage, component } = this.state;
     const type = this.field.getValue('type');
     const payloadType = this.field.getValue('payloadType');
     const components = ['webservice', 'worker', 'task'];
-    const isNotInclude = !components.includes(componentType);
+    const isNotInclude = component?.componentType && !components.includes(component?.componentType);
     if (isNotInclude && payloadType !== 'custom' && !hasImage && type === 'webhook') {
       return true;
     } else {
@@ -163,22 +161,24 @@ class TriggerDialog extends React.Component<Props, State> {
     }
   }
 
-  changePayloadType = (value: string) => {
-    const { components = [] } = this.props;
-    const componentName = components[0]?.name || '';
-    this.field.setValue('payloadType', value);
-    if (value && value !== 'custom') {
-      this.field.setValue('componentName', componentName);
-    } else {
-      this.field.remove('componentName');
-    }
+  changeComponentName = (value: string) => {
+    this.field.setValue('componentName', value);
+    let componentType = '';
+    const { components } = this.props;
+    components.map((c) => {
+      if (c.name === value) {
+        componentType = c.componentType;
+        this.setState({ component: c });
+      }
+    });
+    this.onDetailComponentDefinition(componentType);
   };
 
   render() {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const { t, workflows, onClose, components } = this.props;
+    const { workflows, onClose, components } = this.props;
     const { payloadTypes } = this.state;
     const workflowOption = workflows?.map((workflow) => {
       return {
@@ -203,7 +203,7 @@ class TriggerDialog extends React.Component<Props, State> {
 
     return (
       <DrawerWithFooter
-        title={t('Add Trigger')}
+        title={i18n.t('Add Trigger')}
         placement="right"
         width={800}
         onClose={onClose}
@@ -215,7 +215,7 @@ class TriggerDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Name</Translation>} required>
                 <Input
                   name="name"
-                  placeholder={t('Please enter the name').toString()}
+                  placeholder={i18n.t('Please enter the name').toString()}
                   {...init('name', {
                     rules: [
                       {
@@ -234,7 +234,7 @@ class TriggerDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
-                  placeholder={t('Please enter').toString()}
+                  placeholder={i18n.t('Please enter').toString()}
                   {...init('alias', {
                     rules: [
                       {
@@ -252,7 +252,7 @@ class TriggerDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Description</Translation>}>
                 <Input
                   name="description"
-                  placeholder={t('Please enter').toString()}
+                  placeholder={i18n.t('Please enter').toString()}
                   {...init('description', {
                     rules: [
                       {
@@ -278,7 +278,7 @@ class TriggerDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        message: 'Please select a type',
+                        message: i18n.t('Please select a type'),
                       },
                     ],
                   })}
@@ -299,11 +299,10 @@ class TriggerDialog extends React.Component<Props, State> {
                       rules: [
                         {
                           required: true,
-                          message: 'Please select a payloadType',
+                          message: i18n.t('Please select a payloadType'),
                         },
                       ],
                     })}
-                    onChange={this.changePayloadType}
                   />
                 </FormItem>
               </If>
@@ -321,7 +320,7 @@ class TriggerDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         required: true,
-                        message: 'Please select a workflow',
+                        message: i18n.t('Please select a workflow'),
                       },
                     ],
                   })}
@@ -330,28 +329,30 @@ class TriggerDialog extends React.Component<Props, State> {
             </Col>
 
             <Col span={12} style={{ padding: '0 8px' }}>
-              <If condition={this.field.getValue('payloadType') !== 'custom'}>
-                <FormItem label={<Translation>Component</Translation>} required>
-                  <Select
-                    name="componentName"
-                    locale={locale().Select}
-                    dataSource={componentsOption}
-                    {...init('componentName', {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Please select a component',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </If>
+              <FormItem label={<Translation>Component</Translation>} required>
+                <Select
+                  name="componentName"
+                  locale={locale().Select}
+                  dataSource={componentsOption}
+                  {...init('componentName', {
+                    initValue: components.length > 0 && components[0].name,
+                    rules: [
+                      {
+                        required: true,
+                        message: i18n.t('Please select a component'),
+                      },
+                    ],
+                  })}
+                  onChange={this.changeComponentName}
+                />
+              </FormItem>
             </Col>
           </Row>
           <Message type="warning" animation={true} visible={this.isShowMessage()} title="Warning">
-            Your component type does not support the image field, and the image update cannot be
-            performed.
+            <Translation>
+              Your component type does not support the image field, and the image update cannot be
+              performed
+            </Translation>
           </Message>
         </Form>
       </DrawerWithFooter>

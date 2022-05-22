@@ -215,10 +215,31 @@ class TraitDialog extends React.Component<Props, State> {
       .catch(() => this.setState({ definitionLoading: false }));
   };
 
-  handleChange = (value: string) => {
+  handleTypeChange = (value: string) => {
     this.removeProperties();
     this.field.setValues({ type: value });
     this.onDetailsTraitDefinition(value);
+    this.setAlias(value);
+  };
+
+  setAlias = (traitType: string) => {
+    let alias = traitType;
+    switch (traitType) {
+      case 'scaler':
+        alias = i18n.t('Manual Scaler');
+        break;
+      case 'http-route':
+        alias = i18n.t('HTTP Route');
+        break;
+      case 'https-route':
+        alias = i18n.t('HTTPs Route');
+        break;
+      case 'gateway':
+        alias = i18n.t('HTTP Route');
+        break;
+      default:
+    }
+    this.field.setValue('alias', alias);
   };
 
   extButtonList = () => {
@@ -319,7 +340,7 @@ class TraitDialog extends React.Component<Props, State> {
                     ],
                   })}
                   dataSource={this.transTraitDefinitions()}
-                  onChange={this.handleChange}
+                  onChange={this.handleTypeChange}
                 />
               </FormItem>
             </Col>
@@ -375,6 +396,7 @@ class TraitDialog extends React.Component<Props, State> {
                 <If condition={definitionDetail && definitionDetail.uiSchema}>
                   <FormItem required={true}>
                     <UISchema
+                      key={traitType}
                       {...init(`properties`, {
                         rules: [
                           {

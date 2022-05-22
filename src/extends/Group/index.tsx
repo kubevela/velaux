@@ -9,7 +9,7 @@ import './index.less';
 
 const { Col, Row } = Grid;
 type Props = {
-  title: string | React.ReactNode;
+  title?: string | React.ReactNode;
   description?: string | React.ReactNode;
   children?: React.ReactNode;
   // if required is false, this will be effective
@@ -98,51 +98,53 @@ class Group extends React.Component<Props, State> {
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
         <div className="group-container">
-          <div className="group-title-container">
-            <Row>
-              <Col span={'21'}>
-                <span className={`group-title ${required && 'required'}`}>{title}</span>
-                <div className="group-title-desc">{description}</div>
-              </Col>
-              <Col span={'3'} className="flexcenter">
-                <If condition={!required}>
-                  <Switch
-                    size="small"
-                    defaultChecked={required}
-                    checked={checked}
-                    disabled={disableAddon}
-                    onChange={(event: boolean) => {
-                      if (event === true) {
-                        this.setState({ enable: event, closed: false, checked: true });
-                      } else if (event === false) {
-                        Dialog.confirm({
-                          type: 'confirm',
-                          content: (
-                            <Translation>
-                              If Switch is turned off, The configuration will be reset. Are you sure
-                              you want to do this?
-                            </Translation>
-                          ),
-                          onOk: () => {
-                            this.setState({ enable: event, closed: false, checked: false });
-                            this.removeJsonKeyValue();
-                          },
-                          locale: locale().Dialog,
-                        });
-                      }
-                    }}
-                  />
-                </If>
-                <If condition={enable && hasToggleIcon}>
-                  <Icon
-                    onClick={this.toggleShowClass}
-                    className="icon"
-                    type={closed ? 'arrow-down' : 'arrow-up'}
-                  />
-                </If>
-              </Col>
-            </Row>
-          </div>
+          <If condition={title}>
+            <div className="group-title-container">
+              <Row>
+                <Col span={'21'}>
+                  <span className={`group-title ${required && 'required'}`}>{title}</span>
+                  <div className="group-title-desc">{description}</div>
+                </Col>
+                <Col span={'3'} className="flexcenter">
+                  <If condition={!required}>
+                    <Switch
+                      size="small"
+                      defaultChecked={required}
+                      checked={checked}
+                      disabled={disableAddon}
+                      onChange={(event: boolean) => {
+                        if (event === true) {
+                          this.setState({ enable: event, closed: false, checked: true });
+                        } else if (event === false) {
+                          Dialog.confirm({
+                            type: 'confirm',
+                            content: (
+                              <Translation>
+                                If Switch is turned off, The configuration will be reset. Are you
+                                sure you want to do this?
+                              </Translation>
+                            ),
+                            onOk: () => {
+                              this.setState({ enable: event, closed: false, checked: false });
+                              this.removeJsonKeyValue();
+                            },
+                            locale: locale().Dialog,
+                          });
+                        }
+                      }}
+                    />
+                  </If>
+                  <If condition={enable && hasToggleIcon}>
+                    <Icon
+                      onClick={this.toggleShowClass}
+                      className="icon"
+                      type={closed ? 'arrow-down' : 'arrow-up'}
+                    />
+                  </If>
+                </Col>
+              </Row>
+            </div>
+          </If>
           <If condition={enable}>
             <div className={`group-box ${closed ? 'disable' : ''}`}>{children}</div>
           </If>

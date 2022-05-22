@@ -77,7 +77,7 @@ export default {
     updatePoliciesList(state, { type, payload }) {
       return {
         ...state,
-        namespaceList: payload,
+        policies: payload.policies,
       };
     },
     updateComponentDefinitions(state, { type, payload }) {
@@ -153,9 +153,8 @@ export default {
         payload: { components: result && result.components, componentsApp: action.payload.appName },
       });
     },
-    *getPolicies(action, { call, put }) {
-      const { urlParam } = action.payload;
-      const result = yield call(getPolicyList, { name: urlParam });
+    *getApplicationPolicies(action, { call, put }) {
+      const result = yield call(getPolicyList, action.payload);
       yield put({ type: 'updatePoliciesList', payload: result });
     },
     *getComponentDefinitions(action, { call, put }) {

@@ -20,7 +20,6 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
 import Title from '../../../../components/Title';
-import TraitsList from '../../components/TraitsList';
 import { Link } from 'dva/router';
 import locale from '../../../../utils/locale';
 import { If } from 'tsx-control-statements/components';
@@ -30,6 +29,7 @@ import { transComponentDefinitions } from '../../../../utils/utils';
 import './index.less';
 import Group from '../../../../extends/Group';
 import { connect } from 'dva';
+import Permission from '../../../../components/Permission';
 
 type Props = {
   appName?: string;
@@ -39,9 +39,6 @@ type Props = {
   temporaryTraitList: Trait[];
   componentDefinitions: [];
   components: ApplicationComponentBase[];
-  onAddTrait: () => void;
-  changeTraitStats: (is: boolean, params: any) => void;
-  onDeleteTrait: (type: string, callback: () => void) => void;
   onComponentOK: () => void;
   onComponentClose: () => void;
   dispatch?: any;
@@ -188,17 +185,42 @@ class ComponentDialog extends React.Component<Props, State> {
   };
 
   extButtonList = () => {
-    const { onComponentClose, isEditComponent } = this.props;
-    const { isCreateComponentLoading } = this.state;
+    const { onComponentClose, isEditComponent, project, componentName } = this.props;
+    const { isCreateComponentLoading, isUpdateComponentLoading } = this.state;
     return (
       <div>
+        <Button type="secondary" onClick={onComponentClose} className="margin-right-10">
+          {i18n.t('Cancel')}
+        </Button>
         <If condition={!isEditComponent}>
-          <Button type="secondary" onClick={onComponentClose} className="margin-right-10">
-            {i18n.t('Cancel')}
-          </Button>
-          <Button type="primary" onClick={this.onSubmitCreate} loading={isCreateComponentLoading}>
-            {i18n.t('Create')}
-          </Button>
+          <Permission
+            request={{
+              resource: `project/application/component:*`,
+              action: 'create',
+            }}
+            project={project}
+          >
+            <Button type="primary" onClick={this.onSubmitCreate} loading={isCreateComponentLoading}>
+              {i18n.t('Create')}
+            </Button>
+          </Permission>
+        </If>
+        <If condition={isEditComponent}>
+          <Permission
+            request={{
+              resource: `project/application/component:${componentName || '*'}`,
+              action: 'update',
+            }}
+            project={project}
+          >
+            <Button
+              type="primary"
+              onClick={this.onSubmitEditComponent}
+              loading={isUpdateComponentLoading}
+            >
+              {i18n.t('Update')}
+            </Button>
+          </Permission>
         </If>
       </div>
     );
@@ -312,7 +334,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
     const { isEditComponent, componentDefinitions, onComponentClose } = this.props;
-    const { definitionDetail, isUpdateComponentLoading, loading } = this.state;
+    const { definitionDetail, loading } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -327,15 +349,9 @@ class ComponentDialog extends React.Component<Props, State> {
       >
         <Form field={this.field} className="basic-config-wrapper">
           <section className="title">
-            <Title title={i18n.t('Component Config')} actions={[]} />
+            <Title title={i18n.t('Basic Configuration')} actions={[]} />
           </section>
-          <Group
-            hasToggleIcon={true}
-            initClose={isEditComponent ? true : false}
-            required={true}
-            loading={loading}
-            title={i18n.t('Component Basic Info')}
-          >
+          <Group hasToggleIcon={true} initClose={false} required={true} loading={loading}>
             <Row>
               <Col span={12} style={{ paddingRight: '8px' }}>
                 <FormItem
@@ -468,6 +484,9 @@ class ComponentDialog extends React.Component<Props, State> {
               </Col>
             </Row>
           </Group>
+          <section className="title">
+            <Title title={i18n.t('Deployment Properties')} actions={[]} />
+          </section>
           <Row>
             <If condition={definitionDetail && definitionDetail.uiSchema}>
               <UISchema
@@ -485,36 +504,7 @@ class ComponentDialog extends React.Component<Props, State> {
               />
             </If>
           </Row>
-          <If condition={isEditComponent}>
-            <div className="edit-component-update-btn">
-              <Button
-                type="primary"
-                onClick={this.onSubmitEditComponent}
-                loading={isUpdateComponentLoading}
-              >
-                {i18n.t('Update')}
-              </Button>
-            </div>
-          </If>
         </Form>
-        <div className="trait-config-wrapper">
-          <section className="title">
-            <Title title={i18n.t('Traits')} actions={[]} />
-          </section>
-          <TraitsList
-            traits={this.getTraitList()}
-            isEditComponent={isEditComponent}
-            changeTraitStats={(is: boolean, trait: Trait) => {
-              this.props.changeTraitStats(is, trait);
-            }}
-            onDeleteTrait={(traitType: string) => {
-              this.props.onDeleteTrait(traitType, () => {
-                this.onGetEditComponentInfo();
-              });
-            }}
-            onAdd={this.props.onAddTrait}
-          />
-        </div>
       </DrawerWithFooter>
     );
   }

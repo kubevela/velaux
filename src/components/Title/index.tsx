@@ -14,7 +14,7 @@ const Title: React.FC<Props> = (props) => {
         <h3>{props.title}</h3>
       </Col>
       <Col span={12} className="flexright">
-        <div>
+        <div style={{ padding: '12px 8px 0 0' }}>
           {props.actions.map((item) => {
             return item;
           })}
