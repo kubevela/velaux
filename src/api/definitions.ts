@@ -1,19 +1,19 @@
 import { get, put } from './request';
 import type { UIParam } from '../interface/application';
-import { componentDefinition } from './productionLink';
+import { definition } from './productionLink';
 import { getDomain } from '../utils/common';
 
 const baseURLOject = getDomain();
 const base = baseURLOject.APIBASE;
 
 export function getDefinitionsList(params: { definitionType: string; queryAll: boolean }) {
-  const url = base + componentDefinition;
+  const url = base + definition;
   const { definitionType, queryAll } = params;
   return get(url, { params: { type: definitionType, queryAll } }).then((res) => res);
 }
 
 export function detailDefinition(params: { name: string; type: string }) {
-  const url = base + `${componentDefinition}/${params.name}`;
+  const url = base + `${definition}/${params.name}`;
   return get(url, { params: { type: params.type } }).then((res) => res);
 }
 
@@ -22,7 +22,7 @@ export function updateDefinitionStatus(params: {
   hiddenInUI: boolean;
   type: string;
 }) {
-  const url = base + `${componentDefinition}/${params.name}/status`;
+  const url = base + `${definition}/${params.name}/status`;
   const paramsData = {
     hiddenInUI: params.hiddenInUI,
     type: params.type,
@@ -35,7 +35,7 @@ export function updateUISchema(params: {
   definitionType: string;
   uiSchema: UIParam[] | undefined;
 }) {
-  const url = base + `${componentDefinition}/${params.name}/uischema`;
+  const url = base + `${definition}/${params.name}/uischema`;
   const paramsData = {
     type: params.definitionType,
     uiSchema: params.uiSchema,

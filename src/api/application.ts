@@ -16,7 +16,7 @@ import {
   getTrait_mock,
   updateApplicationEnv_mock,
 } from './devLink';
-import { application, componentDefinition } from './productionLink';
+import { application, definition } from './productionLink';
 import { getDomain } from '../utils/common';
 import type {
   ApplicationDeployRequest,
@@ -99,8 +99,8 @@ export function deployApplication(params: ApplicationDeployRequest, customError?
   return post(gurl, params, customError);
 }
 
-export function getPolicyList(params: any) {
-  const gurl = isMock ? `${getPolicyList_mock}` : `${application}/${params.name}/policies`;
+export function getPolicyList(params: { appName: string }) {
+  const gurl = isMock ? `${getPolicyList_mock}` : `${application}/${params.appName}/policies`;
   return get(gurl, params).then((res) => res);
 }
 
@@ -109,10 +109,10 @@ export function createPolicy(params: any) {
   return post(gurl, params).then((res) => res);
 }
 
-export function getPolicyDetails(params: any) {
+export function getPolicyDetail(params: { appName: string; policyName: string }) {
   const gurl = isMock
     ? `${getPolicyDetails_mock}`
-    : `${application}/${params.name}/policies/${params.policyName}`;
+    : `${application}/${params.appName}/policies/${params.policyName}`;
   return get(gurl, params).then((res) => res);
 }
 
@@ -124,13 +124,23 @@ export function createApplicationTemplate(params: any) {
 }
 
 export function getComponentDefinitions() {
-  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentDefinition}`;
+  const gurl = isMock ? `${getPolicyDetails_mock}` : `${definition}`;
   return get(gurl, { params: { type: 'component' } }).then((res) => res);
 }
 
 export function detailComponentDefinition(params: { name: string }) {
-  const gurl = isMock ? `${getPolicyDetails_mock}` : `${componentDefinition}/${params.name}`;
+  const gurl = isMock ? `${getPolicyDetails_mock}` : `${definition}/${params.name}`;
   return get(gurl, { params: { type: 'component' } }).then((res) => res);
+}
+
+export function getPolicyDefinitions() {
+  const gurl = isMock ? `${getPolicyDetails_mock}` : `${definition}`;
+  return get(gurl, { params: { type: 'policy' } }).then((res) => res);
+}
+
+export function detailPolicyDefinition(params: { name: string }) {
+  const gurl = isMock ? `${getPolicyDetails_mock}` : `${definition}/${params.name}`;
+  return get(gurl, { params: { type: 'policy' } }).then((res) => res);
 }
 
 export function createApplicationEnv(params: { appName?: string }) {
@@ -161,16 +171,14 @@ export function recycleApplicationEnvbinding(params: { appName: string; envName:
 }
 
 export function getTraitDefinitions(params: { appliedWorkload: string }) {
-  const gurl = isMock ? `${getTraitDefinitions_mock}` : `${componentDefinition}`;
+  const gurl = isMock ? `${getTraitDefinitions_mock}` : `${definition}`;
   return get(gurl, { params: { type: 'trait', appliedWorkload: params.appliedWorkload } }).then(
     (res) => res,
   );
 }
 
 export function detailTraitDefinition(params: { name: string }) {
-  const gurl = isMock
-    ? `${getTraitDefinitionsDetails_mock}`
-    : `${componentDefinition}/${params.name}`;
+  const gurl = isMock ? `${getTraitDefinitionsDetails_mock}` : `${definition}/${params.name}`;
   return get(gurl, { params: { type: 'trait' } }).then((res) => res);
 }
 

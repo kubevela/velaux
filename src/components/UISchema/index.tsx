@@ -146,6 +146,7 @@ class UISchema extends Component<Props, State> {
   validate = (callback: (error?: string) => void) => {
     this.form.validate((errors) => {
       if (errors) {
+        console.log(errors);
         callback('ui schema validate failure');
         return;
       }

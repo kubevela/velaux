@@ -383,12 +383,16 @@ export interface ComponentDefinitionsBase {
   workloadType?: string;
 }
 
-export interface PolicyBase {
+export interface ApplicationPolicyBase {
   createTime: string;
   creator: string;
   description: string;
   name: string;
+  alias?: string;
   properties: {};
   type: string;
   updateTime: string;
+  envName?: string;
 }
+
+export type ApplicationPolicyDetail = ApplicationPolicyBase;

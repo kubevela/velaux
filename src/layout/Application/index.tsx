@@ -49,6 +49,7 @@ class ApplicationLayout extends Component<Props, any> {
           this.loadApplicationComponents();
           this.loadApplicationEnvbinding();
           this.loadApplicationWorkflows();
+          this.loadApplicationPolicies();
         });
       },
     });
@@ -79,6 +80,16 @@ class ApplicationLayout extends Component<Props, any> {
     } = this.props.match;
     this.props.dispatch({
       type: 'application/getApplicationComponents',
+      payload: { appName: appName },
+    });
+  };
+
+  loadApplicationPolicies = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationPolicies',
       payload: { appName: appName },
     });
   };

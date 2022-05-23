@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'dva';
 import { Select } from '@b-design/ui';
 import { getPolicyList } from '../../api/application';
-import type { PolicyBase } from '../../interface/application';
+import type { ApplicationPolicyBase } from '../../interface/application';
 import locale from '../../utils/locale';
 import i18n from '../../i18n';
 
@@ -16,7 +16,7 @@ type Props = {
 };
 
 type State = {
-  policySelectDataSource?: PolicyBase[];
+  policySelectDataSource?: ApplicationPolicyBase[];
 };
 
 @connect((store: any) => {
@@ -38,12 +38,12 @@ class PolicySelect extends React.Component<Props, State> {
     const { appName = '' } = this.props;
     if (appName) {
       getPolicyList({
-        name: appName,
+        appName: appName,
       })
         .then((res) => {
           if (res && res.policies) {
             const policyListData = (res.policies || []).map(
-              (item: PolicyBase) => `${item.name}(${item.type})`,
+              (item: ApplicationPolicyBase) => `${item.name}(${item.type})`,
             );
             this.setState({
               policySelectDataSource: policyListData,
