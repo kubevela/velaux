@@ -22,7 +22,7 @@ type State = {
   errorNotice: string;
   isLoading: boolean;
   secretName: string;
-  status: 'warning' | 'success' | 'error' | 'loading' | undefined;
+  status?: 'warning' | 'success' | 'error' | 'loading' | undefined;
 };
 
 @connect((store: any) => {
@@ -34,7 +34,6 @@ class ImageInput extends React.Component<Props, State> {
     this.state = {
       errorNotice: '',
       isLoading: false,
-      status: undefined,
       secretName: '',
     };
   }
@@ -48,7 +47,6 @@ class ImageInput extends React.Component<Props, State> {
 
   onCheckImageName = () => {
     const { value, project, onChangeImagePullSecretsRef } = this.props;
-    debugger;
     if (project && value) {
       const imageData = {
         image: value,
