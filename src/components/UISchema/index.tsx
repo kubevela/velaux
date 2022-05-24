@@ -88,6 +88,7 @@ function convertRule(validate?: UIParamValidate) {
 type State = {
   secretKeys?: string[];
   advanced: boolean;
+  isEnableImagePullSecrets: boolean;
 };
 
 class UISchema extends Component<Props, State> {
@@ -118,6 +119,7 @@ class UISchema extends Component<Props, State> {
     this.state = {
       secretKeys: [],
       advanced: props.advanced || false,
+      isEnableImagePullSecrets: false,
     };
   }
 
@@ -131,6 +133,9 @@ class UISchema extends Component<Props, State> {
 
   onChangeAdvanced = (advanced: boolean) => {
     this.setState({ advanced: advanced });
+  };
+  onChangeImagePullSecretsMonitorStatus = (isEnableImagePullSecrets: boolean) => {
+    this.setState({ isEnableImagePullSecrets });
   };
 
   setValues = () => {
@@ -406,12 +411,7 @@ class UISchema extends Component<Props, State> {
             );
           case 'ImageInput':
             return (
-              <Form.Item
-                required={required}
-                label={label}
-                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
-                key={param.jsonKey}
-              >
+              <Form.Item required={required} label={label} key={param.jsonKey}>
                 <ImageInput
                   disabled={disableEdit}
                   {...init(param.jsonKey, {
@@ -424,8 +424,17 @@ class UISchema extends Component<Props, State> {
                       },
                     ],
                   })}
-                  onChangeImagePullSecretsRef={(data: string[]) => {
-                    this.form.setValue('imagePullSecrets', data);
+                  mode={this.props.mode}
+                  onChangeImagePullSecretsRef={(data: string) => {
+                    if (data) {
+                      this.form.setValue('imagePullSecrets', [data]);
+                    } else {
+                      this.form.setValue('imagePullSecrets', []);
+                    }
+                    this.setState({ isEnableImagePullSecrets: true });
+                    const values = this.form.getValues();
+                    const { onChange } = this.props;
+                    if (onChange) onChange(values);
                   }}
                 />
               </Form.Item>
@@ -542,6 +551,10 @@ class UISchema extends Component<Props, State> {
                   initValue: initValue,
                   rules: convertRule(param.validate),
                 })}
+                isEnableImagePullSecrets={this.state.isEnableImagePullSecrets}
+                onChangeImagePullSecretsMonitorStatus={(isEnableImagePullSecrets: boolean) => {
+                  this.onChangeImagePullSecretsMonitorStatus(isEnableImagePullSecrets);
+                }}
               />,
             );
           case 'SecretSelect':

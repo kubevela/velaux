@@ -552,5 +552,8 @@
   "Your component type does not support the image field, and the image update cannot be performed": "选择的组件不存在 image 字段，无法进行镜像更新",
   "Please select a component": "请选择一个组件",
   "Please select a workflow": "请选择一个工作流",
-  "Please select a payloadType": "请选择请求体类型，不同的外部系统请求参数类型具有差异"
+  "Please select a payloadType": "请选择请求体类型，不同的外部系统请求参数类型具有差异",
+  "To deploy from a private image repository, you need to first": "要从私有镜像仓库部署，您需要先",
+  "create an image registry secret": "创建镜像仓库密钥",
+  "Please check if the entered image name exists": "请检查输入的镜像名称是否存在"
 }

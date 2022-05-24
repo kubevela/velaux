@@ -10,6 +10,8 @@ type Props = {
   id: string;
   onChange: (value: any) => void;
   disabled: boolean;
+  isEnableImagePullSecrets?: boolean;
+  onChangeImagePullSecretsMonitorStatus: (isEnableImagePullSecrets: boolean) => void;
 };
 
 type InputParams = {
@@ -82,6 +84,24 @@ class Strings extends React.Component<Props, State> {
   }
 
   componentDidMount = async () => {};
+  componentWillReceiveProps(nextProps: Props) {
+    const isImagePullSecrets =
+      nextProps.id === 'imagePullSecrets' && nextProps.isEnableImagePullSecrets === true;
+    if (isImagePullSecrets && nextProps.value !== this.props.value) {
+      const inputList: ListParams[] = [];
+      nextProps.value.map((v: string, index: number) => {
+        const key = Date.now().toString() + index;
+        inputList.push({
+          key,
+          value: v,
+        });
+      });
+      this.state = {
+        inputList,
+      };
+      this.props.onChangeImagePullSecretsMonitorStatus(false);
+    }
+  }
 
   changeValues = () => {
     const values = this.field.getValues();
