@@ -5,7 +5,6 @@ import { Message, Loading, Button } from '@b-design/ui';
 import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
-import '../../common.less';
 import { If } from 'tsx-control-statements/components';
 import { deleteApplicationPlan, getComponentDefinitions } from '../../api/application';
 import type { ApplicationBase } from '../../interface/application';
@@ -121,7 +120,7 @@ class Application extends Component<Props, State> {
           subTitle="Deploy and manage all your applications"
           extButtons={[
             <Permission
-              request={{ resource: 'project/application:*', action: 'create' }}
+              request={{ resource: 'project:?/application:*', action: 'create' }}
               project={'?'}
             >
               <Button
@@ -144,7 +143,6 @@ class Application extends Component<Props, State> {
             this.getApplications(params);
           }}
         />
-
         <Loading visible={isLoading} fullScreen>
           <CardContend
             applications={applicationList}

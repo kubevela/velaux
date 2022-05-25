@@ -243,7 +243,7 @@ class WorkflowStep extends Component<Props, State> {
     const { recordItem } = this.props;
     const steps: WorkflowStepItem[] | undefined = recordItem.steps;
     if (steps) {
-      let currentStep = steps.length;
+      let currentStep = steps.length - 1;
       (steps || []).map((item: WorkflowStepItem, i: number) => {
         if (item.phase != 'succeeded') {
           if (i < currentStep) {
@@ -258,7 +258,7 @@ class WorkflowStep extends Component<Props, State> {
             this.setState({ hiddenConfirm: false });
           }}
           title={this.renderStepItemTitle(item)}
-          content={this.renderContent(recordItem, item, index == currentStep - 1)}
+          content={this.renderContent(recordItem, item, index == currentStep)}
         />
       ));
       const changeStepClassName = this.changeFirstClassName(steps);

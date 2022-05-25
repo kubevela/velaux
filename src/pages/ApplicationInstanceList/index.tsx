@@ -27,6 +27,8 @@ import StatusShow from '../../components/StatusShow';
 import locale from '../../utils/locale';
 import { getLink } from '../../utils/utils';
 import i18n from '../../i18n';
+import querystring from 'query-string';
+import type { LoginUserInfo } from '../../interface/user';
 
 const { Column } = Table;
 type Props = {
@@ -41,6 +43,7 @@ type Props = {
   applicationStatus?: ApplicationStatus;
   envbinding: EnvBinding[];
   components?: ApplicationComponent[];
+  userInfo?: LoginUserInfo;
 };
 
 type State = {
@@ -68,7 +71,7 @@ type CloudInstance = {
 };
 
 @connect((store: any) => {
-  return { ...store.application };
+  return { ...store.application, ...store.user };
 })
 class ApplicationInstanceList extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -85,6 +88,11 @@ class ApplicationInstanceList extends React.Component<Props, State> {
 
   componentDidMount() {
     this.loadApplicationStatus();
+
+    const query = querystring.parse(location.search);
+    if (query && query.pod) {
+      this.onRowOpen([query.pod as string]);
+    }
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -406,6 +414,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   onRowOpen = (openRowKeys: any) => {
     this.setState({ openRowKeys });
   };
+
   onDeploy = (force?: boolean) => {
     const { envbinding } = this.props;
     const {
@@ -479,7 +488,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   };
 
   render() {
-    const { applicationStatus, applicationDetail, components } = this.props;
+    const { applicationStatus, applicationDetail, components, userInfo } = this.props;
     const { podList, loading, showStatus, cloudInstance, endpoints, deployLoading } = this.state;
     const columns = this.getColumns();
     const envbinding = this.getEnvbindingByName();
@@ -488,6 +497,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         <div style={{ margin: '16px 0' }}>
           <PodDetail
             env={envbinding}
+            userInfo={userInfo}
             clusterName={record.cluster}
             application={applicationDetail}
             pod={record}

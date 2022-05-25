@@ -111,7 +111,10 @@ class targetList extends React.Component<Props, State> {
           title="Environments"
           subTitle="Set up the Environments for your Application based on Target sources"
           extButtons={[
-            <Permission request={{ resource: 'environment:*', action: 'create' }} project={'?'}>
+            <Permission
+              request={{ resource: 'project:?/environment:*', action: 'create' }}
+              project={'?'}
+            >
               <Button
                 type="primary"
                 onClick={() => {

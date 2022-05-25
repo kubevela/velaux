@@ -388,7 +388,7 @@ class ApplicationConfig extends Component<Props, State> {
       isEditComponent,
       componentDefinitions,
     } = this.state;
-
+    const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     return (
       <div>
         <Row wrap={true}>
@@ -402,8 +402,11 @@ class ApplicationConfig extends Component<Props, State> {
           </Col>
           <Col xl={12} xs={24} style={{ padding: '0 16px' }} className="flexright">
             <Permission
-              request={{ resource: `project/application/:${appName}`, action: 'delete' }}
-              project={`${applicationDetail && applicationDetail.project?.name}`}
+              request={{
+                resource: `project:${projectName}/application/:${appName}`,
+                action: 'delete',
+              }}
+              project={projectName}
             >
               <Button
                 className="danger-btn"
@@ -415,8 +418,11 @@ class ApplicationConfig extends Component<Props, State> {
               </Button>
             </Permission>
             <Permission
-              request={{ resource: `project/application/:${appName}`, action: 'update' }}
-              project={`${applicationDetail && applicationDetail.project?.name}`}
+              request={{
+                resource: `project:${projectName}/application/:${appName}`,
+                action: 'update',
+              }}
+              project={projectName}
             >
               <Button onClick={this.editAppPlan} type="secondary">
                 <Translation>Edit</Translation>
@@ -495,10 +501,10 @@ class ApplicationConfig extends Component<Props, State> {
                       ? [
                           <Permission
                             request={{
-                              resource: `project/application/component:*`,
+                              resource: `project:${projectName}/application:${applicationDetail?.name}/component:*`,
                               action: 'create',
                             }}
-                            project={`${applicationDetail && applicationDetail.project?.name}`}
+                            project={projectName}
                           >
                             <a
                               key={'add'}
@@ -562,8 +568,11 @@ class ApplicationConfig extends Component<Props, State> {
                 <Title
                   actions={[
                     <Permission
-                      request={{ resource: `project/application/trigger:*`, action: 'create' }}
-                      project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                      request={{
+                        resource: `project:${projectName}/application:${applicationDetail?.name}/trigger:*`,
+                        action: 'create',
+                      }}
+                      project={projectName}
                     >
                       <a
                         key={'add'}

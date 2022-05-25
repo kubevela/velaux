@@ -168,6 +168,7 @@ class Header extends Component<Props, State> {
       }
       return 'warning';
     };
+    const projectName = applicationDetail && applicationDetail.project?.name;
     return (
       <div>
         <Row className="border-radius-8">
@@ -243,10 +244,10 @@ class Header extends Component<Props, State> {
             <If condition={!applicationStatus || !applicationStatus.status}>
               <Permission
                 request={{
-                  resource: `project/application/envBinding:${envName}`,
+                  resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
                   action: 'delete',
                 }}
-                project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                project={projectName}
               >
                 <Button
                   style={{ marginLeft: '16px' }}
@@ -268,10 +269,10 @@ class Header extends Component<Props, State> {
             >
               <Permission
                 request={{
-                  resource: `project/application/envBinding:${envName}`,
+                  resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
                   action: 'recycle',
                 }}
-                project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                project={projectName}
               >
                 <Button
                   loading={recycleLoading}

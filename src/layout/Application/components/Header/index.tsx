@@ -142,6 +142,7 @@ class ApplicationHeader extends Component<Props, State> {
     const { statistics, records, showDeployConfig } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     const item = <Translation>{`app-${activeKey}`}</Translation>;
+    const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     return (
       <div>
         <Row>
@@ -172,10 +173,12 @@ class ApplicationHeader extends Component<Props, State> {
             </If>
             <Permission
               request={{
-                resource: `project/application:${applicationDetail && applicationDetail.name}`,
+                resource: `project:${projectName}/application:${
+                  applicationDetail && applicationDetail.name
+                }`,
                 action: 'deploy',
               }}
-              project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+              project={projectName}
             >
               <Button
                 style={{ marginLeft: '16px' }}

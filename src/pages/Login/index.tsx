@@ -32,6 +32,7 @@ type State = {
   };
   loginType: string;
   loginErrorMessage: string;
+  loginLoading: boolean;
 };
 export default class LoginPage extends Component<Props, State> {
   field: Field;
@@ -47,6 +48,7 @@ export default class LoginPage extends Component<Props, State> {
       },
       loginType: '',
       loginErrorMessage: '',
+      loginLoading: false,
     };
   }
   componentDidMount() {
@@ -89,6 +91,7 @@ export default class LoginPage extends Component<Props, State> {
       if (error) {
         return;
       }
+      this.setState({ loginLoading: true, loginErrorMessage: '' });
       const { username, password } = values;
       const params = {
         username: username,
@@ -111,6 +114,7 @@ export default class LoginPage extends Component<Props, State> {
           }
           this.setState({
             loginErrorMessage: customErrorMessage,
+            loginLoading: false,
           });
         });
     });
@@ -132,7 +136,7 @@ export default class LoginPage extends Component<Props, State> {
         span: 20,
       },
     };
-    const { loginType, loginErrorMessage } = this.state;
+    const { loginType, loginErrorMessage, loginLoading } = this.state;
     const { Row, Col } = Grid;
     return (
       <Fragment>
@@ -220,7 +224,7 @@ export default class LoginPage extends Component<Props, State> {
                       <Icon type="warning1" /> <Translation>{loginErrorMessage}</Translation>
                     </div>
                   </If>
-                  <Button type="primary" onClick={this.handleSubmit}>
+                  <Button loading={loginLoading} type="primary" onClick={this.handleSubmit}>
                     <Translation>Sign in</Translation>
                   </Button>
                 </Card>

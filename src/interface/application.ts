@@ -1,5 +1,6 @@
 import type { Target } from './target';
 import type { Project } from './project';
+import type { Resource } from './observation';
 
 export interface ApplicationDetail extends ApplicationBase {
   resourceInfo: {
@@ -136,27 +137,6 @@ export interface ComponentStatus {
     healthy: string;
     message: string;
   }[];
-}
-
-export interface Resource {
-  apiVersion: string;
-  cluster: string;
-  kind: string;
-  name: string;
-  namespace: string;
-}
-
-export interface AppliedResource {
-  apiVersion: string;
-  cluster: string;
-  kind: string;
-  name: string;
-  namespace: string;
-  component: string;
-  trait?: string;
-  publishVersion?: string;
-  revision?: string;
-  latest: boolean;
 }
 
 export interface Condition {

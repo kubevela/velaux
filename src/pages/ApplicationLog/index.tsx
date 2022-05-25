@@ -12,6 +12,7 @@ import type { PodBase, Container } from '../../interface/observation';
 import LogContainer from './components/LogContainer';
 import Translation from '../../components/Translation';
 import i18n from '../../i18n';
+import querystring from 'query-string';
 
 type Props = {
   match: {
@@ -104,7 +105,12 @@ class ApplicationLog extends React.Component<Props, State> {
                 activePodName: '',
               },
               () => {
-                this.handlePodNameChange(res.podList[0].metadata.name);
+                const query = querystring.parse(location.search);
+                if (query && query.pod) {
+                  this.handlePodNameChange(query.pod);
+                } else {
+                  this.handlePodNameChange(res.podList[0].metadata.name);
+                }
               },
             );
           } else {

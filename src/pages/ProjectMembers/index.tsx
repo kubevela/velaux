@@ -230,7 +230,10 @@ class ProjectMembers extends Component<Props, State> {
           return (
             <Fragment>
               <Permission
-                request={{ resource: `project/projectUser:${record.name}`, action: 'update' }}
+                request={{
+                  resource: `project:${projectName}/projectUser:${record.name}`,
+                  action: 'update',
+                }}
                 project={projectName}
               >
                 <Button
@@ -246,7 +249,10 @@ class ProjectMembers extends Component<Props, State> {
                 </Button>
               </Permission>
               <Permission
-                request={{ resource: `project/projectUser:${record.name}`, action: 'delete' }}
+                request={{
+                  resource: `project:${projectName}/projectUser:${record.name}`,
+                  action: 'delete',
+                }}
                 project={projectName}
               >
                 <Button
@@ -272,7 +278,7 @@ class ProjectMembers extends Component<Props, State> {
         <div className="member-wrapper">
           <section className="member-create-btn">
             <Permission
-              request={{ resource: `project/projectUser:*`, action: 'create' }}
+              request={{ resource: `project:${projectName}/projectUser:*`, action: 'create' }}
               project={projectName}
             >
               <Button type="primary" onClick={this.handleClickCreate}>

@@ -201,3 +201,36 @@ export interface Endpoint {
     uid: string;
   };
 }
+
+export interface Resource {
+  apiVersion?: string;
+  cluster?: string;
+  kind?: string;
+  name: string;
+  namespace?: string;
+}
+
+export interface AppliedResource extends Resource {
+  component: string;
+  trait?: string;
+  publishVersion?: string;
+  revision?: string;
+  latest: boolean;
+  resourceTree?: ResourceTreeNode;
+}
+
+export interface ResourceTreeNode extends Resource {
+  uid?: string;
+  healthStatus?: ResourceHealthStatus;
+  leafNodes?: ResourceTreeNode[];
+}
+
+export interface ResourceHealthStatus {
+  statusCode: string;
+  reason: string;
+  message: string;
+}
+
+export interface ResourceObject {
+  metadata: Metadata;
+}

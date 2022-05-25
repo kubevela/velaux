@@ -14,6 +14,7 @@ import appSvg from '../../../../assets/application.svg';
 import locale from '../../../../utils/locale';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkPermission } from '../../../../utils/permission';
+import Permission from '../../../../components/Permission';
 
 type State = {
   extendDotVisible: boolean;
@@ -60,7 +61,7 @@ class CardContent extends React.Component<Props, State> {
   isEditPermission = (item: ApplicationBase) => {
     const { userInfo } = this.props;
     const project = item?.project?.name || '';
-    const request = { resource: `project/application:${item.name}`, action: 'update' };
+    const request = { resource: `project:${project}/application:${item.name}`, action: 'update' };
     if (checkPermission(request, project, userInfo)) {
       return (
         <Menu.Item
@@ -79,7 +80,7 @@ class CardContent extends React.Component<Props, State> {
   isDeletePermission = (item: ApplicationBase) => {
     const { userInfo } = this.props;
     const project = item?.project?.name || '';
-    const request = { resource: `project/application:${item.name}`, action: 'delete' };
+    const request = { resource: `project:${project}/application:${item.name}`, action: 'delete' };
     if (checkPermission(request, project, userInfo)) {
       return (
         <Menu.Item
@@ -114,15 +115,20 @@ class CardContent extends React.Component<Props, State> {
             <section style={{ textAlign: 'center' }}>
               <Translation>There is no applications</Translation>
               <main>
-                <Button
-                  component="a"
-                  ghost={true}
-                  onClick={() => {
-                    setVisible(true);
-                  }}
+                <Permission
+                  request={{ resource: 'project:?/application:*', action: 'create' }}
+                  project={'?'}
                 >
-                  <Translation>New Application</Translation>
-                </Button>
+                  <Button
+                    component="a"
+                    ghost={true}
+                    onClick={() => {
+                      setVisible(true);
+                    }}
+                  >
+                    <Translation>New Application</Translation>
+                  </Button>
+                </Permission>
               </main>
             </section>
           }

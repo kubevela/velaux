@@ -52,6 +52,7 @@ class ComponentsList extends Component<Props> {
   render() {
     const { Row, Col } = Grid;
     const { components, editComponent, application } = this.props;
+    const projectName = application && application.project?.name;
     return (
       <div className="list-warper">
         <div className="box">
@@ -74,10 +75,10 @@ class ComponentsList extends Component<Props> {
                         <If condition={!application?.readOnly}>
                           <Permission
                             request={{
-                              resource: `project/application/component:${item.name}`,
+                              resource: `project:${projectName}/application:${application?.name}/component:${item.name}`,
                               action: 'delete',
                             }}
-                            project={`${(application && application.project?.name) || ''}`}
+                            project={projectName}
                           >
                             <Icon
                               type="ashbin1"

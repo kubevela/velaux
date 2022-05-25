@@ -134,6 +134,7 @@ class TriggerList extends Component<Props, State> {
         </svg>
       </span>
     );
+    const projectName = applicationDetail && applicationDetail.project?.name;
     return (
       <div className="list-warper">
         <div className="box">
@@ -148,10 +149,10 @@ class TriggerList extends Component<Props, State> {
                     <div className="trigger-list-operation">
                       <Permission
                         request={{
-                          resource: `project/application/trigger:${item.name}`,
+                          resource: `project:${projectName}/application:${applicationDetail?.name}/trigger:${item.name}`,
                           action: 'delete',
                         }}
-                        project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                        project={projectName}
                       >
                         <Icon
                           type="ashbin1"

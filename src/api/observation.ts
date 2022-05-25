@@ -142,3 +142,44 @@ export function listApplicationServiceAppliedResources(params: {
     },
   });
 }
+
+export function listApplicationResourceTree(params: {
+  appNs: string;
+  appName: string;
+  componentName?: string;
+  cluster?: string;
+  clusterNs?: string;
+}) {
+  let velaQLParams = `appNs=${params.appNs}, appName=${params.appName}`;
+  if (params.cluster) {
+    velaQLParams = `cluster=${params.cluster}, clusterNs=${params.clusterNs}, ` + velaQLParams;
+  }
+  if (params.componentName) {
+    velaQLParams = `name=${params.componentName}, ` + velaQLParams;
+  }
+  const urlParams = `application-resource-tree-view{${velaQLParams}}.status`;
+  return get('/api/v1/query', {
+    params: {
+      velaql: urlParams,
+    },
+  });
+}
+
+export function detailResource(params: {
+  name: string;
+  namespace: string;
+  kind: string;
+  apiVersion: string;
+  cluster?: string;
+}) {
+  let velaQLParams = `name=${params.name}, namespace=${params.namespace}, kind=${params.kind}, apiVersion=${params.apiVersion}`;
+  if (params.cluster) {
+    velaQLParams = `cluster=${params.cluster}, ` + velaQLParams;
+  }
+  const urlParams = `application-resource-detail-view{${velaQLParams}}.status`;
+  return get('/api/v1/query', {
+    params: {
+      velaql: urlParams,
+    },
+  });
+}

@@ -200,6 +200,7 @@ class WorkflowComponent extends Component<Props, State> {
     const newData = _.cloneDeep(data);
     convertWorkflowStep(newData, data.appName, 32, option.edit);
     const workflowData = newData.data || { nodes: {}, edges: {} };
+    const projectName = applicationDetail && applicationDetail.project?.name;
     return (
       <Loading visible={loading} style={{ width: '100%' }}>
         <div
@@ -261,10 +262,10 @@ class WorkflowComponent extends Component<Props, State> {
               <If condition={!option.edit}>
                 <Permission
                   request={{
-                    resource: `project/application/workflow:${data.name}`,
+                    resource: `project:${projectName}/application:${applicationDetail?.name}/workflow:${data.name}`,
                     action: 'update',
                   }}
-                  project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                  project={projectName}
                 >
                   <a
                     className="option-item"
@@ -286,8 +287,11 @@ class WorkflowComponent extends Component<Props, State> {
                   <Translation>Cancel</Translation>
                 </a>
                 <Permission
-                  request={{ resource: `project/application/workflow:*`, action: 'create' }}
-                  project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                  request={{
+                    resource: `project:${projectName}/application:${applicationDetail?.name}/workflow:*`,
+                    action: 'create',
+                  }}
+                  project={projectName}
                 >
                   <a
                     className="option-item"
