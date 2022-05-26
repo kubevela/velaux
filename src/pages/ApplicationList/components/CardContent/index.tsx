@@ -113,7 +113,7 @@ class CardContent extends React.Component<Props, State> {
         <Empty
           message={
             <section style={{ textAlign: 'center' }}>
-              <Translation>There is no applications</Translation>
+              <Translation>There are no applications</Translation>
               <main>
                 <Permission
                   request={{ resource: 'project:?/application:*', action: 'create' }}

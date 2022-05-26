@@ -119,7 +119,7 @@ class PolicyList extends Component<Props, State> {
               style={{ minHeight: '400px' }}
               message={
                 <span>
-                  <Translation>There is no policies</Translation>
+                  <Translation>There are no policies</Translation>
                 </span>
               }
             />

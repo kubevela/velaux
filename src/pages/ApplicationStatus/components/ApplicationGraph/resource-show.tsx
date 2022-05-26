@@ -1,9 +1,11 @@
-import { CodeSnippet } from '@b-design/ui';
 import * as React from 'react';
 import { detailResource } from '../../../../api/observation';
 import DrawerWithFooter from '../../../../components/Drawer';
 import type { ResourceTreeNode, ResourceObject } from '../../../../interface/observation';
 import * as yaml from 'js-yaml';
+import DefinitionCode from '../../../../components/DefinitionCode';
+import { If } from 'tsx-control-statements/components';
+import Empty from '../../../../components/Empty';
 
 type ResourceProps = {
   resource: ResourceTreeNode;
@@ -22,6 +24,8 @@ function loadResource(resource: ResourceTreeNode, setResource: any) {
       if (res && res.resource) {
         delete res.resource.metadata.managedFields;
         setResource(res.resource);
+      } else {
+        setResource(null);
       }
     });
   }
@@ -32,8 +36,9 @@ export const ShowResource = (props: ResourceProps) => {
 
   React.useEffect(() => {
     loadResource(props.resource, setResource);
-  });
+  }, [props.resource]);
 
+  const containerId = 'resource-show' + resource?.metadata.name;
   return (
     <React.Fragment>
       <DrawerWithFooter
@@ -42,7 +47,19 @@ export const ShowResource = (props: ResourceProps) => {
         width={600}
         onClose={props.onClose}
       >
-        <CodeSnippet code={yaml.dump(resource)} />
+        <If condition={resource}>
+          <div id={containerId} style={{ height: 'calc(100vh - 100px)' }}>
+            <DefinitionCode
+              containerId={containerId}
+              language={'yaml'}
+              readOnly={true}
+              value={yaml.dump(resource)}
+            />
+          </div>
+        </If>
+        <If condition={!resource}>
+          <Empty message="Loading the resource" />
+        </If>
       </DrawerWithFooter>
     </React.Fragment>
   );

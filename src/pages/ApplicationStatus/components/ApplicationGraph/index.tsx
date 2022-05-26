@@ -1,3 +1,4 @@
+import { Button, Icon } from '@b-design/ui';
 import React from 'react';
 import { If } from 'tsx-control-statements/components';
 import type { TreeNode } from '../../../../components/TreeGraph';
@@ -5,6 +6,7 @@ import { TreeGraph } from '../../../../components/TreeGraph';
 import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
 import type { AppliedResource, ResourceTreeNode } from '../../../../interface/observation';
 import { ShowResource } from './resource-show';
+import './index.less';
 
 type Props = {
   application?: ApplicationDetail;
@@ -15,6 +17,7 @@ type Props = {
 type State = {
   showResource: boolean;
   resource?: ResourceTreeNode;
+  zoom: number;
 };
 
 class ApplicationGraph extends React.Component<Props, State> {
@@ -22,6 +25,7 @@ class ApplicationGraph extends React.Component<Props, State> {
     super(props);
     this.state = {
       showResource: false,
+      zoom: 1,
     };
   }
 
@@ -96,17 +100,39 @@ class ApplicationGraph extends React.Component<Props, State> {
 
   render() {
     const { env, application } = this.props;
-    const { showResource, resource } = this.state;
+    const { showResource, resource, zoom } = this.state;
     const data = this.buildTree();
     return (
-      <div>
+      <div className="graph-container">
+        <div className="operation">
+          <Button.Group>
+            <Button
+              onClick={() => {
+                this.setState({ zoom: zoom - 0.1 });
+              }}
+              type="secondary"
+              disabled={zoom <= 0.5}
+            >
+              <Icon type="minus" />
+            </Button>
+            <Button
+              onClick={() => {
+                this.setState({ zoom: zoom + 0.1 });
+              }}
+              // disabled={zoom >= 2}
+              type="secondary"
+            >
+              <Icon type="add" />
+            </Button>
+          </Button.Group>
+        </div>
         <TreeGraph
           onResourceDetailClick={this.onResourceDetailClick}
           appName={application?.name || ''}
           envName={env?.name || ''}
           onNodeClick={() => {}}
           node={data}
-          zoom={1}
+          zoom={zoom}
         />
         <If condition={showResource && resource}>
           {resource && (

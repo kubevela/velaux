@@ -152,7 +152,7 @@ export const ResourceIcon = ({
     width: '32px',
     height: '32px',
     borderRadius: '50%',
-    backgroundColor: '#8FA4B1',
+    backgroundColor: '#1b58f4',
     textAlign: 'center',
     lineHeight: '30px',
     ...customStyle,

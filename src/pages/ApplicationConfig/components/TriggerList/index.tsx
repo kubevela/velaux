@@ -225,7 +225,7 @@ class TriggerList extends Component<Props, State> {
               style={{ minHeight: '400px' }}
               message={
                 <span>
-                  <Translation>There is no triggers</Translation>
+                  <Translation>There are no triggers</Translation>
                 </span>
               }
             />

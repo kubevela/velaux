@@ -138,7 +138,7 @@ class ComponentsList extends Component<Props> {
               style={{ minHeight: '400px' }}
               message={
                 <span>
-                  <Translation>There is no components</Translation>
+                  <Translation>There are no components</Translation>
                 </span>
               }
             />
