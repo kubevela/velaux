@@ -31,6 +31,10 @@ function loadResource(resource: ResourceTreeNode, setResource: any) {
   }
 }
 
+export function nodeKey(resource: ResourceTreeNode, sep: string = '-') {
+  return [resource.cluster, resource.kind, resource.namespace, resource.name].join(sep);
+}
+
 export const ShowResource = (props: ResourceProps) => {
   const [resource, setResource] = React.useState<ResourceObject>();
 
@@ -38,11 +42,11 @@ export const ShowResource = (props: ResourceProps) => {
     loadResource(props.resource, setResource);
   }, [props.resource]);
 
-  const containerId = 'resource-show' + resource?.metadata.name;
+  const containerId = 'resource-show' + nodeKey(props.resource);
   return (
     <React.Fragment>
       <DrawerWithFooter
-        title={`${props.resource.namespace}/${props.resource.kind}/${props.resource.name}`}
+        title={nodeKey(props.resource, '/')}
         placement="right"
         width={600}
         onClose={props.onClose}
@@ -50,6 +54,7 @@ export const ShowResource = (props: ResourceProps) => {
         <If condition={resource}>
           <div id={containerId} style={{ height: 'calc(100vh - 100px)' }}>
             <DefinitionCode
+              id={containerId + 'content'}
               containerId={containerId}
               language={'yaml'}
               readOnly={true}
