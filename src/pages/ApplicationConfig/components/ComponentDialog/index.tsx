@@ -185,7 +185,7 @@ class ComponentDialog extends React.Component<Props, State> {
   };
 
   extButtonList = () => {
-    const { onComponentClose, isEditComponent, project, componentName } = this.props;
+    const { onComponentClose, isEditComponent, project, componentName, appName } = this.props;
     const { isCreateComponentLoading, isUpdateComponentLoading } = this.state;
     return (
       <div>
@@ -195,7 +195,7 @@ class ComponentDialog extends React.Component<Props, State> {
         <If condition={!isEditComponent}>
           <Permission
             request={{
-              resource: `project/application/component:*`,
+              resource: `project:${project}/application:${appName}/component:*`,
               action: 'create',
             }}
             project={project}
@@ -208,7 +208,9 @@ class ComponentDialog extends React.Component<Props, State> {
         <If condition={isEditComponent}>
           <Permission
             request={{
-              resource: `project/application/component:${componentName || '*'}`,
+              resource: `project:${project}/application:${appName}/component:${
+                componentName || '*'
+              }`,
               action: 'update',
             }}
             project={project}

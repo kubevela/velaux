@@ -157,7 +157,7 @@ class SelectSearch extends React.Component<Props, State> {
           </Col>
           <Col span="4">
             <Permission
-              request={{ resource: `project/application:*`, action: 'create' }}
+              request={{ resource: `project:${projectName}/application:*`, action: 'create' }}
               project={projectName}
             >
               <Button

@@ -1,0 +1,19 @@
+@import '../../../../lib.less';
+
+.graph-container {
+  padding: 32px;
+  overflow: auto;
+  background: rgba(171, 205, 239, 0.2);
+  min-width: 100%;
+  max-width: 100%;
+  min-height: calc(100vh - 443px);
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  //position: relative;
+  .operation {
+      position: absolute;
+      top: 32px;
+      z-index: 100;
+  }
+}

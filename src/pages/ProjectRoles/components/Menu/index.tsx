@@ -48,7 +48,7 @@ class ProjectMenu extends Component<Props> {
         >
           <span> {item.alias || item.name} </span>
           <Permission
-            request={{ resource: `project/role:${item.name}`, action: 'delete' }}
+            request={{ resource: `project:${projectName}/role:${item.name}`, action: 'delete' }}
             project={projectName}
           >
             <span>

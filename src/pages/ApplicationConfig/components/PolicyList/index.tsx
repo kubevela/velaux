@@ -49,6 +49,7 @@ class PolicyList extends Component<Props, State> {
     envbinding?.map((item) => {
       envNameAlias[item.name] = item.alias;
     });
+    //const projectName = applicationDetail && applicationDetail.project?.name;
     return (
       <div className="list-warper">
         <div className="box">
@@ -65,10 +66,10 @@ class PolicyList extends Component<Props, State> {
                     {/* <div className="trigger-list-operation">
                     <Permission
                       request={{
-                        resource: `project/application/policy:${item.name}`,
+                        resource: `project:${projectName}/application/policy:${item.name}`,
                         action: 'delete',
                       }}
-                      project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                      project={projectName}
                     >
                       <Icon
                         type="ashbin1"
@@ -118,7 +119,7 @@ class PolicyList extends Component<Props, State> {
               style={{ minHeight: '400px' }}
               message={
                 <span>
-                  <Translation>There is no policies</Translation>
+                  <Translation>There are no policies</Translation>
                 </span>
               }
             />

@@ -12,6 +12,7 @@ type Props = {
   'data-meta'?: string;
   id?: string;
   onChange?: (params: any) => void;
+  style?: React.CSSProperties;
 };
 
 class DefinitionCode extends React.Component<Props> {
@@ -80,8 +81,8 @@ class DefinitionCode extends React.Component<Props> {
   }
 
   render() {
-    const { id } = this.props;
-    return <div id={id} />;
+    const { id, style } = this.props;
+    return <div style={style} id={id} />;
   }
 }
 

@@ -1,14 +1,24 @@
 import React from 'react';
 import { connect } from 'dva';
 
-import { Table, Card, Loading, Balloon, Icon, Button, Message, Dialog, Tag } from '@b-design/ui';
+import {
+  Table,
+  Card,
+  Loading,
+  Balloon,
+  Icon,
+  Button,
+  Message,
+  Dialog,
+  Tag,
+  Switch,
+} from '@b-design/ui';
 import type {
   ApplicationComponent,
   ApplicationDetail,
   ApplicationStatus,
   Condition,
   EnvBinding,
-  AppliedResource,
   ComponentStatus,
 } from '../../interface/application';
 import { If } from 'tsx-control-statements/components';
@@ -17,10 +27,11 @@ import locale from '../../utils/locale';
 import { Link } from 'dva/router';
 import Header from '../ApplicationInstanceList/components/Header';
 import {
+  listApplicationResourceTree,
   listApplicationServiceAppliedResources,
   listApplicationServiceEndpoints,
 } from '../../api/observation';
-import type { Endpoint } from '../../interface/observation';
+import type { Endpoint, AppliedResource } from '../../interface/observation';
 import type { Target } from '../../interface/target';
 import { getLink } from '../../utils/utils';
 import { deployApplication } from '../../api/application';
@@ -30,6 +41,7 @@ import i18next from 'i18next';
 import { checkPermission } from '../../utils/permission';
 import type { LoginUserInfo } from '../../interface/user';
 import './index.less';
+import ApplicationGraph from './components/ApplicationGraph';
 
 type Props = {
   dispatch: ({}) => {};
@@ -52,21 +64,24 @@ type State = {
   endpoints?: Endpoint[];
   target?: Target;
   componentName?: string;
-  resources?: AppliedResource[];
+  resources: AppliedResource[];
   deployLoading: boolean;
   envName: string;
+  mode: 'table' | 'graph';
 };
 
 @connect((store: any) => {
   return { ...store.application, ...store.user };
 })
-class ApplicationMonitor extends React.Component<Props, State> {
+class ApplicationStatusPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       loading: true,
       deployLoading: false,
       envName: '',
+      mode: 'graph',
+      resources: [],
     };
   }
 
@@ -80,6 +95,9 @@ class ApplicationMonitor extends React.Component<Props, State> {
       this.setState({ envName: params.envName }, () => {
         this.loadApplicationStatus();
       });
+    }
+    if (this.props.envbinding.length != nextProps.envbinding.length) {
+      this.loadApplicationStatus();
     }
   }
 
@@ -152,6 +170,11 @@ class ApplicationMonitor extends React.Component<Props, State> {
   };
 
   loadApplicationAppliedResources = async () => {
+    const { mode } = this.state;
+    if (mode == 'graph') {
+      await this.loadResourceTree();
+      return;
+    }
     const { applicationDetail } = this.props;
     const {
       params: { appName },
@@ -172,6 +195,40 @@ class ApplicationMonitor extends React.Component<Props, State> {
       }
       this.setState({ loading: true });
       listApplicationServiceAppliedResources(param)
+        .then((re) => {
+          if (re && re.resources) {
+            this.setState({ resources: re.resources });
+          } else {
+            this.setState({ resources: [] });
+          }
+        })
+        .finally(() => {
+          this.setState({ loading: false });
+        });
+    }
+  };
+
+  loadResourceTree = async () => {
+    const { applicationDetail } = this.props;
+    const env = this.getEnvbindingByName();
+    const { target, componentName } = this.state;
+    const {
+      params: { appName },
+    } = this.props.match;
+    if (applicationDetail && applicationDetail.name && env) {
+      const param = {
+        appName: env.appDeployName || appName,
+        appNs: env.appDeployNamespace,
+        componentName: componentName,
+        cluster: '',
+        clusterNs: '',
+      };
+      if (target) {
+        param.cluster = target.cluster?.clusterName || '';
+        param.clusterNs = target.cluster?.namespace || '';
+      }
+      this.setState({ loading: true });
+      listApplicationResourceTree(param)
         .then((re) => {
           if (re && re.resources) {
             this.setState({ resources: re.resources });
@@ -264,12 +321,25 @@ class ApplicationMonitor extends React.Component<Props, State> {
     }
   };
 
+  onChangeMode = () => {
+    const { mode } = this.state;
+    if (mode == 'graph') {
+      this.setState({ mode: 'table' }, () => {
+        this.loadApplicationAppliedResources();
+      });
+    } else {
+      this.setState({ mode: 'graph' }, () => {
+        this.loadApplicationAppliedResources();
+      });
+    }
+  };
+
   render() {
     const { applicationStatus, applicationDetail, components, userInfo } = this.props;
     const {
       params: { appName, envName },
     } = this.props.match;
-    const { loading, endpoints, resources, componentName, deployLoading } = this.state;
+    const { loading, endpoints, resources, componentName, deployLoading, mode } = this.state;
     const gatewayIPs: any = [];
     endpoints?.map((endpointObj) => {
       const item = getLink(endpointObj);
@@ -279,7 +349,9 @@ class ApplicationMonitor extends React.Component<Props, State> {
     if (componentName) {
       componentStatus = componentStatus?.filter((item) => item.name == componentName);
     }
+    const env = this.getEnvbindingByName();
     const { Group: TagGroup } = Tag;
+
     return (
       <div className="application-status-wrapper">
         <Header
@@ -304,8 +376,19 @@ class ApplicationMonitor extends React.Component<Props, State> {
           }}
           dispatch={this.props.dispatch}
         />
+        <If condition={applicationStatus}>
+          <Switch
+            unCheckedChildren="Table"
+            checkedChildren="Graph"
+            defaultChecked={true}
+            onChange={this.onChangeMode}
+          />
+        </If>
         <Loading visible={loading} style={{ width: '100%' }}>
-          <If condition={applicationStatus}>
+          <If condition={applicationStatus && mode === 'graph'}>
+            <ApplicationGraph application={applicationDetail} env={env} resources={resources} />
+          </If>
+          <If condition={applicationStatus && mode === 'table'}>
             <Card
               locale={locale().Card}
               contentHeight="200px"
@@ -539,4 +622,4 @@ class ApplicationMonitor extends React.Component<Props, State> {
   }
 }
 
-export default ApplicationMonitor;
+export default ApplicationStatusPage;

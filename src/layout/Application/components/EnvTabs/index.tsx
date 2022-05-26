@@ -53,6 +53,7 @@ class TabsContent extends Component<Props, State> {
   render() {
     const { activeKey, applicationDetail, envbinding } = this.props;
     const { visibleEnvPlan } = this.state;
+    const projectName = applicationDetail && applicationDetail.project?.name;
     return (
       <div className="padding16">
         <div className="tabs-content">
@@ -99,8 +100,11 @@ class TabsContent extends Component<Props, State> {
               <div className="action-list">
                 <If condition={!applicationDetail?.readOnly}>
                   <Permission
-                    request={{ resource: `project/application/envBinding:*`, action: 'create' }}
-                    project={`${(applicationDetail && applicationDetail.project?.name) || ''}`}
+                    request={{
+                      resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:*`,
+                      action: 'create',
+                    }}
+                    project={projectName}
                   >
                     <a
                       onClick={() => {

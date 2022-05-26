@@ -1,0 +1,124 @@
+@import '../../lib.less';
+
+.graph-tree {
+  position: relative;
+  overflow: auto;
+
+  .graph-node {
+    position: absolute;
+    display: flex;
+    width: 200px;
+    margin: 10px;
+    padding-right: 1em;
+    padding-left: 3.5em;
+    background: #fff;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s linear;
+
+    .name {
+      display: flex;
+      flex: 1 1;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      width: 100%;
+      overflow: hidden;
+      line-height: 40px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .icon {
+      position: absolute;
+      left: 0.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+
+      img {
+        width: 30px;
+      }
+    }
+
+    .icon-error {
+      color: @dangerColor;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: end;
+
+      i {
+        color: #666;
+      }
+    }
+  }
+
+  .graph-node-app {
+    padding-left: 5em;
+
+    .icon {
+      top: -10px;
+      left: -10px;
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      border: 2px solid (@primarycolor);
+      border-radius: 30px;
+
+      img {
+        width: 50px;
+      }
+    }
+  }
+
+  .graph-node.node-error {
+    box-shadow: 1px 1px 1px (@dangerColor);
+  }
+
+  .graph-node-pod {
+    .icon {
+      height: 60px;
+    }
+    .name {
+      line-height: 30px;
+      .actions {
+        .next-icon {
+          &:hover {
+            color: @primarycolor;
+          }
+        }
+      }
+    }
+  }
+
+  .graph-node.error-status {
+    border: solid 0.2em @dangerColor;
+  }
+  .graph-node.warning-status {
+    border: solid 0.2em @warningColor;
+  }
+
+  .graph-edge {
+    .graph-edge-line {
+      position: absolute;
+      z-index: -1;
+      border-top: 1px dashed #666;
+      transition: all 0.2s linear;
+
+      &:last-child {
+        &:after {
+          position: absolute;
+          top: -10px;
+          color: #a3a3a3;
+          font-size: 10px;
+          transform: rotate(180deg);
+          content: '\25BA';
+        }
+      }
+    }
+  }
+}

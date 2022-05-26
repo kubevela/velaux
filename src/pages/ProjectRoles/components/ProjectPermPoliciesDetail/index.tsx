@@ -115,7 +115,7 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
     if (isCreateProjectRoles) {
       return (
         <Permission
-          request={{ resource: `project/role:*`, action: 'create' }}
+          request={{ resource: `project:${projectName}/role:*`, action: 'create' }}
           project={projectName}
         >
           <Button className="create-auth-btn" type="primary" onClick={this.onSubmit}>
@@ -126,7 +126,7 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
     } else {
       return (
         <Permission
-          request={{ resource: `project/role:${name}`, action: 'update' }}
+          request={{ resource: `project:${projectName}/role:${name}`, action: 'update' }}
           project={projectName}
         >
           <Button className="create-auth-btn" type="primary" onClick={this.onSubmit}>

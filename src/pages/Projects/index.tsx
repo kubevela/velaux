@@ -14,8 +14,11 @@ import Title from '../../components/ListTitle';
 import { If } from 'tsx-control-statements/components';
 import Permission from '../../components/Permission';
 import './index.less';
+import { connect } from 'dva';
 
-type Props = {};
+type Props = {
+  dispatch: ({}) => void;
+};
 
 type State = {
   list: Project[];
@@ -29,6 +32,7 @@ type State = {
   userList: User[];
 };
 
+@connect()
 class Projects extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -99,6 +103,7 @@ class Projects extends Component<Props, State> {
               if (res) {
                 Message.success(<Translation>Delete project success</Translation>);
                 this.listProjects();
+                this.onUpdateUserInfo();
               }
             })
             .catch();
@@ -111,6 +116,13 @@ class Projects extends Component<Props, State> {
   onCreate = () => {
     this.setState({ visible: false });
     this.listProjects();
+    this.onUpdateUserInfo();
+  };
+
+  onUpdateUserInfo = () => {
+    this.props.dispatch({
+      type: 'user/getLoginUserInfo',
+    });
   };
 
   onCloseCreate = () => {

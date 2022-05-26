@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dialog, Table, Card, Loading, Button, Balloon, Icon } from '@b-design/ui';
-import type { ApplicationStatus, Condition, Resource } from '../../interface/application';
+import type { ApplicationStatus, Condition } from '../../interface/application';
+import type { Resource } from '../../interface/observation';
 import Translation from '../../components/Translation';
 import { If } from 'tsx-control-statements/components';
 import locale from '../../utils/locale';

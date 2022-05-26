@@ -6,6 +6,7 @@ import { createBrowserHistory } from 'history';
 import RouterView from './router';
 import './i18n';
 import '@b-design/ui/dist/index.css';
+import './common.less';
 
 const app: any = dva({
   history: createBrowserHistory(),

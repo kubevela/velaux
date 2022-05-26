@@ -12,12 +12,15 @@ import type { ApplicationDetail, EnvBinding } from '../../../../interface/applic
 import { getAddonsStatus } from '../../../../api/addons';
 import type { AddonClusterInfo, AddonStatus } from '../../../../interface/addon';
 import { If } from 'tsx-control-statements/components';
+import { checkPermission } from '../../../../utils/permission';
+import type { LoginUserInfo } from '../../../../interface/user';
 
 export type Props = {
   pod: PodBase;
   env?: EnvBinding;
   clusterName: string;
   application?: ApplicationDetail;
+  userInfo?: LoginUserInfo;
 };
 
 export type State = {
@@ -82,11 +85,14 @@ class PodDetail extends React.Component<Props, State> {
   };
 
   loadAddonStatus = async () => {
-    getAddonsStatus({ name: 'observability' }).then((re: AddonStatus) => {
-      if (re && re.phase == 'enabled') {
-        this.setState({ observability: re.clusters });
-      }
-    });
+    const { userInfo } = this.props;
+    if (checkPermission({ resource: `addon`, action: 'list' }, '', userInfo)) {
+      getAddonsStatus({ name: 'observability' }).then((re: AddonStatus) => {
+        if (re && re.phase == 'enabled') {
+          this.setState({ observability: re.clusters });
+        }
+      });
+    }
   };
 
   showContainerLog = (containerName: string) => {
