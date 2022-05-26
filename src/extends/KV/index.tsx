@@ -23,12 +23,7 @@ type Props = {
 
 type State = {
   items: Item[];
-  selectValues?: {
-    [propName: string]: any;
-  };
-  changeEntryKey?: {
-    [propName: string]: any;
-  };
+  inputValue?: string;
 };
 
 type Item = {
@@ -37,18 +32,6 @@ type Item = {
   value?: any;
   valueType: any;
 };
-
-type Objects = {
-  [propName: string]: any;
-};
-function getEmptyItem() {
-  return {
-    key: Date.now().toString(),
-    label: '',
-    value: '',
-    valueType: 'string',
-  };
-}
 
 class KV extends Component<Props, State> {
   form: Field;
@@ -60,21 +43,18 @@ class KV extends Component<Props, State> {
     this.form = new Field(this, {
       onChange: (name: string, value: string) => {
         const { keyOptions } = this.props;
-        const { selectValues } = this.state;
         if (keyOptions && name.indexOf('envKey-') > -1) {
           const itemKey = name.substring(name.indexOf('-') + 1);
           this.form.setValue('envValue-' + itemKey, keyOptions[value]);
           const { items } = this.state;
-          const newSelectValues: Objects = {};
           const newItems = items.map((item) => {
             if (item.key == itemKey) {
               item.value = keyOptions[value];
-              newSelectValues[item.key] = value;
               item.valueType = this.getValueType(keyOptions[value]);
             }
             return item;
           });
-          this.setState({ items: newItems, selectValues: { ...selectValues, ...newSelectValues } });
+          this.setState({ items: newItems });
         }
         this.submit();
       },
@@ -89,7 +69,6 @@ class KV extends Component<Props, State> {
     const { value } = this.props;
     const { items } = this.state;
     const newItems = [...items];
-    const selectValues: Objects = {};
     if (value) {
       for (const label in value) {
         const key = Date.now().toString() + label;
@@ -101,21 +80,24 @@ class KV extends Component<Props, State> {
         });
         this.form.setValue('envKey-' + key, label);
         this.form.setValue('envValue-' + key, value[label]);
-        selectValues[key] = label;
       }
     }
 
-    this.setState({ items: newItems, selectValues: selectValues });
+    this.setState({ items: newItems });
   };
 
   addItem() {
     const { items } = this.state;
-    items.push(getEmptyItem());
+    items.push({
+      key: Date.now().toString(),
+      label: '',
+      value: '',
+      valueType: this.getValueType(''),
+    });
     this.setState({ items: [...items] });
   }
 
   submit() {
-    this.updateEntryKey();
     const values: any = this.form.getValues();
     const items: Map<string, Item> = new Map();
     Object.keys(values).map((key) => {
@@ -149,17 +131,6 @@ class KV extends Component<Props, State> {
     }
   }
 
-  updateEntryKey = () => {
-    const values: Objects = this.form.getValues();
-    const { changeEntryKey } = this.state;
-    for (const key in changeEntryKey) {
-      if (`envKey-${key}` in values) {
-        this.form.remove('envKey-' + key);
-        this.form.setValue('envKey-' + key, changeEntryKey[key]);
-      }
-    }
-  };
-
   remove(key: any) {
     const { items } = this.state;
     items.forEach((item, i) => {
@@ -173,30 +144,8 @@ class KV extends Component<Props, State> {
     this.submit();
   }
 
-  onSearch = (key: string, value: string) => {
-    const { items, selectValues, changeEntryKey } = this.state;
-    const newSelectValues: Objects = {};
-    items.forEach((item) => {
-      if (item.key === key) {
-        item.value = value;
-        newSelectValues[item.key] = value;
-        this.form.setValue('envKey-' + key, value);
-        this.form.remove('envValue-' + key);
-      }
-      return item;
-    });
-    const newChangeEntryKey = {
-      [key]: value,
-    };
-    this.setState({
-      selectValues: { ...selectValues, ...newSelectValues },
-      changeEntryKey: { ...changeEntryKey, ...newChangeEntryKey },
-    });
-  };
-
-  findKey = (key: string) => {
-    const { selectValues } = this.state;
-    return (selectValues && selectValues[key]) || '';
+  onSearch = (value: string) => {
+    this.setState({ inputValue: value });
   };
 
   getValueType = (value: any) => {
@@ -230,10 +179,13 @@ class KV extends Component<Props, State> {
   };
 
   render() {
-    const { items } = this.state;
+    const { items, inputValue } = this.state;
     const { id, keyOptions } = this.props;
     const { init } = this.form;
     const dataSource = keyOptions ? Object.keys(keyOptions) : [];
+    if (inputValue) {
+      dataSource.push(inputValue);
+    }
     return (
       <div id={id}>
         {items.map((item) => {
@@ -250,10 +202,7 @@ class KV extends Component<Props, State> {
                       label={'Key'}
                       placeholder={i18n.t('Please select')}
                       locale={locale().Select}
-                      onSearch={(value: string) => {
-                        this.onSearch(item.key, value);
-                      }}
-                      value={this.findKey(item.key)}
+                      onSearch={this.onSearch}
                     />
                   </If>
                   <If condition={!keyOptions}>
@@ -276,7 +225,11 @@ class KV extends Component<Props, State> {
                       {...init(`envValue-${item.key}`)}
                       label={'Value'}
                       className="full-width"
-                      placeholder={i18n.t('Please input or select key')}
+                      placeholder={i18n.t(
+                        item.valueType == 'number'
+                          ? 'Please input a number'
+                          : 'Please input a value',
+                      )}
                     />
                   </If>
                   <If condition={item.valueType == 'boolean'}>
