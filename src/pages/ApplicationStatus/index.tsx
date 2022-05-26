@@ -66,6 +66,8 @@ type State = {
   componentName?: string;
   resources: AppliedResource[];
   deployLoading: boolean;
+  resourceLoading: boolean;
+  endpointLoading: boolean;
   envName: string;
   mode: 'table' | 'graph';
 };
@@ -79,6 +81,8 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     this.state = {
       loading: true,
       deployLoading: false,
+      resourceLoading: false,
+      endpointLoading: false,
       envName: '',
       mode: 'graph',
       resources: [],
@@ -95,6 +99,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       this.setState({ envName: params.envName }, () => {
         this.loadApplicationStatus();
       });
+      return;
     }
     if (this.props.envbinding.length != nextProps.envbinding.length) {
       this.loadApplicationStatus();
@@ -110,7 +115,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         type: 'application/getApplicationStatus',
         payload: { appName: appName, envName: envName },
         callback: () => {
-          this.setState({ loading: false });
           this.loadApplicationEndpoints();
           this.loadApplicationAppliedResources();
         },
@@ -154,7 +158,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         param.cluster = target.cluster?.clusterName || '';
         param.clusterNs = target.cluster?.namespace || '';
       }
-      this.setState({ loading: true });
+      this.setState({ endpointLoading: true });
       listApplicationServiceEndpoints(param)
         .then((re) => {
           if (re && re.endpoints) {
@@ -164,7 +168,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
           }
         })
         .finally(() => {
-          this.setState({ loading: false });
+          this.setState({ endpointLoading: false });
         });
     }
   };
@@ -193,7 +197,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         param.cluster = target.cluster?.clusterName || '';
         param.clusterNs = target.cluster?.namespace || '';
       }
-      this.setState({ loading: true });
+      this.setState({ resourceLoading: true });
       listApplicationServiceAppliedResources(param)
         .then((re) => {
           if (re && re.resources) {
@@ -203,7 +207,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
           }
         })
         .finally(() => {
-          this.setState({ loading: false });
+          this.setState({ resourceLoading: false });
         });
     }
   };
@@ -211,11 +215,11 @@ class ApplicationStatusPage extends React.Component<Props, State> {
   loadResourceTree = async () => {
     const { applicationDetail } = this.props;
     const env = this.getEnvbindingByName();
-    const { target, componentName } = this.state;
+    const { target, componentName, resourceLoading } = this.state;
     const {
       params: { appName },
     } = this.props.match;
-    if (applicationDetail && applicationDetail.name && env) {
+    if (applicationDetail && applicationDetail.name && env && !resourceLoading) {
       const param = {
         appName: env.appDeployName || appName,
         appNs: env.appDeployNamespace,
@@ -227,7 +231,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         param.cluster = target.cluster?.clusterName || '';
         param.clusterNs = target.cluster?.namespace || '';
       }
-      this.setState({ loading: true });
+      this.setState({ resourceLoading: true });
       listApplicationResourceTree(param)
         .then((re) => {
           if (re && re.resources) {
@@ -237,7 +241,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
           }
         })
         .finally(() => {
-          this.setState({ loading: false });
+          this.setState({ resourceLoading: false });
         });
     }
   };
@@ -339,7 +343,16 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     const {
       params: { appName, envName },
     } = this.props.match;
-    const { loading, endpoints, resources, componentName, deployLoading, mode } = this.state;
+    const {
+      loading,
+      endpointLoading,
+      resourceLoading,
+      endpoints,
+      resources,
+      componentName,
+      deployLoading,
+      mode,
+    } = this.state;
     const gatewayIPs: any = [];
     endpoints?.map((endpointObj) => {
       const item = getLink(endpointObj);
@@ -354,28 +367,30 @@ class ApplicationStatusPage extends React.Component<Props, State> {
 
     return (
       <div className="application-status-wrapper">
-        <Header
-          envbinding={this.getEnvbindingByName()}
-          targets={this.getTargets()}
-          envName={envName}
-          appName={appName}
-          disableStatusShow={true}
-          gatewayIPs={gatewayIPs}
-          applicationDetail={applicationDetail}
-          applicationStatus={applicationStatus}
-          components={components}
-          updateEnvs={() => {
-            this.loadApplicationEnvbinding();
-            this.loadApplicationWorkflows();
-          }}
-          updateQuery={(params: { target?: string; component?: string }) => {
-            this.updateQuery(params);
-          }}
-          refresh={() => {
-            this.loadApplicationStatus();
-          }}
-          dispatch={this.props.dispatch}
-        />
+        <Loading visible={loading && endpointLoading} style={{ width: '100%' }}>
+          <Header
+            envbinding={this.getEnvbindingByName()}
+            targets={this.getTargets()}
+            envName={envName}
+            appName={appName}
+            disableStatusShow={true}
+            gatewayIPs={gatewayIPs}
+            applicationDetail={applicationDetail}
+            applicationStatus={applicationStatus}
+            components={components}
+            updateEnvs={() => {
+              this.loadApplicationEnvbinding();
+              this.loadApplicationWorkflows();
+            }}
+            updateQuery={(params: { target?: string; component?: string }) => {
+              this.updateQuery(params);
+            }}
+            refresh={() => {
+              this.loadApplicationStatus();
+            }}
+            dispatch={this.props.dispatch}
+          />
+        </Loading>
         <If condition={applicationStatus}>
           <Switch
             unCheckedChildren="Table"
@@ -384,7 +399,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             onChange={this.onChangeMode}
           />
         </If>
-        <Loading visible={loading} style={{ width: '100%' }}>
+        <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
           <If condition={applicationStatus && mode === 'graph'}>
             <ApplicationGraph application={applicationDetail} env={env} resources={resources} />
           </If>

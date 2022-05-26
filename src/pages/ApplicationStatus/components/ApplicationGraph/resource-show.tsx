@@ -6,6 +6,7 @@ import * as yaml from 'js-yaml';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
+import { v4 as uuid } from 'uuid';
 
 type ResourceProps = {
   resource: ResourceTreeNode;
@@ -13,7 +14,7 @@ type ResourceProps = {
 };
 
 function loadResource(resource: ResourceTreeNode, setResource: any) {
-  if (resource.name && resource.namespace && resource.kind && resource.apiVersion) {
+  if (resource.name && resource.kind && resource.apiVersion) {
     detailResource({
       name: resource.name,
       namespace: resource.namespace,
@@ -32,7 +33,7 @@ function loadResource(resource: ResourceTreeNode, setResource: any) {
 }
 
 export function nodeKey(resource: ResourceTreeNode, sep: string = '-') {
-  return [resource.cluster, resource.kind, resource.namespace, resource.name].join(sep);
+  return [resource.cluster || '', resource.kind || '', resource.namespace, resource.name].join(sep);
 }
 
 export const ShowResource = (props: ResourceProps) => {
@@ -41,8 +42,7 @@ export const ShowResource = (props: ResourceProps) => {
   React.useEffect(() => {
     loadResource(props.resource, setResource);
   }, [props.resource]);
-
-  const containerId = 'resource-show' + nodeKey(props.resource);
+  const containerId = uuid();
   return (
     <React.Fragment>
       <DrawerWithFooter
