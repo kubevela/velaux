@@ -6,6 +6,7 @@ import * as yaml from 'js-yaml';
 import DefinitionCode from '../../../../components/DefinitionCode';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
+import { v4 as uuid } from 'uuid';
 
 type ResourceProps = {
   resource: ResourceTreeNode;
@@ -13,7 +14,7 @@ type ResourceProps = {
 };
 
 function loadResource(resource: ResourceTreeNode, setResource: any) {
-  if (resource.name && resource.namespace && resource.kind && resource.apiVersion) {
+  if (resource.name && resource.kind && resource.apiVersion) {
     detailResource({
       name: resource.name,
       namespace: resource.namespace,
@@ -31,18 +32,21 @@ function loadResource(resource: ResourceTreeNode, setResource: any) {
   }
 }
 
+export function nodeKey(resource: ResourceTreeNode, sep: string = '-') {
+  return [resource.cluster || '', resource.kind || '', resource.namespace, resource.name].join(sep);
+}
+
 export const ShowResource = (props: ResourceProps) => {
   const [resource, setResource] = React.useState<ResourceObject>();
 
   React.useEffect(() => {
     loadResource(props.resource, setResource);
   }, [props.resource]);
-
-  const containerId = 'resource-show' + resource?.metadata.name;
+  const containerId = uuid();
   return (
     <React.Fragment>
       <DrawerWithFooter
-        title={`${props.resource.namespace}/${props.resource.kind}/${props.resource.name}`}
+        title={nodeKey(props.resource, '/')}
         placement="right"
         width={600}
         onClose={props.onClose}
@@ -50,6 +54,7 @@ export const ShowResource = (props: ResourceProps) => {
         <If condition={resource}>
           <div id={containerId} style={{ height: 'calc(100vh - 100px)' }}>
             <DefinitionCode
+              id={containerId + 'content'}
               containerId={containerId}
               language={'yaml'}
               readOnly={true}

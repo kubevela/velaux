@@ -32,8 +32,8 @@ class DefinitionCode extends React.Component<Props> {
       container.innerHTML = '';
     }
     if (defineTheme) {
-      monaco.editor.defineTheme(containerId, defineTheme as any);
-      monaco.editor.setTheme(containerId);
+      monaco.editor.defineTheme('default', defineTheme as any);
+      monaco.editor.setTheme('default');
     }
     const modelUri = monaco.Uri.parse(`${containerId}:${fileUrl}`);
     let model = monaco.editor.getModel(modelUri);
@@ -48,7 +48,7 @@ class DefinitionCode extends React.Component<Props> {
       minimap: { enabled: false },
       automaticLayout: true,
       model,
-      theme: containerId,
+      theme: 'default',
     });
     const textModel: monaco.editor.ITextModel | null = this.editor.getModel();
     if (textModel) {

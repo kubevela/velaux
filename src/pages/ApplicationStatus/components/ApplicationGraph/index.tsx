@@ -119,7 +119,7 @@ class ApplicationGraph extends React.Component<Props, State> {
               onClick={() => {
                 this.setState({ zoom: zoom + 0.1 });
               }}
-              // disabled={zoom >= 2}
+              disabled={zoom >= 2}
               type="secondary"
             >
               <Icon type="add" />

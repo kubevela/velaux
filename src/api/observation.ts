@@ -167,14 +167,17 @@ export function listApplicationResourceTree(params: {
 
 export function detailResource(params: {
   name: string;
-  namespace: string;
+  namespace?: string;
   kind: string;
   apiVersion: string;
   cluster?: string;
 }) {
-  let velaQLParams = `name=${params.name}, namespace=${params.namespace}, kind=${params.kind}, apiVersion=${params.apiVersion}`;
+  let velaQLParams = `name=${params.name}, kind=${params.kind}, apiVersion=${params.apiVersion}`;
   if (params.cluster) {
     velaQLParams = `cluster=${params.cluster}, ` + velaQLParams;
+  }
+  if (params.namespace) {
+    velaQLParams = `namespace=${params.namespace}, ` + velaQLParams;
   }
   const urlParams = `application-resource-detail-view{${velaQLParams}}.status`;
   return get('/api/v1/query', {
