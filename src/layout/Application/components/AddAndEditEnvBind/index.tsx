@@ -10,6 +10,7 @@ import { getEnvs } from '../../../../api/env';
 import type { Env } from '../../../../interface/env';
 import { If } from 'tsx-control-statements/components';
 import EnvDialog from '../../../../pages/EnvPage/components/EnvDialog';
+import type { LoginUserInfo } from '../../../../interface/user';
 
 interface Props {
   onClose: () => void;
@@ -17,6 +18,7 @@ interface Props {
   applicationDetail?: ApplicationDetail;
   envbinding?: EnvBinding[];
   targets?: [];
+  userInfo?: LoginUserInfo;
   dispatch?: ({}) => {};
 }
 
@@ -30,7 +32,7 @@ interface State {
 type Callback = (envName: string) => void;
 
 @connect((store: any) => {
-  return { ...store.application, ...store.target };
+  return { ...store.application, ...store.target, ...store.user };
 })
 class EnvBindPlanDialog extends Component<Props, State> {
   field: Field;
@@ -157,6 +159,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
   };
   render() {
     const { loading, isEdit, envs, visibleEnvDialog } = this.state;
+    const { userInfo } = this.props;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const init = this.field.init;
@@ -232,7 +235,8 @@ class EnvBindPlanDialog extends Component<Props, State> {
         <If condition={visibleEnvDialog}>
           <EnvDialog
             visible={visibleEnvDialog}
-            projects={[]}
+            projects={userInfo?.projects || []}
+            userInfo={userInfo}
             isEdit={false}
             onClose={this.onCloseEnvDialog}
             onOK={this.onOKEnvDialog}

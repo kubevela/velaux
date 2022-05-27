@@ -21,7 +21,7 @@ class TableList extends Component<Props> {
   onDelete = (record: Env) => {
     deleteEnv({ name: record.name || '' }).then((re) => {
       if (re) {
-        Message.success('env delete success');
+        Message.success('Environment deleted successfully');
         this.props.updateEnvList();
       }
     });

@@ -18,6 +18,7 @@ import { getEnvs } from '../../../../api/env';
 import type { Env } from '../../../../interface/env';
 import type { Target } from '../../../../interface/target';
 import EnvDialog from '../../../EnvPage/components/EnvDialog';
+import type { LoginUserInfo } from '../../../../interface/user';
 
 type Props = {
   visible: boolean;
@@ -26,6 +27,7 @@ type Props = {
   targets?: Target[];
   componentDefinitions: [];
   projects?: Project[];
+  userInfo?: LoginUserInfo;
   setVisible: (visible: boolean) => void;
   dispatch: ({}) => void;
   onClose: () => void;
@@ -345,7 +347,8 @@ class AppDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
 
-    const { visible, setVisible, dispatch, projects, onClose, isDisableProject } = this.props;
+    const { visible, setVisible, dispatch, projects, onClose, isDisableProject, userInfo } =
+      this.props;
 
     const { definitionDetail, dialogStats, envs, visibleEnvDialog } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -357,6 +360,7 @@ class AppDialog extends React.Component<Props, State> {
         value: env.name,
       };
     });
+
     return (
       <React.Fragment>
         <DrawerWithFooter
@@ -372,6 +376,7 @@ class AppDialog extends React.Component<Props, State> {
                 visible={visible}
                 setVisible={setVisible}
                 dispatch={dispatch}
+                userInfo={userInfo}
                 projects={projects}
                 isDisableProject={isDisableProject}
                 field={this.field}
@@ -478,6 +483,7 @@ class AppDialog extends React.Component<Props, State> {
         <If condition={visibleEnvDialog}>
           <EnvDialog
             visible={visibleEnvDialog}
+            userInfo={userInfo}
             projects={projects || []}
             isEdit={false}
             onClose={this.onCloseEnvDialog}

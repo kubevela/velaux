@@ -160,6 +160,7 @@ class Application extends Component<Props, State> {
           <AppDialog
             visible={showAddApplication}
             targets={targets}
+            userInfo={userInfo}
             projects={userInfo?.projects}
             componentDefinitions={componentDefinitions}
             setVisible={(visible) => {

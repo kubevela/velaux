@@ -6,12 +6,15 @@ import './index.less';
 import Translation from '../../../../components/Translation';
 import type { Project } from '../../../../interface/project';
 import i18n from '../../../../i18n';
+import { checkPermission } from '../../../../utils/permission';
+import type { LoginUserInfo } from '../../../../interface/user';
 
 type Props = {
   visible: boolean;
   field: Field;
   projects?: Project[];
   isDisableProject?: boolean;
+  userInfo?: LoginUserInfo;
   setVisible: (visible: boolean) => void;
   dispatch: ({}) => void;
 };
@@ -29,19 +32,25 @@ class GeneralConfig extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { projects, isDisableProject } = this.props;
+    const { projects, isDisableProject, userInfo } = this.props;
     let defaultProject = '';
-    const projectList = (projects || []).map((item, i: number) => {
-      if (i == 0) {
-        defaultProject = item.name;
+    const projectOptions: { label: string; value: string }[] = [];
+    (projects || []).map((project) => {
+      if (
+        checkPermission(
+          { resource: `project:${project.name}/application:*`, action: 'create' },
+          project.name,
+          userInfo,
+        )
+      ) {
+        if (project.name === 'default') {
+          defaultProject = project.name;
+        }
+        projectOptions.push({
+          label: project.alias ? `${project.alias}(${project.name})` : project.name,
+          value: project.name,
+        });
       }
-      if (item.name == 'default') {
-        defaultProject = item.name;
-      }
-      return {
-        label: item.alias || item.name,
-        value: item.name,
-      };
     });
     const FormItem = Form.Item;
     const formItemLayout = {
@@ -121,7 +130,7 @@ class GeneralConfig extends React.Component<Props, State> {
                   name="project"
                   placeholder={i18n.t('Please select a project').toString()}
                   disabled={isDisableProject ? true : false}
-                  dataSource={projectList}
+                  dataSource={projectOptions}
                   filterLocal={true}
                   hasClear={true}
                   style={{ width: '100%' }}

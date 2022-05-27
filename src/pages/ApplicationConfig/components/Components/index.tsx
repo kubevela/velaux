@@ -108,26 +108,42 @@ class ComponentsList extends Component<Props> {
                         >
                           <div>{label}</div>
                           <div className="trait-actions">
-                            <Icon
-                              onClick={(event: React.MouseEvent<HTMLElement>) => {
-                                event.stopPropagation();
-                                this.props.onDeleteTrait(item.name, trait.type);
+                            <Permission
+                              request={{
+                                resource: `project:${projectName}/application:${application?.name}/component:${item.name}/trait:${trait.type}`,
+                                action: 'delete',
                               }}
-                              size={14}
-                              className="danger-icon"
-                              type="ashbin1"
-                            />
+                              project={projectName}
+                            >
+                              <Icon
+                                onClick={(event: React.MouseEvent<HTMLElement>) => {
+                                  event.stopPropagation();
+                                  this.props.onDeleteTrait(item.name, trait.type);
+                                }}
+                                size={14}
+                                className="danger-icon"
+                                type="ashbin1"
+                              />
+                            </Permission>
                           </div>
                         </div>
                       );
                     })}
-                    <div
-                      title={i18n.t('Add a trait')}
-                      className="trait-icon"
-                      onClick={() => this.props.onAddTrait(item.name)}
+                    <Permission
+                      request={{
+                        resource: `project:${projectName}/application:${application?.name}/component:${item.name}/trait:*`,
+                        action: 'create',
+                      }}
+                      project={projectName}
                     >
-                      <Icon type="add" size="small" />
-                    </div>
+                      <div
+                        title={i18n.t('Add a trait')}
+                        className="trait-icon"
+                        onClick={() => this.props.onAddTrait(item.name)}
+                      >
+                        <Icon type="add" size="small" />
+                      </div>
+                    </Permission>
                   </Row>
                 </Card>
               </Col>
