@@ -7,9 +7,11 @@ import { listNamespaces } from '../../../../api/observation';
 import locale from '../../../../utils/locale';
 import type { Env } from '../../../../interface/env';
 import type { Project } from '../../../../interface/project';
+import type { LoginUserInfo } from '../../../../interface/user';
 import { createEnv, updateEnv } from '../../../../api/env';
 import i18n from '../../../../i18n';
 import { getProjectTargetList } from '../../../../api/project';
+import { checkPermission } from '../../../../utils/permission';
 
 type Props = {
   project?: string;
@@ -17,6 +19,7 @@ type Props = {
   visible: boolean;
   projects: Project[];
   envItem?: Env;
+  userInfo?: LoginUserInfo;
   onOK: () => void;
   onClose: () => void;
 };
@@ -165,13 +168,22 @@ class EnvDialog extends React.Component<Props, State> {
       },
     };
 
-    const { visible, isEdit, projects } = this.props;
+    const { visible, isEdit, projects, userInfo } = this.props;
     const { targetLoading, submitLoading } = this.state;
-    const projectList = (projects || []).map((project) => {
-      return {
-        label: project.alias ? `${project.alias}(${project.name})` : project.name,
-        value: project.name,
-      };
+    const projectOptions: { label: string; value: string }[] = [];
+    (projects || []).map((project) => {
+      if (
+        checkPermission(
+          { resource: `project:${project.name}/environment:*`, action: 'create' },
+          project.name,
+          userInfo,
+        )
+      ) {
+        projectOptions.push({
+          label: project.alias ? `${project.alias}(${project.name})` : project.name,
+          value: project.name,
+        });
+      }
     });
     return (
       <div>
@@ -288,15 +300,15 @@ class EnvDialog extends React.Component<Props, State> {
                     name="project"
                     hasClear
                     showSearch
-                    placeholder={i18n.t('Please select').toString()}
+                    placeholder={i18n.t('Please select a project').toString()}
                     filterLocal={true}
-                    dataSource={projectList}
+                    dataSource={projectOptions}
                     style={{ width: '100%' }}
                     {...init('project', {
                       rules: [
                         {
                           required: true,
-                          message: 'Please select project',
+                          message: i18n.t('Please select a project'),
                         },
                       ],
                     })}

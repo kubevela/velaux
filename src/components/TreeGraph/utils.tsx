@@ -38,13 +38,25 @@ export function describeNode(node: GraphNode) {
     `Name: ${node.resource.name}`,
   ];
   if (node.resource.healthStatus?.statusCode) {
-    lines.push(`Status: ${node.resource.healthStatus?.statusCode}`);
+    let statue = `Status: ${node.resource.healthStatus?.statusCode}`;
+    if (node.resource.kind === 'Pod') {
+      statue = statue + `(${node.resource.additionalInfo?.Status})`;
+    }
+    lines.push(statue);
   }
   if (node.resource.healthStatus?.message) {
     lines.push(`Message: ${node.resource.healthStatus?.message}`);
   }
   if (node.resource.healthStatus?.reason) {
     lines.push(`Reason: ${node.resource.healthStatus?.reason}`);
+  }
+  if (node.resource.kind === 'Service') {
+    lines.push(`EIP: ${node.resource.additionalInfo?.EIP}`);
+  }
+  if (node.resource.kind === 'Pod') {
+    lines.push(`Age: ${node.resource.additionalInfo?.Age}`);
+    lines.push(`Ready: ${node.resource.additionalInfo?.Ready}`);
+    lines.push(`Restarts: ${node.resource.additionalInfo?.Restarts}`);
   }
   return lines.join('\n');
 }

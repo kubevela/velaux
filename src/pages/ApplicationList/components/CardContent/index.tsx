@@ -24,6 +24,7 @@ type State = {
 type Props = {
   applications?: ApplicationBase[];
   userInfo?: LoginUserInfo;
+  projectName?: string;
   editAppPlan: (item: ApplicationBase) => void;
   deleteAppPlan: (name: string) => void;
   setVisible: (visible: boolean) => void;
@@ -60,7 +61,7 @@ class CardContent extends React.Component<Props, State> {
 
   isEditPermission = (item: ApplicationBase) => {
     const { userInfo } = this.props;
-    const project = item?.project?.name || '';
+    const project = item?.project?.name || this.props.projectName || '?';
     const request = { resource: `project:${project}/application:${item.name}`, action: 'update' };
     if (checkPermission(request, project, userInfo)) {
       return (
@@ -79,7 +80,7 @@ class CardContent extends React.Component<Props, State> {
 
   isDeletePermission = (item: ApplicationBase) => {
     const { userInfo } = this.props;
-    const project = item?.project?.name || '';
+    const project = item?.project?.name || this.props.projectName || '?';
     const request = { resource: `project:${project}/application:${item.name}`, action: 'delete' };
     if (checkPermission(request, project, userInfo)) {
       return (
@@ -108,6 +109,7 @@ class CardContent extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { applications, setVisible } = this.props;
+    const projectName = this.props.projectName || '?';
     if (!applications || applications.length === 0) {
       return (
         <Empty
@@ -116,8 +118,8 @@ class CardContent extends React.Component<Props, State> {
               <Translation>There are no applications</Translation>
               <main>
                 <Permission
-                  request={{ resource: 'project:?/application:*', action: 'create' }}
-                  project={'?'}
+                  request={{ resource: `project:${projectName}/application:*`, action: 'create' }}
+                  project={projectName}
                 >
                   <Button
                     component="a"

@@ -151,6 +151,7 @@ class targetList extends React.Component<Props, State> {
             visible={visibleEnvDialog}
             projects={userInfo?.projects || []}
             isEdit={isEdit}
+            userInfo={userInfo}
             envItem={envItem}
             onClose={this.onClose}
             onOK={this.onOk}

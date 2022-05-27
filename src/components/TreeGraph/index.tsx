@@ -20,8 +20,9 @@ import pod from '../../assets/resources/pod.svg';
 import kubevela from '../../assets/KubeVela-01.svg';
 
 import { Link } from 'dva/router';
-import { Dropdown, Icon, Menu } from '@b-design/ui';
+import { Dropdown, Icon, Menu, Tag } from '@b-design/ui';
 import i18n from '../../i18n';
+import { If } from 'tsx-control-statements/components';
 
 type TreeGraphProps = {
   node: TreeNode;
@@ -89,6 +90,13 @@ function renderResourceNode(props: TreeGraphProps, id: string, node: GraphNode) 
           </Menu>
         </Dropdown>
       </div>
+      <If condition={node.resource.kind === 'Service' && node.resource.additionalInfo?.EIP}>
+        <div className={classNames('additional')}>
+          <Tag size="small" color="orange">
+            EIP: {node.resource.additionalInfo?.EIP}
+          </Tag>
+        </div>
+      </If>
     </div>
   );
 }
@@ -156,6 +164,11 @@ function renderPodNode(props: TreeGraphProps, id: string, node: GraphNode) {
             <Icon title={i18n.t('Logger')} type="news" />
           </Link>
         </div>
+      </div>
+      <div className={classNames('additional')}>
+        <Tag size="small" color="orange">
+          Ready: {node.resource.additionalInfo?.Ready}
+        </Tag>
       </div>
     </div>
   );

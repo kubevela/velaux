@@ -180,6 +180,7 @@ class ProjectApplications extends Component<Props, State> {
           />
           <Loading visible={isLoading} fullScreen>
             <CardContend
+              projectName={projectName}
               applications={applicationList}
               editAppPlan={(editItem: ApplicationBase) => {
                 this.editApplicationPlan(editItem);
@@ -196,6 +197,7 @@ class ProjectApplications extends Component<Props, State> {
               visible={isAddApplication}
               targets={targets}
               projects={userInfo?.projects}
+              userInfo={userInfo}
               isDisableProject={true}
               projectName={projectName}
               componentDefinitions={componentDefinitions}

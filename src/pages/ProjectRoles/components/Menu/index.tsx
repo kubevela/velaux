@@ -67,13 +67,19 @@ class ProjectMenu extends Component<Props> {
   };
 
   render() {
+    const { projectName } = this.props;
     return (
       <Fragment>
         <ul className="project-menu-wrapper">
           {this.getMenuList()}
-          <li className="add-roles-btn" onClick={this.props.addRole}>
-            <Translation>New Role</Translation>
-          </li>
+          <Permission
+            request={{ resource: `project:${projectName}/role:*`, action: 'create' }}
+            project={projectName}
+          >
+            <li className="add-roles-btn" onClick={this.props.addRole}>
+              <Translation>New Role</Translation>
+            </li>
+          </Permission>
         </ul>
       </Fragment>
     );

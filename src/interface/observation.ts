@@ -222,6 +222,7 @@ export interface AppliedResource extends Resource {
 export interface ResourceTreeNode extends Resource {
   uid?: string;
   healthStatus?: ResourceHealthStatus;
+  additionalInfo?: Record<string, any>;
   leafNodes?: ResourceTreeNode[];
 }
 
