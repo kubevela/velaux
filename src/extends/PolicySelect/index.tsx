@@ -42,9 +42,12 @@ class PolicySelect extends React.Component<Props, State> {
       })
         .then((res) => {
           if (res && res.policies) {
-            const policyListData = (res.policies || []).map(
-              (item: ApplicationPolicyBase) => `${item.name}(${item.type})`,
-            );
+            const policyListData = (res.policies || []).map((item: ApplicationPolicyBase) => {
+              return {
+                label: `${item.name}(${item.type})`,
+                value: item.name,
+              };
+            });
             this.setState({
               policySelectDataSource: policyListData,
             });
