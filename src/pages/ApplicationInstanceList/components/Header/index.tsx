@@ -15,7 +15,7 @@ import type {
 } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import locale from '../../../../utils/locale';
-import { Link } from 'dva/router';
+import { Link, routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import Permission from '../../../../components/Permission';
 
@@ -113,13 +113,14 @@ class Header extends Component<Props, State> {
     Dialog.confirm({
       content: i18n.t('Are you sure you want to delete the current environment binding?'),
       onOk: () => {
-        const { applicationDetail, envName, updateEnvs } = this.props;
+        const { applicationDetail, envName, updateEnvs, dispatch } = this.props;
         if (applicationDetail) {
           deleteApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then(
             (re) => {
               if (re) {
                 Message.success(i18n.t('Environment binding deleted successfully'));
                 updateEnvs();
+                dispatch(routerRedux.push(`/applications/${applicationDetail.name}/config`));
               }
             },
           );
