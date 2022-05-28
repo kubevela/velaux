@@ -20,7 +20,7 @@ import pod from '../../assets/resources/pod.svg';
 import kubevela from '../../assets/KubeVela-01.svg';
 
 import { Link } from 'dva/router';
-import { Dropdown, Icon, Menu, Tag } from '@b-design/ui';
+import { Dropdown, Icon, Menu, Tag, Balloon } from '@b-design/ui';
 import i18n from '../../i18n';
 import { If } from 'tsx-control-statements/components';
 
@@ -60,7 +60,7 @@ export interface TreeNode {
 
 function renderResourceNode(props: TreeGraphProps, id: string, node: GraphNode) {
   const fullName = nodeKey(node);
-  return (
+  const graphNode = (
     <div
       key={id}
       onClick={() => props.onNodeClick && props.onNodeClick(fullName)}
@@ -68,7 +68,6 @@ function renderResourceNode(props: TreeGraphProps, id: string, node: GraphNode) 
         'error-status': node.resource.healthStatus?.statusCode == 'UnHealthy',
         'warning-status': node.resource.healthStatus?.statusCode == 'Progressing',
       })}
-      title={describeNode(node)}
       style={{
         left: node.x,
         top: node.y,
@@ -99,17 +98,25 @@ function renderResourceNode(props: TreeGraphProps, id: string, node: GraphNode) 
       </If>
     </div>
   );
+  return (
+    <Balloon trigger={graphNode}>
+      <div>
+        {describeNode(node).map((line) => {
+          return <p className="line">{line}</p>;
+        })}
+      </div>
+    </Balloon>
+  );
 }
 
 function renderAppNode(props: TreeGraphProps, id: string, node: GraphNode) {
   const fullName = nodeKey(node);
 
-  return (
+  const graphNode = (
     <div
       key={id}
       onClick={() => props.onNodeClick && props.onNodeClick(fullName)}
       className={classNames('graph-node', 'graph-node-app')}
-      title={describeNode(node)}
       style={{
         left: node.x,
         top: node.y,
@@ -126,12 +133,21 @@ function renderAppNode(props: TreeGraphProps, id: string, node: GraphNode) {
       </div>
     </div>
   );
+  return (
+    <Balloon trigger={graphNode}>
+      <div>
+        {describeNode(node).map((line) => {
+          return <p className="line">{line}</p>;
+        })}
+      </div>
+    </Balloon>
+  );
 }
 
 function renderPodNode(props: TreeGraphProps, id: string, node: GraphNode) {
   const fullName = nodeKey(node);
   const { appName, envName } = props;
-  return (
+  const graphNode = (
     <div
       key={id}
       onClick={() => props.onNodeClick && props.onNodeClick(fullName)}
@@ -139,7 +155,6 @@ function renderPodNode(props: TreeGraphProps, id: string, node: GraphNode) {
         'error-status': node.resource.healthStatus?.statusCode == 'UnHealthy',
         'warning-status': node.resource.healthStatus?.statusCode == 'Progressing',
       })}
-      title={describeNode(node)}
       style={{
         left: node.x,
         top: node.y,
@@ -172,16 +187,24 @@ function renderPodNode(props: TreeGraphProps, id: string, node: GraphNode) {
       </div>
     </div>
   );
+  return (
+    <Balloon trigger={graphNode}>
+      <div>
+        {describeNode(node).map((line) => {
+          return <p className="line">{line}</p>;
+        })}
+      </div>
+    </Balloon>
+  );
 }
 
 function renderClusterNode(props: TreeGraphProps, id: string, node: GraphNode) {
   const fullName = nodeKey(node);
 
-  return (
+  const graphNode = (
     <div
       onClick={() => props.onNodeClick && props.onNodeClick(fullName)}
       className={classNames('graph-node', 'graph-node-cluster')}
-      title={describeCluster(node)}
       style={{
         left: node.x,
         top: node.y,
@@ -197,6 +220,15 @@ function renderClusterNode(props: TreeGraphProps, id: string, node: GraphNode) {
         <span>{node.resource.name}</span>
       </div>
     </div>
+  );
+  return (
+    <Balloon trigger={graphNode}>
+      <div>
+        {describeCluster(node).map((line) => {
+          return <p className="line">{line}</p>;
+        })}
+      </div>
+    </Balloon>
   );
 }
 
