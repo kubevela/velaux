@@ -10,6 +10,7 @@ import {
   deleteComponent,
   getComponentDefinitions,
   deleteApplicationPlan,
+  deletePolicy,
 } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
@@ -370,6 +371,26 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
+  onDeletePolicy = (policyName: string) => {
+    const { appName } = this.state;
+    deletePolicy({ appName: appName, policyName: policyName }).then((re) => {
+      if (re) {
+        Message.success('Application policy deleted successfully');
+        this.loadApplicationPolicies();
+      }
+    });
+  };
+
+  loadApplicationPolicies = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationPolicies',
+      payload: { appName: appName },
+    });
+  };
+
   render() {
     const { applicationDetail, workflows, components, policies, envbinding } = this.props;
     const {
@@ -555,7 +576,7 @@ class ApplicationConfig extends Component<Props, State> {
               policies={policies}
               envbinding={envbinding}
               onDeletePolicy={(name: string) => {
-                console.log(name);
+                this.onDeletePolicy(name);
               }}
               onShowPolicy={(name: string) => {
                 console.log(name);
