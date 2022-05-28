@@ -50,6 +50,13 @@ class TabsContent extends Component<Props, State> {
       payload: { appName: appName },
     });
   };
+  loadApplicationPolicies = async () => {
+    const { appName } = this.props;
+    this.props.dispatch({
+      type: 'application/getApplicationPolicies',
+      payload: { appName: appName },
+    });
+  };
   render() {
     const { activeKey, applicationDetail, envbinding } = this.props;
     const { visibleEnvPlan } = this.state;
@@ -128,6 +135,7 @@ class TabsContent extends Component<Props, State> {
             onOK={() => {
               this.loadEnvbinding();
               this.loadApplicationWorkflows();
+              this.loadApplicationPolicies();
               this.setState({ visibleEnvPlan: false });
             }}
           />

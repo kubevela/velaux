@@ -114,9 +114,11 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       this.props.dispatch({
         type: 'application/getApplicationStatus',
         payload: { appName: appName, envName: envName },
-        callback: () => {
-          this.loadApplicationEndpoints();
-          this.loadApplicationAppliedResources();
+        callback: (res: any) => {
+          if (res.status) {
+            this.loadApplicationEndpoints();
+            this.loadApplicationAppliedResources();
+          }
         },
       });
     }
@@ -256,6 +258,16 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     });
   };
 
+  loadApplicationPolicies = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationPolicies',
+      payload: { appName: appName },
+    });
+  };
+
   loadApplicationEnvbinding = async () => {
     const {
       params: { appName },
@@ -381,6 +393,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             updateEnvs={() => {
               this.loadApplicationEnvbinding();
               this.loadApplicationWorkflows();
+              this.loadApplicationPolicies();
             }}
             updateQuery={(params: { target?: string; component?: string }) => {
               this.updateQuery(params);
