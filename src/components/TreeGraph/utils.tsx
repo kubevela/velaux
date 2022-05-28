@@ -58,12 +58,12 @@ export function describeNode(node: GraphNode) {
     lines.push(`Ready: ${node.resource.additionalInfo?.Ready}`);
     lines.push(`Restarts: ${node.resource.additionalInfo?.Restarts}`);
   }
-  return lines.join('\n');
+  return lines;
 }
 
 export function describeCluster(node: GraphNode) {
   const lines = [`Cluster: ${node.resource.name}`];
-  return lines.join('\n');
+  return lines;
 }
 
 export function treeNodeKey(node: TreeNode & { uid?: string }) {
