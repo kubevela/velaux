@@ -15,7 +15,6 @@ const Permission = (props: Props) => {
   if (!props.userInfo) {
     return null;
   }
-  console.log(props.request);
   if (!checkPermission(props.request, props.project, props.userInfo)) {
     return null;
   }

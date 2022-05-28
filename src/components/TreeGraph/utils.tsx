@@ -50,7 +50,7 @@ export function describeNode(node: GraphNode) {
   if (node.resource.healthStatus?.reason) {
     lines.push(`Reason: ${node.resource.healthStatus?.reason}`);
   }
-  if (node.resource.kind === 'Service') {
+  if (node.resource.kind === 'Service' && node.resource.additionalInfo?.EIP) {
     lines.push(`EIP: ${node.resource.additionalInfo?.EIP}`);
   }
   if (node.resource.kind === 'Pod') {

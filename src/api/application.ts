@@ -116,6 +116,11 @@ export function getPolicyDetail(params: { appName: string; policyName: string })
   return get(gurl, params).then((res) => res);
 }
 
+export function deletePolicy(params: { appName: string; policyName: string }) {
+  const gurl = `${application}/${params.appName}/policies/${params.policyName}`;
+  return rdelete(gurl, params).then((res) => res);
+}
+
 export function createApplicationTemplate(params: any) {
   const gurl = isMock
     ? `${createApplicationTemplate_mock}`

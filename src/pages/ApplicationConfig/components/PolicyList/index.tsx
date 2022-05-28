@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Dialog, Grid } from '@b-design/ui';
+import { Card, Dialog, Grid, Icon } from '@b-design/ui';
 import type {
   ApplicationDetail,
   ApplicationPolicyBase,
@@ -12,6 +12,7 @@ import Empty from '../../../../components/Empty';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import Item from '../../../../components/Item';
+import Permission from '../../../../components/Permission';
 // import Permission from '../../../../components/Permission';
 
 type Props = {
@@ -43,13 +44,13 @@ class PolicyList extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { policies, envbinding } = this.props;
+    const { policies, envbinding, applicationDetail } = this.props;
     const envNameAlias: any = {};
     envNameAlias[''] = '-';
     envbinding?.map((item) => {
       envNameAlias[item.name] = item.alias;
     });
-    //const projectName = applicationDetail && applicationDetail.project?.name;
+    const projectName = applicationDetail && applicationDetail.project?.name;
     return (
       <div className="list-warper">
         <div className="box">
@@ -63,24 +64,24 @@ class PolicyList extends Component<Props, State> {
                       {item.alias ? `${item.alias}(${item.name})` : item.name}
                       {/* </a> */}
                     </div>
-                    {/* <div className="trigger-list-operation">
-                    <Permission
-                      request={{
-                        resource: `project:${projectName}/application/policy:${item.name}`,
-                        action: 'delete',
-                      }}
-                      project={projectName}
-                    >
-                      <Icon
-                        type="ashbin1"
-                        size={14}
-                        className="margin-right-0 cursor-pointer"
-                        onClick={() => {
-                          this.handlePolicyDelete(item.name);
+                    <div className="trigger-list-operation">
+                      <Permission
+                        request={{
+                          resource: `project:${projectName}/application/policy:${item.name}`,
+                          action: 'delete',
                         }}
-                      />
-                    </Permission>
-                  </div> */}
+                        project={projectName}
+                      >
+                        <Icon
+                          type="ashbin1"
+                          size={14}
+                          className="margin-right-0 cursor-pointer"
+                          onClick={() => {
+                            this.handlePolicyDelete(item.name);
+                          }}
+                        />
+                      </Permission>
+                    </div>
                   </div>
                   <div className="policy-list-content">
                     <Row wrap={true}>

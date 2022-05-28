@@ -4,7 +4,9 @@ import { Upload, Button, Icon, Message } from '@b-design/ui';
 import DefinitionCode from '../../components/DefinitionCode';
 import Translation from '../../components/Translation';
 import * as yaml from 'js-yaml';
+import { v4 as uuid } from 'uuid';
 import { If } from 'tsx-control-statements/components';
+import type { KubernetesObject } from './objects';
 
 type Props = {
   value: any;
@@ -15,6 +17,7 @@ type Props = {
 type State = {
   message: string;
   containerId: string;
+  showButton: boolean;
 };
 
 class K8sObjectsCode extends React.Component<Props, State> {
@@ -23,7 +26,8 @@ class K8sObjectsCode extends React.Component<Props, State> {
     super(props);
     this.state = {
       message: '',
-      containerId: Date.now().toString(),
+      containerId: uuid(),
+      showButton: false,
     };
     this.form = new Field(this, {
       onChange: () => {
@@ -37,17 +41,20 @@ class K8sObjectsCode extends React.Component<Props, State> {
     const { value } = this.props;
     this.setValues(value);
   };
-  componentWillReceiveProps(nextProps: Props) {
-    const { value } = nextProps;
-    if (value !== this.props.value) {
-      this.setValues(value);
-    }
-  }
 
-  setValues = (value: any) => {
+  setValues = (value: KubernetesObject[]) => {
     if (value) {
       try {
-        const code = yaml.dump(value);
+        let code = '---\n';
+        if (value instanceof Array) {
+          value.map((res) => {
+            if (res) {
+              code = code + yaml.dump(res) + '---\n';
+            }
+          });
+        } else {
+          code = yaml.dump(value) + '---\n';
+        }
         this.form.setValues({ code: code });
       } catch {}
     }
@@ -57,10 +64,11 @@ class K8sObjectsCode extends React.Component<Props, State> {
     const { onChange, value } = this.props;
     if (onChange) {
       try {
-        let object = yaml.load(v);
+        let object: any = yaml.load(v);
         if (!(object instanceof Array)) {
           object = [object];
         }
+        object = object.filter((ob: any) => ob != null);
         if (yaml.dump(value) != v) {
           onChange(object);
         }
@@ -68,11 +76,14 @@ class K8sObjectsCode extends React.Component<Props, State> {
       } catch (error: any) {
         if ((error.message = 'expected a single document in the stream, but found more')) {
           try {
-            const objects = yaml.loadAll(v);
+            let objects = yaml.loadAll(v);
             if (yaml.dump(value) != v) {
+              objects = objects.filter((ob: any) => ob != null);
               onChange(objects);
             }
-            this.setState({ message: '' });
+            this.setState({
+              message: '',
+            });
           } catch (err: any) {
             this.setState({ message: err.message });
           }
@@ -96,15 +107,25 @@ class K8sObjectsCode extends React.Component<Props, State> {
     };
   };
 
+  onConvert2WebService = () => {};
+
   render() {
     const { id } = this.props;
     const { init } = this.form;
-    const { message, containerId } = this.state;
+    const { message, containerId, showButton } = this.state;
     return (
       <div id={id}>
         <If condition={message}>
           <span style={{ color: 'red' }}>{message}</span>
         </If>
+
+        <Message type="notice" style={{ marginTop: '16px' }}>
+          <Translation>
+            The input data will be automatically formatted. Ensure that the input data is a valid
+            k8s resource YAML.
+          </Translation>
+        </Message>
+
         <Upload request={this.customRequest}>
           <Button text type="normal" className="padding-left-0">
             <Icon type="cloudupload" />
@@ -120,12 +141,19 @@ class K8sObjectsCode extends React.Component<Props, State> {
             {...init('code')}
           />
         </div>
-        <Message type="notice" style={{ marginTop: '16px' }}>
-          <Translation>
-            The input data will be automatically formatted. Ensure that the input data is a valid
-            k8s resource YAML.
-          </Translation>
-        </Message>
+
+        <If condition={showButton}>
+          <div style={{ marginTop: '16px' }}>
+            <span style={{ fontSize: '14px', color: '#000', marginRight: '16px' }}>
+              <Translation>
+                Convert the kubernetes resource component to the webservice component?
+              </Translation>
+            </span>
+            <Button type="secondary" onClick={this.onConvert2WebService}>
+              Yes
+            </Button>
+          </div>
+        </If>
       </div>
     );
   }
