@@ -552,5 +552,6 @@
   "Your component type does not support the image field, and the image update cannot be performed": "选择的组件不存在 image 字段，无法进行镜像更新",
   "Please select a component": "请选择一个组件",
   "Please select a workflow": "请选择一个工作流",
-  "Please select a payloadType": "请选择请求体类型，不同的外部系统请求参数类型具有差异"
+  "Please select a payloadType": "请选择请求体类型，不同的外部系统请求参数类型具有差异",
+  "Resource Graph": "资源拓扑图"
 }
