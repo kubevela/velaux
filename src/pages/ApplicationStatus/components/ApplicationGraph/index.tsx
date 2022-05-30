@@ -3,12 +3,17 @@ import React from 'react';
 import { If } from 'tsx-control-statements/components';
 import type { TreeNode } from '../../../../components/TreeGraph';
 import { TreeGraph } from '../../../../components/TreeGraph';
-import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
+import type {
+  ApplicationDetail,
+  ApplicationStatus,
+  EnvBinding,
+} from '../../../../interface/application';
 import type { AppliedResource, ResourceTreeNode } from '../../../../interface/observation';
 import { ShowResource } from './resource-show';
 import './index.less';
 
 type Props = {
+  applicationStatus?: ApplicationStatus;
   application?: ApplicationDetail;
   env?: EnvBinding;
   resources: AppliedResource[];
