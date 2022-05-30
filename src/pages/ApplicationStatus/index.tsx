@@ -11,7 +11,7 @@ import {
   Message,
   Dialog,
   Tag,
-  Switch,
+  Tab,
 } from '@b-design/ui';
 import type {
   ApplicationComponent,
@@ -42,6 +42,7 @@ import { checkPermission } from '../../utils/permission';
 import type { LoginUserInfo } from '../../interface/user';
 import './index.less';
 import ApplicationGraph from './components/ApplicationGraph';
+import i18n from '../../i18n';
 
 type Props = {
   dispatch: ({}) => {};
@@ -69,7 +70,7 @@ type State = {
   resourceLoading: boolean;
   endpointLoading: boolean;
   envName: string;
-  mode: 'table' | 'graph';
+  mode: 'overview' | 'resource-graph' | 'application-graph';
 };
 
 @connect((store: any) => {
@@ -84,7 +85,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       resourceLoading: false,
       endpointLoading: false,
       envName: '',
-      mode: 'graph',
+      mode: 'overview',
       resources: [],
     };
   }
@@ -177,7 +178,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
 
   loadApplicationAppliedResources = async () => {
     const { mode } = this.state;
-    if (mode == 'graph') {
+    if (mode === 'resource-graph') {
       await this.loadResourceTree();
       return;
     }
@@ -337,14 +338,13 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     }
   };
 
-  onChangeMode = () => {
-    const { mode } = this.state;
-    if (mode == 'graph') {
-      this.setState({ mode: 'table' }, () => {
+  onChangeMode = (mode: string | number) => {
+    if (mode == 'overview') {
+      this.setState({ mode: mode }, () => {
         this.loadApplicationAppliedResources();
       });
-    } else {
-      this.setState({ mode: 'graph' }, () => {
+    } else if (mode == 'resource-graph') {
+      this.setState({ mode: mode }, () => {
         this.loadApplicationAppliedResources();
       });
     }
@@ -363,7 +363,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       resources,
       componentName,
       deployLoading,
-      mode,
     } = this.state;
     const gatewayIPs: any = [];
     endpoints?.map((endpointObj) => {
@@ -404,247 +403,282 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             dispatch={this.props.dispatch}
           />
         </Loading>
-        <If condition={applicationStatus}>
-          <Switch
-            unCheckedChildren="Table"
-            checkedChildren="Graph"
-            defaultChecked={true}
-            onChange={this.onChangeMode}
-          />
-        </If>
-        <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
-          <If condition={applicationStatus && mode === 'graph'}>
-            <ApplicationGraph application={applicationDetail} env={env} resources={resources} />
-          </If>
-          <If condition={applicationStatus && mode === 'table'}>
-            <Card
-              locale={locale().Card}
-              contentHeight="200px"
-              title={<Translation>Applied Resources</Translation>}
-            >
-              <Table locale={locale().Table} dataSource={resources}>
-                <Table.Column
-                  dataIndex="cluster"
-                  title={<Translation>Cluster</Translation>}
-                  width="200px"
-                  cell={(v: string) => {
-                    let clusterName = v;
-                    if (!clusterName) {
-                      clusterName = 'Local';
-                    }
-                    if (
-                      checkPermission(
-                        { resource: 'cluster:*', action: 'list' },
-                        applicationDetail?.project?.name,
-                        userInfo,
-                      )
-                    ) {
-                      return <Link to="/clusters">{clusterName}</Link>;
-                    }
-                    return <span>{clusterName}</span>;
-                  }}
-                />
-                <Table.Column
-                  dataIndex="name"
-                  width="240px"
-                  title={<Translation>Namespace/Name</Translation>}
-                  cell={(v: string, i: number, row: AppliedResource) => {
-                    return `${row.namespace}/${row.name}`;
-                  }}
-                />
-                <Table.Column
-                  width="200px"
-                  dataIndex="kind"
-                  title={<Translation>Kind</Translation>}
-                />
-                <Table.Column
-                  dataIndex="apiVersion"
-                  title={<Translation>APIVersion</Translation>}
-                />
-                <Table.Column dataIndex="component" title={<Translation>Component</Translation>} />
-                <Table.Column
-                  dataIndex="deployVersion"
-                  title={<Translation>Revision</Translation>}
-                  cell={(v: string, i: number, row: AppliedResource) => {
-                    if (row.latest) {
-                      return (
-                        <span>
-                          <Icon
-                            style={{ color: 'green', marginRight: '8px' }}
-                            type="NEW"
-                            title="latest version resource"
-                          />
-                          <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
-                        </span>
-                      );
-                    }
-                    return (
-                      <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
-                    );
-                  }}
-                />
-              </Table>
-            </Card>
-            <If condition={componentStatus}>
-              <Card
-                locale={locale().Card}
-                style={{ marginTop: '8px', marginBottom: '16px' }}
-                contentHeight="auto"
-                title={<Translation>Component Status</Translation>}
-              >
-                <Table locale={locale().Table} className="customTable" dataSource={componentStatus}>
-                  <Table.Column
-                    align="left"
-                    dataIndex="name"
-                    style={{ width: '17%' }}
-                    title={<Translation>Name</Translation>}
-                  />
-                  <Table.Column
-                    align="left"
-                    dataIndex="healthy"
-                    width="100px"
-                    cell={(v: boolean) => {
-                      if (v) {
-                        return (
-                          <div>
-                            <span className="circle circle-success" />
-                            <span>Healthy</span>
-                          </div>
-                        );
-                      }
-                      return (
-                        <div>
-                          <span className="circle circle-warning" />
-                          <span>UnHealthy</span>
-                        </div>
-                      );
-                    }}
-                    title={<Translation>Healthy</Translation>}
-                  />
-                  <Table.Column
-                    align="left"
-                    dataIndex="trait"
-                    cell={(v: boolean, i: number, record: ComponentStatus) => {
-                      const { traits } = record;
-                      const Tags = (traits || []).map((item) => {
-                        if (item.healthy) {
-                          return (
-                            <Tag type="normal" size="small">
+        <Tab onChange={this.onChangeMode} shape="capsule">
+          <Tab.Item title={i18n.t('Overview')} key="overview">
+            <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
+              <If condition={applicationStatus}>
+                <If condition={componentStatus}>
+                  <Card
+                    locale={locale().Card}
+                    style={{ marginTop: '8px', marginBottom: '16px' }}
+                    contentHeight="auto"
+                    title={<Translation>Component Status</Translation>}
+                  >
+                    <Table
+                      locale={locale().Table}
+                      className="customTable"
+                      dataSource={componentStatus}
+                    >
+                      <Table.Column
+                        align="left"
+                        dataIndex="name"
+                        style={{ width: '17%' }}
+                        title={<Translation>Name</Translation>}
+                      />
+                      <Table.Column
+                        dataIndex="cluster"
+                        title={<Translation>Cluster</Translation>}
+                        width="200px"
+                        cell={(v: string) => {
+                          let clusterName = v;
+                          if (!clusterName) {
+                            clusterName = 'Local';
+                          }
+                          if (
+                            checkPermission(
+                              { resource: 'cluster:*', action: 'list' },
+                              applicationDetail?.project?.name,
+                              userInfo,
+                            )
+                          ) {
+                            return <Link to="/clusters">{clusterName}</Link>;
+                          }
+                          return <span>{clusterName}</span>;
+                        }}
+                      />
+                      <Table.Column
+                        align="left"
+                        dataIndex="healthy"
+                        width="100px"
+                        cell={(v: boolean) => {
+                          if (v) {
+                            return (
                               <div>
                                 <span className="circle circle-success" />
-                                <span>{item.type}</span>
+                                <span>Healthy</span>
                               </div>
-                            </Tag>
-                          );
-                        } else {
-                          return (
-                            <Tag type="normal" size="small">
-                              <div>
-                                <span className="circle circle-failure" />
-                                <span>{item.type}</span>
-                              </div>
-                            </Tag>
-                          );
-                        }
-                      });
-                      return <TagGroup className="tags-content">{Tags}</TagGroup>;
-                    }}
-                    title={<Translation>Traits</Translation>}
-                  />
-                  <Table.Column
-                    align="center"
-                    dataIndex="message"
-                    style={{ width: '50%' }}
-                    title={<Translation>Message</Translation>}
-                    cell={(v: string, i: number, record: ComponentStatus) => {
-                      const { message = '', traits } = record;
-                      const TraitMessages = (traits || []).map((item) => {
-                        if (item.message) {
+                            );
+                          }
                           return (
                             <div>
-                              <span>{item.type}: </span>
-                              <span>{item.message}</span>
+                              <span className="circle circle-warning" />
+                              <span>UnHealthy</span>
                             </div>
                           );
-                        }
-                      });
-                      return (
-                        <div>
-                          <div>{message}</div>
-                          {TraitMessages}
-                        </div>
-                      );
-                    }}
-                  />
-                </Table>
-              </Card>
-            </If>
-            <If condition={applicationStatus?.conditions}>
-              <Card
-                locale={locale().Card}
-                style={{ marginTop: '8px' }}
-                contentHeight="auto"
-                title={<Translation>Conditions</Translation>}
-              >
-                <Table locale={locale().Table} dataSource={applicationStatus?.conditions}>
-                  <Table.Column
-                    width="150px"
-                    dataIndex="type"
-                    title={<Translation>Type</Translation>}
-                  />
-                  <Table.Column dataIndex="status" title={<Translation>Status</Translation>} />
-
-                  <Table.Column
-                    dataIndex="lastTransitionTime"
-                    title={<Translation>LastTransitionTime</Translation>}
-                  />
-                  <Table.Column
-                    dataIndex="reason"
-                    title={<Translation>Reason</Translation>}
-                    cell={(v: string, index: number, row: Condition) => {
-                      if (row.message) {
-                        return (
-                          <Balloon
-                            trigger={
-                              <span style={{ color: 'red', cursor: 'pointer' }}>
-                                {v} <Icon size={'xs'} type="question-circle" />
-                              </span>
+                        }}
+                        title={<Translation>Healthy</Translation>}
+                      />
+                      <Table.Column
+                        align="left"
+                        dataIndex="trait"
+                        cell={(v: boolean, i: number, record: ComponentStatus) => {
+                          const { traits } = record;
+                          const Tags = (traits || []).map((item) => {
+                            if (item.healthy) {
+                              return (
+                                <Tag type="normal" size="small">
+                                  <div>
+                                    <span className="circle circle-success" />
+                                    <span>{item.type}</span>
+                                  </div>
+                                </Tag>
+                              );
+                            } else {
+                              return (
+                                <Tag type="normal" size="small">
+                                  <div>
+                                    <span className="circle circle-failure" />
+                                    <span>{item.type}</span>
+                                  </div>
+                                </Tag>
+                              );
                             }
-                          >
-                            {row.message}
-                          </Balloon>
+                          });
+                          return <TagGroup className="tags-content">{Tags}</TagGroup>;
+                        }}
+                        title={<Translation>Traits</Translation>}
+                      />
+                      <Table.Column
+                        align="center"
+                        dataIndex="message"
+                        title={<Translation>Message</Translation>}
+                        cell={(v: string, i: number, record: ComponentStatus) => {
+                          const { message = '', traits } = record;
+                          const TraitMessages = (traits || []).map((item) => {
+                            if (item.message) {
+                              return (
+                                <div>
+                                  <span>{item.type}: </span>
+                                  <span>{item.message}</span>
+                                </div>
+                              );
+                            }
+                          });
+                          return (
+                            <div>
+                              <div>{message}</div>
+                              {TraitMessages}
+                            </div>
+                          );
+                        }}
+                      />
+                    </Table>
+                  </Card>
+                </If>
+                <Card
+                  locale={locale().Card}
+                  contentHeight="200px"
+                  title={<Translation>Applied Resources</Translation>}
+                >
+                  <Table locale={locale().Table} dataSource={resources}>
+                    <Table.Column
+                      dataIndex="name"
+                      width="240px"
+                      title={<Translation>Namespace/Name</Translation>}
+                      cell={(v: string, i: number, row: AppliedResource) => {
+                        return `${row.namespace}/${row.name}`;
+                      }}
+                    />
+                    <Table.Column
+                      dataIndex="cluster"
+                      title={<Translation>Cluster</Translation>}
+                      width="200px"
+                      cell={(v: string) => {
+                        let clusterName = v;
+                        if (!clusterName) {
+                          clusterName = 'Local';
+                        }
+                        if (
+                          checkPermission(
+                            { resource: 'cluster:*', action: 'list' },
+                            applicationDetail?.project?.name,
+                            userInfo,
+                          )
+                        ) {
+                          return <Link to="/clusters">{clusterName}</Link>;
+                        }
+                        return <span>{clusterName}</span>;
+                      }}
+                    />
+                    <Table.Column
+                      width="200px"
+                      dataIndex="kind"
+                      title={<Translation>Kind</Translation>}
+                    />
+                    <Table.Column
+                      dataIndex="apiVersion"
+                      title={<Translation>APIVersion</Translation>}
+                    />
+                    <Table.Column
+                      dataIndex="component"
+                      title={<Translation>Component</Translation>}
+                    />
+                    <Table.Column
+                      dataIndex="deployVersion"
+                      title={<Translation>Revision</Translation>}
+                      cell={(v: string, i: number, row: AppliedResource) => {
+                        if (row.latest) {
+                          return (
+                            <span>
+                              <Icon
+                                style={{ color: 'green', marginRight: '8px' }}
+                                type="NEW"
+                                title="latest version resource"
+                              />
+                              <Link to={`/applications/${applicationDetail?.name}/revisions`}>
+                                {v}
+                              </Link>
+                            </span>
+                          );
+                        }
+                        return (
+                          <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
                         );
-                      }
-                      return <span>{v}</span>;
-                    }}
-                  />
-                </Table>
-              </Card>
-            </If>
-          </If>
-          <If condition={!applicationStatus}>
-            <div className="deployNotice">
-              <div className="noticeBox">
-                <h2>
-                  <Translation>Not Deploy</Translation>
-                </h2>
-                <div className="desc">
-                  <Translation>The current environment has not been deployed.</Translation>
-                </div>
-                <div className="noticeAction">
-                  <Button
-                    loading={deployLoading}
-                    disabled={applicationDetail?.readOnly}
-                    onClick={() => this.onDeploy()}
-                    type="primary"
+                      }}
+                    />
+                  </Table>
+                </Card>
+
+                <If condition={applicationStatus?.conditions}>
+                  <Card
+                    locale={locale().Card}
+                    style={{ marginTop: '8px' }}
+                    contentHeight="auto"
+                    title={<Translation>Conditions</Translation>}
                   >
-                    <Translation>Deploy</Translation>
-                  </Button>
+                    <Table locale={locale().Table} dataSource={applicationStatus?.conditions}>
+                      <Table.Column
+                        width="150px"
+                        dataIndex="type"
+                        title={<Translation>Type</Translation>}
+                      />
+                      <Table.Column dataIndex="status" title={<Translation>Status</Translation>} />
+
+                      <Table.Column
+                        dataIndex="lastTransitionTime"
+                        title={<Translation>LastTransitionTime</Translation>}
+                      />
+                      <Table.Column
+                        dataIndex="reason"
+                        title={<Translation>Reason</Translation>}
+                        cell={(v: string, index: number, row: Condition) => {
+                          if (row.message) {
+                            return (
+                              <Balloon
+                                trigger={
+                                  <span style={{ color: 'red', cursor: 'pointer' }}>
+                                    {v} <Icon size={'xs'} type="question-circle" />
+                                  </span>
+                                }
+                              >
+                                {row.message}
+                              </Balloon>
+                            );
+                          }
+                          return <span>{v}</span>;
+                        }}
+                      />
+                    </Table>
+                  </Card>
+                </If>
+              </If>
+              <If condition={!applicationStatus}>
+                <div className="deployNotice">
+                  <div className="noticeBox">
+                    <h2>
+                      <Translation>Not Deploy</Translation>
+                    </h2>
+                    <div className="desc">
+                      <Translation>The current environment has not been deployed.</Translation>
+                    </div>
+                    <div className="noticeAction">
+                      <Button
+                        loading={deployLoading}
+                        disabled={applicationDetail?.readOnly}
+                        onClick={() => this.onDeploy()}
+                        type="primary"
+                      >
+                        <Translation>Deploy</Translation>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </If>
-        </Loading>
+              </If>
+            </Loading>
+          </Tab.Item>
+          <Tab.Item title={i18n.t('Resource Graph')} key="resource-graph">
+            <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
+              <If condition={applicationStatus}>
+                <ApplicationGraph
+                  applicationStatus={applicationStatus}
+                  application={applicationDetail}
+                  env={env}
+                  resources={resources}
+                />
+              </If>
+            </Loading>
+          </Tab.Item>
+        </Tab>
       </div>
     );
   }
