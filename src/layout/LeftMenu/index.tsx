@@ -65,6 +65,8 @@ const LeftMenu = (props: Props) => {
     return null;
   });
 
+  const releaseVersion = process.env.VERSION || version;
+
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       <div className="slide-wrapper">
@@ -74,7 +76,7 @@ const LeftMenu = (props: Props) => {
             align="t"
             trigger={
               <div className="nav-container">
-                {version}-{__COMMIT_HASH__}
+                {releaseVersion}-{__COMMIT_HASH__}
               </div>
             }
           >
