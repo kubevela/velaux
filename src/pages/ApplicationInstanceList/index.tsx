@@ -549,11 +549,11 @@ class ApplicationInstanceList extends React.Component<Props, State> {
             <Table
               style={{ marginBottom: '32px' }}
               locale={locale().Table}
-              className="podlist-table-wraper"
+              className="podlist-table-wrapper"
               size="medium"
               primaryKey={'primaryKey'}
               loading={loading}
-              dataSource={podList}
+              dataSource={podList || []}
               expandedIndexSimulate
               expandedRowRender={expandedRowRender}
               openRowKeys={this.state.openRowKeys}
