@@ -93,6 +93,8 @@ export interface Metadata {
   resourceVersion: string;
   selfLink: string;
   uid: string;
+  annotations?: Record<string, string>;
+  labels?: Record<string, string>;
 }
 
 export interface ManagedFields {
@@ -111,28 +113,22 @@ export interface CloudResource {
   status: string;
 }
 
-export interface Configuration {
+export interface Configuration extends ResourceObject {
   apiVersion: string;
   kind: string;
-  metadata: {
-    name: string;
-    namespace: string;
-    creationTimestamp: string;
-    annotations: any;
-    labels: any;
-  };
   spec: {
-    region: string;
     providerRef: {
       name: string;
       namespace: string;
     };
+    region?: string;
   };
   status?: {
     apply?: {
       outputs?: any;
       state?: string;
       message?: string;
+      region?: string;
     };
   };
 }
