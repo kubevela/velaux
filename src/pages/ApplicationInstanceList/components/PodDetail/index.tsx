@@ -99,7 +99,7 @@ class PodDetail extends React.Component<Props, State> {
     this.setState({ showContainerLog: true, containerName: containerName });
   };
 
-  getContainerCloumns = () => {
+  getContainerColumns = () => {
     const { observability } = this.state;
     const { clusterName, env, pod, application } = this.props;
     let domain = '';
@@ -244,7 +244,7 @@ class PodDetail extends React.Component<Props, State> {
     ];
   };
 
-  getEventCloumns = () => {
+  getEventColumns = () => {
     return [
       {
         key: 'type',
@@ -282,15 +282,15 @@ class PodDetail extends React.Component<Props, State> {
 
   render() {
     const { Column } = Table;
-    const containerColumns = this.getContainerCloumns();
-    const eventCloumns = this.getEventCloumns();
+    const containerColumns = this.getContainerColumns();
+    const eventColumns = this.getEventColumns();
     const { events, containers, loading, showContainerLog, containerName } = this.state;
     const { pod, clusterName } = this.props;
     return (
       <div className="table-podDetails-list  margin-top-20">
         <Table
-          className="container-table-wraper margin-top-20"
-          dataSource={containers}
+          className="container-table-wrapper margin-top-20"
+          dataSource={containers || []}
           hasBorder={false}
           primaryKey="name"
           loading={loading}
@@ -301,15 +301,15 @@ class PodDetail extends React.Component<Props, State> {
         </Table>
 
         <Table
-          className="event-table-wraper margin-top-20"
-          dataSource={events}
+          className="event-table-wrapper margin-top-20"
+          dataSource={events || []}
           hasBorder={false}
           loading={loading}
           primaryKey="time"
           locale={locale().Table}
         >
-          {eventCloumns &&
-            eventCloumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+          {eventColumns &&
+            eventColumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
 
         <If condition={showContainerLog}>
