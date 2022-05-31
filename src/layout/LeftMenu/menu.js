@@ -75,7 +75,7 @@ export function getLeftSlider(pathname) {
           link: '/definitions',
           iconType: 'database-set',
           navName: 'Definitions',
-          permission: { resource: 'definition:*', action: 'update' },
+          permission: { resource: 'definition:*', action: 'list' },
         },
       ],
     },

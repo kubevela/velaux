@@ -12,6 +12,8 @@ import SelectSearch from './components/SelectSearch';
 import locale from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
 import './index.less';
+import { checkPermission } from '../../utils/permission';
+import type { LoginUserInfo } from '../../interface/user';
 
 type Props = {
   match: {
@@ -19,6 +21,7 @@ type Props = {
       definitionType: string;
     };
   };
+  userInfo?: LoginUserInfo;
 };
 
 type State = {
@@ -30,7 +33,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.definitions };
+  return { ...store.definitions, ...store.user };
 })
 class Definitions extends Component<Props, State> {
   constructor(props: Props) {
@@ -62,8 +65,12 @@ class Definitions extends Component<Props, State> {
   }
 
   lisDefinitions() {
+    const { userInfo } = this.props;
     const { definitionType } = this.state;
     if (!definitionType) {
+      return;
+    }
+    if (!checkPermission({ resource: 'definition:*', action: 'list' }, '', userInfo)) {
       return;
     }
     const params = {
