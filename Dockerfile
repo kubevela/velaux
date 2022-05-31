@@ -1,6 +1,8 @@
 FROM node:16-alpine as builder
+ARG VERSION
 WORKDIR /app/velaux
 ADD . .
+ENV VERSION=${VERSION}
 RUN apk add --no-cache git && yarn install && yarn build
 RUN rm -rf /app/velaux/build/mock
 
