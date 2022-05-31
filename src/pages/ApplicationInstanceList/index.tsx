@@ -184,10 +184,15 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const instances: CloudInstance[] = [];
     if (Array.isArray(configurations) && configurations.length > 0) {
       configurations.map((configuration) => {
-        let url = configuration.metadata.annotations['cloud-resource/console-url'];
-        const identifierKey = configuration.metadata.annotations['cloud-resource/identifier'];
+        let url = '';
+        let identifierKey = '';
+        if (configuration.metadata.annotations) {
+          url = configuration.metadata.annotations['cloud-resource/console-url'];
+          identifierKey = configuration.metadata.annotations['cloud-resource/identifier'];
+        }
         const outputs = configuration.status?.apply?.outputs;
         let instanceName = '';
+        const region = configuration.status?.apply?.region || configuration.spec.region || '';
         if (outputs) {
           if (outputs[identifierKey]) {
             instanceName = outputs[identifierKey].value;
@@ -197,8 +202,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
             if (Array.isArray(params) && params.length > 0) {
               params.map((param) => {
                 const paramKey = param.replace('{', '').replace('}', '');
-                if (paramKey.toLowerCase() == 'region' && configuration.spec.region) {
-                  url = url.replace(param, configuration.spec.region);
+                if (paramKey.toLowerCase() == 'region' && region) {
+                  url = url.replace(param, region);
                 }
                 if (outputs[paramKey]) {
                   url = url.replace(param, outputs[paramKey].value);
@@ -209,12 +214,13 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         }
         instances.push({
           instanceName: instanceName,
-          status: configuration.status?.apply?.state || 'Initing',
+          status: configuration.status?.apply?.state || '-',
           url: url,
-          createTime: configuration.metadata.creationTimestamp,
-          region: configuration.spec.region,
+          createTime: configuration.metadata.creationTimestamp || '',
+          region: region,
           message: configuration.status?.apply?.message,
-          type: configuration.metadata.labels['workload.oam.dev/type'],
+          type:
+            configuration.metadata.labels && configuration.metadata.labels['workload.oam.dev/type'],
         });
       });
     }
