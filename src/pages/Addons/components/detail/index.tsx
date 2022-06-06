@@ -297,7 +297,6 @@ class AddonDetailDialog extends React.Component<Props, State> {
         <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
           <Translation>Cancel</Translation>
         </Button>
-        ,
         <Permission
           request={{
             resource: `addon:${addonName}`,
