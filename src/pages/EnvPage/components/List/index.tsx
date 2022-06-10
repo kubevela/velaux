@@ -80,14 +80,14 @@ class TableList extends Component<Props> {
           return <span>{v}</span>;
         },
       },
-      // {
-      //   key: 'project',
-      //   title: <Translation>Project</Translation>,
-      //   dataIndex: 'project',
-      //   cell: (v: NameAlias) => {
-      //     return <span>{v.alias || v.name}</span>;
-      //   },
-      // },
+      {
+        key: 'project',
+        title: <Translation>Project</Translation>,
+        dataIndex: 'project',
+        cell: (v: NameAlias) => {
+          return <span>{v.alias || v.name}</span>;
+        },
+      },
       {
         key: 'description',
         title: <Translation>Description</Translation>,
@@ -118,6 +118,7 @@ class TableList extends Component<Props> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
+        width: '120px',
         cell: (v: string, i: number, record: Env) => {
           return (
             <div>
@@ -171,11 +172,12 @@ class TableList extends Component<Props> {
     const columns = this.getColumns();
     const { list } = this.props;
     return (
-      <div className="table-delivery-list margin-top-20">
+      <div className="table-env-list margin-top-20">
         <Table
           locale={locale().Table}
           className="customTable"
           size="medium"
+          style={{ minWidth: '1200px' }}
           dataSource={list}
           hasBorder={false}
           loading={false}

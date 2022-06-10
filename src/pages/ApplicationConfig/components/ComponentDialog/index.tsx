@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Field, Form, Message, Button, Input, Select, Divider } from '@b-design/ui';
+import { Grid, Field, Form, Message, Button, Input, Select, Divider, Icon } from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import {
@@ -50,6 +50,7 @@ type State = {
   isUpdateComponentLoading: boolean;
   editComponent?: ApplicationComponent;
   loading: boolean;
+  propertiesMode: string;
 };
 
 @connect()
@@ -63,6 +64,7 @@ class ComponentDialog extends React.Component<Props, State> {
       isCreateComponentLoading: false,
       isUpdateComponentLoading: false,
       loading: true,
+      propertiesMode: 'native',
     };
     this.uiSchemaRef = React.createRef();
   }
@@ -336,7 +338,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
     const { isEditComponent, componentDefinitions, onComponentClose } = this.props;
-    const { definitionDetail, loading } = this.state;
+    const { definitionDetail, loading, propertiesMode } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -487,10 +489,43 @@ class ComponentDialog extends React.Component<Props, State> {
             </Row>
           </Group>
           <section className="title">
-            <Title title={i18n.t('Deployment Properties')} actions={[]} />
+            <Title
+              title={i18n.t('Deployment Properties')}
+              actions={
+                definitionDetail && definitionDetail.uiSchema
+                  ? [
+                      <Button
+                        style={{ marginTop: '-12px' }}
+                        onClick={() => {
+                          if (propertiesMode === 'native') {
+                            this.setState({ propertiesMode: 'code' });
+                          } else {
+                            this.setState({ propertiesMode: 'native' });
+                          }
+                        }}
+                      >
+                        <If condition={propertiesMode === 'native'}>
+                          <Icon
+                            style={{ color: '#1b58f4' }}
+                            type={'display-code'}
+                            title={'Switch to code mode'}
+                          />
+                        </If>
+                        <If condition={propertiesMode === 'code'}>
+                          <Icon
+                            style={{ color: '#1b58f4' }}
+                            type={'laptop'}
+                            title={'Switch to native mode'}
+                          />
+                        </If>
+                      </Button>,
+                    ]
+                  : []
+              }
+            />
           </section>
           <Row>
-            <If condition={definitionDetail && definitionDetail.uiSchema}>
+            <If condition={definitionDetail}>
               <UISchema
                 {...init(`properties`, {
                   rules: [
@@ -500,7 +535,13 @@ class ComponentDialog extends React.Component<Props, State> {
                     },
                   ],
                 })}
+                enableCodeEdit={propertiesMode === 'code'}
                 uiSchema={definitionDetail && definitionDetail.uiSchema}
+                definition={{
+                  name: definitionDetail?.name || '',
+                  type: 'component',
+                  description: definitionDetail?.description || '',
+                }}
                 ref={this.uiSchemaRef}
                 mode={isEditComponent ? 'edit' : 'new'}
               />

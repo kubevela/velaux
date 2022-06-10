@@ -41,7 +41,11 @@ export interface ApplicationBase {
 }
 
 export interface DefinitionDetail {
+  name: string;
+  description: string;
   uiSchema: UIParam[];
+  labels: Record<string, string>;
+  status: string;
 }
 
 export interface UIParam {

@@ -140,6 +140,7 @@ class TableList extends Component<Props> {
           locale={locale().Table}
           className="customTable"
           size="medium"
+          style={{ minWidth: '1200px' }}
           dataSource={list}
           hasBorder={false}
           loading={false}

@@ -9,9 +9,9 @@ type Props = {
   language: string;
   fileUrl?: string;
   runtime?: any;
-  'data-meta'?: string;
   id?: string;
   onChange?: (params: any) => void;
+  onBlurEditor?: (value: string) => void;
   style?: React.CSSProperties;
 };
 
@@ -25,6 +25,7 @@ class DefinitionCode extends React.Component<Props> {
       language,
       readOnly,
       onChange,
+      onBlurEditor,
       fileUrl = `//b.txt`,
     } = this.props;
     const container: any = document.getElementById(containerId);
@@ -55,6 +56,12 @@ class DefinitionCode extends React.Component<Props> {
       if (onChange) {
         this.editor.onDidChangeModelContent(() => onChange(textModel.getValue()));
       }
+      if (onBlurEditor) {
+        this.editor.onDidBlurEditorText(() => {
+          onBlurEditor(textModel.getValue());
+        });
+      }
+
       monaco.editor.setModelLanguage(textModel, language);
     }
   }
