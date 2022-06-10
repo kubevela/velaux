@@ -47,6 +47,7 @@ type State = {
   traitDefinitions?: DefinitionBase[];
   podDisruptive?: any;
   component?: ApplicationComponent;
+  propertiesMode: 'native' | 'code';
 };
 @connect()
 class TraitDialog extends React.Component<Props, State> {
@@ -58,6 +59,7 @@ class TraitDialog extends React.Component<Props, State> {
       definitionLoading: false,
       isLoading: false,
       traitDefinitions: [],
+      propertiesMode: 'native',
     };
     this.field = new Field(this);
     this.uiSchemaRef = React.createRef();
@@ -286,7 +288,7 @@ class TraitDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
     const { onClose, isEditTrait } = this.props;
-    const { definitionDetail, definitionLoading, podDisruptive } = this.state;
+    const { definitionDetail, definitionLoading, podDisruptive, propertiesMode } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -393,8 +395,37 @@ class TraitDialog extends React.Component<Props, State> {
                 required={true}
                 hasToggleIcon={true}
               >
-                <If condition={definitionDetail && definitionDetail.uiSchema}>
+                <If condition={definitionDetail}>
                   <FormItem required={true}>
+                    <If condition={definitionDetail && definitionDetail.uiSchema}>
+                      <div className="flexright">
+                        <Button
+                          style={{ marginTop: '-12px' }}
+                          onClick={() => {
+                            if (propertiesMode === 'native') {
+                              this.setState({ propertiesMode: 'code' });
+                            } else {
+                              this.setState({ propertiesMode: 'native' });
+                            }
+                          }}
+                        >
+                          <If condition={propertiesMode === 'native'}>
+                            <Icon
+                              style={{ color: '#1b58f4' }}
+                              type={'display-code'}
+                              title={'Switch to code mode'}
+                            />
+                          </If>
+                          <If condition={propertiesMode === 'code'}>
+                            <Icon
+                              style={{ color: '#1b58f4' }}
+                              type={'laptop'}
+                              title={'Switch to native mode'}
+                            />
+                          </If>
+                        </Button>
+                      </div>
+                    </If>
                     <UISchema
                       key={traitType}
                       {...init(`properties`, {
@@ -405,7 +436,13 @@ class TraitDialog extends React.Component<Props, State> {
                           },
                         ],
                       })}
+                      enableCodeEdit={propertiesMode === 'code'}
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
+                      definition={{
+                        type: 'trait',
+                        name: definitionDetail?.name || '',
+                        description: definitionDetail?.description || '',
+                      }}
                       ref={this.uiSchemaRef}
                       mode={this.props.isEditTrait ? 'edit' : 'new'}
                     />

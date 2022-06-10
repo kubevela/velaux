@@ -5,7 +5,7 @@ import _ from 'lodash';
 import type { DiagramMakerNode } from 'diagram-maker';
 import type { WorkFlowNodeType } from '../entity';
 
-import { Grid, Field, Form, Select, Input, Message, Button } from '@b-design/ui';
+import { Grid, Field, Form, Select, Input, Message, Button, Icon } from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../extends/Group';
@@ -35,6 +35,7 @@ type Props = {
 type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
+  propertiesMode: 'native' | 'code';
 };
 
 @connect()
@@ -45,6 +46,7 @@ class WorkflowForm extends Component<Props, State> {
     super(props);
     this.state = {
       definitionLoading: false,
+      propertiesMode: 'native',
     };
     this.field = new Field(this, {
       onChange: (name: string, value: string) => {
@@ -129,7 +131,7 @@ class WorkflowForm extends Component<Props, State> {
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const { t, closeDrawer, data, checkStepName } = this.props;
-    const { definitionDetail } = this.state;
+    const { definitionDetail, propertiesMode } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -260,8 +262,37 @@ class WorkflowForm extends Component<Props, State> {
                 required={true}
                 hasToggleIcon={true}
               >
-                <If condition={definitionDetail && definitionDetail.uiSchema}>
+                <If condition={definitionDetail}>
                   <FormItem required={true}>
+                    <If condition={definitionDetail && definitionDetail.uiSchema}>
+                      <div className="flexright">
+                        <Button
+                          style={{ marginTop: '-12px' }}
+                          onClick={() => {
+                            if (propertiesMode === 'native') {
+                              this.setState({ propertiesMode: 'code' });
+                            } else {
+                              this.setState({ propertiesMode: 'native' });
+                            }
+                          }}
+                        >
+                          <If condition={propertiesMode === 'native'}>
+                            <Icon
+                              style={{ color: '#1b58f4' }}
+                              type={'display-code'}
+                              title={'Switch to code mode'}
+                            />
+                          </If>
+                          <If condition={propertiesMode === 'code'}>
+                            <Icon
+                              style={{ color: '#1b58f4' }}
+                              type={'laptop'}
+                              title={'Switch to native mode'}
+                            />
+                          </If>
+                        </Button>
+                      </div>
+                    </If>
                     <UISchema
                       {...init(`properties`, {
                         rules: [
@@ -271,7 +302,13 @@ class WorkflowForm extends Component<Props, State> {
                           },
                         ],
                       })}
+                      enableCodeEdit={propertiesMode === 'code'}
                       uiSchema={definitionDetail && definitionDetail.uiSchema}
+                      definition={{
+                        type: 'workflowstep',
+                        name: definitionDetail?.name || '',
+                        description: definitionDetail?.description || '',
+                      }}
                       ref={this.uiSchemaRef}
                       mode={this.props.data ? 'edit' : 'new'}
                     />

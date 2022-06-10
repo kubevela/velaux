@@ -25,6 +25,10 @@ import i18n from 'i18next';
 import { getValue } from '../../utils/utils';
 import HelmRepoSelect from '../../extends/HelmRepoSelect';
 import PolicySelect from '../../extends/PolicySelect';
+import { v4 as uuid } from 'uuid';
+import DefinitionCode from '../DefinitionCode';
+import * as yaml from 'js-yaml';
+import type { Definition } from '../../interface/addon';
 
 const { Col, Row } = Grid;
 
@@ -32,6 +36,7 @@ type Props = {
   inline?: boolean;
   id?: string;
   value?: any;
+  enableCodeEdit?: boolean;
   uiSchema?: UIParam[];
   maxColSpan?: number;
   onChange?: (params: any) => void;
@@ -39,6 +44,7 @@ type Props = {
   disableRenderRow?: boolean;
   mode: 'new' | 'edit';
   advanced?: boolean;
+  definition?: Definition;
 };
 
 function convertRule(validate?: UIParamValidate) {
@@ -88,6 +94,8 @@ function convertRule(validate?: UIParamValidate) {
 type State = {
   secretKeys?: string[];
   advanced: boolean;
+  codeError?: string;
+  codeID: string;
 };
 
 class UISchema extends Component<Props, State> {
@@ -118,6 +126,7 @@ class UISchema extends Component<Props, State> {
     this.state = {
       secretKeys: [],
       advanced: props.advanced || false,
+      codeID: uuid(),
     };
   }
 
@@ -145,8 +154,13 @@ class UISchema extends Component<Props, State> {
 
   validate = (callback: (error?: string) => void) => {
     this.form.validate((errors) => {
+      const { codeError } = this.state;
       if (errors) {
         console.log(errors);
+        callback('ui schema validate failure');
+        return;
+      }
+      if (codeError) {
         callback('ui schema validate failure');
         return;
       }
@@ -200,11 +214,74 @@ class UISchema extends Component<Props, State> {
     return false;
   };
 
+  renderDocumentURL = () => {
+    const { definition } = this.props;
+    if (definition) {
+      switch (definition.type) {
+        case 'component':
+          return 'https://kubevela.net/docs/end-user/components/references#' + definition.name;
+        case 'trait':
+          return 'https://kubevela.net/docs/end-user/traits/references#' + definition.name;
+        case 'policy':
+          return 'https://kubevela.net/docs/end-user/policies/references#' + definition.name;
+        case 'workflowstep':
+          return (
+            'https://kubevela.net/docs/end-user/workflow/built-in-workflow-defs#' + definition.name
+          );
+      }
+    }
+  };
+
+  renderCodeEdit = () => {
+    const { value, onChange, definition } = this.props;
+    const { codeError, codeID } = this.state;
+    let yamlValue = yaml.dump(value);
+    if (yamlValue == '{}\n') {
+      yamlValue = '';
+    }
+    return (
+      <div style={{ width: '100%' }}>
+        <If condition={codeError}>
+          <span style={{ color: 'red' }}>{codeError}</span>
+        </If>
+        <If condition={definition}>
+          <p>
+            Refer to the document:
+            <a style={{ marginLeft: '8px' }} target="_blank" href={this.renderDocumentURL()}>
+              click here
+            </a>
+          </p>
+        </If>
+        <div id={codeID} className="guide-code">
+          <DefinitionCode
+            value={yamlValue}
+            onBlurEditor={(v) => {
+              if (onChange) {
+                try {
+                  const valueObj = yaml.load(v);
+                  onChange(valueObj);
+                  this.setState({ codeError: '' });
+                } catch (err) {
+                  this.setState({ codeError: 'Please input a valid yaml config:' + err });
+                }
+              }
+            }}
+            id={codeID + '-code'}
+            containerId={codeID}
+            language={'yaml'}
+            readOnly={false}
+          />
+        </div>
+      </div>
+    );
+  };
+
   render() {
     const { advanced } = this.state;
-    const { uiSchema, inline, maxColSpan, disableRenderRow, value, mode } = this.props;
-    if (!uiSchema) {
-      return <div />;
+    const { uiSchema, inline, maxColSpan, disableRenderRow, value, mode, enableCodeEdit } =
+      this.props;
+    if (!uiSchema || enableCodeEdit) {
+      return this.renderCodeEdit();
     }
     if (mode == 'edit' && value === undefined) {
       return <div />;
