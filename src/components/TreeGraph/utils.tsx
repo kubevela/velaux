@@ -160,6 +160,7 @@ export const ResourceIcon = ({
   const style: React.CSSProperties = {
     display: 'inline-block',
     verticalAlign: 'middle',
+    overflow: 'hidden',
     padding: `${n <= 2 ? 2 : 0}px 4px`,
     width: '32px',
     height: '32px',

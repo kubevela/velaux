@@ -80,7 +80,8 @@ function renderResourceNode(props: TreeGraphProps, id: string, node: GraphNode) 
         <ResourceIcon kind={node.resource.kind || ''} />
       </div>
       <div className={classNames('name')}>
-        <span>{node.resource.name}</span>
+        <div>{node.resource.name}</div>
+        <div className="kind">{node.resource.kind}</div>
       </div>
       <div className={classNames('actions')}>
         <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
