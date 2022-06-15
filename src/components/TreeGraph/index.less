@@ -19,14 +19,18 @@
 
     .name {
       display: flex;
-      flex: 1 1;
-      flex-wrap: wrap;
+      flex-direction: column;
       justify-content: flex-start;
       width: 100%;
       overflow: hidden;
-      line-height: 40px;
+      line-height: 20px;
       white-space: nowrap;
       text-overflow: ellipsis;
+      .kind {
+        margin: 0;
+        font-size: 12px;
+        color: #a6a6a6;
+      }
     }
 
     .icon {
@@ -60,6 +64,12 @@
       bottom: -12px;
       display: block;
       right:8px
+    }
+  }
+
+  .graph-node-app, .graph-node-cluster {
+    .name {
+      line-height: 40px;
     }
   }
 
