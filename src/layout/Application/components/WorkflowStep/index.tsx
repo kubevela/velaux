@@ -64,7 +64,7 @@ class WorkflowStep extends Component<Props, State> {
     resumeApplicationWorkflowRecord(params)
       .then((re) => {
         if (re) {
-          Message.success('resume the workflow success');
+          Message.success('Workflow resumed successfully');
           this.setState({ hiddenConfirm: true });
         }
       })
@@ -84,7 +84,7 @@ class WorkflowStep extends Component<Props, State> {
     rollbackApplicationWorkflowRecord(params)
       .then((re) => {
         if (re) {
-          Message.success('rollback the workflow success');
+          Message.success('Workflow rollbacked successfully');
           this.setState({ hiddenConfirm: true });
         }
       })
@@ -104,7 +104,7 @@ class WorkflowStep extends Component<Props, State> {
     terminateApplicationWorkflowRecord(params)
       .then((re) => {
         if (re) {
-          Message.success('stop the workflow success');
+          Message.success('Workflow terminated successfully');
           this.setState({ hiddenConfirm: true });
         }
       })
@@ -120,6 +120,7 @@ class WorkflowStep extends Component<Props, State> {
       { name: 'succeeded', value: 'succeeded', iconType: 'success' },
       { name: 'failed', value: 'failed', iconType: 'error' },
       { name: 'stopped', value: 'stopped', iconType: 'warning' },
+      { name: 'skipped', value: 'stopped', iconType: 'warning' },
       { name: 'running', value: 'running', iconType: '' },
     ];
     const find = stepStatus.find((item) => {
@@ -127,6 +128,7 @@ class WorkflowStep extends Component<Props, State> {
         return item;
       }
     }) || {
+      name: '',
       value: 'stopped',
       iconType: '',
     };
@@ -134,7 +136,7 @@ class WorkflowStep extends Component<Props, State> {
     const isAnimate = find && find.value === 'running' ? 'shanshan' : '';
 
     return (
-      <div className={`${find.value} ${isAnimate}`}>
+      <div className={`${find.value} ${isAnimate}`} title={find.name}>
         {find.iconType ? <Icon type={find.iconType} /> : <span>{index + 1}</span>}
       </div>
     );
@@ -258,7 +260,7 @@ class WorkflowStep extends Component<Props, State> {
             this.setState({ hiddenConfirm: false });
           }}
           title={this.renderStepItemTitle(item)}
-          content={this.renderContent(recordItem, item, index == currentStep)}
+          content={this.renderContent(recordItem, item, index == currentStep - 1)}
         />
       ));
       const changeStepClassName = this.changeFirstClassName(steps);
