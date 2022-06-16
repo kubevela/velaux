@@ -166,6 +166,7 @@ function renderPodNode(props: TreeGraphProps, id: string, node: GraphNode) {
     >
       <div className={classNames('icon')}>
         <img src={pod} />
+        <span>Pod</span>
       </div>
       <div className={classNames('name')}>
         <Link
@@ -218,7 +219,8 @@ function renderClusterNode(props: TreeGraphProps, id: string, node: GraphNode) {
         <img src={kubernetes} />
       </div>
       <div className={classNames('name')}>
-        <span>{node.resource.name}</span>
+        <div>{node.resource.name}</div>
+        <div className="kind">Cluster</div>
       </div>
     </div>
   );
