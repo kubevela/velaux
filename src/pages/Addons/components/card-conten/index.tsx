@@ -54,6 +54,17 @@ class CardContent extends React.Component<Props, State> {
           return '';
       }
     };
+    const nameUpper = (name: string) => {
+      return name
+        .split('-')
+        .map((sep) => {
+          if (sep.length > 0) {
+            return sep.toUpperCase()[0];
+          }
+        })
+        .toString()
+        .replace(',', '');
+    };
     return (
       <div>
         <If condition={addonLists}>
@@ -72,7 +83,23 @@ class CardContent extends React.Component<Props, State> {
                           <img src={icon} />
                         </If>
                         <If condition={!icon || icon === 'none'}>
-                          <img />
+                          <div
+                            style={{
+                              display: 'inline-block',
+                              verticalAlign: 'middle',
+                              padding: `2px 4px`,
+                              width: '60px',
+                              height: '60px',
+                              borderRadius: '50%',
+                              backgroundColor: '#fff',
+                              textAlign: 'center',
+                              lineHeight: '60px',
+                            }}
+                          >
+                            <span style={{ color: '#1b58f4', fontSize: `2em` }}>
+                              {nameUpper(name)}
+                            </span>
+                          </div>
                         </If>
                       </div>
                     </a>
