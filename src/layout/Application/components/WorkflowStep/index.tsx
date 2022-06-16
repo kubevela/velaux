@@ -221,11 +221,11 @@ class WorkflowStep extends Component<Props, State> {
   }
 
   changeFirstClassName(steps: WorkflowStepItem[] | undefined) {
-    const firsetItem = (steps && steps[0]) || { phase: '', type: '', name: '', alias: '' };
-    const isSuspend = firsetItem.type === 'suspend' ? true : false;
-    const isFailed = firsetItem.phase === 'failed' ? true : false;
+    const firstItem = (steps && steps[0]) || { phase: '', type: '', name: '', alias: '' };
+    const isSuspend = firstItem.type === 'suspend' ? true : false;
+    const isFailed = firstItem.phase === 'failed' ? true : false;
 
-    const { name, alias } = firsetItem;
+    const { name, alias } = firstItem;
     let longTitle = '';
     if (
       (typeof alias === 'string' && alias.length >= 18) ||
@@ -234,7 +234,7 @@ class WorkflowStep extends Component<Props, State> {
       longTitle = 'longTitle';
     }
 
-    if (firsetItem.phase && (isSuspend || isFailed)) {
+    if (firstItem.phase && (isSuspend || isFailed)) {
       return `changeStep ${longTitle}`;
     } else {
       return `${longTitle}`;
@@ -260,7 +260,7 @@ class WorkflowStep extends Component<Props, State> {
             this.setState({ hiddenConfirm: false });
           }}
           title={this.renderStepItemTitle(item)}
-          content={this.renderContent(recordItem, item, index == currentStep - 1)}
+          content={this.renderContent(recordItem, item, index == currentStep)}
         />
       ));
       const changeStepClassName = this.changeFirstClassName(steps);
@@ -286,8 +286,9 @@ class WorkflowStep extends Component<Props, State> {
 
   render() {
     const isHiddenSlide = this.onHiddenSlide();
+    const { recordName } = this.props;
     return (
-      <div id="workflowStatus" className={`workflow-step-wraper ${isHiddenSlide}`}>
+      <div id={recordName} className={`workflow-step-wraper ${isHiddenSlide}`}>
         {this.getWorkFlowStep()}
       </div>
     );
