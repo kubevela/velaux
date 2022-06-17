@@ -22,7 +22,6 @@ import {
 } from '../../../../api/addons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import './index.less';
 import Empty from '../../../../components/Empty';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Group from '../../../../extends/Group';
@@ -35,6 +34,8 @@ import type { ApplicationStatus } from '../../../../interface/application';
 import i18n from '../../../../i18n';
 import type { NameAlias } from '../../../../interface/env';
 import Permission from '../../../../components/Permission';
+import 'github-markdown-css/github-markdown-light.css';
+import './index.less';
 
 type Props = {
   addonName: string;
@@ -515,11 +516,12 @@ class AddonDetailDialog extends React.Component<Props, State> {
             <Card
               contentHeight="auto"
               locale={locale().Card}
-              title={<Translation>Readme</Translation>}
+              title={<Translation>README</Translation>}
               style={{ marginTop: '16px' }}
             >
               <If condition={addonDetailInfo?.detail}>
                 <ReactMarkdown
+                  className="markdown-body addon-readme"
                   children={addonDetailInfo?.detail || ''}
                   remarkPlugins={[remarkGfm]}
                 />
