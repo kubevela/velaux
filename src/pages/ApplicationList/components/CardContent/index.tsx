@@ -142,7 +142,7 @@ class CardContent extends React.Component<Props, State> {
     return (
       <Row wrap={true}>
         {applications?.map((item: ApplicationBase) => {
-          const { name, alias, icon, description, createTime } = item;
+          const { name, alias, icon, description, createTime, readOnly } = item;
           const showName = alias || name;
           return (
             <Col
@@ -213,6 +213,12 @@ class CardContent extends React.Component<Props, State> {
                   <Row className="content-foot colorA6A6A6">
                     <Col span="16">
                       <span>{createTime && momentDate(createTime)}</span>
+                    </Col>
+                    <Col span={8} className="flexright">
+                      <If condition={readOnly}>
+                        <span className="circle circle-warning" />
+                        <Translation>ReadOnly</Translation>
+                      </If>
                     </Col>
                   </Row>
                 </div>

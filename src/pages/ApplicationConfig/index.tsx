@@ -223,6 +223,7 @@ class ApplicationConfig extends Component<Props, State> {
       name = '',
       createTime = '',
       icon = '',
+      labels,
     } = applicationDetail || {};
     this.setState({
       editItem: {
@@ -231,6 +232,7 @@ class ApplicationConfig extends Component<Props, State> {
         description,
         createTime,
         icon,
+        labels,
       },
       showEditApplication: true,
     });

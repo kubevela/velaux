@@ -16,7 +16,7 @@ type State = {
 
 type Props = {
   clickAddon: (name: string) => void;
-  addonLists: [];
+  addonLists: Addon[];
   enabledAddons?: AddonBaseStatus[];
 };
 
@@ -65,17 +65,36 @@ class CardContent extends React.Component<Props, State> {
         .toString()
         .replace(',', '');
     };
+    const orderAddonList: Addon[] = [];
+    addonLists.map((addon) => {
+      const status = enabledAddons?.filter((addonStatus: AddonBaseStatus) => {
+        return addonStatus.name == addon.name;
+      });
+      if (status && status.length > 0 && status[0].phase == 'enabled') {
+        orderAddonList.unshift(addon);
+      } else {
+        orderAddonList.push(addon);
+      }
+    });
     return (
       <div>
         <If condition={addonLists}>
           <Row wrap={true}>
-            {addonLists.map((item: Addon) => {
+            {orderAddonList.map((item: Addon) => {
               const { name, icon, version, description, tags, registryName } = item;
               const status = enabledAddons?.filter((addonStatus: AddonBaseStatus) => {
                 return addonStatus.name == name;
               });
               return (
-                <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={name}>
+                <Col
+                  xl={4}
+                  l={6}
+                  m={8}
+                  s={12}
+                  xxs={24}
+                  className={`card-content-wraper`}
+                  key={name}
+                >
                   <Card locale={locale().Card} contentHeight="auto">
                     <a onClick={() => clickAddon(name)}>
                       <div className="cluster-card-top flexcenter">
@@ -119,21 +138,15 @@ class CardContent extends React.Component<Props, State> {
                           {description}
                         </h4>
                       </Row>
-                      <If condition={tags}>
-                        <Row className="content-main-btn">
-                          {tags?.map((tag: string) => {
-                            return (
-                              <Tag
-                                style={{ marginRight: '8px' }}
-                                color={getTagColor(tag)}
-                                key={tag}
-                              >
-                                {tag}
-                              </Tag>
-                            );
-                          })}
-                        </Row>
-                      </If>
+                      <Row className="content-main-btn">
+                        {tags?.map((tag: string) => {
+                          return (
+                            <Tag style={{ marginRight: '8px' }} color={getTagColor(tag)} key={tag}>
+                              {tag}
+                            </Tag>
+                          );
+                        })}
+                      </Row>
 
                       <Row className="content-foot colorA6A6A6">
                         <Col span="16">
