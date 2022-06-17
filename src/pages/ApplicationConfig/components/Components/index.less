@@ -1,67 +1,65 @@
-
-  .cloud-component-show {
-    border-top: #1b58f4 2px solid;
-  }
-  .components-list-nav {
+.cloud-component-show {
+  border-top: #1b58f4 2px solid;
+}
+.components-list-nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  .components-list-title {
     display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    .components-list-title {
-      height: 24px;
-      color: #1b58f4;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-    }
-  }
-  .components-list-operation {
-    line-height: 24px;
-    .next-icon:hover {
-      color: #1b58f4;
-    }
-  }
-  .components-list-content {
-    display: flex;
-    min-height: 48px;
-    padding: 16px 0;
-    color: #a6a6a6;
-  }
-  .components-list-date {
-    display: flex;
-    justify-content: flex-end;
-    height: 37px;
-    line-height: 37px;
-  }
-  .trait-icon {
-    display: flex;
-    align-items: center;
-    justify-content: start;
-    margin: 4px 4px 0 0;
-    padding: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
+    height: 24px;
+    color: #1b58f4;
+    font-size: 16px;
     cursor: pointer;
-    position: relative;
-    .trait-actions {
-      background: rgba(166, 166, 166, 0.9);
-      display:none;
-      color: #1b58f4;
-      position: absolute;
-      right: 0;
-      padding: 9.5px;
-      width: 40px;
-      text-align: center;
-      border-radius: 0 4px 4px 0;
-    }
   }
-  .trait-icon:hover {
-    border: #1b58f4 solid 1px;
-    .trait-actions {
-      display: block;
-    }
+}
+.components-list-operation {
+  line-height: 24px;
+  .next-icon:hover {
+    color: #1b58f4;
   }
-  .component-icon {
-    width: 20px;
-    margin-right: 4px;
+}
+.components-list-content {
+  display: flex;
+  min-height: 48px;
+  padding: 16px 0;
+  color: #a6a6a6;
+}
+.components-list-date {
+  display: flex;
+  justify-content: flex-end;
+  height: 37px;
+  line-height: 37px;
+}
+.trait-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  margin: 4px 4px 0 0;
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  .trait-actions {
+    position: absolute;
+    right: 0;
+    display: none;
+    width: 40px;
+    padding: 9.5px;
+    color: #1b58f4;
+    text-align: center;
+    background: rgba(166, 166, 166, 0.9);
+    border-radius: 0 4px 4px 0;
   }
-
+}
+.trait-icon:hover {
+  border: #1b58f4 solid 1px;
+  .trait-actions {
+    display: block;
+  }
+}
+.component-icon {
+  width: 20px;
+  margin-right: 4px;
+}
