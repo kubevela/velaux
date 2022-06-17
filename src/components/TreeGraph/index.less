@@ -19,14 +19,18 @@
 
     .name {
       display: flex;
-      flex: 1 1;
-      flex-wrap: wrap;
+      flex-direction: column;
       justify-content: flex-start;
       width: 100%;
       overflow: hidden;
-      line-height: 40px;
+      line-height: 20px;
       white-space: nowrap;
       text-overflow: ellipsis;
+      .kind {
+        margin: 0;
+        color: #a6a6a6;
+        font-size: 12px;
+      }
     }
 
     .icon {
@@ -57,15 +61,17 @@
     }
     .additional {
       position: absolute;
+      right: 8px;
       bottom: -12px;
       display: block;
-      right:8px
     }
   }
 
   .graph-node-app {
     padding-left: 5em;
-
+    .name {
+      line-height: 40px;
+    }
     .icon {
       top: -10px;
       left: -10px;
@@ -87,7 +93,13 @@
 
   .graph-node-pod {
     .icon {
+      display: flex;
+      flex-direction: column;
       height: 60px;
+      span {
+        color: #a6a6a6;
+        font-size: 12px;
+      }
     }
     .name {
       line-height: 30px;
@@ -116,7 +128,7 @@
       transition: all 0.2s linear;
 
       &:last-child {
-        &:after {
+        &::after {
           position: absolute;
           top: -10px;
           color: #a3a3a3;
@@ -128,8 +140,8 @@
     }
   }
   .line {
-    line-height: 16px;
-    padding: 0;
     margin: 0;
+    padding: 0;
+    line-height: 16px;
   }
 }
