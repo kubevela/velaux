@@ -90,20 +90,6 @@ export interface UIParamValidate {
   immutable?: boolean;
 }
 
-export interface ImageInfo {
-  imageURL: string;
-  imageName: string;
-  tag: string;
-  repoHost: string;
-  namespace: string;
-  ports: number[];
-  volumes: ImageVolume[];
-}
-
-export interface ImageVolume {
-  mountPath: string;
-}
-
 export interface ApplicationDeployRequest {
   appName: string;
   workflowName?: string;
@@ -328,26 +314,6 @@ export interface TraitDefinitionSpec {
   podDisruptive?: boolean;
   appliesToWorkloads?: string[];
 }
-
-export interface ChartVersion {
-  name: string;
-  version: string;
-  description?: string;
-  apiVersion: string;
-  appVersion: string;
-  type?: string;
-  urls: string[];
-  created: string;
-  digest: string;
-  icon?: string;
-}
-
-export interface HelmRepo {
-  url: string;
-  type: string;
-  secretName?: string;
-}
-
 export interface ApplicationQuery {
   query?: string;
   project?: string;

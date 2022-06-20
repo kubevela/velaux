@@ -103,7 +103,7 @@ class CreateIntegration extends React.Component<Props, State> {
       createConfigType(queryData, params)
         .then((res) => {
           if (res) {
-            Message.success(<Translation>Create config success</Translation>);
+            Message.success(<Translation>Integration config created successfully</Translation>);
             this.props.onCreate();
           }
         })

@@ -102,8 +102,8 @@ class Integrations extends Component<Props, State> {
         if (params) {
           deleteConfig(params).then((res) => {
             if (res) {
-              Message.success(<Translation>Delete config success</Translation>);
-              this.listIntegrations();
+              Message.success(<Translation>Integration config deleted successfully</Translation>);
+              setTimeout(() => this.listIntegrations(), 2000);
             }
           });
         }
@@ -114,7 +114,7 @@ class Integrations extends Component<Props, State> {
 
   onCreate = () => {
     this.setState({ visible: false });
-    this.listIntegrations();
+    setTimeout(() => this.listIntegrations(), 2000);
   };
 
   onCloseCreate = () => {
