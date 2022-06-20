@@ -1,6 +1,7 @@
 import 'mocha';
 import { assert } from 'chai';
 import { resourceMatch, ResourceName } from '../permission';
+import { equalArray } from '../common';
 
 describe('test permission', () => {
   it('test resourceMatch', () => {
@@ -12,5 +13,13 @@ describe('test permission', () => {
       ),
       true,
     );
+  });
+});
+
+describe('test util', () => {
+  it('test equal the array', () => {
+    assert.equal(equalArray(['a', 'b'], ['b', 'a']), true);
+    assert.equal(equalArray(['b'], ['b', 'a']), false);
+    assert.equal(equalArray(undefined, ['b', 'a']), false);
   });
 });

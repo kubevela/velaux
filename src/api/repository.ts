@@ -45,3 +45,13 @@ export function getChartRepos(params: { project?: string }) {
   }
   return get(url, { params: params }).then((res) => res);
 }
+
+export function getImageRepos(params: { project: string }) {
+  const url = baseURL + repository + '/image/repos';
+  return get(url, { params: params }).then((res) => res);
+}
+
+export function getImageInfo(params: { project: string; secretName?: string; name: string }) {
+  const url = baseURL + repository + '/image/info';
+  return get(url, { params: params }).then((res) => res);
+}
