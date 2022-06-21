@@ -482,27 +482,31 @@ class UISchema extends Component<Props, State> {
               </Form.Item>
             );
           case 'ImageInput':
+            const imagePullSecretsValue = value && value.imagePullSecrets;
+            const initResult = init('imagePullSecrets', {
+              initValue: imagePullSecretsValue,
+              rules: [],
+            });
             return (
-              <Form.Item
-                required={required}
+              <ImageInput
                 label={label}
-                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
                 key={param.jsonKey}
-              >
-                <ImageInput
-                  disabled={disableEdit}
-                  {...init(param.jsonKey, {
-                    initValue: initValue,
-                    rules: [
-                      {
-                        required: true,
-                        pattern: checkImageName,
-                        message: 'Please enter a valid image name',
-                      },
-                    ],
-                  })}
-                />
-              </Form.Item>
+                required={required || false}
+                disabled={disableEdit}
+                {...init(param.jsonKey, {
+                  initValue: initValue,
+                  rules: [
+                    {
+                      required: true,
+                      pattern: checkImageName,
+                      message: 'Please enter a valid image name',
+                    },
+                  ],
+                })}
+                secretValue={initResult.value}
+                onSecretChange={initResult.onChange}
+                secretID={initResult.id}
+              />
             );
           case 'HelmChartSelect':
             return (

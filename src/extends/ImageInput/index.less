@@ -1,3 +1,51 @@
+@import '../../lib.less';
+
 .image-input-container {
   display: flex;
+}
+
+.image-info {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
+  overflow-x: hidden;
+  background: rgba(171, 205, 239, 0.2);
+  .container-base {
+    display: flex;
+    padding: 8px;
+    .docker-base {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .docker-logo {
+      width: 50px;
+      margin: 0 16px 0 0;
+    }
+    .name {
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+      font-size: 14px;
+      .desc {
+        padding: 0 8px;
+      }
+    }
+    .desc {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+  }
+  .image-item {
+    display: flex;
+    padding: 8px;
+    svg {
+      margin-right: 6px;
+      font-size: 24px;
+      line-height: 60px;
+    }
+  }
+  .message {
+    color: @dangerColor;
+  }
 }
