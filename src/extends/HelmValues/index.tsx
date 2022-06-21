@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import _ from 'lodash';
-import type { HelmRepo, UIParam } from '../../interface/application';
+import type { UIParam } from '../../interface/application';
+import type { HelmRepo } from '../../interface/repository';
 import KV from '../KV';
 import { getChartValues } from '../../api/repository';
 import { Loading } from '@b-design/ui';

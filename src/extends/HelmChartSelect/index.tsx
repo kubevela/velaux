@@ -4,7 +4,7 @@ import { Loading, Select } from '@b-design/ui';
 import i18n from '../../i18n';
 import locale from '../../utils/locale';
 import { connect } from 'dva';
-import type { HelmRepo } from '../../interface/application';
+import type { HelmRepo } from '../../interface/repository';
 
 type Props = {
   value?: any;

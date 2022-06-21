@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { getChartVersions } from '../../api/repository';
 import { Loading, Select } from '@b-design/ui';
-import type { ChartVersion, HelmRepo } from '../../interface/application';
+import type { ChartVersion, HelmRepo } from '../../interface/repository';
 import i18n from '../../i18n';
 import locale from '../../utils/locale';
 import { connect } from 'dva';

@@ -89,6 +89,43 @@ export function momentShortDate(time: undefined | string): string {
   return moment(time).format('YYYY/MM/DD');
 }
 
+export function beautifyTime(time?: string) {
+  if (!time) {
+    return '';
+  }
+  const timestamp = moment(time).unix();
+  const now = new Date();
+  let mistiming = Math.round(now.getTime() / 1000) - timestamp;
+  const postfix = mistiming > 0 ? 'ago' : 'later';
+  mistiming = Math.abs(mistiming);
+  const arrr = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'];
+  const arrn = [31536000, 2592000, 604800, 86400, 3600, 60, 1];
+
+  for (let i = 0; i < 7; i++) {
+    const inm = Math.floor(mistiming / arrn[i]);
+    if (inm != 0) {
+      return inm + ' ' + arrr[i] + ' ' + postfix;
+    }
+  }
+}
+
+export function beautifyBinarySize(value?: number) {
+  if (null == value || value == 0) {
+    return '0 Bytes';
+  }
+  const unitArr = new Array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+  let index = 0;
+  index = Math.floor(Math.log(value) / Math.log(1024));
+  const size = value / Math.pow(1024, index);
+  let sizeStr = '';
+  if (size % 1 === 0) {
+    sizeStr = size.toFixed(0);
+  } else {
+    sizeStr = size.toFixed(2);
+  }
+  return sizeStr + unitArr[index];
+}
+
 export const checkName = /^[a-z]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/;
 export const urlRegular =
   /(https|http|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g;
@@ -170,4 +207,25 @@ export const checkUserEmail = /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$/;
 export function isMatchBusinessCode(businessCode: number) {
   const tokenExpiredList = [12002, 12010];
   return tokenExpiredList.includes(businessCode);
+}
+
+export function equalArray(a?: string[], b?: string[]) {
+  if (a === undefined && b === undefined) {
+    return true;
+  }
+  if (b === undefined || a === undefined) {
+    return false;
+  }
+  if (a.length !== b.length) {
+    return false;
+  } else {
+    const sa = a.sort();
+    const sb = b.sort();
+    for (let i = 0; i < sa.length; i++) {
+      if (sa[i] !== sb[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

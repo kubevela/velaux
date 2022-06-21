@@ -3,7 +3,7 @@ import { Loading, Select } from '@b-design/ui';
 import i18n from '../../i18n';
 import locale from '../../utils/locale';
 import { getChartRepos } from '../../api/repository';
-import type { HelmRepo } from '../../interface/application';
+import type { HelmRepo } from '../../interface/repository';
 import { connect } from 'dva';
 import _ from 'lodash';
 

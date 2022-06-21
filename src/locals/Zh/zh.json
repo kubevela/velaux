@@ -553,5 +553,6 @@
   "Please select a component": "请选择一个组件",
   "Please select a workflow": "请选择一个工作流",
   "Please select a payloadType": "请选择请求体类型，不同的外部系统请求参数类型具有差异",
-  "Resource Graph": "资源拓扑图"
+  "Resource Graph": "资源拓扑图",
+  "The ImagePullSecrets property has been automatically assigned": "发现镜像仓库配置，已自动为 ImagePullSecrets 字段赋值"
 }
