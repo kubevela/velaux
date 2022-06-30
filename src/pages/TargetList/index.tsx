@@ -114,7 +114,7 @@ class targetList extends React.Component<Props, State> {
   };
 
   render() {
-    const { t, clusterList, targets, total, userInfo } = this.props;
+    const { t, clusterList, targets, total } = this.props;
     const { visibleDelivery, isEdit, targetItem } = this.state;
     return (
       <div>
@@ -158,7 +158,6 @@ class targetList extends React.Component<Props, State> {
           <TargetDialog
             t={t}
             visible={visibleDelivery}
-            projects={userInfo?.projects || []}
             clusterList={clusterList || []}
             isEdit={isEdit}
             targetItem={targetItem}
