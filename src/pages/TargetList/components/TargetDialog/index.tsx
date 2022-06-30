@@ -1,11 +1,11 @@
 import React from 'react';
-import { Message, Grid, Dialog, Form, Input, Field, Select } from '@b-design/ui';
+import { Message, Grid, Dialog, Form, Input, Field, Select, Loading } from '@b-design/ui';
 import Group from '../../../../extends/Group';
 import Namespace from '../Namespace';
 import type { NamespaceItem } from '../Namespace';
 import { checkName } from '../../../../utils/common';
 import { createTarget, updateTarget } from '../../../../api/target';
-import { getCloudServiceProviderList } from '../../../../api/project';
+import { getCloudServiceProviderList, getProjectList } from '../../../../api/project';
 import type { Target, ProvideList } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
@@ -24,13 +24,14 @@ type Props = {
   onOK: () => void;
   onClose: () => void;
   t: (key: string) => string;
-  projects: Project[];
 };
 
 type State = {
   cluster?: string;
   namespaces: NamespaceItem[];
   providerList: ProvideList[];
+  projects?: Project[];
+  isLoading: boolean;
 };
 
 class DeliveryDialog extends React.Component<Props, State> {
@@ -64,6 +65,7 @@ class DeliveryDialog extends React.Component<Props, State> {
     this.state = {
       namespaces: [],
       providerList: [],
+      isLoading: true,
     };
   }
 
@@ -94,7 +96,22 @@ class DeliveryDialog extends React.Component<Props, State> {
         this.loadNamespaces(cluster.clusterName);
       }
     }
+    this.listProjects();
   }
+
+  listProjects = async () => {
+    this.setState({ isLoading: true });
+    getProjectList({ page: 0, pageSize: 0 })
+      .then((res) => {
+        this.setState({
+          projects: res.projects || [],
+          isLoading: false,
+        });
+      })
+      .catch(() => {
+        this.setState({ isLoading: false });
+      });
+  };
 
   onClose = () => {
     this.props.onClose();
@@ -226,11 +243,11 @@ class DeliveryDialog extends React.Component<Props, State> {
       },
     };
 
-    const { t, visible, isEdit, projects } = this.props;
-    const { namespaces } = this.state;
+    const { t, visible, isEdit } = this.props;
+    const { namespaces, projects, isLoading } = this.state;
     const cluster: string = this.field.getValue('clusterName');
 
-    const projectOptions = projects.map((project) => {
+    const projectOptions = projects?.map((project) => {
       return {
         label: project.alias ? project.alias : project.name,
         value: project.name,
@@ -297,30 +314,32 @@ class DeliveryDialog extends React.Component<Props, State> {
 
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Project</Translation>} required>
-                  <Select
-                    name="project"
-                    hasClear
-                    showSearch
-                    placeholder={t('Please select').toString()}
-                    filterLocal={true}
-                    dataSource={projectOptions}
-                    style={{ width: '100%' }}
-                    {...init('project', {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Please select project',
-                        },
-                      ],
-                    })}
-                    onChange={(item: string) => {
-                      this.field.setValue('var_providerName', '');
-                      this.field.setValue('project', item);
-                      this.getProviderList(item);
-                    }}
-                  />
-                </FormItem>
+                <Loading visible={isLoading} style={{ width: '100%' }}>
+                  <FormItem label={<Translation>Project</Translation>} required>
+                    <Select
+                      name="project"
+                      hasClear
+                      showSearch
+                      placeholder={t('Please select').toString()}
+                      filterLocal={true}
+                      dataSource={projectOptions}
+                      style={{ width: '100%' }}
+                      {...init('project', {
+                        rules: [
+                          {
+                            required: true,
+                            message: 'Please select project',
+                          },
+                        ],
+                      })}
+                      onChange={(item: string) => {
+                        this.field.setValue('var_providerName', '');
+                        this.field.setValue('project', item);
+                        this.getProviderList(item);
+                      }}
+                    />
+                  </FormItem>
+                </Loading>
               </Col>
             </Row>
 
