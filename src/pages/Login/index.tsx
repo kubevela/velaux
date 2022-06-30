@@ -201,6 +201,9 @@ export default class LoginPage extends Component<Props, State> {
                       <Input
                         name="password"
                         htmlType="password"
+                        onPressEnter={() => {
+                          this.handleSubmit();
+                        }}
                         placeholder={i18n.t('Please input the password').toString()}
                         {...init('password', {
                           rules: [

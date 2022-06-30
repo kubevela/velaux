@@ -1,6 +1,6 @@
 import { post, get, rdelete, put } from './request';
 import type { User } from '../interface/user';
-import { users } from './productionLink';
+import { users, cloudShell } from './productionLink';
 
 type UserQuery = {
   name: string;
@@ -38,4 +38,9 @@ export function changeUserDisable(params: { name: string }) {
 export function changeUserEnable(params: { name: string }) {
   const urlPath = users + `/${params.name}/enable`;
   return get(urlPath, {}).then((res) => res);
+}
+
+export function prepareCloudShell() {
+  const urlPath = cloudShell;
+  return post(urlPath, {}).then((res) => res);
 }

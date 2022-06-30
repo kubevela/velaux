@@ -305,6 +305,7 @@ class UISchema extends Component<Props, State> {
     }
 
     let couldBeDisabledParamCount = 0;
+    let requiredParamCount = 0;
     const items = uiSchema.map((param) => {
       const init = this.form.init;
       const required = param.validate && param.validate.required;
@@ -318,6 +319,8 @@ class UISchema extends Component<Props, State> {
 
       if (!required) {
         couldBeDisabledParamCount += 1;
+      } else {
+        requiredParamCount += 1;
       }
 
       if (onlyShowRequired && !required && !advanced) {
@@ -890,7 +893,8 @@ class UISchema extends Component<Props, State> {
       },
     };
 
-    const showAdvancedButton = couldBeDisabledParamCount != couldShowParamCount;
+    const showAdvancedButton =
+      couldBeDisabledParamCount != couldShowParamCount || requiredParamCount === 0;
     return (
       <Form field={this.form} className="ui-schema-container">
         <If condition={disableRenderRow}>{items}</If>

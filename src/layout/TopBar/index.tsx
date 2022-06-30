@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './index.less';
 import { routerRedux } from 'dva/router';
-import { Dropdown, Grid, Icon, Menu } from '@b-design/ui';
+import { Dialog, Dropdown, Grid, Icon, Menu } from '@b-design/ui';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
@@ -16,11 +16,18 @@ import PlatformSetting from '../../components/PlatformSetting';
 import EditPlatFormUserDialog from './components/EditPlatFormUserDialog';
 import { getBrowserNameAndVersion, isAdminUserCheck } from '../../utils/utils';
 import { getData, setData } from '../../utils/cache';
+import { AiOutlineCode } from 'react-icons/ai';
+import CloudShell from '../CloudShell';
+import locale from '../../utils/locale';
+import type { AddonBaseStatus } from '../../interface/addon';
+import i18n from '../../i18n';
 
 type Props = {
   dispatch: ({}) => {};
   userInfo?: LoginUserInfo;
   systemInfo?: SystemInfo;
+  show?: boolean;
+  enabledAddons?: AddonBaseStatus[];
 };
 
 type State = {
@@ -32,7 +39,7 @@ type State = {
 const TelemetryDataCollectionKey = 'telemetryDataCollection';
 const TelemetryDataCollectionServer = 'https://telemetry.kubevela.net/collecting';
 @connect((store: any) => {
-  return { ...store.user };
+  return { ...store.user, ...store.cloudshell, ...store.addons };
 })
 class TopBar extends Component<Props, State> {
   loadCount: number;
@@ -48,6 +55,7 @@ class TopBar extends Component<Props, State> {
   componentDidMount() {
     this.loadSystemInfo();
     this.loadUserInfo();
+    this.loadEnabledAddons();
   }
 
   loadSystemInfo = () => {
@@ -56,6 +64,13 @@ class TopBar extends Component<Props, State> {
       callback: () => {
         this.telemetryDataCollection();
       },
+    });
+  };
+
+  loadEnabledAddons = () => {
+    this.props.dispatch({
+      type: 'addons/getEnabledAddons',
+      payload: {},
     });
   };
 
@@ -125,6 +140,41 @@ class TopBar extends Component<Props, State> {
     );
   };
 
+  checkEnabledAddon = (addonName: string) => {
+    const { enabledAddons } = this.props;
+    if (!enabledAddons) {
+      return false;
+    }
+    const addonNames = enabledAddons.map((addon) => {
+      return addon.name;
+    });
+    if (addonNames.includes(addonName)) {
+      return true;
+    }
+    return false;
+  };
+
+  onOpenCloudShell = () => {
+    if (!this.checkEnabledAddon('cloudshell')) {
+      Dialog.alert({
+        title: i18n.t('CloudShell feature is not enabled'),
+        content: i18n.t('You must enable the CloudShell addon'),
+        onOk: () => {
+          this.props.dispatch(
+            routerRedux.push({
+              pathname: '/addons/cloudshell',
+            }),
+          );
+        },
+        locale: locale().Dialog,
+      });
+      return;
+    }
+    this.props.dispatch({
+      type: 'cloudshell/open',
+    });
+  };
+
   showPlatformSetting = () => {
     this.setState({ platformSetting: true });
   };
@@ -145,7 +195,7 @@ class TopBar extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { systemInfo, dispatch } = this.props;
+    const { systemInfo, dispatch, show } = this.props;
     const { platformSetting, isEditAdminUser, userInfo } = this.state;
     return (
       <div className="layout-topbar" id="layout-topbar">
@@ -158,6 +208,15 @@ class TopBar extends Component<Props, State> {
             <Permission request={{ resource: 'systemSetting', action: 'update' }}>
               <div className="vela-item" onClick={this.showPlatformSetting}>
                 <Translation>Platform Setting</Translation>
+              </div>
+            </Permission>
+            <Permission request={{ resource: 'cloudshell', action: 'create' }}>
+              <div
+                className="vela-item"
+                title="Open the cloud shell"
+                onClick={this.onOpenCloudShell}
+              >
+                <AiOutlineCode size={18} />
               </div>
             </Permission>
             <div className="vela-item">
@@ -275,6 +334,9 @@ class TopBar extends Component<Props, State> {
         </If>
         <If condition={isEditAdminUser}>
           <EditPlatFormUserDialog userInfo={userInfo} onClose={this.onCloseEditAdminUser} />
+        </If>
+        <If condition={show}>
+          <CloudShell />
         </If>
       </div>
     );

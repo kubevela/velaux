@@ -169,7 +169,12 @@ class ApplicationHeader extends Component<Props, State> {
               />
             </If>
             <If condition={applicationDetail?.readOnly}>
-              <Message type="notice" title={i18n.t('This application is readonly').toString()} />
+              <Message
+                type="notice"
+                title={i18n
+                  .t('This application is managed by the addon, and it is readonly')
+                  .toString()}
+              />
             </If>
             <Permission
               request={{
