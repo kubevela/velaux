@@ -2,37 +2,37 @@ import React, { Component } from 'react';
 import { Balloon, Table } from '@b-design/ui';
 import Empty from '../Empty';
 import Translation from '../../../../components/Translation';
-import type { ApplicationDetail, Revisions } from '../../../../interface/application';
+import type { ApplicationDetail, ApplicationRevision } from '../../../../interface/application';
 import { statusList } from '../../constants';
 import { momentDate } from '../../../../utils/common';
 import { Link } from 'dva/router';
 import './index.less';
-import { If } from 'tsx-control-statements/components';
 import locale from '../../../../utils/locale';
 import Item from '../../../../components/Item';
 
 type Props = {
-  list: Revisions[];
+  list: ApplicationRevision[];
   getRevisionList: () => void;
   applicationDetail?: ApplicationDetail;
+  onShowAppModel: (record: ApplicationRevision) => void;
 };
 
 type State = {};
 
 class TableList extends Component<Props, State> {
   //Todo
-  onRollback = (record: Revisions) => {
+  onRollback = (record: ApplicationRevision) => {
     console.log(record);
   };
 
-  getCloumns = () => {
+  getColumns = () => {
     const { applicationDetail } = this.props;
     return [
       {
         key: 'version',
         title: <Translation>Revision</Translation>,
         dataIndex: 'version',
-        cell: (v: string, i: number, record: Revisions) => {
+        cell: (v: string, i: number, record: ApplicationRevision) => {
           if (record.codeInfo) {
             return (
               <Balloon style={{ width: '220px' }} trigger={<a>{v}</a>}>
@@ -54,10 +54,16 @@ class TableList extends Component<Props, State> {
         key: 'status',
         title: <Translation>Status</Translation>,
         dataIndex: 'status',
-        cell: (v: string) => {
+        cell: (v: string, i: number, record: ApplicationRevision) => {
           const findObj = statusList.find((item) => item.value === v);
           if (findObj) {
-            return <Translation>{findObj.label}</Translation>;
+            return (
+              <div title={record.reason}>
+                {v === 'failure' && <span className="circle circle-failure" />}
+                {v === 'terminated' && <span className="circle circle-warning" />}
+                <Translation>{findObj.label}</Translation>
+              </div>
+            );
           }
           return '';
         },
@@ -97,18 +103,12 @@ class TableList extends Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: (v: string, i: number, record: Revisions) => {
+        cell: (v: string, i: number, record: ApplicationRevision) => {
           return (
             <div>
-              <If condition={record.status === 'complete'}>
-                {/* <a
-                  onClick={() => {
-                    this.onRollback(record);
-                  }}
-                >
-                  <Translation>Rollback</Translation>
-                </a> */}
-              </If>
+              <a onClick={() => this.props.onShowAppModel(record)}>
+                <Translation>Detail</Translation>
+              </a>
             </div>
           );
         },
@@ -118,7 +118,7 @@ class TableList extends Component<Props, State> {
 
   render() {
     const { Column } = Table;
-    const columns = this.getCloumns();
+    const columns = this.getColumns();
     const { list } = this.props;
     return (
       <div className="table-version-list  margin-top-20">

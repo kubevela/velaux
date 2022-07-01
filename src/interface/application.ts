@@ -214,9 +214,14 @@ export interface ApplicationComponent extends ApplicationComponentBase {
   };
 }
 
-export interface Revisions {
+export interface ApplicationRevision {
   createTime?: string;
-  deployUser?: string;
+  deployUser?:
+    | string
+    | {
+        name: string;
+        alias: string;
+      };
   envName?: string;
   note?: string;
   reason?: string;
@@ -228,6 +233,27 @@ export interface Revisions {
     branch?: string;
     user?: string;
   };
+  imageInfo?: {
+    type: string;
+    resource?: {
+      digest: string;
+      tag: string;
+      url: string;
+      createTime: string;
+    };
+    repository?: {
+      name: string;
+      namespace: string;
+      fullName: string;
+      region: string;
+      type: string;
+      createTime: string;
+    };
+  };
+}
+
+export interface ApplicationRevisionDetail extends ApplicationRevision {
+  applyAppConfig: string;
 }
 
 export interface ApplicationStatistics {

@@ -4,10 +4,16 @@ import { Pagination } from '@b-design/ui';
 import { listRevisions } from '../../api/application';
 import Header from './components/Hearder';
 import TableList from './components/List';
-import type { ApplicationDetail, EnvBinding, Revisions } from '../../interface/application';
+import type {
+  ApplicationDetail,
+  EnvBinding,
+  ApplicationRevision,
+} from '../../interface/application';
 import { statusList } from './constants';
 import './index.less';
 import locale from '../../utils/locale';
+import { If } from 'tsx-control-statements/components';
+import { ShowRevision } from './components/Detail';
 
 type Props = {
   revisions: [];
@@ -27,8 +33,10 @@ type State = {
   pageSize: number;
   envName: string;
   status: string;
-  revisionsList: Revisions[];
+  revisionsList: ApplicationRevision[];
   revisionsListTotal: number;
+  showAppRevision: boolean;
+  revision?: ApplicationRevision;
 };
 
 @connect((store: any) => {
@@ -46,6 +54,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
       status: '',
       revisionsList: [],
       revisionsListTotal: 0,
+      showAppRevision: false,
     };
   }
 
@@ -102,8 +111,12 @@ class ApplicationRevisionList extends React.Component<Props, State> {
     );
   };
 
+  showAppModel = (revision: ApplicationRevision) => {
+    this.setState({ showAppRevision: true, revision: revision });
+  };
+
   render() {
-    const { revisionsList } = this.state;
+    const { revisionsList, showAppRevision, revision, appName } = this.state;
     const { envbinding, applicationDetail } = this.props;
 
     return (
@@ -122,6 +135,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
         <TableList
           applicationDetail={applicationDetail}
           list={revisionsList}
+          onShowAppModel={this.showAppModel}
           getRevisionList={this.getRevisionList}
         />
         <Pagination
@@ -134,6 +148,17 @@ class ApplicationRevisionList extends React.Component<Props, State> {
           current={this.state.page}
           onChange={this.handleChange}
         />
+        <If condition={showAppRevision}>
+          {revision && (
+            <ShowRevision
+              onClose={() => {
+                this.setState({ showAppRevision: false, revision: undefined });
+              }}
+              appName={appName}
+              revision={revision}
+            />
+          )}
+        </If>
       </div>
     );
   }
