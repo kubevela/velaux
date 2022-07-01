@@ -225,6 +225,12 @@ export function listRevisions(query: listRevisionsQuery) {
   return get(gurl, { params: query }).then((res) => res);
 }
 
+export function detailRevision(query: { appName: string; revision: string }) {
+  const { appName, revision } = query;
+  const gurl = isMock ? `${getTrait_mock}` : `${application}/${appName}/revisions/${revision}`;
+  return get(gurl, {}).then((res) => res);
+}
+
 export function getApplicationStatistics(params: { appName: string }) {
   return get(`${application}/${params.appName}/statistics`, params).then((res) => res);
 }
