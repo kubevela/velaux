@@ -88,19 +88,19 @@ class ComponentDialog extends React.Component<Props, State> {
             this.onDetailsComponentDefinition(type);
           }
         }
-        dispatch({
-          type: 'uischema/setAppName',
-          payload: appName,
-        });
-        dispatch({
-          type: 'uischema/setProject',
-          payload: project,
-        });
       });
     } else {
       const getInitComponentType: string = this.field.getValue('componentType') || '';
       this.onDetailsComponentDefinition(getInitComponentType);
     }
+    dispatch({
+      type: 'uischema/setAppName',
+      payload: appName,
+    });
+    dispatch({
+      type: 'uischema/setProject',
+      payload: project,
+    });
   }
 
   onGetEditComponentInfo(callback?: () => void) {

@@ -173,7 +173,14 @@ export default class LoginPage extends Component<Props, State> {
                   <h3 className="login-title-description">
                     <Translation>Make shipping applications more enjoyable</Translation>
                   </h3>
-                  <Form onSubmitCapture={(e) => {e.preventDefault()}} onSubmit={this.handleSubmit} {...formItemLayout} field={this.field}>
+                  <Form
+                    onSubmitCapture={(e) => {
+                      e.preventDefault();
+                    }}
+                    onSubmit={this.handleSubmit}
+                    {...formItemLayout}
+                    field={this.field}
+                  >
                     <FormItem
                       label={<Translation className="label-title">Username</Translation>}
                       labelAlign="top"
@@ -218,7 +225,12 @@ export default class LoginPage extends Component<Props, State> {
                         })}
                       />
                     </FormItem>
-                    <Button loading={loginLoading} type="primary" htmlType="submit" onClick={this.handleSubmit}>
+                    <Button
+                      loading={loginLoading}
+                      type="primary"
+                      htmlType="submit"
+                      onClick={this.handleSubmit}
+                    >
                       <Translation>Sign in</Translation>
                     </Button>
                   </Form>

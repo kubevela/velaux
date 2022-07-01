@@ -454,7 +454,7 @@
   "Members": "成员",
   "General": "基本信息",
   "Settings": "系统配置",
-  "This application is readonly": "该应用为只读模式，不能通过 VelaUX 进行部署。",
+  "This application is managed by the addon, and it is readonly": "该应用由插件管理，仅提供可视化",
   "Please check the component properties": "请检查组件配置参数",
   "LastLoginTime": "上次登录时间",
   "Search by name": "基于用户名称搜索",
@@ -554,5 +554,7 @@
   "Please select a workflow": "请选择一个工作流",
   "Please select a payloadType": "请选择请求体类型，不同的外部系统请求参数类型具有差异",
   "Resource Graph": "资源拓扑图",
-  "The ImagePullSecrets property has been automatically assigned": "发现镜像仓库配置，已自动为 ImagePullSecrets 字段赋值"
+  "The ImagePullSecrets property has been automatically assigned": "发现镜像仓库配置，已自动为 ImagePullSecrets 字段赋值",
+  "CloudShell feature is not enabled": "云终端功能未启用",
+  "You must enable the CloudShell addon": "你需要先启动 CloudShell 插件"
 }

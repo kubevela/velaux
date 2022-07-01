@@ -34,3 +34,8 @@ export interface PermissionBase {
   createTime: string;
   updateTime: string;
 }
+
+export interface CloudShellPrepare {
+  status: string;
+  message?: string;
+}

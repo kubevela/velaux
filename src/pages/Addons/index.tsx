@@ -7,7 +7,6 @@ import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
 import RegistryManageDialog from './components/registry-manage/index';
 import { If } from 'tsx-control-statements/components';
-import { getEnabledAddons } from '../../api/addons';
 import type { AddonBaseStatus } from '../../interface/addon';
 import Permission from '../../components/Permission';
 import Translation from '../../components/Translation';
@@ -19,13 +18,13 @@ type Props = {
   addonListMessage: string;
   loading: any;
   match?: any;
+  enabledAddons?: AddonBaseStatus[];
 };
 
 type State = {
   showAddonDetail: boolean;
   addonName: string;
   showRegistryManage: boolean;
-  enabledAddons?: AddonBaseStatus[];
 };
 
 @connect((store: any) => {
@@ -61,10 +60,9 @@ class Addons extends React.Component<Props, State> {
   };
 
   getEnabledAddon = async () => {
-    getEnabledAddons({}).then((res) => {
-      if (res) {
-        this.setState({ enabledAddons: res.enabledAddons });
-      }
+    this.props.dispatch({
+      type: 'addons/getEnabledAddons',
+      payload: {},
     });
   };
 
@@ -93,10 +91,17 @@ class Addons extends React.Component<Props, State> {
   };
 
   render() {
-    const { addonsList = [], registryList = [], dispatch, loading, addonListMessage } = this.props;
+    const {
+      addonsList = [],
+      registryList = [],
+      dispatch,
+      loading,
+      addonListMessage,
+      enabledAddons,
+    } = this.props;
 
     const isLoading = loading.models.addons;
-    const { showAddonDetail, addonName, showRegistryManage, enabledAddons } = this.state;
+    const { showAddonDetail, addonName, showRegistryManage } = this.state;
     return (
       <div>
         <Title
