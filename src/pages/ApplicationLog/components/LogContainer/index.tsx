@@ -110,6 +110,9 @@ class ContainerLog extends Component<Props, State> {
           if (res && res.logs) {
             this.setState({ logs: this.toLogLines(res.logs), info: res.info });
           }
+          if (res && res.err) {
+            this.setState({ logs: this.toLogLines(res.err) });
+          }
           const { autoRefresh, refreshInterval } = this.state;
           if (autoRefresh) {
             this.timeoutID = setTimeout(() => this.loadContainerLog(), refreshInterval);
