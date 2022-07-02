@@ -79,7 +79,7 @@ class CloudShell extends Component<Props, State> {
       <iframe
         width={'100%'}
         height={'100%'}
-        src={`${BASE_DOMAIN}/view/cloudshell?token=${getToken()}`}
+        src={`${BASE_DOMAIN || ''}/view/cloudshell?token=${getToken()}`}
       />
     );
   }
@@ -94,9 +94,9 @@ class CloudShell extends Component<Props, State> {
 
   loadFullScreenAddress = () => {
     const { BASE_DOMAIN } = process.env;
-    let domain = BASE_DOMAIN;
+    let domain = BASE_DOMAIN || '';
     if (!domain) {
-      domain = document.domain;
+      domain = document.location.origin;
     }
     return `${domain}/view/cloudshell?token=${getToken()}`;
   };
