@@ -37,6 +37,3 @@ jobs:
         build-args: |
           GITVERSION=git-${{ steps.vars.outputs.git_revision }}
           VERSION=${{ steps.get_version.outputs.VERSION }}
-        tags: |-
-          acr.kubevela.net/oamdev/velaux:${{ steps.get_version.outputs.VERSION }}
-          oamdev/velaux:${{ steps.get_version.outputs.VERSION }}
