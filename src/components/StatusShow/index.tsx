@@ -53,7 +53,7 @@ class StatusShow extends React.Component<Props> {
                 width="150px"
                 title={<Translation>Namespace/Name</Translation>}
                 cell={(v: string, i: number, row: Resource) => {
-                  return `${row.namespace}/${row.name}`;
+                  return `${row.namespace || '-'}/${row.name}`;
                 }}
               />
               <Table.Column
