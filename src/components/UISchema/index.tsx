@@ -19,6 +19,7 @@ import { checkImageName, replaceUrl } from '../../utils/common';
 import locale from '../../utils/locale';
 import HelmValues from '../../extends/HelmValues';
 import HelmChartSelect from '../../extends/HelmChartSelect';
+import CertBase64 from '../../extends/CertBase64';
 import HelmChartVersionSelect from '../../extends/HelmChartVersionSelect';
 import { If } from 'tsx-control-statements/components';
 import i18n from 'i18next';
@@ -861,6 +862,25 @@ class UISchema extends Component<Props, State> {
                 key={param.jsonKey}
               >
                 <PolicySelect
+                  disabled={disableEdit}
+                  {...init(param.jsonKey, {
+                    initValue: initValue,
+                    rules: convertRule(param.validate),
+                  })}
+                />
+              </Form.Item>
+            );
+          case 'CertBase64':
+            return (
+              <Form.Item
+                labelAlign={inline ? 'inset' : 'left'}
+                required={required}
+                label={label}
+                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
+                disabled={disableEdit}
+                key={param.jsonKey}
+              >
+                <CertBase64
                   disabled={disableEdit}
                   {...init(param.jsonKey, {
                     initValue: initValue,
