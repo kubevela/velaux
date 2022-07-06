@@ -536,7 +536,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                       width="240px"
                       title={<Translation>Namespace/Name</Translation>}
                       cell={(v: string, i: number, row: AppliedResource) => {
-                        return `${row.namespace}/${row.name}`;
+                        return `${row.namespace || '-'}/${row.name}`;
                       }}
                     />
                     <Table.Column
