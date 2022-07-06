@@ -6,8 +6,10 @@ import Translation from '../../../../components/Translation';
 import {
   recycleApplicationEnvbinding,
   deleteApplicationEnvbinding,
+  compareApplication,
 } from '../../../../api/application';
 import type {
+  ApplicationCompareResponse,
   ApplicationComponent,
   ApplicationDetail,
   ApplicationStatus,
@@ -18,6 +20,7 @@ import locale from '../../../../utils/locale';
 import { Link, routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import Permission from '../../../../components/Permission';
+import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 
 export type GatewayIP = {
   ip: string;
@@ -49,6 +52,8 @@ type State = {
   visibleEnvEditPlan: boolean;
   target?: string;
   component?: string;
+  compare?: ApplicationCompareResponse;
+  visibleApplicationDiff: boolean;
 };
 
 class Header extends Component<Props, State> {
@@ -60,36 +65,38 @@ class Header extends Component<Props, State> {
       refreshLoading: false,
       showStatus: false,
       visibleEnvEditPlan: false,
+      visibleApplicationDiff: false,
     };
   }
-  componentDidMount() {}
+  componentDidMount() {
+    this.compareCurrentWithCluster();
+  }
 
-  loadEnvbinding = async () => {
-    const { applicationDetail } = this.props;
-    if (applicationDetail) {
-      this.props.dispatch({
-        type: 'application/getApplicationEnvbinding',
-        payload: { appName: applicationDetail.name },
-      });
+  compareCurrentWithCluster = () => {
+    const { applicationStatus, appName, envName } = this.props;
+    if (!applicationStatus) {
+      this.setState({ compare: undefined });
+      return;
     }
+    compareApplication(appName, { compareCurrentWithCluster: { env: envName } }).then(
+      (res: ApplicationCompareResponse) => {
+        this.setState({ compare: res });
+      },
+    );
   };
-  loadApplicationWorkflows = async () => {
-    const { appName } = this.props;
-    this.props.dispatch({
-      type: 'application/getApplicationWorkflows',
-      payload: { appName: appName },
-    });
-  };
+
   handleTargetChange = (value: string) => {
     this.setState({ target: value }, () => {
       this.props.updateQuery({ component: this.state.component, target: this.state.target });
     });
   };
+
   handleComponentChange = (value: string) => {
     this.setState({ component: value }, () => {
       this.props.updateQuery({ component: this.state.component, target: this.state.target });
     });
   };
+
   recycleEnv = async () => {
     Dialog.confirm({
       content: i18n.t('Are you sure you want to reclaim the current environment?'),
@@ -109,6 +116,7 @@ class Header extends Component<Props, State> {
       locale: locale().Dialog,
     });
   };
+
   deleteEnv = async () => {
     Dialog.confirm({
       content: i18n.t('Are you sure you want to delete the current environment binding?'),
@@ -132,7 +140,9 @@ class Header extends Component<Props, State> {
 
   refresh = async () => {
     this.props.refresh();
+    this.compareCurrentWithCluster();
   };
+
   showStatus = () => {
     this.refresh();
     this.setState({ showStatus: true });
@@ -142,10 +152,15 @@ class Header extends Component<Props, State> {
     this.setState({ visibleEnvEditPlan: true });
   };
 
+  showApplicationDiff = () => {
+    this.setState({ visibleApplicationDiff: true });
+  };
+
   render() {
     const { Row, Col } = Grid;
     const { appName, envName, components, applicationDetail } = this.props;
-    const { recycleLoading, deleteLoading, refreshLoading } = this.state;
+    const { recycleLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff } =
+      this.state;
     const { targets, applicationStatus, gatewayIPs, disableStatusShow } = this.props;
     const targetOptions = (targets || []).map((item: Target) => ({
       label: item.alias || item.name,
@@ -172,8 +187,8 @@ class Header extends Component<Props, State> {
     const projectName = applicationDetail && applicationDetail.project?.name;
     return (
       <div>
-        <Row className="border-radius-8">
-          <Col span="4" style={{ marginBottom: '16px' }}>
+        <Row wrap={true} className="border-radius-8">
+          <Col xl={4} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
             <Select
               locale={locale().Select}
               mode="single"
@@ -184,7 +199,7 @@ class Header extends Component<Props, State> {
               hasClear
             />
           </Col>
-          <Col span="4" style={{ marginBottom: '16px', paddingLeft: '16px' }}>
+          <Col xl={4} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
             <Select
               locale={locale().Select}
               mode="single"
@@ -195,12 +210,12 @@ class Header extends Component<Props, State> {
               hasClear
             />
           </Col>
-          <Col span={6}>
+          <Col xl={6} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
             <If condition={applicationStatus}>
               <Message
                 type={getAppStatusShowType(applicationStatus?.status)}
                 size="medium"
-                style={{ marginLeft: '16px', padding: '8px' }}
+                style={{ padding: '8px' }}
               >
                 <Translation>{`Application is ${applicationStatus?.status || 'Init'}`}</Translation>
                 <If condition={!disableStatusShow}>
@@ -213,8 +228,25 @@ class Header extends Component<Props, State> {
               </Message>
             </If>
           </Col>
-          <Col span="10" className="flexright" style={{ marginBottom: '16px' }}>
-            <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
+          <Col
+            xl={10}
+            m={12}
+            xs={24}
+            className="flexright"
+            style={{ marginBottom: '16px', padding: '0 8px' }}
+          >
+            <If condition={compare && compare.isDiff}>
+              <Button type="secondary" onClick={this.showApplicationDiff}>
+                <span className="circle circle-failure" />
+                Diff
+              </Button>
+            </If>
+            <Button
+              type="secondary"
+              style={{ marginLeft: '16px' }}
+              loading={refreshLoading}
+              onClick={this.refresh}
+            >
               <Icon type="refresh" />
             </Button>
 
@@ -288,6 +320,18 @@ class Header extends Component<Props, State> {
             </If>
           </Col>
         </Row>
+        <If condition={visibleApplicationDiff}>
+          {compare && (
+            <ApplicationDiff
+              baseName="Latest Application Configuration"
+              targetName="Deployed Application"
+              compare={compare}
+              onClose={() => {
+                this.setState({ visibleApplicationDiff: false });
+              }}
+            />
+          )}
+        </If>
       </div>
     );
   }

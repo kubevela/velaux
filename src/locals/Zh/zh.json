@@ -401,7 +401,6 @@
   "Workflow Properties": "工作流属性",
   "Trait Properties": "运维特征属性",
   "Specify the number of workload": "指定工作负载数量",
-  "Application configuration changes take effect only after deploy": "应用配置仅在部署后才能生效",
   "Target Count": "交付目标",
   "Environment Count": "环境",
   "Revision Count": "版本",
@@ -556,5 +555,11 @@
   "Resource Graph": "资源拓扑图",
   "The ImagePullSecrets property has been automatically assigned": "发现镜像仓库配置，已自动为 ImagePullSecrets 字段赋值",
   "CloudShell feature is not enabled": "云终端功能未启用",
-  "You must enable the CloudShell addon": "你需要先启动 CloudShell 插件"
+  "You must enable the CloudShell addon": "你需要先启动 CloudShell 插件",
+  "Diff With Deployed Application": "与当前部署应用的差异",
+  "Diff With Latest Configuration": "与最新配置的差异",
+  "Diff": "差异比对",
+  "Detail": "详情",
+  "Platform": "平台",
+  "Go to enable": "去启用"
 }

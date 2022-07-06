@@ -160,14 +160,6 @@ class ApplicationHeader extends Component<Props, State> {
             </Breadcrumb>
           </Col>
           <Col span={18} className="flexright" style={{ padding: '0 16px' }}>
-            <If condition={!applicationDetail?.readOnly}>
-              <Message
-                type="notice"
-                title={i18n
-                  .t('Application configuration changes take effect only after deploy')
-                  .toString()}
-              />
-            </If>
             <If condition={applicationDetail?.readOnly}>
               <Message
                 type="notice"
@@ -197,8 +189,8 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
         </Row>
         <Row wrap={true}>
-          <Col xl={12} m={12} s={24} className="padding16">
-            <Card locale={locale().Card}>
+          <Col xl={12} m={24} s={24} className="padding16">
+            <Card locale={locale().Card} contentHeight="auto">
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
@@ -227,7 +219,7 @@ class ApplicationHeader extends Component<Props, State> {
               </Row>
             </Card>
           </Col>
-          <Col xl={12} m={12} s={24} className="padding16">
+          <Col xl={12} m={24} s={24} className="padding16">
             <If condition={!records || (Array.isArray(records) && records.length === 0)}>
               <Card locale={locale().Card}>
                 <Empty

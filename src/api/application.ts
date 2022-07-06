@@ -314,3 +314,15 @@ export function deleteComponent(query: { appName: string; componentName: string 
     : `${application}/${query.appName}/components/${query.componentName}`;
   return rdelete(gurl, {}).then((res) => res);
 }
+
+export function compareApplication(
+  appName: string,
+  params: {
+    compareRevisionWithCluster?: { revision?: string };
+    compareRevisionWithCurrent?: { revision?: string };
+    compareCurrentWithCluster?: { env: string };
+  },
+) {
+  const gurl = `${application}/${appName}/compare`;
+  return post(gurl, params).then((res) => res);
+}

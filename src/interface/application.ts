@@ -372,3 +372,10 @@ export interface ApplicationPolicyBase {
 }
 
 export type ApplicationPolicyDetail = ApplicationPolicyBase;
+
+export interface ApplicationCompareResponse {
+  isDiff: boolean;
+  diffReport: string;
+  baseAppYAML: string;
+  targetAppYAML: string;
+}
