@@ -95,6 +95,9 @@ class DeliveryDialog extends React.Component<Props, State> {
       if (cluster) {
         this.loadNamespaces(cluster.clusterName);
       }
+      if (project.name) {
+        this.getProviderList(project.name);
+      }
     }
     this.listProjects();
   }
