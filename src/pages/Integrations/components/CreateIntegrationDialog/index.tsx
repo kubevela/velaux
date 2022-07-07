@@ -172,7 +172,7 @@ class CreateIntegration extends React.Component<Props, State> {
                     {...init('name', {
                       rules: [
                         {
-                          required: false,
+                          required: true,
                           pattern: checkName,
                           message: <Translation>Please enter a valid name</Translation>,
                         },
