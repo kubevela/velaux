@@ -379,3 +379,9 @@ export interface ApplicationCompareResponse {
   baseAppYAML: string;
   targetAppYAML: string;
 }
+
+export interface ApplicationCompareRequest {
+  compareRevisionWithRunning?: { revision?: string };
+  compareRevisionWithLatest?: { revision?: string };
+  compareLatestWithRunning?: { env: string };
+}

@@ -3,6 +3,7 @@ import { Balloon, Button, Dropdown, Menu, Table } from '@b-design/ui';
 import Empty from '../Empty';
 import Translation from '../../../../components/Translation';
 import type {
+  ApplicationCompareRequest,
   ApplicationCompareResponse,
   ApplicationDetail,
   ApplicationRevision,
@@ -49,12 +50,12 @@ class TableList extends Component<Props, State> {
       this.setState({ compare: undefined });
       return;
     }
-    let params: any = {
-      compareRevisionWithCurrent: { revision: revision },
+    let params: ApplicationCompareRequest = {
+      compareRevisionWithLatest: { revision: revision },
     };
     if (mode === 'cluster') {
       params = {
-        compareRevisionWithCluster: { revision: revision },
+        compareRevisionWithRunning: { revision: revision },
       };
     }
     compareApplication(applicationDetail?.name, params).then((res: ApplicationCompareResponse) => {

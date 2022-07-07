@@ -78,7 +78,7 @@ class Header extends Component<Props, State> {
       this.setState({ compare: undefined });
       return;
     }
-    compareApplication(appName, { compareCurrentWithCluster: { env: envName } }).then(
+    compareApplication(appName, { compareLatestWithRunning: { env: envName } }).then(
       (res: ApplicationCompareResponse) => {
         this.setState({ compare: res });
       },

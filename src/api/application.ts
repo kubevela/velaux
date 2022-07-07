@@ -24,6 +24,7 @@ import type {
   Trigger,
   ApplicationComponentConfig,
   ApplicationQuery,
+  ApplicationCompareRequest,
 } from '../interface/application';
 
 interface TraitQuery {
@@ -315,14 +316,7 @@ export function deleteComponent(query: { appName: string; componentName: string 
   return rdelete(gurl, {}).then((res) => res);
 }
 
-export function compareApplication(
-  appName: string,
-  params: {
-    compareRevisionWithCluster?: { revision?: string };
-    compareRevisionWithCurrent?: { revision?: string };
-    compareCurrentWithCluster?: { env: string };
-  },
-) {
+export function compareApplication(appName: string, params: ApplicationCompareRequest) {
   const gurl = `${application}/${appName}/compare`;
   return post(gurl, params).then((res) => res);
 }
