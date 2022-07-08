@@ -414,16 +414,138 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                     contentHeight="auto"
                     title={<Translation>Component Status</Translation>}
                   >
+                    <div style={{ overflow: 'auto' }}>
+                      <Table
+                        locale={locale().Table}
+                        className="customTable"
+                        dataSource={componentStatus}
+                        style={{ minWidth: '1000px' }}
+                      >
+                        <Table.Column
+                          align="left"
+                          dataIndex="name"
+                          style={{ width: '17%' }}
+                          title={<Translation>Name</Translation>}
+                        />
+                        <Table.Column
+                          dataIndex="cluster"
+                          title={<Translation>Cluster</Translation>}
+                          width="200px"
+                          cell={(v: string) => {
+                            let clusterName = v;
+                            if (!clusterName) {
+                              clusterName = 'Local';
+                            }
+                            if (
+                              checkPermission(
+                                { resource: 'cluster:*', action: 'list' },
+                                applicationDetail?.project?.name,
+                                userInfo,
+                              )
+                            ) {
+                              return <Link to="/clusters">{clusterName}</Link>;
+                            }
+                            return <span>{clusterName}</span>;
+                          }}
+                        />
+                        <Table.Column
+                          align="left"
+                          dataIndex="healthy"
+                          width="100px"
+                          cell={(v: boolean) => {
+                            if (v) {
+                              return (
+                                <div>
+                                  <span className="circle circle-success" />
+                                  <span>Healthy</span>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div>
+                                <span className="circle circle-warning" />
+                                <span>UnHealthy</span>
+                              </div>
+                            );
+                          }}
+                          title={<Translation>Healthy</Translation>}
+                        />
+                        <Table.Column
+                          align="left"
+                          dataIndex="trait"
+                          cell={(v: boolean, i: number, record: ComponentStatus) => {
+                            const { traits } = record;
+                            const Tags = (traits || []).map((item) => {
+                              if (item.healthy) {
+                                return (
+                                  <Tag type="normal" size="small">
+                                    <div>
+                                      <span className="circle circle-success" />
+                                      <span>{item.type}</span>
+                                    </div>
+                                  </Tag>
+                                );
+                              } else {
+                                return (
+                                  <Tag type="normal" size="small">
+                                    <div>
+                                      <span className="circle circle-failure" />
+                                      <span>{item.type}</span>
+                                    </div>
+                                  </Tag>
+                                );
+                              }
+                            });
+                            return <TagGroup className="tags-content">{Tags}</TagGroup>;
+                          }}
+                          title={<Translation>Traits</Translation>}
+                        />
+                        <Table.Column
+                          align="center"
+                          dataIndex="message"
+                          title={<Translation>Message</Translation>}
+                          cell={(v: string, i: number, record: ComponentStatus) => {
+                            const { message = '', traits } = record;
+                            const TraitMessages = (traits || []).map((item) => {
+                              if (item.message) {
+                                return (
+                                  <div>
+                                    <span>{item.type}: </span>
+                                    <span>{item.message}</span>
+                                  </div>
+                                );
+                              }
+                            });
+                            return (
+                              <div>
+                                <div>{message}</div>
+                                {TraitMessages}
+                              </div>
+                            );
+                          }}
+                        />
+                      </Table>
+                    </div>
+                  </Card>
+                </If>
+                <Card
+                  locale={locale().Card}
+                  contentHeight="200px"
+                  title={<Translation>Applied Resources</Translation>}
+                >
+                  <div style={{ overflow: 'auto' }}>
                     <Table
+                      style={{ minWidth: '1000px' }}
                       locale={locale().Table}
-                      className="customTable"
-                      dataSource={componentStatus}
+                      dataSource={resources}
                     >
                       <Table.Column
-                        align="left"
                         dataIndex="name"
-                        style={{ width: '17%' }}
-                        title={<Translation>Name</Translation>}
+                        width="240px"
+                        title={<Translation>Namespace/Name</Translation>}
+                        cell={(v: string, i: number, row: AppliedResource) => {
+                          return `${row.namespace || '-'}/${row.name}`;
+                        }}
                       />
                       <Table.Column
                         dataIndex="cluster"
@@ -447,156 +569,45 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                         }}
                       />
                       <Table.Column
-                        align="left"
-                        dataIndex="healthy"
-                        width="100px"
-                        cell={(v: boolean) => {
-                          if (v) {
+                        width="200px"
+                        dataIndex="kind"
+                        title={<Translation>Kind</Translation>}
+                      />
+                      <Table.Column
+                        dataIndex="apiVersion"
+                        title={<Translation>APIVersion</Translation>}
+                      />
+                      <Table.Column
+                        dataIndex="component"
+                        title={<Translation>Component</Translation>}
+                      />
+                      <Table.Column
+                        dataIndex="deployVersion"
+                        title={<Translation>Revision</Translation>}
+                        cell={(v: string, i: number, row: AppliedResource) => {
+                          if (row.latest) {
                             return (
-                              <div>
-                                <span className="circle circle-success" />
-                                <span>Healthy</span>
-                              </div>
+                              <span>
+                                <Icon
+                                  style={{ color: 'green', marginRight: '8px' }}
+                                  type="NEW"
+                                  title="latest version resource"
+                                />
+                                <Link to={`/applications/${applicationDetail?.name}/revisions`}>
+                                  {v}
+                                </Link>
+                              </span>
                             );
                           }
                           return (
-                            <div>
-                              <span className="circle circle-warning" />
-                              <span>UnHealthy</span>
-                            </div>
-                          );
-                        }}
-                        title={<Translation>Healthy</Translation>}
-                      />
-                      <Table.Column
-                        align="left"
-                        dataIndex="trait"
-                        cell={(v: boolean, i: number, record: ComponentStatus) => {
-                          const { traits } = record;
-                          const Tags = (traits || []).map((item) => {
-                            if (item.healthy) {
-                              return (
-                                <Tag type="normal" size="small">
-                                  <div>
-                                    <span className="circle circle-success" />
-                                    <span>{item.type}</span>
-                                  </div>
-                                </Tag>
-                              );
-                            } else {
-                              return (
-                                <Tag type="normal" size="small">
-                                  <div>
-                                    <span className="circle circle-failure" />
-                                    <span>{item.type}</span>
-                                  </div>
-                                </Tag>
-                              );
-                            }
-                          });
-                          return <TagGroup className="tags-content">{Tags}</TagGroup>;
-                        }}
-                        title={<Translation>Traits</Translation>}
-                      />
-                      <Table.Column
-                        align="center"
-                        dataIndex="message"
-                        title={<Translation>Message</Translation>}
-                        cell={(v: string, i: number, record: ComponentStatus) => {
-                          const { message = '', traits } = record;
-                          const TraitMessages = (traits || []).map((item) => {
-                            if (item.message) {
-                              return (
-                                <div>
-                                  <span>{item.type}: </span>
-                                  <span>{item.message}</span>
-                                </div>
-                              );
-                            }
-                          });
-                          return (
-                            <div>
-                              <div>{message}</div>
-                              {TraitMessages}
-                            </div>
+                            <Link to={`/applications/${applicationDetail?.name}/revisions`}>
+                              {v}
+                            </Link>
                           );
                         }}
                       />
                     </Table>
-                  </Card>
-                </If>
-                <Card
-                  locale={locale().Card}
-                  contentHeight="200px"
-                  title={<Translation>Applied Resources</Translation>}
-                >
-                  <Table locale={locale().Table} dataSource={resources}>
-                    <Table.Column
-                      dataIndex="name"
-                      width="240px"
-                      title={<Translation>Namespace/Name</Translation>}
-                      cell={(v: string, i: number, row: AppliedResource) => {
-                        return `${row.namespace || '-'}/${row.name}`;
-                      }}
-                    />
-                    <Table.Column
-                      dataIndex="cluster"
-                      title={<Translation>Cluster</Translation>}
-                      width="200px"
-                      cell={(v: string) => {
-                        let clusterName = v;
-                        if (!clusterName) {
-                          clusterName = 'Local';
-                        }
-                        if (
-                          checkPermission(
-                            { resource: 'cluster:*', action: 'list' },
-                            applicationDetail?.project?.name,
-                            userInfo,
-                          )
-                        ) {
-                          return <Link to="/clusters">{clusterName}</Link>;
-                        }
-                        return <span>{clusterName}</span>;
-                      }}
-                    />
-                    <Table.Column
-                      width="200px"
-                      dataIndex="kind"
-                      title={<Translation>Kind</Translation>}
-                    />
-                    <Table.Column
-                      dataIndex="apiVersion"
-                      title={<Translation>APIVersion</Translation>}
-                    />
-                    <Table.Column
-                      dataIndex="component"
-                      title={<Translation>Component</Translation>}
-                    />
-                    <Table.Column
-                      dataIndex="deployVersion"
-                      title={<Translation>Revision</Translation>}
-                      cell={(v: string, i: number, row: AppliedResource) => {
-                        if (row.latest) {
-                          return (
-                            <span>
-                              <Icon
-                                style={{ color: 'green', marginRight: '8px' }}
-                                type="NEW"
-                                title="latest version resource"
-                              />
-                              <Link to={`/applications/${applicationDetail?.name}/revisions`}>
-                                {v}
-                              </Link>
-                            </span>
-                          );
-                        }
-                        return (
-                          <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
-                        );
-                      }}
-                    />
-                  </Table>
+                  </div>
                 </Card>
 
                 <If condition={applicationStatus?.conditions}>
@@ -606,39 +617,48 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                     contentHeight="auto"
                     title={<Translation>Conditions</Translation>}
                   >
-                    <Table locale={locale().Table} dataSource={applicationStatus?.conditions}>
-                      <Table.Column
-                        width="150px"
-                        dataIndex="type"
-                        title={<Translation>Type</Translation>}
-                      />
-                      <Table.Column dataIndex="status" title={<Translation>Status</Translation>} />
+                    <div style={{ overflow: 'auto' }}>
+                      <Table
+                        style={{ minWidth: '1000px' }}
+                        locale={locale().Table}
+                        dataSource={applicationStatus?.conditions}
+                      >
+                        <Table.Column
+                          width="150px"
+                          dataIndex="type"
+                          title={<Translation>Type</Translation>}
+                        />
+                        <Table.Column
+                          dataIndex="status"
+                          title={<Translation>Status</Translation>}
+                        />
 
-                      <Table.Column
-                        dataIndex="lastTransitionTime"
-                        title={<Translation>LastTransitionTime</Translation>}
-                      />
-                      <Table.Column
-                        dataIndex="reason"
-                        title={<Translation>Reason</Translation>}
-                        cell={(v: string, index: number, row: Condition) => {
-                          if (row.message) {
-                            return (
-                              <Balloon
-                                trigger={
-                                  <span style={{ color: 'red', cursor: 'pointer' }}>
-                                    {v} <Icon size={'xs'} type="question-circle" />
-                                  </span>
-                                }
-                              >
-                                {row.message}
-                              </Balloon>
-                            );
-                          }
-                          return <span>{v}</span>;
-                        }}
-                      />
-                    </Table>
+                        <Table.Column
+                          dataIndex="lastTransitionTime"
+                          title={<Translation>LastTransitionTime</Translation>}
+                        />
+                        <Table.Column
+                          dataIndex="reason"
+                          title={<Translation>Reason</Translation>}
+                          cell={(v: string, index: number, row: Condition) => {
+                            if (row.message) {
+                              return (
+                                <Balloon
+                                  trigger={
+                                    <span style={{ color: 'red', cursor: 'pointer' }}>
+                                      {v} <Icon size={'xs'} type="question-circle" />
+                                    </span>
+                                  }
+                                >
+                                  {row.message}
+                                </Balloon>
+                              );
+                            }
+                            return <span>{v}</span>;
+                          }}
+                        />
+                      </Table>
+                    </div>
                   </Card>
                 </If>
               </If>

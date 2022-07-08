@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './index.less';
 import { routerRedux } from 'dva/router';
-import { Dialog, Dropdown, Grid, Icon, Menu } from '@b-design/ui';
+import { Button, Dialog, Dropdown, Grid, Icon, Menu } from '@b-design/ui';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
@@ -159,14 +159,21 @@ class TopBar extends Component<Props, State> {
       Dialog.alert({
         title: i18n.t('CloudShell feature is not enabled'),
         content: i18n.t('You must enable the CloudShell addon'),
-        onOk: () => {
-          this.props.dispatch(
-            routerRedux.push({
-              pathname: '/addons/cloudshell',
-            }),
-          );
-        },
         locale: locale().Dialog,
+        footer: (
+          <Button
+            type="secondary"
+            onClick={() => {
+              this.props.dispatch(
+                routerRedux.push({
+                  pathname: '/addons/cloudshell',
+                }),
+              );
+            }}
+          >
+            <Translation>Go to enable</Translation>
+          </Button>
+        ),
       });
       return;
     }

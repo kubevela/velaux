@@ -44,6 +44,7 @@
   "dependencies": {
     "@alifd/meet-react": "^2.0.0",
     "@b-design/ui": "^1.0.63",
+    "ansi-to-html": "^0.7.2",
     "ansi-to-react": "^6.1.6",
     "axios": "0.24.0",
     "base-64": "^1.0.0",
@@ -88,6 +89,7 @@
     "@babel/preset-typescript": "^7.12.7",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.1",
     "@testing-library/react": "^12.1.2",
+    "@types/base-64": "^1.0.0",
     "@types/chai": "^4.2.11",
     "@types/js-yaml": "^4.0.1",
     "@types/lodash": "^4.14.176",
@@ -96,7 +98,6 @@
     "@types/react-cookies": "^0.1.0",
     "@types/react-copy-to-clipboard": "^5.0.2",
     "@types/react-dom": "^17.0.9",
-    "@types/base-64": "^1.0.0",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^4.0.0",
     "@typescript-eslint/parser": "^4.0.0",

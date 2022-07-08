@@ -174,7 +174,7 @@ class ContainerLog extends Component<Props, State> {
                         {momentDate(line.timestamp)} | <Ansi>{line.content}</Ansi>
                       </If>
                       <If condition={!showTimestamps}>
-                        <Ansi>{line.content}</Ansi>
+                        <Ansi linkify={true}>{line.content}</Ansi>
                       </If>
                     </span>
                   </div>

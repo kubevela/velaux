@@ -1,14 +1,22 @@
 import React, { Component } from 'react';
-import { Balloon, Table } from '@b-design/ui';
+import { Balloon, Button, Dropdown, Menu, Table } from '@b-design/ui';
 import Empty from '../Empty';
 import Translation from '../../../../components/Translation';
-import type { ApplicationDetail, ApplicationRevision } from '../../../../interface/application';
+import type {
+  ApplicationCompareRequest,
+  ApplicationCompareResponse,
+  ApplicationDetail,
+  ApplicationRevision,
+} from '../../../../interface/application';
 import { statusList } from '../../constants';
 import { momentDate } from '../../../../utils/common';
 import { Link } from 'dva/router';
 import './index.less';
 import locale from '../../../../utils/locale';
 import Item from '../../../../components/Item';
+import { compareApplication } from '../../../../api/application';
+import { If } from 'tsx-control-statements/components';
+import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 
 type Props = {
   list: ApplicationRevision[];
@@ -17,12 +25,42 @@ type Props = {
   onShowAppModel: (record: ApplicationRevision) => void;
 };
 
-type State = {};
+type State = {
+  compare?: ApplicationCompareResponse;
+  visibleApplicationDiff: boolean;
+  diffMode: 'latest' | 'cluster';
+};
 
 class TableList extends Component<Props, State> {
-  //Todo
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      diffMode: 'latest',
+      visibleApplicationDiff: false,
+    };
+  }
+
   onRollback = (record: ApplicationRevision) => {
     console.log(record);
+  };
+
+  loadChanges = (revision: string, mode: 'latest' | 'cluster') => {
+    const { applicationDetail } = this.props;
+    if (!revision || !applicationDetail) {
+      this.setState({ compare: undefined });
+      return;
+    }
+    let params: ApplicationCompareRequest = {
+      compareRevisionWithLatest: { revision: revision },
+    };
+    if (mode === 'cluster') {
+      params = {
+        compareRevisionWithRunning: { revision: revision },
+      };
+    }
+    compareApplication(applicationDetail?.name, params).then((res: ApplicationCompareResponse) => {
+      this.setState({ compare: res, visibleApplicationDiff: true, diffMode: mode });
+    });
   };
 
   getColumns = () => {
@@ -106,9 +144,42 @@ class TableList extends Component<Props, State> {
         cell: (v: string, i: number, record: ApplicationRevision) => {
           return (
             <div>
-              <a onClick={() => this.props.onShowAppModel(record)}>
+              <Button
+                text
+                size={'medium'}
+                ghost={true}
+                component={'a'}
+                onClick={() => {
+                  this.props.onShowAppModel(record);
+                }}
+              >
                 <Translation>Detail</Translation>
-              </a>
+              </Button>
+              <span className="line" />
+              <Dropdown
+                trigger={
+                  <Button text size={'medium'} ghost={true} component={'a'}>
+                    <Translation>Diff</Translation>
+                  </Button>
+                }
+              >
+                <Menu>
+                  <Menu.Item
+                    onClick={() => {
+                      this.loadChanges(record.version, 'cluster');
+                    }}
+                  >
+                    <Translation>Diff With Deployed Application</Translation>
+                  </Menu.Item>
+                  <Menu.Item
+                    onClick={() => {
+                      this.loadChanges(record.version, 'latest');
+                    }}
+                  >
+                    <Translation>Diff With Latest Configuration</Translation>
+                  </Menu.Item>
+                </Menu>
+              </Dropdown>
             </div>
           );
         },
@@ -120,6 +191,12 @@ class TableList extends Component<Props, State> {
     const { Column } = Table;
     const columns = this.getColumns();
     const { list } = this.props;
+    const { visibleApplicationDiff, compare, diffMode } = this.state;
+    const baseName = 'Current Revision';
+    let targetName = 'Latest Application Configuration';
+    if (diffMode == 'cluster') {
+      targetName = 'Deployed Application';
+    }
     return (
       <div className="table-version-list  margin-top-20">
         <Table
@@ -134,6 +211,18 @@ class TableList extends Component<Props, State> {
         >
           {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
         </Table>
+        <If condition={visibleApplicationDiff}>
+          {compare && (
+            <ApplicationDiff
+              onClose={() => {
+                this.setState({ visibleApplicationDiff: false, compare: undefined });
+              }}
+              baseName={baseName}
+              targetName={targetName}
+              compare={compare}
+            />
+          )}
+        </If>
       </div>
     );
   }
