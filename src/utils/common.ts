@@ -229,3 +229,10 @@ export function equalArray(a?: string[], b?: string[]) {
     return true;
   }
 }
+
+export function intersectionArray(a?: string[], b?: string[]): string[] | undefined {
+  if (a == undefined || b == undefined) {
+    return undefined;
+  }
+  return a.filter((v) => b.indexOf(v) > -1);
+}
