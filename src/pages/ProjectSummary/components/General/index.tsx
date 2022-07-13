@@ -96,8 +96,8 @@ class General extends Component<Props, State> {
               <Row wrap={true}>
                 <Col m={12} xs={24}>
                   <Item
-                    label={<Translation>Alias(Name)</Translation>}
-                    value={`${projectDetails.alias}(${projectDetails.name})`}
+                    label={<Translation>Name(Alias)</Translation>}
+                    value={`${projectDetails.name}(${projectDetails.alias || '-'})`}
                   />
                 </Col>
                 <Col m={12} xs={24}>

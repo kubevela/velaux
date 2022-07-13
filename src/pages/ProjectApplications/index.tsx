@@ -15,6 +15,7 @@ import AppDialog from '../ApplicationList/components/AddAppDialog';
 import SelectSearch from './components/SelectSearch';
 import type { LoginUserInfo } from '../../interface/user';
 import { getProjectTargetList } from '../../api/project';
+import type { ShowMode } from '../ApplicationList';
 
 type Props = {
   applicationList: ApplicationBase[];
@@ -37,6 +38,7 @@ type State = {
   componentDefinitions: [];
   isEditApplication: boolean;
   isAddApplication: boolean;
+  showMode: ShowMode;
 };
 
 @connect((store: any) => {
@@ -45,6 +47,10 @@ type State = {
 class ProjectApplications extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    let mode: ShowMode = localStorage.getItem('application-list-mode');
+    if (mode != 'table' && mode != 'card') {
+      mode = 'card';
+    }
     this.state = {
       isLoading: false,
       applicationList: [],
@@ -59,6 +65,7 @@ class ProjectApplications extends Component<Props, State> {
       componentDefinitions: [],
       isEditApplication: false,
       isAddApplication: false,
+      showMode: mode,
     };
   }
 
@@ -177,6 +184,13 @@ class ProjectApplications extends Component<Props, State> {
             onAddApplication={() => {
               this.setState({ isAddApplication: true });
             }}
+            setMode={(mode: ShowMode) => {
+              this.setState({ showMode: mode });
+              if (mode) {
+                localStorage.setItem('application-list-mode', mode);
+              }
+            }}
+            showMode={this.state.showMode}
           />
           <Loading visible={isLoading} fullScreen>
             <CardContend
@@ -185,6 +199,7 @@ class ProjectApplications extends Component<Props, State> {
               editAppPlan={(editItem: ApplicationBase) => {
                 this.editApplicationPlan(editItem);
               }}
+              showMode={this.state.showMode}
               deleteAppPlan={this.onDeleteApplicationItem}
               setVisible={(visible) => {
                 this.setState({ isAddApplication: visible });

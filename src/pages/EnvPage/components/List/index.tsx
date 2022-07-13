@@ -38,26 +38,18 @@ class TableList extends Component<Props> {
     return [
       {
         key: 'name',
-        title: <Translation>Name</Translation>,
+        title: <Translation>Name(Alias)</Translation>,
         dataIndex: 'name',
-        cell: (v: string) => {
+        cell: (v: string, i: number, env: Env) => {
           return (
             <a
               onClick={() => {
                 this.showEnvAppList(v);
               }}
             >
-              {v}
+              {`${env.name}(${env.alias || '-'})`}
             </a>
           );
-        },
-      },
-      {
-        key: 'alias',
-        title: <Translation>Alias</Translation>,
-        dataIndex: 'alias',
-        cell: (v: string) => {
-          return <span>{v}</span>;
         },
       },
       {
@@ -66,7 +58,7 @@ class TableList extends Component<Props> {
         dataIndex: 'project',
         cell: (v: Project) => {
           if (v && v.name) {
-            return <Link to={`/projects/${v.name}/summary`}>{v && v.name}</Link>;
+            return <Link to={`/projects/${v.name}/summary`}>{v.alias || v.name}</Link>;
           } else {
             return null;
           }
@@ -78,14 +70,6 @@ class TableList extends Component<Props> {
         dataIndex: 'namespace',
         cell: (v: string) => {
           return <span>{v}</span>;
-        },
-      },
-      {
-        key: 'project',
-        title: <Translation>Project</Translation>,
-        dataIndex: 'project',
-        cell: (v: NameAlias) => {
-          return <span>{v.alias || v.name}</span>;
         },
       },
       {

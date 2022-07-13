@@ -446,7 +446,7 @@
   "Owner": "负责人",
   "Are you sure you want to delete the project": "你确定想删除这个项目吗",
   "Please enter a project name": "请输入符合规范的项目名称",
-  "Alias(Name)": "别名(名称)",
+  "Name(Alias)": "名称（别名）",
   "Integrations": "集成配置",
   "Summary": "概览",
   "Roles": "角色",

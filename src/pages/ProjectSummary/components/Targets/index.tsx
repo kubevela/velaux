@@ -55,11 +55,11 @@ class Targets extends Component<Props, State> {
     const columns = [
       {
         key: 'name',
-        title: <Translation>Alias(Name)</Translation>,
+        title: <Translation>Name(Alias)</Translation>,
         dataIndex: 'name',
         cell: (v: string, i: number, record: { alias: string; name: string }) => {
           const { alias, name } = record;
-          return <span>{`${alias}(${name})`}</span>;
+          return <span>{`${name}(${alias || '-'})`}</span>;
         },
       },
       {

@@ -1,10 +1,11 @@
 import React from 'react';
-import { Grid, Icon, Select, Input } from '@b-design/ui';
+import { Grid, Icon, Select, Input, Button } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import './index.less';
 import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
 import type { Env } from '../../../../interface/env';
+import type { ShowMode } from '../..';
 
 const { Row, Col } = Grid;
 
@@ -14,6 +15,8 @@ type Props = {
   projects?: Project[];
   envs?: Env[];
   getApplications: (params: any) => void;
+  setMode: (mode: ShowMode) => void;
+  showMode: ShowMode;
 };
 
 type State = {
@@ -91,7 +94,7 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { projects, t, envs } = this.props;
+    const { projects, t, envs, showMode } = this.props;
     const { projectValue, inputValue, envValue } = this.state;
 
     const projectPlaceholder = t('Search by Project').toString();
@@ -138,7 +141,6 @@ class SelectSearch extends React.Component<Props, State> {
             value={envValue}
           />
         </Col>
-
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
             innerAfter={
@@ -156,6 +158,24 @@ class SelectSearch extends React.Component<Props, State> {
             value={inputValue}
             className="item"
           />
+        </Col>
+        <Col xl={6}>
+          <div className="show-mode">
+            <Button.Group>
+              <Button
+                type={showMode == 'card' ? 'primary' : 'secondary'}
+                onClick={() => this.props.setMode('card')}
+              >
+                Card
+              </Button>
+              <Button
+                type={showMode == 'table' ? 'primary' : 'secondary'}
+                onClick={() => this.props.setMode('table')}
+              >
+                Table
+              </Button>
+            </Button.Group>
+          </div>
         </Col>
       </Row>
     );

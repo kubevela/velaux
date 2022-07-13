@@ -8,6 +8,7 @@ import i18n from '../../../../i18n';
 import Translation from '../../../../components/Translation';
 import Permission from '../../../../components/Permission';
 import './index.less';
+import type { ShowMode } from '../../../ApplicationList';
 
 const { Row, Col } = Grid;
 
@@ -17,6 +18,8 @@ type Props = {
   listApplication: (params: any) => void;
   onAddApplication: () => void;
   projectName?: string;
+  showMode: ShowMode;
+  setMode: (mode: ShowMode) => void;
 };
 
 type State = {
@@ -89,7 +92,7 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { targetList, envs, projectName } = this.props;
+    const { targetList, envs, projectName, showMode } = this.props;
     const { targetValue, inputValue, envValue } = this.state;
     const targetSource = targetList?.map((item) => {
       return {
@@ -152,6 +155,24 @@ class SelectSearch extends React.Component<Props, State> {
                   value={inputValue}
                   className="item"
                 />
+              </Col>
+              <Col xl={6}>
+                <div className="show-mode">
+                  <Button.Group>
+                    <Button
+                      type={showMode == 'card' ? 'primary' : 'secondary'}
+                      onClick={() => this.props.setMode('card')}
+                    >
+                      Card
+                    </Button>
+                    <Button
+                      type={showMode == 'table' ? 'primary' : 'secondary'}
+                      onClick={() => this.props.setMode('table')}
+                    >
+                      Table
+                    </Button>
+                  </Button.Group>
+                </div>
               </Col>
             </Row>
           </Col>
