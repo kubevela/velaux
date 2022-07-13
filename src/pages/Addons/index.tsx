@@ -7,13 +7,13 @@ import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
 import RegistryManageDialog from './components/registry-manage/index';
 import { If } from 'tsx-control-statements/components';
-import type { AddonBaseStatus } from '../../interface/addon';
+import type { Addon, AddonBaseStatus } from '../../interface/addon';
 import Permission from '../../components/Permission';
 import Translation from '../../components/Translation';
 
 type Props = {
   dispatch: ({}) => {};
-  addonsList: [];
+  addonsList: Addon[];
   registryList: [];
   addonListMessage: string;
   loading: any;
@@ -25,6 +25,8 @@ type State = {
   showAddonDetail: boolean;
   addonName: string;
   showRegistryManage: boolean;
+  tagList?: { tag: string; num: number }[];
+  selectTags: string[];
 };
 
 @connect((store: any) => {
@@ -37,6 +39,7 @@ class Addons extends React.Component<Props, State> {
       showAddonDetail: false,
       addonName: '',
       showRegistryManage: false,
+      selectTags: [],
     };
   }
 
@@ -55,8 +58,29 @@ class Addons extends React.Component<Props, State> {
         if (match && match.params && match.params.addonName) {
           this.openAddonDetail(match.params.addonName);
         }
+        this.generateTagList();
       },
     });
+  };
+
+  generateTagList = () => {
+    const { addonsList } = this.props;
+    const tagMap: Map<string, number> = new Map<string, number>();
+    addonsList.map((addon) => {
+      addon.tags?.map((tag) => {
+        const old = tagMap.get(tag);
+        tagMap.set(tag, old ? old + 1 : 1);
+      });
+    });
+    const list: { tag: string; num: number }[] = [];
+    tagMap.forEach((v: number, key: string) => {
+      list.push({ tag: key, num: v });
+    });
+    list.sort((a, b) => {
+      return b.num - a.num;
+    });
+
+    this.setState({ tagList: list });
   };
 
   getEnabledAddon = async () => {
@@ -101,7 +125,7 @@ class Addons extends React.Component<Props, State> {
     } = this.props;
 
     const isLoading = loading.models.addons;
-    const { showAddonDetail, addonName, showRegistryManage } = this.state;
+    const { showAddonDetail, addonName, showRegistryManage, tagList, selectTags } = this.state;
     return (
       <div>
         <Title
@@ -117,14 +141,17 @@ class Addons extends React.Component<Props, State> {
               >
                 <Translation>Addon Registries</Translation>
               </Button>
-              ,
             </Permission>,
           ]}
         />
         <SelectSearch
           dispatch={dispatch}
+          tagList={tagList}
           registries={registryList}
           listFunction={this.getAddonsList}
+          onTagChange={(tags: string[]) => {
+            this.setState({ selectTags: tags });
+          }}
         />
         <Loading visible={isLoading} style={{ width: '100%' }}>
           <If condition={addonListMessage}>
@@ -134,6 +161,7 @@ class Addons extends React.Component<Props, State> {
           </If>
           <CardContend
             addonLists={addonsList}
+            selectTags={selectTags}
             enabledAddons={enabledAddons}
             clickAddon={this.openAddonDetail}
           />

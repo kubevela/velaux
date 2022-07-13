@@ -8,6 +8,7 @@ import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
 import locale from '../../../../utils/locale';
 import Translation from '../../../../components/Translation';
+import { intersectionArray } from '../../../../utils/common';
 
 type State = {
   extendDotVisible: boolean;
@@ -18,6 +19,7 @@ type Props = {
   clickAddon: (name: string) => void;
   addonLists: Addon[];
   enabledAddons?: AddonBaseStatus[];
+  selectTags: string[];
 };
 
 class CardContent extends React.Component<Props, State> {
@@ -40,7 +42,7 @@ class CardContent extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { addonLists, clickAddon, enabledAddons } = this.props;
+    const { addonLists, clickAddon, enabledAddons, selectTags } = this.props;
 
     const getTagColor = (tag: string) => {
       switch (tag) {
@@ -70,6 +72,9 @@ class CardContent extends React.Component<Props, State> {
       const status = enabledAddons?.filter((addonStatus: AddonBaseStatus) => {
         return addonStatus.name == addon.name;
       });
+      if (selectTags.length > 0 && !intersectionArray(addon.tags, selectTags)?.length) {
+        return;
+      }
       if (status && status.length > 0 && status[0].phase == 'enabled') {
         orderAddonList.unshift(addon);
       } else {
