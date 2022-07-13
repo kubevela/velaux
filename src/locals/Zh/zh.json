@@ -561,5 +561,7 @@
   "Diff": "差异比对",
   "Detail": "详情",
   "Platform": "平台",
-  "Go to enable": "去启用"
+  "Go to enable": "去启用",
+  "DryRun": "试运行",
+  "Please select a workflow first": "请先选择一个工作流"
 }

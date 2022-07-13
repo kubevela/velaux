@@ -25,6 +25,7 @@ import type {
   ApplicationComponentConfig,
   ApplicationQuery,
   ApplicationCompareRequest,
+  ApplicationDryRunRequest,
 } from '../interface/application';
 
 interface TraitQuery {
@@ -319,4 +320,9 @@ export function deleteComponent(query: { appName: string; componentName: string 
 export function compareApplication(appName: string, params: ApplicationCompareRequest) {
   const gurl = `${application}/${appName}/compare`;
   return post(gurl, params).then((res) => res);
+}
+
+export function dryRunApplication(appName: string, params: ApplicationDryRunRequest) {
+  const gurl = `${application}/${appName}/dry-run`;
+  return post(gurl, params, true).then((res) => res);
 }

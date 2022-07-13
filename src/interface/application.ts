@@ -385,3 +385,16 @@ export interface ApplicationCompareRequest {
   compareRevisionWithLatest?: { revision?: string };
   compareLatestWithRunning?: { env: string };
 }
+
+export interface ApplicationDryRunRequest {
+  dryRunType: 'APP' | 'Revision';
+  env?: string;
+  workflow: string;
+  version?: string;
+}
+
+export interface ApplicationDryRunResponse {
+  yaml: string;
+  success: boolean;
+  message?: string;
+}

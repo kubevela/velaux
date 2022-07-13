@@ -238,6 +238,7 @@ class ApplicationHeader extends Component<Props, State> {
             onClose={() => {
               this.setState({ showDeployConfig: false });
             }}
+            appName={appName}
             onOK={this.onDeploy}
             workflows={workflows}
           />
