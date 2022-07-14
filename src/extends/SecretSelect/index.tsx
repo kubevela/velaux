@@ -1,10 +1,10 @@
-import { Select } from '@b-design/ui';
 import { connect } from 'dva';
 import React from 'react';
 import { listCloudResourceSecrets } from '../../api/observation';
 import type { Secret } from '../../interface/observation';
 import locale from '../../utils/locale';
 import i18n from 'i18next';
+import { CustomSelect } from '../../components/CustomSelect';
 
 type Props = {
   onChange: (value: any) => void;
@@ -63,26 +63,24 @@ class SecretSelect extends React.Component<Props, State> {
     const { value, id, disabled } = this.props;
     const { secrets } = this.state;
     const filters = secrets?.filter((secret) => secret.metadata.labels['app.oam.dev/sync-alias']);
+    const dataSource =
+      filters?.map((secret) => {
+        return {
+          label: secret.metadata.labels['app.oam.dev/sync-alias'],
+          value: secret.metadata.labels['app.oam.dev/sync-alias'],
+        };
+      }) || [];
     return (
-      <Select
+      <CustomSelect
         locale={locale().Select}
         onChange={this.onChange}
         value={value}
         id={id}
         disabled={disabled}
-        placeholder={i18n.t('Please select the secret').toString()}
-      >
-        {filters?.map((secret) => {
-          return (
-            <Select.Option
-              key={secret.metadata.name}
-              value={secret.metadata.labels['app.oam.dev/sync-alias']}
-            >
-              {secret.metadata.labels['app.oam.dev/sync-alias']}
-            </Select.Option>
-          );
-        })}
-      </Select>
+        placeholder={i18n.t('Please select or input a secret name').toString()}
+        enableInput={true}
+        dataSource={dataSource}
+      />
     );
   }
 }

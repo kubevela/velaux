@@ -128,7 +128,7 @@ const localeData = {
     Select: {
       selectPlaceholder: '请选择',
       autoCompletePlaceholder: '请输入',
-      notFoundContent: '没有下拉项',
+      notFoundContent: '没有可选项',
       maxTagPlaceholder: '{selected}/{total} 条目已选择.',
       selectAll: '全选',
     },

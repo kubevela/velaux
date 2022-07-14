@@ -139,10 +139,10 @@ export interface Secret {
   metadata: {
     name: string;
     namespace: string;
-    annotations: any;
-    labels: any;
+    annotations: Record<string, string>;
+    labels: Record<string, string>;
   };
-  data: any;
+  data: Record<string, string>;
 }
 
 export interface Service {

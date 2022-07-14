@@ -1,7 +1,7 @@
 import React from 'react';
-import { Select } from '@b-design/ui';
 import locale from '../../utils/locale';
 import i18n from 'i18next';
+import { CustomSelect } from '../../components/CustomSelect';
 
 type Props = {
   onChange: (value: any) => void;
@@ -26,23 +26,21 @@ class SecretKeySelect extends React.Component<Props, State> {
   render() {
     const { onChange, value, secretKeys, id, disabled } = this.props;
     return (
-      <Select
+      <CustomSelect
         locale={locale().Select}
         onChange={onChange}
         defaultValue={value}
         id={id}
         disabled={disabled}
         value={value}
-        placeholder={i18n.t('Please select the secret key').toString()}
-      >
-        {secretKeys?.map((item) => {
-          return (
-            <Select.Option key={item} value={item}>
-              {item}
-            </Select.Option>
-          );
-        })}
-      </Select>
+        placeholder={i18n.t('Please select or input a secret key').toString()}
+        enableInput={true}
+        dataSource={
+          secretKeys?.map((item) => {
+            return { label: item, value: item };
+          }) || []
+        }
+      />
     );
   }
 }
