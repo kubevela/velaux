@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import React from 'react';
 import './index.less';
 import { Link } from 'dva/router';
-import { Grid, Card, Menu, Dropdown, Dialog, Button } from '@b-design/ui';
+import { Grid, Card, Menu, Dropdown, Dialog, Button, Table } from '@b-design/ui';
 import type { ApplicationBase } from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 import { momentDate } from '../../../../utils/common';
@@ -15,6 +15,9 @@ import locale from '../../../../utils/locale';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkPermission } from '../../../../utils/permission';
 import Permission from '../../../../components/Permission';
+import type { ShowMode } from '../..';
+import type { Project } from '../../../../interface/project';
+const { Column } = Table;
 
 type State = {
   extendDotVisible: boolean;
@@ -28,6 +31,7 @@ type Props = {
   editAppPlan: (item: ApplicationBase) => void;
   deleteAppPlan: (name: string) => void;
   setVisible: (visible: boolean) => void;
+  showMode: ShowMode;
 };
 
 @connect((store: any) => {
@@ -59,11 +63,26 @@ class CardContent extends React.Component<Props, State> {
     this.props.editAppPlan(item);
   };
 
-  isEditPermission = (item: ApplicationBase) => {
+  isEditPermission = (item: ApplicationBase, button?: boolean) => {
     const { userInfo } = this.props;
     const project = item?.project?.name || this.props.projectName || '?';
     const request = { resource: `project:${project}/application:${item.name}`, action: 'update' };
     if (checkPermission(request, project, userInfo)) {
+      if (button) {
+        return (
+          <Button
+            text
+            size={'medium'}
+            ghost={true}
+            component={'a'}
+            onClick={() => {
+              this.onEditAppPlan(item);
+            }}
+          >
+            <Translation>Edit</Translation>
+          </Button>
+        );
+      }
       return (
         <Menu.Item
           onClick={() => {
@@ -78,26 +97,32 @@ class CardContent extends React.Component<Props, State> {
     }
   };
 
-  isDeletePermission = (item: ApplicationBase) => {
+  isDeletePermission = (item: ApplicationBase, button?: boolean) => {
     const { userInfo } = this.props;
     const project = item?.project?.name || this.props.projectName || '?';
     const request = { resource: `project:${project}/application:${item.name}`, action: 'delete' };
+    const onClick = () => {
+      Dialog.confirm({
+        type: 'confirm',
+        content: (
+          <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>
+        ),
+        onOk: () => {
+          this.onDeleteAppPlan(item.name);
+        },
+        locale: locale().Dialog,
+      });
+    };
     if (checkPermission(request, project, userInfo)) {
+      if (button) {
+        return (
+          <Button text size={'medium'} ghost={true} component={'a'} onClick={onClick}>
+            <Translation>Remove</Translation>
+          </Button>
+        );
+      }
       return (
-        <Menu.Item
-          onClick={() => {
-            Dialog.confirm({
-              type: 'confirm',
-              content: (
-                <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>
-              ),
-              onOk: () => {
-                this.onDeleteAppPlan(item.name);
-              },
-              locale: locale().Dialog,
-            });
-          }}
-        >
+        <Menu.Item onClick={onClick}>
           <Translation>Remove</Translation>
         </Menu.Item>
       );
@@ -106,9 +131,59 @@ class CardContent extends React.Component<Props, State> {
     }
   };
 
+  getColumns = () => {
+    return [
+      {
+        key: 'name',
+        title: <Translation>Name(Alias)</Translation>,
+        dataIndex: 'name',
+        cell: (v: string, i: number, app: ApplicationBase) => {
+          const showName = app.name + '(' + (app.alias || '-') + ')';
+          return <Link to={`/applications/${v}/config`}>{showName}</Link>;
+        },
+      },
+      {
+        key: 'project',
+        title: <Translation>Project</Translation>,
+        dataIndex: 'project',
+        cell: (v: Project) => {
+          if (v && v.name) {
+            return <Link to={`/projects/${v.name}/summary`}>{v && v.name}</Link>;
+          } else {
+            return null;
+          }
+        },
+      },
+      {
+        key: 'description',
+        title: <Translation>Description</Translation>,
+        dataIndex: 'description',
+        cell: (v: string) => {
+          return <span>{v}</span>;
+        },
+      },
+
+      {
+        key: 'operation',
+        title: <Translation>Actions</Translation>,
+        dataIndex: 'operation',
+        width: '200px',
+        cell: (v: string, i: number, record: ApplicationBase) => {
+          return (
+            <div>
+              {this.isDeletePermission(record, true)}
+              <span className="line" />
+              {this.isEditPermission(record, true)}
+            </div>
+          );
+        },
+      },
+    ];
+  };
+
   render() {
     const { Row, Col } = Grid;
-    const { applications, setVisible } = this.props;
+    const { applications, setVisible, showMode } = this.props;
     const projectName = this.props.projectName || '?';
     if (!applications || applications.length === 0) {
       return (
@@ -136,6 +211,24 @@ class CardContent extends React.Component<Props, State> {
           }
           style={{ minHeight: '400px' }}
         />
+      );
+    }
+    const columns = this.getColumns();
+    if (showMode == 'table') {
+      return (
+        <div style={{ overflow: 'auto' }}>
+          <Table
+            locale={locale().Table}
+            className="customTable"
+            size="medium"
+            style={{ minWidth: '1200px' }}
+            dataSource={applications}
+            hasBorder={false}
+            loading={false}
+          >
+            {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
+          </Table>
+        </div>
       );
     }
 

@@ -21,12 +21,16 @@ type Props = {
   history: any;
   userInfo?: LoginUserInfo;
 };
+
+export type ShowMode = 'table' | 'card' | string | null;
+
 type State = {
   showAddApplication: boolean;
   componentDefinitions: [];
   isLoading: boolean;
   showEditApplication: boolean;
   editItem?: ApplicationBase;
+  showMode: ShowMode;
 };
 
 @connect((store: any) => {
@@ -35,11 +39,16 @@ type State = {
 class Application extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    let mode: ShowMode = localStorage.getItem('application-list-mode');
+    if (mode != 'table' && mode != 'card') {
+      mode = 'card';
+    }
     this.state = {
       showAddApplication: false,
       componentDefinitions: [],
       isLoading: false,
       showEditApplication: false,
+      showMode: mode,
     };
   }
 
@@ -111,8 +120,14 @@ class Application extends Component<Props, State> {
 
   render() {
     const { applicationList, targets, dispatch, envs, userInfo } = this.props;
-    const { showAddApplication, componentDefinitions, isLoading, showEditApplication, editItem } =
-      this.state;
+    const {
+      showAddApplication,
+      componentDefinitions,
+      isLoading,
+      showEditApplication,
+      editItem,
+      showMode,
+    } = this.state;
     return (
       <div>
         <Title
@@ -139,6 +154,13 @@ class Application extends Component<Props, State> {
           projects={userInfo?.projects}
           dispatch={dispatch}
           envs={envs}
+          showMode={showMode}
+          setMode={(mode: ShowMode) => {
+            this.setState({ showMode: mode });
+            if (mode) {
+              localStorage.setItem('application-list-mode', mode);
+            }
+          }}
           getApplications={(params: any) => {
             this.getApplications(params);
           }}
@@ -149,6 +171,7 @@ class Application extends Component<Props, State> {
             editAppPlan={(item: ApplicationBase) => {
               this.editAppPlan(item);
             }}
+            showMode={showMode}
             deleteAppPlan={this.onDeleteAppPlan}
             setVisible={(visible) => {
               this.setState({ showAddApplication: visible });
