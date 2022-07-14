@@ -28,14 +28,23 @@ type Props = {
 })
 class ProjectLayout extends Component<Props> {
   componentDidMount() {
-    this.loadProjectDetail();
+    const { params = { projectName: '' } } = this.props.match;
+    this.loadProjectDetail(params.projectName);
   }
 
-  loadProjectDetail = async () => {
-    const { params = { projectName: '' } } = this.props.match;
+  shouldComponentUpdate(nextProps: Props) {
+    const change = nextProps.match.params.projectName !== this.props.match.params.projectName;
+    if (change) {
+      const { params = { projectName: '' } } = nextProps.match;
+      this.loadProjectDetail(params.projectName);
+    }
+    return true;
+  }
+
+  loadProjectDetail = async (projectName: string) => {
     this.props.dispatch({
       type: 'project/getProjectDetails',
-      payload: { projectName: params.projectName },
+      payload: { projectName: projectName },
     });
   };
 

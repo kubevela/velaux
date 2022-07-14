@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Link } from 'dva/router';
 import { Table, Button } from '@b-design/ui';
 import { getProjectConfigs } from '../../../../api/project';
-import { IntegrationConfigs } from '../../../../interface/integrations';
+import type { IntegrationConfigs } from '../../../../interface/integrations';
 import Translation from '../../../../components/Translation';
 import Permission from '../../../../components/Permission';
 import _ from 'lodash';
@@ -29,11 +29,19 @@ class Integrations extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.listConfigs();
+    const { projectName } = this.props;
+    this.listConfigs(projectName);
   }
 
-  listConfigs = async () => {
-    const { projectName = '' } = this.props;
+  shouldComponentUpdate(nextProps: Props) {
+    const change = nextProps.projectName !== this.props.projectName;
+    if (change) {
+      this.listConfigs(nextProps.projectName);
+    }
+    return true;
+  }
+
+  listConfigs = async (projectName: string) => {
     this.setState({
       isLoading: true,
     });

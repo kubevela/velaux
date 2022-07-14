@@ -15,7 +15,6 @@ type State = {
   list: [];
   isLoading: boolean;
   isEditIntegration: boolean;
-  editIntegrationItem: {};
 };
 
 class Targets extends Component<Props, State> {
@@ -25,16 +24,23 @@ class Targets extends Component<Props, State> {
       list: [],
       isLoading: false,
       isEditIntegration: false,
-      editIntegrationItem: {},
     };
   }
 
   componentDidMount() {
-    this.onTargets();
+    const { projectName } = this.props;
+    this.loadTargets(projectName);
   }
 
-  onTargets() {
-    const { projectName } = this.props;
+  shouldComponentUpdate(nextProps: Props) {
+    const change = nextProps.projectName !== this.props.projectName;
+    if (change) {
+      this.loadTargets(nextProps.projectName);
+    }
+    return true;
+  }
+
+  loadTargets(projectName: string) {
     this.setState({
       isLoading: true,
     });
@@ -72,7 +78,7 @@ class Targets extends Component<Props, State> {
           record: { cluster: { clusterName: string; namespace: string } },
         ) => {
           const { cluster = { clusterName: '', namespace: '' } } = record;
-          return <span>{`${cluster.clusterName}(${cluster.namespace})`}</span>;
+          return <span>{`${cluster.clusterName}/${cluster.namespace}`}</span>;
         },
       },
       {

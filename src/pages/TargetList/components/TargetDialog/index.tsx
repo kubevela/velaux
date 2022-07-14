@@ -323,6 +323,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                       name="project"
                       hasClear
                       showSearch
+                      disabled={isEdit}
                       placeholder={t('Please select').toString()}
                       filterLocal={true}
                       dataSource={projectOptions}

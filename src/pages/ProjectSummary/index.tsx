@@ -8,6 +8,7 @@ import Integrations from './components/Integrations';
 
 type Props = {
   projectDetails: Project;
+  location: any;
   match: {
     params: {
       projectName: string;
@@ -29,8 +30,6 @@ class Summary extends Component<Props, State> {
     };
   }
 
-  componentDidMount() {}
-
   loadProjectDetail = async () => {
     const { params = { projectName: '' } } = this.props.match;
     this.props.dispatch({
@@ -45,7 +44,7 @@ class Summary extends Component<Props, State> {
     const { params = { projectName: '' } } = match;
     return (
       <Fragment>
-        <div className="container">
+        <div className="container" id={params.projectName}>
           <General
             projectDetails={projectDetails}
             userList={userList}

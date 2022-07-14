@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './index.less';
-import { routerRedux } from 'dva/router';
-import { Button, Dialog, Dropdown, Grid, Icon, Menu } from '@b-design/ui';
+import { Link, routerRedux } from 'dva/router';
+import { Button, Dialog, Dropdown, Grid, Icon, Menu, Table } from '@b-design/ui';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
@@ -21,6 +21,7 @@ import CloudShell from '../CloudShell';
 import locale from '../../utils/locale';
 import type { AddonBaseStatus } from '../../interface/addon';
 import i18n from '../../i18n';
+import type { Project } from '../../interface/project';
 
 type Props = {
   dispatch: ({}) => {};
@@ -34,6 +35,7 @@ type State = {
   platformSetting: boolean;
   isEditAdminUser: boolean;
   userInfo?: LoginUserInfo;
+  showMysqlProjectList: boolean;
 };
 
 const TelemetryDataCollectionKey = 'telemetryDataCollection';
@@ -48,6 +50,7 @@ class TopBar extends Component<Props, State> {
     this.state = {
       platformSetting: false,
       isEditAdminUser: false,
+      showMysqlProjectList: false,
     };
     this.loadCount = 0;
   }
@@ -200,10 +203,14 @@ class TopBar extends Component<Props, State> {
     this.setState({ isEditAdminUser: false });
   };
 
+  showMyProjectList = () => {
+    this.setState({ showMysqlProjectList: true });
+  };
+
   render() {
     const { Row, Col } = Grid;
     const { systemInfo, dispatch, show } = this.props;
-    const { platformSetting, isEditAdminUser, userInfo } = this.state;
+    const { platformSetting, isEditAdminUser, userInfo, showMysqlProjectList } = this.state;
     return (
       <div className="layout-topbar" id="layout-topbar">
         <Row className="nav-wrapper">
@@ -316,6 +323,9 @@ class TopBar extends Component<Props, State> {
                 }
               >
                 <Menu>
+                  <Menu.Item onClick={this.showMyProjectList}>
+                    <Translation>My Projects</Translation>
+                  </Menu.Item>
                   <Menu.Item onClick={this.onLogout}>
                     <Translation>Logout</Translation>
                   </Menu.Item>
@@ -344,6 +354,49 @@ class TopBar extends Component<Props, State> {
         </If>
         <If condition={show}>
           <CloudShell />
+        </If>
+        <If condition={showMysqlProjectList}>
+          <Dialog
+            locale={locale().Dialog}
+            visible={showMysqlProjectList}
+            className={'commonDialog'}
+            title={i18n.t('My Projects')}
+            autoFocus={true}
+            isFullScreen={true}
+            style={{ width: '800px' }}
+            onClose={() => {
+              this.setState({ showMysqlProjectList: false });
+            }}
+            footer={<div />}
+            height="auto"
+            footerAlign="center"
+          >
+            <Table dataSource={userInfo?.projects}>
+              <Table.Column
+                key="name"
+                title={<Translation>Project</Translation>}
+                dataIndex="name"
+                cell={(v: string, i: number, item: Project) => {
+                  if (item && item.name) {
+                    return (
+                      <Link
+                        onClick={() => this.setState({ showMysqlProjectList: false })}
+                        to={`/projects/${item.name}/summary`}
+                      >
+                        {item.alias || item.name}
+                      </Link>
+                    );
+                  } else {
+                    return null;
+                  }
+                }}
+              />
+              <Table.Column
+                dataIndex="description"
+                title={<Translation>Description</Translation>}
+              />
+            </Table>
+          </Dialog>
         </If>
       </div>
     );
