@@ -243,7 +243,11 @@ class CreateUser extends React.Component<Props, State> {
 
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Roles</Translation>} labelTextAlign="left">
+                <FormItem
+                  help={i18n.t('The common developer no need assign the platform roles.')}
+                  label={<Translation>Platform Roles</Translation>}
+                  labelTextAlign="left"
+                >
                   <Select
                     {...init(`roles`, {
                       rules: [
