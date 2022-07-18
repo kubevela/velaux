@@ -117,7 +117,7 @@ class ComponentPatches extends React.Component<Props, State> {
 
   onRemove = (id: string) => {
     const { componentPatches } = this.state;
-    this.setState({ componentPatches: componentPatches.filter((cp) => cp.id != id) });
+    this.setState({ componentPatches: componentPatches.filter((cp) => cp.id != id) || [] });
     this.field.remove(id);
   };
 

@@ -61,7 +61,6 @@ type State = {
   selectedPolicyItem?: PolicyItem;
   policyDefinitionDetail?: DefinitionDetail;
   createPolicyLoading: boolean;
-  definitionsLoading: boolean;
   definitionDetailLoading: boolean;
   definitions?: DefinitionBase[];
   propertiesMode: 'native' | 'code';
@@ -150,7 +149,6 @@ class PolicyDialog extends React.Component<Props, State> {
         // },
       ],
       createPolicyLoading: false,
-      definitionsLoading: false,
       definitionDetailLoading: false,
       propertiesMode: 'native',
     };
@@ -291,7 +289,7 @@ class PolicyDialog extends React.Component<Props, State> {
     workflows.map((wf) => {
       if (wf.name == workflowName) {
         wf.steps?.map((step) => {
-          if ((step.type = 'deploy')) {
+          if (step.type == 'deploy') {
             stepOptions.push({
               label: `${step.name}(${step.alias || '-'})`,
               value: step.name,
