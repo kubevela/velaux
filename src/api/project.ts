@@ -8,6 +8,7 @@ import type {
   ProjectRole,
   ProjectUserCreate,
   QueryData,
+  ProjectUserQuery,
 } from '../interface/project';
 import { project_mock } from './devLink';
 import { project } from './productionLink';
@@ -70,9 +71,9 @@ export function deleteProjectRoles(query: QueryProjectRole) {
   return rdelete(urlPath, {}).then((res) => res);
 }
 
-export function getProjectUsers(query: ProjectName) {
+export function getProjectUsers(query: ProjectUserQuery) {
   const urlPath = project + `/${query.projectName}/users`;
-  return get(urlPath, {}).then((res) => res);
+  return get(urlPath, { params: query }).then((res) => res);
 }
 
 export function createProjectUsers(query: ProjectName, params: ProjectUserCreate) {

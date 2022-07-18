@@ -78,3 +78,9 @@ export interface QueryData {
   projectName: string;
   configType: string;
 }
+
+export interface ProjectUserQuery {
+  projectName: string;
+  page: number;
+  pageSize: number;
+}
