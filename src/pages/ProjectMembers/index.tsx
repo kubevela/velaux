@@ -57,9 +57,11 @@ class ProjectMembers extends Component<Props, State> {
   }
 
   listMember = async () => {
-    const { projectName } = this.state;
+    const { projectName, page, pageSize } = this.state;
     const params = {
       projectName,
+      page,
+      pageSize,
     };
     this.setState({ isLoading: true });
     getProjectUsers(params)
@@ -162,7 +164,6 @@ class ProjectMembers extends Component<Props, State> {
     this.setState(
       {
         page,
-        pageSize: 10,
       },
       () => {
         this.listMember();
@@ -301,7 +302,6 @@ class ProjectMembers extends Component<Props, State> {
               className="margin-top-20 text-align-right"
               total={total}
               locale={locale().Pagination}
-              hideOnlyOnePage={true}
               size="medium"
               pageSize={pageSize}
               current={page}

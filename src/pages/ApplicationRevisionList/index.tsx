@@ -48,7 +48,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
     const { params } = props.match;
     this.state = {
       appName: params.appName,
-      page: 0,
+      page: 1,
       pageSize: 10,
       envName: '',
       status: '',
@@ -103,7 +103,6 @@ class ApplicationRevisionList extends React.Component<Props, State> {
     this.setState(
       {
         page,
-        pageSize: 10,
       },
       () => {
         this.getRevisionList();

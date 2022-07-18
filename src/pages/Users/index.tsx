@@ -43,7 +43,7 @@ class Users extends Component<Props, State> {
       name: '',
       email: '',
       alias: '',
-      page: 0,
+      page: 1,
       pageSize: 10,
       isLoading: false,
       total: 0,
@@ -147,7 +147,7 @@ class Users extends Component<Props, State> {
     this.listUser();
   };
 
-  onResetPassWordCreat = () => {
+  onResetPassWord = () => {
     this.setState({
       isResetPasswordDialog: false,
     });
@@ -236,7 +236,6 @@ class Users extends Component<Props, State> {
     this.setState(
       {
         page,
-        pageSize: 10,
       },
       () => {
         this.listUser();
@@ -457,7 +456,6 @@ class Users extends Component<Props, State> {
               className="margin-top-20 text-align-right"
               total={total}
               locale={locale().Pagination}
-              hideOnlyOnePage={true}
               size="medium"
               pageSize={pageSize}
               current={page}
@@ -481,7 +479,7 @@ class Users extends Component<Props, State> {
                 editUser={editUser}
                 isResetPassword={isResetPassword}
                 onClose={this.onResetPassWordClose}
-                onCreate={this.onResetPassWordCreat}
+                onCreate={this.onResetPassWord}
               />
             </If>
           </section>
