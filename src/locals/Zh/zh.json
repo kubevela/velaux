@@ -569,11 +569,11 @@
   "The common developer no need assign the platform roles.": "普通开发者无需分配平台角色，仅需要在项目中分配项目决赛即可。",
   "My Projects": "我的项目",
   "Override": "配置覆盖",
-  "Apply Once": "一次性部署",
+  "Deliver Once": "一次性部署",
   "Set differentiated configurations of the application in different environments.": "设置应用在各环境的差异化配置。",
-  "This policy allows direct changes to the resources distributed to the target cluster.": "此策略允许分发后资源配置漂移。",
-  "PVC GC Ignore": "存储保留",
-  "This policy allows keeping the PVC resource after recycling the application.": "此策略将在应用回收后保留 PVC 资源，可以进行不丢失数据的应用计算资源回收。",
-  "Replicas Drift": "副本飘移",
-  "This policy allows for drift in replicas configuration for workloads, such as working with HPA.": "此策略允许工作负载的副本数配置漂移，例如与 HPA 协同工作。"
+  "This policy allows direct changes to the resources distributed to the target cluster, the controller won't keep reconciling.": "此策略允许分发后资源被修改，不做面向终态的配置检查。",
+  "PVC Retain": "存储保留",
+  "This policy allows retaining the PVC resource after recycling the application.": "此策略将在应用回收后保留 PVC 资源，可以进行不丢失数据的应用计算资源回收。",
+  "Replicas Scalable": "实例可伸缩",
+  "This policy allows replicas of workloads to be changed, such as working with HPA.": "此策略允许工作负载的副本数被其他控制器修改，例如与 HPA 协同工作。"
 }

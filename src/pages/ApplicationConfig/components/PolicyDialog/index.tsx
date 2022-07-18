@@ -21,7 +21,12 @@ import {
   Icon,
   Loading,
 } from '@b-design/ui';
-import { AiOutlineHdd, AiOutlineMergeCells, AiOutlineOneToOne } from 'react-icons/ai';
+import {
+  AiOutlineHdd,
+  AiOutlineMergeCells,
+  AiOutlineOneToOne,
+  AiOutlineReconciliation,
+} from 'react-icons/ai';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import classNames from 'classnames';
@@ -84,24 +89,24 @@ class PolicyDialog extends React.Component<Props, State> {
           ),
         },
         {
-          label: i18n.t('Apply Once'),
+          label: i18n.t('Deliver Once'),
           type: 'apply-once',
           name: 'apply-once-no-rule',
           icon: <AiOutlineOneToOne size={35} />,
           title: i18n.t(
-            'This policy allows direct changes to the resources distributed to the target cluster.',
+            "This policy allows direct changes to the resources distributed to the target cluster, the controller won't keep reconciling.",
           ),
           properties: {
             enable: true,
           },
         },
         {
-          label: i18n.t('PVC GC Ignore'),
+          label: i18n.t('PVC Retain'),
           type: 'garbage-collect',
-          name: 'garbage-collect-ignore-pvc',
+          name: 'garbage-collect-retain-pvc',
           icon: <AiOutlineHdd size={35} />,
           title: i18n.t(
-            'This policy allows keeping the PVC resource after recycling the application.',
+            'This policy allows retaining the PVC resource after recycling the application.',
           ),
           properties: {
             rules: [
@@ -115,12 +120,12 @@ class PolicyDialog extends React.Component<Props, State> {
           },
         },
         {
-          label: i18n.t('Replicas Drift'),
+          label: i18n.t('Replicas Scalable'),
           type: 'apply-once',
           name: 'apply-once-ignore-replicas',
-          icon: <AiOutlineOneToOne size={35} />,
+          icon: <AiOutlineReconciliation size={35} />,
           title: i18n.t(
-            'This policy allows for drift in replicas configuration for workloads, such as working with HPA.',
+            'This policy allows replicas of workloads to be changed, such as working with HPA.',
           ),
           properties: {
             rules: [
