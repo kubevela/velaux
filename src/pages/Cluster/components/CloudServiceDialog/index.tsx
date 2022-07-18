@@ -151,7 +151,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
     this.setState(
       {
         page: pageIdx,
-        pageSize: 10,
       },
       () => {
         const { provider, accessKeyID, accessKeySecret } = this.field.getValues();

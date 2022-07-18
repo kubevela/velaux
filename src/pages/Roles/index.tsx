@@ -33,7 +33,7 @@ class Roles extends Component<Props, State> {
     this.state = {
       list: [],
       total: 0,
-      page: 0,
+      page: 1,
       pageSize: 10,
       permissions: [],
       visible: false,
@@ -117,7 +117,6 @@ class Roles extends Component<Props, State> {
     this.setState(
       {
         page,
-        pageSize: 10,
       },
       () => {
         this.listRoles();
@@ -239,7 +238,6 @@ class Roles extends Component<Props, State> {
             className="margin-top-20 text-align-right"
             total={total}
             locale={locale().Pagination}
-            hideOnlyOnePage={true}
             size="medium"
             pageSize={pageSize}
             current={page}
