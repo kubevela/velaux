@@ -110,14 +110,15 @@ class ComponentPatches extends React.Component<Props, State> {
   };
 
   addPatch = () => {
-    const { componentPatches } = this.state;
-    const newPatcher = [...componentPatches, { id: uuid() }];
-    this.setState({ componentPatches: newPatcher });
+    this.setState((prevState) => ({
+      componentPatches: [...prevState.componentPatches, { id: uuid() }],
+    }));
   };
 
   onRemove = (id: string) => {
-    const { componentPatches } = this.state;
-    this.setState({ componentPatches: componentPatches.filter((cp) => cp.id != id) || [] });
+    this.setState((prevState) => ({
+      componentPatches: prevState.componentPatches.filter((cp) => cp.id != id) || [],
+    }));
     this.field.remove(id);
   };
 
