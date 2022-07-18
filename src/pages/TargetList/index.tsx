@@ -42,8 +42,8 @@ class targetList extends React.Component<Props, State> {
     super(props);
     this.state = {
       query: '',
-      page: 0,
-      pageSize: 10,
+      page: 1,
+      pageSize: 5,
       showAddTarget: false,
       editTargetName: '',
       visibleDelivery: false,
@@ -107,10 +107,14 @@ class targetList extends React.Component<Props, State> {
   };
 
   handleChange = (page: number) => {
-    this.setState({
-      page,
-      pageSize: 10,
-    });
+    this.setState(
+      {
+        page,
+      },
+      () => {
+        this.getTargetList();
+      },
+    );
   };
 
   render() {

@@ -40,7 +40,7 @@ class targetList extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      page: 0,
+      page: 1,
       pageSize: 10,
       showAddTarget: false,
       editTargetName: '',
@@ -96,10 +96,14 @@ class targetList extends React.Component<Props, State> {
   };
 
   handleChange = (page: number) => {
-    this.setState({
-      page,
-      pageSize: 10,
-    });
+    this.setState(
+      {
+        page,
+      },
+      () => {
+        this.getEnvList();
+      },
+    );
   };
 
   render() {

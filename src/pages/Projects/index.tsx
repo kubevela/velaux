@@ -39,7 +39,7 @@ class Projects extends Component<Props, State> {
     this.state = {
       list: [],
       total: 0,
-      page: 0,
+      page: 1,
       pageSize: 10,
       visible: false,
       isEditProject: false,
@@ -140,7 +140,6 @@ class Projects extends Component<Props, State> {
     this.setState(
       {
         page,
-        pageSize: 10,
       },
       () => {
         this.listProjects();
