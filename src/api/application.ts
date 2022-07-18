@@ -26,10 +26,11 @@ import type {
   ApplicationQuery,
   ApplicationCompareRequest,
   ApplicationDryRunRequest,
+  CreatePolicyRequest,
 } from '../interface/application';
 
 interface TraitQuery {
-  appName?: string;
+  appName: string;
   componentName?: string;
   traitType?: string;
 }
@@ -71,12 +72,10 @@ export function deleteApplicationPlan(params: { name: string }) {
   return rdelete(url + '/' + params.name, params);
 }
 
-export function getApplicationComponents(params: { appName: string; envName: string }) {
-  const { appName, envName } = params;
-  const gurl = isMock
-    ? `${getApplicationComponents_mock}`
-    : `${application}/${appName}/components?envName=${envName}`;
-  return get(gurl, params).then((res) => res);
+export function getApplicationComponents(params: { appName: string }) {
+  const { appName } = params;
+  const gurl = isMock ? `${getApplicationComponents_mock}` : `${application}/${appName}/components`;
+  return get(gurl, {}).then((res) => res);
 }
 
 export function createApplicationComponent(
@@ -106,8 +105,8 @@ export function getPolicyList(params: { appName: string }) {
   return get(gurl, params).then((res) => res);
 }
 
-export function createPolicy(params: any) {
-  const gurl = isMock ? `${createPolicy_mock}` : `${application}/${params.name}/policies`;
+export function createPolicy(appName: string, params: CreatePolicyRequest) {
+  const gurl = isMock ? `${createPolicy_mock}` : `${application}/${appName}/policies`;
   return post(gurl, params).then((res) => res);
 }
 
@@ -189,8 +188,7 @@ export function detailTraitDefinition(params: { name: string }) {
   return get(gurl, { params: { type: 'trait' } }).then((res) => res);
 }
 
-export function getApplicationComponent(query: TraitQuery) {
-  const { appName, componentName } = query;
+export function getApplicationComponent(appName: string, componentName: string) {
   const gurl = isMock
     ? `${getTrait_mock}`
     : `${application}/${appName}/components/${componentName}`;

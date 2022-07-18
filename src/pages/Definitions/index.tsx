@@ -18,14 +18,14 @@ import type { LoginUserInfo } from '../../interface/user';
 type Props = {
   match: {
     params: {
-      definitionType: string;
+      definitionType: 'component' | 'trait' | 'workflowstep' | 'policy';
     };
   };
   userInfo?: LoginUserInfo;
 };
 
 type State = {
-  definitionType: string;
+  definitionType: 'component' | 'trait' | 'workflowstep' | 'policy';
   list: DefinitionBase[];
   isLoading: boolean;
   searchValue: string;

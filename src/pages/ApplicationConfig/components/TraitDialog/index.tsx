@@ -94,20 +94,18 @@ class TraitDialog extends React.Component<Props, State> {
 
   onGetComponentInfo(callback: () => void) {
     const { appName, componentName } = this.props;
-    const params = {
-      appName,
-      componentName,
-    };
-    getApplicationComponent(params).then((res: ApplicationComponent) => {
-      if (res) {
-        this.setState(
-          {
-            component: res,
-          },
-          callback,
-        );
-      }
-    });
+    if (appName && componentName) {
+      getApplicationComponent(appName, componentName).then((res: ApplicationComponent) => {
+        if (res) {
+          this.setState(
+            {
+              component: res,
+            },
+            callback,
+          );
+        }
+      });
+    }
   }
 
   onGetTraitDefinitions = async () => {
@@ -413,14 +411,14 @@ class TraitDialog extends React.Component<Props, State> {
                             <Icon
                               style={{ color: '#1b58f4' }}
                               type={'display-code'}
-                              title={'Switch to code mode'}
+                              title={'Switch to the coding mode'}
                             />
                           </If>
                           <If condition={propertiesMode === 'code'}>
                             <Icon
                               style={{ color: '#1b58f4' }}
                               type={'laptop'}
-                              title={'Switch to native mode'}
+                              title={'Switch to the native mode'}
                             />
                           </If>
                         </Button>

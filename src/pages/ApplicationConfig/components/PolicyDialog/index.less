@@ -1,0 +1,20 @@
+@import '../../../../lib.less';
+
+.policy-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 8px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid #dedede;
+  cursor: pointer;
+  &:hover {
+    color: @primarycolor;
+    border: 2px solid @primarycolor;
+  }
+}
+.policy-item.active {
+  color: @primarycolor;
+  border: 2px solid @primarycolor;
+}

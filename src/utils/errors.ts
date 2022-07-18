@@ -21,10 +21,11 @@ export interface APIError {
   BusinessCode: number;
   Message: string;
 }
+
 export function handleError(err: APIError) {
   // TODO: Handle errors based on businessCode
   const isShowErrFlag = isMatchBusinessCode(err.BusinessCode);
   if (err && !isShowErrFlag) {
-    Message.error(err.Message);
+    Message.error({ title: err.Message, duration: 3000 });
   }
 }

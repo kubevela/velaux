@@ -6,7 +6,10 @@ import { getDomain } from '../utils/common';
 const baseURLOject = getDomain();
 const base = baseURLOject.APIBASE;
 
-export function getDefinitionsList(params: { definitionType: string; queryAll: boolean }) {
+export function getDefinitionsList(params: {
+  definitionType: 'component' | 'trait' | 'workflowstep' | 'policy';
+  queryAll: boolean;
+}) {
   const url = base + definition;
   const { definitionType, queryAll } = params;
   return get(url, { params: { type: definitionType, queryAll } }).then((res) => res);

@@ -40,19 +40,19 @@ class Workflow extends Component<Props, State> {
 
   componentDidMount() {
     this.onGetWorkflow();
-    this.onGetWorkFlowdefinitions();
+    this.onGetWorkflowDefinitions();
   }
 
   onGetWorkflow = () => {
     this.props.dispatch({
-      type: 'workflow/getWrokflowList',
+      type: 'workflow/getWorkflowList',
       payload: {
         appName: this.state.appName,
       },
     });
   };
 
-  onGetWorkFlowdefinitions = async () => {
+  onGetWorkflowDefinitions = async () => {
     getWorkFlowDefinitions().then((res: any) => {
       if (res) {
         this.setState({
@@ -62,23 +62,11 @@ class Workflow extends Component<Props, State> {
     });
   };
 
-  addWrokflow = () => {};
-
   render() {
     const { workflowList, dispatch, applicationDetail } = this.props;
     const { params } = this.props.match;
     return (
       <div style={{ height: '100%' }} className="workflow-wraper">
-        <If condition={workflowList.length === 0}>
-          {/* <div className="empty-container">
-            <div className="empty-word">
-              <Translation>Please create workflow</Translation>
-            </div>
-            <Button type="primary" onClick={this.addWrokflow}>
-              <Translation>New Workflow</Translation>
-            </Button>
-          </div> */}
-        </If>
         <If condition={workflowList.length > 0}>
           <React.Fragment>
             {workflowList.map((workflow: WorkFlowData) => (

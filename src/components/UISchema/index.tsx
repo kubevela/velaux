@@ -30,6 +30,8 @@ import { v4 as uuid } from 'uuid';
 import DefinitionCode from '../DefinitionCode';
 import * as yaml from 'js-yaml';
 import type { Definition } from '../../interface/addon';
+import ComponentSelect from '../../extends/ComponentSelect';
+import ComponentPatches from '../../extends/ComponentPatches';
 
 const { Col, Row } = Grid;
 
@@ -96,7 +98,6 @@ type State = {
   secretKeys?: string[];
   advanced: boolean;
   codeError?: string;
-  codeID: string;
 };
 
 class UISchema extends Component<Props, State> {
@@ -104,16 +105,19 @@ class UISchema extends Component<Props, State> {
   registerForm: Record<string, Field>;
   constructor(props: Props) {
     super(props);
-    const numberParams: string[] = [];
+    const paramKeyMap: Record<string, UIParam> = {};
     this.props.uiSchema?.map((param) => {
-      if (param.uiType == 'Number') {
-        numberParams.push(param.jsonKey);
-      }
+      paramKeyMap[param.jsonKey] = param;
     });
     this.form = new Field(this, {
       onChange: (name: string, value: any) => {
         const values: any = this.form.getValues();
-        if (numberParams.includes(name) && value === '') {
+        // Can not assign the empty value for the field with the number type
+        if (paramKeyMap[name].uiType == 'Number' && value === '') {
+          delete values[name];
+        }
+        // Can not assign the empty value for the field with the array type
+        if (Array.isArray(value) && value.length == 0) {
           delete values[name];
         }
         const { onChange } = this.props;
@@ -127,7 +131,6 @@ class UISchema extends Component<Props, State> {
     this.state = {
       secretKeys: [],
       advanced: props.advanced || false,
-      codeID: uuid(),
     };
   }
 
@@ -235,7 +238,8 @@ class UISchema extends Component<Props, State> {
 
   renderCodeEdit = () => {
     const { value, onChange, definition } = this.props;
-    const { codeError, codeID } = this.state;
+    const { codeError } = this.state;
+    const codeID = uuid();
     let yamlValue = yaml.dump(value);
     if (yamlValue == '{}\n') {
       yamlValue = '';
@@ -866,6 +870,51 @@ class UISchema extends Component<Props, State> {
                   {...init(param.jsonKey, {
                     initValue: initValue,
                     rules: convertRule(param.validate),
+                  })}
+                />
+              </Form.Item>
+            );
+          case 'ComponentSelect':
+            return (
+              <Form.Item
+                labelAlign={inline ? 'inset' : 'left'}
+                required={required}
+                label={label}
+                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
+                disabled={disableEdit}
+                key={param.jsonKey}
+              >
+                <ComponentSelect
+                  disabled={disableEdit}
+                  {...init(param.jsonKey, {
+                    initValue: initValue,
+                    rules: convertRule(param.validate),
+                  })}
+                />
+              </Form.Item>
+            );
+          case 'ComponentPatches':
+            return (
+              <Form.Item
+                labelAlign={inline ? 'inset' : 'left'}
+                required={required}
+                label={label}
+                help={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
+                disabled={disableEdit}
+                key={param.jsonKey}
+              >
+                <ComponentPatches
+                  disabled={disableEdit}
+                  registerForm={(form: Field) => {
+                    this.onRegisterForm(param.jsonKey, form);
+                  }}
+                  {...init(param.jsonKey, {
+                    initValue: initValue,
+                    rules: [
+                      {
+                        validator: validator,
+                      },
+                    ],
                   })}
                 />
               </Form.Item>

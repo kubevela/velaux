@@ -1,5 +1,17 @@
 import React from 'react';
-import { Grid, Field, Form, Message, Button, Input, Select, Divider, Icon } from '@b-design/ui';
+import {
+  Grid,
+  Field,
+  Form,
+  Message,
+  Button,
+  Input,
+  Select,
+  Divider,
+  Icon,
+  Card,
+  Loading,
+} from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import {
@@ -19,7 +31,6 @@ import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
-import Title from '../../../../components/Title';
 import { Link } from 'dva/router';
 import locale from '../../../../utils/locale';
 import { If } from 'tsx-control-statements/components';
@@ -27,7 +38,6 @@ import _ from 'lodash';
 import i18n from '../../../../i18n';
 import { transComponentDefinitions } from '../../../../utils/utils';
 import './index.less';
-import Group from '../../../../extends/Group';
 import { connect } from 'dva';
 import Permission from '../../../../components/Permission';
 
@@ -105,22 +115,20 @@ class ComponentDialog extends React.Component<Props, State> {
 
   onGetEditComponentInfo(callback?: () => void) {
     const { appName, componentName } = this.props;
-    const params = {
-      appName,
-      componentName,
-    };
     this.setState({ loading: true });
-    getApplicationComponent(params).then((res: ApplicationComponent) => {
-      if (res) {
-        this.setState(
-          {
-            editComponent: res,
-            loading: false,
-          },
-          callback,
-        );
-      }
-    });
+    if (appName && componentName) {
+      getApplicationComponent(appName, componentName).then((res: ApplicationComponent) => {
+        if (res) {
+          this.setState(
+            {
+              editComponent: res,
+              loading: false,
+            },
+            callback,
+          );
+        }
+      });
+    }
   }
 
   onClose = () => {
@@ -352,201 +360,201 @@ class ComponentDialog extends React.Component<Props, State> {
         extButtons={this.extButtonList()}
       >
         <Form field={this.field} className="basic-config-wrapper">
-          <section className="title">
-            <Title title={i18n.t('Basic Configuration')} actions={[]} />
-          </section>
-          <Group hasToggleIcon={true} initClose={false} required={true} loading={loading}>
-            <Row>
-              <Col span={12} style={{ paddingRight: '8px' }}>
-                <FormItem
-                  label={
-                    <Translation className="font-size-14 font-weight-bold color333">
-                      Name
-                    </Translation>
-                  }
-                  labelTextAlign="left"
-                  required={true}
-                >
-                  <Input
-                    name="name"
-                    maxLength={32}
-                    disabled={isEditComponent ? true : false}
-                    addonTextBefore={this.getInitName()}
-                    {...init('name', {
-                      rules: [
-                        {
-                          required: true,
-                          pattern: checkName,
-                          message: 'Please enter a valid application name',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </Col>
+          <Loading visible={loading} style={{ width: '100%' }}>
+            <Card contentHeight={'auto'} title="Basic Configuration">
+              <Row>
+                <Col span={12} style={{ paddingRight: '8px' }}>
+                  <FormItem
+                    label={
+                      <Translation className="font-size-14 font-weight-bold color333">
+                        Name
+                      </Translation>
+                    }
+                    labelTextAlign="left"
+                    required={true}
+                  >
+                    <Input
+                      name="name"
+                      maxLength={32}
+                      disabled={isEditComponent ? true : false}
+                      addonTextBefore={this.getInitName()}
+                      {...init('name', {
+                        rules: [
+                          {
+                            required: true,
+                            pattern: checkName,
+                            message: 'Please enter a valid application name',
+                          },
+                        ],
+                      })}
+                    />
+                  </FormItem>
+                </Col>
 
-              <Col span={12} style={{ paddingLeft: '8px' }}>
-                <FormItem label={<Translation>Alias</Translation>}>
-                  <Input
-                    name="alias"
-                    placeholder={i18n.t('Please enter').toString()}
-                    {...init('alias', {
-                      rules: [
-                        {
-                          minLength: 2,
-                          maxLength: 64,
-                          message: 'Enter a string of 2 to 64 characters.',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={24}>
-                <FormItem label={<Translation>Description</Translation>}>
-                  <Input
-                    name="description"
-                    placeholder={i18n.t('Please enter').toString()}
-                    {...init('description', {
-                      rules: [
-                        {
-                          maxLength: 256,
-                          message: 'Enter a description that contains less than 256 characters.',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={12} style={{ paddingRight: '8px' }}>
-                <FormItem
-                  label={
-                    <Translation className="font-size-14 font-weight-bold color333">
-                      Type
-                    </Translation>
-                  }
-                  required={true}
-                  help={
-                    <span>
-                      <Translation>Get more component type?</Translation>
-                      <Link to="/addons">
-                        <Translation>Go to enable addon</Translation>
-                      </Link>
-                    </span>
-                  }
-                >
-                  <Select
-                    locale={locale().Select}
-                    showSearch
-                    disabled={isEditComponent ? true : false}
-                    className="select"
-                    {...init(`componentType`, {
-                      initValue: isEditComponent ? '' : 'webservice',
-                      rules: [
-                        {
-                          required: true,
-                          message: i18n.t('Please select'),
-                        },
-                      ],
-                    })}
-                    dataSource={transComponentDefinitions(componentDefinitions)}
-                    onChange={(item: string) => {
-                      this.removeProperties();
-                      this.field.setValue('componentType', item);
-                      this.onDetailsComponentDefinition(item);
-                    }}
-                  />
-                </FormItem>
-              </Col>
+                <Col span={12} style={{ paddingLeft: '8px' }}>
+                  <FormItem label={<Translation>Alias</Translation>}>
+                    <Input
+                      name="alias"
+                      placeholder={i18n.t('Please enter').toString()}
+                      {...init('alias', {
+                        rules: [
+                          {
+                            minLength: 2,
+                            maxLength: 64,
+                            message: 'Enter a string of 2 to 64 characters.',
+                          },
+                        ],
+                      })}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <FormItem label={<Translation>Description</Translation>}>
+                    <Input
+                      name="description"
+                      placeholder={i18n.t('Please enter').toString()}
+                      {...init('description', {
+                        rules: [
+                          {
+                            maxLength: 256,
+                            message: 'Enter a description that contains less than 256 characters.',
+                          },
+                        ],
+                      })}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={12} style={{ paddingRight: '8px' }}>
+                  <FormItem
+                    label={
+                      <Translation className="font-size-14 font-weight-bold color333">
+                        Type
+                      </Translation>
+                    }
+                    required={true}
+                    help={
+                      <span>
+                        <Translation>Get more component type?</Translation>
+                        <Link to="/addons">
+                          <Translation>Go to enable addon</Translation>
+                        </Link>
+                      </span>
+                    }
+                  >
+                    <Select
+                      locale={locale().Select}
+                      showSearch
+                      disabled={isEditComponent ? true : false}
+                      className="select"
+                      {...init(`componentType`, {
+                        initValue: isEditComponent ? '' : 'webservice',
+                        rules: [
+                          {
+                            required: true,
+                            message: i18n.t('Please select'),
+                          },
+                        ],
+                      })}
+                      dataSource={transComponentDefinitions(componentDefinitions)}
+                      onChange={(item: string) => {
+                        this.removeProperties();
+                        this.field.setValue('componentType', item);
+                        this.onDetailsComponentDefinition(item);
+                      }}
+                    />
+                  </FormItem>
+                </Col>
 
-              <Col span={12} style={{ paddingRight: '8px' }}>
-                <FormItem
-                  label={
-                    <Translation className="font-size-14 font-weight-bold color333">
-                      Depends On
-                    </Translation>
-                  }
-                >
-                  <Select
-                    {...init(`dependsOn`, {
-                      rules: [
-                        {
-                          required: false,
-                          message: i18n.t('Please select'),
-                        },
-                      ],
-                    })}
-                    locale={locale().Select}
-                    mode="multiple"
-                    dataSource={this.getDependsOptions()}
-                  />
-                </FormItem>
-              </Col>
+                <Col span={12} style={{ paddingRight: '8px' }}>
+                  <FormItem
+                    label={
+                      <Translation className="font-size-14 font-weight-bold color333">
+                        Depends On
+                      </Translation>
+                    }
+                  >
+                    <Select
+                      {...init(`dependsOn`, {
+                        rules: [
+                          {
+                            required: false,
+                            message: i18n.t('Please select'),
+                          },
+                        ],
+                      })}
+                      locale={locale().Select}
+                      mode="multiple"
+                      dataSource={this.getDependsOptions()}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+            </Card>
+          </Loading>
+          <Card
+            contentHeight={'auto'}
+            className="withActions"
+            title="Deployment Properties"
+            subTitle={
+              definitionDetail && definitionDetail.uiSchema
+                ? [
+                    <Button
+                      style={{ marginTop: '-12px' }}
+                      onClick={() => {
+                        if (propertiesMode === 'native') {
+                          this.setState({ propertiesMode: 'code' });
+                        } else {
+                          this.setState({ propertiesMode: 'native' });
+                        }
+                      }}
+                    >
+                      <If condition={propertiesMode === 'native'}>
+                        <Icon
+                          style={{ color: '#1b58f4' }}
+                          type={'display-code'}
+                          title={'Switch to the coding mode'}
+                        />
+                      </If>
+                      <If condition={propertiesMode === 'code'}>
+                        <Icon
+                          style={{ color: '#1b58f4' }}
+                          type={'laptop'}
+                          title={'Switch to the native mode'}
+                        />
+                      </If>
+                    </Button>,
+                  ]
+                : []
+            }
+          >
+            <Row>
+              <If condition={definitionDetail}>
+                <UISchema
+                  {...init(`properties`, {
+                    rules: [
+                      {
+                        validator: validator,
+                        message: i18n.t('Please check the component properties'),
+                      },
+                    ],
+                  })}
+                  enableCodeEdit={propertiesMode === 'code'}
+                  uiSchema={definitionDetail && definitionDetail.uiSchema}
+                  definition={{
+                    name: definitionDetail?.name || '',
+                    type: 'component',
+                    description: definitionDetail?.description || '',
+                  }}
+                  ref={this.uiSchemaRef}
+                  mode={isEditComponent ? 'edit' : 'new'}
+                />
+              </If>
             </Row>
-          </Group>
-          <section className="title">
-            <Title
-              title={i18n.t('Deployment Properties')}
-              actions={
-                definitionDetail && definitionDetail.uiSchema
-                  ? [
-                      <Button
-                        style={{ marginTop: '-12px' }}
-                        onClick={() => {
-                          if (propertiesMode === 'native') {
-                            this.setState({ propertiesMode: 'code' });
-                          } else {
-                            this.setState({ propertiesMode: 'native' });
-                          }
-                        }}
-                      >
-                        <If condition={propertiesMode === 'native'}>
-                          <Icon
-                            style={{ color: '#1b58f4' }}
-                            type={'display-code'}
-                            title={'Switch to code mode'}
-                          />
-                        </If>
-                        <If condition={propertiesMode === 'code'}>
-                          <Icon
-                            style={{ color: '#1b58f4' }}
-                            type={'laptop'}
-                            title={'Switch to native mode'}
-                          />
-                        </If>
-                      </Button>,
-                    ]
-                  : []
-              }
-            />
-          </section>
-          <Row>
-            <If condition={definitionDetail}>
-              <UISchema
-                {...init(`properties`, {
-                  rules: [
-                    {
-                      validator: validator,
-                      message: i18n.t('Please check the component properties'),
-                    },
-                  ],
-                })}
-                enableCodeEdit={propertiesMode === 'code'}
-                uiSchema={definitionDetail && definitionDetail.uiSchema}
-                definition={{
-                  name: definitionDetail?.name || '',
-                  type: 'component',
-                  description: definitionDetail?.description || '',
-                }}
-                ref={this.uiSchemaRef}
-                mode={isEditComponent ? 'edit' : 'new'}
-              />
-            </If>
-          </Row>
+          </Card>
         </Form>
       </DrawerWithFooter>
     );

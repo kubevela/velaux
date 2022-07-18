@@ -10,6 +10,7 @@ type ApplicationDiffProps = {
   targetName: string;
   compare: ApplicationCompareResponse;
   onClose: () => void;
+  id?: string;
 };
 
 export const ApplicationDiff = (props: ApplicationDiffProps) => {
@@ -27,6 +28,7 @@ export const ApplicationDiff = (props: ApplicationDiffProps) => {
       className={'commonDialog application-diff'}
       isFullScreen={true}
       footer={<div />}
+      id={props.id}
       visible={true}
       onClose={props.onClose}
       title={

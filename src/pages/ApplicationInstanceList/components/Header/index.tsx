@@ -73,11 +73,18 @@ class Header extends Component<Props, State> {
     };
   }
   componentDidMount() {
-    this.compareCurrentWithCluster();
+    this.compareCurrentWithCluster(this.props.appName, this.props.envName);
   }
 
-  compareCurrentWithCluster = () => {
-    const { applicationStatus, appName, envName } = this.props;
+  shouldComponentUpdate(nextProps: Props) {
+    if (nextProps.appName + nextProps.envName != this.props.appName + this.props.envName) {
+      this.compareCurrentWithCluster(this.props.appName, nextProps.envName);
+    }
+    return true;
+  }
+
+  compareCurrentWithCluster = (appName: string, envName: string) => {
+    const { applicationStatus } = this.props;
     if (!applicationStatus) {
       this.setState({ compare: undefined });
       return;
@@ -144,7 +151,7 @@ class Header extends Component<Props, State> {
 
   refresh = async () => {
     this.props.refresh();
-    this.compareCurrentWithCluster();
+    this.compareCurrentWithCluster(this.props.appName, this.props.envName);
   };
 
   showStatus = () => {
@@ -348,6 +355,7 @@ class Header extends Component<Props, State> {
         <If condition={visibleApplicationDiff}>
           {compare && (
             <ApplicationDiff
+              id={appName + envName}
               baseName="Latest Application Configuration"
               targetName="Deployed Application"
               compare={compare}

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { Card, Dialog, Grid, Icon } from '@b-design/ui';
+import { Balloon, Card, Dialog, Grid, Icon } from '@b-design/ui';
 import type {
   ApplicationDetail,
   ApplicationPolicyBase,
   EnvBinding,
 } from '../../../../interface/application';
-import { momentDate } from '../../../../utils/common';
+import { beautifyTime, momentDate } from '../../../../utils/common';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
@@ -13,7 +13,6 @@ import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import Item from '../../../../components/Item';
 import Permission from '../../../../components/Permission';
-// import Permission from '../../../../components/Permission';
 
 type Props = {
   policies?: ApplicationPolicyBase[];
@@ -54,20 +53,29 @@ class PolicyList extends Component<Props, State> {
     return (
       <div className="list-warper">
         <div className="box">
-          {(policies || []).map((item: ApplicationPolicyBase) => (
-            <Row wrap={true} className="box-item">
-              <Col span={24} key={item.type}>
-                <Card free={true} style={{ padding: '16px' }} locale={locale().Card}>
+          <Row wrap={true}>
+            {(policies || []).map((item: ApplicationPolicyBase) => (
+              <Col m={24} key={item.type} className="box-item">
+                <Card
+                  free={true}
+                  style={{ padding: '16px' }}
+                  hasBorder
+                  contentHeight="auto"
+                  locale={locale().Card}
+                >
                   <div className="policy-list-nav">
                     <div className="policy-list-title">
                       {/* <a onClick={() => this.props.onShowPolicy(item.name)}> */}
-                      {item.alias ? `${item.alias}(${item.name})` : item.name}
+
+                      <Balloon trigger={<span>{item.alias ? item.alias : item.name}</span>}>
+                        {item.description}
+                      </Balloon>
                       {/* </a> */}
                     </div>
                     <div className="trigger-list-operation">
                       <Permission
                         request={{
-                          resource: `project:${projectName}/application/policy:${item.name}`,
+                          resource: `project:${projectName}/application:${applicationDetail?.name}/policy:${item.name}`,
                           action: 'delete',
                         }}
                         project={projectName}
@@ -75,7 +83,7 @@ class PolicyList extends Component<Props, State> {
                         <Icon
                           type="ashbin1"
                           size={14}
-                          className="margin-right-0 cursor-pointer"
+                          className="margin-right-0 cursor-pointer danger-icon"
                           onClick={() => {
                             this.handlePolicyDelete(item.name);
                           }}
@@ -106,15 +114,19 @@ class PolicyList extends Component<Props, State> {
                           marginBottom="8px"
                           labelSpan={12}
                           label={<Translation>Create Time</Translation>}
-                          value={momentDate(item.createTime)}
+                          value={
+                            <span title={momentDate(item.createTime)}>
+                              {beautifyTime(item.createTime)}
+                            </span>
+                          }
                         />
                       </Col>
                     </Row>
                   </div>
                 </Card>
               </Col>
-            </Row>
-          ))}
+            ))}
+          </Row>
           <If condition={!policies || policies.length == 0}>
             <Empty
               style={{ minHeight: '400px' }}

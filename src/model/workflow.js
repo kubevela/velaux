@@ -31,7 +31,7 @@ export default {
     },
   },
   effects: {
-    *getWrokflowList(action, { call, put }) {
+    *getWorkflowList(action, { call, put }) {
       const result = yield call(listWorkFlow, action.payload);
       yield put({
         type: 'updateWorkflow',
