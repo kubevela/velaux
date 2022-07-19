@@ -139,10 +139,8 @@ class ApplicationRevisionList extends React.Component<Props, State> {
         />
         <Pagination
           locale={locale().Pagination}
-          className="revison-pagenation"
-          hideOnlyOnePage={true}
+          className="revision-pagination text-align-right"
           total={this.state.revisionsListTotal}
-          size="small"
           pageSize={this.state.pageSize}
           current={this.state.page}
           onChange={this.handleChange}

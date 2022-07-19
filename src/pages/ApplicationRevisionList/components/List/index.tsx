@@ -95,13 +95,17 @@ class TableList extends Component<Props, State> {
         cell: (v: string, i: number, record: ApplicationRevision) => {
           const findObj = statusList.find((item) => item.value === v);
           if (findObj) {
-            return (
-              <div title={record.reason}>
+            const show = (
+              <div>
                 {v === 'failure' && <span className="circle circle-failure" />}
                 {v === 'terminated' && <span className="circle circle-warning" />}
                 <Translation>{findObj.label}</Translation>
               </div>
             );
+            if (record.reason) {
+              return <Balloon trigger={show}>{record.reason}</Balloon>;
+            }
+            return show;
           }
           return '';
         },
