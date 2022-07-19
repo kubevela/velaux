@@ -6,7 +6,7 @@ ENV VERSION=${VERSION}
 RUN apk add --no-cache git && yarn install && yarn build
 RUN rm -rf /app/velaux/build/mock
 
-FROM nginx:1.21
+FROM nginx:1.23
 ARG GITVERSION
 COPY --from=builder /app/velaux/build /usr/share/nginx/html
 COPY web.conf /etc/nginx/nginx.conf

@@ -1,4 +1,4 @@
-FROM nginx:1.21
+FROM nginx:1.23
 
 COPY build /usr/share/nginx/html
 COPY web.conf /etc/nginx/nginx.conf
