@@ -33,7 +33,6 @@ import {
 } from '../../api/observation';
 import type { Endpoint, AppliedResource } from '../../interface/observation';
 import type { Target } from '../../interface/target';
-import { getLink } from '../../utils/utils';
 import { deployApplication } from '../../api/application';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
@@ -364,11 +363,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       componentName,
       deployLoading,
     } = this.state;
-    const gatewayIPs: any = [];
-    endpoints?.map((endpointObj) => {
-      const item = getLink(endpointObj);
-      gatewayIPs.push(item);
-    });
     let componentStatus = applicationStatus?.services;
     if (componentName) {
       componentStatus = componentStatus?.filter((item) => item.name == componentName);
@@ -385,7 +379,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             envName={envName}
             appName={appName}
             disableStatusShow={true}
-            gatewayIPs={gatewayIPs}
+            endpoints={endpoints}
             applicationDetail={applicationDetail}
             applicationStatus={applicationStatus}
             components={components}
