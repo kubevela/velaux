@@ -11,12 +11,14 @@ import {
   getComponentDefinitions,
   deleteApplicationPlan,
   deletePolicy,
+  getPolicyDetail,
 } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
 import { routerRedux } from 'dva/router';
 import Item from '../../components/Item';
 import TraitDialog from './components/TraitDialog';
+import type { ApplicationPolicyDetail } from '../../interface/application';
 import type {
   ApplicationDetail,
   Trait,
@@ -40,6 +42,9 @@ import i18n from '../../i18n';
 import { Link } from 'dva/router';
 import Permission from '../../components/Permission';
 import PolicyList from './components/PolicyList';
+import PolicyDialog from './components/PolicyDialog';
+import type { APIError } from '../../utils/errors';
+import { handleError } from '../../utils/errors';
 
 const { Row, Col } = Grid;
 
@@ -79,6 +84,7 @@ type State = {
   componentDefinitions: [];
   visiblePolicy: boolean;
   showPolicyName?: string;
+  policyDetail?: ApplicationPolicyDetail;
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -266,6 +272,10 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
+  onAddPolicy = () => {
+    this.setState({ visiblePolicy: true });
+  };
+
   onDeleteComponent = async (componentName: string) => {
     const { appName } = this.state;
     const params = {
@@ -375,10 +385,45 @@ class ApplicationConfig extends Component<Props, State> {
 
   onDeletePolicy = (policyName: string) => {
     const { appName } = this.state;
-    deletePolicy({ appName: appName, policyName: policyName }).then((re) => {
-      if (re) {
-        Message.success('Application policy deleted successfully');
-        this.loadApplicationPolicies();
+    deletePolicy({ appName: appName, policyName: policyName })
+      .then((re) => {
+        if (re) {
+          Message.success('Application policy deleted successfully');
+          this.loadApplicationPolicies();
+        }
+      })
+      .catch((err: APIError) => {
+        if (err.BusinessCode === 10026) {
+          Dialog.confirm({
+            type: 'confirm',
+            content: (
+              <Translation>
+                This policy is being used by workflow, do you want to force delete it?
+              </Translation>
+            ),
+            onOk: () => {
+              deletePolicy({ appName: appName, policyName: policyName, force: true }).then(
+                (res: any) => {
+                  if (res) {
+                    Message.success('Application policy deleted successfully');
+                    this.loadApplicationPolicies();
+                  }
+                },
+              );
+            },
+            locale: locale().Dialog,
+          });
+        } else {
+          handleError(err);
+        }
+      });
+  };
+
+  onEditPolicy = (policyName: string) => {
+    const { appName } = this.state;
+    getPolicyDetail({ appName, policyName }).then((res: ApplicationPolicyDetail) => {
+      if (res) {
+        this.setState({ policyDetail: res, visiblePolicy: true });
       }
     });
   };
@@ -410,6 +455,7 @@ class ApplicationConfig extends Component<Props, State> {
       temporaryTraitList,
       isEditComponent,
       componentDefinitions,
+      visiblePolicy,
     } = this.state;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     return (
@@ -570,18 +616,35 @@ class ApplicationConfig extends Component<Props, State> {
                       <Translation>Policies</Translation>
                     </span>
                   }
-                  actions={[]}
+                  actions={[
+                    <Permission
+                      request={{
+                        resource: `project:${projectName}/application:${applicationDetail?.name}/policy:*`,
+                        action: 'create',
+                      }}
+                      project={projectName}
+                    >
+                      <a
+                        key={'add'}
+                        className="font-size-14 font-weight-400"
+                        onClick={this.onAddPolicy}
+                      >
+                        <Translation>New Policy</Translation>
+                      </a>
+                    </Permission>,
+                  ]}
                 />
               </Col>
             </Row>
             <PolicyList
               policies={policies}
               envbinding={envbinding}
+              applicationDetail={applicationDetail}
               onDeletePolicy={(name: string) => {
                 this.onDeletePolicy(name);
               }}
               onShowPolicy={(name: string) => {
-                console.log(name);
+                this.onEditPolicy(name);
               }}
             />
           </Col>
@@ -680,6 +743,22 @@ class ApplicationConfig extends Component<Props, State> {
             componentDefinitions={componentDefinitions}
             onComponentClose={this.onComponentClose}
             onComponentOK={this.onComponentOK}
+          />
+        </If>
+        <If condition={visiblePolicy}>
+          <PolicyDialog
+            project={applicationDetail?.project?.name || ''}
+            visible={visiblePolicy}
+            appName={appName}
+            envbinding={envbinding || []}
+            workflows={workflows || []}
+            onClose={() => {
+              this.setState({ visiblePolicy: false });
+            }}
+            onOK={() => {
+              this.loadApplicationPolicies();
+              this.setState({ visiblePolicy: false });
+            }}
           />
         </If>
       </div>

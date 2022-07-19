@@ -13,7 +13,6 @@ export const CustomSelect = (props: CustomSelectProps) => {
   const dataSource = [...props.dataSource];
   if (inputValue != '') {
     dataSource.unshift({ label: inputValue, value: inputValue });
-    console.log(dataSource, props.dataSource);
   }
   return (
     <Select

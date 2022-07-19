@@ -55,11 +55,7 @@ class TriggerList extends Component<Props, State> {
       return;
     }
     const { appName } = this.props;
-    const params = {
-      appName,
-      componentName,
-    };
-    getApplicationComponent(params).then((res: ApplicationComponent) => {
+    getApplicationComponent(appName, componentName).then((res: ApplicationComponent) => {
       if (res) {
         this.setState({
           component: res,

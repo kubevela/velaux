@@ -13,7 +13,7 @@ export interface DefinitionBase {
   description?: string;
   icon?: string;
   status: string;
-  lables: any;
+  labels: Record<string, string>;
   component: any;
   workloadType: string;
 }

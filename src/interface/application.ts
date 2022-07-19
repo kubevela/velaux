@@ -270,6 +270,8 @@ export interface Workflow {
   description?: string;
   default: boolean;
   createTime?: string;
+  enable: boolean;
+  steps?: WorkflowStep[];
 }
 
 export interface UpdateComponentProperties {
@@ -317,6 +319,8 @@ export interface WorkflowStep {
   alias: string;
   description?: string;
   type: string;
+  dependsOn: string[];
+  properties: string;
 }
 
 export interface ApplicationComponentConfig {
@@ -387,7 +391,7 @@ export interface ApplicationCompareRequest {
 }
 
 export interface ApplicationDryRunRequest {
-  dryRunType: 'APP' | 'Revision';
+  dryRunType: 'APP' | 'REVISION';
   env?: string;
   workflow: string;
   version?: string;
@@ -397,4 +401,19 @@ export interface ApplicationDryRunResponse {
   yaml: string;
   success: boolean;
   message?: string;
+}
+
+export interface CreatePolicyRequest {
+  name: string;
+  description?: string;
+  type: string;
+  alias?: string;
+  properties: string;
+  envName?: string;
+  workflowPolicyBind?: WorkflowPolicyBinding[];
+}
+
+export interface WorkflowPolicyBinding {
+  name: string;
+  steps: string[];
 }

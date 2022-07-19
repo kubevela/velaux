@@ -52,7 +52,21 @@ class StructItem extends React.Component<StructItemProps> {
     }
     params.map((p) => {
       if (!p.disable && p.uiType != 'Ignore' && p.uiType != 'InnerGroup') {
-        count += 1;
+        if (
+          [
+            'Structs',
+            'Strings',
+            'CertBase64',
+            'Group',
+            'ImageInput',
+            'K8sObjectsCode',
+            'KV',
+          ].indexOf(p.uiType) > -1
+        ) {
+          count += 3;
+        } else {
+          count += 1;
+        }
       }
       if (!p.disable && p.subParameters) {
         count += this.getParamCount(p.subParameters);

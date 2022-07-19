@@ -19,6 +19,7 @@ import { checkName } from '../../../utils/common';
 import './index.less';
 import DrawerWithFooter from '../../../components/Drawer';
 import locale from '../../../utils/locale';
+import i18n from '../../../i18n';
 
 type Props = {
   createOrUpdateNode: (data: any) => void;
@@ -280,14 +281,14 @@ class WorkflowForm extends Component<Props, State> {
                             <Icon
                               style={{ color: '#1b58f4' }}
                               type={'display-code'}
-                              title={'Switch to code mode'}
+                              title={i18n.t('Switch to the coding mode')}
                             />
                           </If>
                           <If condition={propertiesMode === 'code'}>
                             <Icon
                               style={{ color: '#1b58f4' }}
                               type={'laptop'}
-                              title={'Switch to native mode'}
+                              title={i18n.t('Switch to the native mode')}
                             />
                           </If>
                         </Button>
@@ -298,7 +299,7 @@ class WorkflowForm extends Component<Props, State> {
                         rules: [
                           {
                             validator: validator,
-                            message: 'Please check workflow deploy properties',
+                            message: i18n.t('Please check the properties of the workflow step'),
                           },
                         ],
                       })}
