@@ -575,5 +575,6 @@
   "PVC Retain": "存储保留",
   "This policy allows retaining the PVC resource after recycling the application.": "此策略将在应用回收后保留 PVC 资源，可以进行不丢失数据的应用计算资源回收。",
   "Replicas Scalable": "实例可伸缩",
-  "This policy allows replicas of workloads to be changed, such as working with HPA.": "此策略允许工作负载的副本数被其他控制器修改，例如与 HPA 协同工作。"
+  "This policy allows replicas of workloads to be changed, such as working with HPA.": "此策略允许工作负载的副本数被其他控制器修改，例如与 HPA 协同工作。",
+  "This policy is being used by workflow, do you want to force delete it?": "此策略正被工作流引用，是否强制删除它？"
 }

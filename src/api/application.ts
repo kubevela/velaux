@@ -117,9 +117,12 @@ export function getPolicyDetail(params: { appName: string; policyName: string })
   return get(gurl, params).then((res) => res);
 }
 
-export function deletePolicy(params: { appName: string; policyName: string }) {
+export function deletePolicy(params: { appName: string; policyName: string; force?: boolean }) {
   const gurl = `${application}/${params.appName}/policies/${params.policyName}`;
-  return rdelete(gurl, params).then((res) => res);
+  if (params.force) {
+    return rdelete(gurl, { params: { force: true } }, true).then((res) => res);
+  }
+  return rdelete(gurl, {}, true).then((res) => res);
 }
 
 export function createApplicationTemplate(params: any) {

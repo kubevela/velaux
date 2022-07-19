@@ -43,6 +43,8 @@ import { Link } from 'dva/router';
 import Permission from '../../components/Permission';
 import PolicyList from './components/PolicyList';
 import PolicyDialog from './components/PolicyDialog';
+import type { APIError } from '../../utils/errors';
+import { handleError } from '../../utils/errors';
 
 const { Row, Col } = Grid;
 
@@ -383,12 +385,38 @@ class ApplicationConfig extends Component<Props, State> {
 
   onDeletePolicy = (policyName: string) => {
     const { appName } = this.state;
-    deletePolicy({ appName: appName, policyName: policyName }).then((re) => {
-      if (re) {
-        Message.success('Application policy deleted successfully');
-        this.loadApplicationPolicies();
-      }
-    });
+    deletePolicy({ appName: appName, policyName: policyName })
+      .then((re) => {
+        if (re) {
+          Message.success('Application policy deleted successfully');
+          this.loadApplicationPolicies();
+        }
+      })
+      .catch((err: APIError) => {
+        if (err.BusinessCode === 10026) {
+          Dialog.confirm({
+            type: 'confirm',
+            content: (
+              <Translation>
+                This policy is being used by workflow, do you want to force delete it?
+              </Translation>
+            ),
+            onOk: () => {
+              deletePolicy({ appName: appName, policyName: policyName, force: true }).then(
+                (res: any) => {
+                  if (res) {
+                    Message.success('Application policy deleted successfully');
+                    this.loadApplicationPolicies();
+                  }
+                },
+              );
+            },
+            locale: locale().Dialog,
+          });
+        } else {
+          handleError(err);
+        }
+      });
   };
 
   onEditPolicy = (policyName: string) => {
