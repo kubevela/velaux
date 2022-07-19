@@ -25,7 +25,6 @@ import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import StatusShow from '../../components/StatusShow';
 import locale from '../../utils/locale';
-import { getLink } from '../../utils/utils';
 import i18n from '../../i18n';
 import querystring from 'query-string';
 import type { LoginUserInfo } from '../../interface/user';
@@ -511,11 +510,6 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         </div>
       );
     };
-    const gatewayIPs: any = [];
-    endpoints?.map((endpointObj) => {
-      const item = getLink(endpointObj);
-      gatewayIPs.push(item);
-    });
     const {
       params: { envName, appName },
     } = this.props.match;
@@ -535,7 +529,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           components={components}
           envName={envName}
           appName={appName}
-          gatewayIPs={gatewayIPs}
+          endpoints={endpoints}
           updateEnvs={() => {
             this.loadApplicationEnvbinding();
             this.loadApplicationWorkflows();

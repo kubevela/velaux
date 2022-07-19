@@ -21,6 +21,10 @@ import { Link, routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import Permission from '../../../../components/Permission';
 import { ApplicationDiff } from '../../../../components/ApplicationDiff';
+import type { Endpoint } from '../../../../interface/observation';
+import { getLink } from '../../../../utils/utils';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { AiOutlineCopy } from 'react-icons/ai';
 
 export type GatewayIP = {
   ip: string;
@@ -37,7 +41,7 @@ type Props = {
   appName: string;
   envbinding?: EnvBinding;
   disableStatusShow?: boolean;
-  gatewayIPs?: string[];
+  endpoints?: Endpoint[];
   updateQuery: (params: { target?: string; component?: string }) => void;
   updateEnvs: () => void;
   refresh: () => void;
@@ -161,7 +165,7 @@ class Header extends Component<Props, State> {
     const { appName, envName, components, applicationDetail } = this.props;
     const { recycleLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff } =
       this.state;
-    const { targets, applicationStatus, gatewayIPs, disableStatusShow } = this.props;
+    const { targets, applicationStatus, endpoints, disableStatusShow } = this.props;
     const targetOptions = (targets || []).map((item: Target) => ({
       label: item.alias || item.name,
       value: item.name,
@@ -250,7 +254,7 @@ class Header extends Component<Props, State> {
               <Icon type="refresh" />
             </Button>
 
-            <If condition={gatewayIPs && gatewayIPs.length > 0}>
+            <If condition={endpoints && endpoints.length > 0}>
               <Dropdown
                 trigger={
                   <Button style={{ marginLeft: '16px' }} type="secondary">
@@ -259,13 +263,34 @@ class Header extends Component<Props, State> {
                 }
               >
                 <Menu>
-                  {gatewayIPs?.map((item) => {
-                    if (item) {
+                  {endpoints?.map((item) => {
+                    const linkURL = getLink(item);
+                    if (item && !item.endpoint.inner) {
                       return (
-                        <Menu.Item key={item}>
-                          <a target="_blank" href={item}>
-                            {item}
+                        <Menu.Item key={linkURL}>
+                          <a style={{ color: '#1b58f4' }} target="_blank" href={linkURL}>
+                            {linkURL}
                           </a>
+                        </Menu.Item>
+                      );
+                    }
+                  })}
+                  {endpoints?.map((item) => {
+                    const linkURL = getLink(item);
+                    if (item && item.endpoint.inner) {
+                      return (
+                        <Menu.Item key={linkURL}>
+                          <span>
+                            {linkURL}(Inner)
+                            <CopyToClipboard
+                              onCopy={() => {
+                                Message.success('Copied successfully');
+                              }}
+                              text={linkURL}
+                            >
+                              <AiOutlineCopy size={14} />
+                            </CopyToClipboard>
+                          </span>
                         </Menu.Item>
                       );
                     }
