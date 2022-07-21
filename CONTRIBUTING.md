@@ -33,4 +33,4 @@ When you're ready to contribute, it's time to [Create a pull request](https://gi
 
 ### Report bugs / Suggest enhancements / Answering questions etc.
 
-velaux follows the KubeVela [CONTRIBUTING Guide](https://github.com/oam-dev/kubevela/blob/master/CONTRIBUTING.md)
+VelaUX follows the KubeVela [CONTRIBUTING Guide](https://github.com/oam-dev/kubevela/blob/master/CONTRIBUTING.md)
