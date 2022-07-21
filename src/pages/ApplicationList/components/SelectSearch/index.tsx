@@ -159,8 +159,13 @@ class SelectSearch extends React.Component<Props, State> {
             className="item"
           />
         </Col>
-        <Col xl={6}>
-          <div className="show-mode">
+        <Col xl={6} className="flexboth">
+          <div className="padding16">
+            <Button type={'secondary'} onClick={() => this.getApplications()}>
+              <Icon type="refresh" />
+            </Button>
+          </div>
+          <div className="show-mode padding16">
             <Button.Group>
               <Button
                 type={showMode == 'card' ? 'primary' : 'secondary'}

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Icon } from '@b-design/ui';
+import { Card, Icon } from '@b-design/ui';
 import WorkflowStep from '../WorkflowStep';
 import type { WorkflowBase } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
@@ -54,24 +54,33 @@ class WorkflowSlider extends Component<Props, State> {
     const { records, appName } = this.props;
     const { activeValue } = this.state;
     let recordItem: WorkflowBase = { name: '', namespace: '', workflowName: '' };
-    if (Array.isArray(records) && records.length - 1 > activeValue) {
-      recordItem = records[0];
-    } else {
-      recordItem = records[activeValue];
+    if (Array.isArray(records)) {
+      if (records.length - 1 < activeValue || activeValue < 0) {
+        recordItem = records[0];
+      } else {
+        recordItem = records[activeValue];
+      }
+    }
+    if (!recordItem) {
+      <Card className="slide-workflow-wrapper" contentHeight={'auto'} />;
     }
     return (
-      <div className="slide--workflow-wraper">
-        <div className="slide-hearder">
-          <span className="slide-hearder-name">
+      <Card
+        className="slide-workflow-wrapper"
+        contentHeight={'auto'}
+        id={recordItem.applicationRevision}
+      >
+        <div className="slide-header">
+          <span className="slide-header-name">
             {recordItem.workflowAlias || recordItem.workflowName}({recordItem.status})
           </span>
-          <span className="slide-hearder-version">
-            <Translation>Deploy Version</Translation>: {recordItem.applicationRevision}
+          <span className="slide-header-version">
+            <Translation>Revision</Translation>: {recordItem.applicationRevision}
           </span>
         </div>
 
         <If condition={Array.isArray(records) && records.length > 1}>
-          <div className="slide-icon-wraper">
+          <div className="slide-icon-wrapper">
             <span onClick={this.handleLeftClick}>
               <Icon type="arrow-left" size="xxl" className="arrow-left" />
             </span>
@@ -90,7 +99,7 @@ class WorkflowSlider extends Component<Props, State> {
           recordItem={recordItem}
           records={records}
         />
-      </div>
+      </Card>
     );
   }
 }

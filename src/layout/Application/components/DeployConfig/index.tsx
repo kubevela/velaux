@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { Button, Dialog, Message, Radio } from '@b-design/ui';
-import type { ApplicationDryRunResponse, Workflow } from '../../../../interface/application';
+import type {
+  ApplicationDetail,
+  ApplicationDryRunResponse,
+  Workflow,
+} from '../../../../interface/application';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import './index.less';
@@ -15,6 +19,7 @@ const { Group: RadioGroup } = Radio;
 
 interface Props {
   appName: string;
+  applicationDetail: ApplicationDetail;
   onClose: () => void;
   onOK: (workflowName?: string, force?: boolean) => void;
   workflows?: Workflow[];
@@ -108,7 +113,7 @@ class DeployConfigDialog extends Component<Props, State> {
   };
 
   render() {
-    const { workflows, onClose } = this.props;
+    const { workflows, onClose, applicationDetail } = this.props;
     const {
       workflowName,
       dryRunLoading,
@@ -117,6 +122,8 @@ class DeployConfigDialog extends Component<Props, State> {
       dryRunResultState,
       dryRunMessage,
     } = this.state;
+    const sourceOfTrust =
+      applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
     return (
       <React.Fragment>
         <Dialog
@@ -141,6 +148,14 @@ class DeployConfigDialog extends Component<Props, State> {
             </div>
           }
         >
+          <If condition={sourceOfTrust === 'from-k8s-resource'}>
+            <Message type="warning" style={{ marginBottom: '16px' }}>
+              <Translation>
+                Once deployed, VelaUX hosts this application and no longer syncs the configuration
+                from the cluster.
+              </Translation>
+            </Message>
+          </If>
           <RadioGroup value={workflowName} onChange={this.onChange}>
             {workflows?.map((workflow) => {
               return (

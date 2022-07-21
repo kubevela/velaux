@@ -13,9 +13,11 @@
 }
 
 .list-warper {
+  height: calc(100% - 80px);
+  min-height: 300px;
   padding: 0 8px;
   .box {
-    min-height: 400px;
+    height: 100%;
     background: #fff;
     .box-item {
       margin-bottom: 4px;
@@ -23,5 +25,11 @@
         min-height: 80px;
       }
     }
+  }
+}
+.app-spec {
+  display: flex;
+  .app-spec {
+    align-self: stretch;
   }
 }

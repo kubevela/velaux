@@ -55,7 +55,7 @@ class PolicyList extends Component<Props, State> {
         <div className="box">
           <Row wrap={true}>
             {(policies || []).map((item: ApplicationPolicyBase) => (
-              <Col m={24} key={item.type} className="box-item">
+              <Col span={24} key={item.type} className="box-item">
                 <Card
                   free={true}
                   style={{ padding: '16px' }}

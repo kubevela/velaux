@@ -47,8 +47,8 @@ class Hearder extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { t } = this.props;
-    const envPlacehole = t('Select Environment').toString();
-    const statusPlacehole = t('Status select').toString();
+    const envPlaceholder = t('Select Environment').toString();
+    const statusPlaceholder = t('Select Status').toString();
     const { envValue, statusValue } = this.state;
     const { statusList, envBinding } = this.props;
     const envBinds = (envBinding || []).map((item: { name: string; alias?: string }) => ({
@@ -61,10 +61,9 @@ class Hearder extends React.Component<Props, State> {
           <Select
             locale={locale().Select}
             mode="single"
-            size="small"
             onChange={this.handleChangeEnv}
             dataSource={envBinds}
-            placeholder={envPlacehole}
+            placeholder={envPlaceholder}
             className="item"
             hasClear
             value={envValue}
@@ -75,10 +74,9 @@ class Hearder extends React.Component<Props, State> {
           <Select
             locale={locale().Select}
             mode="single"
-            size="small"
             onChange={this.handleChangeStatus}
             dataSource={statusList}
-            placeholder={statusPlacehole}
+            placeholder={statusPlaceholder}
             className="item"
             hasClear
             value={statusValue}

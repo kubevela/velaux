@@ -109,19 +109,33 @@ class Header extends Component<Props, State> {
   };
 
   recycleEnv = async () => {
+    const { applicationDetail, envName, refresh, dispatch } = this.props;
+    const sourceOfTrust =
+      applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
+
+    let content = 'Are you sure you want to recycle the application form this environment?';
+    if (sourceOfTrust === 'from-k8s-resource') {
+      content =
+        'This application is synchronizing from cluster, recycling from this environment means this application will be deleted.';
+    }
     Dialog.confirm({
-      content: i18n.t('Are you sure you want to reclaim the current environment?'),
+      needWrapper: true,
+      content: <span>{i18n.t(content)}</span>,
       onOk: () => {
-        const { applicationDetail, envName, refresh } = this.props;
         if (applicationDetail) {
-          recycleApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then(
-            (re) => {
-              if (re) {
-                Message.success(i18n.t('Recycle application environment success'));
+          recycleApplicationEnvbinding({
+            appName: applicationDetail.name,
+            envName: envName,
+          }).then((re) => {
+            if (re) {
+              Message.success(i18n.t('Recycle application environment success'));
+              if (sourceOfTrust === 'from-k8s-resource') {
+                dispatch(routerRedux.push(`/applications`));
+              } else {
                 refresh();
               }
-            },
-          );
+            }
+          });
         }
       },
       locale: locale().Dialog,
