@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Button, Card, Message, Dialog } from '@b-design/ui';
+import { Grid, Button, Card, Message, Dialog, Balloon, Tag } from '@b-design/ui';
 import './index.less';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
@@ -31,7 +31,7 @@ import type {
   ApplicationPolicyBase,
 } from '../../interface/application';
 
-import { momentDate } from '../../utils/common';
+import { beautifyTime, momentDate } from '../../utils/common';
 import locale from '../../utils/locale';
 import TriggerList from './components/TriggerList';
 import TriggerDialog from './components/TriggerDialog';
@@ -460,64 +460,49 @@ class ApplicationConfig extends Component<Props, State> {
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     return (
       <div>
-        <Row wrap={true}>
-          <Col xl={12} xs={24} style={{ padding: '0 16px' }}>
-            <Message
-              type="notice"
-              title={i18n.t(
-                'Note that baseline configuration changes will be applied to all environments',
-              )}
-            />
-          </Col>
-          <Col xl={12} xs={24} style={{ padding: '0 16px' }} className="flexright">
-            <Permission
-              request={{
-                resource: `project:${projectName}/application/:${appName}`,
-                action: 'delete',
-              }}
-              project={projectName}
-            >
-              <Button
-                className="danger-btn"
-                style={{ marginRight: '16px' }}
-                onClick={this.onDeleteApplication}
-                type="secondary"
-              >
-                <Translation>Remove</Translation>
-              </Button>
-            </Permission>
-            <Permission
-              request={{
-                resource: `project:${projectName}/application/:${appName}`,
-                action: 'update',
-              }}
-              project={projectName}
-            >
-              <Button onClick={this.editAppPlan} type="secondary">
-                <Translation>Edit</Translation>
-              </Button>
-            </Permission>
-          </Col>
-        </Row>
         <Row>
-          <Col span={24} className="padding16">
-            <Card locale={locale().Card} contentHeight="auto">
+          <Col span={24}>
+            <Card
+              locale={locale().Card}
+              contentHeight="auto"
+              title={
+                applicationDetail && `${applicationDetail.name}(${applicationDetail.alias || '-'})`
+              }
+              subTitle={applicationDetail?.description}
+            >
               <Row wrap={true}>
-                <Col m={12} xs={24}>
-                  <Item
-                    label={<Translation>Name</Translation>}
-                    value={applicationDetail && applicationDetail.name}
-                  />
+                <Col xxs={24} className="flexright" style={{ marginBottom: '16px' }}>
+                  <div>
+                    <Permission
+                      request={{
+                        resource: `project:${projectName}/application/:${appName}`,
+                        action: 'delete',
+                      }}
+                      project={projectName}
+                    >
+                      <Button
+                        className="danger-btn"
+                        style={{ marginRight: '16px' }}
+                        onClick={this.onDeleteApplication}
+                        type="secondary"
+                      >
+                        <Translation>Remove</Translation>
+                      </Button>
+                    </Permission>
+                    <Permission
+                      request={{
+                        resource: `project:${projectName}/application/:${appName}`,
+                        action: 'update',
+                      }}
+                      project={projectName}
+                    >
+                      <Button onClick={this.editAppPlan} type="secondary">
+                        <Translation>Edit</Translation>
+                      </Button>
+                    </Permission>
+                  </div>
                 </Col>
-                <Col m={12} xs={24}>
-                  <Item
-                    label={<Translation>Alias</Translation>}
-                    value={applicationDetail && applicationDetail.alias}
-                  />
-                </Col>
-              </Row>
-              <Row wrap={true}>
-                <Col m={12} xs={24}>
+                <Col l={8} xxs={24}>
                   <Item
                     label={<Translation>Project</Translation>}
                     value={
@@ -530,33 +515,59 @@ class ApplicationConfig extends Component<Props, State> {
                   />
                 </Col>
 
-                <Col m={12} xs={24}>
-                  <Item
-                    label={<Translation>Description</Translation>}
-                    value={applicationDetail && applicationDetail.description}
-                  />
-                </Col>
-              </Row>
-              <Row wrap={true}>
-                <Col m={12} xs={24}>
+                <Col l={8} xxs={24}>
                   <Item
                     label={<Translation>Create Time</Translation>}
-                    value={momentDate((applicationDetail && applicationDetail.createTime) || '')}
+                    value={
+                      <Balloon
+                        trigger={
+                          <span>
+                            {beautifyTime(applicationDetail && applicationDetail.createTime)}
+                          </span>
+                        }
+                      >
+                        {momentDate(applicationDetail && applicationDetail.createTime) || '-'}
+                      </Balloon>
+                    }
                   />
                 </Col>
-                <Col m={12} xs={24}>
+
+                <Col l={8} xxs={24}>
                   <Item
                     label={<Translation>Update Time</Translation>}
-                    value={momentDate((applicationDetail && applicationDetail.updateTime) || '')}
+                    value={
+                      <Balloon
+                        trigger={
+                          <span>
+                            {beautifyTime(applicationDetail && applicationDetail.updateTime)}
+                          </span>
+                        }
+                      >
+                        {momentDate(applicationDetail && applicationDetail.updateTime) || '-'}
+                      </Balloon>
+                    }
                   />
+                </Col>
+                <Col xxs={24}>
+                  {applicationDetail?.labels &&
+                    Object.keys(applicationDetail?.labels).map((key) => {
+                      if (applicationDetail?.labels) {
+                        return (
+                          <Tag
+                            style={{ margin: '4px' }}
+                            color="blue"
+                          >{`${key}=${applicationDetail?.labels[key]}`}</Tag>
+                        );
+                      }
+                    })}
                 </Col>
               </Row>
             </Card>
           </Col>
         </Row>
 
-        <Row wrap={true}>
-          <Col xl={8} xs={24}>
+        <Row wrap={true} className="app-spec">
+          <Col xl={8} xs={24} className="app-spec-item">
             <Row>
               <Col span={24} className="padding16">
                 <Title
@@ -607,7 +618,7 @@ class ApplicationConfig extends Component<Props, State> {
               changeTraitStats={this.changeTraitStats}
             />
           </Col>
-          <Col xl={8} xs={24}>
+          <Col xl={8} xs={24} className="app-spec-item">
             <Row>
               <Col span={24} className="padding16">
                 <Title
@@ -648,7 +659,7 @@ class ApplicationConfig extends Component<Props, State> {
               }}
             />
           </Col>
-          <Col xl={8} xs={24}>
+          <Col xl={8} xs={24} className="app-spec-item">
             <Row>
               <Col span={24} className="padding16">
                 <Title

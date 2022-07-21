@@ -108,7 +108,7 @@
   "Applications": "应用列表",
   "Applied Resources": "应用资源",
   "Auto-refresh": "自动刷新",
-  "Baseline Config": "基础配置",
+  "Application Config": "应用配置",
   "Bind Environment": "绑定环境",
   "Environment bound successfully": "绑定环境成功",
   "Bucket": "Bucket",
@@ -393,7 +393,6 @@
   "Please check app deploy properties": "请填写应用部署参数",
   "generic for Minio, Amazon S3, Google Cloud Storage, Alibaba Cloud OSS, aws for retrieve credentials from the EC2 service when credentials not specified, default is generic": "",
   "The bucket region, optional": "bucket 所在区，可选",
-  "Note that baseline configuration changes will be applied to all environments": "请注意，基础配置更改后可在所有环境中部署生效",
   "Adjust the number of application instance.": "调整应用实例数",
   "Get more trait type?": "需要更多运维特征？",
   "Set the configuration parameters for the Trait.": "给运维特征配置参数",
@@ -520,7 +519,7 @@
   "Please set a email address for the administrator, it must same as the SSO account.": "请为管理员设置电子邮件地址, 它必须与SSO帐户相同",
   "No dex connector configurations": "没有dex连接器配置",
   "Before enabling SSO, you must add at least one dex connector configuration.": "在启用SSO之前, 必须至少添加一个dex连接器配置.",
-  "Are you sure you want to reclaim the current environment?": "您确定要回收当前环境吗?",
+  "Are you sure you want to recycle the application form this environment?": "您确定要从当前环境回收应用吗?",
   "Are you sure you want to delete the current environment binding?": "是否确实要删除当前环境绑定?",
   "Recycle application environment success": "回收应用程序环境成功",
   "Environment binding deleted successfully": "成功移除环境绑定",
@@ -576,5 +575,8 @@
   "This policy allows retaining the PVC resource after recycling the application.": "此策略将在应用回收后保留 PVC 资源，可以进行不丢失数据的应用计算资源回收。",
   "Replicas Scalable": "实例可伸缩",
   "This policy allows replicas of workloads to be changed, such as working with HPA.": "此策略允许工作负载的副本数被其他控制器修改，例如与 HPA 协同工作。",
-  "This policy is being used by workflow, do you want to force delete it?": "此策略正被工作流引用，是否强制删除它？"
+  "This policy is being used by workflow, do you want to force delete it?": "此策略正被工作流引用，是否强制删除它？",
+  "The application is synchronizing from the cluster.": "该应用正在从集群同步配置和状态",
+  "Once deployed, VelaUX hosts this application and no longer syncs the configuration from the cluster.": "执行部署后，控制台将接管该应用且不再从集群同步配置。",
+  "This application is synchronizing from cluster, recycling from this environment means this application will be deleted.": "该应用正在从集群同步配置，如果回收意味着该应用将被删除"
 }

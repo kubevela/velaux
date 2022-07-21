@@ -10,6 +10,7 @@ import _ from 'lodash';
 import Translation from '../../../../components/Translation';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
+import i18n from '../../../../i18n';
 
 type Props = {
   recordItem: WorkflowBase;
@@ -53,6 +54,14 @@ class WorkflowStep extends Component<Props, State> {
       ele.scrollLeft = Math.ceil(550 / steps.length) * findIdx;
     }
   }
+
+  shouldComponentUpdate(nextProps: Props): boolean {
+    if (nextProps.recordItem.status != this.props.recordItem.status) {
+      this.setState({ hiddenConfirm: false });
+    }
+    return true;
+  }
+
   onResumeApplicationWorkflowRecord = () => {
     const { appName, recordName, workflowName } = this.props;
     const params = {
@@ -84,7 +93,7 @@ class WorkflowStep extends Component<Props, State> {
     rollbackApplicationWorkflowRecord(params)
       .then((re) => {
         if (re) {
-          Message.success('Workflow rollbacked successfully');
+          Message.success(i18n.t('Workflow rollback successfully'));
           this.setState({ hiddenConfirm: true });
         }
       })
@@ -170,7 +179,7 @@ class WorkflowStep extends Component<Props, State> {
     if (isSuspend && currentStep && !hiddenConfirm) {
       const { rollbackLoading, terminateLoading, resumeLoading } = this.state;
       return (
-        <div className="step-confirm-wraper">
+        <div className="step-confirm-wrapper">
           <div className="step-confirm-title">
             <Translation>Needs review before continuing</Translation>
             <Icon
@@ -288,7 +297,7 @@ class WorkflowStep extends Component<Props, State> {
     const isHiddenSlide = this.onHiddenSlide();
     const { recordName } = this.props;
     return (
-      <div id={recordName} className={`workflow-step-wraper ${isHiddenSlide}`}>
+      <div id={recordName} className={`workflow-step-wrapper ${isHiddenSlide}`}>
         {this.getWorkFlowStep()}
       </div>
     );

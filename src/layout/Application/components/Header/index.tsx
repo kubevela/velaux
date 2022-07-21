@@ -34,6 +34,7 @@ interface Props {
   applicationDetail?: ApplicationDetail;
   applicationStatus?: { status?: ApplicationStatus };
   workflows?: Workflow[];
+  dispatch?: (params: any) => void;
 }
 
 interface State {
@@ -62,6 +63,16 @@ class ApplicationHeader extends Component<Props, State> {
     this.setState({ showDeployConfig: true });
   };
 
+  onGetApplicationDetails = async () => {
+    const { appName, dispatch } = this.props;
+    if (dispatch && appName) {
+      dispatch({
+        type: 'application/getApplicationDetail',
+        payload: { appName: appName },
+      });
+    }
+  };
+
   onDeploy = (workflowName?: string, force?: boolean) => {
     const { applicationDetail } = this.props;
     if (applicationDetail) {
@@ -77,12 +88,13 @@ class ApplicationHeader extends Component<Props, State> {
         .then((re) => {
           if (re) {
             Message.success('Application deployed successfully');
+            this.onGetApplicationDetails();
           }
         })
         .catch((err: APIError) => {
           if (err.BusinessCode === 10004) {
             Dialog.confirm({
-              content: 'Workflow is executing. Do you want to force a restart?',
+              content: i18n.t('Workflow is executing. Do you want to force a restart?'),
               onOk: () => {
                 this.onDeploy(workflowName, true);
               },
@@ -143,6 +155,8 @@ class ApplicationHeader extends Component<Props, State> {
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     const item = <Translation>{`app-${activeKey}`}</Translation>;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
+    const sourceOfTrust =
+      applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
     return (
       <div>
         <Row>
@@ -168,6 +182,12 @@ class ApplicationHeader extends Component<Props, State> {
                   .toString()}
               />
             </If>
+            <If condition={sourceOfTrust === 'from-k8s-resource'}>
+              <Message
+                type="warning"
+                title={i18n.t('The application is synchronizing from the cluster.').toString()}
+              />
+            </If>
             <Permission
               request={{
                 resource: `project:${projectName}/application:${
@@ -190,7 +210,7 @@ class ApplicationHeader extends Component<Props, State> {
         </Row>
         <Row wrap={true}>
           <Col xl={12} m={24} s={24} className="padding16">
-            <Card locale={locale().Card} contentHeight="auto">
+            <Card locale={locale().Card} contentHeight="auto" style={{ minHeight: '160px' }}>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
@@ -221,7 +241,7 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
           <Col xl={12} m={24} s={24} className="padding16">
             <If condition={!records || (Array.isArray(records) && records.length === 0)}>
-              <Card locale={locale().Card}>
+              <Card locale={locale().Card} contentHeight="auto" style={{ minHeight: '160px' }}>
                 <Empty
                   message={<Translation>There is no running workflow</Translation>}
                   iconWidth={'30px'}
@@ -234,14 +254,17 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
         </Row>
         <If condition={showDeployConfig}>
-          <DeployConfig
-            onClose={() => {
-              this.setState({ showDeployConfig: false });
-            }}
-            appName={appName}
-            onOK={this.onDeploy}
-            workflows={workflows}
-          />
+          {applicationDetail && (
+            <DeployConfig
+              applicationDetail={applicationDetail}
+              onClose={() => {
+                this.setState({ showDeployConfig: false });
+              }}
+              appName={appName}
+              onOK={this.onDeploy}
+              workflows={workflows}
+            />
+          )}
         </If>
       </div>
     );

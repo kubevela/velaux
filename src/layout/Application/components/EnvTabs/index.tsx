@@ -79,7 +79,7 @@ class TabsContent extends Component<Props, State> {
                 <Tab.Item
                   title={
                     <Link className="item" to={`/applications/${applicationDetail?.name}/config`}>
-                      <Translation>Baseline Config</Translation>
+                      <Translation>Application Config</Translation>
                     </Link>
                   }
                   key={'basisConfig'}
