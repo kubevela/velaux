@@ -375,7 +375,9 @@ export interface ApplicationPolicyBase {
   envName?: string;
 }
 
-export type ApplicationPolicyDetail = ApplicationPolicyBase;
+export interface ApplicationPolicyDetail extends ApplicationPolicyBase {
+  workflowPolicyBind?: WorkflowPolicyBinding[];
+}
 
 export interface ApplicationCompareResponse {
   isDiff: boolean;
@@ -403,14 +405,17 @@ export interface ApplicationDryRunResponse {
   message?: string;
 }
 
-export interface CreatePolicyRequest {
-  name: string;
+export interface UpdatePolicyRequest {
   description?: string;
-  type: string;
   alias?: string;
   properties: string;
   envName?: string;
+  type: string;
   workflowPolicyBind?: WorkflowPolicyBinding[];
+}
+
+export interface CreatePolicyRequest extends UpdatePolicyRequest {
+  name: string;
 }
 
 export interface WorkflowPolicyBinding {

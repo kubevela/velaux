@@ -65,12 +65,11 @@ class PolicyList extends Component<Props, State> {
                 >
                   <div className="policy-list-nav">
                     <div className="policy-list-title">
-                      {/* <a onClick={() => this.props.onShowPolicy(item.name)}> */}
-
-                      <Balloon trigger={<span>{item.alias ? item.alias : item.name}</span>}>
-                        {item.description}
-                      </Balloon>
-                      {/* </a> */}
+                      <a onClick={() => this.props.onShowPolicy(item.name)}>
+                        <Balloon trigger={<span>{item.alias ? item.alias : item.name}</span>}>
+                          {item.description}
+                        </Balloon>
+                      </a>
                     </div>
                     <div className="trigger-list-operation">
                       <Permission

@@ -27,6 +27,7 @@ import type {
   ApplicationCompareRequest,
   ApplicationDryRunRequest,
   CreatePolicyRequest,
+  UpdatePolicyRequest,
 } from '../interface/application';
 
 interface TraitQuery {
@@ -108,6 +109,11 @@ export function getPolicyList(params: { appName: string }) {
 export function createPolicy(appName: string, params: CreatePolicyRequest) {
   const gurl = isMock ? `${createPolicy_mock}` : `${application}/${appName}/policies`;
   return post(gurl, params).then((res) => res);
+}
+
+export function updatePolicy(appName: string, policyName: string, params: UpdatePolicyRequest) {
+  const gurl = `${application}/${appName}/policies/${policyName}`;
+  return put(gurl, params).then((res) => res);
 }
 
 export function getPolicyDetail(params: { appName: string; policyName: string }) {

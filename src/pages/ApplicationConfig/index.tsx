@@ -456,6 +456,7 @@ class ApplicationConfig extends Component<Props, State> {
       isEditComponent,
       componentDefinitions,
       visiblePolicy,
+      policyDetail,
     } = this.state;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     return (
@@ -761,14 +762,15 @@ class ApplicationConfig extends Component<Props, State> {
             project={applicationDetail?.project?.name || ''}
             visible={visiblePolicy}
             appName={appName}
+            policy={policyDetail}
             envbinding={envbinding || []}
             workflows={workflows || []}
             onClose={() => {
-              this.setState({ visiblePolicy: false });
+              this.setState({ visiblePolicy: false, policyDetail: undefined });
             }}
             onOK={() => {
               this.loadApplicationPolicies();
-              this.setState({ visiblePolicy: false });
+              this.setState({ visiblePolicy: false, policyDetail: undefined });
             }}
           />
         </If>
