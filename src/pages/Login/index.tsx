@@ -10,6 +10,7 @@ import LogoWhite from '../../assets/kubevela-logo-white.png';
 
 import i18n from '../../i18n';
 import './index.less';
+import type { DexConfig } from '../../interface/system';
 
 type Props = {
   code: string;
@@ -24,12 +25,7 @@ type Props = {
 };
 
 type State = {
-  dexConfig: {
-    clientID: string;
-    clientSecret: string;
-    issuer: string;
-    redirectURL: string;
-  };
+  dexConfig: DexConfig;
   loginType: string;
   loginErrorMessage: string;
   loginLoading: boolean;
