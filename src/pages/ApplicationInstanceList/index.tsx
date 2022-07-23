@@ -546,79 +546,92 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         />
         <If condition={applicationStatus}>
           <If condition={!onlyShowCloudInstance}>
-            <Table
-              style={{ marginBottom: '32px' }}
-              locale={locale().Table}
-              className="podlist-table-wrapper"
-              size="medium"
-              primaryKey={'primaryKey'}
-              loading={loading}
-              dataSource={podList || []}
-              expandedIndexSimulate
-              expandedRowRender={expandedRowRender}
-              openRowKeys={this.state.openRowKeys}
-              onRowOpen={(openRowKeys: any) => {
-                this.onRowOpen(openRowKeys);
-              }}
-            >
-              {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
-            </Table>
+            <div style={{ overflow: 'auto' }}>
+              <Table
+                style={{ marginBottom: '32px', minWidth: '1000px' }}
+                locale={locale().Table}
+                className="podlist-table-wrapper"
+                size="medium"
+                primaryKey={'primaryKey'}
+                loading={loading}
+                dataSource={podList || []}
+                expandedIndexSimulate
+                expandedRowRender={expandedRowRender}
+                openRowKeys={this.state.openRowKeys}
+                onRowOpen={(openRowKeys: any) => {
+                  this.onRowOpen(openRowKeys);
+                }}
+              >
+                {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
+              </Table>
+            </div>
           </If>
           <If condition={showCloudInstance}>
             <Card title={i18n.t('Instances of the cloud service')}>
-              <Table
-                size="medium"
-                locale={locale().Table}
-                className="customTable"
-                dataSource={cloudInstance}
-                primaryKey={'instanceName'}
-                loading={loading}
-              >
-                <Column
-                  align="left"
-                  title={<Translation>Name</Translation>}
-                  dataIndex="instanceName"
-                  cell={(value: string, index: number, record: CloudInstance) => {
-                    if (record.url) {
-                      return (
-                        <a target="_blank" href={record.url}>
-                          {value}
-                        </a>
-                      );
-                    }
-                    return value;
-                  }}
-                />
-                <Column align="left" title={<Translation>Status</Translation>} dataIndex="status" />
-                <Column
-                  align="left"
-                  title={<Translation>Resource Type</Translation>}
-                  dataIndex="type"
-                />
-                <Column
-                  align="left"
-                  title={<Translation>Create Time</Translation>}
-                  dataIndex="createTime"
-                  cell={(v: string) => {
-                    return <span>{momentDate(v)}</span>;
-                  }}
-                />
-                <Column align="left" title={<Translation>Region</Translation>} dataIndex="region" />
-                <Column
-                  align="left"
-                  title={<Translation>Actions</Translation>}
-                  dataIndex="url"
-                  cell={(value: string, index: number, record: CloudInstance) => {
-                    if (record.instanceName) {
-                      return (
-                        <a target="_blank" href={value}>
-                          <Translation>Console</Translation>
-                        </a>
-                      );
-                    }
-                  }}
-                />
-              </Table>
+              <div style={{ overflow: 'auto' }}>
+                <Table
+                  size="medium"
+                  locale={locale().Table}
+                  style={{ minWidth: '1000px' }}
+                  className="customTable"
+                  dataSource={cloudInstance}
+                  primaryKey={'instanceName'}
+                  loading={loading}
+                >
+                  <Column
+                    align="left"
+                    title={<Translation>Name</Translation>}
+                    dataIndex="instanceName"
+                    cell={(value: string, index: number, record: CloudInstance) => {
+                      if (record.url) {
+                        return (
+                          <a target="_blank" href={record.url}>
+                            {value}
+                          </a>
+                        );
+                      }
+                      return value;
+                    }}
+                  />
+                  <Column
+                    align="left"
+                    title={<Translation>Status</Translation>}
+                    dataIndex="status"
+                  />
+                  <Column
+                    align="left"
+                    title={<Translation>Resource Type</Translation>}
+                    dataIndex="type"
+                  />
+                  <Column
+                    align="left"
+                    title={<Translation>Create Time</Translation>}
+                    dataIndex="createTime"
+                    cell={(v: string) => {
+                      return <span>{momentDate(v)}</span>;
+                    }}
+                  />
+                  <Column
+                    align="left"
+                    title={<Translation>Region</Translation>}
+                    dataIndex="region"
+                  />
+                  <Column
+                    align="left"
+                    title={<Translation>Actions</Translation>}
+                    dataIndex="url"
+                    cell={(value: string, index: number, record: CloudInstance) => {
+                      if (record.instanceName) {
+                        return (
+                          <a target="_blank" href={value}>
+                            <Translation>Console</Translation>
+                          </a>
+                        );
+                      }
+                    }}
+                  />
+                </Table>
+              </div>
             </Card>
           </If>
         </If>
