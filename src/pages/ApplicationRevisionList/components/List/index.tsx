@@ -202,10 +202,11 @@ class TableList extends Component<Props, State> {
       targetName = 'Deployed Application';
     }
     return (
-      <div className="table-version-list  margin-top-20">
+      <div className="table-version-list  margin-top-20" style={{ overflow: 'auto' }}>
         <Table
           locale={locale().Table}
           primaryKey={'version'}
+          style={{ minWidth: '1000px' }}
           className="customTable"
           rowHeight={40}
           dataSource={list}
