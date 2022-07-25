@@ -6,11 +6,14 @@ import { Dialog, Card, Button, Form } from '@b-design/ui';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
 import i18n from '../../i18n';
-import type { SystemInfo } from '../../interface/system';
+import type { DexConfig, SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
 import { updateSystemInfo } from '../../api/config';
 import { checkPermission } from '../../utils/permission';
 import Item from '../Item';
+import { If } from 'tsx-control-statements/components';
+import { getDexConfig } from '../../api/authentication';
+
 const { Col, Row } = Grid;
 
 type Props = {
@@ -24,6 +27,7 @@ type Props = {
 
 type State = {
   businessGuideCode: number;
+  dexConfig?: DexConfig;
 };
 
 type QuickShowRet = {
@@ -49,7 +53,18 @@ class PlatformSetting extends React.Component<Props, State> {
       loginType: this.props.systemInfo.loginType,
       enableCollection: this.props.systemInfo.enableCollection,
     });
+    this.ontDexConfig();
   }
+
+  ontDexConfig = () => {
+    getDexConfig().then((res: DexConfig) => {
+      if (res) {
+        this.setState({
+          dexConfig: res,
+        });
+      }
+    });
+  };
 
   onUpdate = () => {
     this.field.validate((errs: any, values: any) => {
@@ -160,6 +175,17 @@ class PlatformSetting extends React.Component<Props, State> {
     }
   };
 
+  generateDexAddress = () => {
+    if (!this.state.dexConfig) {
+      return;
+    }
+    const { clientID, redirectURL } = this.state.dexConfig;
+    const newRedirectURl = encodeURIComponent(redirectURL);
+    return `${this.field.getValue(
+      'velaAddress',
+    )}/dex/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access&state=velaux`;
+  };
+
   getIssuerDefaultValue = () => {
     const domain = `${window.location.protocol}//${window.location.host}`;
     return domain;
@@ -212,6 +238,11 @@ class PlatformSetting extends React.Component<Props, State> {
                     </Radio>
                   </Radio.Group>
                 </Form.Item>
+                <If condition={this.field.getValue('loginType') == 'dex'}>
+                  <a href={this.generateDexAddress()} target="_blank">
+                    <Translation>Click me to test open the dex page.</Translation>
+                  </a>
+                </If>
               </Col>
               <Col span={24}>
                 <Form.Item

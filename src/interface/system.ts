@@ -24,3 +24,10 @@ export interface UpdateSystemInfo {
   loginType: 'local' | 'dex';
   velaAddress: string;
 }
+
+export interface DexConfig {
+  clientID: string;
+  clientSecret: string;
+  issuer: string;
+  redirectURL: string;
+}
