@@ -70,6 +70,7 @@ export interface ProjectRoleBase {
 
 export interface ProjectMember {
   name: string;
+  alias?: string;
   createTime?: string;
   updateTime?: string;
   userRoles: string[];

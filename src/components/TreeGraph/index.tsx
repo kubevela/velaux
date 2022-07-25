@@ -132,6 +132,13 @@ function renderAppNode(props: TreeGraphProps, id: string, node: GraphNode) {
       <div className={classNames('name')}>
         <span>{node.resource.name}</span>
       </div>
+      <div className={classNames('actions')}>
+        <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
+          <Menu>
+            <Menu.Item onClick={() => props.onResourceDetailClick(node.resource)}>Detail</Menu.Item>
+          </Menu>
+        </Dropdown>
+      </div>
     </div>
   );
   return (
@@ -181,6 +188,13 @@ function renderPodNode(props: TreeGraphProps, id: string, node: GraphNode) {
             <Icon title={i18n.t('Logger')} type="news" />
           </Link>
         </div>
+      </div>
+      <div className={classNames('actions')}>
+        <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
+          <Menu>
+            <Menu.Item onClick={() => props.onResourceDetailClick(node.resource)}>Detail</Menu.Item>
+          </Menu>
+        </Dropdown>
       </div>
       <div className={classNames('additional')}>
         <Tag size="small" color="orange">

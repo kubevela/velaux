@@ -92,6 +92,7 @@ class ApplicationGraph extends React.Component<Props, State> {
       resource: {
         name: env?.appDeployName || application?.name || '',
         kind: 'Application',
+        apiVersion: 'core.oam.dev/v1beta1',
         namespace: env?.appDeployNamespace || '',
       },
       leafNodes: this.buildClusterNode(resources),
