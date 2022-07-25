@@ -1,9 +1,11 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import type {
+  ApplicationPolicyDetail,
   CreatePolicyRequest,
   DefinitionDetail,
   EnvBinding,
+  UpdatePolicyRequest,
   Workflow,
 } from '../../../../interface/application';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -22,6 +24,8 @@ import {
   Loading,
 } from '@b-design/ui';
 import {
+  AiOutlineFileDone,
+  AiOutlineGroup,
   AiOutlineHdd,
   AiOutlineMergeCells,
   AiOutlineOneToOne,
@@ -32,7 +36,12 @@ import { If } from 'tsx-control-statements/components';
 import classNames from 'classnames';
 import Permission from '../../../../components/Permission';
 import locale from '../../../../utils/locale';
-import { createPolicy, detailPolicyDefinition } from '../../../../api/application';
+import {
+  createPolicy,
+  detailPolicyDefinition,
+  getPolicyDefinitions,
+  updatePolicy,
+} from '../../../../api/application';
 import type { DefinitionBase } from '../../../../interface/definitions';
 import { checkName } from '../../../../utils/common';
 import UISchema from '../../../../components/UISchema';
@@ -47,6 +56,7 @@ type Props = {
   project: string;
   workflows: Workflow[];
   envbinding: EnvBinding[];
+  policy?: ApplicationPolicyDetail;
   onClose: () => void;
   onOK: () => void;
   dispatch?: ({}) => {};
@@ -87,6 +97,13 @@ class PolicyDialog extends React.Component<Props, State> {
           title: i18n.t(
             'Set differentiated configurations of the application in different environments.',
           ),
+        },
+        {
+          label: i18n.t('Topology'),
+          type: 'topology',
+          name: 'topology',
+          icon: <AiOutlineGroup size={35} />,
+          title: i18n.t('This policy allows custom the topology by the target'),
         },
         {
           label: i18n.t('Deliver Once'),
@@ -145,25 +162,69 @@ class PolicyDialog extends React.Component<Props, State> {
             ],
           },
         },
-        // {
-        //   label: i18n.t('Custom'),
-        //   name: 'custom',
-        //   type: '',
-        //   icon: <AiOutlineFileDone size={35} />,
-        //   title: i18n.t('Configure other supported policy types.'),
-        // },
+        {
+          label: i18n.t('Custom'),
+          name: 'custom',
+          type: '',
+          icon: <AiOutlineFileDone size={35} />,
+        },
       ],
       createPolicyLoading: false,
       definitionDetailLoading: false,
       propertiesMode: 'native',
     };
-    this.field = new Field(this);
+    this.field = new Field(this, {
+      onChange: (name: string, value: any) => {
+        if (name === 'type') {
+          this.handleTypeChange(value);
+        }
+      },
+    });
     this.uiSchemaRef = React.createRef();
   }
 
   componentDidMount() {
     this.setUISchemaContext();
+    const { policy } = this.props;
+    if (policy) {
+      let selected = false;
+      this.state.items.map((item) => {
+        if (item.type == policy.type && item.properties == undefined) {
+          this.onSelectPolicy(item);
+          selected = true;
+        }
+      });
+      if (!selected) {
+        this.onSelectPolicy({
+          label: i18n.t('Custom'),
+          name: 'custom',
+          type: '',
+          icon: <AiOutlineFileDone size={35} />,
+        });
+      }
+      this.field.setValues({ ...policy });
+      if (Array.isArray(policy.workflowPolicyBind) && policy.workflowPolicyBind.length > 0) {
+        this.field.setValues({
+          workflow: policy.workflowPolicyBind[0].name,
+          steps: policy.workflowPolicyBind[0].steps,
+        });
+      }
+      this.loadPolicyDefinitionDetail(policy.type);
+    }
   }
+
+  handleTypeChange = (value: string) => {
+    this.removeProperties(() => {
+      this.loadPolicyDefinitionDetail(value);
+      this.field.setValue('name', value);
+      this.field.setValue('alias', value);
+    });
+  };
+
+  removeProperties = (callback: () => void) => {
+    this.field.remove('properties');
+    this.setState({ policyDefinitionDetail: undefined }, callback);
+  };
 
   setUISchemaContext = () => {
     const { dispatch, appName, project } = this.props;
@@ -180,7 +241,7 @@ class PolicyDialog extends React.Component<Props, State> {
   };
 
   extButtonList = () => {
-    const { appName, project } = this.props;
+    const { appName, project, policy } = this.props;
     const { createPolicyLoading, selectedPolicyItem } = this.state;
     return (
       <div>
@@ -191,14 +252,26 @@ class PolicyDialog extends React.Component<Props, State> {
           }}
           project={project}
         >
-          <Button
-            disabled={!selectedPolicyItem}
-            type="primary"
-            onClick={this.onSubmitCreate}
-            loading={createPolicyLoading}
-          >
-            {i18n.t('Create')}
-          </Button>
+          <If condition={!policy}>
+            <Button
+              disabled={!selectedPolicyItem}
+              type="primary"
+              onClick={this.onSubmitCreate}
+              loading={createPolicyLoading}
+            >
+              {i18n.t('Create')}
+            </Button>
+          </If>
+          <If condition={policy}>
+            <Button
+              disabled={!selectedPolicyItem}
+              type="primary"
+              onClick={this.onSubmitUpdate}
+              loading={createPolicyLoading}
+            >
+              {i18n.t('Update')}
+            </Button>
+          </If>
         </Permission>
       </div>
     );
@@ -218,23 +291,23 @@ class PolicyDialog extends React.Component<Props, State> {
       if (!appName) {
         return;
       }
-      const { properties, name, alias, description, env, type, workflow, steps } = values;
+      const { properties, name, alias, description, envName, type, workflow, steps } = values;
       let policyType = selectedPolicyItem.type;
-      if (!policyType) {
+      if (type) {
         policyType = type;
       }
       if (!policyType) {
         Message.warning(i18n.t('Please select a policy type first.'));
         return;
       }
-      let envName = env;
-      if (!envName && workflow) {
-        envName = this.getEnvNameFromWorkflow(workflow);
+      let env = envName;
+      if (!env && workflow) {
+        env = this.getEnvNameFromWorkflow(workflow);
       }
       const params: CreatePolicyRequest = {
         name: name,
-        type: selectedPolicyItem.type,
-        envName: envName,
+        type: policyType,
+        envName: env,
         description: description,
         alias: alias,
         properties: JSON.stringify(properties),
@@ -259,6 +332,50 @@ class PolicyDialog extends React.Component<Props, State> {
         });
     });
   };
+
+  onSubmitUpdate = () => {
+    this.field.validate((error: any, values: any) => {
+      if (error) {
+        return;
+      }
+      this.setState({ createPolicyLoading: true });
+      const { appName } = this.props;
+      if (!appName) {
+        return;
+      }
+      const { properties, name, alias, description, envName, type, workflow, steps } = values;
+      let env = envName;
+      if (!env && workflow) {
+        env = this.getEnvNameFromWorkflow(workflow);
+      }
+      const params: UpdatePolicyRequest = {
+        envName: env,
+        description: description,
+        alias: alias,
+        type: type,
+        properties: JSON.stringify(properties),
+      };
+      if (workflow && steps && steps.length > 0) {
+        params.workflowPolicyBind = [
+          {
+            name: workflow,
+            steps: steps,
+          },
+        ];
+      }
+      updatePolicy(appName, name, params)
+        .then((res) => {
+          if (res) {
+            Message.success(i18n.t('Policy updated successfully'));
+            this.props.onOK();
+          }
+        })
+        .finally(() => {
+          this.setState({ createPolicyLoading: false });
+        });
+    });
+  };
+
   onSelectPolicy = (item: PolicyItem) => {
     this.field.reset();
     this.field.setValues({
@@ -316,6 +433,20 @@ class PolicyDialog extends React.Component<Props, State> {
     });
   };
 
+  buildPolicyTypeOptions = () => {
+    const { definitions } = this.state;
+    const options: { label: string; value: string }[] = [];
+    definitions?.map((definition) => {
+      if (definition.name != 'override' && definition.name != 'topology') {
+        options.push({
+          label: definition.name,
+          value: definition.name,
+        });
+      }
+    });
+    return options;
+  };
+
   getEnvNameFromWorkflow = (workflowName: string) => {
     const { workflows } = this.props;
     let envName = '';
@@ -327,7 +458,11 @@ class PolicyDialog extends React.Component<Props, State> {
     return envName;
   };
 
-  loadPolicyDefinitions = () => {};
+  loadPolicyDefinitions = () => {
+    getPolicyDefinitions().then((res) => {
+      this.setState({ definitions: res.definitions });
+    });
+  };
 
   loadPolicyDefinitionDetail = (policyType: string) => {
     this.setState({ definitionDetailLoading: true });
@@ -343,7 +478,7 @@ class PolicyDialog extends React.Component<Props, State> {
   };
 
   render() {
-    const { onClose } = this.props;
+    const { onClose, policy } = this.props;
     const {
       items,
       selectedPolicyItem,
@@ -355,9 +490,10 @@ class PolicyDialog extends React.Component<Props, State> {
       this.uiSchemaRef.current?.validate(callback);
     };
     const init = this.field.init;
+    const span = selectedPolicyItem && selectedPolicyItem?.name == 'custom' ? 8 : 12;
     return (
       <DrawerWithFooter
-        title={i18n.t('New Policy')}
+        title={policy ? i18n.t('Update Policy') : i18n.t('New Policy')}
         placement="right"
         width={800}
         onClose={onClose}
@@ -365,26 +501,48 @@ class PolicyDialog extends React.Component<Props, State> {
       >
         <Form field={this.field}>
           <Card contentHeight="auto" title={i18n.t('Select a policy type')}>
-            <Row wrap={true}>
-              {items.map((item) => {
-                return (
-                  <Col l={6} title={item.title} key={item.name}>
-                    <div
-                      className={classNames('policy-item', {
-                        active: selectedPolicyItem && selectedPolicyItem.name == item.name,
-                      })}
-                      onClick={() => this.onSelectPolicy(item)}
-                    >
-                      <div className="policy-icon">{item.icon}</div>
-                      <div className="policy-name">{item.label}</div>
-                    </div>
-                  </Col>
-                );
-              })}
-            </Row>
+            <If condition={!policy}>
+              <Row wrap={true}>
+                {items.map((item) => {
+                  return (
+                    <Col l={4} title={item.title} key={item.name}>
+                      <div
+                        className={classNames('policy-item', {
+                          active: selectedPolicyItem && selectedPolicyItem.name == item.name,
+                        })}
+                        onClick={() => this.onSelectPolicy(item)}
+                      >
+                        <div className="policy-icon">{item.icon}</div>
+                        <div className="policy-name">{item.label}</div>
+                      </div>
+                    </Col>
+                  );
+                })}
+              </Row>
+            </If>
             <If condition={selectedPolicyItem}>
               <Row wrap={true}>
-                <Col span={12} style={{ padding: '0 8px' }}>
+                <If condition={selectedPolicyItem && selectedPolicyItem?.name == 'custom'}>
+                  <Col span={span} style={{ padding: '0 8px' }}>
+                    <Form.Item label="Policy Type" required>
+                      <Select
+                        {...init('type', {
+                          rules: [
+                            {
+                              required: true,
+                              message: i18n.t('Please must select the policy type.'),
+                            },
+                          ],
+                        })}
+                        hasClear
+                        disabled={policy != undefined}
+                        locale={locale().Select}
+                        dataSource={this.buildPolicyTypeOptions()}
+                      />
+                    </Form.Item>
+                  </Col>
+                </If>
+                <Col span={span} style={{ padding: '0 8px' }}>
                   <Form.Item label={i18n.t('Name')} required={true}>
                     <Input
                       {...init(`name`, {
@@ -392,15 +550,16 @@ class PolicyDialog extends React.Component<Props, State> {
                           {
                             required: true,
                             pattern: checkName,
-                            message: 'Please enter a valid policy name',
+                            message: 'Please input a valid policy name',
                           },
                         ],
                       })}
+                      disabled={policy != undefined}
                       locale={locale().Input}
                     />
                   </Form.Item>
                 </Col>
-                <Col span={12} style={{ padding: '0 8px' }}>
+                <Col span={span} style={{ padding: '0 8px' }}>
                   <Form.Item label={i18n.t('Alias')}>
                     <Input
                       {...init(`alias`, {
@@ -408,7 +567,7 @@ class PolicyDialog extends React.Component<Props, State> {
                           {
                             minLength: 2,
                             maxLength: 64,
-                            message: 'Enter a string of 2 to 64 characters.',
+                            message: 'Input a string of 2 to 64 characters.',
                           },
                         ],
                       })}
@@ -420,7 +579,7 @@ class PolicyDialog extends React.Component<Props, State> {
                   <Form.Item label={<Translation>Description</Translation>}>
                     <Input
                       name="description"
-                      placeholder={i18n.t('Please enter').toString()}
+                      placeholder={i18n.t('Please input the description').toString()}
                       {...init('description', {
                         rules: [
                           {
@@ -434,18 +593,6 @@ class PolicyDialog extends React.Component<Props, State> {
                     />
                   </Form.Item>
                 </Col>
-                <If condition={selectedPolicyItem && selectedPolicyItem?.name == 'custom'}>
-                  <Form.Item label="Custom Type">
-                    <Select
-                      {...init('type', {
-                        rules: [],
-                      })}
-                      hasClear
-                      locale={locale().Select}
-                      dataSource={this.buildEnvironmentOptions()}
-                    />
-                  </Form.Item>
-                </If>
               </Row>
             </If>
             <If condition={selectedPolicyItem?.properties}>
@@ -467,7 +614,7 @@ class PolicyDialog extends React.Component<Props, State> {
                   )}
                 >
                   <Select
-                    {...init('env', {
+                    {...init('envName', {
                       rules: [],
                     })}
                     hasClear
