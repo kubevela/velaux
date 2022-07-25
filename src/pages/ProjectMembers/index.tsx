@@ -190,18 +190,14 @@ class ProjectMembers extends Component<Props, State> {
         key: 'name',
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
-        cell: (v: string) => {
-          return <span>{v}</span>;
+        cell: (v: string, i: number, item: ProjectMember) => {
+          return (
+            <span>
+              {v}({item.alias || '-'})
+            </span>
+          );
         },
       },
-      // {
-      //   key: 'alias',
-      //   title: <Translation>Alias</Translation>,
-      //   dataIndex: 'alias',
-      //   cell: (v: string) => {
-      //     return <span>{v}</span>;
-      //   },
-      // },
       {
         key: 'userRoles',
         title: <Translation>UserRoles</Translation>,
