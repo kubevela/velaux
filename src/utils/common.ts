@@ -1,4 +1,5 @@
 import moment from 'moment';
+import type { AddonBaseStatus } from '../interface/addon';
 
 type Navigator = {
   language: string;
@@ -235,4 +236,17 @@ export function intersectionArray(a?: string[], b?: string[]): string[] | undefi
     return undefined;
   }
   return a.filter((v) => b.indexOf(v) > -1);
+}
+
+export function checkEnabledAddon(addonName: string, enabledAddons?: AddonBaseStatus[]) {
+  if (!enabledAddons) {
+    return false;
+  }
+  const addonNames = enabledAddons.map((addon) => {
+    return addon.name;
+  });
+  if (addonNames.includes(addonName)) {
+    return true;
+  }
+  return false;
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Progress, Message, Icon } from '@b-design/ui';
+import { Table, Progress, Message, Icon, Dialog, Button } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import type { PodBase, Container, Event } from '../../../../interface/observation';
 import { listApplicationPodsDetails } from '../../../../api/observation';
@@ -9,11 +9,15 @@ import '../../index.less';
 import { quantityToScalar } from '../../../../utils/utils';
 import locale from '../../../../utils/locale';
 import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
-import { getAddonsStatus } from '../../../../api/addons';
-import type { AddonClusterInfo, AddonStatus } from '../../../../interface/addon';
 import { If } from 'tsx-control-statements/components';
-import { checkPermission } from '../../../../utils/permission';
 import type { LoginUserInfo } from '../../../../interface/user';
+import { AiOutlineCode, AiOutlineCopy } from 'react-icons/ai';
+import { connect } from 'dva';
+import type { AddonBaseStatus } from '../../../../interface/addon';
+import i18n from '../../../../i18n';
+import { routerRedux } from 'dva/router';
+import { checkEnabledAddon } from '../../../../utils/common';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 export type Props = {
   pod: PodBase;
@@ -21,16 +25,21 @@ export type Props = {
   clusterName: string;
   application?: ApplicationDetail;
   userInfo?: LoginUserInfo;
+  enabledAddons?: AddonBaseStatus[];
+  dispatch?: ({}) => void;
 };
 
 export type State = {
   containers?: Container[];
   events?: Event[];
   loading: boolean;
-  observability?: Record<string, AddonClusterInfo>;
   showContainerLog: boolean;
   containerName: string;
 };
+
+@connect((store: any) => {
+  return { ...store.cloudshell, ...store.addons };
+})
 class PodDetail extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -39,7 +48,6 @@ class PodDetail extends React.Component<Props, State> {
 
   componentDidMount() {
     this.loadPodDetail();
-    this.loadAddonStatus();
   }
 
   showStatus = (statu: string) => {
@@ -63,6 +71,71 @@ class PodDetail extends React.Component<Props, State> {
     }
   };
 
+  onOpenCloudShell = () => {
+    const { env } = this.props;
+    if (!checkEnabledAddon('cloudshell', this.props.enabledAddons)) {
+      Dialog.alert({
+        title: i18n.t('CloudShell feature is not enabled'),
+        content: i18n.t('You must enable the CloudShell addon first'),
+        locale: locale().Dialog,
+        footer: (
+          <Button
+            type="secondary"
+            onClick={() => {
+              if (this.props.dispatch) {
+                this.props.dispatch(
+                  routerRedux.push({
+                    pathname: '/addons/cloudshell',
+                  }),
+                );
+              }
+            }}
+          >
+            <Translation>Go to enable</Translation>
+          </Button>
+        ),
+      });
+      return;
+    }
+    const shellScript = `vela exec ${env?.appDeployName} -e ${env?.appDeployNamespace} -- bash`;
+    Dialog.show({
+      footer: false,
+      style: { width: 400 },
+      content: (
+        <div>
+          <h5>1. Copy the command:</h5>
+          <code className="code">
+            {shellScript}{' '}
+            <CopyToClipboard
+              onCopy={() => {
+                Message.success('Copied successfully');
+              }}
+              text={shellScript}
+            >
+              <AiOutlineCopy size={14} />
+            </CopyToClipboard>
+          </code>
+          <h5>2. Open Cloud Shell:</h5>
+          <div>
+            <Button
+              size="small"
+              type="secondary"
+              onClick={() => {
+                if (this.props.dispatch) {
+                  this.props.dispatch({
+                    type: 'cloudshell/open',
+                  });
+                }
+              }}
+            >
+              Open Cloud Shell
+            </Button>
+          </div>
+        </div>
+      ),
+    });
+  };
+
   loadPodDetail = async () => {
     listApplicationPodsDetails({
       name: this.props.pod.metadata.name || '',
@@ -84,40 +157,11 @@ class PodDetail extends React.Component<Props, State> {
       });
   };
 
-  loadAddonStatus = async () => {
-    const { userInfo } = this.props;
-    if (checkPermission({ resource: `addon`, action: 'list' }, '', userInfo)) {
-      getAddonsStatus({ name: 'observability' }).then((re: AddonStatus) => {
-        if (re && re.phase == 'enabled') {
-          this.setState({ observability: re.clusters });
-        }
-      });
-    }
-  };
-
   showContainerLog = (containerName: string) => {
     this.setState({ showContainerLog: true, containerName: containerName });
   };
 
   getContainerColumns = () => {
-    const { observability } = this.state;
-    const { clusterName, env, pod, application } = this.props;
-    let domain = '';
-    if (observability) {
-      Object.keys(observability).map((key) => {
-        if (key == clusterName) {
-          const clusterInfo = observability[key];
-          if (clusterInfo.serviceExternalIP) {
-            domain = clusterInfo.serviceExternalIP;
-          } else if (clusterInfo.loadBalancerIP) {
-            domain = 'http://' + clusterInfo.loadBalancerIP;
-          }
-          if (domain && !domain.startsWith('http')) {
-            domain = 'http://' + domain;
-          }
-        }
-      });
-    }
     return [
       {
         key: 'name',
@@ -209,33 +253,21 @@ class PodDetail extends React.Component<Props, State> {
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
         cell: (v: string, i: number, record: Container) => {
-          if (!domain) {
-            return (
-              <div>
-                <a
-                  title="Log"
-                  onClick={() => this.showContainerLog(record.name)}
-                  className="actionIcon"
-                >
-                  <Icon type="news" />
-                </a>
-              </div>
-            );
-          }
-          const logURL = `${domain}/d/kubevela_application_logging/kubevela-application-logging-dashboard?orgId=1&refresh=10s&var-envName=${env?.name}&var-clusterName=${clusterName}&var-appName=${application?.name}&var-appAlias=${application?.alias}&var-podName=${pod.metadata.name}&var-podNamespace=${pod.metadata.namespace}&var-containerName=${record.name}&var-container=${record.name}&var-pod=All&var-stream=All&var-searchable_pattern=`;
-          const monitorURL = `${domain}/d/kubevela_core_monitoring/kubevela-core-system-monitoring-dashboard?var-origin_prometheus=&var-NameSpace=${pod.metadata.namespace}&var-Container=${record.name}&var-Pod=All`;
           return (
-            <div>
-              <a title="Log" href={logURL} target="_blank" className="actionIcon">
+            <div className="operations">
+              <a
+                title="Log"
+                onClick={() => this.showContainerLog(record.name)}
+                className="actionIcon"
+              >
                 <Icon type="news" />
               </a>
               <a
-                title="Grafana Dashboard"
-                className="margin-left-5"
-                href={monitorURL}
-                target="_blank"
+                title="Console Shell"
+                onClick={() => this.onOpenCloudShell()}
+                className="actionIcon"
               >
-                <Icon type="monitoring" />
+                <AiOutlineCode size={20} />
               </a>
             </div>
           );
