@@ -17,12 +17,20 @@ export interface SystemInfo {
     policyDefinitionTopList?: string[];
     updateTime: string;
   };
+  dexUserDefaultProjects?: {
+    name: string;
+    roles: string[];
+  }[];
 }
 
 export interface UpdateSystemInfo {
   enableCollection: boolean;
   loginType: 'local' | 'dex';
   velaAddress: string;
+  dexUserDefaultProjects?: {
+    name: string;
+    roles: string[];
+  }[];
 }
 
 export interface DexConfig {

@@ -5,12 +5,12 @@ import locale from '../../utils/locale';
 
 interface CustomSelectProps extends SelectProps {
   enableInput?: boolean;
-  dataSource: { label?: string; value: any }[];
+  dataSource?: { label?: string; value: any }[];
 }
 
 export const CustomSelect = (props: CustomSelectProps) => {
   const [inputValue, setInputValue] = React.useState('');
-  const dataSource = [...props.dataSource];
+  const dataSource = [...(props.dataSource || [])];
   if (inputValue != '') {
     dataSource.unshift({ label: inputValue, value: inputValue });
   }
