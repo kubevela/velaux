@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Grid, Form, Input, Field, Button, Message, Icon, Dialog } from '@b-design/ui';
 import { updateUser } from '../../../../api/users';
 import type { LoginUserInfo } from '../../../../interface/user';
-import { checkUserPassword, checkUserEmail } from '../../../../utils/common';
+import { checkUserPassword } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 
@@ -143,7 +143,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
                       rules: [
                         {
                           required: true,
-                          pattern: checkUserEmail,
+                          format: 'email',
                           message: <Translation>Please input a valid email</Translation>,
                         },
                       ],
