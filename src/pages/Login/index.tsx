@@ -25,7 +25,7 @@ type Props = {
 };
 
 type State = {
-  dexConfig: DexConfig;
+  dexConfig?: DexConfig;
   loginType: string;
   loginErrorMessage: string;
   loginLoading: boolean;
@@ -36,19 +36,12 @@ export default class LoginPage extends Component<Props, State> {
     super(props);
     this.field = new Field(this);
     this.state = {
-      dexConfig: {
-        clientID: '',
-        clientSecret: '',
-        issuer: '',
-        redirectURL: '',
-      },
       loginType: '',
       loginErrorMessage: '',
       loginLoading: false,
     };
   }
   componentDidMount() {
-    this.ontDexConfig();
     this.onGetLoginType();
   }
   onGetLoginType = () => {
@@ -62,7 +55,7 @@ export default class LoginPage extends Component<Props, State> {
             () => {
               const { loginType } = this.state;
               if (loginType === 'dex') {
-                this.onGetDexCode();
+                this.ontDexConfig();
               }
             },
           );
@@ -74,9 +67,14 @@ export default class LoginPage extends Component<Props, State> {
     getDexConfig()
       .then((res) => {
         if (res) {
-          this.setState({
-            dexConfig: res,
-          });
+          this.setState(
+            {
+              dexConfig: res,
+            },
+            () => {
+              this.onGetDexCode();
+            },
+          );
         }
       })
       .catch();
@@ -116,10 +114,12 @@ export default class LoginPage extends Component<Props, State> {
     });
   };
   onGetDexCode = () => {
-    const { clientID, issuer, redirectURL } = this.state.dexConfig;
-    const newRedirectURl = encodeURIComponent(redirectURL);
-    const dexClientURL = `${issuer}/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access&state=velaux`;
-    window.location.href = dexClientURL;
+    if (this.state.dexConfig) {
+      const { clientID, issuer, redirectURL } = this.state.dexConfig;
+      const newRedirectURl = encodeURIComponent(redirectURL);
+      const dexClientURL = `${issuer}/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access&state=velaux`;
+      window.location.href = dexClientURL;
+    }
   };
   render() {
     const FormItem = Form.Item;
