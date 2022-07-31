@@ -71,8 +71,8 @@ class PodDetail extends React.Component<Props, State> {
     }
   };
 
-  onOpenCloudShell = () => {
-    const { env } = this.props;
+  onOpenCloudShell = (containerName: string) => {
+    const { env, pod } = this.props;
     if (!checkEnabledAddon('cloudshell', this.props.enabledAddons)) {
       Dialog.alert({
         title: i18n.t('CloudShell feature is not enabled'),
@@ -97,13 +97,15 @@ class PodDetail extends React.Component<Props, State> {
       });
       return;
     }
-    const shellScript = `vela exec ${env?.appDeployName} -e ${env?.appDeployNamespace} -- bash`;
+    const shellScript = `vela exec ${env?.appDeployName} -n ${env?.appDeployNamespace} --component ${pod.component} --cluster ${pod.cluster} --pod ${pod.metadata.name} --container ${containerName} -- bash`;
     Dialog.show({
       footer: false,
-      style: { width: 400 },
+      style: { width: 600 },
       content: (
         <div>
-          <h5>1. Copy the command:</h5>
+          <h5>
+            1. <Translation>Copy the command</Translation>:
+          </h5>
           <code className="code">
             {shellScript}{' '}
             <CopyToClipboard
@@ -115,7 +117,9 @@ class PodDetail extends React.Component<Props, State> {
               <AiOutlineCopy size={14} />
             </CopyToClipboard>
           </code>
-          <h5>2. Open Cloud Shell:</h5>
+          <h5>
+            2. <Translation>Open Cloud Shell</Translation>:
+          </h5>
           <div>
             <Button
               size="small"
@@ -128,7 +132,7 @@ class PodDetail extends React.Component<Props, State> {
                 }
               }}
             >
-              Open Cloud Shell
+              <Translation>Open Cloud Shell</Translation>
             </Button>
           </div>
         </div>
@@ -264,7 +268,7 @@ class PodDetail extends React.Component<Props, State> {
               </a>
               <a
                 title="Console Shell"
-                onClick={() => this.onOpenCloudShell()}
+                onClick={() => this.onOpenCloudShell(record.name)}
                 className="actionIcon"
               >
                 <AiOutlineCode size={20} />
