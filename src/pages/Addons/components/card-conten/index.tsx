@@ -146,7 +146,12 @@ class CardContent extends React.Component<Props, State> {
                       <Row className="content-main-btn">
                         {tags?.map((tag: string) => {
                           return (
-                            <Tag style={{ marginRight: '8px' }} color={getTagColor(tag)} key={tag}>
+                            <Tag
+                              title={tag}
+                              style={{ marginRight: '8px' }}
+                              color={getTagColor(tag)}
+                              key={tag}
+                            >
                               {tag}
                             </Tag>
                           );
