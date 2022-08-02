@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   Form,
   Button,
@@ -10,6 +10,9 @@ import {
   Message,
   Select,
   Checkbox,
+  Grid,
+  Dropdown,
+  Menu,
 } from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { If } from 'tsx-control-statements/components';
@@ -36,6 +39,12 @@ import type { NameAlias } from '../../../../interface/env';
 import Permission from '../../../../components/Permission';
 import 'github-markdown-css/github-markdown-light.css';
 import './index.less';
+import { Link } from 'dva/router';
+import { listApplicationServiceEndpoints } from '../../../../api/observation';
+import type { Endpoint } from '../../../../interface/observation';
+import { getLink } from '../../../../utils/utils';
+
+const { Col, Row } = Grid;
 
 type Props = {
   addonName: string;
@@ -58,11 +67,10 @@ type State = {
   clusters?: string[];
   allClusters?: NameAlias[];
   enabledClusters?: string[];
+  endpoints?: Endpoint[];
 };
 
 class AddonDetailDialog extends React.Component<Props, State> {
-  timer?: number;
-  readonly refreshTime = 1000;
   form: Field;
   statusLoop: boolean;
   uiSchemaRef: React.RefObject<UISchema>;
@@ -86,12 +94,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
   componentDidMount() {
     this.loadAddonDetail();
     this.loadAddonStatus();
-  }
-
-  componentWillUnmount() {
-    if (this.timer) {
-      window.clearInterval(this.timer);
-    }
+    this.loadAddonEndpoints();
   }
 
   loadAddonDetail = async () => {
@@ -116,7 +119,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
     getAddonsStatus({ name: this.props.addonName })
       .then((res: AddonStatus) => {
         if (!res) return;
-        if (res.phase == 'enabling' && !this.statusLoop) {
+        if ((res.phase == 'enabling' || res.phase === 'disabling') && !this.statusLoop) {
           this.statusLoop = true;
           setTimeout(() => {
             this.statusLoop = false;
@@ -158,26 +161,40 @@ class AddonDetailDialog extends React.Component<Props, State> {
       });
   };
 
-  handleSubmit = () => {
-    const { status } = this.state;
-    if (status === 'enabled') {
-      Dialog.confirm({
-        content:
-          'Please make sure that the Addon is no longer in use and the related application has been recycled.',
-        onOk: this.disableAddon,
-        locale: locale().Dialog,
-      });
-      return;
-    }
-    if (status === 'disabled') {
-      this.form.validate((errors: any, values: any) => {
-        if (errors) {
-          return;
-        }
-        this.enableAddon(values.properties);
-      });
-    }
+  loadAddonEndpoints = () => {
+    // TODO: the app name and namespace should get from the api server.
+    const appName = 'addon-' + this.props.addonName;
+    listApplicationServiceEndpoints({
+      appName: appName,
+      appNs: 'vela-system',
+    }).then((re) => {
+      if (re && re.endpoints) {
+        this.setState({ endpoints: re.endpoints });
+      } else {
+        this.setState({ endpoints: [] });
+      }
+    });
   };
+
+  onDisable = () => {
+    Dialog.confirm({
+      content:
+        'Please make sure that the Addon is no longer in use and the related application has been recycled.',
+      onOk: this.disableAddon,
+      locale: locale().Dialog,
+    });
+    return;
+  };
+
+  onEnable = () => {
+    this.form.validate((errors: any, values: any) => {
+      if (errors) {
+        return;
+      }
+      this.enableAddon(values.properties);
+    });
+  };
+
   onUpgrade = () => {
     this.form.validate((errors: any, values: any) => {
       if (errors) {
@@ -278,6 +295,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
       clusters,
       allClusters,
       enabledClusters,
+      endpoints,
     } = this.state;
     const { showAddon, addonName } = this.props;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -293,32 +311,30 @@ class AddonDetailDialog extends React.Component<Props, State> {
         item.uiType = 'Password';
       }
     });
-    const buttons = [
-      <Fragment>
-        <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
-          <Translation>Cancel</Translation>
-        </Button>
+    const buttons = [];
+    if (status === 'enabled' || status === 'enabling' || status === 'disabling') {
+      buttons.push(
         <Permission
           request={{
             resource: `addon:${addonName}`,
-            action: status === 'enabled' ? 'disable' : 'enable',
+            action: 'disable',
           }}
           project={''}
         >
           <Button
-            type="primary"
-            onClick={this.handleSubmit}
-            warning={status === 'enabled'}
+            type="secondary"
+            onClick={this.onDisable}
             title={status}
-            style={{ backgroundColor: status === 'enabled' ? 'red' : '' }}
-            loading={statusLoading || loading || status == 'enabling' || status == 'disabling'}
-            disabled={status == 'enabling' || status == 'disabling' || version == ''}
+            className="danger-btn"
+            loading={status === 'disabling'}
+            disabled={status === 'disabling'}
           >
-            <Translation>{status === 'enabled' ? 'Disable' : 'Enable'}</Translation>
+            <Translation>Disable</Translation>
           </Button>
-        </Permission>
-      </Fragment>,
-    ];
+        </Permission>,
+      );
+    }
+
     if (status == 'enabled' || status == 'suspend') {
       buttons.push(
         <Permission request={{ resource: `addon:${addonName}`, action: 'update' }} project={''}>
@@ -329,6 +345,21 @@ class AddonDetailDialog extends React.Component<Props, State> {
             style={{ marginLeft: '16px' }}
           >
             <Translation>Upgrade</Translation>
+          </Button>
+        </Permission>,
+      );
+    }
+
+    if (status === 'disabled' || status === 'enabling') {
+      buttons.push(
+        <Permission request={{ resource: `addon:${addonName}`, action: 'enable' }} project={''}>
+          <Button
+            loading={status === 'enabling'}
+            type="primary"
+            onClick={this.onEnable}
+            style={{ marginLeft: '16px' }}
+          >
+            <Translation>Enable</Translation>
           </Button>
         </Permission>,
       );
@@ -364,6 +395,8 @@ class AddonDetailDialog extends React.Component<Props, State> {
       };
     });
 
+    const outerEndpoint = endpoints?.filter((end) => !end.endpoint.inner);
+
     return (
       <div className="basic">
         <DrawerWithFooter
@@ -383,16 +416,47 @@ class AddonDetailDialog extends React.Component<Props, State> {
             </If>
 
             <If condition={addonsStatus && addonsStatus.status}>
-              <Message
-                type={getAppStatusShowType(addonsStatus?.status)}
-                size="medium"
-                style={{ padding: '8px', marginBottom: '10px' }}
-              >
-                {`${i18n.t('Addon status is ')}${addonsStatus?.status || 'Initing'}`}
-                <a style={{ marginLeft: '16px' }} onClick={() => this.updateStatusShow(true)}>
-                  <Translation>Check the details</Translation>
-                </a>
-              </Message>
+              <Row>
+                <Col span={16}>
+                  <Message
+                    type={getAppStatusShowType(addonsStatus?.status)}
+                    size="medium"
+                    style={{ padding: '8px', marginBottom: '10px' }}
+                  >
+                    {`${i18n.t('Addon status is ')}${addonsStatus?.status || 'Init'}`}
+                    <Link
+                      style={{ marginLeft: '16px' }}
+                      to={`/applications/addon-${addonDetailInfo?.name}`}
+                    >
+                      <Translation>Check the details</Translation>
+                    </Link>
+                  </Message>
+                </Col>
+                <If condition={outerEndpoint && outerEndpoint?.length > 0}>
+                  <Col span={8} className={'flexright'}>
+                    <Dropdown
+                      trigger={
+                        <Button style={{ marginLeft: '16px' }} type="secondary">
+                          <Translation>Endpoints</Translation>
+                        </Button>
+                      }
+                    >
+                      <Menu>
+                        {outerEndpoint?.map((item) => {
+                          const linkURL = getLink(item);
+                          return (
+                            <Menu.Item key={linkURL}>
+                              <a style={{ color: '#1b58f4' }} target="_blank" href={linkURL}>
+                                {linkURL}
+                              </a>
+                            </Menu.Item>
+                          );
+                        })}
+                      </Menu>
+                    </Dropdown>
+                  </Col>
+                </If>
+              </Row>
             </If>
 
             {/* select the addon version */}
