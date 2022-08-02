@@ -289,7 +289,12 @@ class Header extends Component<Props, State> {
                     if (item && !item.endpoint.inner) {
                       return (
                         <Menu.Item key={linkURL}>
-                          <a style={{ color: '#1b58f4' }} target="_blank" href={linkURL}>
+                          <a
+                            style={{ color: '#1b58f4' }}
+                            target="_blank"
+                            href={linkURL}
+                            rel="noopener noreferrer"
+                          >
                             {linkURL}
                           </a>
                         </Menu.Item>
