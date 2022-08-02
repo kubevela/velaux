@@ -1,9 +1,4 @@
 import React from 'react';
-import Group from '../../extends/Group';
 export default function NotFound() {
-  return (
-    <div>
-      <Group title="envplan" description="envplan" />
-    </div>
-  );
+  return <div>The route is not exist(404)</div>;
 }
