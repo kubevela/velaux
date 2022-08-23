@@ -110,6 +110,9 @@ export function getLink(endpointObj: Endpoint) {
   if (appProtocol && appProtocol !== '') {
     protocol = appProtocol;
   }
+  if (host == '') {
+    return path;
+  }
   if (path === '/') {
     path = '';
   }
