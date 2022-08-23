@@ -1,5 +1,6 @@
 import { Dialog } from '@b-design/ui';
 import i18n from '../i18n';
+import locale from './locale';
 
 class ResetLogin {
   private static singleton: ResetLogin;
@@ -14,6 +15,7 @@ class ResetLogin {
         content: i18n.t('Authentication failed, please log in again'),
         closeable: true,
         closeMode: [],
+        locale: locale().Dialog,
         footerActions: ['ok'],
         onOk: () => {
           localStorage.removeItem('token');
