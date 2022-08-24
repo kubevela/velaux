@@ -288,9 +288,6 @@ class UISchema extends Component<Props, State> {
     if (!uiSchema || enableCodeEdit) {
       return this.renderCodeEdit();
     }
-    if (mode == 'edit' && value === undefined) {
-      return <div />;
-    }
     let onlyShowRequired = false;
     let couldShowParamCount = 0;
     uiSchema.map((param) => {
@@ -359,7 +356,7 @@ class UISchema extends Component<Props, State> {
       if (initValue === undefined) {
         initValue = param.validate?.defaultValue;
       }
-      const disableEdit = (param.validate?.immutable && this.props.mode == 'edit') || false;
+      const disableEdit = (param.validate?.immutable && mode == 'edit') || false;
       const getGroup = (children: React.ReactNode) => {
         return (
           <Group

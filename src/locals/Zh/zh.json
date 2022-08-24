@@ -342,7 +342,7 @@
   "Instructions for assessing whether the container is alive.": "容器健康状态探针",
   "Specify the annotations in the workload": "指定工作负载的注释",
   "Specify the labels in the workload": "指定工作负载的标签",
-  "If Switch is turned off, The configuration will be reset. Are you sure you want to do this?": "如果关闭，配置将重置。确定操作吗？",
+  "The configuration will be reset if the switch is turned off. Are you sure want to do this?": "如果关闭，配置将重置。确定操作吗？",
   "Mount PVC type volume": "挂载 PVC 数据卷",
   "Mount HostPath type volume": "挂载 HostPath 数据卷",
   "Mount EmptyDir type volume": "挂载 EmptyDir 数据卷",
