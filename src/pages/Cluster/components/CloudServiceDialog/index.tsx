@@ -271,7 +271,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       <React.Fragment>
         <Dialog
           locale={locale().Dialog}
-          className="dialog-cluoudService-wraper"
+          className="dialog-cloudService-wrapper"
           title={<Translation>Connect Kubernetes Cluster From Cloud</Translation>}
           autoFocus={true}
           visible={visible}
@@ -294,7 +294,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
                 available permission set
               </Translation>
             </Message>
-            <Form {...formItemLayout} field={this.field} className="cloud-server-wraper">
+            <Form {...formItemLayout} field={this.field} className="cloud-server-wrapper">
               <FormItem label={<Translation>Provider</Translation>} required={true}>
                 <Select
                   locale={locale().Select}

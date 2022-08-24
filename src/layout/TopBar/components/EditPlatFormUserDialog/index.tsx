@@ -5,6 +5,7 @@ import type { LoginUserInfo } from '../../../../interface/user';
 import { checkUserPassword } from '../../../../utils/common';
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
+import locale from '../../../../utils/locale';
 
 type Props = {
   userInfo?: LoginUserInfo;
@@ -96,6 +97,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
           title={this.showTitle()}
           style={{ width: '600px' }}
           onOk={this.onUpdateUser}
+          locale={locale().Dialog}
           footerActions={['ok']}
         >
           <Form {...formItemLayout} field={this.field}>
