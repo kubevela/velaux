@@ -120,8 +120,8 @@ class Group extends React.Component<Props, State> {
                             type: 'confirm',
                             content: (
                               <Translation>
-                                If Switch is turned off, The configuration will be reset. Are you
-                                sure you want to do this?
+                                The configuration will be reset if the switch is turned off. Are you
+                                sure want to do this?
                               </Translation>
                             ),
                             onOk: () => {
