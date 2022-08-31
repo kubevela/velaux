@@ -43,7 +43,7 @@ export const ShowRevision = (props: RevisionProps) => {
   React.useEffect(() => {
     loadRevisionDetail(props.appName, props.revision, setDetail);
   }, [props.appName, props.revision]);
-  const containerId = props.revision.version;
+  const containerId = props.revision.version + 'detail';
 
   return (
     <React.Fragment>
