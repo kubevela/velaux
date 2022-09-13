@@ -415,7 +415,7 @@ class EnvDialog extends React.Component<Props, State> {
               </Row>
               <Row>
                 <Col span={24} style={{ padding: '0 8px' }}>
-                  <Table dataSource={this.makeTargetDataSource()}>
+                  <Table locale={locale().Table} dataSource={this.makeTargetDataSource()}>
                     <Table.Column
                       dataIndex={'name'}
                       title={i18n.t('Name')}
