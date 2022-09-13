@@ -434,7 +434,7 @@ class AppDialog extends React.Component<Props, State> {
                           this.changeEnvDialog(true);
                         }}
                       >
-                        <Translation>Create new environment</Translation>
+                        <Translation>New environment</Translation>
                       </a>
                     }
                     required={true}
@@ -485,6 +485,7 @@ class AppDialog extends React.Component<Props, State> {
             visible={visibleEnvDialog}
             userInfo={userInfo}
             projects={projects || []}
+            project={this.field.getValue('project')}
             isEdit={false}
             onClose={this.onCloseEnvDialog}
             onOK={this.onOKEnvDialog}

@@ -71,14 +71,13 @@ class EnvDialog extends React.Component<Props, State> {
 
   componentDidMount() {
     const { envItem, isEdit } = this.props;
+    let projectName = this.props.project;
     if (envItem && isEdit) {
       const { name, alias, description, targets, namespace, project } = envItem;
       const targetNames = targets?.map((target) => {
         return target.name;
       });
-      if (project.name) {
-        this.loadProjectTarget(project.name);
-      }
+      projectName = project.name;
       this.field.setValues({
         name,
         alias,
@@ -87,6 +86,9 @@ class EnvDialog extends React.Component<Props, State> {
         targets: targetNames,
         project: project.name,
       });
+    }
+    if (projectName) {
+      this.loadProjectTarget(projectName);
     }
     this.loadClusters();
   }
@@ -366,6 +368,7 @@ class EnvDialog extends React.Component<Props, State> {
                           message: i18n.t('Please select a project'),
                         },
                       ],
+                      initValue: this.props.project,
                     })}
                   />
                 </FormItem>
