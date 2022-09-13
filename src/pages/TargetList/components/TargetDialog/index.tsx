@@ -223,11 +223,7 @@ class TargetDialog extends React.Component<Props, State> {
   };
 
   getProviderList = async (projectName: string) => {
-    const params = {
-      projectName,
-      configType: 'terraform-provider',
-    };
-    getCloudServiceProviderList(params).then((res) => {
+    getCloudServiceProviderList(projectName).then((res) => {
       if (res && Array.isArray(res)) {
         this.setState({
           providerList: res,
