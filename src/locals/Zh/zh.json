@@ -187,6 +187,7 @@
   "Monitor": "监控",
   "Name": "名称",
   "Namespace": "命名空间",
+  "Environment Namespace": "环境命名空间",
   "Namespace/Name": "命名空间/名称",
   "Needs review before continuing": "继续前请确认",
   "New": "新增",

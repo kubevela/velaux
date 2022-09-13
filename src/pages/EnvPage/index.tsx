@@ -6,7 +6,6 @@ import ListTitle from '../../components/ListTitle';
 import TableList from './components/List';
 import EnvDialog from './components/EnvDialog';
 import './index.less';
-import type { Cluster } from '../../interface/cluster';
 import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 import type { Env } from '../../interface/env';
@@ -17,7 +16,6 @@ import Translation from '../../components/Translation';
 type Props = {
   envTotal?: number;
   envs: Env[];
-  clusterList?: Cluster[];
   dispatch: ({}) => void;
   t: (key: string) => string;
   userInfo?: LoginUserInfo;
@@ -135,13 +133,14 @@ class targetList extends React.Component<Props, State> {
         <TableList
           list={envs || []}
           updateEnvList={this.updateEnvList}
+          userInfo={userInfo}
           changeISEdit={(is: boolean, record: Env) => {
             this.changeISEdit(is, record);
           }}
         />
 
         <Pagination
-          className="delivery-target-pagenation"
+          className="delivery-target-pagination"
           total={envTotal}
           locale={locale().Pagination}
           size="medium"

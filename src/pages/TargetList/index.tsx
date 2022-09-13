@@ -19,7 +19,6 @@ type Props = {
   total?: number;
   clusterList?: Cluster[];
   dispatch: ({}) => void;
-  t: (key: string) => string;
   userInfo?: LoginUserInfo;
 };
 
@@ -118,7 +117,7 @@ class targetList extends React.Component<Props, State> {
   };
 
   render() {
-    const { t, clusterList, targets, total } = this.props;
+    const { clusterList, targets, total } = this.props;
     const { visibleDelivery, isEdit, targetItem } = this.state;
     return (
       <div>
@@ -149,7 +148,7 @@ class targetList extends React.Component<Props, State> {
         />
 
         <Pagination
-          className="delivery-target-pagenation"
+          className="delivery-target-pagination"
           total={total}
           locale={locale().Pagination}
           size="medium"
@@ -160,7 +159,6 @@ class targetList extends React.Component<Props, State> {
 
         <If condition={visibleDelivery}>
           <TargetDialog
-            t={t}
             visible={visibleDelivery}
             clusterList={clusterList || []}
             isEdit={isEdit}

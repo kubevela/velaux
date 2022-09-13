@@ -14,6 +14,7 @@ import { listNamespaces } from '../../../../api/observation';
 import locale from '../../../../utils/locale';
 import { getSelectLabel } from '../../../../utils/utils';
 import i18n from '../../../../i18n';
+import { If } from 'tsx-control-statements/components';
 
 type Props = {
   project?: string;
@@ -21,9 +22,9 @@ type Props = {
   visible: boolean;
   clusterList: Cluster[];
   targetItem?: Target;
-  onOK: () => void;
+  liteMode?: boolean;
+  onOK: (name: string) => void;
   onClose: () => void;
-  t: (key: string) => string;
 };
 
 type State = {
@@ -34,7 +35,7 @@ type State = {
   isLoading: boolean;
 };
 
-class DeliveryDialog extends React.Component<Props, State> {
+class TargetDialog extends React.Component<Props, State> {
   field: Field;
 
   constructor(props: Props) {
@@ -126,7 +127,7 @@ class DeliveryDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { isEdit } = this.props;
+      const { isEdit, liteMode } = this.props;
       const {
         name,
         alias,
@@ -156,11 +157,16 @@ class DeliveryDialog extends React.Component<Props, State> {
         project,
       };
 
+      if (liteMode) {
+        params.name = params.cluster.clusterName + '-' + runtimeNamespace;
+        params.project = this.props.project;
+      }
+
       if (isEdit) {
         updateTarget(params).then((res) => {
           if (res) {
             Message.success(<Translation>Target updated successfully</Translation>);
-            this.props.onOK();
+            this.props.onOK(params.name);
             this.onClose();
           }
         });
@@ -168,7 +174,7 @@ class DeliveryDialog extends React.Component<Props, State> {
         createTarget(params).then((res) => {
           if (res) {
             Message.success(<Translation>Target created successfully</Translation>);
-            this.props.onOK();
+            this.props.onOK(params.name);
             this.onClose();
           }
         });
@@ -246,7 +252,7 @@ class DeliveryDialog extends React.Component<Props, State> {
       },
     };
 
-    const { t, visible, isEdit } = this.props;
+    const { visible, isEdit, liteMode } = this.props;
     const { namespaces, projects, isLoading } = this.state;
     const cluster: string = this.field.getValue('clusterName');
 
@@ -273,98 +279,102 @@ class DeliveryDialog extends React.Component<Props, State> {
           onOk={this.onOk}
           onCancel={this.onClose}
           onClose={this.onClose}
-          footerActions={['cancel', 'ok']}
+          footerActions={['ok']}
           footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>
-            <Row>
-              <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Name</Translation>} required>
-                  <Input
-                    name="name"
-                    disabled={isEdit}
-                    placeholder={t('Please enter').toString()}
-                    {...init('name', {
-                      rules: [
-                        {
-                          required: true,
-                          pattern: checkName,
-                          message: 'Please enter a valid English name',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </Col>
-              <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Alias</Translation>}>
-                  <Input
-                    name="alias"
-                    placeholder={t('Please enter').toString()}
-                    {...init('alias', {
-                      rules: [
-                        {
-                          minLength: 2,
-                          maxLength: 64,
-                          message: 'Enter a string of 2 to 64 characters.',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <Loading visible={isLoading} style={{ width: '100%' }}>
-                  <FormItem label={<Translation>Project</Translation>} required>
-                    <Select
-                      name="project"
-                      hasClear
-                      showSearch
+            <If condition={!liteMode}>
+              <Row>
+                <Col span={12} style={{ padding: '0 8px' }}>
+                  <FormItem label={<Translation>Name</Translation>} required>
+                    <Input
+                      name="name"
                       disabled={isEdit}
-                      placeholder={t('Please select').toString()}
-                      filterLocal={true}
-                      dataSource={projectOptions}
-                      style={{ width: '100%' }}
-                      {...init('project', {
+                      placeholder={i18n.t('Please enter').toString()}
+                      {...init('name', {
                         rules: [
                           {
                             required: true,
-                            message: 'Please select project',
+                            pattern: checkName,
+                            message: 'Please enter a valid English name',
                           },
                         ],
                       })}
-                      onChange={(item: string) => {
-                        this.field.setValue('var_providerName', '');
-                        this.field.setValue('project', item);
-                        this.getProviderList(item);
-                      }}
                     />
                   </FormItem>
-                </Loading>
-              </Col>
-            </Row>
+                </Col>
 
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Description</Translation>}>
-                  <Input
-                    name="description"
-                    placeholder={t('Please enter').toString()}
-                    {...init('description', {
-                      rules: [
-                        {
-                          maxLength: 256,
-                          message: 'Enter a description that contains less than 256 characters.',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
+                <Col span={12} style={{ padding: '0 8px' }}>
+                  <FormItem label={<Translation>Alias</Translation>}>
+                    <Input
+                      name="alias"
+                      placeholder={i18n.t('Please enter').toString()}
+                      {...init('alias', {
+                        rules: [
+                          {
+                            minLength: 2,
+                            maxLength: 64,
+                            message: 'Enter a string of 2 to 64 characters.',
+                          },
+                        ],
+                      })}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <Loading visible={isLoading} style={{ width: '100%' }}>
+                    <FormItem label={<Translation>Project</Translation>} required>
+                      <Select
+                        name="project"
+                        hasClear
+                        showSearch
+                        disabled={isEdit}
+                        placeholder={i18n.t('Please select').toString()}
+                        filterLocal={true}
+                        dataSource={projectOptions}
+                        readOnly={this.props.project != undefined}
+                        style={{ width: '100%' }}
+                        {...init('project', {
+                          rules: [
+                            {
+                              required: true,
+                              message: 'Please select project',
+                            },
+                          ],
+                          initValue: this.props.project,
+                        })}
+                        onChange={(item: string) => {
+                          this.field.setValue('var_providerName', '');
+                          this.field.setValue('project', item);
+                          this.getProviderList(item);
+                        }}
+                      />
+                    </FormItem>
+                  </Loading>
+                </Col>
+              </Row>
+
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <FormItem label={<Translation>Description</Translation>}>
+                    <Input
+                      name="description"
+                      placeholder={i18n.t('Please enter').toString()}
+                      {...init('description', {
+                        rules: [
+                          {
+                            maxLength: 256,
+                            message: 'Enter a description that contains less than 256 characters.',
+                          },
+                        ],
+                      })}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+            </If>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Cluster</Translation>} required>
@@ -372,7 +382,7 @@ class DeliveryDialog extends React.Component<Props, State> {
                     locale={locale().Select}
                     className="select"
                     disabled={isEdit}
-                    placeholder={t('Please select').toString()}
+                    placeholder={i18n.t('Please select').toString()}
                     {...init(`clusterName`, {
                       rules: [
                         {
@@ -406,90 +416,56 @@ class DeliveryDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <Group
-                  title={<Translation>Shared Variables</Translation>}
-                  required={false}
-                  description={
-                    <Translation>You can define parameters such as region and zone</Translation>
-                  }
-                  hasToggleIcon
-                >
-                  <Row>
-                    <Col span={12} style={{ padding: '0 8px' }}>
-                      <FormItem label={<Translation>Cloud Service Provider</Translation>}>
-                        <Select
-                          className="select"
-                          placeholder={i18n.t('Please select').toString()}
-                          {...init(`var_providerName`, {
-                            rules: [
-                              {
-                                required: false,
-                                message: i18n.t('Please select terraform provider name'),
-                              },
-                            ],
-                          })}
-                          dataSource={providerListOptions}
-                        />
-                      </FormItem>
-                    </Col>
-                    <Col span={12} style={{ padding: '0 8px' }}>
-                      <FormItem label={<Translation>Region</Translation>}>
-                        <Input
-                          name="var_region"
-                          placeholder={t('Please enter').toString()}
-                          {...init('var_region', {
-                            rules: [
-                              {
-                                maxLength: 256,
-                                message: 'Enter a Region.',
-                              },
-                            ],
-                          })}
-                        />
-                      </FormItem>
-                    </Col>
-                  </Row>
-
-                  {/* <Row>
-                    <Col span={12} style={{ padding: '0 8px' }}>
-                      <FormItem label={<Translation>Zone</Translation>}>
-                        <Input
-                          name="var_zone"
-                          placeholder={t('Please enter').toString()}
-                          {...init('var_zone', {
-                            rules: [
-                              {
-                                maxLength: 256,
-                                message: 'Enter a Zone.',
-                              },
-                            ],
-                          })}
-                        />
-                      </FormItem>
-                    </Col>
-
-                    <Col span={12} style={{ padding: '0 8px' }}>
-                      <FormItem label={'VPC'}>
-                        <Input
-                          name="var_vpcID"
-                          placeholder={t('Please enter').toString()}
-                          {...init('var_vpcID', {
-                            rules: [
-                              {
-                                maxLength: 256,
-                                message: 'Enter a VPC',
-                              },
-                            ],
-                          })}
-                        />
-                      </FormItem>
-                    </Col>
-                  </Row> */}
-                </Group>
-              </Col>
-            </Row>
+            <If condition={!liteMode}>
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <Group
+                    title={<Translation>Shared Variables</Translation>}
+                    required={false}
+                    description={
+                      <Translation>You can define parameters such as region and zone</Translation>
+                    }
+                    hasToggleIcon
+                  >
+                    <Row>
+                      <Col span={12} style={{ padding: '0 8px' }}>
+                        <FormItem label={<Translation>Cloud Service Provider</Translation>}>
+                          <Select
+                            className="select"
+                            placeholder={i18n.t('Please select').toString()}
+                            {...init(`var_providerName`, {
+                              rules: [
+                                {
+                                  required: false,
+                                  message: i18n.t('Please select terraform provider name'),
+                                },
+                              ],
+                            })}
+                            dataSource={providerListOptions}
+                          />
+                        </FormItem>
+                      </Col>
+                      <Col span={12} style={{ padding: '0 8px' }}>
+                        <FormItem label={<Translation>Region</Translation>}>
+                          <Input
+                            name="var_region"
+                            placeholder={i18n.t('Please enter').toString()}
+                            {...init('var_region', {
+                              rules: [
+                                {
+                                  maxLength: 256,
+                                  message: 'Enter a Region.',
+                                },
+                              ],
+                            })}
+                          />
+                        </FormItem>
+                      </Col>
+                    </Row>
+                  </Group>
+                </Col>
+              </Row>
+            </If>
           </Form>
         </Dialog>
       </div>
@@ -497,4 +473,4 @@ class DeliveryDialog extends React.Component<Props, State> {
   }
 }
 
-export default DeliveryDialog;
+export default TargetDialog;
