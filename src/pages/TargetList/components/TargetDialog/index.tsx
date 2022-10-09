@@ -296,7 +296,7 @@ class TargetDialog extends React.Component<Props, State> {
                           {
                             required: true,
                             pattern: checkName,
-                            message: 'Please enter a valid English name',
+                            message: 'Please enter a valid name contains only alphabetical words',
                           },
                         ],
                       })}
@@ -423,7 +423,7 @@ class TargetDialog extends React.Component<Props, State> {
                     title={<Translation>Shared Variables</Translation>}
                     required={false}
                     description={
-                      <Translation>You can define parameters such as region and zone</Translation>
+                      <Translation>You can define parameters such as region or zone</Translation>
                     }
                     hasToggleIcon
                   >

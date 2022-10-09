@@ -284,7 +284,11 @@ class EnvDialog extends React.Component<Props, State> {
                         {
                           required: true,
                           pattern: checkName,
-                          message: <Translation>Please enter a valid English name</Translation>,
+                          message: (
+                            <Translation>
+                              Please enter a valid name contains only alphabetical words
+                            </Translation>
+                          ),
                         },
                       ],
                     })}

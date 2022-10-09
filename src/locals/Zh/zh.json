@@ -317,7 +317,7 @@
   "Setup Kubernetes clusters by adding an existing one or creating a new one via cloud provider": "通过云服务商创建新集群/导入已有集群",
   "KubeVela won't save your AK/SK and we strongly recommend allocating the smallest available permission set": "KubeVela 不会保存你的密钥信息，同时我们推荐你使用最小的权限进行授权",
   "content cannot be empty": "内容不可为空",
-  "You can define parameters such as region and zone": "",
+  "You can define parameters such as region or zone": "你可以定义例如区域或可用区等参数",
   "Addon Registries": "插件仓库",
   "Manages and extends platform capabilities": "管理与扩展平台能力",
   "The addon registry type": "插件仓库类型",
