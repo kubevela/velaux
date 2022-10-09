@@ -446,6 +446,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
                           const linkURL = getLink(item);
                           return (
                             <Menu.Item key={linkURL}>
+                              <If condition={item.endpoint.portName}>
+                                <span className="margin-right-5">{item.endpoint.portName}:</span>
+                              </If>
                               <a
                                 style={{ color: '#1b58f4' }}
                                 target="_blank"

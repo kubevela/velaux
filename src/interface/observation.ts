@@ -189,6 +189,7 @@ export interface Endpoint {
     protocol: string;
     path?: string;
     inner: boolean;
+    portName?: string;
   };
   ref: {
     kind: string;
