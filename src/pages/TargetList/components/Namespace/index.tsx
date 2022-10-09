@@ -64,7 +64,7 @@ class Namespace extends React.Component<Props, State> {
     if (cluster && namespace) {
       createClusterNamespace({ cluster: cluster, namespace: namespace }).then((re) => {
         if (re) {
-          Message.success('create namespace success');
+          Message.success('Namespace created successfully');
           loadNamespaces(cluster);
         }
         targetField.setValue('runtimeNamespace', namespace);
@@ -123,7 +123,7 @@ class Namespace extends React.Component<Props, State> {
 
         <Dialog
           locale={locale().Dialog}
-          className={'namespaceDialogWraper'}
+          className={'namespaceDialogWrapper'}
           title={<Translation>Create Namespace</Translation>}
           autoFocus={true}
           isFullScreen={true}
@@ -131,7 +131,7 @@ class Namespace extends React.Component<Props, State> {
           onOk={this.createNamespace}
           onCancel={this.onClose}
           onClose={this.onClose}
-          footerActions={['cancel', 'ok']}
+          footerActions={['ok']}
           footerAlign="center"
         >
           <Form field={this.field} {...formItemLayout}>
@@ -140,12 +140,12 @@ class Namespace extends React.Component<Props, State> {
                 <Form.Item label={<Translation>namespace</Translation>} required>
                   <Input
                     name="namespace"
-                    placeholder={'Please enter'}
+                    placeholder={'Please input the name of namespace'}
                     {...init('namespace', {
                       rules: [
                         {
                           required: true,
-                          message: 'Please select namesapce',
+                          message: 'Please input the name of namespace',
                         },
                       ],
                     })}

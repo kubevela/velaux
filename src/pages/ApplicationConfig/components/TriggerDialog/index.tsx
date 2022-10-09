@@ -221,7 +221,7 @@ class TriggerDialog extends React.Component<Props, State> {
                       {
                         required: true,
                         pattern: checkName,
-                        message: 'Please enter a valid English name',
+                        message: 'Please enter a valid name contains only alphabetical words',
                       },
                     ],
                   })}

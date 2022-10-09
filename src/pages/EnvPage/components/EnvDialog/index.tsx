@@ -1,5 +1,16 @@
 import React from 'react';
-import { Message, Grid, Dialog, Form, Input, Field, Select, Loading, Button } from '@b-design/ui';
+import {
+  Message,
+  Grid,
+  Dialog,
+  Form,
+  Input,
+  Field,
+  Select,
+  Loading,
+  Button,
+  Table,
+} from '@b-design/ui';
 import { checkName } from '../../../../utils/common';
 import type { Target } from '../../../../interface/target';
 import Translation from '../../../../components/Translation';
@@ -12,12 +23,18 @@ import { createEnv, updateEnv } from '../../../../api/env';
 import i18n from '../../../../i18n';
 import { getProjectTargetList } from '../../../../api/project';
 import { checkPermission } from '../../../../utils/permission';
+import { If } from 'tsx-control-statements/components';
+import TargetDialog from '../../../TargetList/components/TargetDialog';
+import Permission from '../../../../components/Permission';
+import type { Cluster } from '../../../../interface/cluster';
+import { getClusterList } from '../../../../api/cluster';
 
 type Props = {
   project?: string;
   isEdit?: boolean;
   visible: boolean;
   projects: Project[];
+
   envItem?: Env;
   userInfo?: LoginUserInfo;
   onOK: () => void;
@@ -29,6 +46,8 @@ type State = {
   namespaces?: { label: string; value: string }[];
   targetLoading: boolean;
   submitLoading: boolean;
+  newTarget: boolean;
+  clusterList?: Cluster[];
 };
 
 class EnvDialog extends React.Component<Props, State> {
@@ -46,19 +65,19 @@ class EnvDialog extends React.Component<Props, State> {
     this.state = {
       targetLoading: false,
       submitLoading: false,
+      newTarget: false,
     };
   }
 
   componentDidMount() {
     const { envItem, isEdit } = this.props;
+    let projectName = this.props.project;
     if (envItem && isEdit) {
       const { name, alias, description, targets, namespace, project } = envItem;
       const targetNames = targets?.map((target) => {
         return target.name;
       });
-      if (project.name) {
-        this.loadProjectTarget(project.name);
-      }
+      projectName = project.name;
       this.field.setValues({
         name,
         alias,
@@ -68,20 +87,52 @@ class EnvDialog extends React.Component<Props, State> {
         project: project.name,
       });
     }
+    if (projectName) {
+      this.loadProjectTarget(projectName);
+    }
+    this.loadClusters();
   }
+
+  loadClusters = () => {
+    if (checkPermission({ resource: 'cluster', action: 'list' }, '', this.props.userInfo)) {
+      getClusterList({}).then((res) => {
+        if (res) {
+          this.setState({ clusterList: res.clusters });
+        }
+      });
+    }
+  };
 
   onClose = () => {
     this.props.onClose();
     this.resetField();
   };
 
-  loadProjectTarget = async (projectName: string) => {
+  loadProjectTarget = async (projectName: string, callback?: () => void) => {
     this.setState({ targetLoading: true });
     getProjectTargetList({ projectName }).then((res) => {
       if (res) {
-        this.setState({ targets: res.targets, targetLoading: false });
+        this.setState({ targets: res.targets, targetLoading: false }, callback);
       }
     });
+  };
+
+  makeTargetDataSource = () => {
+    const { targets } = this.state;
+    const selectTargets: string[] = this.field.getValue('targets');
+    const targetMap = new Map();
+    if (!targets || !selectTargets) {
+      return [];
+    }
+    targets?.map((t) => {
+      targetMap.set(t.name, t);
+    });
+    const data = selectTargets
+      .filter((t) => targetMap.get(t))
+      .map((t) => {
+        return targetMap.get(t);
+      });
+    return data;
   };
 
   onOk = () => {
@@ -137,7 +188,9 @@ class EnvDialog extends React.Component<Props, State> {
   convertTarget = () => {
     const { targets } = this.state;
     return (targets || []).map((target: Target) => ({
-      label: target.alias || target.name,
+      label: `${target.alias || target.name}(${target.cluster?.clusterName}/${
+        target.cluster?.namespace
+      })`,
       value: target.name,
     }));
   };
@@ -155,6 +208,10 @@ class EnvDialog extends React.Component<Props, State> {
     }
   };
 
+  showNewTarget = () => {
+    this.setState({ newTarget: true });
+  };
+
   render() {
     const { Col, Row } = Grid;
     const FormItem = Form.Item;
@@ -169,7 +226,7 @@ class EnvDialog extends React.Component<Props, State> {
     };
 
     const { visible, isEdit, projects, userInfo } = this.props;
-    const { targetLoading, submitLoading } = this.state;
+    const { targetLoading, submitLoading, newTarget, clusterList } = this.state;
     const projectOptions: { label: string; value: string }[] = [];
     (projects || []).map((project) => {
       if (
@@ -227,7 +284,11 @@ class EnvDialog extends React.Component<Props, State> {
                         {
                           required: true,
                           pattern: checkName,
-                          message: <Translation>Please enter a valid English name</Translation>,
+                          message: (
+                            <Translation>
+                              Please enter a valid name contains only alphabetical words
+                            </Translation>
+                          ),
                         },
                       ],
                     })}
@@ -254,7 +315,7 @@ class EnvDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Namespace</Translation>}>
+                <FormItem label={<Translation>Environment Namespace</Translation>}>
                   <Input
                     name="namespace"
                     disabled={isEdit}
@@ -311,36 +372,96 @@ class EnvDialog extends React.Component<Props, State> {
                           message: i18n.t('Please select a project'),
                         },
                       ],
+                      initValue: this.props.project,
                     })}
                   />
                 </FormItem>
               </Col>
             </Row>
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <Loading visible={targetLoading} style={{ width: '100%' }}>
-                  <FormItem label={<Translation>Target</Translation>} required>
-                    <Select
-                      locale={locale().Select}
-                      className="select"
-                      mode="multiple"
-                      placeholder={i18n.t('Please select a target').toString()}
-                      {...init(`targets`, {
-                        rules: [
-                          {
-                            required: true,
-                            message: 'Please select at least one target',
-                          },
-                        ],
-                      })}
-                      dataSource={this.convertTarget()}
+            <If condition={this.field.getValue('project')}>
+              <Row wrap={true}>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <Loading visible={targetLoading} style={{ width: '100%' }}>
+                    <FormItem label={<Translation>Target</Translation>} required>
+                      <Select
+                        locale={locale().Select}
+                        className="select"
+                        mode="multiple"
+                        placeholder={i18n.t('Please select a target').toString()}
+                        {...init(`targets`, {
+                          rules: [
+                            {
+                              required: true,
+                              message: 'Please select at least one target',
+                            },
+                          ],
+                          initValue: [],
+                        })}
+                        dataSource={this.convertTarget()}
+                      />
+                    </FormItem>
+                  </Loading>
+                </Col>
+                <Permission
+                  request={{ resource: 'target:*', action: 'create' }}
+                  project={this.field.getValue('project')}
+                >
+                  <Col className="flexright">
+                    <Button
+                      onClick={this.showNewTarget}
+                      type="secondary"
+                      style={{ marginBottom: '16px' }}
+                    >
+                      <Translation>New Target</Translation>
+                    </Button>
+                  </Col>
+                </Permission>
+              </Row>
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <Table locale={locale().Table} dataSource={this.makeTargetDataSource()}>
+                    <Table.Column
+                      dataIndex={'name'}
+                      title={i18n.t('Name')}
+                      cell={(v: string, i: number, t: Target) => {
+                        if (t.alias) {
+                          return `${t.name}(${t.alias})`;
+                        }
+                        return t.name;
+                      }}
                     />
-                  </FormItem>
-                </Loading>
-              </Col>
-            </Row>
+                    <Table.Column dataIndex={'cluster.clusterName'} title={i18n.t('Cluster')} />
+                    <Table.Column dataIndex={'cluster.namespace'} title={i18n.t('Namespace')} />
+                  </Table>
+                </Col>
+              </Row>
+            </If>
           </Form>
         </Dialog>
+        <If condition={newTarget}>
+          <TargetDialog
+            visible={newTarget}
+            clusterList={clusterList || []}
+            isEdit={false}
+            liteMode={true}
+            project={this.field.getValue('project')}
+            onClose={() => {
+              this.setState({ newTarget: false });
+            }}
+            onOK={(name: string) => {
+              if (this.field.getValue('project')) {
+                this.loadProjectTarget(this.field.getValue('project'), () => {
+                  const existTarget: string[] = this.field.getValue('targets') || [];
+                  existTarget.push(name);
+                  this.field.setValue('targets', existTarget);
+                });
+              }
+              this.setState({
+                newTarget: false,
+              });
+            }}
+          />
+        </If>
       </div>
     );
   }

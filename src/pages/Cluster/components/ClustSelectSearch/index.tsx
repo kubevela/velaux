@@ -5,9 +5,7 @@ import './index.less';
 import i18n from '../../../../i18n';
 
 type Props = {
-  t: (key: string) => {};
-  dispatch: ({}) => {};
-  getChildCompentQuery: (value: string) => (() => void) | undefined;
+  query: (value: string) => (() => void) | undefined;
 };
 
 type State = {
@@ -30,14 +28,14 @@ class InputSearch extends React.Component<Props, State> {
 
   handleClickSearch = () => {
     const { inputValue } = this.state;
-    this.props.getChildCompentQuery(inputValue);
+    this.props.query(inputValue);
   };
 
   render() {
     const { Row, Col } = Grid;
     const { inputValue } = this.state;
     return (
-      <Row className="cluster-input-wraper">
+      <Row className="cluster-input-wrapper">
         <Col span="24">
           <Input
             innerAfter={

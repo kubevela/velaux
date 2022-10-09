@@ -9,11 +9,14 @@ import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
 import type { Project } from '../../../../interface/project';
 import Permission from '../../../../components/Permission';
+import { checkPermission } from '../../../../utils/permission';
+import type { LoginUserInfo } from '../../../../interface/user';
 const { Group: TagGroup } = Tag;
 
 type Props = {
   list?: Env[];
   updateEnvList: () => void;
+  userInfo?: LoginUserInfo;
   changeISEdit: (param: boolean, record: Env) => void;
 };
 
@@ -84,13 +87,32 @@ class TableList extends Component<Props> {
         key: 'targets',
         title: <Translation>Targets</Translation>,
         dataIndex: 'targets',
-        cell: (v?: NameAlias[]) => {
+        cell: (v: NameAlias[], i: number, record: Env) => {
           return (
             <TagGroup>
               {v?.map((target: NameAlias) => {
                 return (
-                  <Tag color="green" key={target.name}>
-                    <Link to="/targets"> {target.alias ? target.alias : target.name}</Link>
+                  <Tag color="green" key={target.name + i}>
+                    <If
+                      condition={checkPermission(
+                        { resource: `target:*`, action: 'list' },
+                        record.project.name,
+                        this.props.userInfo,
+                      )}
+                    >
+                      <Link to="/targets">{target.alias ? target.alias : target.name}</Link>
+                    </If>
+                    <If
+                      condition={
+                        !checkPermission(
+                          { resource: `target:*`, action: 'list' },
+                          record.project.name,
+                          this.props.userInfo,
+                        )
+                      }
+                    >
+                      {target.alias ? target.alias : target.name}
+                    </If>
                   </Tag>
                 );
               })}

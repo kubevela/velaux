@@ -65,7 +65,7 @@ class Cluster extends React.Component<Props, State> {
     });
   };
 
-  getChildCompentQuery = (query: string) => {
+  query = (query: string) => {
     this.setState(
       {
         query,
@@ -185,9 +185,8 @@ class Cluster extends React.Component<Props, State> {
         </If>
 
         <SelectSearch
-          dispatch={dispatch}
-          getChildCompentQuery={(q: string): any => {
-            this.getChildCompentQuery(q);
+          query={(q: string): any => {
+            this.query(q);
           }}
         />
         <CardContend

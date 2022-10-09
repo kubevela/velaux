@@ -207,7 +207,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
                         this.changeEnvDialog(true);
                       }}
                     >
-                      <Translation>Create new environment</Translation>
+                      <Translation>New environment</Translation>
                     </a>
                   }
                   required={true}
@@ -237,6 +237,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
             visible={visibleEnvDialog}
             projects={userInfo?.projects || []}
             userInfo={userInfo}
+            project={this.props.applicationDetail?.project?.name}
             isEdit={false}
             onClose={this.onCloseEnvDialog}
             onOK={this.onOKEnvDialog}
