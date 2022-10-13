@@ -66,6 +66,18 @@ export function describeCluster(node: GraphNode) {
   return lines;
 }
 
+export function describeComponents(node: GraphNode) {
+  const lines = [
+    `Name: ${node.resource.name}`,
+    `Namespace: ${node.resource.service.namespace || '(global)'}`,
+    `Cluster: ${node.resource.service.cluster || 'local'}`
+  ];
+  if (node.resource.service.message) {
+    lines.push(`Message: ${node.resource.service.message}`);
+  }
+  return lines;
+}
+
 export function treeNodeKey(node: TreeNode & { uid?: string }) {
   if (node.uid && node.uid.length > 0) {
     return node.uid;

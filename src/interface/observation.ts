@@ -222,6 +222,8 @@ export interface ResourceTreeNode extends Resource {
   healthStatus?: ResourceHealthStatus;
   additionalInfo?: Record<string, any>;
   leafNodes?: ResourceTreeNode[];
+  service?: any;
+  componentType?: any
 }
 
 export interface ResourceHealthStatus {

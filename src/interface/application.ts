@@ -127,6 +127,8 @@ export interface ComponentStatus {
     healthy: string;
     message: string;
   }[];
+  leafNodes?: any;
+  cluster?: string;
 }
 
 export interface Condition {
@@ -212,6 +214,9 @@ export interface ApplicationComponent extends ApplicationComponentBase {
       type: string;
     };
   };
+  kind?: string;
+  service?: ComponentStatus;
+  leafNodes?: any;
 }
 
 export interface ApplicationRevision {
