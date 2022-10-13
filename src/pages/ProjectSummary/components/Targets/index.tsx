@@ -14,7 +14,7 @@ type Props = {
 type State = {
   list: [];
   isLoading: boolean;
-  isEditIntegration: boolean;
+  isEditConfig: boolean;
 };
 
 class Targets extends Component<Props, State> {
@@ -23,7 +23,7 @@ class Targets extends Component<Props, State> {
     this.state = {
       list: [],
       isLoading: false,
-      isEditIntegration: false,
+      isEditConfig: false,
     };
   }
 

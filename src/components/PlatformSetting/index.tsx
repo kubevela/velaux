@@ -8,7 +8,7 @@ import locale from '../../utils/locale';
 import i18n from '../../i18n';
 import type { DexConfig, SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
-import { updateSystemInfo } from '../../api/config';
+import { updateSystemInfo } from '../../api/system_config';
 import { checkPermission } from '../../utils/permission';
 import Item from '../Item';
 import { If } from 'tsx-control-statements/components';
@@ -214,7 +214,7 @@ class PlatformSetting extends React.Component<Props, State> {
       this.props.onClose();
       this.props.dispatch(
         routerRedux.push({
-          pathname: '/integrations/config-dex-connector/config',
+          pathname: '/configs/config-dex-connector/config',
         }),
       );
     } else if (businessGuideCode === 14010) {

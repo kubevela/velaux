@@ -75,10 +75,6 @@ export interface ProjectMember {
   updateTime?: string;
   userRoles: string[];
 }
-export interface QueryData {
-  projectName: string;
-  configType: string;
-}
 
 export interface ProjectUserQuery {
   projectName: string;

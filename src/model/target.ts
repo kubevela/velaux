@@ -1,6 +1,6 @@
 import { getTarget } from '../api/target';
 
-export interface Querytarget {
+export interface QueryTarget {
   query?: string;
   page?: number;
   pageSize?: number;
@@ -50,7 +50,7 @@ const targets: ModelsType = {
   },
 
   effects: {
-    *listTargets(action: { payload: Querytarget }, { call, put }: { call: any; put: any }) {
+    *listTargets(action: { payload: QueryTarget }, { call, put }: { call: any; put: any }) {
       const result: ResponseGenerator = yield call(getTarget, action.payload);
       yield put({ type: 'updateTargets', payload: result || {} });
     },

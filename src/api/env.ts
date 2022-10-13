@@ -1,12 +1,12 @@
 import { post, get, rdelete, put } from './request';
 import { getDomain } from '../utils/common';
-import type { Querytarget } from '../model/target';
+import type { QueryTarget } from '../model/target';
 import type { CreateEnvRequest } from '../interface/env';
 import { envURL } from './productionLink';
 
 const baseURLOject = getDomain();
 const base = baseURLOject.MOCK || baseURLOject.APIBASE;
-export function getEnvs(params: Querytarget) {
+export function getEnvs(params: QueryTarget) {
   const url = base + envURL;
   return get(url, { params: params }).then((res) => res);
 }

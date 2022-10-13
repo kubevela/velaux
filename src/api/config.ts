@@ -1,15 +1,90 @@
-import type { UpdateSystemInfo } from '../interface/system';
+import { get, post, put, rdelete } from './request';
+import type {
+  CreateConfigDistribution,
+  CreateConfigRequest,
+  NamespacedName,
+  UpdateConfigRequest,
+} from '../interface/configs';
 import { getDomain } from '../utils/common';
-import { get, put } from './request';
-const domainObj = getDomain();
-export const baseURL = domainObj.APIBASE || domainObj.MOCK;
+import { configs, configTemplates, project } from './productionLink';
+import type { ProjectName } from '../interface/project';
 
-export function loadSystemInfo() {
-  const url = `/api/v1/system_info`;
-  return get(url, {});
+const baseURLOject = getDomain();
+const base = baseURLOject.APIBASE;
+
+export function listTemplates(projectName?: string) {
+  let url = base + configTemplates;
+  if (projectName) {
+    url = base + project + '/' + projectName + '/config_templates';
+  }
+  return get(url, {}).then((res) => res);
 }
 
-export function updateSystemInfo(params: UpdateSystemInfo) {
-  const url = `/api/v1/system_info`;
-  return put(url, params, true);
+export function detailTemplate(queryData: NamespacedName, projectName?: string) {
+  let url = base + configTemplates + `/${queryData.name}`;
+  if (projectName) {
+    url = base + project + '/' + projectName + '/config_templates/' + queryData.name;
+  }
+  return get(url, {
+    params: {
+      namespace: queryData.namespace,
+    },
+  }).then((res) => res);
+}
+
+export function createConfig(data: CreateConfigRequest, projectName?: string) {
+  let url = base + configs;
+  if (projectName) {
+    url = base + project + '/' + projectName + '/configs';
+  }
+  return post(url, data).then((res) => res);
+}
+
+export function updateConfig(name: string, data: UpdateConfigRequest, projectName?: string) {
+  let url = base + configs + `/${name}`;
+  if (projectName) {
+    url = base + project + '/' + projectName + '/configs/' + name;
+  }
+  return put(url, data).then((res) => res);
+}
+
+export function getConfigs(template?: string) {
+  const url = base + configs;
+  return get(url, {
+    params: { template: template ? template : '' },
+  }).then((res) => res);
+}
+
+export function detailConfig(name: string, projectName?: string) {
+  let url = base + configs + `/${name}`;
+  if (projectName) {
+    url = base + project + '/' + projectName + '/configs/' + name;
+  }
+  return get(url, {}).then((res) => res);
+}
+
+export function deleteConfig(name: string, projectName?: string) {
+  let url = base + configs + `/${name}`;
+  if (projectName) {
+    url = base + project + '/' + projectName + '/configs/' + name;
+  }
+  return rdelete(url, {}).then((res) => res);
+}
+
+export function getProjectConfigs(query: ProjectName) {
+  const urlPath = project + `/${query.projectName}/configs`;
+  return get(urlPath, {}).then((res) => res);
+}
+
+export function getProjectConfigDistributions(query: ProjectName) {
+  const urlPath = project + `/${query.projectName}/distributions`;
+  return get(urlPath, {}).then((res) => res);
+}
+
+export function applyProjectConfigDistribution(
+  projectName: string,
+  params: CreateConfigDistribution,
+) {
+  const urlPath = project + `/${projectName}/distributions`;
+  return post(urlPath, params).then((res) => res);
 }

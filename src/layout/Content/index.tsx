@@ -21,8 +21,8 @@ import ProjectApplications from '../../pages/ProjectApplications';
 import Roles from '../../pages/Roles';
 import ProjectRoles from '../../pages/ProjectRoles';
 import ProjectMembers from '../../pages/ProjectMembers';
-import IntegrationsLayout from '../Integrations';
-import Integrations from '../../pages/Integrations';
+import ConfigsLayout from '../Configs';
+import Configs from '../../pages/Configs';
 import DefinitionsLayout from '../Definitions';
 import Definitions from '../../pages/Definitions';
 import DefinitionDetails from '../DefinitionDetails';
@@ -195,28 +195,28 @@ export default function Content() {
 
       <Route
         exact
-        path="/integrations"
+        path="/configs"
         render={(props: any) => {
-          return <IntegrationsLayout {...props} />;
+          return <ConfigsLayout {...props} />;
         }}
       />
 
       <Route
         exact
-        path="/integrations/:configType"
+        path="/configs/:templateName"
         render={(props: any) => {
-          return <Redirect to={`/integrations/${props.match.params.configType}/config`} />;
+          return <Redirect to={`/configs/${props.match.params.templateName}/config`} />;
         }}
       />
 
       <Route
         exact
-        path="/integrations/:configType/config"
+        path="/configs/:templateName/config"
         render={(props: any) => {
           return (
-            <IntegrationsLayout {...props}>
-              <Integrations {...props} />
-            </IntegrationsLayout>
+            <ConfigsLayout {...props}>
+              <Configs {...props} />
+            </ConfigsLayout>
           );
         }}
       />

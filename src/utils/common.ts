@@ -63,8 +63,8 @@ export function isRolesPath(pathname: string) {
   return (pathname || '').startsWith('/roles');
 }
 
-export function isIntegrationPath(pathname: string) {
-  return (pathname || '').startsWith('/integration');
+export function isConfigPath(pathname: string) {
+  return (pathname || '').startsWith('/config');
 }
 
 export function isDefinitionsPath(pathname: string) {

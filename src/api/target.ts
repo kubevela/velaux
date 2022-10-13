@@ -3,12 +3,12 @@ import { gettarget_mock } from './devLink';
 import { targetURL } from './productionLink';
 import { getDomain } from '../utils/common';
 import type { Target } from '../interface/target';
-import type { Querytarget } from '../model/target';
+import type { QueryTarget } from '../model/target';
 
 const baseURLOject = getDomain();
 const isMock = baseURLOject.MOCK;
 
-export function getTarget(params: Querytarget) {
+export function getTarget(params: QueryTarget) {
   const url = isMock ? gettarget_mock : targetURL;
   return get(url, { params: params }).then((res) => res);
 }

@@ -151,9 +151,6 @@ class UISchema extends Component<Props, State> {
     if (value) {
       this.form.setValues(value);
     }
-    const values = this.form.getValues();
-    const { onChange } = this.props;
-    if (onChange) onChange(values);
   };
 
   validate = (callback: (error?: string) => void) => {

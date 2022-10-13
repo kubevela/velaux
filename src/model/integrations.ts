@@ -1,29 +1,32 @@
-import { getConfigTypes } from '../api/integration';
-import type { IntegrationBase } from '../interface/integrations';
+import { listTemplates } from '../api/config';
+import type { ConfigTemplate, ListTemplateResponse } from '../interface/configs';
 
-const integrations: any = {
-  namespace: 'integrations',
+interface ConfigState {
+  configTemplates: ConfigTemplate[];
+}
+
+const configs: any = {
+  namespace: 'configs',
   state: {
-    integrationsConfigTypes: [],
+    configTemplates: [],
   },
   reducers: {
-    updateIntegrationType(state: IntegrationBase, { payload }: { payload: IntegrationBase }) {
+    updateTemplates(state: ConfigState, { payload }: { payload: ListTemplateResponse }) {
       return {
         ...state,
-        integrationsConfigTypes: payload,
+        configTemplates: payload.templates || [],
       };
     },
   },
 
   effects: {
-    *getConfigTypes(
-      action: { payload: { projectName: string } },
-      { call, put }: { call: any; put: any },
-    ) {
-      const result: IntegrationBase[] = yield call(getConfigTypes, action.payload);
-      yield put({ type: 'updateIntegrationType', payload: result || [] });
+    *loadTemplates(action: { payload: {} }, { call, put }: { call: any; put: any }) {
+      const result: ListTemplateResponse = yield call(listTemplates);
+      if (result) {
+        yield put({ type: 'updateTemplates', payload: result });
+      }
     },
   },
 };
 
-export default integrations;
+export default configs;

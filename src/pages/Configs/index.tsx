@@ -2,11 +2,10 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
 import { Table, Button, Dialog, Message } from '@b-design/ui';
-import CreateIntegration from './components/CreateIntegrationDialog';
-import { getConfigs, deleteConfig } from '../../api/integration';
+import CreateConfigDialog from './components/CreateConfigDialog';
+import { getConfigs, deleteConfig } from '../../api/config';
 import type { LoginUserInfo } from '../../interface/user';
-import type { IntegrationBase, IntegrationConfigs } from '../../interface/integrations';
-import _ from 'lodash';
+import type { ConfigTemplate, Config } from '../../interface/configs';
 import Translation from '../../components/Translation';
 import Permission from '../../components/Permission';
 import locale from '../../utils/locale';
@@ -16,63 +15,64 @@ import './index.less';
 
 type Props = {
   userInfo?: LoginUserInfo;
-  integrationsConfigTypes: IntegrationBase[];
+  configTemplates: ConfigTemplate[];
   match: {
     params: {
-      configType: string;
+      templateName: string;
     };
   };
 };
 
 type State = {
-  configType: string;
-  list: [];
+  template: string;
+  list: Config[];
+  configName?: string;
   visible: boolean;
   isLoading: boolean;
 };
 
 @connect((store: any) => {
-  return { ...store.integrations, ...store.user };
+  return { ...store.configs, ...store.user };
 })
-class Integrations extends Component<Props, State> {
+class Configs extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      configType: this.getConfigType(),
+      template: this.getTemplateName(),
       list: [],
       visible: false,
       isLoading: false,
     };
   }
   componentDidMount() {
-    this.listIntegrations();
+    this.listConfigs();
   }
 
   componentWillReceiveProps(nextProps: Props) {
     const nextPropsParams = nextProps.match.params || {};
-    if (nextPropsParams.configType !== this.state.configType) {
+    if (nextPropsParams.templateName && nextPropsParams.templateName !== this.state.template) {
       this.setState(
         {
-          configType: nextPropsParams.configType,
+          template: nextPropsParams.templateName,
         },
         () => {
-          this.listIntegrations();
+          this.listConfigs();
         },
       );
     }
   }
 
-  listIntegrations() {
-    const { configType } = this.state;
-    if (!configType) {
+  listConfigs() {
+    const { template } = this.state;
+    if (!template) {
       return;
     }
     this.setState({ isLoading: true });
-    getConfigs({ configType })
+    getConfigs(template)
       .then((res) => {
         if (res) {
           this.setState({
-            list: res,
+            list: res.configs || [],
           });
         } else {
           this.setState({
@@ -85,25 +85,20 @@ class Integrations extends Component<Props, State> {
       });
   }
 
-  getConfigType = () => {
-    return getMatchParamObj(this.props.match, 'configType');
+  getTemplateName = () => {
+    return getMatchParamObj(this.props.match, 'templateName');
   };
 
-  onDelete = (record: IntegrationConfigs) => {
+  onDelete = (record: Config) => {
     Dialog.confirm({
-      content: 'Are you sure you want to delete the config',
+      content: 'Are you sure want to delete this config',
       onOk: () => {
         const { name } = record;
-        const { configType } = this.state;
-        const params = {
-          name,
-          configType,
-        };
-        if (params) {
-          deleteConfig(params).then((res) => {
+        if (name) {
+          deleteConfig(name).then((res) => {
             if (res) {
-              Message.success(<Translation>Integration config deleted successfully</Translation>);
-              setTimeout(() => this.listIntegrations(), 2000);
+              Message.success(<Translation>Config deleted successfully</Translation>);
+              this.listConfigs();
             }
           });
         }
@@ -112,13 +107,13 @@ class Integrations extends Component<Props, State> {
     });
   };
 
-  onCreate = () => {
-    this.setState({ visible: false });
-    setTimeout(() => this.listIntegrations(), 2000);
+  onSuccess = () => {
+    this.setState({ visible: false, configName: '' });
+    this.listConfigs();
   };
 
   onCloseCreate = () => {
-    this.setState({ visible: false });
+    this.setState({ visible: false, configName: '' });
   };
 
   handleClickCreate = () => {
@@ -127,50 +122,33 @@ class Integrations extends Component<Props, State> {
     });
   };
 
-  getConfigTypeDefinitions() {
-    const { integrationsConfigTypes } = this.props;
-    const { configType } = this.state;
-    const findDefinition = _.find(integrationsConfigTypes, (item) => {
-      return item.name === configType;
+  onClick = (configName: string) => {
+    this.setState({
+      visible: true,
+      configName: configName,
     });
-    const transData = ((findDefinition && findDefinition.definitions) || []).map((item: string) => {
-      return { name: item };
-    });
-    return transData || [];
-  }
+  };
 
   render() {
     const columns = [
       {
         key: 'name',
-        title: <Translation>Name</Translation>,
+        title: <Translation>Name(Alias)</Translation>,
         dataIndex: 'name',
-        cell: (v: string) => {
-          return <span>{v}</span>;
+        cell: (v: string, i: number, config: Config) => {
+          const title = `${v}(${config.alias || '-'})`;
+          if (config.sensitive) {
+            return <span>{title}</span>;
+          }
+          return <a onClick={() => this.onClick(config.name)}>{title}</a>;
         },
       },
       {
-        key: 'project',
-        title: <Translation>Project</Translation>,
-        dataIndex: 'project',
+        key: 'description',
+        title: <Translation>Description</Translation>,
+        dataIndex: 'description',
         cell: (v: string) => {
           return <span>{v}</span>;
-        },
-      },
-      {
-        key: 'status',
-        title: <Translation>Status</Translation>,
-        dataIndex: 'status',
-        cell: (v: string) => {
-          const enumStatusList = [
-            { name: 'Ready', color: 'isReadyColor' },
-            { name: 'Not ready', color: 'isNotReady' },
-          ];
-          const findStatus = _.find(enumStatusList, (item) => {
-            return item.name === v;
-          });
-          const colorClass = (findStatus && findStatus.color) || '';
-          return <span className={`${colorClass}`}>{v}</span>;
         },
       },
       {
@@ -185,11 +163,11 @@ class Integrations extends Component<Props, State> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        cell: (v: string, i: number, record: IntegrationConfigs) => {
+        cell: (v: string, i: number, record: Config) => {
           return (
             <Fragment>
               <Permission
-                request={{ resource: `configType/config:${record.name}`, action: 'delete' }}
+                request={{ resource: `config:${record.name}`, action: 'delete' }}
                 project={''}
               >
                 <Button
@@ -211,12 +189,11 @@ class Integrations extends Component<Props, State> {
     ];
 
     const { Column } = Table;
-    const { userInfo } = this.props;
-    const { list, visible, isLoading, configType } = this.state;
+    const { list, visible, isLoading, template, configName } = this.state;
     return (
       <div className="list-content">
         <div className="create-btn">
-          <Permission request={{ resource: `configType/config:*`, action: 'create' }} project={''}>
+          <Permission request={{ resource: `config:*`, action: 'create' }} project={''}>
             <Button type="primary" onClick={this.handleClickCreate}>
               <Translation>New</Translation>
             </Button>
@@ -226,13 +203,12 @@ class Integrations extends Component<Props, State> {
           {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
 
-        <If condition={visible}>
-          <CreateIntegration
+        <If condition={visible && template}>
+          <CreateConfigDialog
             visible={visible}
-            configType={configType}
-            projects={userInfo?.projects || []}
-            componentDefinitions={this.getConfigTypeDefinitions()}
-            onCreate={this.onCreate}
+            configName={configName}
+            template={{ name: template }}
+            onSuccess={this.onSuccess}
             onClose={this.onCloseCreate}
           />
         </If>
@@ -241,4 +217,4 @@ class Integrations extends Component<Props, State> {
   }
 }
 
-export default Integrations;
+export default Configs;

@@ -1,10 +1,10 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
 import Title from '../../components/ListTitle';
-import SelectSearch from './components/ClustSelectSearch';
+import SelectSearch from './components/ClusterSelectSearch';
 import CardContend from './components/CardContent/index';
 import CloudServiceDialog from './components/CloudServiceDialog/index';
-import AddClustDialog from './components/AddClustDialog/index';
+import AddClusterDialog from './components/AddClusterDialog/index';
 import { Button, Message } from '@b-design/ui';
 import { deleteCluster } from '../../api/cluster';
 import Translation from '../../components/Translation';
@@ -214,7 +214,7 @@ class Cluster extends React.Component<Props, State> {
             />
           </If>
           <If condition={showAddCluster}>
-            <AddClustDialog
+            <AddClusterDialog
               page={page}
               pageSize={pageSize}
               query={query}

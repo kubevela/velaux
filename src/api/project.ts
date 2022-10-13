@@ -7,7 +7,6 @@ import type {
   QueryProjectRole,
   ProjectRole,
   ProjectUserCreate,
-  QueryData,
   ProjectUserQuery,
 } from '../interface/project';
 import { project_mock } from './devLink';
@@ -90,12 +89,7 @@ export function deleteProjectUser(query: QueryProjectUser, params: UserRoles) {
   const urlPath = project + `/${query.projectName}/users/${query.userName}`;
   return rdelete(urlPath, params).then((res) => res);
 }
-export function getCloudServiceProviderList(queryData: QueryData) {
-  const urlPath = project + `/${queryData.projectName}/configs?configType=${queryData.configType}`;
-  return get(urlPath, {}).then((res) => res);
-}
-
-export function getProjectConfigs(query: ProjectName) {
-  const urlPath = project + `/${query.projectName}/configs`;
+export function getCloudServiceProviderList(projectName: string) {
+  const urlPath = project + `/${projectName}/providers`;
   return get(urlPath, {}).then((res) => res);
 }

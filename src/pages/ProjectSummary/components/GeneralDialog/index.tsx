@@ -66,7 +66,7 @@ class GeneralDialog extends React.Component<Props, State> {
           .then((res) => {
             this.setState({ loading: false });
             if (res) {
-              Message.success(<Translation>Update general success</Translation>);
+              Message.success(<Translation>Project updated successfully</Translation>);
               this.props.onUpdateGeneral();
             }
           })

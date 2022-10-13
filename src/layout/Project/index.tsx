@@ -115,7 +115,9 @@ class ProjectLayout extends Component<Props> {
                 <Translation>Projects</Translation>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                {projectDetails && (projectDetails.alias || projectDetails.name)}
+                <Link to={'/projects/' + projectDetails?.name}>
+                  {projectDetails?.alias || projectDetails?.name}
+                </Link>
               </Breadcrumb.Item>
             </Breadcrumb>
           </Col>
