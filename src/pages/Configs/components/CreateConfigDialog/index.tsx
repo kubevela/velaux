@@ -72,14 +72,13 @@ class CreateConfigDialog extends React.Component<Props, State> {
 
   componentDidMount() {
     const { configName, template } = this.props;
-    if (template) {
-      this.onDetailTemplate(template, () => {
-        if (configName) {
-          this.onDetailConfig();
+    if (configName) {
+      this.onDetailConfig(() => {
+        if (template) {
+          this.onDetailTemplate(template);
         }
       });
     }
-
     this.loadProjectTemplates();
   }
 
@@ -96,7 +95,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
     }
   };
 
-  onDetailConfig = () => {
+  onDetailConfig = (callback?: () => void) => {
     const { configName, project } = this.props;
     if (configName) {
       detailConfig(configName, project).then((res: Config) => {
@@ -108,18 +107,21 @@ class CreateConfigDialog extends React.Component<Props, State> {
             description: res.description,
             properties: res.properties,
           });
+          if (callback) {
+            callback();
+          }
         }
       });
     }
   };
-  onDetailTemplate = (template: NamespacedName, callback?: () => void) => {
+  onDetailTemplate = (template: NamespacedName) => {
     this.setState({ templateLoading: true });
 
     const { project } = this.props;
     detailTemplate(template, project)
       .then((re) => {
         if (re) {
-          this.setState({ templateDetail: re }, callback);
+          this.setState({ templateDetail: re });
         }
       })
       .finally(() => {
@@ -338,6 +340,8 @@ class CreateConfigDialog extends React.Component<Props, State> {
                           namespace = value.split('/')[0];
                           name = value.split('/')[1];
                         }
+                        this.field.remove('properties');
+                        this.setState({ templateDetail: undefined });
                         this.onDetailTemplate({ name: name, namespace: namespace });
                         this.field.setValue('template', value);
                       }}
@@ -389,7 +393,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
                             rules: [
                               {
                                 validator: validator,
-                                message: i18n.t('Please check app deploy properties'),
+                                message: i18n.t('Please check the config properties'),
                               },
                             ],
                           })}
