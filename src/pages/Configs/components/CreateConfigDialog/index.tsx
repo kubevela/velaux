@@ -45,11 +45,9 @@ type Props = {
 };
 
 type State = {
-  loading: boolean;
   templateDetail?: ConfigTemplateDetail;
   templateLoading: boolean;
   createLoading: boolean;
-  config?: Config;
   propertiesMode: 'native' | 'code';
   templates?: ConfigTemplate[];
 };
@@ -61,7 +59,6 @@ class CreateConfigDialog extends React.Component<Props, State> {
     super(props);
     this.field = new Field(this);
     this.state = {
-      loading: false,
       templateLoading: false,
       createLoading: false,
       propertiesMode: 'native',
@@ -78,6 +75,10 @@ class CreateConfigDialog extends React.Component<Props, State> {
           this.onDetailTemplate(template);
         }
       });
+    } else {
+      if (template) {
+        this.onDetailTemplate(template);
+      }
     }
     this.loadProjectTemplates();
   }
@@ -100,7 +101,6 @@ class CreateConfigDialog extends React.Component<Props, State> {
     if (configName) {
       detailConfig(configName, project).then((res: Config) => {
         if (res) {
-          this.setState({ config: res });
           this.field.setValues({
             name: res.name,
             alias: res.alias,
@@ -138,15 +138,17 @@ class CreateConfigDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      let { template } = this.props;
+      const { template } = this.props;
       let templateName = template?.name;
       let namespace = template?.namespace;
       if (values.template) {
         if (values.template.includes('/')) {
           namespace = values.template.split('/')[0];
           templateName = values.template.split('/')[1];
+        } else {
+          templateName = values.template;
+          namespace = '';
         }
-        template = values.template;
       }
       if (!templateName) {
         return;

@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
-import { Table, Button, Dialog, Message } from '@b-design/ui';
+import { Table, Button, Dialog, Message, Icon } from '@b-design/ui';
 import CreateConfigDialog from './components/CreateConfigDialog';
 import { getConfigs, deleteConfig } from '../../api/config';
 import type { LoginUserInfo } from '../../interface/user';
@@ -193,6 +193,13 @@ class Configs extends Component<Props, State> {
     return (
       <div className="list-content">
         <div className="create-btn">
+          <Button
+            type="secondary"
+            onClick={() => this.listConfigs()}
+            style={{ marginRight: '16px' }}
+          >
+            <Icon type="refresh" />
+          </Button>
           <Permission request={{ resource: `config:*`, action: 'create' }} project={''}>
             <Button type="primary" onClick={this.handleClickCreate}>
               <Translation>New</Translation>
