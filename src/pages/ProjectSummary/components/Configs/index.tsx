@@ -242,7 +242,9 @@ class Configs extends Component<Props, State> {
               hasBorder={true}
               loading={isLoading}
             >
-              {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+              {columns.map((col, key) => (
+                <Column {...col} key={key} align={'left'} />
+              ))}
             </Table>
           </section>
         </div>

@@ -352,7 +352,9 @@ class CloudServiceDialog extends React.Component<Props, State> {
               hasBorder={false}
               loading={tableLoading}
             >
-              {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+              {columns.map((col, key) => (
+                <Column {...col} key={key} align={'left'} />
+              ))}
             </Table>
             <Pagination
               locale={locale().Pagination}

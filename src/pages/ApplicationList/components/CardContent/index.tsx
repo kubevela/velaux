@@ -226,7 +226,9 @@ class CardContent extends React.Component<Props, State> {
             hasBorder={false}
             loading={false}
           >
-            {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
+            {columns.map((col) => (
+              <Column {...col} key={col.key} align={'left'} />
+            ))}
           </Table>
         </div>
       );

@@ -207,7 +207,9 @@ class Configs extends Component<Props, State> {
           </Permission>
         </div>
         <Table locale={locale().Table} dataSource={list} hasBorder={false} loading={isLoading}>
-          {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+          {columns.map((col, key) => (
+            <Column {...col} key={key} align={'left'} />
+          ))}
         </Table>
 
         <If condition={visible && template}>
