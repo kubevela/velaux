@@ -163,13 +163,24 @@ class ApplicationHeader extends Component<Props, State> {
           <Col span={6} className="padding16">
             <Breadcrumb separator="/">
               <Breadcrumb.Item>
-                <Link to="/applications">
+                <Translation>Projects</Translation>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link to={'/projects/' + projectName}>{projectName}</Link>
+              </Breadcrumb.Item>
+
+              <Breadcrumb.Item>
+                <Link to={`/projects/${projectName}/applications`}>
                   <Translation>Applications</Translation>
                 </Link>
               </Breadcrumb.Item>
+
               <Breadcrumb.Item>
-                {applicationDetail && (applicationDetail.alias || applicationDetail.name)}
+                <Link to={`/applications/${applicationDetail?.name || ''}`}>
+                  {applicationDetail && (applicationDetail.alias || applicationDetail.name)}
+                </Link>
               </Breadcrumb.Item>
+
               <Breadcrumb.Item>{item}</Breadcrumb.Item>
             </Breadcrumb>
           </Col>

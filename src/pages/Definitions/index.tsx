@@ -241,7 +241,9 @@ class Definitions extends Component<Props, State> {
           maxBodyHeight={'calc(100vh - 100px)'}
           className="margin-16"
         >
-          {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+          {columns.map((col, key) => (
+            <Column {...col} key={key} align={'left'} />
+          ))}
         </Table>
       </div>
     );

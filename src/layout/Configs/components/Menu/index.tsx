@@ -1,42 +1,76 @@
 import React, { Component } from 'react';
 import { Icon, Grid } from '@b-design/ui';
 import { Link } from 'dva/router';
-import type { IntegrationBase, IntegrationBaseExtends } from '../../../../interface/integrations';
-import defaultIntegrationSVG from '../../../../assets/integration.svg';
+import type { ConfigTemplate } from '../../../../interface/configs';
+import defaultConfigSVG from '../../../../assets/config.svg';
 import helmImg from '../../../../assets/helm.svg';
 import dockerImg from '../../../../assets/docker.svg';
 import gitImg from '../../../../assets/git.svg';
 import ssoImg from '../../../../assets/sso.svg';
 import terraformImg from '../../../../assets/terraform.svg';
+import aliyunImg from '../../../../assets/aliyun.svg';
+import awsImg from '../../../../assets/aws.svg';
+import azureImg from '../../../../assets/azure.svg';
+import nacosImg from '../../../../assets/nacos.svg';
+import grafanaImg from '../../../../assets/grafana.svg';
+import prometheusImg from '../../../../assets/prometheus.svg';
 import _ from 'lodash';
 import './index.less';
 
 const imgDate = [
   {
-    id: 'config-helm-repository',
+    id: 'helm-repository',
     img: helmImg,
   },
   {
-    id: 'config-image-registry',
+    id: 'image-registry',
     img: dockerImg,
   },
   {
-    id: 'terraform-provider',
-    img: terraformImg,
-  },
-  {
-    id: 'config-dex-connector',
+    id: 'dex-connector',
     img: ssoImg,
   },
   {
     id: 'git',
     img: gitImg,
   },
+  {
+    id: 'alibaba',
+    img: aliyunImg,
+  },
+  {
+    id: 'aws',
+    img: awsImg,
+  },
+  {
+    id: 'azure',
+    img: azureImg,
+  },
+  {
+    id: 'terraform',
+    img: terraformImg,
+  },
+  {
+    id: 'nacos',
+    img: nacosImg,
+  },
+  {
+    id: 'grafana',
+    img: grafanaImg,
+  },
+  {
+    id: 'loki',
+    img: grafanaImg,
+  },
+  {
+    id: 'prometheus',
+    img: prometheusImg,
+  },
 ];
 
 type Props = {
   activeName: string;
-  menuData: IntegrationBase[];
+  menuData: ConfigTemplate[];
 };
 type State = {};
 
@@ -53,16 +87,13 @@ class Menu extends Component<Props, State> {
 
   transMenuData = () => {
     const { menuData } = this.props;
-    return (menuData || []).map((item: IntegrationBaseExtends) => {
+    return menuData.map((item: ConfigTemplate) => {
       const findMatchData: any = this.matchMenuData(item.name);
       if (findMatchData) {
-        item.iconType = 'arrow-right';
-        item.img = findMatchData.img;
+        return Object.assign(item, { iconType: 'arrow-right', img: findMatchData.img });
       } else {
-        item.iconType = 'arrow-right';
-        item.img = defaultIntegrationSVG;
+        return Object.assign(item, { iconType: 'arrow-right', img: defaultConfigSVG });
       }
-      return item;
     });
   };
 
@@ -74,7 +105,7 @@ class Menu extends Component<Props, State> {
       const isActive = activeName === item.name ? 'active-menu-item' : '';
       return (
         <li key={item.name}>
-          <Link to={`/integrations/${item.name}/config`}>
+          <Link to={`/configs/${item.name}/config`}>
             <Row className={`menu-item-wrapper ${isActive}`}>
               <Col span="5">
                 <div className="menu-item-img-wrapper">

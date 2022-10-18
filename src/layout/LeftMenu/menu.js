@@ -7,7 +7,7 @@ import {
   isUsersPath,
   isProjectPath,
   isRolesPath,
-  isIntegrationPath,
+  isConfigPath,
   isDefinitionsPath,
 } from '../../utils/common';
 export function getLeftSlider(pathname) {
@@ -19,7 +19,7 @@ export function getLeftSlider(pathname) {
   const isUser = isUsersPath(pathname);
   const isProject = isProjectPath(pathname);
   const isRole = isRolesPath(pathname);
-  const isIntegration = isIntegrationPath(pathname);
+  const isConfig = isConfigPath(pathname);
   const isDefinitions = isDefinitionsPath(pathname);
   return [
     {
@@ -104,11 +104,11 @@ export function getLeftSlider(pathname) {
           permission: { resource: 'project:*', action: 'list' },
         },
         {
-          className: isIntegration,
-          link: '/integrations',
+          className: isConfig,
+          link: '/configs',
           iconType: 'indent',
-          navName: 'Integrations',
-          permission: { resource: 'configType:*', action: 'list' },
+          navName: 'Configs',
+          permission: { resource: 'configTemplate:*', action: 'list' },
         },
       ],
     },

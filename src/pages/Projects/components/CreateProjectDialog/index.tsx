@@ -22,7 +22,7 @@ type State = {
   loading: boolean;
 };
 
-class CreateIntegration extends React.Component<Props, State> {
+class CreateConfig extends React.Component<Props, State> {
   field: Field;
   constructor(props: Props) {
     super(props);
@@ -223,4 +223,4 @@ class CreateIntegration extends React.Component<Props, State> {
   }
 }
 
-export default CreateIntegration;
+export default CreateConfig;

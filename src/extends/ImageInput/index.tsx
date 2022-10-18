@@ -98,8 +98,8 @@ class ImageInput extends React.Component<Props, State> {
               help={
                 <span>
                   To deploy from a private registry, you need to{' '}
-                  <Link to="/integrations/config-image-registry/config">
-                    create a integration configuration
+                  <Link to="/configs/config-image-registry/config">
+                    create a config configuration
                   </Link>
                 </span>
               }

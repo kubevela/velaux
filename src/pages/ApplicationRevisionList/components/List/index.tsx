@@ -214,7 +214,9 @@ class TableList extends Component<Props, State> {
           loading={false}
           emptyContent={<Empty />}
         >
-          {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
+          {columns.map((col) => (
+            <Column {...col} key={col.key} align={'left'} />
+          ))}
         </Table>
         <If condition={visibleApplicationDiff}>
           {compare && (

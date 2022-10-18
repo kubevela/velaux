@@ -12,7 +12,6 @@ import type { Cluster } from '../../../../interface/cluster';
 import type { Project } from '../../../../interface/project';
 import { listNamespaces } from '../../../../api/observation';
 import locale from '../../../../utils/locale';
-import { getSelectLabel } from '../../../../utils/utils';
 import i18n from '../../../../i18n';
 import { If } from 'tsx-control-statements/components';
 
@@ -223,14 +222,10 @@ class TargetDialog extends React.Component<Props, State> {
   };
 
   getProviderList = async (projectName: string) => {
-    const params = {
-      projectName,
-      configType: 'terraform-provider',
-    };
-    getCloudServiceProviderList(params).then((res) => {
-      if (res && Array.isArray(res)) {
+    getCloudServiceProviderList(projectName).then((res) => {
+      if (res && Array.isArray(res.providers)) {
         this.setState({
-          providerList: res,
+          providerList: res.providers,
         });
       } else {
         this.setState({
@@ -263,7 +258,12 @@ class TargetDialog extends React.Component<Props, State> {
       };
     });
     const { providerList } = this.state;
-    const providerListOptions = getSelectLabel(providerList);
+    const providerListOptions = providerList.map((pro) => {
+      return {
+        label: `(${pro.provider})${pro.name}`,
+        value: pro.name,
+      };
+    });
     return (
       <div>
         <Dialog
@@ -429,10 +429,14 @@ class TargetDialog extends React.Component<Props, State> {
                   >
                     <Row>
                       <Col span={12} style={{ padding: '0 8px' }}>
-                        <FormItem label={<Translation>Cloud Service Provider</Translation>}>
+                        <FormItem
+                          label={<Translation>Cloud Service Provider</Translation>}
+                          help={i18n.t('Load the options after the project selected')}
+                        >
                           <Select
                             className="select"
-                            placeholder={i18n.t('Please select').toString()}
+                            locale={locale().Select}
+                            placeholder={i18n.t('Please select a terraform provider').toString()}
                             {...init(`var_providerName`, {
                               rules: [
                                 {
@@ -441,6 +445,14 @@ class TargetDialog extends React.Component<Props, State> {
                                 },
                               ],
                             })}
+                            onChange={(provider: string) => {
+                              providerList.map((pro) => {
+                                if (pro.name == provider) {
+                                  this.field.setValue('var_region', pro.region);
+                                }
+                              });
+                              this.field.setValue('var_providerName', provider);
+                            }}
                             dataSource={providerListOptions}
                           />
                         </FormItem>
@@ -449,6 +461,7 @@ class TargetDialog extends React.Component<Props, State> {
                         <FormItem label={<Translation>Region</Translation>}>
                           <Input
                             name="var_region"
+                            locale={locale().Input}
                             placeholder={i18n.t('Please enter').toString()}
                             {...init('var_region', {
                               rules: [

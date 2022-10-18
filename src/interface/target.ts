@@ -13,11 +13,8 @@ export type Target = {
   project?: NameAlias;
 };
 export interface ProvideList {
-  configType: string;
-  createdTime?: string;
-  description?: string;
-  identifier: string;
   name: string;
-  project: string;
-  updatedTime?: string;
+  region: string;
+  provider: string;
+  createTime: string;
 }

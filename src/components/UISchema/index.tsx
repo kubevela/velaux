@@ -146,14 +146,12 @@ class UISchema extends Component<Props, State> {
     this.setState({ advanced: advanced });
   };
 
+  // The upper component must set the values before init the UI Schema component.
   setValues = () => {
     const { value } = this.props;
     if (value) {
       this.form.setValues(value);
     }
-    const values = this.form.getValues();
-    const { onChange } = this.props;
-    if (onChange) onChange(values);
   };
 
   validate = (callback: (error?: string) => void) => {

@@ -4,7 +4,9 @@ import type { Project } from '../../interface/project';
 import type { User } from '../../interface/user';
 import General from './components/General';
 import Targets from './components/Targets';
-import Integrations from './components/Integrations';
+import Configs from './components/Configs';
+import Permission from '../../components/Permission';
+import ConfigDistributionPage from './components/ConfigDistribution';
 
 type Props = {
   projectDetails: Project;
@@ -52,7 +54,13 @@ class Summary extends Component<Props, State> {
             projectName={params.projectName}
           />
           <Targets projectName={params.projectName} />
-          <Integrations projectName={params.projectName} />
+          <Permission
+            project={params.projectName}
+            request={{ resource: `project:${params.projectName}/configs:*`, action: 'list' }}
+          >
+            <Configs projectName={params.projectName} />
+            <ConfigDistributionPage projectName={params.projectName} />
+          </Permission>
         </div>
       </Fragment>
     );

@@ -1,7 +1,7 @@
 import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios from 'axios';
 import { getMessage } from './status';
-import { baseURL } from './config';
+import { baseURL } from './system_config';
 import { Message } from '@b-design/ui';
 import { handleError } from '../utils/errors';
 import { getToken } from '../utils/storage';

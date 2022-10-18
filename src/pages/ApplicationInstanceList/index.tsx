@@ -562,7 +562,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                   this.onRowOpen(openRowKeys);
                 }}
               >
-                {columns && columns.map((col) => <Column {...col} key={col.key} align={'left'} />)}
+                {columns.map((col) => (
+                  <Column {...col} key={col.key} align={'left'} />
+                ))}
               </Table>
             </div>
           </If>

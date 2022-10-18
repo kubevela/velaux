@@ -5,13 +5,13 @@ import { Grid } from '@b-design/ui';
 import Title from '../../components/ListTitle';
 import Menu from './components/Menu';
 import Empty from '../../components/Empty';
-import type { IntegrationBase } from '../../interface/integrations';
+import type { ConfigTemplate } from '../../interface/configs';
 import { getMatchParamObj } from '../../utils/utils';
 import './index.less';
 
 type Props = {
   activeName: string;
-  integrationsConfigTypes: IntegrationBase[];
+  configTemplates: ConfigTemplate[];
   history: {
     push: (path: string, state?: {}) => {};
   };
@@ -20,7 +20,7 @@ type Props = {
   };
   match: {
     params: {
-      configType: string;
+      templateName: string;
     };
     path: string;
   };
@@ -31,66 +31,66 @@ type State = {
   activeName: string;
 };
 @connect((store: any) => {
-  return { ...store.integrations };
+  return { ...store.configs };
 })
-class IntegrationsLayout extends Component<Props, State> {
+class ConfigsLayout extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      activeName: this.getConfigType(),
+      activeName: this.getTemplateName(),
     };
   }
 
   componentDidMount() {
-    this.listConfigType();
+    this.listTemplates();
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    const { integrationsConfigTypes = [] } = nextProps;
+    const { configTemplates } = nextProps;
     if (nextProps.location.pathname != this.props.location.pathname) {
       const nextPropsParams = nextProps.match.params || {};
       this.setState({
-        activeName: nextPropsParams.configType,
+        activeName: nextPropsParams.templateName,
       });
     }
 
-    if (nextProps.match.path === '/integrations' && integrationsConfigTypes.length != 0) {
-      const pathname = this.getIntegrationsFirstMenuName(integrationsConfigTypes);
+    if (nextProps.match.path === '/configs' && configTemplates.length != 0) {
+      const pathname = this.getConfigsFirstMenuName(configTemplates);
       this.initMenuRoute(pathname);
     }
   }
 
-  listConfigType = () => {
+  listTemplates = () => {
     this.props.dispatch({
-      type: 'integrations/getConfigTypes',
+      type: 'configs/loadTemplates',
       payload: {},
     });
   };
 
-  getConfigType = () => {
-    return getMatchParamObj(this.props.match, 'configType');
+  getTemplateName = () => {
+    return getMatchParamObj(this.props.match, 'templateName');
   };
 
-  getIntegrationsFirstMenuName = (data: IntegrationBase[]) => {
+  getConfigsFirstMenuName = (data: ConfigTemplate[]) => {
     return (data && data[0] && data[0].name) || '';
   };
 
   initMenuRoute = (pathname: string) => {
     if (pathname) {
-      const link = `/integrations/${pathname}`;
+      const link = `/configs/${pathname}`;
       this.props.history.push(link);
     }
   };
 
   render() {
     const { Row, Col } = Grid;
-    const { integrationsConfigTypes } = this.props;
+    const { configTemplates } = this.props;
     const { activeName } = this.state;
     return (
-      <div className="integrations-wrapper">
+      <div className="configs-wrapper">
         <Title
-          title={'Integrations'}
-          subTitle={'Integration with external systems and configuration management.'}
+          title={'Configs'}
+          subTitle={'Provide templated, extensibility configuration management capabilities.'}
         />
         <If condition={!activeName}>
           <Empty style={{ marginTop: '40px' }} />
@@ -98,7 +98,7 @@ class IntegrationsLayout extends Component<Props, State> {
         <If condition={activeName}>
           <Row>
             <Col span="5">
-              <Menu activeName={activeName} menuData={integrationsConfigTypes} />
+              <Menu activeName={activeName} menuData={configTemplates} />
             </Col>
             <Col span="19">{this.props.children}</Col>
           </Row>
@@ -108,4 +108,4 @@ class IntegrationsLayout extends Component<Props, State> {
   }
 }
 
-export default IntegrationsLayout;
+export default ConfigsLayout;

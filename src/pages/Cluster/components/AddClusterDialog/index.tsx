@@ -36,7 +36,7 @@ type State = {
   cluster: Cluster;
 };
 
-class AddClustDialog extends React.Component<Props, State> {
+class AddClusterDialog extends React.Component<Props, State> {
   field: Field;
   DefinitionCodeRef: React.RefObject<DefinitionCode>;
   constructor(props: Props) {
@@ -284,4 +284,4 @@ class AddClustDialog extends React.Component<Props, State> {
   }
 }
 
-export default AddClustDialog;
+export default AddClusterDialog;

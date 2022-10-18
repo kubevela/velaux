@@ -14,7 +14,7 @@ type Props = {
 type State = {
   list: [];
   isLoading: boolean;
-  isEditIntegration: boolean;
+  isEditConfig: boolean;
 };
 
 class Targets extends Component<Props, State> {
@@ -23,7 +23,7 @@ class Targets extends Component<Props, State> {
     this.state = {
       list: [],
       isLoading: false,
-      isEditIntegration: false,
+      isEditConfig: false,
     };
   }
 
@@ -111,7 +111,9 @@ class Targets extends Component<Props, State> {
           </section>
           <section className="card-content-table">
             <Table locale={locale().Table} dataSource={list} hasBorder={true} loading={isLoading}>
-              {columns && columns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+              {columns.map((col, key) => (
+                <Column {...col} key={key} align={'left'} />
+              ))}
             </Table>
           </section>
         </div>
