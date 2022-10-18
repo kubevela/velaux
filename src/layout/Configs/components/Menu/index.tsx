@@ -12,6 +12,8 @@ import aliyunImg from '../../../../assets/aliyun.svg';
 import awsImg from '../../../../assets/aws.svg';
 import azureImg from '../../../../assets/azure.svg';
 import nacosImg from '../../../../assets/nacos.svg';
+import grafanaImg from '../../../../assets/grafana.svg';
+import prometheusImg from '../../../../assets/prometheus.svg';
 import _ from 'lodash';
 import './index.less';
 
@@ -51,6 +53,18 @@ const imgDate = [
   {
     id: 'nacos',
     img: nacosImg,
+  },
+  {
+    id: 'grafana',
+    img: grafanaImg,
+  },
+  {
+    id: 'loki',
+    img: grafanaImg,
+  },
+  {
+    id: 'prometheus',
+    img: prometheusImg,
   },
 ];
 
