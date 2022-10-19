@@ -65,7 +65,6 @@ type State = {
   target?: Target;
   componentName?: string;
   resources: AppliedResource[];
-  componentData: ApplicationComponent[];
   deployLoading: boolean;
   resourceLoading: boolean;
   endpointLoading: boolean;
@@ -87,7 +86,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       envName: '',
       mode: 'overview',
       resources: [],
-      componentData: [],
     };
   }
 
