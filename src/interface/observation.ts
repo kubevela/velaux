@@ -1,3 +1,5 @@
+import type { ApplicationComponent, ComponentStatus } from './application';
+
 export interface PodBase {
   cluster: string;
   component: string;
@@ -222,8 +224,10 @@ export interface ResourceTreeNode extends Resource {
   healthStatus?: ResourceHealthStatus;
   additionalInfo?: Record<string, any>;
   leafNodes?: ResourceTreeNode[];
-  service?: any;
-  componentType?: any
+
+  // For the component node
+  service?: ComponentStatus;
+  component?: ApplicationComponent;
 }
 
 export interface ResourceHealthStatus {

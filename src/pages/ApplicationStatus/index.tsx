@@ -95,48 +95,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     this.loadApplicationStatus();
   }
 
-  buildComponentsData(components?: ApplicationComponent[]) {
-    const newComponents: ApplicationComponent[] = JSON.parse(JSON.stringify(components))
-    newComponents?.map((comRes) => {
-      if (comRes.dependsOn !== null) {
-        comRes.dependsOn.map((res) => {
-          const arr = newComponents.filter((n) => {
-            return n.name === res
-          })
-          if (arr[0].leafNodes) {
-            arr[0].leafNodes.push(comRes)
-          } else {
-            arr[0].leafNodes = []
-            arr[0].leafNodes.push(comRes)
-          }
-        })
-      }
-    })
-    return newComponents
-  }
-
-  addServicesStatus(services?: ComponentStatus[], components?: ApplicationComponent[]) {
-    const newData: any[] = []
-    components?.map((comRes) => {
-      comRes.kind = 'Component'
-      const clusters: any[] = []
-      services?.map((service) => {
-        if (!clusters.includes(service.cluster)) {
-          clusters.push(service.cluster)
-        }
-        clusters.map((res) => {
-          if (comRes.name === service.name && res === service.cluster) {
-            const newRes = {...comRes }
-            newRes.service = service
-            newRes.service.cluster = res
-            newData.push(newRes)
-          }
-        })
-      })
-    })   
-    return this.buildComponentsData(newData)
-  }
-
   componentWillReceiveProps(nextProps: any) {
     const { params } = nextProps.match;
     if (params.envName !== this.state.envName) {
@@ -162,8 +120,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
           if (res.status) {
             this.loadApplicationEndpoints();
             this.loadApplicationAppliedResources();
-            const { components } = this.props
-            this.setState({ componentData: this.addServicesStatus(res.status?.services, components )})
           }
         },
       });
@@ -223,7 +179,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
 
   loadApplicationAppliedResources = async () => {
     const { mode } = this.state;
-    if (mode === 'resource-graph' || mode === 'application-graph') {
+    if (mode === 'resource-graph') {
       await this.loadResourceTree();
       return;
     }
@@ -392,8 +348,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       this.setState({ mode: mode }, () => {
         this.loadApplicationAppliedResources();
       });
-    } else if (mode == 'application-graph') {
-      this.loadApplicationAppliedResources();
     }
   };
 
@@ -410,7 +364,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       resources,
       componentName,
       deployLoading,
-      componentData,
     } = this.state;
     let componentStatus = applicationStatus?.services;
     if (componentName) {
@@ -737,6 +690,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                   application={applicationDetail}
                   env={env}
                   resources={resources}
+                  graphType="resource-graph"
                 />
               </If>
             </Loading>
@@ -750,7 +704,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                   env={env}
                   resources={resources}
                   components={components}
-                  componentsData={componentData}
                   graphType="application-graph"
                 />
               </If>

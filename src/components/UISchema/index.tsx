@@ -113,7 +113,7 @@ class UISchema extends Component<Props, State> {
       onChange: (name: string, value: any) => {
         const values: any = this.form.getValues();
         // Can not assign the empty value for the field with the number type
-        if (paramKeyMap[name].uiType == 'Number' && value === '') {
+        if (paramKeyMap[name] && paramKeyMap[name].uiType == 'Number' && value === '') {
           delete values[name];
         }
         // Can not assign the empty value for the field with the array type

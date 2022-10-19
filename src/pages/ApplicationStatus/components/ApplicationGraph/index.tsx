@@ -1,17 +1,19 @@
 import { Button, Icon } from '@b-design/ui';
 import React from 'react';
 import { If } from 'tsx-control-statements/components';
-import type { TreeNode } from '../../../../components/TreeGraph';
-import TreeGraph from '../../../../components/TreeGraph';
+import type { TreeNode } from '../../../../components/TreeGraph/interface';
+import { TreeGraph } from '../../../../components/TreeGraph';
 import type {
   ApplicationDetail,
   ApplicationStatus,
   EnvBinding,
   ApplicationComponent,
+  ComponentStatus,
 } from '../../../../interface/application';
 import type { AppliedResource, ResourceTreeNode } from '../../../../interface/observation';
 import { ShowResource } from './resource-show';
 import './index.less';
+import classNames from 'classnames';
 
 type Props = {
   applicationStatus?: ApplicationStatus;
@@ -19,8 +21,7 @@ type Props = {
   env?: EnvBinding;
   resources: AppliedResource[];
   components?: ApplicationComponent[];
-  graphType?: string,
-  componentsData?: ApplicationComponent[];
+  graphType: 'resource-graph' | 'application-graph';
 };
 
 type State = {
@@ -66,7 +67,54 @@ class ApplicationGraph extends React.Component<Props, State> {
     return tree;
   }
 
-  buildClusterNode(resources: AppliedResource[], components?: ApplicationComponent[], graphType?: string): TreeNode[] {
+  convertComponentNode(service: ComponentStatus, component?: ApplicationComponent): TreeNode {
+    const node: TreeNode = {
+      nodeType: 'component',
+      resource: {
+        name: service.name,
+        namespace: service.namespace,
+        kind: 'Component',
+        component: component,
+        cluster: service.cluster,
+        service: service,
+      },
+    };
+    return node;
+  }
+
+  isLeafNode(componentName: string, component: ApplicationComponent): boolean {
+    return component.dependsOn?.includes(componentName) || false;
+  }
+
+  generateTree(tree: Map<string, TreeNode>, components: ApplicationComponent[]) {
+    tree.forEach((node) => {
+      const nodeMap = new Map<string, TreeNode>();
+      node.leafNodes?.map((ln) => {
+        nodeMap.set(ln.resource.name, ln);
+      });
+      const deleteNode: string[] = [];
+      node.leafNodes?.map((n) => {
+        let isTop = true;
+        components.map((c) => {
+          if (this.isLeafNode(n.resource.name, c)) {
+            const parentNode = nodeMap.get(c.name);
+            if (parentNode && !parentNode.leafNodes) {
+              parentNode.leafNodes = [n];
+            } else if (parentNode && parentNode.leafNodes) {
+              parentNode.leafNodes.push(n);
+            }
+            isTop = false;
+          }
+        });
+        if (!isTop) {
+          deleteNode.push(n.resource.name);
+        }
+      });
+      node.leafNodes = node.leafNodes?.filter((n) => !deleteNode.includes(n.resource.name));
+    });
+  }
+
+  buildClusterNode(resources: AppliedResource[], graphType?: string): TreeNode[] {
     const clusterTree: Map<string, TreeNode> = new Map<string, TreeNode>();
     if (graphType === 'resource-graph') {
       resources.map((res) => {
@@ -85,22 +133,33 @@ class ApplicationGraph extends React.Component<Props, State> {
           }
         }
       });
-    } else {
-      const arr = components?.filter((res) => {return res.dependsOn === null})
-      arr?.map((res) => {
-        const cluster = res?.service?.cluster || 'local'
-        if (!clusterTree.get(cluster)) {
-          clusterTree.set(cluster, { resource: { name: cluster }, nodeType: 'cluster' });
+    } else if (graphType === 'application-graph') {
+      const { applicationStatus, components } = this.props;
+      const services = (applicationStatus && applicationStatus.services) || [];
+      const componentMap = new Map<string, ApplicationComponent>();
+      components?.map((com) => {
+        componentMap.set(com.name, com);
+      });
+      services.map((s) => {
+        const cluster = s.cluster || 'local';
+        const namespace = s.namespace;
+        const name = `${cluster}/${namespace}`;
+        if (!clusterTree.get(name)) {
+          clusterTree.set(name, { resource: { name: name }, nodeType: 'target' });
         }
-        const node = clusterTree.get(cluster);
-        if (node) {
-          if (!node.leafNodes) {
-            node.leafNodes = this.convertNode(arr);
+        const clusterNode = clusterTree.get(name);
+        if (clusterNode) {
+          const component = componentMap.get(s.name);
+          if (!clusterNode.leafNodes) {
+            clusterNode.leafNodes = [this.convertComponentNode(s, component)];
           } else {
-            node.leafNodes = node.leafNodes.concat(this.convertNode(arr));
+            clusterNode.leafNodes = clusterNode.leafNodes.concat(
+              this.convertComponentNode(s, component),
+            );
           }
         }
-      })
+      });
+      this.generateTree(clusterTree, components || []);
     }
     const tree: TreeNode[] = [];
     clusterTree.forEach((value: TreeNode) => {
@@ -110,7 +169,7 @@ class ApplicationGraph extends React.Component<Props, State> {
   }
 
   buildTree(): TreeNode {
-    const { resources, env, application, graphType, componentsData } = this.props;
+    const { resources, env, application, graphType } = this.props;
     const root: TreeNode = {
       nodeType: 'app',
       resource: {
@@ -119,7 +178,7 @@ class ApplicationGraph extends React.Component<Props, State> {
         apiVersion: 'core.oam.dev/v1beta1',
         namespace: env?.appDeployNamespace || '',
       },
-      leafNodes: this.buildClusterNode(resources, graphType === 'resource-graph' ? [] : componentsData, graphType),
+      leafNodes: this.buildClusterNode(resources, graphType),
     };
     return root;
   }
@@ -133,7 +192,7 @@ class ApplicationGraph extends React.Component<Props, State> {
     const { showResource, resource, zoom } = this.state;
     const data = this.buildTree();
     return (
-      <div className="graph-container">
+      <div className={classNames('graph-container')}>
         <div className="operation">
           <Button.Group>
             <Button
@@ -160,10 +219,9 @@ class ApplicationGraph extends React.Component<Props, State> {
           onResourceDetailClick={this.onResourceDetailClick}
           appName={application?.name || ''}
           envName={env?.name || ''}
-          onNodeClick={() => {}}
           node={data}
           zoom={zoom}
-          graphType={graphType}
+          nodesep={graphType === 'resource-graph' ? 50 : 80}
         />
         <If condition={showResource && resource}>
           {resource && (
