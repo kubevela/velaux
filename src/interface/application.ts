@@ -107,28 +107,21 @@ export interface ApplicationStatus {
     revision: number;
     revisionHash: string;
   };
-  components?: {
-    kind: string;
-    namespace: string;
-    name: string;
-    apiVersion: string;
-  }[];
   services?: ComponentStatus[];
   appliedResources: Resource[];
 }
 
 export interface ComponentStatus {
   name: string;
-  env?: string;
-  healthy: string;
+  namespace: string;
+  healthy: boolean;
   message: string;
-  traits: {
-    type: string;
-    healthy: string;
-    message: string;
-  }[];
-  leafNodes?: any;
-  cluster?: string;
+  traits?: TraitStatus[];
+  cluster: string;
+  workloadDefinition: {
+    apiVersion: string;
+    kind: string;
+  };
 }
 
 export interface Condition {
@@ -169,6 +162,12 @@ export interface Trait {
   updateTime?: string;
 }
 
+export interface TraitStatus {
+  type: string;
+  healthy: string;
+  message: string;
+}
+
 export interface ApplicationComponentBase {
   name: string;
   alias?: string;
@@ -177,7 +176,7 @@ export interface ApplicationComponentBase {
   componentType: string;
   creator?: string;
   main: boolean;
-  dependsOn: string[];
+  dependsOn?: string[];
   createTime?: string;
   updateTime?: string;
   input?: InputItem[];
@@ -214,9 +213,6 @@ export interface ApplicationComponent extends ApplicationComponentBase {
       type: string;
     };
   };
-  kind?: string;
-  service?: ComponentStatus;
-  leafNodes?: any;
 }
 
 export interface ApplicationRevision {

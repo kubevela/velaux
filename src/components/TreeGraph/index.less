@@ -2,6 +2,8 @@
 
 .graph-tree {
   position: relative;
+
+  margin-top: 32px;
   overflow: auto;
 
   .graph-node {
@@ -31,6 +33,9 @@
         color: #a6a6a6;
         font-size: 12px;
       }
+      .healthy.success {
+        color: #28a745;
+      }
     }
 
     .icon {
@@ -58,20 +63,6 @@
       i {
         color: #666;
       }
-    }
-    .trait {
-      height: 24px;
-      line-height: 24px;
-    }
-    .label-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 5px;
-      background: #2DC86D;
-      display: inline-block;
-      position: absolute;
-      bottom: 7px;
-      left: -9px;
     }
     .additional {
       position: absolute;

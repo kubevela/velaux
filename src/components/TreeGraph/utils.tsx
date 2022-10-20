@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { GraphNode, TreeNode } from './index';
+import type { GraphNode, TreeNode, Node } from './interface';
 
 import cm from '../../assets/resources/cm.svg';
 import deploy from '../../assets/resources/deploy.svg';
@@ -66,14 +66,26 @@ export function describeCluster(node: GraphNode) {
   return lines;
 }
 
+export function describeTarget(node: GraphNode) {
+  const info = node.resource.name.split('/');
+  if (info.length > 1) {
+    const lines = [`Cluster: ${info[0]}`, `Namespace: ${info[1]}`];
+    return lines;
+  }
+  return [`Cluster: ${node.resource.name}`];
+}
+
 export function describeComponents(node: GraphNode) {
   const lines = [
     `Name: ${node.resource.name}`,
-    `Namespace: ${node.resource.service.namespace || '(global)'}`,
-    `Cluster: ${node.resource.service.cluster || 'local'}`
+    `Alias: ${node.resource.component?.alias}`,
+    `Type: ${node.resource.component?.componentType}`,
+    `DependsOn: ${node.resource.component?.dependsOn || []}`,
+    `Namespace: ${node.resource?.namespace}`,
+    `Cluster: ${node.resource.service?.cluster || 'local'}`,
   ];
-  if (node.resource.service.message) {
-    lines.push(`Message: ${node.resource.service.message}`);
+  if (node.resource.service?.message) {
+    lines.push(`Message: ${node.resource.service?.message}`);
   }
   return lines;
 }
@@ -95,7 +107,7 @@ export function nodeKey(node: TreeNode) {
   ].join('/');
 }
 
-export function getGraphSize(nodes: GraphNode[]): { width: number; height: number } {
+export function getGraphSize(nodes: Node[]): { width: number; height: number } {
   let width = 0;
   let height = 0;
   nodes.forEach((node) => {
@@ -112,13 +124,21 @@ export function getNodeSize(node: TreeNode): { width: number; height: number } {
     width = 140;
     height = 40;
   }
+  if (node.nodeType == 'target') {
+    width = 200;
+    height = 40;
+  }
   if (node.nodeType == 'app') {
     width = 180;
     height = 40;
   }
   if (node.nodeType == 'pod') {
-    width = 180;
+    width = 220;
     height = 60;
+  }
+  if (node.nodeType == 'component') {
+    width = 320;
+    height = 40;
   }
   return { width, height };
 }

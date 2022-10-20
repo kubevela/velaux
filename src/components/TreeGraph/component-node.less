@@ -1,0 +1,30 @@
+.label-traits {
+  z-index: 1000;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  white-space: nowrap;
+  .trait-num {
+    display: block;
+    padding: 2px 4px;
+    border: rgb(27, 88, 244) solid 1px;
+    border-radius: 4px;
+    &.active {
+      color: #fff;
+      background-color: rgb(27, 88, 244);
+    }
+  }
+}
+
+.trait-graph {
+  position: absolute;
+  top: -16px;
+  left: 260px;
+  .trait {
+    height: 24px;
+    line-height: 24px;
+  }
+  .trait-node {
+    padding-left: 1em;
+  }
+}
