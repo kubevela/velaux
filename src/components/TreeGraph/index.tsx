@@ -325,7 +325,7 @@ export const TreeGraph = (props: TreeGraphProps) => {
           case 'pod':
             return <React.Fragment key={key}>{renderPodNode(props, key, node)}</React.Fragment>;
           case 'component':
-            return <ComponentNode key={key} node={node} showTrait={false} />;
+            return <ComponentNode key={key} node={node} showTrait={true} />;
           default:
             return (
               <React.Fragment key={key}>{renderResourceNode(props, key, node)}</React.Fragment>

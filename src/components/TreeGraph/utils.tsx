@@ -80,7 +80,8 @@ export function describeComponents(node: GraphNode) {
     `Name: ${node.resource.name}`,
     `Alias: ${node.resource.component?.alias}`,
     `Type: ${node.resource.component?.componentType}`,
-    `Namespace: ${node.resource.service?.namespace}`,
+    `DependsOn: ${node.resource.component?.dependsOn || []}`,
+    `Namespace: ${node.resource?.namespace}`,
     `Cluster: ${node.resource.service?.cluster || 'local'}`,
   ];
   if (node.resource.service?.message) {

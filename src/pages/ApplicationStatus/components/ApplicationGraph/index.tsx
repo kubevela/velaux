@@ -86,6 +86,7 @@ class ApplicationGraph extends React.Component<Props, State> {
     return component.dependsOn?.includes(componentName) || false;
   }
 
+  // generate the component tree base the dependencies
   generateTree(tree: Map<string, TreeNode>, components: ApplicationComponent[]) {
     tree.forEach((node) => {
       const nodeMap = new Map<string, TreeNode>();
@@ -159,7 +160,7 @@ class ApplicationGraph extends React.Component<Props, State> {
           }
         }
       });
-      this.generateTree(clusterTree, components || []);
+      //this.generateTree(clusterTree, components || []);
     }
     const tree: TreeNode[] = [];
     clusterTree.forEach((value: TreeNode) => {
