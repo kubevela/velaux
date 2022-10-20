@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
-import { Balloon, Icon } from '@b-design/ui';
+import { Icon } from '@b-design/ui';
 import { getLeftSlider } from './menu';
 import type { LoginUserInfo } from '../../interface/user';
 import type { SystemInfo } from '../../interface/system';
@@ -72,17 +72,13 @@ const LeftMenu = (props: Props) => {
       <div className="slide-wrapper">
         <ul className="ul-wrapper">{childrenSlider}</ul>
         <div className="bottom">
-          <Balloon
-            align="t"
-            trigger={
-              <div className="nav-container">
-                {releaseVersion}-{__COMMIT_HASH__}
-              </div>
-            }
-          >
-            <p>API Server Version: {props.systemInfo?.systemVersion?.velaVersion}</p>
-            <p>API Server GitCommit: {props.systemInfo?.systemVersion?.gitVersion}</p>
-          </Balloon>
+          <p>
+            UI Version: {releaseVersion}-{__COMMIT_HASH__}
+          </p>
+          <p>
+            API Version: {props.systemInfo?.systemVersion?.velaVersion}-
+            {props.systemInfo?.systemVersion?.gitVersion}
+          </p>
         </div>
       </div>
     </div>
