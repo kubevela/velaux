@@ -1,6 +1,7 @@
 import { post, get, rdelete, put } from './request';
 import { addons, addonRegistries, enabledAddon } from './productionLink';
 import { getDomain } from '../utils/common';
+import type { EnableAddonRequest } from '../interface/addon';
 
 const baseURLOject = getDomain();
 const base = baseURLOject.MOCK || baseURLOject.APIBASE;
@@ -23,7 +24,16 @@ export function getAddonsList(params: any) {
 
 export function getAddonsDetails(params: { name: string; version?: string }) {
   const gurl = `${base + addons}/${params.name}`;
-  return get(gurl, params).then((res) => res);
+  return get(
+    gurl,
+    params.version
+      ? {
+          params: {
+            version: params.version,
+          },
+        }
+      : {},
+  ).then((res) => res);
 }
 
 export function disableAddon(params: { name: string }) {
@@ -31,12 +41,7 @@ export function disableAddon(params: { name: string }) {
   return post(gurl, params).then((res) => res);
 }
 
-export function enableAddon(params: {
-  name: string;
-  version: string;
-  clusters?: string[];
-  properties: any;
-}) {
+export function enableAddon(params: EnableAddonRequest) {
   const gurl = `${base + addons}/${params.name}/enable`;
   const req: any = { args: params.properties, version: params.version };
   if (params.clusters) {
@@ -45,12 +50,7 @@ export function enableAddon(params: {
   return post(gurl, req).then((res) => res);
 }
 
-export function upgradeAddon(params: {
-  name: string;
-  version: string;
-  clusters?: string[];
-  properties: any;
-}) {
+export function upgradeAddon(params: EnableAddonRequest) {
   const gurl = `${base + addons}/${params.name}/update`;
   const req: any = { args: params.properties, version: params.version };
   if (params.clusters) {
