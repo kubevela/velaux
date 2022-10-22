@@ -2,6 +2,10 @@
   width: 100%;
   padding: 0 16px;
   box-shadow: 5px 0 8px #888;
+  cursor: auto !important;
+  .logo {
+    width: 224px;
+  }
   .nav-wrapper {
     position: relative;
     width: 100%;
@@ -40,6 +44,29 @@
       padding: 0 8px;
       span {
         margin-left: 8px;
+      }
+    }
+  }
+  .integration-items {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 100%;
+    .item {
+      a {
+        display: flex;
+        justify-content: center;
+        height: 100%;
+        color: #fff;
+        img {
+          width: 30px;
+        }
+        span {
+          margin-left: 4px;
+          line-height: 48px;
+        }
+        &:hover {
+          color: var(--hover-color);
+        }
       }
     }
   }
