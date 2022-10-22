@@ -16,6 +16,10 @@ export interface Addon {
   registryName?: string;
   availableVersions?: string[];
   url?: string;
+  system?: {
+    vela?: string;
+    kubernetes?: string;
+  };
 }
 
 export interface AddonStatus {
@@ -68,4 +72,11 @@ export interface AddonRegistry {
 export interface AddonBaseStatus {
   name: string;
   phase: 'disabled' | 'enabled' | 'enabling' | 'suspend' | 'disabling';
+}
+
+export interface EnableAddonRequest {
+  name: string;
+  version: string;
+  properties: Record<string, any>;
+  clusters?: string[];
 }
