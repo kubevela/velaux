@@ -33,7 +33,7 @@ import UISchema from '../../../../components/UISchema';
 import type { Addon, AddonStatus, EnableAddonRequest } from '../../../../interface/addon';
 import locale from '../../../../utils/locale';
 import StatusShow from '../../../../components/StatusShow';
-import type { ApplicationStatus } from '../../../../interface/application';
+import type { ApplicationStatus, UIParam } from '../../../../interface/application';
 import i18n from '../../../../i18n';
 import type { NameAlias } from '../../../../interface/env';
 import Permission from '../../../../components/Permission';
@@ -69,6 +69,7 @@ type State = {
   enabledClusters?: string[];
   endpoints?: Endpoint[];
   propertiesMode: 'code' | 'native';
+  schema?: UIParam[];
 };
 
 class AddonDetailDialog extends React.Component<Props, State> {
@@ -105,7 +106,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
     getAddonsDetails({ name: this.props.addonName, version: version })
       .then((res: Addon) => {
         if (res) {
-          this.setState({ addonDetailInfo: res, loading: false });
+          this.setState({ addonDetailInfo: res, schema: res.uiSchema, loading: false });
           if (!this.state.version && res.version) {
             this.setState({ version: res.version });
           }
@@ -279,7 +280,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
   };
   changeVersion = (version: string) => {
     this.setState({ version: version }, () => {
-      this.loadAddonDetail();
+      this.setState({ schema: undefined }, () => {
+        this.loadAddonDetail();
+      });
     });
   };
 
@@ -306,6 +309,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
       enabledClusters,
       endpoints,
       propertiesMode,
+      schema,
     } = this.state;
     const { showAddon, addonName } = this.props;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -510,13 +514,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
               </If>
             </Card>
 
-            <If condition={addonDetailInfo?.uiSchema}>
+            <If condition={schema}>
               <Card
                 contentHeight={'auto'}
                 className="withActions"
                 title="Properties"
                 subTitle={
-                  addonDetailInfo && addonDetailInfo.uiSchema
+                  schema
                     ? [
                         <Button
                           style={{ marginTop: '-12px' }}
@@ -548,7 +552,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                 }
               >
                 <Row>
-                  <If condition={addonDetailInfo}>
+                  <If condition={schema}>
                     {this.state.mode && (
                       <UISchema
                         {...this.form.init(`properties`, {
@@ -560,7 +564,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                           ],
                         })}
                         enableCodeEdit={propertiesMode === 'code'}
-                        uiSchema={addonDetailInfo && addonDetailInfo.uiSchema}
+                        uiSchema={schema}
                         definition={{
                           name: addonDetailInfo?.name || '',
                           type: 'addon',
