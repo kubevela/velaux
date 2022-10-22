@@ -7,7 +7,6 @@ import {
   Button,
   Input,
   Select,
-  Divider,
   Icon,
   Card,
   Loading,
@@ -246,14 +245,12 @@ class ComponentDialog extends React.Component<Props, State> {
       return (
         <div>
           <span>{alias ? `${alias}(${name})` : name}</span>
-          <Divider />
         </div>
       );
     } else {
       return (
         <div>
           <span>{i18n.t('New Component')} </span>
-          <Divider />
         </div>
       );
     }

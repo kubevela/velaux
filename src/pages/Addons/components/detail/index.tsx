@@ -13,6 +13,7 @@ import {
   Grid,
   Dropdown,
   Menu,
+  Icon,
 } from '@b-design/ui';
 import type { Rule } from '@alifd/field';
 import { If } from 'tsx-control-statements/components';
@@ -27,13 +28,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Empty from '../../../../components/Empty';
 import DrawerWithFooter from '../../../../components/Drawer';
-import Group from '../../../../extends/Group';
 import Translation from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
-import type { Addon, AddonStatus } from '../../../../interface/addon';
+import type { Addon, AddonStatus, EnableAddonRequest } from '../../../../interface/addon';
 import locale from '../../../../utils/locale';
 import StatusShow from '../../../../components/StatusShow';
-import type { ApplicationStatus } from '../../../../interface/application';
+import type { ApplicationStatus, UIParam } from '../../../../interface/application';
 import i18n from '../../../../i18n';
 import type { NameAlias } from '../../../../interface/env';
 import Permission from '../../../../components/Permission';
@@ -68,6 +68,8 @@ type State = {
   allClusters?: NameAlias[];
   enabledClusters?: string[];
   endpoints?: Endpoint[];
+  propertiesMode: 'code' | 'native';
+  schema?: UIParam[];
 };
 
 class AddonDetailDialog extends React.Component<Props, State> {
@@ -77,6 +79,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
+      propertiesMode: 'native',
       addonDetailInfo: {
         name: '',
       },
@@ -103,7 +106,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
     getAddonsDetails({ name: this.props.addonName, version: version })
       .then((res: Addon) => {
         if (res) {
-          this.setState({ addonDetailInfo: res, loading: false });
+          this.setState({ addonDetailInfo: res, schema: res.uiSchema, loading: false });
           if (!this.state.version && res.version) {
             this.setState({ version: res.version });
           }
@@ -212,17 +215,21 @@ class AddonDetailDialog extends React.Component<Props, State> {
         return;
       }
       this.setState({ upgradeLoading: true });
-      upgradeAddon({
+      const params: EnableAddonRequest = {
         name: this.props.addonName,
         version: this.state.version,
-        clusters: this.state.clusters,
         properties: values.properties,
-      }).then(() => {
+      };
+      if (this.state.addonDetailInfo?.deployTo?.runtimeCluster) {
+        params.clusters = this.state.clusters;
+      }
+      upgradeAddon(params).then(() => {
         this.loadAddonStatus();
         this.setState({ upgradeLoading: false });
       });
     });
   };
+
   enableAddon = async (properties: any) => {
     if (!this.state.version) {
       Message.warning(i18n.t('Please firstly select want to enable version'));
@@ -237,12 +244,15 @@ class AddonDetailDialog extends React.Component<Props, State> {
     }
     this.setState({ statusLoading: true }, () => {
       if (this.state.version) {
-        enableAddon({
+        const params: EnableAddonRequest = {
           name: this.props.addonName,
           version: this.state.version,
-          clusters: this.state.clusters,
           properties: properties,
-        }).then(() => {
+        };
+        if (this.state.addonDetailInfo?.deployTo?.runtimeCluster) {
+          params.clusters = this.state.clusters;
+        }
+        enableAddon(params).then(() => {
           this.loadAddonStatus();
         });
       }
@@ -270,7 +280,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
   };
   changeVersion = (version: string) => {
     this.setState({ version: version }, () => {
-      this.loadAddonDetail();
+      this.setState({ schema: undefined }, () => {
+        this.loadAddonDetail();
+      });
     });
   };
 
@@ -296,6 +308,8 @@ class AddonDetailDialog extends React.Component<Props, State> {
       allClusters,
       enabledClusters,
       endpoints,
+      propertiesMode,
+      schema,
     } = this.state;
     const { showAddon, addonName } = this.props;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -477,6 +491,18 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     value={version}
                   />
                 </Form.Item>
+                {addonDetailInfo?.system && (
+                  <span className="warning-text">
+                    This version requirements: (
+                    {addonDetailInfo?.system.vela
+                      ? `KubeVela: ${addonDetailInfo?.system.vela}`
+                      : ''}
+                    {addonDetailInfo?.system.kubernetes
+                      ? ` Kubernetes: ${addonDetailInfo?.system.kubernetes}`
+                      : ''}
+                    )
+                  </span>
+                )}
               </If>
 
               <If condition={addonDetailInfo?.deployTo?.runtimeCluster}>
@@ -491,34 +517,69 @@ class AddonDetailDialog extends React.Component<Props, State> {
               </If>
             </Card>
 
-            <If condition={addonDetailInfo?.uiSchema}>
-              <Group
-                title={<Translation>Properties</Translation>}
-                description={<Translation>Set the addon configuration parameters</Translation>}
-                required={true}
-                closed={status === 'enabled'}
-                alwaysShow={true}
-                disableAddon={true}
-                hasToggleIcon={true}
+            <If condition={schema}>
+              <Card
+                contentHeight={'auto'}
+                className="withActions"
+                title="Properties"
+                subTitle={
+                  schema
+                    ? [
+                        <Button
+                          style={{ marginTop: '-12px' }}
+                          onClick={() => {
+                            if (propertiesMode === 'native') {
+                              this.setState({ propertiesMode: 'code' });
+                            } else {
+                              this.setState({ propertiesMode: 'native' });
+                            }
+                          }}
+                        >
+                          <If condition={propertiesMode === 'native'}>
+                            <Icon
+                              style={{ color: '#1b58f4' }}
+                              type={'display-code'}
+                              title={'Switch to the coding mode'}
+                            />
+                          </If>
+                          <If condition={propertiesMode === 'code'}>
+                            <Icon
+                              style={{ color: '#1b58f4' }}
+                              type={'laptop'}
+                              title={'Switch to the native mode'}
+                            />
+                          </If>
+                        </Button>,
+                      ]
+                    : []
+                }
               >
-                <Form field={this.form}>
-                  {this.state.mode && (
-                    <UISchema
-                      {...this.form.init('properties', {
-                        rules: [
-                          {
-                            validator: validator,
-                            message: 'Please check addon properties',
-                          },
-                        ],
-                      })}
-                      ref={this.uiSchemaRef}
-                      uiSchema={addonDetailInfo?.uiSchema}
-                      mode={this.state.mode}
-                    />
-                  )}
-                </Form>
-              </Group>
+                <Row>
+                  <If condition={schema}>
+                    {this.state.mode && (
+                      <UISchema
+                        {...this.form.init(`properties`, {
+                          rules: [
+                            {
+                              validator: validator,
+                              message: i18n.t('Please check the addon properties'),
+                            },
+                          ],
+                        })}
+                        enableCodeEdit={propertiesMode === 'code'}
+                        uiSchema={schema}
+                        definition={{
+                          name: addonDetailInfo?.name || '',
+                          type: 'addon',
+                          description: addonDetailInfo?.description || '',
+                        }}
+                        ref={this.uiSchemaRef}
+                        mode={this.state.mode}
+                      />
+                    )}
+                  </If>
+                </Row>
+              </Card>
             </If>
             <If condition={addonDetailInfo?.dependencies}>
               <Card
