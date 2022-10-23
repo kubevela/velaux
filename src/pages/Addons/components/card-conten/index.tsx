@@ -2,7 +2,7 @@ import type { MouseEvent } from 'react';
 import React from 'react';
 import './index.less';
 
-import { Grid, Card, Tag } from '@b-design/ui';
+import { Grid, Card, Tag, Balloon } from '@b-design/ui';
 import type { Addon, AddonBaseStatus } from '../../../../interface/addon';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
@@ -132,9 +132,11 @@ class CardContent extends React.Component<Props, State> {
                         <Col span="16" className="font-size-16">
                           <a onClick={() => clickAddon(name)}>{name}</a>
                         </Col>
-                        <If condition={registryName}>
+                        <If condition={registryName && registryName == 'experimental'}>
                           <Col span="8" className="flexright">
-                            <Tag color="blue">{registryName}</Tag>
+                            <Balloon trigger={<Tag color="yellow">Experimental</Tag>}>
+                              This addon is experimental, please don't use it in production
+                            </Balloon>
                           </Col>
                         </If>
                       </Row>

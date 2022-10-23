@@ -239,7 +239,11 @@ class TopBar extends Component<Props, State> {
                 if (config.properties && config.properties.endpoint) {
                   return (
                     <div className="item" title={config.description}>
-                      <a target="_blank" href={config.properties.endpoint}>
+                      <a
+                        target="_blank"
+                        href={config.properties.endpoint}
+                        rel="noopener noreferrer"
+                      >
                         <img src={grafanaImg} />
                         <span>{config.alias || config.name}</span>
                       </a>
