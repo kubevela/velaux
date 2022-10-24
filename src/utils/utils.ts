@@ -110,6 +110,10 @@ export function getLink(endpointObj: Endpoint) {
   if (appProtocol && appProtocol !== '') {
     protocol = appProtocol;
   }
+  // Support to open this address in a new window directly.
+  if (protocol == 'tcp') {
+    protocol = 'http';
+  }
   if (host == '') {
     return path;
   }
