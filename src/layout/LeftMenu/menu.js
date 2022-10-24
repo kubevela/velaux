@@ -108,7 +108,7 @@ export function getLeftSlider(pathname) {
           link: '/configs',
           iconType: 'indent',
           navName: 'Configs',
-          permission: { resource: 'configTemplate:*', action: 'list' },
+          permission: { resource: 'config:*', action: 'list' },
         },
       ],
     },

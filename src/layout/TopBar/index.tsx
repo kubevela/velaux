@@ -22,6 +22,11 @@ import locale from '../../utils/locale';
 import type { AddonBaseStatus } from '../../interface/addon';
 import i18n from '../../i18n';
 import type { Project } from '../../interface/project';
+import { getConfigs } from '../../api/config';
+import type { Config } from '../../interface/configs';
+import { AiFillSetting } from 'react-icons/ai';
+import grafanaImg from '../../assets/grafana.svg';
+import { checkPermission } from '../../utils/permission';
 
 type Props = {
   dispatch: ({}) => {};
@@ -34,8 +39,8 @@ type Props = {
 type State = {
   platformSetting: boolean;
   isEditAdminUser: boolean;
-  userInfo?: LoginUserInfo;
   showMysqlProjectList: boolean;
+  grafanaConfigs?: Config[];
 };
 
 const TelemetryDataCollectionKey = 'telemetryDataCollection';
@@ -75,6 +80,17 @@ class TopBar extends Component<Props, State> {
       type: 'addons/getEnabledAddons',
       payload: {},
     });
+  };
+
+  loadGrafanaIntegration = () => {
+    const { userInfo } = this.props;
+    if (checkPermission({ resource: 'config', action: 'list' }, '', userInfo)) {
+      getConfigs('grafana').then((res) => {
+        if (res && res.configs) {
+          this.setState({ grafanaConfigs: res.configs });
+        }
+      });
+    }
   };
 
   telemetryDataCollection = async () => {
@@ -125,10 +141,9 @@ class TopBar extends Component<Props, State> {
   loadUserInfo = () => {
     this.props.dispatch({
       type: 'user/getLoginUserInfo',
-      callback: (res: LoginUserInfo) => {
-        this.setState({ userInfo: res }, () => {
-          this.isEditPlatForm();
-        });
+      callback: () => {
+        this.isEditPlatForm();
+        this.loadGrafanaIntegration();
       },
     });
   };
@@ -190,7 +205,7 @@ class TopBar extends Component<Props, State> {
   };
 
   isEditPlatForm = () => {
-    const { userInfo } = this.state;
+    const { userInfo } = this.props;
     const isAdminUser = isAdminUserCheck(userInfo);
     if (isAdminUser && userInfo && !userInfo.email) {
       this.setState({
@@ -208,38 +223,52 @@ class TopBar extends Component<Props, State> {
   };
 
   render() {
-    const { Row, Col } = Grid;
-    const { systemInfo, dispatch, show } = this.props;
-    const { platformSetting, isEditAdminUser, userInfo, showMysqlProjectList } = this.state;
+    const { Row } = Grid;
+    const { systemInfo, dispatch, show, userInfo } = this.props;
+    const { platformSetting, isEditAdminUser, showMysqlProjectList, grafanaConfigs } = this.state;
+
     return (
       <div className="layout-topbar" id="layout-topbar">
         <Row className="nav-wrapper">
-          <Col span="4" className="logo">
+          <div className="logo">
             <img src={logo} title={'Make shipping applications more enjoyable.'} />
-          </Col>
-          <div style={{ flex: '1 1 0%' }} />
+          </div>
+          <div style={{ flex: '1 1 0%' }}>
+            <div className="integration-items">
+              {grafanaConfigs?.map((config) => {
+                if (config.properties && config.properties.endpoint) {
+                  return (
+                    <div className="item" title={config.description}>
+                      <a
+                        target="_blank"
+                        href={config.properties.endpoint}
+                        rel="noopener noreferrer"
+                      >
+                        <img src={grafanaImg} />
+                        <span>{config.alias || config.name}</span>
+                      </a>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+          </div>
           <div className="right">
-            <Permission request={{ resource: 'systemSetting', action: 'update' }}>
-              <div className="vela-item" onClick={this.showPlatformSetting}>
-                <Translation>Platform Setting</Translation>
-              </div>
-            </Permission>
             <Permission request={{ resource: 'cloudshell', action: 'create' }}>
-              <div
-                className="vela-item"
-                title="Open the cloud shell"
-                onClick={this.onOpenCloudShell}
-              >
+              <div className="vela-item" title="Open Cloud Shell" onClick={this.onOpenCloudShell}>
                 <AiOutlineCode size={18} />
               </div>
             </Permission>
+            <Permission request={{ resource: 'systemSetting', action: 'update' }}>
+              <div className="vela-item" onClick={this.showPlatformSetting}>
+                <AiFillSetting size={18} title={'Platform Setting'} />
+              </div>
+            </Permission>
+
             <div className="vela-item">
               <a title="KubeVela Documents" href="https://kubevela.io" target="_blank">
                 <Icon size={14} type="help1" />
               </a>
-            </div>
-            <div className="vela-item">
-              <SwitchLanguage />
             </div>
 
             <If condition={userInfo}>
@@ -332,6 +361,9 @@ class TopBar extends Component<Props, State> {
                 </Menu>
               </Dropdown>
             </If>
+            <div className="vela-item">
+              <SwitchLanguage />
+            </div>
           </div>
         </Row>
         <If condition={platformSetting}>

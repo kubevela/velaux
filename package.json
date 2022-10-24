@@ -75,7 +75,6 @@
     "react-refresh": "^0.10.0",
     "redux": "4.1.2",
     "remark-gfm": "3.0.1",
-    "tiny-pubsub": "^1.1.0",
     "tsx-control-statements": "4.1.1",
     "uuid": "^8.3.2"
   },
