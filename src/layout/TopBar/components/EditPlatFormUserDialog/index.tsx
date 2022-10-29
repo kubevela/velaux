@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Grid, Form, Input, Field, Button, Message, Icon, Dialog } from '@b-design/ui';
+import { Grid, Form, Input, Field, Message, Icon, Dialog } from '@b-design/ui';
 import { updateUser } from '../../../../api/users';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkUserPassword } from '../../../../utils/common';
@@ -63,15 +63,6 @@ class EditPlatFormUserDialog extends Component<Props, State> {
     return i18n.t('Reset the password and email for the administrator account');
   }
 
-  showClickButtons = () => {
-    const { isLoading } = this.state;
-    return [
-      <Button type="primary" onClick={this.onUpdateUser} loading={isLoading}>
-        {i18n.t('Update')}
-      </Button>,
-    ];
-  };
-
   handleClickLook = () => {
     this.setState({
       isLookPassword: !this.state.isLookPassword,
@@ -80,6 +71,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
 
   render() {
     const init = this.field.init;
+    const { isLoading } = this.state;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const formItemLayout = {
@@ -95,12 +87,13 @@ class EditPlatFormUserDialog extends Component<Props, State> {
         <Dialog
           visible={true}
           title={this.showTitle()}
+          className={'commonDialog'}
           style={{ width: '600px' }}
           onOk={this.onUpdateUser}
           locale={locale().Dialog}
           footerActions={['ok']}
         >
-          <Form {...formItemLayout} field={this.field}>
+          <Form loading={isLoading} {...formItemLayout} field={this.field}>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Password</Translation>} required>
