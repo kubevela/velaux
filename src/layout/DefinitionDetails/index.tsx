@@ -1,12 +1,13 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'dva';
-import { Grid, Breadcrumb } from '@b-design/ui';
+import { Grid, Breadcrumb, Icon } from '@b-design/ui';
 import { Link } from 'dva/router';
 import Translation from '../../components/Translation';
 import type { LoginUserInfo } from '../../interface/user';
 import type { DefinitionMenuType } from '../../interface/definitions';
 import _ from 'lodash';
 import './index.less';
+import classNames from 'classnames';
 
 const { Row, Col } = Grid;
 
@@ -66,7 +67,10 @@ class DefinitionDetailsLayout extends Component<Props> {
     return (
       <Fragment>
         <Row>
-          <Col span={6} className="padding16">
+          <Col span={6} className={classNames('padding16', 'breadcrumb')}>
+            <Link to={'/'}>
+              <Icon type="home" />
+            </Link>
             <Breadcrumb separator="/">
               <Breadcrumb.Item>
                 <Translation>Definitions</Translation>

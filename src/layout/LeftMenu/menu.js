@@ -8,6 +8,7 @@ import {
   isProjectPath,
   isRolesPath,
   isConfigPath,
+  isPipelinePath,
   isDefinitionsPath,
 } from '../../utils/common';
 export function getLeftSlider(pathname) {
@@ -16,6 +17,7 @@ export function getLeftSlider(pathname) {
   const isAddons = isAddonsPath(pathname);
   const isTarget = isTargetURL(pathname);
   const isEnv = isEnvPath(pathname);
+  const isPipeline = isPipelinePath(pathname);
   const isUser = isUsersPath(pathname);
   const isProject = isProjectPath(pathname);
   const isRole = isRolesPath(pathname);
@@ -35,9 +37,16 @@ export function getLeftSlider(pathname) {
         {
           className: isEnv,
           link: '/envs',
-          iconType: 'Directory-tree',
+          iconType: 'layer-group',
           navName: 'Environments',
           permission: { resource: 'project:?/environment:*', action: 'list' },
+        },
+        {
+          className: isPipeline,
+          link: '/pipelines',
+          iconType: 'Directory-tree',
+          navName: 'Pipelines',
+          permission: { resource: 'project:?/pipelines:*', action: 'list' },
         },
       ],
     },

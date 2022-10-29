@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Message, Dialog } from '@b-design/ui';
+import { Table, Message, Dialog, Button } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import { deleteTarget } from '../../../../api/target';
 import './index.less';
@@ -8,6 +8,7 @@ import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
 import { Link } from 'dva/router';
 import Permission from '../../../../components/Permission';
+import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
 
 type Props = {
   list?: [];
@@ -84,14 +85,39 @@ class TableList extends Component<Props> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
+        width: '200px',
         cell: (v: string, i: number, record: Target) => {
           return (
             <div>
               <Permission
+                request={{ resource: `target:${record.name}`, action: 'update' }}
+                project={''}
+              >
+                <Button
+                  text={true}
+                  component={'a'}
+                  size={'medium'}
+                  ghost={true}
+                  className="margin-left-10"
+                  onClick={() => {
+                    this.onEdit(record);
+                  }}
+                >
+                  <AiFillSetting />
+                  <Translation>Edit</Translation>
+                </Button>
+                <span className="line" />
+              </Permission>
+              <Permission
                 request={{ resource: `target:${record.name}`, action: 'delete' }}
                 project={''}
               >
-                <a
+                <Button
+                  text={true}
+                  component={'a'}
+                  size={'medium'}
+                  className="danger-btn"
+                  ghost={true}
                   onClick={() => {
                     Dialog.confirm({
                       type: 'confirm',
@@ -107,21 +133,9 @@ class TableList extends Component<Props> {
                     });
                   }}
                 >
+                  <AiFillDelete />
                   <Translation>Remove</Translation>
-                </a>
-              </Permission>
-              <Permission
-                request={{ resource: `target:${record.name}`, action: 'update' }}
-                project={''}
-              >
-                <a
-                  className="margin-left-10"
-                  onClick={() => {
-                    this.onEdit(record);
-                  }}
-                >
-                  <Translation>Edit</Translation>
-                </a>
+                </Button>
               </Permission>
             </div>
           );

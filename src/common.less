@@ -364,14 +364,30 @@ a {
 }
 
 .commonDialog {
+  flex-direction: column;
+  justify-content: space-between;
   width: 800px;
   height: auto;
   min-height: 400px;
-
+  padding: 0 !important;
+  .next-dialog-header {
+    color: var(--grey-900);
+    font-weight: 700;
+    font-size: var(--font-size-medium);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .next-dialog-close {
+    .next-dialog-close-icon {
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
+  }
   .next-dialog-footer {
-    display: flex;
+    position: absolute;
+    bottom: 0;
     justify-content: center !important;
-
+    width: 100%;
     .next-btn {
       display: block;
       flex: none !important;
@@ -380,8 +396,10 @@ a {
   }
 
   .next-dialog-body {
+    flex: 1;
     width: 100% !important;
     max-height: none !important;
+    margin-bottom: 48px !important;
   }
 
   .basic {
@@ -421,10 +439,6 @@ a {
 
 .next-select {
   width: 100%;
-}
-
-.next-dialog-body {
-  width: 100% !important;
 }
 
 .cursor-pointer {
@@ -474,14 +488,49 @@ a {
   color: @dangerColor !important;
   border: @dangerColor 1px solid !important;
 }
+
+.next-btn.next-btn-text.danger-btn {
+  border: @dangerColor 0px solid !important;
+}
+
 .danger-btn:hover {
   color: #fff !important;
   background: @dangerColor !important;
 }
+
 .danger-icon:hover {
   color: @dangerColor !important;
 }
 
 .line {
   border: solid 0.2px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: nowrap;
+  .next-breadcrumb {
+    margin-left: 8px;
+  }
+  .next-breadcrumb-text,
+  .next-breadcrumb-separator {
+    height: 30px;
+    line-height: 30px;
+    a {
+      color: @primarycolor;
+    }
+  }
+}
+
+.next-btn,
+.inline-center {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dropdown-menu-item {
+  svg {
+    margin-right: 8px;
+  }
+  color: var(--grey-500);
 }

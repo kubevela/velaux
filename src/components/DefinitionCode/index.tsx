@@ -12,7 +12,6 @@ type Props = {
   id?: string;
   onChange?: (params: any) => void;
   onBlurEditor?: (value: string) => void;
-  style?: React.CSSProperties;
 };
 
 class DefinitionCode extends React.Component<Props> {
@@ -88,8 +87,7 @@ class DefinitionCode extends React.Component<Props> {
   }
 
   render() {
-    const { id, style } = this.props;
-    return <div style={style} id={id} />;
+    return null;
   }
 }
 
