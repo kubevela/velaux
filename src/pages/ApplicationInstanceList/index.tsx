@@ -592,7 +592,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                     cell={(value: string, index: number, record: CloudInstance) => {
                       if (record.url) {
                         return (
-                          <a target="_blank" href={record.url}>
+                          <a target="_blank" href={record.url} rel="noopener noreferrer">
                             {value}
                           </a>
                         );
@@ -630,7 +630,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                     cell={(value: string, index: number, record: CloudInstance) => {
                       if (record.instanceName) {
                         return (
-                          <a target="_blank" href={value}>
+                          <a target="_blank" href={value} rel="noopener noreferrer">
                             <Translation>Console</Translation>
                           </a>
                         );

@@ -266,7 +266,12 @@ class TopBar extends Component<Props, State> {
             </Permission>
 
             <div className="vela-item">
-              <a title="KubeVela Documents" href="https://kubevela.io" target="_blank">
+              <a
+                title="KubeVela Documents"
+                href="https://kubevela.io"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Icon size={14} type="help1" />
               </a>
             </div>

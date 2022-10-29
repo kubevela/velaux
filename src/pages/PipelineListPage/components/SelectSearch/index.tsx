@@ -18,9 +18,7 @@ type Props = {
 
 type State = {
   projectValue: string;
-  targetValue: string;
   inputValue: string;
-  envValue: string;
 };
 
 class SelectSearch extends React.Component<Props, State> {
@@ -28,12 +26,9 @@ class SelectSearch extends React.Component<Props, State> {
     super(props);
     this.state = {
       projectValue: '',
-      targetValue: '',
-      envValue: '',
       inputValue: '',
     };
     this.onChangeProject = this.onChangeProject.bind(this);
-    this.onChangeTarget = this.onChangeTarget.bind(this);
     this.handleChangName = this.handleChangName.bind(this);
   }
 
@@ -43,18 +38,7 @@ class SelectSearch extends React.Component<Props, State> {
         projectValue: e,
       },
       () => {
-        this.getApplications();
-      },
-    );
-  }
-
-  onChangeTarget(e: string) {
-    this.setState(
-      {
-        targetValue: e,
-      },
-      () => {
-        this.getApplications();
+        this.getPipelines();
       },
     );
   }
@@ -65,22 +49,11 @@ class SelectSearch extends React.Component<Props, State> {
     });
   }
 
-  onChangeEnv = (e: string) => {
-    this.setState(
-      {
-        envValue: e,
-      },
-      () => {
-        this.getApplications();
-      },
-    );
-  };
-
   handleClickSearch = () => {
-    this.getApplications();
+    this.getPipelines();
   };
 
-  getApplications = async () => {
+  getPipelines = async () => {
     const { projectValue, inputValue } = this.state;
     const params = {
       project: projectValue,
@@ -136,7 +109,7 @@ class SelectSearch extends React.Component<Props, State> {
         </Col>
         <Col xl={6} className="flexboth">
           <div className="padding16">
-            <Button type={'secondary'} onClick={() => this.getApplications()}>
+            <Button type={'secondary'} onClick={() => this.getPipelines()}>
               <Icon type="refresh" />
             </Button>
           </div>
