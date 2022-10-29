@@ -71,6 +71,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
 
   render() {
     const init = this.field.init;
+    const { isLoading } = this.state;
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const formItemLayout = {
@@ -92,7 +93,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
           locale={locale().Dialog}
           footerActions={['ok']}
         >
-          <Form {...formItemLayout} field={this.field}>
+          <Form loading={isLoading} {...formItemLayout} field={this.field}>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Password</Translation>} required>
