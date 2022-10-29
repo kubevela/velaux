@@ -117,7 +117,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
     reader.readAsText(fileSelect);
     reader.onload = () => {
       this.field.setValues({
-        config: reader.result?.toString() || '',
+        steps: reader.result?.toString() || '',
       });
     };
     return {
