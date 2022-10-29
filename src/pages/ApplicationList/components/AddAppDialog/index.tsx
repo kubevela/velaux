@@ -10,7 +10,6 @@ import type { DefinitionDetail } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
-import './index.less';
 import type { Project } from '../../../../interface/project';
 import { connect } from 'dva';
 import locale from '../../../../utils/locale';

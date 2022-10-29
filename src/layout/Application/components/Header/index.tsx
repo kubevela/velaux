@@ -1,4 +1,4 @@
-import { Grid, Card, Breadcrumb, Button, Message, Dialog } from '@b-design/ui';
+import { Grid, Card, Breadcrumb, Button, Message, Dialog, Icon } from '@b-design/ui';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 import Translation from '../../../../components/Translation';
@@ -25,6 +25,7 @@ import locale from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
 import i18n from 'i18next';
 import Permission from '../../../../components/Permission';
+import classNames from 'classnames';
 
 const { Row, Col } = Grid;
 
@@ -160,11 +161,11 @@ class ApplicationHeader extends Component<Props, State> {
     return (
       <div>
         <Row>
-          <Col span={6} className="padding16">
+          <Col span={6} className={classNames('padding16', 'breadcrumb')}>
+            <Link to={'/'}>
+              <Icon type="home" />
+            </Link>
             <Breadcrumb separator="/">
-              <Breadcrumb.Item>
-                <Translation>Projects</Translation>
-              </Breadcrumb.Item>
               <Breadcrumb.Item>
                 <Link to={'/projects/' + projectName}>{projectName}</Link>
               </Breadcrumb.Item>

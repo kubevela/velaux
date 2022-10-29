@@ -52,10 +52,22 @@ export function isEnvPath(pathname: string) {
   return (pathname || '').startsWith('/envs');
 }
 
+export function isPipelinePath(pathname: string) {
+  if ((pathname || '').startsWith('/pipelines')) {
+    return true;
+  }
+  const re = new RegExp('^/projects/.*./pipelines.*');
+  return re.test(pathname);
+}
+
 export function isUsersPath(pathname: string) {
   return (pathname || '').startsWith('/users');
 }
 export function isProjectPath(pathname: string) {
+  const re = new RegExp('^/projects/.*./pipelines.*');
+  if (re.test(pathname)) {
+    return false;
+  }
   return (pathname || '').startsWith('/projects');
 }
 
@@ -110,6 +122,21 @@ export function beautifyTime(time?: string) {
   }
 }
 
+export function timeDiff(start?: string, end?: string): string {
+  if (!start) {
+    return '-';
+  }
+  let endTime = moment(moment.now());
+  if (end) {
+    endTime = moment(end);
+  }
+  const seconds = endTime.diff(moment(start), 'seconds');
+  if (seconds > 60) {
+    return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+  }
+  return `${seconds}s`;
+}
+
 export function beautifyBinarySize(value?: number) {
   if (null == value || value == 0) {
     return '0 Bytes';
@@ -141,7 +168,7 @@ export const formItemLayout = {
   },
 };
 
-export const ACKCLusterStatus = [
+export const ACKClusterStatus = [
   {
     key: 'initial',
     value: '集群创建中',
@@ -248,4 +275,22 @@ export function checkEnabledAddon(addonName: string, enabledAddons?: AddonBaseSt
     return true;
   }
   return false;
+}
+
+export function convertAny(data?: any): string {
+  if (!data) {
+    return '';
+  }
+  switch (typeof data) {
+    case 'string':
+      return data;
+    case 'boolean':
+      return data ? 'true' : 'false';
+    case 'object':
+      return JSON.stringify(data);
+    case 'number':
+      return data.toString();
+    default:
+      return '';
+  }
 }

@@ -265,7 +265,7 @@ class EnvDialog extends React.Component<Props, State> {
           footer={
             <div>
               <Button onClick={this.onOk} type="primary" loading={submitLoading}>
-                <Translation>Confirm</Translation>
+                <Translation>OK</Translation>
               </Button>
             </div>
           }

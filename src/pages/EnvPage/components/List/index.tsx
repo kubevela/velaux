@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Message, Dialog, Tag } from '@b-design/ui';
+import { Table, Message, Dialog, Tag, Button } from '@b-design/ui';
 import Translation from '../../../../components/Translation';
 import './index.less';
 import locale from '../../../../utils/locale';
@@ -11,6 +11,7 @@ import type { Project } from '../../../../interface/project';
 import Permission from '../../../../components/Permission';
 import { checkPermission } from '../../../../utils/permission';
 import type { LoginUserInfo } from '../../../../interface/user';
+import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
 const { Group: TagGroup } = Tag;
 
 type Props = {
@@ -124,48 +125,58 @@ class TableList extends Component<Props> {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
-        width: '120px',
+        width: '200px',
         cell: (v: string, i: number, record: Env) => {
           return (
             <div>
-              <If condition={record.targets?.length}>
-                <Permission
-                  request={{ resource: `environment:${record.name}`, action: 'delete' }}
-                  project={record.project.name}
+              <Permission
+                request={{ resource: `environment:${record.name}`, action: 'update' }}
+                project={record.project.name}
+              >
+                <Button
+                  className="margin-left-10"
+                  text={true}
+                  component={'a'}
+                  size={'medium'}
+                  ghost={true}
+                  onClick={() => {
+                    this.onEdit(record);
+                  }}
                 >
-                  <a
-                    onClick={() => {
-                      Dialog.confirm({
-                        type: 'confirm',
-                        content: (
-                          <Translation>
-                            Unrecoverable after deletion, are you sure to delete it?
-                          </Translation>
-                        ),
-                        onOk: () => {
-                          this.onDelete(record);
-                        },
-                        locale: locale().Dialog,
-                      });
-                    }}
-                  >
-                    <Translation>Remove</Translation>
-                  </a>
-                </Permission>
-                <Permission
-                  request={{ resource: `environment:${record.name}`, action: 'update' }}
-                  project={record.project.name}
+                  <AiFillSetting />
+                  <Translation>Edit</Translation>
+                </Button>
+                <span className="line" />
+              </Permission>
+              <Permission
+                request={{ resource: `environment:${record.name}`, action: 'delete' }}
+                project={record.project.name}
+              >
+                <Button
+                  text={true}
+                  component={'a'}
+                  size={'medium'}
+                  ghost={true}
+                  className={'danger-btn'}
+                  onClick={() => {
+                    Dialog.confirm({
+                      type: 'confirm',
+                      content: (
+                        <Translation>
+                          Unrecoverable after deletion, are you sure to delete it?
+                        </Translation>
+                      ),
+                      onOk: () => {
+                        this.onDelete(record);
+                      },
+                      locale: locale().Dialog,
+                    });
+                  }}
                 >
-                  <a
-                    className="margin-left-10"
-                    onClick={() => {
-                      this.onEdit(record);
-                    }}
-                  >
-                    <Translation>Edit</Translation>
-                  </a>
-                </Permission>
-              </If>
+                  <AiFillDelete />
+                  <Translation>Remove</Translation>
+                </Button>
+              </Permission>
             </div>
           );
         },
