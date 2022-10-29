@@ -12,9 +12,8 @@ import {
 } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
 import { If } from 'tsx-control-statements/components';
-import { ACKCLusterStatus } from '../../../../utils/common';
+import { ACKClusterStatus } from '../../../../utils/common';
 import { getCloudClustersList } from '../../../../api/cluster';
-import './index.less';
 import { handleError } from '../../../../utils/errors';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
@@ -113,7 +112,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
     });
   }
 
-  connectcloudCluster = (record: Record) => {
+  connectCloudCluster = (record: Record) => {
     const { id = '', description = '', icon = '', name = '' } = record;
     const { accessKeyID, accessKeySecret, provider } = this.field.getValues();
     const params = {
@@ -212,7 +211,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
         title: <Translation>Cluster Status</Translation>,
         dataIndex: 'status',
         cell: (v: string) => {
-          const findArr = ACKCLusterStatus.filter((item) => {
+          const findArr = ACKClusterStatus.filter((item) => {
             return item.key == v;
           });
           return <span style={{ color: findArr[0].color || '' }}> {v} </span>;
@@ -254,7 +253,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
                 ghost={true}
                 component={'a'}
                 onClick={() => {
-                  this.connectcloudCluster(record);
+                  this.connectCloudCluster(record);
                 }}
               >
                 <Translation>Connect</Translation>
@@ -271,7 +270,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
       <React.Fragment>
         <Dialog
           locale={locale().Dialog}
-          className="dialog-cloudService-wrapper"
+          className="commonDialog"
           title={<Translation>Connect Kubernetes Cluster From Cloud</Translation>}
           autoFocus={true}
           visible={visible}

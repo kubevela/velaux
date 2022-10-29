@@ -47,7 +47,7 @@ class ConfigDistributionPage extends Component<Props, State> {
     getProjectConfigDistributions({ projectName })
       .then((res) => {
         this.setState({
-          distributions: Array.isArray(res.distributions) ? res.distributions : [],
+          distributions: res && Array.isArray(res.distributions) ? res.distributions : [],
         });
       })
       .finally(() => {
@@ -101,9 +101,11 @@ class ConfigDistributionPage extends Component<Props, State> {
         ) => {
           const targetStatus = new Map<string, WorkflowStepStatus>();
           record.status?.workflow?.steps?.map((step) => {
-            const target = step.name.split('-');
-            if (target.length == 3 && target[0] == 'deploy') {
-              targetStatus.set(step.name.replace('deploy-', ''), step);
+            if (step.name) {
+              const target = step.name.split('-');
+              if (target.length == 3 && target[0] == 'deploy') {
+                targetStatus.set(step.name.replace('deploy-', ''), step);
+              }
             }
           });
           return (

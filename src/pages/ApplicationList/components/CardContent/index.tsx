@@ -17,6 +17,7 @@ import { checkPermission } from '../../../../utils/permission';
 import Permission from '../../../../components/Permission';
 import type { ShowMode } from '../..';
 import type { Project } from '../../../../interface/project';
+import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
 const { Column } = Table;
 
 type State = {
@@ -79,6 +80,7 @@ class CardContent extends React.Component<Props, State> {
               this.onEditAppPlan(item);
             }}
           >
+            <AiFillSetting />
             <Translation>Edit</Translation>
           </Button>
         );
@@ -89,7 +91,10 @@ class CardContent extends React.Component<Props, State> {
             this.onEditAppPlan(item);
           }}
         >
-          <Translation>Edit</Translation>
+          <div className="dropdown-menu-item inline-center">
+            <AiFillSetting />
+            <Translation>Edit</Translation>
+          </div>
         </Menu.Item>
       );
     } else {
@@ -116,14 +121,23 @@ class CardContent extends React.Component<Props, State> {
     if (checkPermission(request, project, userInfo)) {
       if (button) {
         return (
-          <Button text size={'medium'} ghost={true} component={'a'} onClick={onClick}>
-            <Translation>Remove</Translation>
+          <Button
+            text
+            size={'medium'}
+            className="danger-btn"
+            ghost={true}
+            component={'a'}
+            onClick={onClick}
+          >
+            <AiFillDelete /> <Translation>Remove</Translation>
           </Button>
         );
       }
       return (
         <Menu.Item onClick={onClick}>
-          <Translation>Remove</Translation>
+          <div className="dropdown-menu-item inline-center">
+            <AiFillDelete /> <Translation>Remove</Translation>
+          </div>
         </Menu.Item>
       );
     } else {
@@ -171,9 +185,9 @@ class CardContent extends React.Component<Props, State> {
         cell: (v: string, i: number, record: ApplicationBase) => {
           return (
             <div>
-              {this.isDeletePermission(record, true)}
-              <span className="line" />
               {this.isEditPermission(record, true)}
+              <span className="line" />
+              {this.isDeletePermission(record, true)}
             </div>
           );
         },

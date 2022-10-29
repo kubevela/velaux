@@ -119,6 +119,7 @@ class CloudShell extends Component<Props, State> {
             className="full-screen"
             target="_blank"
             href={this.loadFullScreenAddress()}
+            rel="noopener noreferrer"
             title="Full Screen"
           >
             <AiOutlineFullscreen color="#fff" />

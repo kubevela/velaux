@@ -4,7 +4,6 @@ import { If } from 'tsx-control-statements/components';
 import Translation from '../../../../components/Translation';
 import { createClusterNamespace } from '../../../../api/cluster';
 import locale from '../../../../utils/locale';
-import './index.less';
 
 type Props = {
   cluster?: string;
@@ -123,7 +122,7 @@ class Namespace extends React.Component<Props, State> {
 
         <Dialog
           locale={locale().Dialog}
-          className={'namespaceDialogWrapper'}
+          className={'commonDialog'}
           title={<Translation>Create Namespace</Translation>}
           autoFocus={true}
           isFullScreen={true}
