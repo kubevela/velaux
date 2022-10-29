@@ -142,15 +142,19 @@ export interface WorkflowStatus {
   startTime?: string;
 }
 
-export interface WorkflowStepStatus {
+interface StepStatus {
   id: string;
   name: string;
   type: string;
-  phase: string;
-  message: string;
-  reason: string;
+  phase: 'succeeded' | 'failed' | 'skipped' | 'stopped' | 'running' | 'pending';
+  message?: string;
+  reason?: string;
   firstExecuteTime?: string;
   lastExecuteTime?: string;
+}
+
+export interface WorkflowStepStatus extends StepStatus {
+  subSteps?: StepStatus[];
 }
 
 export interface Trait {

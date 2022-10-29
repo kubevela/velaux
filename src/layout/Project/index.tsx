@@ -1,12 +1,13 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'dva';
-import { Grid, Breadcrumb } from '@b-design/ui';
+import { Grid, Breadcrumb, Icon } from '@b-design/ui';
 import { Link } from 'dva/router';
 import Translation from '../../components/Translation';
 import './index.less';
 import type { ProjectDetail } from '../../interface/project';
 import { checkPermission } from '../../utils/permission';
 import type { LoginUserInfo } from '../../interface/user';
+import classNames from 'classnames';
 
 const { Row, Col } = Grid;
 
@@ -109,10 +110,13 @@ class ProjectLayout extends Component<Props> {
     return (
       <Fragment>
         <Row>
-          <Col span={6} className="padding16">
+          <Col span={6} className={classNames('padding16', 'breadcrumb')}>
+            <Link to={'/'}>
+              <Icon type="home" />
+            </Link>
             <Breadcrumb separator="/">
               <Breadcrumb.Item>
-                <Translation>Projects</Translation>
+                <Link to={'/projects'}>Projects</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
                 <Link to={'/projects/' + projectDetails?.name}>

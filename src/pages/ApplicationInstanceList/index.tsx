@@ -236,6 +236,9 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       (c) => c.workloadType?.type == 'configurations.terraform.core.oam.dev',
     );
     const showCloudInstance = cloudComponents?.length && cloudComponents?.length > 0;
+    const queryPod =
+      cloudComponents?.length == undefined ||
+      (components?.length && components.length > cloudComponents?.length);
     const { target, componentName } = this.state;
     const envs = envbinding.filter((item) => item.name == envName);
     if (applicationDetail && applicationDetail.name && envs.length > 0) {
@@ -251,20 +254,22 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         param.clusterNs = target.cluster?.namespace || '';
       }
       this.setState({ loading: true });
-      listApplicationPods(param)
-        .then((re) => {
-          if (re && re.podList) {
-            re.podList.map((item: any) => {
-              item.primaryKey = item.metadata.name;
-            });
-            this.setState({ podList: re.podList });
-          } else {
-            this.setState({ podList: [] });
-          }
-        })
-        .finally(() => {
-          this.setState({ loading: false });
-        });
+      if (queryPod) {
+        listApplicationPods(param)
+          .then((re) => {
+            if (re && re.podList) {
+              re.podList.map((item: any) => {
+                item.primaryKey = item.metadata.name;
+              });
+              this.setState({ podList: re.podList });
+            } else {
+              this.setState({ podList: [] });
+            }
+          })
+          .finally(() => {
+            this.setState({ loading: false });
+          });
+      }
       if (showCloudInstance) {
         this.setState({ loading: true });
         listCloudResources(param)
@@ -587,7 +592,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                     cell={(value: string, index: number, record: CloudInstance) => {
                       if (record.url) {
                         return (
-                          <a target="_blank" href={record.url}>
+                          <a target="_blank" href={record.url} rel="noopener noreferrer">
                             {value}
                           </a>
                         );
@@ -625,7 +630,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                     cell={(value: string, index: number, record: CloudInstance) => {
                       if (record.instanceName) {
                         return (
-                          <a target="_blank" href={value}>
+                          <a target="_blank" href={value} rel="noopener noreferrer">
                             <Translation>Console</Translation>
                           </a>
                         );

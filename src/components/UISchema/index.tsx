@@ -250,7 +250,12 @@ class UISchema extends Component<Props, State> {
         <If condition={definition}>
           <p>
             Refer to the document:
-            <a style={{ marginLeft: '8px' }} target="_blank" href={this.renderDocumentURL()}>
+            <a
+              style={{ marginLeft: '8px' }}
+              target="_blank"
+              href={this.renderDocumentURL()}
+              rel="noopener noreferrer"
+            >
               click here
             </a>
           </p>

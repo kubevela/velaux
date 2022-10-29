@@ -27,6 +27,8 @@ import DefinitionsLayout from '../Definitions';
 import Definitions from '../../pages/Definitions';
 import DefinitionDetails from '../DefinitionDetails';
 import UiSchema from '../../pages/UiSchema';
+import PipelineRunPage from '../../pages/PipelineRunPage';
+import PipelineListPage from '../../pages/PipelineListPage';
 
 export default function Content() {
   return (
@@ -129,6 +131,12 @@ export default function Content() {
         render={(props: any) => {
           return <EnvPage {...props} />;
         }}
+      />
+      <Route exact path="/pipelines" component={PipelineListPage} />
+      <Route
+        exact
+        path="/projects/:projectName/pipelines/:pipelineName/runs/:runName"
+        component={PipelineRunPage}
       />
       <Route path="/targets" component={TargetList} />
       <Route path="/clusters" component={Clusters} />

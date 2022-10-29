@@ -14,7 +14,6 @@ import {
 import DefinitionCode from '../../../../components/DefinitionCode';
 import { checkName } from '../../../../utils/common';
 import { getClusterDetails, updateCluster } from '../../../../api/cluster';
-import './index.less';
 import Translation from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
 import locale from '../../../../utils/locale';

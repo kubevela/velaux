@@ -14,7 +14,7 @@ const localeData = {
     },
     Dialog: {
       close: 'Close',
-      ok: 'Confirm',
+      ok: 'OK',
       cancel: 'Cancel',
     },
     Drawer: {
@@ -51,7 +51,7 @@ const localeData = {
     },
     Table: {
       empty: 'No Data',
-      ok: 'Confirm',
+      ok: 'OK',
       reset: 'Reset',
       asc: 'Asc',
       desc: 'Desc',
