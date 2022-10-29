@@ -24,6 +24,7 @@ import CreatePipeline from './components/CreatePipeline';
 import { beautifyTime, momentDate } from '../../utils/common';
 import ClonePipeline from './components/PipelineClone';
 import RunStatusIcon from '../PipelineRunPage/components/RunStatusIcon';
+import type { AddonBaseStatus } from '../../interface/addon';
 
 type Props = {
   targets?: [];
@@ -31,6 +32,7 @@ type Props = {
   history: any;
   userInfo?: LoginUserInfo;
   dispatch: Dispatch<any>;
+  enabledAddons?: AddonBaseStatus[];
 };
 
 export type ShowMode = 'table' | 'card' | string | null;
@@ -48,7 +50,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.user };
+  return { ...store.user, ...store.addons };
 })
 class PipelineListPage extends Component<Props, State> {
   constructor(props: Props) {
@@ -342,6 +344,8 @@ class PipelineListPage extends Component<Props, State> {
       showNewPipeline,
       showClonePipeline,
     } = this.state;
+    const { enabledAddons } = this.props;
+    const addonEnabled = enabledAddons?.filter((addon) => addon.name == 'vela-workflow').length;
     return (
       <div>
         <Title
@@ -352,14 +356,16 @@ class PipelineListPage extends Component<Props, State> {
               request={{ resource: 'project:?/pipeline:*', action: 'create' }}
               project={'?'}
             >
-              <Button
-                type="primary"
-                onClick={() => {
-                  this.setState({ showNewPipeline: true });
-                }}
-              >
-                <Translation>New Pipeline</Translation>
-              </Button>
+              <If condition={addonEnabled}>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    this.setState({ showNewPipeline: true });
+                  }}
+                >
+                  <Translation>New Pipeline</Translation>
+                </Button>
+              </If>
             </Permission>,
           ]}
         />
@@ -377,10 +383,17 @@ class PipelineListPage extends Component<Props, State> {
             this.getPipelines(params);
           }}
         />
-
-        <Loading style={{ width: '100%' }} visible={isLoading}>
-          {this.renderPipelineTable()}
-        </Loading>
+        <If condition={addonEnabled}>
+          <Loading style={{ width: '100%' }} visible={isLoading}>
+            {this.renderPipelineTable()}
+          </Loading>
+        </If>
+        <If condition={!addonEnabled}>
+          <div className="addon-notice">
+            Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> Addon that
+            powers Pipeline.
+          </div>
+        </If>
 
         <If condition={showRunPipeline}>
           {pipeline && (
