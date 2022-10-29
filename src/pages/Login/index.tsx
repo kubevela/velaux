@@ -144,7 +144,12 @@ export default class LoginPage extends Component<Props, State> {
             <div style={{ flex: '1 1 0%' }} />
             <div className="right">
               <div className="vela-item">
-                <a title="KubeVela Documents" href="https://kubevela.io" target="_blank">
+                <a
+                  title="KubeVela Documents"
+                  href="https://kubevela.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Icon size={14} type="help1" />
                 </a>
               </div>

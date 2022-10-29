@@ -285,7 +285,7 @@ export function convertAny(data?: any): string {
     case 'string':
       return data;
     case 'boolean':
-      return data ? 'true' : 'false';
+      return data === true ? 'true' : 'false';
     case 'object':
       return JSON.stringify(data);
     case 'number':

@@ -108,7 +108,12 @@ class CardContent extends React.Component<Props, State> {
                   <Row className="content-title">
                     <Col span={16} className="font-size-16 color1A1A1A">
                       <If condition={dashboardURL}>
-                        <a title={name} target="_blank" href={dashboardURL}>
+                        <a
+                          title={name}
+                          target="_blank"
+                          href={dashboardURL}
+                          rel="noopener noreferrer"
+                        >
                           {showName}
                         </a>
                       </If>

@@ -340,7 +340,7 @@ class PlatformSetting extends React.Component<Props, State> {
                   </Radio.Group>
                 </Form.Item>
                 <If condition={this.field.getValue('loginType') == 'dex'}>
-                  <a href={this.generateDexAddress()} target="_blank">
+                  <a href={this.generateDexAddress()} target="_blank" rel="noopener noreferrer">
                     <Translation>Click me to test open the dex page.</Translation>
                   </a>
                 </If>
@@ -416,7 +416,11 @@ class PlatformSetting extends React.Component<Props, State> {
             title={
               <span>
                 <Translation>User experience improvement plan</Translation>
-                <a target="_blank" href="https://kubevela.io/docs/reference/user-improvement-plan">
+                <a
+                  target="_blank"
+                  href="https://kubevela.io/docs/reference/user-improvement-plan"
+                  rel="noopener noreferrer"
+                >
                   <Icon style={{ marginLeft: '4px' }} type="help" />
                 </a>
               </span>

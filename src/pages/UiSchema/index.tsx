@@ -193,6 +193,7 @@ class UiSchema extends Component<Props, State> {
                     style={{ marginLeft: '8px' }}
                     target="_blank"
                     href="https://kubevela.net/docs/reference/ui-schema"
+                    rel="noopener noreferrer"
                   >
                     <Icon size="medium" type="external-link" />
                   </a>
