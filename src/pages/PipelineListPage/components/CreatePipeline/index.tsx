@@ -14,6 +14,7 @@ import { v4 as uuid } from 'uuid';
 import type { Pipeline, PipelineDetail } from '../../../../interface/pipeline';
 import { checkName } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
+import { templates } from './pipeline-template';
 
 const FormItem = Form.Item;
 
@@ -277,6 +278,19 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
                       },
                     ],
                   })}
+                />
+              </FormItem>
+            </Col>
+            <Col span={24} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>Template</Translation>}>
+                <Select
+                  locale={locale().Select}
+                  name="template"
+                  dataSource={templates}
+                  placeholder="Select a template"
+                  onChange={(value) => {
+                    this.field.setValue('steps', value);
+                  }}
                 />
               </FormItem>
             </Col>
