@@ -46,7 +46,7 @@ export function getLeftSlider(pathname) {
           link: '/pipelines',
           iconType: 'Directory-tree',
           navName: 'Pipelines',
-          permission: { resource: 'project:?/pipelines:*', action: 'list' },
+          permission: { resource: 'project:?/pipeline:*', action: 'list' },
         },
       ],
     },

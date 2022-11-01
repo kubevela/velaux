@@ -220,7 +220,7 @@ class Configs extends Component<Props, State> {
                 <Icon type="refresh" />
               </Button>
               <Permission
-                request={{ resource: `project/config:*`, action: 'create' }}
+                request={{ resource: `project:${projectName}/config:*`, action: 'create' }}
                 project={projectName}
               >
                 <Button
