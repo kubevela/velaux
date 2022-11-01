@@ -56,9 +56,14 @@ class Summary extends Component<Props, State> {
           <Targets projectName={params.projectName} />
           <Permission
             project={params.projectName}
-            request={{ resource: `project:${params.projectName}/configs:*`, action: 'list' }}
+            request={{ resource: `project:${params.projectName}/config:*`, action: 'list' }}
           >
             <Configs projectName={params.projectName} />
+          </Permission>
+          <Permission
+            project={params.projectName}
+            request={{ resource: `project:${params.projectName}/config:*`, action: 'distribute' }}
+          >
             <ConfigDistributionPage projectName={params.projectName} />
           </Permission>
         </div>
