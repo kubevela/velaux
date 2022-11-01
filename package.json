@@ -1,6 +1,6 @@
 {
   "name": "valaux",
-  "version": "1.6",
+  "version": "1.6.0",
   "private": true,
   "scripts": {
     "start": "node scripts/start.js",
