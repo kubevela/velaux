@@ -206,14 +206,6 @@ class ConfigDistributionPage extends Component<Props, State> {
             >
               <Icon type="refresh" />
             </Button>
-            {/* <Permission
-              request={{ resource: `project/config:*`, action: 'create' }}
-              project={projectName}
-            >
-              <Button className="card-button-wrapper">
-                <Translation>Add</Translation>
-              </Button>
-            </Permission> */}
           </section>
           <section className="card-content-table">
             <Table
