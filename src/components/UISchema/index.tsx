@@ -424,6 +424,7 @@ class UISchema extends Component<Props, State> {
               >
                 <Input
                   disabled={disableEdit}
+                  autoComplete="off"
                   {...init(param.jsonKey, {
                     initValue: initValue,
                     rules: convertRule(param.validate),
@@ -443,6 +444,7 @@ class UISchema extends Component<Props, State> {
                 <Input
                   disabled={disableEdit}
                   htmlType="password"
+                  autoComplete="off"
                   {...init(param.jsonKey, {
                     initValue: initValue,
                     rules: convertRule(param.validate),
