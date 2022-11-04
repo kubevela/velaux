@@ -88,3 +88,8 @@ export function applyProjectConfigDistribution(
   const urlPath = project + `/${projectName}/distributions`;
   return post(urlPath, params).then((res) => res);
 }
+
+export function deleteProjectConfigDistribution(projectName: string, name: string) {
+  const urlPath = project + `/${projectName}/distributions/${name}`;
+  return rdelete(urlPath, {}).then((res) => res);
+}

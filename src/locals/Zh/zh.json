@@ -447,7 +447,8 @@
   "Are you sure you want to delete the project": "你确定想删除这个项目吗",
   "Please enter a project name": "请输入符合规范的项目名称",
   "Name(Alias)": "名称（别名）",
-  "Configs": "集成配置",
+  "Configs": "配置",
+  "Config Distributions": "配置分发",
   "Summary": "概览",
   "Roles": "角色",
   "Members": "成员",
@@ -580,5 +581,15 @@
   "This policy is being used by workflow, do you want to force delete it?": "此策略正被工作流引用，是否强制删除它？",
   "The application is synchronizing from the cluster.": "该应用正在从集群同步配置和状态",
   "Once deployed, VelaUX hosts this application and no longer syncs the configuration from the cluster.": "执行部署后，控制台将接管该应用且不再从集群同步配置。",
-  "This application is synchronizing from cluster, recycling from this environment means this application will be deleted.": "该应用正在从集群同步配置，如果回收意味着该应用将被删除"
+  "This application is synchronizing from cluster, recycling from this environment means this application will be deleted.": "该应用正在从集群同步配置，如果回收意味着该应用将被删除",
+  "Pipelines": "流水线",
+  "Orchestrate your multiple cloud native app release processes or model your cloud native pipeline.": "编排你的多个云原生应用发布过程或为你的任何云原生流水线建模。",
+  "New Pipeline": "创建流水线",
+  "Distribute": "分发",
+  "Distribution": "分发状态",
+  "Last Run": "上一次执行",
+  "Recent Runs(Last 7-Days)": "最近执行（过去 7 天）",
+  "Clone": "克隆",
+  "Run": "执行",
+  "View Runs": "执行记录"
 }

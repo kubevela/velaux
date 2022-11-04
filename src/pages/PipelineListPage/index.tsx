@@ -122,7 +122,7 @@ class PipelineListPage extends Component<Props, State> {
         >
           <Table.Column
             key={'name'}
-            title="Name(Alias)"
+            title={i18n.t('Name(Alias)')}
             dataIndex="name"
             cell={(name: string, i: number, pipeline: Pipeline) => {
               let text = name;
@@ -145,7 +145,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'project'}
-            title="Project"
+            title={i18n.t('Project')}
             dataIndex="project"
             cell={(project: NameAlias) => {
               let text = project.name;
@@ -157,7 +157,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'createTime'}
-            title="CreateTime"
+            title={i18n.t('CreateTime')}
             dataIndex="createTime"
             width={160}
             cell={(v: string) => {
@@ -166,7 +166,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'runs'}
-            title="Recent Runs(Last 7-Days)"
+            title={i18n.t('Recent Runs(Last 7-Days)')}
             dataIndex="info.runStat"
             width={'280px'}
             cell={(runState: { activeNum: number; total: RunStateInfo; week?: RunStateInfo[] }) => {
@@ -213,7 +213,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'lastRun'}
-            title="Last Run"
+            title={i18n.t('Last Run')}
             dataIndex="info.lastRun"
             cell={(run?: PipelineRun) => {
               if (run) {
@@ -236,7 +236,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'actions'}
-            title="Actions"
+            title={i18n.t('Actions')}
             dataIndex="name"
             width={'360px'}
             cell={(name: string, i: number, pipeline: Pipeline) => {
