@@ -1,12 +1,15 @@
 import React, { Component, Fragment } from 'react';
-import { Table, Button, Tag, Balloon, Icon } from '@b-design/ui';
+import { Table, Button, Tag, Balloon, Icon, Dialog, Message } from '@b-design/ui';
 import type { ConfigDistribution } from '../../../../interface/configs';
 import Translation from '../../../../components/Translation';
 import Permission from '../../../../components/Permission';
 import locale from '../../../../utils/locale';
 import { momentDate } from '../../../../utils/common';
 import './index.less';
-import { getProjectConfigDistributions } from '../../../../api/config';
+import {
+  deleteProjectConfigDistribution,
+  getProjectConfigDistributions,
+} from '../../../../api/config';
 import type { WorkflowStepStatus } from '../../../../interface/application';
 
 type Props = {
@@ -58,7 +61,20 @@ class ConfigDistributionPage extends Component<Props, State> {
   };
 
   onDelete = (record: ConfigDistribution) => {
-    console.log(record);
+    const { projectName } = this.props;
+    Dialog.confirm({
+      type: 'confirm',
+      content: <Translation>Are you sure to delete?</Translation>,
+      onOk: () => {
+        deleteProjectConfigDistribution(projectName, record.name).then((res) => {
+          if (res) {
+            Message.success('Distribution deleted successfully');
+            this.listConfigDistributions(projectName);
+          }
+        });
+      },
+      locale: locale().Dialog,
+    });
   };
 
   render() {

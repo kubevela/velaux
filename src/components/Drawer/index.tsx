@@ -33,6 +33,7 @@ class DrawerWithFooter extends Component<Props, any> {
       <Drawer
         title={title}
         closeMode="close"
+        className="customDrawer"
         closeable="close"
         onClose={onClose}
         visible={true}
