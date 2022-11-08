@@ -208,7 +208,7 @@ class KV extends Component<Props, State> {
     if (inputValue) {
       dataSource.push(inputValue);
     }
-    const options = [{ label: 'string', value: 'string' }, { label: 'number', value: 'number' }, { label: 'boolean', value: 'boolean' }, { label: 'object', value: 'object' }]
+    const options = [{ label: 'String', value: 'string' }, { label: 'Number', value: 'number' }, { label: 'Boolean', value: 'boolean' }, { label: 'Object', value: 'object' }]
     const checkObjectFormat = (rule: Rule, value: any, callback: (error?: string) => void) => {
       if (value == undefined) {
         callback()
@@ -286,19 +286,25 @@ class KV extends Component<Props, State> {
                   </Col>
                   <Col span={9}>
                     <Form.Item>
-                      <If condition={item.valueType == 'number' || item.valueType == 'string'}>
+                      <If condition={item.valueType == 'string'}>
                         <Input
                           disabled={this.props.disabled}
-                          htmlType={item.valueType == 'number' ? 'number' : ''}
                           {...init(`envValue-${item.key}`)}
                           value={item.value}
                           label={'Value'}
                           className="full-width"
-                          placeholder={i18n.t(
-                            item.valueType == 'number'
-                              ? 'Please input a number'
-                              : 'Please input a value',
-                          )}
+                          placeholder={i18n.t('Please input a value',)}
+                        />
+                      </If>
+                      <If condition={item.valueType == 'number'}>
+                        <Input
+                          disabled={this.props.disabled}
+                          htmlType={'number'}
+                          {...init(`envValue-${item.key}`)}
+                          value={item.value}
+                          label={'Value'}
+                          className="full-width"
+                          placeholder={i18n.t('Please input a number')}
                         />
                       </If>
                       <If condition={item.valueType == 'object'}>
