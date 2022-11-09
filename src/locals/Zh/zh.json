@@ -591,5 +591,6 @@
   "Recent Runs(Last 7-Days)": "最近执行（过去 7 天）",
   "Clone": "克隆",
   "Run": "执行",
-  "View Runs": "执行记录"
+  "View Runs": "执行记录",
+  "Tags": "标签"
 }
