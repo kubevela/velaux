@@ -102,6 +102,7 @@ class TriggerDialog extends React.Component<Props, State> {
         payloadType = '',
         workflowName = '',
         componentName = '',
+        registry = '',
       } = values;
       const query = { appName };
       const params: Trigger = {
@@ -113,13 +114,13 @@ class TriggerDialog extends React.Component<Props, State> {
         workflowName,
         token: '',
         componentName,
+        registry,
       };
       createTriggers(params, query).then((res: any) => {
         if (res) {
           Message.success({
             duration: 4000,
-            title: 'Trigger create success.',
-            content: 'Trigger create success.',
+            content: 'Trigger created successfully.',
           });
           this.props.onOK(res);
         }
@@ -266,7 +267,7 @@ class TriggerDialog extends React.Component<Props, State> {
             </Col>
           </Row>
 
-          <Row>
+          <Row wrap>
             <Col span={12} style={{ padding: '0 8px' }}>
               <FormItem label={<Translation>Type</Translation>} required>
                 <Select
@@ -303,6 +304,34 @@ class TriggerDialog extends React.Component<Props, State> {
                         },
                       ],
                     })}
+                  />
+                </FormItem>
+              </If>
+            </Col>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <If
+                condition={
+                  this.field.getValue('type') === 'webhook' &&
+                  this.field.getValue('payloadType') === 'acr'
+                }
+              >
+                <FormItem label={<Translation>Registry</Translation>}>
+                  <Input
+                    name="registry"
+                    locale={locale().Input}
+                    {...init('registry', {
+                      initValue: '',
+                      rules: [
+                        {
+                          pattern:
+                            '^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$',
+                          message: 'This is a invalid domain',
+                        },
+                      ],
+                    })}
+                    placeholder={i18n.t(
+                      'For the ACR Enterprise Edition, you should set the domain of the registry.',
+                    )}
                   />
                 </FormItem>
               </If>
