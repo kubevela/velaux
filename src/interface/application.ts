@@ -313,6 +313,7 @@ export interface Trigger {
   workflowName: string;
   type: 'webhook';
   payloadType?: 'custom' | 'dockerHub' | 'ACR' | 'harbor' | 'artifactory';
+  registry?: string;
   token: string;
   createTime?: string;
   updateTime?: string;
