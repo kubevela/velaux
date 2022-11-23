@@ -95,8 +95,8 @@ class AppDialog extends React.Component<Props, State> {
       }
       return;
     });
-    if (defaultProject != '') {
-      this.setState({ project: defaultProject }, () => {
+    if (projectName || defaultProject) {
+      this.setState({ project: projectName ? projectName : defaultProject }, () => {
         this.loadEnvs();
       });
     }
