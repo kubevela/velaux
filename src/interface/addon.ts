@@ -79,4 +79,5 @@ export interface EnableAddonRequest {
   version: string;
   properties: Record<string, any>;
   clusters?: string[];
+  registry?: string;
 }
