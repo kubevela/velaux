@@ -219,6 +219,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
         name: this.props.addonName,
         version: this.state.version,
         properties: values.properties,
+        registry: this.state.addonDetailInfo?.registryName,
       };
       if (this.state.addonDetailInfo?.deployTo?.runtimeCluster) {
         params.clusters = this.state.clusters;
@@ -248,6 +249,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
           name: this.props.addonName,
           version: this.state.version,
           properties: properties,
+          registry: this.state.addonDetailInfo?.registryName,
         };
         if (this.state.addonDetailInfo?.deployTo?.runtimeCluster) {
           params.clusters = this.state.clusters;
