@@ -11,6 +11,7 @@ import {
   Icon,
   Loading,
   Select,
+  Dialog,
 } from '@b-design/ui';
 import DrawerWithFooter from '../../../../components/Drawer';
 import UISchema from '../../../../components/UISchema';
@@ -33,6 +34,7 @@ import type {
 } from '../../../../interface/configs';
 import Permission from '../../../../components/Permission';
 import locale from '../../../../utils/locale';
+import { connect } from 'dva';
 
 type Props = {
   visible: boolean;
@@ -52,6 +54,7 @@ type State = {
   templates?: ConfigTemplate[];
 };
 
+@connect()
 class CreateConfigDialog extends React.Component<Props, State> {
   field: Field;
   uiSchemaRef: React.RefObject<UISchema>;
@@ -170,7 +173,23 @@ class CreateConfigDialog extends React.Component<Props, State> {
         .then((res) => {
           if (res) {
             Message.success(<Translation>Config created successfully</Translation>);
-            this.props.onSuccess();
+            if (
+              templateName &&
+              ['image-registry', 'helm-repository', 'tls-certificate'].includes(templateName)
+            ) {
+              Dialog.confirm({
+                content: i18n.t(
+                  'This config needs to be distributed, you should go to the project summary page to do it before you want to use it.',
+                ),
+                locale: locale().Dialog,
+                onOk: () => {
+                  this.props.onSuccess();
+                },
+                onCancel: () => {
+                  this.props.onSuccess();
+                },
+              });
+            }
           }
         })
         .finally(() => {
