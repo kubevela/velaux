@@ -164,7 +164,7 @@ class PipelineStudio extends React.Component<Props, State> {
               </Breadcrumb.Item>
 
               <Breadcrumb.Item>
-                <Link to={`/pipelines`}>
+                <Link to={`/projects/${projectName}/pipelines`}>
                   <Translation>Pipelines</Translation>
                 </Link>
               </Breadcrumb.Item>

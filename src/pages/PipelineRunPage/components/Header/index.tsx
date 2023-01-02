@@ -171,7 +171,7 @@ class Header extends Component<Props, State> {
                 <Link to={'/projects/' + projectName}>{projectName}</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link to={`/pipelines`}>
+                <Link to={`/projects/${projectName}/pipelines`}>
                   <Translation>Pipelines</Translation>
                 </Link>
               </Breadcrumb.Item>
