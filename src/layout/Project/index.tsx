@@ -64,6 +64,11 @@ class ProjectLayout extends Component<Props> {
         name: <Translation>Applications</Translation>,
         to: `/projects/${projectName}/applications`,
       },
+      {
+        id: 'pipelines',
+        name: <Translation>Pipelines</Translation>,
+        to: `/projects/${projectName}/pipelines`,
+      },
     ];
 
     if (
@@ -110,7 +115,7 @@ class ProjectLayout extends Component<Props> {
     return (
       <Fragment>
         <Row>
-          <Col span={6} className={classNames('padding16', 'breadcrumb')}>
+          <Col span={6} className={classNames('breadcrumb')}>
             <Link to={'/'}>
               <Icon type="home" />
             </Link>

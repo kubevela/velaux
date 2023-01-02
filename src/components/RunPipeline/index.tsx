@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, Loading, Tag } from '@b-design/ui';
+import { Checkbox, Dialog, Loading, Message, Tag } from '@b-design/ui';
 import { listPipelineContexts, runPipeline } from '../../api/pipeline';
 import i18n from '../../i18n';
-import type { KeyValue, Pipeline } from '../../interface/pipeline';
+import type { KeyValue, PipelineListItem } from '../../interface/pipeline';
 import './index.less';
 import locale from '../../utils/locale';
 import ListTitle from '../ListTitle';
 import classNames from 'classnames';
 import { If } from 'tsx-control-statements/components';
 import NewContext from './new-context';
+import Translation from '../Translation';
 
 export interface PipelineProps {
-  pipeline: Pipeline;
+  pipeline: PipelineListItem;
   onClose: () => void;
   onSuccess?: (runName: string) => void;
 }
@@ -19,6 +20,7 @@ export interface PipelineProps {
 const RunPipeline = (props: PipelineProps) => {
   const [loading, setLoading] = useState(true);
   const [contexts, setContexts] = useState<Record<string, KeyValue[]>>({});
+  const [noContext, setNoContext] = useState<boolean>();
   const [contextName, setSelectContextName] = useState('');
   const [addContext, showAddContext] = useState(false);
   const { pipeline } = props;
@@ -27,7 +29,7 @@ const RunPipeline = (props: PipelineProps) => {
     if (loading) {
       listPipelineContexts(pipeline.project.name, pipeline.name)
         .then((res) => {
-          setContexts(res && res.contexts ? res.contexts : []);
+          setContexts(res && res.contexts ? res.contexts : {});
         })
         .finally(() => {
           setLoading(false);
@@ -36,6 +38,8 @@ const RunPipeline = (props: PipelineProps) => {
   }, [pipeline, loading]);
 
   const onRunPipeline = () => {
+    if (!contextName && !noContext) {
+    }
     runPipeline(pipeline.project.name, pipeline.name, contextName).then((res) => {
       if (res) {
         if (props.onSuccess) {
@@ -44,6 +48,7 @@ const RunPipeline = (props: PipelineProps) => {
       }
     });
   };
+  const okButtonDisable = !contextName && !noContext;
   return (
     <Dialog
       className="commonDialog"
@@ -54,6 +59,9 @@ const RunPipeline = (props: PipelineProps) => {
       onCancel={props.onClose}
       onOk={onRunPipeline}
       isFullScreen={true}
+      okProps={{
+        disabled: okButtonDisable,
+      }}
     >
       <Loading style={{ width: '100%' }} visible={loading}>
         <div className="context-box">
@@ -101,10 +109,24 @@ const RunPipeline = (props: PipelineProps) => {
               />
             </div>
           </If>
+          <If condition={Object.keys(contexts).length == 0 && !addContext}>
+            <div style={{ width: '100%' }}>
+              <Message type="notice">
+                <Translation>There is no context option.</Translation>
+              </Message>
+            </div>
+          </If>
           <If condition={contextName == ''}>
-            <span className="notice">
-              No context is required for the execution of this Pipeline
-            </span>
+            <div className="notice">
+              <Checkbox
+                onChange={(v: boolean) => {
+                  setNoContext(v);
+                }}
+                checked={noContext}
+                style={{ marginRight: '8px' }}
+              />
+              <Translation>No context is required for the execution of this Pipeline</Translation>
+            </div>
           </If>
           <If condition={contextName != ''}>
             <span className="notice success">Selected a context: {contextName}</span>

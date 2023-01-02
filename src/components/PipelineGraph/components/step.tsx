@@ -36,7 +36,7 @@ export const Step = (props: StepProps) => {
     >
       <If condition={group}>
         <div className="step-title">{step.name || step.id}</div>
-        <div className="groups" style={{ width: stepWidth + 'px' }}>
+        <div className="groups" style={{ width: stepWidth + 'px', minHeight: '70px' }}>
           {step.subSteps?.map((subStep) => {
             return (
               <div
@@ -47,7 +47,7 @@ export const Step = (props: StepProps) => {
                 }}
               >
                 <div>{renderStepStatusIcon(subStep)}</div>
-                <div className="step-name">{subStep.name || subStep.id}</div>
+                <div className="step-name">{subStep.alias || subStep.name || subStep.id}</div>
                 <div>{timeDiff(subStep.firstExecuteTime, subStep.lastExecuteTime)}</div>
               </div>
             );
@@ -58,7 +58,7 @@ export const Step = (props: StepProps) => {
         <div className="groups" style={{ width: stepWidth + 'px' }}>
           <div className="step-status">
             <div>{renderStepStatusIcon(step)}</div>
-            <div className="step-name">{step.name || step.id}</div>
+            <div className="step-name">{step.alias || step.name || step.id}</div>
             <div className="">{timeDiff(step.firstExecuteTime, step.lastExecuteTime)}</div>
           </div>
         </div>

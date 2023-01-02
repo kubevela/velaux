@@ -5,7 +5,7 @@ import { connect } from 'dva';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkPermission } from '../../../../utils/permission';
 import { createPipeline, loadPipeline } from '../../../../api/pipeline';
-import type { Pipeline, PipelineDetail } from '../../../../interface/pipeline';
+import type { PipelineListItem, PipelineDetail } from '../../../../interface/pipeline';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
 import { If } from 'tsx-control-statements/components';
@@ -20,7 +20,7 @@ export interface PipelineProps {
   onClose: () => void;
   onSuccess?: () => void;
   userInfo?: LoginUserInfo;
-  pipeline?: Pipeline;
+  pipeline?: PipelineListItem;
 }
 
 type State = {

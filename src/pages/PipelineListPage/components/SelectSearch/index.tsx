@@ -6,6 +6,7 @@ import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
 import type { ShowMode } from '../..';
 import i18n from '../../../../i18n';
+import { If } from 'tsx-control-statements/components';
 
 const { Row, Col } = Grid;
 
@@ -14,6 +15,7 @@ type Props = {
   getPipelines: (params: any) => void;
   setMode: (mode: ShowMode) => void;
   showMode: ShowMode;
+  disableProject?: boolean;
 };
 
 type State = {
@@ -63,7 +65,7 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { projects } = this.props;
+    const { projects, disableProject } = this.props;
     const { projectValue, inputValue } = this.state;
 
     const projectPlaceholder = i18n.t('Search by Project').toString();
@@ -76,19 +78,21 @@ class SelectSearch extends React.Component<Props, State> {
     });
     return (
       <Row className="app-select-wrapper border-radius-8" wrap={true}>
-        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
-          <Select
-            locale={locale().Select}
-            mode="single"
-            size="large"
-            onChange={this.onChangeProject}
-            dataSource={projectSource}
-            placeholder={projectPlaceholder}
-            className="item"
-            hasClear
-            value={projectValue}
-          />
-        </Col>
+        <If condition={!disableProject}>
+          <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+            <Select
+              locale={locale().Select}
+              mode="single"
+              size="large"
+              onChange={this.onChangeProject}
+              dataSource={projectSource}
+              placeholder={projectPlaceholder}
+              className="item"
+              hasClear
+              value={projectValue}
+            />
+          </Col>
+        </If>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
             innerAfter={

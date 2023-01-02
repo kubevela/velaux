@@ -32,17 +32,17 @@ class Menu extends Component<Props, any> {
           to: `/applications/${appName}/config`,
         },
         {
-          key: 'workflows',
-          label: <Translation>Workflows</Translation>,
-          to: `/applications/${appName}/workflows`,
-        },
-        {
           key: 'revisions',
           label: <Translation>Revisions</Translation>,
           to: `/applications/${appName}/revisions`,
         },
       ],
       envPage: [
+        {
+          key: 'workflow',
+          label: <Translation>Workflow</Translation>,
+          to: `/applications/${appName}/envbinding/${envName}/workflow`,
+        },
         {
           key: 'status',
           label: <Translation>Status</Translation>,
@@ -65,6 +65,7 @@ class Menu extends Component<Props, any> {
       activeItems = menuItems.envPage;
     }
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+
     return (
       <Card locale={locale().Card} contentHeight="100px" className="app-menu">
         {activeItems.map((item) => {
@@ -72,7 +73,11 @@ class Menu extends Component<Props, any> {
             <Link
               key={item.key}
               to={item.to}
-              className={item.key === activeKey ? 'menu-item-active' : 'menu-item'}
+              className={
+                item.key === activeKey || currentPath.startsWith(item.to)
+                  ? 'menu-item-active'
+                  : 'menu-item'
+              }
             >
               {item.label}
             </Link>

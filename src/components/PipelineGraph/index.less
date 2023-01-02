@@ -138,13 +138,13 @@
       display: inline-block;
       width: 18px;
       height: 16px;
-      margin-right: 8px;
       overflow: visible;
       vertical-align: text-bottom;
       fill: currentColor;
     }
     .step-name {
       flex: 1;
+      margin-left: 8px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
@@ -159,6 +159,9 @@
     }
     .pending-icon {
       color: var(--running-color);
+    }
+    .stopped-icon {
+      color: var(--failed-color);
     }
     @keyframes rotate-keyframes {
       from {

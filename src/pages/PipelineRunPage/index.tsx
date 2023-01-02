@@ -60,6 +60,7 @@ interface State {
 
 class PipelineRunPage extends Component<Props, State> {
   loop: boolean;
+  disableLoop: boolean;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -68,8 +69,11 @@ class PipelineRunPage extends Component<Props, State> {
       activeKey: 'detail',
     };
     this.loop = false;
+    this.disableLoop = false;
   }
-
+  componentWillUnmount() {
+    this.disableLoop = true;
+  }
   componentDidMount() {
     this.onGetPipeline(this.props.match);
     this.onGetRunBase(this.props.match);
@@ -146,7 +150,12 @@ class PipelineRunPage extends Component<Props, State> {
       .then((res: PipelineRunStatus) => {
         if (res) {
           this.setState({ runStatus: res });
-          if (res.status === 'executing' && !this.loop) {
+          if (
+            res.status &&
+            ['terminated', 'failed', 'succeeded'].indexOf(res.status) == -1 &&
+            !this.loop &&
+            !this.disableLoop
+          ) {
             this.loop = true;
             setTimeout(() => {
               this.loop = false;
@@ -277,7 +286,12 @@ class PipelineRunPage extends Component<Props, State> {
         >
           <div className={classNames('studio')}>
             {runStatus && (
-              <PipelineGraph pipeline={runStatus} zoom={1} onNodeClick={this.onStepClick} />
+              <PipelineGraph
+                name={`${runBase?.pipelineRunName}+${runStatus.status}`}
+                steps={runStatus.steps}
+                zoom={1}
+                onNodeClick={this.onStepClick}
+              />
             )}
           </div>
           <If condition={showDetail && stepStatus}>

@@ -7,7 +7,12 @@ import SelectSearch from './components/SelectSearch';
 import type { LoginUserInfo } from '../../interface/user';
 import Permission from '../../components/Permission';
 import Translation from '../../components/Translation';
-import type { Pipeline, PipelineRun, RunStateInfo } from '../../interface/pipeline';
+import type {
+  PipelineBase,
+  PipelineListItem,
+  PipelineRun,
+  RunStateInfo,
+} from '../../interface/pipeline';
 import locale from '../../utils/locale';
 import { Link, routerRedux } from 'dva/router';
 import type { NameAlias } from '../../interface/env';
@@ -27,9 +32,6 @@ import RunStatusIcon from '../PipelineRunPage/components/RunStatusIcon';
 import type { AddonBaseStatus } from '../../interface/addon';
 
 type Props = {
-  targets?: [];
-  envs?: [];
-  history: any;
   userInfo?: LoginUserInfo;
   dispatch: Dispatch<any>;
   enabledAddons?: AddonBaseStatus[];
@@ -39,11 +41,11 @@ export type ShowMode = 'table' | 'card' | string | null;
 
 type State = {
   isLoading: boolean;
-  editItem?: Pipeline;
-  pipelines?: Pipeline[];
+  editItem?: PipelineListItem;
+  pipelines?: PipelineListItem[];
   showMode: ShowMode;
   showRunPipeline?: boolean;
-  pipeline?: Pipeline;
+  pipeline?: PipelineListItem;
   showRuns?: boolean;
   showNewPipeline?: boolean;
   showClonePipeline?: boolean;
@@ -78,19 +80,19 @@ class PipelineListPage extends Component<Props, State> {
       });
   };
 
-  onShowPipelineRuns = (pipeline: Pipeline) => {
+  onShowPipelineRuns = (pipeline: PipelineListItem) => {
     this.setState({ showRuns: true, pipeline: pipeline });
   };
 
-  onRunPipeline = (pipeline: Pipeline) => {
+  onRunPipeline = (pipeline: PipelineListItem) => {
     this.setState({ pipeline: pipeline, showRunPipeline: true });
   };
 
-  onClonePipeline = (pipeline: Pipeline) => {
+  onClonePipeline = (pipeline: PipelineListItem) => {
     this.setState({ pipeline, showClonePipeline: true });
   };
 
-  onDeletePipeline = (pipeline: Pipeline) => {
+  onDeletePipeline = (pipeline: PipelineListItem) => {
     Dialog.confirm({
       type: 'confirm',
       content: <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>,
@@ -124,20 +126,16 @@ class PipelineListPage extends Component<Props, State> {
             key={'name'}
             title={i18n.t('Name(Alias)')}
             dataIndex="name"
-            cell={(name: string, i: number, pipeline: Pipeline) => {
+            cell={(name: string, i: number, pipeline: PipelineListItem) => {
               let text = name;
               if (pipeline.alias) {
                 text = `${name}(${pipeline.alias})`;
               }
               return (
                 <div className="pipeline-name">
-                  <a
-                    onClick={() => {
-                      this.setState({ pipeline: pipeline, showNewPipeline: true });
-                    }}
-                  >
+                  <Link to={`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/studio`}>
                     {text}
-                  </a>
+                  </Link>
                   <span>{pipeline.description}</span>
                 </div>
               );
@@ -227,7 +225,7 @@ class PipelineListPage extends Component<Props, State> {
                       </Link>
                       <span>{beautifyTime(run.status?.startTime)}</span>
                     </div>
-                    <RunStatusIcon runStatus={run.status} />
+                    <RunStatusIcon status={run.status?.status} />
                   </div>
                 );
               }
@@ -239,7 +237,7 @@ class PipelineListPage extends Component<Props, State> {
             title={i18n.t('Actions')}
             dataIndex="name"
             width={'360px'}
-            cell={(name: string, i: number, pipeline: Pipeline) => {
+            cell={(name: string, i: number, pipeline: PipelineListItem) => {
               return (
                 <div>
                   <Permission
@@ -428,9 +426,10 @@ class PipelineListPage extends Component<Props, State> {
             onClose={() => {
               this.setState({ showNewPipeline: false, pipeline: undefined });
             }}
-            onSuccess={() => {
-              this.getPipelines({});
-              this.setState({ showNewPipeline: false, pipeline: undefined });
+            onSuccess={(p: PipelineBase) => {
+              this.props.dispatch(
+                routerRedux.push(`/projects/${p.project.name}/pipelines/${p.name}/studio`),
+              );
             }}
             pipeline={pipeline}
           />

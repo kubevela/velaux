@@ -108,7 +108,7 @@ class ApplicationLayout extends Component<Props, any> {
     const { loading, activeName } = this.state;
     const { children, dispatch } = this.props;
     const {
-      path,
+      url,
       params: { appName, envName },
     } = this.props.match;
     const loadingDom = <Loading style={{ width: '100%', minHeight: '200px' }} />;
@@ -121,7 +121,7 @@ class ApplicationLayout extends Component<Props, any> {
     }
     return (
       <div className="app-layout">
-        <Header appName={appName} currentPath={path} />
+        <Header appName={appName} currentPath={url} />
         <EnvTabs
           dispatch={dispatch}
           appName={appName}
@@ -129,7 +129,7 @@ class ApplicationLayout extends Component<Props, any> {
         />
         <Row className="padding16 main">
           <div className="menu">
-            <Menus currentPath={path} appName={appName} envName={envName} />
+            <Menus currentPath={url} appName={appName} envName={envName} />
           </div>
           <div className="content">{children}</div>
         </Row>

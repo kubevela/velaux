@@ -9,6 +9,7 @@ import {
 import { deployApplication } from '../../api/application';
 import type {
   ApplicationComponent,
+  ApplicationDeployResponse,
   ApplicationDetail,
   ApplicationStatus,
   EnvBinding,
@@ -18,7 +19,7 @@ import type { PodBase, CloudResource, Configuration, Endpoint } from '../../inte
 import PodDetail from './components/PodDetail';
 import Header from './components/Header';
 import type { Target } from '../../interface/target';
-import { Link } from 'dva/router';
+import { Link, routerRedux } from 'dva/router';
 import { momentDate } from '../../utils/common';
 import { If } from 'tsx-control-statements/components';
 import type { APIError } from '../../utils/errors';
@@ -426,7 +427,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
   };
 
   onDeploy = (force?: boolean) => {
-    const { envbinding } = this.props;
+    const { envbinding, dispatch } = this.props;
     const {
       params: { appName, envName },
     } = this.props.match;
@@ -442,11 +443,18 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         },
         true,
       )
-        .then((re) => {
+        .then((re: ApplicationDeployResponse) => {
           if (re) {
             Message.success(i18n.t('Application deployed successfully'));
             this.setState({ deployLoading: false });
             this.loadApplicationStatus();
+            if (re.record && re.record.name && dispatch) {
+              dispatch(
+                routerRedux.push(
+                  `/applications/${appName}/envbinding/${re.envName}/workflow/records/${re.record.name}`,
+                ),
+              );
+            }
           }
         })
         .catch((err: APIError) => {

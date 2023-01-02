@@ -14,6 +14,15 @@ export interface DefinitionBase {
   icon?: string;
   status: string;
   labels: Record<string, string>;
-  component: any;
+  ownerAddon: string;
   workloadType: string;
+
+  component?: any;
+  trait?: {
+    definitionRef?: { name: string; version: string };
+    podDisruptive: boolean;
+    appliesToWorkloads: string[];
+  };
+  policy?: any;
+  workflowStep?: any;
 }

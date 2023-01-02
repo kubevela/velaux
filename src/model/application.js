@@ -10,7 +10,7 @@ import {
   getApplicationEnvbinding,
 } from '../api/application';
 
-import { listWorkFlow } from '../api/workflows';
+import { listWorkflow } from '../api/workflows';
 
 import { getProjectList } from '../api/project';
 
@@ -166,7 +166,7 @@ export default {
       });
     },
     *getApplicationWorkflows(action, { call, put }) {
-      const result = yield call(listWorkFlow, action.payload);
+      const result = yield call(listWorkflow, action.payload);
       yield put({
         type: 'updateWorkflow',
         payload: result.workflows,

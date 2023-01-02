@@ -1,13 +1,13 @@
 import React from 'react';
 import type { WorkflowStepStatus } from '../../interface/application';
-import type { PipelineRunStatus } from '../../interface/pipeline';
 import Draggable from 'react-draggable';
 
 import './index.less';
 import { Step } from './components/step';
 
 type PipelineGraphProps = {
-  pipeline: PipelineRunStatus;
+  name?: string;
+  steps?: WorkflowStepStatus[];
   zoom: number;
   onNodeClick: (step: WorkflowStepStatus) => void;
 };
@@ -32,7 +32,7 @@ class PipelineGraph extends React.Component<PipelineGraphProps, State> {
     const endPoint = startPoint + stepInterval;
     const width = (stepInterval + stepWidth) * total;
     return (
-      <svg className="workflow-connectors" width={width} height={300}>
+      <svg key={from + to} className="workflow-connectors" width={width} height={300}>
         <path
           className="workflow-connector"
           data-from={'step-' + from}
@@ -45,12 +45,12 @@ class PipelineGraph extends React.Component<PipelineGraphProps, State> {
   }
 
   render() {
-    const { pipeline, zoom } = this.props;
-    const steps = pipeline.steps;
+    const { steps, zoom, name } = this.props;
     return (
       <Draggable>
         <div
           className="workflow-graph"
+          key={name}
           style={{
             transform: `scale(${zoom})`,
           }}
@@ -66,6 +66,7 @@ class PipelineGraph extends React.Component<PipelineGraphProps, State> {
             steps.map((step, i: number) => {
               return (
                 <Step
+                  key={name + step.id}
                   probeState={this.state}
                   step={step}
                   group={step.type == 'step-group'}

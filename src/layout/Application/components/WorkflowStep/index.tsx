@@ -5,7 +5,7 @@ import {
   rollbackApplicationWorkflowRecord,
   terminateApplicationWorkflowRecord,
 } from '../../../../api/application';
-import type { WorkflowBase, WorkflowStepItem } from '../../../../interface/application';
+import type { WorkflowRecord, WorkflowStepStatus } from '../../../../interface/application';
 import _ from 'lodash';
 import Translation from '../../../../components/Translation';
 import './index.less';
@@ -13,13 +13,13 @@ import { If } from 'tsx-control-statements/components';
 import i18n from '../../../../i18n';
 
 type Props = {
-  recordItem: WorkflowBase;
+  recordItem: WorkflowRecord;
   activeValue: number;
   indexValue: number;
   appName: string;
   workflowName: string;
   recordName: string;
-  records: WorkflowBase[];
+  records: WorkflowRecord[];
 };
 
 const { Item: StepItem } = Step;
@@ -44,9 +44,9 @@ class WorkflowStep extends Component<Props, State> {
   componentDidMount() {
     const ele = document.getElementById('stepWorkflow');
     const { recordItem } = this.props;
-    const steps = recordItem.steps || [{ id: '', name: '', type: '', phase: '' }];
+    const steps = recordItem.steps || [];
 
-    const findIdx = _.findIndex(steps, (item: WorkflowStepItem) => {
+    const findIdx = _.findIndex(steps, (item: WorkflowStepStatus) => {
       return item.phase === 'running';
     });
 
@@ -151,7 +151,7 @@ class WorkflowStep extends Component<Props, State> {
     );
   };
 
-  renderStepItemTitle(data: WorkflowStepItem) {
+  renderStepItemTitle(data: WorkflowStepStatus) {
     const isFailedClassName = data.phase === 'failed' ? 'failedTitle' : '';
     const isFailed = data.phase === 'failed' ? true : false;
     const { name, alias } = data;
@@ -173,7 +173,7 @@ class WorkflowStep extends Component<Props, State> {
     }
   }
 
-  renderContent(workflow: WorkflowBase, data: WorkflowStepItem, currentStep: boolean) {
+  renderContent(workflow: WorkflowRecord, data: WorkflowStepStatus, currentStep: boolean) {
     const { hiddenConfirm } = this.state;
     const isSuspend = workflow.status == 'running' && data.type === 'suspend' ? true : false;
     if (isSuspend && currentStep && !hiddenConfirm) {
@@ -229,7 +229,7 @@ class WorkflowStep extends Component<Props, State> {
     return <span />;
   }
 
-  changeFirstClassName(steps: WorkflowStepItem[] | undefined) {
+  changeFirstClassName(steps: WorkflowStepStatus[] | undefined) {
     const firstItem = (steps && steps[0]) || { phase: '', type: '', name: '', alias: '' };
     const isSuspend = firstItem.type === 'suspend' ? true : false;
     const isFailed = firstItem.phase === 'failed' ? true : false;
@@ -252,17 +252,17 @@ class WorkflowStep extends Component<Props, State> {
 
   getWorkFlowStep() {
     const { recordItem } = this.props;
-    const steps: WorkflowStepItem[] | undefined = recordItem.steps;
+    const steps: WorkflowStepStatus[] | undefined = recordItem.steps;
     if (steps) {
       let currentStep = steps.length - 1;
-      (steps || []).map((item: WorkflowStepItem, i: number) => {
+      (steps || []).map((item: WorkflowStepStatus, i: number) => {
         if (item.phase != 'succeeded') {
           if (i < currentStep) {
             currentStep = i;
           }
         }
       });
-      const stepItem = (steps || []).map((item: WorkflowStepItem, index: number) => (
+      const stepItem = (steps || []).map((item: WorkflowStepStatus, index: number) => (
         <StepItem
           key={item.id}
           onClick={() => {

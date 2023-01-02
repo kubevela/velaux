@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Button, Card, Message, Dialog, Balloon, Tag } from '@b-design/ui';
+import { Grid, Button, Card, Message, Dialog, Balloon, Tag, Loading } from '@b-design/ui';
 import './index.less';
 import { connect } from 'dva';
 import { If } from 'tsx-control-statements/components';
@@ -12,13 +12,14 @@ import {
   deleteApplicationPlan,
   deletePolicy,
   getPolicyDetail,
+  getApplicationStatistics,
 } from '../../api/application';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
 import { routerRedux } from 'dva/router';
 import Item from '../../components/Item';
 import TraitDialog from './components/TraitDialog';
-import type { ApplicationPolicyDetail } from '../../interface/application';
+import type { ApplicationPolicyDetail, ApplicationStatistics } from '../../interface/application';
 import type {
   ApplicationDetail,
   Trait,
@@ -31,7 +32,7 @@ import type {
   ApplicationPolicyBase,
 } from '../../interface/application';
 
-import { beautifyTime, momentDate } from '../../utils/common';
+import { beautifyTime, momentDate, showAlias } from '../../utils/common';
 import locale from '../../utils/locale';
 import TriggerList from './components/TriggerList';
 import TriggerDialog from './components/TriggerDialog';
@@ -45,6 +46,7 @@ import PolicyList from './components/PolicyList';
 import PolicyDialog from './components/PolicyDialog';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
+import NumItem from '../../components/NumItem';
 
 const { Row, Col } = Grid;
 
@@ -85,6 +87,7 @@ type State = {
   visiblePolicy: boolean;
   showPolicyName?: string;
   policyDetail?: ApplicationPolicyDetail;
+  statistics?: ApplicationStatistics;
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -114,6 +117,7 @@ class ApplicationConfig extends Component<Props, State> {
   componentDidMount() {
     this.onGetApplicationTrigger();
     this.onGetComponentDefinitions();
+    this.loadAppStatistics();
   }
 
   onGetApplicationTrigger() {
@@ -129,6 +133,17 @@ class ApplicationConfig extends Component<Props, State> {
       }
     });
   }
+
+  loadAppStatistics = async () => {
+    const { appName } = this.state;
+    if (appName) {
+      getApplicationStatistics({ appName: appName }).then((re: ApplicationStatistics) => {
+        if (re) {
+          this.setState({ statistics: re });
+        }
+      });
+    }
+  };
 
   onDeleteTrait = async (componentName: string, traitType: string) => {
     const { appName } = this.state;
@@ -457,22 +472,28 @@ class ApplicationConfig extends Component<Props, State> {
       componentDefinitions,
       visiblePolicy,
       policyDetail,
+      statistics,
     } = this.state;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
+    if (!applicationDetail) {
+      return <Loading visible />;
+    }
     return (
       <div>
-        <Row>
-          <Col span={24}>
+        <Row className="flex-row" wrap={true}>
+          <Col xl={16} m={24} s={24} style={{ padding: '0 8px' }}>
             <Card
               locale={locale().Card}
               contentHeight="auto"
-              title={
-                applicationDetail && `${applicationDetail.name}(${applicationDetail.alias || '-'})`
-              }
               subTitle={applicationDetail?.description}
             >
               <Row wrap={true}>
-                <Col xxs={24} className="flexright" style={{ marginBottom: '16px' }}>
+                <Col xxs={12}>
+                  <div className="app-name">
+                    {showAlias(applicationDetail?.name, applicationDetail?.alias)}
+                  </div>
+                </Col>
+                <Col xxs={12} className="flexright" style={{ marginBottom: '16px' }}>
                   <div>
                     <Permission
                       request={{
@@ -503,6 +524,7 @@ class ApplicationConfig extends Component<Props, State> {
                     </Permission>
                   </div>
                 </Col>
+
                 <Col l={8} xxs={24}>
                   <Item
                     label={<Translation>Project</Translation>}
@@ -549,6 +571,7 @@ class ApplicationConfig extends Component<Props, State> {
                     }
                   />
                 </Col>
+
                 <Col xxs={24}>
                   {applicationDetail?.labels &&
                     Object.keys(applicationDetail?.labels).map((key) => {
@@ -561,6 +584,36 @@ class ApplicationConfig extends Component<Props, State> {
                         );
                       }
                     })}
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+          <Col xl={8} m={24} s={24} style={{ padding: '0 8px' }}>
+            <Card locale={locale().Card} contentHeight="auto" style={{ height: '100%' }}>
+              <Row>
+                <Col span={6} style={{ padding: '22px 0' }}>
+                  <NumItem
+                    number={statistics?.envCount}
+                    title={i18n.t('Environment Count').toString()}
+                  />
+                </Col>
+                <Col span={6} style={{ padding: '22px 0' }}>
+                  <NumItem
+                    number={statistics?.targetCount}
+                    title={i18n.t('Target Count').toString()}
+                  />
+                </Col>
+                <Col span={6} style={{ padding: '22px 0' }}>
+                  <NumItem
+                    number={statistics?.revisionCount}
+                    title={i18n.t('Revision Count').toString()}
+                  />
+                </Col>
+                <Col span={6} style={{ padding: '22px 0' }}>
+                  <NumItem
+                    number={statistics?.workflowCount}
+                    title={i18n.t('Workflow Count').toString()}
+                  />
                 </Col>
               </Row>
             </Card>

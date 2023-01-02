@@ -1,17 +1,20 @@
 import React from 'react';
-import { Button, Field, Form, Grid, Icon, Input, Message, Select, Upload } from '@b-design/ui';
+import { Field, Form, Grid, Input, Message, Select } from '@b-design/ui';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
-import DefinitionCode from '../../../../components/DefinitionCode';
+import type DefinitionCode from '../../../../components/DefinitionCode';
 import i18n from '../../../../i18n';
 import * as yaml from 'js-yaml';
 import { connect } from 'dva';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkPermission } from '../../../../utils/permission';
-import classNames from 'classnames';
 import { createPipeline, loadPipeline, updatePipeline } from '../../../../api/pipeline';
 import { v4 as uuid } from 'uuid';
-import type { Pipeline, PipelineDetail } from '../../../../interface/pipeline';
+import type {
+  PipelineBase,
+  PipelineDetail,
+  PipelineListItem,
+} from '../../../../interface/pipeline';
 import { checkName } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import { templates } from './pipeline-template';
@@ -22,9 +25,9 @@ const { Row, Col } = Grid;
 
 export interface PipelineProps {
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (pipeline: PipelineBase) => void;
   userInfo?: LoginUserInfo;
-  pipeline?: Pipeline;
+  pipeline?: PipelineListItem;
 }
 
 type State = {
@@ -76,7 +79,11 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
         return;
       }
       const { name, steps, project, alias, description, stepMode, subStepMode } = values;
-      const stepArray: any = yaml.load(steps);
+
+      let stepArray: any = [];
+      if (steps) {
+        stepArray = yaml.load(steps) || [];
+      }
       const request = {
         project,
         alias,
@@ -95,7 +102,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
           if (res) {
             Message.success(i18n.t('Pipeline updated successfully'));
             if (this.props.onSuccess) {
-              this.props.onSuccess();
+              this.props.onSuccess(res);
             }
           }
         });
@@ -104,7 +111,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
           if (res) {
             Message.success(i18n.t('Pipeline created successfully'));
             if (this.props.onSuccess) {
-              this.props.onSuccess();
+              this.props.onSuccess(res);
             }
           }
         });
@@ -172,7 +179,6 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
         });
       }
     });
-    const { configError, containerId } = this.state;
     const modeOptions = [{ value: 'StepByStep' }, { value: 'DAG' }];
 
     return (
@@ -292,55 +298,6 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
                     this.field.setValue('steps', value);
                   }}
                 />
-              </FormItem>
-            </Col>
-            <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem
-                className={classNames({
-                  'has-error': configError != undefined && configError.length > 0,
-                })}
-                label={<Translation>Steps</Translation>}
-                required
-              >
-                <Upload request={this.customRequest}>
-                  <Button text type="normal" className="padding-left-0">
-                    <Icon type="cloudupload" />
-                    <Translation>Upload YAML File</Translation>
-                  </Button>
-                </Upload>
-                <div id={containerId} className="guide-code">
-                  <DefinitionCode
-                    containerId={containerId}
-                    {...init<string>('steps', {
-                      rules: [
-                        {
-                          validator: (rule, v: string, callback) => {
-                            const message = 'Please input the valid Pipeline Steps YAML.';
-                            try {
-                              const pipelineSteps: any = yaml.load(v);
-                              const stepMessage = this.checkStepConfig(pipelineSteps);
-                              callback(stepMessage.toString());
-                              this.setState({ configError: stepMessage });
-                            } catch (err) {
-                              this.setState({ configError: [message + err] });
-                              callback(message + err);
-                            }
-                          },
-                        },
-                      ],
-                    })}
-                    language={'yaml'}
-                    readOnly={false}
-                    ref={this.DefinitionCodeRef}
-                  />
-                </div>
-                {configError && (
-                  <div className="next-form-item-help" style={{ marginTop: '24px' }}>
-                    {configError.map((m) => {
-                      return <p>{m}</p>;
-                    })}
-                  </div>
-                )}
               </FormItem>
             </Col>
           </Row>

@@ -38,7 +38,7 @@ class EditAppDialog extends React.Component<Props> {
 
         updateApplication(params).then((res) => {
           if (res) {
-            Message.success(<Translation>update application success</Translation>);
+            Message.success(<Translation>Application updated successfully</Translation>);
             this.props.onOK();
           }
         });

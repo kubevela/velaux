@@ -1,0 +1,33 @@
+.suspend-actions {
+  position: absolute;
+  left: 200px;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: var(--elevation-3);
+  &:before {
+    position: absolute;
+    top: 32px;
+    left: -4px;
+    width: 28px;
+    height: 28px;
+    background-color: #fff;
+    border-radius: 4px;
+    -moz-transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(45deg);
+    content: '';
+  }
+  .desc {
+    position: relative;
+    z-index: 1;
+    margin-bottom: var(--spacing-6);
+    color: var(--grey-500);
+    font-size: var(--font-size-normal);
+    vertical-align: middle;
+  }
+}
+
+.description .status {
+  position: relative;
+}

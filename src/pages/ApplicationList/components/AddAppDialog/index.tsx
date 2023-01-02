@@ -144,7 +144,7 @@ class AppDialog extends React.Component<Props, State> {
       this.setState({ createLoading: true });
       createApplication(params).then((res) => {
         if (res && res.name) {
-          Message.success(<Translation>create application success</Translation>);
+          Message.success(<Translation>Application created successfully</Translation>);
           this.props.onOK(name);
         }
         this.setState({ createLoading: false });

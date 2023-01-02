@@ -13,7 +13,6 @@ import {
 } from '../../../../api/application';
 import type {
   ApplicationComponent,
-  DefinitionBase,
   DefinitionDetail,
   Trait,
 } from '../../../../interface/application';
@@ -23,6 +22,7 @@ import Translation from '../../../../components/Translation';
 import { Link } from 'dva/router';
 import i18n from '../../../../i18n';
 import { connect } from 'dva';
+import type { DefinitionBase } from '../../../../interface/definitions';
 
 type Props = {
   project: string;
