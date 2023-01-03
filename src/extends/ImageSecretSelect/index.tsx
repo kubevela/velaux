@@ -73,7 +73,7 @@ class ImageSecretSelect extends Component<Props, State> {
   render() {
     const { disabled, onChange, value } = this.props;
     const { registries, loading, inputRepo } = this.state;
-    const dataSource = registries;
+    const dataSource = registries || [];
     if (inputRepo) {
       dataSource.unshift({ secretName: inputRepo, name: inputRepo });
     }
