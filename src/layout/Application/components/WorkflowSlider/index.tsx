@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { Card, Icon } from '@b-design/ui';
 import WorkflowStep from '../WorkflowStep';
-import type { WorkflowBase } from '../../../../interface/application';
+import type { WorkflowRecord } from '../../../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import './index.less';
 import Translation from '../../../../components/Translation';
 
 type Props = {
-  records: WorkflowBase[];
+  records: WorkflowRecord[];
   appName: string;
 };
 
@@ -53,7 +53,7 @@ class WorkflowSlider extends Component<Props, State> {
   render() {
     const { records, appName } = this.props;
     const { activeValue } = this.state;
-    let recordItem: WorkflowBase = { name: '', namespace: '', workflowName: '' };
+    let recordItem: WorkflowRecord = { name: '', namespace: '', workflowName: '' };
     if (Array.isArray(records)) {
       if (records.length - 1 < activeValue || activeValue < 0) {
         recordItem = records[0];

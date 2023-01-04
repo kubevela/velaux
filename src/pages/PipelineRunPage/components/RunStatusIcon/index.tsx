@@ -3,34 +3,34 @@ import classNames from 'classnames';
 import React from 'react';
 import { FaStopCircle } from 'react-icons/fa';
 import { If } from 'tsx-control-statements/components';
-import type { PipelineRunStatus } from '../../../../interface/pipeline';
+import type { RunPhase } from '../../../../interface/pipeline';
 
-const RunStatusIcon = (props: { runStatus?: PipelineRunStatus }) => {
-  const { runStatus } = props;
+const RunStatusIcon = (props: { status?: RunPhase }) => {
+  const { status } = props;
   return (
     <div
       className={classNames(
         'icon',
-        { warning: runStatus?.status == 'failed' },
-        { success: runStatus?.status == 'succeeded' },
+        { warning: status == 'failed' },
+        { success: status == 'succeeded' },
       )}
     >
-      <If condition={runStatus?.status == 'failed' || runStatus?.status == 'terminated'}>
+      <If condition={status == 'failed' || status == 'terminated'}>
         <Icon type="wind-warning" />
       </If>
-      <If condition={runStatus?.status == 'executing'}>
+      <If condition={status == 'executing'}>
         <Icon type="loading" />
       </If>
-      <If condition={runStatus?.status == 'succeeded'}>
+      <If condition={status == 'succeeded'}>
         <Icon type="success-filling" />
       </If>
-      <If condition={runStatus?.status == 'initializing'}>
+      <If condition={status == 'initializing'}>
         <FaStopCircle />
       </If>
-      <If condition={runStatus?.status == 'suspending'}>
+      <If condition={status == 'suspending'}>
         <Icon type="clock-fill" />
       </If>
-      <span className="status-text">{(runStatus?.status || 'pending').toUpperCase()}</span>
+      <span className="status-text">{(status || 'pending').toUpperCase()}</span>
     </div>
   );
 };

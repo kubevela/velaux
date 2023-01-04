@@ -166,7 +166,7 @@ class TriggerList extends Component<Props, State> {
                       <Col span={24}>
                         <Item
                           marginBottom="8px"
-                          labelSpan={12}
+                          labelWidth={160}
                           label={<Translation>Type</Translation>}
                           value={
                             item.type == 'webhook' ? (
@@ -182,7 +182,7 @@ class TriggerList extends Component<Props, State> {
                       <Col span={24}>
                         <Item
                           marginBottom="8px"
-                          labelSpan={12}
+                          labelWidth={160}
                           label={<Translation>Execute Workflow</Translation>}
                           value={item.workflowName}
                         />
@@ -192,7 +192,7 @@ class TriggerList extends Component<Props, State> {
                       <Col span={24}>
                         <Item
                           marginBottom="8px"
-                          labelSpan={12}
+                          labelWidth={160}
                           label={<Translation>Create Time</Translation>}
                           value={momentDate(item.createTime)}
                         />
@@ -239,7 +239,7 @@ class TriggerList extends Component<Props, State> {
             <Row>
               <Col span={24}>
                 <Item
-                  labelSpan={4}
+                  labelWidth={160}
                   label={<Translation>Webhook URL</Translation>}
                   value={
                     <div>
@@ -259,13 +259,13 @@ class TriggerList extends Component<Props, State> {
             </Row>
             <Row>
               <Col span={24}>
-                <Item labelSpan={4} label={<Translation>Method</Translation>} value={'Post'} />
+                <Item labelWidth={160} label={<Translation>Method</Translation>} value={'Post'} />
               </Col>
             </Row>
             <Row>
               <Col span={24}>
                 <Item
-                  labelSpan={4}
+                  labelWidth={160}
                   label={<Translation>Header</Translation>}
                   value={'content-type: application/json'}
                 />

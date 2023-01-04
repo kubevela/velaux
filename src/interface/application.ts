@@ -1,6 +1,9 @@
 import type { Target } from './target';
 import type { Project } from './project';
 import type { Resource } from './observation';
+import type { RunPhase, WorkflowStep } from './pipeline';
+import type { ObjectReference } from './kubernetes';
+import type { NameAlias } from './env';
 
 export interface ApplicationDetail extends ApplicationBase {
   resourceInfo: {
@@ -20,12 +23,7 @@ export interface EnvBinding {
   updateTime?: string;
   appDeployName: string;
   appDeployNamespace: string;
-}
-
-export interface WorkflowStatus {
-  name: string;
-  status?: string;
-  takeTime?: string;
+  workflow: NameAlias;
 }
 
 export interface ApplicationBase {
@@ -98,10 +96,14 @@ export interface ApplicationDeployRequest {
   force: boolean;
 }
 
+export interface ApplicationDeployResponse extends ApplicationRevision {
+  record?: WorkflowRecordBase;
+}
+
 export interface ApplicationStatus {
   conditions: Condition[];
   status: string;
-  workflow: WorkflowStatus;
+  workflow?: WorkflowStatus;
   latestRevision: {
     name: string;
     revision: number;
@@ -135,16 +137,25 @@ export interface Condition {
 export interface WorkflowStatus {
   appRevision: string;
   mode: string;
+  status: RunPhase;
+  message: string;
+
   suspend: boolean;
+  suspendState: string;
   terminated: boolean;
   finished: boolean;
-  steps: WorkflowStepStatus[];
+
+  contextBackend?: ObjectReference;
+  steps?: WorkflowStepStatus[];
+
   startTime?: string;
+  endTime?: string;
 }
 
 interface StepStatus {
   id: string;
   name: string;
+  alias: string;
   type: string;
   phase: 'succeeded' | 'failed' | 'skipped' | 'stopped' | 'running' | 'pending';
   message?: string;
@@ -155,6 +166,17 @@ interface StepStatus {
 
 export interface WorkflowStepStatus extends StepStatus {
   subSteps?: StepStatus[];
+}
+
+export type WorkflowMode = 'StepByStep' | 'DAG';
+
+export interface UpdateWorkflowRequest {
+  alias?: string;
+  description?: string;
+  mode: WorkflowMode;
+  subMode: WorkflowMode;
+  steps: WorkflowStep[];
+  default?: boolean;
 }
 
 export interface Trait {
@@ -276,6 +298,8 @@ export interface Workflow {
   default: boolean;
   createTime?: string;
   enable: boolean;
+  mode: WorkflowMode;
+  subMode: WorkflowMode;
   steps?: WorkflowStep[];
 }
 
@@ -284,26 +308,22 @@ export interface UpdateComponentProperties {
   componentName?: string;
   properties: string;
 }
-export interface WorkflowBase {
+
+export interface WorkflowRecordBase {
   name: string;
   namespace: string;
   workflowAlias?: string;
   workflowName: string;
   startTime?: string;
-  status?: string;
-  applicationRevision?: string;
-  steps?: WorkflowStepItem[];
-}
-export interface WorkflowStepItem {
-  id: string;
-  name: string;
-  alias?: string;
-  type: string;
-  phase?: string;
+  endTime?: string;
+  status?: RunPhase;
+  mode?: string;
   message?: string;
-  reason?: string;
-  firstExecuteTime?: string;
-  lastExecuteTime?: string;
+  applicationRevision?: string;
+}
+
+export interface WorkflowRecord extends WorkflowRecordBase {
+  steps?: WorkflowStepStatus[];
 }
 
 export interface Trigger {
@@ -320,15 +340,6 @@ export interface Trigger {
   componentName?: string;
 }
 
-export interface WorkflowStep {
-  name: string;
-  alias: string;
-  description?: string;
-  type: string;
-  dependsOn: string[];
-  properties: string;
-}
-
 export interface ApplicationComponentConfig {
   name: string;
   alias: string;
@@ -337,13 +348,6 @@ export interface ApplicationComponentConfig {
   properties: any;
   traits?: Trait[];
   dependsOn?: string[];
-}
-
-export interface DefinitionBase {
-  name: string;
-  description?: string;
-  icon?: string;
-  trait?: TraitDefinitionSpec;
 }
 
 export interface TraitDefinitionSpec {

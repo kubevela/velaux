@@ -1,51 +1,92 @@
-import { post, get, rdelete, put } from './request';
-import {
-  workflows_mock,
-  getWorkFlowsDetails_mock,
-  getWorkFlowsRecord_mock,
-  listWorkflowDefinition_mock,
-  listWorkflowDetailsDefinition_mock,
-} from './devLink';
-import { workflows, definition } from './productionLink';
+import { get, rdelete, put } from './request';
+import { application, definition } from './productionLink';
 import { getDomain } from '../utils/common';
-import type { WorkFlowData } from '../pages/ApplicationWorkflow/entity';
+import type { UpdateWorkflowRequest } from '../interface/application';
 
 const baseURLOject = getDomain();
-const isMock = baseURLOject.MOCK;
+const base = baseURLOject.APIBASE;
 
-export function listWorkFlow(params: { appName: string }) {
-  const url = isMock ? `${workflows_mock}` : `${workflows}/${params.appName}/workflows`;
+export function listWorkflow(params: { appName: string }) {
+  const url = base + `${application}/${params.appName}/workflows`;
   return get(url, {}).then((res) => res);
 }
 
-export function createWorkFlow(params: WorkFlowData) {
-  const url = isMock ? `${workflows_mock}` : `${workflows}/${params.appName}/workflows`;
-  return post(url, params).then((res) => res);
-}
-
-export function updateWorkFlow(params: WorkFlowData) {
-  const url = isMock ? `${workflows_mock}` : `${workflows}/${params.appName}/workflows`;
+export function updateWorkflow(
+  pathParams: { appName: string; workflowName: string },
+  params: UpdateWorkflowRequest,
+) {
+  const url = base + `${application}/${pathParams.appName}/workflows/${pathParams.workflowName}`;
   return put(url, params).then((res) => res);
 }
 
-export function getWorkFlowsRecord(params: { name: string }) {
-  const url = isMock ? `${getWorkFlowsRecord_mock}` : `${workflows}/${params.name}/records`;
+export function getEnvWorkflowRecord(params: { appName: string; workflowName: string }) {
+  const url = base + `${application}/${params.appName}/workflows/${params.workflowName}/records`;
   return get(url, params).then((res) => res);
 }
 
-export function deleteWorkFlow(params: { appName: string; name: string }) {
-  const url = isMock
-    ? `${getWorkFlowsDetails_mock}`
-    : `${workflows}/${params.appName}/workflows/${params.name}`;
+export function detailWorkflow(params: { appName: string; name: string }) {
+  const url = base + `${application}/${params.appName}/workflows/${params.name}`;
+  return get(url, {});
+}
+
+export function detailWorkflowRecord(params: {
+  appName: string;
+  workflowName: string;
+  record: string;
+}) {
+  const url =
+    base +
+    `${application}/${params.appName}/workflows/${params.workflowName}/records/${params.record}`;
+  return get(url, {});
+}
+
+export function getWorkflowRecordLogs(params: {
+  appName: string;
+  workflowName: string;
+  record: string;
+  step: string;
+}) {
+  const url =
+    base +
+    `${application}/${params.appName}/workflows/${params.workflowName}/records/${params.record}/logs`;
+  return get(url, { params: { step: params.step } });
+}
+
+export function getWorkflowRecordInputs(params: {
+  appName: string;
+  workflowName: string;
+  record: string;
+  step: string;
+}) {
+  const url =
+    base +
+    `${application}/${params.appName}/workflows/${params.workflowName}/records/${params.record}/inputs`;
+  return get(url, { params: { step: params.step } });
+}
+
+export function getWorkflowRecordOutputs(params: {
+  appName: string;
+  workflowName: string;
+  record: string;
+  step: string;
+}) {
+  const url =
+    base +
+    `${application}/${params.appName}/workflows/${params.workflowName}/records/${params.record}/outputs`;
+  return get(url, { params: { step: params.step } });
+}
+
+export function deleteWorkflow(params: { appName: string; name: string }) {
+  const url = base + `${application}/${params.appName}/workflows/${params.name}`;
   return rdelete(url, {});
 }
 
-export function getWorkFlowDefinitions() {
-  const url = isMock ? `${listWorkflowDefinition_mock}` : `${definition}`;
-  return get(url, { params: { type: 'workflowstep' } }).then((res) => res);
+export function getWorkflowDefinitions(scope?: 'Application' | 'WorkflowRun') {
+  const url = base + `${definition}`;
+  return get(url, { params: { type: 'workflowstep', scope: scope } }).then((res) => res);
 }
 
-export function detailWorkFLowDefinition(params: { name: string }) {
-  const url = isMock ? `${listWorkflowDetailsDefinition_mock}` : `${definition}/${params.name}`;
+export function detailWorkflowDefinition(params: { name: string }) {
+  const url = base + `${definition}/${params.name}`;
   return get(url, { params: { type: 'workflowstep' } }).then((res) => res);
 }

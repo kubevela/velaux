@@ -12,6 +12,7 @@ type Props = {
   id?: string;
   onChange?: (params: any) => void;
   onBlurEditor?: (value: string) => void;
+  theme?: 'default' | 'hc-black';
 };
 
 class DefinitionCode extends React.Component<Props> {
@@ -26,6 +27,7 @@ class DefinitionCode extends React.Component<Props> {
       onChange,
       onBlurEditor,
       fileUrl = `//b.txt`,
+      theme = 'default',
     } = this.props;
     const container: any = document.getElementById(containerId);
     if (container) {
@@ -48,7 +50,7 @@ class DefinitionCode extends React.Component<Props> {
       minimap: { enabled: false },
       automaticLayout: true,
       model,
-      theme: 'default',
+      theme: theme,
     });
     const textModel: monaco.editor.ITextModel | null = this.editor.getModel();
     if (textModel) {

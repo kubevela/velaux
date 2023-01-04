@@ -140,3 +140,25 @@ export function runPipeline(projectName: string, pipelineName: string, contextNa
   const url = base + `/api/v1/projects/${projectName}/pipelines/${pipelineName}/run`;
   return post(url, contextName ? { contextName } : {}).then((res) => res);
 }
+
+export function terminatePipelineRun(params: {
+  projectName: string;
+  pipelineName: string;
+  runName: string;
+}) {
+  const url =
+    base +
+    `/api/v1/projects/${params.projectName}/pipelines/${params.pipelineName}/runs/${params.runName}/terminate`;
+  return post(url, {}).then((res) => res);
+}
+
+export function resumePipelineRun(params: {
+  projectName: string;
+  pipelineName: string;
+  runName: string;
+}) {
+  const url =
+    base +
+    `/api/v1/projects/${params.projectName}/pipelines/${params.pipelineName}/runs/${params.runName}/resume`;
+  return post(url, {}).then((res) => res);
+}

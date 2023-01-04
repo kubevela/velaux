@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Balloon, Button, Dialog, Table, Message } from '@b-design/ui';
 import { deletePipelineRun, loadPipelineRuns } from '../../../../api/pipeline';
-import type { Pipeline, PipelineRunBriefing } from '../../../../interface/pipeline';
+import type { PipelineListItem, PipelineRunBriefing } from '../../../../interface/pipeline';
 import locale from '../../../../utils/locale';
 import i18n from '../../../../i18n';
 import { Link } from 'dva/router';
@@ -13,7 +13,7 @@ import Permission from '../../../../components/Permission';
 import { If } from 'tsx-control-statements/components';
 
 export interface ViewRunsProps {
-  pipeline: Pipeline;
+  pipeline: PipelineListItem;
   onClose: () => void;
 }
 

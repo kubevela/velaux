@@ -405,7 +405,7 @@ class PolicyDialog extends React.Component<Props, State> {
   };
 
   buildWorkflowStepsOptions = () => {
-    const workflowName = this.field.getValue('workflow');
+    const workflowName: string = this.field.getValue('workflow');
     const { workflows } = this.props;
     const stepOptions: { label: string; value: string }[] = [];
     workflows.map((wf) => {

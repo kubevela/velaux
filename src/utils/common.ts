@@ -103,7 +103,7 @@ export function momentShortDate(time: undefined | string): string {
 }
 
 export function beautifyTime(time?: string) {
-  if (!time) {
+  if (!time || time === '0001-01-01T00:00:00Z') {
     return '';
   }
   const timestamp = moment(time).unix();
@@ -123,11 +123,11 @@ export function beautifyTime(time?: string) {
 }
 
 export function timeDiff(start?: string, end?: string): string {
-  if (!start) {
+  if (!start || start == '0001-01-01T00:00:00Z') {
     return '-';
   }
   let endTime = moment(moment.now());
-  if (end) {
+  if (end && end != '0001-01-01T00:00:00Z') {
     endTime = moment(end);
   }
   const seconds = endTime.diff(moment(start), 'seconds');
@@ -293,4 +293,11 @@ export function convertAny(data?: any): string {
     default:
       return '';
   }
+}
+
+export function showAlias(name: string, alias?: string) {
+  if (alias) {
+    return `${name}(${alias})`;
+  }
+  return name;
 }

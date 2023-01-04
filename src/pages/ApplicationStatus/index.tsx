@@ -20,11 +20,12 @@ import type {
   Condition,
   EnvBinding,
   ComponentStatus,
+  ApplicationDeployResponse,
 } from '../../interface/application';
 import { If } from 'tsx-control-statements/components';
 import Translation from '../../components/Translation';
 import locale from '../../utils/locale';
-import { Link } from 'dva/router';
+import { Link, routerRedux } from 'dva/router';
 import Header from '../ApplicationInstanceList/components/Header';
 import {
   listApplicationResourceTree,
@@ -69,7 +70,7 @@ type State = {
   resourceLoading: boolean;
   endpointLoading: boolean;
   envName: string;
-  mode: 'overview' | 'resource-graph' | 'application-graph';
+  mode: 'overview' | 'resource-graph' | 'application-graph' | string | number;
 };
 
 @connect((store: any) => {
@@ -84,7 +85,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       resourceLoading: false,
       endpointLoading: false,
       envName: '',
-      mode: 'overview',
+      mode: 'resource-graph',
       resources: [],
     };
   }
@@ -293,7 +294,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
   };
 
   onDeploy = (force?: boolean) => {
-    const { envbinding } = this.props;
+    const { envbinding, dispatch } = this.props;
     const {
       params: { appName, envName },
     } = this.props.match;
@@ -309,11 +310,18 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         },
         true,
       )
-        .then((re) => {
+        .then((re: ApplicationDeployResponse) => {
           if (re) {
             Message.success(i18next.t('Application deployed successfully'));
             this.setState({ deployLoading: false });
             this.loadApplicationStatus();
+            if (re.record && re.record.name && dispatch) {
+              dispatch(
+                routerRedux.push(
+                  `/applications/${appName}/envbinding/${re.envName}/workflow/records/${re.record.name}`,
+                ),
+              );
+            }
           }
         })
         .catch((err: APIError) => {
@@ -338,15 +346,11 @@ class ApplicationStatusPage extends React.Component<Props, State> {
   };
 
   onChangeMode = (mode: string | number) => {
-    if (mode == 'overview') {
-      this.setState({ mode: mode }, () => {
+    this.setState({ mode: mode }, () => {
+      if (mode === 'overview' || mode === 'resource-graph') {
         this.loadApplicationAppliedResources();
-      });
-    } else if (mode == 'resource-graph') {
-      this.setState({ mode: mode }, () => {
-        this.loadApplicationAppliedResources();
-      });
-    }
+      }
+    });
   };
 
   render() {
@@ -362,6 +366,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       resources,
       componentName,
       deployLoading,
+      mode,
     } = this.state;
     let componentStatus = applicationStatus?.services;
     if (componentName) {
@@ -369,7 +374,28 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     }
     const env = this.getEnvbindingByName();
     const { Group: TagGroup } = Tag;
-
+    const notDeploy = (
+      <div className="deployNotice">
+        <div className="noticeBox">
+          <h2>
+            <Translation>Not Deploy</Translation>
+          </h2>
+          <div className="desc">
+            <Translation>The current environment has not been deployed.</Translation>
+          </div>
+          <div className="noticeAction">
+            <Button
+              loading={deployLoading}
+              disabled={applicationDetail?.readOnly}
+              onClick={() => this.onDeploy()}
+              type="primary"
+            >
+              <Translation>Deploy</Translation>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
     return (
       <div className="application-status-wrapper">
         <Loading visible={loading && endpointLoading} style={{ width: '100%' }}>
@@ -397,7 +423,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             dispatch={this.props.dispatch}
           />
         </Loading>
-        <Tab onChange={this.onChangeMode} shape="capsule">
+        <Tab onChange={this.onChangeMode} defaultActiveKey={mode} shape="capsule">
           <Tab.Item title={i18n.t('Overview')} key="overview">
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
@@ -656,28 +682,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                   </Card>
                 </If>
               </If>
-              <If condition={!applicationStatus}>
-                <div className="deployNotice">
-                  <div className="noticeBox">
-                    <h2>
-                      <Translation>Not Deploy</Translation>
-                    </h2>
-                    <div className="desc">
-                      <Translation>The current environment has not been deployed.</Translation>
-                    </div>
-                    <div className="noticeAction">
-                      <Button
-                        loading={deployLoading}
-                        disabled={applicationDetail?.readOnly}
-                        onClick={() => this.onDeploy()}
-                        type="primary"
-                      >
-                        <Translation>Deploy</Translation>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </If>
+              <If condition={!applicationStatus}>{notDeploy}</If>
             </Loading>
           </Tab.Item>
           <Tab.Item title={i18n.t('Resource Graph')} key="resource-graph">
@@ -692,6 +697,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                 />
               </If>
             </Loading>
+            <If condition={!applicationStatus}>{notDeploy}</If>
           </Tab.Item>
           <Tab.Item title={i18n.t('Application Graph')} key="application-graph">
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
@@ -706,6 +712,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                 />
               </If>
             </Loading>
+            <If condition={!applicationStatus}>{notDeploy}</If>
           </Tab.Item>
         </Tab>
       </div>
