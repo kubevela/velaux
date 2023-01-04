@@ -130,7 +130,10 @@ class TableList extends Component<Props> {
           return (
             <div>
               <Permission
-                request={{ resource: `environment:${record.name}`, action: 'update' }}
+                request={{
+                  resource: `project:${record.project.name}/environment:${record.name}`,
+                  action: 'update',
+                }}
                 project={record.project.name}
               >
                 <Button
@@ -149,7 +152,10 @@ class TableList extends Component<Props> {
                 <span className="line" />
               </Permission>
               <Permission
-                request={{ resource: `environment:${record.name}`, action: 'delete' }}
+                request={{
+                  resource: `project:${record.project.name}/environment:${record.name}`,
+                  action: 'delete',
+                }}
                 project={record.project.name}
               >
                 <Button
