@@ -1,10 +1,10 @@
 import React from 'react';
-import { connect } from 'dva';
 import { Select } from '@b-design/ui';
 import { getPolicyList } from '../../api/application';
 import type { ApplicationPolicyBase } from '../../interface/application';
 import locale from '../../utils/locale';
 import i18n from '../../i18n';
+import { UISchemaContext } from '../../context';
 
 type Props = {
   onChange: (value: any) => void;
@@ -19,9 +19,6 @@ type State = {
   policySelectDataSource?: ApplicationPolicyBase[];
 };
 
-@connect((store: any) => {
-  return { ...store.uischema };
-})
 class PolicySelect extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -35,7 +32,7 @@ class PolicySelect extends React.Component<Props, State> {
   };
 
   fetchPolicyList = async () => {
-    const { appName = '' } = this.props;
+    const { appName = '' } = this.context;
     if (appName) {
       getPolicyList({
         appName: appName,
@@ -89,5 +86,7 @@ class PolicySelect extends React.Component<Props, State> {
     );
   }
 }
+
+PolicySelect.contextType = UISchemaContext;
 
 export default PolicySelect;

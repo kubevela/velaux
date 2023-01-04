@@ -1,26 +1,20 @@
-import { Grid, Card, Breadcrumb, Button, Message, Dialog, Icon } from '@b-design/ui';
+import { Grid, Breadcrumb, Button, Message, Dialog, Icon } from '@b-design/ui';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 import Translation from '../../../../components/Translation';
-import {
-  deployApplication,
-  getApplicationStatistics,
-  getApplicationWorkflowRecord,
-} from '../../../../api/application';
+import { deployApplication } from '../../../../api/application';
 import type {
   ApplicationDetail,
   ApplicationStatus,
   ApplicationStatistics,
   Workflow,
-  WorkflowBase,
+  WorkflowRecord,
+  ApplicationDeployResponse,
 } from '../../../../interface/application';
-import NumItem from '../../../../components/NumItem';
-import { Link } from 'dva/router';
+import { Link, routerRedux } from 'dva/router';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
-import WorkflowSlider from '../WorkflowSlider';
 import { If } from 'tsx-control-statements/components';
-import Empty from '../../../../components/Empty';
 import locale from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
 import i18n from 'i18next';
@@ -41,7 +35,7 @@ interface Props {
 interface State {
   loading: boolean;
   statistics?: ApplicationStatistics;
-  records?: WorkflowBase[];
+  records?: WorkflowRecord[];
   showDeployConfig: boolean;
 }
 
@@ -49,15 +43,12 @@ interface State {
   return { ...store.application };
 })
 class ApplicationHeader extends Component<Props, State> {
-  interval: any;
-  sync: boolean;
   constructor(props: any) {
     super(props);
     this.state = {
       loading: true,
       showDeployConfig: false,
     };
-    this.sync = true;
   }
 
   onDeployConfig = () => {
@@ -75,7 +66,7 @@ class ApplicationHeader extends Component<Props, State> {
   };
 
   onDeploy = (workflowName?: string, force?: boolean) => {
-    const { applicationDetail } = this.props;
+    const { applicationDetail, dispatch } = this.props;
     if (applicationDetail) {
       deployApplication(
         {
@@ -86,10 +77,17 @@ class ApplicationHeader extends Component<Props, State> {
         },
         true,
       )
-        .then((re) => {
+        .then((re: ApplicationDeployResponse) => {
           if (re) {
             Message.success('Application deployed successfully');
             this.onGetApplicationDetails();
+            if (re.record && re.record.name && dispatch) {
+              dispatch(
+                routerRedux.push(
+                  `/applications/${applicationDetail.name}/envbinding/${re.envName}/workflow/records/${re.record.name}`,
+                ),
+              );
+            }
           }
         })
         .catch((err: APIError) => {
@@ -110,54 +108,22 @@ class ApplicationHeader extends Component<Props, State> {
     }
   };
 
-  loadAppStatistics = async () => {
-    const { appName } = this.props;
-    if (appName) {
-      getApplicationStatistics({ appName: appName }).then((re: ApplicationStatistics) => {
-        if (re) {
-          this.setState({ statistics: re });
-        }
-      });
-    }
-  };
+  componentDidMount() {}
 
-  loadWorkflowRecord = async () => {
-    const { appName } = this.props;
-    if (appName) {
-      getApplicationWorkflowRecord({ appName: appName })
-        .then((re) => {
-          if (re) {
-            this.setState({ records: re.records });
-          }
-        })
-        .finally(() => {
-          if (this.sync) {
-            this.interval = setTimeout(() => {
-              this.loadWorkflowRecord();
-            }, 3000);
-          }
-        });
-    }
-  };
-
-  componentDidMount() {
-    this.loadAppStatistics();
-    this.loadWorkflowRecord();
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this.interval);
-    this.sync = false;
-  }
+  componentWillUnmount() {}
 
   render() {
     const { applicationDetail, currentPath, workflows, appName } = this.props;
-    const { statistics, records, showDeployConfig } = this.state;
+    const { showDeployConfig } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
-    const item = <Translation>{`app-${activeKey}`}</Translation>;
+    let item = <Translation>{`app-${activeKey}`}</Translation>;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     const sourceOfTrust =
       applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
+    const envPage = currentPath.startsWith(`/applications/${appName}/envbinding/`);
+    if (envPage) {
+      item = <Translation>{`Environment`}</Translation>;
+    }
     return (
       <div>
         <Row>
@@ -218,51 +184,6 @@ class ApplicationHeader extends Component<Props, State> {
                 <Translation>Deploy</Translation>
               </Button>
             </Permission>
-          </Col>
-        </Row>
-        <Row wrap={true}>
-          <Col xl={12} m={24} s={24} className="padding16">
-            <Card locale={locale().Card} contentHeight="auto" style={{ minHeight: '160px' }}>
-              <Row>
-                <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem
-                    number={statistics?.envCount}
-                    title={i18n.t('Environment Count').toString()}
-                  />
-                </Col>
-                <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem
-                    number={statistics?.targetCount}
-                    title={i18n.t('Target Count').toString()}
-                  />
-                </Col>
-                <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem
-                    number={statistics?.revisionCount}
-                    title={i18n.t('Revision Count').toString()}
-                  />
-                </Col>
-                <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem
-                    number={statistics?.workflowCount}
-                    title={i18n.t('Workflow Count').toString()}
-                  />
-                </Col>
-              </Row>
-            </Card>
-          </Col>
-          <Col xl={12} m={24} s={24} className="padding16">
-            <If condition={!records || (Array.isArray(records) && records.length === 0)}>
-              <Card locale={locale().Card} contentHeight="auto" style={{ minHeight: '160px' }}>
-                <Empty
-                  message={<Translation>There is no running workflow</Translation>}
-                  iconWidth={'30px'}
-                />
-              </Card>
-            </If>
-            <If condition={Array.isArray(records) && records.length > 0}>
-              <WorkflowSlider appName={appName} records={records || []} />
-            </If>
           </Col>
         </Row>
         <If condition={showDeployConfig}>

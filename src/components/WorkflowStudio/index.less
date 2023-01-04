@@ -1,0 +1,110 @@
+.line-action {
+  position: absolute;
+  top: 27px;
+  left: -60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  background: var(--color-border-default);
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 1;
+  &:hover {
+    background: var(--primary-color);
+  }
+  .line-icon {
+    color: #fff;
+    svg {
+      display: block;
+      fill: currentColor;
+    }
+  }
+}
+
+.workflow-graph {
+  .step-start,
+  .step-end {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 75px;
+    margin-right: 100px;
+    i {
+      color: var(--color-border-default);
+      &::before {
+        font-size: var(--font-size-x-large);
+      }
+    }
+  }
+  .step-delete {
+    .next-icon {
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
+  }
+  .sub-step-add {
+    text-align: center;
+    border: 1px dashed var(--grey-300);
+  }
+}
+
+.def-items {
+  display: flex;
+  flex-wrap: wrap;
+  .def-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3);
+    .icon {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      padding: var(--spacing-3);
+      border: 1px solid transparent;
+      border-radius: 4px;
+      box-shadow: var(--elevation-2);
+      cursor: pointer;
+      &:hover {
+        border: 1px solid var(--primary-color);
+      }
+    }
+    .name {
+      display: grid;
+      margin-top: var(--spacing-3);
+      text-align: center;
+    }
+  }
+}
+
+.input-items {
+  .item {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+    .item-form {
+      flex: 1;
+    }
+    .item-delete {
+      width: 40px;
+    }
+    .next-form-item {
+      margin-bottom: 0;
+    }
+    .from {
+      .next-input {
+        border-right: 0;
+      }
+    }
+  }
+}

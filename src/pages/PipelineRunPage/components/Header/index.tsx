@@ -13,9 +13,15 @@ import type {
 import classNames from 'classnames';
 import { momentDate, timeDiff } from '../../../../utils/common';
 import { If } from 'tsx-control-statements/components';
-import { runPipeline, stopPipelineRun } from '../../../../api/pipeline';
+import {
+  resumePipelineRun,
+  runPipeline,
+  stopPipelineRun,
+  terminatePipelineRun,
+} from '../../../../api/pipeline';
 import locale from '../../../../utils/locale';
 import RunStatusIcon from '../RunStatusIcon';
+import i18n from '../../../../i18n';
 
 const { Row, Col } = Grid;
 
@@ -31,6 +37,8 @@ interface Props {
 interface State {
   stopLoading?: boolean;
   reRunLoading?: boolean;
+  resumeLoading?: boolean;
+  terminateLoading?: boolean;
 }
 
 @connect((store: any) => {
@@ -53,7 +61,6 @@ class Header extends Component<Props, State> {
           this.setState({ reRunLoading: true });
           runPipeline(runBase?.project.name, pipeline?.name, runBase.contextName)
             .then((res) => {
-              debugger;
               if (res && res.pipelineRunName && this.props.dispatch) {
                 this.props.dispatch(
                   routerRedux.push(
@@ -97,19 +104,61 @@ class Header extends Component<Props, State> {
     });
   };
 
-  componentDidMount() {}
+  onTerminatePipelineRun = () => {
+    this.setState({ terminateLoading: true });
+    const { pipeline, runBase, loadRunStatus } = this.props;
+    if (!pipeline || !runBase) {
+      return;
+    }
+    const params = {
+      projectName: pipeline.project.name,
+      pipelineName: runBase.pipelineName,
+      runName: runBase?.pipelineRunName,
+    };
+    this.setState({ terminateLoading: true });
+    terminatePipelineRun(params)
+      .then((re) => {
+        if (re) {
+          Message.success(i18n.t('Pipeline terminated successfully'));
+          loadRunStatus();
+        }
+      })
+      .finally(() => {
+        this.setState({ terminateLoading: false });
+      });
+  };
 
-  componentWillUnmount() {}
+  onResumePipelineRun = () => {
+    this.setState({ terminateLoading: true });
+    const { pipeline, runBase, loadRunStatus } = this.props;
+    if (!pipeline || !runBase) {
+      return;
+    }
+    const params = {
+      projectName: pipeline.project.name,
+      pipelineName: runBase.pipelineName,
+      runName: runBase?.pipelineRunName,
+    };
+    this.setState({ terminateLoading: true });
+    resumePipelineRun(params)
+      .then((re) => {
+        if (re) {
+          Message.success(i18n.t('Pipeline resumed successfully'));
+          loadRunStatus();
+        }
+      })
+      .finally(() => {
+        this.setState({ terminateLoading: false });
+      });
+  };
 
   render() {
     const { pipeline, runBase, runStatus, statusLoading } = this.props;
     const projectName = (pipeline && pipeline.project?.name) || '';
     const runCondition = runStatus?.conditions?.filter((con) => con.type === 'WorkflowRun');
-    const { reRunLoading, stopLoading } = this.state;
-    let message = runStatus?.message;
-    if (runStatus?.status == 'suspending' && !runStatus?.message) {
-      message = 'Pipeline need you approve.';
-    }
+    const { reRunLoading, stopLoading, resumeLoading, terminateLoading } = this.state;
+    const message = runStatus?.message;
+
     return (
       <div>
         <Row style={{ marginBottom: '16px' }}>
@@ -122,11 +171,15 @@ class Header extends Component<Props, State> {
                 <Link to={'/projects/' + projectName}>{projectName}</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link to={`/pipelines`}>
+                <Link to={`/projects/${projectName}/pipelines`}>
                   <Translation>Pipelines</Translation>
                 </Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>{pipeline && (pipeline.alias || pipeline.name)}</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link to={`/projects/${projectName}/pipelines/${pipeline?.name}/studio`}>
+                  {pipeline && (pipeline.alias || pipeline.name)}
+                </Link>
+              </Breadcrumb.Item>
               <Breadcrumb.Item>{runBase?.pipelineRunName}</Breadcrumb.Item>
             </Breadcrumb>
           </Col>
@@ -233,17 +286,45 @@ class Header extends Component<Props, State> {
               <div
                 className={classNames(
                   'status',
-                  { warning: runStatus?.status == 'failed' },
+                  { warning: runStatus?.status == 'failed' || runStatus?.status === 'terminated' },
                   { success: runStatus?.status == 'succeeded' },
                 )}
               >
-                <RunStatusIcon runStatus={runStatus} />
+                <RunStatusIcon status={runStatus?.status} />
                 <If condition={message}>
                   <div className="message">
                     <div className="summary">
                       {runStatus?.status == 'failed' ? 'Error Summary' : 'Summary'}
                     </div>
                     <p className="text">{message}</p>
+                  </div>
+                </If>
+                <If condition={runStatus?.status === 'suspending'}>
+                  <div className={classNames('suspend-actions')}>
+                    <div className="desc">This Pipeline need you approve.</div>
+                    <Button.Group>
+                      <Button
+                        type="secondary"
+                        size="small"
+                        loading={terminateLoading}
+                        className="margin-top-5 margin-left-8"
+                        title="Terminate this workflow"
+                        onClick={this.onTerminatePipelineRun}
+                      >
+                        <Translation>Terminate</Translation>
+                      </Button>
+
+                      <Button
+                        type="primary"
+                        size="small"
+                        loading={resumeLoading}
+                        className="margin-top-5 margin-left-8"
+                        title="Approve and continue this workflow"
+                        onClick={this.onResumePipelineRun}
+                      >
+                        <Translation>Resume</Translation>
+                      </Button>
+                    </Button.Group>
                   </div>
                 </If>
               </div>

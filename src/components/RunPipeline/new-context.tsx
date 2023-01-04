@@ -5,13 +5,13 @@ import KV from '../../extends/KV';
 import i18n from '../../i18n';
 import Translation from '../Translation';
 import { createPipelineContext } from '../../api/pipeline';
-import type { KeyValue, Pipeline } from '../../interface/pipeline';
+import type { KeyValue, PipelineListItem } from '../../interface/pipeline';
 import { checkName } from '../../utils/common';
 
 const { Row, Col } = Grid;
 
 export interface NewContextProps {
-  pipeline: Pipeline;
+  pipeline: PipelineListItem;
   onSuccess: () => void;
   onCancel: () => void;
 }

@@ -15,7 +15,7 @@ export function renderStepStatusIcon(status: WorkflowStepStatus) {
           role="img"
         >
           <path
-            fill-rule="evenodd"
+            fillRule="evenodd"
             d="M8 16A8 8 0 108 0a8 8 0 000 16zm3.78-9.72a.75.75 0 00-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5z"
           />
         </svg>
@@ -32,7 +32,7 @@ export function renderStepStatusIcon(status: WorkflowStepStatus) {
           role="img"
         >
           <path
-            fill-rule="evenodd"
+            fillRule="evenodd"
             d="M2.343 13.657A8 8 0 1113.657 2.343 8 8 0 012.343 13.657zM6.03 4.97a.75.75 0 00-1.06 1.06L6.94 8 4.97 9.97a.75.75 0 101.06 1.06L8 9.06l1.97 1.97a.75.75 0 101.06-1.06L9.06 8l1.97-1.97a.75.75 0 10-1.06-1.06L8 6.94 6.03 4.97z"
           />
         </svg>
@@ -49,7 +49,7 @@ export function renderStepStatusIcon(status: WorkflowStepStatus) {
           role="img"
         >
           <path
-            fill-rule="evenodd"
+            fillRule="evenodd"
             d="M4.47.22A.75.75 0 015 0h6a.75.75 0 01.53.22l4.25 4.25c.141.14.22.331.22.53v6a.75.75 0 01-.22.53l-4.25 4.25A.75.75 0 0111 16H5a.75.75 0 01-.53-.22L.22 11.53A.75.75 0 010 11V5a.75.75 0 01.22-.53L4.47.22zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5H5.31zM8 4a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 018 4zm0 8a1 1 0 100-2 1 1 0 000 2z"
           />
         </svg>
@@ -75,6 +75,20 @@ export function renderStepStatusIcon(status: WorkflowStepStatus) {
           </svg>
         </div>
       );
+    case 'stopped':
+      return (
+        <svg
+          aria-hidden="true"
+          height="16"
+          viewBox="0 0 16 16"
+          version="1.1"
+          width="16"
+          data-view-component="true"
+          className="step-icon stopped-icon"
+        >
+          <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8z" />
+        </svg>
+      );
     default:
       return (
         <svg
@@ -86,7 +100,7 @@ export function renderStepStatusIcon(status: WorkflowStepStatus) {
           data-view-component="true"
           className="step-icon pending-icon"
         >
-          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8z" />
+          <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8z" />
         </svg>
       );
   }

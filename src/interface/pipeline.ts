@@ -11,12 +11,16 @@ export interface CreatePipelineRequest {
     mode?: PipelineRunMode;
   };
 }
-export interface Pipeline {
+
+interface PipelineMeta {
   name: string;
   alias?: string;
   description?: string;
   project: NameAlias;
   createTime?: string;
+}
+
+export interface PipelineListItem extends PipelineMeta {
   info?: {
     lastRun?: PipelineRun;
     runStat?: {
@@ -25,6 +29,15 @@ export interface Pipeline {
       week: RunStateInfo[];
     };
   };
+}
+
+export interface PipelineSpec {
+  mode: PipelineRunMode;
+  steps: WorkflowStep[];
+}
+
+export interface PipelineBase extends PipelineMeta {
+  spec: PipelineSpec;
 }
 
 export interface PipelineRun extends PipelineRunBase {
@@ -36,6 +49,7 @@ export interface PipelineDetail {
   description: string;
   name: string;
   project: NameAlias;
+  createTime?: string;
   spec: {
     steps: WorkflowStep[];
     mode?: PipelineRunMode;
@@ -85,8 +99,10 @@ interface PipelineRunSpec {
   };
 }
 
-interface WorkflowStepBase {
+export interface WorkflowStepBase {
   name: string;
+  alias?: string;
+  description?: string;
   type: string;
   meta?: {
     alias?: string;
@@ -108,14 +124,15 @@ interface PipelineRunMode {
   subSteps?: 'DAG' | 'StepByStep';
 }
 
-type RunPhase =
+export type RunPhase =
   | 'initializing'
   | 'executing'
   | 'suspending'
   | 'terminated'
   | 'failed'
   | 'succeeded'
-  | 'skipped';
+  | 'skipped'
+  | string;
 
 export interface PipelineRunStatus {
   conditions?: Condition[];

@@ -95,7 +95,7 @@ class PolicyList extends Component<Props, State> {
                       <Col span={24}>
                         <Item
                           marginBottom="8px"
-                          labelSpan={12}
+                          labelWidth={160}
                           label={<Translation>Type</Translation>}
                           value={item.type}
                         />
@@ -103,7 +103,7 @@ class PolicyList extends Component<Props, State> {
                       <Col span={24}>
                         <Item
                           marginBottom="8px"
-                          labelSpan={12}
+                          labelWidth={160}
                           label={<Translation>Environment</Translation>}
                           value={envNameAlias[item.envName || '']}
                         />
@@ -111,7 +111,7 @@ class PolicyList extends Component<Props, State> {
                       <Col span={24}>
                         <Item
                           marginBottom="8px"
-                          labelSpan={12}
+                          labelWidth={160}
                           label={<Translation>Create Time</Translation>}
                           value={
                             <span title={momentDate(item.createTime)}>

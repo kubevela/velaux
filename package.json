@@ -101,6 +101,8 @@
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^4.0.0",
     "@typescript-eslint/parser": "^4.0.0",
+    "@types/react-router-dom": "^4.2.7",
+    "@svgr/cli": "^6.5.1",
     "@umijs/fabric": "2.8.1",
     "babel-loader": "8.2.3",
     "bfj": "7.0.2",

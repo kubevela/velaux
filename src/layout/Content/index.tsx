@@ -3,7 +3,7 @@ import { Route, Switch, Redirect } from 'dva/router';
 import Application from '../../pages/ApplicationList';
 import Clusters from '../../pages/Cluster/index';
 import Addons from '../../pages/Addons/index';
-import ApplicationWorkflow from '../../pages/ApplicationWorkflow/index';
+import ApplicationWorkflowStatus from '../../pages/ApplicationWorkflowStatus/index';
 import ApplicationConfig from '../../pages/ApplicationConfig';
 import NotFound from '../../pages/NotFound';
 import ApplicationInstanceList from '../../pages/ApplicationInstanceList';
@@ -29,6 +29,9 @@ import DefinitionDetails from '../DefinitionDetails';
 import UiSchema from '../../pages/UiSchema';
 import PipelineRunPage from '../../pages/PipelineRunPage';
 import PipelineListPage from '../../pages/PipelineListPage';
+import ApplicationWorkflowStudio from '../../pages/ApplicationWorkflowStudio';
+import PipelineStudio from '../../pages/PipelineStudio';
+import ProjectPipelines from '../../pages/ProjectPipelines';
 
 export default function Content() {
   return (
@@ -55,17 +58,6 @@ export default function Content() {
           return (
             <ApplicationLayout {...props}>
               <ApplicationConfig {...props} />
-            </ApplicationLayout>
-          );
-        }}
-      />
-      <Route
-        exact
-        path="/applications/:appName/workflows"
-        render={(props: any) => {
-          return (
-            <ApplicationLayout {...props}>
-              <ApplicationWorkflow {...props} />
             </ApplicationLayout>
           );
         }}
@@ -116,6 +108,39 @@ export default function Content() {
       />
       <Route
         exact
+        path="/applications/:appName/envbinding/:envName/workflow"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationWorkflowStatus {...props} />
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/applications/:appName/envbinding/:envName/workflow/records/:record"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationWorkflowStatus {...props} />
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/applications/:appName/envbinding/:envName/workflow/studio"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationWorkflowStudio {...props} />
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
         path="/applications/:appName/envbinding/:envName/logs"
         render={(props: any) => {
           return (
@@ -137,6 +162,11 @@ export default function Content() {
         exact
         path="/projects/:projectName/pipelines/:pipelineName/runs/:runName"
         component={PipelineRunPage}
+      />
+      <Route
+        exact
+        path="/projects/:projectName/pipelines/:pipelineName/studio"
+        component={PipelineStudio}
       />
       <Route path="/targets" component={TargetList} />
       <Route path="/clusters" component={Clusters} />
@@ -171,6 +201,18 @@ export default function Content() {
           return (
             <ProjectLayout {...mergeProps}>
               <ProjectApplications {...mergeProps} />
+            </ProjectLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/projects/:projectName/pipelines"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'pipelines' } };
+          return (
+            <ProjectLayout {...mergeProps}>
+              <ProjectPipelines {...mergeProps} />
             </ProjectLayout>
           );
         }}

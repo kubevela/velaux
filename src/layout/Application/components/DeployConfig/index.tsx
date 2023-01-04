@@ -160,6 +160,7 @@ class DeployConfigDialog extends Component<Props, State> {
             {workflows?.map((workflow) => {
               return (
                 <Radio
+                  key={workflow.name}
                   id={workflow.name}
                   value={workflow.name}
                   onClick={() => {

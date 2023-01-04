@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Tab, Grid } from '@b-design/ui';
 import './index.less';
 import Translation from '../../../../components/Translation';
 import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
@@ -8,8 +7,10 @@ import { If } from 'tsx-control-statements/components';
 import AddAndEditEnvBind from '../AddAndEditEnvBind';
 import { Link } from 'dva/router';
 import Permission from '../../../../components/Permission';
+import classNames from 'classnames';
+import { Balloon, Icon } from '@b-design/ui';
+import { beautifyTime } from '../../../../utils/common';
 
-const { Row, Col } = Grid;
 type Props = {
   activeKey: string;
   applicationDetail?: ApplicationDetail;
@@ -62,70 +63,60 @@ class TabsContent extends Component<Props, State> {
     const { visibleEnvPlan } = this.state;
     const projectName = applicationDetail && applicationDetail.project?.name;
     return (
-      <div className="padding16">
-        <div className="tabs-content">
-          <Row className="tabs-wraper">
-            <Col span={20}>
-              <Tab
-                animation={true}
-                shape="wrapped"
-                size="medium"
-                activeKey={activeKey}
-                onChange={this.handleChange}
-                tabRender={(key: string, props: any) => {
-                  return props.title;
-                }}
-              >
-                <Tab.Item
-                  title={
-                    <Link className="item" to={`/applications/${applicationDetail?.name}/config`}>
-                      <Translation>Application Config</Translation>
+      <div>
+        <div className="top-menus">
+          <Link
+            className={classNames('top-menu-item', { active: activeKey === 'basisConfig' })}
+            to={`/applications/${applicationDetail?.name}/config`}
+          >
+            <Translation>Application Config</Translation>
+          </Link>
+          <div className="env-box">
+            <div className="env-name">
+              <Translation>Environments</Translation>
+            </div>
+            {envbinding?.map((item) => {
+              return (
+                <Balloon
+                  key={item.name}
+                  trigger={
+                    <Link
+                      key={item.name + 'link'}
+                      className={classNames('top-menu-item', { active: activeKey === item.name })}
+                      to={`/applications/${applicationDetail?.name}/envbinding/${item.name}/workflow`}
+                    >
+                      <span title={item.description}>{item.alias ? item.alias : item.name}</span>
                     </Link>
                   }
-                  key={'basisConfig'}
-                />
-                {envbinding?.map((item) => {
-                  return (
-                    <Tab.Item
-                      title={
-                        <Link
-                          className="item"
-                          to={`/applications/${applicationDetail?.name}/envbinding/${item.name}/status`}
-                        >
-                          <span title={item.description}>
-                            {item.alias ? item.alias : item.name}
-                          </span>
-                        </Link>
-                      }
-                      key={item.name}
-                    />
-                  );
-                })}
-              </Tab>
-            </Col>
-            <Col span={4}>
-              <div className="action-list">
-                <If condition={!applicationDetail?.readOnly}>
-                  <Permission
-                    request={{
-                      resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:*`,
-                      action: 'create',
-                    }}
-                    project={projectName}
-                  >
-                    <a
-                      onClick={() => {
-                        this.setState({ visibleEnvPlan: true });
-                      }}
-                    >
-                      <Translation>Bind Environment</Translation>
-                    </a>
-                  </Permission>
-                </If>
-              </div>
-            </Col>
-          </Row>
+                >
+                  {item.description}
+                  <p>Name: {item.name}</p>
+                  <p>Bind Time: {beautifyTime(item.createTime)}</p>
+                </Balloon>
+              );
+            })}
+            <If condition={!applicationDetail?.readOnly}>
+              <Permission
+                request={{
+                  resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:*`,
+                  action: 'create',
+                }}
+                project={projectName}
+              >
+                <a
+                  className={classNames('top-menu-item')}
+                  style={{ width: '50px' }}
+                  onClick={() => {
+                    this.setState({ visibleEnvPlan: true });
+                  }}
+                >
+                  <Icon type="add" />
+                </a>
+              </Permission>
+            </If>
+          </div>
         </div>
+
         <If condition={visibleEnvPlan}>
           <AddAndEditEnvBind
             envbinding={envbinding}
