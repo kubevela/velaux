@@ -36,12 +36,8 @@ import { If } from 'tsx-control-statements/components';
 import classNames from 'classnames';
 import Permission from '../../../../components/Permission';
 import locale from '../../../../utils/locale';
-import {
-  createPolicy,
-  detailPolicyDefinition,
-  getPolicyDefinitions,
-  updatePolicy,
-} from '../../../../api/application';
+import { createPolicy, updatePolicy } from '../../../../api/application';
+import { detailPolicyDefinition, getPolicyDefinitions } from '../../../../api/definitions';
 import type { DefinitionBase } from '../../../../interface/definitions';
 import { checkName } from '../../../../utils/common';
 import UISchema from '../../../../components/UISchema';

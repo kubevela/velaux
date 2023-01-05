@@ -45,3 +45,35 @@ export function updateUISchema(params: {
   };
   return put(url, paramsData).then((res) => res);
 }
+
+export function getComponentDefinitions() {
+  const _url = base + definition;
+  return get(_url, { params: { type: 'component' } }).then((res) => res);
+}
+
+export function detailComponentDefinition(params: { name: string }) {
+  const _url = `${base + definition}/${params.name}`;
+  return get(_url, { params: { type: 'component' } }).then((res) => res);
+}
+
+export function getPolicyDefinitions() {
+  const _url = base + definition;
+  return get(_url, { params: { type: 'policy' } }).then((res) => res);
+}
+
+export function detailPolicyDefinition(params: { name: string }) {
+  const _url = `${base + definition}/${params.name}`;
+  return get(_url, { params: { type: 'policy' } }).then((res) => res);
+}
+
+export function getTraitDefinitions(params: { appliedWorkload: string }) {
+  const _url = base + definition;
+  return get(_url, { params: { type: 'trait', appliedWorkload: params.appliedWorkload } }).then(
+    (res) => res,
+  );
+}
+
+export function detailTraitDefinition(params: { name: string }) {
+  const _url = `${base + definition}/${params.name}`;
+  return get(_url, { params: { type: 'trait' } }).then((res) => res);
+}

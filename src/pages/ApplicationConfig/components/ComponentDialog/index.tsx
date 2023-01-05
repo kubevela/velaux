@@ -16,9 +16,9 @@ import { withTranslation } from 'react-i18next';
 import {
   createApplicationComponent,
   updateComponentProperties,
-  detailComponentDefinition,
   getApplicationComponent,
 } from '../../../../api/application';
+import { detailComponentDefinition } from '../../../../api/definitions';
 import type {
   DefinitionDetail,
   Trait,

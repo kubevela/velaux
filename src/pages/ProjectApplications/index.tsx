@@ -3,11 +3,8 @@ import { connect } from 'dva';
 import { Loading, Message } from '@b-design/ui';
 import CardContend from '../ApplicationList/components/CardContent';
 import type { ApplicationBase, ApplicationQuery } from '../../interface/application';
-import {
-  getApplicationList,
-  deleteApplicationPlan,
-  getComponentDefinitions,
-} from '../../api/application';
+import { getApplicationList, deleteApplication } from '../../api/application';
+import { getComponentDefinitions } from '../../api/definitions';
 import { getEnvs } from '../../api/env';
 import { If } from 'tsx-control-statements/components';
 import EditAppDialog from '../ApplicationList/components/EditAppDialog';
@@ -134,9 +131,9 @@ class ProjectApplications extends Component<Props, State> {
   };
 
   onDeleteApplicationItem = (name: string) => {
-    deleteApplicationPlan({ name: name }).then((re) => {
+    deleteApplication({ name: name }).then((re) => {
       if (re) {
-        Message.success('Application delete success');
+        Message.success('Application deleted successfully');
         this.listApplication();
       }
     });

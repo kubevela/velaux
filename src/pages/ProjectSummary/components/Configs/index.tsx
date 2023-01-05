@@ -159,7 +159,7 @@ class Configs extends Component<Props, State> {
                     resource: `project:${projectName}/config:${record.name}`,
                     action: 'delete',
                   }}
-                  project={''}
+                  project={projectName}
                 >
                   <Button
                     text
@@ -179,7 +179,7 @@ class Configs extends Component<Props, State> {
                   resource: `project:${projectName}/config:${record.name}`,
                   action: 'distribute',
                 }}
-                project={''}
+                project={projectName}
               >
                 <Button
                   text

@@ -1,8 +1,9 @@
 import React from 'react';
 import { Grid, Field, Form, Select, Message, Button, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-import { createTriggers, detailComponentDefinition } from '../../../../api/application';
+import { createTriggers } from '../../../../api/application';
 import { getPayloadType } from '../../../../api/payload';
+import { detailComponentDefinition } from '../../../../api/definitions';
 import type {
   Workflow,
   Trigger,

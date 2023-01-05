@@ -119,7 +119,7 @@ class ConfigDistributionPage extends Component<Props, State> {
           record.status?.workflow?.steps?.map((step) => {
             if (step.name) {
               const target = step.name.split('-');
-              if (target.length == 3 && target[0] == 'deploy') {
+              if (target.length >= 3 && target[0] == 'deploy') {
                 targetStatus.set(step.name.replace('deploy-', ''), step);
               }
             }
@@ -139,7 +139,7 @@ class ConfigDistributionPage extends Component<Props, State> {
                         : 'yellow'
                     }
                   >
-                    {t.clusterName}/{t.namespace}
+                    {t.clusterName}/{t.namespace}/{step?.phase}
                   </Tag>
                 );
                 return step?.message ? <Balloon trigger={tag}>{step.message}</Balloon> : tag;
