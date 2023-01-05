@@ -105,7 +105,6 @@ class Header extends Component<Props, State> {
   };
 
   onTerminatePipelineRun = () => {
-    this.setState({ terminateLoading: true });
     const { pipeline, runBase, loadRunStatus } = this.props;
     if (!pipeline || !runBase) {
       return;
@@ -129,7 +128,6 @@ class Header extends Component<Props, State> {
   };
 
   onResumePipelineRun = () => {
-    this.setState({ terminateLoading: true });
     const { pipeline, runBase, loadRunStatus } = this.props;
     if (!pipeline || !runBase) {
       return;
@@ -139,7 +137,7 @@ class Header extends Component<Props, State> {
       pipelineName: runBase.pipelineName,
       runName: runBase?.pipelineRunName,
     };
-    this.setState({ terminateLoading: true });
+    this.setState({ resumeLoading: true });
     resumePipelineRun(params)
       .then((re) => {
         if (re) {
@@ -148,7 +146,7 @@ class Header extends Component<Props, State> {
         }
       })
       .finally(() => {
-        this.setState({ terminateLoading: false });
+        this.setState({ resumeLoading: false });
       });
   };
 

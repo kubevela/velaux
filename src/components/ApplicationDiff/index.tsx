@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { Dialog } from '@b-design/ui';
+import { Dialog, Message } from '@b-design/ui';
 import type { ApplicationCompareResponse } from '../../interface/application';
-const Convert = require('ansi-to-html');
-const convert = new Convert();
 import './index.less';
+import { DiffEditor } from '../DiffEditor';
+import { If } from 'tsx-control-statements/components';
+import Translation from '../Translation';
 
 type ApplicationDiffProps = {
   baseName: string;
@@ -14,15 +15,8 @@ type ApplicationDiffProps = {
 };
 
 export const ApplicationDiff = (props: ApplicationDiffProps) => {
-  const lines = props.compare.diffReport.split('\n');
-  const parseToDOM = (str: string, padding: number) => {
-    return (
-      <div
-        style={{ paddingLeft: `${padding}px`, fontSize: '14px' }}
-        dangerouslySetInnerHTML={{ __html: str }}
-      />
-    );
-  };
+  const { baseName, targetName, compare } = props;
+  const container = 'revision' + baseName + targetName;
   return (
     <Dialog
       className={'commonDialog application-diff'}
@@ -34,18 +28,24 @@ export const ApplicationDiff = (props: ApplicationDiffProps) => {
       title={
         <div style={{ color: '#fff' }}>
           {' Differences between '}
-          <span className="name base">{props.baseName}</span>
+          <span className="name">{props.baseName}</span>
           {' and '}
-          <span className="name target">{props.targetName}</span>
+          <span className="name">{props.targetName}</span>
         </div>
       }
     >
-      <div className="diff-box">
-        {lines.map((line) => {
-          let parsed: string = line.replaceAll(' ', '&nbsp;');
-          parsed = convert.toHtml(parsed);
-          return parseToDOM(parsed.trimStart(), 0);
-        })}
+      <If condition={!compare.isDiff}>
+        <Message type="success" style={{ marginBottom: '8px' }}>
+          <Translation>There is no change</Translation>
+        </Message>
+      </If>
+      <div id={container} className="diff-box">
+        <DiffEditor
+          language={'yaml'}
+          id={container}
+          target={compare.targetAppYAML}
+          base={compare.baseAppYAML}
+        />
       </div>
     </Dialog>
   );

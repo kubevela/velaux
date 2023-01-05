@@ -6,9 +6,10 @@ import {
   getApplicationStatus,
   getApplicationComponents,
   getPolicyList,
-  getComponentDefinitions,
   getApplicationEnvbinding,
 } from '../api/application';
+
+import { getComponentDefinitions } from '../api/definitions';
 
 import { listWorkflow } from '../api/workflows';
 

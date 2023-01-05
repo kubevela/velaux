@@ -4,13 +4,8 @@ import type { Rule } from '@alifd/field';
 import { withTranslation } from 'react-i18next';
 import Group from '../../../../extends/Group';
 import { If } from 'tsx-control-statements/components';
-import {
-  detailTraitDefinition,
-  updateTrait,
-  createTrait,
-  getTraitDefinitions,
-  getApplicationComponent,
-} from '../../../../api/application';
+import { updateTrait, createTrait, getApplicationComponent } from '../../../../api/application';
+import { detailTraitDefinition, getTraitDefinitions } from '../../../../api/definitions';
 import type {
   ApplicationComponent,
   DefinitionDetail,

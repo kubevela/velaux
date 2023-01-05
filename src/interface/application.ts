@@ -100,6 +100,10 @@ export interface ApplicationDeployResponse extends ApplicationRevision {
   record?: WorkflowRecordBase;
 }
 
+export interface ApplicationRollbackResponse {
+  record: WorkflowRecordBase;
+}
+
 export interface ApplicationStatus {
   conditions: Condition[];
   status: string;
