@@ -6,7 +6,8 @@ import SelectSearch from './components/SelectSearch';
 import CardContend from './components/CardContent';
 import AppDialog from './components/AddAppDialog';
 import { If } from 'tsx-control-statements/components';
-import { deleteApplicationPlan, getComponentDefinitions } from '../../api/application';
+import { deleteApplication } from '../../api/application';
+import { getComponentDefinitions } from '../../api/definitions';
 import type { ApplicationBase } from '../../interface/application';
 import EditAppDialog from './components/EditAppDialog';
 import type { LoginUserInfo } from '../../interface/user';
@@ -78,8 +79,8 @@ class Application extends Component<Props, State> {
     });
   };
 
-  onDeleteAppPlan = (name: string) => {
-    deleteApplicationPlan({ name: name }).then((re) => {
+  onDeleteApp = (name: string) => {
+    deleteApplication({ name: name }).then((re) => {
       if (re) {
         Message.success('Application deleted successfully');
         this.getApplications({});
@@ -172,7 +173,7 @@ class Application extends Component<Props, State> {
               this.editAppPlan(item);
             }}
             showMode={showMode}
-            deleteAppPlan={this.onDeleteAppPlan}
+            deleteAppPlan={this.onDeleteApp}
             setVisible={(visible) => {
               this.setState({ showAddApplication: visible });
             }}

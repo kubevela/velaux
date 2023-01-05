@@ -14,12 +14,13 @@ import './index.less';
 import locale from '../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 import { ShowRevision } from './components/Detail';
+import type { Dispatch } from 'redux';
 
 type Props = {
   revisions: [];
   applicationDetail?: ApplicationDetail;
   envbinding?: EnvBinding[];
-  dispatch: ({}) => {};
+  dispatch: Dispatch<any>;
   match: {
     params: {
       appName: string;
@@ -116,7 +117,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
 
   render() {
     const { revisionsList, showAppRevision, revision, appName } = this.state;
-    const { envbinding, applicationDetail } = this.props;
+    const { envbinding, applicationDetail, dispatch } = this.props;
 
     return (
       <div>
@@ -136,6 +137,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
           list={revisionsList}
           onShowAppModel={this.showAppModel}
           getRevisionList={this.getRevisionList}
+          dispatch={dispatch}
         />
         <Pagination
           locale={locale().Pagination}

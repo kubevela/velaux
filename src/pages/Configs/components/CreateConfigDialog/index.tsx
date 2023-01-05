@@ -248,7 +248,13 @@ class CreateConfigDialog extends React.Component<Props, State> {
     ];
     if (!edit) {
       buttons.push(
-        <Permission request={{ resource: `config:*`, action: 'create' }} project={''}>
+        <Permission
+          request={{
+            resource: project ? `project:${project}/config:${configName}` : `config:${configName}`,
+            action: 'create',
+          }}
+          project={project}
+        >
           <Button type="primary" onClick={this.onCreate} loading={createLoading}>
             <Translation>Create</Translation>
           </Button>
@@ -256,7 +262,13 @@ class CreateConfigDialog extends React.Component<Props, State> {
       );
     } else {
       buttons.push(
-        <Permission request={{ resource: `config:${configName}`, action: 'update' }} project={''}>
+        <Permission
+          request={{
+            resource: project ? `project:${project}/config:${configName}` : `config:${configName}`,
+            action: 'update',
+          }}
+          project={project}
+        >
           <Button type="primary" onClick={this.onUpdate} loading={createLoading}>
             <Translation>Update</Translation>
           </Button>

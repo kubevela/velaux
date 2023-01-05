@@ -381,8 +381,8 @@ class Header extends Component<Props, State> {
           {compare && (
             <ApplicationDiff
               id={appName + envName}
-              baseName="Latest Application Configuration"
-              targetName="Deployed Application"
+              baseName="Deployed Application"
+              targetName="Latest Application Configuration"
               compare={compare}
               onClose={() => {
                 this.setState({ visibleApplicationDiff: false });

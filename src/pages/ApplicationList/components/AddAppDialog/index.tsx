@@ -5,7 +5,7 @@ import { Link } from 'dva/router';
 import { If } from 'tsx-control-statements/components';
 import GeneralConfig from '../GeneralConfig';
 import type { Rule } from '@alifd/field';
-import { detailComponentDefinition, createApplication } from '../../../../api/application';
+import { createApplication } from '../../../../api/application';
 import type { DefinitionDetail } from '../../../../interface/application';
 import UISchema from '../../../../components/UISchema';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -18,6 +18,7 @@ import type { Env } from '../../../../interface/env';
 import type { Target } from '../../../../interface/target';
 import EnvDialog from '../../../EnvPage/components/EnvDialog';
 import type { LoginUserInfo } from '../../../../interface/user';
+import { detailComponentDefinition } from '../../../../api/definitions';
 
 type Props = {
   visible: boolean;

@@ -8,12 +8,12 @@ import {
   getApplicationTriggers,
   deleteTriggers,
   deleteComponent,
-  getComponentDefinitions,
-  deleteApplicationPlan,
+  deleteApplication,
   deletePolicy,
   getPolicyDetail,
   getApplicationStatistics,
 } from '../../api/application';
+import { getComponentDefinitions } from '../../api/definitions';
 import Translation from '../../components/Translation';
 import Title from '../../components/Title';
 import { routerRedux } from 'dva/router';
@@ -387,7 +387,7 @@ class ApplicationConfig extends Component<Props, State> {
       type: 'confirm',
       content: <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>,
       onOk: () => {
-        deleteApplicationPlan({ name: appName }).then((re) => {
+        deleteApplication({ name: appName }).then((re) => {
           if (re) {
             Message.success('Application deleted successfully');
             this.props.dispatch(routerRedux.push('/applications'));

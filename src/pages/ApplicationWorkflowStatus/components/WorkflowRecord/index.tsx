@@ -35,7 +35,7 @@ import {
 import i18n from '../../../../i18n';
 
 import './index.less';
-import { routerRedux } from 'dva/router';
+import { Link, routerRedux } from 'dva/router';
 import type { Dispatch } from 'redux';
 
 const { Row, Col } = Grid;
@@ -289,7 +289,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
   };
 
   render() {
-    const { workflow } = this.props;
+    const { workflow, applicationDetail } = this.props;
     const {
       statusLoading,
       zoom,
@@ -349,6 +349,14 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                   <div className="mode">
                     <span className="label_key">Mode:</span>
                     <time className="label_value">{showRecord?.mode || 'StepByStep-DAG'}</time>
+                  </div>
+                  <div className="mode">
+                    <span className="label_key">Revision:</span>
+                    <time className="label_value">
+                      <Link to={`/applications/${applicationDetail.name}/revisions`}>
+                        {showRecord?.applicationRevision}
+                      </Link>
+                    </time>
                   </div>
                 </div>
               </div>

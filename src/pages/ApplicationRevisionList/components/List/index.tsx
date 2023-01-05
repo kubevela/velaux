@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Balloon, Button, Dropdown, Menu, Table } from '@b-design/ui';
+import { Balloon, Button, Dialog, Dropdown, Menu, Message, Table } from '@b-design/ui';
 import Empty from '../Empty';
 import Translation from '../../../../components/Translation';
 import type {
@@ -7,22 +7,27 @@ import type {
   ApplicationCompareResponse,
   ApplicationDetail,
   ApplicationRevision,
+  ApplicationRollbackResponse,
 } from '../../../../interface/application';
 import { statusList } from '../../constants';
-import { momentDate } from '../../../../utils/common';
-import { Link } from 'dva/router';
+import { momentDate, showAlias } from '../../../../utils/common';
+import { Link, routerRedux } from 'dva/router';
 import './index.less';
 import locale from '../../../../utils/locale';
 import Item from '../../../../components/Item';
-import { compareApplication } from '../../../../api/application';
+import { compareApplication, rollbackWithRevision } from '../../../../api/application';
 import { If } from 'tsx-control-statements/components';
 import { ApplicationDiff } from '../../../../components/ApplicationDiff';
+import Permission from '../../../../components/Permission';
+import type { Dispatch } from 'redux';
+import type { NameAlias } from '../../../../interface/env';
 
 type Props = {
   list: ApplicationRevision[];
   getRevisionList: () => void;
   applicationDetail?: ApplicationDetail;
   onShowAppModel: (record: ApplicationRevision) => void;
+  dispatch: Dispatch<any>;
 };
 
 type State = {
@@ -40,8 +45,39 @@ class TableList extends Component<Props, State> {
     };
   }
 
-  onRollback = (record: ApplicationRevision) => {
-    console.log(record);
+  onRollback = (record: ApplicationRevision, ok?: boolean) => {
+    const { applicationDetail, dispatch } = this.props;
+    if (record.status === 'terminated' && !ok) {
+      Dialog.confirm({
+        type: 'confirm',
+        content: (
+          <Translation>
+            This revision status is terminated, are you sure to rollback to this revision?
+          </Translation>
+        ),
+        onOk: () => {
+          this.onRollback(record, true);
+        },
+        locale: locale().Dialog,
+      });
+      return;
+    }
+    if (applicationDetail) {
+      rollbackWithRevision({ appName: applicationDetail?.name, revision: record.version }).then(
+        (res: ApplicationRollbackResponse) => {
+          if (res) {
+            Message.success('Application rollback successfully');
+            if (res.record && res.record.name && dispatch) {
+              dispatch(
+                routerRedux.push(
+                  `/applications/${applicationDetail.name}/envbinding/${record.envName}/workflow/records/${res.record.name}`,
+                ),
+              );
+            }
+          }
+        },
+      );
+    }
   };
 
   loadChanges = (revision: string, mode: 'latest' | 'cluster') => {
@@ -89,6 +125,14 @@ class TableList extends Component<Props, State> {
         },
       },
       {
+        key: 'deployUser',
+        title: <Translation>Deploy User</Translation>,
+        dataIndex: 'deployUser',
+        cell: (v: NameAlias) => {
+          return showAlias(v.name, v.alias);
+        },
+      },
+      {
         key: 'status',
         title: <Translation>Status</Translation>,
         dataIndex: 'status',
@@ -99,6 +143,7 @@ class TableList extends Component<Props, State> {
               <div>
                 {v === 'failure' && <span className="circle circle-failure" />}
                 {v === 'terminated' && <span className="circle circle-warning" />}
+                {v === 'complete' && <span className="circle circle-success" />}
                 <Translation>{findObj.label}</Translation>
               </div>
             );
@@ -148,17 +193,25 @@ class TableList extends Component<Props, State> {
         cell: (v: string, i: number, record: ApplicationRevision) => {
           return (
             <div>
-              <Button
-                text
-                size={'medium'}
-                ghost={true}
-                component={'a'}
-                onClick={() => {
-                  this.props.onShowAppModel(record);
+              <Permission
+                project={applicationDetail?.project?.name}
+                request={{
+                  resource: `project:${applicationDetail?.project?.name}/application:${applicationDetail?.name}`,
+                  action: 'detail',
                 }}
               >
-                <Translation>Detail</Translation>
-              </Button>
+                <Button
+                  text
+                  size={'medium'}
+                  ghost={true}
+                  component={'a'}
+                  onClick={() => {
+                    this.props.onShowAppModel(record);
+                  }}
+                >
+                  <Translation>Detail</Translation>
+                </Button>
+              </Permission>
               <span className="line" />
               <Dropdown
                 trigger={
@@ -184,6 +237,29 @@ class TableList extends Component<Props, State> {
                   </Menu.Item>
                 </Menu>
               </Dropdown>
+              <span className="line" />
+
+              <If condition={record.status === 'complete' || record.status == 'terminated'}>
+                <Permission
+                  project={applicationDetail?.project?.name}
+                  request={{
+                    resource: `project:${applicationDetail?.project?.name}/application:${applicationDetail?.name}/revision:${record.version}`,
+                    action: 'rollback',
+                  }}
+                >
+                  <Button
+                    text
+                    size={'medium'}
+                    ghost={true}
+                    component={'a'}
+                    onClick={() => {
+                      this.onRollback(record);
+                    }}
+                  >
+                    <Translation>Rollback</Translation>
+                  </Button>
+                </Permission>
+              </If>
             </div>
           );
         },
