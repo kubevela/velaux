@@ -76,6 +76,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
   form: Field;
   statusLoop: boolean;
   uiSchemaRef: React.RefObject<UISchema>;
+  timeout: NodeJS.Timeout | null;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -92,12 +93,19 @@ class AddonDetailDialog extends React.Component<Props, State> {
     this.form = new Field(this);
     this.uiSchemaRef = React.createRef();
     this.statusLoop = false;
+    this.timeout = null;
   }
 
   componentDidMount() {
     this.loadAddonDetail();
     this.loadAddonStatus();
     this.loadAddonEndpoints();
+  }
+
+  componentWillUnmount(): void {
+    if (this.timeout != null) {
+      clearTimeout(this.timeout);
+    }
   }
 
   loadAddonDetail = async () => {
@@ -124,10 +132,10 @@ class AddonDetailDialog extends React.Component<Props, State> {
         if (!res) return;
         if ((res.phase == 'enabling' || res.phase === 'disabling') && !this.statusLoop) {
           this.statusLoop = true;
-          setTimeout(() => {
+          this.timeout = setTimeout(() => {
             this.statusLoop = false;
             this.loadAddonStatus();
-          }, 3000);
+          }, 4000);
         }
 
         let clusters = undefined;
@@ -328,6 +336,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
       }
     });
     const buttons = [];
+
+    const workflowStatus = addonsStatus?.status;
+
     if (status === 'enabled' || status === 'enabling' || status === 'disabling') {
       buttons.push(
         <Permission
@@ -335,6 +346,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             resource: `addon:${addonName}`,
             action: 'disable',
           }}
+          key={'disable'}
           project={''}
         >
           <Button
@@ -351,9 +363,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
       );
     }
 
-    if (status == 'enabled' || status == 'suspend') {
+    if (status == 'enabled' || status == 'suspend' || workflowStatus == 'workflowFailed') {
       buttons.push(
-        <Permission request={{ resource: `addon:${addonName}`, action: 'update' }} project={''}>
+        <Permission
+          key={'upgrade'}
+          request={{ resource: `addon:${addonName}`, action: 'update' }}
+          project={''}
+        >
           <Button
             loading={upgradeLoading}
             type="primary"
@@ -366,9 +382,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
       );
     }
 
-    if (status === 'disabled' || status === 'enabling') {
+    if (status === 'disabled' || (status === 'enabling' && workflowStatus != 'workflowFailed')) {
       buttons.push(
-        <Permission request={{ resource: `addon:${addonName}`, action: 'enable' }} project={''}>
+        <Permission
+          key={'enable'}
+          request={{ resource: `addon:${addonName}`, action: 'enable' }}
+          project={''}
+        >
           <Button
             loading={status === 'enabling'}
             type="primary"
@@ -442,7 +462,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     {`${i18n.t('Addon status is ')}${addonsStatus?.status || 'Init'}`}
                     <Link
                       style={{ marginLeft: '16px' }}
-                      to={`/applications/addon-${addonDetailInfo?.name}`}
+                      to={`/applications/addon-${addonDetailInfo?.name}/envbinding/system/workflow`}
                     >
                       <Translation>Check the details</Translation>
                     </Link>

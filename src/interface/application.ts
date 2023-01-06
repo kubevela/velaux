@@ -106,7 +106,16 @@ export interface ApplicationRollbackResponse {
 
 export interface ApplicationStatus {
   conditions: Condition[];
-  status: string;
+  status:
+    | 'starting'
+    | 'rendering'
+    | 'runningWorkflow'
+    | 'workflowSuspending'
+    | 'workflowTerminated'
+    | 'workflowFailed'
+    | 'running'
+    | 'deleting'
+    | string;
   workflow?: WorkflowStatus;
   latestRevision: {
     name: string;
