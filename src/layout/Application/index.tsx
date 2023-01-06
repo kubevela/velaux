@@ -105,8 +105,8 @@ class ApplicationLayout extends Component<Props, any> {
   };
 
   render() {
-    const { loading, activeName } = this.state;
-    const { children, dispatch } = this.props;
+    const { activeName } = this.state;
+    const { children, dispatch, applicationDetail } = this.props;
     const {
       url,
       params: { appName, envName },
@@ -116,7 +116,7 @@ class ApplicationLayout extends Component<Props, any> {
       this.onGetApplicationDetails();
       return loadingDom;
     }
-    if (loading) {
+    if (!applicationDetail) {
       return loadingDom;
     }
     return (

@@ -19,6 +19,7 @@ import { beautifyTime } from '../../utils/common';
 import i18n from '../../i18n';
 import Empty from '../../components/Empty';
 import Permission from '../../components/Permission';
+import { If } from 'tsx-control-statements/components';
 
 const { Row, Col } = Grid;
 
@@ -62,7 +63,6 @@ class ApplicationWorkflow extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Readonly<Props>): void {
     if (prevProps.match !== this.props.match || prevProps.envbinding !== this.props.envbinding) {
-      console.log(prevProps.match, prevProps.envbinding);
       this.setState({ records: [], showRecordName: '' }, () => {
         this.loadWorkflowRecord();
       });
@@ -200,17 +200,19 @@ class ApplicationWorkflow extends React.Component<Props, State> {
                 justifyContent: 'end',
               }}
             >
-              <Permission
-                project={applicationDetail.project?.name}
-                request={{
-                  resource: `project:${applicationDetail.project?.name}/application:${applicationDetail.name}/workflow:*`,
-                  action: 'update',
-                }}
-              >
-                <Link to={`/applications/${appName}/envbinding/${envName}/workflow/studio`}>
-                  <Button type="primary">Launch Workflow Studio</Button>
-                </Link>
-              </Permission>
+              <If condition={!applicationDetail?.readOnly}>
+                <Permission
+                  project={applicationDetail.project?.name}
+                  request={{
+                    resource: `project:${applicationDetail.project?.name}/application:${applicationDetail.name}/workflow:*`,
+                    action: 'update',
+                  }}
+                >
+                  <Link to={`/applications/${appName}/envbinding/${envName}/workflow/studio`}>
+                    <Button type="primary">Launch Workflow Studio</Button>
+                  </Link>
+                </Permission>
+              </If>
             </Col>
           </Row>
         </Card>
