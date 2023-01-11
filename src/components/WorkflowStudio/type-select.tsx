@@ -9,6 +9,7 @@ import './index.less';
 import Translation from '../Translation';
 import type { Rule } from '@alifd/meet-react/lib/field';
 import type { WorkflowStepBase } from '../../interface/pipeline';
+import i18n from '../../i18n';
 
 const { Row, Col } = Grid;
 
@@ -152,7 +153,7 @@ class TypeSelect extends React.Component<Props, State> {
         onClose={onClose}
         onCancel={onClose}
         onOk={this.onSubmit}
-        title="Select Step Type"
+        title={i18n.t('Select Step Type')}
         visible
       >
         <div>
