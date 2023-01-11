@@ -592,5 +592,9 @@
   "Clone": "克隆",
   "Run": "执行",
   "View Runs": "执行记录",
-  "Tags": "标签"
+  "Tags": "标签",
+  "Launch Workflow Studio": "工作流画板",
+  "Available Targets": "可用的交付目标",
+  "Select Step Type": "选择步骤类型",
+  "Unsaved changes": "变更未保存"
 }

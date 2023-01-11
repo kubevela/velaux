@@ -191,7 +191,7 @@ class PipelineStudio extends React.Component<Props, State> {
             <WorkflowPrompt
               changed={changed}
               content="Do you want to save your changes?"
-              title="Unsaved changes"
+              title={i18n.t('Unsaved changes')}
               onSave={this.onSave}
               dispatch={dispatch}
               onClearChanged={() => {

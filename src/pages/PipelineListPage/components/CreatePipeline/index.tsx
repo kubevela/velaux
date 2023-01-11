@@ -293,6 +293,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
                   locale={locale().Select}
                   name="template"
                   dataSource={templates}
+                  hasClear
                   placeholder="Select a template"
                   onChange={(value) => {
                     this.field.setValue('steps', value);
