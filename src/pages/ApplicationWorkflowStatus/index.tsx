@@ -20,6 +20,7 @@ import i18n from '../../i18n';
 import Empty from '../../components/Empty';
 import Permission from '../../components/Permission';
 import { If } from 'tsx-control-statements/components';
+import Translation from '../../components/Translation';
 
 const { Row, Col } = Grid;
 
@@ -209,7 +210,9 @@ class ApplicationWorkflow extends React.Component<Props, State> {
                   }}
                 >
                   <Link to={`/applications/${appName}/envbinding/${envName}/workflow/studio`}>
-                    <Button type="primary">Launch Workflow Studio</Button>
+                    <Button type="primary">
+                      <Translation>Launch Workflow Studio</Translation>
+                    </Button>
                   </Link>
                 </Permission>
               </If>

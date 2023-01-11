@@ -25,6 +25,7 @@ import './index.less';
 import classNames from 'classnames';
 import { ButtonGroup } from '@alifd/meet-react/lib/button';
 import { WorkflowYAML } from '../../components/WorkflowYAML';
+import i18n from '../../i18n';
 
 const { Row, Col } = Grid;
 
@@ -145,7 +146,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
           <WorkflowPrompt
             changed={changed}
             content="Do you want to save your changes?"
-            title="Unsaved changes"
+            title={i18n.t('Unsaved changes')}
             onSave={this.onSave}
             dispatch={dispatch}
             onClearChanged={() => {
@@ -157,7 +158,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
           <Row>
             <Col span={11}>
               <Item
-                label="Available Targets"
+                label={i18n.t('Available Targets')}
                 value={
                   <div>
                     {envbinding?.targets?.map((tar) => {
