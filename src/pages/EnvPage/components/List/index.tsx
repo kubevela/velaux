@@ -44,6 +44,7 @@ class TableList extends Component<Props> {
         key: 'name',
         title: <Translation>Name(Alias)</Translation>,
         dataIndex: 'name',
+        width: '150px',
         cell: (v: string, i: number, env: Env) => {
           return (
             <a
@@ -60,6 +61,7 @@ class TableList extends Component<Props> {
         key: 'project',
         title: <Translation>Project</Translation>,
         dataIndex: 'project',
+        width: '100px',
         cell: (v: Project) => {
           if (v && v.name) {
             return <Link to={`/projects/${v.name}/summary`}>{v.alias || v.name}</Link>;
@@ -72,6 +74,7 @@ class TableList extends Component<Props> {
         key: 'namespace',
         title: <Translation>Namespace</Translation>,
         dataIndex: 'namespace',
+        width: '100px',
         cell: (v: string) => {
           return <span>{v}</span>;
         },

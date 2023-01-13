@@ -58,6 +58,7 @@ type State = {
   loading: boolean;
   status: 'disabled' | 'enabled' | 'enabling' | 'suspend' | 'disabling' | '';
   statusLoading: boolean;
+  enableLoading?: boolean;
   upgradeLoading: boolean;
   args?: any;
   addonsStatus?: ApplicationStatus;
@@ -251,7 +252,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
       Message.warning(i18n.t('Please firstly select at least one cluster.'));
       return;
     }
-    this.setState({ statusLoading: true }, () => {
+    this.setState({ statusLoading: true, enableLoading: true }, () => {
       if (this.state.version) {
         const params: EnableAddonRequest = {
           name: this.props.addonName,
@@ -262,9 +263,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
         if (this.state.addonDetailInfo?.deployTo?.runtimeCluster) {
           params.clusters = this.state.clusters;
         }
-        enableAddon(params).then(() => {
-          this.loadAddonStatus();
-        });
+        enableAddon(params)
+          .then(() => {
+            this.loadAddonStatus();
+          })
+          .finally(() => {
+            this.setState({ enableLoading: false });
+          });
       }
     });
   };
@@ -311,6 +316,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
       status,
       statusLoading,
       upgradeLoading,
+      enableLoading,
       addonsStatus,
       showStatusVisible,
       version,
@@ -390,7 +396,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
           project={''}
         >
           <Button
-            loading={status === 'enabling'}
+            loading={status === 'enabling' || enableLoading}
             type="primary"
             onClick={this.onEnable}
             style={{ marginLeft: '16px' }}
@@ -462,7 +468,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     {`${i18n.t('Addon status is ')}${addonsStatus?.status || 'Init'}`}
                     <Link
                       style={{ marginLeft: '16px' }}
-                      to={`/applications/addon-${addonDetailInfo?.name}/envbinding/system/workflow`}
+                      to={`/applications/addon-${addonDetailInfo?.name}/envbinding`}
                     >
                       <Translation>Check the details</Translation>
                     </Link>
