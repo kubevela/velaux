@@ -135,8 +135,8 @@ class TriggerList extends Component<Props, State> {
       <div className="list-warper">
         <div className="box">
           {(triggers || []).map((item: Trigger) => (
-            <Row wrap={true} className="box-item">
-              <Col span={24} key={item.type}>
+            <Row wrap={true} key={item.type} className="box-item">
+              <Col span={24}>
                 <Card free={true} style={{ padding: '16px' }} locale={locale().Card}>
                   <div className="trigger-list-nav">
                     <div className="trigger-list-title">
