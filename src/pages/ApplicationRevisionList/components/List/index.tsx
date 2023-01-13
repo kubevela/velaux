@@ -32,6 +32,7 @@ type Props = {
 
 type State = {
   compare?: ApplicationCompareResponse;
+  revision?: ApplicationRevision;
   visibleApplicationDiff: boolean;
   diffMode: 'latest' | 'cluster';
 };
@@ -80,22 +81,27 @@ class TableList extends Component<Props, State> {
     }
   };
 
-  loadChanges = (revision: string, mode: 'latest' | 'cluster') => {
+  loadChanges = (revision: ApplicationRevision, mode: 'latest' | 'cluster') => {
     const { applicationDetail } = this.props;
     if (!revision || !applicationDetail) {
       this.setState({ compare: undefined });
       return;
     }
     let params: ApplicationCompareRequest = {
-      compareRevisionWithLatest: { revision: revision },
+      compareRevisionWithLatest: { revision: revision.version },
     };
     if (mode === 'cluster') {
       params = {
-        compareRevisionWithRunning: { revision: revision },
+        compareRevisionWithRunning: { revision: revision.version },
       };
     }
     compareApplication(applicationDetail?.name, params).then((res: ApplicationCompareResponse) => {
-      this.setState({ compare: res, visibleApplicationDiff: true, diffMode: mode });
+      this.setState({
+        revision: revision,
+        compare: res,
+        visibleApplicationDiff: true,
+        diffMode: mode,
+      });
     });
   };
 
@@ -223,14 +229,14 @@ class TableList extends Component<Props, State> {
                 <Menu>
                   <Menu.Item
                     onClick={() => {
-                      this.loadChanges(record.version, 'cluster');
+                      this.loadChanges(record, 'cluster');
                     }}
                   >
                     <Translation>Diff With Deployed Application</Translation>
                   </Menu.Item>
                   <Menu.Item
                     onClick={() => {
-                      this.loadChanges(record.version, 'latest');
+                      this.loadChanges(record, 'latest');
                     }}
                   >
                     <Translation>Diff With Latest Configuration</Translation>
@@ -271,7 +277,7 @@ class TableList extends Component<Props, State> {
     const { Column } = Table;
     const columns = this.getColumns();
     const { list } = this.props;
-    const { visibleApplicationDiff, compare, diffMode } = this.state;
+    const { visibleApplicationDiff, compare, diffMode, revision } = this.state;
     const baseName = 'Current Revision';
     let targetName = 'Latest Application Configuration';
     if (diffMode == 'cluster') {
@@ -298,8 +304,19 @@ class TableList extends Component<Props, State> {
           {compare && (
             <ApplicationDiff
               onClose={() => {
-                this.setState({ visibleApplicationDiff: false, compare: undefined });
+                this.setState({
+                  visibleApplicationDiff: false,
+                  compare: undefined,
+                  revision: undefined,
+                });
               }}
+              rollback2Revision={
+                diffMode === 'cluster' && revision
+                  ? () => {
+                      this.onRollback(revision);
+                    }
+                  : undefined
+              }
               baseName={baseName}
               targetName={targetName}
               compare={compare}

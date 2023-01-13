@@ -578,6 +578,7 @@ class ApplicationConfig extends Component<Props, State> {
                       if (applicationDetail?.labels) {
                         return (
                           <Tag
+                            key={key}
                             style={{ margin: '4px' }}
                             color="blue"
                           >{`${key}=${applicationDetail?.labels[key]}`}</Tag>
