@@ -32,6 +32,7 @@ import PipelineListPage from '../../pages/PipelineListPage';
 import ApplicationWorkflowStudio from '../../pages/ApplicationWorkflowStudio';
 import PipelineStudio from '../../pages/PipelineStudio';
 import ProjectPipelines from '../../pages/ProjectPipelines';
+import ApplicationEnvRoute from '../../pages/ApplicationEnvRoute';
 
 export default function Content() {
   return (
@@ -69,6 +70,17 @@ export default function Content() {
           return (
             <ApplicationLayout {...props}>
               <ApplicationRevisionList {...props} />
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/applications/:appName/envbinding"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationEnvRoute {...props} />;
             </ApplicationLayout>
           );
         }}
