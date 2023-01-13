@@ -57,8 +57,8 @@ class ComponentsList extends Component<Props> {
       <div className="list-warper">
         <div className="box">
           {(components || []).map((item: ApplicationComponentBase) => (
-            <Row wrap={true} className="box-item">
-              <Col span={24} key={item.name}>
+            <Row key={item.name} wrap={true} className="box-item">
+              <Col span={24}>
                 <Card locale={locale().Card} contentHeight="auto">
                   <div className="components-list-nav">
                     <div
