@@ -47,6 +47,19 @@ type State = {
   editMode: 'visual' | 'yaml';
 };
 
+export const WorkflowModeOptions = [
+  {
+    value: 'DAG',
+    label: i18n.t('DAG'),
+    description: 'Workflows will be executed in parallel in DAG mode based on dependencies.',
+  },
+  {
+    value: 'StepByStep',
+    label: i18n.t('StepByStep'),
+    description: 'The workflow will be executed serially step by step .',
+  },
+];
+
 @connect((store: any) => {
   return { ...store.application };
 })
@@ -214,18 +227,22 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                   <Translation>Unsaved changes</Translation>
                 </div>
               )}
-              <Form.Item label="Mode" labelAlign="inset" style={{ marginRight: '8px' }}>
+              <Form.Item label={i18n.t('Mode')} labelAlign="inset" style={{ marginRight: '8px' }}>
                 <Select
                   locale={locale().Select}
                   defaultValue="StepByStep"
                   value={mode}
-                  dataSource={[{ value: 'StepByStep' }, { value: 'DAG' }]}
+                  dataSource={WorkflowModeOptions}
                   onChange={(value) => {
                     this.setState({ mode: value, changed: this.state.mode !== value });
                   }}
                 />
               </Form.Item>
-              <Form.Item label="Sub Mode" labelAlign="inset" style={{ marginRight: '8px' }}>
+              <Form.Item
+                label={i18n.t('Sub Mode')}
+                labelAlign="inset"
+                style={{ marginRight: '8px' }}
+              >
                 <Select
                   locale={locale().Select}
                   defaultValue="DAG"
@@ -233,7 +250,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                   onChange={(value) => {
                     this.setState({ subMode: value, changed: this.state.subMode !== value });
                   }}
-                  dataSource={[{ value: 'DAG' }, { value: 'StepByStep' }]}
+                  dataSource={WorkflowModeOptions}
                 />
               </Form.Item>
               <Button

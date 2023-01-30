@@ -155,15 +155,13 @@ class ApplicationHeader extends Component<Props, State> {
             <If condition={applicationDetail?.readOnly}>
               <Message
                 type="notice"
-                title={i18n
-                  .t('This application is managed by the addon, and it is readonly')
-                  .toString()}
+                title={i18n.t('This application is managed by the addon, and it is readonly')}
               />
             </If>
             <If condition={sourceOfTrust === 'from-k8s-resource'}>
               <Message
                 type="warning"
-                title={i18n.t('The application is synchronizing from the cluster.').toString()}
+                title={i18n.t('The application is synchronizing from the cluster.')}
               />
             </If>
             <Permission

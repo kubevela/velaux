@@ -47,8 +47,19 @@ export const Step = (props: StepProps) => {
           }}
         >
           {showAlias(step.name, step.alias)}
+          <span className="step-delete">
+            <Icon
+              size={14}
+              type="ashbin"
+              onClick={(event) => {
+                onDelete(step.name);
+                event.stopPropagation();
+              }}
+              title="Delete this step group."
+            />
+          </span>
         </div>
-        <div className="groups asd" style={{ width: stepWidth + 'px' }}>
+        <div className="groups" style={{ width: stepWidth + 'px' }}>
           {step.subSteps?.map((subStep) => {
             return (
               <div
