@@ -596,5 +596,11 @@
   "Launch Workflow Studio": "工作流画板",
   "Available Targets": "可用的交付目标",
   "Select Step Type": "选择步骤类型",
-  "Unsaved changes": "变更未保存"
+  "Unsaved changes": "变更未保存",
+  "DAG": "并行执行",
+  "StepByStep": "串行执行",
+  "Mode": "执行模式",
+  "Sub Mode": "子步骤",
+  "The workflow step spec reference document": "工作流部署规范参考文档",
+  "Click here": "点击这里"
 }

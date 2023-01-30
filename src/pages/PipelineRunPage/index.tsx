@@ -128,7 +128,8 @@ class PipelineRunPage extends Component<Props, State> {
         stepName: stepStatus?.name,
       })
         .then((res: { log: string }) => {
-          this.setState({ logs: res && res.log ? res.log.split('\n') : [] });
+          const logLines = res && res.log ? res.log.split('\n') : [];
+          this.setState({ logs: logLines });
         })
         .finally(() => {
           this.setState({ logLoading: false });
@@ -380,7 +381,7 @@ class PipelineRunPage extends Component<Props, State> {
                           <Icon type="refresh" />
                         </Button>
                       </div>
-                      <div className="logBox">
+                      <div className="log-content">
                         {logs?.map((line, i: number) => {
                           return (
                             <div key={`log-${i}`} className="logLine">
