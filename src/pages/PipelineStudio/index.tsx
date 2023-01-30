@@ -21,6 +21,7 @@ import i18n from '../../i18n';
 import { If } from 'tsx-control-statements/components';
 import RunPipeline from '../../components/RunPipeline';
 import { routerRedux } from 'dva/router';
+import { WorkflowModeOptions } from '../ApplicationWorkflowStudio';
 
 const { Row, Col } = Grid;
 
@@ -234,18 +235,22 @@ class PipelineStudio extends React.Component<Props, State> {
                     <Translation>Unsaved changes</Translation>
                   </div>
                 )}
-                <Form.Item label="Mode" labelAlign="inset" style={{ marginRight: '8px' }}>
+                <Form.Item label={i18n.t('Mode')} labelAlign="inset" style={{ marginRight: '8px' }}>
                   <Select
                     locale={locale().Select}
                     defaultValue="StepByStep"
                     value={mode}
-                    dataSource={[{ value: 'StepByStep' }, { value: 'DAG' }]}
+                    dataSource={WorkflowModeOptions}
                     onChange={(value) => {
                       this.setState({ mode: value, changed: this.state.mode !== value });
                     }}
                   />
                 </Form.Item>
-                <Form.Item label="Sub Mode" labelAlign="inset" style={{ marginRight: '8px' }}>
+                <Form.Item
+                  label={i18n.t('Sub Mode')}
+                  labelAlign="inset"
+                  style={{ marginRight: '8px' }}
+                >
                   <Select
                     locale={locale().Select}
                     defaultValue="DAG"
@@ -253,7 +258,7 @@ class PipelineStudio extends React.Component<Props, State> {
                     onChange={(value) => {
                       this.setState({ subMode: value, changed: this.state.subMode !== value });
                     }}
-                    dataSource={[{ value: 'DAG' }, { value: 'StepByStep' }]}
+                    dataSource={WorkflowModeOptions}
                   />
                 </Form.Item>
                 <Button

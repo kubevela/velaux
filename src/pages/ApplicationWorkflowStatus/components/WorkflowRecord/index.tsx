@@ -534,7 +534,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                             <Icon type="refresh" />
                           </Button>
                         </div>
-                        <div className="logBox">
+                        <div className="log-content">
                           {logs?.map((line, i: number) => {
                             return (
                               <div key={`log-${i}`} className="logLine">

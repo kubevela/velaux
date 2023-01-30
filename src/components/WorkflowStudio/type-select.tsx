@@ -10,19 +10,23 @@ import Translation from '../Translation';
 import type { Rule } from '@alifd/meet-react/lib/field';
 import type { WorkflowStepBase } from '../../interface/pipeline';
 import i18n from '../../i18n';
+import Item from '../Item';
 
 const { Row, Col } = Grid;
 
 interface DefinitionCatalog {
   title: string;
+  sort: number;
   description?: string;
   definitions: DefinitionBase[];
 }
 
 const defaultDefinitionCatalog: Record<string, string> = {
+  'step-group': 'Group',
   deploy: 'Delivery',
   'apply-app': 'Delivery',
   'apply-deployment': 'Delivery',
+  'apply-component': 'Delivery',
   'addon-operation': 'Delivery',
   'deploy-cloud-resource': 'Delivery',
   'share-cloud-resource': 'Delivery',
@@ -34,34 +38,47 @@ const defaultDefinitionCatalog: Record<string, string> = {
   'list-config': 'Config Management',
   'read-config': 'Config Management',
   'export-data': 'Config Management',
+  export2config: 'Config Management',
+  export2secret: 'Config Management',
   suspend: 'Notification',
 };
 
 const defaultCatalog: Record<string, DefinitionCatalog> = {
+  Group: {
+    title: 'Group',
+    description: 'Merge a set of steps.',
+    definitions: [],
+    sort: 1,
+  },
   Delivery: {
     title: 'Delivery',
     description: 'Delivery the Application or workloads to the Targets',
     definitions: [],
+    sort: 2,
   },
   Approval: {
     title: 'Approval',
     description: 'Approval or reject the changes during Workflow or Pipeline progress',
     definitions: [],
+    sort: 3,
   },
   'Config Management': {
     title: 'Config Management',
     description: 'Create or read the config.',
     definitions: [],
+    sort: 4,
   },
   Notification: {
-    title: 'Approval',
+    title: 'Notification',
     description: 'Send messages to users or other applications.',
     definitions: [],
+    sort: 5,
   },
   Custom: {
     title: 'Custom',
     description: 'Custom Workflow or Pipeline steps',
     definitions: [],
+    sort: 1000,
   },
 };
 
@@ -93,10 +110,12 @@ const buildDefinitionCatalog = (defs: DefinitionBase[]) => {
     if (catalogMap[catalog]) {
       catalogMap[catalog].definitions.push(def);
     } else {
-      catalogMap[catalog] = { title: catalog, definitions: [def] };
+      catalogMap[catalog] = { title: catalog, definitions: [def], sort: 100 };
     }
   });
-  return Object.values(catalogMap);
+  return Object.values(catalogMap).sort((a, b) => {
+    return a.sort - b.sort;
+  });
 };
 
 type Props = {
@@ -107,7 +126,7 @@ type Props = {
   addSub?: boolean;
 };
 type State = {
-  selectType?: string;
+  selectType?: DefinitionBase;
 };
 
 class TypeSelect extends React.Component<Props, State> {
@@ -126,7 +145,12 @@ class TypeSelect extends React.Component<Props, State> {
         return;
       }
       const { name, alias, description } = values;
-      this.props.addStep({ type: selectType, name: name, alias: alias, description: description });
+      this.props.addStep({
+        type: selectType.name,
+        name: name,
+        alias: alias,
+        description: description,
+      });
     });
   };
 
@@ -136,6 +160,7 @@ class TypeSelect extends React.Component<Props, State> {
     const catalogs = buildDefinitionCatalog(
       definitions?.filter((def) => !addSub || def.name != 'step-group') || [],
     );
+    console.log(catalogs);
     const { init } = this.field;
     const checkStepNameRule = (rule: Rule, value: any, callback: (error?: string) => void) => {
       if (checkStepName(value)) {
@@ -153,7 +178,7 @@ class TypeSelect extends React.Component<Props, State> {
         onClose={onClose}
         onCancel={onClose}
         onOk={this.onSubmit}
-        title={i18n.t('Select Step Type')}
+        title={selectType ? i18n.t('Set Step Basic Info') : i18n.t('Select Step Type')}
         visible
       >
         <div>
@@ -175,7 +200,7 @@ class TypeSelect extends React.Component<Props, State> {
                             <div
                               className="icon"
                               onClick={() => {
-                                this.setState({ selectType: def.name });
+                                this.setState({ selectType: def });
                               }}
                             >
                               <StepTypeIcon type={def.name} />
@@ -198,6 +223,17 @@ class TypeSelect extends React.Component<Props, State> {
               })}
           {selectType && (
             <Form field={this.field}>
+              <Row wrap>
+                <Col span={24}>
+                  <Item
+                    label={i18n.t('Select Type')}
+                    value={showAlias(selectType.name, selectType.alias)}
+                  />
+                </Col>
+                <Col span={24}>
+                  <Item label={i18n.t('Type Description')} value={selectType.description} />
+                </Col>
+              </Row>
               <Row>
                 <Col span={12} style={{ padding: '0 8px' }}>
                   <Form.Item
