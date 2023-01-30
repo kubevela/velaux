@@ -102,12 +102,11 @@ export function createApplicationTemplate(params: any) {
   return post(`${url}/${params.name}/template`, params).then((res) => res);
 }
 
-export function createApplicationEnv(params: { appName?: string }) {
-  delete params.appName;
+export function createApplicationEnvbinding(params: { appName?: string }) {
   return post(`${url}/${params.appName}/envs`, params).then((res) => res);
 }
 
-export function updateApplicationEnv(params: { appName?: string; name: string }) {
+export function updateApplicationEnvbinding(params: { appName?: string; name: string }) {
   return put(`${url}/${params.appName}/envs/${params.name}`, params).then((res) => res);
 }
 
