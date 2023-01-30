@@ -1,6 +1,9 @@
 export const templates = [
   {
     label: 'Observability Template',
+    defaultContext: {
+      readConfig: 'false',
+    },
     value: `
 - name: Enable Prism
   type: addon-operation
