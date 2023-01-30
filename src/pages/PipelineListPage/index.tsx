@@ -17,7 +17,7 @@ import locale from '../../utils/locale';
 import { Link, routerRedux } from 'dva/router';
 import type { NameAlias } from '../../interface/env';
 import { deletePipeline, listPipelines } from '../../api/pipeline';
-import { AiFillCaretRight, AiFillDelete } from 'react-icons/ai';
+import { AiFillCaretRight, AiFillDelete, AiFillSetting } from 'react-icons/ai';
 import { BiCopyAlt } from 'react-icons/bi';
 import { HiViewList } from 'react-icons/hi';
 import './index.less';
@@ -109,6 +109,10 @@ class PipelineListPage extends Component<Props, State> {
       },
       locale: locale().Dialog,
     });
+  };
+
+  onEditPipeline = (pipeline: PipelineListItem) => {
+    this.setState({ showNewPipeline: true, pipeline: pipeline });
   };
 
   renderPipelineTable = () => {
@@ -236,7 +240,7 @@ class PipelineListPage extends Component<Props, State> {
             key={'actions'}
             title={i18n.t('Actions')}
             dataIndex="name"
-            width={'360px'}
+            width={'420px'}
             cell={(name: string, i: number, pipeline: PipelineListItem) => {
               return (
                 <div>
@@ -298,6 +302,26 @@ class PipelineListPage extends Component<Props, State> {
                       }}
                     >
                       <BiCopyAlt /> <Translation>Clone</Translation>
+                    </Button>
+                    <span className="line" />
+                  </Permission>
+                  <Permission
+                    project={pipeline.project.name}
+                    resource={{
+                      resource: `project:${pipeline.project.name}/pipeline:${pipeline.name}`,
+                      action: 'update',
+                    }}
+                  >
+                    <Button
+                      text
+                      size={'medium'}
+                      ghost={true}
+                      component={'a'}
+                      onClick={() => {
+                        this.onEditPipeline(pipeline);
+                      }}
+                    >
+                      <AiFillSetting /> <Translation>Edit</Translation>
                     </Button>
                     <span className="line" />
                   </Permission>

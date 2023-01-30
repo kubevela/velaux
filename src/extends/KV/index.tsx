@@ -82,7 +82,6 @@ class KV extends Component<Props, State> {
         this.form.setValue('envValue-' + key, value[label]);
       }
     }
-
     this.setState({ items: newItems });
   };
 
