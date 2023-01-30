@@ -14,17 +14,28 @@
     width: 100%;
     margin-top: var(--spacing-4);
     padding: 16px;
-    border: solid 1px var(--grey-200);
+    border: dashed 1px var(--grey-200);
     border-radius: 6px;
     cursor: pointer;
     .context-name {
+      flex-grow: 0;
+      width: 100px;
       margin-right: var(--spacing-4);
       font-weight: 600;
       font-size: var(--font-size-normal);
       line-height: 24px;
     }
+    .context-values {
+      flex: auto;
+      flex-grow: 1;
+    }
     &.active {
       border: solid 2px var(--primary-color);
+    }
+    .actions {
+      display: flex;
+      flex-grow: 0;
+      flex-wrap: nowrap;
     }
   }
 }
