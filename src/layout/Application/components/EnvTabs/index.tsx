@@ -82,7 +82,9 @@ class TabsContent extends Component<Props, State> {
                   trigger={
                     <Link
                       key={item.name + 'link'}
-                      className={classNames('top-menu-item', { active: activeKey === item.name })}
+                      className={classNames('top-menu-item', 'item-env', {
+                        active: activeKey === item.name,
+                      })}
                       to={`/applications/${applicationDetail?.name}/envbinding/${item.name}/workflow`}
                     >
                       <span title={item.description}>{item.alias ? item.alias : item.name}</span>

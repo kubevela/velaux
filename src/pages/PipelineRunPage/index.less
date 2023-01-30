@@ -29,23 +29,33 @@
     .detail-page {
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 250px);
+      justify-content: space-between;
+      height: calc(100vh - 300px);
       .step-info {
-        flex: auto;
+        height: 300px;
         overflow: auto;
         border-collapse: collapse;
       }
       .step-log {
-        height: 600px;
+        flex: 1;
+        overflow: auto;
+
+        background: #000;
         .header {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          width: 100%;
           padding: 4px 16px;
           color: var(--grey-300);
           font-size: var(--font-size-small);
           background: #090909;
           border-bottom: 1px solid var(--grey-800);
+        }
+        .log-content {
+          margin-bottom: 32px;
+          padding: 16px;
+          color: #fff;
         }
       }
     }
