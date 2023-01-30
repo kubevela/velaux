@@ -3,7 +3,10 @@ import { withTranslation } from 'react-i18next';
 import { connect } from 'dva';
 import { Dialog, Field, Form, Grid, Message, Select, Button } from '@b-design/ui';
 import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
-import { createApplicationEnv, updateApplicationEnv } from '../../../../api/application';
+import {
+  createApplicationEnvbinding,
+  updateApplicationEnvbinding,
+} from '../../../../api/application';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
 import { getEnvs } from '../../../../api/env';
@@ -11,6 +14,8 @@ import type { Env } from '../../../../interface/env';
 import { If } from 'tsx-control-statements/components';
 import EnvDialog from '../../../../pages/EnvPage/components/EnvDialog';
 import type { LoginUserInfo } from '../../../../interface/user';
+import { showAlias } from '../../../../utils/common';
+import type { Dispatch } from 'redux';
 
 interface Props {
   onClose: () => void;
@@ -19,7 +24,7 @@ interface Props {
   envbinding?: EnvBinding[];
   targets?: [];
   userInfo?: LoginUserInfo;
-  dispatch?: ({}) => {};
+  dispatch?: Dispatch<any>;
 }
 
 interface State {
@@ -53,9 +58,9 @@ class EnvBindPlanDialog extends Component<Props, State> {
 
   loadEnvs = async (callback?: Callback) => {
     const { applicationDetail, envbinding } = this.props;
-    if (applicationDetail) {
+    if (applicationDetail && applicationDetail.project?.name) {
       //Temporary logic
-      getEnvs({ project: applicationDetail.project?.name || 'default', page: 0 }).then((re) => {
+      getEnvs({ project: applicationDetail.project?.name, page: 0 }).then((re) => {
         const existEnvs =
           envbinding?.map((eb) => {
             return eb.name;
@@ -65,7 +70,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
         this.setState({ envs: canAdd });
         const envOption = canAdd?.map((env: { name: string; alias: string }) => {
           return {
-            label: env.alias ? `${env.alias}(${env.name})` : env.name,
+            label: showAlias(env.name, env.alias),
             value: env.name,
           };
         });
@@ -78,19 +83,19 @@ class EnvBindPlanDialog extends Component<Props, State> {
 
   onSubmit = () => {
     const { applicationDetail } = this.props;
+    if (!applicationDetail) {
+      return;
+    }
     const { isEdit } = this.state;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
       this.setState({ loading: true });
-      const { name, alias, description, targetNames } = values;
+      const { name } = values;
       const params = {
         appName: applicationDetail && applicationDetail.name,
         name,
-        alias,
-        targetNames,
-        description,
       };
       if (isEdit) {
         this.onUpdateApplicationEnv(params);
@@ -101,7 +106,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
   };
 
   onCreateApplicationEnv(params: any) {
-    createApplicationEnv(params)
+    createApplicationEnvbinding(params)
       .then((res) => {
         if (res) {
           Message.success(<Translation>Environment bound successfully</Translation>);
@@ -114,7 +119,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
   }
 
   onUpdateApplicationEnv(params: any) {
-    updateApplicationEnv(params)
+    updateApplicationEnvbinding(params)
       .then((res: any) => {
         if (res) {
           Message.success(<Translation>Environment bound successfully</Translation>);
