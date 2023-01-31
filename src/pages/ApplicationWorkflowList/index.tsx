@@ -54,7 +54,7 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
       listWorkflow(params).then((res) => {
         if (res) {
           this.setState({
-            workflowList: res && res.workflows,
+            workflowList: res.workflows || [],
           });
         }
       });
