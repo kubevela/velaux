@@ -4,8 +4,13 @@ import i18n from '../../../../i18n';
 import { connect } from 'dva';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkPermission } from '../../../../utils/permission';
-import { createPipeline, loadPipeline } from '../../../../api/pipeline';
-import type { PipelineListItem, PipelineDetail } from '../../../../interface/pipeline';
+import {
+  createPipeline,
+  createPipelineContext,
+  listPipelineContexts,
+  loadPipeline,
+} from '../../../../api/pipeline';
+import type { PipelineListItem, PipelineDetail, KeyValue } from '../../../../interface/pipeline';
 import Translation from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
 import { If } from 'tsx-control-statements/components';
@@ -25,7 +30,10 @@ export interface PipelineProps {
 
 type State = {
   loading: boolean;
+  loadingContext: boolean;
   pipelineDetail?: PipelineDetail;
+  contexts?: Record<string, KeyValue[]>;
+  cloneLoading?: boolean;
 };
 
 @connect((store: any) => {
@@ -37,6 +45,7 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
     super(props);
     this.state = {
       loading: true,
+      loadingContext: true,
     };
     this.field = new Field(this);
   }
@@ -44,19 +53,34 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
   componentDidMount() {
     const { pipeline } = this.props;
     if (pipeline) {
-      loadPipeline({ projectName: pipeline.project.name, pipelineName: pipeline.name })
-        .then((res: PipelineDetail) => {
-          this.setState({ pipelineDetail: res });
-        })
-        .finally(() => {
-          this.setState({ loading: false });
-        });
+      this.onLoadingPipeline(pipeline);
+      this.onLoadingPipelineContexts(pipeline);
     }
   }
 
+  onLoadingPipeline = async (pipeline: PipelineListItem) => {
+    loadPipeline({ projectName: pipeline.project.name, pipelineName: pipeline.name })
+      .then((res: PipelineDetail) => {
+        this.setState({ pipelineDetail: res });
+      })
+      .finally(() => {
+        this.setState({ loading: false });
+      });
+  };
+
+  onLoadingPipelineContexts = async (pipeline: PipelineListItem) => {
+    listPipelineContexts(pipeline.project.name, pipeline.name)
+      .then((res) => {
+        this.setState({ contexts: res && res.contexts ? res.contexts : {} });
+      })
+      .finally(() => {
+        this.setState({ loadingContext: false });
+      });
+  };
   onSubmit = () => {
-    const { pipelineDetail } = this.state;
+    const { pipelineDetail, contexts } = this.state;
     if (pipelineDetail) {
+      this.setState({ cloneLoading: true });
       this.field.validate((errs: any, values: any) => {
         if (errs) {
           return;
@@ -69,20 +93,29 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
           name: name,
           spec: pipelineDetail?.spec,
         };
-        createPipeline(request).then((res) => {
-          if (res) {
-            Message.success(i18n.t('Pipeline cloned successfully'));
-            if (this.props.onSuccess) {
-              this.props.onSuccess();
+        createPipeline(request)
+          .then((res) => {
+            if (res) {
+              if (contexts) {
+                Object.keys(contexts).map((key) => {
+                  createPipelineContext(project, name, { name: key, values: contexts[key] });
+                });
+              }
+              Message.success(i18n.t('Pipeline cloned successfully'));
+              if (this.props.onSuccess) {
+                this.props.onSuccess();
+              }
             }
-          }
-        });
+          })
+          .catch(() => {
+            this.setState({ cloneLoading: false });
+          });
       });
     }
   };
 
   render() {
-    const { loading, pipelineDetail } = this.state;
+    const { loading, pipelineDetail, loadingContext, contexts, cloneLoading } = this.state;
     const { userInfo } = this.props;
     const { init } = this.field;
     const projectOptions: { label: string; value: string }[] = [];
@@ -100,9 +133,15 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
         });
       }
     });
+    const message = contexts
+      ? i18n.t('Includes') + ` ${Object.keys(contexts).length} ` + i18n.t('contexts')
+      : '';
     return (
       <Dialog
         onOk={this.onSubmit}
+        okProps={{
+          loading: cloneLoading,
+        }}
         onClose={this.props.onClose}
         onCancel={this.props.onClose}
         locale={locale().Dialog}
@@ -110,11 +149,11 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
         className="commonDialog"
         title="Clone Pipeline"
       >
-        <Loading visible={loading}>
-          <If condition={pipelineDetail}>
+        <Loading visible={loading || loadingContext}>
+          <If condition={pipelineDetail && contexts}>
             <Message
               type="success"
-              title={i18n.t('Pipeline loaded successfully and is ready to clone.')}
+              title={i18n.t('Pipeline loaded successfully and is ready to clone.') + message}
             />
             <Form field={this.field}>
               <Row wrap>

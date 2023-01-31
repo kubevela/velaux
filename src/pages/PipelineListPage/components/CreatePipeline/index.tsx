@@ -8,7 +8,12 @@ import * as yaml from 'js-yaml';
 import { connect } from 'dva';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkPermission } from '../../../../utils/permission';
-import { createPipeline, loadPipeline, updatePipeline } from '../../../../api/pipeline';
+import {
+  createPipeline,
+  createPipelineContext,
+  loadPipeline,
+  updatePipeline,
+} from '../../../../api/pipeline';
 import { v4 as uuid } from 'uuid';
 import type {
   PipelineBase,
@@ -18,6 +23,7 @@ import type {
 import { checkName } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import { templates } from './pipeline-template';
+import { If } from 'tsx-control-statements/components';
 
 const FormItem = Form.Item;
 
@@ -33,6 +39,8 @@ export interface PipelineProps {
 type State = {
   configError?: string[];
   containerId: string;
+  defaultContext?: Record<string, string>;
+  loading?: boolean;
 };
 
 @connect((store: any) => {
@@ -97,24 +105,45 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
           },
         },
       };
+      this.setState({ loading: true });
       if (pipeline) {
-        updatePipeline(request).then((res) => {
-          if (res) {
-            Message.success(i18n.t('Pipeline updated successfully'));
-            if (this.props.onSuccess) {
-              this.props.onSuccess(res);
+        updatePipeline(request)
+          .then((res) => {
+            if (res) {
+              Message.success(i18n.t('Pipeline updated successfully'));
+              if (this.props.onSuccess) {
+                this.props.onSuccess(res);
+              }
             }
-          }
-        });
+          })
+          .finally(() => {
+            this.setState({ loading: false });
+          });
       } else {
-        createPipeline(request).then((res) => {
-          if (res) {
-            Message.success(i18n.t('Pipeline created successfully'));
-            if (this.props.onSuccess) {
-              this.props.onSuccess(res);
+        createPipeline(request)
+          .then((res) => {
+            if (res) {
+              // Create the default context
+              const { defaultContext } = this.state;
+              if (defaultContext) {
+                const contextValues: {
+                  key: string;
+                  value: string;
+                }[] = [];
+                Object.keys(defaultContext).map((key) => {
+                  contextValues.push({ key: key, value: defaultContext[key] });
+                });
+                createPipelineContext(project, name, { name: 'default', values: contextValues });
+              }
+              Message.success(i18n.t('Pipeline created successfully'));
+              if (this.props.onSuccess) {
+                this.props.onSuccess(res);
+              }
             }
-          }
-        });
+          })
+          .finally(() => {
+            this.setState({ loading: false });
+          });
       }
     });
   };
@@ -161,6 +190,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
     const { init } = this.field;
     const { userInfo, pipeline } = this.props;
     let defaultProject = '';
+    const editMode = pipeline != undefined;
     const projectOptions: { label: string; value: string }[] = [];
     (userInfo?.projects || []).map((project) => {
       if (
@@ -180,12 +210,13 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
       }
     });
     const modeOptions = [{ value: 'StepByStep' }, { value: 'DAG' }];
-
+    const { loading } = this.state;
     return (
       <DrawerWithFooter
-        title={i18n.t(pipeline == undefined ? 'New Pipeline' : 'Edit Pipeline')}
+        title={i18n.t(!editMode ? 'New Pipeline' : 'Edit Pipeline')}
         onClose={this.props.onClose}
         onOk={this.onSubmit}
+        onOkButtonLoading={loading}
       >
         <Form field={this.field}>
           <Row wrap>
@@ -193,7 +224,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
               <FormItem required label={<Translation>Name</Translation>}>
                 <Input
                   name="name"
-                  disabled={pipeline != undefined}
+                  disabled={editMode}
                   {...init('name', {
                     initValue: '',
                     rules: [
@@ -235,6 +266,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
                   dataSource={projectOptions}
                   filterLocal={true}
                   hasClear={true}
+                  disabled={editMode}
                   style={{ width: '100%' }}
                   {...init('project', {
                     initValue: defaultProject,
@@ -287,20 +319,24 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
                 />
               </FormItem>
             </Col>
-            <Col span={24} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Template</Translation>}>
-                <Select
-                  locale={locale().Select}
-                  name="template"
-                  dataSource={templates}
-                  hasClear
-                  placeholder="Select a template"
-                  onChange={(value) => {
-                    this.field.setValue('steps', value);
-                  }}
-                />
-              </FormItem>
-            </Col>
+            <If condition={!editMode}>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem label={<Translation>Template</Translation>}>
+                  <Select
+                    locale={locale().Select}
+                    name="template"
+                    dataSource={templates}
+                    hasClear
+                    placeholder="Select a template"
+                    onChange={(value) => {
+                      this.field.setValue('steps', value);
+                      const template = templates.find((t) => t.value == value);
+                      this.setState({ defaultContext: template?.defaultContext });
+                    }}
+                  />
+                </FormItem>
+              </Col>
+            </If>
           </Row>
         </Form>
       </DrawerWithFooter>
