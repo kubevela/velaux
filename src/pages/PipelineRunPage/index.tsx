@@ -288,7 +288,7 @@ class PipelineRunPage extends Component<Props, State> {
           <div className={classNames('studio')}>
             {runStatus && (
               <PipelineGraph
-                name={`${runBase?.pipelineRunName}+${runStatus.status}`}
+                name={`${runBase?.pipelineRunName}`}
                 steps={runStatus.steps}
                 zoom={1}
                 onNodeClick={this.onStepClick}

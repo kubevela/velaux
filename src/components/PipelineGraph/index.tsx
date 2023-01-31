@@ -50,7 +50,6 @@ class PipelineGraph extends React.Component<PipelineGraphProps, State> {
       <Draggable>
         <div
           className="workflow-graph"
-          key={name}
           style={{
             transform: `scale(${zoom})`,
           }}
@@ -66,7 +65,7 @@ class PipelineGraph extends React.Component<PipelineGraphProps, State> {
             steps.map((step, i: number) => {
               return (
                 <Step
-                  key={name + step.id}
+                  key={name + step.name}
                   probeState={this.state}
                   step={step}
                   group={step.type == 'step-group'}

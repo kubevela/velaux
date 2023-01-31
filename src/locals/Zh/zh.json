@@ -615,5 +615,6 @@
   "Pipeline loaded successfully and is ready to clone.": "流水线配置加载完成，可以开始克隆。",
   "Clone Pipeline": "克隆流水线",
   "Includes": "包括",
-  "contexts": "上下文参数"
+  "contexts": "上下文参数",
+  "Are you sure to rerun this Pipeline?": "确定要重新运行流水线吗？"
 }
