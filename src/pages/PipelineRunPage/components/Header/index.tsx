@@ -53,7 +53,7 @@ class Header extends Component<Props, State> {
   onRerun = () => {
     Dialog.confirm({
       type: 'alert',
-      content: 'Are you sure to rerun this Pipeline?',
+      content: i18n.t('Are you sure to rerun this Pipeline?'),
       locale: locale().Dialog,
       onOk: () => {
         const { pipeline, runBase } = this.props;
