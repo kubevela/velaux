@@ -602,5 +602,17 @@
   "Mode": "执行模式",
   "Sub Mode": "子步骤",
   "The workflow step spec reference document": "工作流部署规范参考文档",
-  "Click here": "点击这里"
+  "Click here": "点击这里",
+  "Select Contexts": "选择上下文参数",
+  "The context is the runtime inputs for the Pipeline": "上下文参数作为工作流的运行时输入",
+  "New Context": "新建上下文参数",
+  "No context is required for the execution of this Pipeline": "工作流执行无必需的上下文参数",
+  "Run Pipeline": "执行工作流",
+  "Click and deselect": "点击取消选中",
+  "Click and select": "点击选中",
+  "Edit Pipeline": "编辑流水线",
+  "Pipeline loaded successfully and is ready to clone.": "流水线配置加载完成，可以开始克隆。",
+  "Clone Pipeline": "克隆流水线",
+  "Includes": "包括",
+  "contexts": "上下文参数"
 }

@@ -100,6 +100,29 @@ export function listPipelineContexts(projectName: string, pipelineName: string) 
   return get(url, {}).then((res) => res);
 }
 
+export function deletePipelineContext(
+  projectName: string,
+  pipelineName: string,
+  contextName: string,
+) {
+  const url =
+    base + `/api/v1/projects/${projectName}/pipelines/${pipelineName}/contexts/${contextName}`;
+  return rdelete(url, {}).then((res) => res);
+}
+
+export function updatePipelineContext(
+  projectName: string,
+  pipelineName: string,
+  context: {
+    name: string;
+    values: { key: string; value: string }[];
+  },
+) {
+  const url =
+    base + `/api/v1/projects/${projectName}/pipelines/${pipelineName}/contexts/${context.name}`;
+  return put(url, context).then((res) => res);
+}
+
 export function loadPipelineRunStepOutputs(params: {
   projectName: string;
   pipelineName: string;
