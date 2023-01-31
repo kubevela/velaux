@@ -353,6 +353,26 @@ export interface Trigger {
   componentName?: string;
 }
 
+export interface CreateTriggerRequest {
+  name: string;
+  alias?: string;
+  description?: string;
+  workflowName: string;
+  type: 'webhook';
+  payloadType?: 'custom' | 'dockerHub' | 'ACR' | 'harbor' | 'artifactory';
+  registry?: string;
+  componentName?: string;
+}
+
+export interface UpdateTriggerRequest {
+  alias?: string;
+  description?: string;
+  workflowName: string;
+  payloadType?: 'custom' | 'dockerHub' | 'ACR' | 'harbor' | 'artifactory';
+  registry?: string;
+  componentName?: string;
+}
+
 export interface ApplicationComponentConfig {
   name: string;
   alias: string;
