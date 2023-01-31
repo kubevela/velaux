@@ -36,6 +36,11 @@ class Menu extends Component<Props, any> {
           label: <Translation>Revisions</Translation>,
           to: `/applications/${appName}/revisions`,
         },
+        {
+          key: 'workflows',
+          label: <Translation>Workflows</Translation>,
+          to: `/applications/${appName}/workflows`,
+        },
       ],
       envPage: [
         {

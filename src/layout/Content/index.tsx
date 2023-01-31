@@ -33,6 +33,7 @@ import ApplicationWorkflowStudio from '../../pages/ApplicationWorkflowStudio';
 import PipelineStudio from '../../pages/PipelineStudio';
 import ProjectPipelines from '../../pages/ProjectPipelines';
 import ApplicationEnvRoute from '../../pages/ApplicationEnvRoute';
+import ApplicationWorkflowList from '../../pages/ApplicationWorkflowList';
 
 export default function Content() {
   return (
@@ -81,6 +82,17 @@ export default function Content() {
           return (
             <ApplicationLayout {...props}>
               <ApplicationEnvRoute {...props} />;
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/applications/:appName/workflows"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationWorkflowList {...props} />
             </ApplicationLayout>
           );
         }}
