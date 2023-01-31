@@ -5,13 +5,14 @@ import { getDomain } from '../utils/common';
 import type {
   ApplicationDeployRequest,
   Trait,
-  Trigger,
   ApplicationComponentConfig,
   ApplicationQuery,
   ApplicationCompareRequest,
   ApplicationDryRunRequest,
   CreatePolicyRequest,
   UpdatePolicyRequest,
+  UpdateTriggerRequest,
+  CreateTriggerRequest,
 } from '../interface/application';
 
 interface TraitQuery {
@@ -220,12 +221,20 @@ export function updateApplication(params: any) {
   return put(`${url}/${params.name}`, params).then((res) => res);
 }
 
-export function createTriggers(params: Trigger, query: { appName: string }) {
+export function createTrigger(params: CreateTriggerRequest, query: { appName: string }) {
   const { appName } = query;
   return post(`${url}/${appName}/triggers`, params).then((res) => res);
 }
 
-export function deleteTriggers(params: { appName: string; token: string }) {
+export function updateTrigger(
+  params: UpdateTriggerRequest,
+  query: { appName: string; token: string },
+) {
+  const { appName, token } = query;
+  return put(`${url}/${appName}/triggers/${token}`, params).then((res) => res);
+}
+
+export function deleteTrigger(params: { appName: string; token: string }) {
   const { appName, token } = params;
   return rdelete(`${url}/${appName}/triggers/${token}`, {}).then((res) => res);
 }

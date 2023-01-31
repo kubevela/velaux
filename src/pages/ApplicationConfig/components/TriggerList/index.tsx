@@ -7,7 +7,7 @@ import type {
   ApplicationDetail,
 } from '../../../../interface/application';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { momentDate } from '../../../../utils/common';
+import { momentDate, showAlias } from '../../../../utils/common';
 import './index.less';
 import { If } from 'tsx-control-statements/components';
 import Empty from '../../../../components/Empty';
@@ -24,6 +24,7 @@ type Props = {
   components: ApplicationComponentBase[];
   applicationDetail?: ApplicationDetail;
   onDeleteTrigger: (token: string) => void;
+  onEditTrigger: (t: Trigger) => void;
 };
 
 type State = {
@@ -139,8 +140,13 @@ class TriggerList extends Component<Props, State> {
               <Col span={24}>
                 <Card free={true} style={{ padding: '16px' }} locale={locale().Card}>
                   <div className="trigger-list-nav">
-                    <div className="trigger-list-title">
-                      {item.alias ? `${item.alias}(${item.name})` : item.name}
+                    <div
+                      onClick={() => {
+                        this.props.onEditTrigger(item);
+                      }}
+                      className="trigger-list-title"
+                    >
+                      {showAlias(item)}
                     </div>
                     <div className="trigger-list-operation">
                       <Permission

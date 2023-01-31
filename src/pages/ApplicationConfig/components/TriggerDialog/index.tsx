@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Field, Form, Select, Message, Button, Input } from '@b-design/ui';
 import { withTranslation } from 'react-i18next';
-import { createTriggers } from '../../../../api/application';
+import { createTrigger, updateTrigger } from '../../../../api/application';
 import { getPayloadType } from '../../../../api/payload';
 import { detailComponentDefinition } from '../../../../api/definitions';
 import type {
@@ -9,6 +9,8 @@ import type {
   Trigger,
   UIParam,
   ApplicationComponentBase,
+  CreateTriggerRequest,
+  UpdateTriggerRequest,
 } from '../../../../interface/application';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Translation from '../../../../components/Translation';
@@ -16,6 +18,7 @@ import { checkName } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import { If } from 'tsx-control-statements/components';
 import i18n from '../../../../i18n';
+import type { Dispatch } from 'redux';
 
 type Props = {
   visible: boolean;
@@ -23,8 +26,9 @@ type Props = {
   workflows?: Workflow[];
   onOK: (params: Trigger) => void;
   onClose: () => void;
-  dispatch?: ({}) => {};
+  dispatch?: Dispatch<any>;
   components: ApplicationComponentBase[];
+  trigger?: Trigger;
 };
 
 type State = {
@@ -32,6 +36,7 @@ type State = {
   payloadTypes: string[];
   hasImage: boolean;
   component?: ApplicationComponentBase;
+  submitLoading?: boolean;
 };
 
 class TriggerDialog extends React.Component<Props, State> {
@@ -47,6 +52,10 @@ class TriggerDialog extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    const { trigger } = this.props;
+    if (trigger) {
+      this.field.setValues(trigger);
+    }
     const type = this.field.getValue('type');
     if (type === 'webhook') {
       this.onGetPayloadType();
@@ -90,6 +99,8 @@ class TriggerDialog extends React.Component<Props, State> {
   };
 
   onSubmit = () => {
+    const { trigger } = this.props;
+    const editMode = trigger != undefined;
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
@@ -106,38 +117,68 @@ class TriggerDialog extends React.Component<Props, State> {
         registry = '',
       } = values;
       const query = { appName };
-      const params: Trigger = {
-        name,
-        alias,
-        description,
-        type,
-        payloadType,
-        workflowName,
-        token: '',
-        componentName,
-        registry,
-      };
-      createTriggers(params, query).then((res: any) => {
-        if (res) {
-          Message.success({
-            duration: 4000,
-            content: 'Trigger created successfully.',
+      this.setState({ submitLoading: true });
+      if (editMode) {
+        const params: UpdateTriggerRequest = {
+          alias,
+          description,
+          payloadType,
+          workflowName,
+          componentName,
+          registry,
+        };
+        updateTrigger(params, { appName, token: trigger.token })
+          .then((res: any) => {
+            if (res) {
+              Message.success({
+                duration: 4000,
+                content: 'Trigger updated successfully.',
+              });
+              this.props.onOK(res);
+            }
+          })
+          .finally(() => {
+            this.setState({ submitLoading: false });
           });
-          this.props.onOK(res);
-        }
-      });
+      } else {
+        const params: CreateTriggerRequest = {
+          name,
+          alias,
+          description,
+          type,
+          payloadType,
+          workflowName,
+          componentName,
+          registry,
+        };
+        createTrigger(params, query)
+          .then((res: any) => {
+            if (res) {
+              Message.success({
+                duration: 4000,
+                content: 'Trigger created successfully.',
+              });
+              this.props.onOK(res);
+            }
+          })
+          .finally(() => {
+            this.setState({ submitLoading: false });
+          });
+      }
     });
   };
 
   extButtonList = () => {
-    const { onClose } = this.props;
+    const { onClose, trigger } = this.props;
+    const { submitLoading } = this.state;
+    const editMode = trigger != undefined;
     return (
       <div>
         <Button type="secondary" onClick={onClose} className="margin-right-10">
           <Translation>Cancel</Translation>
         </Button>
-        <Button type="primary" onClick={this.onSubmit}>
-          <Translation>Create</Translation>
+        <Button loading={submitLoading} type="primary" onClick={this.onSubmit}>
+          <Translation>{editMode ? 'Update' : 'Create'}</Translation>
         </Button>
       </div>
     );
@@ -180,7 +221,8 @@ class TriggerDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const { workflows, onClose, components } = this.props;
+    const { workflows, onClose, components, trigger } = this.props;
+    const editMode = trigger != undefined;
     const { payloadTypes } = this.state;
     const workflowOption = workflows?.map((workflow) => {
       return {
@@ -205,7 +247,7 @@ class TriggerDialog extends React.Component<Props, State> {
 
     return (
       <DrawerWithFooter
-        title={i18n.t('Add Trigger')}
+        title={editMode ? i18n.t('Edit Trigger') : i18n.t('Add Trigger')}
         placement="right"
         width={800}
         onClose={onClose}
@@ -217,6 +259,7 @@ class TriggerDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Name</Translation>} required>
                 <Input
                   name="name"
+                  disabled={editMode}
                   placeholder={i18n.t('Please enter the name').toString()}
                   {...init('name', {
                     rules: [
@@ -274,6 +317,7 @@ class TriggerDialog extends React.Component<Props, State> {
                 <Select
                   name="type"
                   locale={locale().Select}
+                  disabled={editMode}
                   dataSource={[{ label: 'On Webhook Event', value: 'webhook' }]}
                   {...init('type', {
                     initValue: 'webhook',

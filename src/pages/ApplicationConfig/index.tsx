@@ -6,7 +6,7 @@ import { If } from 'tsx-control-statements/components';
 import {
   deleteTrait,
   getApplicationTriggers,
-  deleteTriggers,
+  deleteTrigger,
   deleteComponent,
   deleteApplication,
   deletePolicy,
@@ -76,6 +76,7 @@ type State = {
   mainComponent?: ApplicationComponent;
   traitItem: Trait;
   triggers: Trigger[];
+  trigger?: Trigger;
   visibleTrigger: boolean;
   createTriggerInfo: Trigger;
   showEditApplication: boolean;
@@ -211,6 +212,7 @@ class ApplicationConfig extends Component<Props, State> {
   onTriggerClose = () => {
     this.setState({
       visibleTrigger: false,
+      trigger: undefined,
     });
     this.onLoadApplicationComponents();
   };
@@ -219,6 +221,7 @@ class ApplicationConfig extends Component<Props, State> {
     this.onGetApplicationTrigger();
     this.setState({
       visibleTrigger: false,
+      trigger: undefined,
       createTriggerInfo: res,
     });
   };
@@ -229,8 +232,12 @@ class ApplicationConfig extends Component<Props, State> {
       appName,
       token,
     };
-    deleteTriggers(params).then((res: any) => {
+    deleteTrigger(params).then((res: any) => {
       if (res) {
+        Message.success({
+          duration: 4000,
+          content: 'Trigger deleted successfully.',
+        });
         this.onGetApplicationTrigger();
       }
     });
@@ -462,6 +469,7 @@ class ApplicationConfig extends Component<Props, State> {
       componentName = '',
       traitItem,
       triggers,
+      trigger,
       visibleTrigger,
       createTriggerInfo,
       showEditApplication,
@@ -752,6 +760,9 @@ class ApplicationConfig extends Component<Props, State> {
               }}
               createTriggerInfo={createTriggerInfo}
               applicationDetail={applicationDetail}
+              onEditTrigger={(t: Trigger) => {
+                this.setState({ visibleTrigger: true, trigger: t });
+              }}
             />
           </Col>
         </Row>
@@ -781,6 +792,7 @@ class ApplicationConfig extends Component<Props, State> {
           <TriggerDialog
             visible={visibleTrigger}
             appName={appName}
+            trigger={trigger}
             workflows={workflows}
             components={components || []}
             onClose={this.onTriggerClose}
