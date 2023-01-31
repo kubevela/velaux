@@ -445,7 +445,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
           <div className={classNames('studio')}>
             {showRecord && (
               <PipelineGraph
-                name={`${showRecord?.name}/${showRecord?.status}`}
+                name={`${showRecord?.name}`}
                 zoom={zoom}
                 onNodeClick={this.onStepClick}
                 steps={showRecord?.steps}
