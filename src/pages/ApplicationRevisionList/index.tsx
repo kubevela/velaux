@@ -76,8 +76,8 @@ class ApplicationRevisionList extends React.Component<Props, State> {
     listRevisions(params).then((res) => {
       if (res) {
         this.setState({
-          revisionsList: res && res.revisions,
-          revisionsListTotal: res && res.total,
+          revisionsList: res.revisions || [],
+          revisionsListTotal: res.total || 0,
         });
       }
     });
