@@ -15,6 +15,7 @@ import Permission from '../../../../components/Permission';
 import terraform from '../../../../assets/terraform.svg';
 import kubernetes from '../../../../assets/kubernetes.svg';
 import helm from '../../../../assets/helm.svg';
+import { showAlias } from '../../../../utils/common';
 
 type Props = {
   application?: ApplicationBase;
@@ -68,7 +69,7 @@ class ComponentsList extends Component<Props> {
                       }}
                     >
                       {this.getComponentTypeIcon(item)}
-                      {item.alias ? `${item.alias}(${item.name})` : item.name}
+                      {showAlias(item)}
                     </div>
                     <If condition={item.main != true}>
                       <div className="components-list-operation">
@@ -98,7 +99,7 @@ class ComponentsList extends Component<Props> {
                   </If>
                   <Row wrap={true}>
                     {item.traits?.map((trait) => {
-                      const label = trait.alias ? trait.alias + '(' + trait.type + ')' : trait.type;
+                      const label = showAlias(trait.type, trait.alias);
                       return (
                         <div
                           key={trait.type}

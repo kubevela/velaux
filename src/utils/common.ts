@@ -295,9 +295,20 @@ export function convertAny(data?: any): string {
   }
 }
 
-export function showAlias(name: string, alias?: string) {
-  if (alias) {
-    return `${name}(${alias})`;
+export function showAlias(name: string, alias?: string): string;
+export function showAlias(item: { name: string; alias?: string }): string;
+export function showAlias(item: { name: string; alias?: string } | string, alias?: string) {
+  if (typeof item == 'string') {
+    if (alias) {
+      return `${item}(${alias})`;
+    }
+    return item;
   }
-  return name;
+  if (!item) {
+    return '';
+  }
+  if (item.alias) {
+    return `${item.name}(${item.alias})`;
+  }
+  return item.name;
 }
