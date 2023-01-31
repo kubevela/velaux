@@ -615,12 +615,14 @@ class ApplicationConfig extends Component<Props, State> {
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
                     number={statistics?.revisionCount}
+                    to={`/applications/${applicationDetail.name}/revisions`}
                     title={i18n.t('Revision Count').toString()}
                   />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
                     number={statistics?.workflowCount}
+                    to={`/applications/${applicationDetail.name}/workflows`}
                     title={i18n.t('Workflow Count').toString()}
                   />
                 </Col>
