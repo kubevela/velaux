@@ -37,27 +37,37 @@ class HelmRepoSelect extends Component<Props, State> {
   }
   componentDidMount() {
     if (!this.props.helm?.repoType || this.props.helm?.repoType == 'helm') {
-      this.onLoadRepos();
+      this.onLoadRepos(this.props.helm?.repoType);
     }
   }
 
   componentWillReceiveProps(nextProps: Props) {
     const repoType = nextProps.helm?.repoType;
-    if (repoType !== this.props.helm?.repoType && repoType == 'helm') {
-      this.onLoadRepos();
+    if (repoType !== this.props.helm?.repoType && (repoType == 'helm' || repoType == 'oci')) {
+      this.onLoadRepos(repoType);
     }
   }
 
-  onLoadRepos = () => {
+  onLoadRepos = (repoType?: string) => {
     const { project } = this.props;
     const defaultRepos = [{ url: 'https://charts.bitnami.com/bitnami', type: 'helm' }];
-    this.setState({ loading: true, repos: defaultRepos });
+    this.setState({ loading: true, repos: repoType === 'helm' ? defaultRepos : [] });
+    console.log(repoType);
     getChartRepos({ project: project }).then((res) => {
       let repos: HelmRepo[] = [];
       if (res && res.repos) {
-        repos = repos.concat(res.repos);
+        res.repos.map((repo: HelmRepo) => {
+          if (repoType == 'oci' && repo.url.startsWith('oci://')) {
+            repos.push(repo);
+          }
+          if (repoType == 'helm' && !repo.url.startsWith('oci://')) {
+            repos.push(repo);
+          }
+        });
       }
-      repos = repos.concat(defaultRepos);
+      if (repoType == 'helm') {
+        repos = repos.concat(defaultRepos);
+      }
       this.setState({
         repos: repos,
         loading: false,

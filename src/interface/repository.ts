@@ -1,6 +1,6 @@
 export interface HelmRepo {
   url: string;
-  type: string;
+  type?: string;
   secretName?: string;
 }
 
