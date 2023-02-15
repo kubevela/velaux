@@ -489,7 +489,7 @@ class ApplicationConfig extends Component<Props, State> {
     return (
       <div>
         <Row className="flex-row" wrap={true}>
-          <Col xl={16} m={24} s={24} style={{ padding: '0 8px' }}>
+          <Col xl={16} l={24} s={24} style={{ padding: '0 8px' }}>
             <Card
               locale={locale().Card}
               contentHeight="auto"
@@ -533,7 +533,7 @@ class ApplicationConfig extends Component<Props, State> {
                   </div>
                 </Col>
 
-                <Col l={8} xxs={24}>
+                <Col l={8} xs={24}>
                   <Item
                     label={<Translation>Project</Translation>}
                     value={
@@ -546,7 +546,7 @@ class ApplicationConfig extends Component<Props, State> {
                   />
                 </Col>
 
-                <Col l={8} xxs={24}>
+                <Col l={8} xs={24}>
                   <Item
                     label={<Translation>Create Time</Translation>}
                     value={
@@ -563,7 +563,7 @@ class ApplicationConfig extends Component<Props, State> {
                   />
                 </Col>
 
-                <Col l={8} xxs={24}>
+                <Col l={8} xs={24}>
                   <Item
                     label={<Translation>Update Time</Translation>}
                     value={
@@ -597,7 +597,7 @@ class ApplicationConfig extends Component<Props, State> {
               </Row>
             </Card>
           </Col>
-          <Col xl={8} m={24} s={24} style={{ padding: '0 8px' }}>
+          <Col xl={8} l={24} s={24} style={{ padding: '0 8px' }}>
             <Card locale={locale().Card} contentHeight="auto" style={{ height: '100%' }}>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
@@ -632,7 +632,7 @@ class ApplicationConfig extends Component<Props, State> {
         </Row>
 
         <Row wrap={true} className="app-spec">
-          <Col xl={8} xs={24} className="app-spec-item">
+          <Col xl={8} xxs={24} className="app-spec-item">
             <Row>
               <Col span={24} className="padding16">
                 <Title
@@ -683,7 +683,7 @@ class ApplicationConfig extends Component<Props, State> {
               changeTraitStats={this.changeTraitStats}
             />
           </Col>
-          <Col xl={8} xs={24} className="app-spec-item">
+          <Col xl={8} xxs={24} className="app-spec-item">
             <Row>
               <Col span={24} className="padding16">
                 <Title
@@ -724,7 +724,7 @@ class ApplicationConfig extends Component<Props, State> {
               }}
             />
           </Col>
-          <Col xl={8} xs={24} className="app-spec-item">
+          <Col xl={8} xxs={24} className="app-spec-item">
             <Row>
               <Col span={24} className="padding16">
                 <Title

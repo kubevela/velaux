@@ -19,6 +19,25 @@ export function getChartValues(params: {
   }).then((res) => res);
 }
 
+export function getChartValueFiles(params: {
+  url: string;
+  repoType: string;
+  secretName?: string;
+  chart: string;
+  version: string;
+}) {
+  const url = baseURL + repository + '/chart/values';
+  return get(url, {
+    params: {
+      repoUrl: params.url,
+      repoType: params.repoType,
+      secretName: params.secretName,
+      chart: params.chart,
+      version: params.version,
+    },
+  }).then((res) => res);
+}
+
 export function getCharts(params: { url: string; repoType: string; secretName?: string }) {
   const url = baseURL + repository + '/charts';
   return get(url, {
@@ -32,9 +51,14 @@ export function getChartVersions(params: {
   chart: string;
   secretName?: string;
 }) {
-  const url = baseURL + repository + '/charts/' + params.chart + '/versions';
+  const url = baseURL + repository + '/chart/versions';
   return get(url, {
-    params: { repoUrl: params.url, repoType: params.repoType, secretName: params.secretName },
+    params: {
+      repoUrl: params.url,
+      repoType: params.repoType,
+      secretName: params.secretName,
+      chart: params.chart,
+    },
   }).then((res) => res);
 }
 
