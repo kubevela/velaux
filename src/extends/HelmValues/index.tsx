@@ -4,9 +4,12 @@ import _ from 'lodash';
 import type { UIParam } from '../../interface/application';
 import type { HelmRepo } from '../../interface/repository';
 import KV from '../KV';
-import { getChartValues } from '../../api/repository';
-import { Loading } from '@b-design/ui';
+import { getChartValueFiles } from '../../api/repository';
+import { Button, Loading } from '@b-design/ui';
 import { connect } from 'dva';
+import YAML from 'js-yaml';
+import Translation from '../../components/Translation';
+import HelmValueShow from '../../components/HelmValueShow';
 
 type Props = {
   value?: any;
@@ -62,6 +65,8 @@ type State = {
     version: string;
   };
   loading: boolean;
+  valueFiles?: Record<string, string>;
+  showValuesFile?: boolean;
 };
 @connect((store: any) => {
   return { ...store.uischema };
@@ -81,11 +86,19 @@ class HelmValues extends Component<Props, State> {
   loadChartValues = () => {
     const { helm, repo } = this.props;
     if (helm?.chart && helm.version && helm.url) {
-      getChartValues({ ...helm, secretName: repo?.secretName }).then((re) => {
-        if (re) {
-          this.setState({ values: re.BusinessCode ? undefined : re, helm: helm, loading: false });
-        }
-      });
+      getChartValueFiles({ ...helm, secretName: repo?.secretName }).then(
+        (re: Record<string, string>) => {
+          if (re) {
+            try {
+              const defaultValueFile = re['values.yaml'];
+              const defaultValue = YAML.load(defaultValueFile);
+              const newValues: any = {};
+              getValues(defaultValue, '', newValues);
+              this.setState({ values: newValues, valueFiles: re, helm: helm, loading: false });
+            } catch (err) {}
+          }
+        },
+      );
     }
   };
 
@@ -115,7 +128,7 @@ class HelmValues extends Component<Props, State> {
 
   render() {
     const { helm } = this.props;
-    const { values, loading, helm: stateHelm } = this.state;
+    const { values, loading, helm: stateHelm, showValuesFile, valueFiles } = this.state;
     if (this.renderHelmKey(helm) != this.renderHelmKey(stateHelm)) {
       this.loadChartValues();
     }
@@ -131,6 +144,26 @@ class HelmValues extends Component<Props, State> {
           subParameters={this.props.subParameters}
           id={this.props.id}
         />
+        {valueFiles && (
+          <Button
+            onClick={() => {
+              this.setState({ showValuesFile: true });
+            }}
+            size="small"
+            type="secondary"
+          >
+            <Translation>Show Values File</Translation>
+          </Button>
+        )}
+        {showValuesFile && valueFiles && (
+          <HelmValueShow
+            name={helm?.chart || 'default'}
+            valueFiles={valueFiles}
+            onClose={() => {
+              this.setState({ showValuesFile: false });
+            }}
+          />
+        )}
       </Loading>
     );
   }
