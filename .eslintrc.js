@@ -10,7 +10,7 @@ module.exports = {
     eqeqeq: 'off',
     'react/prop-types': 'off',
     // need to ignore emotion's `css` prop, see https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-unknown-property.md#rule-options
-    'react/no-unknown-property': ['error', { ignore: ['css'] }],
+    // 'react/no-unknown-property': ['error', { ignore: ['css'] }],
     // 'import/order': [
     //   'error',
     //   {

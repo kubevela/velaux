@@ -80,7 +80,7 @@ jobs:
           kubernetesVersion: v1.21.2
 
       - name: Run api server unit test
-        run: make unit-test-apiserver
+        run: make unit-test-server
 
       - name: Upload coverage report
         uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
@@ -153,9 +153,6 @@ jobs:
           k3d kubeconfig get worker > /tmp/worker.client.kubeconfig
           cp /tmp/worker.client.kubeconfig /tmp/worker.kubeconfig
           sed -i "s/0.0.0.0:[0-9]\+/$internal_ip:6443/"  /tmp/worker.kubeconfig
-
-      - name: Load image to k3d cluster
-        run: make image-load
 
       - name: Cleanup for e2e tests
         run: |
