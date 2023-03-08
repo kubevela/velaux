@@ -100,16 +100,28 @@ build-swagger:
 
 lint: golangci
 	@$(INFO) lint
-	@$(GOLANGCILINT) run --skip-dirs 'scaffold'
+	@$(GOLANGCILINT) run
 
 vet:
 	@$(INFO) go vet
 	@go vet $(shell go list ./...)
 
+fmt: goimports
+	go fmt ./...
+	$(GOIMPORTS) -local github.com/kubevela/velaux -w $$(go list -f {{.Dir}} ./...)
+
 staticcheck: staticchecktool
 	@$(INFO) staticcheck
 	@$(STATICCHECK) $(shell go list ./...)
+mod:
+	go mod tidy
+reviewable: mod fmt vet staticcheck lint
 
-reviewable: lint vet staticcheck
+# Execute auto-gen code commands and ensure branch is clean.
+check-diff: reviewable
+	git --no-pager diff
+	git diff --quiet || ($(ERR) please run 'make reviewable' to include all changes && false)
+	@$(OK) branch is clean
+
 run-server:
 	go run ./cmd/server/main.go

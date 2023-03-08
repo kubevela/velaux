@@ -39,13 +39,14 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	kubevelatypes "github.com/oam-dev/kubevela/apis/types"
+	"github.com/oam-dev/kubevela/pkg/auth"
+	pkgutils "github.com/oam-dev/kubevela/pkg/utils"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
-	kubevelatypes "github.com/oam-dev/kubevela/apis/types"
-	"github.com/oam-dev/kubevela/pkg/auth"
-	pkgutils "github.com/oam-dev/kubevela/pkg/utils"
 )
 
 const (

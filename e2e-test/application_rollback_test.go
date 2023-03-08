@@ -25,9 +25,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
-	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 )
 
 var _ = Describe("Test the rest api that rollback the application", func() {

@@ -31,11 +31,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 
-	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
+
+	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
 var _ = Describe("Test namespace service functions", func() {

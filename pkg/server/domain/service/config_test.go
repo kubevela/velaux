@@ -25,12 +25,13 @@ import (
 	. "github.com/onsi/gomega"
 	apitypes "k8s.io/apimachinery/pkg/types"
 
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
-	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
-	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/config"
 	"github.com/oam-dev/kubevela/pkg/cue/script"
+
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
+	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
+	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 var alibabaTerraformTemplate = `

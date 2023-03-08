@@ -26,13 +26,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/util/workqueue"
 
-	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/domain/repository"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 	common2 "github.com/oam-dev/kubevela/pkg/utils/common"
+
+	"github.com/kubevela/velaux/pkg/server/domain/model"
+	"github.com/kubevela/velaux/pkg/server/domain/repository"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 )
 
 var _ = Describe("Test Worker CR sync to datastore", func() {

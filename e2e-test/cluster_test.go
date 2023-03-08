@@ -26,8 +26,9 @@ import (
 
 	"github.com/kubevela/pkg/util/rand"
 
-	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/oam-dev/kubevela/pkg/multicluster"
+
+	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
 const (

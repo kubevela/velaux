@@ -24,8 +24,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/oam-dev/kubevela/pkg/multicluster"
+
+	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
 var _ = Describe("Test env rest api", func() {

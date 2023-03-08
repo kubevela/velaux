@@ -26,11 +26,12 @@ import (
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kubevela/velaux/pkg/server/domain/repository"
-	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/utils/common"
+
+	"github.com/kubevela/velaux/pkg/server/domain/repository"
+	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
 var _ = Describe("Test the application synchronizing", func() {

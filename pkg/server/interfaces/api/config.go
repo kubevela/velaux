@@ -20,10 +20,11 @@ import (
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 
+	pkgconfig "github.com/oam-dev/kubevela/pkg/config"
+
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
-	pkgconfig "github.com/oam-dev/kubevela/pkg/config"
 )
 
 // Config returns config web service

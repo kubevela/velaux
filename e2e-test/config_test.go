@@ -23,9 +23,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/config"
+
+	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
 var tc = `

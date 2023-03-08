@@ -36,8 +36,10 @@ jobs:
         node-version: '16'
     - run: yarn install
     - run: yarn lint
+      name: Check Frontend Code Style
     - run: yarn test
-    - run: make reviewable
+    - run: make check-diff
+      name: Check Server Code Style
     - name: Build docker image
       id: docker_build
       uses: docker/build-push-action@v2

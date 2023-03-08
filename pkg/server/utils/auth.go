@@ -24,9 +24,10 @@ import (
 	"k8s.io/apiserver/pkg/endpoints/request"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/oam-dev/kubevela/pkg/auth"
 	"github.com/oam-dev/kubevela/pkg/features"
+
+	"github.com/kubevela/velaux/pkg/server/domain/model"
 )
 
 // KubeVelaProjectGroupPrefix the prefix kubevela project

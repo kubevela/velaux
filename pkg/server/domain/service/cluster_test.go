@@ -31,11 +31,12 @@ import (
 	clustergatewayv1alpha1 "github.com/oam-dev/cluster-gateway/pkg/apis/cluster/v1alpha1"
 	clustergatewaycommon "github.com/oam-dev/cluster-gateway/pkg/common"
 
+	"github.com/oam-dev/kubevela/pkg/oam/util"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
-	"github.com/oam-dev/kubevela/pkg/oam/util"
 )
 
 var _ = Describe("Test cluster service function", func() {

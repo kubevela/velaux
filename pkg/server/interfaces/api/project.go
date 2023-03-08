@@ -21,11 +21,12 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"k8s.io/klog/v2"
 
+	pkgconfig "github.com/oam-dev/kubevela/pkg/config"
+
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
-	pkgconfig "github.com/oam-dev/kubevela/pkg/config"
 )
 
 type project struct {

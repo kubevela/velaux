@@ -22,10 +22,11 @@ import (
 
 	"k8s.io/klog/v2"
 
+	"github.com/oam-dev/kubevela/pkg/utils"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
-	"github.com/oam-dev/kubevela/pkg/utils"
 )
 
 // ListApplicationPolicies query the application policies

@@ -27,12 +27,13 @@ import (
 
 	"github.com/kubevela/workflow/pkg/cue/packages"
 
+	"github.com/oam-dev/kubevela/pkg/oam/discoverymapper"
+	"github.com/oam-dev/kubevela/pkg/velaql"
+
 	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
-	"github.com/oam-dev/kubevela/pkg/oam/discoverymapper"
-	"github.com/oam-dev/kubevela/pkg/velaql"
 )
 
 // VelaQLService velaQL service

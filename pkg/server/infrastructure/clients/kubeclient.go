@@ -27,10 +27,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	apiConfig "github.com/kubevela/velaux/pkg/server/config"
 	"github.com/oam-dev/kubevela/pkg/auth"
 	"github.com/oam-dev/kubevela/pkg/oam/discoverymapper"
 	"github.com/oam-dev/kubevela/pkg/utils/common"
+
+	apiConfig "github.com/kubevela/velaux/pkg/server/config"
 )
 
 var kubeClient client.Client

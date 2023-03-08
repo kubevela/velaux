@@ -28,8 +28,8 @@ import (
 var versionPrefix = "/api/v1"
 
 // GetAPIPrefix return the prefix of the api route path
-func GetAPIPrefix() string {
-	return versionPrefix
+func GetAPIPrefix() []string {
+	return []string{versionPrefix, viewPrefix, "/v1"}
 }
 
 // viewPrefix the path prefix for view page

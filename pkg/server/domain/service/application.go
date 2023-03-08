@@ -36,14 +36,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
-	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/domain/repository"
-	"github.com/kubevela/velaux/pkg/server/event/sync/convert"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
-	assembler "github.com/kubevela/velaux/pkg/server/interfaces/api/assembler/v1"
-	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
-	"github.com/kubevela/velaux/pkg/server/utils"
-	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	velatypes "github.com/oam-dev/kubevela/apis/types"
@@ -55,6 +47,15 @@ import (
 	"github.com/oam-dev/kubevela/pkg/utils/app"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 	commonutil "github.com/oam-dev/kubevela/pkg/utils/common"
+
+	"github.com/kubevela/velaux/pkg/server/domain/model"
+	"github.com/kubevela/velaux/pkg/server/domain/repository"
+	"github.com/kubevela/velaux/pkg/server/event/sync/convert"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
+	assembler "github.com/kubevela/velaux/pkg/server/interfaces/api/assembler/v1"
+	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
+	"github.com/kubevela/velaux/pkg/server/utils"
+	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 // PolicyType build-in policy type

@@ -22,10 +22,11 @@ import (
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 
+	"github.com/oam-dev/kubevela/pkg/utils"
+
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
-	"github.com/oam-dev/kubevela/pkg/utils"
 )
 
 type repository struct {

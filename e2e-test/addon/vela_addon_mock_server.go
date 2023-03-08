@@ -27,8 +27,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/kubevela/velaux/e2e-test/addon/utils"
 	"github.com/oam-dev/kubevela/pkg/addon"
+
+	"github.com/kubevela/velaux/e2e-test/addon/utils"
 )
 
 var (
@@ -73,10 +74,10 @@ var ossHandler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request
 		t, err := template.New("").Parse(string(data))
 		if err != nil {
 			// Render the data
-			t.Execute(rw, error)
+			_ = t.Execute(rw, error)
 		}
 		// Render the data
-		t.Execute(rw, data)
+		_ = t.Execute(rw, data)
 
 	} else {
 		found := false
@@ -88,17 +89,17 @@ var ossHandler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request
 				t, err := template.New("").Parse(string(file))
 				if err != nil {
 					// Render the data
-					t.Execute(rw, error)
+					_ = t.Execute(rw, error)
 				}
 				found = true
-				t.Execute(rw, file)
+				_ = t.Execute(rw, file)
 				break
 			}
 		}
 		if !found {
 			nf := "not found"
 			t, _ := template.New("").Parse(nf)
-			t.Execute(rw, nf)
+			_ = t.Execute(rw, nf)
 		}
 	}
 }

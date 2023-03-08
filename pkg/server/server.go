@@ -31,6 +31,13 @@ import (
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/oam-dev/kubevela/apis/types"
+	pkgaddon "github.com/oam-dev/kubevela/pkg/addon"
+	pkgconfig "github.com/oam-dev/kubevela/pkg/config"
+	"github.com/oam-dev/kubevela/pkg/features"
+	pkgUtils "github.com/oam-dev/kubevela/pkg/utils"
+	"github.com/oam-dev/kubevela/pkg/utils/apply"
+
 	"github.com/kubevela/velaux/pkg/server/config"
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	"github.com/kubevela/velaux/pkg/server/event"
@@ -41,12 +48,6 @@ import (
 	"github.com/kubevela/velaux/pkg/server/interfaces/api"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/container"
-	"github.com/oam-dev/kubevela/apis/types"
-	pkgaddon "github.com/oam-dev/kubevela/pkg/addon"
-	pkgconfig "github.com/oam-dev/kubevela/pkg/config"
-	"github.com/oam-dev/kubevela/pkg/features"
-	pkgUtils "github.com/oam-dev/kubevela/pkg/utils"
-	"github.com/oam-dev/kubevela/pkg/utils/apply"
 )
 
 const (
@@ -324,13 +325,19 @@ func enrichSwaggerObject(swo *spec.Swagger) {
 func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	klog.Infof("request log %s", req.URL.Path)
 	switch {
-	case strings.HasPrefix(req.URL.Path, api.GetAPIPrefix()):
-		s.webContainer.ServeHTTP(res, req)
 	case strings.HasPrefix(req.URL.Path, SwaggerConfigRoutePath):
 		s.webContainer.ServeHTTP(res, req)
+		return
 	case strings.HasPrefix(req.URL.Path, BuildPublicRoutePath):
 		s.staticFiles(res, req, "./")
+		return
 	default:
+		for _, pre := range api.GetAPIPrefix() {
+			if strings.HasPrefix(req.URL.Path, pre) {
+				s.webContainer.ServeHTTP(res, req)
+				return
+			}
+		}
 		// Rewrite to index.html, which means this route is handled by frontend.
 		req.URL.Path = "/"
 		s.staticFiles(res, req, BuildPublicPath)

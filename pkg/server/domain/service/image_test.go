@@ -23,8 +23,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	velatypes "github.com/oam-dev/kubevela/apis/types"
+
+	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
 func TestGetImageInfo(t *testing.T) {

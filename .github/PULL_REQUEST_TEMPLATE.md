@@ -14,7 +14,8 @@ I have:
 
 - [ ] Read and followed KubeVela's [contribution process](https://github.com/oam-dev/kubevela/blob/master/contribute/create-pull-request.md).
 - [ ] [Related Docs](https://github.com/oam-dev/kubevela.io) updated properly. In a new feature or configuration option, an update to the documentation is necessary.
-- [ ] Run `yarn lint` to ensure this PR is ready for review.
+- [ ] Run `yarn lint` to ensure the frontend changes are ready for review.
+- [ ] Run `make reviewable`to ensure the server changes are ready for review.
 - [ ] Added `backport release-x.y` labels to auto-backport this PR if necessary.
 
 ### Special notes for your reviewer

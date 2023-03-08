@@ -28,7 +28,6 @@ import (
 	"helm.sh/helm/v3/pkg/repo"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
@@ -36,6 +35,8 @@ import (
 	"github.com/oam-dev/kubevela/pkg/cloudprovider"
 	"github.com/oam-dev/kubevela/pkg/config"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
+
+	"github.com/kubevela/velaux/pkg/server/domain/model"
 )
 
 var (

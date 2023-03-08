@@ -23,10 +23,11 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
-	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 )
 
 // getApp will return the app and appname if exists

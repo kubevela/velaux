@@ -36,8 +36,9 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/oam-dev/kubevela/apis/types"
+
+	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
 // True -

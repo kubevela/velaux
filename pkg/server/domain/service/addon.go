@@ -37,9 +37,6 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
-	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
-	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 	common2 "github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
@@ -51,6 +48,10 @@ import (
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 	velaerr "github.com/oam-dev/kubevela/pkg/utils/errors"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
+
+	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
+	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
+	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 // AddonService handle CRUD and installation of addons

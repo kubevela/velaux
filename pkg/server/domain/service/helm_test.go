@@ -28,12 +28,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
-	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/oam-dev/kubevela/pkg/config"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 	"github.com/oam-dev/kubevela/pkg/utils/helm"
+
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
+	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

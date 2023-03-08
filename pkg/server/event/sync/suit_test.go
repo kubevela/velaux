@@ -30,11 +30,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
+	"github.com/oam-dev/kubevela/pkg/utils/common"
+
 	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/kubeapi"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mongodb"
-	"github.com/oam-dev/kubevela/pkg/utils/common"
 )
 
 var cfg *rest.Config

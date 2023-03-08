@@ -22,12 +22,13 @@ import (
 
 	"k8s.io/klog/v2"
 
+	"github.com/oam-dev/kubevela/pkg/utils"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
-	"github.com/oam-dev/kubevela/pkg/utils"
 )
 
 // DataStoreApp is a memory struct that describes the model of an application in datastore
