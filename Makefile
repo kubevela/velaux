@@ -1,4 +1,12 @@
 GOLANGCILINT_VERSION ?= 1.49.0
+
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
+
 GLOBAL_GOLANGCILINT := $(shell which golangci-lint)
 GOBIN_GOLANGCILINT:= $(shell which $(GOBIN)/golangci-lint)
 
@@ -75,6 +83,9 @@ install-addon:
 	kubectl wait --for=condition=Ready pod -l app=source-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app=helm-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=vela-workflow -n vela-system --timeout=600s
+
+start-addon-mock-server:
+	go run ./e2e-test/addon &
 
 .PHONY: e2e-server-test
 e2e-server-test:
