@@ -42,6 +42,8 @@ module.exports = {
     '@typescript-eslint/no-duplicate-imports': 'warn',
     'react/no-deprecated': 'off',
     'react/no-unknown-property': 'off',
+    '@typescript-eslint/explicit-member-accessibility': 'off',
+    '@typescript-eslint/array-type': 'off',
   },
   overrides: [
     {

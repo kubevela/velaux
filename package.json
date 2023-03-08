@@ -12,7 +12,8 @@
         "lint:ts": "eslint . --ext .js,.tsx,.ts --cache",
         "lint:fix": "yarn lint:ts --fix",
         "test": "yarn test:ui",
-        "test:ui": "yarn workspace @velaux/ui run test"
+        "test:ui": "yarn workspace @velaux/ui run test",
+        "server": "go run ./cmd/server/main.go"
     },
     "workspaces": {
         "packages": [

@@ -21,7 +21,7 @@ const { Col, Row } = Grid;
 type Props = {
   projectName: string;
   appName: string;
-  value: ComponentPatchData;
+  value?: ComponentPatchData;
   id: string;
   onChange: (value: ComponentPatchData) => void;
   onRemove: (id: string) => void;
@@ -160,14 +160,14 @@ class ComponentPatch extends React.Component<Props, State> {
         <Form field={this.form}>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <Form.Item label={i18n.t('Name')}>
+              <Form.Item label={i18n.t('Name').toString()}>
                 <Select
                   placeholder={i18n.t('You can base a component to set the patch configuration')}
                   disabled={disabled}
                   dataSource={componentOptions}
                   hasClear
                   {...init('name', {
-                    initValue: value.name,
+                    initValue: value?.name,
                     rules: [{ validator: validatorName }],
                   })}
                   locale={locale().Select}
@@ -186,7 +186,7 @@ class ComponentPatch extends React.Component<Props, State> {
                   hasClear
                   enableInput
                   {...init('type', {
-                    initValue: value.type,
+                    initValue: value?.type,
                     rules: [{ validator: validatorType }],
                   })}
                   locale={locale().Select}

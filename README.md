@@ -1,22 +1,40 @@
 ![alt](docs/images/KubeVela-03.png)
 
-# VelaUX
+[![Go Report Card](https://goreportcard.com/badge/github.com/kubevela/velaux)](https://goreportcard.com/report/github.com/kubevela/velaux)
+![Docker Pulls](https://img.shields.io/docker/pulls/oamdev/velaux)
 
 ## Overview
 
-The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Dashboard. Designed as an extensible, application-oriented delivery control panel.
+The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Platform. Designed as an extensible, application-oriented delivery control panel.
 
-## Quickstart
+## Quick Start
+
+### Build the frontend
 
 ```shell
 yarn install
-yarn start
+yarn build
 ```
 
-Configure the API server address locally.
+### Start the server
+
+* Install the Go 1.19
+* Prepare a KubeVela core controller plan.
 
 ```shell
-echo "BASE_DOMAIN='http://127.0.0.1:8000'" > .env
+## Linux or Mac
+curl -fsSl https://static.kubevela.net/script/install-velad.sh | bash
+## Windows
+powershell -Command "iwr -useb https://static.kubevela.net/script/install-velad.ps1 | iex"
+
+velad install
+```
+
+* Start the server on local
+
+```shell
+go mod tidy
+yarn server
 ```
 
 ## Community

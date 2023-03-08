@@ -6,7 +6,6 @@ import UISchema from '../../components/UISchema';
 import type { UIParam, GroupOption } from '../../interface/application';
 import ArrayItemGroup from '../ArrayItemGroup';
 
-
 import './index.less';
 import { If } from '../../components/If';
 
@@ -187,7 +186,7 @@ class Structs extends React.Component<Props, State> {
           }
         });
       }
-      const structList = Array<any>();
+      const structList: any[] = [];
       value.map((item: any, index: number) => {
         const key = Date.now().toString() + index;
         const valueKeys = [];

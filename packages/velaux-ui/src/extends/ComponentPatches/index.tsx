@@ -51,7 +51,9 @@ class ComponentPatches extends React.Component<Props, State> {
           data.push(values[key]);
         });
         const { onChange } = this.props;
-        if (onChange) {onChange(data);}
+        if (onChange) {
+          onChange(data);
+        }
       },
     });
     this.props.registerForm(this.field);
@@ -70,7 +72,7 @@ class ComponentPatches extends React.Component<Props, State> {
       })
         .then((res) => {
           if (res && res.components) {
-            const componentTypeOptions: { label: string; value: string }[] = [];
+            const componentTypeOptions: Array<{ label: string; value: string }> = [];
             const componentOptions = (res.components || []).map(
               (item: ApplicationComponentBase) => {
                 componentTypeOptions.push({

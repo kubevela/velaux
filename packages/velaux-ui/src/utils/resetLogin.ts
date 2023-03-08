@@ -13,8 +13,8 @@ class ResetLogin {
   private resetDom(): React.ReactNode | null {
     if (window.location.href.indexOf('/login') === -1) {
       return Dialog.alert({
-        title: i18n.t('The token is expired(12010)'),
-        content: i18n.t('Authentication failed, please log in again'),
+        title: i18n.t('The token is expired(12010)').toString(),
+        content: i18n.t('Authentication failed, please log in again').toString(),
         closeable: true,
         closeMode: [],
         locale: locale().Dialog,

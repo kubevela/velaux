@@ -133,7 +133,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
     this.setState({ statusLoading: true });
     getAddonsStatus({ name: this.props.addonName })
       .then((res: AddonStatus) => {
-        if (!res) return;
+        if (!res) {
+          return;
+        }
         if ((res.phase == 'enabling' || res.phase === 'disabling') && !this.statusLoop) {
           this.statusLoop = true;
           this.timeout = setTimeout(() => {
