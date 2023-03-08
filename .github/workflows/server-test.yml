@@ -78,6 +78,11 @@ jobs:
           version: 3.1.0
           kubebuilderOnly: false
           kubernetesVersion: v1.21.2
+      
+      - name: Prepare the CRDs
+        run: |
+          git clone --depth=1 https://github.com/kubevela/kubevela -o kubevela
+          mv kubevela/charts charts
 
       - name: Run api server unit test
         run: make unit-test-server
@@ -112,10 +117,6 @@ jobs:
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
         with:
           submodules: true
-
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./...
 
       - name: Tear down K3d if exist
         run: |
