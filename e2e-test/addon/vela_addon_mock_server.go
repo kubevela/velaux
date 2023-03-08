@@ -24,6 +24,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 
@@ -47,6 +48,7 @@ func main() {
 		log.Fatal(err)
 	}
 	http.HandleFunc("/", ossHandler)
+	http.HandleFunc("/helm/", helmHandler)
 	err = http.ListenAndServe(fmt.Sprintf(":%d", utils.Port), nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
@@ -102,6 +104,60 @@ var ossHandler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request
 			_ = t.Execute(rw, nf)
 		}
 	}
+}
+
+var helmHandler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request) {
+	switch {
+	case strings.Contains(req.URL.Path, "index.yaml"):
+		file, err := os.ReadFile("./e2e-test/addon/testrepo/helm-repo/index.yaml")
+		if err != nil {
+			_, _ = rw.Write([]byte(err.Error()))
+		}
+		_, _ = rw.Write(file)
+	case strings.Contains(req.URL.Path, "fluxcd-test-version-1.0.0.tgz"):
+		file, err := os.ReadFile("./e2e-test/addon/testrepo/helm-repo/fluxcd-test-version-1.0.0.tgz")
+		if err != nil {
+			_, _ = rw.Write([]byte(err.Error()))
+		}
+		_, _ = rw.Write(file)
+	case strings.Contains(req.URL.Path, "fluxcd-test-version-2.0.0.tgz"):
+		file, err := os.ReadFile("./e2e-test/addon/testrepo/helm-repo/fluxcd-test-version-2.0.0.tgz")
+		if err != nil {
+			_, _ = rw.Write([]byte(err.Error()))
+		}
+		_, _ = rw.Write(file)
+	case strings.Contains(req.URL.Path, "vela-workflow-v0.3.5.tgz"):
+		file, err := os.ReadFile("./e2e-test/addon/testrepo/helm-repo/vela-workflow-v0.3.5.tgz")
+		if err != nil {
+			_, _ = rw.Write([]byte(err.Error()))
+		}
+		_, _ = rw.Write(file)
+	case strings.Contains(req.URL.Path, "foo-v1.0.0.tgz"):
+		file, err := os.ReadFile("./e2e-test/addon/testrepo/helm-repo/foo-v1.0.0.tgz")
+		if err != nil {
+			_, _ = rw.Write([]byte(err.Error()))
+		}
+		_, _ = rw.Write(file)
+	case strings.Contains(req.URL.Path, "bar-v1.0.0.tgz"):
+		file, err := os.ReadFile("./e2e-test/addon/testrepo/helm-repo/bar-v1.0.0.tgz")
+		if err != nil {
+			_, _ = rw.Write([]byte(err.Error()))
+		}
+		_, _ = rw.Write(file)
+	case strings.Contains(req.URL.Path, "bar-v2.0.0.tgz"):
+		file, err := os.ReadFile("./e2e-test/addon/testrepo/helm-repo/bar-v2.0.0.tgz")
+		if err != nil {
+			_, _ = rw.Write([]byte(err.Error()))
+		}
+		_, _ = rw.Write(file)
+	case strings.Contains(req.URL.Path, "mock-be-dep-addon-v1.0.0.tgz"):
+		file, err := os.ReadFile("./e2e-test/addon/testrepo/helm-repo/mock-be-dep-addon-v1.0.0.tgz")
+		if err != nil {
+			_, _ = rw.Write([]byte(err.Error()))
+		}
+		_, _ = rw.Write(file)
+	}
+
 }
 
 func init() {

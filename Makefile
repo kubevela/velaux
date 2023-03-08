@@ -100,7 +100,7 @@ build-swagger:
 
 lint: golangci
 	@$(INFO) lint
-	@$(GOLANGCILINT) run
+	@$(GOLANGCILINT) run --timeout 5m
 
 vet:
 	@$(INFO) go vet
