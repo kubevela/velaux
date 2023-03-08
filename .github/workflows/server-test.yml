@@ -3,14 +3,14 @@ name: VelaUX APIServer Test
 on:
   push:
     branches:
-      - master
+      - main
       - release-*
     tags:
       - v*
   workflow_dispatch: { }
   pull_request:
     branches:
-      - master
+      - main
       - release-*
 
 env:

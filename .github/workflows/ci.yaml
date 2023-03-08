@@ -33,7 +33,7 @@ jobs:
 
     - uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '16'
     - run: yarn install
     - run: yarn lint
     - run: yarn test
@@ -44,4 +44,4 @@ jobs:
         context: ./
         file: ./Dockerfile
         push: false
-        tags: oamdev/velaux:1.8.0
+        tags: oamdev/velaux:latest
