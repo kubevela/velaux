@@ -63,7 +63,8 @@ var _ = Describe("Test oam application service function", func() {
 
 	AfterEach(func() {
 		By("Clean up resources after a test")
-		k8sClient.DeleteAllOf(ctx, &v1beta1.Application{}, client.InNamespace(namespace))
+		err := k8sClient.DeleteAllOf(ctx, &v1beta1.Application{}, client.InNamespace(namespace))
+		Expect(err).Should(BeNil())
 		baseApp = v1beta1.Application{}
 		By(fmt.Sprintf("Delete the entire namespaceName %s", ns.Name))
 		Expect(k8sClient.Delete(ctx, &ns, client.PropagationPolicy(metav1.DeletePropagationForeground))).Should(Succeed())

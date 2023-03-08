@@ -238,7 +238,8 @@ var _ = Describe("Test namespace service functions", func() {
 		cdata, err := os.ReadFile("./testdata/workflowstep-apply-object.yaml")
 		Expect(err).Should(Succeed())
 		var schema schema.UISchema
-		yaml.Unmarshal(cdata, &schema)
+		err = yaml.Unmarshal(cdata, &schema)
+		Expect(err).Should(Succeed())
 		uiSchema, err := du.AddDefinitionUISchema(context.TODO(), "apply-object", "workflowstep", schema)
 		Expect(err).Should(Succeed())
 		for _, param := range uiSchema {

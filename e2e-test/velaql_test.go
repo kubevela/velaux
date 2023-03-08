@@ -418,7 +418,10 @@ var _ = Describe("Test velaQL rest api", func() {
 				}},
 			}}
 		Expect(k8sClient.Create(context.Background(), pod)).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
-		defer k8sClient.Delete(context.Background(), pod)
+		defer func() {
+			err := k8sClient.Delete(context.Background(), pod)
+			Expect(err).Should(BeNil())
+		}()
 		Eventually(func(g Gomega) {
 			g.Expect(k8sClient.Get(context.Background(), types.NamespacedName{Name: podName, Namespace: "default"}, pod)).Should(Succeed())
 			g.Expect(pod.Status.Phase).Should(Equal(corev1.PodRunning))

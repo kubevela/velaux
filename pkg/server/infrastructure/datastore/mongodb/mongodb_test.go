@@ -40,7 +40,8 @@ var _ = BeforeSuite(func(done Done) {
 	clientOpts := options.Client().ApplyURI("mongodb://localhost:27017")
 	client, err := mongo.Connect(context.TODO(), clientOpts)
 	Expect(err).ToNot(HaveOccurred())
-	client.Database("kubevela").Drop(context.TODO())
+	err = client.Database("kubevela").Drop(context.TODO())
+	Expect(err).ToNot(HaveOccurred())
 
 	mongodbDriver, err = New(context.TODO(), datastore.Config{
 		URL:      "mongodb://localhost:27017",

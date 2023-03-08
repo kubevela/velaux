@@ -488,12 +488,13 @@ var _ = Describe("Test application service function", func() {
 		By("no running records in application")
 		ctx := context.TODO()
 		for i := 0; i < 2; i++ {
-			appService.Store.Add(ctx, &model.WorkflowRecord{
+			err := appService.Store.Add(ctx, &model.WorkflowRecord{
 				AppPrimaryKey: "app-records",
 				Name:          fmt.Sprintf("list-%d", i),
 				Finished:      "true",
 				Status:        model.RevisionStatusComplete,
 			})
+			Expect(err).Should(BeNil())
 		}
 
 		resp, err := appService.ListRecords(context.TODO(), "app-records")
@@ -502,12 +503,13 @@ var _ = Describe("Test application service function", func() {
 
 		By("3 running records in application")
 		for i := 0; i < 3; i++ {
-			appService.Store.Add(ctx, &model.WorkflowRecord{
+			err = appService.Store.Add(ctx, &model.WorkflowRecord{
 				AppPrimaryKey: "app-records",
 				Name:          fmt.Sprintf("list-running-%d", i),
 				Finished:      "false",
 				Status:        model.RevisionStatusRunning,
 			})
+			Expect(err).Should(BeNil())
 		}
 
 		resp, err = appService.ListRecords(context.TODO(), "app-records")

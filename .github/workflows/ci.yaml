@@ -37,6 +37,7 @@ jobs:
     - run: yarn install
     - run: yarn lint
     - run: yarn test
+    - run: make reviewable
     - name: Build docker image
       id: docker_build
       uses: docker/build-push-action@v2

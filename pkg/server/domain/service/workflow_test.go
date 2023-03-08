@@ -360,12 +360,13 @@ var _ = Describe("Test workflow service functions", func() {
 	It("Test CreateRecord function", func() {
 		ctx := context.TODO()
 		for i := 0; i < 3; i++ {
-			workflowService.Store.Add(ctx, &model.WorkflowRecord{
+			err := workflowService.Store.Add(ctx, &model.WorkflowRecord{
 				AppPrimaryKey: "record-app",
 				Name:          fmt.Sprintf("test-record-%d", i),
 				WorkflowName:  "test-workflow",
 				Finished:      "false",
 			})
+			Expect(err).Should(BeNil())
 		}
 
 		app, err := createTestSuspendApp(ctx, "record-app", "default", "revision-123", "test-workflow", "test-record-3", workflowService.KubeClient)

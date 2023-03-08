@@ -26,40 +26,53 @@
 velad install
 ```
 
-2. Install VelaUX
+2. Install VelaUX environment
 
 ```bash
-vela addon enable velaux
-vela port-forward addon-velaux -n vela-system 9082:80
+vela addon enable ./addon
 ```
 
-## Start the UI project
-
-```shell
-echo "BASE_DOMAIN='http://127.0.0.1:9082'" > .env
-```
+## Start the server on local
 
 Make sure you have installed [yarn](https://classic.yarnpkg.com/en/docs/install).
 
 ```shell
 yarn install
-yarn start
+yarn build
 ```
 
-> The default account/password is `admin/VelaUX12345`
+* Start the server
+
+```shell
+make run-server
+```
 
 * Check the code style
 
 ```shell
+# Frontend
 yarn lint
+# Server
+make reviewable
 ```
 
 * Test the code
+
+Frontend:
 
 ```shell
 yarn test
 ```
 
-## Read the API documents
+Server:
 
-Refer to [Kubevela API 1.4](https://kubevela.stoplight.io/docs/kubevela/uz7fzdxthv175-kube-vela-api-1-4)
+```shell
+make unit-test-server
+make e2e-server-test
+```
+
+* Generate the OpenAPI schema
+
+```shell
+make build-swagger
+```

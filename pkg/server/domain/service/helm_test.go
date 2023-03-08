@@ -178,22 +178,22 @@ var _ = Describe("test helm usecasae", func() {
 				indexFile := string(index)
 				indexFile = strings.ReplaceAll(indexFile, "server-url", mockServer.URL)
 				if err != nil {
-					writer.Write([]byte(err.Error()))
+					_, _ = writer.Write([]byte(err.Error()))
 					return
 				}
-				writer.Write([]byte(indexFile))
+				_, _ = writer.Write([]byte(indexFile))
 
 				return
 			case strings.Contains(request.URL.Path, "mysql-8.8.23.tgz"):
 				pkg, err := os.ReadFile("./testdata/helm/mysql-8.8.23.tgz")
 				if err != nil {
-					writer.Write([]byte(err.Error()))
+					_, _ = writer.Write([]byte(err.Error()))
 					return
 				}
-				writer.Write(pkg)
+				_, _ = writer.Write(pkg)
 				return
 			default:
-				writer.Write([]byte("404 page not found"))
+				_, _ = writer.Write([]byte("404 page not found"))
 			}
 		})
 

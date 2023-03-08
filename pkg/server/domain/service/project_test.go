@@ -147,7 +147,8 @@ var _ = Describe("Test project service functions", func() {
 		Expect(cmp.Diff(base.Description, req.Description)).Should(BeEmpty())
 		_, err = projectService.ListProjects(context.TODO(), 0, 0)
 		Expect(err).Should(BeNil())
-		projectService.DeleteProject(context.TODO(), "test-project")
+		err = projectService.DeleteProject(context.TODO(), "test-project")
+		Expect(err).Should(BeNil())
 	})
 
 	It("Test Update project function", func() {

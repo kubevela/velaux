@@ -9,33 +9,47 @@ The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Platfor
 
 ## Quick Start
 
-### Build the frontend
+### Users
+
+Please refer to: [https://kubevela.net/docs/install](https://kubevela.net/docs/install)
+
+### Developers
+
+#### Build the frontend
+
+Make sure you have installed [yarn](https://classic.yarnpkg.com/en/docs/install).
 
 ```shell
 yarn install
 yarn build
 ```
 
-### Start the server
+#### Start the server
 
-* Install the Go 1.19
-* Prepare a KubeVela core controller plan.
+1. Install the Go 1.19
+2. Prepare a KubeVela core environment.
 
-```shell
-## Linux or Mac
-curl -fsSl https://static.kubevela.net/script/install-velad.sh | bash
-## Windows
-powershell -Command "iwr -useb https://static.kubevela.net/script/install-velad.ps1 | iex"
+  ```shell
+  ## Linux or Mac
+  curl -fsSl https://static.kubevela.net/script/install-velad.sh | bash
+  ## Windows
+  powershell -Command "iwr -useb https://static.kubevela.net/script/install-velad.ps1 | iex"
 
-velad install
-```
+  velad install
+  ```
 
-* Start the server on local
+3. Init the dependencies.
 
-```shell
-go mod tidy
-yarn server
-```
+  ```shell
+  vela addon enable ./addon
+  ```
+
+4. Start the server on local
+
+  ```shell
+  go mod tidy
+  make run-server
+  ```
 
 ## Community
 

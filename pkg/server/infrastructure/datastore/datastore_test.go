@@ -33,7 +33,7 @@ var _ = Describe("Test new entity function", func() {
 		var app model.Application
 		new, err := NewEntity(&app)
 		Expect(err).To(BeNil())
-		json.Unmarshal([]byte(`{"name":"demo"}`), new)
+		err = json.Unmarshal([]byte(`{"name":"demo"}`), new)
 		Expect(err).To(BeNil())
 		diff := cmp.Diff(new.PrimaryKey(), "demo")
 		Expect(diff).Should(BeEmpty())
@@ -46,7 +46,7 @@ var _ = Describe("Test new entity function", func() {
 		for n > 0 {
 			new, err := NewEntity(&app)
 			Expect(err).To(BeNil())
-			json.Unmarshal([]byte(fmt.Sprintf(`{"name":"demo %d"}`, n)), new)
+			err = json.Unmarshal([]byte(fmt.Sprintf(`{"name":"demo %d"}`, n)), new)
 			Expect(err).To(BeNil())
 			diff := cmp.Diff(new.PrimaryKey(), fmt.Sprintf("demo %d", n))
 			Expect(diff).Should(BeEmpty())
