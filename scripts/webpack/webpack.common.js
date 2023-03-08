@@ -1,3 +1,4 @@
+const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const { ProvidePlugin } = require('webpack');
 
@@ -37,6 +38,20 @@ module.exports = {
     new CorsWorkerPlugin(),
     new ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, '../../packages/velaux-ui/public'),
+          to: path.resolve(__dirname, '../../public/build'),
+          filter: (filepath) => {
+            if (filepath.indexOf('index.html') > -1) {
+              return false;
+            }
+            return true;
+          },
+        },
+      ],
     }),
   ],
   module: {

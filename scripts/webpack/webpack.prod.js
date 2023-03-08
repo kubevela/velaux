@@ -84,7 +84,7 @@ module.exports = (env = {}) =>
       }),
 
       new WebpackManifestPlugin({
-        fileName: path.join(process.cwd(), 'manifest.json'),
+        fileName: path.join(process.cwd(), 'public', 'build', 'manifest.json'),
         filter: (file) => !file.name.endsWith('.map'),
       }),
       function () {
