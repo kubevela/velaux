@@ -40,7 +40,7 @@ const targets: ModelsType = {
     total: 0,
   },
   reducers: {
-    updateTargets(state: targetState, { payload }: { payload: { targets: []; total: number } }) {
+    updateTargets(state: TargetState, { payload }: { payload: { targets: []; total: number } }) {
       return {
         ...state,
         targets: payload.targets,

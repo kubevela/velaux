@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Progress, Message, Icon, Dialog, Button } from '@b-design/ui';
+import { Table, Progress, Message, Icon, Dialog, Button } from '@alifd/next';
 
 import '../../index.less';
 import { connect } from 'dva';
@@ -20,6 +20,7 @@ import { checkEnabledAddon } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import { quantityToScalar } from '../../../../utils/utils';
 import ContainerLog from '../ContainerLog';
+import { HiOutlineNewspaper } from 'react-icons/hi';
 
 export type Props = {
   pod: PodBase;
@@ -77,8 +78,8 @@ class PodDetail extends React.Component<Props, State> {
     const { env, pod } = this.props;
     if (!checkEnabledAddon('cloudshell', this.props.enabledAddons)) {
       Dialog.alert({
-        title: i18n.t('CloudShell feature is not enabled'),
-        content: i18n.t('You must enable the CloudShell addon first'),
+        title: i18n.t('CloudShell feature is not enabled').toString(),
+        content: i18n.t('You must enable the CloudShell addon first').toString(),
         locale: locale().Dialog,
         footer: (
           <Button
@@ -88,7 +89,7 @@ class PodDetail extends React.Component<Props, State> {
                 this.props.dispatch(
                   routerRedux.push({
                     pathname: '/addons/cloudshell',
-                  }),
+                  })
                 );
               }
             }}
@@ -261,18 +262,10 @@ class PodDetail extends React.Component<Props, State> {
         cell: (v: string, i: number, record: Container) => {
           return (
             <div className="operations">
-              <a
-                title="Log"
-                onClick={() => this.showContainerLog(record.name)}
-                className="actionIcon"
-              >
-                <Icon type="news" />
+              <a title="Log" onClick={() => this.showContainerLog(record.name)} className="actionIcon">
+                <HiOutlineNewspaper />
               </a>
-              <a
-                title="Console Shell"
-                onClick={() => this.onOpenCloudShell(record.name)}
-                className="actionIcon"
-              >
+              <a title="Console Shell" onClick={() => this.onOpenCloudShell(record.name)} className="actionIcon">
                 <AiOutlineCode size={20} />
               </a>
             </div>
@@ -334,8 +327,7 @@ class PodDetail extends React.Component<Props, State> {
           loading={loading}
           locale={locale().Table}
         >
-          {containerColumns &&
-            containerColumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+          {containerColumns && containerColumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
 
         <Table
@@ -346,8 +338,7 @@ class PodDetail extends React.Component<Props, State> {
           primaryKey="time"
           locale={locale().Table}
         >
-          {eventColumns &&
-            eventColumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
+          {eventColumns && eventColumns.map((col, key) => <Column {...col} key={key} align={'left'} />)}
         </Table>
 
         <If condition={showContainerLog}>

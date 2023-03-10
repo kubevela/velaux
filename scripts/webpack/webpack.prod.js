@@ -5,15 +5,10 @@ let commitHash = require('child_process').execSync('git rev-parse --short HEAD')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const { resolveToEsbuildTarget } = require('esbuild-plugin-browserslist');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const { DefinePlugin } = require('webpack');
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const { merge } = require('webpack-merge');
-
-const HTMLWebpackCSSChunks = require('./plugins/HTMLWebpackCSSChunks');
 const common = require('./webpack.common.js');
 const esbuildTargets = resolveToEsbuildTarget(browserslist(), {
   printUnknownTargets: false,
@@ -25,8 +20,6 @@ module.exports = (env = {}) =>
   merge(common, {
     mode: 'production',
     devtool: 'source-map',
-
-    entry: {},
 
     module: {
       // Note: order is bottom-to-top and/or right-to-left
@@ -65,17 +58,6 @@ module.exports = (env = {}) =>
     },
 
     plugins: [
-      new MiniCssExtractPlugin({
-        filename: 'static/css/[name].[contenthash:8].css',
-      }),
-      new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, '../../packages/velaux-ui/public/index.html'),
-        inject: true,
-      }),
-      new InterpolateHtmlPlugin(HtmlWebpackPlugin, {
-        PUBLIC_URL: '/public/build',
-      }),
-      new HTMLWebpackCSSChunks(),
       new DefinePlugin({
         'process.env': {
           NODE_ENV: JSON.stringify('production'),

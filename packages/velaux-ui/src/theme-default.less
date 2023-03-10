@@ -1,4 +1,7 @@
 @import './lib.less';
+// Import the base framework style
+@import '@velaux/theme/dist/next.css';
+@import '@velaux/theme/variables.less';
 
 .next-form-item.next-large .next-form-item-label {
   font-size: 14px !important;
@@ -305,7 +308,7 @@
 }
 
 .link {
-  color: @primarycolor;
+  color: @primary-color;
   cursor: pointer;
 
   &:hover {
@@ -330,7 +333,7 @@
   z-index: 3;
 
   .dm-handle {
-    background: @primarycolor !important;
+    background: @primary-color !important;
   }
 }
 
@@ -359,54 +362,8 @@
 }
 
 a {
-  color: @primarycolor;
+  color: @primary-color;
   cursor: pointer;
-}
-
-.commonDialog {
-  flex-direction: column;
-  justify-content: space-between;
-  width: 800px;
-  height: auto;
-  min-height: 400px;
-  padding: 0 !important;
-  .next-dialog-header {
-    color: var(--grey-900);
-    font-weight: 700;
-    font-size: var(--font-size-medium);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  .next-dialog-close {
-    .next-dialog-close-icon {
-      &:hover {
-        color: var(--primary-color);
-      }
-    }
-  }
-  .next-dialog-footer {
-    position: absolute;
-    bottom: 0;
-    justify-content: center !important;
-    width: 100%;
-    .next-btn {
-      display: block;
-      flex: none !important;
-      width: auto !important;
-      min-width: 100px !important;
-    }
-  }
-
-  .next-dialog-body {
-    flex: 1;
-    width: 100% !important;
-    max-height: none !important;
-    margin-bottom: 48px !important;
-  }
-
-  .basic {
-    width: 100%;
-    padding: 0 16px;
-  }
 }
 
 .tableButton {
@@ -493,6 +450,11 @@ a {
 .next-btn.next-btn-text.danger-btn {
   border: @dangerColor 0px solid !important;
 }
+.next-btn.next-btn-text {
+  margin-right: @s-2;
+  display: inline-flex;
+  align-items: center;
+}
 
 .danger-btn:hover {
   color: #fff !important;
@@ -504,18 +466,18 @@ a {
 }
 
 .breadcrumb {
-  display: flex;
-  flex-wrap: nowrap;
+  display: inline-flex;
+  align-items: center;
   .next-breadcrumb {
     margin-left: 8px;
   }
   .next-breadcrumb-text,
   .next-breadcrumb-separator {
     height: 30px;
-    line-height: 30px;
     font-size: 16px;
+    line-height: 30px;
     a {
-      color: @primarycolor;
+      color: @primary-color;
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Table, Button, Message, Dialog, Card } from '@b-design/ui';
+import { Table, Button, Message, Dialog, Card } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import querystring from 'query-string';
@@ -31,8 +31,6 @@ import locale from '../../utils/locale';
 
 import Header from './components/Header';
 import PodDetail from './components/PodDetail';
-
-
 
 const { Column } = Table;
 type Props = {
@@ -407,7 +405,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
 
   updateQuery = (params: { target?: string; component?: string }) => {
     const targets = this.getTargets()?.filter((item) => item.name == params.target);
-    let target = undefined;
+    let target: Target | undefined = undefined;
     if (targets && targets.length > 0) {
       target = targets[0];
     }
@@ -586,7 +584,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
             </div>
           </If>
           <If condition={showCloudInstance}>
-            <Card title={i18n.t('Instances of the cloud service')}>
+            <Card title={i18n.t('Instances of the cloud service').toString()}>
               <div style={{ overflow: 'auto' }}>
                 <Table
                   size="medium"

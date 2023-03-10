@@ -1,4 +1,4 @@
-import { Table, Message, Dialog, Button } from '@b-design/ui';
+import { Table, Message, Dialog, Button } from '@alifd/next';
 import React, { Component } from 'react';
 import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
 
@@ -11,8 +11,6 @@ import type { Target } from '../../../../interface/target';
 import locale from '../../../../utils/locale';
 
 import { Link } from 'dva/router';
-
-
 
 type Props = {
   list?: [];
@@ -71,8 +69,7 @@ class TableList extends Component<Props> {
         cell: (v: string, i: number, record: Target) => {
           return (
             <span>
-              {record?.clusterAlias ? record?.clusterAlias : record?.cluster?.clusterName}/
-              {record?.cluster?.namespace}
+              {record?.clusterAlias ? record?.clusterAlias : record?.cluster?.clusterName}/{record?.cluster?.namespace}
             </span>
           );
         },
@@ -93,15 +90,11 @@ class TableList extends Component<Props> {
         cell: (v: string, i: number, record: Target) => {
           return (
             <div>
-              <Permission
-                request={{ resource: `target:${record.name}`, action: 'update' }}
-                project={''}
-              >
+              <Permission request={{ resource: `target:${record.name}`, action: 'update' }} project={''}>
                 <Button
                   text={true}
                   component={'a'}
                   size={'medium'}
-                  ghost={true}
                   className="margin-left-10"
                   onClick={() => {
                     this.onEdit(record);
@@ -112,24 +105,16 @@ class TableList extends Component<Props> {
                 </Button>
                 <span className="line" />
               </Permission>
-              <Permission
-                request={{ resource: `target:${record.name}`, action: 'delete' }}
-                project={''}
-              >
+              <Permission request={{ resource: `target:${record.name}`, action: 'delete' }} project={''}>
                 <Button
                   text={true}
                   component={'a'}
                   size={'medium'}
                   className="danger-btn"
-                  ghost={true}
                   onClick={() => {
                     Dialog.confirm({
                       type: 'confirm',
-                      content: (
-                        <Translation>
-                          Unrecoverable after deletion, are you sure to delete it?
-                        </Translation>
-                      ),
+                      content: <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>,
                       onOk: () => {
                         this.onDelete(record);
                       },

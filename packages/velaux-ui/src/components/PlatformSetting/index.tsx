@@ -4,19 +4,19 @@ import {
   Radio,
   Input,
   Message,
-  Icon,
   Switch,
   Select,
   Dialog,
   Card,
   Button,
   Form,
-} from '@b-design/ui';
+} from '@alifd/next';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import React from 'react';
 import { AiOutlineDelete, AiOutlinePlus } from 'react-icons/ai';
 import { v4 as uuid } from 'uuid';
+import { MdOutlineHelpCenter } from 'react-icons/md';
 
 import { getDexConfig } from '../../api/authentication';
 import { getProjectList, getProjectRoles } from '../../api/project';
@@ -309,26 +309,24 @@ class PlatformSetting extends React.Component<Props, State> {
     const { defaultProjectItems } = this.state;
     return (
       <Dialog
+        v2
         locale={locale().Dialog}
         visible={platformSetting}
-        className={'commonDialog'}
         title={i18n.t('Platform Setting').toString()}
         autoFocus={true}
-        isFullScreen={true}
+        overflowScroll={true}
         style={{ width: '800px' }}
         onClose={onClose}
         footer={
-          <div className="next-dialog-footer">
+          <div>
             <Button onClick={onClose}>
               <Translation>Close</Translation>
             </Button>
-            <Button type="primary" onClick={this.onUpdate}>
+            <Button style={{ marginLeft: '16px' }} type="primary" onClick={this.onUpdate}>
               <Translation>Update</Translation>
             </Button>
           </div>
         }
-        height="auto"
-        footerAlign="center"
       >
         <Form field={this.field} labelCol={{ fixedSpan: 8 }} wrapperCol={{ span: 16 }}>
           <Card
@@ -443,7 +441,10 @@ class PlatformSetting extends React.Component<Props, State> {
                   href="https://kubevela.io/docs/reference/user-improvement-plan"
                   rel="noopener noreferrer"
                 >
-                  <Icon style={{ marginLeft: '4px' }} type="help" />
+                  <MdOutlineHelpCenter
+                    size={16}
+                    style={{ marginLeft: '4px' }}
+                  ></MdOutlineHelpCenter>
                 </a>
               </span>
             }

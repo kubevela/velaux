@@ -1,4 +1,4 @@
-import { Dialog } from '@b-design/ui';
+import { Dialog } from '@alifd/next';
 import { Prompt, routerRedux } from 'dva/router';
 import type * as H from 'history';
 import React, { useEffect } from 'react';
@@ -9,7 +9,7 @@ import locale from '../../utils/locale';
 export interface Props {
   changed: boolean;
   title: string;
-  content: React.ReactNode;
+  content?: React.ReactNode;
   dispatch?: Dispatch<any>;
   onSave: () => void;
   onClearChanged: () => void;
@@ -33,7 +33,7 @@ export const WorkflowPrompt = React.memo(
     const onHistoryBlock = (location: H.Location) => {
       if (changed) {
         Dialog.confirm({
-          content: content,
+          content: <div>{content}</div>,
           locale: locale().Dialog,
           onOk: () => {
             onSave();

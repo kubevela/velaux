@@ -1,9 +1,8 @@
 import type { Rule } from '@alifd/field';
-import { Grid, Field, Form, Input, Button, Icon } from '@b-design/ui';
+import { Grid, Field, Form, Input, Button, Icon } from '@alifd/next';
 import _ from 'lodash';
 import React, { Component } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
 
 import { detailWorkflowDefinition } from '../../api/workflows';
 import { UISchemaContext, WorkflowContext } from '../../context';
@@ -21,7 +20,7 @@ import UISchema from '../UISchema';
 
 import { InputItems } from './input-item';
 import { OutputItems } from './output-item';
-
+import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
 type Props = {
   onUpdate: (data: WorkflowStepBase) => void;
@@ -150,7 +149,7 @@ class StepForm extends Component<Props, State> {
                       <If condition={definitionDetail && definitionDetail.uiSchema}>
                         <div className="flexright">
                           <Button
-                            style={{ marginTop: '-12px' }}
+                            style={{ marginTop: '-12px', alignItems: 'center', display: 'flex' }}
                             onClick={() => {
                               if (propertiesMode === 'native') {
                                 this.setState({ propertiesMode: 'code' });
@@ -159,20 +158,12 @@ class StepForm extends Component<Props, State> {
                               }
                             }}
                           >
-                            <If condition={propertiesMode === 'native'}>
-                              <Icon
-                                style={{ color: '#1b58f4' }}
-                                type={'display-code'}
-                                title={i18n.t('Switch to the coding mode')}
-                              />
-                            </If>
-                            <If condition={propertiesMode === 'code'}>
-                              <Icon
-                                style={{ color: '#1b58f4' }}
-                                type={'laptop'}
-                                title={i18n.t('Switch to the native mode')}
-                              />
-                            </If>
+                            {propertiesMode === 'native' && (
+                              <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                            )}
+                            {propertiesMode === 'code' && (
+                              <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />
+                            )}
                           </Button>
                         </div>
                       </If>
@@ -205,9 +196,7 @@ class StepForm extends Component<Props, State> {
           )}
           <Group
             title={i18n.t('Advanced Configs')}
-            description={i18n.t(
-              'Configure the inputs, outputs, timeout, and dependsOn, etc fields for the step.',
-            )}
+            description={i18n.t('Configure the inputs, outputs, timeout, and dependsOn, etc fields for the step.')}
             initClose={true}
             hasToggleIcon
             required
@@ -216,7 +205,7 @@ class StepForm extends Component<Props, State> {
               <Row>
                 <Col span={24} style={{ padding: '0 8px' }}>
                   <Form.Item label={<Translation>DependsOn</Translation>}>
-                    <StepSelect disabled={false} {...init('dependsOn', {})} />
+                    <StepSelect disabled={false} {...init('dependsOn')} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -228,9 +217,7 @@ class StepForm extends Component<Props, State> {
                   help={
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: replaceUrl(
-                          'Reference: http://kubevela.net/docs/end-user/workflow/if-condition',
-                        ),
+                        __html: replaceUrl('Reference: http://kubevela.net/docs/end-user/workflow/if-condition'),
                       }}
                     />
                   }
@@ -251,9 +238,7 @@ class StepForm extends Component<Props, State> {
                     help={
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: replaceUrl(
-                            'Reference: http://kubevela.net/docs/end-user/workflow/inputs-outputs',
-                          ),
+                          __html: replaceUrl('Reference: http://kubevela.net/docs/end-user/workflow/inputs-outputs'),
                         }}
                       />
                     }
@@ -269,9 +254,7 @@ class StepForm extends Component<Props, State> {
                     help={
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: replaceUrl(
-                            'Reference: http://kubevela.net/docs/end-user/workflow/inputs-outputs',
-                          ),
+                          __html: replaceUrl('Reference: http://kubevela.net/docs/end-user/workflow/inputs-outputs'),
                         }}
                       />
                     }

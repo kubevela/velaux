@@ -1,4 +1,4 @@
-import { Table, Button, Pagination, Message, Dialog } from '@b-design/ui';
+import { Table, Button, Pagination, Message, Dialog } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import { getProjectRoles, getProjectUsers, deleteProjectUser } from '../../api/project';
@@ -169,7 +169,7 @@ class ProjectMembers extends Component<Props, State> {
       },
       () => {
         this.listMember();
-      },
+      }
     );
   };
 
@@ -240,7 +240,6 @@ class ProjectMembers extends Component<Props, State> {
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onEdit(record);
@@ -259,7 +258,6 @@ class ProjectMembers extends Component<Props, State> {
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onDelete(record);
@@ -289,12 +287,7 @@ class ProjectMembers extends Component<Props, State> {
           </section>
 
           <section className="margin-top-20  member-list-wrapper">
-            <Table
-              locale={locale().Table}
-              dataSource={memberList}
-              hasBorder={false}
-              loading={isLoading}
-            >
+            <Table locale={locale().Table} dataSource={memberList} hasBorder={false} loading={isLoading}>
               {columns.map((col, key) => (
                 <Column {...col} key={key} align={'left'} />
               ))}

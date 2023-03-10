@@ -1,4 +1,4 @@
-import { Button, Dialog, Message } from '@b-design/ui';
+import { Button, Dialog, Message } from '@alifd/next';
 import * as React from 'react';
 
 import type { ApplicationCompareResponse } from '../../interface/application';
@@ -21,8 +21,10 @@ export const ApplicationDiff = (props: ApplicationDiffProps) => {
   const container = 'revision' + baseName + targetName;
   return (
     <Dialog
-      className={'commonDialog application-diff'}
-      isFullScreen={true}
+      v2
+      className={'application-diff'}
+      width="800px"
+      overflowScroll={true}
       footer={
         <div>
           <If condition={compare.isDiff && rollback2Revision}>
@@ -50,12 +52,7 @@ export const ApplicationDiff = (props: ApplicationDiffProps) => {
         </Message>
       </If>
       <div id={container} className="diff-box">
-        <DiffEditor
-          language={'yaml'}
-          id={container}
-          target={compare.targetAppYAML}
-          base={compare.baseAppYAML}
-        />
+        <DiffEditor language={'yaml'} id={container} target={compare.targetAppYAML} base={compare.baseAppYAML} />
       </div>
     </Dialog>
   );

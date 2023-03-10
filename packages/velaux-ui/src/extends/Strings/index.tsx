@@ -1,13 +1,14 @@
-import { Input, Button, Field, Icon } from '@b-design/ui';
+import { Input, Button, Field, Icon } from '@alifd/next';
 import React from 'react';
 
 import './index.less';
 import { If } from '../../components/If';
 import Translation from '../../components/Translation';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 type Props = {
   label?: string;
-  value: any;
+  value?: any;
   id: string;
   onChange: (value: any) => void;
   disabled: boolean;
@@ -46,8 +47,7 @@ function InputItem(props: InputParams) {
       />
       <div className="remove-option-container">
         <If condition={!props.isFirst}>
-          <Icon
-            type="ashbin"
+          <AiOutlineDelete
             onClick={() => {
               props.delete(props.id);
             }}
@@ -125,7 +125,7 @@ class Strings extends React.Component<Props, State> {
       },
       () => {
         this.changeValues();
-      },
+      }
     );
   };
 

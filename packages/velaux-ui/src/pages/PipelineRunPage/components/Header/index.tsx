@@ -1,25 +1,18 @@
-import { Grid, Breadcrumb, Button, Icon, Dialog, Message, Balloon } from '@b-design/ui';
+import { Grid, Breadcrumb, Button, Icon, Dialog, Message, Balloon } from '@alifd/next';
 import classNames from 'classnames';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React, { Component } from 'react';
+import { AiOutlineHome } from 'react-icons/ai';
+import { HiOutlineRefresh } from 'react-icons/hi';
 import type { Dispatch } from 'redux';
-
-import {
-  resumePipelineRun,
-  runPipeline,
-  stopPipelineRun,
-  terminatePipelineRun,
-} from '../../../../api/pipeline';
+import { TiWarningOutline } from 'react-icons/ti';
+import { resumePipelineRun, runPipeline, stopPipelineRun, terminatePipelineRun } from '../../../../api/pipeline';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type {
-  PipelineDetail,
-  PipelineRunBase,
-  PipelineRunStatus,
-} from '../../../../interface/pipeline';
+import type { PipelineDetail, PipelineRunBase, PipelineRunStatus } from '../../../../interface/pipeline';
 import { momentDate, timeDiff } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import RunStatusIcon from '../RunStatusIcon';
@@ -54,7 +47,7 @@ class Header extends Component<Props, State> {
   onRerun = () => {
     Dialog.confirm({
       type: 'alert',
-      content: i18n.t('Are you sure to rerun this Pipeline?'),
+      content: i18n.t('Are you sure to rerun this Pipeline?').toString(),
       locale: locale().Dialog,
       onOk: () => {
         const { pipeline, runBase } = this.props;
@@ -65,8 +58,8 @@ class Header extends Component<Props, State> {
               if (res && res.pipelineRunName && this.props.dispatch) {
                 this.props.dispatch(
                   routerRedux.push(
-                    `/projects/${pipeline.project.name}/pipelines/${pipeline.name}/runs/${res.pipelineRunName}`,
-                  ),
+                    `/projects/${pipeline.project.name}/pipelines/${pipeline.name}/runs/${res.pipelineRunName}`
+                  )
                 );
               }
             })
@@ -163,7 +156,7 @@ class Header extends Component<Props, State> {
         <Row style={{ marginBottom: '16px' }}>
           <Col span={6} className={classNames('breadcrumb')}>
             <Link to={'/'}>
-              <Icon type="home" />
+              <AiOutlineHome size={18} />
             </Link>
             <Breadcrumb separator="/">
               <Breadcrumb.Item>
@@ -193,9 +186,7 @@ class Header extends Component<Props, State> {
               <Button
                 loading={reRunLoading}
                 disabled={
-                  runStatus?.status != 'failed' &&
-                  runStatus?.status != 'succeeded' &&
-                  runStatus?.status != 'terminated'
+                  runStatus?.status != 'failed' && runStatus?.status != 'succeeded' && runStatus?.status != 'terminated'
                 }
                 style={{ marginLeft: '16px' }}
                 type="primary"
@@ -207,9 +198,9 @@ class Header extends Component<Props, State> {
             <If condition={runStatus?.status == 'executing' || runStatus?.status == 'suspending'}>
               <Permission
                 request={{
-                  resource: `project:${projectName}/pipeline:${
-                    pipeline && pipeline.name
-                  }/pipelineRun:${runBase?.pipelineRunName}`,
+                  resource: `project:${projectName}/pipeline:${pipeline && pipeline.name}/pipelineRun:${
+                    runBase?.pipelineRunName
+                  }`,
                   action: 'run',
                 }}
                 project={projectName}
@@ -238,9 +229,7 @@ class Header extends Component<Props, State> {
                   </div>
                   <div className="duration_time">
                     <span className="label_key">Duration:</span>
-                    <time className="label_value">
-                      {timeDiff(runStatus?.startTime, runStatus?.endTime)}
-                    </time>
+                    <time className="label_value">{timeDiff(runStatus?.startTime, runStatus?.endTime)}</time>
                   </div>
                   <div className="mode">
                     <span className="label_key">Mode:</span>
@@ -271,30 +260,24 @@ class Header extends Component<Props, State> {
               </div>
               <div className="flexright">
                 <Button type="secondary" loading={statusLoading} onClick={this.props.loadRunStatus}>
-                  <Icon type="refresh" />
+                  <HiOutlineRefresh />
                 </Button>
               </div>
             </div>
           </Col>
           <Col xl={8} xs={24}>
-            <If
-              condition={
-                !runCondition || runCondition.length == 0 || runCondition[0].status == 'True'
-              }
-            >
+            <If condition={!runCondition || runCondition.length == 0 || runCondition[0].status == 'True'}>
               <div
                 className={classNames(
                   'status',
                   { warning: runStatus?.status == 'failed' || runStatus?.status === 'terminated' },
-                  { success: runStatus?.status == 'succeeded' },
+                  { success: runStatus?.status == 'succeeded' }
                 )}
               >
                 <RunStatusIcon status={runStatus?.status} />
                 <If condition={message}>
                   <div className="message">
-                    <div className="summary">
-                      {runStatus?.status == 'failed' ? 'Error Summary' : 'Summary'}
-                    </div>
+                    <div className="summary">{runStatus?.status == 'failed' ? 'Error Summary' : 'Summary'}</div>
                     <p className="text">{message}</p>
                   </div>
                 </If>
@@ -331,7 +314,7 @@ class Header extends Component<Props, State> {
             <If condition={runCondition && runCondition[0].status == 'False'}>
               <div className={classNames('status', { warning: runStatus?.status == 'failed' })}>
                 <div className="icon">
-                  <Icon type="wind-warning" />
+                  <TiWarningOutline />
                   <span>{(runStatus?.status || 'pending').toUpperCase()}</span>
                 </div>
                 <If condition={runCondition && runCondition[0].message}>

@@ -1,4 +1,4 @@
-import { Pagination } from '@b-design/ui';
+import { Pagination } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
 import type { Dispatch } from 'redux';
@@ -13,13 +13,11 @@ import type {
 import locale from '../../utils/locale';
 
 import { ShowRevision } from './components/Detail';
-import Header from './components/Hearder';
+import Header from './components/Header';
 import TableList from './components/List';
 import { statusList } from './constants';
 
 import './index.less';
-
-
 
 type Props = {
   revisions: [];

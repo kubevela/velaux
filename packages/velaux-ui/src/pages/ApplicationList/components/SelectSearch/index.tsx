@@ -1,17 +1,17 @@
-import { Grid, Icon, Select, Input, Button } from '@b-design/ui';
+import { Grid, Icon, Select, Input, Button } from '@alifd/next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 
 import './index.less';
 import type { ShowMode } from '../..';
 import type { Env } from '../../../../interface/env';
 import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
+import i18n from '../../../../i18n';
+import { AiOutlineSearch } from 'react-icons/ai';
 
 const { Row, Col } = Grid;
 
 type Props = {
-  t: (key: string) => {};
   dispatch: ({}) => {};
   projects?: Project[];
   envs?: Env[];
@@ -48,7 +48,7 @@ class SelectSearch extends React.Component<Props, State> {
       },
       () => {
         this.getApplications();
-      },
+      }
     );
   }
 
@@ -59,7 +59,7 @@ class SelectSearch extends React.Component<Props, State> {
       },
       () => {
         this.getApplications();
-      },
+      }
     );
   }
 
@@ -76,7 +76,7 @@ class SelectSearch extends React.Component<Props, State> {
       },
       () => {
         this.getApplications();
-      },
+      }
     );
   };
 
@@ -95,12 +95,12 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { projects, t, envs, showMode } = this.props;
+    const { projects, envs, showMode } = this.props;
     const { projectValue, inputValue, envValue } = this.state;
 
-    const projectPlaceholder = t('Search by Project').toString();
-    const appPlaceholder = t('Search by name and description etc').toString();
-    const envPlaceholder = t('Search by Environment').toString();
+    const projectPlaceholder = i18n.t('Search by Project').toString();
+    const appPlaceholder = i18n.t('Search by name and description etc').toString();
+    const envPlaceholder = i18n.t('Search by Environment').toString();
     const projectSource = projects?.map((item) => {
       return {
         label: item.alias || item.name,
@@ -144,15 +144,9 @@ class SelectSearch extends React.Component<Props, State> {
         </Col>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
-            innerAfter={
-              <Icon
-                type="search"
-                size="xs"
-                onClick={this.handleClickSearch}
-                style={{ margin: 4 }}
-              />
-            }
+            innerAfter={<AiOutlineSearch onClick={this.handleClickSearch} style={{ margin: 4 }} />}
             hasClear
+            size="large"
             placeholder={appPlaceholder}
             onChange={this.handleChangName}
             onPressEnter={this.handleClickSearch}
@@ -168,16 +162,10 @@ class SelectSearch extends React.Component<Props, State> {
           </div>
           <div className="show-mode padding16">
             <Button.Group>
-              <Button
-                type={showMode == 'card' ? 'primary' : 'secondary'}
-                onClick={() => this.props.setMode('card')}
-              >
+              <Button type={showMode == 'card' ? 'primary' : 'secondary'} onClick={() => this.props.setMode('card')}>
                 Card
               </Button>
-              <Button
-                type={showMode == 'table' ? 'primary' : 'secondary'}
-                onClick={() => this.props.setMode('table')}
-              >
+              <Button type={showMode == 'table' ? 'primary' : 'secondary'} onClick={() => this.props.setMode('table')}>
                 Table
               </Button>
             </Button.Group>
@@ -188,4 +176,4 @@ class SelectSearch extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(SelectSearch);
+export default SelectSearch;

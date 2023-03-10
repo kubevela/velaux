@@ -1,8 +1,9 @@
 import type { Rule } from '@alifd/field';
-import { Message, Field, Grid, Button, Loading, Card, Icon } from '@b-design/ui';
+import { Message, Field, Grid, Button, Loading, Card, Icon } from '@alifd/next';
 import * as yaml from 'js-yaml';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import { detailDefinition, updateUISchema } from '../../api/definitions';
 import DefinitionCode from '../../components/DefinitionCode';
@@ -146,7 +147,7 @@ class UiSchema extends Component<Props, State> {
           this.setState({
             uiSchema: object,
           });
-        },
+        }
       );
     } catch {}
   };
@@ -175,21 +176,14 @@ class UiSchema extends Component<Props, State> {
           <Loading visible={isLoading} inline={false}>
             <If condition={!uiSchema || uiSchema.length === 0}>
               <Card locale={locale().Card}>
-                <Empty
-                  message={<Translation>There is no ui schema definition</Translation>}
-                  iconWidth={'30px'}
-                />
+                <Empty message={<Translation>There is no ui schema definition</Translation>} iconWidth={'30px'} />
               </Card>
             </If>
             <If condition={!uiSchema || uiSchema.length !== 0}>
-              <section
-                className="margin-top-20"
-                style={{ maxWidth: '1520px', margin: '16px auto' }}
-              >
+              <section className="margin-top-20" style={{ maxWidth: '1520px', margin: '16px auto' }}>
                 <Message type="notice" style={{ margin: '0 8px 8px 16px' }}>
                   <Translation>
-                    Custom the UI schema will preview in right, please refer to the document to get
-                    more info
+                    Custom the UI schema will preview in right, please refer to the document to get more info
                   </Translation>
                   <a
                     style={{ marginLeft: '8px' }}
@@ -197,7 +191,7 @@ class UiSchema extends Component<Props, State> {
                     href="https://kubevela.net/docs/reference/ui-schema"
                     rel="noopener noreferrer"
                   >
-                    <Icon size="medium" type="external-link" />
+                    <AiOutlineQuestionCircle size={16} />
                   </a>
                 </Message>
                 <Row>
@@ -227,11 +221,7 @@ class UiSchema extends Component<Props, State> {
                             <Translation>Preview</Translation>
                           </span>
                         </div>
-                        <Card
-                          locale={locale().Card}
-                          contentHeight="auto"
-                          className="view-ui-schema"
-                        >
+                        <Card locale={locale().Card} contentHeight="auto" className="view-ui-schema">
                           <UISchema
                             {...init(`properties`, {
                               rules: [
@@ -261,11 +251,7 @@ class UiSchema extends Component<Props, State> {
                   }}
                   project={''}
                 >
-                  <Button
-                    type="primary"
-                    loading={updateUISchemaLoading}
-                    onClick={this.updateUISchema}
-                  >
+                  <Button type="primary" loading={updateUISchemaLoading} onClick={this.updateUISchema}>
                     <Translation>Save & Online</Translation>
                   </Button>
                 </Permission>

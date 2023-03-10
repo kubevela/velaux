@@ -1,5 +1,6 @@
-import { Icon, Message } from '@b-design/ui';
+import { Icon, Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 import Permission from '../../../../components/Permission';
 import Translation from '../../../../components/Translation';
@@ -24,9 +25,7 @@ class ProjectMenu extends Component<Props> {
       this.props.handleChangeRole(name);
     } else {
       return Message.warning(
-        <Translation>
-          When adding a project role, you cannot view the details of other project roles
-        </Translation>,
+        <Translation>When adding a project role, you cannot view the details of other project roles</Translation>
       );
     }
   };
@@ -53,8 +52,7 @@ class ProjectMenu extends Component<Props> {
             project={projectName}
           >
             <span>
-              <Icon
-                type="delete"
+              <AiOutlineDelete
                 onClick={(e) => {
                   this.handleClick(item.name, e);
                 }}
@@ -73,10 +71,7 @@ class ProjectMenu extends Component<Props> {
       <Fragment>
         <ul className="project-menu-wrapper">
           {this.getMenuList()}
-          <Permission
-            request={{ resource: `project:${projectName}/role:*`, action: 'create' }}
-            project={projectName}
-          >
+          <Permission request={{ resource: `project:${projectName}/role:*`, action: 'create' }} project={projectName}>
             <li className="add-roles-btn" onClick={this.props.addRole}>
               <Translation>New Role</Translation>
             </li>

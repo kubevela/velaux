@@ -1,4 +1,4 @@
-import { Balloon, Button, Dialog, Dropdown, Menu, Message, Table } from '@b-design/ui';
+import { Balloon, Button, Dialog, Dropdown, Menu, Message, Table } from '@alifd/next';
 
 import Empty from '../Empty';
 
@@ -56,9 +56,7 @@ class TableList extends Component<Props, State> {
       Dialog.confirm({
         type: 'confirm',
         content: (
-          <Translation>
-            This revision status is terminated, are you sure to rollback to this revision?
-          </Translation>
+          <Translation>This revision status is terminated, are you sure to rollback to this revision?</Translation>
         ),
         onOk: () => {
           this.onRollback(record, true);
@@ -75,12 +73,12 @@ class TableList extends Component<Props, State> {
             if (res.record && res.record.name && dispatch) {
               dispatch(
                 routerRedux.push(
-                  `/applications/${applicationDetail.name}/envbinding/${record.envName}/workflow/records/${res.record.name}`,
-                ),
+                  `/applications/${applicationDetail.name}/envbinding/${record.envName}/workflow/records/${res.record.name}`
+                )
               );
             }
           }
-        },
+        }
       );
     }
   };
@@ -122,9 +120,7 @@ class TableList extends Component<Props, State> {
               <Balloon style={{ width: '220px' }} trigger={<a>{v}</a>}>
                 <Item
                   label="Commit"
-                  value={
-                    <a title={record.codeInfo.commit}>{record.codeInfo.commit?.slice(0, 7)}</a>
-                  }
+                  value={<a title={record.codeInfo.commit}>{record.codeInfo.commit?.slice(0, 7)}</a>}
                 />
                 <Item label="Branch" value={record.codeInfo.branch} />
                 <Item label="User" value={record.codeInfo.user} />
@@ -185,11 +181,7 @@ class TableList extends Component<Props, State> {
         cell: (v: string) => {
           return (
             <span>
-              <Link
-                to={`/applications/${
-                  applicationDetail && applicationDetail.name
-                }/envbinding/${v}/status`}
-              >
+              <Link to={`/applications/${applicationDetail && applicationDetail.name}/envbinding/${v}/status`}>
                 {v}
               </Link>
             </span>
@@ -213,7 +205,6 @@ class TableList extends Component<Props, State> {
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.props.onShowAppModel(record);
@@ -225,7 +216,7 @@ class TableList extends Component<Props, State> {
               <span className="line" />
               <Dropdown
                 trigger={
-                  <Button text size={'medium'} ghost={true} component={'a'}>
+                  <Button text size={'medium'} component={'a'}>
                     <Translation>Diff</Translation>
                   </Button>
                 }
@@ -260,7 +251,6 @@ class TableList extends Component<Props, State> {
                   <Button
                     text
                     size={'medium'}
-                    ghost={true}
                     component={'a'}
                     onClick={() => {
                       this.onRollback(record);

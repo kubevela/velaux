@@ -1,4 +1,4 @@
-import { Table, Button, Tag, Balloon, Icon, Dialog, Message } from '@b-design/ui';
+import { Table, Button, Tag, Balloon, Icon, Dialog, Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import Permission from '../../../../components/Permission';
@@ -7,11 +7,9 @@ import type { ConfigDistribution } from '../../../../interface/configs';
 import { momentDate } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import './index.less';
-import {
-  deleteProjectConfigDistribution,
-  getProjectConfigDistributions,
-} from '../../../../api/config';
+import { deleteProjectConfigDistribution, getProjectConfigDistributions } from '../../../../api/config';
 import type { WorkflowStepStatus } from '../../../../interface/application';
+import { HiOutlineRefresh } from 'react-icons/hi';
 
 type Props = {
   projectName: string;
@@ -111,11 +109,7 @@ class ConfigDistributionPage extends Component<Props, State> {
         key: 'targets',
         title: <Translation>Targets</Translation>,
         dataIndex: 'targets',
-        cell: (
-          targets: Array<{ clusterName: string; namespace: string }>,
-          i: number,
-          record: ConfigDistribution,
-        ) => {
+        cell: (targets: Array<{ clusterName: string; namespace: string }>, i: number, record: ConfigDistribution) => {
           const targetStatus = new Map<string, WorkflowStepStatus>();
           record.status?.workflow?.steps?.map((step) => {
             if (step.name) {
@@ -132,13 +126,7 @@ class ConfigDistributionPage extends Component<Props, State> {
                 const tag = (
                   <Tag
                     animation={true}
-                    color={
-                      step?.phase === 'succeeded'
-                        ? 'green'
-                        : step?.phase === 'failed'
-                        ? 'red'
-                        : 'yellow'
-                    }
+                    color={step?.phase === 'succeeded' ? 'green' : step?.phase === 'failed' ? 'red' : 'yellow'}
                   >
                     {t.clusterName}/{t.namespace}/{step?.phase}
                   </Tag>
@@ -189,7 +177,6 @@ class ConfigDistributionPage extends Component<Props, State> {
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onDelete(record);
@@ -221,16 +208,11 @@ class ConfigDistributionPage extends Component<Props, State> {
               }}
               className="card-button-wrapper"
             >
-              <Icon type="refresh" />
+              <HiOutlineRefresh />
             </Button>
           </section>
           <section className="card-content-table">
-            <Table
-              locale={locale().Table}
-              dataSource={distributions}
-              hasBorder={true}
-              loading={isLoading}
-            >
+            <Table locale={locale().Table} dataSource={distributions} hasBorder={true} loading={isLoading}>
               {columns.map((col, key) => (
                 <Column {...col} key={key} align={'left'} />
               ))}

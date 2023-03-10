@@ -1,7 +1,6 @@
-import { Dialog, Field, Form, Grid, Message, Select, Button } from '@b-design/ui';
+import { Dialog, Field, Form, Grid, Message, Select, Button } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
-import { withTranslation } from 'react-i18next';
 import type { Dispatch } from 'redux';
 
 import {
@@ -186,11 +185,11 @@ class EnvBindPlanDialog extends Component<Props, State> {
     return (
       <React.Fragment>
         <Dialog
+          v2
           visible={true}
           locale={locale().Dialog}
-          className={'commonDialog'}
           style={{ width: '600px' }}
-          isFullScreen={true}
+          overflowScroll={true}
           footerActions={['ok']}
           onClose={this.props.onClose}
           footer={
@@ -254,4 +253,4 @@ class EnvBindPlanDialog extends Component<Props, State> {
   }
 }
 
-export default withTranslation()(EnvBindPlanDialog);
+export default EnvBindPlanDialog;

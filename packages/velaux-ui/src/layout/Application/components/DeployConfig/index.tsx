@@ -1,6 +1,5 @@
-import { Button, Dialog, Message, Radio } from '@b-design/ui';
+import { Button, Dialog, Message, Radio } from '@alifd/next';
 import React, { Component } from 'react';
-import { withTranslation } from 'react-i18next';
 
 import { dryRunApplication } from '../../../../api/application';
 import { ApplicationDryRun } from '../../../../components/ApplicationDryRun';
@@ -106,7 +105,7 @@ class DeployConfigDialog extends Component<Props, State> {
           onClose={() => {
             this.setState({ showDryRunResult: false });
           }}
-          title="Dry run result"
+          title={i18n.t('DryRun Result').toString()}
           dryRun={dryRunResult}
         />
       );
@@ -130,20 +129,20 @@ class DeployConfigDialog extends Component<Props, State> {
         <Dialog
           visible={true}
           locale={locale().Dialog}
-          className={'commonDialog deployConfig'}
+          className={'deployConfig'}
           style={{ width: '600px' }}
-          height="auto"
-          isFullScreen={true}
+          v2
+          overflowScroll={true}
           onClose={onClose}
           onCancel={onClose}
           onOk={this.onSubmit}
           title={<Translation>Select Workflow</Translation>}
           footer={
-            <div className="flexcenter">
+            <div>
               <Button loading={dryRunLoading} type="secondary" onClick={this.onDryRun}>
                 <Translation>DryRun</Translation>
               </Button>
-              <Button type="primary" onClick={this.onSubmit}>
+              <Button style={{ marginLeft: '16px' }} type="primary" onClick={this.onSubmit}>
                 <Translation>Deploy</Translation>
               </Button>
             </div>
@@ -199,4 +198,4 @@ class DeployConfigDialog extends Component<Props, State> {
   }
 }
 
-export default withTranslation()(DeployConfigDialog);
+export default DeployConfigDialog;

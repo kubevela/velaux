@@ -7,7 +7,7 @@ import locale from '../../utils/locale';
 type Props = {
   onChange: (value: any) => void;
   secretKeys?: string[];
-  value: any;
+  value?: any;
   id: string;
   disabled: boolean;
 };

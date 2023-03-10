@@ -1,6 +1,5 @@
-import { Table, Button, Pagination, Dialog, Message } from '@b-design/ui';
+import { Table, Button, Pagination, Dialog, Message } from '@alifd/next';
 import React, { Fragment, Component } from 'react';
-
 
 import { getPlatformPermissions } from '../../api/rbac';
 import { getRoleList, deleteRole } from '../../api/roles';
@@ -16,7 +15,7 @@ import './index.less';
 
 import RolesDialog from './components/RolesDialog';
 
-type Props = {};
+interface Props {}
 
 type State = {
   list: RolesBase[];
@@ -45,6 +44,7 @@ class Roles extends Component<Props, State> {
       isLoading: false,
     };
   }
+
   componentDidMount() {
     this.listRoles();
     this.listPermissions();
@@ -123,7 +123,7 @@ class Roles extends Component<Props, State> {
       },
       () => {
         this.listRoles();
-      },
+      }
     );
   };
 
@@ -168,14 +168,10 @@ class Roles extends Component<Props, State> {
         cell: (v: string, i: number, record: RolesBase) => {
           return (
             <Fragment>
-              <Permission
-                request={{ resource: `role:${record.name}`, action: 'update' }}
-                project={''}
-              >
+              <Permission request={{ resource: `role:${record.name}`, action: 'update' }} project={''}>
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onEdit(record);
@@ -185,14 +181,10 @@ class Roles extends Component<Props, State> {
                 </Button>
               </Permission>
 
-              <Permission
-                request={{ resource: `role:${record.name}`, action: 'delete' }}
-                project={''}
-              >
+              <Permission request={{ resource: `role:${record.name}`, action: 'delete' }} project={''}>
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onDelete(record);
@@ -208,17 +200,7 @@ class Roles extends Component<Props, State> {
     ];
 
     const { Column } = Table;
-    const {
-      list,
-      page,
-      pageSize,
-      total,
-      visible,
-      isEditRole,
-      editRoleItem,
-      permissions,
-      isLoading,
-    } = this.state;
+    const { list, page, pageSize, total, visible, isEditRole, editRoleItem, permissions, isLoading } = this.state;
     return (
       <Fragment>
         <div className="roles-list-content">

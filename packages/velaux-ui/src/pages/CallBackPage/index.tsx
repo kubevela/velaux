@@ -1,4 +1,4 @@
-import { Dialog, Button } from '@b-design/ui';
+import { Dialog, Button } from '@alifd/next';
 import querystring from 'query-string';
 import React from 'react';
 
@@ -49,11 +49,11 @@ export default class CallBackPage extends React.Component<Props> {
           customErrorMessage = 'Please check the network or contact the administrator!';
         }
         return Dialog.alert({
-          title: i18n.t('Dex Error'),
+          title: i18n.t('Dex Error').toString(),
           content: `${i18n.t(customErrorMessage)}`,
           closeable: true,
           closeMode: [],
-          footer: <Button onClick={this.handleClickRetry}>{i18n.t('Retry')}</Button>,
+          footer: <Button onClick={this.handleClickRetry}>{i18n.t('Retry').toString()}</Button>,
         });
       });
   };

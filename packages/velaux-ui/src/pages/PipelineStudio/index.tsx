@@ -1,10 +1,11 @@
-import { ButtonGroup } from '@alifd/meet-react/lib/button';
-import { Breadcrumb, Button, Card, Form, Grid, Icon, Loading, Message, Select } from '@b-design/ui';
+import { Breadcrumb, Button, Card, Form, Grid, Icon, Loading, Message, Select } from '@alifd/next';
+
 import classNames from 'classnames';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import _ from 'lodash';
 import React from 'react';
+import { AiOutlineHome } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import type { Dispatch } from 'redux';
 
@@ -25,6 +26,7 @@ import locale from '../../utils/locale';
 import { WorkflowModeOptions } from '../ApplicationWorkflowStudio';
 
 const { Row, Col } = Grid;
+const ButtonGroup = Button.Group;
 
 type Props = {
   dispatch: Dispatch<any>;
@@ -138,16 +140,7 @@ class PipelineStudio extends React.Component<Props, State> {
   };
 
   render() {
-    const {
-      pipeline,
-      definitions,
-      changed,
-      saveLoading,
-      mode,
-      subMode,
-      editMode,
-      showRunPipeline,
-    } = this.state;
+    const { pipeline, definitions, changed, saveLoading, mode, subMode, editMode, showRunPipeline } = this.state;
     const { dispatch } = this.props;
     const {
       params: { projectName },
@@ -158,7 +151,7 @@ class PipelineStudio extends React.Component<Props, State> {
         <Row>
           <Col span={12} className={classNames('breadcrumb')}>
             <Link to={'/'}>
-              <Icon type="home" />
+              <AiOutlineHome size={18} />
             </Link>
             <Breadcrumb separator="/">
               <Breadcrumb.Item>
@@ -236,7 +229,7 @@ class PipelineStudio extends React.Component<Props, State> {
                     <Translation>Unsaved changes</Translation>
                   </div>
                 )}
-                <Form.Item label={i18n.t('Mode')} labelAlign="inset" style={{ marginRight: '8px' }}>
+                <Form.Item label={i18n.t('Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
                   <Select
                     locale={locale().Select}
                     defaultValue="StepByStep"
@@ -247,11 +240,7 @@ class PipelineStudio extends React.Component<Props, State> {
                     }}
                   />
                 </Form.Item>
-                <Form.Item
-                  label={i18n.t('Sub Mode')}
-                  labelAlign="inset"
-                  style={{ marginRight: '8px' }}
-                >
+                <Form.Item label={i18n.t('Sub Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
                   <Select
                     locale={locale().Select}
                     defaultValue="DAG"
@@ -262,12 +251,7 @@ class PipelineStudio extends React.Component<Props, State> {
                     dataSource={WorkflowModeOptions}
                   />
                 </Form.Item>
-                <Button
-                  disabled={!changed}
-                  loading={saveLoading}
-                  type="primary"
-                  onClick={this.onSave}
-                >
+                <Button disabled={!changed} loading={saveLoading} type="primary" onClick={this.onSave}>
                   <Translation>Save</Translation>
                 </Button>
               </Col>
@@ -296,11 +280,7 @@ class PipelineStudio extends React.Component<Props, State> {
             </WorkflowContext.Provider>
           )}
           {pipeline && editMode === 'yaml' && (
-            <WorkflowYAML
-              steps={_.cloneDeep(pipeline.spec.steps)}
-              name={pipeline.name}
-              onChange={this.onChange}
-            />
+            <WorkflowYAML steps={_.cloneDeep(pipeline.spec.steps)} name={pipeline.name} onChange={this.onChange} />
           )}
         </div>
         <If condition={showRunPipeline}>
@@ -311,9 +291,7 @@ class PipelineStudio extends React.Component<Props, State> {
               }}
               onSuccess={(runName) => {
                 this.props.dispatch(
-                  routerRedux.push(
-                    `/projects/${pipeline.project.name}/pipelines/${pipeline.name}/runs/${runName}`,
-                  ),
+                  routerRedux.push(`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/runs/${runName}`)
                 );
               }}
               pipeline={pipeline}

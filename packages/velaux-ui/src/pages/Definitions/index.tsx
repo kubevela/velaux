@@ -1,4 +1,4 @@
-import { Table, Button, Message } from '@b-design/ui';
+import { Table, Button, Message } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
@@ -64,7 +64,7 @@ class Definitions extends Component<Props, State> {
         },
         () => {
           this.lisDefinitions();
-        },
+        }
       );
     }
   }
@@ -212,7 +212,6 @@ class Definitions extends Component<Props, State> {
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onChangeStatus(record);

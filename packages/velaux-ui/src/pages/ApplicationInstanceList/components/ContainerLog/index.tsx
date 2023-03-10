@@ -1,6 +1,5 @@
-import { Dialog, Grid, Checkbox, Dropdown, Icon, Menu } from '@b-design/ui';
+import { Dialog, Grid, Checkbox, Dropdown, Icon, Menu } from '@alifd/next';
 import React, { Component } from 'react';
-import { withTranslation } from 'react-i18next';
 
 import { If } from '../../../../components/If';
 import Translation from '../../../../components/Translation';
@@ -11,6 +10,7 @@ import './index.less';
 import { listContainerLog } from '../../../../api/observation';
 
 import Ansi from 'ansi-to-react';
+import { FaEllipsisV } from 'react-icons/fa';
 
 const { Row, Col } = Grid;
 
@@ -36,7 +36,6 @@ interface LogLine {
 }
 
 class ContainerLog extends Component<Props, State> {
-  private readonly maxLogSize = 2e9;
   private readonly maxTailLine = 3000;
   timeoutID?: NodeJS.Timeout;
   constructor(props: Props) {
@@ -120,23 +119,20 @@ class ContainerLog extends Component<Props, State> {
     const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous } = this.state;
     return (
       <Dialog
-        className="commonDialog logDialog"
+        className="logDialog"
         locale={locale().Dialog}
         visible={true}
         footerActions={[]}
         onClose={this.props.onClose}
-        isFullScreen
+        overflowScroll
+        v2
         title={<Translation>Container Log</Translation>}
         footer={
           <Row style={{ width: '100%' }}>
             <Col span={12}>
               <span style={{ float: 'left' }}>
                 <Translation>Logs Date</Translation>:
-                <span
-                  style={{ marginLeft: '8px' }}
-                  className="logDate"
-                  title={momentDate(info?.fromDate)}
-                >
+                <span style={{ marginLeft: '8px' }} className="logDate" title={momentDate(info?.fromDate)}>
                   {momentShortDate(info?.fromDate)}
                 </span>
                 ~
@@ -147,16 +143,13 @@ class ContainerLog extends Component<Props, State> {
             </Col>
             <Col span={12}>
               <div className="logAction">
-                <Checkbox
-                  checked={showTimestamps}
-                  onChange={(v) => this.setState({ showTimestamps: v })}
-                >
+                <Checkbox checked={showTimestamps} onChange={(v) => this.setState({ showTimestamps: v })}>
                   <Translation>Show timestamps</Translation>
                 </Checkbox>
                 <Checkbox checked={autoRefresh} onChange={this.setAutoRefresh}>
                   <Translation>Auto-refresh</Translation>(every {refreshInterval / 1000} s.)
                 </Checkbox>
-                <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
+                <Dropdown trigger={<FaEllipsisV />}>
                   <Menu>
                     <Menu.Item>
                       <Checkbox checked={previous} onChange={(v) => this.setState({ previous: v })}>
@@ -191,4 +184,4 @@ class ContainerLog extends Component<Props, State> {
   }
 }
 
-export default withTranslation()(ContainerLog);
+export default ContainerLog;

@@ -4,7 +4,7 @@ import Translation from '../Translation';
 import type { ParamCondition, UIParam, UIParamValidate } from '../../interface/application';
 
 import type { Rule } from '@alifd/field';
-import { Form, Input, Select, Field, Switch, Grid, Divider } from '@b-design/ui';
+import { Form, Input, Select, Field, Switch, Grid, Divider } from '@alifd/next';
 
 import './index.less';
 import i18n from 'i18next';
@@ -55,7 +55,7 @@ type Props = {
 };
 
 function convertRule(validate?: UIParamValidate) {
-  const rules = [];
+  const rules: Rule[] = [];
   if (!validate) {
     return [];
   }
@@ -125,7 +125,9 @@ class UISchema extends Component<Props, State> {
           delete values[name];
         }
         const { onChange } = this.props;
-        if (onChange) {onChange(values);}
+        if (onChange) {
+          onChange(values);
+        }
       },
     });
     this.registerForm = {};
@@ -364,7 +366,7 @@ class UISchema extends Component<Props, State> {
         initValue = param.validate?.defaultValue;
       }
       const disableEdit = (param.validate?.immutable && mode == 'edit') || false;
-      const getGroup = (children: React.ReactNode) => {
+      const getGroup = (children?: React.ReactNode) => {
         return (
           <Group
             hasToggleIcon
@@ -382,7 +384,7 @@ class UISchema extends Component<Props, State> {
             }}
           >
             <Form.Item required={required} disabled={disableEdit} key={param.jsonKey}>
-              {children}
+              <>{children}</>
             </Form.Item>
           </Group>
         );

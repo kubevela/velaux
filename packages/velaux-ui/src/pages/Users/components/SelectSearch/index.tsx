@@ -1,6 +1,6 @@
-import { Grid, Icon, Input } from '@b-design/ui';
+import { Grid, Icon, Input } from '@alifd/next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
+import { AiOutlineSearch } from 'react-icons/ai';
 
 import i18n from '../../../../i18n';
 
@@ -42,8 +42,9 @@ class SelectSearch extends React.Component<Props, State> {
       <Row className="user-select-wrapper border-radius-8" wrap={true}>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
-            innerAfter={<Icon type="search" size="xs" style={{ margin: 4 }} />}
+            innerAfter={<AiOutlineSearch style={{ margin: 4 }} />}
             hasClear
+            size="large"
             placeholder={i18n.t('Search by name')}
             onChange={this.handleChangName}
             value={name}
@@ -53,8 +54,9 @@ class SelectSearch extends React.Component<Props, State> {
 
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
-            innerAfter={<Icon type="search" size="xs" style={{ margin: 4 }} />}
+            innerAfter={<AiOutlineSearch style={{ margin: 4 }} />}
             hasClear
+            size="large"
             placeholder={i18n.t('Search by alias')}
             onChange={this.handleChangAlias}
             value={alias}
@@ -64,8 +66,9 @@ class SelectSearch extends React.Component<Props, State> {
 
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
-            innerAfter={<Icon type="search" size="xs" style={{ margin: 4 }} />}
+            innerAfter={<AiOutlineSearch style={{ margin: 4 }} />}
             hasClear
+            size="large"
             placeholder={i18n.t('Search by email')}
             onChange={this.handleChangEmail}
             value={email}
@@ -77,4 +80,4 @@ class SelectSearch extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(SelectSearch);
+export default SelectSearch;

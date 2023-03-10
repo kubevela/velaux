@@ -1,4 +1,4 @@
-import { Dialog } from '@b-design/ui';
+import { Dialog } from '@alifd/next';
 import * as React from 'react';
 
 import type { ApplicationDryRunResponse } from '../../interface/application';
@@ -18,8 +18,9 @@ export const ApplicationDryRun = (props: ApplicationDryRunProps) => {
   const id = uuid();
   return (
     <Dialog
-      className={'commonDialog dryRunDialog'}
-      isFullScreen={true}
+      v2
+      className={'dryRunDialog'}
+      overflowScroll={true}
       footer={<div />}
       visible={true}
       onClose={props.onClose}

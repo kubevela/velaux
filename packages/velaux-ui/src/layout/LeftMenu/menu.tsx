@@ -1,3 +1,8 @@
+import * as React from 'react';
+import { AiFillCodeSandboxCircle, AiFillEnvironment, AiFillProject, AiOutlineCluster } from 'react-icons/ai';
+import { FaLayerGroup } from 'react-icons/fa';
+import { BsFileEarmarkPerson, BsFillFileCodeFill, BsHddNetworkFill, BsPlugin } from 'react-icons/bs';
+import { RiUserSettingsFill } from 'react-icons/ri';
 import {
   isApplicationPath,
   isClustersPath,
@@ -11,7 +16,8 @@ import {
   isPipelinePath,
   isDefinitionsPath,
 } from '../../utils/common';
-export function getLeftSlider(pathname) {
+import { MdConfirmationNumber } from 'react-icons/md';
+export function getLeftSlider(pathname: string) {
   const isApplication = isApplicationPath(pathname);
   const isCluster = isClustersPath(pathname);
   const isAddons = isAddonsPath(pathname);
@@ -30,21 +36,21 @@ export function getLeftSlider(pathname) {
         {
           className: isApplication,
           link: '/applications',
-          iconType: 'layergroup-fill',
+          icon: <FaLayerGroup />,
           navName: 'Applications',
           permission: { resource: 'project:?/application:*', action: 'list' },
         },
         {
           className: isEnv,
           link: '/envs',
-          iconType: 'layer-group',
+          icon: <AiFillEnvironment></AiFillEnvironment>,
           navName: 'Environments',
           permission: { resource: 'project:?/environment:*', action: 'list' },
         },
         {
           className: isPipeline,
           link: '/pipelines',
-          iconType: 'Directory-tree',
+          icon: <BsHddNetworkFill></BsHddNetworkFill>,
           navName: 'Pipelines',
           permission: { resource: 'project:?/pipeline:*', action: 'list' },
         },
@@ -56,14 +62,14 @@ export function getLeftSlider(pathname) {
         {
           className: isCluster,
           link: '/clusters',
-          iconType: 'clouddownload',
+          icon: <AiOutlineCluster />,
           navName: 'Clusters',
           permission: { resource: 'cluster:*', action: 'list' },
         },
         {
           className: isTarget,
           link: '/targets',
-          iconType: 'box',
+          icon: <AiFillCodeSandboxCircle></AiFillCodeSandboxCircle>,
           navName: 'Targets',
           permission: { resource: 'target:*', action: 'list' },
         },
@@ -75,14 +81,14 @@ export function getLeftSlider(pathname) {
         {
           className: isAddons,
           link: '/addons',
-          iconType: 'database-set',
+          icon: <BsPlugin></BsPlugin>,
           navName: 'Addons',
           permission: { resource: 'addon:*', action: 'list' },
         },
         {
           className: isDefinitions,
           link: '/definitions',
-          iconType: 'database-set',
+          icon: <BsFillFileCodeFill></BsFillFileCodeFill>,
           navName: 'Definitions',
           permission: { resource: 'definition:*', action: 'list' },
         },
@@ -94,28 +100,28 @@ export function getLeftSlider(pathname) {
         {
           className: isUser,
           link: '/users',
-          iconType: 'user-group-fill',
+          icon: <RiUserSettingsFill></RiUserSettingsFill>,
           navName: 'Users',
           permission: { resource: 'user:*', action: 'list' },
         },
         {
           className: isRole,
           link: '/roles',
-          iconType: 'supervise',
+          icon: <BsFileEarmarkPerson></BsFileEarmarkPerson>,
           navName: 'Roles',
           permission: { resource: 'role:*', action: 'list' },
         },
         {
           className: isProject,
           link: '/projects',
-          iconType: 'structured-data',
+          icon: <AiFillProject></AiFillProject>,
           navName: 'Projects',
           permission: { resource: 'project:*', action: 'list' },
         },
         {
           className: isConfig,
           link: '/configs',
-          iconType: 'indent',
+          icon: <MdConfirmationNumber></MdConfirmationNumber>,
           navName: 'Configs',
           permission: { resource: 'config:*', action: 'list' },
         },

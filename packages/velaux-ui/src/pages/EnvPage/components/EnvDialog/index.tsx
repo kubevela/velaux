@@ -9,7 +9,7 @@ import {
   Loading,
   Button,
   Table,
-} from '@b-design/ui';
+} from '@alifd/next';
 import React from 'react';
 
 import { getClusterList } from '../../../../api/cluster';
@@ -246,9 +246,8 @@ class EnvDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
+          v2
           locale={locale().Dialog}
-          className={'commonDialog'}
-          height="auto"
           title={
             isEdit ? (
               <Translation>Edit Environment</Translation>
@@ -257,7 +256,7 @@ class EnvDialog extends React.Component<Props, State> {
             )
           }
           autoFocus={true}
-          isFullScreen={true}
+          overflowScroll={true}
           visible={visible}
           onOk={this.onOk}
           onCancel={this.onClose}
@@ -270,7 +269,6 @@ class EnvDialog extends React.Component<Props, State> {
               </Button>
             </div>
           }
-          footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>
             <Row>
@@ -423,7 +421,7 @@ class EnvDialog extends React.Component<Props, State> {
                   <Table locale={locale().Table} dataSource={this.makeTargetDataSource()}>
                     <Table.Column
                       dataIndex={'name'}
-                      title={i18n.t('Name')}
+                      title={i18n.t('Name').toString()}
                       cell={(v: string, i: number, t: Target) => {
                         if (t.alias) {
                           return `${t.name}(${t.alias})`;
@@ -431,8 +429,14 @@ class EnvDialog extends React.Component<Props, State> {
                         return t.name;
                       }}
                     />
-                    <Table.Column dataIndex={'cluster.clusterName'} title={i18n.t('Cluster')} />
-                    <Table.Column dataIndex={'cluster.namespace'} title={i18n.t('Namespace')} />
+                    <Table.Column
+                      dataIndex={'cluster.clusterName'}
+                      title={i18n.t('Cluster').toString()}
+                    />
+                    <Table.Column
+                      dataIndex={'cluster.namespace'}
+                      title={i18n.t('Namespace').toString()}
+                    />
                   </Table>
                 </Col>
               </Row>

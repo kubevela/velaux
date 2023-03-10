@@ -1,16 +1,6 @@
-import {
-  Button,
-  Message,
-  Grid,
-  Dialog,
-  Form,
-  Input,
-  Upload,
-  Field,
-  Icon,
-  Loading,
-} from '@b-design/ui';
+import { Button, Message, Grid, Dialog, Form, Input, Upload, Field, Icon, Loading } from '@alifd/next';
 import React from 'react';
+import { AiOutlineCloudUpload } from 'react-icons/ai';
 
 import { getClusterDetails, updateCluster } from '../../../../api/cluster';
 import DefinitionCode from '../../../../components/DefinitionCode';
@@ -154,7 +144,6 @@ class AddClusterDialog extends React.Component<Props, State> {
     return (
       <Dialog
         locale={locale().Dialog}
-        className={'commonDialog'}
         title={
           editMode ? (
             <Translation>Edit Cluster Config</Translation>
@@ -162,14 +151,14 @@ class AddClusterDialog extends React.Component<Props, State> {
             <Translation>Connect Existing Cluster</Translation>
           )
         }
-        isFullScreen={true}
+        overflowScroll={true}
         autoFocus={true}
         visible={visible}
         onOk={this.onOk}
         onCancel={this.onClose}
         onClose={this.onClose}
         footerActions={['cancel', 'ok']}
-        footerAlign="center"
+        v2
       >
         <Loading visible={editClusterName && !editMode ? true : false} style={{ width: '100%' }}>
           <Form {...formItemLayout} field={this.field}>
@@ -251,7 +240,7 @@ class AddClusterDialog extends React.Component<Props, State> {
                 <FormItem label={<Translation>KubeConfig</Translation>} labelAlign="top" required>
                   <Upload request={this.customRequest}>
                     <Button text type="normal" className="padding-left-0">
-                      <Icon type="cloudupload" />
+                      <AiOutlineCloudUpload />
                       <Translation>Upload Config File</Translation>
                     </Button>
                   </Upload>

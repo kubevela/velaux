@@ -1,7 +1,7 @@
-import { Switch } from '@alifd/meet-react';
-import { Grid, Button, Icon, Form, Input, Field, Select } from '@b-design/ui';
+import { Grid, Button, Icon, Form, Input, Field, Select, Switch } from '@alifd/next';
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { AiOutlineDelete } from 'react-icons/ai';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 import { If } from '../../components/If';
@@ -226,9 +226,7 @@ class KV extends Component<Props, State> {
                       label={'Value'}
                       className="full-width"
                       placeholder={i18n.t(
-                        item.valueType == 'number'
-                          ? 'Please input a number'
-                          : 'Please input a value',
+                        item.valueType == 'number' ? 'Please input a number' : 'Please input a value'
                       )}
                     />
                   </If>
@@ -247,19 +245,14 @@ class KV extends Component<Props, State> {
               </Col>
               <Col span={1}>
                 <div className="mt-5" style={{ padding: '8px 0' }}>
-                  <Icon type="ashbin" size="small" onClick={() => this.remove(item.key)} />
+                  <AiOutlineDelete onClick={() => this.remove(item.key)} />
                 </div>
               </Col>
             </Row>
           );
         })}
         <div className="mb-20 flexright">
-          <Button
-            disabled={this.props.disabled}
-            size="small"
-            type="secondary"
-            onClick={this.addItem.bind(this)}
-          >
+          <Button disabled={this.props.disabled} size="small" type="secondary" onClick={this.addItem.bind(this)}>
             Add
           </Button>
         </div>

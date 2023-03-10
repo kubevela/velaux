@@ -1,4 +1,4 @@
-import { Dialog } from '@b-design/ui';
+import { Dialog } from '@alifd/next';
 
 import i18n from '../i18n';
 

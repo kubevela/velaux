@@ -1,10 +1,11 @@
-import { Grid, Select, Button, Dialog, Message, Icon, Menu, Dropdown } from '@b-design/ui';
+import { Grid, Select, Button, Dialog, Message, Icon, Menu, Dropdown } from '@alifd/next';
 import { Link, routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { withTranslation } from 'react-i18next';
 import { AiOutlineCopy } from 'react-icons/ai';
+import { HiOutlineRefresh } from 'react-icons/hi';
+import { MdRefresh } from 'react-icons/md';
 
 import {
   recycleApplicationEnvbinding,
@@ -93,7 +94,7 @@ class Header extends Component<Props, State> {
     compareApplication(appName, { compareLatestWithRunning: { env: envName } }).then(
       (res: ApplicationCompareResponse) => {
         this.setState({ compare: res });
-      },
+      }
     );
   };
 
@@ -111,8 +112,7 @@ class Header extends Component<Props, State> {
 
   recycleEnv = async () => {
     const { applicationDetail, envName, refresh, dispatch } = this.props;
-    const sourceOfTrust =
-      applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
+    const sourceOfTrust = applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
 
     let content = 'Are you sure you want to recycle the application form this environment?';
     if (sourceOfTrust === 'from-k8s-resource') {
@@ -145,19 +145,17 @@ class Header extends Component<Props, State> {
 
   deleteEnv = async () => {
     Dialog.confirm({
-      content: i18n.t('Are you sure you want to delete the current environment binding?'),
+      content: i18n.t('Are you sure you want to delete the current environment binding?').toString(),
       onOk: () => {
         const { applicationDetail, envName, updateEnvs, dispatch } = this.props;
         if (applicationDetail) {
-          deleteApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then(
-            (re) => {
-              if (re) {
-                Message.success(i18n.t('Environment binding deleted successfully'));
-                updateEnvs();
-                dispatch(routerRedux.push(`/applications/${applicationDetail.name}/config`));
-              }
-            },
-          );
+          deleteApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then((re) => {
+            if (re) {
+              Message.success(i18n.t('Environment binding deleted successfully'));
+              updateEnvs();
+              dispatch(routerRedux.push(`/applications/${applicationDetail.name}/config`));
+            }
+          });
         }
       },
       locale: locale().Dialog,
@@ -185,8 +183,7 @@ class Header extends Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { appName, envName, components, applicationDetail } = this.props;
-    const { recycleLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff } =
-      this.state;
+    const { recycleLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff } = this.state;
     const { targets, applicationStatus, endpoints, disableStatusShow } = this.props;
     const targetOptions = (targets || []).map((item: Target) => ({
       label: item.alias || item.name,
@@ -220,7 +217,7 @@ class Header extends Component<Props, State> {
               mode="single"
               onChange={this.handleTargetChange}
               dataSource={targetOptions}
-              label={i18n.t('Target')}
+              label={i18n.t('Target').toString()}
               placeholder={i18n.t('Target Selector').toString()}
               hasClear
             />
@@ -231,18 +228,14 @@ class Header extends Component<Props, State> {
               mode="single"
               onChange={this.handleComponentChange}
               dataSource={componentOptions}
-              label={i18n.t('Component')}
+              label={i18n.t('Component').toString()}
               placeholder={i18n.t('Component Selector').toString()}
               hasClear
             />
           </Col>
           <Col xl={6} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
             <If condition={applicationStatus}>
-              <Message
-                type={getAppStatusShowType(applicationStatus?.status)}
-                size="medium"
-                style={{ padding: '8px' }}
-              >
+              <Message type={getAppStatusShowType(applicationStatus?.status)} size="medium" style={{ padding: '8px' }}>
                 <Translation>{`Application is ${applicationStatus?.status || 'Init'}`}</Translation>
                 <If condition={!disableStatusShow}>
                   <span style={{ marginLeft: '16px' }}>
@@ -254,26 +247,15 @@ class Header extends Component<Props, State> {
               </Message>
             </If>
           </Col>
-          <Col
-            xl={10}
-            m={12}
-            xs={24}
-            className="flexright"
-            style={{ marginBottom: '16px', padding: '0 8px' }}
-          >
+          <Col xl={10} m={12} xs={24} className="flexright" style={{ marginBottom: '16px', padding: '0 8px' }}>
             <If condition={compare && compare.isDiff}>
               <Button type="secondary" onClick={this.showApplicationDiff}>
                 <span className="circle circle-failure" />
                 Diff
               </Button>
             </If>
-            <Button
-              type="secondary"
-              style={{ marginLeft: '16px' }}
-              loading={refreshLoading}
-              onClick={this.refresh}
-            >
-              <Icon type="refresh" />
+            <Button type="secondary" style={{ marginLeft: '16px' }} loading={refreshLoading} onClick={this.refresh}>
+              <HiOutlineRefresh />
             </Button>
 
             <If condition={endpoints && endpoints.length > 0}>
@@ -293,12 +275,7 @@ class Header extends Component<Props, State> {
                           <If condition={item.endpoint.portName}>
                             <span className="margin-right-5">{item.endpoint.portName}:</span>
                           </If>
-                          <a
-                            style={{ color: '#1b58f4' }}
-                            target="_blank"
-                            href={linkURL}
-                            rel="noopener noreferrer"
-                          >
+                          <a style={{ color: '#1b58f4' }} target="_blank" href={linkURL} rel="noopener noreferrer">
                             {linkURL}
                           </a>
                         </Menu.Item>
@@ -351,13 +328,7 @@ class Header extends Component<Props, State> {
                 </Button>
               </Permission>
             </If>
-            <If
-              condition={
-                applicationStatus &&
-                applicationStatus.status &&
-                applicationStatus.status != 'deleting'
-              }
-            >
+            <If condition={applicationStatus && applicationStatus.status && applicationStatus.status != 'deleting'}>
               <Permission
                 request={{
                   resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
@@ -396,4 +367,4 @@ class Header extends Component<Props, State> {
   }
 }
 
-export default withTranslation()(Header);
+export default Header;

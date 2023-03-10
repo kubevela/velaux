@@ -1,6 +1,6 @@
 import Title from '../../components/ListTitle';
 
-import { Loading, Button, Table, Dialog, Message, Balloon } from '@b-design/ui';
+import { Loading, Button, Table, Dialog, Message, Balloon } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React, { Component } from 'react';
@@ -19,12 +19,7 @@ import Translation from '../../components/Translation';
 import i18n from '../../i18n';
 import type { AddonBaseStatus } from '../../interface/addon';
 import type { NameAlias } from '../../interface/env';
-import type {
-  PipelineBase,
-  PipelineListItem,
-  PipelineRun,
-  RunStateInfo,
-} from '../../interface/pipeline';
+import type { PipelineBase, PipelineListItem, PipelineRun, RunStateInfo } from '../../interface/pipeline';
 import type { LoginUserInfo } from '../../interface/user';
 import { beautifyTime, momentDate } from '../../utils/common';
 import locale from '../../utils/locale';
@@ -132,7 +127,7 @@ class PipelineListPage extends Component<Props, State> {
         >
           <Table.Column
             key={'name'}
-            title={i18n.t('Name(Alias)')}
+            title={i18n.t('Name(Alias)').toString()}
             dataIndex="name"
             cell={(name: string, i: number, pipeline: PipelineListItem) => {
               let text = name;
@@ -141,9 +136,7 @@ class PipelineListPage extends Component<Props, State> {
               }
               return (
                 <div className="pipeline-name">
-                  <Link to={`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/studio`}>
-                    {text}
-                  </Link>
+                  <Link to={`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/studio`}>{text}</Link>
                   <span>{pipeline.description}</span>
                 </div>
               );
@@ -151,7 +144,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'project'}
-            title={i18n.t('Project')}
+            title={i18n.t('Project').toString()}
             dataIndex="project"
             cell={(project: NameAlias) => {
               let text = project.name;
@@ -163,7 +156,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'createTime'}
-            title={i18n.t('CreateTime')}
+            title={i18n.t('CreateTime').toString()}
             dataIndex="createTime"
             width={160}
             cell={(v: string) => {
@@ -172,7 +165,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'runs'}
-            title={i18n.t('Recent Runs(Last 7-Days)')}
+            title={i18n.t('Recent Runs(Last 7-Days)').toString()}
             dataIndex="info.runStat"
             width={'280px'}
             cell={(runState: { activeNum: number; total: RunStateInfo; week?: RunStateInfo[] }) => {
@@ -219,7 +212,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'lastRun'}
-            title={i18n.t('Last Run')}
+            title={i18n.t('Last Run').toString()}
             dataIndex="info.lastRun"
             cell={(run?: PipelineRun) => {
               if (run) {
@@ -242,7 +235,7 @@ class PipelineListPage extends Component<Props, State> {
           />
           <Table.Column
             key={'actions'}
-            title={i18n.t('Actions')}
+            title={i18n.t('Actions').toString()}
             dataIndex="name"
             width={'420px'}
             cell={(name: string, i: number, pipeline: PipelineListItem) => {
@@ -258,7 +251,6 @@ class PipelineListPage extends Component<Props, State> {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       component={'a'}
                       onClick={() => {
                         this.onRunPipeline(pipeline);
@@ -278,7 +270,6 @@ class PipelineListPage extends Component<Props, State> {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       component={'a'}
                       onClick={() => {
                         this.onShowPipelineRuns(pipeline);
@@ -299,7 +290,6 @@ class PipelineListPage extends Component<Props, State> {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       component={'a'}
                       onClick={() => {
                         this.onClonePipeline(pipeline);
@@ -319,7 +309,6 @@ class PipelineListPage extends Component<Props, State> {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       component={'a'}
                       onClick={() => {
                         this.onEditPipeline(pipeline);
@@ -339,7 +328,6 @@ class PipelineListPage extends Component<Props, State> {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       className={'danger-btn'}
                       component={'a'}
                       onClick={() => {
@@ -361,15 +349,7 @@ class PipelineListPage extends Component<Props, State> {
 
   render() {
     const { userInfo } = this.props;
-    const {
-      showMode,
-      isLoading,
-      showRunPipeline,
-      pipeline,
-      showRuns,
-      showNewPipeline,
-      showClonePipeline,
-    } = this.state;
+    const { showMode, isLoading, showRunPipeline, pipeline, showRuns, showNewPipeline, showClonePipeline } = this.state;
     const { enabledAddons } = this.props;
     const addonEnabled = enabledAddons?.filter((addon) => addon.name == 'vela-workflow').length;
     return (
@@ -378,10 +358,7 @@ class PipelineListPage extends Component<Props, State> {
           title="Pipelines"
           subTitle="Orchestrate your multiple cloud native app release processes or model your cloud native pipeline."
           extButtons={[
-            <Permission
-              request={{ resource: 'project:?/pipeline:*', action: 'create' }}
-              project={'?'}
-            >
+            <Permission request={{ resource: 'project:?/pipeline:*', action: 'create' }} project={'?'}>
               <If condition={addonEnabled}>
                 <Button
                   type="primary"
@@ -416,8 +393,7 @@ class PipelineListPage extends Component<Props, State> {
         </If>
         <If condition={!addonEnabled}>
           <div className="addon-notice">
-            Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> Addon that
-            powers Pipeline.
+            Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> Addon that powers Pipeline.
           </div>
         </If>
 
@@ -429,9 +405,7 @@ class PipelineListPage extends Component<Props, State> {
               }}
               onSuccess={(runName) => {
                 this.props.dispatch(
-                  routerRedux.push(
-                    `/projects/${pipeline.project.name}/pipelines/${pipeline.name}/runs/${runName}`,
-                  ),
+                  routerRedux.push(`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/runs/${runName}`)
                 );
               }}
               pipeline={pipeline}
@@ -455,9 +429,7 @@ class PipelineListPage extends Component<Props, State> {
               this.setState({ showNewPipeline: false, pipeline: undefined });
             }}
             onSuccess={(p: PipelineBase) => {
-              this.props.dispatch(
-                routerRedux.push(`/projects/${p.project.name}/pipelines/${p.name}/studio`),
-              );
+              this.props.dispatch(routerRedux.push(`/projects/${p.project.name}/pipelines/${p.name}/studio`));
             }}
             pipeline={pipeline}
           />

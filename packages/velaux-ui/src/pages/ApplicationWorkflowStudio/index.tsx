@@ -1,4 +1,4 @@
-import { Balloon, Button, Card, Form, Grid, Loading, Message, Select, Tag } from '@b-design/ui';
+import { Balloon, Button, Card, Form, Grid, Loading, Message, Select, Tag } from '@alifd/next';
 import { connect } from 'dva';
 import _ from 'lodash';
 import React from 'react';
@@ -24,12 +24,12 @@ import locale from '../../utils/locale';
 
 import './index.less';
 import classNames from 'classnames';
-import { ButtonGroup } from '@alifd/meet-react/lib/button';
 
 import { WorkflowYAML } from '../../components/WorkflowYAML';
 import i18n from '../../i18n';
 
 const { Row, Col } = Grid;
+const ButtonGroup = Button.Group;
 
 type Props = {
   dispatch: Dispatch<any>;
@@ -229,7 +229,11 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                   <Translation>Unsaved changes</Translation>
                 </div>
               )}
-              <Form.Item label={i18n.t('Mode')} labelAlign="inset" style={{ marginRight: '8px' }}>
+              <Form.Item
+                label={i18n.t('Mode').toString()}
+                labelAlign="inset"
+                style={{ marginRight: '8px' }}
+              >
                 <Select
                   locale={locale().Select}
                   defaultValue="StepByStep"
@@ -241,7 +245,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                 />
               </Form.Item>
               <Form.Item
-                label={i18n.t('Sub Mode')}
+                label={i18n.t('Sub Mode').toString()}
                 labelAlign="inset"
                 style={{ marginRight: '8px' }}
               >

@@ -1,6 +1,5 @@
-import { Grid, Icon, Select, Input, Button } from '@b-design/ui';
+import { Grid, Icon, Select, Input, Button } from '@alifd/next';
 import React, { Fragment } from 'react';
-import { withTranslation } from 'react-i18next';
 
 import Permission from '../../../../components/Permission';
 import Translation from '../../../../components/Translation';
@@ -197,4 +196,4 @@ class SelectSearch extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(SelectSearch);
+export default SelectSearch;

@@ -1,4 +1,4 @@
-import { Button, Grid, Card, Message } from '@b-design/ui';
+import { Button, Grid, Card, Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import { If } from '../../../../components/If';

@@ -1,4 +1,4 @@
-import { Select } from '@b-design/ui';
+import { Select } from '@alifd/next';
 import React from 'react';
 
 import { getPolicyList } from '../../api/application';
@@ -10,7 +10,7 @@ import locale from '../../utils/locale';
 type Props = {
   onChange: (value: any) => void;
   policySelectDataSource?: string[];
-  value: any;
+  value?: any;
   id: string;
   disabled: boolean;
   appName?: string;

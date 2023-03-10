@@ -6,10 +6,12 @@ import type { WorkflowStep } from '../../interface/pipeline';
 import { StepTypeIcon } from './step-icon';
 
 import './index.less';
-import { Icon } from '@b-design/ui';
+import { Icon } from '@alifd/next';
 
 import { showAlias } from '../../utils/common';
 import { If } from '../If';
+import { AiOutlineDelete } from 'react-icons/ai';
+import { IoMdAdd } from 'react-icons/io';
 
 export interface StepProps {
   step: WorkflowStep;
@@ -52,9 +54,8 @@ export const Step = (props: StepProps) => {
         >
           {showAlias(step.name, step.alias)}
           <span className="step-delete">
-            <Icon
+            <AiOutlineDelete
               size={14}
-              type="ashbin"
               onClick={(event) => {
                 onDelete(step.name);
                 event.stopPropagation();
@@ -83,14 +84,14 @@ export const Step = (props: StepProps) => {
                     event.stopPropagation();
                   }}
                 >
-                  <Icon size={14} type="ashbin" />
+                  <AiOutlineDelete size={14} />
                 </div>
               </div>
             );
           })}
           <div className="step-status sub-step-add" onClick={onAddSubStep}>
             <div className="step-name">
-              <Icon size={14} type="add" />
+              <IoMdAdd size={14} />
             </div>
           </div>
         </div>
@@ -107,7 +108,7 @@ export const Step = (props: StepProps) => {
                 event.stopPropagation();
               }}
             >
-              <Icon size={14} type="ashbin" />
+              <AiOutlineDelete size={14} />
             </div>
           </div>
         </div>

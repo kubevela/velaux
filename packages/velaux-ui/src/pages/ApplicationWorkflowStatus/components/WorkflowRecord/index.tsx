@@ -8,11 +8,10 @@ import type {
   WorkflowStepStatus,
 } from '../../../../interface/application';
 
-import { Card, Button, Tab, Icon, Loading, Grid, Message } from '@b-design/ui';
+import { Card, Button, Tab, Icon, Loading, Grid, Message } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import classNames from 'classnames';
 import { connect } from 'dva';
-
 
 import './index.less';
 import { Link, routerRedux } from 'dva/router';
@@ -34,13 +33,11 @@ import { If } from '../../../../components/If';
 import PipelineGraph from '../../../../components/PipelineGraph';
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type {
-  WorkflowStepBase,
-  WorkflowStepInputs,
-  WorkflowStepOutputs,
-} from '../../../../interface/pipeline';
+import type { WorkflowStepBase, WorkflowStepInputs, WorkflowStepOutputs } from '../../../../interface/pipeline';
 import { convertAny, momentDate, timeDiff } from '../../../../utils/common';
 import RunStatusIcon from '../../../PipelineRunPage/components/RunStatusIcon';
+import { MdRefresh } from 'react-icons/md';
+import { HiOutlineRefresh } from 'react-icons/hi';
 
 const { Row, Col } = Grid;
 
@@ -169,9 +166,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
       })
         .then((res) => {
           const outputs: WorkflowStepOutputs | undefined =
-            res && Array.isArray(res.outputs) && res.outputs.length > 0
-              ? res.outputs[0]
-              : undefined;
+            res && Array.isArray(res.outputs) && res.outputs.length > 0 ? res.outputs[0] : undefined;
           this.setState({
             outputs: outputs,
           });
@@ -261,8 +256,8 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
           if (dispatch && re.name) {
             dispatch(
               routerRedux.push(
-                `/applications/${applicationDetail.name}/envbinding/${envName}/workflow/records/${re.name}`,
-              ),
+                `/applications/${applicationDetail.name}/envbinding/${envName}/workflow/records/${re.name}`
+              )
             );
           }
         }
@@ -346,9 +341,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                   </div>
                   <div className="duration_time">
                     <span className="label_key">Duration:</span>
-                    <time className="label_value">
-                      {timeDiff(showRecord?.startTime, showRecord?.endTime)}
-                    </time>
+                    <time className="label_value">{timeDiff(showRecord?.startTime, showRecord?.endTime)}</time>
                   </div>
                   <div className="mode">
                     <span className="label_key">Mode:</span>
@@ -372,7 +365,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                     this.loadWorkflowRecord();
                   }}
                 >
-                  <Icon type="refresh" />
+                  <HiOutlineRefresh />
                 </Button>
               </div>
             </div>
@@ -382,15 +375,13 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
               className={classNames(
                 'status',
                 { warning: showRecord?.status == 'failed' || showRecord?.status === 'terminated' },
-                { success: showRecord?.status == 'succeeded' },
+                { success: showRecord?.status == 'succeeded' }
               )}
             >
               <RunStatusIcon status={showRecord?.status} />
               <If condition={showRecord?.message}>
                 <div className="message">
-                  <div className="summary">
-                    {showRecord?.status == 'failed' ? 'Error Summary' : 'Summary'}
-                  </div>
+                  <div className="summary">{showRecord?.status == 'failed' ? 'Error Summary' : 'Summary'}</div>
                   <p className="text">{showRecord?.message}</p>
                 </div>
               </If>
@@ -495,9 +486,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                           </tr>
                           <tr>
                             <th>Duration:</th>
-                            <td>
-                              {timeDiff(stepStatus.firstExecuteTime, stepStatus.lastExecuteTime)}
-                            </td>
+                            <td>{timeDiff(stepStatus.firstExecuteTime, stepStatus.lastExecuteTime)}</td>
                           </tr>
                           <If condition={stepSpec?.timeout}>
                             <tr>
@@ -507,9 +496,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                           </If>
                           <tr>
                             <th>Phase:</th>
-                            <td className={'step-status-text-' + stepStatus.phase}>
-                              {stepStatus.phase}
-                            </td>
+                            <td className={'step-status-text-' + stepStatus.phase}>{stepStatus.phase}</td>
                           </tr>
                           <If condition={stepStatus.message || stepStatus.reason}>
                             <tr>
@@ -535,7 +522,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                             style={{ color: '#fff' }}
                             size="small"
                           >
-                            <Icon type="refresh" />
+                            <HiOutlineRefresh />
                           </Button>
                         </div>
                         <div className="log-content">
@@ -569,11 +556,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                   </div>
                 </Tab.Item>
                 <Tab.Item title="Outputs" key={'outputs'}>
-                  <If
-                    condition={
-                      !outputLoading && (!outputs || !outputs.values || outputs.values.length == 0)
-                    }
-                  >
+                  <If condition={!outputLoading && (!outputs || !outputs.values || outputs.values.length == 0)}>
                     <Empty hideIcon message={'There are no outputs.'} />
                   </If>
                   <Loading visible={outputLoading} style={{ width: '100%' }}>
@@ -600,11 +583,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                   </Loading>
                 </Tab.Item>
                 <Tab.Item title="Inputs" key={'inputs'}>
-                  <If
-                    condition={
-                      !inputLoading && (!inputs || !inputs?.values || inputs.values.length == 0)
-                    }
-                  >
+                  <If condition={!inputLoading && (!inputs || !inputs?.values || inputs.values.length == 0)}>
                     <Empty hideIcon message={'There are no inputs.'} />
                   </If>
                   <Loading visible={inputLoading} style={{ width: '100%' }}>

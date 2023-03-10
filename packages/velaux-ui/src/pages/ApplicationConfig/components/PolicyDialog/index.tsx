@@ -1,17 +1,5 @@
-import {
-  Card,
-  Form,
-  Grid,
-  Message,
-  Button,
-  Select,
-  Input,
-  Field,
-  Icon,
-  Loading,
-} from '@b-design/ui';
+import { Card, Form, Grid, Message, Button, Select, Input, Field, Icon, Loading } from '@alifd/next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 import {
   AiOutlineFileDone,
   AiOutlineGroup,
@@ -45,9 +33,9 @@ import { checkName } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import UISchema from '../../../../components/UISchema';
 
-import type { Rule } from '@alifd/meet-react/lib/field';
+import type { Rule } from '@alifd/next/lib/field';
 import { connect } from 'dva';
-
+import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
 const { Row, Col } = Grid;
 
@@ -95,9 +83,7 @@ class PolicyDialog extends React.Component<Props, State> {
           type: 'override',
           name: 'override-custom',
           icon: <AiOutlineMergeCells size={35} />,
-          title: i18n.t(
-            'Set differentiated configurations of the application in different environments.',
-          ),
+          title: i18n.t('Set differentiated configurations of the application in different environments.'),
         },
         {
           label: i18n.t('Topology'),
@@ -112,7 +98,7 @@ class PolicyDialog extends React.Component<Props, State> {
           name: 'apply-once-no-rule',
           icon: <AiOutlineOneToOne size={35} />,
           title: i18n.t(
-            "This policy allows direct changes to the resources distributed to the target cluster, the controller won't keep reconciling.",
+            "This policy allows direct changes to the resources distributed to the target cluster, the controller won't keep reconciling."
           ),
           properties: {
             enable: true,
@@ -123,9 +109,7 @@ class PolicyDialog extends React.Component<Props, State> {
           type: 'garbage-collect',
           name: 'garbage-collect-retain-pvc',
           icon: <AiOutlineHdd size={35} />,
-          title: i18n.t(
-            'This policy allows retaining the PVC resource after recycling the application.',
-          ),
+          title: i18n.t('This policy allows retaining the PVC resource after recycling the application.'),
           properties: {
             rules: [
               {
@@ -142,9 +126,7 @@ class PolicyDialog extends React.Component<Props, State> {
           type: 'apply-once',
           name: 'apply-once-ignore-replicas',
           icon: <AiOutlineReconciliation size={35} />,
-          title: i18n.t(
-            'This policy allows replicas of workloads to be changed, such as working with HPA.',
-          ),
+          title: i18n.t('This policy allows replicas of workloads to be changed, such as working with HPA.'),
           properties: {
             rules: [
               {
@@ -260,7 +242,7 @@ class PolicyDialog extends React.Component<Props, State> {
               onClick={this.onSubmitCreate}
               loading={createPolicyLoading}
             >
-              {i18n.t('Create')}
+              {i18n.t('Create').toString()}
             </Button>
           </If>
           <If condition={policy}>
@@ -270,7 +252,7 @@ class PolicyDialog extends React.Component<Props, State> {
               onClick={this.onSubmitUpdate}
               loading={createPolicyLoading}
             >
-              {i18n.t('Update')}
+              {i18n.t('Update').toString()}
             </Button>
           </If>
         </Permission>
@@ -480,13 +462,7 @@ class PolicyDialog extends React.Component<Props, State> {
 
   render() {
     const { onClose, policy } = this.props;
-    const {
-      items,
-      selectedPolicyItem,
-      definitionDetailLoading,
-      policyDefinitionDetail,
-      propertiesMode,
-    } = this.state;
+    const { items, selectedPolicyItem, definitionDetailLoading, policyDefinitionDetail, propertiesMode } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -501,7 +477,7 @@ class PolicyDialog extends React.Component<Props, State> {
         extButtons={this.extButtonList()}
       >
         <Form field={this.field}>
-          <Card contentHeight="auto" title={i18n.t('Select a policy type')}>
+          <Card contentHeight="auto" title={i18n.t('Select a policy type').toString()}>
             <If condition={!policy}>
               <Row wrap={true}>
                 {items.map((item) => {
@@ -531,7 +507,7 @@ class PolicyDialog extends React.Component<Props, State> {
                           rules: [
                             {
                               required: true,
-                              message: i18n.t('Please must select the policy type.'),
+                              message: i18n.t('Please must select the policy type.').toString(),
                             },
                           ],
                         })}
@@ -544,7 +520,7 @@ class PolicyDialog extends React.Component<Props, State> {
                   </Col>
                 </If>
                 <Col span={span} style={{ padding: '0 8px' }}>
-                  <Form.Item label={i18n.t('Name')} required={true}>
+                  <Form.Item label={i18n.t('Name').toString()} required={true}>
                     <Input
                       {...init(`name`, {
                         rules: [
@@ -561,7 +537,7 @@ class PolicyDialog extends React.Component<Props, State> {
                   </Form.Item>
                 </Col>
                 <Col span={span} style={{ padding: '0 8px' }}>
-                  <Form.Item label={i18n.t('Alias')}>
+                  <Form.Item label={i18n.t('Alias').toString()}>
                     <Input
                       {...init(`alias`, {
                         rules: [
@@ -585,9 +561,7 @@ class PolicyDialog extends React.Component<Props, State> {
                         rules: [
                           {
                             maxLength: 256,
-                            message: i18n.t(
-                              'Enter a description that contains less than 256 characters.',
-                            ),
+                            message: i18n.t('Enter a description that contains less than 256 characters.'),
                           },
                         ],
                       })}
@@ -602,17 +576,13 @@ class PolicyDialog extends React.Component<Props, State> {
               </Message>
             </If>
           </Card>
-          <Card
-            contentHeight="auto"
-            style={{ marginTop: '8px' }}
-            title={i18n.t('Select an environment')}
-          >
+          <Card contentHeight="auto" style={{ marginTop: '8px' }} title={i18n.t('Select an environment').toString()}>
             <If condition={!selectedPolicyItem || selectedPolicyItem.type != 'override'}>
               <div>
                 <Form.Item
-                  help={i18n.t(
-                    'If select an environment, this policy is only enabled in the selected environment.',
-                  )}
+                  help={i18n
+                    .t('If select an environment, this policy is only enabled in the selected environment.')
+                    .toString()}
                 >
                   <Select
                     {...init('envName', {
@@ -630,9 +600,9 @@ class PolicyDialog extends React.Component<Props, State> {
                 <Row>
                   <Col span={12} style={{ padding: '0 8px' }}>
                     <Form.Item
-                      help={i18n.t('Select the workflow to which the policy should be applied.')}
+                      help={i18n.t('Select the workflow to which the policy should be applied.').toString()}
                       required
-                      label={i18n.t('Workflow')}
+                      label={i18n.t('Workflow').toString()}
                     >
                       <Select
                         {...init('workflow', {
@@ -650,8 +620,8 @@ class PolicyDialog extends React.Component<Props, State> {
                   </Col>
                   <Col span={12} style={{ padding: '0 8px' }}>
                     <Form.Item
-                      help={i18n.t('Select the steps to which the policy should be applied.')}
-                      label={i18n.t('Steps')}
+                      help={i18n.t('Select the steps to which the policy should be applied.').toString()}
+                      label={i18n.t('Steps').toString()}
                       required={true}
                     >
                       <Select
@@ -678,11 +648,11 @@ class PolicyDialog extends React.Component<Props, State> {
               <Card
                 contentHeight={'auto'}
                 style={{ marginTop: '8px' }}
-                title={i18n.t('Policy Properties')}
+                title={i18n.t('Policy Properties').toString()}
                 className="withActions"
                 subTitle={
                   <Button
-                    style={{ marginTop: '-12px' }}
+                    style={{ marginTop: '-12px', alignItems: 'center', display: 'flex' }}
                     onClick={() => {
                       if (propertiesMode === 'native') {
                         this.setState({ propertiesMode: 'code' });
@@ -691,20 +661,10 @@ class PolicyDialog extends React.Component<Props, State> {
                       }
                     }}
                   >
-                    <If condition={propertiesMode === 'native'}>
-                      <Icon
-                        style={{ color: '#1b58f4' }}
-                        type={'display-code'}
-                        title={'Switch to the coding mode'}
-                      />
-                    </If>
-                    <If condition={propertiesMode === 'code'}>
-                      <Icon
-                        style={{ color: '#1b58f4' }}
-                        type={'laptop'}
-                        title={'Switch to the native mode'}
-                      />
-                    </If>
+                    {propertiesMode === 'native' && (
+                      <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                    )}
+                    {propertiesMode === 'code' && <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />}
                   </Button>
                 }
               >
@@ -744,4 +704,4 @@ class PolicyDialog extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(PolicyDialog);
+export default PolicyDialog;

@@ -1,5 +1,5 @@
 import type { Rule } from '@alifd/field';
-import { Form, Icon, Field, Button } from '@b-design/ui';
+import { Form, Icon, Field, Button } from '@alifd/next';
 import React from 'react';
 
 import UISchema from '../../components/UISchema';
@@ -8,6 +8,7 @@ import ArrayItemGroup from '../ArrayItemGroup';
 
 import './index.less';
 import { If } from '../../components/If';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 type Props = {
   _key?: string;
@@ -16,7 +17,7 @@ type Props = {
   onChange?: (params: any) => void;
   registerForm: (form: Field) => void;
   id: string;
-  value: any;
+  value?: any;
   label: string;
   mode: 'new' | 'edit';
 };
@@ -55,15 +56,7 @@ class StructItem extends React.Component<StructItemProps> {
     params.map((p) => {
       if (!p.disable && p.uiType != 'Ignore' && p.uiType != 'InnerGroup') {
         if (
-          [
-            'Structs',
-            'Strings',
-            'CertBase64',
-            'Group',
-            'ImageInput',
-            'K8sObjectsCode',
-            'KV',
-          ].indexOf(p.uiType) > -1
+          ['Structs', 'Strings', 'CertBase64', 'Group', 'ImageInput', 'K8sObjectsCode', 'KV'].indexOf(p.uiType) > -1
         ) {
           count += 3;
         } else {
@@ -137,8 +130,7 @@ class StructItem extends React.Component<StructItemProps> {
             />
           </div>
           <div className="remove-option-container">
-            <Icon
-              type="ashbin"
+            <AiOutlineDelete
               onClick={() => {
                 if (this.props.delete) {
                   this.props.delete(this.props.id);
@@ -189,7 +181,7 @@ class Structs extends React.Component<Props, State> {
       const structList: any[] = [];
       value.map((item: any, index: number) => {
         const key = Date.now().toString() + index;
-        const valueKeys = [];
+        const valueKeys: string[] = [];
         for (const itemkey in item) {
           valueKeys.push(itemkey);
         }
@@ -297,11 +289,7 @@ class Structs extends React.Component<Props, State> {
           <If condition={parameterGroupOption.length !== 0}>
             <Button.Group>
               {parameterGroupOption?.map((item) => (
-                <Button
-                  type="secondary"
-                  key={item.keys.join(',')}
-                  onClick={() => this.addStructPlanItem(item)}
-                >
+                <Button type="secondary" key={item.keys.join(',')} onClick={() => this.addStructPlanItem(item)}>
                   {item.label || item.keys.join(':')}
                 </Button>
               ))}

@@ -1,4 +1,4 @@
-import { Grid, Form, Input, Field, Button, Message } from '@b-design/ui';
+import { Grid, Form, Input, Field, Button, Message } from '@alifd/next';
 import React from 'react';
 
 import { updateUser } from '../../../../api/users';

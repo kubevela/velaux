@@ -1,4 +1,4 @@
-import { Message, Loading, Button } from '@b-design/ui';
+import { Message, Loading, Button } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 
@@ -181,7 +181,6 @@ class Application extends Component<Props, State> {
             }}
           />
         </Loading>
-
         <If condition={showAddApplication}>
           <AppDialog
             visible={showAddApplication}

@@ -1,4 +1,4 @@
-import { Dialog, Field, Form, Grid, Input, Loading, Message, Select } from '@b-design/ui';
+import { Dialog, Field, Form, Grid, Input, Loading, Message, Select } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
 
@@ -146,7 +146,7 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
         onCancel={this.props.onClose}
         locale={locale().Dialog}
         visible
-        className="commonDialog"
+        v2
         title="Clone Pipeline"
       >
         <Loading visible={loading || loadingContext}>
@@ -236,7 +236,7 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
             </Form>
           </If>
           <If condition={!pipelineDetail}>
-            <Message type="notice" title={i18n.t('Pipeline loading')} />
+            <Message type="notice" title={i18n.t('Pipeline loading').toString()} />
           </If>
         </Loading>
       </Dialog>

@@ -1,4 +1,4 @@
-import { Card } from '@b-design/ui';
+import { Card } from '@alifd/next';
 import React, { Component } from 'react';
 
 import Translation from '../../../../components/Translation';

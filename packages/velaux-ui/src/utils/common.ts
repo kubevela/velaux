@@ -4,12 +4,11 @@ import type { AddonBaseStatus } from '../interface/addon';
 
 type Navigator = {
   language: string;
-  userLanguage?: string;
 };
 
 export function getLanguage() {
   const navigator: Navigator = window.navigator;
-  const lang = navigator.language || navigator.userLanguage || 'en';
+  const lang = navigator.language || 'en';
   return localStorage.getItem('lang') || lang.split('-')[0];
 }
 

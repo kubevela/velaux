@@ -1,4 +1,4 @@
-import { Message } from '@b-design/ui';
+import { Message } from '@alifd/next';
 import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios from 'axios';
 
@@ -9,8 +9,6 @@ import { getToken } from '../utils/storage';
 import { authenticationRefreshToken } from './productionLink';
 import { getMessage } from './status';
 import { baseURL } from './system_config';
-
-
 
 type RetryRequests = (token: string) => void;
 let isRefreshing = false;

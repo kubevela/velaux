@@ -1,4 +1,4 @@
-import { Button, Checkbox, Dialog, Loading, Message, Tag } from '@b-design/ui';
+import { Button, Checkbox, Dialog, Loading, Message, Tag } from '@alifd/next';
 import React, { useState, useEffect } from 'react';
 import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
 import { BiCopyAlt } from 'react-icons/bi';
@@ -17,7 +17,6 @@ import Permission from '../Permission';
 import Translation from '../Translation';
 
 import NewContext from './new-context';
-
 
 export interface PipelineProps {
   pipeline: PipelineListItem;
@@ -86,14 +85,14 @@ const RunPipeline = (props: PipelineProps) => {
   const okButtonDisable = !contextName && !noContext;
   return (
     <Dialog
-      className="commonDialog"
+      v2
       visible={true}
       locale={locale().Dialog}
-      title={i18n.t('Run Pipeline')}
+      title={i18n.t('Run Pipeline').toString()}
       onClose={props.onClose}
       onCancel={props.onClose}
       onOk={onRunPipeline}
-      isFullScreen={true}
+      overflowScroll={true}
       okProps={{
         disabled: okButtonDisable,
       }}
@@ -121,20 +120,13 @@ const RunPipeline = (props: PipelineProps) => {
                     setSelectContextName('');
                   }
                 }}
-                title={
-                  contextName === key ? i18n.t('Click and deselect') : i18n.t('Click and select')
-                }
+                title={contextName === key ? i18n.t('Click and deselect') : i18n.t('Click and select')}
               >
                 <div className="context-name">{key}</div>
                 <div className="context-values">
                   {Array.isArray(contexts[key]) &&
                     contexts[key].map((item) => {
-                      return (
-                        <Tag
-                          style={{ marginBottom: '8px' }}
-                          key={item.key}
-                        >{`${item.key}=${item.value}`}</Tag>
-                      );
+                      return <Tag style={{ marginBottom: '8px' }} key={item.key}>{`${item.key}=${item.value}`}</Tag>;
                     })}
                 </div>
                 <div className="actions">
@@ -150,7 +142,6 @@ const RunPipeline = (props: PipelineProps) => {
                       text={true}
                       component={'a'}
                       size={'medium'}
-                      ghost={true}
                       onClick={(event) => {
                         onEditPipelineContext(key);
                         event.stopPropagation();
@@ -171,7 +162,6 @@ const RunPipeline = (props: PipelineProps) => {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       component={'a'}
                       onClick={(event) => {
                         onClonePipelineContext(key);
@@ -192,7 +182,6 @@ const RunPipeline = (props: PipelineProps) => {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       className={'danger-btn'}
                       component={'a'}
                       onClick={(event) => {

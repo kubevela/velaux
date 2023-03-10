@@ -1,5 +1,5 @@
-import type { Field } from '@b-design/ui';
-import { Grid, Form, Input, Select } from '@b-design/ui';
+import type { Field } from '@alifd/next';
+import { Grid, Form, Input, Select } from '@alifd/next';
 import React from 'react';
 
 import { checkName } from '../../../../utils/common';

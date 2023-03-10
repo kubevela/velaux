@@ -1,4 +1,4 @@
-import { Grid, Dialog, Message } from '@b-design/ui';
+import { Grid, Dialog, Message } from '@alifd/next';
 import React, { Component } from 'react';
 
 import { getProjectRoles, getProjectPermissions, deleteProjectRoles } from '../../api/project';

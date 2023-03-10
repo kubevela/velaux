@@ -1,5 +1,6 @@
-import { Grid, Icon, Input } from '@b-design/ui';
+import { Grid, Icon, Input } from '@alifd/next';
 import React from 'react';
+import { AiOutlineSearch } from 'react-icons/ai';
 
 import i18n from '../../../../i18n';
 import './index.less';
@@ -19,10 +20,11 @@ class SelectSearch extends React.Component<Props> {
     const { searchValue } = this.props;
     return (
       <Row className="definitions-select-wrapper border-radius-8" wrap={true}>
-        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+        <Col m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
-            innerAfter={<Icon type="search" size="xs" style={{ margin: 4 }} />}
+            innerAfter={<AiOutlineSearch style={{ margin: 4 }} />}
             hasClear
+            size="large"
             placeholder={i18n.t('Search by definition name')}
             onChange={this.handleChangName}
             value={searchValue}

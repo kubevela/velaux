@@ -1,4 +1,4 @@
-import { Balloon, Button, Dialog, Table, Message } from '@b-design/ui';
+import { Balloon, Button, Dialog, Table, Message } from '@alifd/next';
 import classNames from 'classnames';
 import { Link } from 'dva/router';
 import React, { useState, useEffect } from 'react';
@@ -12,8 +12,6 @@ import i18n from '../../../../i18n';
 import type { PipelineListItem, PipelineRunBriefing } from '../../../../interface/pipeline';
 import { momentDate, timeDiff } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
-
-
 
 export interface ViewRunsProps {
   pipeline: PipelineListItem;
@@ -41,9 +39,7 @@ const ViewRuns = (props: ViewRunsProps) => {
     if (name) {
       Dialog.confirm({
         type: 'confirm',
-        content: (
-          <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>
-        ),
+        content: <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>,
         onOk: () => {
           deletePipelineRun({
             projectName: pipeline.project.name,
@@ -63,26 +59,24 @@ const ViewRuns = (props: ViewRunsProps) => {
 
   return (
     <Dialog
-      className="commonDialog"
+      v2
       visible={true}
       locale={locale().Dialog}
-      title={i18n.t('Pipeline Runs')}
+      title={i18n.t('Pipeline Runs').toString()}
       onClose={props.onClose}
       onCancel={props.onClose}
       footerActions={['cancel']}
-      isFullScreen={true}
+      overflowScroll={true}
       style={{ width: '1200px' }}
     >
       <Table loading={loading} dataSource={runs} locale={locale().Table}>
         <Table.Column
           key={'name'}
           dataIndex="pipelineRunName"
-          title={i18n.t('Name')}
+          title={i18n.t('Name').toString()}
           cell={(name: string) => {
             return (
-              <Link
-                to={`/projects/${props.pipeline.project.name}/pipelines/${props.pipeline.name}/runs/${name}`}
-              >
+              <Link to={`/projects/${props.pipeline.project.name}/pipelines/${props.pipeline.name}/runs/${name}`}>
                 {name}
               </Link>
             );
@@ -91,7 +85,7 @@ const ViewRuns = (props: ViewRunsProps) => {
         <Table.Column
           key={'status'}
           dataIndex="phase"
-          title={i18n.t('Status')}
+          title={i18n.t('Status').toString()}
           cell={(phase: string, i: number, run: PipelineRunBriefing) => {
             const show = (
               <span
@@ -112,7 +106,7 @@ const ViewRuns = (props: ViewRunsProps) => {
         <Table.Column
           key={'startTime'}
           dataIndex="startTime"
-          title={i18n.t('Start Time')}
+          title={i18n.t('Start Time').toString()}
           cell={(value: string) => {
             return momentDate(value);
           }}
@@ -120,7 +114,7 @@ const ViewRuns = (props: ViewRunsProps) => {
         <Table.Column
           key={'endTime'}
           dataIndex="endTime"
-          title={i18n.t('End Time')}
+          title={i18n.t('End Time').toString()}
           cell={(value: string) => {
             return momentDate(value);
           }}
@@ -129,7 +123,7 @@ const ViewRuns = (props: ViewRunsProps) => {
         <Table.Column
           key={'endTime'}
           dataIndex="endTime"
-          title={i18n.t('Duration')}
+          title={i18n.t('Duration').toString()}
           cell={(value: string, i: number, run: PipelineRunBriefing) => {
             return timeDiff(run.startTime, run.endTime);
           }}
@@ -137,7 +131,7 @@ const ViewRuns = (props: ViewRunsProps) => {
         <Table.Column
           key={'contextName'}
           dataIndex="contextName"
-          title={i18n.t('Context Name')}
+          title={i18n.t('Context Name').toString()}
           cell={(value: string) => {
             return value;
           }}
@@ -146,7 +140,7 @@ const ViewRuns = (props: ViewRunsProps) => {
         <Table.Column
           key={'actions'}
           dataIndex="pipelineRunName"
-          title={i18n.t('Actions')}
+          title={i18n.t('Actions').toString()}
           cell={(name: string, i: number, run: PipelineRunBriefing) => {
             return (
               <div>
@@ -161,7 +155,6 @@ const ViewRuns = (props: ViewRunsProps) => {
                     <Button
                       text
                       size={'small'}
-                      ghost={true}
                       className={'danger-btn'}
                       component={'a'}
                       onClick={() => {

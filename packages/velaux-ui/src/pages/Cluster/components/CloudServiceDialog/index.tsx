@@ -1,16 +1,5 @@
-import {
-  Button,
-  Dialog,
-  Form,
-  Input,
-  Select,
-  Field,
-  Table,
-  Message,
-  Pagination,
-} from '@b-design/ui';
+import { Button, Dialog, Form, Input, Select, Field, Table, Message, Pagination } from '@alifd/next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 
 import { getCloudClustersList } from '../../../../api/cluster';
 import { If } from '../../../../components/If';
@@ -24,7 +13,6 @@ type Props = {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   setCloudService: (isCloudService: boolean) => void;
-  t: (key: string) => string;
   onPropsOK: () => void;
   dispatch: ({}) => void;
 };
@@ -48,6 +36,12 @@ type Record = {
   status: string;
   apiServerURL: string;
   dashboardURL: string;
+};
+
+type AccessKey = {
+  accessKeyID: string;
+  accessKeySecret: string;
+  provider: string;
 };
 
 class CloudServiceDialog extends React.Component<Props, State> {
@@ -115,7 +109,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
 
   connectCloudCluster = (record: Record) => {
     const { id = '', description = '', icon = '', name = '' } = record;
-    const { accessKeyID, accessKeySecret, provider } = this.field.getValues();
+    const { accessKeyID, accessKeySecret, provider } = this.field.getValues<AccessKey>();
     const params = {
       provider,
       accessKeyID: accessKeyID,
@@ -153,7 +147,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
         page: pageIdx,
       },
       () => {
-        const { provider, accessKeyID, accessKeySecret } = this.field.getValues();
+        const { provider, accessKeyID, accessKeySecret } = this.field.getValues<AccessKey>();
         const { page, pageSize } = this.state;
         const params = {
           provider,
@@ -179,7 +173,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
             this.setState({ tableLoading: false });
             handleError(err);
           });
-      },
+      }
     );
   };
 
@@ -251,7 +245,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
             <Permission request={{ resource: 'cluster:*', action: 'create' }} project={''}>
               <Button
                 text
-                ghost={true}
                 component={'a'}
                 onClick={() => {
                   this.connectCloudCluster(record);
@@ -272,7 +265,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
       <React.Fragment>
         <Dialog
           locale={locale().Dialog}
-          className="commonDialog"
           title={<Translation>Connect Kubernetes Cluster From Cloud</Translation>}
           autoFocus={true}
           visible={visible}
@@ -286,7 +278,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
               </Button>
             )
           }
-          footerAlign="center"
+          v2
         >
           <If condition={choseInput}>
             <Message style={{ marginBottom: '16px' }}>
@@ -344,12 +336,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           </If>
 
           <If condition={!choseInput}>
-            <Table
-              locale={locale().Table}
-              dataSource={cloudClusters}
-              hasBorder={false}
-              loading={tableLoading}
-            >
+            <Table locale={locale().Table} dataSource={cloudClusters} hasBorder={false} loading={tableLoading}>
               {columns.map((col, key) => (
                 <Column {...col} key={key} align={'left'} />
               ))}
@@ -371,4 +358,4 @@ class CloudServiceDialog extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(CloudServiceDialog);
+export default CloudServiceDialog;

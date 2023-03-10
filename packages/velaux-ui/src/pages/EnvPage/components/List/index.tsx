@@ -1,5 +1,5 @@
 import { ColumnProps } from '@alifd/next/types/table';
-import { Table, Message, Dialog, Tag, Button } from '@b-design/ui';
+import { Table, Message, Dialog, Tag, Button } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Component } from 'react';
 import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
@@ -47,7 +47,7 @@ class TableList extends Component<Props> {
         title: <Translation>Name(Alias)</Translation>,
         dataIndex: 'name',
         width: '150px',
-        cell: (v: string, i: string, env: Env) => {
+        cell: (v: string, i: number, env: Env) => {
           return (
             <a
               onClick={() => {
@@ -76,7 +76,7 @@ class TableList extends Component<Props> {
         key: 'namespace',
         title: <Translation>Namespace</Translation>,
         dataIndex: 'namespace',
-        width: '100px',
+        width: '120px',
         cell: (v: string) => {
           return <span>{v}</span>;
         },
@@ -93,7 +93,7 @@ class TableList extends Component<Props> {
         key: 'targets',
         title: <Translation>Targets</Translation>,
         dataIndex: 'targets',
-        cell: (v: NameAlias[], i: string, record: Env) => {
+        cell: (v: NameAlias[], i: number, record: Env) => {
           return (
             <TagGroup>
               {v?.map((target: NameAlias) => {
@@ -103,7 +103,7 @@ class TableList extends Component<Props> {
                       condition={checkPermission(
                         { resource: `target:*`, action: 'list' },
                         record.project.name,
-                        this.props.userInfo,
+                        this.props.userInfo
                       )}
                     >
                       <Link to="/targets">{target.alias ? target.alias : target.name}</Link>
@@ -113,7 +113,7 @@ class TableList extends Component<Props> {
                         !checkPermission(
                           { resource: `target:*`, action: 'list' },
                           record.project.name,
-                          this.props.userInfo,
+                          this.props.userInfo
                         )
                       }
                     >
@@ -131,7 +131,7 @@ class TableList extends Component<Props> {
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
         width: '200px',
-        cell: (v: string, i: string, record: Env) => {
+        cell: (v: string, i: number, record: Env) => {
           return (
             <div>
               <Permission
@@ -146,7 +146,6 @@ class TableList extends Component<Props> {
                   text={true}
                   component={'a'}
                   size={'medium'}
-                  ghost={true}
                   onClick={() => {
                     this.onEdit(record);
                   }}
@@ -167,16 +166,11 @@ class TableList extends Component<Props> {
                   text={true}
                   component={'a'}
                   size={'medium'}
-                  ghost={true}
                   className={'danger-btn'}
                   onClick={() => {
                     Dialog.confirm({
                       type: 'confirm',
-                      content: (
-                        <Translation>
-                          Unrecoverable after deletion, are you sure to delete it?
-                        </Translation>
-                      ),
+                      content: <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>,
                       onOk: () => {
                         this.onDelete(record);
                       },

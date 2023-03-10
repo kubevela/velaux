@@ -1,8 +1,8 @@
-import { Input } from '@b-design/ui';
+import { Input } from '@alifd/next';
 import React from 'react';
 
 type Props = {
-  value: any;
+  value?: any;
   id: string;
   onChange: (value: any) => void;
   disabled: boolean;
@@ -29,7 +29,7 @@ class CPUNumber extends React.Component<Props, State> {
 
   render() {
     const { value, id, disabled } = this.props;
-    let initValue = undefined;
+    let initValue: number | undefined = undefined;
     if (value) {
       initValue = parseFloat(value);
     }

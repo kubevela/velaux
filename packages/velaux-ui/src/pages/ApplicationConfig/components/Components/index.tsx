@@ -1,4 +1,4 @@
-import { Card, Grid, Icon, Dialog } from '@b-design/ui';
+import { Card, Grid, Icon, Dialog } from '@alifd/next';
 import React, { Component } from 'react';
 
 import helm from '../../../../assets/helm.svg';
@@ -9,14 +9,12 @@ import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type {
-  ApplicationBase,
-  ApplicationComponentBase,
-  Trait,
-} from '../../../../interface/application';
+import type { ApplicationBase, ApplicationComponentBase, Trait } from '../../../../interface/application';
 import './index.less';
 import { showAlias } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
+import { IoMdAdd } from 'react-icons/io';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 type Props = {
   application?: ApplicationBase;
@@ -32,7 +30,7 @@ type Props = {
 class ComponentsList extends Component<Props> {
   handleDelete = (name: string) => {
     Dialog.alert({
-      content: i18n.t('Are you sure want to delete this Component?'),
+      content: i18n.t('Are you sure want to delete this Component?').toString(),
       onOk: () => {
         this.props.onDeleteComponent(name || '');
       },
@@ -82,8 +80,7 @@ class ComponentsList extends Component<Props> {
                             }}
                             project={projectName}
                           >
-                            <Icon
-                              type="ashbin1"
+                            <AiOutlineDelete
                               size={14}
                               className="cursor-pointer danger-icon"
                               onClick={() => {
@@ -117,14 +114,13 @@ class ComponentsList extends Component<Props> {
                               }}
                               project={projectName}
                             >
-                              <Icon
-                                onClick={(event: React.MouseEvent<HTMLElement>) => {
+                              <AiOutlineDelete
+                                onClick={(event: React.MouseEvent<SVGElement>) => {
                                   event.stopPropagation();
                                   this.props.onDeleteTrait(item.name, trait.type);
                                 }}
                                 size={14}
                                 className="danger-icon"
-                                type="ashbin1"
                               />
                             </Permission>
                           </div>
@@ -143,7 +139,7 @@ class ComponentsList extends Component<Props> {
                         className="trait-icon"
                         onClick={() => this.props.onAddTrait(item.name)}
                       >
-                        <Icon type="add" size="small" />
+                        <IoMdAdd />
                       </div>
                     </Permission>
                   </Row>

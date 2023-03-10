@@ -1,12 +1,13 @@
 import { Router, Switch, Redirect } from 'dva/router';
 import React, { Component } from 'react';
+import * as history from 'history';
 
 import AuthRoute from '../components/AuthRoute';
 
 type RouteConfig = { children: []; component: any; name: string; path: string };
 type Props = {
   routes: RouteConfig[];
-  history: any;
+  history: history.History;
 };
 
 class RouterMap extends Component<Props, {}> {

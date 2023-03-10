@@ -1,4 +1,4 @@
-import { Select } from '@b-design/ui';
+import { Select } from '@alifd/next';
 import React, { useContext } from 'react';
 
 import { WorkflowContext, WorkflowEditContext } from '../../context';
@@ -8,7 +8,7 @@ import { showAlias } from '../../utils/common';
 import locale from '../../utils/locale';
 
 type Props = {
-  value: string[];
+  value?: string[];
   id: string;
   onChange: (value: string[]) => void;
   disabled?: boolean;

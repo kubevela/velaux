@@ -1,13 +1,19 @@
 const CopyPlugin = require('copy-webpack-plugin');
+const browserslist = require('browserslist');
+const { resolveToEsbuildTarget } = require('esbuild-plugin-browserslist');
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { ProvidePlugin } = require('webpack');
-
+const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CorsWorkerPlugin = require('./plugins/CorsWorkerPlugin');
+const esbuildTargets = resolveToEsbuildTarget(browserslist(), { printUnknownTargets: false });
 
 module.exports = {
   target: 'web',
   entry: {
     app: './packages/velaux-ui/src/index.tsx',
+    default: './packages/velaux-ui/src/theme-default.less',
   },
   output: {
     clean: true,
@@ -38,6 +44,16 @@ module.exports = {
     new CorsWorkerPlugin(),
     new ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'velaux.[name].[contenthash].css',
+    }),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, '../../packages/velaux-ui/public/index.html'),
+      inject: true,
+    }),
+    new InterpolateHtmlPlugin(HtmlWebpackPlugin, {
+      PUBLIC_URL: '/public/build',
     }),
     new CopyPlugin({
       patterns: [
@@ -79,10 +95,9 @@ module.exports = {
       },
       {
         test: /\.less$/,
+        exclude: /node_modules/,
         use: [
-          {
-            loader: 'style-loader',
-          },
+          MiniCssExtractPlugin.loader,
           {
             loader: 'css-loader',
           },
@@ -95,12 +110,14 @@ module.exports = {
         test: /\.(ts|tsx)$/,
         use: [
           {
-            loader: 'ts-loader',
+            loader: 'esbuild-loader',
             options: {
-              transpileOnly: true,
+              loader: 'tsx',
+              target: esbuildTargets,
             },
           },
         ],
+        exclude: /node_modules/,
       },
     ],
   },

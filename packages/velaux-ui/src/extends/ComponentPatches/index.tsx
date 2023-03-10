@@ -1,5 +1,5 @@
-import type { Rule } from '@alifd/meet-react/lib/field';
-import { Field } from '@b-design/ui';
+import type { Rule } from '@alifd/next/lib/field';
+import { Field } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
 import { AiOutlinePlus } from 'react-icons/ai';
@@ -12,7 +12,7 @@ import type { ComponentPatchData } from './component-patch';
 import ComponentPatch from './component-patch';
 
 type Props = {
-  value: ComponentPatchData[];
+  value?: ComponentPatchData[];
   id: string;
   onChange: (value: ComponentPatchData[]) => void;
   registerForm: (form: Field) => void;

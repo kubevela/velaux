@@ -1,7 +1,6 @@
-import { Grid, Field, Form, Message, Button, Input } from '@b-design/ui';
+import { Grid, Field, Form, Message, Button, Input } from '@alifd/next';
 import i18n from 'i18next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 
 import { updateApplication } from '../../../../api/application';
 import DrawerWithFooter from '../../../../components/Drawer';
@@ -133,4 +132,4 @@ class EditAppDialog extends React.Component<Props> {
   }
 }
 
-export default withTranslation()(EditAppDialog);
+export default EditAppDialog;

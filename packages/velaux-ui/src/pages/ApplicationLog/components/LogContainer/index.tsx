@@ -1,7 +1,6 @@
-import { Grid, Checkbox, Dropdown, Icon, Menu, Loading } from '@b-design/ui';
+import { Grid, Checkbox, Dropdown, Icon, Menu, Loading } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import React, { Component, Fragment } from 'react';
-import { withTranslation } from 'react-i18next';
 
 import { listContainerLog } from '../../../../api/observation';
 import Translation from '../../../../components/Translation';
@@ -9,6 +8,7 @@ import type { ContainerLogResponse, PodBase } from '../../../../interface/observ
 import { momentDate, momentShortDate } from '../../../../utils/common';
 import './index.less';
 import { If } from '../../../../components/If';
+import { FaEllipsisV } from 'react-icons/fa';
 
 type Props = {
   pod?: PodBase;
@@ -31,7 +31,6 @@ interface LogLine {
 }
 
 class ContainerLog extends Component<Props, State> {
-  private readonly maxLogSize = 2e9;
   private readonly maxTailLine = 3000;
   timeoutID?: NodeJS.Timeout;
   constructor(props: Props) {
@@ -64,7 +63,7 @@ class ContainerLog extends Component<Props, State> {
         },
         () => {
           this.loadContainerLog();
-        },
+        }
       );
     }
   }
@@ -141,8 +140,7 @@ class ContainerLog extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous, loading } =
-      this.state;
+    const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous, loading } = this.state;
     return (
       <Fragment>
         <div className="application-logs-actions">
@@ -153,7 +151,7 @@ class ContainerLog extends Component<Props, State> {
             <Translation className="font-bold font-size-14">Auto-refresh</Translation>(every
             {refreshInterval / 1000} s.)
           </Checkbox>
-          <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
+          <Dropdown trigger={<FaEllipsisV />}>
             <Menu>
               <Menu.Item>
                 <Checkbox checked={previous} onChange={(v) => this.setState({ previous: v })}>
@@ -207,4 +205,4 @@ class ContainerLog extends Component<Props, State> {
   }
 }
 
-export default withTranslation()(ContainerLog);
+export default ContainerLog;

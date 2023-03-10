@@ -1,4 +1,4 @@
-import { Grid, Breadcrumb, Icon } from '@b-design/ui';
+import { Grid, Breadcrumb, Icon } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React, { Component, Fragment } from 'react';
@@ -10,6 +10,7 @@ import type { LoginUserInfo } from '../../interface/user';
 import { checkPermission } from '../../utils/permission';
 
 import classNames from 'classnames';
+import { AiOutlineHome } from 'react-icons/ai';
 
 const { Row, Col } = Grid;
 
@@ -73,26 +74,14 @@ class ProjectLayout extends Component<Props> {
       },
     ];
 
-    if (
-      checkPermission(
-        { resource: `project:${projectName}/role:*`, action: 'list' },
-        projectName,
-        userInfo,
-      )
-    ) {
+    if (checkPermission({ resource: `project:${projectName}/role:*`, action: 'list' }, projectName, userInfo)) {
       list.push({
         id: 'roles',
         name: <Translation>Roles</Translation>,
         to: `/projects/${projectName}/roles`,
       });
     }
-    if (
-      checkPermission(
-        { resource: `project:${projectName}/projectUser:*`, action: 'list' },
-        projectName,
-        userInfo,
-      )
-    ) {
+    if (checkPermission({ resource: `project:${projectName}/projectUser:*`, action: 'list' }, projectName, userInfo)) {
       list.push({
         id: 'members',
         name: <Translation>Members</Translation>,
@@ -119,16 +108,14 @@ class ProjectLayout extends Component<Props> {
         <Row>
           <Col span={6} className={classNames('breadcrumb')}>
             <Link to={'/'}>
-              <Icon type="home" />
+              <AiOutlineHome size={18} />
             </Link>
             <Breadcrumb separator="/">
               <Breadcrumb.Item>
                 <Link to={'/projects'}>Projects</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link to={'/projects/' + projectDetails?.name}>
-                  {projectDetails?.alias || projectDetails?.name}
-                </Link>
+                <Link to={'/projects/' + projectDetails?.name}>{projectDetails?.alias || projectDetails?.name}</Link>
               </Breadcrumb.Item>
             </Breadcrumb>
           </Col>

@@ -1,4 +1,4 @@
-import { Card, Button, Input, Form, Field, Icon, Grid } from '@b-design/ui';
+import { Card, Button, Input, Form, Field, Icon, Grid } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
@@ -11,6 +11,7 @@ import i18n from '../../i18n';
 import './index.less';
 import type { DexConfig } from '../../interface/system';
 import { checkName, checkUserPassword } from '../../utils/common';
+import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 type Props = {
   code: string;
@@ -57,7 +58,7 @@ export default class LoginPage extends Component<Props, State> {
               if (loginType === 'dex') {
                 this.ontDexConfig();
               }
-            },
+            }
           );
         }
       })
@@ -73,7 +74,7 @@ export default class LoginPage extends Component<Props, State> {
             },
             () => {
               this.onGetDexCode();
-            },
+            }
           );
         }
       })
@@ -144,13 +145,8 @@ export default class LoginPage extends Component<Props, State> {
             <div style={{ flex: '1 1 0%' }} />
             <div className="right">
               <div className="vela-item">
-                <a
-                  title="KubeVela Documents"
-                  href="https://kubevela.io"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Icon size={14} type="help1" />
+                <a title="KubeVela Documents" href="https://kubevela.io" target="_blank" rel="noopener noreferrer">
+                  <AiOutlineQuestionCircle size={18} />
                 </a>
               </div>
               <div className="vela-item">
@@ -217,8 +213,7 @@ export default class LoginPage extends Component<Props, State> {
                               pattern: checkUserPassword,
                               message: (
                                 <Translation>
-                                  The password should be 8-16 bits and contain at least one number
-                                  and one letter
+                                  The password should be 8-16 bits and contain at least one number and one letter
                                 </Translation>
                               ),
                             },
@@ -226,12 +221,7 @@ export default class LoginPage extends Component<Props, State> {
                         })}
                       />
                     </FormItem>
-                    <Button
-                      loading={loginLoading}
-                      type="primary"
-                      htmlType="submit"
-                      onClick={this.handleSubmit}
-                    >
+                    <Button loading={loginLoading} type="primary" htmlType="submit" onClick={this.handleSubmit}>
                       <Translation>Sign in</Translation>
                     </Button>
                   </Form>

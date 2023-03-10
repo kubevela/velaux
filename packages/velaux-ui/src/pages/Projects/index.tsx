@@ -1,4 +1,4 @@
-import { Table, Button, Pagination, Dialog, Message } from '@b-design/ui';
+import { Table, Button, Pagination, Dialog, Message } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Fragment, Component } from 'react';
 
@@ -16,10 +16,8 @@ import locale from '../../utils/locale';
 
 import CreateProjectDialog from './components/CreateProjectDialog';
 
-
 import './index.less';
 import { connect } from 'dva';
-
 
 type Props = {
   dispatch: ({}) => void;
@@ -148,7 +146,7 @@ class Projects extends Component<Props, State> {
       },
       () => {
         this.listProjects();
-      },
+      }
     );
   };
 
@@ -205,14 +203,10 @@ class Projects extends Component<Props, State> {
         cell: (v: string, i: number, record: Project) => {
           return (
             <Fragment>
-              <Permission
-                request={{ resource: `project:${record.name}`, action: 'update' }}
-                project={`${record.name}`}
-              >
+              <Permission request={{ resource: `project:${record.name}`, action: 'update' }} project={`${record.name}`}>
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onEdit(record);
@@ -221,14 +215,10 @@ class Projects extends Component<Props, State> {
                   <Translation>Edit</Translation>
                 </Button>
               </Permission>
-              <Permission
-                request={{ resource: `project:${record.name}`, action: 'delete' }}
-                project={`${record.name}`}
-              >
+              <Permission request={{ resource: `project:${record.name}`, action: 'delete' }} project={`${record.name}`}>
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onDelete(record);
@@ -244,17 +234,7 @@ class Projects extends Component<Props, State> {
     ];
 
     const { Column } = Table;
-    const {
-      list,
-      page,
-      pageSize,
-      total,
-      visible,
-      isEditProject,
-      editProjectItem,
-      isLoading,
-      userList,
-    } = this.state;
+    const { list, page, pageSize, total, visible, isEditProject, editProjectItem, isLoading, userList } = this.state;
     return (
       <Fragment>
         <div className="project-list-content">

@@ -3,7 +3,7 @@ import type { MouseEvent } from 'react';
 import React from 'react';
 import './index.less';
 import { Link } from 'dva/router';
-import { Grid, Card, Menu, Dropdown, Dialog, Button, Table } from '@b-design/ui';
+import { Grid, Card, Menu, Dropdown, Dialog, Button, Table } from '@alifd/next';
 import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
 
 import type { ShowMode } from '../..';
@@ -74,7 +74,6 @@ class CardContent extends React.Component<Props, State> {
           <Button
             text
             size={'medium'}
-            ghost={true}
             component={'a'}
             onClick={() => {
               this.onEditAppPlan(item);
@@ -109,9 +108,7 @@ class CardContent extends React.Component<Props, State> {
     const onClick = () => {
       Dialog.confirm({
         type: 'confirm',
-        content: (
-          <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>
-        ),
+        content: <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>,
         onOk: () => {
           this.onDeleteAppPlan(item.name);
         },
@@ -121,14 +118,7 @@ class CardContent extends React.Component<Props, State> {
     if (checkPermission(request, project, userInfo)) {
       if (button) {
         return (
-          <Button
-            text
-            size={'medium'}
-            className="danger-btn"
-            ghost={true}
-            component={'a'}
-            onClick={onClick}
-          >
+          <Button text size={'medium'} className="danger-btn" component={'a'} onClick={onClick}>
             <AiFillDelete /> <Translation>Remove</Translation>
           </Button>
         );
@@ -212,7 +202,6 @@ class CardContent extends React.Component<Props, State> {
                 >
                   <Button
                     component="a"
-                    ghost={true}
                     onClick={() => {
                       setVisible(true);
                     }}
@@ -254,14 +243,7 @@ class CardContent extends React.Component<Props, State> {
           const { name, alias, icon, description, createTime, readOnly } = item;
           const showName = alias || name;
           return (
-            <Col
-              xl={6}
-              m={8}
-              s={12}
-              xxs={24}
-              className={`card-content-wrapper`}
-              key={`${item.name}`}
-            >
+            <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wrapper`} key={`${item.name}`}>
               <Card locale={locale().Card} contentHeight="auto">
                 <Link to={`/applications/${name}/config`}>
                   <div className="appplan-card-top flexcenter">

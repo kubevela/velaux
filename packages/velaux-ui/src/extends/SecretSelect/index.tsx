@@ -10,7 +10,7 @@ import locale from '../../utils/locale';
 type Props = {
   onChange: (value: any) => void;
   setKeys: (keys: string[]) => void;
-  value: any;
+  value?: any;
   id: string;
   appNamespace?: string;
   disabled: boolean;

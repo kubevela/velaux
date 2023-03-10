@@ -1,5 +1,6 @@
-import { Grid, Form, Input, Field, Message, Icon, Dialog } from '@b-design/ui';
+import { Grid, Form, Input, Field, Message, Icon, Dialog } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
+import { AiOutlineEye } from 'react-icons/ai';
 
 import { updateUser } from '../../../../api/users';
 import Translation from '../../../../components/Translation';
@@ -86,9 +87,9 @@ class EditPlatFormUserDialog extends Component<Props, State> {
     return (
       <Fragment>
         <Dialog
+          v2
           visible={true}
           title={this.showTitle()}
-          className={'commonDialog'}
           style={{ width: '600px' }}
           onOk={this.onUpdateUser}
           locale={locale().Dialog}
@@ -102,11 +103,10 @@ class EditPlatFormUserDialog extends Component<Props, State> {
                     name="password"
                     htmlType={this.state.isLookPassword ? 'passwordInput' : 'password'}
                     addonTextAfter={
-                      <Icon
+                      <AiOutlineEye
                         style={{
                           cursor: 'pointer',
                         }}
-                        type="eye-fill"
                         onClick={this.handleClickLook}
                       />
                     }
@@ -118,8 +118,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
                           pattern: checkUserPassword,
                           message: (
                             <Translation>
-                              Password should be 8-16 bits and contain at least one number and one
-                              letter
+                              Password should be 8-16 bits and contain at least one number and one letter
                             </Translation>
                           ),
                         },

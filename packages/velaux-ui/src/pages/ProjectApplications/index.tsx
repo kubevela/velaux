@@ -1,4 +1,4 @@
-import { Loading, Message } from '@b-design/ui';
+import { Loading, Message } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component, Fragment } from 'react';
 

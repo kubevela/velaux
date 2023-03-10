@@ -1,4 +1,4 @@
-import { Step, Button, Balloon, Icon, Message } from '@b-design/ui';
+import { Step, Button, Balloon, Icon, Message } from '@alifd/next';
 import _ from 'lodash';
 import React, { Component } from 'react';
 

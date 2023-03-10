@@ -1,4 +1,4 @@
-import { Card, Dialog, Grid, Message, Icon } from '@b-design/ui';
+import { Card, Dialog, Grid, Message, Icon } from '@alifd/next';
 import React, { Component } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
@@ -17,6 +17,7 @@ import type {
 import { momentDate, showAlias } from '../../../../utils/common';
 import './index.less';
 import locale from '../../../../utils/locale';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 type Props = {
   appName: string;
@@ -46,9 +47,7 @@ class TriggerList extends Component<Props, State> {
   }
   showWebhook = (trigger: Trigger) => {
     const { components } = this.props;
-    this.loadComponentDetail(
-      trigger.componentName || (components.length > 0 ? components[0].name : ''),
-    );
+    this.loadComponentDetail(trigger.componentName || (components.length > 0 ? components[0].name : ''));
     this.setState({ showTrigger: trigger });
   };
 
@@ -103,9 +102,7 @@ class TriggerList extends Component<Props, State> {
           user: '',
         },
       };
-      command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL} -d '${JSON.stringify(
-        body,
-      )}'`;
+      command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL} -d '${JSON.stringify(body)}'`;
     }
     const copy = (
       <span style={{ lineHeight: '16px', marginLeft: '8px' }}>
@@ -157,8 +154,7 @@ class TriggerList extends Component<Props, State> {
                         }}
                         project={projectName}
                       >
-                        <Icon
-                          type="ashbin1"
+                        <AiOutlineDelete
                           size={14}
                           className="margin-right-0 cursor-pointer danger-icon"
                           onClick={() => {
@@ -175,13 +171,7 @@ class TriggerList extends Component<Props, State> {
                           marginBottom="8px"
                           labelWidth={160}
                           label={<Translation>Type</Translation>}
-                          value={
-                            item.type == 'webhook' ? (
-                              <Translation>On Webhook Event</Translation>
-                            ) : (
-                              item.type
-                            )
-                          }
+                          value={item.type == 'webhook' ? <Translation>On Webhook Event</Translation> : item.type}
                         />
                       </Col>
                     </Row>
@@ -236,11 +226,12 @@ class TriggerList extends Component<Props, State> {
         </div>
         <If condition={showTrigger}>
           <Dialog
+            v2
             locale={locale().Dialog}
-            className="commonDialog"
             visible={true}
             onClose={this.closeWebhook}
             footer={<div />}
+            width={500}
             title={<Translation>Trigger Webhook</Translation>}
           >
             <Row>
@@ -253,7 +244,7 @@ class TriggerList extends Component<Props, State> {
                       <a href={webHookURL}>{webHookURL}</a>
                       <CopyToClipboard
                         onCopy={() => {
-                          Message.success('Copy success');
+                          Message.success('Copy successfully');
                         }}
                         text={webHookURL}
                       >
@@ -284,7 +275,7 @@ class TriggerList extends Component<Props, State> {
                   <Translation>Curl Command</Translation>
                   <CopyToClipboard
                     onCopy={() => {
-                      Message.success('Copy success');
+                      Message.success('Copy successfully');
                     }}
                     text={command}
                   >
@@ -293,9 +284,7 @@ class TriggerList extends Component<Props, State> {
                 </h4>
                 <code>{command}</code>
                 <span>
-                  <Translation>
-                    Please set the properties that need to be changed, such as `image`
-                  </Translation>
+                  <Translation>Please set the properties that need to be changed, such as `image`</Translation>
                 </span>
               </Col>
             </Row>

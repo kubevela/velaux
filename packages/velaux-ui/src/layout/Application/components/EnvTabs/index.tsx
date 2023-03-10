@@ -11,8 +11,8 @@ import AddAndEditEnvBind from '../AddAndEditEnvBind';
 
 import { Link } from 'dva/router';
 import classNames from 'classnames';
-import { Balloon, Icon } from '@b-design/ui';
-
+import { Balloon, Icon } from '@alifd/next';
+import { IoMdAdd } from 'react-icons/io';
 
 type Props = {
   activeKey: string;
@@ -115,7 +115,7 @@ class TabsContent extends Component<Props, State> {
                     this.setState({ visibleEnvPlan: true });
                   }}
                 >
-                  <Icon type="add" />
+                  <IoMdAdd />
                 </a>
               </Permission>
             </If>

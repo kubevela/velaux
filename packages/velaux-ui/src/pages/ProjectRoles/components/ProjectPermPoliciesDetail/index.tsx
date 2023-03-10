@@ -1,4 +1,4 @@
-import { Grid, Form, Input, Field, Checkbox, Button, Message } from '@b-design/ui';
+import { Grid, Form, Input, Field, Checkbox, Button, Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import { createProjectRoles, updateProjectRoles } from '../../../../api/project';

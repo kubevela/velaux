@@ -1,4 +1,4 @@
-import { Loading, Message, Button } from '@b-design/ui';
+import { Loading, Message, Button } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
 
@@ -12,7 +12,6 @@ import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
 import RegistryManageDialog from './components/registry-manage/index';
 import SelectSearch from './components/search/index';
-
 
 type Props = {
   dispatch: ({}) => {};

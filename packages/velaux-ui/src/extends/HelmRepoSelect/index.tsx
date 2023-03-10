@@ -1,4 +1,4 @@
-import { Loading, Select } from '@b-design/ui';
+import { Loading, Select } from '@alifd/next';
 import { connect } from 'dva';
 import _ from 'lodash';
 import React, { Component } from 'react';

@@ -1,7 +1,7 @@
-import { Grid, Input, Form, Select, Button, Icon } from '@b-design/ui';
+import { Grid, Input, Form, Select, Button, Icon } from '@alifd/next';
 import _ from 'lodash';
 import React, { useContext, useState } from 'react';
-
+import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 import { WorkflowEditContext } from '../../context';
 import type { InputItem, OutputItem } from '../../interface/application';
 import locale from '../../utils/locale';
@@ -50,12 +50,7 @@ export const InputItemForm = (props: { value?: InputItem; onChange: (i: InputIte
       <Row>
         <Col className="from" span={12} style={{ paddingLeft: '8px' }}>
           <Form.Item label="From" labelAlign="inset">
-            <Select
-              dataSource={fromItemOptions}
-              locale={locale().Select}
-              value={from}
-              onChange={fromChange}
-            />
+            <Select dataSource={fromItemOptions} locale={locale().Select} value={from} onChange={fromChange} />
           </Form.Item>
         </Col>
         <Col span={12} style={{ paddingRight: '8px' }}>
@@ -68,11 +63,7 @@ export const InputItemForm = (props: { value?: InputItem; onChange: (i: InputIte
   );
 };
 
-export const InputItems = (props: {
-  value?: InputItem[];
-  id: string;
-  onChange: (items: InputItem[]) => void;
-}) => {
+export const InputItems = (props: { value?: InputItem[]; id: string; onChange: (items: InputItem[]) => void }) => {
   const [items, setItems] = useState<InputItem[]>(props.value || [{ from: '', parameterKey: '' }]);
   const onChange = (update: InputItem[]) => {
     props.onChange(update.filter((item) => item.from != '' && item.parameterKey != ''));
@@ -106,7 +97,7 @@ export const InputItems = (props: {
                   type="secondary"
                   style={{ justifyContent: 'center', marginLeft: '8px' }}
                 >
-                  <Icon type="semi-select" />
+                  <IoMdRemove />
                 </Button>
               </div>
             )}
@@ -124,7 +115,7 @@ export const InputItems = (props: {
         type="secondary"
         style={{ justifyContent: 'center', marginLeft: '8px' }}
       >
-        <Icon type="add" />
+        <IoMdAdd />
       </Button>
     </div>
   );

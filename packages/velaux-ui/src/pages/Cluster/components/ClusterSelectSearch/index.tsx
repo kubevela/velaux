@@ -1,12 +1,12 @@
-import { Grid, Icon, Input } from '@b-design/ui';
+import { Grid, Icon, Input } from '@alifd/next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 
 import './index.less';
 import i18n from '../../../../i18n';
+import { AiOutlineSearch } from 'react-icons/ai';
 
 type Props = {
-  query: (value: string) => (() => void) | undefined;
+  query: (value: string) => void;
 };
 
 type State = {
@@ -39,18 +39,12 @@ class InputSearch extends React.Component<Props, State> {
       <Row className="cluster-input-wrapper">
         <Col span="24">
           <Input
-            innerAfter={
-              <Icon
-                type="search"
-                size="xs"
-                onClick={this.handleClickSearch}
-                style={{ margin: 4 }}
-              />
-            }
+            innerAfter={<AiOutlineSearch onClick={this.handleClickSearch} style={{ margin: 4 }} />}
             placeholder={i18n.t('Search by name and description etc').toString()}
             onChange={this.handleChangName}
             onPressEnter={this.handleClickSearch}
             value={inputValue}
+            size="large"
             className="item"
           />
         </Col>
@@ -59,4 +53,4 @@ class InputSearch extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(InputSearch);
+export default InputSearch;

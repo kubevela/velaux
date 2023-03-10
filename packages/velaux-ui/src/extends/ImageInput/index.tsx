@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, Form, Loading, Grid, Tag } from '@b-design/ui';
+import { Input, Form, Loading, Grid, Tag } from '@alifd/next';
 import './index.less';
 
 import type { InputProps } from '@alifd/next/types/input';
@@ -17,7 +17,7 @@ import ImageSecretSelect from '../ImageSecretSelect';
 const { Col, Row } = Grid;
 
 interface Props extends InputProps {
-  value: any;
+  value?: any;
   key: string;
   id: string;
   label: string;

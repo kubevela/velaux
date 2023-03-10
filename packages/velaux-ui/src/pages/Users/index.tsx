@@ -1,4 +1,4 @@
-import { Table, Button, Pagination, Message, Dialog } from '@b-design/ui';
+import { Table, Button, Pagination, Message, Dialog } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import { getRoleList } from '../../api/roles';
@@ -109,7 +109,7 @@ class Users extends Component<Props, State> {
       },
       () => {
         this.listUser();
-      },
+      }
     );
   };
 
@@ -120,7 +120,7 @@ class Users extends Component<Props, State> {
       },
       () => {
         this.listUser();
-      },
+      }
     );
   }
 
@@ -131,7 +131,7 @@ class Users extends Component<Props, State> {
       },
       () => {
         this.listUser();
-      },
+      }
     );
   }
 
@@ -242,7 +242,7 @@ class Users extends Component<Props, State> {
       },
       () => {
         this.listUser();
-      },
+      }
     );
   };
 
@@ -318,14 +318,10 @@ class Users extends Component<Props, State> {
         cell: (v: string, i: number, record: User) => {
           return (
             <Fragment>
-              <Permission
-                request={{ resource: `user:${record.name}`, action: 'update' }}
-                project={''}
-              >
+              <Permission request={{ resource: `user:${record.name}`, action: 'update' }} project={''}>
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onResetPassword(record);
@@ -335,14 +331,10 @@ class Users extends Component<Props, State> {
                 </Button>
               </Permission>
               <span className="line" />
-              <Permission
-                request={{ resource: `user:${record.name}`, action: 'update' }}
-                project={''}
-              >
+              <Permission request={{ resource: `user:${record.name}`, action: 'update' }} project={''}>
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onEdit(record);
@@ -362,7 +354,6 @@ class Users extends Component<Props, State> {
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onChangeStatus(record);
@@ -372,14 +363,10 @@ class Users extends Component<Props, State> {
                 </Button>
               </Permission>
               <span className="line" />
-              <Permission
-                request={{ resource: `user:${record.name}`, action: 'delete' }}
-                project={''}
-              >
+              <Permission request={{ resource: `user:${record.name}`, action: 'delete' }} project={''}>
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onDelete(record);
@@ -446,12 +433,7 @@ class Users extends Component<Props, State> {
           </section>
 
           <section className="margin-top-20  user-list-wrapper">
-            <Table
-              locale={locale().Table}
-              dataSource={dataSource}
-              hasBorder={false}
-              loading={isLoading}
-            >
+            <Table locale={locale().Table} dataSource={dataSource} hasBorder={false} loading={isLoading}>
               {columns.map((col, key) => (
                 <Column {...col} key={key} align={'left'} />
               ))}

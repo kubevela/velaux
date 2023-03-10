@@ -1,4 +1,4 @@
-import { Field, Loading, Button, Form, Grid, Input } from '@b-design/ui';
+import { Field, Loading, Button, Form, Grid, Input } from '@alifd/next';
 import React from 'react';
 
 import { createPipelineContext, updatePipelineContext } from '../../api/pipeline';

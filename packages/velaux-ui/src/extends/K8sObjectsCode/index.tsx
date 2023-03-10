@@ -1,6 +1,7 @@
-import { Upload, Button, Icon, Message, Field } from '@b-design/ui';
+import { Upload, Button, Icon, Message, Field } from '@alifd/next';
 import * as yaml from 'js-yaml';
 import React from 'react';
+import { AiOutlineCloudUpload } from 'react-icons/ai';
 import { v4 as uuid } from 'uuid';
 
 import DefinitionCode from '../../components/DefinitionCode';
@@ -10,7 +11,7 @@ import Translation from '../../components/Translation';
 import type { KubernetesObject } from './objects';
 
 type Props = {
-  value: any;
+  value?: any;
   id: string;
   onChange: (value: any) => void;
 };
@@ -122,33 +123,25 @@ class K8sObjectsCode extends React.Component<Props, State> {
 
         <Message type="notice" style={{ marginTop: '16px' }}>
           <Translation>
-            The input data will be automatically formatted. Ensure that the input data is a valid
-            k8s resource YAML.
+            The input data will be automatically formatted. Ensure that the input data is a valid k8s resource YAML.
           </Translation>
         </Message>
 
         <Upload request={this.customRequest}>
           <Button text type="normal" className="padding-left-0">
-            <Icon type="cloudupload" />
+            <AiOutlineCloudUpload />
             <Translation>Upload Yaml File</Translation>
           </Button>
         </Upload>
 
         <div id={containerId} className="guide-code">
-          <DefinitionCode
-            containerId={containerId}
-            language={'yaml'}
-            readOnly={false}
-            {...init('code')}
-          />
+          <DefinitionCode containerId={containerId} language={'yaml'} readOnly={false} {...init('code')} />
         </div>
 
         <If condition={showButton}>
           <div style={{ marginTop: '16px' }}>
             <span style={{ fontSize: '14px', color: '#000', marginRight: '16px' }}>
-              <Translation>
-                Convert the kubernetes resource component to the webservice component?
-              </Translation>
+              <Translation>Convert the kubernetes resource component to the webservice component?</Translation>
             </span>
             <Button type="secondary" onClick={this.onConvert2WebService}>
               Yes

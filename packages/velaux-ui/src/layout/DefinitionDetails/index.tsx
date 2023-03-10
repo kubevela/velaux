@@ -1,4 +1,4 @@
-import { Grid, Breadcrumb, Icon } from '@b-design/ui';
+import { Grid, Breadcrumb, Icon } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
@@ -10,6 +10,7 @@ import type { LoginUserInfo } from '../../interface/user';
 
 import './index.less';
 import classNames from 'classnames';
+import { AiOutlineHome } from 'react-icons/ai';
 
 const { Row, Col } = Grid;
 
@@ -71,7 +72,7 @@ class DefinitionDetailsLayout extends Component<Props> {
         <Row>
           <Col span={6} className={classNames('padding16', 'breadcrumb')}>
             <Link to={'/'}>
-              <Icon type="home" />
+              <AiOutlineHome size={18} />
             </Link>
             <Breadcrumb separator="/">
               <Breadcrumb.Item>

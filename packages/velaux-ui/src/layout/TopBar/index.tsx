@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import './index.less';
-import { Button, Dialog, Dropdown, Grid, Icon, Menu, Table } from '@b-design/ui';
+import { Button, Dialog, Dropdown, Grid, Icon, Menu, Table } from '@alifd/next';
 import axios from 'axios';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
-import { withTranslation } from 'react-i18next';
-import { AiFillSetting, AiOutlineCode } from 'react-icons/ai';
+import { AiFillSetting, AiOutlineCode, AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import { getConfigs } from '../../api/config';
 import grafanaImg from '../../assets/grafana.svg';
@@ -113,10 +112,7 @@ class TopBar extends Component<Props, State> {
     return {
       platformID: systemInfo?.platformID,
       installTime: systemInfo?.installTime,
-      version:
-        (systemInfo?.systemVersion?.velaVersion || '') +
-        +'/' +
-        (systemInfo?.systemVersion?.gitVersion || ''),
+      version: (systemInfo?.systemVersion?.velaVersion || '') + +'/' + (systemInfo?.systemVersion?.gitVersion || ''),
       clusterCount: systemInfo?.statisticInfo.clusterCount || '',
       appCount: systemInfo?.statisticInfo.appCount || '',
       enableAddonList: systemInfo?.statisticInfo.enableAddonList || {},
@@ -155,7 +151,7 @@ class TopBar extends Component<Props, State> {
     this.props.dispatch(
       routerRedux.push({
         pathname: '/login',
-      }),
+      })
     );
   };
 
@@ -176,8 +172,8 @@ class TopBar extends Component<Props, State> {
   onOpenCloudShell = () => {
     if (!this.checkEnabledAddon('cloudshell')) {
       Dialog.alert({
-        title: i18n.t('CloudShell feature is not enabled'),
-        content: i18n.t('You must enable the CloudShell addon'),
+        title: i18n.t('CloudShell feature is not enabled').toString(),
+        content: i18n.t('You must enable the CloudShell addon').toString(),
         locale: locale().Dialog,
         footer: (
           <Button
@@ -186,7 +182,7 @@ class TopBar extends Component<Props, State> {
               this.props.dispatch(
                 routerRedux.push({
                   pathname: '/addons/cloudshell',
-                }),
+                })
               );
             }}
           >
@@ -240,11 +236,7 @@ class TopBar extends Component<Props, State> {
                 if (config.properties && config.properties.endpoint) {
                   return (
                     <div className="item" title={config.description}>
-                      <a
-                        target="_blank"
-                        href={config.properties.endpoint}
-                        rel="noopener noreferrer"
-                      >
+                      <a target="_blank" href={config.properties.endpoint} rel="noopener noreferrer">
                         <img src={grafanaImg} />
                         <span>{config.alias || config.name}</span>
                       </a>
@@ -268,22 +260,22 @@ class TopBar extends Component<Props, State> {
 
             <div className="vela-item">
               <a
+                style={{
+                  lineHeight: '14px',
+                }}
                 title="KubeVela Documents"
                 href="https://kubevela.io"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Icon size={14} type="help1" />
+                <AiOutlineQuestionCircle size={18} />
               </a>
             </div>
 
             <If condition={userInfo}>
               <Dropdown
                 trigger={
-                  <div
-                    className="user-item vela-item"
-                    title={userInfo?.alias ? userInfo.alias : userInfo?.name}
-                  >
+                  <div className="user-item vela-item" title={userInfo?.alias ? userInfo.alias : userInfo?.name}>
                     <svg
                       viewBox="0 0 1024 1024"
                       version="1.1"
@@ -397,17 +389,15 @@ class TopBar extends Component<Props, State> {
           <Dialog
             locale={locale().Dialog}
             visible={showMysqlProjectList}
-            className={'commonDialog'}
-            title={i18n.t('My Projects')}
+            title={i18n.t('My Projects').toString()}
             autoFocus={true}
-            isFullScreen={true}
+            overflowScroll={true}
             style={{ width: '800px' }}
             onClose={() => {
               this.setState({ showMysqlProjectList: false });
             }}
-            footer={<div />}
-            height="auto"
-            footerAlign="center"
+            footer={<div></div>}
+            v2
           >
             <Table dataSource={userInfo?.projects}>
               <Table.Column
@@ -429,10 +419,7 @@ class TopBar extends Component<Props, State> {
                   }
                 }}
               />
-              <Table.Column
-                dataIndex="description"
-                title={<Translation>Description</Translation>}
-              />
+              <Table.Column dataIndex="description" title={<Translation>Description</Translation>} />
             </Table>
           </Dialog>
         </If>
@@ -441,4 +428,4 @@ class TopBar extends Component<Props, State> {
   }
 }
 
-export default withTranslation()(TopBar);
+export default TopBar;
