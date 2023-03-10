@@ -158,7 +158,7 @@ class PipelineListPage extends Component<Props, State> {
             key={'createTime'}
             title={i18n.t('CreateTime').toString()}
             dataIndex="createTime"
-            width={160}
+            width={180}
             cell={(v: string) => {
               return momentDate(v);
             }}

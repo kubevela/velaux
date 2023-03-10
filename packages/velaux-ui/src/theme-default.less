@@ -3,6 +3,12 @@
 @import '@velaux/theme/dist/next.css';
 @import '@velaux/theme/variables.less';
 
+a,
+a:visited,
+a:link {
+  color: @link-color;
+}
+
 .next-form-item.next-large .next-form-item-label {
   font-size: 14px !important;
 }
@@ -470,6 +476,7 @@ a {
   align-items: center;
   .next-breadcrumb {
     margin-left: 8px;
+    height: auto;
   }
   .next-breadcrumb-text,
   .next-breadcrumb-separator {

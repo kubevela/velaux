@@ -1,16 +1,16 @@
-import { Grid, Breadcrumb, Icon } from '@alifd/next';
+import { Grid } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import Translation from '../../components/Translation';
+import { Breadcrumb } from '../../components/Breadcrumb';
 import type { DefinitionMenuType } from '../../interface/definitions';
 import type { LoginUserInfo } from '../../interface/user';
 
 import './index.less';
 import classNames from 'classnames';
-import { AiOutlineHome } from 'react-icons/ai';
 
 const { Row, Col } = Grid;
 
@@ -71,18 +71,17 @@ class DefinitionDetailsLayout extends Component<Props> {
       <Fragment>
         <Row>
           <Col span={6} className={classNames('padding16', 'breadcrumb')}>
-            <Link to={'/'}>
-              <AiOutlineHome size={18} />
-            </Link>
-            <Breadcrumb separator="/">
-              <Breadcrumb.Item>
-                <Translation>Definitions</Translation>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link to={`/definitions/${definitionType}/config`}>{matchDefinitionKey}</Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>{definitionName}</Breadcrumb.Item>
-            </Breadcrumb>
+            <Breadcrumb
+              items={[
+                {
+                  to: `/definitions/${definitionType}/config`,
+                  title: 'Definitions',
+                },
+                {
+                  title: definitionName,
+                },
+              ]}
+            />
           </Col>
         </Row>
         <nav className="definitions-detail-wrapper">

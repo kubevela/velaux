@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import './index.less';
-import { Button, Dialog, Dropdown, Grid, Icon, Menu, Table } from '@alifd/next';
+import { Button, Dialog, Dropdown, Grid, Menu, Table } from '@alifd/next';
 import axios from 'axios';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
-import { AiFillSetting, AiOutlineCode, AiOutlineQuestionCircle } from 'react-icons/ai';
+import { AiFillSetting, AiOutlineBars, AiOutlineCode, AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import { getConfigs } from '../../api/config';
 import grafanaImg from '../../assets/grafana.svg';
@@ -25,11 +25,15 @@ import locale from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
 import { getBrowserNameAndVersion, isAdminUserCheck } from '../../utils/utils';
 import CloudShell from '../CloudShell';
+import { locationService } from '../../services/LocationService';
 
 import EditPlatFormUserDialog from './components/EditPlatFormUserDialog';
+import { LayoutMode } from 'src/types/main';
+import { Dispatch } from 'redux';
 
 type Props = {
-  dispatch: ({}) => {};
+  dispatch: Dispatch;
+  mode: LayoutMode;
   userInfo?: LoginUserInfo;
   systemInfo?: SystemInfo;
   show?: boolean;
@@ -221,12 +225,26 @@ class TopBar extends Component<Props, State> {
 
   render() {
     const { Row } = Grid;
-    const { systemInfo, dispatch, show, userInfo } = this.props;
+    const { systemInfo, dispatch, show, userInfo, mode } = this.props;
     const { platformSetting, isEditAdminUser, showMysqlProjectList, grafanaConfigs } = this.state;
 
     return (
-      <div className="layout-topbar" id="layout-topbar">
+      <div className="layout-top-bar" id="layout-top-bar">
         <Row className="nav-wrapper">
+          <div
+            className="cycle-mode"
+            onClick={() => {
+              switch (mode) {
+                case 'default':
+                  locationService.partial({ 'layout-mode': 'neat' });
+                  break;
+                default:
+                  locationService.partial({ 'layout-mode': 'default' });
+              }
+            }}
+          >
+            <AiOutlineBars size={20}></AiOutlineBars>
+          </div>
           <div className="logo">
             <img src={logo} title={'Make shipping applications more enjoyable.'} />
           </div>
@@ -243,6 +261,7 @@ class TopBar extends Component<Props, State> {
                     </div>
                   );
                 }
+                return null;
               })}
             </div>
           </div>

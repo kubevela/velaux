@@ -1,13 +1,12 @@
-import { Breadcrumb, Button, Card, Form, Grid, Icon, Loading, Message, Select } from '@alifd/next';
+import { Button, Card, Form, Grid, Loading, Message, Select } from '@alifd/next';
 
 import classNames from 'classnames';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import _ from 'lodash';
 import React from 'react';
-import { AiOutlineHome } from 'react-icons/ai';
-import { Link } from 'react-router-dom';
 import type { Dispatch } from 'redux';
+import { Breadcrumb } from '../../components/Breadcrumb';
 
 import { loadPipeline, updatePipeline } from '../../api/pipeline';
 import { getWorkflowDefinitions } from '../../api/workflows';
@@ -150,30 +149,19 @@ class PipelineStudio extends React.Component<Props, State> {
       <div>
         <Row>
           <Col span={12} className={classNames('breadcrumb')}>
-            <Link to={'/'}>
-              <AiOutlineHome size={18} />
-            </Link>
-            <Breadcrumb separator="/">
-              <Breadcrumb.Item>
-                <Link to={'/projects/' + projectName}>{projectName}</Link>
-              </Breadcrumb.Item>
-
-              <Breadcrumb.Item>
-                <Link to={`/projects/${projectName}/pipelines`}>
-                  <Translation>Pipelines</Translation>
-                </Link>
-              </Breadcrumb.Item>
-
-              <Breadcrumb.Item>
-                <Link to={`/projects/${projectName}/pipelines/${pipeline?.name || ''}/studio`}>
-                  {pipeline && (pipeline.alias || pipeline.name)}
-                </Link>
-              </Breadcrumb.Item>
-
-              <Breadcrumb.Item>
-                <Translation>Studio</Translation>
-              </Breadcrumb.Item>
-            </Breadcrumb>
+            <Breadcrumb
+              items={[
+                {
+                  to: '/projects/' + projectName + '/pipelines',
+                  title: projectName,
+                },
+                {
+                  to: `/projects/${projectName}/pipelines/${pipeline?.name}/studio`,
+                  title: (pipeline && (pipeline.alias || pipeline.name)) || '',
+                },
+                { title: 'Studio' },
+              ]}
+            />
           </Col>
           <Col span={12} className="flexright">
             <Button type="primary" onClick={this.runPipeline}>

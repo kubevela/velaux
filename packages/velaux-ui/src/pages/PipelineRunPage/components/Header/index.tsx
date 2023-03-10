@@ -1,4 +1,4 @@
-import { Grid, Breadcrumb, Button, Icon, Dialog, Message, Balloon } from '@alifd/next';
+import { Grid, Button, Dialog, Message, Balloon } from '@alifd/next';
 import classNames from 'classnames';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
@@ -16,6 +16,7 @@ import type { PipelineDetail, PipelineRunBase, PipelineRunStatus } from '../../.
 import { momentDate, timeDiff } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 import RunStatusIcon from '../RunStatusIcon';
+import { Breadcrumb } from '../../../../components/Breadcrumb';
 
 const { Row, Col } = Grid;
 
@@ -154,26 +155,20 @@ class Header extends Component<Props, State> {
     return (
       <div>
         <Row style={{ marginBottom: '16px' }}>
-          <Col span={6} className={classNames('breadcrumb')}>
-            <Link to={'/'}>
-              <AiOutlineHome size={18} />
-            </Link>
-            <Breadcrumb separator="/">
-              <Breadcrumb.Item>
-                <Link to={'/projects/' + projectName}>{projectName}</Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link to={`/projects/${projectName}/pipelines`}>
-                  <Translation>Pipelines</Translation>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link to={`/projects/${projectName}/pipelines/${pipeline?.name}/studio`}>
-                  {pipeline && (pipeline.alias || pipeline.name)}
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>{runBase?.pipelineRunName}</Breadcrumb.Item>
-            </Breadcrumb>
+          <Col span={6}>
+            <Breadcrumb
+              items={[
+                {
+                  to: '/projects/' + projectName + '/pipelines',
+                  title: projectName,
+                },
+                {
+                  to: `/projects/${projectName}/pipelines/${pipeline?.name}/studio`,
+                  title: (pipeline && (pipeline.alias || pipeline.name)) || '',
+                },
+                { title: runBase?.pipelineRunName || '' },
+              ]}
+            />
           </Col>
           <Col span={18} className="flexright" style={{ padding: '0 16px' }}>
             <Permission

@@ -1,16 +1,4 @@
-import {
-  Field,
-  Grid,
-  Radio,
-  Input,
-  Message,
-  Switch,
-  Select,
-  Dialog,
-  Card,
-  Button,
-  Form,
-} from '@alifd/next';
+import { Field, Grid, Radio, Input, Message, Switch, Select, Dialog, Card, Button, Form } from '@alifd/next';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import React from 'react';
@@ -31,6 +19,7 @@ import { checkPermission } from '../../utils/permission';
 import { CustomSelect } from '../CustomSelect';
 import { If } from '../If';
 import Item from '../Item';
+import { Dispatch } from 'redux';
 
 const { Col, Row } = Grid;
 
@@ -40,7 +29,7 @@ type Props = {
   systemInfo: SystemInfo;
   userInfo?: LoginUserInfo;
   platformSetting: boolean;
-  dispatch: ({}) => {};
+  dispatch: Dispatch;
 };
 
 type State = {
@@ -161,7 +150,7 @@ class PlatformSetting extends React.Component<Props, State> {
               } else {
                 Message.error(err?.Message);
               }
-            },
+            }
           );
         });
     });
@@ -170,9 +159,7 @@ class PlatformSetting extends React.Component<Props, State> {
   renderUserGuideDialog = () => {
     this.dialogGuideUser = Dialog.alert({
       title: i18n.t('The email address of administrator is empty').toString(),
-      content: i18n
-        .t('Please set a email address for the administrator, it must same as the SSO account.')
-        .toString(),
+      content: i18n.t('Please set a email address for the administrator, it must same as the SSO account.').toString(),
       footerActions: ['ok'],
       footer: this.getGuideUserButton(),
     });
@@ -182,9 +169,7 @@ class PlatformSetting extends React.Component<Props, State> {
   renderDexGuideDialog = () => {
     this.dialogGuideDex = Dialog.alert({
       title: i18n.t('No dex connector configurations').toString(),
-      content: i18n
-        .t('Before enabling SSO, you must add at least one dex connector configuration.')
-        .toString(),
+      content: i18n.t('Before enabling SSO, you must add at least one dex connector configuration.').toString(),
       footerActions: ['ok'],
       footer: this.getGuideDexButton(),
     });
@@ -229,7 +214,7 @@ class PlatformSetting extends React.Component<Props, State> {
       this.props.dispatch(
         routerRedux.push({
           pathname: '/configs/config-dex-connector/config',
-        }),
+        })
       );
     } else if (businessGuideCode === 14010) {
       this.dialogGuideUser?.hide();
@@ -237,7 +222,7 @@ class PlatformSetting extends React.Component<Props, State> {
       this.props.dispatch(
         routerRedux.push({
           pathname: '/users',
-        }),
+        })
       );
     }
   };
@@ -249,7 +234,7 @@ class PlatformSetting extends React.Component<Props, State> {
     const { clientID, redirectURL } = this.state.dexConfig;
     const newRedirectURl = encodeURIComponent(redirectURL);
     return `${this.field.getValue(
-      'velaAddress',
+      'velaAddress'
     )}/dex/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access&state=velaux`;
   };
 
@@ -382,11 +367,7 @@ class PlatformSetting extends React.Component<Props, State> {
                     return (
                       <Row id={item.id} key={item.id}>
                         <Col span={8} style={{ padding: '0 4px' }}>
-                          <Form.Item
-                            labelAlign="inset"
-                            required={true}
-                            label={i18n.t('Project').toString()}
-                          >
+                          <Form.Item labelAlign="inset" required={true} label={i18n.t('Project').toString()}>
                             <Select
                               locale={locale().Select}
                               {...this.field.init(`${item.id}-name`, {
@@ -398,11 +379,7 @@ class PlatformSetting extends React.Component<Props, State> {
                           </Form.Item>
                         </Col>
                         <Col span={12} style={{ padding: '0 4px' }}>
-                          <Form.Item
-                            labelAlign="inset"
-                            required={true}
-                            label={i18n.t('Roles').toString()}
-                          >
+                          <Form.Item labelAlign="inset" required={true} label={i18n.t('Roles').toString()}>
                             <CustomSelect
                               locale={locale().Select}
                               {...this.field.init(`${item.id}-roles`, {
@@ -441,10 +418,7 @@ class PlatformSetting extends React.Component<Props, State> {
                   href="https://kubevela.io/docs/reference/user-improvement-plan"
                   rel="noopener noreferrer"
                 >
-                  <MdOutlineHelpCenter
-                    size={16}
-                    style={{ marginLeft: '4px' }}
-                  ></MdOutlineHelpCenter>
+                  <MdOutlineHelpCenter size={16} style={{ marginLeft: '4px' }}></MdOutlineHelpCenter>
                 </a>
               </span>
             }

@@ -7,7 +7,12 @@
     "resolveJsonModule": true,
     "rootDirs": [
       "."
-    ]
+    ],
+    "paths": {
+      "@velaux/ui": [
+        "."
+      ]
+    }
   },
   "exclude": [
     "dist/**/*"

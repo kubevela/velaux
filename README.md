@@ -5,7 +5,7 @@
 
 ## Overview
 
-The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Platform. Designed as an extensible, application-oriented delivery control panel.
+The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Dashboard. Designed as an extensible, application-oriented delivery platform.
 
 ## Quick Start
 
@@ -59,7 +59,7 @@ yarn build
   make run-server
   ```
 
-Then, you can open the http://127.0.0.1:8000.
+Then, you can open the http://127.0.0.1:8000. More info refer to [contributing](./docs/contributing/velaux.md)
 
 ## Community
 

@@ -1,13 +1,13 @@
 import dva from 'dva';
 import createLoading from 'dva-loading';
-import { createBrowserHistory } from 'history';
 
 import RouterView from './router';
 import { createModel } from './store';
+import { locationService } from './services/LocationService';
 import './i18n';
 
 const app = dva({
-  history: createBrowserHistory(),
+  history: locationService.getHistory(),
 });
 
 app.use(createLoading());

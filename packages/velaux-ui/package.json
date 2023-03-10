@@ -91,6 +91,7 @@
     "@types/uuid": "^8.3.4",
     "@types/react-router-dom": "5.3.3",
     "@types/webpack-env": "1.18.0",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.1"
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.1",
+    "ts-mocha": "10.0.0"
   }
 }

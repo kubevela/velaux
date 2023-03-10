@@ -1,16 +1,16 @@
-import { Grid, Breadcrumb, Icon } from '@alifd/next';
+import { Grid } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React, { Component, Fragment } from 'react';
 
 import Translation from '../../components/Translation';
+import { Breadcrumb } from '../../components/Breadcrumb';
 import './index.less';
 import type { ProjectDetail } from '../../interface/project';
 import type { LoginUserInfo } from '../../interface/user';
 import { checkPermission } from '../../utils/permission';
 
 import classNames from 'classnames';
-import { AiOutlineHome } from 'react-icons/ai';
 
 const { Row, Col } = Grid;
 
@@ -103,21 +103,22 @@ class ProjectLayout extends Component<Props> {
   render() {
     const menu = this.getNavList();
     const { projectDetails } = this.props;
+    const projectName = projectDetails?.alias || projectDetails?.name || '';
     return (
       <Fragment>
         <Row>
           <Col span={6} className={classNames('breadcrumb')}>
-            <Link to={'/'}>
-              <AiOutlineHome size={18} />
-            </Link>
-            <Breadcrumb separator="/">
-              <Breadcrumb.Item>
-                <Link to={'/projects'}>Projects</Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link to={'/projects/' + projectDetails?.name}>{projectDetails?.alias || projectDetails?.name}</Link>
-              </Breadcrumb.Item>
-            </Breadcrumb>
+            <Breadcrumb
+              items={[
+                {
+                  to: '/projects',
+                  title: 'Projects',
+                },
+                {
+                  title: projectName,
+                },
+              ]}
+            />
           </Col>
         </Row>
         <nav className="project-detail-wrapper">

@@ -11,12 +11,7 @@ import { WorkflowPrompt } from '../../components/WorkflowPrompt';
 import WorkflowStudio from '../../components/WorkflowStudio';
 import { WorkflowContext } from '../../context';
 import type { WorkflowData } from '../../context/index';
-import type {
-  ApplicationDetail,
-  EnvBinding,
-  Workflow,
-  WorkflowMode,
-} from '../../interface/application';
+import type { ApplicationDetail, EnvBinding, Workflow, WorkflowMode } from '../../interface/application';
 import type { DefinitionBase } from '../../interface/definitions';
 import type { WorkflowStep } from '../../interface/pipeline';
 import { showAlias } from '../../utils/common';
@@ -136,7 +131,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
           mode: mode,
           subMode: subMode,
           steps: steps || [],
-        },
+        }
       )
         .then((res) => {
           if (res) {
@@ -171,7 +166,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
         )}
         <Card contentHeight={'auto'}>
           <Row>
-            <Col span={11}>
+            <Col span={10}>
               <Item
                 label={i18n.t('Available Targets')}
                 value={
@@ -181,14 +176,12 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                         <Balloon
                           key={tar.name}
                           trigger={
-                            <Tag color="green" type="primary">
+                            <Tag style={{ marginBottom: '4px' }} color="#85d4ff" type="primary">
                               {showAlias(tar.name, tar.alias)}
                             </Tag>
                           }
                         >
-                          <p>
-                            Cluster: {showAlias(tar.cluster?.clusterName || '', tar.clusterAlias)}
-                          </p>
+                          <p>Cluster: {showAlias(tar.cluster?.clusterName || '', tar.clusterAlias)}</p>
                           <p>Namespace: {tar.cluster?.namespace}</p>
                         </Balloon>
                       );
@@ -197,7 +190,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                 }
               />
             </Col>
-            <Col span={2}>
+            <Col span={4}>
               <ButtonGroup>
                 <Button
                   onClick={() => {
@@ -218,7 +211,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
               </ButtonGroup>
             </Col>
             <Col
-              span={11}
+              span={10}
               style={{
                 display: 'flex',
                 justifyContent: 'end',
@@ -229,11 +222,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                   <Translation>Unsaved changes</Translation>
                 </div>
               )}
-              <Form.Item
-                label={i18n.t('Mode').toString()}
-                labelAlign="inset"
-                style={{ marginRight: '8px' }}
-              >
+              <Form.Item label={i18n.t('Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
                 <Select
                   locale={locale().Select}
                   defaultValue="StepByStep"
@@ -244,11 +233,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                   }}
                 />
               </Form.Item>
-              <Form.Item
-                label={i18n.t('Sub Mode').toString()}
-                labelAlign="inset"
-                style={{ marginRight: '8px' }}
-              >
+              <Form.Item label={i18n.t('Sub Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
                 <Select
                   locale={locale().Select}
                   defaultValue="DAG"
@@ -259,12 +244,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                   dataSource={WorkflowModeOptions}
                 />
               </Form.Item>
-              <Button
-                disabled={!changed}
-                loading={saveLoading}
-                type="primary"
-                onClick={this.onSave}
-              >
+              <Button disabled={!changed} loading={saveLoading} type="primary" onClick={this.onSave}>
                 <Translation>Save</Translation>
               </Button>
             </Col>
@@ -279,19 +259,11 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
               workflow: workflow as WorkflowData,
             }}
           >
-            <WorkflowStudio
-              definitions={definitions}
-              steps={_.cloneDeep(workflow.steps)}
-              onChange={this.onChange}
-            />
+            <WorkflowStudio definitions={definitions} steps={_.cloneDeep(workflow.steps)} onChange={this.onChange} />
           </WorkflowContext.Provider>
         )}
         {workflow && editMode === 'yaml' && (
-          <WorkflowYAML
-            steps={_.cloneDeep(workflow.steps)}
-            name={workflow.name}
-            onChange={this.onChange}
-          />
+          <WorkflowYAML steps={_.cloneDeep(workflow.steps)} name={workflow.name} onChange={this.onChange} />
         )}
       </div>
     );

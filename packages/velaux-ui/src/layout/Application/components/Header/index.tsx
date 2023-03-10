@@ -1,10 +1,10 @@
-import { Grid, Breadcrumb, Button, Message, Dialog, Icon } from '@alifd/next';
+import { Grid, Button, Message, Dialog, Icon } from '@alifd/next';
 import classNames from 'classnames';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
-import { AiOutlineHome } from 'react-icons/ai';
+import { Breadcrumb } from '../../../../components/Breadcrumb';
 
 import { deployApplication } from '../../../../api/application';
 import { If } from '../../../../components/If';
@@ -22,6 +22,7 @@ import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
 import locale from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
+import { showAlias } from 'src/utils/common';
 
 const { Row, Col } = Grid;
 
@@ -128,29 +129,22 @@ class ApplicationHeader extends Component<Props, State> {
     return (
       <div>
         <Row>
-          <Col span={6} className={classNames('padding16', 'breadcrumb')}>
-            <Link to={'/'}>
-              <AiOutlineHome size={18} />
-            </Link>
-            <Breadcrumb separator="/">
-              <Breadcrumb.Item>
-                <Link to={'/projects/' + projectName}>{projectName}</Link>
-              </Breadcrumb.Item>
-
-              <Breadcrumb.Item>
-                <Link to={`/projects/${projectName}/applications`}>
-                  <Translation>Applications</Translation>
-                </Link>
-              </Breadcrumb.Item>
-
-              <Breadcrumb.Item>
-                <Link to={`/applications/${applicationDetail?.name || ''}`}>
-                  {applicationDetail && (applicationDetail.alias || applicationDetail.name)}
-                </Link>
-              </Breadcrumb.Item>
-
-              <Breadcrumb.Item>{item}</Breadcrumb.Item>
-            </Breadcrumb>
+          <Col span={6} className={classNames('padding16')}>
+            <Breadcrumb
+              items={[
+                {
+                  to: '/projects/' + projectName + '/applications',
+                  title: projectName,
+                },
+                {
+                  to: `/applications/${applicationDetail?.name || ''}`,
+                  title: (applicationDetail && (applicationDetail.alias || applicationDetail.name)) || '',
+                },
+                {
+                  title: item,
+                },
+              ]}
+            />
           </Col>
           <Col span={18} className="flexright" style={{ padding: '0 16px' }}>
             <If condition={applicationDetail?.readOnly}>

@@ -7,7 +7,7 @@
     "repository": "github:kubevela/velaux",
     "scripts": {
         "dev": "NODE_ENV=dev webpack --progress --color --config scripts/webpack/webpack.dev.js --watch",
-        "build": "NODE_ENV=production webpack --progress --config scripts/webpack/webpack.prod.js",
+        "build": "yarn run build-theme && NODE_ENV=production webpack --progress --config scripts/webpack/webpack.prod.js",
         "lint": "yarn run lint:ts",
         "lint:ts": "eslint . --ext .js,.tsx,.ts --cache",
         "lint:fix": "yarn lint:ts --fix",
