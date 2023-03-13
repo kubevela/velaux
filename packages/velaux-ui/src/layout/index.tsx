@@ -2,7 +2,7 @@ import { ConfigProvider } from '@alifd/next';
 import React, { useEffect, useState } from 'react';
 import Content from './Content';
 import LeftMenu from './LeftMenu';
-import TopBar from './TopBar';
+import Header from './Header';
 import './index.less';
 import { LayoutMode } from 'src/types/main';
 import { locationService } from '../services/LocationService';
@@ -18,7 +18,7 @@ export default function MainLayout(props: any) {
   return (
     <ConfigProvider>
       <div className="layout">
-        <TopBar mode={mode} {...props} />
+        <Header mode={mode} {...props} />
         <div className="layout-shell">
           {mode === 'default' && (
             <div className="layout-navigation">

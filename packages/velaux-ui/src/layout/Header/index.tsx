@@ -52,7 +52,7 @@ const TelemetryDataCollectionServer = 'https://telemetry.kubevela.net/collecting
 @connect((store: any) => {
   return { ...store.user, ...store.cloudshell, ...store.addons };
 })
-class TopBar extends Component<Props, State> {
+class Header extends Component<Props, State> {
   loadCount: number;
   constructor(props: Props) {
     super(props);
@@ -447,4 +447,4 @@ class TopBar extends Component<Props, State> {
   }
 }
 
-export default TopBar;
+export default Header;
