@@ -499,7 +499,7 @@ class PolicyDialog extends React.Component<Props, State> {
             </If>
             <If condition={selectedPolicyItem}>
               <Row wrap={true}>
-                <If condition={selectedPolicyItem && selectedPolicyItem?.name == 'custom'}>
+                {selectedPolicyItem && selectedPolicyItem?.name == 'custom' && (
                   <Col span={span} style={{ padding: '0 8px' }}>
                     <Form.Item label="Policy Type" required>
                       <Select
@@ -518,7 +518,7 @@ class PolicyDialog extends React.Component<Props, State> {
                       />
                     </Form.Item>
                   </Col>
-                </If>
+                )}
                 <Col span={span} style={{ padding: '0 8px' }}>
                   <Form.Item label={i18n.t('Name').toString()} required={true}>
                     <Input
@@ -577,25 +577,26 @@ class PolicyDialog extends React.Component<Props, State> {
             </If>
           </Card>
           <Card contentHeight="auto" style={{ marginTop: '8px' }} title={i18n.t('Select an environment').toString()}>
-            <If condition={!selectedPolicyItem || selectedPolicyItem.type != 'override'}>
-              <div>
-                <Form.Item
-                  help={i18n
-                    .t('If select an environment, this policy is only enabled in the selected environment.')
-                    .toString()}
-                >
-                  <Select
-                    {...init('envName', {
-                      rules: [],
-                    })}
-                    hasClear
-                    locale={locale().Select}
-                    dataSource={this.buildEnvironmentOptions()}
-                  />
-                </Form.Item>
-              </div>
-            </If>
-            <If condition={selectedPolicyItem && selectedPolicyItem.type == 'override'}>
+            {!selectedPolicyItem ||
+              (selectedPolicyItem.type != 'override' && (
+                <div>
+                  <Form.Item
+                    help={i18n
+                      .t('If select an environment, this policy is only enabled in the selected environment.')
+                      .toString()}
+                  >
+                    <Select
+                      {...init('envName', {
+                        rules: [],
+                      })}
+                      hasClear
+                      locale={locale().Select}
+                      dataSource={this.buildEnvironmentOptions()}
+                    />
+                  </Form.Item>
+                </div>
+              ))}
+            {selectedPolicyItem && selectedPolicyItem.type == 'override' && (
               <div>
                 <Row>
                   <Col span={12} style={{ padding: '0 8px' }}>
@@ -641,9 +642,9 @@ class PolicyDialog extends React.Component<Props, State> {
                   </Col>
                 </Row>
               </div>
-            </If>
+            )}
           </Card>
-          <If condition={selectedPolicyItem && !selectedPolicyItem?.properties}>
+          {selectedPolicyItem && !selectedPolicyItem?.properties && (
             <Loading visible={definitionDetailLoading} style={{ width: '100%' }}>
               <Card
                 contentHeight={'auto'}
@@ -652,7 +653,7 @@ class PolicyDialog extends React.Component<Props, State> {
                 className="withActions"
                 subTitle={
                   <Button
-                    style={{ marginTop: '-12px', alignItems: 'center', display: 'flex' }}
+                    style={{ alignItems: 'center', display: 'flex' }}
                     onClick={() => {
                       if (propertiesMode === 'native') {
                         this.setState({ propertiesMode: 'code' });
@@ -697,7 +698,7 @@ class PolicyDialog extends React.Component<Props, State> {
                 </If>
               </Card>
             </Loading>
-          </If>
+          )}
         </Form>
       </DrawerWithFooter>
     );

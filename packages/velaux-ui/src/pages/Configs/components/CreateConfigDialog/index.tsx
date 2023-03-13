@@ -365,7 +365,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
                     className="withActions"
                     subTitle={
                       <Button
-                        style={{ marginTop: '-12px', alignItems: 'center', display: 'flex' }}
+                        style={{ alignItems: 'center', display: 'flex' }}
                         onClick={() => {
                           if (propertiesMode === 'native') {
                             this.setState({ propertiesMode: 'code' });

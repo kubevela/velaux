@@ -1,5 +1,5 @@
 import type { Rule } from '@alifd/field';
-import { Grid, Field, Form, Select, Message, Button, Input, Icon } from '@alifd/next';
+import { Grid, Field, Form, Select, Message, Button, Input, Icon, Card, Loading } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React from 'react';
@@ -373,65 +373,61 @@ class TraitDialog extends React.Component<Props, State> {
           </Row>
           <Row>
             <Col span={24} style={{ padding: '0 8px' }}>
-              <Group
-                title={i18n.t('Trait Properties')}
-                description={i18n.t('Set the configuration parameters for the Trait.')}
-                closed={false}
-                loading={definitionLoading}
-                required={true}
-                hasToggleIcon={true}
+              <Card
+                contentHeight={'auto'}
+                style={{ marginTop: '8px' }}
+                title={i18n.t('Properties').toString()}
+                className="withActions"
+                subTitle={
+                  <Button
+                    style={{ alignItems: 'center', display: 'flex' }}
+                    onClick={() => {
+                      if (propertiesMode === 'native') {
+                        this.setState({ propertiesMode: 'code' });
+                      } else {
+                        this.setState({ propertiesMode: 'native' });
+                      }
+                    }}
+                  >
+                    {propertiesMode === 'native' && (
+                      <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                    )}
+                    {propertiesMode === 'code' && <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />}
+                  </Button>
+                }
               >
-                <If condition={definitionDetail}>
-                  <FormItem required={true}>
-                    <If condition={definitionDetail && definitionDetail.uiSchema}>
-                      <div className="flexright">
-                        <Button
-                          style={{ marginTop: '-12px', alignItems: 'center', display: 'flex' }}
-                          onClick={() => {
-                            if (propertiesMode === 'native') {
-                              this.setState({ propertiesMode: 'code' });
-                            } else {
-                              this.setState({ propertiesMode: 'native' });
-                            }
-                          }}
-                        >
-                          {propertiesMode === 'native' && (
-                            <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
-                          )}
-                          {propertiesMode === 'code' && (
-                            <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />
-                          )}
-                        </Button>
-                      </div>
-                    </If>
-                    <UISchema
-                      key={traitType}
-                      {...init(`properties`, {
-                        rules: [
-                          {
-                            validator: validator,
-                            message: i18n.t('Please check trait deploy properties'),
-                          },
-                        ],
-                      })}
-                      enableCodeEdit={propertiesMode === 'code'}
-                      uiSchema={definitionDetail && definitionDetail.uiSchema}
-                      definition={{
-                        type: 'trait',
-                        name: definitionDetail?.name || '',
-                        description: definitionDetail?.description || '',
-                      }}
-                      ref={this.uiSchemaRef}
-                      mode={this.props.isEditTrait ? 'edit' : 'new'}
-                    />
-                  </FormItem>
-                </If>
-                <If condition={!definitionDetail}>
-                  <Message type="notice">
-                    <Translation>Please select trait type first.</Translation>
-                  </Message>
-                </If>
-              </Group>
+                <Loading visible={definitionLoading}>
+                  <If condition={definitionDetail}>
+                    <FormItem required={true}>
+                      <UISchema
+                        key={traitType}
+                        {...init(`properties`, {
+                          rules: [
+                            {
+                              validator: validator,
+                              message: i18n.t('Please check trait deploy properties'),
+                            },
+                          ],
+                        })}
+                        enableCodeEdit={propertiesMode === 'code'}
+                        uiSchema={definitionDetail && definitionDetail.uiSchema}
+                        definition={{
+                          type: 'trait',
+                          name: definitionDetail?.name || '',
+                          description: definitionDetail?.description || '',
+                        }}
+                        ref={this.uiSchemaRef}
+                        mode={this.props.isEditTrait ? 'edit' : 'new'}
+                      />
+                    </FormItem>
+                  </If>
+                  <If condition={!definitionDetail}>
+                    <Message type="notice">
+                      <Translation>Please select trait type first.</Translation>
+                    </Message>
+                  </If>
+                </Loading>
+              </Card>
             </Col>
           </Row>
         </Form>
