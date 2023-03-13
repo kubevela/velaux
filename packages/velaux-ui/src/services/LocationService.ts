@@ -1,4 +1,5 @@
-//
+// This module was inspired by Grafana.
+
 import * as H from 'history';
 
 /**
@@ -22,7 +23,7 @@ function renderUrl(path: string, query: UrlQueryMap | undefined): string {
   return path;
 }
 
-function encodeURIComponentAsAngularJS(val: string, pctEncodeSpaces?: boolean) {
+function encodeURIComponent2(val: string, pctEncodeSpaces?: boolean) {
   return encodeURIComponent(val)
     .replace(/%40/gi, '@')
     .replace(/%3A/gi, ':')
@@ -46,10 +47,10 @@ function toUrlParams(a: any) {
   const add = (k: string, v: any) => {
     v = typeof v === 'function' ? v() : v === null ? '' : v === undefined ? '' : v;
     if (typeof v !== 'boolean') {
-      s[s.length] = encodeURIComponentAsAngularJS(k, true) + '=' + encodeURIComponentAsAngularJS(v, true);
+      s[s.length] = encodeURIComponent2(k, true) + '=' + encodeURIComponent2(v, true);
     } else {
-      const valueQueryPart = v ? '' : '=' + encodeURIComponentAsAngularJS('false', true);
-      s[s.length] = encodeURIComponentAsAngularJS(k, true) + valueQueryPart;
+      const valueQueryPart = v ? '' : '=' + encodeURIComponent2('false', true);
+      s[s.length] = encodeURIComponent2(k, true) + valueQueryPart;
     }
   };
 
@@ -224,6 +225,7 @@ export class HistoryWrapper implements LocationService {
     return this.history.location;
   }
 
+  // The param key include a prefix $
   getSearchObject() {
     return locationSearchToObject(this.history.location.search);
   }
@@ -250,14 +252,3 @@ export function locationSearchToObject(search: string | number): UrlQueryMap {
  * @public
  */
 export let locationService: LocationService = new HistoryWrapper();
-
-/**
- * Used for tests only
- * @internal
- */
-export const setLocationService = (location: LocationService) => {
-  if (process.env.NODE_ENV !== 'test') {
-    throw new Error('locationService can be only overriden in test environment');
-  }
-  locationService = location;
-};
