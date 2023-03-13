@@ -1,4 +1,4 @@
-import { Button, Dialog, Message, Table } from '@b-design/ui';
+import { Button, Dialog, Message, Table } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React from 'react';
@@ -67,9 +67,7 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
     if (applicationDetail) {
       Dialog.confirm({
         type: 'confirm',
-        content: (
-          <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>
-        ),
+        content: <Translation>Unrecoverable after deletion, are you sure to delete it?</Translation>,
         onOk: () => {
           deleteWorkflow({
             appName: applicationDetail.name,
@@ -96,46 +94,40 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
           <Translation>One environment corresponds to one workflow</Translation>
         </Message>
         <Table dataSource={workflowList}>
-          <Table.Column dataIndex="name" title={i18n.t('Name')} />
+          <Table.Column dataIndex="name" title={i18n.t('Name').toString()} />
           <Table.Column
             dataIndex="envName"
-            title={i18n.t('Environment')}
+            title={i18n.t('Environment').toString()}
             cell={(v: string) => {
-              return (
-                <Link
-                  to={`/applications/${applicationDetail?.name}/envbinding/${v}/workflow/studio`}
-                >
-                  {v}
-                </Link>
-              );
+              return <Link to={`/applications/${applicationDetail?.name}/envbinding/${v}/workflow/studio`}>{v}</Link>;
             }}
           />
-          <Table.Column dataIndex="mode" title={i18n.t('Mode')} />
+          <Table.Column dataIndex="mode" title={i18n.t('Mode').toString()} />
           <Table.Column
             dataIndex="steps"
-            title={i18n.t('Step Number')}
+            title={i18n.t('Step Number').toString()}
             cell={(steps: []) => {
               return steps ? steps.length : 0;
             }}
           />
           <Table.Column
             dataIndex="createTime"
-            title={i18n.t('Create Time')}
+            title={i18n.t('Create Time').toString()}
             cell={(v: string) => {
               return momentDate(v);
             }}
           />
           <Table.Column
             dataIndex="updateTime"
-            title={i18n.t('Update Time')}
+            title={i18n.t('Update Time').toString()}
             cell={(v: string) => {
               return momentDate(v);
             }}
           />
           <Table.Column
             dataIndex="name"
-            title={i18n.t('Action')}
-            cell={(v: string, w: Workflow) => {
+            title={i18n.t('Action').toString()}
+            cell={(v: string, i: number, w: Workflow) => {
               return (
                 <div>
                   <If condition={v === w.envName + '-workflow'}>
@@ -149,7 +141,6 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
                       <Button
                         text
                         size={'medium'}
-                        ghost={true}
                         className={'danger-btn'}
                         component={'a'}
                         onClick={() => {

@@ -1,4 +1,4 @@
-import { Table, Button, Icon, Dialog, Message, Tag, Balloon } from '@b-design/ui';
+import { Table, Button, Icon, Dialog, Message, Tag, Balloon } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import { If } from '../../../../components/If';
@@ -12,7 +12,7 @@ import { deleteConfig, getProjectConfigs } from '../../../../api/config';
 import CreateConfig from '../../../Configs/components/CreateConfigDialog';
 
 import DistributeConfigDialog from './config-distribute';
-
+import { HiOutlineRefresh } from 'react-icons/hi';
 
 type Props = {
   projectName: string;
@@ -123,9 +123,7 @@ class Configs extends Component<Props, State> {
                 const tag = (
                   <Tag
                     animation={true}
-                    color={
-                      t.status === 'succeeded' ? 'green' : t.status === 'failed' ? 'red' : 'yellow'
-                    }
+                    color={t.status === 'succeeded' ? 'green' : t.status === 'failed' ? 'red' : 'yellow'}
                   >
                     {t.clusterName}/{t.namespace}
                   </Tag>
@@ -167,7 +165,6 @@ class Configs extends Component<Props, State> {
                   <Button
                     text
                     size={'medium'}
-                    ghost={true}
                     component={'a'}
                     onClick={() => {
                       this.onDelete(record);
@@ -187,7 +184,6 @@ class Configs extends Component<Props, State> {
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onDistribute(record);
@@ -220,7 +216,7 @@ class Configs extends Component<Props, State> {
                 }}
                 className="card-button-wrapper"
               >
-                <Icon type="refresh" />
+                <HiOutlineRefresh />
               </Button>
               <Permission
                 request={{ resource: `project:${projectName}/config:*`, action: 'create' }}
@@ -239,12 +235,7 @@ class Configs extends Component<Props, State> {
             </div>
           </section>
           <section className="card-content-table">
-            <Table
-              locale={locale().Table}
-              dataSource={configs}
-              hasBorder={true}
-              loading={isLoading}
-            >
+            <Table locale={locale().Table} dataSource={configs} hasBorder={true} loading={isLoading}>
               {columns.map((col, key) => (
                 <Column {...col} key={key} align={'left'} />
               ))}

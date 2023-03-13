@@ -1,4 +1,4 @@
-import { Select, Grid, Card, Loading, Button } from '@b-design/ui';
+import { Select, Grid, Card, Loading, Button } from '@alifd/next';
 import { connect } from 'dva';
 import { routerRedux, Link } from 'dva/router';
 import React from 'react';
@@ -23,8 +23,6 @@ import { beautifyTime } from '../../utils/common';
 import locale from '../../utils/locale';
 
 import ApplicationWorkflowRecord from './components/WorkflowRecord';
-
-
 
 const { Row, Col } = Grid;
 

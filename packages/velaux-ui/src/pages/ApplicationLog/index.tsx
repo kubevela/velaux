@@ -1,4 +1,4 @@
-import { Message, Grid, Select } from '@b-design/ui';
+import { Message, Grid, Select } from '@alifd/next';
 import { connect } from 'dva';
 import querystring from 'query-string';
 import React, { Fragment } from 'react';
@@ -15,7 +15,6 @@ import type {
 import type { PodBase, Container } from '../../interface/observation';
 
 import LogContainer from './components/LogContainer';
-
 
 type Props = {
   match: {
@@ -245,7 +244,7 @@ class ApplicationLog extends React.Component<Props, State> {
           <Col span="4">
             <Select
               placeholder={i18n.t('Select Component').toString()}
-              label={i18n.t('Component')}
+              label={i18n.t('Component').toString()}
               dataSource={this.getComponentNameList()}
               value={activeComponentName}
               onChange={this.handleComponentNameChange}

@@ -1,5 +1,6 @@
-import { Button, Grid, Form, Input, Field, Upload, Icon, Message } from '@b-design/ui';
+import { Button, Grid, Form, Input, Field, Upload, Icon, Message } from '@alifd/next';
 import React from 'react';
+import { AiOutlineCloudUpload } from 'react-icons/ai';
 
 import DefinitionCode from '../../../../components/DefinitionCode';
 import Translation from '../../../../components/Translation';
@@ -102,11 +103,7 @@ class YmalConfig extends React.Component<Props> {
         <Form {...formItemLayout} field={this.field}>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem
-                label={<Translation>Name</Translation>}
-                labelTextAlign="left"
-                required={true}
-              >
+              <FormItem label={<Translation>Name</Translation>} labelTextAlign="left" required={true}>
                 <Input
                   htmlType="name"
                   name="name"
@@ -166,7 +163,7 @@ class YmalConfig extends React.Component<Props> {
               <FormItem label={'ApplicationYmal'} required={true}>
                 <Upload request={this.customRequest}>
                   <Button text type="normal" className="padding-left-0">
-                    <Icon type="cloudupload" />
+                    <AiOutlineCloudUpload />
                     <Translation>Upload Yaml File</Translation>
                   </Button>
                 </Upload>

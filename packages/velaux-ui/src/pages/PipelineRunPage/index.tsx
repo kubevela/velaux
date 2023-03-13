@@ -1,8 +1,9 @@
-import { Button, Card, Icon, Loading, Tab } from '@b-design/ui';
+import { Button, Card, Icon, Loading, Tab } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import classNames from 'classnames';
 import { Link } from 'dva/router';
 import React, { Component } from 'react';
+import { HiOutlineRefresh } from 'react-icons/hi';
 
 import {
   loadPipeline,
@@ -98,11 +99,9 @@ class PipelineRunPage extends Component<Props, State> {
     };
   }) => {
     const { projectName, pipelineName } = match ? match.params : this.props.match.params;
-    loadPipeline({ projectName: projectName, pipelineName: pipelineName }).then(
-      (res: PipelineDetail) => {
-        this.setState({ pipelineDetail: res });
-      },
-    );
+    loadPipeline({ projectName: projectName, pipelineName: pipelineName }).then((res: PipelineDetail) => {
+      this.setState({ pipelineDetail: res });
+    });
   };
 
   onGetRunBase = (match?: {
@@ -146,8 +145,7 @@ class PipelineRunPage extends Component<Props, State> {
       runName: string;
     };
   }) => {
-    const { projectName, pipelineName, runName } =
-      match && match.params ? match.params : this.props.match.params;
+    const { projectName, pipelineName, runName } = match && match.params ? match.params : this.props.match.params;
     this.setState({ loading: true });
     loadPipelineRunStatus({ projectName, pipelineName, runName })
       .then((res: PipelineRunStatus) => {
@@ -185,9 +183,7 @@ class PipelineRunPage extends Component<Props, State> {
       })
         .then((res) => {
           const outputs: WorkflowStepOutputs | undefined =
-            res && Array.isArray(res.outputs) && res.outputs.length > 0
-              ? res.outputs[0]
-              : undefined;
+            res && Array.isArray(res.outputs) && res.outputs.length > 0 ? res.outputs[0] : undefined;
           this.setState({
             outputs: outputs,
           });
@@ -320,8 +316,8 @@ class PipelineRunPage extends Component<Props, State> {
                             <tr>
                               <th>Addon:</th>
                               <td>
-                                <Link to={`/addons/${addonName}`}>{addonName}</Link> (Click here to
-                                check the addon detail)
+                                <Link to={`/addons/${addonName}`}>{addonName}</Link> (Click here to check the addon
+                                detail)
                               </td>
                             </tr>
                           </If>
@@ -341,9 +337,7 @@ class PipelineRunPage extends Component<Props, State> {
                           </tr>
                           <tr>
                             <th>Duration:</th>
-                            <td>
-                              {timeDiff(stepStatus.firstExecuteTime, stepStatus.lastExecuteTime)}
-                            </td>
+                            <td>{timeDiff(stepStatus.firstExecuteTime, stepStatus.lastExecuteTime)}</td>
                           </tr>
                           <If condition={stepSpec?.timeout}>
                             <tr>
@@ -353,9 +347,7 @@ class PipelineRunPage extends Component<Props, State> {
                           </If>
                           <tr>
                             <th>Phase:</th>
-                            <td className={'step-status-text-' + stepStatus.phase}>
-                              {stepStatus.phase}
-                            </td>
+                            <td className={'step-status-text-' + stepStatus.phase}>{stepStatus.phase}</td>
                           </tr>
                           <If condition={stepStatus.message || stepStatus.reason}>
                             <tr>
@@ -380,7 +372,7 @@ class PipelineRunPage extends Component<Props, State> {
                           style={{ color: '#fff' }}
                           size="small"
                         >
-                          <Icon type="refresh" />
+                          <HiOutlineRefresh />
                         </Button>
                       </div>
                       <div className="log-content">
@@ -406,11 +398,7 @@ class PipelineRunPage extends Component<Props, State> {
                           return (
                             <tr key={key}>
                               <th>{key}:</th>
-                              <td>
-                                {stepSpec &&
-                                  stepSpec.properties &&
-                                  convertAny(stepSpec.properties[key])}
-                              </td>
+                              <td>{stepSpec && stepSpec.properties && convertAny(stepSpec.properties[key])}</td>
                             </tr>
                           );
                         })}
@@ -418,11 +406,7 @@ class PipelineRunPage extends Component<Props, State> {
                   </div>
                 </Tab.Item>
                 <Tab.Item title="Outputs" key={'outputs'}>
-                  <If
-                    condition={
-                      !outputLoading && (!outputs || !outputs.values || outputs.values.length == 0)
-                    }
-                  >
+                  <If condition={!outputLoading && (!outputs || !outputs.values || outputs.values.length == 0)}>
                     <Empty hideIcon message={'There are no outputs.'} />
                   </If>
                   <Loading visible={outputLoading} style={{ width: '100%' }}>
@@ -449,11 +433,7 @@ class PipelineRunPage extends Component<Props, State> {
                   </Loading>
                 </Tab.Item>
                 <Tab.Item title="Inputs" key={'inputs'}>
-                  <If
-                    condition={
-                      !inputLoading && (!inputs || !inputs?.values || inputs.values.length == 0)
-                    }
-                  >
+                  <If condition={!inputLoading && (!inputs || !inputs?.values || inputs.values.length == 0)}>
                     <Empty hideIcon message={'There are no inputs.'} />
                   </If>
                   <Loading visible={inputLoading} style={{ width: '100%' }}>

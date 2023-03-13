@@ -1,9 +1,10 @@
-import { Icon } from '@b-design/ui';
 import classNames from 'classnames';
 import { connect } from 'dva';
 import _ from 'lodash';
 import React from 'react';
 import Draggable from 'react-draggable';
+import { AiOutlinePlayCircle } from 'react-icons/ai';
+import { FiStopCircle } from 'react-icons/fi';
 import type { Dispatch } from 'redux';
 
 import { WorkflowEditContext } from '../../context';
@@ -14,8 +15,6 @@ import { Edge } from './edge';
 import { Step } from './step';
 import StepForm from './step-form';
 import TypeSelect from './type-select';
-
-
 
 type Props = {
   steps?: WorkflowStep[];
@@ -96,7 +95,7 @@ class WorkflowStudio extends React.Component<Props, State> {
         addIndex: 0,
         subStep: false,
       },
-      this.onChange,
+      this.onChange
     );
     if (step.type != 'step-group') {
       this.setState({ showStep: step, subStep: subStep });
@@ -132,7 +131,7 @@ class WorkflowStudio extends React.Component<Props, State> {
     this.setState({ steps: newSteps }, this.onChange);
   };
 
-  render(): React.ReactNode {
+  render() {
     const { steps, stepInterval, addIndex, showStep, subStep } = this.state;
     const { definitions } = this.props;
     return (
@@ -155,13 +154,7 @@ class WorkflowStudio extends React.Component<Props, State> {
                     }}
                   >
                     <span className="line-icon">
-                      <svg
-                        data-icon="plus"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="currentColor"
-                      >
+                      <svg data-icon="plus" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <desc>plus</desc>
                         <path
                           d="M13 7H9V3c0-.55-.45-1-1-1s-1 .45-1 1v4H3c-.55 0-1 .45-1 1s.45 1 1 1h4v4c0 .55.45 1 1 1s1-.45 1-1V9h4c.55 0 1-.45 1-1s-.45-1-1-1z"
@@ -174,11 +167,8 @@ class WorkflowStudio extends React.Component<Props, State> {
                 switch (step.nodeType) {
                   case 'start':
                     return (
-                      <div
-                        key={step.nodeType + step.name}
-                        className={classNames('step', 'step-start')}
-                      >
-                        <Icon type="playcircle-fill" />
+                      <div key={step.nodeType + step.name} className={classNames('step', 'step-start')}>
+                        <AiOutlinePlayCircle size={24} />
                         <div className="workflow-step-port workflow-step-port-output step-circle" />
                       </div>
                     );
@@ -205,11 +195,8 @@ class WorkflowStudio extends React.Component<Props, State> {
                   case 'end':
                     return (
                       <div key={step.nodeType + step.name} style={{ position: 'relative' }}>
-                        <div
-                          key={step.nodeType + step.name}
-                          className={classNames('step', 'step-end')}
-                        >
-                          <Icon type="stopcircle-fill" />
+                        <div key={step.nodeType + step.name} className={classNames('step', 'step-end')}>
+                          <FiStopCircle size={24} />
                           <div className="workflow-step-port workflow-step-port-input step-circle" />
                         </div>
                         {addAction}

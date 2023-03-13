@@ -2,7 +2,7 @@ import type { MouseEvent } from 'react';
 import React from 'react';
 import './index.less';
 
-import { Grid, Card, Tag, Balloon } from '@b-design/ui';
+import { Grid, Card, Tag, Balloon } from '@alifd/next';
 
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';

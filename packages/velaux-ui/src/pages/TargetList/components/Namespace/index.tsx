@@ -1,4 +1,4 @@
-import { Input, Select, Button, Message, Dialog, Form, Field, Grid } from '@b-design/ui';
+import { Input, Select, Button, Message, Dialog, Form, Field, Grid } from '@alifd/next';
 import React from 'react';
 
 import { createClusterNamespace } from '../../../../api/cluster';
@@ -122,17 +122,16 @@ class Namespace extends React.Component<Props, State> {
         </div>
 
         <Dialog
+          v2
           locale={locale().Dialog}
-          className={'commonDialog'}
           title={<Translation>Create Namespace</Translation>}
           autoFocus={true}
-          isFullScreen={true}
+          overflowScroll={true}
           visible={visible}
           onOk={this.createNamespace}
           onCancel={this.onClose}
           onClose={this.onClose}
           footerActions={['ok']}
-          footerAlign="center"
         >
           <Form field={this.field} {...formItemLayout}>
             <Row>

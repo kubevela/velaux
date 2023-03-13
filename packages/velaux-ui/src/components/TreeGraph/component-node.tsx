@@ -1,4 +1,4 @@
-import { Balloon, Tag } from '@b-design/ui';
+import { Balloon, Tag } from '@alifd/next';
 import classNames from 'classnames';
 import * as dagre from 'dagre';
 import React, { useState } from 'react';
@@ -7,7 +7,6 @@ import Translation from '../Translation';
 
 import type { GraphNode, GraphEdge, TraitGraphNode, Line } from './interface';
 import { describeComponents, getGraphSize, ResourceIcon } from './utils';
-
 
 import './component-node.less';
 import type { TraitStatus } from '../../interface/application';

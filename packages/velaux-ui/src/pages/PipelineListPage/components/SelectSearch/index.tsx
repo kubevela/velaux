@@ -1,6 +1,5 @@
-import { Grid, Icon, Select, Input, Button } from '@b-design/ui';
+import { Grid, Icon, Select, Input, Button } from '@alifd/next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 
 import './index.less';
 import type { ShowMode } from '../..';
@@ -8,6 +7,8 @@ import { If } from '../../../../components/If';
 import i18n from '../../../../i18n';
 import type { Project } from '../../../../interface/project';
 import locale from '../../../../utils/locale';
+import { AiOutlineSearch } from 'react-icons/ai';
+import { HiOutlineRefresh } from 'react-icons/hi';
 const { Row, Col } = Grid;
 
 type Props = {
@@ -41,7 +42,7 @@ class SelectSearch extends React.Component<Props, State> {
       },
       () => {
         this.getPipelines();
-      },
+      }
     );
   }
 
@@ -95,15 +96,9 @@ class SelectSearch extends React.Component<Props, State> {
         </If>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Input
-            innerAfter={
-              <Icon
-                type="search"
-                size="xs"
-                onClick={this.handleClickSearch}
-                style={{ margin: 4 }}
-              />
-            }
+            innerAfter={<AiOutlineSearch onClick={this.handleClickSearch} style={{ margin: 4 }} />}
             hasClear
+            size="large"
             placeholder={appPlaceholder}
             onChange={this.handleChangName}
             onPressEnter={this.handleClickSearch}
@@ -114,7 +109,7 @@ class SelectSearch extends React.Component<Props, State> {
         <Col xl={6} className="flexboth">
           <div className="padding16">
             <Button type={'secondary'} onClick={() => this.getPipelines()}>
-              <Icon type="refresh" />
+              <HiOutlineRefresh />
             </Button>
           </div>
         </Col>
@@ -123,4 +118,4 @@ class SelectSearch extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(SelectSearch);
+export default SelectSearch;

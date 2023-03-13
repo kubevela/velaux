@@ -1,10 +1,9 @@
-import { Message, Grid, Dialog, Form, Input, Field, Select, Loading } from '@b-design/ui';
+import { Message, Grid, Dialog, Form, Input, Field, Select, Loading } from '@alifd/next';
 import React from 'react';
 
 import { listNamespaces } from '../../../../api/observation';
 import { getCloudServiceProviderList, getProjectList } from '../../../../api/project';
 import { createTarget, updateTarget } from '../../../../api/target';
-import { If } from '../../../../components/If';
 import Translation from '../../../../components/Translation';
 import Group from '../../../../extends/Group';
 import i18n from '../../../../i18n';
@@ -250,7 +249,6 @@ class TargetDialog extends React.Component<Props, State> {
     const { visible, isEdit, liteMode } = this.props;
     const { namespaces, projects, isLoading } = this.state;
     const cluster: string = this.field.getValue('clusterName');
-
     const projectOptions = projects?.map((project) => {
       return {
         label: project.alias ? project.alias : project.name,
@@ -267,116 +265,117 @@ class TargetDialog extends React.Component<Props, State> {
     return (
       <div>
         <Dialog
+          v2
           locale={locale().Dialog}
-          className={'commonDialog'}
-          height="auto"
           title={
             isEdit ? <Translation>Edit Target</Translation> : <Translation>New Target</Translation>
           }
           autoFocus={true}
-          isFullScreen={true}
+          overflowScroll={true}
           visible={visible}
           onOk={this.onOk}
           onCancel={this.onClose}
           onClose={this.onClose}
           footerActions={['ok']}
-          footerAlign="center"
         >
           <Form {...formItemLayout} field={this.field}>
-            <If condition={!liteMode}>
-              <Row>
-                <Col span={12} style={{ padding: '0 8px' }}>
-                  <FormItem label={<Translation>Name</Translation>} required>
-                    <Input
-                      name="name"
-                      disabled={isEdit}
-                      placeholder={i18n.t('Please enter').toString()}
-                      {...init('name', {
-                        rules: [
-                          {
-                            required: true,
-                            pattern: checkName,
-                            message: 'Please enter a valid name contains only alphabetical words',
-                          },
-                        ],
-                      })}
-                    />
-                  </FormItem>
-                </Col>
-
-                <Col span={12} style={{ padding: '0 8px' }}>
-                  <FormItem label={<Translation>Alias</Translation>}>
-                    <Input
-                      name="alias"
-                      placeholder={i18n.t('Please enter').toString()}
-                      {...init('alias', {
-                        rules: [
-                          {
-                            minLength: 2,
-                            maxLength: 64,
-                            message: 'Enter a string of 2 to 64 characters.',
-                          },
-                        ],
-                      })}
-                    />
-                  </FormItem>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24} style={{ padding: '0 8px' }}>
-                  <Loading visible={isLoading} style={{ width: '100%' }}>
-                    <FormItem label={<Translation>Project</Translation>} required>
-                      <Select
-                        name="project"
-                        hasClear
-                        showSearch
+            {!liteMode && (
+              <>
+                <Row>
+                  <Col m={12} style={{ padding: '0 8px' }}>
+                    <FormItem label={<Translation>Name</Translation>} required>
+                      <Input
+                        name="name"
                         disabled={isEdit}
-                        placeholder={i18n.t('Please select').toString()}
-                        filterLocal={true}
-                        dataSource={projectOptions}
-                        readOnly={this.props.project != undefined}
-                        style={{ width: '100%' }}
-                        {...init('project', {
+                        placeholder={i18n.t('Please enter').toString()}
+                        {...init('name', {
                           rules: [
                             {
                               required: true,
-                              message: 'Please select project',
+                              pattern: checkName,
+                              message: 'Please enter a valid name contains only alphabetical words',
                             },
                           ],
-                          initValue: this.props.project,
                         })}
-                        onChange={(item: string) => {
-                          this.field.setValue('var_providerName', '');
-                          this.field.setValue('project', item);
-                          this.getProviderList(item);
-                        }}
                       />
                     </FormItem>
-                  </Loading>
-                </Col>
-              </Row>
+                  </Col>
 
-              <Row>
-                <Col span={24} style={{ padding: '0 8px' }}>
-                  <FormItem label={<Translation>Description</Translation>}>
-                    <Input
-                      name="description"
-                      placeholder={i18n.t('Please enter').toString()}
-                      {...init('description', {
-                        rules: [
-                          {
-                            maxLength: 256,
-                            message: 'Enter a description that contains less than 256 characters.',
-                          },
-                        ],
-                      })}
-                    />
-                  </FormItem>
-                </Col>
-              </Row>
-            </If>
+                  <Col m={12} style={{ padding: '0 8px' }}>
+                    <FormItem label={<Translation>Alias</Translation>}>
+                      <Input
+                        name="alias"
+                        placeholder={i18n.t('Please enter').toString()}
+                        {...init('alias', {
+                          rules: [
+                            {
+                              minLength: 2,
+                              maxLength: 64,
+                              message: 'Enter a string of 2 to 64 characters.',
+                            },
+                          ],
+                        })}
+                      />
+                    </FormItem>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24} style={{ padding: '0 8px' }}>
+                    <Loading visible={isLoading} style={{ width: '100%' }}>
+                      <FormItem label={<Translation>Project</Translation>} required>
+                        <Select
+                          name="project"
+                          hasClear
+                          showSearch
+                          disabled={isEdit}
+                          placeholder={i18n.t('Please select').toString()}
+                          filterLocal={true}
+                          dataSource={projectOptions}
+                          readOnly={this.props.project != undefined}
+                          style={{ width: '100%' }}
+                          {...init('project', {
+                            rules: [
+                              {
+                                required: true,
+                                message: 'Please select project',
+                              },
+                            ],
+                            initValue: this.props.project,
+                          })}
+                          onChange={(item: string) => {
+                            this.field.setValue('var_providerName', '');
+                            this.field.setValue('project', item);
+                            this.getProviderList(item);
+                          }}
+                        />
+                      </FormItem>
+                    </Loading>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col span={24} style={{ padding: '0 8px' }}>
+                    <FormItem label={<Translation>Description</Translation>}>
+                      <Input
+                        name="description"
+                        placeholder={i18n.t('Please enter').toString()}
+                        {...init('description', {
+                          rules: [
+                            {
+                              maxLength: 256,
+                              message:
+                                'Enter a description that contains less than 256 characters.',
+                            },
+                          ],
+                        })}
+                      />
+                    </FormItem>
+                  </Col>
+                </Row>
+              </>
+            )}
             <Row>
-              <Col span={12} style={{ padding: '0 8px' }}>
+              <Col m={12} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Cluster</Translation>} required>
                   <Select
                     locale={locale().Select}
@@ -395,7 +394,7 @@ class TargetDialog extends React.Component<Props, State> {
                   />
                 </FormItem>
               </Col>
-              <Col span={12} style={{ padding: '0 8px' }}>
+              <Col m={12} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Namespace</Translation>} required>
                   <Namespace
                     {...init(`runtimeNamespace`, {
@@ -416,7 +415,7 @@ class TargetDialog extends React.Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
-            <If condition={!liteMode}>
+            {!liteMode && (
               <Row>
                 <Col span={24} style={{ padding: '0 8px' }}>
                   <Group
@@ -431,7 +430,7 @@ class TargetDialog extends React.Component<Props, State> {
                       <Col span={12} style={{ padding: '0 8px' }}>
                         <FormItem
                           label={<Translation>Cloud Service Provider</Translation>}
-                          help={i18n.t('Load the options after the project selected')}
+                          help={i18n.t('Load the options after the project selected').toString()}
                         >
                           <Select
                             className="select"
@@ -478,7 +477,7 @@ class TargetDialog extends React.Component<Props, State> {
                   </Group>
                 </Col>
               </Row>
-            </If>
+            )}
           </Form>
         </Dialog>
       </div>

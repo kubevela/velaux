@@ -1,7 +1,6 @@
-import { Pagination, Button } from '@b-design/ui';
+import { Pagination, Button } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 
 import { If } from '../../components/If';
 import ListTitle from '../../components/ListTitle';
@@ -20,7 +19,6 @@ type Props = {
   envTotal?: number;
   envs: Env[];
   dispatch: ({}) => void;
-  t: (key: string) => string;
   userInfo?: LoginUserInfo;
 };
 
@@ -37,7 +35,7 @@ type State = {
 @connect((store: any) => {
   return { ...store.target, ...store.application, ...store.env, ...store.user };
 })
-class targetList extends React.Component<Props, State> {
+class EnvList extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -117,6 +115,7 @@ class targetList extends React.Component<Props, State> {
           subTitle="Set up the Environments for your Application based on Target sources"
           extButtons={[
             <Permission
+              key={'new-env'}
               request={{ resource: 'project:?/environment:*', action: 'create' }}
               project={'?'}
             >
@@ -168,4 +167,4 @@ class targetList extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(targetList);
+export default EnvList;

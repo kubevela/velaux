@@ -1,4 +1,4 @@
-import { Button, Icon } from '@b-design/ui';
+import { Button, Icon } from '@alifd/next';
 import React from 'react';
 
 import { TreeGraph } from '../../../../components/TreeGraph';
@@ -18,6 +18,8 @@ import './index.less';
 import classNames from 'classnames';
 
 import { If } from '../../../../components/If';
+import { IoMdAdd } from 'react-icons/io';
+import { AiOutlineMinus } from 'react-icons/ai';
 
 type Props = {
   applicationStatus?: ApplicationStatus;
@@ -158,9 +160,7 @@ class ApplicationGraph extends React.Component<Props, State> {
           if (!clusterNode.leafNodes) {
             clusterNode.leafNodes = [this.convertComponentNode(s, component)];
           } else {
-            clusterNode.leafNodes = clusterNode.leafNodes.concat(
-              this.convertComponentNode(s, component),
-            );
+            clusterNode.leafNodes = clusterNode.leafNodes.concat(this.convertComponentNode(s, component));
           }
         }
       });
@@ -207,7 +207,7 @@ class ApplicationGraph extends React.Component<Props, State> {
               type="secondary"
               disabled={zoom <= 0.5}
             >
-              <Icon type="minus" />
+              <AiOutlineMinus />
             </Button>
             <Button
               onClick={() => {
@@ -216,7 +216,7 @@ class ApplicationGraph extends React.Component<Props, State> {
               disabled={zoom >= 2}
               type="secondary"
             >
-              <Icon type="add" />
+              <IoMdAdd />
             </Button>
           </Button.Group>
         </div>

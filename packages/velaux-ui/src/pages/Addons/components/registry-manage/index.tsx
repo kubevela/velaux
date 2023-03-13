@@ -1,4 +1,4 @@
-import { Button, Message, Grid, Dialog, Form, Input, Table, Field, Select } from '@b-design/ui';
+import { Button, Message, Grid, Dialog, Form, Input, Table, Field, Select } from '@alifd/next';
 import React from 'react';
 
 import { createAddonRegistry, deleteAddonRegistry } from '../../../../api/addons';
@@ -213,17 +213,16 @@ class RegistryManageDialog extends React.Component<Props, State> {
       <div>
         <Dialog
           locale={locale().Dialog}
-          className="commonDialog"
           title={<Translation>Registry Management</Translation>}
           autoFocus={true}
-          isFullScreen={true}
+          overflowScroll={true}
           visible={visible}
           style={{ width: '1000px' }}
           onOk={this.onOk}
           onCancel={this.onClose}
           onClose={this.onClose}
           footerActions={[]}
-          footerAlign="center"
+          v2
         >
           <Row>
             <Col>

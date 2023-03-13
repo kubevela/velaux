@@ -1,4 +1,4 @@
-import { Input, Select, Button, Message } from '@b-design/ui';
+import { Input, Select, Button, Message } from '@alifd/next';
 import React from 'react';
 
 import { createClusterNamespace } from '../../../../api/cluster';

@@ -34,7 +34,7 @@ RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
 
 FROM ${BASE_IMAGE:-alpine:3.15@sha256:cf34c62ee8eb3fe8aa24c1fab45d7e9d12768d945c3f5a6fd6a63d901e898479}
 # This is required by daemon connecting with cri
-RUN apk add --no-cache ca-certificates bash expat
+RUN apk add --no-cache ca-certificates bash expat openssl-dev
 
 WORKDIR /
 

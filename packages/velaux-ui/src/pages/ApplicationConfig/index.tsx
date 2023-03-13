@@ -1,4 +1,4 @@
-import { Grid, Button, Card, Message, Dialog, Balloon, Tag, Loading } from '@b-design/ui';
+import { Grid, Button, Card, Message, Dialog, Balloon, Tag, Loading } from '@alifd/next';
 import React, { Component } from 'react';
 import './index.less';
 import { connect } from 'dva';
@@ -162,7 +162,7 @@ class ApplicationConfig extends Component<Props, State> {
           if (res) {
             Message.success({
               duration: 4000,
-              content: i18n.t('Trait deleted successfully'),
+              content: i18n.t('Trait deleted successfully').toString(),
             });
             this.onLoadApplicationComponents();
           }
@@ -309,8 +309,8 @@ class ApplicationConfig extends Component<Props, State> {
       if (res) {
         Message.success({
           duration: 4000,
-          title: i18n.t('Success'),
-          content: i18n.t('Delete component success.'),
+          title: i18n.t('Success').toString(),
+          content: i18n.t('Delete component success.').toString(),
         });
         this.onLoadApplicationComponents();
       }

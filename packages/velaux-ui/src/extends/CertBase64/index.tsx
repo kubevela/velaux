@@ -1,13 +1,14 @@
-import { Upload, Button, Icon, Field } from '@b-design/ui';
+import { Upload, Button, Icon, Field } from '@alifd/next';
 import { decode, encode } from 'base-64';
 import React from 'react';
+import { AiOutlineCloudUpload } from 'react-icons/ai';
 import { v4 as uuid } from 'uuid';
 
 import DefinitionCode from '../../components/DefinitionCode';
 import { If } from '../../components/If';
 import Translation from '../../components/Translation';
 type Props = {
-  value: any;
+  value?: any;
   id: string;
   onChange: (value: any) => void;
   disabled: boolean;
@@ -77,18 +78,13 @@ class CertBase64 extends React.Component<Props, State> {
 
         <Upload disabled={disabled} request={this.customRequest}>
           <Button text type="normal" className="padding-left-0">
-            <Icon type="cloudupload" />
+            <AiOutlineCloudUpload />
             <Translation>Upload File</Translation>
           </Button>
         </Upload>
 
         <div id={containerId} className="guide-code">
-          <DefinitionCode
-            containerId={containerId}
-            language={'yaml'}
-            readOnly={disabled}
-            {...init('cert')}
-          />
+          <DefinitionCode containerId={containerId} language={'yaml'} readOnly={disabled} {...init('cert')} />
         </div>
       </div>
     );

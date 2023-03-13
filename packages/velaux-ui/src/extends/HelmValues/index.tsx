@@ -1,4 +1,4 @@
-import { Button, Loading } from '@b-design/ui';
+import { Button, Loading } from '@alifd/next';
 import { connect } from 'dva';
 import YAML from 'js-yaml';
 import _ from 'lodash';
@@ -11,8 +11,6 @@ import Translation from '../../components/Translation';
 import type { UIParam } from '../../interface/application';
 import type { HelmRepo } from '../../interface/repository';
 import KV from '../KV';
-
-
 
 type Props = {
   value?: any;

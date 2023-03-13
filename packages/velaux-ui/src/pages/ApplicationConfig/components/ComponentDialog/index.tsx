@@ -1,21 +1,9 @@
 import type { Rule } from '@alifd/field';
-import {
-  Grid,
-  Field,
-  Form,
-  Message,
-  Button,
-  Input,
-  Select,
-  Icon,
-  Card,
-  Loading,
-} from '@b-design/ui';
+import { Grid, Field, Form, Message, Button, Input, Select, Icon, Card, Loading } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 
 import {
   createApplicationComponent,
@@ -42,6 +30,7 @@ import './index.less';
 
 import Permission from '../../../../components/Permission';
 import { If } from '../../../../components/If';
+import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
 type Props = {
   appName?: string;
@@ -86,8 +75,7 @@ class ComponentDialog extends React.Component<Props, State> {
     if (isEditComponent) {
       this.onGetEditComponentInfo(() => {
         if (this.state.editComponent) {
-          const { name, alias, type, description, properties, dependsOn } =
-            this.state.editComponent;
+          const { name, alias, type, description, properties, dependsOn } = this.state.editComponent;
           this.field.setValues({
             name,
             alias,
@@ -126,7 +114,7 @@ class ComponentDialog extends React.Component<Props, State> {
               editComponent: res,
               loading: false,
             },
-            callback,
+            callback
           );
         }
       });
@@ -143,14 +131,7 @@ class ComponentDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', temporaryTraitList = [] } = this.props;
-      const {
-        name,
-        alias = '',
-        description = '',
-        componentType = '',
-        properties,
-        dependsOn = [],
-      } = values;
+      const { name, alias = '', description = '', componentType = '', properties, dependsOn = [] } = values;
       const params: ApplicationComponentConfig = {
         name,
         alias,
@@ -174,7 +155,7 @@ class ComponentDialog extends React.Component<Props, State> {
         if (res) {
           Message.success({
             duration: 4000,
-            content: i18n.t('Component created successfully'),
+            content: i18n.t('Component created successfully').toString(),
           });
           this.props.onComponentOK();
         }
@@ -202,7 +183,7 @@ class ComponentDialog extends React.Component<Props, State> {
     return (
       <div>
         <Button type="secondary" onClick={onComponentClose} className="margin-right-10">
-          {i18n.t('Cancel')}
+          {i18n.t('Cancel').toString()}
         </Button>
         <If condition={!isEditComponent}>
           <Permission
@@ -213,26 +194,20 @@ class ComponentDialog extends React.Component<Props, State> {
             project={project}
           >
             <Button type="primary" onClick={this.onSubmitCreate} loading={isCreateComponentLoading}>
-              {i18n.t('Create')}
+              {i18n.t('Create').toString()}
             </Button>
           </Permission>
         </If>
         <If condition={isEditComponent}>
           <Permission
             request={{
-              resource: `project:${project}/application:${appName}/component:${
-                componentName || '*'
-              }`,
+              resource: `project:${project}/application:${appName}/component:${componentName || '*'}`,
               action: 'update',
             }}
             project={project}
           >
-            <Button
-              type="primary"
-              onClick={this.onSubmitEditComponent}
-              loading={isUpdateComponentLoading}
-            >
-              {i18n.t('Update')}
+            <Button type="primary" onClick={this.onSubmitEditComponent} loading={isUpdateComponentLoading}>
+              {i18n.t('Update').toString()}
             </Button>
           </Permission>
         </If>
@@ -284,14 +259,7 @@ class ComponentDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', componentName = '' } = this.props;
-      const {
-        name,
-        alias = '',
-        description = '',
-        componentType = '',
-        properties,
-        dependsOn = [],
-      } = values;
+      const { name, alias = '', description = '', componentType = '', properties, dependsOn = [] } = values;
       const params: ApplicationComponentConfig = {
         name,
         alias,
@@ -305,7 +273,7 @@ class ComponentDialog extends React.Component<Props, State> {
         if (res) {
           Message.success({
             duration: 4000,
-            content: i18n.t('Component updated successfully'),
+            content: i18n.t('Component updated successfully').toString(),
           });
           this.props.onComponentOK();
         }
@@ -324,8 +292,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const filterComponents = (components || []).filter((component) => {
       if (
         componentName &&
-        (component.name === componentName ||
-          (component.dependsOn && component.dependsOn.includes(componentName)))
+        (component.name === componentName || (component.dependsOn && component.dependsOn.includes(componentName)))
       ) {
         return false;
       } else {
@@ -365,11 +332,7 @@ class ComponentDialog extends React.Component<Props, State> {
               <Row>
                 <Col span={12} style={{ paddingRight: '8px' }}>
                   <FormItem
-                    label={
-                      <Translation className="font-size-14 font-weight-bold color333">
-                        Name
-                      </Translation>
-                    }
+                    label={<Translation className="font-size-14 font-weight-bold color333">Name</Translation>}
                     labelTextAlign="left"
                     required={true}
                   >
@@ -430,11 +393,7 @@ class ComponentDialog extends React.Component<Props, State> {
               <Row>
                 <Col span={12} style={{ paddingRight: '8px' }}>
                   <FormItem
-                    label={
-                      <Translation className="font-size-14 font-weight-bold color333">
-                        Type
-                      </Translation>
-                    }
+                    label={<Translation className="font-size-14 font-weight-bold color333">Type</Translation>}
                     required={true}
                     help={
                       <span>
@@ -471,11 +430,7 @@ class ComponentDialog extends React.Component<Props, State> {
 
                 <Col span={12} style={{ paddingRight: '8px' }}>
                   <FormItem
-                    label={
-                      <Translation className="font-size-14 font-weight-bold color333">
-                        Depends On
-                      </Translation>
-                    }
+                    label={<Translation className="font-size-14 font-weight-bold color333">Depends On</Translation>}
                   >
                     <Select
                       {...init(`dependsOn`, {
@@ -503,7 +458,7 @@ class ComponentDialog extends React.Component<Props, State> {
               definitionDetail && definitionDetail.uiSchema
                 ? [
                     <Button
-                      style={{ marginTop: '-12px' }}
+                      style={{ marginTop: '-12px', alignItems: 'center', display: 'flex' }}
                       onClick={() => {
                         if (propertiesMode === 'native') {
                           this.setState({ propertiesMode: 'code' });
@@ -512,20 +467,10 @@ class ComponentDialog extends React.Component<Props, State> {
                         }
                       }}
                     >
-                      <If condition={propertiesMode === 'native'}>
-                        <Icon
-                          style={{ color: '#1b58f4' }}
-                          type={'display-code'}
-                          title={'Switch to the coding mode'}
-                        />
-                      </If>
-                      <If condition={propertiesMode === 'code'}>
-                        <Icon
-                          style={{ color: '#1b58f4' }}
-                          type={'laptop'}
-                          title={'Switch to the native mode'}
-                        />
-                      </If>
+                      {propertiesMode === 'native' && (
+                        <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                      )}
+                      {propertiesMode === 'code' && <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />}
                     </Button>,
                   ]
                 : []
@@ -561,4 +506,4 @@ class ComponentDialog extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(ComponentDialog);
+export default ComponentDialog;

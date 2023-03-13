@@ -1,6 +1,6 @@
-import { Grid, Select } from '@b-design/ui';
+import { Grid, Select } from '@alifd/next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
+import i18n from '../../../../i18n';
 
 import type { EnvBinding } from '../../../../interface/application';
 import locale from '../../../../utils/locale';
@@ -14,7 +14,6 @@ type Props = {
   statusList: Label[];
   envBinding?: EnvBinding[];
   updateQuery: (params: { isChangeEnv?: boolean; isChangeStatus?: boolean; value: string }) => void;
-  t: (key: string) => {};
   dispatch?: ({}) => {};
 };
 
@@ -23,7 +22,7 @@ type State = {
   statusValue: string;
 };
 
-class Hearder extends React.Component<Props, State> {
+class Header extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -47,9 +46,8 @@ class Hearder extends React.Component<Props, State> {
   transEnvBind = () => {};
   render() {
     const { Row, Col } = Grid;
-    const { t } = this.props;
-    const envPlaceholder = t('Select Environment').toString();
-    const statusPlaceholder = t('Select Status').toString();
+    const envPlaceholder = i18n.t('Select Environment').toString();
+    const statusPlaceholder = i18n.t('Select Status').toString();
     const { envValue, statusValue } = this.state;
     const { statusList, envBinding } = this.props;
     const envBinds = (envBinding || []).map((item: { name: string; alias?: string }) => ({
@@ -88,4 +86,4 @@ class Hearder extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(Hearder);
+export default Header;

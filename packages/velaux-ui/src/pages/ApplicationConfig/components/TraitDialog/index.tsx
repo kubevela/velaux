@@ -1,9 +1,9 @@
 import type { Rule } from '@alifd/field';
-import { Grid, Field, Form, Select, Message, Button, Input, Icon } from '@b-design/ui';
+import { Grid, Field, Form, Select, Message, Button, Input, Icon } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
+import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
 import { updateTrait, createTrait, getApplicationComponent } from '../../../../api/application';
 import { detailTraitDefinition, getTraitDefinitions } from '../../../../api/definitions';
@@ -13,11 +13,7 @@ import Translation from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import Group from '../../../../extends/Group';
 import i18n from '../../../../i18n';
-import type {
-  ApplicationComponent,
-  DefinitionDetail,
-  Trait,
-} from '../../../../interface/application';
+import type { ApplicationComponent, DefinitionDetail, Trait } from '../../../../interface/application';
 import type { DefinitionBase } from '../../../../interface/definitions';
 
 type Props = {
@@ -97,7 +93,7 @@ class TraitDialog extends React.Component<Props, State> {
             {
               component: res,
             },
-            callback,
+            callback
           );
         }
       });
@@ -121,7 +117,7 @@ class TraitDialog extends React.Component<Props, State> {
               podDisruptive: podDisruptive,
             });
           }
-        },
+        }
       );
     }
   };
@@ -152,8 +148,8 @@ class TraitDialog extends React.Component<Props, State> {
             if (res) {
               Message.success({
                 duration: 4000,
-                title: i18n.t('Trait properties update success.'),
-                content: i18n.t('You need to re-execute the workflow for it to take effect.'),
+                title: i18n.t('Trait properties update success.').toString(),
+                content: i18n.t('You need to re-execute the workflow for it to take effect.').toString(),
               });
               this.props.onOK();
             }
@@ -164,8 +160,8 @@ class TraitDialog extends React.Component<Props, State> {
             if (res) {
               Message.success({
                 duration: 4000,
-                title: i18n.t('Trait create success.'),
-                content: i18n.t('You need to re-execute the workflow for it to take effect.'),
+                title: i18n.t('Trait create success.').toString(),
+                content: i18n.t('You need to re-execute the workflow for it to take effect.').toString(),
               });
               this.props.onOK();
             }
@@ -178,9 +174,7 @@ class TraitDialog extends React.Component<Props, State> {
           params.properties = JSON.parse(params.properties);
           this.props.createTemporaryTrait(params);
         } else if (!isEditTrait && findSameType) {
-          return Message.warning(
-            i18n.t('A trait with the same trait type exists, please modify it'),
-          );
+          return Message.warning(i18n.t('A trait with the same trait type exists, please modify it'));
         } else if (isEditTrait) {
           params.properties = JSON.parse(params.properties);
           this.props.upDateTemporaryTrait(params);
@@ -302,9 +296,9 @@ class TraitDialog extends React.Component<Props, State> {
               <Col span={24}>
                 <Message
                   type="warning"
-                  title={i18n.t(
-                    'This trait properties change will cause pod restart after the application deploy',
-                  )}
+                  title={i18n
+                    .t('This trait properties change will cause pod restart after the application deploy')
+                    .toString()}
                 />
               </Col>
             </Row>
@@ -369,9 +363,7 @@ class TraitDialog extends React.Component<Props, State> {
                     rules: [
                       {
                         maxLength: 256,
-                        message: i18n.t(
-                          'Enter a description that contains less than 256 characters.',
-                        ),
+                        message: i18n.t('Enter a description that contains less than 256 characters.'),
                       },
                     ],
                   })}
@@ -394,7 +386,7 @@ class TraitDialog extends React.Component<Props, State> {
                     <If condition={definitionDetail && definitionDetail.uiSchema}>
                       <div className="flexright">
                         <Button
-                          style={{ marginTop: '-12px' }}
+                          style={{ marginTop: '-12px', alignItems: 'center', display: 'flex' }}
                           onClick={() => {
                             if (propertiesMode === 'native') {
                               this.setState({ propertiesMode: 'code' });
@@ -403,20 +395,12 @@ class TraitDialog extends React.Component<Props, State> {
                             }
                           }}
                         >
-                          <If condition={propertiesMode === 'native'}>
-                            <Icon
-                              style={{ color: '#1b58f4' }}
-                              type={'display-code'}
-                              title={'Switch to the coding mode'}
-                            />
-                          </If>
-                          <If condition={propertiesMode === 'code'}>
-                            <Icon
-                              style={{ color: '#1b58f4' }}
-                              type={'laptop'}
-                              title={'Switch to the native mode'}
-                            />
-                          </If>
+                          {propertiesMode === 'native' && (
+                            <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                          )}
+                          {propertiesMode === 'code' && (
+                            <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />
+                          )}
                         </Button>
                       </div>
                     </If>
@@ -456,4 +440,4 @@ class TraitDialog extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(TraitDialog);
+export default TraitDialog;

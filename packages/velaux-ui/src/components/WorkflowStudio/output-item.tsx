@@ -1,15 +1,13 @@
-import { Grid, Input, Form, Button, Icon } from '@b-design/ui';
+import { Grid, Input, Form, Button, Icon } from '@alifd/next';
 import _ from 'lodash';
 import React, { useState } from 'react';
+import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 
 import type { OutputItem } from '../../interface/application';
 import locale from '../../utils/locale';
 const { Row, Col } = Grid;
 
-export const OutputItemForm = (props: {
-  value?: OutputItem;
-  onChange: (i: OutputItem) => void;
-}) => {
+export const OutputItemForm = (props: { value?: OutputItem; onChange: (i: OutputItem) => void }) => {
   const [name, setName] = useState<string>(props.value ? props.value.name : '');
   const [valueFrom, setValueFrom] = useState<string>(props.value?.valueFrom || '');
   const nameChange = (value: string) => {
@@ -43,11 +41,7 @@ export const OutputItemForm = (props: {
   );
 };
 
-export const OutputItems = (props: {
-  value?: OutputItem[];
-  id: string;
-  onChange: (items: OutputItem[]) => void;
-}) => {
+export const OutputItems = (props: { value?: OutputItem[]; id: string; onChange: (items: OutputItem[]) => void }) => {
   const [items, setItems] = useState<OutputItem[]>(props.value || [{ name: '', valueFrom: '' }]);
 
   const onChange = (update: OutputItem[]) => {
@@ -83,7 +77,7 @@ export const OutputItems = (props: {
                   type="secondary"
                   style={{ justifyContent: 'center', marginLeft: '8px' }}
                 >
-                  <Icon type="semi-select" />
+                  <IoMdRemove />
                 </Button>
               </div>
             )}
@@ -100,7 +94,7 @@ export const OutputItems = (props: {
         type="secondary"
         style={{ justifyContent: 'center', marginLeft: '8px' }}
       >
-        <Icon type="add" />
+        <IoMdAdd />
       </Button>
     </div>
   );

@@ -1,7 +1,6 @@
-import { Pagination, Button } from '@b-design/ui';
+import { Pagination, Button } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 
 import { If } from '../../components/If';
 import ListTitle from '../../components/ListTitle';
@@ -39,7 +38,7 @@ type State = {
 @connect((store: any) => {
   return { ...store.target, ...store.clusters, ...store.user };
 })
-class targetList extends React.Component<Props, State> {
+class TargetList extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -128,7 +127,11 @@ class targetList extends React.Component<Props, State> {
           title="Targets"
           subTitle="Define the targets that applications would deliver to"
           extButtons={[
-            <Permission request={{ resource: 'target:*', action: 'create' }} project={''}>
+            <Permission
+              key={'new-target'}
+              request={{ resource: 'target:*', action: 'create' }}
+              project={''}
+            >
               <Button
                 type="primary"
                 onClick={() => {
@@ -175,4 +178,4 @@ class targetList extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(targetList);
+export default TargetList;

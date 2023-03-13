@@ -27,9 +27,9 @@ import {
 } from './utils';
 
 import { Link } from 'dva/router';
-import { Dropdown, Icon, Menu, Tag, Balloon } from '@b-design/ui';
-
-
+import { Dropdown, Icon, Menu, Tag, Balloon } from '@alifd/next';
+import { FaEllipsisV } from 'react-icons/fa';
+import { HiOutlineNewspaper } from 'react-icons/hi';
 
 type TreeGraphProps = {
   node: TreeNode;
@@ -64,7 +64,7 @@ function renderResourceNode(props: TreeGraphProps, id: string, node: GraphNode) 
         <div className="kind">{node.resource.kind}</div>
       </div>
       <div className={classNames('actions')}>
-        <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
+        <Dropdown trigger={<FaEllipsisV />}>
           <Menu>
             <Menu.Item onClick={() => props.onResourceDetailClick(node.resource)}>Detail</Menu.Item>
           </Menu>
@@ -110,7 +110,7 @@ function renderAppNode(props: TreeGraphProps, id: string, node: GraphNode) {
         <span>{node.resource.name}</span>
       </div>
       <div className={classNames('actions')}>
-        <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
+        <Dropdown trigger={<FaEllipsisV />}>
           <Menu>
             <Menu.Item onClick={() => props.onResourceDetailClick(node.resource)}>Detail</Menu.Item>
           </Menu>
@@ -151,21 +151,17 @@ function renderPodNode(props: TreeGraphProps, id: string, node: GraphNode) {
         <span>Pod</span>
       </div>
       <div className={classNames('name')}>
-        <Link
-          to={`/applications/${appName}/envbinding/${envName}/instances?pod=${node.resource.name}`}
-        >
+        <Link to={`/applications/${appName}/envbinding/${envName}/instances?pod=${node.resource.name}`}>
           {node.resource.name}
         </Link>
         <div className={classNames('actions')}>
-          <Link
-            to={`/applications/${appName}/envbinding/${envName}/logs?pod=${node.resource.name}`}
-          >
-            <Icon title={i18n.t('Logger')} type="news" />
+          <Link to={`/applications/${appName}/envbinding/${envName}/logs?pod=${node.resource.name}`}>
+            <HiOutlineNewspaper title={i18n.t('Logger')} />
           </Link>
         </div>
       </div>
       <div className={classNames('actions')}>
-        <Dropdown trigger={<Icon type="ellipsis-vertical" />}>
+        <Dropdown trigger={<FaEllipsisV />}>
           <Menu>
             <Menu.Item onClick={() => props.onResourceDetailClick(node.resource)}>Detail</Menu.Item>
           </Menu>
@@ -333,18 +329,14 @@ export const TreeGraph = (props: TreeGraphProps) => {
           case 'component':
             return <ComponentNode key={key} node={node} showTrait={true} />;
           default:
-            return (
-              <React.Fragment key={key}>{renderResourceNode(props, key, node)}</React.Fragment>
-            );
+            return <React.Fragment key={key}>{renderResourceNode(props, key, node)}</React.Fragment>;
         }
       })}
 
       {edges.map((edge) => (
         <div key={`${edge.from}-${edge.to}`} className="graph-edge">
           {edge.lines.map((line) => {
-            const distance = Math.sqrt(
-              Math.pow(line.x1 - line.x2, 2) + Math.pow(line.y1 - line.y2, 2),
-            );
+            const distance = Math.sqrt(Math.pow(line.x1 - line.x2, 2) + Math.pow(line.y1 - line.y2, 2));
             const xMid = (line.x1 + line.x2) / 2;
             const yMid = (line.y1 + line.y2) / 2;
             const angle = (Math.atan2(line.y1 - line.y2, line.x1 - line.x2) * 180) / Math.PI;

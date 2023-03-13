@@ -1,5 +1,5 @@
-import type { Rule } from '@alifd/meet-react/lib/field';
-import { Card, Form, Select, Grid, Field, Icon, Balloon, Message } from '@b-design/ui';
+import type { Rule } from '@alifd/next/lib/field';
+import { Card, Form, Select, Grid, Field, Icon, Balloon, Message } from '@alifd/next';
 import classNames from 'classnames';
 import { connect } from 'dva';
 import React from 'react';
@@ -10,11 +10,7 @@ import { CustomSelect } from '../../components/CustomSelect';
 import { If } from '../../components/If';
 import Translation from '../../components/Translation';
 import i18n from '../../i18n';
-import type {
-  ApplicationComponent,
-  ApplicationComponentBase,
-  Trait,
-} from '../../interface/application';
+import type { ApplicationComponent, ApplicationComponentBase, Trait } from '../../interface/application';
 import locale from '../../utils/locale';
 const { Col, Row } = Grid;
 
@@ -178,9 +174,7 @@ class ComponentPatch extends React.Component<Props, State> {
             <Col span={12} style={{ padding: '0 8px' }}>
               <Form.Item label={i18n.t('Type').toString()}>
                 <CustomSelect
-                  placeholder={i18n.t(
-                    'You can base a component type to set the patch configuration',
-                  )}
+                  placeholder={i18n.t('You can base a component type to set the patch configuration')}
                   disabled={disabled}
                   dataSource={componentTypeOptions}
                   hasClear
@@ -203,25 +197,21 @@ class ComponentPatch extends React.Component<Props, State> {
                     const label = trait.alias ? trait.alias + '(' + trait.type + ')' : trait.type;
                     const disable = traitPatchMap.get(trait.type)?.disable;
                     const icon = (
-                      <Icon
+                      <AiOutlineDelete
                         onClick={(event: React.MouseEvent<HTMLElement>) => {
                           event.stopPropagation();
                           if (disable) {
                             this.setFormValue(
                               'traits',
-                              traitPatches.filter((t) => t.type != trait.type),
+                              traitPatches.filter((t) => t.type != trait.type)
                             );
                           } else {
-                            this.setFormValue('traits', [
-                              ...traitPatches,
-                              { type: trait.type, disable: true },
-                            ]);
+                            this.setFormValue('traits', [...traitPatches, { type: trait.type, disable: true }]);
                           }
                         }}
                         size={14}
                         className="danger-icon"
                         title={disable ? i18n.t('Cancel Disable') : i18n.t('Disable')}
-                        type="ashbin1"
                       />
                     );
                     return (
@@ -235,9 +225,7 @@ class ComponentPatch extends React.Component<Props, State> {
                       >
                         <div>{label}</div>
                         <div className="trait-actions">
-                          <Balloon trigger={icon}>
-                            {disable ? i18n.t('Cancel Disable') : i18n.t('Disable')}
-                          </Balloon>
+                          <Balloon trigger={icon}>{disable ? i18n.t('Cancel Disable') : i18n.t('Disable')}</Balloon>
                         </div>
                       </div>
                     );

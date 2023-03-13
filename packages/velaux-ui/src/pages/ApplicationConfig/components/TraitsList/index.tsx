@@ -1,4 +1,4 @@
-import { Card, Grid, Icon, Dialog } from '@b-design/ui';
+import { Card, Grid, Icon, Dialog } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import type { Trait } from '../../../../interface/application';
@@ -7,6 +7,7 @@ import './index.less';
 import locale from '../../../../utils/locale';
 import i18n from '../../../../i18n';
 import { If } from '../../../../components/If';
+import { AiOutlineDelete, AiOutlinePlusCircle } from 'react-icons/ai';
 
 type Props = {
   traits: Trait[];
@@ -30,7 +31,7 @@ type TraitTrans = {
 class TraitsList extends Component<Props> {
   handleDelete = (traitType: string) => {
     Dialog.alert({
-      content: i18n.t('Are you sure want to delete this trait?'),
+      content: i18n.t('Are you sure want to delete this trait?').toString(),
       onOk: () => {
         this.props.onDeleteTrait(traitType || '');
       },
@@ -55,8 +56,7 @@ class TraitsList extends Component<Props> {
               {item.alias ? `${item.alias}(${item.type})` : item.type}
             </div>
             <div className="traits-list-operation">
-              <Icon
-                type="ashbin1"
+              <AiOutlineDelete
                 size={14}
                 className="margin-right-16 cursor-pointer"
                 onClick={() => {
@@ -78,8 +78,7 @@ class TraitsList extends Component<Props> {
       <Col xl={12} m={12} s={24} className="padding16 card-add-wrapper">
         <Card locale={locale().Card}>
           <div className="traits-add-operation">
-            <Icon
-              type="plus-circle"
+            <AiOutlinePlusCircle
               size={14}
               className="margin-right-16 cursor-pointer"
               onClick={() => {

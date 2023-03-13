@@ -1,13 +1,13 @@
-import { Grid, Icon, Select, Input, Checkbox } from '@b-design/ui';
+import { Grid, Icon, Select, Input, Checkbox } from '@alifd/next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
+import { AiOutlineSearch } from 'react-icons/ai';
 
 import Translation from '../../../../components/Translation';
+import i18n from '../../../../i18n';
 import locale from '../../../../utils/locale';
 import './index.less';
 
 type Props = {
-  t: (key: string) => {};
   dispatch: ({}) => {};
   listFunction: ({}) => {};
   onTagChange: (tags: string[]) => void;
@@ -38,7 +38,7 @@ class SelectSearch extends React.Component<Props, State> {
       },
       () => {
         this.handleClickSearch();
-      },
+      }
     );
   }
 
@@ -66,15 +66,15 @@ class SelectSearch extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { Option } = Select;
-    const { t, registries } = this.props;
-    const queryPlaceholder = t('Search by name and description etc').toString();
+    const { registries } = this.props;
+    const queryPlaceholder = i18n.t('Search by name and description etc').toString();
     const { registryValue, inputValue } = this.state;
 
     return (
       <div className="border-radius-8 addon-search">
         <div>
           <Row wrap={true}>
-            <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+            <Col m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
               <Select
                 locale={locale().Select}
                 mode="single"
@@ -96,17 +96,11 @@ class SelectSearch extends React.Component<Props, State> {
               </Select>
             </Col>
 
-            <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+            <Col m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
               <Input
-                innerAfter={
-                  <Icon
-                    type="search"
-                    size="xs"
-                    onClick={this.handleClickSearch}
-                    style={{ margin: 4 }}
-                  />
-                }
+                innerAfter={<AiOutlineSearch onClick={this.handleClickSearch} style={{ margin: 4 }} />}
                 placeholder={queryPlaceholder}
+                size="large"
                 onChange={this.handleChangName}
                 onPressEnter={this.handleClickSearch}
                 value={inputValue}
@@ -133,4 +127,4 @@ class SelectSearch extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(SelectSearch);
+export default SelectSearch;

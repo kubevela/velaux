@@ -1,4 +1,4 @@
-import { Grid } from '@b-design/ui';
+import { Grid } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 

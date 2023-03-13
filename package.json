@@ -7,12 +7,13 @@
     "repository": "github:kubevela/velaux",
     "scripts": {
         "dev": "NODE_ENV=dev webpack --progress --color --config scripts/webpack/webpack.dev.js --watch",
-        "build": "NODE_ENV=production webpack --progress --config scripts/webpack/webpack.prod.js",
+        "build": "yarn run build-theme && NODE_ENV=production webpack --progress --config scripts/webpack/webpack.prod.js",
         "lint": "yarn run lint:ts",
         "lint:ts": "eslint . --ext .js,.tsx,.ts --cache",
         "lint:fix": "yarn lint:ts --fix",
         "test": "yarn test:ui",
-        "test:ui": "yarn workspace @velaux/ui run test"
+        "test:ui": "yarn workspace @velaux/ui run test",
+        "build-theme": "yarn workspace @velaux/theme run build-theme"
     },
     "workspaces": {
         "packages": [
@@ -20,9 +21,7 @@
             "plugins-bundled/internal/*"
         ]
     },
-    "dependencies": {
-        "jquery": "3.6.1"
-    },
+    "dependencies": {},
     "devDependencies": {
         "browserslist": "^4.21.4",
         "@babel/core": "7.20.5",
@@ -76,6 +75,7 @@
         "@grafana/eslint-config": "5.1.0",
         "@typescript-eslint/parser": "5.42.0",
         "@typescript-eslint/eslint-plugin": "5.42.0",
+        "react-dev-utils": "^11.0.4",
         "typescript": "4.4.4"
     },
     "engines": {

@@ -1,4 +1,4 @@
-import { Button } from '@b-design/ui';
+import { Button } from '@alifd/next';
 import React from 'react';
 
 import Translation from '../Translation';

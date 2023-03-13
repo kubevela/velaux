@@ -1,4 +1,4 @@
-import { Loading } from '@b-design/ui';
+import { Loading } from '@alifd/next';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import React, { useEffect } from 'react';

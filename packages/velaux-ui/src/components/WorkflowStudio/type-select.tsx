@@ -1,4 +1,4 @@
-import { Balloon, Card, Dialog, Field, Form, Grid, Input } from '@b-design/ui';
+import { Balloon, Card, Dialog, Field, Form, Grid, Input } from '@alifd/next';
 import _ from 'lodash';
 import React from 'react';
 
@@ -13,8 +13,7 @@ import Translation from '../Translation';
 import { StepTypeIcon } from './step-icon';
 
 import './index.less';
-import type { Rule } from '@alifd/meet-react/lib/field';
-
+import type { Rule } from '@alifd/next/lib/field';
 
 const { Row, Col } = Grid;
 
@@ -158,12 +157,10 @@ class TypeSelect extends React.Component<Props, State> {
     });
   };
 
-  render(): React.ReactNode {
+  render() {
     const { definitions, onClose, checkStepName, addSub } = this.props;
     const { selectType } = this.state;
-    const catalogs = buildDefinitionCatalog(
-      definitions?.filter((def) => !addSub || def.name != 'step-group') || [],
-    );
+    const catalogs = buildDefinitionCatalog(definitions?.filter((def) => !addSub || def.name != 'step-group') || []);
     console.log(catalogs);
     const { init } = this.field;
     const checkStepNameRule = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -176,14 +173,15 @@ class TypeSelect extends React.Component<Props, State> {
     return (
       <Dialog
         locale={locale().Dialog}
-        className={'commonDialog'}
         autoFocus={true}
-        isFullScreen={true}
+        overflowScroll={true}
         onClose={onClose}
         onCancel={onClose}
+        width={800}
         onOk={this.onSubmit}
-        title={selectType ? i18n.t('Set Step Basic Info') : i18n.t('Select Step Type')}
+        title={selectType ? i18n.t('Set Step Basic Info').toString() : i18n.t('Select Step Type').toString()}
         visible
+        v2
       >
         <div>
           {!selectType &&
@@ -191,12 +189,7 @@ class TypeSelect extends React.Component<Props, State> {
               .filter((c) => c.definitions.length > 0)
               .map((catalog) => {
                 return (
-                  <Card
-                    title={catalog.title}
-                    contentHeight={'auto'}
-                    key={catalog.title}
-                    subTitle={catalog.description}
-                  >
+                  <Card title={catalog.title} contentHeight={'auto'} key={catalog.title} subTitle={catalog.description}>
                     <div className="def-items">
                       {catalog.definitions?.map((def) => {
                         const item = (
@@ -229,10 +222,7 @@ class TypeSelect extends React.Component<Props, State> {
             <Form field={this.field}>
               <Row wrap>
                 <Col span={24}>
-                  <Item
-                    label={i18n.t('Select Type')}
-                    value={showAlias(selectType.name, selectType.alias)}
-                  />
+                  <Item label={i18n.t('Select Type')} value={showAlias(selectType.name, selectType.alias)} />
                 </Col>
                 <Col span={24}>
                   <Item label={i18n.t('Type Description')} value={selectType.description} />
@@ -240,11 +230,7 @@ class TypeSelect extends React.Component<Props, State> {
               </Row>
               <Row>
                 <Col span={12} style={{ padding: '0 8px' }}>
-                  <Form.Item
-                    label={<Translation>Name</Translation>}
-                    labelTextAlign="left"
-                    required={true}
-                  >
+                  <Form.Item label={<Translation>Name</Translation>} labelTextAlign="left" required={true}>
                     <Input
                       htmlType="name"
                       name="name"

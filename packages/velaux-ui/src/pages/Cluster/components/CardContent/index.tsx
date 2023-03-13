@@ -1,7 +1,7 @@
 import React from 'react';
 import './index.less';
 
-import { Dropdown, Menu, Grid, Card, Dialog } from '@b-design/ui';
+import { Dropdown, Menu, Grid, Card, Dialog } from '@alifd/next';
 
 import kubernetesSvg from '../../../../assets/kubernetes.svg';
 import { If } from '../../../../components/If';
@@ -12,7 +12,6 @@ import locale from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
 
 import { connect } from 'dva';
-
 
 type State = {
   extendDotVisible: boolean;

@@ -1,4 +1,4 @@
-import { Switch } from '@b-design/ui';
+import { Switch } from '@alifd/next';
 import React from 'react';
 
 type Props = {

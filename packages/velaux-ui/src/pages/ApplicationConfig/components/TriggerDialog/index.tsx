@@ -1,6 +1,5 @@
-import { Grid, Field, Form, Select, Message, Button, Input } from '@b-design/ui';
+import { Grid, Field, Form, Select, Message, Button, Input } from '@alifd/next';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
 import type { Dispatch } from 'redux';
 
 import { createTrigger, updateTrigger } from '../../../../api/application';
@@ -435,4 +434,4 @@ class TriggerDialog extends React.Component<Props, State> {
   }
 }
 
-export default withTranslation()(TriggerDialog);
+export default TriggerDialog;

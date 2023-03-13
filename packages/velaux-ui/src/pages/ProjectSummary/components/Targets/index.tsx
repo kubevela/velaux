@@ -1,4 +1,4 @@
-import { Button, Table } from '@b-design/ui';
+import { Button, Table } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Component, Fragment } from 'react';
 

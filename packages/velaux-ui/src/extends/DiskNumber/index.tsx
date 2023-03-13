@@ -1,10 +1,10 @@
-import { Input } from '@b-design/ui';
+import { Input } from '@alifd/next';
 import React from 'react';
 
 type Props = {
   id: string;
   onChange: (value: any) => void;
-  value: any;
+  value?: any;
   disabled: boolean;
 };
 
@@ -25,7 +25,7 @@ class DiskNumber extends React.Component<Props, State> {
 
   render() {
     const { value, id, disabled } = this.props;
-    let initValue = undefined;
+    let initValue: number | undefined = undefined;
     if (value) {
       initValue = parseInt(value.replace('Gi', ''), 10);
     }

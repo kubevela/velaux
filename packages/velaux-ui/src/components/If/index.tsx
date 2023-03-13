@@ -4,5 +4,5 @@ export function If(props: { children: React.ReactNode; condition: unknown }) {
   if (props.condition) {
     return props.children as any;
   }
-  return null;
+  return <div></div>;
 }

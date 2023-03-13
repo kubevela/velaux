@@ -2,7 +2,7 @@
 
 ## About VelaUX
 
-The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Platform, it provides out-of-box application delivery and management platform.
+The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Dashboard. Designed as an extensible, application-oriented delivery platform.
 
 To help us create a safe and positive community experience for all, we require all participants to adhere to the [Code of Conduct](https://github.com/oam-dev/kubevela/blob/master/CODE_OF_CONDUCT.md).
 

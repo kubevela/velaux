@@ -1,4 +1,4 @@
-import { Drawer } from '@b-design/ui';
+import { Drawer } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 import { AiOutlineFullscreen } from 'react-icons/ai';

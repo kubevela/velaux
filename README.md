@@ -5,7 +5,7 @@
 
 ## Overview
 
-The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Platform. Designed as an extensible, application-oriented delivery control panel.
+The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Dashboard. Designed as an extensible, application-oriented delivery platform.
 
 ## Quick Start
 
@@ -19,6 +19,8 @@ Please refer to: [https://kubevela.net/docs/install](https://kubevela.net/docs/i
 
 Make sure you have installed [yarn](https://classic.yarnpkg.com/en/docs/install).
 
+Install frontend dependencies and build the frontend.
+
 ```shell
 yarn install
 yarn build
@@ -26,7 +28,7 @@ yarn build
 
 #### Start the server
 
-1. Install the Go 1.19
+1. Install the Go 1.19+.
 2. Prepare a KubeVela core environment.
 
   ```shell
@@ -41,15 +43,23 @@ yarn build
 3. Init the dependencies.
 
   ```shell
-  vela addon enable ./addon
+  vela addon enable ./addon replicas=0
   ```
 
 4. Start the server on local
 
   ```shell
+  # Install all dependencies
   go mod tidy
+
+  # Setting the kube config
+  export KUBECONFIG=$(velad kubeconfig --host)
+
+  # Start the server
   make run-server
   ```
+
+Then, you can open the http://127.0.0.1:8000. More info refer to [contributing](./docs/contributing/velaux.md)
 
 ## Community
 

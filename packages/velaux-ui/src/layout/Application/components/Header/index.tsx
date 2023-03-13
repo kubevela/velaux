@@ -1,9 +1,10 @@
-import { Grid, Breadcrumb, Button, Message, Dialog, Icon } from '@b-design/ui';
+import { Grid, Button, Message, Dialog, Icon } from '@alifd/next';
 import classNames from 'classnames';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
+import { Breadcrumb } from '../../../../components/Breadcrumb';
 
 import { deployApplication } from '../../../../api/application';
 import { If } from '../../../../components/If';
@@ -21,6 +22,7 @@ import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
 import locale from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
+import { showAlias } from 'src/utils/common';
 
 const { Row, Col } = Grid;
 
@@ -76,7 +78,7 @@ class ApplicationHeader extends Component<Props, State> {
           triggerType: 'web',
           force: force || false,
         },
-        true,
+        true
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
@@ -85,8 +87,8 @@ class ApplicationHeader extends Component<Props, State> {
             if (re.record && re.record.name && dispatch) {
               dispatch(
                 routerRedux.push(
-                  `/applications/${applicationDetail.name}/envbinding/${re.envName}/workflow/records/${re.record.name}`,
-                ),
+                  `/applications/${applicationDetail.name}/envbinding/${re.envName}/workflow/records/${re.record.name}`
+                )
               );
             }
           }
@@ -94,7 +96,7 @@ class ApplicationHeader extends Component<Props, State> {
         .catch((err: APIError) => {
           if (err.BusinessCode === 10004) {
             Dialog.confirm({
-              content: i18n.t('Workflow is executing. Do you want to force a restart?'),
+              content: i18n.t('Workflow is executing. Do you want to force a restart?').toString(),
               onOk: () => {
                 this.onDeploy(workflowName, true);
               },
@@ -119,8 +121,7 @@ class ApplicationHeader extends Component<Props, State> {
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     let item = <Translation>{`app-${activeKey}`}</Translation>;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
-    const sourceOfTrust =
-      applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
+    const sourceOfTrust = applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
     const envPage = currentPath.startsWith(`/applications/${appName}/envbinding/`);
     if (envPage) {
       item = <Translation>{`Environment`}</Translation>;
@@ -128,48 +129,36 @@ class ApplicationHeader extends Component<Props, State> {
     return (
       <div>
         <Row>
-          <Col span={6} className={classNames('padding16', 'breadcrumb')}>
-            <Link to={'/'}>
-              <Icon type="home" />
-            </Link>
-            <Breadcrumb separator="/">
-              <Breadcrumb.Item>
-                <Link to={'/projects/' + projectName}>{projectName}</Link>
-              </Breadcrumb.Item>
-
-              <Breadcrumb.Item>
-                <Link to={`/projects/${projectName}/applications`}>
-                  <Translation>Applications</Translation>
-                </Link>
-              </Breadcrumb.Item>
-
-              <Breadcrumb.Item>
-                <Link to={`/applications/${applicationDetail?.name || ''}`}>
-                  {applicationDetail && (applicationDetail.alias || applicationDetail.name)}
-                </Link>
-              </Breadcrumb.Item>
-
-              <Breadcrumb.Item>{item}</Breadcrumb.Item>
-            </Breadcrumb>
+          <Col span={6} className={classNames('padding16')}>
+            <Breadcrumb
+              items={[
+                {
+                  to: '/projects/' + projectName + '/applications',
+                  title: projectName,
+                },
+                {
+                  to: `/applications/${applicationDetail?.name || ''}`,
+                  title: (applicationDetail && (applicationDetail.alias || applicationDetail.name)) || '',
+                },
+                {
+                  title: item,
+                },
+              ]}
+            />
           </Col>
           <Col span={18} className="flexright" style={{ padding: '0 16px' }}>
             <If condition={applicationDetail?.readOnly}>
               <Message
                 type="notice"
-                title={i18n.t('This application is managed by the addon, and it is readonly')}
+                title={i18n.t('This application is managed by the addon, and it is readonly').toString()}
               />
             </If>
             <If condition={sourceOfTrust === 'from-k8s-resource'}>
-              <Message
-                type="warning"
-                title={i18n.t('The application is synchronizing from the cluster.')}
-              />
+              <Message type="warning" title={i18n.t('The application is synchronizing from the cluster.').toString()} />
             </If>
             <Permission
               request={{
-                resource: `project:${projectName}/application:${
-                  applicationDetail && applicationDetail.name
-                }`,
+                resource: `project:${projectName}/application:${applicationDetail && applicationDetail.name}`,
                 action: 'deploy',
               }}
               project={projectName}

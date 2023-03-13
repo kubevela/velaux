@@ -37,8 +37,20 @@ export default class AuthRoute extends Component<Props> {
           } else {
             return (
               <Fragment>
-                <Route exact path="/callback" component={CallBackPage} />
-                <Route exact path="/login" component={LoginPage} />
+                <Route
+                  exact
+                  path="/callback"
+                  render={(props: any) => {
+                    return <CallBackPage {...props}></CallBackPage>;
+                  }}
+                />
+                <Route
+                  exact
+                  path="/login"
+                  render={(props: any) => {
+                    return <LoginPage {...props}></LoginPage>;
+                  }}
+                />
               </Fragment>
             );
           }

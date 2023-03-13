@@ -1,19 +1,16 @@
-import { Balloon, Card, Dialog, Grid, Icon } from '@b-design/ui';
+import { Balloon, Card, Dialog, Grid, Icon } from '@alifd/next';
 import React, { Component } from 'react';
 
 import { If } from '../../../../components/If';
 import Item from '../../../../components/Item';
 import Permission from '../../../../components/Permission';
-import type {
-  ApplicationDetail,
-  ApplicationPolicyBase,
-  EnvBinding,
-} from '../../../../interface/application';
+import type { ApplicationDetail, ApplicationPolicyBase, EnvBinding } from '../../../../interface/application';
 import { beautifyTime, momentDate } from '../../../../utils/common';
 import './index.less';
 import Empty from '../../../../components/Empty';
 import Translation from '../../../../components/Translation';
 import locale from '../../../../utils/locale';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 type Props = {
   policies?: ApplicationPolicyBase[];
@@ -57,13 +54,7 @@ class PolicyList extends Component<Props, State> {
           <Row wrap={true}>
             {(policies || []).map((item: ApplicationPolicyBase) => (
               <Col span={24} key={item.type} className="box-item">
-                <Card
-                  free={true}
-                  style={{ padding: '16px' }}
-                  hasBorder
-                  contentHeight="auto"
-                  locale={locale().Card}
-                >
+                <Card free={true} style={{ padding: '16px' }} hasBorder contentHeight="auto" locale={locale().Card}>
                   <div className="policy-list-nav">
                     <div className="policy-list-title">
                       <a onClick={() => this.props.onShowPolicy(item.name)}>
@@ -80,8 +71,7 @@ class PolicyList extends Component<Props, State> {
                         }}
                         project={projectName}
                       >
-                        <Icon
-                          type="ashbin1"
+                        <AiOutlineDelete
                           size={14}
                           className="margin-right-0 cursor-pointer danger-icon"
                           onClick={() => {
@@ -114,11 +104,7 @@ class PolicyList extends Component<Props, State> {
                           marginBottom="8px"
                           labelWidth={160}
                           label={<Translation>Create Time</Translation>}
-                          value={
-                            <span title={momentDate(item.createTime)}>
-                              {beautifyTime(item.createTime)}
-                            </span>
-                          }
+                          value={<span title={momentDate(item.createTime)}>{beautifyTime(item.createTime)}</span>}
                         />
                       </Col>
                     </Row>

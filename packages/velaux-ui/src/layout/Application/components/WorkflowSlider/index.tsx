@@ -1,4 +1,4 @@
-import { Card, Icon } from '@b-design/ui';
+import { Card, Icon } from '@alifd/next';
 import React, { Component } from 'react';
 
 import type { WorkflowRecord } from '../../../../interface/application';

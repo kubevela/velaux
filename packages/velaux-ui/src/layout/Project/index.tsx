@@ -1,9 +1,10 @@
-import { Grid, Breadcrumb, Icon } from '@b-design/ui';
+import { Grid } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React, { Component, Fragment } from 'react';
 
 import Translation from '../../components/Translation';
+import { Breadcrumb } from '../../components/Breadcrumb';
 import './index.less';
 import type { ProjectDetail } from '../../interface/project';
 import type { LoginUserInfo } from '../../interface/user';
@@ -73,26 +74,14 @@ class ProjectLayout extends Component<Props> {
       },
     ];
 
-    if (
-      checkPermission(
-        { resource: `project:${projectName}/role:*`, action: 'list' },
-        projectName,
-        userInfo,
-      )
-    ) {
+    if (checkPermission({ resource: `project:${projectName}/role:*`, action: 'list' }, projectName, userInfo)) {
       list.push({
         id: 'roles',
         name: <Translation>Roles</Translation>,
         to: `/projects/${projectName}/roles`,
       });
     }
-    if (
-      checkPermission(
-        { resource: `project:${projectName}/projectUser:*`, action: 'list' },
-        projectName,
-        userInfo,
-      )
-    ) {
+    if (checkPermission({ resource: `project:${projectName}/projectUser:*`, action: 'list' }, projectName, userInfo)) {
       list.push({
         id: 'members',
         name: <Translation>Members</Translation>,
@@ -114,23 +103,22 @@ class ProjectLayout extends Component<Props> {
   render() {
     const menu = this.getNavList();
     const { projectDetails } = this.props;
+    const projectName = projectDetails?.alias || projectDetails?.name || '';
     return (
       <Fragment>
         <Row>
           <Col span={6} className={classNames('breadcrumb')}>
-            <Link to={'/'}>
-              <Icon type="home" />
-            </Link>
-            <Breadcrumb separator="/">
-              <Breadcrumb.Item>
-                <Link to={'/projects'}>Projects</Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link to={'/projects/' + projectDetails?.name}>
-                  {projectDetails?.alias || projectDetails?.name}
-                </Link>
-              </Breadcrumb.Item>
-            </Breadcrumb>
+            <Breadcrumb
+              items={[
+                {
+                  to: '/projects',
+                  title: 'Projects',
+                },
+                {
+                  title: projectName,
+                },
+              ]}
+            />
           </Col>
         </Row>
         <nav className="project-detail-wrapper">

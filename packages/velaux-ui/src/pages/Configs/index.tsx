@@ -1,7 +1,6 @@
-import { Table, Button, Dialog, Message, Icon } from '@b-design/ui';
+import { Table, Button, Dialog, Message, Icon } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component, Fragment } from 'react';
-
 
 import { getConfigs, deleteConfig } from '../../api/config';
 import { If } from '../../components/If';
@@ -15,6 +14,7 @@ import { getMatchParamObj } from '../../utils/utils';
 import './index.less';
 
 import CreateConfigDialog from './components/CreateConfigDialog';
+import { HiOutlineRefresh } from 'react-icons/hi';
 
 type Props = {
   userInfo?: LoginUserInfo;
@@ -60,7 +60,7 @@ class Configs extends Component<Props, State> {
         },
         () => {
           this.listConfigs();
-        },
+        }
       );
     }
   }
@@ -169,14 +169,10 @@ class Configs extends Component<Props, State> {
         cell: (v: string, i: number, record: Config) => {
           return (
             <Fragment>
-              <Permission
-                request={{ resource: `config:${record.name}`, action: 'delete' }}
-                project={''}
-              >
+              <Permission request={{ resource: `config:${record.name}`, action: 'delete' }} project={''}>
                 <Button
                   text
                   size={'medium'}
-                  ghost={true}
                   component={'a'}
                   onClick={() => {
                     this.onDelete(record);
@@ -196,12 +192,8 @@ class Configs extends Component<Props, State> {
     return (
       <div className="list-content">
         <div className="create-btn">
-          <Button
-            type="secondary"
-            onClick={() => this.listConfigs()}
-            style={{ marginRight: '16px' }}
-          >
-            <Icon type="refresh" />
+          <Button type="secondary" onClick={() => this.listConfigs()} style={{ marginRight: '16px' }}>
+            <HiOutlineRefresh />
           </Button>
           <Permission request={{ resource: `config:*`, action: 'create' }} project={''}>
             <Button type="primary" onClick={this.handleClickCreate}>

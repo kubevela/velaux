@@ -1,5 +1,6 @@
-import { Icon } from '@b-design/ui';
+import { Icon } from '@alifd/next';
 import React from 'react';
+import { AiOutlineSafetyCertificate } from 'react-icons/ai';
 
 import SvgApi from '../Icons/SvgAPI';
 import SvgEp from '../Icons/SvgEp';
@@ -46,7 +47,7 @@ export const StepTypeIcon = (props: { type: string }) => {
     case 'webhook':
       return <SvgApi width="24px" height="24px" />;
     case 'suspend':
-      return <Icon type="safety-certificate" />;
+      return <AiOutlineSafetyCertificate />;
     case 'collect-service-endpoints':
       return (
         <SvgEp

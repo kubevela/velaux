@@ -1,4 +1,4 @@
-import { Loading, Select } from '@b-design/ui';
+import { Loading, Select } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 
@@ -6,7 +6,6 @@ import { getChartVersions } from '../../api/repository';
 import i18n from '../../i18n';
 import type { ChartVersion, HelmRepo } from '../../interface/repository';
 import locale from '../../utils/locale';
-
 
 type Props = {
   value?: any;

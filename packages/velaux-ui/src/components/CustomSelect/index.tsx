@@ -1,5 +1,5 @@
-import type { SelectProps } from '@alifd/meet-react/lib/select';
-import { Select } from '@b-design/ui';
+import type { SelectProps } from '@alifd/next/lib/select';
+import { Select } from '@alifd/next';
 import * as React from 'react';
 
 import locale from '../../utils/locale';

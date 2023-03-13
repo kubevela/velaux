@@ -1,15 +1,12 @@
 import type { Rule } from '@alifd/field';
-import { Grid, Field, Form, Select, Message, Button } from '@b-design/ui';
+import { Grid, Field, Form, Select, Message, Button } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React from 'react';
-import { withTranslation } from 'react-i18next';
-
 import { createApplication } from '../../../../api/application';
 import { detailComponentDefinition } from '../../../../api/definitions';
 import { getEnvs } from '../../../../api/env';
 import DrawerWithFooter from '../../../../components/Drawer';
-import { If } from '../../../../components/If';
 import Translation from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import type { DefinitionDetail } from '../../../../interface/application';
@@ -33,7 +30,6 @@ type Props = {
   dispatch: ({}) => void;
   onClose: () => void;
   onOK: (name: string) => void;
-  t: (key: string) => string;
 };
 
 type State = {
@@ -69,6 +65,7 @@ class AppDialog extends React.Component<Props, State> {
       createLoading: false,
     };
     this.field = new Field(this, {
+      autoUnmount: false,
       onChange: (name: string, value: string) => {
         if (name === 'project') {
           this.setState({ project: value }, () => {
@@ -124,7 +121,7 @@ class AppDialog extends React.Component<Props, State> {
         envBindings,
         project,
       } = values;
-      const envbinding = envBindings.map((env: string) => {
+      const envbinding = envBindings?.map((env: string) => {
         return { name: env };
       });
       const params = {
@@ -347,10 +344,9 @@ class AppDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-
     const { visible, setVisible, dispatch, projects, onClose, isDisableProject, userInfo } =
       this.props;
-
+    console.log(this.field);
     const { definitionDetail, dialogStats, envs, visibleEnvDialog } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
@@ -361,108 +357,111 @@ class AppDialog extends React.Component<Props, State> {
         value: env.name,
       };
     });
-
+    const secondStep =
+      dialogStats === 'isCreateComponent' && definitionDetail && definitionDetail.uiSchema
+        ? true
+        : false;
+    init('test');
     return (
       <React.Fragment>
         <DrawerWithFooter
           title={<Translation>New Application</Translation>}
           placement="right"
           width={800}
+          visible={visible}
           onClose={onClose}
           extButtons={this.extButtonList()}
         >
           <Form field={this.field}>
-            <If condition={dialogStats === 'isBasic'}>
-              <GeneralConfig
-                visible={visible}
-                setVisible={setVisible}
-                dispatch={dispatch}
-                userInfo={userInfo}
-                projects={projects}
-                isDisableProject={isDisableProject}
-                field={this.field}
-                ref={this.basicRef}
-              />
+            {dialogStats === 'isBasic' && (
+              <>
+                <GeneralConfig
+                  visible={visible}
+                  setVisible={setVisible}
+                  dispatch={dispatch}
+                  userInfo={userInfo}
+                  projects={projects}
+                  isDisableProject={isDisableProject}
+                  field={this.field}
+                  ref={this.basicRef}
+                />
 
-              <Row>
-                <Col span={24} style={{ padding: '0 8px' }}>
-                  <FormItem
-                    label={
-                      <Translation className="font-size-14 font-weight-bold">
-                        Main Component Type
-                      </Translation>
-                    }
-                    required={true}
-                    help={
-                      <span>
-                        <Translation>Get more component type?</Translation>
-                        <Link to="/addons">
-                          <Translation>Go to enable addon</Translation>
-                        </Link>
-                      </span>
-                    }
-                  >
-                    <Select
-                      locale={locale().Select}
-                      showSearch
-                      className="select"
-                      {...init(`componentType`, {
-                        initValue: 'webservice',
-                        rules: [
-                          {
-                            required: true,
-                            message: 'Please select',
-                          },
-                        ],
-                      })}
-                      dataSource={this.transComponentDefinitions()}
-                      onChange={this.handleChange}
-                    />
-                  </FormItem>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24} style={{ padding: '0 8px' }}>
-                  <FormItem
-                    label={
-                      <Translation className="font-size-14 font-weight-bold">
-                        Bind Environments
-                      </Translation>
-                    }
-                    help={
-                      <a
-                        onClick={() => {
-                          this.changeEnvDialog(true);
-                        }}
-                      >
-                        <Translation>New Environment</Translation>
-                      </a>
-                    }
-                    required={true}
-                  >
-                    <Select
-                      {...init(`envBindings`, {
-                        rules: [
-                          {
-                            required: true,
-                            message: 'Please select env',
-                          },
-                        ],
-                      })}
-                      locale={locale().Select}
-                      mode="multiple"
-                      dataSource={envOptions}
-                    />
-                  </FormItem>
-                </Col>
-              </Row>
-            </If>
+                <Row>
+                  <Col span={24} style={{ padding: '0 8px' }}>
+                    <FormItem
+                      label={
+                        <Translation className="font-size-14 font-weight-bold">
+                          Main Component Type
+                        </Translation>
+                      }
+                      required={true}
+                      help={
+                        <span>
+                          <Translation>Get more component type?</Translation>
+                          <Link to="/addons">
+                            <Translation>Go to enable addon</Translation>
+                          </Link>
+                        </span>
+                      }
+                    >
+                      <Select
+                        locale={locale().Select}
+                        showSearch
+                        className="select"
+                        {...init(`componentType`, {
+                          initValue: 'webservice',
+                          rules: [
+                            {
+                              required: true,
+                              message: 'Please select',
+                            },
+                          ],
+                        })}
+                        dataSource={this.transComponentDefinitions()}
+                        onChange={this.handleChange}
+                      />
+                    </FormItem>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24} style={{ padding: '0 8px' }}>
+                    <FormItem
+                      label={
+                        <Translation className="font-size-14 font-weight-bold">
+                          Bind Environments
+                        </Translation>
+                      }
+                      help={
+                        <a
+                          onClick={() => {
+                            this.changeEnvDialog(true);
+                          }}
+                        >
+                          <Translation>New Environment</Translation>
+                        </a>
+                      }
+                      required={true}
+                    >
+                      <Select
+                        {...init(`envBindings`, {
+                          rules: [
+                            {
+                              required: true,
+                              message: 'Please select env',
+                            },
+                          ],
+                        })}
+                        locale={locale().Select}
+                        mode="multiple"
+                        dataSource={envOptions}
+                      />
+                    </FormItem>
+                  </Col>
+                </Row>
+              </>
+            )}
 
-            <If
-              condition={
-                dialogStats === 'isCreateComponent' && definitionDetail && definitionDetail.uiSchema
-              }
-            >
+            {secondStep && (
               <FormItem required={true}>
                 <UISchema
                   {...init(`properties`, {
@@ -478,10 +477,10 @@ class AppDialog extends React.Component<Props, State> {
                   mode="new"
                 />
               </FormItem>
-            </If>
+            )}
           </Form>
         </DrawerWithFooter>
-        <If condition={visibleEnvDialog}>
+        {visibleEnvDialog && (
           <EnvDialog
             visible={visibleEnvDialog}
             userInfo={userInfo}
@@ -491,10 +490,10 @@ class AppDialog extends React.Component<Props, State> {
             onClose={this.onCloseEnvDialog}
             onOK={this.onOKEnvDialog}
           />
-        </If>
+        )}
       </React.Fragment>
     );
   }
 }
 
-export default withTranslation()(AppDialog);
+export default AppDialog;

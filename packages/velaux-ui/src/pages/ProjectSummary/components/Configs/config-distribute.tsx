@@ -1,4 +1,4 @@
-import { Message, Grid, Dialog, Form, Field, Select } from '@b-design/ui';
+import { Message, Grid, Dialog, Form, Field, Select } from '@alifd/next';
 import React from 'react';
 
 import './index.less';
@@ -102,9 +102,9 @@ class DistributeConfigDialog extends React.Component<Props, State> {
     return (
       <Dialog
         locale={locale().Dialog}
-        className={'commonDialog'}
+        v2
         title={<Translation>Distribute the config</Translation>}
-        isFullScreen={true}
+        overflowScroll={true}
         autoFocus={true}
         visible={true}
         onOk={this.onOk}

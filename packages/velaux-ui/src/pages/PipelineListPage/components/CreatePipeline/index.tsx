@@ -1,4 +1,4 @@
-import { Field, Form, Grid, Input, Message, Select } from '@b-design/ui';
+import { Field, Form, Grid, Input, Message, Select } from '@alifd/next';
 import { connect } from 'dva';
 import * as yaml from 'js-yaml';
 import React from 'react';

@@ -1,4 +1,4 @@
-import { Button, Message } from '@b-design/ui';
+import { Button, Message } from '@alifd/next';
 import * as React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 

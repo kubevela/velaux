@@ -1,4 +1,4 @@
-import { Grid } from '@b-design/ui';
+import { Grid } from '@alifd/next';
 import React from 'react';
 
 const { Col, Row } = Grid;

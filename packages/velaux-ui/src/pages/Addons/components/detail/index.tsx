@@ -14,22 +14,15 @@ import {
   Dropdown,
   Menu,
   Icon,
-} from '@b-design/ui';
+} from '@alifd/next';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import {
-  getAddonsDetails,
-  getAddonsStatus,
-  disableAddon,
-  enableAddon,
-  upgradeAddon,
-} from '../../../../api/addons';
+import { getAddonsDetails, getAddonsStatus, disableAddon, enableAddon, upgradeAddon } from '../../../../api/addons';
 import { listApplicationServiceEndpoints } from '../../../../api/observation';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Empty from '../../../../components/Empty';
-import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import StatusShow from '../../../../components/StatusShow';
 import Translation from '../../../../components/Translation';
@@ -46,6 +39,7 @@ import { Link } from 'dva/router';
 
 import type { Endpoint } from '../../../../interface/observation';
 import { getLink } from '../../../../utils/utils';
+import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
 const { Col, Row } = Grid;
 
@@ -144,7 +138,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
           }, 4000);
         }
 
-        let clusters = undefined;
+        let clusters: string[] = [];
         if (res.args) {
           this.form.setValue('properties', res.args);
           this.setState({ mode: 'edit' });
@@ -195,8 +189,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
 
   onDisable = () => {
     Dialog.confirm({
-      content:
-        'Please make sure that the Addon is no longer in use and the related application has been recycled.',
+      content: 'Please make sure that the Addon is no longer in use and the related application has been recycled.',
       onOk: this.disableAddon,
       locale: locale().Dialog,
     });
@@ -218,14 +211,14 @@ class AddonDetailDialog extends React.Component<Props, State> {
         return;
       }
       if (!this.state.version) {
-        Message.warning(i18n.t('Please firstly select want to enable version'));
+        Message.warning(i18n.t('Please select want to enable version firstly'));
         return;
       }
       if (
         this.state.addonDetailInfo?.deployTo?.runtimeCluster &&
         (!this.state.clusters || this.state.clusters.length == 0)
       ) {
-        Message.warning(i18n.t('Please firstly select at least one cluster.'));
+        Message.warning(i18n.t('Please select at least one cluster firstly.'));
         return;
       }
       this.setState({ upgradeLoading: true });
@@ -247,14 +240,14 @@ class AddonDetailDialog extends React.Component<Props, State> {
 
   enableAddon = async (properties: any) => {
     if (!this.state.version) {
-      Message.warning(i18n.t('Please firstly select want to enable version'));
+      Message.warning(i18n.t('Please select want to enable version'));
       return;
     }
     if (
-      !this.state.addonDetailInfo?.deployTo?.runtimeCluster &&
+      this.state.addonDetailInfo?.deployTo?.runtimeCluster &&
       (!this.state.clusters || this.state.clusters.length == 0)
     ) {
-      Message.warning(i18n.t('Please firstly select at least one cluster.'));
+      Message.warning(i18n.t('Please select at least one cluster firstly.'));
       return;
     }
     this.setState({ statusLoading: true, enableLoading: true }, () => {
@@ -346,7 +339,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
         item.uiType = 'Password';
       }
     });
-    const buttons = [];
+    const buttons: React.ReactNode[] = [];
 
     const workflowStatus = addonsStatus?.status;
 
@@ -370,36 +363,23 @@ class AddonDetailDialog extends React.Component<Props, State> {
           >
             <Translation>Disable</Translation>
           </Button>
-        </Permission>,
+        </Permission>
       );
     }
 
     if (status == 'enabled' || status == 'suspend' || workflowStatus == 'workflowFailed') {
       buttons.push(
-        <Permission
-          key={'upgrade'}
-          request={{ resource: `addon:${addonName}`, action: 'update' }}
-          project={''}
-        >
-          <Button
-            loading={upgradeLoading}
-            type="primary"
-            onClick={this.onUpgrade}
-            style={{ marginLeft: '16px' }}
-          >
+        <Permission key={'upgrade'} request={{ resource: `addon:${addonName}`, action: 'update' }} project={''}>
+          <Button loading={upgradeLoading} type="primary" onClick={this.onUpgrade} style={{ marginLeft: '16px' }}>
             <Translation>Upgrade</Translation>
           </Button>
-        </Permission>,
+        </Permission>
       );
     }
 
     if (status === 'disabled' || (status === 'enabling' && workflowStatus != 'workflowFailed')) {
       buttons.push(
-        <Permission
-          key={'enable'}
-          request={{ resource: `addon:${addonName}`, action: 'enable' }}
-          project={''}
-        >
+        <Permission key={'enable'} request={{ resource: `addon:${addonName}`, action: 'enable' }} project={''}>
           <Button
             loading={status === 'enabling' || enableLoading}
             type="primary"
@@ -408,7 +388,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
           >
             <Translation>Enable</Translation>
           </Button>
-        </Permission>,
+        </Permission>
       );
     }
 
@@ -446,21 +426,15 @@ class AddonDetailDialog extends React.Component<Props, State> {
     const notice = "This addon is experimental, please don't use it in production";
     return (
       <div className="basic">
-        <DrawerWithFooter
-          title={showName}
-          width={800}
-          placement="right"
-          onClose={this.onClose}
-          extButtons={buttons}
-        >
+        <DrawerWithFooter title={showName} width={800} placement="right" onClose={this.onClose} extButtons={buttons}>
           <Loading visible={loading} style={{ width: '100%' }}>
-            <If condition={addonDetailInfo && addonDetailInfo.registryName == 'experimental'}>
+            {addonDetailInfo && addonDetailInfo.registryName == 'experimental' && (
               <Message type="warning">
                 <Translation>{notice}</Translation>
               </Message>
-            </If>
+            )}
 
-            <If condition={addonsStatus && addonsStatus.status}>
+            {addonsStatus && addonsStatus.status && (
               <Row>
                 <Col span={16}>
                   <Message
@@ -469,15 +443,12 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     style={{ padding: '8px', marginBottom: '10px' }}
                   >
                     {`${i18n.t('Addon status is ')}${addonsStatus?.status || 'Init'}`}
-                    <Link
-                      style={{ marginLeft: '16px' }}
-                      to={`/applications/addon-${addonDetailInfo?.name}/envbinding`}
-                    >
+                    <Link style={{ marginLeft: '16px' }} to={`/applications/addon-${addonDetailInfo?.name}/envbinding`}>
                       <Translation>Check the details</Translation>
                     </Link>
                   </Message>
                 </Col>
-                <If condition={outerEndpoint && outerEndpoint?.length > 0}>
+                {outerEndpoint && outerEndpoint?.length > 0 && (
                   <Col span={8} className={'flexright'}>
                     <Dropdown
                       trigger={
@@ -491,15 +462,11 @@ class AddonDetailDialog extends React.Component<Props, State> {
                           const linkURL = getLink(item);
                           return (
                             <Menu.Item key={linkURL}>
-                              <If condition={item.endpoint.portName}>
+                              {item.endpoint.portName && (
                                 <span className="margin-right-5">{item.endpoint.portName}:</span>
-                              </If>
-                              <a
-                                style={{ color: '#1b58f4' }}
-                                target="_blank"
-                                href={linkURL}
-                                rel="noopener noreferrer"
-                              >
+                              )}
+
+                              <a style={{ color: '#1b58f4' }} target="_blank" href={linkURL} rel="noopener noreferrer">
                                 {linkURL}
                               </a>
                             </Menu.Item>
@@ -508,35 +475,32 @@ class AddonDetailDialog extends React.Component<Props, State> {
                       </Menu>
                     </Dropdown>
                   </Col>
-                </If>
+                )}
               </Row>
-            </If>
+            )}
 
             {/* select the addon version */}
             <Card title="" contentHeight={'auto'} style={{ marginBottom: '16px' }}>
-              <If condition={addonDetailInfo?.availableVersions}>
-                <Form.Item required label={i18n.t('Version').toString()}>
-                  <Select
-                    onChange={this.changeVersion}
-                    dataSource={addonDetailInfo?.availableVersions || []}
-                    value={version}
-                  />
-                </Form.Item>
-                {addonDetailInfo?.system && (
-                  <span className="warning-text">
-                    This version requirements: (
-                    {addonDetailInfo?.system.vela
-                      ? `KubeVela: ${addonDetailInfo?.system.vela}`
-                      : ''}
-                    {addonDetailInfo?.system.kubernetes
-                      ? ` Kubernetes: ${addonDetailInfo?.system.kubernetes}`
-                      : ''}
-                    )
-                  </span>
-                )}
-              </If>
+              {addonDetailInfo?.availableVersions && (
+                <div>
+                  <Form.Item required label={i18n.t('Version').toString()}>
+                    <Select
+                      onChange={this.changeVersion}
+                      dataSource={addonDetailInfo?.availableVersions || []}
+                      value={version}
+                    />
+                  </Form.Item>
+                  {addonDetailInfo?.system && (
+                    <span className="warning-text">
+                      This version requirements: (
+                      {addonDetailInfo?.system.vela ? `KubeVela: ${addonDetailInfo?.system.vela}` : ''}
+                      {addonDetailInfo?.system.kubernetes ? ` Kubernetes: ${addonDetailInfo?.system.kubernetes}` : ''})
+                    </span>
+                  )}
+                </div>
+              )}
 
-              <If condition={addonDetailInfo?.deployTo?.runtimeCluster}>
+              {addonDetailInfo?.deployTo?.runtimeCluster && (
                 <Form.Item required label={i18n.t('Deployed Clusters').toString()}>
                   <Checkbox.Group
                     className="custom-cluster-checkbox"
@@ -545,10 +509,10 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     dataSource={clusterOptions}
                   />
                 </Form.Item>
-              </If>
+              )}
             </Card>
 
-            <If condition={schema}>
+            {schema && (
               <Card
                 contentHeight={'auto'}
                 className="withActions"
@@ -557,7 +521,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
                   schema
                     ? [
                         <Button
-                          style={{ marginTop: '-12px' }}
+                          style={{ marginTop: '-12px', alignItems: 'center', display: 'flex' }}
                           onClick={() => {
                             if (propertiesMode === 'native') {
                               this.setState({ propertiesMode: 'code' });
@@ -566,58 +530,44 @@ class AddonDetailDialog extends React.Component<Props, State> {
                             }
                           }}
                         >
-                          <If condition={propertiesMode === 'native'}>
-                            <Icon
-                              style={{ color: '#1b58f4' }}
-                              type={'display-code'}
-                              title={'Switch to the coding mode'}
-                            />
-                          </If>
-                          <If condition={propertiesMode === 'code'}>
-                            <Icon
-                              style={{ color: '#1b58f4' }}
-                              type={'laptop'}
-                              title={'Switch to the native mode'}
-                            />
-                          </If>
+                          {propertiesMode === 'native' && (
+                            <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                          )}
+                          {propertiesMode === 'code' && (
+                            <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />
+                          )}
                         </Button>,
                       ]
                     : []
                 }
               >
                 <Row>
-                  <If condition={schema}>
-                    {this.state.mode && (
-                      <UISchema
-                        {...this.form.init(`properties`, {
-                          rules: [
-                            {
-                              validator: validator,
-                              message: i18n.t('Please check the addon properties'),
-                            },
-                          ],
-                        })}
-                        enableCodeEdit={propertiesMode === 'code'}
-                        uiSchema={schema}
-                        definition={{
-                          name: addonDetailInfo?.name || '',
-                          type: 'addon',
-                          description: addonDetailInfo?.description || '',
-                        }}
-                        ref={this.uiSchemaRef}
-                        mode={this.state.mode}
-                      />
-                    )}
-                  </If>
+                  {this.state.mode && schema && (
+                    <UISchema
+                      {...this.form.init(`properties`, {
+                        rules: [
+                          {
+                            validator: validator,
+                            message: i18n.t('Please check the addon properties'),
+                          },
+                        ],
+                      })}
+                      enableCodeEdit={propertiesMode === 'code'}
+                      uiSchema={schema}
+                      definition={{
+                        name: addonDetailInfo?.name || '',
+                        type: 'addon',
+                        description: addonDetailInfo?.description || '',
+                      }}
+                      ref={this.uiSchemaRef}
+                      mode={this.state.mode}
+                    />
+                  )}
                 </Row>
               </Card>
-            </If>
-            <If condition={addonDetailInfo?.dependencies}>
-              <Card
-                locale={locale().Card}
-                contentHeight="auto"
-                title={<Translation>Dependencies</Translation>}
-              >
+            )}
+            {addonDetailInfo?.dependencies && (
+              <Card locale={locale().Card} contentHeight="auto" title={<Translation>Dependencies</Translation>}>
                 <Message type="notice" style={{ marginBottom: '16px' }}>
                   <Translation>Ensure that dependent addon are enabled first.</Translation>
                 </Message>
@@ -639,8 +589,8 @@ class AddonDetailDialog extends React.Component<Props, State> {
                   })}
                 </ul>
               </Card>
-            </If>
-            <If condition={addonDetailInfo?.definitions}>
+            )}
+            {addonDetailInfo?.definitions && (
               <Card
                 contentHeight="auto"
                 locale={locale().Card}
@@ -648,17 +598,10 @@ class AddonDetailDialog extends React.Component<Props, State> {
                 style={{ marginTop: '16px' }}
               >
                 <Message type="notice" style={{ marginBottom: '16px' }}>
-                  <Translation>
-                    Enable the addon to obtain the following extension capabilities
-                  </Translation>
+                  <Translation>Enable the addon to obtain the following extension capabilities</Translation>
                 </Message>
                 <Table locale={locale().Table} dataSource={addonDetailInfo?.definitions}>
-                  <Table.Column
-                    dataIndex="name"
-                    align="left"
-                    width="140px"
-                    title={<Translation>Name</Translation>}
-                  />
+                  <Table.Column dataIndex="name" align="left" width="140px" title={<Translation>Name</Translation>} />
                   <Table.Column
                     dataIndex="type"
                     align="left"
@@ -668,35 +611,31 @@ class AddonDetailDialog extends React.Component<Props, State> {
                     }}
                     title={<Translation>Type</Translation>}
                   />
-                  <Table.Column
-                    dataIndex="description"
-                    align="center"
-                    title={<Translation>Description</Translation>}
-                  />
+                  <Table.Column dataIndex="description" align="center" title={<Translation>Description</Translation>} />
                 </Table>
               </Card>
-            </If>
+            )}
             <Card
               contentHeight="auto"
               locale={locale().Card}
               title={<Translation>README</Translation>}
               style={{ marginTop: '16px' }}
             >
-              <If condition={addonDetailInfo?.detail}>
+              {addonDetailInfo?.detail && (
                 <ReactMarkdown className="markdown-body addon-readme" remarkPlugins={[remarkGfm]}>
                   {addonDetailInfo?.detail || ''}
                 </ReactMarkdown>
-              </If>
-              <If condition={!addonDetailInfo?.detail}>
+              )}
+              {!addonDetailInfo?.detail && (
                 <div className="readme-empty">
                   <Empty />
                 </div>
-              </If>
+              )}
             </Card>
           </Loading>
         </DrawerWithFooter>
 
-        <If condition={showStatusVisible}>
+        {showStatusVisible && (
           <StatusShow
             loading={statusLoading}
             title={<Translation>Addon Status</Translation>}
@@ -704,7 +643,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             loadStatusDetail={this.loadAddonStatus}
             onClose={this.onStatusClose}
           />
-        </If>
+        )}
       </div>
     );
   }

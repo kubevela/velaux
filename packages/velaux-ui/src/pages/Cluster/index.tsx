@@ -1,4 +1,4 @@
-import { Button, Message } from '@b-design/ui';
+import { Button, Message } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Fragment } from 'react';
 
@@ -14,8 +14,6 @@ import AddClusterDialog from './components/AddClusterDialog/index';
 import CardContend from './components/CardContent/index';
 import CloudServiceDialog from './components/CloudServiceDialog/index';
 import SelectSearch from './components/ClusterSelectSearch';
-
-
 
 type Props = {
   clusterList: [];
@@ -76,7 +74,7 @@ class Cluster extends React.Component<Props, State> {
       },
       () => {
         this.getClusterList();
-      },
+      }
     );
   };
 
@@ -166,7 +164,6 @@ class Cluster extends React.Component<Props, State> {
                 >
                   <Translation>Connect From Cloud</Translation>
                 </Button>
-                ,
                 <Button
                   type="primary"
                   style={{ marginRight: '16px' }}
@@ -183,13 +180,13 @@ class Cluster extends React.Component<Props, State> {
 
         <If condition={isShowAddonMessage && addonMessage.length != 0}>
           <Message type="notice" closeable onClose={this.handleHiddenAddonMessage}>
-            Connect Cluster Success! Please upgrade {this.showAddonMessage()} addons, make them take
-            effect in the new cluster.
+            Connect Cluster Success! Please upgrade {this.showAddonMessage()} addons, make them take effect in the new
+            cluster.
           </Message>
         </If>
 
         <SelectSearch
-          query={(q: string): any => {
+          query={(q: string) => {
             this.query(q);
           }}
         />

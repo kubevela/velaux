@@ -1,5 +1,6 @@
-import { Icon, Loading, Grid } from '@b-design/ui';
+import { Icon, Loading, Grid } from '@alifd/next';
 import React from 'react';
+import { AiOutlineDelete } from 'react-icons/ai';
 import './index.less';
 
 type Props = {
@@ -38,7 +39,9 @@ class ArrayItemGroup extends React.Component<Props, State> {
         <div className="spection-group-container">
           <div className="spection-group-title-container">
             <Row>
-              <Col span={'21'}>{labelTitle}</Col>
+              <Col span={'21'}>
+                <div>{labelTitle}</div>
+              </Col>
               <Col span={'3'}>
                 <div>
                   <Icon
@@ -47,9 +50,7 @@ class ArrayItemGroup extends React.Component<Props, State> {
                     type={closed ? 'arrow-down' : 'arrow-up'}
                     style={closed ? { top: '-2px' } : { top: '0' }}
                   />
-                  <Icon
-                    type="delete"
-                    size={'small'}
+                  <AiOutlineDelete
                     className="icon-delete"
                     onClick={() => {
                       if (this.props.delete) {

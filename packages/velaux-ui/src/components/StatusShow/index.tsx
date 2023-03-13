@@ -1,6 +1,7 @@
-import { Dialog, Table, Card, Loading, Button, Balloon, Icon } from '@b-design/ui';
+import { Dialog, Table, Card, Loading, Button, Balloon, Icon } from '@alifd/next';
 import { Link } from 'dva/router';
 import React from 'react';
+import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import Translation from '../../components/Translation';
 import type { ApplicationStatus, Condition } from '../../interface/application';
@@ -23,10 +24,9 @@ class StatusShow extends React.Component<Props> {
       <Dialog
         locale={locale().Dialog}
         visible={true}
-        className={'commonDialog'}
         title={title}
         autoFocus={true}
-        isFullScreen={true}
+        overflowScroll={true}
         style={{ width: '800px' }}
         onClose={onClose}
         footer={
@@ -39,15 +39,10 @@ class StatusShow extends React.Component<Props> {
             </Button>
           </div>
         }
-        height="auto"
-        footerAlign="center"
+        v2
       >
         <Loading visible={loading} style={{ width: '100%' }}>
-          <Card
-            locale={locale().Card}
-            contentHeight="200px"
-            title={<Translation>Applied Resources</Translation>}
-          >
+          <Card locale={locale().Card} contentHeight="200px" title={<Translation>Applied Resources</Translation>}>
             <Table locale={locale().Table} dataSource={applicationStatus?.appliedResources}>
               <Table.Column
                 dataIndex="name"
@@ -57,11 +52,7 @@ class StatusShow extends React.Component<Props> {
                   return `${row.namespace || '-'}/${row.name}`;
                 }}
               />
-              <Table.Column
-                width="150px"
-                dataIndex="kind"
-                title={<Translation>Kind</Translation>}
-              />
+              <Table.Column width="150px" dataIndex="kind" title={<Translation>Kind</Translation>} />
               <Table.Column dataIndex="apiVersion" title={<Translation>APIVersion</Translation>} />
               <Table.Column
                 dataIndex="cluster"
@@ -84,17 +75,9 @@ class StatusShow extends React.Component<Props> {
               title={<Translation>Conditions</Translation>}
             >
               <Table locale={locale().Table} dataSource={applicationStatus?.conditions}>
-                <Table.Column
-                  width="150px"
-                  dataIndex="type"
-                  title={<Translation>Type</Translation>}
-                />
+                <Table.Column width="150px" dataIndex="type" title={<Translation>Type</Translation>} />
                 <Table.Column dataIndex="status" title={<Translation>Status</Translation>} />
-
-                <Table.Column
-                  dataIndex="lastTransitionTime"
-                  title={<Translation>LastTransitionTime</Translation>}
-                />
+                <Table.Column dataIndex="lastTransitionTime" title={<Translation>LastTransitionTime</Translation>} />
                 <Table.Column
                   dataIndex="reason"
                   title={<Translation>Reason</Translation>}
@@ -104,7 +87,7 @@ class StatusShow extends React.Component<Props> {
                         <Balloon
                           trigger={
                             <span style={{ color: 'red', cursor: 'pointer' }}>
-                              {v} <Icon size={'xs'} type="question-circle" />
+                              {v} <AiOutlineQuestionCircle></AiOutlineQuestionCircle>
                             </span>
                           }
                         >
@@ -112,6 +95,7 @@ class StatusShow extends React.Component<Props> {
                         </Balloon>
                       );
                     }
+
                     return <span>{v}</span>;
                   }}
                 />
@@ -125,17 +109,8 @@ class StatusShow extends React.Component<Props> {
               contentHeight="auto"
               title={<Translation>Component Status</Translation>}
             >
-              <Table
-                locale={locale().Table}
-                className="customTable"
-                dataSource={applicationStatus?.services}
-              >
-                <Table.Column
-                  align="left"
-                  dataIndex="name"
-                  width="200px"
-                  title={<Translation>Name</Translation>}
-                />
+              <Table locale={locale().Table} className="customTable" dataSource={applicationStatus?.services}>
+                <Table.Column align="left" dataIndex="name" width="200px" title={<Translation>Name</Translation>} />
                 <Table.Column
                   align="left"
                   dataIndex="healthy"
@@ -158,11 +133,7 @@ class StatusShow extends React.Component<Props> {
                   }}
                   title={<Translation>Healthy</Translation>}
                 />
-                <Table.Column
-                  align="center"
-                  dataIndex="message"
-                  title={<Translation>Message</Translation>}
-                />
+                <Table.Column align="center" dataIndex="message" title={<Translation>Message</Translation>} />
               </Table>
             </Card>
           </If>

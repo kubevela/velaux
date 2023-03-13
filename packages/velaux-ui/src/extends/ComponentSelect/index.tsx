@@ -1,4 +1,4 @@
-import { Select } from '@b-design/ui';
+import { Select } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
 
@@ -8,7 +8,7 @@ import type { ApplicationComponentBase } from '../../interface/application';
 import locale from '../../utils/locale';
 
 type Props = {
-  value: string[];
+  value?: string[];
   id: string;
   onChange: (value: string[]) => void;
   disabled: boolean;

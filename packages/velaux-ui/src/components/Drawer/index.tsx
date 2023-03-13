@@ -1,4 +1,4 @@
-import { Drawer, Button } from '@b-design/ui';
+import { Drawer, Button } from '@alifd/next';
 import React, { Component } from 'react';
 
 import './index.less';
@@ -11,15 +11,17 @@ type Props = {
   onOkButtonLoading?: boolean;
   onClose: () => void;
   width?: number | string;
-  title: string | React.ReactNode;
+  title?: React.ReactNode;
   placement?: 'top' | 'right' | 'bottom' | 'left';
   children?: React.ReactNode;
   extButtons?: React.ReactNode;
+  visible?: boolean;
 };
 
 class DrawerWithFooter extends Component<Props, any> {
   render() {
     const {
+      visible,
       children,
       title,
       placement,
@@ -32,12 +34,12 @@ class DrawerWithFooter extends Component<Props, any> {
     } = this.props;
     return (
       <Drawer
-        title={title}
+        title={<>{title}</>}
         closeMode="close"
         className="customDrawer"
         closeable="close"
         onClose={onClose}
-        visible={true}
+        visible={visible || true}
         autoFocus={true}
         placement={placement || 'right'}
         width={width || '600px'}

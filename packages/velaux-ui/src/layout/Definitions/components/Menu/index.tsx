@@ -1,4 +1,4 @@
-import { Icon, Grid } from '@b-design/ui';
+import { Icon, Grid } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Component } from 'react';
 

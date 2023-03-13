@@ -1,4 +1,4 @@
-import { Loading, Button, Table, Dialog, Message, Balloon } from '@b-design/ui';
+import { Loading, Button, Table, Dialog, Message, Balloon } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React, { Component } from 'react';
@@ -16,12 +16,7 @@ import Translation from '../../components/Translation';
 import i18n from '../../i18n';
 import type { AddonBaseStatus } from '../../interface/addon';
 import type { NameAlias } from '../../interface/env';
-import type {
-  PipelineBase,
-  PipelineListItem,
-  PipelineRun,
-  RunStateInfo,
-} from '../../interface/pipeline';
+import type { PipelineBase, PipelineListItem, PipelineRun, RunStateInfo } from '../../interface/pipeline';
 import type { LoginUserInfo } from '../../interface/user';
 import { beautifyTime, momentDate } from '../../utils/common';
 import locale from '../../utils/locale';
@@ -136,16 +131,14 @@ class ProjectPipelines extends Component<Props, State> {
             key={'name'}
             title={i18n.t('Name(Alias)').toString()}
             dataIndex="name"
-            cell={(name: string, i: string, pipeline: PipelineListItem) => {
+            cell={(name: string, i: number, pipeline: PipelineListItem) => {
               let text = name;
               if (pipeline.alias) {
                 text = `${name}(${pipeline.alias})`;
               }
               return (
                 <div className="pipeline-name">
-                  <Link to={`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/studio`}>
-                    {text}
-                  </Link>
+                  <Link to={`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/studio`}>{text}</Link>
                   <span>{pipeline.description}</span>
                 </div>
               );
@@ -247,7 +240,7 @@ class ProjectPipelines extends Component<Props, State> {
             title={i18n.t('Actions').toString()}
             dataIndex="name"
             width={'360px'}
-            cell={(name: string, i: string, pipeline: PipelineListItem) => {
+            cell={(name: string, i: number, pipeline: PipelineListItem) => {
               return (
                 <div>
                   <Permission
@@ -260,7 +253,6 @@ class ProjectPipelines extends Component<Props, State> {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       component={'a'}
                       onClick={() => {
                         this.onRunPipeline(pipeline);
@@ -280,7 +272,6 @@ class ProjectPipelines extends Component<Props, State> {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       component={'a'}
                       onClick={() => {
                         this.onShowPipelineRuns(pipeline);
@@ -301,7 +292,6 @@ class ProjectPipelines extends Component<Props, State> {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       component={'a'}
                       onClick={() => {
                         this.onClonePipeline(pipeline);
@@ -321,7 +311,6 @@ class ProjectPipelines extends Component<Props, State> {
                     <Button
                       text
                       size={'medium'}
-                      ghost={true}
                       className={'danger-btn'}
                       component={'a'}
                       onClick={() => {
@@ -348,15 +337,7 @@ class ProjectPipelines extends Component<Props, State> {
         params: { projectName },
       },
     } = this.props;
-    const {
-      showMode,
-      isLoading,
-      showRunPipeline,
-      pipeline,
-      showRuns,
-      showNewPipeline,
-      showClonePipeline,
-    } = this.state;
+    const { showMode, isLoading, showRunPipeline, pipeline, showRuns, showNewPipeline, showClonePipeline } = this.state;
     const { enabledAddons } = this.props;
     const addonEnabled = enabledAddons?.filter((addon) => addon.name == 'vela-workflow').length;
     return (
@@ -365,10 +346,7 @@ class ProjectPipelines extends Component<Props, State> {
           title=""
           subTitle=""
           extButtons={[
-            <Permission
-              request={{ resource: `project:${projectName}/pipeline:*`, action: 'create' }}
-              project={'?'}
-            >
+            <Permission request={{ resource: `project:${projectName}/pipeline:*`, action: 'create' }} project={'?'}>
               <If condition={addonEnabled}>
                 <Button
                   type="primary"
@@ -404,8 +382,7 @@ class ProjectPipelines extends Component<Props, State> {
         </If>
         <If condition={!addonEnabled}>
           <div className="addon-notice">
-            Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> Addon that
-            powers Pipeline.
+            Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> Addon that powers Pipeline.
           </div>
         </If>
 
@@ -417,9 +394,7 @@ class ProjectPipelines extends Component<Props, State> {
               }}
               onSuccess={(runName) => {
                 this.props.dispatch(
-                  routerRedux.push(
-                    `/projects/${pipeline.project.name}/pipelines/${pipeline.name}/runs/${runName}`,
-                  ),
+                  routerRedux.push(`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/runs/${runName}`)
                 );
               }}
               pipeline={pipeline}
@@ -443,9 +418,7 @@ class ProjectPipelines extends Component<Props, State> {
               this.setState({ showNewPipeline: false, pipeline: undefined });
             }}
             onSuccess={(p: PipelineBase) => {
-              this.props.dispatch(
-                routerRedux.push(`/projects/${p.project.name}/pipelines/${p.name}/studio`),
-              );
+              this.props.dispatch(routerRedux.push(`/projects/${p.project.name}/pipelines/${p.name}/studio`));
             }}
             pipeline={pipeline}
           />

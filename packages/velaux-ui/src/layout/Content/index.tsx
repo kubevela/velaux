@@ -46,7 +46,13 @@ export default function Content() {
           return <Redirect to="/applications" />;
         }}
       />
-      <Route exact path="/applications" component={Application} />
+      <Route
+        exact
+        path="/applications"
+        render={(props: any) => {
+          return <Application {...props} />;
+        }}
+      />
       <Route
         exact
         path="/applications/:appName"
@@ -182,23 +188,64 @@ export default function Content() {
           return <EnvPage {...props} />;
         }}
       />
-      <Route exact path="/pipelines" component={PipelineListPage} />
+      <Route
+        exact
+        path="/pipelines"
+        render={(props: any) => {
+          return <PipelineListPage {...props} />;
+        }}
+      />
       <Route
         exact
         path="/projects/:projectName/pipelines/:pipelineName/runs/:runName"
-        component={PipelineRunPage}
+        render={(props: any) => {
+          return <PipelineRunPage {...props} />;
+        }}
       />
       <Route
         exact
         path="/projects/:projectName/pipelines/:pipelineName/studio"
-        component={PipelineStudio}
+        render={(props: any) => {
+          return <PipelineStudio {...props} />;
+        }}
       />
-      <Route path="/targets" component={TargetList} />
-      <Route path="/clusters" component={Clusters} />
-      <Route path="/addons/:addonName" component={Addons} />
-      <Route path="/addons" component={Addons} />
-      <Route path="/users" component={Users} />
-      <Route exact path="/projects" component={Projects} />
+      <Route
+        path="/targets"
+        render={(props: any) => {
+          return <TargetList {...props} />;
+        }}
+      />
+      <Route
+        path="/clusters"
+        render={(props: any) => {
+          return <Clusters {...props} />;
+        }}
+      />
+      <Route
+        path="/addons/:addonName"
+        render={(props: any) => {
+          return <Addons {...props} />;
+        }}
+      />
+      <Route
+        path="/addons"
+        render={(props: any) => {
+          return <Addons {...props} />;
+        }}
+      />
+      <Route
+        path="/users"
+        render={(props: any) => {
+          return <Users {...props} />;
+        }}
+      />
+      <Route
+        exact
+        path="/projects"
+        render={(props: any) => {
+          return <Projects {...props} />;
+        }}
+      />
       <Route
         exact
         path="/projects/:projectName"
@@ -266,7 +313,13 @@ export default function Content() {
           );
         }}
       />
-      <Route exact path="/roles" component={Roles} />
+      <Route
+        exact
+        path="/roles"
+        render={(props: any) => {
+          return <Roles {...props} />;
+        }}
+      />
 
       <Route
         exact

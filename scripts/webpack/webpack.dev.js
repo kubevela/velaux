@@ -5,14 +5,11 @@ let commitHash = require('child_process').execSync('git rev-parse --short HEAD')
 const { resolveToEsbuildTarget } = require('esbuild-plugin-browserslist');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
 const path = require('path');
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const { DefinePlugin, HotModuleReplacementPlugin } = require('webpack');
 const { merge } = require('webpack-merge');
 
-const HTMLWebpackCSSChunks = require('./plugins/HTMLWebpackCSSChunks');
 const common = require('./webpack.common.js');
 const esbuildTargets = resolveToEsbuildTarget(browserslist(), {
   printUnknownTargets: false,
@@ -24,10 +21,6 @@ module.exports = (env = {}) =>
   merge(common, {
     devtool: 'eval-cheap-module-source-map',
     mode: 'development',
-
-    entry: {
-      app: './packages/velaux-ui/src/index.tsx',
-    },
 
     // If we enabled watch option via CLI
     watchOptions: {
@@ -93,17 +86,6 @@ module.exports = (env = {}) =>
         lintDirtyModulesOnly: true, // don't lint on start, only lint changed files
         extensions: ['.ts', '.tsx'],
       }),
-      new MiniCssExtractPlugin({
-        filename: 'static/css/[name].[contenthash:8].css',
-      }),
-      new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, '../../packages/velaux-ui/public/index.html'),
-        inject: true,
-      }),
-      new InterpolateHtmlPlugin(HtmlWebpackPlugin, {
-        PUBLIC_URL: '/public/build',
-      }),
-      new HTMLWebpackCSSChunks(),
       new DefinePlugin({
         'process.env': {
           NODE_ENV: JSON.stringify('development'),

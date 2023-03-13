@@ -1,4 +1,4 @@
-import { Message } from '@b-design/ui';
+import { Message } from '@alifd/next';
 import * as yaml from 'js-yaml';
 import React from 'react';
 

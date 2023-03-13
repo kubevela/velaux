@@ -1,39 +1,17 @@
 import type { Rule } from '@alifd/field';
-import {
-  Grid,
-  Form,
-  Input,
-  Field,
-  Button,
-  Message,
-  Card,
-  Icon,
-  Loading,
-  Select,
-  Dialog,
-} from '@b-design/ui';
+import { Grid, Form, Input, Field, Button, Message, Card, Icon, Loading, Select, Dialog } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
+import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
-import {
-  createConfig,
-  detailConfig,
-  detailTemplate,
-  listTemplates,
-  updateConfig,
-} from '../../../../api/config';
+import { createConfig, detailConfig, detailTemplate, listTemplates, updateConfig } from '../../../../api/config';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import Translation from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
-import type {
-  Config,
-  ConfigTemplate,
-  ConfigTemplateDetail,
-  NamespacedName,
-} from '../../../../interface/configs';
+import type { Config, ConfigTemplate, ConfigTemplateDetail, NamespacedName } from '../../../../interface/configs';
 import { checkName } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
 
@@ -174,14 +152,13 @@ class CreateConfigDialog extends React.Component<Props, State> {
         .then((res) => {
           if (res) {
             Message.success(<Translation>Config created successfully</Translation>);
-            if (
-              templateName &&
-              ['image-registry', 'helm-repository', 'tls-certificate'].includes(templateName)
-            ) {
+            if (templateName && ['image-registry', 'helm-repository', 'tls-certificate'].includes(templateName)) {
               Dialog.confirm({
-                content: i18n.t(
-                  'This config needs to be distributed, you should go to the project summary page to do it before you want to use it.',
-                ),
+                content: i18n
+                  .t(
+                    'This config needs to be distributed, you should go to the project summary page to do it before you want to use it.'
+                  )
+                  .toString(),
                 locale: locale().Dialog,
                 onOk: () => {
                   this.props.onSuccess();
@@ -238,8 +215,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
       },
     };
     const { configName, project, template } = this.props;
-    const { createLoading, templateDetail, templateLoading, propertiesMode, templates } =
-      this.state;
+    const { createLoading, templateDetail, templateLoading, propertiesMode, templates } = this.state;
 
     const edit = configName != '' && configName != undefined;
     const buttons = [
@@ -259,7 +235,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
           <Button type="primary" onClick={this.onCreate} loading={createLoading}>
             <Translation>Create</Translation>
           </Button>
-        </Permission>,
+        </Permission>
       );
     } else {
       buttons.push(
@@ -273,7 +249,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
           <Button type="primary" onClick={this.onUpdate} loading={createLoading}>
             <Translation>Update</Translation>
           </Button>
-        </Permission>,
+        </Permission>
       );
     }
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -297,12 +273,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={<Translation>Name</Translation>}
-                  labelTextAlign="left"
-                  required={true}
-                  disabled={edit}
-                >
+                <FormItem label={<Translation>Name</Translation>} labelTextAlign="left" required={true} disabled={edit}>
                   <Input
                     name="name"
                     placeholder={i18n.t('Please enter').toString()}
@@ -390,11 +361,11 @@ class CreateConfigDialog extends React.Component<Props, State> {
                   <Card
                     contentHeight={'auto'}
                     style={{ marginTop: '8px' }}
-                    title={i18n.t('Properties')}
+                    title={i18n.t('Properties').toString()}
                     className="withActions"
                     subTitle={
                       <Button
-                        style={{ marginTop: '-12px' }}
+                        style={{ marginTop: '-12px', alignItems: 'center', display: 'flex' }}
                         onClick={() => {
                           if (propertiesMode === 'native') {
                             this.setState({ propertiesMode: 'code' });
@@ -403,20 +374,12 @@ class CreateConfigDialog extends React.Component<Props, State> {
                           }
                         }}
                       >
-                        <If condition={propertiesMode === 'native'}>
-                          <Icon
-                            style={{ color: '#1b58f4' }}
-                            type={'display-code'}
-                            title={'Switch to the coding mode'}
-                          />
-                        </If>
-                        <If condition={propertiesMode === 'code'}>
-                          <Icon
-                            style={{ color: '#1b58f4' }}
-                            type={'laptop'}
-                            title={'Switch to the native mode'}
-                          />
-                        </If>
+                        {propertiesMode === 'native' && (
+                          <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                        )}
+                        {propertiesMode === 'code' && (
+                          <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />
+                        )}
                       </Button>
                     }
                   >
