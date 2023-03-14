@@ -44,11 +44,11 @@ func NewHelmService() HelmService {
 
 // HelmService responsible handle helm related interface
 type HelmService interface {
-	ListChartNames(ctx context.Context, url string, secretName string, skipCache bool) ([]string, error)
-	ListChartVersions(ctx context.Context, url string, chartName string, secretName string, skipCache bool) (repo.ChartVersions, error)
-	ListChartValuesFiles(ctx context.Context, url string, chartName string, version string, secretName string, repoType string, skipCache bool) (map[string]string, error)
+	ListChartNames(ctx context.Context, url string, secretName string, projectName string, skipCache bool) ([]string, error)
+	ListChartVersions(ctx context.Context, url string, chartName string, secretName string, projectName string, skipCache bool) (repo.ChartVersions, error)
+	ListChartValuesFiles(ctx context.Context, url string, chartName string, version string, secretName string, projectName string, repoType string, skipCache bool) (map[string]string, error)
 	ListChartRepo(ctx context.Context, projectName string) (*v1.ChartRepoResponseList, error)
-	GetChartValues(ctx context.Context, repoURL string, chartName string, version string, secretName string, repoType string, skipCache bool) (map[string]interface{}, error)
+	GetChartValues(ctx context.Context, repoURL string, chartName string, version string, secretName string, projectName string, repoType string, skipCache bool) (map[string]interface{}, error)
 }
 
 type defaultHelmImpl struct {
@@ -57,17 +57,32 @@ type defaultHelmImpl struct {
 	ConfigService ConfigService `inject:""`
 }
 
-func (d defaultHelmImpl) ListChartNames(ctx context.Context, repoURL string, secretName string, skipCache bool) ([]string, error) {
+func (d defaultHelmImpl) GetHelmHTTPOption(ctx context.Context, secretName string, project string) (*common.HTTPOption, error) {
+	var opts *common.HTTPOption
+	var err error
+	if project != "" {
+		config, err := d.ConfigService.GetConfig(ctx, project, secretName)
+		if err != nil {
+			return nil, bcode.ErrRepoBasicAuth
+		}
+		opts, err = helm.SetHTTPOption(ctx, d.K8sClient, types2.NamespacedName{Namespace: config.Namespace, Name: secretName})
+	} else {
+		opts, err = helm.SetHTTPOption(ctx, d.K8sClient, types2.NamespacedName{Namespace: types.DefaultKubeVelaNS, Name: secretName})
+		if err != nil {
+			return nil, bcode.ErrRepoBasicAuth
+		}
+	}
+	return opts, nil
+}
+
+func (d defaultHelmImpl) ListChartNames(ctx context.Context, repoURL string, secretName string, projectName string, skipCache bool) ([]string, error) {
 	if !utils.IsValidURL(repoURL) {
 		return nil, bcode.ErrRepoInvalidURL
 	}
 	var opts *common.HTTPOption
 	var err error
 	if len(secretName) != 0 {
-		opts, err = helm.SetHTTPOption(ctx, d.K8sClient, types2.NamespacedName{Namespace: types.DefaultKubeVelaNS, Name: secretName})
-		if err != nil {
-			return nil, bcode.ErrRepoBasicAuth
-		}
+		opts, err = d.GetHelmHTTPOption(ctx, secretName, projectName)
 	}
 	charts, err := d.helper.ListChartsFromRepo(repoURL, skipCache, opts)
 	if err != nil {
@@ -77,17 +92,14 @@ func (d defaultHelmImpl) ListChartNames(ctx context.Context, repoURL string, sec
 	return charts, nil
 }
 
-func (d defaultHelmImpl) ListChartVersions(ctx context.Context, repoURL string, chartName string, secretName string, skipCache bool) (repo.ChartVersions, error) {
+func (d defaultHelmImpl) ListChartVersions(ctx context.Context, repoURL string, chartName string, secretName string, projectName string, skipCache bool) (repo.ChartVersions, error) {
 	if !utils.IsValidURL(repoURL) {
 		return nil, bcode.ErrRepoInvalidURL
 	}
 	var opts *common.HTTPOption
 	var err error
 	if len(secretName) != 0 {
-		opts, err = helm.SetHTTPOption(ctx, d.K8sClient, types2.NamespacedName{Namespace: types.DefaultKubeVelaNS, Name: secretName})
-		if err != nil {
-			return nil, bcode.ErrRepoBasicAuth
-		}
+		opts, err = d.GetHelmHTTPOption(ctx, secretName, projectName)
 	}
 	chartVersions, err := d.helper.ListVersions(repoURL, chartName, skipCache, opts)
 	if err != nil {
@@ -101,17 +113,14 @@ func (d defaultHelmImpl) ListChartVersions(ctx context.Context, repoURL string, 
 	return chartVersions, nil
 }
 
-func (d defaultHelmImpl) ListChartValuesFiles(ctx context.Context, repoURL string, chartName string, version string, secretName string, repoType string, skipCache bool) (map[string]string, error) {
+func (d defaultHelmImpl) ListChartValuesFiles(ctx context.Context, repoURL string, chartName string, version string, secretName string, projectName string, repoType string, skipCache bool) (map[string]string, error) {
 	if !utils.IsValidURL(repoURL) {
 		return nil, bcode.ErrRepoInvalidURL
 	}
 	var opts *common.HTTPOption
 	var err error
 	if len(secretName) != 0 {
-		opts, err = helm.SetHTTPOption(ctx, d.K8sClient, types2.NamespacedName{Namespace: types.DefaultKubeVelaNS, Name: secretName})
-		if err != nil {
-			return nil, bcode.ErrRepoBasicAuth
-		}
+		opts, err = d.GetHelmHTTPOption(ctx, secretName, projectName)
 	}
 	v, err := d.helper.GetValuesFromChart(repoURL, chartName, version, skipCache, repoType, opts)
 	if err != nil {
@@ -121,17 +130,14 @@ func (d defaultHelmImpl) ListChartValuesFiles(ctx context.Context, repoURL strin
 	return v.Data, nil
 }
 
-func (d defaultHelmImpl) GetChartValues(ctx context.Context, repoURL string, chartName string, version string, secretName string, repoType string, skipCache bool) (map[string]interface{}, error) {
+func (d defaultHelmImpl) GetChartValues(ctx context.Context, repoURL string, chartName string, version string, secretName string, projectName string, repoType string, skipCache bool) (map[string]interface{}, error) {
 	if !utils.IsValidURL(repoURL) {
 		return nil, bcode.ErrRepoInvalidURL
 	}
 	var opts *common.HTTPOption
 	var err error
 	if len(secretName) != 0 {
-		opts, err = helm.SetHTTPOption(ctx, d.K8sClient, types2.NamespacedName{Namespace: types.DefaultKubeVelaNS, Name: secretName})
-		if err != nil {
-			return nil, bcode.ErrRepoBasicAuth
-		}
+		opts, err = d.GetHelmHTTPOption(ctx, secretName, projectName)
 	}
 	v, err := d.helper.GetValuesFromChart(repoURL, chartName, version, skipCache, repoType, opts)
 	if err != nil {
