@@ -204,17 +204,17 @@ var _ = Describe("test helm usecasae", func() {
 
 		u, _, err := NewTestHelmService()
 		Expect(err).Should(BeNil())
-		charts, err := u.ListChartNames(ctx, mockServer.URL, "repo-secret", false)
+		charts, err := u.ListChartNames(ctx, mockServer.URL, "repo-secret", "", false)
 		Expect(err).Should(BeNil())
 		Expect(len(charts)).Should(BeEquivalentTo(1))
 		Expect(charts[0]).Should(BeEquivalentTo("mysql"))
 
-		versions, err := u.ListChartVersions(ctx, mockServer.URL, "mysql", "repo-secret", false)
+		versions, err := u.ListChartVersions(ctx, mockServer.URL, "mysql", "repo-secret", "", false)
 		Expect(err).Should(BeNil())
 		Expect(len(versions)).Should(BeEquivalentTo(1))
 		Expect(versions[0].Version).Should(BeEquivalentTo("8.8.23"))
 
-		values, err := u.ListChartValuesFiles(ctx, mockServer.URL, "mysql", "8.8.23", "repo-secret", "helm", false)
+		values, err := u.ListChartValuesFiles(ctx, mockServer.URL, "mysql", "8.8.23", "repo-secret", "", "helm", false)
 		Expect(err).Should(BeNil())
 		Expect(values).ShouldNot(BeNil())
 		Expect(len(values)).ShouldNot(BeEquivalentTo(0))
@@ -223,13 +223,13 @@ var _ = Describe("test helm usecasae", func() {
 	It("coverage not secret notExist error", func() {
 		u, _, err := NewTestHelmService()
 		Expect(err).Should(BeNil())
-		_, err = u.ListChartNames(ctx, "http://127.0.0.1:8080", "repo-secret-notExist", false)
+		_, err = u.ListChartNames(ctx, "http://127.0.0.1:8080", "repo-secret-notExist", "", false)
 		Expect(err).ShouldNot(BeNil())
 
-		_, err = u.ListChartVersions(ctx, "http://127.0.0.1:8080", "mysql", "repo-secret-notExist", false)
+		_, err = u.ListChartVersions(ctx, "http://127.0.0.1:8080", "mysql", "repo-secret-notExist", "", false)
 		Expect(err).ShouldNot(BeNil())
 
-		_, err = u.ListChartValuesFiles(ctx, "http://127.0.0.1:8080", "mysql", "8.8.23", "repo-secret-notExist", "helm", false)
+		_, err = u.ListChartValuesFiles(ctx, "http://127.0.0.1:8080", "mysql", "8.8.23", "repo-secret-notExist", "", "helm", false)
 		Expect(err).ShouldNot(BeNil())
 	})
 })
