@@ -4,7 +4,13 @@ import { Button, Dialog, Dropdown, Grid, Menu, Table } from '@alifd/next';
 import axios from 'axios';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
-import { AiFillSetting, AiOutlineBars, AiOutlineCode, AiOutlineQuestionCircle } from 'react-icons/ai';
+import {
+  AiFillSetting,
+  AiOutlineCode,
+  AiOutlinePicLeft,
+  AiOutlinePicRight,
+  AiOutlineQuestionCircle,
+} from 'react-icons/ai';
 
 import { getConfigs } from '../../api/config';
 import grafanaImg from '../../assets/grafana.svg';
@@ -28,8 +34,10 @@ import CloudShell from '../CloudShell';
 import { locationService } from '../../services/LocationService';
 
 import EditPlatFormUserDialog from './components/EditPlatFormUserDialog';
-import { LayoutMode } from 'src/types/main';
+import { LayoutMode, Workspace } from '../../types/main';
 import { Dispatch } from 'redux';
+import { menuService } from '../../services/MenuService';
+import classNames from 'classnames';
 
 type Props = {
   dispatch: Dispatch;
@@ -38,13 +46,14 @@ type Props = {
   systemInfo?: SystemInfo;
   show?: boolean;
   enabledAddons?: AddonBaseStatus[];
+  currentWorkspace?: Workspace;
 };
 
 type State = {
   platformSetting: boolean;
   isEditAdminUser: boolean;
-  showMysqlProjectList: boolean;
   grafanaConfigs?: Config[];
+  workspaces: Workspace[];
 };
 
 const TelemetryDataCollectionKey = 'telemetryDataCollection';
@@ -53,15 +62,13 @@ const TelemetryDataCollectionServer = 'https://telemetry.kubevela.net/collecting
   return { ...store.user, ...store.cloudshell, ...store.addons };
 })
 class Header extends Component<Props, State> {
-  loadCount: number;
   constructor(props: Props) {
     super(props);
     this.state = {
       platformSetting: false,
       isEditAdminUser: false,
-      showMysqlProjectList: false,
+      workspaces: [],
     };
-    this.loadCount = 0;
   }
 
   componentDidMount() {
@@ -69,6 +76,13 @@ class Header extends Component<Props, State> {
     this.loadUserInfo();
     this.loadEnabledAddons();
   }
+
+  loadWorkspaces = () => {
+    const { userInfo } = this.props;
+    this.setState({
+      workspaces: menuService.loadWorkspaces(userInfo),
+    });
+  };
 
   loadSystemInfo = () => {
     this.props.dispatch({
@@ -145,6 +159,7 @@ class Header extends Component<Props, State> {
       callback: () => {
         this.isEditPlatForm();
         this.loadGrafanaIntegration();
+        this.loadWorkspaces();
       },
     });
   };
@@ -219,14 +234,10 @@ class Header extends Component<Props, State> {
     this.setState({ isEditAdminUser: false });
   };
 
-  showMyProjectList = () => {
-    this.setState({ showMysqlProjectList: true });
-  };
-
   render() {
     const { Row } = Grid;
-    const { systemInfo, dispatch, show, userInfo, mode } = this.props;
-    const { platformSetting, isEditAdminUser, showMysqlProjectList, grafanaConfigs } = this.state;
+    const { systemInfo, dispatch, show, userInfo, mode, currentWorkspace } = this.props;
+    const { platformSetting, isEditAdminUser, grafanaConfigs, workspaces } = this.state;
 
     return (
       <div className="layout-top-bar" id="layout-top-bar">
@@ -243,17 +254,18 @@ class Header extends Component<Props, State> {
               }
             }}
           >
-            <AiOutlineBars size={20}></AiOutlineBars>
+            {mode === 'default' && <AiOutlinePicLeft size={20}></AiOutlinePicLeft>}
+            {mode === 'neat' && <AiOutlinePicRight size={20}></AiOutlinePicRight>}
           </div>
           <div className="logo">
             <img src={logo} title={'Make shipping applications more enjoyable.'} />
           </div>
           <div style={{ flex: '1 1 0%' }}>
-            <div className="integration-items">
+            <div className="workspace-items">
               {grafanaConfigs?.map((config) => {
                 if (config.properties && config.properties.endpoint) {
                   return (
-                    <div className="item" title={config.description}>
+                    <div key={'config' + config.name} className="item" title={config.description}>
                       <a target="_blank" href={config.properties.endpoint} rel="noopener noreferrer">
                         <img src={grafanaImg} />
                         <span>{config.alias || config.name}</span>
@@ -263,8 +275,25 @@ class Header extends Component<Props, State> {
                 }
                 return null;
               })}
+              {workspaces.map((ws) => {
+                return (
+                  <Link
+                    className={classNames('item', { active: currentWorkspace?.name === ws.name })}
+                    to={ws.rootRoute}
+                    key={'workspace' + ws.name}
+                  >
+                    <div>
+                      {ws.icon}
+                      <span>
+                        <Translation>{ws.label}</Translation>
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
+
           <div className="right">
             <Permission request={{ resource: 'cloudshell', action: 'create' }}>
               <div className="vela-item" title="Open Cloud Shell" onClick={this.onOpenCloudShell}>
@@ -369,9 +398,6 @@ class Header extends Component<Props, State> {
                 }
               >
                 <Menu>
-                  <Menu.Item onClick={this.showMyProjectList}>
-                    <Translation>My Projects</Translation>
-                  </Menu.Item>
                   <Menu.Item onClick={this.onLogout}>
                     <Translation>Logout</Translation>
                   </Menu.Item>
@@ -403,44 +429,6 @@ class Header extends Component<Props, State> {
         </If>
         <If condition={show}>
           <CloudShell />
-        </If>
-        <If condition={showMysqlProjectList}>
-          <Dialog
-            locale={locale().Dialog}
-            visible={showMysqlProjectList}
-            title={i18n.t('My Projects').toString()}
-            autoFocus={true}
-            overflowScroll={true}
-            style={{ width: '800px' }}
-            onClose={() => {
-              this.setState({ showMysqlProjectList: false });
-            }}
-            footer={<div></div>}
-            v2
-          >
-            <Table dataSource={userInfo?.projects}>
-              <Table.Column
-                key="name"
-                title={<Translation>Project</Translation>}
-                dataIndex="name"
-                cell={(v: string, i: number, item: Project) => {
-                  if (item && item.name) {
-                    return (
-                      <Link
-                        onClick={() => this.setState({ showMysqlProjectList: false })}
-                        to={`/projects/${item.name}/summary`}
-                      >
-                        {item.alias || item.name}
-                      </Link>
-                    );
-                  } else {
-                    return null;
-                  }
-                }}
-              />
-              <Table.Column dataIndex="description" title={<Translation>Description</Translation>} />
-            </Table>
-          </Dialog>
         </If>
       </div>
     );

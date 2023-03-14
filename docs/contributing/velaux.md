@@ -2,11 +2,15 @@
 
 ## Prepare the local environment
 
-> Docker v20.10.5+ (runc >= v1.0.0-rc93) or Linux system
-
 ### Install VelaCore
 
-1. Download the binary.
+1. Check requirements
+
+    * VelaD support installing KubeVela on machines based on these OS: Linux, macOS, Windows.
+    * If you are using Linux or macOS, make sure your machine have `curl` installed.
+    * If you are using macOS or Windows, make sure you've already installed [Docker](https://www.docker.com/products/docker-desktop).
+
+2. Download the binary.
 
     * MacOS/Linux
 
@@ -20,17 +24,17 @@
     powershell -Command "iwr -useb https://static.kubevela.net/script/install-velad.ps1 | iex"
     ```
 
-2. Install
+3. Install
 
-```bash
-velad install
-```
+    ```bash
+    velad install
+    ```
 
-3. Install VelaUX environment
+4. Install VelaUX environment
 
-```bash
-vela addon enable ./addon
-```
+    ```bash
+    vela addon enable ./addon
+    ```
 
 ## Start the server on local
 
@@ -58,8 +62,8 @@ Now, the local environment is built successfully, you could write the server or 
 
 Notes:
 
-- If you change the frontend code, it will take effect after the website refresh.
-- If you change the server code, it will take effect after restarted the server.
+* If you change the frontend code, it will take effect after the website refresh.
+* If you change the server code, it will take effect after restarted the server.
 
 ### Check the code style
 

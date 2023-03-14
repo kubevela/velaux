@@ -81,14 +81,14 @@ class CreateUser extends React.Component<Props, State> {
       if (isEditUser) {
         updateUser(params).then((res) => {
           if (res) {
-            Message.success(<Translation>update user success</Translation>);
+            Message.success(<Translation>User updated successfully</Translation>);
             this.props.onCreate();
           }
         });
       } else {
         createUser(params).then((res) => {
           if (res) {
-            Message.success(<Translation>create user success</Translation>);
+            Message.success(<Translation>User created successfully</Translation>);
             this.props.onCreate();
           }
         });
@@ -202,6 +202,7 @@ class CreateUser extends React.Component<Props, State> {
                     <Input
                       name="password"
                       htmlType="password"
+                      autoComplete={'new-password'}
                       placeholder={i18n.t('Please input the password').toString()}
                       {...init('password', {
                         rules: [
@@ -210,8 +211,7 @@ class CreateUser extends React.Component<Props, State> {
                             pattern: checkUserPassword,
                             message: (
                               <Translation>
-                                Password should be 8-16 bits and contain at least one number and one
-                                letter
+                                Password should be 8-16 bits and contain at least one number and one letter
                               </Translation>
                             ),
                           },
@@ -226,6 +226,7 @@ class CreateUser extends React.Component<Props, State> {
                   <Input
                     name="email"
                     placeholder={i18n.t('Please input a email').toString()}
+                    autoComplete={'off'}
                     disabled={isEditUser && editUser.email ? true : false}
                     {...init('email', {
                       rules: [
@@ -244,9 +245,7 @@ class CreateUser extends React.Component<Props, State> {
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem
-                  help={i18n
-                    .t('The common developer no need assign the platform roles.')
-                    .toString()}
+                  help={i18n.t('The common developer no need assign the platform roles.').toString()}
                   label={<Translation>Platform Roles</Translation>}
                   labelTextAlign="left"
                 >

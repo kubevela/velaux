@@ -322,7 +322,6 @@ class PodDetail extends React.Component<Props, State> {
         <Table
           className="container-table-wrapper margin-top-20"
           dataSource={containers || []}
-          hasBorder={false}
           primaryKey="name"
           loading={loading}
           locale={locale().Table}
@@ -333,7 +332,6 @@ class PodDetail extends React.Component<Props, State> {
         <Table
           className="event-table-wrapper margin-top-20"
           dataSource={events || []}
-          hasBorder={false}
           loading={loading}
           primaryKey="time"
           locale={locale().Table}

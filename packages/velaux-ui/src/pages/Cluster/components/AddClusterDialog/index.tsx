@@ -153,6 +153,7 @@ class AddClusterDialog extends React.Component<Props, State> {
         }
         overflowScroll={true}
         autoFocus={true}
+        width={800}
         visible={visible}
         onOk={this.onOk}
         onCancel={this.onClose}

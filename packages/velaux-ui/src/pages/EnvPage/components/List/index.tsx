@@ -46,7 +46,7 @@ class TableList extends Component<Props> {
         key: 'name',
         title: <Translation>Name(Alias)</Translation>,
         dataIndex: 'name',
-        width: '150px',
+        width: '200px',
         cell: (v: string, i: number, env: Env) => {
           return (
             <a
@@ -201,7 +201,6 @@ class TableList extends Component<Props> {
           size="medium"
           style={{ minWidth: '1200px' }}
           dataSource={list}
-          hasBorder={false}
           loading={false}
         >
           {columns.map((col) => (

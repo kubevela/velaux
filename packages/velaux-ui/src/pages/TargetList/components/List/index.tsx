@@ -145,7 +145,6 @@ class TableList extends Component<Props> {
           size="medium"
           style={{ minWidth: '1200px' }}
           dataSource={list}
-          hasBorder={false}
           loading={false}
         >
           {columns.map((col) => (

@@ -4,7 +4,7 @@
   box-shadow: 5px 0 8px #888;
   cursor: auto !important;
   .logo {
-    width: 224px;
+    width: 200px;
   }
   .cycle-mode {
     color: #fff;
@@ -53,27 +53,27 @@
       }
     }
   }
-  .integration-items {
+  .workspace-items {
     display: flex;
     flex-wrap: nowrap;
     height: 100%;
     .item {
-      margin-right: var(--spacing-6);
-      a {
-        display: flex;
-        justify-content: center;
-        height: 100%;
-        color: #fff;
-        img {
-          width: 30px;
-        }
-        span {
-          margin-left: 4px;
-          line-height: 48px;
-        }
-        &:hover {
-          color: var(--hover-color);
-        }
+      line-height: var(--layout-header-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #fff;
+      padding: 0 var(--spacing-4);
+      img {
+        width: 30px;
+      }
+      &:hover,
+      &.active {
+        background: var(--hover-color);
+      }
+      svg {
+        margin-right: var(--spacing-2);
       }
     }
   }

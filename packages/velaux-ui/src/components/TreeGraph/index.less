@@ -1,5 +1,3 @@
-@import '../../lib.less';
-
 .graph-tree {
   position: relative;
 
@@ -56,7 +54,7 @@
     }
 
     .icon-error {
-      color: @dangerColor;
+      color: var(--danger-color);
     }
 
     .actions {
@@ -87,7 +85,7 @@
       width: 60px;
       height: 60px;
       background: #fff;
-      border: 2px solid (@primarycolor);
+      border: 2px solid (var(--primary-color));
       border-radius: 30px;
 
       img {
@@ -97,7 +95,7 @@
   }
 
   .graph-node.node-error {
-    box-shadow: 1px 1px 1px (@dangerColor);
+    box-shadow: 1px 1px 1px (var(--danger-color));
   }
 
   .graph-node-pod {
@@ -115,7 +113,7 @@
       .actions {
         .next-icon {
           &:hover {
-            color: @primarycolor;
+            color: var(--primary-color);
           }
         }
       }
@@ -123,10 +121,10 @@
   }
 
   .graph-node.error-status {
-    border: solid 0.2em @dangerColor;
+    border: solid 0.2em var(--danger-color);
   }
   .graph-node.warning-status {
-    border: solid 0.2em @warningColor;
+    border: solid 0.2em var(--warning-color);
   }
 
   .graph-edge {

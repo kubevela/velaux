@@ -286,7 +286,6 @@ class TableList extends Component<Props, State> {
           className="customTable"
           rowHeight={40}
           dataSource={list}
-          hasBorder={false}
           loading={false}
           emptyContent={<Empty />}
         >

@@ -1,24 +1,29 @@
 import { ConfigProvider } from '@alifd/next';
 import React, { useEffect, useState } from 'react';
-import Content from './Content';
+import Router from './Router';
 import LeftMenu from './LeftMenu';
 import Header from './Header';
 import './index.less';
-import { LayoutMode } from 'src/types/main';
+import { LayoutMode, Workspace } from 'src/types/main';
 import { locationService } from '../services/LocationService';
+import { menuService } from '../services/MenuService';
 
 export default function MainLayout(props: any) {
+  const [workspace, setWorkspace] = useState<Workspace>();
   const [mode, setMode] = useState<LayoutMode>('default');
   const query = locationService.getSearchObject();
+  const path = locationService.getPathName();
   useEffect(() => {
-    if (query['layout-mode'] == 'default' || query['layout-mode'] == 'neat') {
-      setMode(query['layout-mode']);
+    const layoutMode = query['layout-mode'];
+    if (layoutMode && ['neat', 'neat2', 'default'].includes(layoutMode.toString())) {
+      setMode(layoutMode as LayoutMode);
     }
-  }, [query]);
+    setWorkspace(menuService.loadCurrentWorkspace());
+  }, [query, path]);
   return (
     <ConfigProvider>
       <div className="layout">
-        <Header mode={mode} {...props} />
+        {mode !== 'neat2' && <Header currentWorkspace={workspace} mode={mode} {...props} />}
         <div className="layout-shell">
           {mode === 'default' && (
             <div className="layout-navigation">
@@ -26,7 +31,7 @@ export default function MainLayout(props: any) {
             </div>
           )}
           <div className="layout-content">
-            <Content />
+            <Router />
           </div>
         </div>
       </div>

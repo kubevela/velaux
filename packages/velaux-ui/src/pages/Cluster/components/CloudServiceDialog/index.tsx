@@ -336,7 +336,7 @@ class CloudServiceDialog extends React.Component<Props, State> {
           </If>
 
           <If condition={!choseInput}>
-            <Table locale={locale().Table} dataSource={cloudClusters} hasBorder={false} loading={tableLoading}>
+            <Table locale={locale().Table} dataSource={cloudClusters} loading={tableLoading}>
               {columns.map((col, key) => (
                 <Column {...col} key={key} align={'left'} />
               ))}
