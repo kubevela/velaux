@@ -206,7 +206,7 @@ func (i *imageImpl) GetRepositoryTags(ctx context.Context, project, secretName, 
 
 	tags, err := i.registryHelper.ListRepositoryTags(secret, repository)
 	if err != nil {
-		klog.Errorf("fail to list repository tags %s:%s", repository, err.Error())
+		klog.Errorf("fail to list repository tags:%s", repository, err.Error())
 		return nil, err
 	}
 

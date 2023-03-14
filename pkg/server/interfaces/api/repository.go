@@ -320,12 +320,12 @@ func (h repository) verifyRepositorySecret(req *restful.Request, res *restful.Re
 		return
 	}
 	project := req.QueryParameter("project")
-	config, err := h.ImageService.ValidateImageRepoSecret(req.Request.Context(), project, verifyReq)
+	validateRepo, err := h.ImageService.ValidateImageRepoSecret(req.Request.Context(), project, verifyReq)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
-	err = res.WriteEntity(config)
+	err = res.WriteEntity(validateRepo)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
