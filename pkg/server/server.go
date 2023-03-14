@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kubevela/velaux/pkg/server/utils/registries"
+
 	"cuelang.org/go/pkg/strings"
 	restfulSpec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -135,6 +137,11 @@ func (s *restServer) buildIoCContainer() error {
 	factory := pkgconfig.NewConfigFactory(authClient)
 	if err := s.beanContainer.ProvideWithName("configFactory", factory); err != nil {
 		return fmt.Errorf("fail to provides the config factory bean to the container: %w", err)
+	}
+
+	registryHelper := registries.NewRegistryHelper()
+	if err := s.beanContainer.ProvideWithName("registryHelper", registryHelper); err != nil {
+		return fmt.Errorf("fail to provides the registry helper bean to the container: %w", err)
 	}
 
 	addonStore := pkgaddon.NewRegistryDataStore(authClient)

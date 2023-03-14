@@ -1831,3 +1831,12 @@ type ListContextValueResponse struct {
 	Total    int                      `json:"total"`
 	Contexts map[string][]model.Value `json:"contexts"`
 }
+
+type ValidateRepoResponse struct {
+
+	// if validate error,return error code
+	ErrorCode int64 `json:"errorCode,omitempty"`
+
+	// validate repository ok or not
+	Ok bool `json:"ok,omitempty"`
+}
