@@ -83,6 +83,9 @@ func (d defaultHelmImpl) ListChartNames(ctx context.Context, repoURL string, sec
 	var err error
 	if len(secretName) != 0 {
 		opts, err = d.GetHelmHTTPOption(ctx, secretName, projectName)
+		if err != nil {
+			return nil, err
+		}
 	}
 	charts, err := d.helper.ListChartsFromRepo(repoURL, skipCache, opts)
 	if err != nil {
@@ -100,6 +103,9 @@ func (d defaultHelmImpl) ListChartVersions(ctx context.Context, repoURL string, 
 	var err error
 	if len(secretName) != 0 {
 		opts, err = d.GetHelmHTTPOption(ctx, secretName, projectName)
+		if err != nil {
+			return nil, err
+		}
 	}
 	chartVersions, err := d.helper.ListVersions(repoURL, chartName, skipCache, opts)
 	if err != nil {
@@ -121,6 +127,9 @@ func (d defaultHelmImpl) ListChartValuesFiles(ctx context.Context, repoURL strin
 	var err error
 	if len(secretName) != 0 {
 		opts, err = d.GetHelmHTTPOption(ctx, secretName, projectName)
+		if err != nil {
+			return nil, err
+		}
 	}
 	v, err := d.helper.GetValuesFromChart(repoURL, chartName, version, skipCache, repoType, opts)
 	if err != nil {
@@ -138,6 +147,9 @@ func (d defaultHelmImpl) GetChartValues(ctx context.Context, repoURL string, cha
 	var err error
 	if len(secretName) != 0 {
 		opts, err = d.GetHelmHTTPOption(ctx, secretName, projectName)
+		if err != nil {
+			return nil, err
+		}
 	}
 	v, err := d.helper.GetValuesFromChart(repoURL, chartName, version, skipCache, repoType, opts)
 	if err != nil {
