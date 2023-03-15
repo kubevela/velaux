@@ -1,6 +1,6 @@
 import { ConfigProvider } from '@alifd/next';
 import React, { useEffect, useState } from 'react';
-import Router from './Router';
+import LayoutRouter from './LayoutRouter';
 import LeftMenu from './LeftMenu';
 import Header from './Header';
 import './index.less';
@@ -31,7 +31,7 @@ export default function MainLayout(props: any) {
             </div>
           )}
           <div className="layout-content">
-            <Router />
+            <LayoutRouter />
           </div>
         </div>
       </div>
