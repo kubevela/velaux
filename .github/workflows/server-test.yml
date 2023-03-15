@@ -161,6 +161,7 @@ jobs:
           make e2e-setup-core
           make start-addon-mock-server
           make load-image
+          make enable-addon
           
       - name: Run server e2e test
         run: |

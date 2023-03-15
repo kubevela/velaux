@@ -14,6 +14,43 @@ enableImpersonation: *[ if parameter["enableImpersonation"] {
 	"--feature-gates=EnableImpersonation=true"
 }] | []
 
+_nginxTrait: *[
+		if parameter["domain"] != _|_ && parameter["gatewayDriver"] == "nginx" {
+		{
+			type: "gateway"
+			properties: {
+				domain: parameter["domain"]
+				http: {
+					"/": 8000
+				}
+				class: "nginx"
+			}
+		}
+	},
+] | []
+
+_traefikTrait: *[
+		if parameter["domain"] != _|_ && parameter["gatewayDriver"] == "traefik" {
+		{
+			type: "http-route"
+			properties: {
+				domains: [ parameter["domain"]]
+				rules: [{port: 8000}]
+			}
+		}
+	},
+] | []
+
+_httpsTrait: *[ if parameter["secretName"] != _|_ && parameter["domain"] != _|_ && parameter["gatewayDriver"] == "traefik" {
+	type: "https-route"
+	properties: {
+		domains: [ parameter["domain"]]
+		rules: [{port: 80}]
+		secrets: [{
+			name: parameter["secretName"]
+		}]
+	}}] | []
+
 apiserver: {
 	name: "apiserver"
 	type: "webservice"
@@ -30,12 +67,19 @@ apiserver: {
 			imagePullSecrets: parameter["imagePullSecrets"]
 		}
 
+		if parameter["serviceType"] != _|_ {
+			exposeType: parameter["serviceType"]
+		}
+
 		cmd: ["apiserver", "--datastore-type=" + parameter["dbType"]] + database + dbURL + enableImpersonation
 		ports: [
 			{
 				port:     8000
 				protocol: "TCP"
 				expose:   true
+				if parameter["serviceType"] == "NodePort" {
+					nodePort: parameter["nodePort"]
+				}
 			},
 		]
 	}
@@ -46,5 +90,5 @@ apiserver: {
 			properties: name: parameter["serviceAccountName"]
 		},
 		{type: "scaler", properties: replicas: parameter["replicas"]},
-	]
+	] + _nginxTrait + _traefikTrait + _httpsTrait
 }
