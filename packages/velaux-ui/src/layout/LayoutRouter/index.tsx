@@ -35,8 +35,9 @@ import ConfigsLayout from '../Configs';
 import DefinitionDetails from '../DefinitionDetails';
 import DefinitionsLayout from '../Definitions';
 import ProjectLayout from '../Project';
+import MyProjectList from '../../pages/MyProjectList';
 
-export default function Content() {
+export default function Router() {
   return (
     <Switch>
       <Route
@@ -44,6 +45,13 @@ export default function Content() {
         path="/"
         render={() => {
           return <Redirect to="/applications" />;
+        }}
+      />
+      <Route
+        exact
+        path="/projects"
+        render={(props: any) => {
+          return <MyProjectList {...props} />;
         }}
       />
       <Route
@@ -241,7 +249,7 @@ export default function Content() {
       />
       <Route
         exact
-        path="/projects"
+        path="/platform/projects"
         render={(props: any) => {
           return <Projects {...props} />;
         }}

@@ -249,7 +249,7 @@ class Projects extends Component<Props, State> {
               </Permission>,
             ]}
           />
-          <Table locale={locale().Table} dataSource={list} hasBorder={false} loading={isLoading}>
+          <Table locale={locale().Table} dataSource={list} loading={isLoading}>
             {columns.map((col, key) => (
               <Column {...col} key={key} align={'left'} />
             ))}

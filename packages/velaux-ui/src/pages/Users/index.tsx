@@ -433,7 +433,7 @@ class Users extends Component<Props, State> {
           </section>
 
           <section className="margin-top-20  user-list-wrapper">
-            <Table locale={locale().Table} dataSource={dataSource} hasBorder={false} loading={isLoading}>
+            <Table locale={locale().Table} dataSource={dataSource} loading={isLoading}>
               {columns.map((col, key) => (
                 <Column {...col} key={key} align={'left'} />
               ))}

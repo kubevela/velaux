@@ -6,7 +6,7 @@
   "Add item": "添加项",
   "Clear": "清除",
   "Clusters": "集群列表",
-  "Addons": "插件列表",
+  "Addons": "插件管理",
   "Reset": "重置",
   "Please enter": "请输入",
   "App Name-": "应用名称-",
@@ -431,7 +431,7 @@
   "Component Selector": "根据组件筛选",
   "Component Basic Info": "组件基础信息",
   "This trait properties change will cause pod restart after the application deploy": "该类型运维特征参数变更将导致应用重新部署时重启 Pod 实例。",
-  "Users": "用户列表",
+  "Users": "用户管理",
   "Email": "邮箱",
   "Password": "密码",
   "New User": "新增用户",
@@ -440,7 +440,7 @@
   "Basic authorization management is provided for local users by default, but SSO authentication is strongly recommended": "默认提供的是基于本地用户登录的管理能力，非常建议配置并开启 SSO 单点登录",
   "Reset Password": "重置密码",
   "UserManager": "用户管理",
-  "Projects": "项目列表",
+  "Projects": "项目管理",
   "Projects are used to allocate and isolate resources": "项目用于分配和隔离资源",
   "New Project": "新增项目",
   "Edit Project": "编辑项目",
@@ -449,6 +449,7 @@
   "Please enter a project name": "请输入符合规范的项目名称",
   "Name(Alias)": "名称（别名）",
   "Configs": "配置",
+  "Global Configs": "全局配置",
   "Config Distributions": "配置分发",
   "Summary": "概览",
   "Roles": "角色",
@@ -617,5 +618,6 @@
   "Includes": "包括",
   "contexts": "上下文参数",
   "Are you sure to rerun this Pipeline?": "确定要重新运行流水线吗？",
-  "Show Values File": "查看 Value 文件"
+  "Show Values File": "查看 Value 文件",
+  "Showing the all projects that you have permissions": "你拥有权限的所有项目"
 }

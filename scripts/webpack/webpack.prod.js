@@ -7,8 +7,8 @@ const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const { resolveToEsbuildTarget } = require('esbuild-plugin-browserslist');
 const path = require('path');
 const { DefinePlugin } = require('webpack');
-const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const { merge } = require('webpack-merge');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const common = require('./webpack.common.js');
 const esbuildTargets = resolveToEsbuildTarget(browserslist(), {
   printUnknownTargets: false,
@@ -64,7 +64,6 @@ module.exports = (env = {}) =>
         },
         __COMMIT_HASH__: JSON.stringify(commitHash),
       }),
-
       new WebpackManifestPlugin({
         fileName: path.join(process.cwd(), 'public', 'build', 'manifest.json'),
         filter: (file) => !file.name.endsWith('.map'),

@@ -12,7 +12,7 @@ const esbuildTargets = resolveToEsbuildTarget(browserslist(), { printUnknownTarg
 module.exports = {
   target: 'web',
   entry: {
-    app: './packages/velaux-ui/src/index.tsx',
+    app: './packages/velaux-ui/src/index.ts',
     default: './packages/velaux-ui/src/theme-default.less',
   },
   output: {

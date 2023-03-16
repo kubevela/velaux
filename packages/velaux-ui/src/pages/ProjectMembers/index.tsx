@@ -287,7 +287,7 @@ class ProjectMembers extends Component<Props, State> {
           </section>
 
           <section className="margin-top-20  member-list-wrapper">
-            <Table locale={locale().Table} dataSource={memberList} hasBorder={false} loading={isLoading}>
+            <Table locale={locale().Table} dataSource={memberList} loading={isLoading}>
               {columns.map((col, key) => (
                 <Column {...col} key={key} align={'left'} />
               ))}

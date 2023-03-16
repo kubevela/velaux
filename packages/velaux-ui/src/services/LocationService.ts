@@ -153,6 +153,7 @@ export interface LocationService {
   getHistory: () => H.History;
   getSearch: () => URLSearchParams;
   getSearchObject: () => UrlQueryMap;
+  getPathName: () => string;
 }
 
 /** @internal */
@@ -228,6 +229,10 @@ export class HistoryWrapper implements LocationService {
   // The param key include a prefix $
   getSearchObject() {
     return locationSearchToObject(this.history.location.search);
+  }
+
+  getPathName() {
+    return this.history.location.pathname;
   }
 }
 

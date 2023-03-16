@@ -226,7 +226,6 @@ class CardContent extends React.Component<Props, State> {
             size="medium"
             style={{ minWidth: '1200px' }}
             dataSource={applications}
-            hasBorder={false}
             loading={false}
           >
             {columns.map((col) => (

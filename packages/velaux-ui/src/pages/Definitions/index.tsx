@@ -239,7 +239,6 @@ class Definitions extends Component<Props, State> {
           id="definitionTable"
           locale={locale().Table}
           dataSource={this.getDataSource()}
-          hasBorder={false}
           loading={isLoading}
           fixedHeader={true}
           maxBodyHeight={'calc(100vh - 100px)'}
