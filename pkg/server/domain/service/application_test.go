@@ -474,6 +474,7 @@ var _ = Describe("Test application service function", func() {
 		Expect(err).Should(BeNil())
 		Expect(revision.DeployUser.Name).Should(Equal(model.DefaultAdminUserName))
 		Expect(revision.DeployUser.Alias).Should(Equal(model.DefaultAdminUserAlias))
+		Expect(revision.WorkflowName).Should(Equal(repository.ConvertWorkflowName("app-dev")))
 
 		appStats, err := appService.GetApplicationStatus(context.TODO(), appModel, "app-dev")
 		Expect(err).Should(BeNil())
