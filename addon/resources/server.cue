@@ -51,7 +51,7 @@ _httpsTrait: *[ if parameter["secretName"] != _|_ && parameter["domain"] != _|_ 
 		}]
 	}}] | []
 
-apiserver: {
+server: {
 	name: "apiserver"
 	type: "webservice"
 	properties: {
