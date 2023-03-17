@@ -98,7 +98,7 @@ var _ = Describe("Test Worker CR sync to datastore", func() {
 		Expect(ds.Get(ctx, &comp2)).Should(BeNil())
 		Expect(comp2.Properties).Should(BeEquivalentTo(&model.JSONStruct{"image": "nginx2"}))
 
-		env := model.Env{Project: appNS1, Name: model.AutoGenEnvNamePrefix + appNS1}
+		env := model.Env{Project: "example", Name: model.AutoGenEnvNamePrefix + appNS1}
 		Expect(ds.Get(ctx, &env)).Should(BeNil())
 		Expect(env.CreateTime.IsZero()).Should(BeFalse())
 		Expect(len(env.Targets)).Should(Equal(2))

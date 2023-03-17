@@ -42,8 +42,12 @@ import (
 func (c *CR2UX) ConvertApp2DatastoreApp(ctx context.Context, targetApp *v1beta1.Application) (*DataStoreApp, error) {
 	cli := c.cli
 	appName := c.getAppMetaName(ctx, targetApp.Name, targetApp.Namespace)
+	projectName := model.DefaultInitName
+	if labels := targetApp.Labels; labels != nil && labels[model.LabelSyncProject] != "" {
+		projectName = labels[model.LabelSyncProject]
+	}
 	project := v1.CreateProjectRequest{
-		Name: model.DefaultInitName,
+		Name: projectName,
 	}
 	sourceOfTruth := apitypes.FromCR
 	if _, ok := targetApp.Labels[oam.LabelAddonName]; ok && strings.HasPrefix(targetApp.Name, "addon-") && targetApp.Namespace == apitypes.DefaultKubeVelaNS {
@@ -228,10 +232,10 @@ func (c *CR2UX) generateEnv(ctx context.Context, defaultProject string, envNames
 		Targets:     targetNames,
 		Project:     defaultProject,
 	}
-	if defaultProject == model.DefaultInitName && newProject != "" {
-		return env, newProject, nil
+	if defaultProject != model.DefaultInitName {
+		return env, "", nil
 	}
-	return env, "", nil
+	return env, newProject, nil
 }
 
 func getRevision(app v1beta1.Application) string {

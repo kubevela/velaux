@@ -2,6 +2,8 @@ apiVersion: core.oam.dev/v1beta1
 kind: Application
 metadata:
   name: example
+  labels:
+    ux.oam.dev/synced-project: "example"
 spec:
   components:
     - name: nginx

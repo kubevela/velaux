@@ -42,6 +42,8 @@ const (
 	LabelSyncRevision = "ux.oam.dev/synced-revision"
 	// LabelSyncNamespace describes the namespace synced from
 	LabelSyncNamespace = "ux.oam.dev/from-namespace"
+	// LabelSyncProject describes the project synced from
+	LabelSyncProject = "ux.oam.dev/synced-project"
 )
 
 const (
