@@ -234,13 +234,6 @@
 				"parameters": [
 					{
 						"type": "string",
-						"description": "addon name to query detail",
-						"name": "name",
-						"in": "path",
-						"required": true
-					},
-					{
-						"type": "string",
 						"description": "specify addon version to enable",
 						"name": "version",
 						"in": "query"
@@ -4029,9 +4022,9 @@
 				"parameters": [
 					{
 						"enum": [
-							"",
-							"",
-							""
+							"component",
+							"trait",
+							"workflowstep"
 						],
 						"type": "string",
 						"description": "query the definition type",
@@ -4138,6 +4131,13 @@
 				"operationId": "updateDefinitionStatus",
 				"parameters": [
 					{
+						"type": "string",
+						"description": "identifier of the definition",
+						"name": "definitionName",
+						"in": "path",
+						"required": true
+					},
+					{
 						"name": "body",
 						"in": "body",
 						"required": true,
@@ -4175,6 +4175,13 @@
 				"summary": "Update the UI schema for a definition",
 				"operationId": "updateUISchema",
 				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the definition",
+						"name": "definitionName",
+						"in": "path",
+						"required": true
+					},
 					{
 						"name": "body",
 						"in": "body",
@@ -4780,8 +4787,15 @@
 					"project"
 				],
 				"summary": "Detail a template",
-				"operationId": "getConfigTemplate",
+				"operationId": "getConfigTemplateByTemplateName",
 				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the project",
+						"name": "projectName",
+						"in": "path",
+						"required": true
+					},
 					{
 						"type": "string",
 						"description": "identifier of the config template",
@@ -4826,7 +4840,7 @@
 					"project"
 				],
 				"summary": "get configs which are in a project",
-				"operationId": "getConfigs",
+				"operationId": "getProjectConfigs",
 				"parameters": [
 					{
 						"type": "string",
@@ -4870,7 +4884,7 @@
 					"project"
 				],
 				"summary": "create a config in a project",
-				"operationId": "createConfig",
+				"operationId": "createProjectConfig",
 				"parameters": [
 					{
 						"type": "string",
@@ -4971,7 +4985,7 @@
 					"project"
 				],
 				"summary": "update a config in a project",
-				"operationId": "updateConfig",
+				"operationId": "updateProjectConfig",
 				"parameters": [
 					{
 						"type": "string",
@@ -5024,7 +5038,7 @@
 					"project"
 				],
 				"summary": "delete a config from a project",
-				"operationId": "deleteConfig",
+				"operationId": "deleteProjectConfig",
 				"parameters": [
 					{
 						"type": "string",
@@ -7011,6 +7025,13 @@
 				"parameters": [
 					{
 						"type": "string",
+						"description": "identifier of the helm chart",
+						"name": "chart",
+						"in": "path",
+						"required": true
+					},
+					{
+						"type": "string",
 						"description": "helm repository url",
 						"name": "repoUrl",
 						"in": "query"
@@ -7056,6 +7077,20 @@
 				"operationId": "getChartValues",
 				"deprecated": true,
 				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the helm chart",
+						"name": "chart",
+						"in": "path",
+						"required": true
+					},
+					{
+						"type": "string",
+						"description": "version of the helm chart",
+						"name": "version",
+						"in": "path",
+						"required": true
+					},
 					{
 						"type": "string",
 						"description": "helm repository url",
@@ -7702,6 +7737,15 @@
 				],
 				"summary": "get user detail",
 				"operationId": "detailUser",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of a user",
+						"name": "username",
+						"in": "path",
+						"required": true
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -7732,6 +7776,13 @@
 				"summary": "update a user's alias or password",
 				"operationId": "updateUser",
 				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of a user",
+						"name": "username",
+						"in": "path",
+						"required": true
+					},
 					{
 						"name": "body",
 						"in": "body",
@@ -7770,6 +7821,15 @@
 				],
 				"summary": "delete a user",
 				"operationId": "deleteUser",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of a user",
+						"name": "username",
+						"in": "path",
+						"required": true
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -7801,6 +7861,15 @@
 				],
 				"summary": "disable a user",
 				"operationId": "disableUser",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of a user",
+						"name": "username",
+						"in": "path",
+						"required": true
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -7832,6 +7901,15 @@
 				],
 				"summary": "enable a user",
 				"operationId": "enableUser",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of a user",
+						"name": "username",
+						"in": "path",
+						"required": true
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -8071,7 +8149,17 @@
 					"cloudshell"
 				],
 				"summary": "prepare the user's cloud shell environment",
-				"operationId": "proxy",
+				"operationId": "proxyPath",
+				"parameters": [
+					{
+						"pattern": "*",
+						"type": "string",
+						"description": "subpath",
+						"name": "subpath",
+						"in": "path",
+						"required": true
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -9544,9 +9632,9 @@
 		},
 		"model.WorkflowStep": {
 			"required": [
-				"dependsOn",
 				"name",
 				"alias",
+				"dependsOn",
 				"type",
 				"description",
 				"orderIndex"
@@ -10251,12 +10339,13 @@
 		},
 		"v1.ApplicationDeployResponse": {
 			"required": [
-				"version",
-				"note",
-				"triggerType",
 				"envName",
-				"createTime",
+				"triggerType",
+				"workflowName",
 				"status",
+				"note",
+				"createTime",
+				"version",
 				"record"
 			],
 			"properties": {
@@ -10292,6 +10381,9 @@
 					"type": "string"
 				},
 				"version": {
+					"type": "string"
+				},
+				"workflowName": {
 					"type": "string"
 				}
 			}
@@ -10358,7 +10450,8 @@
 				"status",
 				"note",
 				"envName",
-				"triggerType"
+				"triggerType",
+				"workflowName"
 			],
 			"properties": {
 				"codeInfo": {
@@ -10390,6 +10483,9 @@
 					"type": "string"
 				},
 				"version": {
+					"type": "string"
+				},
+				"workflowName": {
 					"type": "string"
 				}
 			}
@@ -11034,13 +11130,13 @@
 		},
 		"v1.ConfigTemplateDetail": {
 			"required": [
-				"namespace",
-				"description",
 				"scope",
 				"sensitive",
 				"createTime",
 				"alias",
 				"name",
+				"namespace",
+				"description",
 				"schema",
 				"uiSchema"
 			],
@@ -11870,11 +11966,11 @@
 		},
 		"v1.DetailAddonResponse": {
 			"required": [
-				"invisible",
 				"name",
 				"version",
 				"description",
 				"icon",
+				"invisible",
 				"schema",
 				"uiSchema",
 				"definitions",
@@ -11954,13 +12050,13 @@
 		},
 		"v1.DetailApplicationResponse": {
 			"required": [
-				"alias",
-				"updateTime",
-				"icon",
-				"name",
 				"project",
 				"description",
+				"icon",
+				"name",
+				"alias",
 				"createTime",
+				"updateTime",
 				"policies",
 				"envBindings",
 				"resourceInfo"
@@ -12017,20 +12113,20 @@
 		},
 		"v1.DetailClusterResponse": {
 			"required": [
-				"description",
-				"labels",
-				"provider",
+				"createTime",
+				"apiServerURL",
+				"dashboardURL",
 				"kubeConfig",
 				"kubeConfigSecret",
 				"updateTime",
-				"apiServerURL",
 				"name",
-				"reason",
 				"alias",
+				"description",
 				"icon",
+				"labels",
 				"status",
-				"dashboardURL",
-				"createTime",
+				"reason",
+				"provider",
 				"resourceInfo"
 			],
 			"properties": {
@@ -12088,14 +12184,14 @@
 		},
 		"v1.DetailComponentResponse": {
 			"required": [
-				"appPrimaryKey",
-				"name",
-				"alias",
+				"type",
 				"createTime",
 				"main",
+				"appPrimaryKey",
 				"creator",
-				"type",
+				"name",
 				"updateTime",
+				"alias",
 				"definition"
 			],
 			"properties": {
@@ -12183,12 +12279,12 @@
 		},
 		"v1.DetailDefinitionResponse": {
 			"required": [
-				"status",
-				"name",
-				"alias",
+				"description",
 				"icon",
 				"ownerAddon",
-				"description",
+				"name",
+				"alias",
+				"status",
 				"labels",
 				"schema",
 				"uiSchema"
@@ -12246,15 +12342,15 @@
 		},
 		"v1.DetailPolicyResponse": {
 			"required": [
-				"updateTime",
-				"envName",
-				"alias",
-				"type",
+				"description",
 				"creator",
 				"createTime",
+				"updateTime",
 				"name",
-				"description",
-				"properties"
+				"alias",
+				"type",
+				"properties",
+				"envName"
 			],
 			"properties": {
 				"alias": {
@@ -12296,18 +12392,18 @@
 		},
 		"v1.DetailRevisionResponse": {
 			"required": [
-				"createTime",
-				"revisionCRName",
-				"workflowName",
-				"updateTime",
-				"status",
-				"note",
-				"triggerType",
-				"appPrimaryKey",
 				"reason",
 				"deployUser",
+				"triggerType",
 				"envName",
-				"version"
+				"updateTime",
+				"version",
+				"revisionCRName",
+				"status",
+				"note",
+				"workflowName",
+				"createTime",
+				"appPrimaryKey"
 			],
 			"properties": {
 				"appPrimaryKey": {
@@ -12364,10 +12460,10 @@
 		},
 		"v1.DetailTargetResponse": {
 			"required": [
-				"createTime",
-				"project",
 				"updateTime",
-				"name"
+				"project",
+				"name",
+				"createTime"
 			],
 			"properties": {
 				"alias": {
@@ -12407,11 +12503,11 @@
 		},
 		"v1.DetailUserResponse": {
 			"required": [
-				"createTime",
-				"lastLoginTime",
 				"name",
 				"email",
 				"disabled",
+				"createTime",
+				"lastLoginTime",
 				"projects",
 				"roles"
 			],
@@ -12452,14 +12548,14 @@
 		},
 		"v1.DetailWorkflowRecordResponse": {
 			"required": [
+				"namespace",
+				"mode",
 				"workflowAlias",
 				"status",
-				"workflowName",
-				"mode",
-				"namespace",
-				"name",
 				"message",
+				"name",
 				"applicationRevision",
+				"workflowName",
 				"deployTime",
 				"deployUser",
 				"note",
@@ -12521,16 +12617,16 @@
 		},
 		"v1.DetailWorkflowResponse": {
 			"required": [
-				"name",
-				"default",
-				"createTime",
-				"envName",
-				"updateTime",
 				"mode",
 				"subMode",
+				"name",
+				"envName",
+				"createTime",
+				"updateTime",
 				"alias",
 				"description",
-				"enable"
+				"enable",
+				"default"
 			],
 			"properties": {
 				"alias": {
@@ -12765,12 +12861,12 @@
 		},
 		"v1.GetPipelineResponse": {
 			"required": [
-				"spec",
 				"name",
 				"alias",
 				"project",
 				"description",
 				"createTime",
+				"spec",
 				"info"
 			],
 			"properties": {
@@ -12813,10 +12909,10 @@
 		},
 		"v1.GetPipelineRunLogResponse": {
 			"required": [
+				"type",
 				"phase",
 				"id",
 				"name",
-				"type",
 				"source",
 				"log"
 			],
@@ -13470,11 +13566,11 @@
 		},
 		"v1.LoginUserInfoResponse": {
 			"required": [
-				"createTime",
 				"lastLoginTime",
 				"name",
 				"email",
 				"disabled",
+				"createTime",
 				"projects",
 				"platformPermissions",
 				"projectPermissions"
@@ -13721,11 +13817,11 @@
 		},
 		"v1.PipelineListItem": {
 			"required": [
+				"createTime",
+				"name",
 				"alias",
 				"project",
 				"description",
-				"createTime",
-				"name",
 				"info"
 			],
 			"properties": {
@@ -14294,10 +14390,10 @@
 		},
 		"v1.StepInputBase": {
 			"required": [
-				"phase",
 				"id",
 				"name",
 				"type",
+				"phase",
 				"values"
 			],
 			"properties": {
@@ -14323,10 +14419,10 @@
 		},
 		"v1.StepOutputBase": {
 			"required": [
-				"phase",
 				"id",
 				"name",
 				"type",
+				"phase",
 				"values"
 			],
 			"properties": {
@@ -14935,14 +15031,14 @@
 		},
 		"v1.WorkflowRecord": {
 			"required": [
-				"message",
-				"mode",
-				"namespace",
-				"workflowAlias",
-				"applicationRevision",
 				"status",
 				"name",
-				"workflowName"
+				"namespace",
+				"applicationRevision",
+				"mode",
+				"workflowName",
+				"workflowAlias",
+				"message"
 			],
 			"properties": {
 				"applicationRevision": {

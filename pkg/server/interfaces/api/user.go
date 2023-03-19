@@ -73,6 +73,7 @@ func (c *user) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/{username}").To(c.detailUser).
 		Doc("get user detail").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("username", "identifier of a user").DataType("string").Required(true)).
 		Filter(c.RbacService.CheckPerm("user", "detail")).
 		Filter(c.userCheckFilter).
 		Returns(200, "OK", apis.DetailUserResponse{}).
@@ -82,6 +83,7 @@ func (c *user) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.PUT("/{username}").To(c.updateUser).
 		Doc("update a user's alias or password").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("username", "identifier of a user").DataType("string").Required(true)).
 		Filter(c.RbacService.CheckPerm("user", "update")).
 		Filter(c.userCheckFilter).
 		Reads(apis.UpdateUserRequest{}).
@@ -92,6 +94,7 @@ func (c *user) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.DELETE("/{username}").To(c.deleteUser).
 		Doc("delete a user").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("username", "identifier of a user").DataType("string").Required(true)).
 		Filter(c.RbacService.CheckPerm("user", "delete")).
 		Returns(200, "OK", apis.EmptyResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
@@ -100,6 +103,7 @@ func (c *user) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/{username}/disable").To(c.disableUser).
 		Doc("disable a user").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("username", "identifier of a user").DataType("string").Required(true)).
 		Filter(c.RbacService.CheckPerm("user", "disable")).
 		Filter(c.userCheckFilter).
 		Returns(200, "OK", apis.EmptyResponse{}).
@@ -109,6 +113,7 @@ func (c *user) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/{username}/enable").To(c.enableUser).
 		Doc("enable a user").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("username", "identifier of a user").DataType("string").Required(true)).
 		Filter(c.RbacService.CheckPerm("user", "enable")).
 		Filter(c.userCheckFilter).
 		Returns(200, "OK", apis.EmptyResponse{}).
