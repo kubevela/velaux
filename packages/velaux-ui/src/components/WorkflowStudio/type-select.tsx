@@ -24,44 +24,22 @@ interface DefinitionCatalog {
   definitions: DefinitionBase[];
 }
 
-const defaultDefinitionCatalog: Record<string, string> = {
-  'step-group': 'Group',
-  deploy: 'Delivery',
-  'apply-app': 'Delivery',
-  'apply-deployment': 'Delivery',
-  'apply-component': 'Delivery',
-  'addon-operation': 'Delivery',
-  'deploy-cloud-resource': 'Delivery',
-  'share-cloud-resource': 'Delivery',
-  'export-service': 'Delivery',
-  notification: 'Notification',
-  webhook: 'Notification',
-  'create-config': 'Config Management',
-  'delete-config': 'Config Management',
-  'list-config': 'Config Management',
-  'read-config': 'Config Management',
-  'export-data': 'Config Management',
-  export2config: 'Config Management',
-  export2secret: 'Config Management',
-  suspend: 'Notification',
-};
-
 const defaultCatalog: Record<string, DefinitionCatalog> = {
-  Group: {
-    title: 'Group',
-    description: 'Merge a set of steps.',
+  'Application Delivery': {
+    title: 'Application Delivery',
+    description: 'Delivery the Application or workloads to the Targets.',
     definitions: [],
     sort: 1,
   },
-  Delivery: {
-    title: 'Delivery',
-    description: 'Delivery the Application or workloads to the Targets',
+  'Resource Management': {
+    title: 'Resource Management',
+    description: 'Steps for Resource Management',
     definitions: [],
     sort: 2,
   },
-  Approval: {
-    title: 'Approval',
-    description: 'Approval or reject the changes during Workflow or Pipeline progress',
+  'Terraform': {
+    title: 'Terraform',
+    description: 'Terraform workflow steps',
     definitions: [],
     sort: 3,
   },
@@ -71,13 +49,31 @@ const defaultCatalog: Record<string, DefinitionCatalog> = {
     definitions: [],
     sort: 4,
   },
-  Notification: {
-    title: 'Notification',
-    description: 'Send messages to users or other applications.',
+  'CI Integration': {
+    title: 'CI Integration',
+    description: 'CI integration steps',
     definitions: [],
     sort: 5,
   },
-  Custom: {
+  'External Integration': {
+    title: 'External Integration',
+    description: 'External Integration steps',
+    definitions: [],
+    sort: 6,
+  },
+  'Process Control': {
+    title: 'Process Control',
+    description: 'Process Control steps',
+    definitions: [],
+    sort: 7,
+  },
+  'Scripts & Commands': {
+    title: 'Scripts & Commands',
+    description: 'Steps for executing Scripts & Commands',
+    definitions: [],
+    sort: 8,
+  },
+  'Custom': {
     title: 'Custom',
     description: 'Custom Workflow or Pipeline steps',
     definitions: [],
@@ -85,21 +81,10 @@ const defaultCatalog: Record<string, DefinitionCatalog> = {
   },
 };
 
-const catalogLabelKey = 'definition.oam.dev/catalog';
-
 const initDefinitionCatalog = (defs: DefinitionBase[]) => {
   return defs.map((def) => {
-    if (!def.labels[catalogLabelKey]) {
-      const d = defaultDefinitionCatalog[def.name];
-      if (def.labels) {
-        def.labels[catalogLabelKey] = d ? d : 'Custom';
-      } else {
-        def.labels = {
-          catalogLabelKey: d ? d : 'Custom',
-        };
-      }
-    } else {
-      def.labels[catalogLabelKey] = def.labels[catalogLabelKey].replaceAll('_', ' ');
+    if(!def.category || def.category==""){
+      def.category = 'Custom';
     }
     return def;
   });
@@ -109,7 +94,7 @@ const buildDefinitionCatalog = (defs: DefinitionBase[]) => {
   const customDefs = initDefinitionCatalog(defs);
   const catalogMap: Record<string, DefinitionCatalog> = _.cloneDeep(defaultCatalog);
   customDefs.map((def) => {
-    const catalog = def.labels[catalogLabelKey];
+    const catalog = def.category;
     if (catalogMap[catalog]) {
       catalogMap[catalog].definitions.push(def);
     } else {
@@ -161,7 +146,6 @@ class TypeSelect extends React.Component<Props, State> {
     const { definitions, onClose, checkStepName, addSub } = this.props;
     const { selectType } = this.state;
     const catalogs = buildDefinitionCatalog(definitions?.filter((def) => !addSub || def.name != 'step-group') || []);
-    console.log(catalogs);
     const { init } = this.field;
     const checkStepNameRule = (rule: Rule, value: any, callback: (error?: string) => void) => {
       if (checkStepName(value)) {

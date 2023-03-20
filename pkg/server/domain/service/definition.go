@@ -187,6 +187,7 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 		Description: def.GetAnnotations()[types.AnnoDefinitionDescription],
 		Icon:        def.GetAnnotations()[types.AnnoDefinitionIcon],
 		Labels:      def.GetLabels(),
+		Category:    def.GetAnnotations()[types.AnnoDefinitionCategory],
 		Status: func() string {
 			if _, exist := def.GetLabels()[types.LabelDefinitionHidden]; exist {
 				return "disable"
