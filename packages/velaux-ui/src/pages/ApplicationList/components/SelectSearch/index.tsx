@@ -15,6 +15,9 @@ type Props = {
   dispatch: ({}) => {};
   projects?: Project[];
   envs?: Env[];
+  appLabels?: string[];
+  labelValue?: string[];
+  setLabelValue: (labels: string[]) => void;
   getApplications: (params: any) => void;
   setMode: (mode: ShowMode) => void;
   showMode: ShowMode;
@@ -25,6 +28,7 @@ type State = {
   targetValue: string;
   inputValue: string;
   envValue: string;
+  labelValue: string[];
 };
 
 class SelectSearch extends React.Component<Props, State> {
@@ -35,10 +39,12 @@ class SelectSearch extends React.Component<Props, State> {
       targetValue: '',
       envValue: '',
       inputValue: '',
+      labelValue: [],
     };
     this.onChangeProject = this.onChangeProject.bind(this);
     this.onChangeTarget = this.onChangeTarget.bind(this);
     this.handleChangName = this.handleChangName.bind(this);
+    this.handleChangeLabel = this.handleChangeLabel.bind(this);
   }
 
   onChangeProject(e: string) {
@@ -69,6 +75,18 @@ class SelectSearch extends React.Component<Props, State> {
     });
   }
 
+  handleChangeLabel(value: string[]) {
+    const { setLabelValue } = this.props;
+    setLabelValue(value)
+    this.setState({
+      labelValue: value,
+    },
+    () => {
+      this.getApplications();
+    });
+
+  }
+
   onChangeEnv = (e: string) => {
     this.setState(
       {
@@ -85,26 +103,35 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   getApplications = async () => {
-    const { projectValue, inputValue, envValue } = this.state;
+    const { projectValue, inputValue, envValue, labelValue } = this.state;
+    const labelSelector = labelValue.join(",")
     const params = {
       project: projectValue,
       query: inputValue,
       env: envValue,
+      labels: labelSelector,
     };
     this.props.getApplications(params);
   };
 
   render() {
-    const { projects, envs, showMode } = this.props;
+    const { projects, appLabels, envs, showMode, labelValue } = this.props;
     const { projectValue, inputValue, envValue } = this.state;
 
     const projectPlaceholder = i18n.t('Search by Project').toString();
     const appPlaceholder = i18n.t('Search by name and description etc').toString();
     const envPlaceholder = i18n.t('Search by Environment').toString();
+    const labelPlaceholder = i18n.t('Search by labels').toString();
     const projectSource = projects?.map((item) => {
       return {
         label: item.alias || item.name,
         value: item.name,
+      };
+    });
+    const labelSource = appLabels?.map((item) => {
+      return {
+        label: item,
+        value: item,
       };
     });
 
@@ -116,7 +143,7 @@ class SelectSearch extends React.Component<Props, State> {
     });
     return (
       <Row className="app-select-wrapper border-radius-8" wrap={true}>
-        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+        <Col xl={6} m={4} s={6} xxs={12} style={{ padding: '0 8px' }}>
           <Select
             locale={locale().Select}
             mode="single"
@@ -129,7 +156,7 @@ class SelectSearch extends React.Component<Props, State> {
             value={projectValue}
           />
         </Col>
-        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+        <Col xl={6} m={4} s={6} xxs={12} style={{ padding: '0 8px' }}>
           <Select
             locale={locale().Select}
             mode="single"
@@ -140,6 +167,19 @@ class SelectSearch extends React.Component<Props, State> {
             className="item"
             hasClear
             value={envValue}
+          />
+        </Col>
+        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+          <Select
+            hasClear
+            size="large"
+            placeholder={labelPlaceholder}
+            onChange={this.handleChangeLabel}
+            showSearch
+            mode="multiple"
+            value={labelValue}
+            className="item"
+            dataSource={labelSource}
           />
         </Col>
         <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>

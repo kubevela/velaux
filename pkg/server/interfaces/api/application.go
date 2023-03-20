@@ -19,6 +19,7 @@ package api
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"k8s.io/klog/v2"
 
@@ -687,11 +688,22 @@ func (c *application) listApplications(req *restful.Request, res *restful.Respon
 	if req.QueryParameter("project") != "" {
 		projetNames = append(projetNames, req.QueryParameter("project"))
 	}
+	labels := map[string]string{}
+	if req.QueryParameter("labels") != "" {
+		allLabels := strings.Split(req.QueryParameter("labels"), ",")
+		for _, label := range allLabels {
+			kv := strings.Split(label, "=")
+			if len(kv) == 2 {
+				labels[kv[0]] = kv[1]
+			}
+		}
+	}
 	apps, err := c.ApplicationService.ListApplications(req.Request.Context(), apis.ListApplicationOptions{
 		Projects:   projetNames,
 		Env:        req.QueryParameter("env"),
 		TargetName: req.QueryParameter("targetName"),
 		Query:      req.QueryParameter("query"),
+		Labels:     labels,
 	})
 	if err != nil {
 		bcode.ReturnError(req, res, err)

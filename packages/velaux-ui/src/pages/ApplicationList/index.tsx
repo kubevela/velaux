@@ -33,6 +33,7 @@ type State = {
   isLoading: boolean;
   showEditApplication: boolean;
   editItem?: ApplicationBase;
+  labelValue: string[];
   showMode: ShowMode;
 };
 
@@ -49,6 +50,7 @@ class Application extends Component<Props, State> {
     this.state = {
       showAddApplication: false,
       componentDefinitions: [],
+      labelValue: [],
       isLoading: false,
       showEditApplication: false,
       showMode: mode,
@@ -78,6 +80,12 @@ class Application extends Component<Props, State> {
     this.props.dispatch({
       type: 'env/listEnvs',
       payload: {},
+    });
+  };
+
+  setLabelValue = async (labels: string[]) => {
+    this.setState({
+      labelValue: labels,
     });
   };
 
@@ -121,6 +129,26 @@ class Application extends Component<Props, State> {
     });
   };
 
+  clickLabelFilter = (label: string) => {
+    let { labelValue } = this.state;
+    let existIndex = -1;
+    labelValue.map((key, index) => {
+      if (key == label) {
+        existIndex = index
+        return
+      }
+    });
+    if (existIndex == -1) {
+      labelValue.push(label)
+    } else {
+      labelValue = labelValue.splice(existIndex, existIndex);
+    }
+    this.setState({
+      labelValue
+    });
+    this.getApplications({labels: labelValue.join(",")});
+  };
+
   render() {
     const { applicationList, targets, dispatch, envs, userInfo } = this.props;
     const {
@@ -129,8 +157,17 @@ class Application extends Component<Props, State> {
       isLoading,
       showEditApplication,
       editItem,
+      labelValue,
       showMode,
     } = this.state;
+    let appLabels: string[] = []
+    applicationList.map((app) => {
+      app.labels && Object.keys(app.labels).map((key: string) => {
+        if (key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
+          if (app.labels) { appLabels.push(key+"="+app.labels[key]) }
+        }
+      })
+    })
     return (
       <div>
         <Title
@@ -155,7 +192,10 @@ class Application extends Component<Props, State> {
 
         <SelectSearch
           projects={userInfo?.projects}
+          appLabels={appLabels}
           dispatch={dispatch}
+          setLabelValue={this.setLabelValue}
+          labelValue={labelValue}
           envs={envs}
           showMode={showMode}
           setMode={(mode: ShowMode) => {
@@ -174,6 +214,7 @@ class Application extends Component<Props, State> {
             editAppPlan={(item: ApplicationBase) => {
               this.editAppPlan(item);
             }}
+            clickLabelFilter={this.clickLabelFilter}
             showMode={showMode}
             deleteAppPlan={this.onDeleteApp}
             setVisible={(visible) => {
