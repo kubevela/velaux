@@ -17,14 +17,14 @@ import type { Rule } from '@alifd/next/lib/field';
 
 const { Row, Col } = Grid;
 
-interface DefinitionCatalog {
+interface DefinitionCategory {
   title: string;
   sort: number;
   description?: string;
   definitions: DefinitionBase[];
 }
 
-const defaultCatalog: Record<string, DefinitionCatalog> = {
+const defaultCategory: Record<string, DefinitionCategory> = {
   'Application Delivery': {
     title: 'Application Delivery',
     description: 'Delivery the Application or workloads to the Targets.',
@@ -81,7 +81,7 @@ const defaultCatalog: Record<string, DefinitionCatalog> = {
   },
 };
 
-const initDefinitionCatalog = (defs: DefinitionBase[]) => {
+const initDefinitionCategory = (defs: DefinitionBase[]) => {
   return defs.map((def) => {
     if(!def.category || def.category==""){
       def.category = 'Custom';
@@ -90,18 +90,18 @@ const initDefinitionCatalog = (defs: DefinitionBase[]) => {
   });
 };
 
-const buildDefinitionCatalog = (defs: DefinitionBase[]) => {
-  const customDefs = initDefinitionCatalog(defs);
-  const catalogMap: Record<string, DefinitionCatalog> = _.cloneDeep(defaultCatalog);
+const buildDefinitionCategory = (defs: DefinitionBase[]) => {
+  const customDefs = initDefinitionCategory(defs);
+  const categoryMap: Record<string, DefinitionCategory> = _.cloneDeep(defaultCategory);
   customDefs.map((def) => {
-    const catalog = def.category;
-    if (catalogMap[catalog]) {
-      catalogMap[catalog].definitions.push(def);
+    const category = def.category;
+    if (categoryMap[category]) {
+      categoryMap[category].definitions.push(def);
     } else {
-      catalogMap[catalog] = { title: catalog, definitions: [def], sort: 100 };
+      categoryMap[category] = { title: category, definitions: [def], sort: 100 };
     }
   });
-  return Object.values(catalogMap).sort((a, b) => {
+  return Object.values(categoryMap).sort((a, b) => {
     return a.sort - b.sort;
   });
 };
@@ -145,7 +145,7 @@ class TypeSelect extends React.Component<Props, State> {
   render() {
     const { definitions, onClose, checkStepName, addSub } = this.props;
     const { selectType } = this.state;
-    const catalogs = buildDefinitionCatalog(definitions?.filter((def) => !addSub || def.name != 'step-group') || []);
+    const categories = buildDefinitionCategory(definitions?.filter((def) => !addSub || def.name != 'step-group') || []);
     const { init } = this.field;
     const checkStepNameRule = (rule: Rule, value: any, callback: (error?: string) => void) => {
       if (checkStepName(value)) {
@@ -169,13 +169,13 @@ class TypeSelect extends React.Component<Props, State> {
       >
         <div>
           {!selectType &&
-            catalogs
+            categories
               .filter((c) => c.definitions.length > 0)
-              .map((catalog) => {
+              .map((category) => {
                 return (
-                  <Card title={catalog.title} contentHeight={'auto'} key={catalog.title} subTitle={catalog.description}>
+                  <Card title={category.title} contentHeight={'auto'} key={category.title} subTitle={category.description}>
                     <div className="def-items">
-                      {catalog.definitions?.map((def) => {
+                      {category.definitions?.map((def) => {
                         const item = (
                           <div key={def.name} className="def-item">
                             <div
