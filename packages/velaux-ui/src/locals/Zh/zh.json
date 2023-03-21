@@ -620,5 +620,7 @@
   "contexts": "上下文参数",
   "Are you sure to rerun this Pipeline?": "确定要重新运行流水线吗？",
   "Show Values File": "查看 Value 文件",
-  "Showing the all projects that you have permissions": "你拥有权限的所有项目"
+  "Showing the all projects that you have permissions": "你拥有权限的所有项目",
+  "More": "显示更多",
+  "Hide": "收起"
 }

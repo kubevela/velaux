@@ -3,7 +3,7 @@ import type { MouseEvent } from 'react';
 import React from 'react';
 import './index.less';
 import { Link } from 'dva/router';
-import { Grid, Card, Menu, Dropdown, Dialog, Button, Table, Tag } from '@alifd/next';
+import { Grid, Card, Menu, Dropdown, Dialog, Button, Table, Tag, Icon } from '@alifd/next';
 import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
 
 import type { ShowMode } from '../..';
@@ -23,6 +23,7 @@ const { Column } = Table;
 type State = {
   extendDotVisible: boolean;
   choseIndex: number;
+  showLabelMode: Map<string, boolean>;
 };
 
 type Props = {
@@ -42,9 +43,19 @@ type Props = {
 class CardContent extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
+    const {applications} = this.props;
+    let showLabelMode = new Map<string, boolean>();
+    applications?.map((app) => {
+      if (app.labels && Object.keys(app.labels).length > 1) {
+        showLabelMode.set(app.name, true)
+      } else {
+        showLabelMode.set(app.name, false)
+      }
+    });
     this.state = {
       extendDotVisible: false,
       choseIndex: 0,
+      showLabelMode: showLabelMode,
     };
   }
 
@@ -69,6 +80,14 @@ class CardContent extends React.Component<Props, State> {
     this.props.clickLabelFilter(label)
   }
 
+  onMoreLabels = (appName: string) => {
+    let { showLabelMode } = this.state;
+    let cur = showLabelMode.get(appName);
+    showLabelMode.set(appName, cur? false: true);
+    this.setState({
+      showLabelMode,
+    });
+  }
 
   isEditPermission = (item: ApplicationBase, button?: boolean) => {
     const { userInfo } = this.props;
@@ -176,21 +195,42 @@ class CardContent extends React.Component<Props, State> {
         key: 'labels',
         title: <Translation>Tags</Translation>,
         dataIndex: 'labels',
-        cell: (v: Record<string, string>) => {
-          return Object.keys(v).map((key) => {
-            if (v && key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
-              return (
+        cell: (label: Record<string, string>, i: number, v: ApplicationBase) => {
+          const { showLabelMode } = this.state
+          const more = showLabelMode.get(v.name)
+          let displayLabels = 0
+          return (
+            <div>
+              <div className={more? '': 'table-content-label'}>
+                { Object.keys(label).map((key) => {
+                  if (label && key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
+                    displayLabels++
+                    return (
+                      <div>
+                        <Tag
+                          onClick={((e) => this.onClickLabelFilter(key+"="+`${label[key]}`))}
+                          key={`${key}=${label[key]}`}
+                          style={{ margin: '2px' }}
+                          color="blue"
+                          size="small"
+                        >{`${key}=${label[key]}`}</Tag>
+                      </div>
+                    )
+                  }
+                })}
+              </div>
+              { displayLabels > 1 &&
                 <div>
-                  <Tag
-                    onClick={((e) => this.onClickLabelFilter(key+"="+`${v[key]}`))}
-                    key={key}
-                    style={{ margin: '4px' }}
-                    color="blue"
-                  >{`${key}=${v[key]}`}</Tag>
+                <Tag
+                  onClick={((e) => this.onMoreLabels(v.name))}
+                  key={"showLabelTag"}
+                  style={{ margin: '2px' }}
+                  size="small"
+                ><Translation>{more? "Hide": "More"}</Translation>{more? <Icon type="minus" />: <Icon type="add" />}</Tag>
                 </div>
-              );
-            }
-          })
+              }
+            </div>
+          )
         },
       },
       {
