@@ -77,9 +77,10 @@ class SelectSearch extends React.Component<Props, State> {
 
   handleChangeLabel(value: string[]) {
     const { setLabelValue } = this.props;
-    setLabelValue(value)
+    let label = value? value:[]
+    setLabelValue(label)
     this.setState({
-      labelValue: value,
+      labelValue: label,
     },
     () => {
       this.getApplications();
