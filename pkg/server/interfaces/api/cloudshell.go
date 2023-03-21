@@ -135,6 +135,8 @@ func (c *CloudShellView) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/{subpath:*}").To(c.proxy).
 		Doc("prepare the user's cloud shell environment").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Operation("proxyPath").
+		Param(ws.PathParameter("subpath", "subpath").DataType("string")).
 		Filter(c.RbacService.CheckPerm("cloudshell", "create")).
 		Returns(200, "OK", apis.EmptyResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).

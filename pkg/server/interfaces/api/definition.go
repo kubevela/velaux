@@ -48,7 +48,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		// TODO: provide project scope api for query definition list
 		// Filter(d.RbacService.CheckPerm("definition", "list")).
-		Param(ws.QueryParameter("type", "query the definition type").DataType("string").Required(true).AllowableValues(map[string]string{"component": "", "trait": "", "workflowstep": ""})).
+		Param(ws.QueryParameter("type", "query the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy"})).
 		Param(ws.QueryParameter("queryAll", "query all definitions include hidden in UI").DataType("boolean").DefaultValue("false")).
 		Param(ws.QueryParameter("appliedWorkload", "if specified, query the trait definition applied to the workload").DataType("string")).
 		Param(ws.QueryParameter("ownerAddon", "query by which addon created the definition").DataType("string")).
@@ -69,6 +69,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Doc("Update the UI schema for a definition").
 		Filter(d.RbacService.CheckPerm("definition", "update")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string").Required(true)).
 		Reads(apis.UpdateUISchemaRequest{}).
 		Returns(200, "update successfully", schema.UISchema{}).
 		Writes(apis.DetailDefinitionResponse{}).Do(returns200, returns500))
@@ -77,6 +78,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Doc("Update the status for a definition").
 		Filter(d.RbacService.CheckPerm("definition", "update")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string").Required(true)).
 		Reads(apis.UpdateDefinitionStatusRequest{}).
 		Returns(200, "update successfully", schema.UISchema{}).
 		Writes(apis.DetailDefinitionResponse{}).Do(returns200, returns500))
