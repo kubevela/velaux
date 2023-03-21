@@ -83,6 +83,7 @@ func (h repository) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/charts/{chart}/versions").To(h.listChartVersions).
 		Doc("list versions").Deprecate().
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("chart", "identifier of the helm chart").DataType("string").Required(true)).
 		Param(ws.QueryParameter("repoUrl", "helm repository url").DataType("string")).
 		Param(ws.QueryParameter("secretName", "secret of the repo").DataType("string")).
 		Returns(200, "OK", v1.ChartVersionListResponse{}).
@@ -105,6 +106,8 @@ func (h repository) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/charts/{chart}/versions/{version}/values").To(h.getChartValues).
 		Doc("get chart value").Deprecate().
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("chart", "identifier of the helm chart").DataType("string").Required(true)).
+		Param(ws.PathParameter("version", "version of the helm chart").DataType("string").Required(true)).
 		Param(ws.QueryParameter("repoUrl", "helm repository url").DataType("string")).
 		Param(ws.QueryParameter("secretName", "secret of the repo").DataType("string")).
 		Returns(200, "OK", map[string]interface{}{}).

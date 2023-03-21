@@ -73,7 +73,6 @@ func (s *addon) GetWebServiceRoute() *restful.WebService {
 		Filter(s.RbacService.CheckPerm("addon", "detail")).
 		Returns(200, "OK", apis.DetailAddonResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
-		Param(ws.PathParameter("name", "addon name to query detail").DataType("string").Required(true)).
 		Param(ws.QueryParameter("version", "specify addon version to enable").DataType("string").Required(false)).
 		Param(ws.PathParameter("addonName", "addon name to query detail").DataType("string").Required(true)).
 		Param(ws.QueryParameter("registry", "filter addons from given registry").DataType("string")).
