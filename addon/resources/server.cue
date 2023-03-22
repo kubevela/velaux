@@ -56,11 +56,11 @@ server: {
 	type: "webservice"
 	properties: {
 		if parameter["repo"] == _|_ {
-			image: "oamdev/vela-apiserver:" + _version
+			image: "oamdev/velaux:" + _version
 		}
 
 		if parameter["repo"] != _|_ {
-			image: parameter["repo"] + "/" + "oamdev/vela-apiserver:" + _version
+			image: parameter["repo"] + "/" + "oamdev/velaux:" + _version
 		}
 
 		if parameter["imagePullSecrets"] != _|_ {
@@ -71,7 +71,7 @@ server: {
 			exposeType: parameter["serviceType"]
 		}
 
-		cmd: ["apiserver", "--datastore-type=" + parameter["dbType"]] + database + dbURL + enableImpersonation
+		cmd: ["server", "--datastore-type=" + parameter["dbType"]] + database + dbURL + enableImpersonation
 		ports: [
 			{
 				port:     8000
