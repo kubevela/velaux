@@ -83,6 +83,14 @@ var _ = Describe("Test application rest api", func() {
 		Expect(cmp.Diff(appBase.Labels["test"], req.Labels["test"])).Should(BeEmpty())
 	})
 
+	It("Test listing applications by label", func() {
+		defer GinkgoRecover()
+		res := get("/applications?labels=test=true")
+		var apps apisv1.ListApplicationResponse
+		Expect(decodeResponseBody(res, &apps)).Should(Succeed())
+		Expect(cmp.Diff(len(apps.Applications), 1)).Should(BeEmpty())
+	})
+
 	It("Test listing components", func() {
 		defer GinkgoRecover()
 		res := get("/applications/" + appName + "/components")
