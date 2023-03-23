@@ -19,6 +19,8 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/oam-dev/kubevela/pkg/multicluster"
 
 	"golang.org/x/crypto/bcrypt"
 	"helm.sh/helm/v3/pkg/time"
@@ -33,13 +35,11 @@ import (
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
-const (
-	// InitAdminPassword the password of first admin user
-	InitAdminPassword = "VelaUX12345"
-)
-
 // UserService User manage api
 type UserService interface {
+	AdminConfigured(ctx context.Context) (apisv1.AdminConfiguredResponse, error)
+	InitAdmin(ctx context.Context, req apisv1.InitAdminRequest) (apisv1.InitAdminResponse, error)
+	GetFirstAdmin(ctx context.Context) (*model.User, error)
 	GetUser(ctx context.Context, username string) (*model.User, error)
 	DetailUser(ctx context.Context, user *model.User) (*apisv1.DetailUserResponse, error)
 	DeleteUser(ctx context.Context, username string) error
@@ -50,7 +50,6 @@ type UserService interface {
 	EnableUser(ctx context.Context, user *model.User) error
 	DetailLoginUserInfo(ctx context.Context) (*apisv1.LoginUserInfoResponse, error)
 	UpdateUserLoginTime(ctx context.Context, user *model.User) error
-	Init(ctx context.Context) error
 }
 
 type userServiceImpl struct {
@@ -59,6 +58,8 @@ type userServiceImpl struct {
 	ProjectService ProjectService      `inject:""`
 	RbacService    RBACService         `inject:""`
 	SysService     SystemInfoService   `inject:""`
+	TargetService  TargetService       `inject:""`
+	EnvService     EnvService          `inject:""`
 }
 
 // NewUserService new User service
@@ -66,32 +67,123 @@ func NewUserService() UserService {
 	return &userServiceImpl{}
 }
 
-func (u *userServiceImpl) Init(ctx context.Context) error {
-	admin := model.DefaultAdminUserName
-	if err := u.Store.Get(ctx, &model.User{
-		Name: admin,
-	}); err != nil {
-		if errors.Is(err, datastore.ErrRecordNotExist) {
-			encrypted, err := GeneratePasswordHash(InitAdminPassword)
-			if err != nil {
+// AdminConfigured check if admin user is initialized
+func (u *userServiceImpl) AdminConfigured(ctx context.Context) (apisv1.AdminConfiguredResponse, error) {
+	users, err := u.Store.List(ctx, &model.User{}, nil)
+	if err != nil {
+		return apisv1.AdminConfiguredResponse{Configured: true}, err
+	}
+	if len(users) == 0 {
+		return apisv1.AdminConfiguredResponse{Configured: false}, nil
+	}
+	return apisv1.AdminConfiguredResponse{Configured: true}, nil
+}
+
+// InitAdmin initialize admin user
+func (u *userServiceImpl) InitAdmin(ctx context.Context, req apisv1.InitAdminRequest) (apisv1.InitAdminResponse, error) {
+	preCheck, err := u.AdminConfigured(ctx)
+	if err != nil {
+		return apisv1.InitAdminResponse{}, err
+	}
+	if preCheck.Configured {
+		return apisv1.InitAdminResponse{}, bcode.ErrAdminAlreadyConfigured
+	}
+
+	createUserRequest := apisv1.CreateUserRequest{
+		Name:     req.Name,
+		Password: req.Password,
+		Email:    req.Email,
+		Roles:    []string{"admin"},
+	}
+	if _, err = u.CreateUser(ctx, createUserRequest); err != nil {
+		return apisv1.InitAdminResponse{}, err
+	}
+	if err = u.InitDefaultProjectEnvTarget(ctx, model.DefaultInitNamespace, req.Name); err != nil {
+		return apisv1.InitAdminResponse{}, err
+	}
+	return apisv1.InitAdminResponse{Success: true}, nil
+}
+
+func (u *userServiceImpl) InitDefaultProjectEnvTarget(ctx context.Context, defaultNamespace string, adminUser string) error {
+	var project = model.Project{}
+	entities, err := u.Store.List(ctx, &project, &datastore.ListOptions{FilterOptions: datastore.FilterOptions{}})
+	if err != nil {
+		return fmt.Errorf("initialize project failed %w", err)
+	}
+	if len(entities) > 0 {
+		for _, project := range entities {
+			pro := project.(*model.Project)
+			pro.Owner = adminUser
+			if err := u.Store.Put(ctx, pro); err != nil {
 				return err
 			}
-			if err := u.Store.Add(ctx, &model.User{
-				Name:      admin,
-				Alias:     model.DefaultAdminUserAlias,
-				Password:  encrypted,
-				UserRoles: []string{"admin"},
-			}); err != nil {
-				return err
+			if err := u.RbacService.SyncDefaultRoleAndUsersForProject(ctx, pro); err != nil {
+				return fmt.Errorf("fail to sync the default role and users for the project %s %w", pro.Name, err)
 			}
-			// print default password of admin user in log
-			klog.Infof("initialized admin username and password: admin / %s", InitAdminPassword)
-		} else {
-			return err
+		}
+		return nil
+	}
+
+	count, _ := u.Store.Count(ctx, &project, nil)
+	if count > 0 {
+		return nil
+	}
+	klog.Info("no default project found, adding a default project with default env and target")
+
+	_, err = u.ProjectService.CreateProject(ctx, apisv1.CreateProjectRequest{
+		Name:        model.DefaultInitName,
+		Alias:       "Default",
+		Description: model.DefaultProjectDescription,
+		Owner:       adminUser,
+	})
+	if err != nil {
+		return fmt.Errorf("initialize project failed %w", err)
+	}
+
+	// initialize default target first
+	_, err = u.TargetService.CreateTarget(ctx, apisv1.CreateTargetRequest{
+		Name:        model.DefaultInitName,
+		Alias:       "Default",
+		Description: model.DefaultTargetDescription,
+		Project:     model.DefaultInitName,
+		Cluster: &apisv1.ClusterTarget{
+			ClusterName: multicluster.ClusterLocalName,
+			Namespace:   defaultNamespace,
+		},
+	})
+
+	// for idempotence, ignore default target already exist error
+	if err != nil && errors.Is(err, bcode.ErrTargetExist) {
+		return fmt.Errorf("initialize default target failed %w", err)
+	}
+
+	// initialize default target first
+	_, err = u.EnvService.CreateEnv(ctx, apisv1.CreateEnvRequest{
+		Name:        model.DefaultInitName,
+		Alias:       "Default",
+		Description: model.DefaultEnvDescription,
+		Project:     model.DefaultInitName,
+		Namespace:   defaultNamespace,
+		Targets:     []string{model.DefaultInitName},
+	})
+	// for idempotence, ignore default env already exist error
+	if err != nil && errors.Is(err, bcode.ErrEnvAlreadyExists) {
+		return fmt.Errorf("initialize default environment failed %w", err)
+	}
+	return nil
+}
+
+func (u *userServiceImpl) GetFirstAdmin(ctx context.Context) (*model.User, error) {
+	users, err := u.Store.List(ctx, &model.User{}, &datastore.ListOptions{FilterOptions: datastore.FilterOptions{}})
+	if err != nil {
+		return nil, err
+	}
+	for _, user := range users {
+		if modelUser := user.(*model.User); modelUser != nil && modelUser.IsAdmin() {
+			return modelUser, nil
 		}
 	}
-	klog.Info("admin user is exist")
-	return nil
+	return nil, bcode.ErrNoAdminUser
 }
 
 // GetUser get user
@@ -219,7 +311,7 @@ func (u *userServiceImpl) UpdateUser(ctx context.Context, user *model.User, req 
 	if err := u.Store.Put(ctx, user); err != nil {
 		return nil, err
 	}
-	if user.Name == model.DefaultAdminUserName {
+	if user.IsAdmin() {
 		if err := generateDexConfig(ctx, u.K8sClient, &model.UpdateDexConfig{
 			StaticPasswords: []model.StaticPassword{
 				{

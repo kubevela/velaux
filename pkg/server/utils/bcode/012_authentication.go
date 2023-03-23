@@ -39,4 +39,6 @@ var (
 	ErrRefreshTokenExpired = NewBcode(400, 12010, "the refresh token is expired")
 	// ErrNoDexConnector is the error of no dex connector
 	ErrNoDexConnector = NewBcode(400, 12011, "there is no dex connector")
+	// ErrAdminAlreadyConfigured is the error of admin user is already configured
+	ErrAdminAlreadyConfigured = NewBcode(400, 12012, "admin user is already configured")
 )

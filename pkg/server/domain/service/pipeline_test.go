@@ -55,8 +55,6 @@ var _ = Describe("Test pipeline service functions", func() {
 		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
 
 		ctx = context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "admin")
-		err = userService.Init(context.TODO())
-		Expect(err).Should(BeNil())
 		_, err = projectService.CreateProject(ctx, apisv1.CreateProjectRequest{
 			Name:  projectName,
 			Owner: "admin",

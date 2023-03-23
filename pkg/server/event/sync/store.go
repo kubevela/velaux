@@ -46,7 +46,7 @@ type DataStoreApp struct {
 }
 
 // StoreProject will create project for synced application
-func StoreProject(ctx context.Context, project v1.CreateProjectRequest, ds datastore.DataStore, projectService service.ProjectService) error {
+func StoreProject(ctx context.Context, project v1.CreateProjectRequest, ds datastore.DataStore, projectService service.ProjectService, userService service.UserService) error {
 	err := ds.Get(ctx, &model.Project{Name: project.Name})
 	if err == nil {
 		// it means the record already exists, don't need to add anything
@@ -56,10 +56,14 @@ func StoreProject(ctx context.Context, project v1.CreateProjectRequest, ds datas
 		// other database error, return it
 		return err
 	}
-	if projectService != nil {
-		project.Owner = model.DefaultAdminUserName
+	if projectService != nil && userService != nil {
+		admin, err := userService.GetFirstAdmin(ctx)
+		if err != nil {
+			return err
+		}
+		project.Owner = admin.Name
 		project.Description = model.AutoGenProj
-		_, err := projectService.CreateProject(ctx, project)
+		_, err = projectService.CreateProject(ctx, project)
 		return err
 	}
 	return nil

@@ -36,7 +36,6 @@ import (
 
 	"github.com/kubevela/velaux/pkg/server"
 	"github.com/kubevela/velaux/pkg/server/config"
-	"github.com/kubevela/velaux/pkg/server/domain/service"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -87,18 +86,41 @@ var _ = BeforeSuite(func() {
 		Expect(err).ShouldNot(HaveOccurred())
 	}()
 	By("wait for api server to start")
+	defaultAdminPassword := "adminPass123"
 	Eventually(
 		func() error {
 			password := os.Getenv("VELA_UX_PASSWORD")
 			if password == "" {
-				password = service.InitAdminPassword
+				password = defaultAdminPassword
 			}
+			// init admin user
+			var initReq = apisv1.InitAdminRequest{
+				Password: password,
+				Email:    "fake@email.com",
+			}
+			bodyByte, err := json.Marshal(initReq)
+			Expect(err).Should(BeNil())
+			initHtpReq, err := http.NewRequest("PUT", baseURL+"/auth/init_admin", bytes.NewBuffer(bodyByte))
+			Expect(err).Should(BeNil())
+			res, err := http.DefaultClient.Do(initHtpReq)
+			Expect(err).Should(BeNil())
+			// either 200 or "admin user is already configured"
+			if res.StatusCode != 200 {
+				body, err := io.ReadAll(res.Body)
+				Expect(err).Should(BeNil())
+				if !strings.Contains(string(body), "admin user is already configured") {
+					return fmt.Errorf("init admin failed: %s", string(body))
+				}
+			}
+
+			// login
 			var req = apisv1.LoginRequest{
 				Username: "admin",
 				Password: password,
 			}
-			bodyByte, err := json.Marshal(req)
+			bodyByte, err = json.Marshal(req)
 			Expect(err).Should(BeNil())
+
 			resp, err := http.Post(baseURL+"/auth/login", "application/json", bytes.NewBuffer(bodyByte))
 			if err != nil {
 				return err

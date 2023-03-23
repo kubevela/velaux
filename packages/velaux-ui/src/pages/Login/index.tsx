@@ -1,7 +1,7 @@
-import { Card, Button, Input, Form, Field, Icon, Grid } from '@alifd/next';
+import { Button, Card, Field, Form, Grid, Icon, Input } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
-import { getDexConfig, loginLocal, getLoginType } from '../../api/authentication';
+import { getDexConfig, getLoginType, isAdminConfigured, loginLocal } from '../../api/authentication';
 import LogoWhite from '../../assets/kubevela-logo-white.png';
 import Logo from '../../assets/kubevela-logo.png';
 import { If } from '../../components/If';
@@ -12,6 +12,8 @@ import './index.less';
 import type { DexConfig } from '../../interface/system';
 import { checkName, checkUserPassword } from '../../utils/common';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
+import EditPlatFormUserDialog from "../../layout/Header/components/EditPlatFormUserDialog";
+import { LoginUserInfo } from "../../interface/user";
 
 type Props = {
   code: string;
@@ -27,24 +29,30 @@ type Props = {
 
 type State = {
   dexConfig?: DexConfig;
+  firstTimeLogin: boolean
   loginType: string;
   loginErrorMessage: string;
   loginLoading: boolean;
 };
 export default class LoginPage extends Component<Props, State> {
   field: Field;
+
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
     this.state = {
+      firstTimeLogin: false,
       loginType: '',
       loginErrorMessage: '',
       loginLoading: false,
     };
   }
+
   componentDidMount() {
+    this.isFirstLogin()
     this.onGetLoginType();
   }
+
   onGetLoginType = () => {
     getLoginType()
       .then((res: any) => {
@@ -64,6 +72,15 @@ export default class LoginPage extends Component<Props, State> {
       })
       .catch();
   };
+  isFirstLogin = () => {
+    isAdminConfigured().then((res: any) => {
+      if (res && !res.configured) {
+        this.setState({
+          firstTimeLogin: true
+        })
+      }
+    })
+  }
   ontDexConfig = () => {
     getDexConfig()
       .then((res) => {
@@ -122,6 +139,11 @@ export default class LoginPage extends Component<Props, State> {
       window.location.href = dexClientURL;
     }
   };
+
+  onCloseEditAdminUser = () => {
+    this.setState({ firstTimeLogin: false });
+  };
+
   render() {
     const FormItem = Form.Item;
     const init = this.field.init;
@@ -133,8 +155,12 @@ export default class LoginPage extends Component<Props, State> {
         span: 20,
       },
     };
-    const { loginType, loginErrorMessage, loginLoading } = this.state;
+    const { loginType, loginErrorMessage, loginLoading, firstTimeLogin } = this.state;
     const { Row, Col } = Grid;
+    let adminInfo: LoginUserInfo = {
+      name: "admin",
+      projects: [],
+    }
     return (
       <Fragment>
         <div className="login-topbar">
@@ -157,83 +183,88 @@ export default class LoginPage extends Component<Props, State> {
         </div>
 
         <div className="full">
-          <div className="login-wrapper">
-            <If condition={loginType === 'dex'}>
-              <div />
-            </If>
-            <If condition={loginType === 'local'}>
-              <div className="login-card-wrapper">
-                <Card contentHeight={'auto'}>
-                  <div className="logo-img-wrapper">
-                    <img src={Logo} />
-                  </div>
-                  <h3 className="login-title-description">
-                    <Translation>Make shipping applications more enjoyable</Translation>
-                  </h3>
-                  <Form
-                    onSubmitCapture={(e) => {
-                      e.preventDefault();
-                    }}
-                    onSubmit={this.handleSubmit}
-                    {...formItemLayout}
-                    field={this.field}
-                  >
-                    <FormItem
-                      label={<Translation className="label-title">Username</Translation>}
-                      labelAlign="top"
-                      required
-                    >
-                      <Input
-                        name="username"
-                        placeholder={i18n.t('Please input the username').toString()}
-                        {...init('username', {
-                          rules: [
-                            {
-                              required: true,
-                              pattern: checkName,
-                              message: <Translation>Please input the username</Translation>,
-                            },
-                          ],
-                        })}
-                      />
-                    </FormItem>
-                    <FormItem
-                      label={<Translation className="label-title">Password</Translation>}
-                      labelAlign="top"
-                      required
-                    >
-                      <Input
-                        name="password"
-                        htmlType="password"
-                        placeholder={i18n.t('Please input the password').toString()}
-                        {...init('password', {
-                          rules: [
-                            {
-                              required: true,
-                              pattern: checkUserPassword,
-                              message: (
-                                <Translation>
-                                  The password should be 8-16 bits and contain at least one number and one letter
-                                </Translation>
-                              ),
-                            },
-                          ],
-                        })}
-                      />
-                    </FormItem>
-                    <Button loading={loginLoading} type="primary" htmlType="submit" onClick={this.handleSubmit}>
-                      <Translation>Sign in</Translation>
-                    </Button>
-                  </Form>
-                  <If condition={loginErrorMessage}>
-                    <div className="logo-error-wrapper">
-                      <Icon type="warning1" /> <Translation>{loginErrorMessage}</Translation>
+          <If condition={!firstTimeLogin}>
+            <div className="login-wrapper">
+              <If condition={loginType === 'dex'}>
+                <div />
+              </If>
+              <If condition={loginType === 'local'}>
+                <div className="login-card-wrapper">
+                  <Card contentHeight={'auto'}>
+                    <div className="logo-img-wrapper">
+                      <img src={Logo} />
                     </div>
-                  </If>
-                </Card>
-              </div>
-            </If>
-          </div>
+                    <h3 className="login-title-description">
+                      <Translation>Make shipping applications more enjoyable</Translation>
+                    </h3>
+                    <Form
+                      onSubmitCapture={(e) => {
+                        e.preventDefault();
+                      }}
+                      onSubmit={this.handleSubmit}
+                      {...formItemLayout}
+                      field={this.field}
+                    >
+                      <FormItem
+                        label={<Translation className="label-title">Username</Translation>}
+                        labelAlign="top"
+                        required
+                      >
+                        <Input
+                          name="username"
+                          placeholder={i18n.t('Please input the username').toString()}
+                          {...init('username', {
+                            rules: [
+                              {
+                                required: true,
+                                pattern: checkName,
+                                message: <Translation>Please input the username</Translation>,
+                              },
+                            ],
+                          })}
+                        />
+                      </FormItem>
+                      <FormItem
+                        label={<Translation className="label-title">Password</Translation>}
+                        labelAlign="top"
+                        required
+                      >
+                        <Input
+                          name="password"
+                          htmlType="password"
+                          placeholder={i18n.t('Please input the password').toString()}
+                          {...init('password', {
+                            rules: [
+                              {
+                                required: true,
+                                pattern: checkUserPassword,
+                                message: (
+                                  <Translation>
+                                    The password should be 8-16 bits and contain at least one number and one letter
+                                  </Translation>
+                                ),
+                              },
+                            ],
+                          })}
+                        />
+                      </FormItem>
+                      <Button loading={loginLoading} type="primary" htmlType="submit" onClick={this.handleSubmit}>
+                        <Translation>Sign in</Translation>
+                      </Button>
+                    </Form>
+                    <If condition={loginErrorMessage}>
+                      <div className="logo-error-wrapper">
+                        <Icon type="warning1" /> <Translation>{loginErrorMessage}</Translation>
+                      </div>
+                    </If>
+                  </Card>
+                </div>
+              </If>
+            </div>
+          </If>
+          <If condition={firstTimeLogin}>
+            <EditPlatFormUserDialog userInfo={adminInfo} onClose={this.onCloseEditAdminUser} />
+          </If>
         </div>
       </Fragment>
     );

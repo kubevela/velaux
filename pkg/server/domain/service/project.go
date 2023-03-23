@@ -20,8 +20,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
-
 	terraformapi "github.com/oam-dev/terraform-controller/api/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -30,7 +28,6 @@ import (
 
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/auth"
-	"github.com/oam-dev/kubevela/pkg/multicluster"
 	"github.com/oam-dev/kubevela/pkg/utils"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
@@ -53,7 +50,6 @@ type ProjectService interface {
 	AddProjectUser(ctx context.Context, projectName string, req apisv1.AddProjectUserRequest) (*apisv1.ProjectUserBase, error)
 	DeleteProjectUser(ctx context.Context, projectName string, userName string) error
 	UpdateProjectUser(ctx context.Context, projectName string, userName string, req apisv1.UpdateProjectUserRequest) (*apisv1.ProjectUserBase, error)
-	Init(ctx context.Context) error
 	ListTerraformProviders(ctx context.Context, projectName string) ([]*apisv1.TerraformProvider, error)
 }
 
@@ -69,82 +65,6 @@ type projectServiceImpl struct {
 // NewProjectService new project service
 func NewProjectService() ProjectService {
 	return &projectServiceImpl{}
-}
-
-// Init init default data
-func (p *projectServiceImpl) Init(ctx context.Context) error {
-	return p.InitDefaultProjectEnvTarget(ctx, model.DefaultInitNamespace)
-}
-
-// initDefaultProjectEnvTarget will initialize a default project with a default env that contain a default target
-// the default env and default target both using the `default` namespace in control plane cluster
-func (p *projectServiceImpl) InitDefaultProjectEnvTarget(ctx context.Context, defaultNamespace string) error {
-	var project = model.Project{}
-	entities, err := p.Store.List(ctx, &project, &datastore.ListOptions{FilterOptions: datastore.FilterOptions{}})
-	if err != nil {
-		return fmt.Errorf("initialize project failed %w", err)
-	}
-	if len(entities) > 0 {
-		for _, project := range entities {
-			pro := project.(*model.Project)
-			pro.Owner = model.DefaultAdminUserName
-			if err := p.Store.Put(ctx, pro); err != nil {
-				return err
-			}
-			if err := p.RbacService.SyncDefaultRoleAndUsersForProject(ctx, pro); err != nil {
-				return fmt.Errorf("fail to sync the default role and users for the project %s %w", pro.Name, err)
-			}
-		}
-		return nil
-	}
-
-	count, _ := p.Store.Count(ctx, &project, nil)
-	if count > 0 {
-		return nil
-	}
-	klog.Info("no default project found, adding a default project with default env and target")
-
-	_, err = p.CreateProject(ctx, apisv1.CreateProjectRequest{
-		Name:        model.DefaultInitName,
-		Alias:       "Default",
-		Description: model.DefaultProjectDescription,
-		Owner:       model.DefaultAdminUserName,
-	})
-	if err != nil {
-		return fmt.Errorf("initialize project failed %w", err)
-	}
-
-	// initialize default target first
-	_, err = p.TargetService.CreateTarget(ctx, apisv1.CreateTargetRequest{
-		Name:        model.DefaultInitName,
-		Alias:       "Default",
-		Description: model.DefaultTargetDescription,
-		Project:     model.DefaultInitName,
-		Cluster: &apisv1.ClusterTarget{
-			ClusterName: multicluster.ClusterLocalName,
-			Namespace:   defaultNamespace,
-		},
-	})
-
-	// for idempotence, ignore default target already exist error
-	if err != nil && errors.Is(err, bcode.ErrTargetExist) {
-		return fmt.Errorf("initialize default target failed %w", err)
-	}
-
-	// initialize default target first
-	_, err = p.EnvService.CreateEnv(ctx, apisv1.CreateEnvRequest{
-		Name:        model.DefaultInitName,
-		Alias:       "Default",
-		Description: model.DefaultEnvDescription,
-		Project:     model.DefaultInitName,
-		Namespace:   defaultNamespace,
-		Targets:     []string{model.DefaultInitName},
-	})
-	// for idempotence, ignore default env already exist error
-	if err != nil && errors.Is(err, bcode.ErrEnvAlreadyExists) {
-		return fmt.Errorf("initialize default environment failed %w", err)
-	}
-	return nil
 }
 
 // GetProject get project
@@ -593,19 +513,19 @@ func ConvertProjectUserModel2Base(user *model.ProjectUser, userModel *model.User
 
 // NewTestProjectService create the project service instance for testing
 func NewTestProjectService(ds datastore.DataStore, c client.Client) ProjectService {
-	targetImpl := &targetServiceImpl{K8sClient: c, Store: ds}
-	envImpl := &envServiceImpl{KubeClient: c, Store: ds}
+	targetService := &targetServiceImpl{K8sClient: c, Store: ds}
+	envService := &envServiceImpl{KubeClient: c, Store: ds}
 	rbacService := &rbacServiceImpl{Store: ds}
-	userService := &userServiceImpl{Store: ds, RbacService: rbacService, SysService: systemInfoServiceImpl{Store: ds}}
+	userService := &userServiceImpl{Store: ds, RbacService: rbacService, SysService: systemInfoServiceImpl{Store: ds}, EnvService: envService, TargetService: targetService}
 	projectService := &projectServiceImpl{
 		K8sClient:     c,
 		Store:         ds,
 		RbacService:   rbacService,
-		TargetService: targetImpl,
+		TargetService: targetService,
 		UserService:   userService,
-		EnvService:    envImpl,
+		EnvService:    envService,
 	}
 	userService.ProjectService = projectService
-	envImpl.ProjectService = projectService
+	envService.ProjectService = projectService
 	return projectService
 }

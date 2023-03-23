@@ -104,8 +104,6 @@ var _ = Describe("Test cloudshell service function", func() {
 	})
 
 	It("Test prepareKubeConfig", func() {
-		err = userService.Init(context.TODO())
-		Expect(err).Should(BeNil())
 		err = projectService.Init(context.TODO())
 		Expect(err).Should(BeNil())
 

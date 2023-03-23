@@ -47,6 +47,8 @@ var resourceActions map[string][]string
 var lock sync.Mutex
 var reg = regexp.MustCompile(`(?U)\{.*\}`)
 
+const AdminRole = "admin"
+
 var defaultProjectPermissionTemplate = []*model.PermissionTemplate{
 	{
 		Name:  "project-view",
@@ -436,7 +438,7 @@ func (p *rbacServiceImpl) Init(ctx context.Context) error {
 			})
 		}
 		batchData = append(batchData, &model.Role{
-			Name:        "admin",
+			Name:        AdminRole,
 			Alias:       "Admin",
 			Permissions: []string{"admin"},
 		})
@@ -643,7 +645,7 @@ func (p *rbacServiceImpl) CheckPerm(resource string, actions ...string) func(req
 			bcode.ReturnError(req, res, bcode.ErrForbidden)
 			return
 		}
-		apiserverutils.SetUsernameAndProjectInRequestContext(req, userName, projectName)
+		apiserverutils.SetUsernameAndProjectInRequestContext(req, userName, projectName, user.UserRoles)
 		chain.ProcessFilter(req, res)
 	}
 	return f

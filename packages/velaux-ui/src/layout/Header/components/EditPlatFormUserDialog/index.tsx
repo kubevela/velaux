@@ -1,13 +1,12 @@
-import { Grid, Form, Input, Field, Message, Dialog } from '@alifd/next';
+import { Dialog, Field, Form, Grid, Input, Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 import { AiOutlineEye } from 'react-icons/ai';
-
-import { updateUser } from '../../../../api/users';
+import { LoginUserInfo } from "../../../../interface/user";
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { LoginUserInfo } from '../../../../interface/user';
-import { checkUserPassword } from '../../../../utils/common';
+import { checkName, checkUserPassword } from '../../../../utils/common';
 import locale from '../../../../utils/locale';
+import { initAdmin } from "../../../../api/authentication";
 
 type Props = {
   userInfo?: LoginUserInfo;
@@ -21,6 +20,7 @@ type State = {
 
 class EditPlatFormUserDialog extends Component<Props, State> {
   field: Field;
+
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
@@ -30,26 +30,24 @@ class EditPlatFormUserDialog extends Component<Props, State> {
     };
   }
 
-  onUpdateUser = async () => {
+  onInitAdmin = async () => {
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
       }
-      const { userInfo } = this.props;
-      const { email, password } = values;
+      const { name,email, password } = values;
       const params = {
-        name: userInfo?.name || '',
-        alias: userInfo?.alias || '',
+        name,
         email,
         password,
       };
       this.setState({
         isLoading: true,
       });
-      updateUser(params)
-        .then((res) => {
-          if (res) {
-            Message.success(<Translation>User updated successfully</Translation>);
+      initAdmin(params)
+        .then((res: { success: boolean }) => {
+          if (res && res.success) {
+            Message.success(<Translation>Admin User Initialized Successfully</Translation>);
             this.props.onClose();
           }
         })
@@ -91,11 +89,36 @@ class EditPlatFormUserDialog extends Component<Props, State> {
           visible={true}
           title={this.showTitle()}
           style={{ width: '600px' }}
-          onOk={this.onUpdateUser}
+          onOk={this.onInitAdmin}
           locale={locale().Dialog}
           footerActions={['ok']}
         >
           <Form loading={isLoading} {...formItemLayout} field={this.field}>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem label={<Translation>Admin Username</Translation>} required>
+                  <Input
+                    name="name"
+                    htmlType=""
+                    placeholder={i18n.t('Please input the admin username').toString()}
+                    {...init('username', {
+                      rules: [
+                        {
+                          required: true,
+                          pattern: checkName,
+                          message: (
+                            <Translation>
+                              You must input a valid name
+                            </Translation>
+                          ),
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Password</Translation>} required>

@@ -41,7 +41,6 @@ var _ = Describe("Test project service functions", func() {
 	var (
 		projectService   *projectServiceImpl
 		envImpl          *envServiceImpl
-		userService      *userServiceImpl
 		targetImpl       *targetServiceImpl
 		defaultNamespace = "project-default-ns1-test"
 	)
@@ -79,65 +78,7 @@ var _ = Describe("Test project service functions", func() {
 			_ = targetImpl.DeleteTarget(context.TODO(), t.Name)
 		}
 	})
-	It("Test project initialize function", func() {
-
-		// init admin user
-		var ns = corev1.Namespace{}
-		ns.Name = velatypes.DefaultKubeVelaNS
-		err := k8sClient.Create(context.TODO(), &ns)
-		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
-		err = userService.Init(context.TODO())
-		Expect(err).Should(BeNil())
-
-		// init default project
-		err = projectService.InitDefaultProjectEnvTarget(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, model.DefaultAdminUserName), defaultNamespace)
-		Expect(err).Should(BeNil())
-		By("test env created")
-		var namespace corev1.Namespace
-		Eventually(func() error {
-			return k8sClient.Get(context.TODO(), types.NamespacedName{Name: defaultNamespace}, &namespace)
-		}, time.Second*3, time.Microsecond*300).Should(BeNil())
-
-		Expect(cmp.Diff(namespace.Labels[oam.LabelNamespaceOfEnvName], model.DefaultInitName)).Should(BeEmpty())
-		Expect(cmp.Diff(namespace.Labels[oam.LabelNamespaceOfTargetName], model.DefaultInitName)).Should(BeEmpty())
-		Expect(cmp.Diff(namespace.Labels[oam.LabelControlPlaneNamespaceUsage], oam.VelaNamespaceUsageEnv)).Should(BeEmpty())
-		Expect(cmp.Diff(namespace.Labels[oam.LabelRuntimeNamespaceUsage], oam.VelaNamespaceUsageTarget)).Should(BeEmpty())
-
-		By("check project created")
-		dp, err := projectService.GetProject(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-		Expect(dp.Alias).Should(BeEquivalentTo("Default"))
-		Expect(dp.Description).Should(BeEquivalentTo(model.DefaultProjectDescription))
-
-		By("check env created")
-
-		env, err := envImpl.GetEnv(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-		Expect(env.Alias).Should(BeEquivalentTo("Default"))
-		Expect(env.Description).Should(BeEquivalentTo(model.DefaultEnvDescription))
-		Expect(env.Project).Should(BeEquivalentTo(model.DefaultInitName))
-		Expect(env.Targets).Should(BeEquivalentTo([]string{model.DefaultInitName}))
-		Expect(env.Namespace).Should(BeEquivalentTo(defaultNamespace))
-
-		By("check target created")
-
-		tg, err := targetImpl.GetTarget(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-		Expect(tg.Alias).Should(BeEquivalentTo("Default"))
-		Expect(tg.Description).Should(BeEquivalentTo(model.DefaultTargetDescription))
-		Expect(tg.Cluster).Should(BeEquivalentTo(&model.ClusterTarget{
-			ClusterName: multicluster.ClusterLocalName,
-			Namespace:   defaultNamespace,
-		}))
-		Expect(env.Targets).Should(BeEquivalentTo([]string{model.DefaultInitName}))
-		Expect(env.Namespace).Should(BeEquivalentTo(defaultNamespace))
-
-		err = targetImpl.DeleteTarget(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-		err = envImpl.DeleteEnv(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-
-	})
+)
 	It("Test Create project function", func() {
 		req := apisv1.CreateProjectRequest{
 			Name:        "test-project",
