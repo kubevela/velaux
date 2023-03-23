@@ -304,8 +304,8 @@
   "Search by Project": "基于项目筛选",
   "Search by Environment": "基于环境筛选",
   "Search by Target": "基于交付目标筛选",
-  "Search by name and description etc": "基于名称、描述等筛选",
-  "Search by labels": "基于标签筛选",
+  "Search by Name and Description etc": "基于名称、描述等筛选",
+  "Search by Label Selector": "基于标签筛选",
   "Unrecoverable after deletion, are you sure to delete it?": "删除操作不可撤销，确认删除吗？",
   "Please enter the Environment name": "请输入环境名称",
   "Please enter the Environment alias": "请输入环境别名",
@@ -620,7 +620,7 @@
   "contexts": "上下文参数",
   "Are you sure to rerun this Pipeline?": "确定要重新运行流水线吗？",
   "Show Values File": "查看 Value 文件",
-  "Showing the all projects that you have permissions": "你拥有权限的所有项目",
+  "Showing all projects you are permitted": "你拥有权限的所有项目",
   "More": "显示更多",
   "Hide": "收起"
 }
