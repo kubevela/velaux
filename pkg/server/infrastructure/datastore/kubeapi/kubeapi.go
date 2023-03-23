@@ -340,46 +340,14 @@ func (m *kubeapi) List(ctx context.Context, entity datastore.Entity, op *datasto
 		return nil, datastore.ErrTableNameEmpty
 	}
 
-	selector, err := labels.Parse(fmt.Sprintf("table=%s", entity.TableName()))
-	if err != nil {
-		return nil, datastore.NewDBError(err)
-	}
-
-	rq, _ := labels.NewRequirement(MigrateKey, selection.DoesNotExist, []string{"ok"})
-	selector = selector.Add(*rq)
-	metedataLabels := convertIndex2Labels(entity.Index())
-	for k, v := range metedataLabels {
-		rq, err := labels.NewRequirement(k, selection.Equals, []string{verifyValue(v)})
-		if err != nil {
-			return nil, datastore.ErrIndexInvalid
-		}
-		selector = selector.Add(*rq)
-	}
+	var filterOptions *datastore.FilterOptions
 	if op != nil {
-		for _, inFilter := range op.In {
-			var values []string
-			for _, value := range inFilter.Values {
-				values = append(values, verifyValue(value))
-			}
-			rq, err := labels.NewRequirement(inFilter.Key, selection.In, values)
-			if err != nil {
-				klog.Errorf("new list requirement failure %s", err.Error())
-				return nil, datastore.ErrIndexInvalid
-			}
-			selector = selector.Add(*rq)
-		}
-		for _, notFilter := range op.IsNotExist {
-			rq, err := labels.NewRequirement(notFilter.Key, selection.DoesNotExist, []string{})
-			if err != nil {
-				klog.Errorf("new list requirement failure %s", err.Error())
-				return nil, datastore.ErrIndexInvalid
-			}
-			selector = selector.Add(*rq)
-		}
+		filterOptions = &op.FilterOptions
 	}
-	options := &client.ListOptions{
-		LabelSelector: selector,
-		Namespace:     m.namespace,
+	rq, _ := labels.NewRequirement(MigrateKey, selection.DoesNotExist, []string{"ok"})
+	items, err := m.listItems(ctx, entity, rq, filterOptions)
+	if err != nil {
+		return nil, err
 	}
 	var skip, limit int
 	if op != nil && op.PageSize > 0 && op.Page > 0 {
@@ -389,14 +357,6 @@ func (m *kubeapi) List(ctx context.Context, entity datastore.Entity, op *datasto
 			skip = 0
 		}
 	}
-	var configMaps corev1.ConfigMapList
-	if err := m.kubeClient.List(ctx, &configMaps, options); err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil, nil
-		}
-		return nil, datastore.NewDBError(err)
-	}
-	items := configMaps.Items
 	if op != nil && len(op.Queries) > 0 {
 		items = _filterConfigMapByFuzzyQueryOptions(items, op.Queries)
 	}
@@ -428,21 +388,77 @@ func (m *kubeapi) List(ctx context.Context, entity datastore.Entity, op *datasto
 	return list, nil
 }
 
+func (m *kubeapi) Aggregate(ctx context.Context, entity datastore.Entity, op *datastore.AggregateOptions) ([]datastore.Entity, error) {
+	if entity.TableName() == "" {
+		return nil, datastore.ErrTableNameEmpty
+	}
+	items, err := m.listItems(ctx, entity, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	aggregatedItems := make([]corev1.ConfigMap, 0)
+	if op != nil {
+		if len(op.SortBy) > 0 {
+			items = _sortConfigMapBySortOptions(items, op.SortBy)
+		}
+		if op.Group != nil && op.Group.KeepFirstElement {
+			keyMap := make(map[string]struct{})
+			for _, item := range items {
+				data := string(item.BinaryData["data"])
+				res := gjson.Get(data, op.Group.Key)
+				if res.Type != gjson.String {
+					break
+				}
+				if _, ok := keyMap[res.Str]; !ok {
+					keyMap[res.Str] = struct{}{}
+					aggregatedItems = append(aggregatedItems, item)
+				}
+			}
+		}
+	}
+	var list []datastore.Entity
+	for _, item := range aggregatedItems {
+		ent, err := datastore.NewEntity(entity)
+		if err != nil {
+			return nil, datastore.NewDBError(err)
+		}
+		if err := json.Unmarshal(item.BinaryData["data"], ent); err != nil {
+			return nil, datastore.NewDBError(err)
+		}
+		list = append(list, ent)
+	}
+	return list, nil
+}
+
 // Count counts entities
 func (m *kubeapi) Count(ctx context.Context, entity datastore.Entity, filterOptions *datastore.FilterOptions) (int64, error) {
 	if entity.TableName() == "" {
 		return 0, datastore.ErrTableNameEmpty
 	}
+	items, err := m.listItems(ctx, entity, nil, filterOptions)
+	if err != nil {
+		return 0, err
+	}
 
+	if filterOptions != nil && len(filterOptions.Queries) > 0 {
+		items = _filterConfigMapByFuzzyQueryOptions(items, filterOptions.Queries)
+	}
+	return int64(len(items)), nil
+}
+
+func (m *kubeapi) listItems(ctx context.Context, entity datastore.Entity, rq *labels.Requirement, filterOptions *datastore.FilterOptions) ([]corev1.ConfigMap, error) {
 	selector, err := labels.Parse(fmt.Sprintf("table=%s", entity.TableName()))
 	if err != nil {
-		return 0, datastore.NewDBError(err)
+		return nil, datastore.NewDBError(err)
+	}
+	if rq != nil {
+		selector = selector.Add(*rq)
 	}
 	metedataLabels := convertIndex2Labels(entity.Index())
 	for k, v := range metedataLabels {
 		rq, err := labels.NewRequirement(k, selection.Equals, []string{verifyValue(v)})
 		if err != nil {
-			return 0, datastore.ErrIndexInvalid
+			return nil, datastore.ErrIndexInvalid
 		}
 		selector = selector.Add(*rq)
 	}
@@ -454,7 +470,7 @@ func (m *kubeapi) Count(ctx context.Context, entity datastore.Entity, filterOpti
 			}
 			rq, err := labels.NewRequirement(inFilter.Key, selection.In, values)
 			if err != nil {
-				return 0, datastore.ErrIndexInvalid
+				return nil, datastore.ErrIndexInvalid
 			}
 			selector = selector.Add(*rq)
 		}
@@ -462,7 +478,7 @@ func (m *kubeapi) Count(ctx context.Context, entity datastore.Entity, filterOpti
 			rq, err := labels.NewRequirement(notFilter.Key, selection.DoesNotExist, []string{})
 			if err != nil {
 				klog.Errorf("new list requirement failure %s", err.Error())
-				return 0, datastore.ErrIndexInvalid
+				return nil, datastore.ErrIndexInvalid
 			}
 			selector = selector.Add(*rq)
 		}
@@ -476,15 +492,11 @@ func (m *kubeapi) Count(ctx context.Context, entity datastore.Entity, filterOpti
 	var configMaps corev1.ConfigMapList
 	if err := m.kubeClient.List(ctx, &configMaps, options); err != nil {
 		if apierrors.IsNotFound(err) {
-			return 0, nil
+			return nil, nil
 		}
-		return 0, datastore.NewDBError(err)
+		return nil, datastore.NewDBError(err)
 	}
-	items := configMaps.Items
-	if filterOptions != nil && len(filterOptions.Queries) > 0 {
-		items = _filterConfigMapByFuzzyQueryOptions(configMaps.Items, filterOptions.Queries)
-	}
-	return int64(len(items)), nil
+	return configMaps.Items, nil
 }
 
 func verifyValue(v string) string {

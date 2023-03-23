@@ -198,6 +198,20 @@ var _ = Describe("Test kubeapi datastore driver", func() {
 		}
 	})
 
+	It("Test aggregate function", func() {
+		var app model.Application
+		list, err := kubeStore.Aggregate(context.TODO(), &app, &datastore.AggregateOptions{
+			Group: &datastore.GroupOption{
+				Key:              "project",
+				KeepFirstElement: true,
+			},
+			SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+		})
+		Expect(err).ShouldNot(HaveOccurred())
+		diff := cmp.Diff(len(list), 2)
+		Expect(diff).Should(BeEmpty())
+	})
+
 	It("Test count function", func() {
 		var app model.Application
 		count, err := kubeStore.Count(context.TODO(), &app, nil)

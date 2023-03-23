@@ -106,6 +106,11 @@ type SortOption struct {
 	Order SortOrder
 }
 
+type GroupOption struct {
+	Key              string
+	KeepFirstElement bool
+}
+
 // FuzzyQueryOption defines the fuzzy query search filter option
 type FuzzyQueryOption struct {
 	Key   string
@@ -138,6 +143,12 @@ type ListOptions struct {
 	SortBy   []SortOption
 }
 
+// ListOptions list api options
+type AggregateOptions struct {
+	Group  *GroupOption
+	SortBy []SortOption
+}
+
 // DataStore datastore interface
 type DataStore interface {
 	// Add adds entity to database, Name() and TableName() can't return zero value.
@@ -163,4 +174,6 @@ type DataStore interface {
 
 	// IsExist Name() and TableName() can't return zero value.
 	IsExist(ctx context.Context, entity Entity) (bool, error)
+
+	Aggregate(ctx context.Context, entity Entity, options *AggregateOptions) ([]Entity, error)
 }

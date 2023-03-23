@@ -105,6 +105,7 @@ var _ = Describe("Test mongodb datastore driver", func() {
 		err := mongodbDriver.Put(context.TODO(), &model.Application{Name: "kubevela-app", Description: "this is demo"})
 		Expect(err).ToNot(HaveOccurred())
 	})
+
 	It("Test list function", func() {
 		var app model.Application
 		list, err := mongodbDriver.List(context.TODO(), &app, &datastore.ListOptions{Page: -1})
@@ -203,6 +204,20 @@ var _ = Describe("Test mongodb datastore driver", func() {
 		for i, name := range []string{"third", "first"} {
 			Expect(entities[i].(*model.Cluster).Name).Should(Equal(name))
 		}
+	})
+
+	It("Test aggregate function", func() {
+		var app model.Application
+		list, err := mongodbDriver.Aggregate(context.TODO(), &app, &datastore.AggregateOptions{
+			Group: &datastore.GroupOption{
+				Key:              "project",
+				KeepFirstElement: true,
+			},
+			SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+		})
+		Expect(err).ShouldNot(HaveOccurred())
+		diff := cmp.Diff(len(list), 2)
+		Expect(diff).Should(BeEmpty())
 	})
 
 	It("Test count function", func() {

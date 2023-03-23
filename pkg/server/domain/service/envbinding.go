@@ -300,7 +300,7 @@ func (e *envBindingServiceImpl) ApplicationEnvRecycle(ctx context.Context, appMo
 		}
 	}
 
-	if err := resetRevisionsAndRecords(ctx, e.Store, appModel.Name, "", "", ""); err != nil {
+	if err := e.WorkflowService.resetRevisionsAndRecords(ctx, e.Store, appModel.Name, "", "", ""); err != nil {
 		return err
 	}
 	klog.Infof("Application %s(%s) recycle successfully from env %s", appModel.Name, name, env.Name)

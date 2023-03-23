@@ -54,9 +54,10 @@ var _ = Describe("Test application service function", func() {
 		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: "app-test-kubevela"})
 		Expect(ds).ToNot(BeNil())
 		Expect(err).Should(BeNil())
-		workflowService = &workflowServiceImpl{Store: ds, EnvService: envService}
+		workflowService = &workflowServiceImpl{Store: ds, EnvService: envService, KubeClient: k8sClient}
 		definitionService = &definitionServiceImpl{KubeClient: k8sClient}
 		envBindingService = &envBindingServiceImpl{Store: ds, EnvService: envService, WorkflowService: workflowService, KubeClient: k8sClient, DefinitionService: definitionService}
+		workflowService.EnvBindingService = envBindingService
 		targetService = &targetServiceImpl{Store: ds, K8sClient: k8sClient}
 		rbacService := &rbacServiceImpl{Store: ds}
 		projectService = &projectServiceImpl{Store: ds, K8sClient: k8sClient, RbacService: rbacService}

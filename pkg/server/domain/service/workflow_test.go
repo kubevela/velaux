@@ -593,7 +593,7 @@ var _ = Describe("Test workflow service functions", func() {
 		})
 		Expect(err).Should(BeNil())
 
-		err = resetRevisionsAndRecords(ctx, workflowService.Store, "reset-app", "reset-workflow", "", "")
+		err = workflowService.resetRevisionsAndRecords(ctx, workflowService.Store, "reset-app", "reset-workflow", "", "")
 		Expect(err).Should(BeNil())
 
 		record := &model.WorkflowRecord{

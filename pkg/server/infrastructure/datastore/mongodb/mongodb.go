@@ -204,6 +204,59 @@ func _applyFilterOptions(filter bson.D, filterOptions datastore.FilterOptions) b
 	return filter
 }
 
+func (m *mongodb) Aggregate(ctx context.Context, entity datastore.Entity, op *datastore.AggregateOptions) ([]datastore.Entity, error) {
+	if entity.TableName() == "" {
+		return nil, datastore.ErrTableNameEmpty
+	}
+	collection := m.client.Database(m.database).Collection(entity.TableName())
+	pipeline := mongo.Pipeline{}
+	if op != nil {
+		if len(op.SortBy) > 0 {
+			pipeline = append(pipeline, bson.D{{Key: "$sort", Value: generateSortBy(op.SortBy)}})
+		}
+		if op.Group != nil {
+			groupBy := bson.D{bson.E{
+				Key:   "_id",
+				Value: fmt.Sprintf("$%s", op.Group.Key),
+			}}
+			if op.Group.KeepFirstElement {
+				groupBy = append(groupBy, bson.E{
+					Key:   "doc",
+					Value: bson.D{{Key: "$first", Value: "$$ROOT"}},
+				})
+			}
+			pipeline = append(pipeline, bson.D{{Key: "$group", Value: groupBy}})
+			if op.Group.KeepFirstElement {
+				pipeline = append(pipeline, bson.D{{Key: "$replaceRoot", Value: bson.D{{Key: "newRoot", Value: "$doc"}}}})
+			}
+		}
+	}
+	cur, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, datastore.NewDBError(err)
+	}
+	defer func() {
+		if err := cur.Close(ctx); err != nil {
+			klog.Warningf("close mongodb cursor failure %s", err.Error())
+		}
+	}()
+	var list []datastore.Entity
+	for cur.Next(ctx) {
+		item, err := datastore.NewEntity(entity)
+		if err != nil {
+			return nil, datastore.NewDBError(err)
+		}
+		if err := cur.Decode(item); err != nil {
+			return nil, datastore.NewDBError(fmt.Errorf("decode entity failure %w", err))
+		}
+		list = append(list, item)
+	}
+	if err := cur.Err(); err != nil {
+		return nil, datastore.NewDBError(err)
+	}
+	return list, nil
+}
+
 // List list entity function
 func (m *mongodb) List(ctx context.Context, entity datastore.Entity, op *datastore.ListOptions) ([]datastore.Entity, error) {
 	if entity.TableName() == "" {
@@ -227,15 +280,7 @@ func (m *mongodb) List(ctx context.Context, entity datastore.Entity, op *datasto
 		findOptions.SetLimit(int64(op.PageSize))
 	}
 	if op != nil && len(op.SortBy) > 0 {
-		_d := bson.D{}
-		for _, sortOp := range op.SortBy {
-			key := strings.ToLower(sortOp.Key)
-			if key == "createtime" || key == "updatetime" {
-				key = "basemodel." + key
-			}
-			_d = append(_d, bson.E{Key: key, Value: int(sortOp.Order)})
-		}
-		findOptions.SetSort(_d)
+		findOptions.SetSort(generateSortBy(op.SortBy))
 	}
 	cur, err := collection.Find(ctx, filter, &findOptions)
 	if err != nil {
@@ -284,6 +329,18 @@ func (m *mongodb) Count(ctx context.Context, entity datastore.Entity, filterOpti
 		return 0, datastore.NewDBError(err)
 	}
 	return count, nil
+}
+
+func generateSortBy(sortBy []datastore.SortOption) bson.D {
+	_d := bson.D{}
+	for _, sortOp := range sortBy {
+		key := strings.ToLower(sortOp.Key)
+		if key == "createtime" || key == "updatetime" {
+			key = "basemodel." + key
+		}
+		_d = append(_d, bson.E{Key: key, Value: int(sortOp.Order)})
+	}
+	return _d
 }
 
 func makeNameFilter(name string) bson.D {
