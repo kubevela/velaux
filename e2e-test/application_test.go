@@ -67,7 +67,7 @@ var _ = Describe("Test application rest api", func() {
 			Project:     appProject,
 			Description: "this is a test app",
 			Icon:        "",
-			Labels:      map[string]string{"test": "true"},
+			Labels:      map[string]string{"test": "true", "labelselector": "true"},
 			EnvBinding:  []*apisv1.EnvBinding{{Name: "dev-env"}},
 			Component: &apisv1.CreateComponentRequest{
 				Name:          "webservice",
@@ -81,6 +81,14 @@ var _ = Describe("Test application rest api", func() {
 		Expect(cmp.Diff(appBase.Name, req.Name)).Should(BeEmpty())
 		Expect(cmp.Diff(appBase.Description, req.Description)).Should(BeEmpty())
 		Expect(cmp.Diff(appBase.Labels["test"], req.Labels["test"])).Should(BeEmpty())
+	})
+
+	It("Test listing applications by label", func() {
+		defer GinkgoRecover()
+		res := get("/applications?env=dev-env&labels=labelselector=true")
+		var apps apisv1.ListApplicationResponse
+		Expect(decodeResponseBody(res, &apps)).Should(Succeed())
+		Expect(cmp.Diff(len(apps.Applications), 1)).Should(BeEmpty())
 	})
 
 	It("Test listing components", func() {

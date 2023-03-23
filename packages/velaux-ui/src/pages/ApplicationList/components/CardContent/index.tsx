@@ -3,7 +3,7 @@ import type { MouseEvent } from 'react';
 import React from 'react';
 import './index.less';
 import { Link } from 'dva/router';
-import { Grid, Card, Menu, Dropdown, Dialog, Button, Table } from '@alifd/next';
+import { Grid, Card, Menu, Dropdown, Dialog, Button, Table, Tag, Icon } from '@alifd/next';
 import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
 
 import type { ShowMode } from '../..';
@@ -23,6 +23,7 @@ const { Column } = Table;
 type State = {
   extendDotVisible: boolean;
   choseIndex: number;
+  showLabelMode: Map<string, boolean>;
 };
 
 type Props = {
@@ -32,6 +33,7 @@ type Props = {
   editAppPlan: (item: ApplicationBase) => void;
   deleteAppPlan: (name: string) => void;
   setVisible: (visible: boolean) => void;
+  clickLabelFilter: (label: string) => void;
   showMode: ShowMode;
 };
 
@@ -41,9 +43,19 @@ type Props = {
 class CardContent extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
+    const {applications} = this.props;
+    let showLabelMode = new Map<string, boolean>();
+    applications?.map((app) => {
+      if (app.labels && Object.keys(app.labels).length > 1) {
+        showLabelMode.set(app.name, true)
+      } else {
+        showLabelMode.set(app.name, false)
+      }
+    });
     this.state = {
       extendDotVisible: false,
       choseIndex: 0,
+      showLabelMode: showLabelMode,
     };
   }
 
@@ -63,6 +75,19 @@ class CardContent extends React.Component<Props, State> {
   onEditAppPlan = (item: ApplicationBase) => {
     this.props.editAppPlan(item);
   };
+
+  onClickLabelFilter = (label: string) => {
+    this.props.clickLabelFilter(label)
+  }
+
+  onMoreLabels = (appName: string) => {
+    let { showLabelMode } = this.state;
+    let cur = showLabelMode.get(appName);
+    showLabelMode.set(appName, cur? false: true);
+    this.setState({
+      showLabelMode,
+    });
+  }
 
   isEditPermission = (item: ApplicationBase, button?: boolean) => {
     const { userInfo } = this.props;
@@ -166,7 +191,48 @@ class CardContent extends React.Component<Props, State> {
           return <span>{v}</span>;
         },
       },
-
+      {
+        key: 'labels',
+        title: <Translation>Tags</Translation>,
+        dataIndex: 'labels',
+        cell: (label: Record<string, string>, i: number, v: ApplicationBase) => {
+          const { showLabelMode } = this.state
+          const more = showLabelMode.get(v.name)
+          let displayLabels = 0
+          return (
+            <div>
+              <div className={more? '': 'table-content-label'}>
+                { Object.keys(label).map((key) => {
+                  if (label && key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
+                    displayLabels++
+                    return (
+                      <div>
+                        <Tag
+                          onClick={((e) => this.onClickLabelFilter(key+"="+`${label[key]}`))}
+                          key={`${key}=${label[key]}`}
+                          style={{ margin: '2px' }}
+                          color="blue"
+                          size="small"
+                        >{`${key}=${label[key]}`}</Tag>
+                      </div>
+                    )
+                  }
+                })}
+              </div>
+              { displayLabels > 1 &&
+                <div>
+                <Tag
+                  onClick={((e) => this.onMoreLabels(v.name))}
+                  key={"showLabelTag"}
+                  style={{ margin: '2px' }}
+                  size="small"
+                ><Translation>{more? "Hide": "More"}</Translation>{more? <Icon type="minus" />: <Icon type="add" />}</Tag>
+                </div>
+              }
+            </div>
+          )
+        },
+      },
       {
         key: 'operation',
         title: <Translation>Actions</Translation>,
@@ -239,7 +305,7 @@ class CardContent extends React.Component<Props, State> {
     return (
       <Row wrap={true}>
         {applications?.map((item: ApplicationBase) => {
-          const { name, alias, icon, description, createTime, readOnly } = item;
+          const { name, alias, icon, description, createTime, readOnly, labels } = item;
           const showName = alias || name;
           return (
             <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wrapper`} key={`${item.name}`}>
@@ -299,7 +365,21 @@ class CardContent extends React.Component<Props, State> {
                       {description}
                     </h4>
                   </Row>
-
+                  <Row className="content-labels">
+                    {labels &&
+                      Object.keys(labels).map((key) => {
+                        if (labels && key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
+                          return (
+                            <Tag
+                              onClick={((e) => this.onClickLabelFilter(key+"="+`${labels[key]}`))}
+                              key={key}
+                              style={{ margin: '4px' }}
+                              color="blue"
+                            >{`${key}=${labels[key]}`}</Tag>
+                          );
+                        }
+                      })}
+                  </Row>      
                   <Row className="content-foot colorA6A6A6">
                     <Col span="16">
                       <span>{createTime && momentDate(createTime)}</span>
