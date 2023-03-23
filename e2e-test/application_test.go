@@ -85,7 +85,7 @@ var _ = Describe("Test application rest api", func() {
 
 	It("Test listing applications by label", func() {
 		defer GinkgoRecover()
-		res := get("/applications?labels=labelselector=true")
+		res := get("/applications?env=dev-env&labels=labelselector=true")
 		var apps apisv1.ListApplicationResponse
 		Expect(decodeResponseBody(res, &apps)).Should(Succeed())
 		Expect(cmp.Diff(len(apps.Applications), 1)).Should(BeEmpty())
