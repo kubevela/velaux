@@ -32,17 +32,15 @@ RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     go build -a -ldflags "-s -w -X github.com/oam-dev/kubevela/version.VelaVersion=${VERSION:-undefined} -X github.com/oam-dev/kubevela/version.GitRevision=${GITVERSION:-undefined}" \
     -o apiserver-${TARGETARCH} cmd/server/main.go
 
-FROM ${BASE_IMAGE:-alpine:3.15@sha256:cf34c62ee8eb3fe8aa24c1fab45d7e9d12768d945c3f5a6fd6a63d901e898479}
+FROM ${BASE_IMAGE:-alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501}
 # This is required by daemon connecting with cri
-RUN apk add --no-cache ca-certificates bash expat openssl-dev
+RUN apk add --no-cache ca-certificates bash expat
 
-WORKDIR /
+WORKDIR /app/velaux
 
 ARG TARGETARCH
-COPY --from=server-builder /workspace/apiserver-${TARGETARCH} /velaux/server
-COPY --from=ui-builder /app/velaux/public /velaux/public
-COPY entrypoint.sh /usr/local/bin/
-
-ENTRYPOINT ["entrypoint.sh"]
+ENV PATH=$PATH:/app/velaux
+COPY --from=server-builder /workspace/apiserver-${TARGETARCH} /app/velaux/server
+COPY --from=ui-builder /app/velaux/public /app/velaux/public
 
 CMD ["server"]

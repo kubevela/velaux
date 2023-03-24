@@ -388,10 +388,11 @@ type ClusterBase struct {
 
 // ListApplicationOptions list application  query options
 type ListApplicationOptions struct {
-	Projects   []string `json:"projects"`
-	Env        string   `json:"env"`
-	TargetName string   `json:"targetName"`
-	Query      string   `json:"query"`
+	Projects   []string          `json:"projects"`
+	Env        string            `json:"env"`
+	TargetName string            `json:"targetName"`
+	Query      string            `json:"query"`
+	Labels     map[string]string `json:"labels"`
 }
 
 // ListApplicationResponse list applications by query params
