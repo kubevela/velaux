@@ -36,6 +36,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/config"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
 
+	pluginTypes "github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 )
 
@@ -1833,4 +1834,25 @@ type ContextNameResponse struct {
 type ListContextValueResponse struct {
 	Total    int                      `json:"total"`
 	Contexts map[string][]model.Value `json:"contexts"`
+}
+
+type PluginDTO struct {
+	pluginTypes.JSONData
+	Class         pluginTypes.Class `json:"class"`
+	DefaultNavURL string            `json:"defaultNavURL"`
+	// SystemJS fields
+	Module  string `json:"module"`
+	BaseURL string `json:"baseURL"`
+}
+
+func (p PluginDTO) IsApp() bool {
+	return p.Type == pluginTypes.PageApp
+}
+
+func (p PluginDTO) IsCorePlugin() bool {
+	return p.Class == pluginTypes.Core
+}
+
+type ListPluginResponse struct {
+	Plugins []PluginDTO `json:"plugins"`
 }

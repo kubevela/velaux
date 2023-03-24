@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'dva/router';
 import './index.less';
 
 export type Props = {
@@ -12,11 +12,7 @@ const NumItem: React.FC<Props> = (props) => {
   return (
     <div className="num-item">
       <div className="number">
-        {props.to ? (
-          <Link to={props.to}>{props.number || 0}</Link>
-        ) : (
-          <span>{props.number || 0}</span>
-        )}
+        {props.to ? <Link to={props.to}>{props.number || 0}</Link> : <span>{props.number || 0}</span>}
       </div>
       <div className="title">{props.title}</div>
     </div>

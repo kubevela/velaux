@@ -233,11 +233,10 @@ class UISchema extends Component<Props, State> {
         case 'policy':
           return 'https://kubevela.net/docs/end-user/policies/references#' + definition.name;
         case 'workflowstep':
-          return (
-            'https://kubevela.net/docs/end-user/workflow/built-in-workflow-defs#' + definition.name
-          );
+          return 'https://kubevela.net/docs/end-user/workflow/built-in-workflow-defs#' + definition.name;
       }
     }
+    return;
   };
 
   renderCodeEdit = () => {
@@ -256,12 +255,7 @@ class UISchema extends Component<Props, State> {
         <If condition={definition}>
           <p>
             Refer to the document:
-            <a
-              style={{ marginLeft: '8px' }}
-              target="_blank"
-              href={this.renderDocumentURL()}
-              rel="noopener noreferrer"
-            >
+            <a style={{ marginLeft: '8px' }} target="_blank" href={this.renderDocumentURL()} rel="noopener noreferrer">
               click here
             </a>
           </p>
@@ -292,8 +286,7 @@ class UISchema extends Component<Props, State> {
 
   render() {
     const { advanced } = this.state;
-    const { uiSchema, inline, maxColSpan, disableRenderRow, value, mode, enableCodeEdit } =
-      this.props;
+    const { uiSchema, inline, maxColSpan, disableRenderRow, value, mode, enableCodeEdit } = this.props;
     if (!uiSchema || enableCodeEdit) {
       return this.renderCodeEdit();
     }
@@ -397,6 +390,7 @@ class UISchema extends Component<Props, State> {
               if (validate.required === true) {
                 return false;
               }
+              return;
             };
             const switchResult = init(param.jsonKey, {
               initValue: initValue || getDefaultSwitchValue(param.validate),
@@ -625,7 +619,7 @@ class UISchema extends Component<Props, State> {
                 helm={this.props.value}
                 additional={param.additional}
                 additionalParameter={param.additionalParameter}
-              />,
+              />
             );
           case 'Strings':
             return getGroup(
@@ -636,7 +630,7 @@ class UISchema extends Component<Props, State> {
                   initValue: initValue,
                   rules: convertRule(param.validate),
                 })}
-              />,
+              />
             );
           case 'SecretSelect':
             return (
@@ -758,9 +752,7 @@ class UISchema extends Component<Props, State> {
                 <Group
                   key={param.jsonKey}
                   hasToggleIcon
-                  description={
-                    <div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />
-                  }
+                  description={<div dangerouslySetInnerHTML={{ __html: replaceUrl(description || '') }} />}
                   title={label}
                   closed={true}
                   required={required}
@@ -813,7 +805,7 @@ class UISchema extends Component<Props, State> {
                       },
                     ],
                   })}
-                />,
+                />
               );
             }
             return <div />;
@@ -946,6 +938,8 @@ class UISchema extends Component<Props, State> {
                 />
               </Form.Item>
             );
+          default:
+            return;
         }
       };
       let colSpan = 24;
@@ -970,8 +964,7 @@ class UISchema extends Component<Props, State> {
       },
     };
 
-    const showAdvancedButton =
-      couldBeDisabledParamCount != couldShowParamCount || requiredParamCount === 0;
+    const showAdvancedButton = couldBeDisabledParamCount != couldShowParamCount || requiredParamCount === 0;
     return (
       <Form field={this.form} className="ui-schema-container">
         <If condition={disableRenderRow}>{items}</If>

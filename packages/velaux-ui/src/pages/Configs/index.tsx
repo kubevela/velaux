@@ -1,4 +1,4 @@
-import { Table, Button, Dialog, Message, Icon } from '@alifd/next';
+import { Table, Button, Dialog, Message } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component, Fragment } from 'react';
 

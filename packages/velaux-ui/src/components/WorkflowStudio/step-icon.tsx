@@ -1,4 +1,3 @@
-import { Icon } from '@alifd/next';
 import React from 'react';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
 

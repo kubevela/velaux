@@ -120,6 +120,7 @@ export function beautifyTime(time?: string) {
       return inm + ' ' + arrr[i] + ' ' + postfix;
     }
   }
+  return '';
 }
 
 export function timeDiff(start?: string, end?: string): string {
@@ -155,8 +156,7 @@ export function beautifyBinarySize(value?: number) {
 }
 
 export const checkName = /^[a-z]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/;
-export const urlRegular =
-  /(https|http|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g;
+export const urlRegular = /(https|http|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g;
 export const checkImageName = /^[^\u4e00-\u9fa5 ]{0,512}$/;
 
 export const formItemLayout = {

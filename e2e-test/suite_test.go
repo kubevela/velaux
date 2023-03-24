@@ -72,6 +72,9 @@ var _ = BeforeSuite(func() {
 		AddonCacheTime: 10 * time.Minute,
 		KubeQPS:        100,
 		KubeBurst:      300,
+		PluginConfig: config.PluginConfig{
+			CustomPluginPath: []string{"plugins"},
+		},
 	}
 	cfg.LeaderConfig.ID = uuid.New().String()
 	cfg.LeaderConfig.LockName = "apiserver-lock"

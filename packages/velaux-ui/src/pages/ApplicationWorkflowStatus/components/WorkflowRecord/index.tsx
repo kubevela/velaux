@@ -8,7 +8,7 @@ import type {
   WorkflowStepStatus,
 } from '../../../../interface/application';
 
-import { Card, Button, Tab, Icon, Loading, Grid, Message } from '@alifd/next';
+import { Card, Button, Tab, Loading, Grid, Message } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import classNames from 'classnames';
 import { connect } from 'dva';
@@ -36,7 +36,6 @@ import i18n from '../../../../i18n';
 import type { WorkflowStepBase, WorkflowStepInputs, WorkflowStepOutputs } from '../../../../interface/pipeline';
 import { convertAny, momentDate, timeDiff } from '../../../../utils/common';
 import RunStatusIcon from '../../../PipelineRunPage/components/RunStatusIcon';
-import { MdRefresh } from 'react-icons/md';
 import { HiOutlineRefresh } from 'react-icons/hi';
 
 const { Row, Col } = Grid;

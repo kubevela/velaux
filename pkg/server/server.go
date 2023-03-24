@@ -47,6 +47,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mongodb"
 	"github.com/kubevela/velaux/pkg/server/interfaces/api"
 	"github.com/kubevela/velaux/pkg/server/utils"
+	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 	"github.com/kubevela/velaux/pkg/server/utils/container"
 )
 
@@ -56,6 +57,9 @@ const (
 
 	// BuildPublicRoutePath the route prefix to request the build static files.
 	BuildPublicRoutePath = "/public/build"
+
+	// PluginPublicRoutePath the route prefix to request the plugin static files.
+	PluginPublicRoutePath = "/public/plugins"
 
 	// BuildPublicPath the route prefix to request the build static files.
 	BuildPublicPath = "public/build"
@@ -73,6 +77,7 @@ type restServer struct {
 	beanContainer *container.Container
 	cfg           config.Config
 	dataStore     datastore.DataStore
+	PluginService service.PluginService `inject:""`
 }
 
 // New create api server with config data
@@ -87,7 +92,9 @@ func New(cfg config.Config) (a APIServer) {
 
 func (s *restServer) buildIoCContainer() error {
 	// infrastructure
-
+	if err := s.beanContainer.ProvideWithName("RestServer", s); err != nil {
+		return fmt.Errorf("fail to provides the RestServer bean to the container: %w", err)
+	}
 	err := clients.SetKubeConfig(s.cfg)
 	if err != nil {
 		return err
@@ -323,7 +330,6 @@ func enrichSwaggerObject(swo *spec.Swagger) {
 }
 
 func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	klog.Infof("request log %s", req.URL.Path)
 	switch {
 	case strings.HasPrefix(req.URL.Path, SwaggerConfigRoutePath):
 		s.webContainer.ServeHTTP(res, req)
@@ -331,6 +337,8 @@ func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	case strings.HasPrefix(req.URL.Path, BuildPublicRoutePath):
 		s.staticFiles(res, req, "./")
 		return
+	case strings.HasPrefix(req.URL.Path, PluginPublicRoutePath):
+		s.getPluginAssets(res, req)
 	default:
 		for _, pre := range api.GetAPIPrefix() {
 			if strings.HasPrefix(req.URL.Path, pre) {
@@ -346,6 +354,30 @@ func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 func (s *restServer) staticFiles(res http.ResponseWriter, req *http.Request, root string) {
 	http.FileServer(http.Dir(root)).ServeHTTP(res, req)
+}
+
+// route: /public/plugins/{pluginId}/*
+func (s *restServer) getPluginAssets(res http.ResponseWriter, req *http.Request) {
+	// Check the plugin
+	pathInfo := strings.SplitN(strings.Replace(req.URL.Path, "/public/plugins/", "", 1), "/", 2)
+	if len(pathInfo) < 2 {
+		bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
+		return
+	}
+	pluginId := pathInfo[0]
+	plugin, err := s.PluginService.GetPlugin(req.Context(), pluginId)
+	if err != nil {
+		bcode.ReturnHTTPError(req, res, err)
+		return
+	}
+	// Generate the static file path
+	path, err := utils.CleanRelativePath(pathInfo[1])
+	if err != nil {
+		bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
+		return
+	}
+	req.URL.Path = path
+	s.staticFiles(res, req, plugin.PluginDir)
 }
 
 func (s *restServer) startHTTP(ctx context.Context) error {

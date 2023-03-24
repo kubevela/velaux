@@ -1,4 +1,4 @@
-import { Grid, Button, Icon, Form, Input, Field, Select, Switch } from '@alifd/next';
+import { Grid, Button, Form, Input, Field, Select, Switch } from '@alifd/next';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { AiOutlineDelete } from 'react-icons/ai';

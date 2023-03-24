@@ -1,4 +1,4 @@
-import { Upload, Button, Icon, Message, Field } from '@alifd/next';
+import { Upload, Button, Message, Field } from '@alifd/next';
 import * as yaml from 'js-yaml';
 import React from 'react';
 import { AiOutlineCloudUpload } from 'react-icons/ai';

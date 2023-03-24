@@ -1,11 +1,12 @@
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { locationService } from '../../services/LocationService';
 import Translation from '../../components/Translation';
 import type { SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
-import { menuService } from '../../services/MenuService';
+import { menuService, LeftMenu } from '../../services/MenuService';
 
 import './index.less';
 interface Props {
@@ -13,18 +14,27 @@ interface Props {
   systemInfo?: SystemInfo;
 }
 
-const LeftMenu = (props: Props) => {
+const LeftMenuModule = (props: Props) => {
+  const path = locationService.getPathName();
+  const [menus, setMenus] = useState<LeftMenu[]>();
+  useEffect(() => {
+    menuService.loadPluginMenus().then(() => {
+      const workspace = menuService.loadCurrentWorkspace();
+      const menus = workspace && props.userInfo ? menuService.loadMenus(workspace, props.userInfo) : [];
+      setMenus(menus);
+    });
+  }, [props.userInfo, path]);
+
   if (!props.userInfo) {
     return <div />;
   }
-  const workspace = menuService.loadCurrentWorkspace();
-  const menus = workspace ? menuService.loadMenus(workspace, props.userInfo) : [];
-  const childrenSlider = menus.map((item) => {
+
+  const childrenSlider = menus?.map((item) => {
     const ele: JSX.Element[] = [];
     if (item.menus && item.menus.length > 0) {
       item.menus.map((childrenItem) => {
         const childrenArr = (
-          <li className="nav-item" key={childrenItem.label}>
+          <li className="nav-item" key={childrenItem.name}>
             <Link to={childrenItem.to} className={childrenItem.active ? 'menu-item-active' : 'menu-item'}>
               <div
                 style={{
@@ -32,7 +42,7 @@ const LeftMenu = (props: Props) => {
                   alignItems: 'center',
                 }}
               >
-                {childrenItem.icon}
+                {childrenItem.icon}.
                 <span className={'menu-item-text'}>
                   <Translation>{childrenItem.label}</Translation>
                 </span>
@@ -74,4 +84,4 @@ export default connect(
   undefined,
   undefined,
   { pure: false }
-)(LeftMenu);
+)(LeftMenuModule);

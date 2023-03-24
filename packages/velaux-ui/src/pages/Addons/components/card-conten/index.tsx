@@ -64,6 +64,7 @@ class CardContent extends React.Component<Props, State> {
           if (sep.length > 0) {
             return sep.toUpperCase()[0];
           }
+          return sep;
         })
         .toString()
         .replace(',', '');
@@ -93,15 +94,7 @@ class CardContent extends React.Component<Props, State> {
                 return addonStatus.name == name;
               });
               return (
-                <Col
-                  xl={4}
-                  l={6}
-                  m={8}
-                  s={12}
-                  xxs={24}
-                  className={`card-content-wraper`}
-                  key={name}
-                >
+                <Col xl={4} l={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={name}>
                   <Card locale={locale().Card} contentHeight="auto">
                     <a onClick={() => clickAddon(name)}>
                       <div className="cluster-card-top flexcenter">
@@ -122,9 +115,7 @@ class CardContent extends React.Component<Props, State> {
                               lineHeight: '60px',
                             }}
                           >
-                            <span style={{ color: '#1b58f4', fontSize: `2em` }}>
-                              {nameUpper(name)}
-                            </span>
+                            <span style={{ color: '#1b58f4', fontSize: `2em` }}>{nameUpper(name)}</span>
                           </div>
                         </If>
                       </div>
@@ -136,9 +127,7 @@ class CardContent extends React.Component<Props, State> {
                         </Col>
                         <If condition={registryName && registryName == 'experimental'}>
                           <Col span="8" className="flexright">
-                            <Balloon trigger={<Tag color="yellow">Experimental</Tag>}>
-                              {notice}
-                            </Balloon>
+                            <Balloon trigger={<Tag color="yellow">Experimental</Tag>}>{notice}</Balloon>
                           </Col>
                         </If>
                       </Row>
@@ -150,12 +139,7 @@ class CardContent extends React.Component<Props, State> {
                       <Row className="content-main-btn">
                         {tags?.map((tag: string) => {
                           return (
-                            <Tag
-                              title={tag}
-                              style={{ marginRight: '8px' }}
-                              color={getTagColor(tag)}
-                              key={tag}
-                            >
+                            <Tag title={tag} style={{ marginRight: '8px' }} color={getTagColor(tag)} key={tag}>
                               {tag}
                             </Tag>
                           );
@@ -167,9 +151,7 @@ class CardContent extends React.Component<Props, State> {
                           <span>{version || '0.0.0'}</span>
                         </Col>
                         <Col span="8" className="text-align-right padding-right-10">
-                          <If
-                            condition={status && status.length > 0 && status[0].phase == 'enabled'}
-                          >
+                          <If condition={status && status.length > 0 && status[0].phase == 'enabled'}>
                             <span className="circle circle-success" />
                             <Translation>Enabled</Translation>
                           </If>

@@ -1,4 +1,4 @@
-import { Button, Icon } from '@alifd/next';
+import { Button } from '@alifd/next';
 import React from 'react';
 
 import { TreeGraph } from '../../../../components/TreeGraph';

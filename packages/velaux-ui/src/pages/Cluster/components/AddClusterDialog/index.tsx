@@ -1,4 +1,4 @@
-import { Button, Message, Grid, Dialog, Form, Input, Upload, Field, Icon, Loading } from '@alifd/next';
+import { Button, Message, Grid, Dialog, Form, Input, Upload, Field, Loading } from '@alifd/next';
 import React from 'react';
 import { AiOutlineCloudUpload } from 'react-icons/ai';
 

@@ -1,5 +1,5 @@
 import type { Rule } from '@alifd/field';
-import { Grid, Form, Input, Field, Button, Message, Card, Icon, Loading, Select, Dialog } from '@alifd/next';
+import { Grid, Form, Input, Field, Button, Message, Card, Loading, Select, Dialog } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
 import { BiCodeBlock, BiLaptop } from 'react-icons/bi';

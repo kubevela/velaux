@@ -1,5 +1,5 @@
 import type { Rule } from '@alifd/field';
-import { Form, Icon, Field, Button } from '@alifd/next';
+import { Form, Field, Button } from '@alifd/next';
 import React from 'react';
 
 import UISchema from '../../components/UISchema';

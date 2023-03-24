@@ -114,14 +114,13 @@ class ApplicationWorkflow extends React.Component<Props, State> {
             } else if (Array.isArray(records) && records.length > 0) {
               this.setState({ showRecordName: records[0].name });
               dispatch(
-                routerRedux.push(
-                  `/applications/${appName}/envbinding/${env.name}/workflow/records/${records[0].name}`,
-                ),
+                routerRedux.push(`/applications/${appName}/envbinding/${env.name}/workflow/records/${records[0].name}`)
               );
-              return <Loading visible={true} />;
+              return;
             }
           }
-        },
+          return;
+        }
       );
     }
   };
@@ -187,8 +186,8 @@ class ApplicationWorkflow extends React.Component<Props, State> {
                   this.setState({ showRecordName: selectRecord }, () => {
                     dispatch(
                       routerRedux.push(
-                        `/applications/${appName}/envbinding/${envName}/workflow/records/${selectRecord}`,
-                      ),
+                        `/applications/${appName}/envbinding/${envName}/workflow/records/${selectRecord}`
+                      )
                     );
                   });
                 }}

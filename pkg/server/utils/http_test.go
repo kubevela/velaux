@@ -37,4 +37,10 @@ var _ = Describe("Test http utils", func() {
 		clientIP = ClientIP(req)
 		Expect(cmp.Diff(clientIP, "198.23.1.2")).Should(BeEmpty())
 	})
+
+	It("Test CleanRelativePath", func() {
+		path, err := CleanRelativePath("../module.js?_cache=0.0.1")
+		Expect(err).Should(BeNil())
+		Expect(path).Should(Equal("module.js?_cache=0.0.1"))
+	})
 })

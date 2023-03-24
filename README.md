@@ -17,7 +17,7 @@ Please refer to: [https://kubevela.net/docs/install](https://kubevela.net/docs/i
 
 #### Build the frontend
 
-Make sure you have installed [yarn](https://classic.yarnpkg.com/en/docs/install).
+Make sure you have installed [yarn 2.0](https://yarnpkg.com/getting-started/install), This is required.
 
 Install frontend dependencies and build the frontend.
 

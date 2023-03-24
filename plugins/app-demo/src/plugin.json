@@ -1,0 +1,41 @@
+{
+  "type": "page-app",
+  "name": "App Demo",
+  "id": "app-demo",
+  "info": {
+    "keywords": [
+      "app"
+    ],
+    "description": "The app demo plugin",
+    "author": {
+      "name": "KubeVela"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "includes": [
+    {
+      "workspace": {
+        "name": "continuous-delivery"
+      },
+      "type": "Workspace",
+      "label": "Custom App",
+      "name": "custom-app",
+      "to": "/plugins/%PLUGIN_ID%",
+      "relatedRoute": [
+        "/plugins/%PLUGIN_ID%"
+      ],
+      "icon": "",
+      "catalog": "Continuous Delivery"
+    }
+  ],
+  "dependencies": {
+    "velauxDependency": ">=1.8.0",
+    "plugins": []
+  }
+}

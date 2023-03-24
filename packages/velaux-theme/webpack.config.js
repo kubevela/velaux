@@ -70,14 +70,6 @@ module.exports = function ({ minimize = false }) {
         },
       },
       {
-        'react-dom': {
-          root: 'ReactDOM',
-          commonjs2: 'react-dom',
-          commonjs: 'react-dom',
-          amd: 'react-dom',
-        },
-      },
-      {
         moment: {
           root: 'moment',
           commonjs2: 'moment',

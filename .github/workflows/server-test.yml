@@ -117,7 +117,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./
-          file: ./Dockerfile
+          file: ./Dockerfile.e2e
           platforms: linux/amd64
           push: false
           tags: oamdev/velaux:latest
@@ -169,6 +169,7 @@ jobs:
           export ALIYUN_ACCESS_KEY_ID=${{ secrets.ALIYUN_ACCESS_KEY_ID }}
           export ALIYUN_ACCESS_KEY_SECRET=${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          docker run -it --rm -v `pwd`/plugins:/plugins oamdev/velaux:latest cp /app/velaux/plugins/* /plugins
           make e2e-server-test
 
       - name: Upload coverage report

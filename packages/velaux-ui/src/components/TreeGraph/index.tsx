@@ -27,7 +27,7 @@ import {
 } from './utils';
 
 import { Link } from 'dva/router';
-import { Dropdown, Icon, Menu, Tag, Balloon } from '@alifd/next';
+import { Dropdown, Menu, Tag, Balloon } from '@alifd/next';
 import { FaEllipsisV } from 'react-icons/fa';
 import { HiOutlineNewspaper } from 'react-icons/hi';
 

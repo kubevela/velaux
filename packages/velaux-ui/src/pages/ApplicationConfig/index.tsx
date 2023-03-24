@@ -246,14 +246,7 @@ class ApplicationConfig extends Component<Props, State> {
 
   editAppPlan = () => {
     const { applicationDetail } = this.props;
-    const {
-      alias = '',
-      description = '',
-      name = '',
-      createTime = '',
-      icon = '',
-      labels,
-    } = applicationDetail || {};
+    const { alias = '', description = '', name = '', createTime = '', icon = '', labels } = applicationDetail || {};
     this.setState({
       editItem: {
         name,
@@ -359,7 +352,7 @@ class ApplicationConfig extends Component<Props, State> {
       },
       () => {
         this.onLoadApplicationComponents();
-      },
+      }
     );
   };
 
@@ -419,20 +412,14 @@ class ApplicationConfig extends Component<Props, State> {
         if (err.BusinessCode === 10026) {
           Dialog.confirm({
             type: 'confirm',
-            content: (
-              <Translation>
-                This policy is being used by workflow, do you want to force delete it?
-              </Translation>
-            ),
+            content: <Translation>This policy is being used by workflow, do you want to force delete it?</Translation>,
             onOk: () => {
-              deletePolicy({ appName: appName, policyName: policyName, force: true }).then(
-                (res: any) => {
-                  if (res) {
-                    Message.success('Application policy deleted successfully');
-                    this.loadApplicationPolicies();
-                  }
-                },
-              );
+              deletePolicy({ appName: appName, policyName: policyName, force: true }).then((res: any) => {
+                if (res) {
+                  Message.success('Application policy deleted successfully');
+                  this.loadApplicationPolicies();
+                }
+              });
             },
             locale: locale().Dialog,
           });
@@ -491,16 +478,10 @@ class ApplicationConfig extends Component<Props, State> {
       <div>
         <Row className="flex-row" wrap={true}>
           <Col xl={16} l={24} s={24} style={{ padding: '0 8px' }}>
-            <Card
-              locale={locale().Card}
-              contentHeight="auto"
-              subTitle={applicationDetail?.description}
-            >
+            <Card locale={locale().Card} contentHeight="auto" subTitle={applicationDetail?.description}>
               <Row wrap={true}>
                 <Col xxs={12}>
-                  <div className="app-name">
-                    {showAlias(applicationDetail?.name, applicationDetail?.alias)}
-                  </div>
+                  <div className="app-name">{showAlias(applicationDetail?.name, applicationDetail?.alias)}</div>
                 </Col>
                 <Col xxs={12} className="flexright" style={{ marginBottom: '16px' }}>
                   <div>
@@ -551,13 +532,7 @@ class ApplicationConfig extends Component<Props, State> {
                   <Item
                     label={<Translation>Create Time</Translation>}
                     value={
-                      <Balloon
-                        trigger={
-                          <span>
-                            {beautifyTime(applicationDetail && applicationDetail.createTime)}
-                          </span>
-                        }
-                      >
+                      <Balloon trigger={<span>{beautifyTime(applicationDetail && applicationDetail.createTime)}</span>}>
                         {momentDate(applicationDetail && applicationDetail.createTime) || '-'}
                       </Balloon>
                     }
@@ -568,13 +543,7 @@ class ApplicationConfig extends Component<Props, State> {
                   <Item
                     label={<Translation>Update Time</Translation>}
                     value={
-                      <Balloon
-                        trigger={
-                          <span>
-                            {beautifyTime(applicationDetail && applicationDetail.updateTime)}
-                          </span>
-                        }
-                      >
+                      <Balloon trigger={<span>{beautifyTime(applicationDetail && applicationDetail.updateTime)}</span>}>
                         {momentDate(applicationDetail && applicationDetail.updateTime) || '-'}
                       </Balloon>
                     }
@@ -593,6 +562,7 @@ class ApplicationConfig extends Component<Props, State> {
                           >{`${key}=${applicationDetail?.labels[key]}`}</Tag>
                         );
                       }
+                      return;
                     })}
                 </Col>
               </Row>
@@ -602,16 +572,10 @@ class ApplicationConfig extends Component<Props, State> {
             <Card locale={locale().Card} contentHeight="auto" style={{ height: '100%' }}>
               <Row>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem
-                    number={statistics?.envCount}
-                    title={i18n.t('Environment Count').toString()}
-                  />
+                  <NumItem number={statistics?.envCount} title={i18n.t('Environment Count').toString()} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem
-                    number={statistics?.targetCount}
-                    title={i18n.t('Target Count').toString()}
-                  />
+                  <NumItem number={statistics?.targetCount} title={i18n.t('Target Count').toString()} />
                 </Col>
                 <Col span={6} style={{ padding: '22px 0' }}>
                   <NumItem
@@ -652,11 +616,7 @@ class ApplicationConfig extends Component<Props, State> {
                             }}
                             project={projectName}
                           >
-                            <a
-                              key={'add'}
-                              onClick={this.onAddComponent}
-                              className="font-size-14 font-weight-400"
-                            >
+                            <a key={'add'} onClick={this.onAddComponent} className="font-size-14 font-weight-400">
                               <Translation>New Component</Translation>
                             </a>
                           </Permission>,
@@ -701,11 +661,7 @@ class ApplicationConfig extends Component<Props, State> {
                       }}
                       project={projectName}
                     >
-                      <a
-                        key={'add'}
-                        className="font-size-14 font-weight-400"
-                        onClick={this.onAddPolicy}
-                      >
+                      <a key={'add'} className="font-size-14 font-weight-400" onClick={this.onAddPolicy}>
                         <Translation>New Policy</Translation>
                       </a>
                     </Permission>,
@@ -737,11 +693,7 @@ class ApplicationConfig extends Component<Props, State> {
                       }}
                       project={projectName}
                     >
-                      <a
-                        key={'add'}
-                        className="font-size-14 font-weight-400"
-                        onClick={this.onAddTrigger}
-                      >
+                      <a key={'add'} className="font-size-14 font-weight-400" onClick={this.onAddTrigger}>
                         <Translation>New Trigger</Translation>
                       </a>
                     </Permission>,
@@ -806,11 +758,7 @@ class ApplicationConfig extends Component<Props, State> {
         </If>
 
         <If condition={showEditApplication}>
-          <EditAppDialog
-            editItem={editItem}
-            onOK={this.onOkEditAppDialog}
-            onClose={this.onCloseEditAppDialog}
-          />
+          <EditAppDialog editItem={editItem} onOK={this.onOkEditAppDialog} onClose={this.onCloseEditAppDialog} />
         </If>
 
         <If condition={visibleComponent}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Progress, Message, Icon, Dialog, Button } from '@alifd/next';
+import { Table, Progress, Message, Dialog, Button } from '@alifd/next';
 
 import '../../index.less';
 import { connect } from 'dva';
@@ -72,6 +72,7 @@ class PodDetail extends React.Component<Props, State> {
       const date = (new Date().getTime() - moment(firstTimestamp).valueOf()) / 60000;
       return date.toFixed(2);
     }
+    return;
   };
 
   onOpenCloudShell = (containerName: string) => {

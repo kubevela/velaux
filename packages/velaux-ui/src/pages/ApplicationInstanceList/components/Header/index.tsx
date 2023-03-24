@@ -1,11 +1,10 @@
-import { Grid, Select, Button, Dialog, Message, Icon, Menu, Dropdown } from '@alifd/next';
+import { Grid, Select, Button, Dialog, Message, Menu, Dropdown } from '@alifd/next';
 import { Link, routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { AiOutlineCopy } from 'react-icons/ai';
 import { HiOutlineRefresh } from 'react-icons/hi';
-import { MdRefresh } from 'react-icons/md';
 
 import {
   recycleApplicationEnvbinding,
@@ -281,6 +280,7 @@ class Header extends Component<Props, State> {
                         </Menu.Item>
                       );
                     }
+                    return;
                   })}
                   {endpoints?.map((item) => {
                     const linkURL = getLink(item);
@@ -304,6 +304,7 @@ class Header extends Component<Props, State> {
                         </Menu.Item>
                       );
                     }
+                    return;
                   })}
                 </Menu>
               </Dropdown>

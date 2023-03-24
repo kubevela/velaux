@@ -1,4 +1,4 @@
-import { Upload, Button, Icon, Field } from '@alifd/next';
+import { Upload, Button, Field } from '@alifd/next';
 import { decode, encode } from 'base-64';
 import React from 'react';
 import { AiOutlineCloudUpload } from 'react-icons/ai';

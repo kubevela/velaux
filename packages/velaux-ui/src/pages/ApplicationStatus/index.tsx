@@ -1,4 +1,4 @@
-import { Table, Card, Loading, Balloon, Icon, Button, Message, Dialog, Tag, Tab } from '@alifd/next';
+import { Table, Card, Loading, Balloon, Button, Message, Dialog, Tag, Tab } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import i18next from 'i18next';
@@ -516,6 +516,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                                   </div>
                                 );
                               }
+                              return;
                             });
                             return (
                               <div>

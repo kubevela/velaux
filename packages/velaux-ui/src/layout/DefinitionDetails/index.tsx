@@ -65,7 +65,6 @@ class DefinitionDetailsLayout extends Component<Props> {
     const menu = this.getNavList();
     const { params = { definitionType: '', definitionName: '' } } = this.props.match;
     const { definitionType, definitionName } = params;
-    const matchDefinitionKey = this.matchDefinitionName(definitionType);
 
     return (
       <Fragment>

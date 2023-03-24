@@ -1,4 +1,4 @@
-import { Grid, Icon, Select, Input, Button } from '@alifd/next';
+import { Grid, Select, Input, Button } from '@alifd/next';
 import React from 'react';
 
 import './index.less';

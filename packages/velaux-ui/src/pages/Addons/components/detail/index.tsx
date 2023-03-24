@@ -13,7 +13,6 @@ import {
   Grid,
   Dropdown,
   Menu,
-  Icon,
 } from '@alifd/next';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';

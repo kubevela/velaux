@@ -1,4 +1,4 @@
-import { Button, Card, Icon, Loading, Tab } from '@alifd/next';
+import { Button, Card, Loading, Tab } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import classNames from 'classnames';
 import { Link } from 'dva/router';

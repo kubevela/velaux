@@ -299,6 +299,7 @@ class Users extends Component<Props, State> {
           if (v) {
             return <span>{momentDate(v)}</span>;
           }
+          return '';
         },
       },
       {
@@ -309,6 +310,7 @@ class Users extends Component<Props, State> {
           if (v) {
             return <span>{momentDate(v)}</span>;
           }
+          return '';
         },
       },
       {

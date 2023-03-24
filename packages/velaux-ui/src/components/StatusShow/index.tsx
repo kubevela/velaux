@@ -1,4 +1,4 @@
-import { Dialog, Table, Card, Loading, Button, Balloon, Icon } from '@alifd/next';
+import { Dialog, Table, Card, Loading, Button, Balloon } from '@alifd/next';
 import { Link } from 'dva/router';
 import React from 'react';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';

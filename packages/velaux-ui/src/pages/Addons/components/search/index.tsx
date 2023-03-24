@@ -1,4 +1,4 @@
-import { Grid, Icon, Select, Input, Checkbox } from '@alifd/next';
+import { Grid, Select, Input, Checkbox } from '@alifd/next';
 import React from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 

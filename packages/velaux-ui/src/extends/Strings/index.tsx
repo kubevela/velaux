@@ -1,4 +1,4 @@
-import { Input, Button, Field, Icon } from '@alifd/next';
+import { Input, Button, Field } from '@alifd/next';
 import React from 'react';
 
 import './index.less';

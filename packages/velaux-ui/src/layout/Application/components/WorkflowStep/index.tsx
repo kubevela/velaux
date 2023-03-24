@@ -137,6 +137,7 @@ class WorkflowStep extends Component<Props, State> {
       if (item.name === steps[index].phase) {
         return item;
       }
+      return;
     }) || {
       name: '',
       value: 'stopped',
@@ -156,10 +157,7 @@ class WorkflowStep extends Component<Props, State> {
     const isFailedClassName = data.phase === 'failed' ? 'failedTitle' : '';
     const isFailed = data.phase === 'failed' ? true : false;
     const { name, alias } = data;
-    if (
-      (typeof alias === 'string' && alias.length >= 10) ||
-      (typeof name === 'string' && name.length >= 10)
-    ) {
+    if ((typeof alias === 'string' && alias.length >= 10) || (typeof name === 'string' && name.length >= 10)) {
       return (
         <Balloon
           trigger={<div className={`title-long-hidden ${isFailedClassName}`}> {alias || name}</div>}
@@ -183,11 +181,7 @@ class WorkflowStep extends Component<Props, State> {
         <div className="step-confirm-wrapper">
           <div className="step-confirm-title">
             <Translation>Needs review before continuing</Translation>
-            <Icon
-              style={{ cursor: 'pointer' }}
-              onClick={() => this.setState({ hiddenConfirm: true })}
-              type="close"
-            />
+            <Icon style={{ cursor: 'pointer' }} onClick={() => this.setState({ hiddenConfirm: true })} type="close" />
           </div>
           <hr />
           <div className="step-confirm-main">
@@ -237,10 +231,7 @@ class WorkflowStep extends Component<Props, State> {
 
     const { name, alias } = firstItem;
     let longTitle = '';
-    if (
-      (typeof alias === 'string' && alias.length >= 18) ||
-      (typeof name === 'string' && name.length >= 18)
-    ) {
+    if ((typeof alias === 'string' && alias.length >= 18) || (typeof name === 'string' && name.length >= 18)) {
       longTitle = 'longTitle';
     }
 
@@ -287,6 +278,7 @@ class WorkflowStep extends Component<Props, State> {
         </Step>
       );
     }
+    return;
   }
 
   onHiddenSlide() {
