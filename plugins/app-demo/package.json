@@ -28,9 +28,6 @@
     },
     "devDependencies": {
         "@babel/core": "^7.16.7",
-        "@grafana/e2e": "9.1.2",
-        "@grafana/e2e-selectors": "9.1.2",
-        "@grafana/eslint-config": "^2.5.0",
         "@grafana/tsconfig": "^1.2.0-rc1",
         "@swc/core": "^1.2.144",
         "@swc/helpers": "^0.3.6",

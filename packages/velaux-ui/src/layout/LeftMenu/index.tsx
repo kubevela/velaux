@@ -42,7 +42,7 @@ const LeftMenuModule = (props: Props) => {
                   alignItems: 'center',
                 }}
               >
-                {childrenItem.icon}.
+                {childrenItem.icon}
                 <span className={'menu-item-text'}>
                   <Translation>{childrenItem.label}</Translation>
                 </span>

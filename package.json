@@ -14,7 +14,7 @@
         "test": "yarn test:ui",
         "test:ui": "yarn workspace @velaux/ui run test",
         "build-packages": "yarn build-theme && yarn build-data && yarn build-ui",
-        "build-theme": "yarn workspace @velaux/theme run build-theme",
+        "build-theme": "yarn workspace @velaux/theme build",
         "build-ui": "yarn workspace @velaux/ui build",
         "build-data": "yarn workspace @velaux/data build",
         "build-plugins": "yarn workspace @velaux-plugins/app-demo build"
@@ -85,7 +85,6 @@
         "mini-css-extract-plugin": "2.7.2",
         "ngtemplate-loader": "2.1.0",
         "react-dev-utils": "^11.0.4",
-        "style-loader": "3.3.1",
         "terser-webpack-plugin": "5.3.6",
         "ts-loader": "8.1.0",
         "tsc": "2.0.4",

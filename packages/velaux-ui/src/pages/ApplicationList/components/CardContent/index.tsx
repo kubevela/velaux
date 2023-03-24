@@ -33,7 +33,7 @@ type Props = {
   editAppPlan: (item: ApplicationBase) => void;
   deleteAppPlan: (name: string) => void;
   setVisible: (visible: boolean) => void;
-  clickLabelFilter: (label: string) => void;
+  clickLabelFilter?: (label: string) => void;
   showMode: ShowMode;
 };
 
@@ -43,13 +43,13 @@ type Props = {
 class CardContent extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
-    const {applications} = this.props;
+    const { applications } = this.props;
     let showLabelMode = new Map<string, boolean>();
     applications?.map((app) => {
       if (app.labels && Object.keys(app.labels).length > 1) {
-        showLabelMode.set(app.name, true)
+        showLabelMode.set(app.name, true);
       } else {
-        showLabelMode.set(app.name, false)
+        showLabelMode.set(app.name, false);
       }
     });
     this.state = {
@@ -77,17 +77,19 @@ class CardContent extends React.Component<Props, State> {
   };
 
   onClickLabelFilter = (label: string) => {
-    this.props.clickLabelFilter(label)
-  }
+    if (this.props.clickLabelFilter) {
+      this.props.clickLabelFilter(label);
+    }
+  };
 
   onMoreLabels = (appName: string) => {
     let { showLabelMode } = this.state;
     let cur = showLabelMode.get(appName);
-    showLabelMode.set(appName, cur? false: true);
+    showLabelMode.set(appName, cur ? false : true);
     this.setState({
       showLabelMode,
     });
-  }
+  };
 
   isEditPermission = (item: ApplicationBase, button?: boolean) => {
     const { userInfo } = this.props;
@@ -196,41 +198,45 @@ class CardContent extends React.Component<Props, State> {
         title: <Translation>Tags</Translation>,
         dataIndex: 'labels',
         cell: (label: Record<string, string>, i: number, v: ApplicationBase) => {
-          const { showLabelMode } = this.state
-          const more = showLabelMode.get(v.name)
-          let displayLabels = 0
+          const { showLabelMode } = this.state;
+          const more = showLabelMode.get(v.name);
+          let displayLabels = 0;
           return (
             <div>
-              <div className={more? '': 'table-content-label'}>
-                { Object.keys(label).map((key) => {
-                  if (label && key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
-                    displayLabels++
+              <div className={more ? '' : 'table-content-label'}>
+                {Object.keys(label).map((key) => {
+                  if (label && key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev')) {
+                    displayLabels++;
                     return (
                       <div>
                         <Tag
-                          onClick={((e) => this.onClickLabelFilter(key+"="+`${label[key]}`))}
+                          onClick={(e) => this.onClickLabelFilter(key + '=' + `${label[key]}`)}
                           key={`${key}=${label[key]}`}
                           style={{ margin: '2px' }}
                           color="blue"
                           size="small"
                         >{`${key}=${label[key]}`}</Tag>
                       </div>
-                    )
+                    );
                   }
+                  return;
                 })}
               </div>
-              { displayLabels > 1 &&
+              {displayLabels > 1 && (
                 <div>
-                <Tag
-                  onClick={((e) => this.onMoreLabels(v.name))}
-                  key={"showLabelTag"}
-                  style={{ margin: '2px' }}
-                  size="small"
-                ><Translation>{more? "Hide": "More"}</Translation>{more? <Icon type="minus" />: <Icon type="add" />}</Tag>
+                  <Tag
+                    onClick={(e) => this.onMoreLabels(v.name)}
+                    key={'showLabelTag'}
+                    style={{ margin: '2px' }}
+                    size="small"
+                  >
+                    <Translation>{more ? 'Hide' : 'More'}</Translation>
+                    {more ? <Icon type="minus" /> : <Icon type="add" />}
+                  </Tag>
                 </div>
-              }
+              )}
             </div>
-          )
+          );
         },
       },
       {
@@ -368,18 +374,19 @@ class CardContent extends React.Component<Props, State> {
                   <Row className="content-labels">
                     {labels &&
                       Object.keys(labels).map((key) => {
-                        if (labels && key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
+                        if (labels && key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev')) {
                           return (
                             <Tag
-                              onClick={((e) => this.onClickLabelFilter(key+"="+`${labels[key]}`))}
+                              onClick={(e) => this.onClickLabelFilter(key + '=' + `${labels[key]}`)}
                               key={key}
                               style={{ margin: '4px' }}
                               color="blue"
                             >{`${key}=${labels[key]}`}</Tag>
                           );
                         }
+                        return null;
                       })}
-                  </Row>      
+                  </Row>
                   <Row className="content-foot colorA6A6A6">
                     <Col span="16">
                       <span>{createTime && momentDate(createTime)}</span>
