@@ -13,6 +13,5 @@
   "extends": "@grafana/tsconfig",
   "include": [
     "src/**/*.ts*",
-    "rollup.config.ts"
   ]
 }

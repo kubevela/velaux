@@ -15,7 +15,12 @@ type CacheablePlugin = {
 
 const pluginInfoCache: PluginCache = {};
 
-export function getPluginInfo(pluginId: string): Promise<PluginMeta> {
+function formatPluginId(pluginId: string): string {
+  return '$' + pluginId;
+}
+
+export function getPluginInfo(id: string): Promise<PluginMeta> {
+  const pluginId = formatPluginId(id);
   const v = pluginInfoCache[pluginId];
   if (v) {
     return Promise.resolve(v);
@@ -31,7 +36,8 @@ export function getPluginInfo(pluginId: string): Promise<PluginMeta> {
     });
 }
 
-export const clearPluginSettingsCache = (pluginId?: string) => {
+export const clearPluginSettingsCache = (id: string) => {
+  const pluginId = formatPluginId(id);
   if (pluginId) {
     return delete pluginInfoCache[pluginId];
   }

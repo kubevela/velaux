@@ -19,9 +19,12 @@ export function AppRootPage({ pluginId }: Props) {
       </div>
     );
   }
-  const pluginRoot = app && app.root && <app.root meta={app.meta} basename={locationService.getLocation().pathname} />;
 
-  return <div>{pluginRoot}</div>;
+  return (
+    <div>
+      <app.root meta={app.meta} basename={locationService.getLocation().pathname} />
+    </div>
+  );
 }
 
 async function loadAppPlugin(

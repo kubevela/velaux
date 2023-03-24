@@ -532,8 +532,8 @@ class ApplicationConfig extends Component<Props, State> {
                   <Item
                     label={<Translation>Create Time</Translation>}
                     value={
-                      <Balloon trigger={<span>{beautifyTime(applicationDetail && applicationDetail.createTime)}</span>}>
-                        {momentDate(applicationDetail && applicationDetail.createTime) || '-'}
+                      <Balloon trigger={<span>{beautifyTime(applicationDetail.createTime)}</span>}>
+                        {momentDate(applicationDetail.createTime) || '-'}
                       </Balloon>
                     }
                   />
@@ -543,8 +543,8 @@ class ApplicationConfig extends Component<Props, State> {
                   <Item
                     label={<Translation>Update Time</Translation>}
                     value={
-                      <Balloon trigger={<span>{beautifyTime(applicationDetail && applicationDetail.updateTime)}</span>}>
-                        {momentDate(applicationDetail && applicationDetail.updateTime) || '-'}
+                      <Balloon trigger={<span>{beautifyTime(applicationDetail.updateTime)}</span>}>
+                        {momentDate(applicationDetail.updateTime) || '-'}
                       </Balloon>
                     }
                   />
