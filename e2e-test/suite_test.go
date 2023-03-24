@@ -73,7 +73,7 @@ var _ = BeforeSuite(func() {
 		KubeQPS:        100,
 		KubeBurst:      300,
 		PluginConfig: config.PluginConfig{
-			CustomPluginPath: []string{"plugins"},
+			CustomPluginPath: []string{"custom-plugins"},
 		},
 	}
 	cfg.LeaderConfig.ID = uuid.New().String()
