@@ -7,17 +7,18 @@
     "repository": "github:kubevela/velaux",
     "scripts": {
         "dev": "NODE_ENV=dev webpack --progress --color --config scripts/webpack/webpack.dev.js --watch",
-        "build": "yarn run build-packages && NODE_ENV=production webpack --progress --config scripts/webpack/webpack.prod.js",
+        "build": "yarn run build-packages && yarn run build-ui",
+        "build-ui": "NODE_ENV=production webpack --progress --config scripts/webpack/webpack.prod.js",
         "lint": "yarn run lint:ts",
         "lint:ts": "eslint . --ext .js,.tsx,.ts --cache",
         "lint:fix": "yarn lint:ts --fix",
         "test": "yarn test:ui",
         "test:ui": "yarn workspace @velaux/ui run test",
-        "build-packages": "yarn build-theme && yarn build-data && yarn build-ui",
-        "build-theme": "yarn workspace @velaux/theme build",
-        "build-ui": "yarn workspace @velaux/ui build",
-        "build-data": "yarn workspace @velaux/data build",
-        "build-plugins": "yarn workspace @velaux-plugins/app-demo build"
+        "build-packages": "yarn packages:theme && yarn packages:data && yarn packages:ui",
+        "packages:theme": "yarn workspace @velaux/theme build",
+        "packages:ui": "yarn workspace @velaux/ui build",
+        "packages:data": "yarn workspace @velaux/data build",
+        "packages:plugins": "yarn workspace @velaux-plugins/app-demo build"
     },
     "workspaces": {
         "packages": [
@@ -84,7 +85,9 @@
         "less-loader": "11.1.0",
         "mini-css-extract-plugin": "2.7.2",
         "ngtemplate-loader": "2.1.0",
+        "pnp-webpack-plugin": "1.7.0",
         "react-dev-utils": "^11.0.4",
+        "style-loader": "3.3.2",
         "terser-webpack-plugin": "5.3.6",
         "ts-loader": "8.1.0",
         "tsc": "2.0.4",

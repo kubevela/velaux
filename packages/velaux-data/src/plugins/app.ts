@@ -1,6 +1,6 @@
 import { ComponentType } from 'react';
 import { PluginMeta, VelaUXPlugin } from '.';
-import { KeyValue } from '..';
+import { KeyValue } from '../types/data';
 
 export interface AppPluginMeta<T extends KeyValue = KeyValue> extends PluginMeta<T> {
   // TODO anything specific to apps?

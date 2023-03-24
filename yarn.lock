@@ -23681,6 +23681,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"style-loader@npm:3.3.2":
+  version: 3.3.2
+  resolution: "style-loader@npm:3.3.2"
+  peerDependencies:
+    webpack: ^5.0.0
+  checksum: 5ee5ce2dc885369eccb55d429376e83d02570d473ac5edeb69fd65ee894847f1e51429cf078351f617bd04516ece8a1dd967f9f40464bd8fa76d903c6b2a6f08
+  languageName: node
+  linkType: hard
+
 "style-loader@npm:^0.21.0":
   version: 0.21.0
   resolution: "style-loader@npm:0.21.0"
@@ -25260,9 +25269,11 @@ __metadata:
     less-loader: 11.1.0
     mini-css-extract-plugin: 2.7.2
     ngtemplate-loader: 2.1.0
+    pnp-webpack-plugin: 1.7.0
     react: ^17.0.2
     react-dev-utils: ^11.0.4
     react-dom: ^17.0.0
+    style-loader: 3.3.2
     terser-webpack-plugin: 5.3.6
     ts-loader: 8.1.0
     tsc: 2.0.4
