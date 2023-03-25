@@ -59,7 +59,7 @@ func (p *pluginImpl) Init(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		klog.Infof("Loaded %d plugins from %s%s", len(plugins), s.Class, s.Paths)
+		klog.V(4).Infof("Loaded %d plugins from %s%s", len(plugins), s.Class, s.Paths)
 		for _, plugin := range plugins {
 			if err := p.registry.Add(ctx, plugin); err != nil {
 				return err
