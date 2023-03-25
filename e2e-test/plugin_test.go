@@ -32,7 +32,7 @@ var _ = Describe("Test plugin rest api", func() {
 		var lpr apisv1.ListPluginResponse
 		Expect(decodeResponseBody(res, &lpr)).Should(Succeed())
 		Expect(cmp.Diff(len(lpr.Plugins), 1)).Should(BeEmpty())
-		Expect(cmp.Diff(lpr.Plugins[0].Module, "public/plugins/app-demo")).Should(BeEmpty())
+		Expect(cmp.Diff(lpr.Plugins[0].Module, "plugins/app-demo/module")).Should(BeEmpty())
 	})
 
 	It("Test get a installed plugin", func() {
@@ -40,6 +40,6 @@ var _ = Describe("Test plugin rest api", func() {
 		res := get("/plugins/app-demo")
 		var dto apisv1.PluginDTO
 		Expect(decodeResponseBody(res, &dto)).Should(Succeed())
-		Expect(cmp.Diff(dto.Module, "public/plugins/app-demo")).Should(BeEmpty())
+		Expect(cmp.Diff(dto.Module, "plugins/app-demo/module")).Should(BeEmpty())
 	})
 })

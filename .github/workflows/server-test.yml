@@ -170,7 +170,6 @@ jobs:
           export ALIYUN_ACCESS_KEY_SECRET=${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           docker run --rm -v `pwd`/e2e-plugins:/plugins oamdev/velaux:latest cp -r -a /app/velaux/plugins/app-demo /plugins/app-demo
-          ls -al `pwd`/e2e-plugins/app-demo
           make e2e-server-test
 
       - name: Upload coverage report
