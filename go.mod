@@ -108,10 +108,7 @@ require (
 
 require github.com/oam-dev/kubevela v1.8.0-alpha.2.0.20230307081937-79f1d5cb0386
 
-require (
-	github.com/gosimple/slug v1.13.1
-	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
-)
+require github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
@@ -309,7 +306,6 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.2 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
-	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

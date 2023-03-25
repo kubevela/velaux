@@ -99,7 +99,6 @@ type Includes struct {
 	To           string      `json:"to"`
 	Type         string      `json:"type"`
 	Icon         string      `json:"icon"`
-	Slug         string      `json:"slug"`
 	Workspace    Workspace   `json:"workspace"`
 	Permission   *Permission `json:"permission,omitempty"`
 	RelatedRoute []string    `json:"relatedRoute"`

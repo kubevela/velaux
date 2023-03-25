@@ -19,6 +19,8 @@ package service
 import (
 	"context"
 
+	"k8s.io/klog/v2"
+
 	"github.com/kubevela/velaux/pkg/plugin/loader"
 	"github.com/kubevela/velaux/pkg/plugin/registry"
 	"github.com/kubevela/velaux/pkg/plugin/types"
@@ -57,6 +59,7 @@ func (p *pluginImpl) Init(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
+		klog.Infof("Loaded %d plugins from %s%s", len(plugins), s.Class, s.Paths)
 		for _, plugin := range plugins {
 			if err := p.registry.Add(ctx, plugin); err != nil {
 				return err

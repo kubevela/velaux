@@ -26,7 +26,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gosimple/slug"
 	"k8s.io/klog/v2"
 
 	"github.com/grafana/grafana/pkg/infra/fs"
@@ -106,10 +105,6 @@ func (l *Loader) loadPlugins(ctx context.Context, class types.Class, pluginJSONP
 			}
 		}
 
-		if plugin.IsPageApp() {
-			setDefaultNavURL(plugin)
-		}
-
 		verifiedPlugins = append(verifiedPlugins, plugin)
 	}
 
@@ -117,7 +112,7 @@ func (l *Loader) loadPlugins(ctx context.Context, class types.Class, pluginJSONP
 }
 
 func (l *Loader) readPluginJSON(pluginJSONPath string) (types.JSONData, error) {
-	klog.Infof("Loading plugin, path: %s", pluginJSONPath)
+	klog.V(4).Info("Loading plugin, path: %s", pluginJSONPath)
 
 	if !strings.EqualFold(filepath.Ext(pluginJSONPath), ".json") {
 		return types.JSONData{}, ErrInvalidPluginJSONFilePath
@@ -152,6 +147,8 @@ func (l *Loader) readPluginJSON(pluginJSONPath string) (types.JSONData, error) {
 		plugin.Dependencies.VelaUXVersion = "*"
 	}
 
+	klog.Infof("Loaded plugin,id: %s type: %s path: %s", plugin.ID, plugin.Type, pluginJSONPath)
+
 	return plugin, nil
 }
 
@@ -173,19 +170,6 @@ func setImages(p *types.Plugin) {
 
 	for i := 0; i < len(p.Info.Screenshots); i++ {
 		p.Info.Screenshots[i].Path = evalRelativePluginURLPath(p.Info.Screenshots[i].Path, p.BaseURL, p.Type)
-	}
-}
-
-func setDefaultNavURL(p *types.Plugin) {
-	// slugify pages
-	for _, include := range p.Includes {
-		if include.Slug == "" {
-			include.Slug = slug.Make(include.Name)
-		}
-
-		if include.Type == "page" {
-			p.DefaultNavURL = path.Join("/plugins/", p.ID, "/page/", include.Slug)
-		}
 	}
 }
 
