@@ -46,7 +46,7 @@ export const StepTypeIcon = (props: { type: string }) => {
     case 'webhook':
       return <SvgApi width="24px" height="24px" />;
     case 'suspend':
-      return <AiOutlineSafetyCertificate />;
+      return <AiOutlineSafetyCertificate size="24" />;
     case 'collect-service-endpoints':
       return (
         <SvgEp

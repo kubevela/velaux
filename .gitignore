@@ -37,3 +37,5 @@ dist
 .yarn/install-state.gz
 
 .pnp.*
+
+tsconfig.tsbuildinfo

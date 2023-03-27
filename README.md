@@ -5,13 +5,21 @@
 
 ## Overview
 
-The [KubeVela](https://github.com/oam-dev/kubevela) User Experience (UX) Dashboard. Designed as an extensible, application-oriented delivery platform.
+VelaUX is a cloud-native application platform that leverages the KubeVela and Kubernetes ecosystem. It also functions as a plugin framework, enabling developers to design custom plugins and seamlessly integrate them into the KubeVela platform. This provides a flexible and customizable approach to expanding the platform's capabilities.
+
+### Highlights
+
+*Customizable User Interface*: With VelaUX, enterprises can customize the user interface for managing application and the infrastructure to meet their specific needs. This allows for a more intuitive and efficient user experience, leading to increased productivity and better utilization of resources.
+
+*Easy Integration*: VelaUX is specifically designed for seamless integration with the KubeVela platform, enabling enterprises to effortlessly deploy and manage cloud-native atomic capabilities within the platform. This makes it easier for enterprises to build platforms that meet their needs for continuous application delivery, observability, security, and other requirements based on these cloud-native atomic capabilities.
+
+*Out-Of-Box*: VelaUX provides a comprehensive set of features that empower enterprises to effectively deploy and monitor their applications. These features include multi-cluster and multi-environment support, pipeline management, observability, and more. Additionally, VelaUX simplifies the complexities of Kubernetes, making it easier for users to manage their deployments.
 
 ## Quick Start
 
 ### Users
 
-Please refer to: [https://kubevela.net/docs/install](https://kubevela.net/docs/install)
+Please refer to this guide to install: [https://kubevela.net/docs/install](https://kubevela.net/docs/install)
 
 ### Developers
 
