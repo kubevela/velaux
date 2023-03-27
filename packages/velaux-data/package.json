@@ -1,0 +1,64 @@
+{
+    "author": "KubeVela",
+    "license": "Apache-2.0",
+    "name": "@velaux/data",
+    "version": "0.0.1",
+    "description": "VelaUX Data Library",
+    "keywords": [
+        "typescript"
+    ],
+    "sideEffects": false,
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/kubevela/velaux.git",
+        "directory": "packages/velaux-data"
+    },
+    "main": "src/index.ts",
+    "types": "src/index.ts",
+    "publishConfig": {
+        "main": "dist/index.js",
+        "module": "dist/esm/index.js",
+        "types": "dist/index.d.ts",
+        "access": "public"
+    },
+    "files": [
+        "dist",
+        "./README.md",
+        "./CHANGELOG.md",
+        "LICENSE_APACHE2"
+    ],
+    "scripts": {
+        "build": "tsc -p ./tsconfig.build.json && rollup -c rollup.config.ts",
+        "clean": "rimraf ./dist ./compiled ./package.tgz",
+        "typecheck": "tsc --emitDeclarationOnly false --noEmit"
+    },
+    "devDependencies": {
+        "@grafana/tsconfig": "^1.2.0-rc1",
+        "@rollup/plugin-commonjs": "23.0.2",
+        "@rollup/plugin-json": "5.0.1",
+        "@rollup/plugin-node-resolve": "15.0.1",
+        "@types/jest": "29.2.3",
+        "@types/jquery": "3.5.14",
+        "@types/lodash": "4.14.187",
+        "@types/marked": "4.0.7",
+        "@types/node": "18.13.0",
+        "@types/papaparse": "5.3.5",
+        "@types/react": "17.0.42",
+        "@types/react-dom": "17.0.2",
+        "@types/sinon": "10.0.13",
+        "@types/testing-library__jest-dom": "5.14.5",
+        "@types/tinycolor2": "1.4.3",
+        "esbuild": "0.16.17",
+        "react": "17.0.2",
+        "react-dom": "17.0.2",
+        "react-scripts": "^3.4.0",
+        "react-test-renderer": "17.0.2",
+        "rimraf": "3.0.2",
+        "rollup": "2.79.1",
+        "rollup-plugin-dts": "^5.0.0",
+        "rollup-plugin-esbuild": "5.0.0",
+        "rollup-plugin-node-externals": "^5.0.0",
+        "sinon": "14.0.1",
+        "typescript": "4.4.4"
+    }
+}

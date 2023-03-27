@@ -1,4 +1,4 @@
-import { Table, Button, Tag, Balloon, Icon, Dialog, Message } from '@alifd/next';
+import { Table, Button, Tag, Balloon, Dialog, Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import Permission from '../../../../components/Permission';

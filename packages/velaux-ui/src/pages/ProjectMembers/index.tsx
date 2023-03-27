@@ -221,6 +221,7 @@ class ProjectMembers extends Component<Props, State> {
           if (v) {
             return <span>{momentDate(v)}</span>;
           }
+          return '';
         },
       },
       {

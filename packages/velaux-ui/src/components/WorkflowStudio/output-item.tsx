@@ -1,4 +1,4 @@
-import { Grid, Input, Form, Button, Icon } from '@alifd/next';
+import { Grid, Input, Form, Button } from '@alifd/next';
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { IoMdAdd, IoMdRemove } from 'react-icons/io';

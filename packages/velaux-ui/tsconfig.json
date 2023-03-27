@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "baseUrl": "./",
+    "isolatedModules": true,
     "declarationDir": "./compiled",
     "emitDeclarationOnly": true,
-    "isolatedModules": true,
     "resolveJsonModule": true,
     "rootDirs": [
       "."
@@ -12,7 +13,12 @@
       "@velaux/ui": [
         "."
       ]
-    }
+    },
+    "lib": [
+      "es2016",
+      "DOM",
+      "ES2021.String"
+    ]
   },
   "exclude": [
     "dist/**/*"
@@ -20,7 +26,8 @@
   "extends": "@grafana/tsconfig",
   "include": [
     "src/**/*.ts*",
-    "images.d.ts"
+    "images.d.ts",
+    "types.ts"
   ],
   // override for storybook which uses ts-node to compile main.ts / preview.ts files.
   "ts-node": {

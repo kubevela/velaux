@@ -57,6 +57,13 @@ type Config struct {
 
 	// WorkflowVersion is the version of workflow
 	WorkflowVersion string
+
+	PluginConfig PluginConfig
+}
+
+type PluginConfig struct {
+	CorePluginPath   string
+	CustomPluginPath []string
 }
 
 type leaderConfig struct {
@@ -85,6 +92,10 @@ func NewConfig() *Config {
 		PprofAddr:               "",
 		KubeQPS:                 100,
 		KubeBurst:               300,
+		PluginConfig: PluginConfig{
+			CorePluginPath:   "core-plugins",
+			CustomPluginPath: []string{"plugins"},
+		},
 	}
 }
 
@@ -115,4 +126,5 @@ func (s *Config) AddFlags(fs *pflag.FlagSet, c *Config) {
 	fs.Float64Var(&s.KubeQPS, "kube-api-qps", c.KubeQPS, "the qps for kube clients. Low qps may lead to low throughput. High qps may give stress to api-server.")
 	fs.IntVar(&s.KubeBurst, "kube-api-burst", c.KubeBurst, "the burst for kube clients. Recommend setting it qps*3.")
 	fs.StringVar(&s.WorkflowVersion, "workflow-version", c.WorkflowVersion, "the version of workflow to meet controller requirement.")
+	fs.StringArrayVar(&s.PluginConfig.CustomPluginPath, "plugin-path", c.PluginConfig.CustomPluginPath, "the path of the plugin directory")
 }

@@ -1,5 +1,5 @@
 import type { Rule } from '@alifd/field';
-import { Message, Field, Grid, Button, Loading, Card, Icon } from '@alifd/next';
+import { Message, Field, Grid, Button, Loading, Card } from '@alifd/next';
 import * as yaml from 'js-yaml';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';

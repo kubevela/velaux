@@ -38,7 +38,7 @@
 
 ## Start the server on local
 
-Make sure you have installed [yarn](https://classic.yarnpkg.com/en/docs/install).
+Make sure you have installed [yarn 2.0](https://yarnpkg.com/getting-started/install), This is required.
 
 ```shell
 yarn install

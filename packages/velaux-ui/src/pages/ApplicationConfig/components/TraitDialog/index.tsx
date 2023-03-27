@@ -11,7 +11,6 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
 import Translation from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
-import Group from '../../../../extends/Group';
 import i18n from '../../../../i18n';
 import type { ApplicationComponent, DefinitionDetail, Trait } from '../../../../interface/application';
 import type { DefinitionBase } from '../../../../interface/definitions';

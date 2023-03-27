@@ -5,11 +5,7 @@ import querystring from 'query-string';
 import React from 'react';
 
 import { deployApplication } from '../../api/application';
-import {
-  listApplicationPods,
-  listCloudResources,
-  listApplicationServiceEndpoints,
-} from '../../api/observation';
+import { listApplicationPods, listCloudResources, listApplicationServiceEndpoints } from '../../api/observation';
 import { If } from '../../components/If';
 import StatusShow from '../../components/StatusShow';
 import Translation from '../../components/Translation';
@@ -221,8 +217,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           createTime: configuration.metadata.creationTimestamp || '',
           region: region,
           message: configuration.status?.apply?.message,
-          type:
-            configuration.metadata.labels && configuration.metadata.labels['workload.oam.dev/type'],
+          type: configuration.metadata.labels && configuration.metadata.labels['workload.oam.dev/type'],
         });
       });
     }
@@ -235,13 +230,10 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const {
       params: { appName, envName },
     } = this.props.match;
-    const cloudComponents = components?.filter(
-      (c) => c.workloadType?.type == 'configurations.terraform.core.oam.dev',
-    );
+    const cloudComponents = components?.filter((c) => c.workloadType?.type == 'configurations.terraform.core.oam.dev');
     const showCloudInstance = cloudComponents?.length && cloudComponents?.length > 0;
     const queryPod =
-      cloudComponents?.length == undefined ||
-      (components?.length && components.length > cloudComponents?.length);
+      cloudComponents?.length == undefined || (components?.length && components.length > cloudComponents?.length);
     const { target, componentName } = this.state;
     const envs = envbinding.filter((item) => item.name == envName);
     if (applicationDetail && applicationDetail.name && envs.length > 0) {
@@ -299,6 +291,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       switch (status) {
         case 'Running':
           return '#28a745';
+        default:
+          return '#000';
       }
     };
     const targets = this.getTargets();
@@ -443,7 +437,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           triggerType: 'web',
           force: force || false,
         },
-        true,
+        true
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
@@ -452,9 +446,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
             this.loadApplicationStatus();
             if (re.record && re.record.name && dispatch) {
               dispatch(
-                routerRedux.push(
-                  `/applications/${appName}/envbinding/${re.envName}/workflow/records/${re.record.name}`,
-                ),
+                routerRedux.push(`/applications/${appName}/envbinding/${re.envName}/workflow/records/${re.record.name}`)
               );
             }
           }
@@ -529,13 +521,10 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       params: { envName, appName },
     } = this.props.match;
 
-    const cloudComponents = components?.filter(
-      (c) => c.workloadType?.type == 'configurations.terraform.core.oam.dev',
-    );
+    const cloudComponents = components?.filter((c) => c.workloadType?.type == 'configurations.terraform.core.oam.dev');
     const showCloudInstance = cloudComponents?.length && cloudComponents?.length > 0;
 
-    const onlyShowCloudInstance =
-      showCloudInstance && cloudComponents?.length == components?.length;
+    const onlyShowCloudInstance = showCloudInstance && cloudComponents?.length == components?.length;
     return (
       <div>
         <Header
@@ -610,16 +599,8 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                       return value;
                     }}
                   />
-                  <Column
-                    align="left"
-                    title={<Translation>Status</Translation>}
-                    dataIndex="status"
-                  />
-                  <Column
-                    align="left"
-                    title={<Translation>Resource Type</Translation>}
-                    dataIndex="type"
-                  />
+                  <Column align="left" title={<Translation>Status</Translation>} dataIndex="status" />
+                  <Column align="left" title={<Translation>Resource Type</Translation>} dataIndex="type" />
                   <Column
                     align="left"
                     title={<Translation>Create Time</Translation>}
@@ -628,11 +609,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                       return <span>{momentDate(v)}</span>;
                     }}
                   />
-                  <Column
-                    align="left"
-                    title={<Translation>Region</Translation>}
-                    dataIndex="region"
-                  />
+                  <Column align="left" title={<Translation>Region</Translation>} dataIndex="region" />
                   <Column
                     align="left"
                     title={<Translation>Actions</Translation>}
@@ -645,6 +622,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
                           </a>
                         );
                       }
+                      return;
                     }}
                   />
                 </Table>

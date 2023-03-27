@@ -1,5 +1,5 @@
 import type { Rule } from '@alifd/next/lib/field';
-import { Card, Form, Select, Grid, Field, Icon, Balloon, Message } from '@alifd/next';
+import { Card, Form, Select, Grid, Field, Balloon, Message } from '@alifd/next';
 import classNames from 'classnames';
 import { connect } from 'dva';
 import React from 'react';
@@ -198,7 +198,7 @@ class ComponentPatch extends React.Component<Props, State> {
                     const disable = traitPatchMap.get(trait.type)?.disable;
                     const icon = (
                       <AiOutlineDelete
-                        onClick={(event: React.MouseEvent<HTMLElement>) => {
+                        onClick={(event: React.MouseEvent<SVGAElement>) => {
                           event.stopPropagation();
                           if (disable) {
                             this.setFormValue(

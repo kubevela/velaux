@@ -36,6 +36,7 @@ import DefinitionDetails from '../DefinitionDetails';
 import DefinitionsLayout from '../Definitions';
 import ProjectLayout from '../Project';
 import MyProjectList from '../../pages/MyProjectList';
+import { AppRootPage } from '../AppRootPage';
 
 export default function Router() {
   return (
@@ -328,7 +329,6 @@ export default function Router() {
           return <Roles {...props} />;
         }}
       />
-
       <Route
         exact
         path="/configs"
@@ -336,7 +336,6 @@ export default function Router() {
           return <ConfigsLayout {...props} />;
         }}
       />
-
       <Route
         exact
         path="/configs/:templateName"
@@ -344,7 +343,6 @@ export default function Router() {
           return <Redirect to={`/configs/${props.match.params.templateName}/config`} />;
         }}
       />
-
       <Route
         exact
         path="/configs/:templateName/config"
@@ -356,7 +354,6 @@ export default function Router() {
           );
         }}
       />
-
       <Route
         exact
         path="/definitions"
@@ -364,7 +361,6 @@ export default function Router() {
           return <Redirect to={`/definitions/component/config`} />;
         }}
       />
-
       <Route
         exact
         path="/definitions/:definitionType"
@@ -372,7 +368,6 @@ export default function Router() {
           return <Redirect to={`/definitions/${props.match.params.definitionType}/config`} />;
         }}
       />
-
       <Route
         exact
         path="/definitions/:definitionType/config"
@@ -384,7 +379,6 @@ export default function Router() {
           );
         }}
       />
-
       <Route
         exact
         path="/definitions/:definitionType/:definitionName/ui-schema"
@@ -397,7 +391,12 @@ export default function Router() {
           );
         }}
       />
-
+      <Route
+        path="/plugins/:pluginId"
+        render={(props: any) => {
+          return <AppRootPage pluginId={props.match.params.pluginId}></AppRootPage>;
+        }}
+      />
       <Route path="/notFound" component={NotFound} />
       <Redirect to="/notFound" />
     </Switch>

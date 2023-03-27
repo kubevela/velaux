@@ -1,4 +1,4 @@
-import { Grid, Icon, Input } from '@alifd/next';
+import { Grid, Input } from '@alifd/next';
 import React from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 

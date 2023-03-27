@@ -6,11 +6,7 @@ import { ApplicationDryRun } from '../../../../components/ApplicationDryRun';
 import { If } from '../../../../components/If';
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type {
-  ApplicationDetail,
-  ApplicationDryRunResponse,
-  Workflow,
-} from '../../../../interface/application';
+import type { ApplicationDetail, ApplicationDryRunResponse, Workflow } from '../../../../interface/application';
 import type { APIError } from '../../../../utils/errors';
 import locale from '../../../../utils/locale';
 import './index.less';
@@ -110,20 +106,14 @@ class DeployConfigDialog extends Component<Props, State> {
         />
       );
     }
+    return <div></div>;
   };
 
   render() {
     const { workflows, onClose, applicationDetail } = this.props;
-    const {
-      workflowName,
-      dryRunLoading,
-      showDryRunResult,
-      dryRunResult,
-      dryRunResultState,
-      dryRunMessage,
-    } = this.state;
-    const sourceOfTrust =
-      applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
+    const { workflowName, dryRunLoading, showDryRunResult, dryRunResult, dryRunResultState, dryRunMessage } =
+      this.state;
+    const sourceOfTrust = applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
     return (
       <React.Fragment>
         <Dialog
@@ -151,8 +141,7 @@ class DeployConfigDialog extends Component<Props, State> {
           <If condition={sourceOfTrust === 'from-k8s-resource'}>
             <Message type="warning" style={{ marginBottom: '16px' }}>
               <Translation>
-                Once deployed, VelaUX hosts this application and no longer syncs the configuration
-                from the cluster.
+                Once deployed, VelaUX hosts this application and no longer syncs the configuration from the cluster.
               </Translation>
             </Message>
           </If>

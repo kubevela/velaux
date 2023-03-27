@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './index.less';
-import { Button, Dialog, Dropdown, Grid, Menu, Table } from '@alifd/next';
+import { Button, Dialog, Dropdown, Grid, Menu } from '@alifd/next';
 import axios from 'axios';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
@@ -23,7 +23,6 @@ import Translation from '../../components/Translation';
 import i18n from '../../i18n';
 import type { AddonBaseStatus } from '../../interface/addon';
 import type { Config } from '../../interface/configs';
-import type { Project } from '../../interface/project';
 import type { SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
 import { getData, setData } from '../../utils/cache';
@@ -34,7 +33,7 @@ import CloudShell from '../CloudShell';
 import { locationService } from '../../services/LocationService';
 
 import EditPlatFormUserDialog from './components/EditPlatFormUserDialog';
-import { LayoutMode, Workspace } from '../../types/main';
+import { LayoutMode, Workspace } from '@velaux/data';
 import { Dispatch } from 'redux';
 import { menuService } from '../../services/MenuService';
 import classNames from 'classnames';
@@ -79,8 +78,10 @@ class Header extends Component<Props, State> {
 
   loadWorkspaces = () => {
     const { userInfo } = this.props;
-    this.setState({
-      workspaces: menuService.loadWorkspaces(userInfo),
+    menuService.loadPluginMenus().then(() => {
+      this.setState({
+        workspaces: menuService.loadWorkspaces(userInfo),
+      });
     });
   };
 

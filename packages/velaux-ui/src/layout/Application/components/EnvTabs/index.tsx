@@ -11,7 +11,7 @@ import AddAndEditEnvBind from '../AddAndEditEnvBind';
 
 import { Link } from 'dva/router';
 import classNames from 'classnames';
-import { Balloon, Icon } from '@alifd/next';
+import { Balloon } from '@alifd/next';
 import { IoMdAdd } from 'react-icons/io';
 
 type Props = {

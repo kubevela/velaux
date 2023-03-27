@@ -1,5 +1,5 @@
 import type { Rule } from '@alifd/field';
-import { Grid, Field, Form, Input, Button, Icon } from '@alifd/next';
+import { Grid, Field, Form, Input, Button } from '@alifd/next';
 import _ from 'lodash';
 import React, { Component } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

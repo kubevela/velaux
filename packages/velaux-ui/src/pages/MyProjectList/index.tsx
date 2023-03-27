@@ -11,7 +11,7 @@ import type { Project } from '../../interface/project';
 import { momentDate } from '../../utils/common';
 import locale from '../../utils/locale';
 import { connect } from 'dva';
-import { LoginUserInfo } from 'src/interface/user';
+import { LoginUserInfo } from '../../interface/user';
 
 type Props = {
   dispatch: ({}) => void;

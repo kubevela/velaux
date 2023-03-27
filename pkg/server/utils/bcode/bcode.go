@@ -19,6 +19,7 @@ package bcode
 import (
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-playground/validator/v10"
@@ -41,6 +42,9 @@ var ErrForbidden = NewBcode(403, 403, "403 Forbidden")
 
 // ErrUnauthorized check user auth failure
 var ErrUnauthorized = NewBcode(401, 401, "401 Unauthorized")
+
+// ErrNotFound the request resource is not found
+var ErrNotFound = NewBcode(404, 404, "404 Not Found")
 
 // Bcode business error code
 type Bcode struct {
@@ -75,6 +79,11 @@ func NewBcode(httpCode, businessCode int32, message string) *Bcode {
 	bcode := &Bcode{HTTPCode: httpCode, BusinessCode: businessCode, Message: message}
 	bcodeMap[businessCode] = bcode
 	return bcode
+}
+
+// ReturnHTTPError Unified handling of all types of errors, generating a standard return structure.
+func ReturnHTTPError(req *http.Request, res http.ResponseWriter, err error) {
+	ReturnError(restful.NewRequest(req), restful.NewResponse(res), err)
 }
 
 // ReturnError Unified handling of all types of errors, generating a standard return structure.

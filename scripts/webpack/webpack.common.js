@@ -22,9 +22,11 @@ module.exports = {
     publicPath: '/public/build/',
     globalObject: 'this',
   },
+  externals: {},
   resolve: {
     extensions: ['.ts', '.tsx', '.es6', '.js', '.json', '.svg'],
     modules: ['node_modules', path.resolve('public')],
+
     fallback: {
       buffer: false,
       fs: false,

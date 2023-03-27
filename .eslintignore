@@ -10,3 +10,5 @@ packages/velaux-ui/src/assets/
 public
 
 *.d.ts
+
+dist

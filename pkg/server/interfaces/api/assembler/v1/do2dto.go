@@ -19,6 +19,7 @@ package v1
 import (
 	"github.com/kubevela/workflow/api/v1alpha1"
 
+	pluginTypes "github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
@@ -297,4 +298,15 @@ func convertBool(b *bool) bool {
 		return false
 	}
 	return *b
+}
+
+// PluginToDTO convert plugin to dto
+func PluginToDTO(p pluginTypes.Plugin) apisv1.PluginDTO {
+	return apisv1.PluginDTO{
+		JSONData:      p.JSONData,
+		Class:         p.Class,
+		DefaultNavURL: p.DefaultNavURL,
+		Module:        p.Module,
+		BaseURL:       p.BaseURL,
+	}
 }

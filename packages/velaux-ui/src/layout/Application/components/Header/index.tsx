@@ -1,7 +1,7 @@
-import { Grid, Button, Message, Dialog, Icon } from '@alifd/next';
+import { Grid, Button, Message, Dialog } from '@alifd/next';
 import classNames from 'classnames';
 import { connect } from 'dva';
-import { Link, routerRedux } from 'dva/router';
+import { routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
 import { Breadcrumb } from '../../../../components/Breadcrumb';
@@ -22,7 +22,6 @@ import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
 import locale from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
-import { showAlias } from 'src/utils/common';
 
 const { Row, Col } = Grid;
 

@@ -1,4 +1,4 @@
-import { Table, Button, Icon, Dialog, Message, Tag, Balloon } from '@alifd/next';
+import { Table, Button, Dialog, Message, Tag, Balloon } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
 import { If } from '../../../../components/If';

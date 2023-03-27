@@ -1,4 +1,4 @@
-import { Balloon, Card, Dialog, Grid, Icon } from '@alifd/next';
+import { Balloon, Card, Dialog, Grid } from '@alifd/next';
 import React, { Component } from 'react';
 
 import { If } from '../../../../components/If';

@@ -1,5 +1,5 @@
 import type { Rule } from '@alifd/field';
-import { Grid, Field, Form, Message, Button, Input, Select, Icon, Card, Loading } from '@alifd/next';
+import { Grid, Field, Form, Message, Button, Input, Select, Card, Loading } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';

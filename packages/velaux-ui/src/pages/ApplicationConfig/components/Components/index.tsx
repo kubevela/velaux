@@ -1,4 +1,4 @@
-import { Card, Grid, Icon, Dialog } from '@alifd/next';
+import { Card, Grid, Dialog } from '@alifd/next';
 import React, { Component } from 'react';
 
 import helm from '../../../../assets/helm.svg';

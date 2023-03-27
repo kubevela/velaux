@@ -1,4 +1,4 @@
-import { Card, Dialog, Grid, Message, Icon } from '@alifd/next';
+import { Card, Dialog, Grid, Message } from '@alifd/next';
 import React, { Component } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 

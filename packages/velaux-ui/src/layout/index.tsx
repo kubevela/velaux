@@ -4,28 +4,30 @@ import LayoutRouter from './LayoutRouter';
 import LeftMenu from './LeftMenu';
 import Header from './Header';
 import './index.less';
-import { LayoutMode, Workspace } from 'src/types/main';
+import { LayoutMode, Workspace, LayoutModes } from '@velaux/data';
 import { locationService } from '../services/LocationService';
 import { menuService } from '../services/MenuService';
 
 export default function MainLayout(props: any) {
   const [workspace, setWorkspace] = useState<Workspace>();
-  const [mode, setMode] = useState<LayoutMode>('default');
+  const [mode, setMode] = useState<LayoutMode>(LayoutModes.Default);
   const query = locationService.getSearchObject();
   const path = locationService.getPathName();
   useEffect(() => {
     const layoutMode = query['layout-mode'];
-    if (layoutMode && ['neat', 'neat2', 'default'].includes(layoutMode.toString())) {
+    if (layoutMode && [LayoutModes.Neat, LayoutModes.NeatPro, LayoutModes.Default].includes(layoutMode as LayoutMode)) {
       setMode(layoutMode as LayoutMode);
     }
-    setWorkspace(menuService.loadCurrentWorkspace());
+    menuService.loadPluginMenus().then(() => {
+      setWorkspace(menuService.loadCurrentWorkspace());
+    });
   }, [query, path]);
   return (
     <ConfigProvider>
       <div className="layout">
-        {mode !== 'neat2' && <Header currentWorkspace={workspace} mode={mode} {...props} />}
+        {mode !== LayoutModes.NeatPro && <Header currentWorkspace={workspace} mode={mode} {...props} />}
         <div className="layout-shell">
-          {mode === 'default' && (
+          {mode === LayoutModes.Default && (
             <div className="layout-navigation">
               <LeftMenu {...props} />
             </div>

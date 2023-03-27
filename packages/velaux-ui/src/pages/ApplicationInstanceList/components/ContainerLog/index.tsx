@@ -1,4 +1,4 @@
-import { Dialog, Grid, Checkbox, Dropdown, Icon, Menu } from '@alifd/next';
+import { Dialog, Grid, Checkbox, Dropdown, Menu } from '@alifd/next';
 import React, { Component } from 'react';
 
 import { If } from '../../../../components/If';

@@ -203,6 +203,7 @@ class WorkflowStudio extends React.Component<Props, State> {
                       </div>
                     );
                 }
+                return;
               })}
             </div>
           </Draggable>

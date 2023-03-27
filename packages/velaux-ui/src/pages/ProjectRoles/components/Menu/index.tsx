@@ -1,4 +1,4 @@
-import { Icon, Message } from '@alifd/next';
+import { Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 import { AiOutlineDelete } from 'react-icons/ai';
 

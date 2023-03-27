@@ -65,6 +65,7 @@ class ResetPassword extends React.Component<Props, State> {
     if (isResetPassword) {
       return <Translation>Reset Password</Translation>;
     }
+    return '';
   };
 
   showClickButtons = () => {
@@ -116,8 +117,7 @@ class ResetPassword extends React.Component<Props, State> {
                           pattern: checkUserPassword,
                           message: (
                             <Translation>
-                              Password should be 8-16 bits and contain at least one number and one
-                              letter
+                              Password should be 8-16 bits and contain at least one number and one letter
                             </Translation>
                           ),
                         },

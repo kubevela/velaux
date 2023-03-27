@@ -6,7 +6,6 @@ import type { WorkflowStep } from '../../interface/pipeline';
 import { StepTypeIcon } from './step-icon';
 
 import './index.less';
-import { Icon } from '@alifd/next';
 
 import { showAlias } from '../../utils/common';
 import { If } from '../If';

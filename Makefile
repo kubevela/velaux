@@ -90,8 +90,10 @@ start-addon-mock-server:
 load-image:
 	k3d image import oamdev/velaux:latest || { echo >&2 "kind not installed or error loading image: $(VELA_CORE_TEST_IMAGE)"; exit 1; }
 
+# Only try to install the addon.
 enable-addon:
-	vela addon enable ./addon 
+	vela addon enable ./addon
+	vela addon enable ./addon replicas=0
 
 .PHONY: e2e-server-test
 e2e-server-test:

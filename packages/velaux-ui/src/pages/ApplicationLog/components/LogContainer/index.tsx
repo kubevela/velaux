@@ -1,4 +1,4 @@
-import { Grid, Checkbox, Dropdown, Icon, Menu, Loading } from '@alifd/next';
+import { Grid, Checkbox, Dropdown, Menu, Loading } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import React, { Component, Fragment } from 'react';
 

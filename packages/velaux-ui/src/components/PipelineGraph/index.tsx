@@ -61,6 +61,7 @@ class PipelineGraph extends React.Component<PipelineGraphProps, State> {
               if (i < steps.length - 1) {
                 return this.renderConnector(i + 1, steps.length, step.id, steps[i + 1].id);
               }
+              return;
             })}
           {steps &&
             steps.map((step, i: number) => {

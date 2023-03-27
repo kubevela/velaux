@@ -8,6 +8,8 @@ const CssSplitWebpackPlugin = require('css-split-webpack-plugin').default;
 const autoprefixer = require('autoprefixer');
 const cssvarFallback = require('postcss-custom-properties');
 const calc = require('postcss-calc');
+const PnpWebpackPlugin = require('pnp-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const css = (options = {}) => [
   {
@@ -59,7 +61,12 @@ module.exports = function ({ minimize = false }) {
     },
     resolve: {
       extensions: ['.js', '.jsx'],
+      plugins: [PnpWebpackPlugin],
     },
+    resolveLoader: {
+      plugins: [PnpWebpackPlugin.moduleLoader(module)],
+    },
+
     externals: [
       {
         react: {
@@ -67,14 +74,6 @@ module.exports = function ({ minimize = false }) {
           commonjs2: 'react',
           commonjs: 'react',
           amd: 'react',
-        },
-      },
-      {
-        'react-dom': {
-          root: 'ReactDOM',
-          commonjs2: 'react-dom',
-          commonjs: 'react-dom',
-          amd: 'react-dom',
         },
       },
       {
@@ -140,18 +139,12 @@ Copyright 2023 KubeVela`),
       new ExtractTextPlugin({
         filename: '[name].min.css',
         allChunks: true,
-      }),
-      new webpack.optimize.UglifyJsPlugin({
-        minimize: true,
-        compress: {
-          warnings: false,
-        },
-        output: {
-          comments: false,
-          ascii_only: true,
-        },
       })
     );
+    config.optimization = {
+      minimize: true,
+      minimizer: [new TerserPlugin()],
+    };
   } else {
     config.output.filename = '[name].js';
     config.plugins.push(
