@@ -180,6 +180,9 @@ func getKindAndVersion(defType string) (apiVersion, kind string, err error) {
 	}
 }
 
+// TODO : Import this variable from types.AnnoDefinitionCategory
+const AnnoDefinitionCategory = "custom.definition.oam.dev/category"
+
 func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.DefinitionBase, error) {
 	definition := &apisv1.DefinitionBase{
 		Name:        def.GetName(),
@@ -187,6 +190,7 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 		Description: def.GetAnnotations()[types.AnnoDefinitionDescription],
 		Icon:        def.GetAnnotations()[types.AnnoDefinitionIcon],
 		Labels:      def.GetLabels(),
+		Category:    def.GetAnnotations()[AnnoDefinitionCategory],
 		Status: func() string {
 			if _, exist := def.GetLabels()[types.LabelDefinitionHidden]; exist {
 				return "disable"

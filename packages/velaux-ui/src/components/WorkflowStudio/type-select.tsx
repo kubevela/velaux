@@ -17,67 +17,63 @@ import type { Rule } from '@alifd/next/lib/field';
 
 const { Row, Col } = Grid;
 
-interface DefinitionCatalog {
+interface DefinitionCategory {
   title: string;
   sort: number;
   description?: string;
   definitions: DefinitionBase[];
 }
 
-const defaultDefinitionCatalog: Record<string, string> = {
-  'step-group': 'Group',
-  deploy: 'Delivery',
-  'apply-app': 'Delivery',
-  'apply-deployment': 'Delivery',
-  'apply-component': 'Delivery',
-  'addon-operation': 'Delivery',
-  'deploy-cloud-resource': 'Delivery',
-  'share-cloud-resource': 'Delivery',
-  'export-service': 'Delivery',
-  notification: 'Notification',
-  webhook: 'Notification',
-  'create-config': 'Config Management',
-  'delete-config': 'Config Management',
-  'list-config': 'Config Management',
-  'read-config': 'Config Management',
-  'export-data': 'Config Management',
-  export2config: 'Config Management',
-  export2secret: 'Config Management',
-  suspend: 'Notification',
-};
-
-const defaultCatalog: Record<string, DefinitionCatalog> = {
-  Group: {
-    title: 'Group',
-    description: 'Merge a set of steps.',
-    definitions: [],
-    sort: 1,
-  },
-  Delivery: {
-    title: 'Delivery',
-    description: 'Delivery the Application or workloads to the Targets',
+const defaultCategory: Record<string, DefinitionCategory> = {
+  'Application Delivery': {
+    title: 'Application Delivery',
+    description: 'Delivery the Application or workloads to the Targets.',
     definitions: [],
     sort: 2,
   },
-  Approval: {
-    title: 'Approval',
-    description: 'Approval or reject the changes during Workflow or Pipeline progress',
+  'Resource Management': {
+    title: 'Resource Management',
+    description: 'Steps for Resource Management',
     definitions: [],
     sort: 3,
+  },
+  'Terraform': {
+    title: 'Terraform',
+    description: 'Terraform workflow steps',
+    definitions: [],
+    sort: 4,
   },
   'Config Management': {
     title: 'Config Management',
     description: 'Create or read the config.',
     definitions: [],
-    sort: 4,
-  },
-  Notification: {
-    title: 'Notification',
-    description: 'Send messages to users or other applications.',
-    definitions: [],
     sort: 5,
   },
-  Custom: {
+  'CI Integration': {
+    title: 'CI Integration',
+    description: 'CI integration steps',
+    definitions: [],
+    sort: 6,
+  },
+  'External Integration': {
+    title: 'External Integration',
+    description: 'External Integration steps',
+    definitions: [],
+    sort: 7,
+  },
+  'Process Control': {
+    title: 'Process Control',
+    description: 'Process Control steps',
+    definitions: [],
+    sort: 1,
+  },
+  'Scripts & Commands': {
+    title: 'Scripts & Commands',
+    description: 'Steps for executing Scripts & Commands',
+    definitions: [],
+    sort: 8,
+  },
+  'Custom': {
     title: 'Custom',
     description: 'Custom Workflow or Pipeline steps',
     definitions: [],
@@ -85,38 +81,27 @@ const defaultCatalog: Record<string, DefinitionCatalog> = {
   },
 };
 
-const catalogLabelKey = 'definition.oam.dev/catalog';
-
-const initDefinitionCatalog = (defs: DefinitionBase[]) => {
+const initDefinitionCategory = (defs: DefinitionBase[]) => {
   return defs.map((def) => {
-    if (!def.labels[catalogLabelKey]) {
-      const d = defaultDefinitionCatalog[def.name];
-      if (def.labels) {
-        def.labels[catalogLabelKey] = d ? d : 'Custom';
-      } else {
-        def.labels = {
-          catalogLabelKey: d ? d : 'Custom',
-        };
-      }
-    } else {
-      def.labels[catalogLabelKey] = def.labels[catalogLabelKey].replaceAll('_', ' ');
+    if(!def.category || def.category==""){
+      def.category = 'Custom';
     }
     return def;
   });
 };
 
-const buildDefinitionCatalog = (defs: DefinitionBase[]) => {
-  const customDefs = initDefinitionCatalog(defs);
-  const catalogMap: Record<string, DefinitionCatalog> = _.cloneDeep(defaultCatalog);
+const buildDefinitionCategory = (defs: DefinitionBase[]) => {
+  const customDefs = initDefinitionCategory(defs);
+  const categoryMap: Record<string, DefinitionCategory> = _.cloneDeep(defaultCategory);
   customDefs.map((def) => {
-    const catalog = def.labels[catalogLabelKey];
-    if (catalogMap[catalog]) {
-      catalogMap[catalog].definitions.push(def);
+    const category = def.category;
+    if (categoryMap[category]) {
+      categoryMap[category].definitions.push(def);
     } else {
-      catalogMap[catalog] = { title: catalog, definitions: [def], sort: 100 };
+      categoryMap[category] = { title: category, definitions: [def], sort: 100 };
     }
   });
-  return Object.values(catalogMap).sort((a, b) => {
+  return Object.values(categoryMap).sort((a, b) => {
     return a.sort - b.sort;
   });
 };
@@ -160,8 +145,7 @@ class TypeSelect extends React.Component<Props, State> {
   render() {
     const { definitions, onClose, checkStepName, addSub } = this.props;
     const { selectType } = this.state;
-    const catalogs = buildDefinitionCatalog(definitions?.filter((def) => !addSub || def.name != 'step-group') || []);
-    console.log(catalogs);
+    const categories = buildDefinitionCategory(definitions?.filter((def) => !addSub || def.name != 'step-group') || []);
     const { init } = this.field;
     const checkStepNameRule = (rule: Rule, value: any, callback: (error?: string) => void) => {
       if (checkStepName(value)) {
@@ -185,13 +169,13 @@ class TypeSelect extends React.Component<Props, State> {
       >
         <div>
           {!selectType &&
-            catalogs
+            categories
               .filter((c) => c.definitions.length > 0)
-              .map((catalog) => {
+              .map((category) => {
                 return (
-                  <Card title={catalog.title} contentHeight={'auto'} key={catalog.title} subTitle={catalog.description}>
+                  <Card title={category.title} contentHeight={'auto'} key={category.title} subTitle={category.description}>
                     <div className="def-items">
-                      {catalog.definitions?.map((def) => {
+                      {category.definitions?.map((def) => {
                         const item = (
                           <div key={def.name} className="def-item">
                             <div

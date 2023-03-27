@@ -16,6 +16,7 @@ export interface DefinitionBase {
   labels: Record<string, string>;
   ownerAddon: string;
   workloadType: string;
+  category?: string;
 
   component?: any;
   trait?: {
