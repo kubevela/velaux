@@ -250,7 +250,7 @@ var _ = Describe("Test workflow service functions", func() {
 			Name: appName,
 		}, "test-workflow-2")
 		Expect(err).Should(BeNil())
-		_, err = workflowService.CreateWorkflowRecord(context.TODO(), &model.Application{
+		re, err := workflowService.CreateWorkflowRecord(context.TODO(), &model.Application{
 			Name: appName,
 		}, app, workflow)
 		Expect(err).Should(BeNil())
@@ -274,7 +274,7 @@ var _ = Describe("Test workflow service functions", func() {
 		app.Status.ObservedGeneration = 1
 		err = workflowService.KubeClient.Status().Patch(ctx, app, client.Merge)
 		Expect(err).Should(BeNil())
-		err = workflowService.SyncWorkflowRecord(ctx)
+		err = workflowService.SyncWorkflowRecord(ctx, appName, re.Name, app, nil)
 		Expect(err).Should(BeNil())
 
 		workflow, err = workflowService.GetWorkflow(context.TODO(), &model.Application{
@@ -322,7 +322,6 @@ var _ = Describe("Test workflow service functions", func() {
 		Expect(err).Should(BeNil())
 
 		By("create one application revision to test sync workflow record")
-
 		appWithRevision := &v1beta1.Application{}
 		err = json.Unmarshal(raw, appWithRevision)
 		Expect(err).Should(BeNil())
@@ -344,7 +343,7 @@ var _ = Describe("Test workflow service functions", func() {
 		appRevision.Status.Workflow.AppRevision = app.Annotations[oam.AnnotationPublishVersion]
 		err = workflowService.KubeClient.Status().Update(ctx, appRevision)
 		Expect(err).Should(BeNil())
-		err = workflowService.SyncWorkflowRecord(ctx)
+		err = workflowService.SyncWorkflowRecord(ctx, appName, "test-workflow-2-111", app, nil)
 		Expect(err).Should(BeNil())
 
 		By("check the record")

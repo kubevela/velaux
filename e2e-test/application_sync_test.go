@@ -114,9 +114,7 @@ var _ = Describe("Test the application synchronizing", func() {
 			Expect(lrr.Records[1].Name).Should(Equal("test-v2"))
 
 			// The workflow includes a suspend step.
-			if lrr.Records[1].Status != "suspending" {
-				return fmt.Errorf("the record status is %s, not suspending", lrr.Records[1].Status)
-			}
+			Expect(lrr.Records[1].Status).Should(Equal("suspending"))
 			return nil
 		}).WithTimeout(time.Minute * 1).WithPolling(3 * time.Second).Should(BeNil())
 	})

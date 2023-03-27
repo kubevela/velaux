@@ -35,15 +35,12 @@ type Worker interface {
 
 // InitEvent init all event worker
 func InitEvent(cfg config.Config) []interface{} {
-	workflow := &sync.WorkflowRecordSync{
-		Duration: cfg.LeaderConfig.Duration,
-	}
 	application := &sync.ApplicationSync{
 		Queue: workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 	}
 	collect := &collect.InfoCalculateCronJob{}
-	workers = append(workers, workflow, application, collect)
-	return []interface{}{workflow, application, collect}
+	workers = append(workers, application, collect)
+	return []interface{}{application, collect}
 }
 
 // StartEventWorker start all event worker

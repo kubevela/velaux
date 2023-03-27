@@ -45,6 +45,7 @@ type ApplicationSync struct {
 	Store              datastore.DataStore        `inject:"datastore"`
 	ProjectService     service.ProjectService     `inject:""`
 	ApplicationService service.ApplicationService `inject:""`
+	WorkflowService    service.WorkflowService    `inject:""`
 	TargetService      service.TargetService      `inject:""`
 	EnvService         service.EnvService         `inject:""`
 	Queue              workqueue.RateLimitingInterface
@@ -78,6 +79,7 @@ func (a *ApplicationSync) Start(ctx context.Context, errorChan chan error) {
 		cache:              sync.Map{},
 		projectService:     a.ProjectService,
 		applicationService: a.ApplicationService,
+		workflowService:    a.WorkflowService,
 		targetService:      a.TargetService,
 		envService:         a.EnvService,
 	}
@@ -87,12 +89,13 @@ func (a *ApplicationSync) Start(ctx context.Context, errorChan chan error) {
 
 	go func() {
 		for {
-			app, down := a.Queue.Get()
+			item, down := a.Queue.Get()
 			if down {
 				break
 			}
-			if err := cu.AddOrUpdate(ctx, app.(*v1beta1.Application)); err != nil {
-				klog.Errorf("fail to add or update application %s", err.Error())
+			app := item.(*v1beta1.Application)
+			if err := cu.AddOrUpdate(ctx, app); err != nil {
+				klog.Errorf("fail to add or update application %s: %s", app.Name, err.Error())
 			}
 			a.Queue.Done(app)
 		}

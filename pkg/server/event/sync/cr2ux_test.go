@@ -268,6 +268,7 @@ func newCR2UX(ds datastore.DataStore) *CR2UX {
 	targetService := service.NewTestTargetService(ds, k8sClient)
 	envService := service.NewTestEnvService(ds, k8sClient)
 	userService := service.NewTestUserService(ds, k8sClient)
+	workflowService := service.NewTestWorkflowService(ds, k8sClient)
 	err := userService.Init(context.TODO())
 	Expect(err).Should(BeNil())
 	return &CR2UX{
@@ -278,5 +279,6 @@ func newCR2UX(ds datastore.DataStore) *CR2UX {
 		targetService:      targetService,
 		envService:         envService,
 		applicationService: applicationService,
+		workflowService:    workflowService,
 	}
 }
