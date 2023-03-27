@@ -66,6 +66,9 @@ func (d defaultHelmImpl) GetHelmHTTPOption(ctx context.Context, secretName strin
 			return nil, bcode.ErrRepoBasicAuth
 		}
 		opts, err = helm.SetHTTPOption(ctx, d.K8sClient, types2.NamespacedName{Namespace: config.Namespace, Name: secretName})
+		if err != nil {
+			return nil, bcode.ErrRepoBasicAuth
+		}
 	} else {
 		opts, err = helm.SetHTTPOption(ctx, d.K8sClient, types2.NamespacedName{Namespace: types.DefaultKubeVelaNS, Name: secretName})
 		if err != nil {
