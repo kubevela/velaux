@@ -17,6 +17,7 @@ type Props = {
     repoType: string;
     chart: string;
   };
+  project?: string;
   repo?: HelmRepo;
 };
 
@@ -46,6 +47,7 @@ class HelmChartVersionSelect extends Component<Props, State> {
   }
 
   loadChartVersions = () => {
+    const { project } = this.props;
     const { helm, repo } = this.props;
     if (
       helm?.url &&
@@ -63,6 +65,7 @@ class HelmChartVersionSelect extends Component<Props, State> {
         repoType: helm.repoType,
         chart: helm.chart,
         secretName: repo?.secretName,
+        project: project
       }).then((re: { versions: ChartVersion[] }) => {
         if (re) {
           this.setState({ versions: re.versions || [], loading: false, helm: helm });

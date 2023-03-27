@@ -16,6 +16,7 @@ type Props = {
     url: string;
     repoType: string;
   };
+  project?: string;
   repo?: HelmRepo;
 };
 
@@ -44,6 +45,7 @@ class HelmChartSelect extends Component<Props, State> {
   }
 
   loadCharts = () => {
+    const { project } = this.props;
     const { helm, repo } = this.props;
     if (helm?.url && (!this.state.loading || this.state.helm?.url != helm.url)) {
       // Reset chart value
@@ -51,7 +53,7 @@ class HelmChartSelect extends Component<Props, State> {
         this.props.onChange('');
       }
       this.setState({ loading: true, helm: helm });
-      getCharts({ url: helm.url, repoType: helm.repoType, secretName: repo?.secretName }).then(
+      getCharts({ url: helm.url, repoType: helm.repoType, secretName: repo?.secretName, project: project }).then(
         (re: string[]) => {
           this.setState({ charts: re && Array.isArray(re) ? re : [], loading: false, helm: helm });
         },
