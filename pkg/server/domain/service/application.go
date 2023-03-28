@@ -176,6 +176,17 @@ func listApp(ctx context.Context, ds datastore.DataStore, listOptions apisv1.Lis
 				continue
 			}
 		}
+		if len(listOptions.Labels) > 0 {
+			matchLabels := false
+			for k, v := range listOptions.Labels {
+				if appModel.Labels != nil && appModel.Labels[k] == v {
+					matchLabels = true
+				}
+			}
+			if !matchLabels {
+				continue
+			}
+		}
 		list = append(list, appModel)
 	}
 	return list, nil
