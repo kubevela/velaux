@@ -37,6 +37,7 @@ type State = {
   componentDefinitions: [];
   isEditApplication: boolean;
   isAddApplication: boolean;
+  labelValue: string[];
   showMode: ShowMode;
 };
 
@@ -62,6 +63,7 @@ class ProjectApplications extends Component<Props, State> {
       },
       envs: [],
       componentDefinitions: [],
+      labelValue: [],
       isEditApplication: false,
       isAddApplication: false,
       showMode: mode,
@@ -77,11 +79,12 @@ class ProjectApplications extends Component<Props, State> {
 
   listApplication = async (queryData?: ApplicationQuery) => {
     const { params = { projectName: '' } } = this.props.match;
-    const { query = '', env = '', targetName = '' } = queryData || {};
+    const { query = '', env = '', targetName = '', labels = '', } = queryData || {};
     const queryParams: ApplicationQuery = {
       query,
       env,
       targetName,
+      labels,
       project: params.projectName,
     };
     this.setState({ isLoading: true });
@@ -125,6 +128,12 @@ class ProjectApplications extends Component<Props, State> {
     });
   };
 
+  setLabelValue = async (labels: string[]) => {
+    this.setState({
+      labelValue: labels,
+    });
+  };
+
   editApplicationPlan = (editApplicationItem: ApplicationBase) => {
     this.setState({
       editApplicationItem,
@@ -155,6 +164,26 @@ class ProjectApplications extends Component<Props, State> {
     this.listApplication();
   };
 
+  clickLabelFilter = (label: string) => {
+    let { labelValue } = this.state;
+    let existIndex = -1;
+    labelValue.map((key, index) => {
+      if (key == label) {
+        existIndex = index
+        return
+      }
+    });
+    if (existIndex == -1) {
+      labelValue.push(label)
+    } else {
+      labelValue = labelValue.splice(existIndex, existIndex);
+    }
+    this.setState({
+      labelValue
+    });
+    this.listApplication({labels: labelValue.join(",")});
+  };
+
   render() {
     const { dispatch, userInfo } = this.props;
     const {
@@ -166,9 +195,18 @@ class ProjectApplications extends Component<Props, State> {
       targets,
       envs,
       componentDefinitions,
+      labelValue,
     } = this.state;
     const { params = { projectName: '' } } = this.props.match;
     const { projectName } = params;
+    let appLabels: string[] = []
+    applicationList.map((app) => {
+      app.labels && Object.keys(app.labels).map((key: string) => {
+        if (key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
+          if (app.labels) { appLabels.push(key+"="+app.labels[key]) }
+        }
+      })
+    })
 
     return (
       <Fragment>
@@ -176,6 +214,9 @@ class ProjectApplications extends Component<Props, State> {
           <SelectSearch
             targetList={targets}
             envs={envs}
+            appLabels={appLabels}
+            setLabelValue={this.setLabelValue}
+            labelValue={labelValue}
             projectName={projectName}
             listApplication={(queryData: ApplicationQuery) => {
               this.listApplication(queryData);
@@ -199,6 +240,7 @@ class ProjectApplications extends Component<Props, State> {
                 this.editApplicationPlan(editItem);
               }}
               showMode={this.state.showMode}
+              clickLabelFilter={this.clickLabelFilter}
               deleteAppPlan={this.onDeleteApplicationItem}
               setVisible={(visible) => {
                 this.setState({ isAddApplication: visible });

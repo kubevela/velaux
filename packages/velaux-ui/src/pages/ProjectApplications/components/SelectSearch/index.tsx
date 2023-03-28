@@ -17,6 +17,9 @@ type Props = {
   envs?: Env[];
   listApplication: (params: any) => void;
   onAddApplication: () => void;
+  setLabelValue: (labels: string[]) => void;
+  appLabels?: string[];
+  labelValue?: string[];
   projectName?: string;
   showMode: ShowMode;
   setMode: (mode: ShowMode) => void;
@@ -26,6 +29,7 @@ type State = {
   targetValue: string;
   inputValue: string;
   envValue: string;
+  labelValue: string[];
 };
 
 class SelectSearch extends React.Component<Props, State> {
@@ -35,6 +39,7 @@ class SelectSearch extends React.Component<Props, State> {
       targetValue: '',
       envValue: '',
       inputValue: '',
+      labelValue: [],
     };
     this.onChangeTarget = this.onChangeTarget.bind(this);
     this.handleChangName = this.handleChangName.bind(this);
@@ -47,7 +52,7 @@ class SelectSearch extends React.Component<Props, State> {
       },
       () => {
         this.getApplications();
-      },
+      }
     );
   }
 
@@ -64,8 +69,20 @@ class SelectSearch extends React.Component<Props, State> {
       },
       () => {
         this.getApplications();
-      },
+      }
     );
+  };
+
+  handleChangeLabel(value: string[]) {
+    const { setLabelValue } = this.props;
+    let label = value? value:[]
+    setLabelValue(label)
+    this.setState({
+      labelValue: label,
+    },
+    () => {
+      this.getApplications();
+    });
   };
 
   handleClickSearch = () => {
@@ -92,7 +109,7 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { targetList, envs, projectName, showMode } = this.props;
+    const { targetList, envs, projectName, showMode, labelValue, appLabels } = this.props;
     const { targetValue, inputValue, envValue } = this.state;
     const targetSource = targetList?.map((item) => {
       return {
@@ -107,12 +124,20 @@ class SelectSearch extends React.Component<Props, State> {
         value: env.name,
       };
     });
+
+    const labelSource = appLabels?.map((item) => {
+      return {
+        label: item,
+        value: item,
+      };
+    });
+
     return (
       <Fragment>
         <Row className="project-select-wrapper border-radius-8 margin-top-20">
           <Col span="20">
             <Row wrap={true}>
-              <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+              <Col xl={6} m={4} s={6} xxs={24} style={{ padding: '0 8px' }}>
                 <Select
                   locale={locale().Select}
                   mode="single"
@@ -125,7 +150,7 @@ class SelectSearch extends React.Component<Props, State> {
                   value={envValue}
                 />
               </Col>
-              <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+              <Col xl={6} m={4} s={6} xxs={24} style={{ padding: '0 8px' }}>
                 <Select
                   locale={locale().Select}
                   mode="single"
@@ -139,16 +164,23 @@ class SelectSearch extends React.Component<Props, State> {
                 />
               </Col>
               <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
-                <Input
-                  innerAfter={
-                    <Icon
-                      type="search"
-                      size="xs"
-                      onClick={this.handleClickSearch}
-                      style={{ margin: 4 }}
-                    />
-                  }
+                <Select
                   hasClear
+                  size="large"
+                  placeholder={i18n.t('Search by labels').toString()}
+                  onChange={this.handleChangeLabel}
+                  showSearch
+                  mode="multiple"
+                  value={labelValue}
+                  className="item"
+                  dataSource={labelSource}
+                />
+              </Col>
+              <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+                <Input
+                  innerAfter={<Icon type="search" size="xs" onClick={this.handleClickSearch} style={{ margin: 4 }} />}
+                  hasClear
+                  size="large"
                   placeholder={i18n.t('Search by name and description etc')}
                   onChange={this.handleChangName}
                   onPressEnter={this.handleClickSearch}
@@ -177,18 +209,16 @@ class SelectSearch extends React.Component<Props, State> {
             </Row>
           </Col>
           <Col span="4">
-            <Permission
-              request={{ resource: `project:${projectName}/application:*`, action: 'create' }}
-              project={projectName}
-            >
-              <Button
-                className="create-btn-wrapper"
-                type="primary"
-                onClick={this.onCreateApplication}
+            <div className="show-mode">
+              <Permission
+                request={{ resource: `project:${projectName}/application:*`, action: 'create' }}
+                project={projectName}
               >
-                <Translation>New Application</Translation>
-              </Button>
-            </Permission>
+                <Button className="create-btn-wrapper" type="primary" onClick={this.onCreateApplication}>
+                  <Translation>New Application</Translation>
+                </Button>
+              </Permission>
+            </div>
           </Col>
         </Row>
       </Fragment>
