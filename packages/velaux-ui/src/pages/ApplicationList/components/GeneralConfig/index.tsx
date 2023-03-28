@@ -76,7 +76,7 @@ class GeneralConfig extends React.Component<Props, State> {
               >
                 <Input
                   name="name"
-                  maxLength={32}
+                  maxLength={31}
                   {...init('name', {
                     rules: [
                       {
