@@ -77,15 +77,16 @@ class SelectSearch extends React.Component<Props, State> {
 
   handleChangeLabel(value: string[]) {
     const { setLabelValue } = this.props;
-    let label = value? value:[]
-    setLabelValue(label)
-    this.setState({
-      labelValue: label,
-    },
-    () => {
-      this.getApplications();
-    });
-
+    let label = value ? value : [];
+    setLabelValue(label);
+    this.setState(
+      {
+        labelValue: label,
+      },
+      () => {
+        this.getApplications();
+      }
+    );
   }
 
   onChangeEnv = (e: string) => {
@@ -105,7 +106,7 @@ class SelectSearch extends React.Component<Props, State> {
 
   getApplications = async () => {
     const { projectValue, inputValue, envValue, labelValue } = this.state;
-    const labelSelector = labelValue.join(",")
+    const labelSelector = labelValue.join(',');
     const params = {
       project: projectValue,
       query: inputValue,
@@ -144,7 +145,7 @@ class SelectSearch extends React.Component<Props, State> {
     });
     return (
       <Row className="app-select-wrapper border-radius-8" wrap={true}>
-        <Col xl={6} m={4} s={6} xxs={12} style={{ padding: '0 8px' }}>
+        <Col xl={4} m={4} s={6} xxs={12} style={{ padding: '0 8px' }}>
           <Select
             locale={locale().Select}
             mode="single"
@@ -157,7 +158,7 @@ class SelectSearch extends React.Component<Props, State> {
             value={projectValue}
           />
         </Col>
-        <Col xl={6} m={4} s={6} xxs={12} style={{ padding: '0 8px' }}>
+        <Col xl={4} m={4} s={6} xxs={12} style={{ padding: '0 8px' }}>
           <Select
             locale={locale().Select}
             mode="single"
@@ -170,7 +171,19 @@ class SelectSearch extends React.Component<Props, State> {
             value={envValue}
           />
         </Col>
-        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+        <Col xl={4} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+          <Input
+            innerAfter={<AiOutlineSearch onClick={this.handleClickSearch} style={{ margin: 4 }} />}
+            hasClear
+            size="large"
+            placeholder={appPlaceholder}
+            onChange={this.handleChangName}
+            onPressEnter={this.handleClickSearch}
+            value={inputValue}
+            className="item"
+          />
+        </Col>
+        <Col xl={8} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
           <Select
             hasClear
             size="large"
@@ -183,20 +196,8 @@ class SelectSearch extends React.Component<Props, State> {
             dataSource={labelSource}
           />
         </Col>
-        <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
-          <Input
-            innerAfter={<AiOutlineSearch onClick={this.handleClickSearch} style={{ margin: 4 }} />}
-            hasClear
-            size="large"
-            placeholder={appPlaceholder}
-            onChange={this.handleChangName}
-            onPressEnter={this.handleClickSearch}
-            value={inputValue}
-            className="item"
-          />
-        </Col>
-        <Col xl={6} className="flexboth">
-          <div className="padding16">
+        <Col xl={4} className="flexboth">
+          <div className="padding16 show-mode">
             <Button type={'secondary'} onClick={() => this.getApplications()}>
               <Icon type="refresh" />
             </Button>

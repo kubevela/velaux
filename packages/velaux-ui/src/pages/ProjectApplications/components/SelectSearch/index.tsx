@@ -47,7 +47,7 @@ class SelectSearch extends React.Component<Props, State> {
       },
       () => {
         this.getApplications();
-      },
+      }
     );
   }
 
@@ -64,7 +64,7 @@ class SelectSearch extends React.Component<Props, State> {
       },
       () => {
         this.getApplications();
-      },
+      }
     );
   };
 
@@ -140,15 +140,9 @@ class SelectSearch extends React.Component<Props, State> {
               </Col>
               <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
                 <Input
-                  innerAfter={
-                    <Icon
-                      type="search"
-                      size="xs"
-                      onClick={this.handleClickSearch}
-                      style={{ margin: 4 }}
-                    />
-                  }
+                  innerAfter={<Icon type="search" size="xs" onClick={this.handleClickSearch} style={{ margin: 4 }} />}
                   hasClear
+                  size="large"
                   placeholder={i18n.t('Search by name and description etc')}
                   onChange={this.handleChangName}
                   onPressEnter={this.handleClickSearch}
@@ -177,18 +171,16 @@ class SelectSearch extends React.Component<Props, State> {
             </Row>
           </Col>
           <Col span="4">
-            <Permission
-              request={{ resource: `project:${projectName}/application:*`, action: 'create' }}
-              project={projectName}
-            >
-              <Button
-                className="create-btn-wrapper"
-                type="primary"
-                onClick={this.onCreateApplication}
+            <div className="show-mode">
+              <Permission
+                request={{ resource: `project:${projectName}/application:*`, action: 'create' }}
+                project={projectName}
               >
-                <Translation>New Application</Translation>
-              </Button>
-            </Permission>
+                <Button className="create-btn-wrapper" type="primary" onClick={this.onCreateApplication}>
+                  <Translation>New Application</Translation>
+                </Button>
+              </Permission>
+            </div>
           </Col>
         </Row>
       </Fragment>

@@ -184,8 +184,8 @@ class PipelineStudio extends React.Component<Props, State> {
           )}
           <Card contentHeight={'auto'}>
             <Row>
-              <Col span={11} />
-              <Col span={2}>
+              <Col span={10} />
+              <Col span={4}>
                 <ButtonGroup>
                   <Button
                     onClick={() => {
@@ -206,7 +206,7 @@ class PipelineStudio extends React.Component<Props, State> {
                 </ButtonGroup>
               </Col>
               <Col
-                span={11}
+                span={10}
                 style={{
                   display: 'flex',
                   justifyContent: 'end',

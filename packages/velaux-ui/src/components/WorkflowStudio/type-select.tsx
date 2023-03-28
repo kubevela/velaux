@@ -37,7 +37,7 @@ const defaultCategory: Record<string, DefinitionCategory> = {
     definitions: [],
     sort: 3,
   },
-  'Terraform': {
+  Terraform: {
     title: 'Terraform',
     description: 'Terraform workflow steps',
     definitions: [],
@@ -73,7 +73,7 @@ const defaultCategory: Record<string, DefinitionCategory> = {
     definitions: [],
     sort: 8,
   },
-  'Custom': {
+  Custom: {
     title: 'Custom',
     description: 'Custom Workflow or Pipeline steps',
     definitions: [],
@@ -83,7 +83,7 @@ const defaultCategory: Record<string, DefinitionCategory> = {
 
 const initDefinitionCategory = (defs: DefinitionBase[]) => {
   return defs.map((def) => {
-    if(!def.category || def.category==""){
+    if (!def.category || def.category == '') {
       def.category = 'Custom';
     }
     return def;
@@ -95,6 +95,9 @@ const buildDefinitionCategory = (defs: DefinitionBase[]) => {
   const categoryMap: Record<string, DefinitionCategory> = _.cloneDeep(defaultCategory);
   customDefs.map((def) => {
     const category = def.category;
+    if (!category) {
+      return;
+    }
     if (categoryMap[category]) {
       categoryMap[category].definitions.push(def);
     } else {
@@ -173,7 +176,12 @@ class TypeSelect extends React.Component<Props, State> {
               .filter((c) => c.definitions.length > 0)
               .map((category) => {
                 return (
-                  <Card title={category.title} contentHeight={'auto'} key={category.title} subTitle={category.description}>
+                  <Card
+                    title={category.title}
+                    contentHeight={'auto'}
+                    key={category.title}
+                    subTitle={category.description}
+                  >
                     <div className="def-items">
                       {category.definitions?.map((def) => {
                         const item = (
