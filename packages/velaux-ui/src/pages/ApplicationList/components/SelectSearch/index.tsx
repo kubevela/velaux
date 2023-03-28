@@ -121,9 +121,9 @@ class SelectSearch extends React.Component<Props, State> {
     const { projectValue, inputValue, envValue } = this.state;
 
     const projectPlaceholder = i18n.t('Search by Project').toString();
-    const appPlaceholder = i18n.t('Search by name and description etc').toString();
+    const appPlaceholder = i18n.t('Search by Name and Description etc').toString();
     const envPlaceholder = i18n.t('Search by Environment').toString();
-    const labelPlaceholder = i18n.t('Search by labels').toString();
+    const labelPlaceholder = i18n.t('Search by Label Selector').toString();
     const projectSource = projects?.map((item) => {
       return {
         label: item.alias || item.name,

@@ -167,7 +167,7 @@ class SelectSearch extends React.Component<Props, State> {
                 <Select
                   hasClear
                   size="large"
-                  placeholder={i18n.t('Search by labels').toString()}
+                  placeholder={i18n.t('Search by Label Selector').toString()}
                   onChange={this.handleChangeLabel}
                   showSearch
                   mode="multiple"
@@ -181,7 +181,7 @@ class SelectSearch extends React.Component<Props, State> {
                   innerAfter={<Icon type="search" size="xs" onClick={this.handleClickSearch} style={{ margin: 4 }} />}
                   hasClear
                   size="large"
-                  placeholder={i18n.t('Search by name and description etc')}
+                  placeholder={i18n.t('Search by Name and Description etc')}
                   onChange={this.handleChangName}
                   onPressEnter={this.handleClickSearch}
                   value={inputValue}
