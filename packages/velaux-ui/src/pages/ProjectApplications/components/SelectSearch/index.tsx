@@ -43,6 +43,7 @@ class SelectSearch extends React.Component<Props, State> {
     };
     this.onChangeTarget = this.onChangeTarget.bind(this);
     this.handleChangName = this.handleChangName.bind(this);
+    this.handleChangeLabel = this.handleChangeLabel.bind(this);
   }
 
   onChangeTarget(e: string) {
