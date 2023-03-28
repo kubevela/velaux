@@ -63,6 +63,7 @@ func (h repository) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/charts").To(h.listCharts).
 		Doc("list charts").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("project", "the config project").DataType("string").Required(true)).
 		Param(ws.QueryParameter("repoUrl", "helm repository url").DataType("string")).
 		Param(ws.QueryParameter("secretName", "secret of the repo").DataType("string")).
 		Returns(200, "OK", []string{}).
@@ -73,6 +74,7 @@ func (h repository) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/chart/versions").To(h.listVersionsFromQuery).
 		Doc("list versions").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("project", "the config project").DataType("string").Required(true)).
 		Param(ws.QueryParameter("chart", "helm chart").DataType("string").Required(true)).
 		Param(ws.QueryParameter("repoUrl", "helm repository url").DataType("string").Required(true)).
 		Param(ws.QueryParameter("secretName", "secret of the repo").DataType("string")).
@@ -83,6 +85,7 @@ func (h repository) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/charts/{chart}/versions").To(h.listChartVersions).
 		Doc("list versions").Deprecate().
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("project", "the config project").DataType("string").Required(true)).
 		Param(ws.PathParameter("chart", "identifier of the helm chart").DataType("string").Required(true)).
 		Param(ws.QueryParameter("repoUrl", "helm repository url").DataType("string")).
 		Param(ws.QueryParameter("secretName", "secret of the repo").DataType("string")).
@@ -94,6 +97,7 @@ func (h repository) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/chart/values").To(h.chartValues).
 		Doc("get chart value").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("project", "the config project").DataType("string").Required(true)).
 		Param(ws.QueryParameter("chart", "helm chart").DataType("string").Required(true)).
 		Param(ws.QueryParameter("version", "helm chart version").DataType("string").Required(true)).
 		Param(ws.QueryParameter("repoUrl", "helm repository url").DataType("string").Required(true)).
@@ -106,6 +110,7 @@ func (h repository) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/charts/{chart}/versions/{version}/values").To(h.getChartValues).
 		Doc("get chart value").Deprecate().
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("project", "the config project").DataType("string").Required(true)).
 		Param(ws.PathParameter("chart", "identifier of the helm chart").DataType("string").Required(true)).
 		Param(ws.PathParameter("version", "version of the helm chart").DataType("string").Required(true)).
 		Param(ws.QueryParameter("repoUrl", "helm repository url").DataType("string")).
@@ -141,12 +146,13 @@ func (h repository) GetWebServiceRoute() *restful.WebService {
 func (h repository) listCharts(req *restful.Request, res *restful.Response) {
 	url := utils.Sanitize(req.QueryParameter("repoUrl"))
 	secName := utils.Sanitize(req.QueryParameter("secretName"))
+	projectName := req.QueryParameter("project")
 	skipCache, err := isSkipCache(req)
 	if err != nil {
 		bcode.ReturnError(req, res, bcode.ErrSkipCacheParameter)
 		return
 	}
-	charts, err := h.HelmService.ListChartNames(req.Request.Context(), url, secName, skipCache)
+	charts, err := h.HelmService.ListChartNames(req.Request.Context(), url, secName, projectName, skipCache)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
@@ -162,13 +168,14 @@ func (h repository) listVersionsFromQuery(req *restful.Request, res *restful.Res
 	url := req.QueryParameter("repoUrl")
 	chartName := req.QueryParameter("chart")
 	secName := req.QueryParameter("secretName")
+	projectName := req.QueryParameter("project")
 	skipCache, err := isSkipCache(req)
 	if err != nil {
 		bcode.ReturnError(req, res, bcode.ErrSkipCacheParameter)
 		return
 	}
 
-	versions, err := h.HelmService.ListChartVersions(req.Request.Context(), url, chartName, secName, skipCache)
+	versions, err := h.HelmService.ListChartVersions(req.Request.Context(), url, chartName, secName, projectName, skipCache)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
@@ -184,6 +191,7 @@ func (h repository) getChartValues(req *restful.Request, res *restful.Response) 
 	url := req.QueryParameter("repoUrl")
 	secName := req.QueryParameter("secretName")
 	chartName := req.PathParameter("chart")
+	projectName := req.QueryParameter("project")
 	version := req.PathParameter("version")
 	skipCache, err := isSkipCache(req)
 	if err != nil {
@@ -191,7 +199,7 @@ func (h repository) getChartValues(req *restful.Request, res *restful.Response) 
 		return
 	}
 
-	values, err := h.HelmService.GetChartValues(req.Request.Context(), url, chartName, version, secName, "helm", skipCache)
+	values, err := h.HelmService.GetChartValues(req.Request.Context(), url, chartName, version, secName, projectName, "helm", skipCache)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
@@ -207,12 +215,13 @@ func (h repository) listChartVersions(req *restful.Request, res *restful.Respons
 	url := req.QueryParameter("repoUrl")
 	chartName := req.PathParameter("chart")
 	secName := req.QueryParameter("secretName")
+	projectName := req.QueryParameter("project")
 	skipCache, err := isSkipCache(req)
 	if err != nil {
 		bcode.ReturnError(req, res, bcode.ErrSkipCacheParameter)
 		return
 	}
-	versions, err := h.HelmService.ListChartVersions(req.Request.Context(), url, chartName, secName, skipCache)
+	versions, err := h.HelmService.ListChartVersions(req.Request.Context(), url, chartName, secName, projectName, skipCache)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
@@ -228,6 +237,7 @@ func (h repository) chartValues(req *restful.Request, res *restful.Response) {
 	url := req.QueryParameter("repoUrl")
 	secName := req.QueryParameter("secretName")
 	chartName := req.QueryParameter("chart")
+	projectName := req.QueryParameter("project")
 	version := req.QueryParameter("version")
 	repoType := req.QueryParameter("repoType")
 	skipCache, err := isSkipCache(req)
@@ -236,7 +246,7 @@ func (h repository) chartValues(req *restful.Request, res *restful.Response) {
 		return
 	}
 
-	values, err := h.HelmService.ListChartValuesFiles(req.Request.Context(), url, chartName, version, secName, repoType, skipCache)
+	values, err := h.HelmService.ListChartValuesFiles(req.Request.Context(), url, chartName, version, secName, projectName, repoType, skipCache)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
