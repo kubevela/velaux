@@ -96,8 +96,8 @@ export class PluginWrapper implements PluginService {
     return getBackendSrv()
       .get('/api/v1/plugins')
       .then((res: any) => {
-        if (res && res.plugins) {
-          const plugins = res.plugins as PluginMeta[];
+        if (res) {
+          const plugins = res.plugins ? (res.plugins as PluginMeta[]) : [];
           return Promise.resolve(plugins.filter((p) => p.type === PluginType.PageApp));
         }
         return Promise.reject(new Error('Unknown Plugins'));
