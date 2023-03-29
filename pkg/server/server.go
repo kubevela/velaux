@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"time"
 
 	"cuelang.org/go/pkg/strings"
@@ -61,6 +63,9 @@ const (
 	// PluginPublicRoutePath the route prefix to request the plugin static files.
 	PluginPublicRoutePath = "/public/plugins"
 
+	// DexRoutePath the route prefix to request the dex service
+	DexRoutePath = "/dex"
+
 	// BuildPublicPath the route prefix to request the build static files.
 	BuildPublicPath = "public/build"
 )
@@ -77,6 +82,7 @@ type restServer struct {
 	beanContainer *container.Container
 	cfg           config.Config
 	dataStore     datastore.DataStore
+	dexProxy      *httputil.ReverseProxy
 	PluginService service.PluginService `inject:""`
 }
 
@@ -339,6 +345,10 @@ func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		return
 	case strings.HasPrefix(req.URL.Path, PluginPublicRoutePath):
 		s.getPluginAssets(res, req)
+		return
+	case strings.HasPrefix(req.URL.Path, DexRoutePath):
+		s.proxyDexService(res, req)
+		return
 	default:
 		for _, pre := range api.GetAPIPrefix() {
 			if strings.HasPrefix(req.URL.Path, pre) {
@@ -378,6 +388,27 @@ func (s *restServer) getPluginAssets(res http.ResponseWriter, req *http.Request)
 	}
 	req.URL.Path = path
 	s.staticFiles(res, req, plugin.PluginDir)
+}
+
+func (s *restServer) proxyDexService(res http.ResponseWriter, req *http.Request) {
+	if s.dexProxy == nil {
+		if s.cfg.DexServerURL == "" {
+			bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
+			return
+		}
+		u, err := url.Parse(s.cfg.DexServerURL)
+		if err != nil {
+			bcode.ReturnHTTPError(req, res, err)
+			return
+		}
+		director := func(req *http.Request) {
+			req.URL.Scheme = u.Scheme
+			req.URL.Host = u.Host
+			req.URL.Path = strings.Replace(req.URL.Path, DexRoutePath, "", 1)
+		}
+		s.dexProxy = &httputil.ReverseProxy{Director: director}
+	}
+	s.dexProxy.ServeHTTP(res, req)
 }
 
 func (s *restServer) startHTTP(ctx context.Context) error {

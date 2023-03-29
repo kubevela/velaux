@@ -59,6 +59,8 @@ type Config struct {
 	WorkflowVersion string
 
 	PluginConfig PluginConfig
+
+	DexServerURL string
 }
 
 type PluginConfig struct {
@@ -96,6 +98,7 @@ func NewConfig() *Config {
 			CorePluginPath:   "core-plugins",
 			CustomPluginPath: []string{"plugins"},
 		},
+		DexServerURL: "http://dex.vela-system:5556",
 	}
 }
 
@@ -126,5 +129,6 @@ func (s *Config) AddFlags(fs *pflag.FlagSet, c *Config) {
 	fs.Float64Var(&s.KubeQPS, "kube-api-qps", c.KubeQPS, "the qps for kube clients. Low qps may lead to low throughput. High qps may give stress to api-server.")
 	fs.IntVar(&s.KubeBurst, "kube-api-burst", c.KubeBurst, "the burst for kube clients. Recommend setting it qps*3.")
 	fs.StringVar(&s.WorkflowVersion, "workflow-version", c.WorkflowVersion, "the version of workflow to meet controller requirement.")
+	fs.StringVar(&s.DexServerURL, "dex-server", c.DexServerURL, "the URL of the dex server.")
 	fs.StringArrayVar(&s.PluginConfig.CustomPluginPath, "plugin-path", c.PluginConfig.CustomPluginPath, "the path of the plugin directory")
 }

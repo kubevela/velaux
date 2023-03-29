@@ -17,15 +17,18 @@ limitations under the License.
 package e2e_test
 
 import (
+	"fmt"
+
+	"cuelang.org/go/pkg/strings"
 	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
+	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
-var _ = Describe("Test plugin rest api", func() {
-
+var _ = Describe("Test the plugin rest api", func() {
 	It("Test list installed plugins", func() {
 		defer GinkgoRecover()
 		res := get("/plugins")
@@ -41,5 +44,26 @@ var _ = Describe("Test plugin rest api", func() {
 		var dto apisv1.PluginDTO
 		Expect(decodeResponseBody(res, &dto)).Should(Succeed())
 		Expect(cmp.Diff(dto.Module, "plugins/app-demo/module")).Should(BeEmpty())
+	})
+})
+
+var _ = Describe("Test to request the plugin static files", func() {
+	It("Test to get the module file", func() {
+		defer GinkgoRecover()
+		res := get("/public/plugins/app-demo/module.js")
+		defer func() { _ = res.Body.Close() }()
+		Expect(cmp.Diff(res.StatusCode, 200)).Should(BeEmpty())
+	})
+})
+
+var _ = Describe("Test to request the dex plugin", func() {
+	It("Test to request the dex", func() {
+		defer GinkgoRecover()
+		res := get(baseDomain + "/dex/a")
+		var bcode bcode.Bcode
+		err := decodeResponseBody(res, &bcode)
+		fmt.Println(err.Error())
+		Expect(strings.HasPrefix(err.Error(), "response code is not 200")).Should(BeTrue())
+		Expect(cmp.Diff(bcode.BusinessCode, int32(404))).Should(BeEmpty())
 	})
 })

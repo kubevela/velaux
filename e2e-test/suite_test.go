@@ -180,10 +180,12 @@ func put(path string, body interface{}) *http.Response {
 
 func get(path string) *http.Response {
 	client := &http.Client{}
-	if !strings.HasPrefix(path, "/v1") {
-		path = baseURL + path
-	} else {
-		path = baseDomain + path
+	if !strings.HasPrefix(path, "http") {
+		if !strings.HasPrefix(path, "/v1") {
+			path = baseURL + path
+		} else {
+			path = baseDomain + path
+		}
 	}
 	req, err := http.NewRequest(http.MethodGet, path, nil)
 	Expect(err).Should(BeNil())
@@ -238,15 +240,14 @@ func decodeResponseBody(resp *http.Response, dst interface{}) error {
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("response code is not 200: %d body: %s", resp.StatusCode, string(body))
-	}
 	if dst != nil {
 		err = json.Unmarshal(body, dst)
 		if err != nil {
 			return err
 		}
-		return nil
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("response code is not 200: %d body: %s", resp.StatusCode, string(body))
 	}
 	return nil
 }
