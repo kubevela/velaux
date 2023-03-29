@@ -40,7 +40,7 @@ class InputSearch extends React.Component<Props, State> {
         <Col span="24">
           <Input
             innerAfter={<AiOutlineSearch onClick={this.handleClickSearch} style={{ margin: 4 }} />}
-            placeholder={i18n.t('Search by name and description etc').toString()}
+            placeholder={i18n.t('Search by Name and Description etc').toString()}
             onChange={this.handleChangName}
             onPressEnter={this.handleClickSearch}
             value={inputValue}

@@ -17,6 +17,9 @@ type Props = {
   envs?: Env[];
   listApplication: (params: any) => void;
   onAddApplication: () => void;
+  setLabelValue: (labels: string[]) => void;
+  appLabels?: string[];
+  labelValue?: string[];
   projectName?: string;
   showMode: ShowMode;
   setMode: (mode: ShowMode) => void;
@@ -26,6 +29,7 @@ type State = {
   targetValue: string;
   inputValue: string;
   envValue: string;
+  labelValue: string[];
 };
 
 class SelectSearch extends React.Component<Props, State> {
@@ -35,9 +39,11 @@ class SelectSearch extends React.Component<Props, State> {
       targetValue: '',
       envValue: '',
       inputValue: '',
+      labelValue: [],
     };
     this.onChangeTarget = this.onChangeTarget.bind(this);
     this.handleChangName = this.handleChangName.bind(this);
+    this.handleChangeLabel = this.handleChangeLabel.bind(this);
   }
 
   onChangeTarget(e: string) {
@@ -68,6 +74,18 @@ class SelectSearch extends React.Component<Props, State> {
     );
   };
 
+  handleChangeLabel(value: string[]) {
+    const { setLabelValue } = this.props;
+    let label = value? value:[]
+    setLabelValue(label)
+    this.setState({
+      labelValue: label,
+    },
+    () => {
+      this.getApplications();
+    });
+  };
+
   handleClickSearch = () => {
     this.getApplications();
   };
@@ -92,7 +110,7 @@ class SelectSearch extends React.Component<Props, State> {
   };
 
   render() {
-    const { targetList, envs, projectName, showMode } = this.props;
+    const { targetList, envs, projectName, showMode, labelValue, appLabels } = this.props;
     const { targetValue, inputValue, envValue } = this.state;
     const targetSource = targetList?.map((item) => {
       return {
@@ -107,12 +125,20 @@ class SelectSearch extends React.Component<Props, State> {
         value: env.name,
       };
     });
+
+    const labelSource = appLabels?.map((item) => {
+      return {
+        label: item,
+        value: item,
+      };
+    });
+
     return (
       <Fragment>
         <Row className="project-select-wrapper border-radius-8 margin-top-20">
           <Col span="20">
             <Row wrap={true}>
-              <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+              <Col xl={4} m={4} s={8} xxs={24} style={{ padding: '0 8px' }}>
                 <Select
                   locale={locale().Select}
                   mode="single"
@@ -125,7 +151,7 @@ class SelectSearch extends React.Component<Props, State> {
                   value={envValue}
                 />
               </Col>
-              <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+              <Col xl={4} m={4} s={8} xxs={24} style={{ padding: '0 8px' }}>
                 <Select
                   locale={locale().Select}
                   mode="single"
@@ -138,19 +164,32 @@ class SelectSearch extends React.Component<Props, State> {
                   value={targetValue}
                 />
               </Col>
-              <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+              <Col xl={8} m={8} s={16} xxs={24} style={{ padding: '0 8px' }}>
+                <Select
+                  hasClear
+                  size="large"
+                  placeholder={i18n.t('Search by Label Selector').toString()}
+                  onChange={this.handleChangeLabel}
+                  showSearch
+                  mode="multiple"
+                  value={labelValue}
+                  className="item"
+                  dataSource={labelSource}
+                />
+              </Col>
+              <Col xl={4} m={8} s={8} xxs={24} style={{ padding: '0 8px' }}>
                 <Input
                   innerAfter={<Icon type="search" size="xs" onClick={this.handleClickSearch} style={{ margin: 4 }} />}
                   hasClear
                   size="large"
-                  placeholder={i18n.t('Search by name and description etc')}
+                  placeholder={i18n.t('Search by Name and Description etc')}
                   onChange={this.handleChangName}
                   onPressEnter={this.handleClickSearch}
                   value={inputValue}
                   className="item"
                 />
               </Col>
-              <Col xl={6}>
+              <Col xl={4} s={8}>
                 <div className="show-mode">
                   <Button.Group>
                     <Button

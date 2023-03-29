@@ -67,7 +67,7 @@ class SelectSearch extends React.Component<Props, State> {
     const { Row, Col } = Grid;
     const { Option } = Select;
     const { registries } = this.props;
-    const queryPlaceholder = i18n.t('Search by name and description etc').toString();
+    const queryPlaceholder = i18n.t('Search by Name and Description etc').toString();
     const { registryValue, inputValue } = this.state;
 
     return (

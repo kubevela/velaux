@@ -392,6 +392,7 @@ export interface ApplicationQuery {
   project?: string;
   env?: string;
   targetName?: string;
+  labels?: string;
 }
 
 export interface ComponentDefinitionsBase {

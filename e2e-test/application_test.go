@@ -33,6 +33,7 @@ import (
 )
 
 var appName = "app-e2e"
+var appName2 = "app-e2e-2"
 var appProject = "test-app-project"
 
 func prepareEnv(envName string) {
@@ -66,6 +67,29 @@ var _ = Describe("Test application rest api", func() {
 			Name:        appName,
 			Project:     appProject,
 			Description: "this is a test app",
+			Icon:        "",
+			Labels:      map[string]string{"test": "true"},
+			EnvBinding:  []*apisv1.EnvBinding{{Name: "dev-env"}},
+			Component: &apisv1.CreateComponentRequest{
+				Name:          "webservice",
+				ComponentType: "webservice",
+				Properties:    "{\"image\":\"nginx\"}",
+			},
+		}
+		res := post("/applications", req)
+		var appBase apisv1.ApplicationBase
+		Expect(decodeResponseBody(res, &appBase)).Should(Succeed())
+		Expect(cmp.Diff(appBase.Name, req.Name)).Should(BeEmpty())
+		Expect(cmp.Diff(appBase.Description, req.Description)).Should(BeEmpty())
+		Expect(cmp.Diff(appBase.Labels["test"], req.Labels["test"])).Should(BeEmpty())
+	})
+
+	It("Test create second app", func() {
+		defer GinkgoRecover()
+		var req = apisv1.CreateApplicationRequest{
+			Name:        appName2,
+			Project:     appProject,
+			Description: "this is another test app",
 			Icon:        "",
 			Labels:      map[string]string{"test": "true", "labelselector": "true"},
 			EnvBinding:  []*apisv1.EnvBinding{{Name: "dev-env"}},
