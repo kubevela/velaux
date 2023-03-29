@@ -50,7 +50,7 @@ var _ = Describe("Test the plugin rest api", func() {
 var _ = Describe("Test to request the plugin static files", func() {
 	It("Test to get the module file", func() {
 		defer GinkgoRecover()
-		res := get("/public/plugins/app-demo/module.js")
+		res := get(baseDomain + "/public/plugins/app-demo/module.js")
 		defer func() { _ = res.Body.Close() }()
 		Expect(cmp.Diff(res.StatusCode, 200)).Should(BeEmpty())
 	})
