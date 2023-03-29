@@ -38,7 +38,7 @@ class HelmRepoSelect extends Component<Props, State> {
   }
   componentDidMount() {
     if (!this.props.helm?.repoType || this.props.helm?.repoType == 'helm') {
-      this.onLoadRepos(this.props.helm?.repoType);
+      this.onLoadRepos(this.props.helm?.repoType || 'helm');
     }
   }
 
