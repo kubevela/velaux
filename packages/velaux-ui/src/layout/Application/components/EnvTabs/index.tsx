@@ -13,12 +13,13 @@ import { Link } from 'dva/router';
 import classNames from 'classnames';
 import { Balloon } from '@alifd/next';
 import { IoMdAdd } from 'react-icons/io';
+import { Dispatch } from 'redux';
 
 type Props = {
   activeKey: string;
   applicationDetail?: ApplicationDetail;
   appName: string;
-  dispatch: ({}) => {};
+  dispatch: Dispatch;
   envbinding?: EnvBinding[];
 };
 

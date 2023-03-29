@@ -4,16 +4,34 @@
     .next-radio-wrapper {
       width: 100%;
       margin-bottom: 8px;
-      padding: 16px 32px;
+      padding: var(--spacing-4) var(--spacing-4) 0 var(--spacing-4);
       border: 1px solid #c0c6cc !important;
       border-radius: 4px;
       cursor: pointer;
-      .env {
-        float: right;
-      }
     }
     .next-radio-wrapper:hover {
-      border: 1px solid #0064c8 !important;
+      border: 1px solid var(--primary-color) !important;
+    }
+  }
+  .deploy-workflow-select-item {
+    display: flex;
+    padding: var(--spacing-4) 0;
+    justify-content: space-between;
+    flex-flow: row nowrap;
+    .env {
+      flex-grow: 1;
+      width: 100px;
+      display: flex;
+      justify-content: end;
+      align-items: center;
+    }
+  }
+  .deploy-notice {
+    color: var(--grey-300);
+    display: flex;
+    align-items: center;
+    .enable-canary-deploy {
+      margin-left: var(--spacing-4);
     }
   }
 }

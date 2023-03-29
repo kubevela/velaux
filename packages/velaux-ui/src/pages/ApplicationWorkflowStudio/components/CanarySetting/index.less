@@ -1,0 +1,35 @@
+.canary-step-setting {
+  margin-top: var(--spacing-6);
+}
+.canary-step {
+  display: flex;
+  justify-content: space-between;
+  .source,
+  .target {
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    border: 1px dashed #c0c6cc;
+    padding: var(--spacing-4);
+  }
+  .source {
+    margin-right: 32px;
+    position: relative;
+    &::after {
+      content: '';
+      position: absolute;
+      height: 7px;
+      width: 7px;
+      right: -19px;
+      border-top: 2px solid #c0c6cc;
+      border-right: 2px solid #c0c6cc;
+      transform: rotate(45deg);
+    }
+  }
+  .target {
+    width: 100%;
+    .next-number-picker-normal.next-medium {
+      width: 100%;
+    }
+  }
+}
