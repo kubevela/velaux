@@ -138,7 +138,7 @@ class SelectSearch extends React.Component<Props, State> {
         <Row className="project-select-wrapper border-radius-8 margin-top-20">
           <Col span="20">
             <Row wrap={true}>
-              <Col xl={6} m={4} s={6} xxs={24} style={{ padding: '0 8px' }}>
+              <Col xl={4} m={4} s={8} xxs={24} style={{ padding: '0 8px' }}>
                 <Select
                   locale={locale().Select}
                   mode="single"
@@ -151,7 +151,7 @@ class SelectSearch extends React.Component<Props, State> {
                   value={envValue}
                 />
               </Col>
-              <Col xl={6} m={4} s={6} xxs={24} style={{ padding: '0 8px' }}>
+              <Col xl={4} m={4} s={8} xxs={24} style={{ padding: '0 8px' }}>
                 <Select
                   locale={locale().Select}
                   mode="single"
@@ -164,7 +164,7 @@ class SelectSearch extends React.Component<Props, State> {
                   value={targetValue}
                 />
               </Col>
-              <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+              <Col xl={8} m={8} s={16} xxs={24} style={{ padding: '0 8px' }}>
                 <Select
                   hasClear
                   size="large"
@@ -177,7 +177,7 @@ class SelectSearch extends React.Component<Props, State> {
                   dataSource={labelSource}
                 />
               </Col>
-              <Col xl={6} m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+              <Col xl={4} m={8} s={8} xxs={24} style={{ padding: '0 8px' }}>
                 <Input
                   innerAfter={<Icon type="search" size="xs" onClick={this.handleClickSearch} style={{ margin: 4 }} />}
                   hasClear
@@ -189,7 +189,7 @@ class SelectSearch extends React.Component<Props, State> {
                   className="item"
                 />
               </Col>
-              <Col xl={6}>
+              <Col xl={4} s={8}>
                 <div className="show-mode">
                   <Button.Group>
                     <Button
