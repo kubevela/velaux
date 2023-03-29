@@ -42,8 +42,8 @@ func NewPluginService(pluginConfig config.PluginConfig) PluginService {
 // PluginService the plugin service provide some handler functions about the plugin
 type PluginService interface {
 	ListInstalledPlugins(ctx context.Context) []v1.PluginDTO
-	DetailInstalledPlugin(ctx context.Context, pluginId string) (*v1.PluginDTO, error)
-	GetPlugin(ctx context.Context, pluginId string) (*types.Plugin, error)
+	DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error)
+	GetPlugin(ctx context.Context, pluginID string) (*types.Plugin, error)
 	Init(ctx context.Context) error
 }
 
@@ -55,7 +55,7 @@ type pluginImpl struct {
 
 func (p *pluginImpl) Init(ctx context.Context) error {
 	for _, s := range pluginSources(p.pluginConfig) {
-		plugins, err := p.loader.Load(ctx, s.Class, s.Paths, nil)
+		plugins, err := p.loader.Load(s.Class, s.Paths, nil)
 		if err != nil {
 			return err
 		}
@@ -78,8 +78,8 @@ func (p *pluginImpl) ListInstalledPlugins(ctx context.Context) []v1.PluginDTO {
 	return pluginDTOs
 }
 
-func (p *pluginImpl) DetailInstalledPlugin(ctx context.Context, pluginId string) (*v1.PluginDTO, error) {
-	plugin, ok := p.registry.Plugin(ctx, pluginId)
+func (p *pluginImpl) DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error) {
+	plugin, ok := p.registry.Plugin(ctx, pluginID)
 	if !ok {
 		return nil, bcode.ErrPluginNotfound
 	}
@@ -87,8 +87,8 @@ func (p *pluginImpl) DetailInstalledPlugin(ctx context.Context, pluginId string)
 	return &dto, nil
 }
 
-func (p *pluginImpl) GetPlugin(ctx context.Context, pluginId string) (*types.Plugin, error) {
-	plugin, ok := p.registry.Plugin(ctx, pluginId)
+func (p *pluginImpl) GetPlugin(ctx context.Context, pluginID string) (*types.Plugin, error) {
+	plugin, ok := p.registry.Plugin(ctx, pluginID)
 	if !ok {
 		return nil, bcode.ErrPluginNotfound
 	}

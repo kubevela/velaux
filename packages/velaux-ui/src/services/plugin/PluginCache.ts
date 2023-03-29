@@ -26,7 +26,7 @@ export function getPluginInfo(id: string): Promise<PluginMeta> {
     return Promise.resolve(v);
   }
   return getBackendSrv()
-    .get(`/api/v1/plugins/${pluginId}`)
+    .get(`/api/v1/plugins/${id}`)
     .then((settings: any) => {
       pluginInfoCache[pluginId] = settings;
       return settings;

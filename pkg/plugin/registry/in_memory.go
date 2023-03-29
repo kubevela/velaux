@@ -8,25 +8,30 @@ import (
 	plugins "github.com/kubevela/velaux/pkg/plugin/types"
 )
 
+// InMemoryPoll save the plugin to memory.
 type InMemoryPoll struct {
 	store map[string]*plugins.Plugin
 	mu    sync.RWMutex
 }
 
+// ProvideService -
 func ProvideService() *InMemoryPoll {
 	return NewInMemory()
 }
 
+// NewInMemory create a memory plugin pool
 func NewInMemory() *InMemoryPoll {
 	return &InMemoryPoll{
 		store: make(map[string]*plugins.Plugin),
 	}
 }
 
+// Plugin load a plugin
 func (i *InMemoryPoll) Plugin(_ context.Context, pluginID string) (*plugins.Plugin, bool) {
 	return i.plugin(pluginID)
 }
 
+// Plugins load all plugins
 func (i *InMemoryPoll) Plugins(_ context.Context) []*plugins.Plugin {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
@@ -39,6 +44,7 @@ func (i *InMemoryPoll) Plugins(_ context.Context) []*plugins.Plugin {
 	return res
 }
 
+// Add save a plugin to pool
 func (i *InMemoryPoll) Add(_ context.Context, p *plugins.Plugin) error {
 	if i.isRegistered(p.ID) {
 		return fmt.Errorf("plugin %s is already registered", p.ID)
@@ -51,6 +57,7 @@ func (i *InMemoryPoll) Add(_ context.Context, p *plugins.Plugin) error {
 	return nil
 }
 
+// Remove remove a plugin from pool
 func (i *InMemoryPoll) Remove(_ context.Context, pluginID string) error {
 	if !i.isRegistered(pluginID) {
 		return fmt.Errorf("plugin %s is not registered", pluginID)

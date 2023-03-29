@@ -180,7 +180,7 @@ func getKindAndVersion(defType string) (apiVersion, kind string, err error) {
 	}
 }
 
-// TODO : Import this variable from types.AnnoDefinitionCategory
+// AnnoDefinitionCategory TODO : Import this variable from types.AnnoDefinitionCategory
 const AnnoDefinitionCategory = "custom.definition.oam.dev/category"
 
 func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.DefinitionBase, error) {

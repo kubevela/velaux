@@ -61,6 +61,7 @@ type Config struct {
 	PluginConfig PluginConfig
 }
 
+// PluginConfig the plugin directory config
 type PluginConfig struct {
 	CorePluginPath   string
 	CustomPluginPath []string
