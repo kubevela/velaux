@@ -41,6 +41,17 @@ export interface StepEdit extends WorkflowStep {
 class WorkflowStudio extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    const steps = this.renderSteps(props);
+    this.state = { steps: steps, stepInterval: 100, addIndex: 0, changed: false };
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>) {
+    if (prevProps.steps != this.props.steps) {
+      this.setState({ steps: this.renderSteps(this.props) });
+    }
+  }
+
+  renderSteps = (props: Props) => {
     const steps =
       props.steps?.map((step) => {
         const se: StepEdit = Object.assign(step, { nodeType: 'step', width: 260 });
@@ -48,9 +59,8 @@ class WorkflowStudio extends React.Component<Props, State> {
       }) || [];
     steps.unshift({ nodeType: 'start', width: 100, name: 'start', type: '' });
     steps.push({ nodeType: 'end', width: 100, name: 'end', type: '' });
-    this.state = { steps: steps, stepInterval: 100, addIndex: 0, changed: false };
-  }
-
+    return steps;
+  };
   onChange = () => {
     const { steps } = this.state;
     const ws = steps

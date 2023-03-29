@@ -22,6 +22,7 @@ import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
 import locale from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
+import { Dispatch } from 'redux';
 
 const { Row, Col } = Grid;
 
@@ -31,7 +32,7 @@ interface Props {
   applicationDetail?: ApplicationDetail;
   applicationStatus?: { status?: ApplicationStatus };
   workflows?: Workflow[];
-  dispatch?: (params: any) => void;
+  dispatch: Dispatch;
 }
 
 interface State {
@@ -115,7 +116,7 @@ class ApplicationHeader extends Component<Props, State> {
   componentWillUnmount() {}
 
   render() {
-    const { applicationDetail, currentPath, workflows, appName } = this.props;
+    const { applicationDetail, currentPath, workflows, appName, dispatch } = this.props;
     const { showDeployConfig } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     let item = <Translation>{`app-${activeKey}`}</Translation>;
@@ -180,6 +181,7 @@ class ApplicationHeader extends Component<Props, State> {
               onClose={() => {
                 this.setState({ showDeployConfig: false });
               }}
+              dispatch={dispatch}
               appName={appName}
               onOK={this.onDeploy}
               workflows={workflows}

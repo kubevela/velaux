@@ -1,4 +1,4 @@
-import { Balloon, Button, Card, Form, Grid, Loading, Message, Select, Tag } from '@alifd/next';
+import { Balloon, Button, Card, Form, Grid, Loading, Message, Select, Tag, MenuButton } from '@alifd/next';
 import { connect } from 'dva';
 import _ from 'lodash';
 import React from 'react';
@@ -22,6 +22,8 @@ import classNames from 'classnames';
 
 import { WorkflowYAML } from '../../components/WorkflowYAML';
 import i18n from '../../i18n';
+import { CanarySetting } from './components/CanarySetting';
+import { locationService } from '../../services/LocationService';
 
 const { Row, Col } = Grid;
 const ButtonGroup = Button.Group;
@@ -42,6 +44,7 @@ type State = {
   mode: WorkflowMode;
   subMode: WorkflowMode;
   editMode: 'visual' | 'yaml';
+  setCanary?: boolean;
 };
 
 export const WorkflowModeOptions = [
@@ -79,6 +82,11 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Readonly<Props>): void {
     if (prevProps.match !== this.props.match || prevProps.envbinding !== this.props.envbinding) {
       this.loadWorkflow();
+    }
+    const search = locationService.getSearchObject();
+    const setCanary = search && search['setCanary'] == true ? true : false;
+    if (this.state.setCanary != setCanary) {
+      this.setState({ setCanary: setCanary });
     }
   }
 
@@ -147,7 +155,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
   };
 
   render() {
-    const { workflow, definitions, changed, saveLoading, mode, subMode, editMode } = this.state;
+    const { workflow, definitions, changed, saveLoading, mode, subMode, editMode, setCanary, steps } = this.state;
     const { applicationDetail, dispatch } = this.props;
     const envbinding = this.getEnvbindingByName();
     return (
@@ -222,6 +230,16 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                   <Translation>Unsaved changes</Translation>
                 </div>
               )}
+              <MenuButton style={{ marginRight: 'var(--spacing-4)' }} autoWidth={false} label="More">
+                <MenuButton.Item
+                  onClick={() => {
+                    locationService.partial({ setCanary: true });
+                    this.setState({ setCanary: true });
+                  }}
+                >
+                  <Translation>Canary Setting</Translation>
+                </MenuButton.Item>
+              </MenuButton>
               <Form.Item label={i18n.t('Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
                 <Select
                   locale={locale().Select}
@@ -259,11 +277,23 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
               workflow: workflow as WorkflowData,
             }}
           >
-            <WorkflowStudio definitions={definitions} steps={_.cloneDeep(workflow.steps)} onChange={this.onChange} />
+            <WorkflowStudio definitions={definitions} steps={steps} onChange={this.onChange} />
           </WorkflowContext.Provider>
         )}
         {workflow && editMode === 'yaml' && (
-          <WorkflowYAML steps={_.cloneDeep(workflow.steps)} name={workflow.name} onChange={this.onChange} />
+          <WorkflowYAML steps={steps} name={workflow.name} onChange={this.onChange} />
+        )}
+
+        {setCanary && (
+          <CanarySetting
+            definitions={definitions}
+            onCancel={() => {
+              locationService.partial({ setCanary: false });
+              this.setState({ setCanary: false });
+            }}
+            workflow={workflow}
+            onChange={this.onChange}
+          ></CanarySetting>
         )}
       </div>
     );

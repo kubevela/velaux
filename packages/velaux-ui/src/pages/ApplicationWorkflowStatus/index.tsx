@@ -3,7 +3,6 @@ import { connect } from 'dva';
 import { routerRedux, Link } from 'dva/router';
 import React from 'react';
 import type { Dispatch } from 'redux';
-
 import { detailWorkflow, getEnvWorkflowRecord } from '../../api/workflows';
 import Empty from '../../components/Empty';
 import { If } from '../../components/If';
@@ -172,7 +171,6 @@ class ApplicationWorkflow extends React.Component<Props, State> {
       const newProperties: Record<string, any> = JSON.parse(properties);
       properties = newProperties;
     }
-
     return (
       <div className="run-layout">
         <Card contentHeight={'auto'}>

@@ -1,3 +1,4 @@
+import { DeployModes } from '@velaux/data';
 import React from 'react';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
 
@@ -12,7 +13,8 @@ import SvgWorkflow from '../Icons/SvgWorkflow';
 
 export const StepTypeIcon = (props: { type: string }) => {
   switch (props.type) {
-    case 'deploy':
+    case DeployModes.Deploy:
+    case DeployModes.CanaryDeploy:
       return <SvgKubernetes width="24px" height="24px" />;
     case 'deploy-cloud-resource':
       return <SvgTerraform width="24px" height="24px" />;

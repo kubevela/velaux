@@ -53,7 +53,7 @@ class PolicyList extends Component<Props, State> {
         <div className="box">
           <Row wrap={true}>
             {(policies || []).map((item: ApplicationPolicyBase) => (
-              <Col span={24} key={item.type} className="box-item">
+              <Col span={24} key={item.type + item.name} className="box-item">
                 <Card free={true} style={{ padding: '16px' }} hasBorder contentHeight="auto" locale={locale().Card}>
                   <div className="policy-list-nav">
                     <div className="policy-list-title">

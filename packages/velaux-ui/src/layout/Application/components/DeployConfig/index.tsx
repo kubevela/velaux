@@ -1,6 +1,6 @@
 import { Button, Dialog, Message, Radio } from '@alifd/next';
 import React, { Component } from 'react';
-
+import { Link, routerRedux } from 'dva/router';
 import { dryRunApplication } from '../../../../api/application';
 import { ApplicationDryRun } from '../../../../components/ApplicationDryRun';
 import { If } from '../../../../components/If';
@@ -10,6 +10,8 @@ import type { ApplicationDetail, ApplicationDryRunResponse, Workflow } from '../
 import type { APIError } from '../../../../utils/errors';
 import locale from '../../../../utils/locale';
 import './index.less';
+import { Dispatch } from 'redux';
+import { DeployModes } from '@velaux/data';
 
 const { Group: RadioGroup } = Radio;
 
@@ -19,6 +21,7 @@ interface Props {
   onClose: () => void;
   onOK: (workflowName?: string, force?: boolean) => void;
   workflows?: Workflow[];
+  dispatch: Dispatch;
 }
 
 interface State {
@@ -28,6 +31,23 @@ interface State {
   showDryRunResult: boolean;
   dryRunResultState?: 'success' | 'failure';
   dryRunMessage?: string;
+}
+
+function checkCanaryDeployStep(w: Workflow): boolean {
+  if (
+    w.steps?.find((step) => {
+      if (step.type === DeployModes.CanaryDeploy) {
+        return true;
+      }
+      if (step.subSteps?.find((sub) => sub.type === DeployModes.CanaryDeploy)) {
+        return true;
+      }
+      return false;
+    })
+  ) {
+    return true;
+  }
+  return false;
 }
 
 class DeployConfigDialog extends Component<Props, State> {
@@ -147,6 +167,7 @@ class DeployConfigDialog extends Component<Props, State> {
           </If>
           <RadioGroup value={workflowName} onChange={this.onChange}>
             {workflows?.map((workflow) => {
+              const haveCanaryDeploy = checkCanaryDeployStep(workflow);
               return (
                 <Radio
                   key={workflow.name}
@@ -157,7 +178,41 @@ class DeployConfigDialog extends Component<Props, State> {
                   }}
                 >
                   {workflow.alias ? workflow.alias : workflow.name}
-                  <span className="env">Env: {workflow.envName}</span>
+                  <div className="deploy-workflow-select-item">
+                    {haveCanaryDeploy ? (
+                      <div className="deploy-notice">
+                        <Translation>Canary Deploy</Translation>
+                      </div>
+                    ) : (
+                      <div className="deploy-notice">
+                        <div>
+                          <Translation>Default Deploy</Translation>
+                        </div>
+                        <div className="enable-canary-deploy">
+                          <Button
+                            size="small"
+                            type="secondary"
+                            onClick={() => {
+                              this.props.dispatch(
+                                routerRedux.push(
+                                  `/applications/${applicationDetail.name}/envbinding/${workflow.envName}/workflow/studio?setCanary`
+                                )
+                              );
+                              this.props.onClose();
+                            }}
+                          >
+                            <Translation>Enable Canary Deploy</Translation>
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    <span className="env">
+                      <Translation>Environment</Translation>:
+                      <Link to={`/applications/${applicationDetail.name}/envbinding/${workflow.envName}/workflow`}>
+                        {workflow.envName}
+                      </Link>
+                    </span>
+                  </div>
                 </Radio>
               );
             })}

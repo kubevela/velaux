@@ -8,12 +8,13 @@ import Menus from './components/Menus';
 
 import './index.less';
 import type { ApplicationDetail } from '../../interface/application';
+import { Dispatch } from 'redux';
 
 const { Row } = Grid;
 
 interface Props {
   match: any;
-  dispatch: any;
+  dispatch: Dispatch;
   location: any;
   applicationDetail?: ApplicationDetail;
 }
@@ -123,12 +124,8 @@ class ApplicationLayout extends Component<Props, any> {
     }
     return (
       <div className="app-layout">
-        <Header appName={appName} currentPath={url} />
-        <EnvTabs
-          dispatch={dispatch}
-          appName={appName}
-          activeKey={envName ? envName : 'basisConfig'}
-        />
+        <Header dispatch={dispatch} appName={appName} currentPath={url} />
+        <EnvTabs dispatch={dispatch} appName={appName} activeKey={envName ? envName : 'basisConfig'} />
         <Row className="padding16 main">
           <div className="menu">
             <Menus currentPath={url} appName={appName} envName={envName} />
