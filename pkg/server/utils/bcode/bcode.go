@@ -83,7 +83,9 @@ func NewBcode(httpCode, businessCode int32, message string) *Bcode {
 
 // ReturnHTTPError Unified handling of all types of errors, generating a standard return structure.
 func ReturnHTTPError(req *http.Request, res http.ResponseWriter, err error) {
-	ReturnError(restful.NewRequest(req), restful.NewResponse(res), err)
+	restRes := restful.NewResponse(res)
+	restRes.SetRequestAccepts(restful.MIME_JSON)
+	ReturnError(restful.NewRequest(req), restRes, err)
 }
 
 // ReturnError Unified handling of all types of errors, generating a standard return structure.
