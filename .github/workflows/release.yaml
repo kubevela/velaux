@@ -19,6 +19,11 @@ jobs:
           VERSION=latest
         fi
         echo ::set-output name=VERSION::${VERSION}
+    - name: Get git revision
+      id: vars
+      shell: bash
+      run: |
+        echo "git_revision=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
     - name: Login to DockerHub
       uses: docker/login-action@v1 
       with:
