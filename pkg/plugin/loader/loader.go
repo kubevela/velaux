@@ -73,13 +73,11 @@ func (l *Loader) loadPlugins(class types.Class, pluginJSONPaths []string, existi
 			klog.Warningf("skipping plugin loading as its plugin.json could not be read,path:%s,err:%s", pluginJSONPath, err.Error())
 			continue
 		}
-
 		pluginJSONAbsPath, err := filepath.Abs(pluginJSONPath)
 		if err != nil {
 			klog.Warningf("skipping plugin loading as absolute plugin.json path could not be calculated,pluginID:%s,err:%s", plugin.ID, err.Error())
 			continue
 		}
-
 		if _, dupe := foundPlugins[filepath.Dir(pluginJSONAbsPath)]; dupe {
 			klog.Warningf("skipping plugin loading as it's a duplicate,pluginID:%s", plugin.ID)
 			continue
@@ -97,19 +95,18 @@ func (l *Loader) loadPlugins(class types.Class, pluginJSONPaths []string, existi
 
 	verifiedPlugins := make([]*types.Plugin, 0)
 	for _, plugin := range loadedPlugins {
-
 		// verify module.js exists for SystemJS to load
 		if !plugin.IsCorePlugin() {
 			module := filepath.Join(plugin.PluginDir, "module.js")
 			if exists, err := fs.Exists(module); err != nil {
 				return nil, err
 			} else if !exists {
-				klog.Warningf("Plugin missing module.js, pluginID: %s, warning: %s, path: %s", plugin.ID,
+				klog.Errorf("Plugin missing module.js, pluginID: %s, warning: %s, path: %s", plugin.ID,
 					"Missing module.js, If you loaded this plugin from git, make sure to compile it.",
 					module)
+				continue
 			}
 		}
-
 		verifiedPlugins = append(verifiedPlugins, plugin)
 	}
 

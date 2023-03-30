@@ -12,3 +12,5 @@ public
 *.d.ts
 
 dist
+
+pkg/
