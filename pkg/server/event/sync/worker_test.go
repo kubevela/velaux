@@ -74,6 +74,7 @@ var _ = Describe("Test Worker CR sync to datastore", func() {
 			ProjectService:     crux.projectService,
 			ApplicationService: crux.applicationService,
 			TargetService:      crux.targetService,
+			WorkflowService:    crux.workflowService,
 			EnvService:         crux.envService,
 		}
 		go appSync.Start(ctx, make(chan error))

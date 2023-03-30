@@ -66,14 +66,20 @@ func (c *CR2UX) initCache(ctx context.Context) error {
 	return nil
 }
 
-func (c *CR2UX) shouldSync(ctx context.Context, targetApp *v1beta1.Application, del bool) bool {
+func (c *CR2UX) appFromUX(targetApp *v1beta1.Application) bool {
+	if targetApp != nil && targetApp.Labels != nil && targetApp.Labels[types.LabelSourceOfTruth] == types.FromUX {
+		return true
+	}
+	return false
+}
+
+func (c *CR2UX) appFromCLI(targetApp *v1beta1.Application) bool {
 	if targetApp != nil && targetApp.Labels != nil {
 		// the source is inner and is not the addon application, ignore it.
 		if targetApp.Labels[types.LabelSourceOfTruth] == types.FromInner && targetApp.Labels[oam.LabelAddonName] == "" {
 			return false
 		}
-		// the source is UX, ignore it
-		if targetApp.Labels[types.LabelSourceOfTruth] == types.FromUX {
+		if c.appFromUX(targetApp) {
 			return false
 		}
 	}
@@ -84,7 +90,10 @@ func (c *CR2UX) shouldSync(ctx context.Context, targetApp *v1beta1.Application, 
 			return false
 		}
 	}
+	return true
+}
 
+func (c *CR2UX) shouldSyncMetaFromCLI(ctx context.Context, targetApp *v1beta1.Application, del bool) bool {
 	key := formatAppComposedName(targetApp.Name, targetApp.Namespace)
 	cachedData, ok := c.cache.Load(key)
 	if ok {

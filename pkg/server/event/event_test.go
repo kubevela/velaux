@@ -26,5 +26,5 @@ import (
 
 func TestInitEvent(t *testing.T) {
 	InitEvent(config.Config{})
-	assert.Equal(t, len(workers), 3)
+	assert.Equal(t, len(workers), 2)
 }

@@ -18,7 +18,6 @@ package sync
 
 import (
 	"context"
-	"sync"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -51,7 +50,7 @@ var _ = Describe("Test Cache", func() {
 		err = k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
 
-		cr2ux := CR2UX{ds: ds, cli: k8sClient, cache: sync.Map{}}
+		cr2ux := newCR2UX(ds)
 
 		ctx := context.Background()
 		Expect(ds.Add(ctx, &model.Application{Name: "app1"})).Should(BeNil())
@@ -70,7 +69,7 @@ var _ = Describe("Test Cache", func() {
 		app1 := &v1beta1.Application{}
 		app1.Name = "app1"
 		app1.Namespace = "app1-ns"
-		Expect(cr2ux.shouldSync(ctx, app1, false)).Should(BeEquivalentTo(true))
+		Expect(cr2ux.shouldSyncMetaFromCLI(ctx, app1, false)).Should(BeEquivalentTo(true))
 
 		app2 := &v1beta1.Application{}
 		app2.Name = "app2"
@@ -78,21 +77,21 @@ var _ = Describe("Test Cache", func() {
 		app2.Generation = 1
 		app2.Status.LatestRevision = &common.Revision{Name: "v1"}
 
-		Expect(cr2ux.shouldSync(ctx, app2, false)).Should(BeEquivalentTo(true))
+		Expect(cr2ux.shouldSyncMetaFromCLI(ctx, app2, false)).Should(BeEquivalentTo(true))
 
 		// Only need to sync once.
 		cr2ux.syncCache(formatAppComposedName(app2.Name, app2.Namespace), "v1", 1)
-		Expect(cr2ux.shouldSync(ctx, app2, false)).Should(BeEquivalentTo(false))
+		Expect(cr2ux.shouldSyncMetaFromCLI(ctx, app2, false)).Should(BeEquivalentTo(false))
 
 		app3 := &v1beta1.Application{}
 		app3.Name = "app3"
 		app3.Namespace = "app3-ns"
 		app3.ResourceVersion = "3"
 		app3.Labels = map[string]string{
-			velatypes.LabelSourceOfTruth: velatypes.FromUX,
+			velatypes.LabelSourceOfTruth: velatypes.FromInner,
 		}
 
-		Expect(cr2ux.shouldSync(ctx, app3, false)).Should(BeEquivalentTo(false))
+		Expect(cr2ux.appFromCLI(app3)).Should(BeEquivalentTo(false))
 
 		Expect(ds.Put(ctx, &model.Application{Name: "app1", Labels: map[string]string{
 			model.LabelSyncRevision:  "v1",
@@ -100,10 +99,10 @@ var _ = Describe("Test Cache", func() {
 		}})).Should(BeNil())
 		cr2ux.syncCache(formatAppComposedName(app1.Name, app1.Namespace), "v1", 0)
 		app1.Status.LatestRevision = &common.Revision{Name: "v1"}
-		Expect(cr2ux.shouldSync(ctx, app1, false)).Should(BeEquivalentTo(false))
-		Expect(cr2ux.shouldSync(ctx, app1, true)).Should(BeEquivalentTo(true))
+		Expect(cr2ux.shouldSyncMetaFromCLI(ctx, app1, false)).Should(BeEquivalentTo(false))
+		Expect(cr2ux.shouldSyncMetaFromCLI(ctx, app1, true)).Should(BeEquivalentTo(true))
 		Expect(ds.Delete(ctx, &model.Application{Name: "app1"})).Should(BeNil())
-		Expect(cr2ux.shouldSync(ctx, app1, false)).Should(BeEquivalentTo(true))
+		Expect(cr2ux.shouldSyncMetaFromCLI(ctx, app1, false)).Should(BeEquivalentTo(true))
 
 	})
 	It("Test don't cache with from inner system label", func() {
@@ -117,7 +116,7 @@ var _ = Describe("Test Cache", func() {
 		err = k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
 
-		cr2ux := CR2UX{ds: ds, cli: k8sClient, cache: sync.Map{}}
+		cr2ux := newCR2UX(ds)
 		ctx := context.Background()
 
 		app1 := &v1beta1.Application{}
@@ -128,6 +127,6 @@ var _ = Describe("Test Cache", func() {
 		app1.Labels = make(map[string]string)
 		app1.Labels[velatypes.LabelSourceOfTruth] = velatypes.FromInner
 		Expect(k8sClient.Create(ctx, app1)).Should(BeNil())
-		Expect(cr2ux.shouldSync(ctx, app1, false)).Should(BeEquivalentTo(false))
+		Expect(cr2ux.appFromCLI(app1)).Should(BeEquivalentTo(false))
 	})
 })
