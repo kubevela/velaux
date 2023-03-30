@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 )
 
+// Plugin VelaUX plugin model
 type Plugin struct {
 	JSONData
 	PluginDir     string
@@ -32,6 +33,7 @@ type Plugin struct {
 	BaseURL string
 }
 
+// BuildInfo the plugin build info
 type BuildInfo struct {
 	Time   int64  `json:"time,omitempty"`
 	Repo   string `json:"repo,omitempty"`
@@ -39,21 +41,25 @@ type BuildInfo struct {
 	Hash   string `json:"hash,omitempty"`
 }
 
+// InfoLink the link model
 type InfoLink struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
 }
 
+// Logos the log model
 type Logos struct {
 	Small string `json:"small"`
 	Large string `json:"large"`
 }
 
+// Screenshots the screenshot model
 type Screenshots struct {
 	Name string `json:"name"`
 	Path string `json:"path"`
 }
 
+// Info the info model
 type Info struct {
 	Author      InfoLink      `json:"author"`
 	Description string        `json:"description"`
@@ -65,34 +71,27 @@ type Info struct {
 	Updated     string        `json:"updated"`
 }
 
-type Dependencies struct {
-	VelaUXDependency string       `json:"velauxDependency"`
-	VelaUXVersion    string       `json:"velauxVersion"`
-	Plugins          []Dependency `json:"plugins"`
-}
-
-type Dependency struct {
-	ID      string `json:"id"`
-	Type    string `json:"type"`
-	Name    string `json:"name"`
-	Version string `json:"version"`
+// Requirement the plugin requirement
+type Requirement struct {
+	VelaUXVersion string `json:"velauxVersion"`
 }
 
 // JSONData represents the plugin's plugin.json
 type JSONData struct {
-	ID           string       `json:"id"`
-	Type         Type         `json:"type"`
-	Name         string       `json:"name"`
-	Info         Info         `json:"info"`
-	Dependencies Dependencies `json:"dependencies"`
-	Includes     []*Includes  `json:"includes"`
-	Category     string       `json:"category"`
-	HideFromList bool         `json:"hideFromList,omitempty"`
-	Preload      bool         `json:"preload"`
-	Backend      bool         `json:"backend"`
-	Routes       []*Route     `json:"routes"`
+	ID           string      `json:"id"`
+	Type         Type        `json:"type"`
+	Name         string      `json:"name"`
+	Info         Info        `json:"info"`
+	Includes     []*Includes `json:"includes"`
+	Category     string      `json:"category"`
+	HideFromList bool        `json:"hideFromList,omitempty"`
+	Preload      bool        `json:"preload"`
+	Backend      bool        `json:"backend"`
+	Routes       []*Route    `json:"routes"`
+	Requirement  Requirement `json:"requirement"`
 }
 
+// Includes means the menus that this plugin include.
 type Includes struct {
 	Name         string      `json:"name"`
 	Label        string      `json:"label"`
@@ -105,10 +104,12 @@ type Includes struct {
 	Catalog      string      `json:"catalog,omitempty"`
 }
 
+// Workspace the workspace menu
 type Workspace struct {
 	Name string `json:"name"`
 }
 
+// Permission RBAC permission policy
 type Permission struct {
 	Resources []string `json:"resource"`
 	Actions   []string `json:"actions"`
@@ -145,20 +146,23 @@ type URLParam struct {
 // JWTTokenAuth struct is both for normal Token Auth and JWT Token Auth with
 // an uploaded JWT file.
 type JWTTokenAuth struct {
-	Url    string            `json:"url"`
+	URL    string            `json:"url"`
 	Scopes []string          `json:"scopes"`
 	Params map[string]string `json:"params"`
 }
 
+// PluginID return the plugin ID
 func (p *Plugin) PluginID() string {
 	return p.ID
 }
 
+// StaticRoute -
 type StaticRoute struct {
 	PluginID  string
 	Directory string
 }
 
+// StaticRoute generate the plugin static file route
 func (p *Plugin) StaticRoute() *StaticRoute {
 	if p.IsCorePlugin() {
 		return nil
@@ -167,43 +171,59 @@ func (p *Plugin) StaticRoute() *StaticRoute {
 	return &StaticRoute{Directory: p.PluginDir, PluginID: p.ID}
 }
 
+// IsPageApp checking the plugin whether is the page app plugin
 func (p *Plugin) IsPageApp() bool {
 	return p.Type == PageApp
 }
 
+// IsCorePlugin checking the plugin whether is the core plugin
 func (p *Plugin) IsCorePlugin() bool {
 	return p.Class == Core
 }
 
+// IsExternalPlugin checking the plugin whether is the external plugin
 func (p *Plugin) IsExternalPlugin() bool {
 	return p.Class == External
 }
 
+// Class -
 type Class string
 
 const (
-	Core     Class = "core"
+	// Core plugin, the plugins belong to this class will be installed default.
+	Core Class = "core"
+	// External plugin, installed from the community registry.
 	External Class = "external"
 )
 
+// PluginTypes plugin type definition
 var PluginTypes = []Type{
 	PageApp,
+	Definition,
 }
 
+// Type the plugin type
 type Type string
 
 const (
+	// PageApp means plugin provide a independent page. The route maybe like `/plugins/{pluginID}`
 	PageApp Type = "page-app"
+	// Definition means the plugin provides a UI component for the component，trait, workflow-step, and policy definitions.
+	Definition Type = "definition"
 )
 
+// IsValid checking the plugin type
 func (pt Type) IsValid() bool {
 	switch pt {
 	case PageApp:
+		return true
+	case Definition:
 		return true
 	}
 	return false
 }
 
+// PluginSource the plugin source.
 type PluginSource struct {
 	Class Class
 	Paths []string

@@ -63,6 +63,7 @@ type Config struct {
 	DexServerURL string
 }
 
+// PluginConfig the plugin directory config
 type PluginConfig struct {
 	CorePluginPath   string
 	CustomPluginPath []string

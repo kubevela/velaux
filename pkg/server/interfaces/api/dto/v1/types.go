@@ -1837,6 +1837,7 @@ type ListContextValueResponse struct {
 	Contexts map[string][]model.Value `json:"contexts"`
 }
 
+// PluginDTO plugin base model
 type PluginDTO struct {
 	pluginTypes.JSONData
 	Class         pluginTypes.Class `json:"class"`
@@ -1846,14 +1847,7 @@ type PluginDTO struct {
 	BaseURL string `json:"baseURL"`
 }
 
-func (p PluginDTO) IsApp() bool {
-	return p.Type == pluginTypes.PageApp
-}
-
-func (p PluginDTO) IsCorePlugin() bool {
-	return p.Class == pluginTypes.Core
-}
-
+// ListPluginResponse -
 type ListPluginResponse struct {
 	Plugins []PluginDTO `json:"plugins"`
 }

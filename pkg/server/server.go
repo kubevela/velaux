@@ -374,8 +374,8 @@ func (s *restServer) getPluginAssets(res http.ResponseWriter, req *http.Request)
 		bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
 		return
 	}
-	pluginId := pathInfo[0]
-	plugin, err := s.PluginService.GetPlugin(req.Context(), pluginId)
+	pluginID := pathInfo[0]
+	plugin, err := s.PluginService.GetPlugin(req.Context(), pluginID)
 	if err != nil {
 		bcode.ReturnHTTPError(req, res, err)
 		return

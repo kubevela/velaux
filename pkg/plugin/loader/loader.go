@@ -17,7 +17,6 @@ limitations under the License.
 package loader
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/url"
@@ -35,30 +34,36 @@ import (
 )
 
 var (
-	ErrInvalidPluginJSON         = errors.New("did not find valid type or id properties in plugin.json")
+	// ErrInvalidPluginJSON -
+	ErrInvalidPluginJSON = errors.New("did not find valid type or id properties in plugin.json")
+	// ErrInvalidPluginJSONFilePath -
 	ErrInvalidPluginJSONFilePath = errors.New("invalid plugin.json filepath was provided")
-	ErrInvalidInclude            = errors.New("the include config is invalid in plugin.json")
+	// ErrInvalidInclude -
+	ErrInvalidInclude = errors.New("the include config is invalid in plugin.json")
 )
 
+// Loader the tool class to load the plugin from the specified path.
 type Loader struct {
 	pluginFinder finder.Finder
 }
 
+// New -
 func New() *Loader {
 	return &Loader{
 		pluginFinder: finder.New(),
 	}
 }
 
-func (l *Loader) Load(ctx context.Context, class types.Class, paths []string, ignore map[string]struct{}) ([]*types.Plugin, error) {
+// Load load plugins from the specified path.
+func (l *Loader) Load(class types.Class, paths []string, ignore map[string]struct{}) ([]*types.Plugin, error) {
 	pluginJSONPaths, err := l.pluginFinder.Find(paths)
 	if err != nil {
 		return nil, err
 	}
-	return l.loadPlugins(ctx, class, pluginJSONPaths, ignore)
+	return l.loadPlugins(class, pluginJSONPaths, ignore)
 }
 
-func (l *Loader) loadPlugins(ctx context.Context, class types.Class, pluginJSONPaths []string, existingPlugins map[string]struct{}) ([]*types.Plugin, error) {
+func (l *Loader) loadPlugins(class types.Class, pluginJSONPaths []string, existingPlugins map[string]struct{}) ([]*types.Plugin, error) {
 	var foundPlugins = foundPlugins{}
 
 	// load plugin.json files and map directory to JSON data
@@ -137,14 +142,6 @@ func (l *Loader) readPluginJSON(pluginJSONPath string) (types.JSONData, error) {
 
 	if err := validatePluginJSON(plugin); err != nil {
 		return types.JSONData{}, err
-	}
-
-	if len(plugin.Dependencies.Plugins) == 0 {
-		plugin.Dependencies.Plugins = []types.Dependency{}
-	}
-
-	if plugin.Dependencies.VelaUXVersion == "" {
-		plugin.Dependencies.VelaUXVersion = "*"
 	}
 
 	klog.Infof("Loaded plugin,id: %s type: %s path: %s", plugin.ID, plugin.Type, pluginJSONPath)

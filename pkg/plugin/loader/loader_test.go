@@ -17,7 +17,6 @@ limitations under the License.
 package loader
 
 import (
-	"context"
 	"testing"
 
 	"gotest.tools/assert"
@@ -27,7 +26,7 @@ import (
 
 func TestLoad(t *testing.T) {
 	l := New()
-	plugins, err := l.Load(context.TODO(), types.External, []string{"../../../plugins"}, nil)
+	plugins, err := l.Load(types.External, []string{"../../../plugins"}, nil)
 	assert.Equal(t, err, nil)
 	assert.Equal(t, len(plugins), 1)
 	assert.Equal(t, plugins[0].ID, "app-demo")
