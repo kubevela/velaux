@@ -42,6 +42,7 @@
     "@alifd/field": "1.6.2",
     "@alifd/next": "1.26.14",
     "@alifd/theme-2": "0.4.4",
+    "@sentry/browser": "7.45.0",
     "@velaux/data": "0.0.1",
     "@velaux/theme": "0.0.1",
     "ansi-to-html": "^0.7.2",

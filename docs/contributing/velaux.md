@@ -43,6 +43,8 @@ Make sure you have installed [yarn 2.0](https://yarnpkg.com/getting-started/inst
 ```shell
 yarn install
 
+yarn build-packages
+
 ## Build the frontend and watch the code changes
 yarn dev
 ```

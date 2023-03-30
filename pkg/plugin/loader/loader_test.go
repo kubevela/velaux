@@ -26,8 +26,8 @@ import (
 
 func TestLoad(t *testing.T) {
 	l := New()
-	plugins, err := l.Load(types.External, []string{"../../../plugins"}, nil)
+	plugins, err := l.Load(types.External, []string{"test_data"}, nil)
 	assert.Equal(t, err, nil)
 	assert.Equal(t, len(plugins), 1)
-	assert.Equal(t, plugins[0].ID, "app-demo")
+	assert.Equal(t, plugins[0].ID, "plugin-test")
 }

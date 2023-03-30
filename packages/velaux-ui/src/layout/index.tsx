@@ -7,6 +7,8 @@ import './index.less';
 import { LayoutMode, Workspace, LayoutModes } from '@velaux/data';
 import { locationService } from '../services/LocationService';
 import { menuService } from '../services/MenuService';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import { ErrorShow } from '../components/ErrorShow';
 
 export default function MainLayout(props: any) {
   const [workspace, setWorkspace] = useState<Workspace>();
@@ -24,19 +26,28 @@ export default function MainLayout(props: any) {
   }, [query, path]);
   return (
     <ConfigProvider>
-      <div className="layout">
-        {mode !== LayoutModes.NeatPro && <Header currentWorkspace={workspace} mode={mode} {...props} />}
-        <div className="layout-shell">
-          {mode === LayoutModes.Default && (
-            <div className="layout-navigation">
-              <LeftMenu {...props} />
+      <ErrorBoundary>
+        {({ error, errorInfo }) => {
+          if (error) {
+            return <ErrorShow error={error} errorInfo={errorInfo} />;
+          }
+          return (
+            <div className="layout">
+              {mode !== LayoutModes.NeatPro && <Header currentWorkspace={workspace} mode={mode} {...props} />}
+              <div className="layout-shell">
+                {mode === LayoutModes.Default && (
+                  <div className="layout-navigation">
+                    <LeftMenu {...props} />
+                  </div>
+                )}
+                <div className="layout-content">
+                  <LayoutRouter></LayoutRouter>
+                </div>
+              </div>
             </div>
-          )}
-          <div className="layout-content">
-            <LayoutRouter />
-          </div>
-        </div>
-      </div>
+          );
+        }}
+      </ErrorBoundary>
     </ConfigProvider>
   );
 }
