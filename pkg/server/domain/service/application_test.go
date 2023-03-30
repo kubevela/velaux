@@ -107,8 +107,10 @@ var _ = Describe("Test application service function", func() {
 		err := k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
 
+		InitFakeAdmin(userService)
+
 		By("prepare test project")
-		_, err = projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{Name: testProject, Owner: model.DefaultAdminUserName})
+		_, err = projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{Name: testProject, Owner: FakeAdminName})
 		Expect(err).Should(BeNil())
 
 		_, err = targetService.CreateTarget(context.TODO(), v1.CreateTargetRequest{
@@ -179,12 +181,12 @@ var _ = Describe("Test application service function", func() {
 	})
 
 	It("Test ListApplications function", func() {
-		_, err := appService.ListApplications(context.WithValue(context.TODO(), &v1.CtxKeyUser, model.DefaultAdminUserName), v1.ListApplicationOptions{})
+		_, err := appService.ListApplications(context.WithValue(context.TODO(), &v1.CtxKeyUser, FakeAdminName), v1.ListApplicationOptions{})
 		Expect(err).Should(BeNil())
 	})
 
 	It("Test ListApplications and filter by targetName function", func() {
-		list, err := appService.ListApplications(context.WithValue(context.TODO(), &v1.CtxKeyUser, model.DefaultAdminUserName), v1.ListApplicationOptions{
+		list, err := appService.ListApplications(context.WithValue(context.TODO(), &v1.CtxKeyUser, FakeAdminName), v1.ListApplicationOptions{
 			Projects:   []string{testProject},
 			TargetName: defaultTarget})
 		Expect(err).Should(BeNil())
@@ -421,7 +423,7 @@ var _ = Describe("Test application service function", func() {
 				Version:       fmt.Sprintf("%d", i),
 				EnvName:       fmt.Sprintf("env-%d", i),
 				Status:        model.RevisionStatusRunning,
-				DeployUser:    model.DefaultAdminUserName,
+				DeployUser:    FakeAdminName,
 			}
 			if i == 0 {
 				appModel.Status = model.RevisionStatusTerminated
@@ -436,7 +438,7 @@ var _ = Describe("Test application service function", func() {
 		revisions, err = appService.ListRevisions(context.TODO(), "test-app-sadasd", "env-0", "", 0, 10)
 		Expect(err).Should(BeNil())
 		Expect(revisions.Total).Should(Equal(int64(1)))
-		Expect(revisions.Revisions[0].DeployUser.Name).Should(Equal(model.DefaultAdminUserName))
+		Expect(revisions.Revisions[0].DeployUser.Name).Should(Equal(FakeAdminName))
 		Expect(revisions.Revisions[0].DeployUser.Alias).Should(Equal(model.DefaultAdminUserAlias))
 
 		revisions, err = appService.ListRevisions(context.TODO(), "test-app-sadasd", "", "terminated", 0, 10)
@@ -452,13 +454,13 @@ var _ = Describe("Test application service function", func() {
 		err := workflowService.createTestApplicationRevision(context.TODO(), &model.ApplicationRevision{
 			AppPrimaryKey: "test-app",
 			Version:       "123",
-			DeployUser:    model.DefaultAdminUserName,
+			DeployUser:    FakeAdminName,
 		})
 		Expect(err).Should(BeNil())
 		revision, err := appService.DetailRevision(context.TODO(), "test-app", "123")
 		Expect(err).Should(BeNil())
 		Expect(revision.Version).Should(Equal("123"))
-		Expect(revision.DeployUser.Name).Should(Equal(model.DefaultAdminUserName))
+		Expect(revision.DeployUser.Name).Should(Equal(FakeAdminName))
 		Expect(revision.DeployUser.Alias).Should(Equal(model.DefaultAdminUserAlias))
 	})
 
@@ -466,10 +468,10 @@ var _ = Describe("Test application service function", func() {
 		appModel, err := appService.GetApplication(context.TODO(), testApp)
 		Expect(err).Should(BeNil())
 		revision, err := appService.Deploy(
-			context.WithValue(context.TODO(), &v1.CtxKeyUser, model.DefaultAdminUserName),
+			context.WithValue(context.TODO(), &v1.CtxKeyUser, FakeAdminName),
 			appModel, v1.ApplicationDeployRequest{WorkflowName: repository.ConvertWorkflowName("app-dev")})
 		Expect(err).Should(BeNil())
-		Expect(revision.DeployUser.Name).Should(Equal(model.DefaultAdminUserName))
+		Expect(revision.DeployUser.Name).Should(Equal(FakeAdminName))
 		Expect(revision.DeployUser.Alias).Should(Equal(model.DefaultAdminUserAlias))
 		Expect(revision.WorkflowName).Should(Equal(repository.ConvertWorkflowName("app-dev")))
 

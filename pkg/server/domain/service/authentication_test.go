@@ -50,6 +50,19 @@ import (
 	"github.com/kubevela/velaux/pkg/server/utils"
 )
 
+var FakeAdminName = "fake-admin"
+
+// InitFakeAdmin is used to init fake admin user, use FakeAdminName as username
+var InitFakeAdmin = func(us UserService) {
+	initResp, err := us.InitAdmin(context.Background(), apisv1.InitAdminRequest{
+		Password: "ComplexPassword1",
+		Email:    "fake@kubevela.io",
+		Name:     FakeAdminName,
+	})
+	Expect(err).Should(BeNil())
+	Expect(initResp.Success).Should(BeTrue())
+}
+
 var _ = Describe("Test authentication service functions", func() {
 	var (
 		authService    *authenticationServiceImpl
@@ -77,6 +90,7 @@ var _ = Describe("Test authentication service functions", func() {
 		targetService = projectService.TargetService.(*targetServiceImpl)
 
 	})
+
 	It("Test Dex login", func() {
 		testIDToken := &oidc.IDToken{}
 		sub := "248289761001Abv"
@@ -265,6 +279,7 @@ var _ = Describe("Test authentication service functions", func() {
 	})
 
 	It("Test init admin user", func() {
+
 		resp, err := userService.AdminConfigured(context.Background())
 		Expect(err).Should(BeNil())
 		Expect(resp.Configured).Should(BeFalse())
