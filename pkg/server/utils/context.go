@@ -50,10 +50,12 @@ func UsernameFrom(ctx context.Context) (string, bool) {
 	return username, ok
 }
 
+// WithUserRole carries user role in context
 func WithUserRole(parent context.Context, roles []string) context.Context {
 	return context.WithValue(parent, permissionKey, roles)
 }
 
+// UserRoleFrom extract user role from context
 func UserRoleFrom(ctx context.Context) ([]string, bool) {
 	roles, ok := ctx.Value(permissionKey).([]string)
 	return roles, ok

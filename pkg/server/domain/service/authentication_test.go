@@ -73,7 +73,7 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(err).Should(BeNil())
 		authService = &authenticationServiceImpl{KubeClient: k8sClient, Store: ds}
 		sysService = &systemInfoServiceImpl{Store: ds, KubeClient: k8sClient}
-		projectService = NewTestProjectService(ds, k8sClient)
+		projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
 		envService = projectService.EnvService.(*envServiceImpl)
 		userService = projectService.UserService.(*userServiceImpl)
 		targetService = projectService.TargetService.(*targetServiceImpl)

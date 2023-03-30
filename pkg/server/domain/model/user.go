@@ -33,6 +33,8 @@ func init() {
 
 // DefaultAdminUserAlias default admin user alias
 const DefaultAdminUserAlias = "Administrator"
+
+// RoleAdmin admin role
 const RoleAdmin = "admin"
 
 // User is the model of user
@@ -79,6 +81,7 @@ func (u *User) Index() map[string]interface{} {
 	return index
 }
 
+// IsAdmin return if the user have admin role
 func (u *User) IsAdmin() bool {
 	for _, role := range u.UserRoles {
 		if role == RoleAdmin {

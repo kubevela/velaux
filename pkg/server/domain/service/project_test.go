@@ -44,7 +44,7 @@ var _ = Describe("Test project service functions", func() {
 		ns.Name = defaultNamespace
 		err = k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
-		projectService = NewTestProjectService(ds, k8sClient)
+		projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
 		envService = projectService.EnvService.(*envServiceImpl)
 		userService = projectService.UserService.(*userServiceImpl)
 		targetService = projectService.TargetService.(*targetServiceImpl)

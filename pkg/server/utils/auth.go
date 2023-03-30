@@ -18,6 +18,7 @@ package utils
 
 import (
 	"context"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 
 	"github.com/emicklei/go-restful/v3"
@@ -25,8 +26,9 @@ import (
 	"k8s.io/apiserver/pkg/endpoints/request"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kubevela/velaux/pkg/features"
 	"github.com/oam-dev/kubevela/pkg/auth"
+
+	"github.com/kubevela/velaux/pkg/features"
 )
 
 // KubeVelaProjectGroupPrefix the prefix kubevela project

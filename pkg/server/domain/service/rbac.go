@@ -47,6 +47,7 @@ var resourceActions map[string][]string
 var lock sync.Mutex
 var reg = regexp.MustCompile(`(?U)\{.*\}`)
 
+// AdminRole is the admin role name
 const AdminRole = "admin"
 
 var defaultProjectPermissionTemplate = []*model.PermissionTemplate{

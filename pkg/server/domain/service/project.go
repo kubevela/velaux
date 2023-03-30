@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+
 	terraformapi "github.com/oam-dev/terraform-controller/api/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -512,7 +513,7 @@ func ConvertProjectUserModel2Base(user *model.ProjectUser, userModel *model.User
 }
 
 // NewTestProjectService create the project service instance for testing
-func NewTestProjectService(ds datastore.DataStore, c client.Client) *projectServiceImpl {
+func NewTestProjectService(ds datastore.DataStore, c client.Client) ProjectService {
 	targetService := &targetServiceImpl{K8sClient: c, Store: ds}
 	envService := &envServiceImpl{KubeClient: c, Store: ds}
 	rbacService := &rbacServiceImpl{Store: ds}
