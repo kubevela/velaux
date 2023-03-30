@@ -1,7 +1,6 @@
 import { Dialog, Field, Form, Grid, Input, Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 import { AiOutlineEye } from 'react-icons/ai';
-import { LoginUserInfo } from "../../../../interface/user";
 import Translation from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import { checkName, checkUserPassword } from '../../../../utils/common';
@@ -9,7 +8,6 @@ import locale from '../../../../utils/locale';
 import { initAdmin } from "../../../../api/authentication";
 
 type Props = {
-  userInfo?: LoginUserInfo;
   onClose: () => void;
 };
 

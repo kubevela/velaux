@@ -57,6 +57,29 @@ func TestService(t *testing.T) {
 	RunSpecs(t, "Service Suite")
 }
 
+// claim all services, ds, kubeClient
+var (
+	pipelineService    *pipelineServiceImpl
+	pipelineRunService *pipelineRunServiceImpl
+	userService        *userServiceImpl
+	contextService     *contextServiceImpl
+	projectService     *projectServiceImpl
+	rbacService        *rbacServiceImpl
+	appService         *applicationServiceImpl
+	workflowService    *workflowServiceImpl
+	envService         *envServiceImpl
+	envBindingService  *envBindingServiceImpl
+	targetService      *targetServiceImpl
+	definitionService  *definitionServiceImpl
+	sysService         *systemInfoServiceImpl
+	authService        *authenticationServiceImpl
+	cloudShellService  *cloudShellServiceImpl
+	configService      *configServiceImpl
+	webhookService     *webhookServiceImpl
+
+	ds datastore.DataStore
+)
+
 var _ = BeforeSuite(func(done Done) {
 	rand.Seed(time.Now().UnixNano())
 	By("bootstrapping test environment")

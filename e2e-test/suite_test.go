@@ -46,9 +46,10 @@ var k8sClient client.Client
 var token string
 
 const (
-	baseDomain   = "http://127.0.0.1:8001"
-	baseURL      = "http://127.0.0.1:8001/api/v1"
-	testNSprefix = "api-test-"
+	baseDomain    = "http://127.0.0.1:8001"
+	baseURL       = "http://127.0.0.1:8001/api/v1"
+	testNSprefix  = "api-test-"
+	fakeAdminName = "fake-admin"
 )
 
 func TestE2eApiserverTest(t *testing.T) {
@@ -97,6 +98,7 @@ var _ = BeforeSuite(func() {
 			var initReq = apisv1.InitAdminRequest{
 				Password: password,
 				Email:    "fake@email.com",
+				Name:     fakeAdminName,
 			}
 			bodyByte, err := json.Marshal(initReq)
 			Expect(err).Should(BeNil())
@@ -115,7 +117,7 @@ var _ = BeforeSuite(func() {
 
 			// login
 			var req = apisv1.LoginRequest{
-				Username: "admin",
+				Username: fakeAdminName,
 				Password: password,
 			}
 			bodyByte, err = json.Marshal(req)

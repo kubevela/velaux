@@ -46,13 +46,9 @@ import (
 
 var _ = Describe("Test cloudshell service function", func() {
 	var (
-		ds                datastore.DataStore
-		cloudShellService *cloudShellServiceImpl
-		userService       *userServiceImpl
-		projectService    *projectServiceImpl
-		envService        *envServiceImpl
-		err               error
-		database          string
+		ds       datastore.DataStore
+		err      error
+		database string
 	)
 
 	BeforeEach(func() {
@@ -104,8 +100,7 @@ var _ = Describe("Test cloudshell service function", func() {
 	})
 
 	It("Test prepareKubeConfig", func() {
-		err = projectService.Init(context.TODO())
-		Expect(err).Should(BeNil())
+		InitFakeAdmin(userService)
 
 		By("test the developer users")
 		_, err = userService.CreateUser(context.TODO(), apisv1.CreateUserRequest{Name: "test-dev", Password: "test"})

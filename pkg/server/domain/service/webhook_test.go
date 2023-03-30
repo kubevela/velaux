@@ -39,16 +39,6 @@ import (
 )
 
 var _ = Describe("Test application service function", func() {
-	var (
-		appService        *applicationServiceImpl
-		workflowService   *workflowServiceImpl
-		envService        *envServiceImpl
-		envBindingService *envBindingServiceImpl
-		targetService     *targetServiceImpl
-		definitionService *definitionServiceImpl
-		projectService    *projectServiceImpl
-		webhookService    *webhookServiceImpl
-	)
 
 	BeforeEach(func() {
 		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: "app-test-kubevela"})

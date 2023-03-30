@@ -41,10 +41,7 @@ import (
 )
 
 var _ = Describe("Test env service functions", func() {
-	var (
-		envService *envServiceImpl
-		ds         datastore.DataStore
-	)
+
 	BeforeEach(func() {
 		var err error
 		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "env-test-kubevela"})
@@ -53,7 +50,11 @@ var _ = Describe("Test env service functions", func() {
 		rbacService := &rbacServiceImpl{Store: ds}
 		projectService := &projectServiceImpl{Store: ds, K8sClient: k8sClient, RbacService: rbacService}
 		envService = &envServiceImpl{KubeClient: k8sClient, Store: ds, ProjectService: projectService}
+		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
 	})
+
+	InitFakeAdmin(userService)
+
 	It("Test Create/Get/Delete Env function", func() {
 		// create target
 		err := ds.Add(context.TODO(), &model.Target{Name: "env-test"})

@@ -31,14 +31,9 @@ import (
 
 var _ = Describe("Test envBindingService functions", func() {
 	var (
-		envService        *envServiceImpl
-		envBindingService *envBindingServiceImpl
-		workflowService   *workflowServiceImpl
-		definitionService DefinitionService
-		envBindingDemo1   apisv1.EnvBinding
-		envBindingDemo2   apisv1.EnvBinding
-		testApp           *model.Application
-		ds                datastore.DataStore
+		envBindingDemo1 apisv1.EnvBinding
+		envBindingDemo2 apisv1.EnvBinding
+		testApp         *model.Application
 	)
 	BeforeEach(func() {
 		var err error

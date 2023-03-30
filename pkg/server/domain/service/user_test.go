@@ -38,11 +38,7 @@ import (
 )
 
 var _ = Describe("Test authentication service functions", func() {
-	var (
-		userService *userServiceImpl
-		ds          datastore.DataStore
-		db          string
-	)
+	var db string
 
 	BeforeEach(func() {
 		var err error

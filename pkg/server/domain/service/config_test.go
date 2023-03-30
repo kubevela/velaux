@@ -106,8 +106,6 @@ template: {
 var _ = Describe("Test config service", func() {
 	var factory config.Factory
 	var ds datastore.DataStore
-	var configService *configServiceImpl
-	var projectService ProjectService
 	BeforeEach(func() {
 		factory = config.NewConfigFactory(k8sClient)
 		Expect(factory).ToNot(BeNil())
@@ -115,7 +113,7 @@ var _ = Describe("Test config service", func() {
 		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "config-test-kubevela"})
 		Expect(ds).ToNot(BeNil())
 		Expect(err).Should(BeNil())
-		projectService = NewTestProjectService(ds, k8sClient)
+		projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
 		configService = &configServiceImpl{
 			KubeClient:     k8sClient,
 			ProjectService: projectService,

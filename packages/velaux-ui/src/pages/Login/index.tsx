@@ -13,7 +13,6 @@ import type { DexConfig } from '../../interface/system';
 import { checkName, checkUserPassword } from '../../utils/common';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 import EditPlatFormUserDialog from "../../layout/Header/components/EditPlatFormUserDialog";
-import { LoginUserInfo } from "../../interface/user";
 
 type Props = {
   code: string;
@@ -157,10 +156,6 @@ export default class LoginPage extends Component<Props, State> {
     };
     const { loginType, loginErrorMessage, loginLoading, firstTimeLogin } = this.state;
     const { Row, Col } = Grid;
-    let adminInfo: LoginUserInfo = {
-      name: "admin",
-      projects: [],
-    }
     return (
       <Fragment>
         <div className="login-topbar">
@@ -263,7 +258,7 @@ export default class LoginPage extends Component<Props, State> {
             </div>
           </If>
           <If condition={firstTimeLogin}>
-            <EditPlatFormUserDialog userInfo={adminInfo} onClose={this.onCloseEditAdminUser} />
+            <EditPlatFormUserDialog onClose={this.onCloseEditAdminUser} />
           </If>
         </div>
       </Fragment>

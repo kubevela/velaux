@@ -63,7 +63,7 @@ func NewTestHelmService() (*defaultHelmImpl, ProjectService, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	projectService := NewTestProjectService(ds, k8sClient)
+	projectService = NewTestProjectService(ds, k8sClient)
 	return &defaultHelmImpl{
 		helper:    helm.NewHelperWithCache(),
 		K8sClient: k8sClient,

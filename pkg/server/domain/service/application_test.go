@@ -52,15 +52,6 @@ import (
 
 var _ = Describe("Test application service function", func() {
 	var (
-		rbacService        *rbacServiceImpl
-		appService         *applicationServiceImpl
-		workflowService    *workflowServiceImpl
-		envService         *envServiceImpl
-		envBindingService  *envBindingServiceImpl
-		targetService      *targetServiceImpl
-		definitionService  *definitionServiceImpl
-		projectService     *projectServiceImpl
-		userService        *userServiceImpl
 		testProject        = "app-project"
 		testApp            = "test-app"
 		defaultTarget      = "default"

@@ -64,18 +64,7 @@ var InitFakeAdmin = func(us UserService) {
 }
 
 var _ = Describe("Test authentication service functions", func() {
-	var (
-		authService    *authenticationServiceImpl
-		userService    *userServiceImpl
-		sysService     *systemInfoServiceImpl
-		projectService *projectServiceImpl
-		ds             datastore.DataStore
-
-		envService    *envServiceImpl
-		targetService *targetServiceImpl
-
-		defaultNamespace = model.DefaultInitNamespace
-	)
+	var defaultNamespace = model.DefaultInitNamespace
 
 	BeforeEach(func() {
 		var err error
@@ -84,7 +73,7 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(err).Should(BeNil())
 		authService = &authenticationServiceImpl{KubeClient: k8sClient, Store: ds}
 		sysService = &systemInfoServiceImpl{Store: ds, KubeClient: k8sClient}
-		projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
+		projectService = NewTestProjectService(ds, k8sClient)
 		envService = projectService.EnvService.(*envServiceImpl)
 		userService = projectService.UserService.(*userServiceImpl)
 		targetService = projectService.TargetService.(*targetServiceImpl)
@@ -127,7 +116,7 @@ var _ = Describe("Test authentication service functions", func() {
 		newUser, err := userService.GetUser(context.TODO(), resp.Name)
 		Expect(err).Should(BeNil())
 		Expect(newUser.DexSub).Should(Equal(sub))
-		Expect(newUser.UserRoles).Should(Equal([]string{"admin"}))
+		Expect(newUser.UserRoles).Should(Equal([]string{model.RoleAdmin}))
 
 		projects, err := projectService.ListUserProjects(context.TODO(), sub)
 		Expect(err).Should(BeNil())

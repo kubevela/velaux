@@ -261,7 +261,7 @@ func (c *cloudShellServiceImpl) prepareKubeConfig(ctx context.Context) error {
 	}
 	groups = append(groups, utils.TemplateReaderGroup)
 
-	if pkgutils.StringsContain(user.UserRoles, "admin") {
+	if pkgutils.StringsContain(user.UserRoles, model.RoleAdmin) {
 		groups = append(groups, utils.KubeVelaAdminGroupPrefix+"admin")
 	}
 

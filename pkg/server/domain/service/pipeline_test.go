@@ -32,12 +32,7 @@ import (
 
 var (
 	// defaultNamespace   = "project-default-ns1-test"
-	pipelineService    *pipelineServiceImpl
-	pipelineRunService *pipelineRunServiceImpl
-	userService        *userServiceImpl
-	contextService     *contextServiceImpl
-	projectService     *projectServiceImpl
-	ctx                context.Context
+	ctx context.Context
 
 	pipelineName = "test-pipeline"
 	projectName  = "test-project"
@@ -54,10 +49,12 @@ var _ = Describe("Test pipeline service functions", func() {
 		projectService = pipelineService.ProjectService.(*projectServiceImpl)
 		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
 
-		ctx = context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "admin")
+		InitFakeAdmin(userService)
+
+		ctx = context.WithValue(context.TODO(), &apisv1.CtxKeyUser, FakeAdminName)
 		_, err = projectService.CreateProject(ctx, apisv1.CreateProjectRequest{
 			Name:  projectName,
-			Owner: "admin",
+			Owner: FakeAdminName,
 		})
 		Expect(err).Should(BeNil())
 		projModel, err := projectService.GetProject(context.TODO(), projectName)

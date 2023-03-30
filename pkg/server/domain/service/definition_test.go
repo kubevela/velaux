@@ -40,10 +40,6 @@ import (
 )
 
 var _ = Describe("Test namespace service functions", func() {
-	var (
-		definitionService *definitionServiceImpl
-	)
-
 	BeforeEach(func() {
 		definitionService = &definitionServiceImpl{KubeClient: k8sClient}
 		err := k8sClient.Create(context.Background(), &corev1.Namespace{

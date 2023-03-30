@@ -18,17 +18,12 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 
-	velatypes "github.com/oam-dev/kubevela/apis/types"
-	"github.com/oam-dev/kubevela/pkg/multicluster"
-	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
@@ -39,24 +34,20 @@ import (
 
 var _ = Describe("Test project service functions", func() {
 	var (
-		projectService   *projectServiceImpl
-		envImpl          *envServiceImpl
-		targetImpl       *targetServiceImpl
 		defaultNamespace = "project-default-ns1-test"
 	)
 	BeforeEach(func() {
 		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: "target-test-kubevela"})
 		Expect(ds).ToNot(BeNil())
 		Expect(err).Should(BeNil())
-		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
 		var ns = corev1.Namespace{}
 		ns.Name = defaultNamespace
 		err = k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
-		projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
-		envImpl = projectService.EnvService.(*envServiceImpl)
+		projectService = NewTestProjectService(ds, k8sClient)
+		envService = projectService.EnvService.(*envServiceImpl)
 		userService = projectService.UserService.(*userServiceImpl)
-		targetImpl = projectService.TargetService.(*targetServiceImpl)
+		targetService = projectService.TargetService.(*targetServiceImpl)
 
 		pp, err := projectService.ListProjects(context.TODO(), 0, 0)
 		Expect(err).Should(BeNil())
@@ -64,21 +55,23 @@ var _ = Describe("Test project service functions", func() {
 		for _, p := range pp.Projects {
 			_ = projectService.DeleteProject(context.TODO(), p.Name)
 		}
-		ctx := context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "admin")
-		envs, err := envImpl.ListEnvs(ctx, 0, 0, apisv1.ListEnvOptions{})
+		ctx := context.WithValue(context.TODO(), &apisv1.CtxKeyUser, FakeAdminName)
+		envs, err := envService.ListEnvs(ctx, 0, 0, apisv1.ListEnvOptions{})
 		Expect(err).Should(BeNil())
 		// reset all projects
 		for _, e := range envs.Envs {
-			_ = envImpl.DeleteEnv(context.TODO(), e.Name)
+			_ = envService.DeleteEnv(context.TODO(), e.Name)
 		}
-		targets, err := targetImpl.ListTargets(context.TODO(), 0, 0, "")
+		targets, err := targetService.ListTargets(context.TODO(), 0, 0, "")
 		Expect(err).Should(BeNil())
 		// reset all projects
 		for _, t := range targets.Targets {
-			_ = targetImpl.DeleteTarget(context.TODO(), t.Name)
+			_ = targetService.DeleteTarget(context.TODO(), t.Name)
 		}
 	})
-)
+
+	InitFakeAdmin(userService)
+
 	It("Test Create project function", func() {
 		req := apisv1.CreateProjectRequest{
 			Name:        "test-project",
@@ -104,7 +97,7 @@ var _ = Describe("Test project service functions", func() {
 		base, err := projectService.UpdateProject(context.TODO(), "test-project", apisv1.UpdateProjectRequest{
 			Alias:       "Change alias",
 			Description: "Change description",
-			Owner:       "admin",
+			Owner:       FakeAdminName,
 		})
 		Expect(err).Should(BeNil())
 		Expect(base.Alias).Should(BeEquivalentTo("Change alias"))

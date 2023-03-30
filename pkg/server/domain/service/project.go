@@ -512,7 +512,7 @@ func ConvertProjectUserModel2Base(user *model.ProjectUser, userModel *model.User
 }
 
 // NewTestProjectService create the project service instance for testing
-func NewTestProjectService(ds datastore.DataStore, c client.Client) ProjectService {
+func NewTestProjectService(ds datastore.DataStore, c client.Client) *projectServiceImpl {
 	targetService := &targetServiceImpl{K8sClient: c, Store: ds}
 	envService := &envServiceImpl{KubeClient: c, Store: ds}
 	rbacService := &rbacServiceImpl{Store: ds}
