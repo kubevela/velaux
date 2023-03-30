@@ -95,6 +95,20 @@ make e2e-server-test
 make build-swagger
 ```
 
+### Config yarn2 in vscode
+
+Add following config in `settings.json`
+```json
+{
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "typescript.tsdk": ".yarn/sdks/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
+```
+
 ## References
 
 * UI framework: [@alifd/next](https://fusion.design/)
