@@ -26,6 +26,7 @@ type Props = {
     chart: string;
     version: string;
   };
+  project?: string;
   repo?: HelmRepo;
 };
 
@@ -85,9 +86,10 @@ class HelmValues extends Component<Props, State> {
   }
 
   loadChartValues = () => {
+    const { project } = this.props;
     const { helm, repo } = this.props;
     if (helm?.chart && helm.version && helm.url) {
-      getChartValueFiles({ ...helm, secretName: repo?.secretName }).then(
+      getChartValueFiles({ ...helm, secretName: repo?.secretName, project: project }).then(
         (re: Record<string, string>) => {
           if (re) {
             try {
