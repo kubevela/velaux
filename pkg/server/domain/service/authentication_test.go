@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"os"
 	"reflect"
 	"strconv"
@@ -247,8 +248,14 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(config.RedirectURL).Should(Equal("http://velaux.com/callback"))
 	})
 
-	It("Test init admin user", func() {
-
+	FIt("Test init admin user", func() {
+		By("Remove all users")
+		users, err := ds.List(context.Background(), &model.User{}, &datastore.ListOptions{})
+		Expect(err).Should(BeNil())
+		for _, user := range users {
+			err := ds.Delete(context.Background(), user.(*model.User))
+			Expect(err).Should(BeNil())
+		}
 		resp, err := userService.AdminConfigured(context.Background())
 		Expect(err).Should(BeNil())
 		Expect(resp.Configured).Should(BeFalse())
