@@ -1,4 +1,4 @@
-import { Grid, Checkbox, Dropdown, Menu, Loading } from '@alifd/next';
+import { Grid, Checkbox, Dropdown, Menu, Loading, Button } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import React, { Component, Fragment } from 'react';
 
@@ -138,12 +138,31 @@ class ContainerLog extends Component<Props, State> {
     }
   };
 
+  downloadLog = () => {
+    const { pod, activeContainerName = '' } = this.props;
+    const { logs } = this.state;
+    
+    let logContent: string[] = [];
+    logs.map((line) => {
+      logContent.push(line.content);
+    });
+    const element = document.createElement("a");
+    const file = new Blob([logContent.join("\n")], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = pod?.metadata.name + "-" + activeContainerName;
+    document.body.appendChild(element);
+    element.click();
+  };
+
   render() {
     const { Row, Col } = Grid;
     const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous, loading } = this.state;
     return (
       <Fragment>
         <div className="application-logs-actions">
+          <Button type="normal" size="small" onClick={this.downloadLog}>
+            <Translation className="font-bold font-size-14">download</Translation>
+          </Button>
           <Checkbox checked={showTimestamps} onChange={(v) => this.setState({ showTimestamps: v })}>
             <Translation className="font-bold font-size-14">Show timestamps</Translation>
           </Checkbox>

@@ -1,4 +1,4 @@
-import { Dialog, Grid, Checkbox, Dropdown, Menu } from '@alifd/next';
+import { Dialog, Grid, Checkbox, Dropdown, Menu, Button } from '@alifd/next';
 import React, { Component } from 'react';
 
 import { If } from '../../../../components/If';
@@ -115,6 +115,22 @@ class ContainerLog extends Component<Props, State> {
     }
   };
 
+  downloadLog = () => {
+    const { pod, containerName = '' } = this.props;
+    const { logs } = this.state;
+    
+    let logContent: string[] = [];
+    logs.map((line) => {
+      logContent.push(line.content)
+    });
+    const element = document.createElement("a");
+    const file = new Blob([logContent.join("\n")], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = pod?.metadata.name + "-" + containerName;
+    document.body.appendChild(element);
+    element.click();
+  };
+
   render() {
     const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous } = this.state;
     return (
@@ -126,7 +142,18 @@ class ContainerLog extends Component<Props, State> {
         onClose={this.props.onClose}
         overflowScroll
         v2
-        title={<Translation>Container Log</Translation>}
+        title={
+          <Row style={{ width: '100%' }}>
+            <Col span={12}>
+              <Translation>Container Log</Translation>
+            </Col>
+            <Col span={12}>
+            <Button style={{float: "right"}} type="normal" size="small" onClick={this.downloadLog}>
+              <Translation className="font-bold font-size-14">download</Translation>
+            </Button>
+            </Col>
+          </Row>
+        }
         footer={
           <Row style={{ width: '100%' }}>
             <Col span={12}>
