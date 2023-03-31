@@ -34,22 +34,15 @@ import (
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 var _ = Describe("Test cluster service function", func() {
-	var (
-		ds    datastore.DataStore
-		cache *utils.MemoryCacheStore
-		ctx   context.Context
-		err   error
-	)
+	var cache *utils.MemoryCacheStore
 
 	BeforeEach(func() {
-		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "cluster-test-kubevela-" + rand.RandomString(4)})
-		Expect(err).Should(Succeed())
+		InitTestEnv("cluster-test-kubevela-" + rand.RandomString(4))
 		cache = utils.NewMemoryCacheStore(context.Background())
 		ctx = context.Background()
 

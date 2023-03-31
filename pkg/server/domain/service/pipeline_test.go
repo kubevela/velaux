@@ -23,15 +23,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/oam-dev/kubevela/pkg/oam/util"
-
 	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
 var (
-	// defaultNamespace   = "project-default-ns1-test"
 	ctx context.Context
 
 	pipelineName = "test-pipeline"
@@ -39,17 +35,8 @@ var (
 )
 var _ = Describe("Test pipeline service functions", func() {
 	It("Init services and project", func() {
-		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: "pipeline-test-kubevela"})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
-		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
-		pipelineService = NewTestPipelineService(ds, k8sClient, cfg).(*pipelineServiceImpl)
-		pipelineRunService = pipelineService.PipelineRunService.(*pipelineRunServiceImpl)
-		contextService = pipelineService.ContextService.(*contextServiceImpl)
-		projectService = pipelineService.ProjectService.(*projectServiceImpl)
-		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
-
-		ok, err := InitFakeAdmin(userService)
+		InitTestEnv("pipeline-test-kubevela")
+		ok, err := InitTestAdmin(userService)
 		Expect(err).Should(BeNil())
 		Expect(ok).Should(BeTrue())
 
@@ -62,6 +49,12 @@ var _ = Describe("Test pipeline service functions", func() {
 		projModel, err := projectService.GetProject(context.TODO(), projectName)
 		Expect(err).Should(BeNil())
 		ctx = context.WithValue(ctx, &apisv1.CtxKeyProject, projModel)
+	})
+
+	It("Init the platform", func() {
+		ok, err := InitTestAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 	})
 
 	It("Test create pipeline", func() {

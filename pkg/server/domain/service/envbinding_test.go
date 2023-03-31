@@ -25,7 +25,6 @@ import (
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
@@ -36,20 +35,11 @@ var _ = Describe("Test envBindingService functions", func() {
 		testApp         *model.Application
 	)
 	BeforeEach(func() {
-		var err error
-		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "env-test-kubevela"})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
+		InitTestEnv("env-test-kubevela")
 		testApp = &model.Application{
 			Name:    "test-app-env",
 			Project: "default",
 		}
-		rbacService := &rbacServiceImpl{Store: ds}
-		projectService := &projectServiceImpl{Store: ds, K8sClient: k8sClient, RbacService: rbacService}
-		envService = &envServiceImpl{Store: ds, KubeClient: k8sClient, ProjectService: projectService}
-		workflowService = &workflowServiceImpl{Store: ds, KubeClient: k8sClient, EnvService: envService}
-		definitionService = &definitionServiceImpl{KubeClient: k8sClient}
-		envBindingService = &envBindingServiceImpl{Store: ds, WorkflowService: workflowService, DefinitionService: definitionService, KubeClient: k8sClient, EnvService: envService}
 		envBindingDemo1 = apisv1.EnvBinding{
 			Name: "envbinding-dev",
 		}

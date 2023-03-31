@@ -41,7 +41,7 @@ import (
 
 var _ = Describe("Test namespace service functions", func() {
 	BeforeEach(func() {
-		definitionService = &definitionServiceImpl{KubeClient: k8sClient}
+		InitTestEnv("todo")
 		err := k8sClient.Create(context.Background(), &corev1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "vela-system",

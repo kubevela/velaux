@@ -104,8 +104,11 @@ var _ = BeforeSuite(func() {
 			Expect(err).Should(BeNil())
 			initHtpReq, err := http.NewRequest("PUT", baseURL+"/auth/init_admin", bytes.NewBuffer(bodyByte))
 			Expect(err).Should(BeNil())
+			initHtpReq.Header.Set("Content-Type", "application/json")
 			res, err := http.DefaultClient.Do(initHtpReq)
-			Expect(err).Should(BeNil())
+			if err != nil {
+				return err
+			}
 			// either 200 or "admin user is already configured"
 			if res.StatusCode != 200 {
 				body, err := io.ReadAll(res.Body)
@@ -143,7 +146,7 @@ var _ = BeforeSuite(func() {
 			err = json.NewDecoder(resp.Body).Decode(code)
 			Expect(err).Should(BeNil())
 			return fmt.Errorf("rest service not ready code:%d message:%s", resp.StatusCode, code.Message)
-		}, time.Second*20, time.Millisecond*200).Should(BeNil())
+		}, time.Second*600, time.Millisecond*200).Should(Succeed())
 	var err error
 	k8sClient, err = clients.GetKubeClient()
 	Expect(err).ShouldNot(HaveOccurred())

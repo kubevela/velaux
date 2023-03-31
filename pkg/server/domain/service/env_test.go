@@ -35,7 +35,6 @@ import (
 	"github.com/oam-dev/kubevela/pkg/oam"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
@@ -43,19 +42,14 @@ import (
 var _ = Describe("Test env service functions", func() {
 
 	BeforeEach(func() {
-		var err error
-		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "env-test-kubevela"})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
-		rbacService := &rbacServiceImpl{Store: ds}
-		projectService := &projectServiceImpl{Store: ds, K8sClient: k8sClient, RbacService: rbacService}
-		envService = &envServiceImpl{KubeClient: k8sClient, Store: ds, ProjectService: projectService}
-		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
+		InitTestEnv("env-test-kubevela")
 	})
 
-	ok, err := InitFakeAdmin(userService)
-	Expect(err).Should(BeNil())
-	Expect(ok).Should(BeTrue())
+	It("Init the platform", func() {
+		ok, err := InitTestAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
+	})
 
 	It("Test Create/Get/Delete Env function", func() {
 		// create target

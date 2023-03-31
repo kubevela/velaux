@@ -29,7 +29,6 @@ import (
 	"github.com/oam-dev/kubevela/pkg/config"
 	"github.com/oam-dev/kubevela/pkg/cue/script"
 
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
@@ -105,15 +104,11 @@ template: {
 
 var _ = Describe("Test config service", func() {
 	var factory config.Factory
-	var ds datastore.DataStore
 	BeforeEach(func() {
 		factory = config.NewConfigFactory(k8sClient)
 		Expect(factory).ToNot(BeNil())
-		var err error
-		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "config-test-kubevela"})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
-		projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
+
+		InitTestEnv("config-test-kubevela")
 		configService = &configServiceImpl{
 			KubeClient:     k8sClient,
 			ProjectService: projectService,

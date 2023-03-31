@@ -61,7 +61,7 @@ var _ = Describe("Test CR convert to ux", func() {
 		Expect(cr2ux).ShouldNot(BeNil())
 		userService = cr2ux.userService
 
-		ok, err := service.InitFakeAdmin(userService)
+		ok, err := service.InitTestAdmin(userService)
 		Expect(err).Should(BeNil())
 		Expect(ok).Should(BeTrue())
 	})

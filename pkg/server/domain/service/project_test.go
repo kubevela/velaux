@@ -49,6 +49,10 @@ var _ = Describe("Test project service functions", func() {
 		userService = projectService.UserService.(*userServiceImpl)
 		targetService = projectService.TargetService.(*targetServiceImpl)
 
+		ok, err := InitTestAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
+
 		pp, err := projectService.ListProjects(context.TODO(), 0, 0)
 		Expect(err).Should(BeNil())
 		// reset all projects
@@ -69,10 +73,6 @@ var _ = Describe("Test project service functions", func() {
 			_ = targetService.DeleteTarget(context.TODO(), t.Name)
 		}
 	})
-
-	ok, err := InitFakeAdmin(userService)
-	Expect(err).Should(BeNil())
-	Expect(ok).Should(BeTrue())
 
 	It("Test Create project function", func() {
 		req := apisv1.CreateProjectRequest{
@@ -132,7 +132,7 @@ var _ = Describe("Test project service functions", func() {
 			Description: "Change description",
 			Owner:       "admin-error",
 		})
-		Expect(err).Should(BeEquivalentTo(bcode.ErrProjectOwnerIsNotExist))
+		Expect(err).Should(BeEquivalentTo(bcode.ErrProjectOwnerInvalid))
 		err = projectService.DeleteProject(context.TODO(), "test-project")
 		Expect(err).Should(BeNil())
 	})
@@ -146,7 +146,7 @@ var _ = Describe("Test project service functions", func() {
 		Expect(err).Should(BeNil())
 
 		_, err = projectService.AddProjectUser(context.TODO(), "test-project", apisv1.AddProjectUserRequest{
-			UserName:  "admin",
+			UserName:  FakeAdminName,
 			UserRoles: []string{"project-admin"},
 		})
 		Expect(err).Should(BeNil())
@@ -166,17 +166,17 @@ var _ = Describe("Test project service functions", func() {
 		Expect(err).Should(BeNil())
 
 		_, err = projectService.AddProjectUser(context.TODO(), "test-project", apisv1.AddProjectUserRequest{
-			UserName:  "admin",
+			UserName:  FakeAdminName,
 			UserRoles: []string{"project-admin"},
 		})
 		Expect(err).Should(BeNil())
 
-		_, err = projectService.UpdateProjectUser(context.TODO(), "test-project", "admin", apisv1.UpdateProjectUserRequest{
+		_, err = projectService.UpdateProjectUser(context.TODO(), "test-project", FakeAdminName, apisv1.UpdateProjectUserRequest{
 			UserRoles: []string{"project-admin", "app-developer"},
 		})
 		Expect(err).Should(BeNil())
 
-		_, err = projectService.UpdateProjectUser(context.TODO(), "test-project", "admin", apisv1.UpdateProjectUserRequest{
+		_, err = projectService.UpdateProjectUser(context.TODO(), "test-project", FakeAdminName, apisv1.UpdateProjectUserRequest{
 			UserRoles: []string{"project-admin", "app-developer", "xxx"},
 		})
 		Expect(err).Should(BeEquivalentTo(bcode.ErrProjectRoleCheckFailure))
@@ -191,12 +191,12 @@ var _ = Describe("Test project service functions", func() {
 		Expect(err).Should(BeNil())
 
 		_, err = projectService.AddProjectUser(context.TODO(), "test-project", apisv1.AddProjectUserRequest{
-			UserName:  "admin",
+			UserName:  FakeAdminName,
 			UserRoles: []string{"project-admin"},
 		})
 		Expect(err).Should(BeNil())
 
-		err = projectService.DeleteProjectUser(context.TODO(), "test-project", "admin")
+		err = projectService.DeleteProjectUser(context.TODO(), "test-project", FakeAdminName)
 		Expect(err).Should(BeNil())
 		err = projectService.DeleteProject(context.TODO(), "test-project")
 		Expect(err).Should(BeNil())

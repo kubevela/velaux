@@ -18,8 +18,9 @@ package sync
 
 import (
 	"context"
-	"github.com/kubevela/velaux/pkg/server/domain/service"
 	"time"
+
+	"github.com/kubevela/velaux/pkg/server/domain/service"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -79,7 +80,7 @@ var _ = Describe("Test Worker CR sync to datastore", func() {
 			WorkflowService:    crux.workflowService,
 			EnvService:         crux.envService,
 		}
-		ok, err := service.InitFakeAdmin(crux.userService)
+		ok, err := service.InitTestAdmin(crux.userService)
 		Expect(err).Should(BeNil())
 		Expect(ok).Should(BeTrue())
 		go appSync.Start(ctx, make(chan error))

@@ -59,26 +59,57 @@ func TestService(t *testing.T) {
 
 // claim all services, ds, kubeClient
 var (
-	pipelineService    *pipelineServiceImpl
-	pipelineRunService *pipelineRunServiceImpl
-	userService        *userServiceImpl
-	contextService     *contextServiceImpl
-	projectService     *projectServiceImpl
-	rbacService        *rbacServiceImpl
-	appService         *applicationServiceImpl
-	workflowService    *workflowServiceImpl
-	envService         *envServiceImpl
-	envBindingService  *envBindingServiceImpl
-	targetService      *targetServiceImpl
-	definitionService  *definitionServiceImpl
-	sysService         *systemInfoServiceImpl
-	authService        *authenticationServiceImpl
-	cloudShellService  *cloudShellServiceImpl
-	configService      *configServiceImpl
-	webhookService     *webhookServiceImpl
+	pipelineService   *pipelineServiceImpl
+	userService       *userServiceImpl
+	contextService    *contextServiceImpl
+	projectService    *projectServiceImpl
+	rbacService       *rbacServiceImpl
+	appService        *applicationServiceImpl
+	workflowService   *workflowServiceImpl
+	envService        *envServiceImpl
+	envBindingService *envBindingServiceImpl
+	targetService     *targetServiceImpl
+	definitionService *definitionServiceImpl
+	sysService        *systemInfoServiceImpl
+	authService       *authenticationServiceImpl
+	cloudShellService *cloudShellServiceImpl
+	configService     *configServiceImpl
+	webhookService    *webhookServiceImpl
 
 	ds datastore.DataStore
 )
+
+var err error
+
+func InitAllServices(ds datastore.DataStore) {
+	userService = NewTestUserService(ds, k8sClient).(*userServiceImpl)
+	contextService = NewTestContextService(ds).(*contextServiceImpl)
+	projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
+	appService = NewTestApplicationService(ds, k8sClient, cfg).(*applicationServiceImpl)
+	workflowService = NewTestWorkflowService(ds, k8sClient).(*workflowServiceImpl)
+	envService = NewTestEnvService(ds, k8sClient).(*envServiceImpl)
+	targetService = NewTestTargetService(ds, k8sClient).(*targetServiceImpl)
+	pipelineService = NewTestPipelineService(ds, k8sClient, cfg).(*pipelineServiceImpl)
+	cloudShellService = NewTestCloudShellService(ds, k8sClient, cfg).(*cloudShellServiceImpl)
+
+	definitionService = &definitionServiceImpl{KubeClient: k8sClient}
+	envBindingService = &envBindingServiceImpl{KubeClient: k8sClient, Store: ds, DefinitionService: definitionService, WorkflowService: workflowService}
+	sysService = &systemInfoServiceImpl{Store: ds, KubeClient: k8sClient}
+	authService = &authenticationServiceImpl{KubeClient: k8sClient, Store: ds, ProjectService: projectService, SysService: sysService, UserService: userService}
+	rbacService = &rbacServiceImpl{KubeClient: k8sClient, Store: ds}
+	webhookService = &webhookServiceImpl{Store: ds, ApplicationService: appService}
+}
+
+func InitTestDB(name string) {
+	ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: name})
+	Expect(ds).ToNot(BeNil())
+	Expect(err).Should(BeNil())
+}
+
+func InitTestEnv(dbName string) {
+	InitTestDB(dbName)
+	InitAllServices(ds)
+}
 
 var _ = BeforeSuite(func(done Done) {
 	rand.Seed(time.Now().UnixNano())

@@ -45,7 +45,6 @@ import (
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
 )
@@ -54,17 +53,7 @@ var _ = Describe("Test authentication service functions", func() {
 	var defaultNamespace = model.DefaultInitNamespace
 
 	BeforeEach(func() {
-		var err error
-		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "auth-test-" + strconv.FormatInt(time.Now().UnixNano(), 10)})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
-		authService = &authenticationServiceImpl{KubeClient: k8sClient, Store: ds}
-		sysService = &systemInfoServiceImpl{Store: ds, KubeClient: k8sClient}
-		projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
-		envService = projectService.EnvService.(*envServiceImpl)
-		userService = projectService.UserService.(*userServiceImpl)
-		targetService = projectService.TargetService.(*targetServiceImpl)
-
+		InitTestEnv("auth-test-" + strconv.FormatInt(time.Now().UnixNano(), 10))
 	})
 
 	It("Test Dex login", func() {
@@ -260,6 +249,7 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(err).Should(BeNil())
 		Expect(resp.Configured).Should(BeFalse())
 		initResp, err := userService.InitAdmin(context.Background(), apisv1.InitAdminRequest{
+			Name:     FakeAdminName,
 			Password: "ComplexPassword1",
 			Email:    "fake@kubevela.io",
 		})

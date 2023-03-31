@@ -243,7 +243,7 @@ func (p *projectServiceImpl) CreateProject(ctx context.Context, req apisv1.Creat
 	var user = &model.User{Name: owner}
 	if owner != "" {
 		if err := p.Store.Get(ctx, user); err != nil {
-			return nil, bcode.ErrProjectOwnerIsNotExist
+			return nil, bcode.ErrProjectOwnerInvalid
 		}
 	}
 
@@ -306,7 +306,7 @@ func (p *projectServiceImpl) UpdateProject(ctx context.Context, projectName stri
 	if req.Owner != "" {
 		if err := p.Store.Get(ctx, user); err != nil {
 			if errors.Is(err, datastore.ErrRecordNotExist) {
-				return nil, bcode.ErrProjectOwnerIsNotExist
+				return nil, bcode.ErrProjectOwnerInvalid
 			}
 			return nil, err
 		}

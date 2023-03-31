@@ -54,7 +54,7 @@ var _ = Describe("Test application service function", func() {
 	var (
 		testProject        = "app-project"
 		testApp            = "test-app"
-		defaultTarget      = "default"
+		defaultTarget      = "default1"
 		defaultTarget2     = "default2"
 		namespace1         = "app-test1"
 		namespace2         = "app-test2"
@@ -64,30 +64,7 @@ var _ = Describe("Test application service function", func() {
 	)
 
 	BeforeEach(func() {
-		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: "app-test-kubevela"})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
-		rbacService = &rbacServiceImpl{Store: ds}
-		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
-		projectService = &projectServiceImpl{Store: ds, K8sClient: k8sClient, RbacService: rbacService}
-		envService = &envServiceImpl{Store: ds, KubeClient: k8sClient, ProjectService: projectService}
-		workflowService = &workflowServiceImpl{Store: ds, EnvService: envService}
-		definitionService = &definitionServiceImpl{KubeClient: k8sClient}
-		envBindingService = &envBindingServiceImpl{Store: ds, EnvService: envService, WorkflowService: workflowService, KubeClient: k8sClient, DefinitionService: definitionService}
-		targetService = &targetServiceImpl{Store: ds, K8sClient: k8sClient}
-		appService = &applicationServiceImpl{
-			Store:             ds,
-			WorkflowService:   workflowService,
-			Apply:             apply.NewAPIApplicator(k8sClient),
-			KubeClient:        k8sClient,
-			KubeConfig:        cfg,
-			EnvBindingService: envBindingService,
-			EnvService:        envService,
-			DefinitionService: definitionService,
-			TargetService:     targetService,
-			ProjectService:    projectService,
-			UserService:       userService,
-		}
+		InitTestEnv("app-test-kubevela")
 	})
 
 	It("Test CreateApplication function", func() {
@@ -98,7 +75,7 @@ var _ = Describe("Test application service function", func() {
 		err := k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
 
-		ok, err := InitFakeAdmin(userService)
+		ok, err := InitTestAdmin(userService)
 		Expect(err).Should(BeNil())
 		Expect(ok).Should(BeTrue())
 

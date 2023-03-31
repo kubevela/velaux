@@ -95,6 +95,7 @@ func (u *userServiceImpl) InitAdmin(ctx context.Context, req apisv1.InitAdminReq
 		Password: req.Password,
 		Email:    req.Email,
 		Roles:    []string{AdminRole},
+		Alias:    model.DefaultAdminUserAlias,
 	}
 	if _, err = u.CreateUser(ctx, createUserRequest); err != nil {
 		return apisv1.InitAdminResponse{}, err

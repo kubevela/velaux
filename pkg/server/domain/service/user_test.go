@@ -44,21 +44,22 @@ var _ = Describe("Test authentication service functions", func() {
 		var err error
 		db = "user-test-" + strconv.FormatInt(time.Now().UnixNano(), 10)
 		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: db})
+
 		Expect(ds).ToNot(BeNil())
 		Expect(err).Should(BeNil())
-		rbacService := &rbacServiceImpl{Store: ds}
-		projectService := &projectServiceImpl{K8sClient: k8sClient, Store: ds, RbacService: rbacService}
-		sysService := &systemInfoServiceImpl{Store: ds}
-		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient, ProjectService: projectService, SysService: sysService, RbacService: rbacService}
+		rbacService = &rbacServiceImpl{Store: ds}
+		projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
+		sysService = &systemInfoServiceImpl{Store: ds}
+		userService = NewTestUserService(ds, k8sClient).(*userServiceImpl)
+
+		ok, err := InitTestAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 	})
 	AfterEach(func() {
 		err := k8sClient.Delete(context.Background(), &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: db}})
 		Expect(err).Should(BeNil())
 	})
-
-	ok, err := InitFakeAdmin(userService)
-	Expect(err).Should(BeNil())
-	Expect(ok).Should(BeTrue())
 
 	It("Test create user", func() {
 		user, err := userService.CreateUser(context.Background(), apisv1.CreateUserRequest{
@@ -134,7 +135,7 @@ var _ = Describe("Test authentication service functions", func() {
 
 		users, err = userService.ListUsers(ctx, 0, 10, apisv1.ListUserOptions{})
 		Expect(err).Should(BeNil())
-		Expect(users.Total).Should(Equal(int64(2)))
+		Expect(users.Total).Should(Equal(int64(3))) // 2 users + 1 admin
 	})
 
 	It("Test delete user", func() {
@@ -148,19 +149,20 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(err).Should(BeNil())
 		users, err := userService.ListUsers(ctx, 0, 10, apisv1.ListUserOptions{})
 		Expect(err).Should(BeNil())
-		Expect(users.Total).Should(Equal(int64(1)))
+		Expect(users.Total).Should(Equal(int64(2))) // 1 user + 1 admin
 
 		err = userService.DeleteUser(ctx, "name")
 		Expect(err).Should(BeNil())
 		users, err = userService.ListUsers(ctx, 0, 10, apisv1.ListUserOptions{})
 		Expect(err).Should(BeNil())
-		Expect(users.Total).Should(Equal(int64(0)))
+		Expect(users.Total).Should(Equal(int64(1))) // 1 admin
 	})
 
 	It("Test update user", func() {
 		ctx := context.Background()
+		userModify := "user-to-modify"
 		userModel := &model.User{
-			Name:     FakeAdminName,
+			Name:     userModify,
 			Alias:    "alias",
 			Email:    "email@example.com",
 			Password: "password",
@@ -180,7 +182,7 @@ var _ = Describe("Test authentication service functions", func() {
 		})
 		Expect(err).Should(BeNil())
 		newUser := &model.User{
-			Name: "admin",
+			Name: userModify,
 		}
 		err = ds.Get(ctx, newUser)
 		Expect(err).Should(BeNil())

@@ -72,12 +72,11 @@ type AuthenticationService interface {
 }
 
 type authenticationServiceImpl struct {
-	SysService        SystemInfoService   `inject:""`
-	UserService       UserService         `inject:""`
-	ProjectService    ProjectService      `inject:""`
-	SystemInfoService SystemInfoService   `inject:""`
-	Store             datastore.DataStore `inject:"datastore"`
-	KubeClient        client.Client       `inject:"kubeClient"`
+	SysService     SystemInfoService   `inject:""`
+	UserService    UserService         `inject:""`
+	ProjectService ProjectService      `inject:""`
+	Store          datastore.DataStore `inject:"datastore"`
+	KubeClient     client.Client       `inject:"kubeClient"`
 }
 
 // NewAuthenticationService new authentication service
@@ -135,7 +134,7 @@ func (a *authenticationServiceImpl) newDexHandler(ctx context.Context, req apisv
 		idToken:           idToken,
 		Store:             a.Store,
 		projectService:    a.ProjectService,
-		systemInfoService: a.SystemInfoService,
+		systemInfoService: a.SysService,
 	}, nil
 }
 
@@ -524,10 +523,16 @@ func (l *localHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) 
 	}, nil
 }
 
+// FakeAdminName is the fake admin name for testing
 var FakeAdminName = "fake-admin"
 
-// InitFakeAdmin is used to init fake admin user, use FakeAdminName as username
-var InitFakeAdmin = func(us UserService) (bool, error) {
+// InitTestAdmin is used to init fake admin user, use FakeAdminName as username
+var InitTestAdmin = func(us UserService) (bool, error) {
+	if resp, err := us.AdminConfigured(context.Background()); err != nil {
+		return false, err
+	} else if resp.Configured {
+		return true, nil
+	}
 	initResp, err := us.InitAdmin(context.Background(), apisv1.InitAdminRequest{
 		Password: "ComplexPassword1",
 		Email:    "fake@kubevela.io",
