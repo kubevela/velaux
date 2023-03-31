@@ -33,7 +33,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
       if (error) {
         return;
       }
-      const { name,email, password } = values;
+      const { name, password, email } = values;
       const params = {
         name,
         email,
@@ -99,7 +99,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
                     name="name"
                     htmlType=""
                     placeholder={i18n.t('Please input the admin username').toString()}
-                    {...init('username', {
+                    {...init('name', {
                       rules: [
                         {
                           required: true,

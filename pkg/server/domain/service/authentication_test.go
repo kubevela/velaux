@@ -54,6 +54,10 @@ var _ = Describe("Test authentication service functions", func() {
 
 	BeforeEach(func() {
 		InitTestEnv("auth-test-" + strconv.FormatInt(time.Now().UnixNano(), 10))
+		// Init admin to init default project for dex login test, which will use default project
+		ok, err := InitTestAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 	})
 
 	It("Test Dex login", func() {
@@ -94,7 +98,7 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(newUser.DexSub).Should(Equal(sub))
 		Expect(newUser.UserRoles).Should(Equal([]string{model.RoleAdmin}))
 
-		projects, err := projectService.ListUserProjects(context.TODO(), strings.ToLower(sub))
+		projects, err := projectService.ListUserProjects(context.TODO(), sub)
 		Expect(err).Should(BeNil())
 		Expect(len(projects)).Should(Equal(1))
 
