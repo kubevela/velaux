@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"k8s.io/klog/v2"
@@ -36,10 +37,18 @@ import (
 var (
 	// ErrInvalidPluginJSON -
 	ErrInvalidPluginJSON = errors.New("did not find valid type or id properties in plugin.json")
+	// ErrInvalidPluginID -
+	ErrInvalidPluginID = errors.New("the id properties is invalid in plugin.json([a-z][a-z-]{4,32})")
 	// ErrInvalidPluginJSONFilePath -
 	ErrInvalidPluginJSONFilePath = errors.New("invalid plugin.json filepath was provided")
 	// ErrInvalidInclude -
 	ErrInvalidInclude = errors.New("the include config is invalid in plugin.json")
+	// ErrInvalidBackendType -
+	ErrInvalidBackendType = errors.New("the backend type is invalid in plugin.json, the kubePermissions field is required if the type is kube-api")
+)
+
+var (
+	pluginIDReg = regexp.MustCompile("^[a-z][a-z-]{4,32}$")
 )
 
 // Loader the tool class to load the plugin from the specified path.
@@ -217,10 +226,19 @@ func validatePluginJSON(data types.JSONData) error {
 	if data.ID == "" || !data.Type.IsValid() {
 		return ErrInvalidPluginJSON
 	}
+	if !pluginIDReg.MatchString(data.ID) {
+		return ErrInvalidPluginJSON
+	}
 	for _, i := range data.Includes {
 		if i.Name == "" || !strings.HasPrefix(i.To, "/plugins") || len(i.RelatedRoute) == 0 {
 			return ErrInvalidInclude
 		}
+	}
+	if data.Backend && data.BackendType != types.KubeAPI && data.BackendType != types.KubeService && data.BackendType != types.StaticServer {
+		return ErrInvalidBackendType
+	}
+	if data.BackendType == types.KubeAPI && len(data.KubePermissions) == 0 {
+		return ErrInvalidBackendType
 	}
 	return nil
 }

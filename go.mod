@@ -108,7 +108,10 @@ require (
 
 require github.com/oam-dev/kubevela v1.8.0-alpha.2.0.20230307081937-79f1d5cb0386
 
-require github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
+require (
+	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
+	github.com/julienschmidt/httprouter v1.3.0
+)
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect

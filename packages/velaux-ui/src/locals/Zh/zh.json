@@ -625,5 +625,10 @@
   "Showing all projects you are permitted": "你拥有权限的所有项目",
   "More": "显示更多",
   "Hide": "收起",
-  "Admin Username": "管理员账号名称"
+  "Admin Username": "管理员账号名称",
+  "The default canary is powered by Kruise Rollout, let's enable the Kruise Rollout addon first.": "金丝雀发布默认由 Kruise Rollout 提供，请先启用该插件。",
+  "You can also edit the workflow directly to switch to canary deploy mode.": "直接便捷工作流也可以切换为金丝雀发布模式",
+  "There is no default deploy step.": "工作流不存在 Deploy 步骤。",
+  "Batch Setting": "批次设置",
+  "Canary Deploy Setting": "金丝雀发布设置"
 }

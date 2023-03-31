@@ -14,13 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package bcode
+package proxy
 
-// ErrPluginNotfound means the plugin does't install
-var ErrPluginNotfound = NewBcode(404, 18001, "the plugin is not exist")
+import (
+	"net/http"
 
-// ErrIsNotBackendPlugin -
-var ErrIsNotBackendPlugin = NewBcode(404, 18002, "the plugin is not backend plugin")
+	"github.com/kubevela/velaux/pkg/plugin/types"
+)
 
-// ErrIsNotProxyBackendPlugin -
-var ErrIsNotProxyBackendPlugin = NewBcode(404, 18003, "the plugin is not backend proxy plugin")
+type staticServerProxy struct {
+	plugin *types.Plugin
+}
+
+func (k *staticServerProxy) Handler(req *http.Request, res http.ResponseWriter) {
+
+}

@@ -14,13 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package bcode
+package proxy
 
-// ErrPluginNotfound means the plugin does't install
-var ErrPluginNotfound = NewBcode(404, 18001, "the plugin is not exist")
+import (
+	"net/http"
 
-// ErrIsNotBackendPlugin -
-var ErrIsNotBackendPlugin = NewBcode(404, 18002, "the plugin is not backend plugin")
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
-// ErrIsNotProxyBackendPlugin -
-var ErrIsNotProxyBackendPlugin = NewBcode(404, 18003, "the plugin is not backend proxy plugin")
+	"github.com/kubevela/velaux/pkg/plugin/types"
+)
+
+type kubeServiceProxy struct {
+	kubeClient client.Client
+	plugin     *types.Plugin
+}
+
+func (k *kubeServiceProxy) Handler(res *http.Request, req http.ResponseWriter) {
+
+}

@@ -268,7 +268,7 @@ class Header extends Component<Props, State> {
                     <div>
                       {ws.icon}
                       <span>
-                        <Translation>{ws.label}</Translation>
+                        <Translation>{ws.label || ws.name}</Translation>
                       </span>
                     </div>
                   </Link>

@@ -99,14 +99,14 @@ export const CanarySetting: React.FunctionComponent<Props> = (props: Props) => {
     >
       <If condition={!canaryDeployDefinition}>
         <Message type="warning">
-          {i18n.t("The default canary power by Kruise Rollout, let's enable the Kruise Rollout addon first.")}
+          {i18n.t("The default canary is powered by Kruise Rollout, let's enable the Kruise Rollout addon first.")}
         </Message>
       </If>
       <If condition={canaryDeployDefinition}>
         {canSetting && (
           <div className="canary-step-setting">
             <Message type="help" style={{ marginBottom: 'var(--spacing-4)' }}>
-              {i18n.t('You can also edit the workflow directly to switch to canary deploy mode')}
+              {i18n.t('You can also edit the workflow directly to switch to canary deploy mode.')}
             </Message>
             <Form>
               {deploySteps.map((step) => {

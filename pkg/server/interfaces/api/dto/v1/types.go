@@ -55,6 +55,8 @@ var (
 	CtxKeyApplicationComponent = "component"
 	// CtxKeyUser request context key of user
 	CtxKeyUser = "user"
+	// CtxKeyUserModel request context key of user model
+	CtxKeyUserModel = "user-model"
 	// CtxKeyProject request context key of project
 	CtxKeyProject = "project"
 	// CtxKeyToken request context key of request token
@@ -1867,4 +1869,18 @@ type PluginDTO struct {
 // ListPluginResponse -
 type ListPluginResponse struct {
 	Plugins []PluginDTO `json:"plugins"`
+}
+
+// PluginSettingResponse plugin setting response model
+type PluginSettingResponse struct {
+	PluginDTO
+	JSONData         map[string]interface{} `json:"jsonData"`
+	SecureJSONFields map[string]bool        `json:"secureJsonFields"`
+}
+
+// PluginSettingRequest plugin setting request model
+type PluginSettingRequest struct {
+	PluginDTO
+	JSONData       map[string]interface{} `json:"jsonData"`
+	SecureJSONData map[string]interface{} `json:"secureJsonData"`
 }

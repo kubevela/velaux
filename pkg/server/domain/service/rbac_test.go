@@ -288,3 +288,18 @@ func TestRegisterResourceAction(t *testing.T) {
 	registerResourceAction("project/role", "list")
 	t.Log(resourceActions)
 }
+
+func TestRegisterPluginResource(t *testing.T) {
+	RegisterPluginResource("cluster/node", map[string]string{
+		"cluster": "clusterName",
+		"node":    "nodeName",
+	})
+	_, err := checkResourcePath("plugin/cluster/node")
+	assert.Equal(t, err, nil)
+	RegisterPluginResource("cluster/pv", map[string]string{
+		"cluster": "clusterName",
+		"pv":      "pvName",
+	})
+	_, err = checkResourcePath("plugin/cluster/pv")
+	assert.Equal(t, err, nil)
+}

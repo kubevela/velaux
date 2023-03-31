@@ -21,11 +21,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
 	"sync"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/julienschmidt/httprouter"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -33,6 +35,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/auth"
 	"github.com/oam-dev/kubevela/pkg/utils"
 
+	plugintypes "github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
@@ -369,6 +372,42 @@ func convertSources(sources map[string]resourceMetadata) map[string]string {
 	return list
 }
 
+func buildMap(resources []string, resourceNameMap map[string]string) map[string]resourceMetadata {
+	if len(resources) == 0 {
+		return nil
+	}
+	return map[string]resourceMetadata{
+		resources[0]: {
+			pathName:     resourceNameMap[resources[0]],
+			subResources: buildMap(resources[1:], resourceNameMap),
+		},
+	}
+}
+
+func mergeMap(source, target map[string]resourceMetadata) {
+	for k, v := range source {
+		if _, exist := target[k]; exist {
+			mergeMap(source[k].subResources, target[k].subResources)
+		} else {
+			target[k] = v
+		}
+	}
+}
+
+// RegisterPluginResource register the allow resources to map
+// resource format like: cluster/node
+// resource map like: plugin: {pathName: "pluginID", subResources:{cluster: {pathName: "clusterName",subResources:{node:{pathName:"nodeName"}}}}}
+func RegisterPluginResource(resource string, resourceNameMap map[string]string) {
+	m := buildMap(strings.Split(resource, "/"), resourceNameMap)
+	mergeMap(map[string]resourceMetadata{
+		"plugin": {
+			pathName:     "pluginID",
+			subResources: m,
+		},
+	}, ResourceMaps)
+	existResourcePaths = convertSources(ResourceMaps)
+}
+
 // registerResourceAction register resource actions
 func registerResourceAction(resource string, actions ...string) {
 	lock.Lock()
@@ -400,6 +439,7 @@ type rbacServiceImpl struct {
 // RBACService implement RBAC-related business logic.
 type RBACService interface {
 	CheckPerm(resource string, actions ...string) func(req *restful.Request, res *restful.Response, chain *restful.FilterChain)
+	CheckPluginRequestPerm(httpParams httprouter.Params, r2 *plugintypes.Route) func(req *http.Request, res http.ResponseWriter) bool
 	GetUserPermissions(ctx context.Context, user *model.User, projectName string, withPlatform bool) ([]*model.Permission, error)
 	CreateRole(ctx context.Context, projectName string, req apisv1.CreateRoleRequest) (*apisv1.RoleBase, error)
 	DeleteRole(ctx context.Context, projectName, roleName string) error
@@ -646,8 +686,79 @@ func (p *rbacServiceImpl) CheckPerm(resource string, actions ...string) func(req
 			bcode.ReturnError(req, res, bcode.ErrForbidden)
 			return
 		}
-		apiserverutils.SetUsernameAndProjectInRequestContext(req, userName, projectName, user.UserRoles)
+
+		apiserverutils.SetUsernameAndProjectInRequestContext(req.Request, userName, projectName, user.UserRoles)
 		chain.ProcessFilter(req, res)
+	}
+	return f
+}
+
+// CheckPluginRequestPerm handle RBAC checking for the the http request to plugin backend
+// pathFormat: eg. nodes/{node}/status
+func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r2 *plugintypes.Route) func(req *http.Request, res http.ResponseWriter) bool {
+	if r2.Permission != nil {
+		RegisterPluginResource("plugin/"+r2.Permission.Resource, r2.ResourceMap)
+		registerResourceAction("plugin/"+r2.Permission.Resource, r2.Permission.Action)
+	}
+	f := func(req *http.Request, res http.ResponseWriter) bool {
+		if r2.Permission == nil {
+			return true
+		}
+		resource := r2.Permission.Resource
+		actions := []string{r2.Permission.Action}
+
+		pathParameter := func(name string) string {
+			return httpParams.ByName(name)
+		}
+		// get login user info
+		userName, ok := req.Context().Value(&apisv1.CtxKeyUser).(string)
+		if !ok {
+			bcode.ReturnHTTPError(req, res, bcode.ErrUnauthorized)
+			return false
+		}
+		user := &model.User{Name: userName}
+		if err := p.Store.Get(req.Context(), user); err != nil {
+			bcode.ReturnHTTPError(req, res, bcode.ErrUnauthorized)
+			return false
+		}
+		path, err := checkResourcePath(resource)
+		if err != nil {
+			klog.Errorf("check resource path failure %s", err.Error())
+			bcode.ReturnHTTPError(req, res, bcode.ErrForbidden)
+			return false
+		}
+
+		// multiple method for get the project name.
+		getProjectName := func() string {
+			if value := pathParameter("projectName"); value != "" {
+				return value
+			}
+			return ""
+		}
+
+		ra := &RequestResourceAction{}
+		ra.SetResourceWithName(path, func(name string) string {
+			if name == ResourceMaps["project"].pathName {
+				return getProjectName()
+			}
+			return pathParameter(name)
+		})
+		ra.SetActions(actions)
+
+		// get user's perm list.
+		projectName := getProjectName()
+		permissions, err := p.GetUserPermissions(req.Context(), user, projectName, true)
+		if err != nil {
+			klog.Errorf("get user's perm policies failure %s, user is %s", err.Error(), user.Name)
+			bcode.ReturnHTTPError(req, res, bcode.ErrForbidden)
+			return false
+		}
+		if !ra.Match(permissions) {
+			bcode.ReturnHTTPError(req, res, bcode.ErrForbidden)
+			return false
+		}
+		apiserverutils.SetUsernameAndProjectInRequestContext(req, userName, projectName, user.UserRoles)
+		return true
 	}
 	return f
 }
