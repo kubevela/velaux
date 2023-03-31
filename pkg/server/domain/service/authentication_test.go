@@ -248,7 +248,7 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(config.RedirectURL).Should(Equal("http://velaux.com/callback"))
 	})
 
-	FIt("Test init admin user", func() {
+	It("Test init admin user", func() {
 		By("Remove all users")
 		users, err := ds.List(context.Background(), &model.User{}, &datastore.ListOptions{})
 		Expect(err).Should(BeNil())
