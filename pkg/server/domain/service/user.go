@@ -94,7 +94,7 @@ func (u *userServiceImpl) InitAdmin(ctx context.Context, req apisv1.InitAdminReq
 		Name:     req.Name,
 		Password: req.Password,
 		Email:    req.Email,
-		Roles:    []string{"admin"},
+		Roles:    []string{AdminRole},
 	}
 	if _, err = u.CreateUser(ctx, createUserRequest); err != nil {
 		return apisv1.InitAdminResponse{}, err
@@ -514,9 +514,12 @@ func compareHashWithPassword(hash, password string) error {
 // NewTestUserService create the user service instance for testing
 func NewTestUserService(ds datastore.DataStore, c client.Client) UserService {
 	return &userServiceImpl{
-		Store: ds, K8sClient: c,
+		Store:          ds,
+		K8sClient:      c,
 		ProjectService: NewTestProjectService(ds, c),
 		RbacService:    &rbacServiceImpl{Store: ds},
+		TargetService:  NewTestTargetService(ds, c),
 		SysService:     &systemInfoServiceImpl{Store: ds, KubeClient: c},
+		EnvService:     NewTestEnvService(ds, c),
 	}
 }

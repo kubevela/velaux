@@ -44,6 +44,7 @@ type ApplicationSync struct {
 	KubeConfig         *rest.Config               `inject:"kubeConfig"`
 	Store              datastore.DataStore        `inject:"datastore"`
 	ProjectService     service.ProjectService     `inject:""`
+	UserService        service.UserService        `inject:""`
 	ApplicationService service.ApplicationService `inject:""`
 	WorkflowService    service.WorkflowService    `inject:""`
 	TargetService      service.TargetService      `inject:""`
@@ -78,6 +79,7 @@ func (a *ApplicationSync) Start(ctx context.Context, errorChan chan error) {
 		cli:                a.KubeClient,
 		cache:              sync.Map{},
 		projectService:     a.ProjectService,
+		userService:        a.UserService,
 		applicationService: a.ApplicationService,
 		workflowService:    a.WorkflowService,
 		targetService:      a.TargetService,

@@ -98,7 +98,9 @@ var _ = Describe("Test application service function", func() {
 		err := k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
 
-		InitFakeAdmin(userService)
+		ok, err := InitFakeAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 
 		By("prepare test project")
 		_, err = projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{Name: testProject, Owner: FakeAdminName})

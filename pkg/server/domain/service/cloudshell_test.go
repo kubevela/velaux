@@ -100,7 +100,9 @@ var _ = Describe("Test cloudshell service function", func() {
 	})
 
 	It("Test prepareKubeConfig", func() {
-		InitFakeAdmin(userService)
+		ok, err := InitFakeAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 
 		By("test the developer users")
 		_, err = userService.CreateUser(context.TODO(), apisv1.CreateUserRequest{Name: "test-dev", Password: "test"})

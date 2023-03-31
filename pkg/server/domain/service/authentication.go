@@ -523,3 +523,15 @@ func (l *localHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) 
 		Email:         user.Email,
 	}, nil
 }
+
+var FakeAdminName = "fake-admin"
+
+// InitFakeAdmin is used to init fake admin user, use FakeAdminName as username
+var InitFakeAdmin = func(us UserService) (bool, error) {
+	initResp, err := us.InitAdmin(context.Background(), apisv1.InitAdminRequest{
+		Password: "ComplexPassword1",
+		Email:    "fake@kubevela.io",
+		Name:     FakeAdminName,
+	})
+	return initResp.Success, err
+}

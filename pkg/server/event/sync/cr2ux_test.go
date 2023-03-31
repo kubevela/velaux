@@ -42,25 +42,31 @@ import (
 
 var _ = Describe("Test CR convert to ux", func() {
 	var (
-		testFakeAdmin = "fake-admin"
-		ds            datastore.DataStore
-		dbNamespace   string
-		err           error
+		ds          datastore.DataStore
+		cr2ux       *CR2UX
+		userService service.UserService
+		dbNamespace string
+		err         error
 	)
 
 	BeforeEach(func() {
+		By("Preparing database")
 		dbNamespace = "test-sync-ns-" + strconv.FormatInt(time.Now().UnixNano(), 10)
 		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: dbNamespace})
 		Expect(ds).ToNot(BeNil())
 		Expect(err).Should(BeNil())
-		fakeAdmin := model.User{Name: testFakeAdmin}
-		Expect(ds.Add(context.Background(), &fakeAdmin)).Should(BeNil())
+
+		By("Preparing cr2ux")
+		cr2ux = newCR2UX(ds)
+		Expect(cr2ux).ShouldNot(BeNil())
+		userService = cr2ux.userService
+
+		ok, err := service.InitFakeAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 	})
 
 	It("Test get app with occupied app", func() {
-
-		By("Preparing database")
-
 		apName1 := "example"
 		appNS1 := "get-app-test-ns1"
 		appNS2 := "get-app-test-ns2"
@@ -75,7 +81,6 @@ var _ = Describe("Test CR convert to ux", func() {
 
 		By("no app created, test the name")
 
-		cr2ux := newCR2UX(ds)
 		gotApp, gotAppName, err := cr2ux.getApp(context.Background(), apName1, appNS1)
 		Expect(gotAppName).Should(BeEquivalentTo(apName1))
 		Expect(gotApp).Should(BeNil())
@@ -117,8 +122,6 @@ var _ = Describe("Test CR convert to ux", func() {
 		ns.ResourceVersion = ""
 		err = k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
-
-		cr2ux := newCR2UX(ds)
 
 		By("create test app1 and check the syncing results")
 		app1 := &v1beta1.Application{}
@@ -164,13 +167,11 @@ var _ = Describe("Test CR convert to ux", func() {
 	})
 
 	It("Test exist env", func() {
-		cr2ux := newCR2UX(ds)
-
 		projectName := "project-e"
 
 		_, err = cr2ux.projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{
 			Name:  projectName,
-			Owner: testFakeAdmin,
+			Owner: service.FakeAdminName,
 		})
 		Expect(err).Should(BeNil())
 
@@ -222,13 +223,11 @@ var _ = Describe("Test CR convert to ux", func() {
 	})
 
 	It("Test to sync the project which existed env belongs", func() {
-		cr2ux := newCR2UX(ds)
-
 		projectName := "project-test"
 
 		_, err = cr2ux.projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{
 			Name:  projectName,
-			Owner: testFakeAdmin,
+			Owner: service.FakeAdminName,
 		})
 		Expect(err).Should(BeNil())
 
@@ -271,8 +270,8 @@ func newCR2UX(ds datastore.DataStore) *CR2UX {
 		ds:                 ds,
 		cli:                k8sClient,
 		cache:              sync.Map{},
-		userService:        userService,
 		projectService:     projectService,
+		userService:        userService,
 		targetService:      targetService,
 		envService:         envService,
 		applicationService: applicationService,

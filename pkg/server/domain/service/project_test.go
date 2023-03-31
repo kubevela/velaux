@@ -70,7 +70,9 @@ var _ = Describe("Test project service functions", func() {
 		}
 	})
 
-	InitFakeAdmin(userService)
+	ok, err := InitFakeAdmin(userService)
+	Expect(err).Should(BeNil())
+	Expect(ok).Should(BeTrue())
 
 	It("Test Create project function", func() {
 		req := apisv1.CreateProjectRequest{

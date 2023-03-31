@@ -53,7 +53,9 @@ var _ = Describe("Test env service functions", func() {
 		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
 	})
 
-	InitFakeAdmin(userService)
+	ok, err := InitFakeAdmin(userService)
+	Expect(err).Should(BeNil())
+	Expect(ok).Should(BeTrue())
 
 	It("Test Create/Get/Delete Env function", func() {
 		// create target
@@ -157,7 +159,7 @@ var _ = Describe("Test env service functions", func() {
 		Expect(err).Should(BeNil())
 
 		By("Test ListEnvs function")
-		_, err = envService.ListEnvs(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "admin"), 1, 1, apisv1.ListEnvOptions{})
+		_, err = envService.ListEnvs(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, FakeAdminName), 1, 1, apisv1.ListEnvOptions{})
 		Expect(err).Should(BeNil())
 	})
 

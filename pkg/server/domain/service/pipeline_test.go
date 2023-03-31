@@ -49,7 +49,9 @@ var _ = Describe("Test pipeline service functions", func() {
 		projectService = pipelineService.ProjectService.(*projectServiceImpl)
 		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
 
-		InitFakeAdmin(userService)
+		ok, err := InitFakeAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 
 		ctx = context.WithValue(context.TODO(), &apisv1.CtxKeyUser, FakeAdminName)
 		_, err = projectService.CreateProject(ctx, apisv1.CreateProjectRequest{

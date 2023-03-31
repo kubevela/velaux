@@ -187,7 +187,7 @@ var defaultPlatformPermission = []*model.PermissionTemplate{
 		Scope:     "platform",
 	},
 	{
-		Name:      "admin",
+		Name:      AdminRole,
 		Alias:     "Admin",
 		Resources: []string{"*"},
 		Actions:   []string{"*"},
@@ -448,7 +448,7 @@ func (p *rbacServiceImpl) Init(ctx context.Context) error {
 		}
 	}
 
-	if err := managePrivilegesForAdminUser(ctx, p.KubeClient, "admin", false); err != nil {
+	if err := managePrivilegesForAdminUser(ctx, p.KubeClient, AdminRole, false); err != nil {
 		return fmt.Errorf("failed to init the RBAC in cluster for the admin role %w", err)
 	}
 	return nil

@@ -56,17 +56,18 @@ func StoreProject(ctx context.Context, project v1.CreateProjectRequest, ds datas
 		// other database error, return it
 		return err
 	}
-	if projectService != nil && userService != nil {
-		admin, err := userService.GetFirstAdmin(ctx)
-		if err != nil {
-			return err
-		}
-		project.Owner = admin.Name
-		project.Description = model.AutoGenProj
-		_, err = projectService.CreateProject(ctx, project)
+	if projectService == nil || userService == nil {
+		klog.Warning("project service or user service is nil, skip creating project")
+		return nil
+	}
+	admin, err := userService.GetFirstAdmin(ctx)
+	if err != nil {
 		return err
 	}
-	return nil
+	project.Owner = admin.Name
+	project.Description = model.AutoGenProj
+	_, err = projectService.CreateProject(ctx, project)
+	return err
 }
 
 // StoreAppMeta will sync application metadata from CR to datastore

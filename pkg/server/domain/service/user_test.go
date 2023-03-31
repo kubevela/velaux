@@ -55,6 +55,11 @@ var _ = Describe("Test authentication service functions", func() {
 		err := k8sClient.Delete(context.Background(), &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: db}})
 		Expect(err).Should(BeNil())
 	})
+
+	ok, err := InitFakeAdmin(userService)
+	Expect(err).Should(BeNil())
+	Expect(ok).Should(BeTrue())
+
 	It("Test create user", func() {
 		user, err := userService.CreateUser(context.Background(), apisv1.CreateUserRequest{
 			Name:     "name",
@@ -155,7 +160,7 @@ var _ = Describe("Test authentication service functions", func() {
 	It("Test update user", func() {
 		ctx := context.Background()
 		userModel := &model.User{
-			Name:     "admin",
+			Name:     FakeAdminName,
 			Alias:    "alias",
 			Email:    "email@example.com",
 			Password: "password",
