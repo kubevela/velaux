@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/agiledragon/gomonkey/v2"
+	"github.com/agiledragon/gomonkey/v2"
 	"github.com/coreos/go-oidc"
 	"github.com/google/go-cmp/cmp"
 	"github.com/oam-dev/kubevela/pkg/multicluster"
@@ -59,7 +59,7 @@ var _ = Describe("Test authentication service functions", func() {
 	It("Test Dex login", func() {
 		testIDToken := &oidc.IDToken{}
 		sub := "248289761001Abv"
-		patch := ApplyMethod(reflect.TypeOf(testIDToken), "Claims", func(_ *oidc.IDToken, v interface{}) error {
+		patch := gomonkey.ApplyMethod(reflect.TypeOf(testIDToken), "Claims", func(_ *oidc.IDToken, v interface{}) error {
 			return json.Unmarshal([]byte(fmt.Sprintf(`{"email":"test@test.com", "name":"show name", "sub": "%s"}`, sub)), v)
 		})
 		defer patch.Reset()
@@ -94,7 +94,7 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(newUser.DexSub).Should(Equal(sub))
 		Expect(newUser.UserRoles).Should(Equal([]string{model.RoleAdmin}))
 
-		projects, err := projectService.ListUserProjects(context.TODO(), sub)
+		projects, err := projectService.ListUserProjects(context.TODO(), strings.ToLower(sub))
 		Expect(err).Should(BeNil())
 		Expect(len(projects)).Should(Equal(1))
 

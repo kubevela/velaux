@@ -146,7 +146,7 @@ var _ = BeforeSuite(func() {
 			err = json.NewDecoder(resp.Body).Decode(code)
 			Expect(err).Should(BeNil())
 			return fmt.Errorf("rest service not ready code:%d message:%s", resp.StatusCode, code.Message)
-		}, time.Second*600, time.Millisecond*200).Should(Succeed())
+		}, time.Second*20, time.Millisecond*200).Should(Succeed())
 	var err error
 	k8sClient, err = clients.GetKubeClient()
 	Expect(err).ShouldNot(HaveOccurred())

@@ -41,7 +41,6 @@ var _ = Describe("Test authentication service functions", func() {
 	var db string
 
 	BeforeEach(func() {
-		var err error
 		db = "user-test-" + strconv.FormatInt(time.Now().UnixNano(), 10)
 		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: db})
 
@@ -162,10 +161,11 @@ var _ = Describe("Test authentication service functions", func() {
 		ctx := context.Background()
 		userModify := "user-to-modify"
 		userModel := &model.User{
-			Name:     userModify,
-			Alias:    "alias",
-			Email:    "email@example.com",
-			Password: "password",
+			Name:      userModify,
+			Alias:     "alias",
+			Email:     "email@example.com",
+			Password:  "password",
+			UserRoles: []string{model.RoleAdmin},
 		}
 		err := ds.Add(ctx, userModel)
 		Expect(err).Should(BeNil())
@@ -196,7 +196,7 @@ var _ = Describe("Test authentication service functions", func() {
 		err = yaml.Unmarshal(dexConfigSecret.Data[secretDexConfigKey], config)
 		Expect(err).Should(BeNil())
 		Expect(len(config.StaticPasswords)).Should(Equal(1))
-		Expect(config.StaticPasswords[0].Username).Should(Equal("admin"))
+		Expect(config.StaticPasswords[0].Username).Should(Equal(userModify))
 		Expect(config.StaticPasswords[0].Hash).Should(Equal(newUser.Password))
 	})
 
