@@ -52,6 +52,7 @@ type PluginService interface {
 	ListInstalledPlugins(ctx context.Context) []v1.PluginDTO
 	DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error)
 	GetPlugin(ctx context.Context, pluginID string) (*types.Plugin, error)
+	InitPluginRole(ctx context.Context, plugin *types.Plugin) error
 	Init(ctx context.Context) error
 }
 
@@ -72,7 +73,7 @@ func (p *pluginImpl) Init(ctx context.Context) error {
 		for _, plugin := range plugins {
 			// Init the plugin role in the kubernetes.
 			if plugin.BackendType == types.KubeAPI && len(plugin.KubePermissions) > 0 {
-				if err := p.initPluginRole(ctx, plugin); err != nil {
+				if err := p.InitPluginRole(ctx, plugin); err != nil {
 					klog.Errorf("failed to init the cluster role for the plugin %s err: %s", plugin.PluginID(), err.Error())
 					continue
 				}
@@ -95,7 +96,7 @@ func GeneratePluginSubjectName(plugin *types.Plugin) string {
 	return pluginRolePrefix + plugin.PluginID()
 }
 
-func (p *pluginImpl) initPluginRole(ctx context.Context, plugin *types.Plugin) error {
+func (p *pluginImpl) InitPluginRole(ctx context.Context, plugin *types.Plugin) error {
 	role := &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   GeneratePluginRoleName(plugin),
@@ -167,5 +168,15 @@ func pluginSources(config config.PluginConfig) []types.PluginSource {
 	return []types.PluginSource{
 		{Class: types.Core, Paths: []string{config.CorePluginPath}},
 		{Class: types.External, Paths: config.CustomPluginPath},
+	}
+}
+
+// NewTestPluginService only used by testing
+func NewTestPluginService(pluginConfig config.PluginConfig, kubeClient client.Client) PluginService {
+	return &pluginImpl{
+		loader:       loader.New(),
+		registry:     registry.NewInMemory(),
+		pluginConfig: pluginConfig,
+		KubeClient:   kubeClient,
 	}
 }

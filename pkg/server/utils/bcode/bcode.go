@@ -46,6 +46,9 @@ var ErrUnauthorized = NewBcode(401, 401, "401 Unauthorized")
 // ErrNotFound the request resource is not found
 var ErrNotFound = NewBcode(404, 404, "404 Not Found")
 
+// ErrUpstreamNotFound the proxy upstream is not found
+var ErrUpstreamNotFound = NewBcode(502, 502, "Upstream not found")
+
 // Bcode business error code
 type Bcode struct {
 	HTTPCode     int32 `json:"-"`

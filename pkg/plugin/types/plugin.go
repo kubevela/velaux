@@ -90,12 +90,14 @@ type JSONData struct {
 	Backend     bool        `json:"backend"`
 	Proxy       bool        `json:"proxy"`
 	BackendType BackendType `json:"backendType"`
-	AuthType    AuthType    `json:"authType"`
+	AuthType    AuthType    `json:"authType,omitempty"`
 	// For the kube auth type, define the max scope permission for this plugin.
-	KubePermissions []rbacv1.PolicyRule `json:"kubePermissions"`
+	KubePermissions []rbacv1.PolicyRule `json:"kubePermissions,omitempty"`
+	// For the KubeService backend type
+	ServiceDiscover *KubernetesService `json:"serviceDiscover"`
 	// Routes define the route to proxy the backend server.
-	Routes      []*Route    `json:"routes"`
-	Requirement Requirement `json:"requirement"`
+	Routes      []*Route    `json:"routes,omitempty"`
+	Requirement Requirement `json:"requirement,omitempty"`
 }
 
 // Includes means the menus that this plugin include.
@@ -136,6 +138,15 @@ type Route struct {
 
 	// Proxy parameters
 	ProxyHeaders []Header `json:"headers,omitempty"`
+}
+
+// KubernetesService define one kubernetes service
+type KubernetesService struct {
+	Name string `json:"name"`
+	// If namespace is not specified, find the service from the vela system namespace
+	Namespace string `json:"namespace"`
+	// If port is not specified, find the first port from the service
+	Port int32
 }
 
 // AuthType The authentication type of the backend server

@@ -43,8 +43,14 @@ var (
 	ErrInvalidPluginJSONFilePath = errors.New("invalid plugin.json filepath was provided")
 	// ErrInvalidInclude -
 	ErrInvalidInclude = errors.New("the include config is invalid in plugin.json")
-	// ErrInvalidBackendType -
-	ErrInvalidBackendType = errors.New("the backend type is invalid in plugin.json, the kubePermissions field is required if the type is kube-api")
+	// ErrInvalidBackendTypeNotSupport -
+	ErrInvalidBackendTypeNotSupport = errors.New("the backend type is invalid in plugin.json, The options include: kube-api、kube-service、static-server")
+
+	// ErrInvalidBackendTypeNoPermission -
+	ErrInvalidBackendTypeNoPermission = errors.New("the backend type is invalid in plugin.json, the kubePermissions field is required if the type is kube-api")
+
+	// ErrInvalidBackendTypeNoServiceDiscover -
+	ErrInvalidBackendTypeNoServiceDiscover = errors.New("the backend type is invalid in plugin.json, the serviceDiscover field is required if the type is kube-service")
 )
 
 var (
@@ -235,11 +241,16 @@ func validatePluginJSON(data types.JSONData) error {
 		}
 	}
 	if data.Backend && data.BackendType != types.KubeAPI && data.BackendType != types.KubeService && data.BackendType != types.StaticServer {
-		return ErrInvalidBackendType
+		return ErrInvalidBackendTypeNotSupport
 	}
 	if data.BackendType == types.KubeAPI && len(data.KubePermissions) == 0 {
-		return ErrInvalidBackendType
+		return ErrInvalidBackendTypeNoPermission
 	}
+
+	if data.BackendType == types.KubeService && (data.ServiceDiscover == nil || data.ServiceDiscover.Name == "") {
+		return ErrInvalidBackendTypeNoServiceDiscover
+	}
+
 	return nil
 }
 

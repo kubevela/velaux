@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 
 	"github.com/kubevela/velaux/pkg/plugin/types"
 )

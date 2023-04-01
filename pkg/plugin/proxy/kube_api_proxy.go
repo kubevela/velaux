@@ -30,13 +30,8 @@ import (
 	"github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
+	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
-
-// ImpersonateGroupHeader this is a header key to impersonate a group
-var ImpersonateGroupHeader = "Impersonate-Group"
-
-// ImpersonateUserHeader this is a header key to impersonate a user
-var ImpersonateUserHeader = "Impersonate-User"
 
 type kubeAPIProxy struct {
 	httpClient *http.Client
@@ -81,7 +76,10 @@ func generateDefaultURL(config *rest.Config) (*url.URL, error) {
 }
 
 func (k *kubeAPIProxy) Handler(req *http.Request, res http.ResponseWriter) {
-	userName := req.Context().Value(&apis.CtxKeyUser).(string)
+	userName, ok := req.Context().Value(&apis.CtxKeyUser).(string)
+	if !ok {
+		bcode.ReturnHTTPError(req, res, bcode.ErrUnauthorized)
+	}
 	director := func(req *http.Request) {
 		var base = *k.baseURL
 		base.Path = req.URL.Path
