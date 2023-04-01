@@ -23,8 +23,9 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kubevela/velaux/pkg/plugin/types"
 )
 
 func TestDefaultGenerateHTTPRouter(t *testing.T) {
