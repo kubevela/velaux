@@ -13,7 +13,7 @@ import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 import { If } from '../../../../components/If';
 import Item from '../../../../components/Item';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type {
   ApplicationCompareRequest,
   ApplicationCompareResponse,
@@ -23,7 +23,7 @@ import type {
 } from '../../../../interface/application';
 import type { NameAlias } from '../../../../interface/env';
 import { momentDate, showAlias } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { statusList } from '../../constants';
 
 type Props = {

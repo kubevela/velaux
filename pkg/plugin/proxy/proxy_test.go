@@ -22,9 +22,13 @@ import (
 	"net/http/httptest"
 	"net/url"
 
+	kubevelatypes "github.com/oam-dev/kubevela/apis/types"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/rbac/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/config"
@@ -58,5 +62,48 @@ var _ = Describe("Test proxy", func() {
 		req = req.WithContext(context.WithValue(context.TODO(), &apis.CtxKeyUser, "test"))
 		proxy.Handler(req, res)
 		Expect(res.Code).To(Equal(200))
+	})
+
+	It("Test kube-service proxy", func() {
+		plugin := &types.Plugin{
+			JSONData: types.JSONData{
+				ID:          "node-manage",
+				BackendType: types.KubeService,
+				ServiceDiscover: &types.KubernetesService{
+					Name: "test",
+				},
+				AuthType: types.Basic,
+				AuthSecret: &types.KubernetesSecret{
+					Name: "test",
+				},
+			},
+		}
+		testService := &corev1.Service{ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: kubevelatypes.DefaultKubeVelaNS,
+		}, Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "t",
+					Port:       80,
+					TargetPort: intstr.FromInt(80),
+				},
+			},
+		}}
+		Expect(k8sClient.Create(context.TODO(), testService)).Should(BeNil())
+		testSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: kubevelatypes.DefaultKubeVelaNS,
+		}, StringData: map[string]string{
+			"username": "n1",
+			"password": "p1",
+		}}
+		Expect(k8sClient.Create(context.TODO(), testSecret)).Should(BeNil())
+		proxy, err := NewBackendPluginProxy(plugin, k8sClient, cfg)
+		Expect(err).To(BeNil())
+		var res = &httptest.ResponseRecorder{}
+		var req = &http.Request{Method: "GET", URL: &url.URL{Scheme: "http", Path: "/test", Host: "127.0.0.1"}}
+		proxy.Handler(req, res)
+		Expect(res.Code).To(Equal(502))
 	})
 })

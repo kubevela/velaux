@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 import './index.less';
 import { If } from '../If';
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 
 type Props = {
   onOk?: () => void;
@@ -20,18 +20,8 @@ type Props = {
 
 class DrawerWithFooter extends Component<Props, any> {
   render() {
-    const {
-      visible,
-      children,
-      title,
-      placement,
-      width,
-      onOk,
-      onClose,
-      extButtons,
-      onOkButtonText,
-      onOkButtonLoading,
-    } = this.props;
+    const { visible, children, title, placement, width, onOk, onClose, extButtons, onOkButtonText, onOkButtonLoading } =
+      this.props;
     return (
       <Drawer
         title={<>{title}</>}

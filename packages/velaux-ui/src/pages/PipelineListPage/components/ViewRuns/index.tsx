@@ -7,11 +7,11 @@ import { AiFillDelete } from 'react-icons/ai';
 import { deletePipelineRun, loadPipelineRuns } from '../../../../api/pipeline';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { PipelineListItem, PipelineRunBriefing } from '../../../../interface/pipeline';
 import { momentDate, timeDiff } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 export interface ViewRunsProps {
   pipeline: PipelineListItem;

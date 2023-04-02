@@ -356,7 +356,7 @@ func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		s.staticFiles(res, req, "./")
 		return
 	case strings.HasPrefix(req.URL.Path, PluginPublicRoutePath):
-		utils.NewFilterChain(s.getPluginAssets, api.AuthTokenCheck).ProcessFilter(req, res)
+		utils.NewFilterChain(s.getPluginAssets).ProcessFilter(req, res)
 		return
 	case strings.HasPrefix(req.URL.Path, PluginProxyRoutePath):
 		utils.NewFilterChain(s.proxyPluginBackend, api.AuthTokenCheck, api.AuthUserCheck(s.UserService)).ProcessFilter(req, res)
@@ -442,6 +442,7 @@ func (s *restServer) pluginBackendProxyHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 	r.URL.Path = strings.Replace(r.URL.Path, "/proxy/plugins/"+plugin.PluginID(), "", 1)
+	r = r.WithContext(context.WithValue(r.Context(), &proxy.RouteCtxKey, route))
 	pro.Handler(r, w)
 }
 

@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import React, { Component } from 'react';
 
 import Empty from '../../components/Empty';
-import Title from '../../components/ListTitle';
+import { ListTitle } from '../../components/ListTitle';
 import type { ConfigTemplate } from '../../interface/configs';
 import { getMatchParamObj } from '../../utils/utils';
 
@@ -92,7 +92,7 @@ class ConfigsLayout extends Component<Props, State> {
     const { activeName } = this.state;
     return (
       <div className="configs-wrapper">
-        <Title
+        <ListTitle
           title={'Configs'}
           subTitle={'Provide templated, extensibility configuration management capabilities.'}
         />

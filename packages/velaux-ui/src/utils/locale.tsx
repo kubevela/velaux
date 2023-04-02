@@ -187,4 +187,4 @@ class SingletonLocal {
   }
 }
 SingletonLocal.getInstance().setLocal(localeData);
-export default SingletonLocal.getInstance().getLocal();
+export const locale = SingletonLocal.getInstance().getLocal();

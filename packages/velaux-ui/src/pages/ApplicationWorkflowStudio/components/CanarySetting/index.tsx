@@ -5,7 +5,7 @@ import _ from 'lodash';
 import i18n from '../../../../i18n';
 import { Workflow, WorkflowMode } from '../../../../interface/application';
 import { WorkflowStep } from '../../../../interface/pipeline';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import './index.less';
 import Item from '../../../../components/Item';
 import { DefinitionBase } from '../../../../interface/definitions';

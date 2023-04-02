@@ -6,7 +6,7 @@ import type { ShowMode } from '../..';
 import { If } from '../../../../components/If';
 import i18n from '../../../../i18n';
 import type { Project } from '../../../../interface/project';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { HiOutlineRefresh } from 'react-icons/hi';
 const { Row, Col } = Grid;

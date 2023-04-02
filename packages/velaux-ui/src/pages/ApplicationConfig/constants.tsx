@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 
 export const MANAGER_TITLE = <Translation>AppPlan Manager</Translation>;
 export const MANAGER_NAME = <Translation>App Name-</Translation>;
@@ -26,9 +26,7 @@ export const COMPONENT_NAME = <Translation>Component Name-</Translation>;
 export const RUNNING_INSTANCES = <Translation>Running instances</Translation>;
 export const LOG_QUERY = <Translation>Log query</Translation>;
 export const SURVEILLANCE_PANEL = <Translation>Surveillance panel</Translation>;
-export const COMPONENT_PARAMETER_CONFIGURATION = (
-  <Translation>Component parameter configuration</Translation>
-);
+export const COMPONENT_PARAMETER_CONFIGURATION = <Translation>Component parameter configuration</Translation>;
 export const DATA_INPUT = <Translation>Data input</Translation>;
 export const DATA_OUTPUT = <Translation>Data output</Translation>;
 export const OPERATING_CHARACTERISTICS = <Translation>Operating characteristics</Translation>;

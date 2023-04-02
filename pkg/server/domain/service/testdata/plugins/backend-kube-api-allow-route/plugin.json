@@ -1,0 +1,52 @@
+{
+  "type": "page-app",
+  "name": "Backend Kube API Allow Route",
+  "id": "backend-kube-api-allow-route",
+  "info": {
+    "keywords": [
+      "app"
+    ],
+    "description": "The app demo plugin",
+    "author": {
+      "name": "KubeVela"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "screenshots": [],
+    "version": "0.0.1",
+    "updated": "2023-03-30"
+  },
+  "backend": true,
+  "proxy": true,
+  "backendType": "kube-api",
+  "kubePermissions": [
+    {
+      "apiGroups": [
+        ""
+      ],
+      "resources": [
+        "nodes",
+        "nodes/status"
+      ],
+      "verbs": [
+        "get",
+        "list"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "path": "/api/v1/nodes",
+      "permission": {
+        "resource": "node",
+        "action": "detail"
+      }
+    }
+  ],
+  "dependencies": {
+    "velauxDependency": ">=1.8.0",
+    "plugins": []
+  }
+}

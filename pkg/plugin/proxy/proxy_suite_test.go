@@ -17,18 +17,23 @@ limitations under the License.
 package proxy
 
 import (
+	"context"
 	"math/rand"
 	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+
+	kubevelatypes "github.com/oam-dev/kubevela/apis/types"
 )
 
 func TestKubeapi(t *testing.T) {
@@ -66,6 +71,8 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).Should(BeNil())
 	Expect(k8sClient).ToNot(BeNil())
 	By("new kube client success")
+
+	Expect(k8sClient.Create(context.TODO(), &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: kubevelatypes.DefaultKubeVelaNS}})).Should(BeNil())
 
 	close(done)
 }, 240)

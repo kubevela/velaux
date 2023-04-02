@@ -19,6 +19,7 @@
         "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development"
     },
     "dependencies": {
+        "@kubernetes/client-node": "0.18.0",
         "@velaux/data": "0.0.1",
         "@velaux/ui": "1.8.0",
         "react": "17.0.2",

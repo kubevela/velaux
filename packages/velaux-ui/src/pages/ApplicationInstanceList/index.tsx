@@ -8,7 +8,7 @@ import { deployApplication } from '../../api/application';
 import { listApplicationPods, listCloudResources, listApplicationServiceEndpoints } from '../../api/observation';
 import { If } from '../../components/If';
 import StatusShow from '../../components/StatusShow';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type {
   ApplicationComponent,
@@ -23,7 +23,7 @@ import type { LoginUserInfo } from '../../interface/user';
 import { momentDate } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 import Header from './components/Header';
 import PodDetail from './components/PodDetail';

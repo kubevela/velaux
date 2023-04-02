@@ -2,11 +2,11 @@ import { Grid, Icon, Select, Input, Button } from '@alifd/next';
 import React, { Fragment } from 'react';
 
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { Env } from '../../../../interface/env';
 import type { Target } from '../../../../interface/target';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import './index.less';
 import type { ShowMode } from '../../../ApplicationList';
 
@@ -76,15 +76,17 @@ class SelectSearch extends React.Component<Props, State> {
 
   handleChangeLabel(value: string[]) {
     const { setLabelValue } = this.props;
-    let label = value? value:[]
-    setLabelValue(label)
-    this.setState({
-      labelValue: label,
-    },
-    () => {
-      this.getApplications();
-    });
-  };
+    let label = value ? value : [];
+    setLabelValue(label);
+    this.setState(
+      {
+        labelValue: label,
+      },
+      () => {
+        this.getApplications();
+      }
+    );
+  }
 
   handleClickSearch = () => {
     this.getApplications();

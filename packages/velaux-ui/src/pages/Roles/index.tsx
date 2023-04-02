@@ -4,13 +4,13 @@ import React, { Fragment, Component } from 'react';
 import { getPlatformPermissions } from '../../api/rbac';
 import { getRoleList, deleteRole } from '../../api/roles';
 import { If } from '../../components/If';
-import Title from '../../components/ListTitle';
+import { ListTitle as Title } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { RolesBase } from '../../interface/roles';
 import type { PermissionBase } from '../../interface/user';
 import { momentDate } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import './index.less';
 
 import RolesDialog from './components/RolesDialog';

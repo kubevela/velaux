@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import * as dagre from 'dagre';
 import React, { useState } from 'react';
 
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 
 import type { GraphNode, GraphEdge, TraitGraphNode, Line } from './interface';
 import { describeComponents, getGraphSize, ResourceIcon } from './utils';
@@ -127,9 +127,7 @@ function renderTraitTree(traits: TraitStatus[]) {
       {edges.map((edge) => (
         <div key={`${edge.from}-${edge.to}`} className="graph-edge">
           {edge.lines.map((line) => {
-            const distance = Math.sqrt(
-              Math.pow(line.x1 - line.x2, 2) + Math.pow(line.y1 - line.y2, 2),
-            );
+            const distance = Math.sqrt(Math.pow(line.x1 - line.x2, 2) + Math.pow(line.y1 - line.y2, 2));
             const xMid = (line.x1 + line.x2) / 2;
             const yMid = (line.y1 + line.y2) / 2;
             const angle = (Math.atan2(line.y1 - line.y2, line.x1 - line.x2) * 180) / Math.PI;
@@ -184,10 +182,8 @@ export const ComponentNode = (props: ComponentNodeProps) => {
     >
       {WithBalloon(
         <div className={classNames('icon')}>
-          <ResourceIcon
-            kind={node.resource.component?.componentType.substring(0, 1).toUpperCase() || ''}
-          />
-        </div>,
+          <ResourceIcon kind={node.resource.component?.componentType.substring(0, 1).toUpperCase() || ''} />
+        </div>
       )}
       {WithBalloon(
         <div className={classNames('name')}>
@@ -202,7 +198,7 @@ export const ComponentNode = (props: ComponentNodeProps) => {
               <Translation>UnHealthy</Translation>
             </If>
           </div>
-        </div>,
+        </div>
       )}
 
       <If condition={traits.length > 0}>

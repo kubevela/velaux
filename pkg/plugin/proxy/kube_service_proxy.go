@@ -17,6 +17,7 @@ limitations under the License.
 package proxy
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -40,6 +41,7 @@ type kubeServiceProxy struct {
 	plugin     *types.Plugin
 	// cache the service config for 5m.
 	availableEndpoint *url.URL
+	availableSecret   *corev1.Secret
 	cacheTime         time.Time
 }
 
@@ -90,11 +92,53 @@ func (k *kubeServiceProxy) Handler(req *http.Request, res http.ResponseWriter) {
 		k.availableEndpoint = availableEndpoint
 		k.cacheTime = time.Now().Add(time.Minute * 10)
 	}
+	route, _ := req.Context().Value(&RouteCtxKey).(*types.Route)
+
 	director := func(req *http.Request) {
 		var base = *k.availableEndpoint
 		base.Path = req.URL.Path
 		req.URL = &base
+		if route != nil {
+			// Setting the custom proxy headers
+			for _, h := range route.ProxyHeaders {
+				req.Header.Set(h.Name, h.Value)
+			}
+		}
+		// Setting the authentication
+		if types.Basic == k.plugin.AuthType && k.plugin.AuthSecret != nil {
+			if err := k.setBasicAuth(req, res); err != nil {
+				klog.Errorf("can't set the basic auth, err:%s", err.Error())
+				return
+			}
+		}
 	}
 	rp := &httputil.ReverseProxy{Director: director, ErrorLog: log.Default()}
 	rp.ServeHTTP(res, req)
+}
+
+func (k *kubeServiceProxy) setBasicAuth(req *http.Request, res http.ResponseWriter) error {
+	if err := k.loadAuthSecret(req.Context()); err != nil {
+		return err
+	}
+	req.SetBasicAuth(string(k.availableSecret.Data["username"]), string(k.availableSecret.Data["password"]))
+	return nil
+}
+
+func (k *kubeServiceProxy) loadAuthSecret(ctx context.Context) error {
+	if k.plugin.AuthSecret == nil || k.plugin.AuthSecret.Name == "" {
+		return fmt.Errorf("auth secret is invalid")
+	}
+	namespace := k.plugin.AuthSecret.Namespace
+	name := k.plugin.AuthSecret.Name
+	if namespace == "" {
+		namespace = kubevelatypes.DefaultKubeVelaNS
+	}
+	if k.availableSecret == nil || time.Now().After(k.cacheTime) {
+		var secret corev1.Secret
+		if err := k.kubeClient.Get(ctx, apitypes.NamespacedName{Namespace: namespace, Name: name}, &secret); err != nil {
+			return err
+		}
+		k.availableSecret = &secret
+	}
+	return nil
 }

@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React, { Component, Fragment } from 'react';
 
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import { Breadcrumb } from '../../components/Breadcrumb';
 import './index.less';
 import type { ProjectDetail } from '../../interface/project';

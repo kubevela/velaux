@@ -29,6 +29,9 @@ import (
 // ErrAvailablePlugin -
 var ErrAvailablePlugin = fmt.Errorf("there is no available proxy for the plugin")
 
+// RouteCtxKey the context key to save the route
+var RouteCtxKey = "route"
+
 // BackendProxy -
 type BackendProxy interface {
 	Handler(*http.Request, http.ResponseWriter)
@@ -50,7 +53,7 @@ func NewBackendPluginProxy(plugin *types.Plugin, kubeClient client.Client, kubeC
 			return nil, err
 		}
 	case types.KubeService:
-		p = &kubeServiceProxy{kubeClient: kubeClient, plugin: plugin}
+		p = NewKubeServiceProxy(kubeClient, plugin)
 	case types.StaticServer:
 		p = &staticServerProxy{plugin: plugin}
 	default:

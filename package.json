@@ -18,7 +18,7 @@
         "packages:theme": "yarn workspace @velaux/theme build",
         "packages:ui": "yarn workspace @velaux/ui build",
         "packages:data": "yarn workspace @velaux/data build",
-        "packages:plugins": "yarn workspace @velaux-plugins/app-demo build"
+        "packages:plugins": "yarn workspace @velaux-plugins/app-demo build && yarn workspace @velaux-plugins/node-dashboard build"
     },
     "workspaces": {
         "packages": [

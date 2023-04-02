@@ -4,7 +4,7 @@ import React from 'react';
 
 import type { WorkflowStep } from '../../interface/pipeline';
 import DefinitionCode from '../DefinitionCode';
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 
 type Props = {
   steps?: WorkflowStep[];

@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import './index.less';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
 import { beautifyTime } from '../../../../utils/common';
 import AddAndEditEnvBind from '../AddAndEditEnvBind';

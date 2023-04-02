@@ -4,10 +4,10 @@ import { AiOutlineCloudUpload } from 'react-icons/ai';
 
 import { getClusterDetails, updateCluster } from '../../../../api/cluster';
 import DefinitionCode from '../../../../components/DefinitionCode';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 const { Col, Row } = Grid;
 
 type Props = {

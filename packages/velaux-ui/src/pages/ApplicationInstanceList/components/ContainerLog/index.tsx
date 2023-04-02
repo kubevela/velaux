@@ -2,11 +2,11 @@ import { Dialog, Grid, Checkbox, Dropdown, Menu, Button, Icon } from '@alifd/nex
 import React, { Component } from 'react';
 
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { ContainerLogResponse, PodBase } from '../../../../interface/observation';
 import { momentDate, momentShortDate } from '../../../../utils/common';
 import { downloadStringFile } from '../../../../utils/utils';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import './index.less';
 import { listContainerLog } from '../../../../api/observation';
 
@@ -119,13 +119,13 @@ class ContainerLog extends Component<Props, State> {
   downloadLog = () => {
     const { pod, containerName = '' } = this.props;
     const { logs } = this.state;
-    
+
     let logContent: string[] = [];
     logs.map((line) => {
-      logContent.push(line.content)
+      logContent.push(line.content);
     });
 
-    downloadStringFile(logContent.join("\n"), pod?.metadata.name + "-" + containerName);
+    downloadStringFile(logContent.join('\n'), pod?.metadata.name + '-' + containerName);
   };
 
   render() {
@@ -145,9 +145,9 @@ class ContainerLog extends Component<Props, State> {
               <Translation>Container Log</Translation>
             </Col>
             <Col span={12}>
-            <Button style={{float: "right"}} type="normal" size="small" onClick={this.downloadLog}>
-              <Icon type="download" />
-            </Button>
+              <Button style={{ float: 'right' }} type="normal" size="small" onClick={this.downloadLog}>
+                <Icon type="download" />
+              </Button>
             </Col>
           </Row>
         }

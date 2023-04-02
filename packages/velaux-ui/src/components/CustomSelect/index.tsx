@@ -2,7 +2,7 @@ import type { SelectProps } from '@alifd/next/lib/select';
 import { Select } from '@alifd/next';
 import * as React from 'react';
 
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 interface CustomSelectProps extends SelectProps {
   enableInput?: boolean;

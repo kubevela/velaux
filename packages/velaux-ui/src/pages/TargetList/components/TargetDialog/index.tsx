@@ -4,14 +4,14 @@ import React from 'react';
 import { listNamespaces } from '../../../../api/observation';
 import { getCloudServiceProviderList, getProjectList } from '../../../../api/project';
 import { createTarget, updateTarget } from '../../../../api/target';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import Group from '../../../../extends/Group';
 import i18n from '../../../../i18n';
 import type { Cluster } from '../../../../interface/cluster';
 import type { Project } from '../../../../interface/project';
 import type { Target, ProvideList } from '../../../../interface/target';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import Namespace from '../Namespace';
 import type { NamespaceItem } from '../Namespace';
 type Props = {
@@ -267,9 +267,7 @@ class TargetDialog extends React.Component<Props, State> {
         <Dialog
           v2
           locale={locale().Dialog}
-          title={
-            isEdit ? <Translation>Edit Target</Translation> : <Translation>New Target</Translation>
-          }
+          title={isEdit ? <Translation>Edit Target</Translation> : <Translation>New Target</Translation>}
           autoFocus={true}
           overflowScroll={true}
           visible={visible}
@@ -363,8 +361,7 @@ class TargetDialog extends React.Component<Props, State> {
                           rules: [
                             {
                               maxLength: 256,
-                              message:
-                                'Enter a description that contains less than 256 characters.',
+                              message: 'Enter a description that contains less than 256 characters.',
                             },
                           ],
                         })}
@@ -421,9 +418,7 @@ class TargetDialog extends React.Component<Props, State> {
                   <Group
                     title={<Translation>Shared Variables</Translation>}
                     required={false}
-                    description={
-                      <Translation>You can define parameters such as region or zone</Translation>
-                    }
+                    description={<Translation>You can define parameters such as region or zone</Translation>}
                     hasToggleIcon
                   >
                     <Row>

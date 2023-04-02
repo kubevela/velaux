@@ -4,14 +4,14 @@ import React, { Component, Fragment } from 'react';
 import { getRoleList } from '../../api/roles';
 import { getUserList, deleteUser, changeUserDisable, changeUserEnable } from '../../api/users';
 import { If } from '../../components/If';
-import Title from '../../components/ListTitle';
+import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { NameAlias } from '../../interface/env';
 import type { RolesBase } from '../../interface/roles';
 import type { User } from '../../interface/user';
 import { momentDate } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 import CreateUser from './components/CreateUser';
 import ResetPassword from './components/ResetPassword';
@@ -403,7 +403,7 @@ class Users extends Component<Props, State> {
       <Fragment>
         <div className="user-wrapper">
           <section>
-            <Title
+            <ListTitle
               title="Users"
               subTitle="Basic authorization management is provided for local users by default, but SSO authentication is strongly recommended"
               extButtons={[

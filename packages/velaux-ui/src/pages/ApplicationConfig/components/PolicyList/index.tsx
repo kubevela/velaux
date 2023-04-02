@@ -8,8 +8,8 @@ import type { ApplicationDetail, ApplicationPolicyBase, EnvBinding } from '../..
 import { beautifyTime, momentDate } from '../../../../utils/common';
 import './index.less';
 import Empty from '../../../../components/Empty';
-import Translation from '../../../../components/Translation';
-import locale from '../../../../utils/locale';
+import { Translation } from '../../../../components/Translation';
+import { locale } from '../../../../utils/locale';
 import { AiOutlineDelete } from 'react-icons/ai';
 
 type Props = {

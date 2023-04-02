@@ -3,19 +3,16 @@ import { connect } from 'dva';
 import React, { Component } from 'react';
 import type { Dispatch } from 'redux';
 
-import {
-  createApplicationEnvbinding,
-  updateApplicationEnvbinding,
-} from '../../../../api/application';
+import { createApplicationEnvbinding, updateApplicationEnvbinding } from '../../../../api/application';
 import { getEnvs } from '../../../../api/env';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
 import type { Env } from '../../../../interface/env';
 import type { LoginUserInfo } from '../../../../interface/user';
 import EnvDialog from '../../../../pages/EnvPage/components/EnvDialog';
 import { showAlias } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 interface Props {
   onClose: () => void;
@@ -150,7 +147,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
       },
       () => {
         this.loadEnvs(this.setEnvValue);
-      },
+      }
     );
   };
   changeEnvDialog = (visible: boolean) => {
@@ -203,9 +200,7 @@ class EnvBindPlanDialog extends Component<Props, State> {
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem
-                  label={
-                    <Translation className="font-size-14 font-weight-bold">Environment</Translation>
-                  }
+                  label={<Translation className="font-size-14 font-weight-bold">Environment</Translation>}
                   help={
                     <a
                       onClick={() => {

@@ -14,7 +14,7 @@ import { detailPolicyDefinition, getPolicyDefinitions } from '../../../../api/de
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type {
   ApplicationPolicyDetail,
@@ -30,7 +30,7 @@ import classNames from 'classnames';
 
 import type { DefinitionBase } from '../../../../interface/definitions';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import UISchema from '../../../../components/UISchema';
 
 import type { Rule } from '@alifd/next/lib/field';

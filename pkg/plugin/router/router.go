@@ -27,6 +27,9 @@ import (
 	"github.com/kubevela/velaux/pkg/plugin/types"
 )
 
+// DefaultPluginResourceKey the path parameter key for the plugin resource
+var DefaultPluginResourceKey = "pluginName"
+
 // Handle the plugin route
 type Handle func(http.ResponseWriter, *http.Request, httprouter.Params, *types.Plugin, *types.Route)
 
@@ -38,7 +41,7 @@ type defaultRouter struct {
 }
 
 func (d *defaultRouter) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	d.h(res, req, nil, d.plugin, &types.Route{})
+	d.h(res, req, httprouter.Params{{Key: DefaultPluginResourceKey, Value: d.plugin.PluginID()}}, d.plugin, &types.Route{})
 }
 
 func newDefaultRouter(h Handle, plugin *types.Plugin) *defaultRouter {
@@ -57,12 +60,12 @@ func GenerateHTTPRouter(plugin *types.Plugin, pathPrefix string, h Handle) http.
 	} else {
 		r := httprouter.New()
 		for _, route := range plugin.Routes {
-			routePath := path.Join(pathPrefix+"/:pluginName", route.Path)
+			routePath := path.Join(pathPrefix+"/:"+DefaultPluginResourceKey, route.Path)
 			method := route.Method
 			if method == "" {
 				method = "GET"
 			}
-			r.Handle(strings.ToUpper(method), path.Join(pathPrefix+"/:pluginName", route.Path), func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+			r.Handle(strings.ToUpper(method), routePath, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				h(w, r, p, plugin, route)
 			})
 			klog.Infof("Register the plugin proxy route for the plugin %s, method:%s path:%s", plugin.PluginID(), method, routePath)

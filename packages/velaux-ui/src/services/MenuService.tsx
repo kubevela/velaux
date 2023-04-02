@@ -206,7 +206,7 @@ export class MenuWrapper implements MenuService {
       .then((plugins) => {
         plugins.map((plugin) => {
           plugin.includes?.map((include) => {
-            if (!this.workspaces.find((w) => w.name)) {
+            if (!this.workspaces.find((w) => w.name === include.workspace.name)) {
               include.workspace.rootRoute = include.to;
               this.workspaces.push(include.workspace);
             }

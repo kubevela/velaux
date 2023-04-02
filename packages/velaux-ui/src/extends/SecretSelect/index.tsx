@@ -5,7 +5,7 @@ import React from 'react';
 import { listCloudResourceSecrets } from '../../api/observation';
 import { CustomSelect } from '../../components/CustomSelect';
 import type { Secret } from '../../interface/observation';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 type Props = {
   onChange: (value: any) => void;

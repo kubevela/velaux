@@ -5,7 +5,7 @@ import { WorkflowContext, WorkflowEditContext } from '../../context';
 import i18n from '../../i18n';
 import type { WorkflowStep, WorkflowStepBase } from '../../interface/pipeline';
 import { showAlias } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 type Props = {
   value?: string[];
@@ -29,10 +29,7 @@ export const StepSelect = (props: Props) => {
       }
     });
   });
-  if (
-    workflow?.mode === 'DAG' &&
-    (workflow.subMode === 'DAG' || (workflow.subMode === 'StepByStep' && !inGroup))
-  ) {
+  if (workflow?.mode === 'DAG' && (workflow.subMode === 'DAG' || (workflow.subMode === 'StepByStep' && !inGroup))) {
     steps
       ?.filter((s) => s.name !== stepName)
       .map((step: WorkflowStep) => {

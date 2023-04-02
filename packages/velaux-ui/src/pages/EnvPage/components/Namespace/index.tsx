@@ -3,8 +3,8 @@ import React from 'react';
 
 import { createClusterNamespace } from '../../../../api/cluster';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
-import locale from '../../../../utils/locale';
+import { Translation } from '../../../../components/Translation';
+import { locale } from '../../../../utils/locale';
 
 type Props = {
   cluster?: string;
@@ -88,11 +88,7 @@ class Namespace extends React.Component<Props, State> {
               value={value}
             />
             <If condition={!disableNew}>
-              <Button
-                className="cluster-option-btn"
-                type="secondary"
-                onClick={this.openNamespaceInput}
-              >
+              <Button className="cluster-option-btn" type="secondary" onClick={this.openNamespaceInput}>
                 <Translation>New</Translation>
               </Button>
             </If>
@@ -100,16 +96,8 @@ class Namespace extends React.Component<Props, State> {
         </If>
         <If condition={showNameSpaceInput}>
           <div className="cluster-container">
-            <Input
-              onChange={(v) => this.setState({ createNamespace: v })}
-              className="cluster-params-input"
-            />
-            <Button
-              loading={loading}
-              className="cluster-option-btn"
-              type="secondary"
-              onClick={this.createNamespace}
-            >
+            <Input onChange={(v) => this.setState({ createNamespace: v })} className="cluster-params-input" />
+            <Button loading={loading} className="cluster-option-btn" type="secondary" onClick={this.createNamespace}>
               <Translation>Submit</Translation>
             </Button>
           </div>

@@ -4,7 +4,7 @@ import React, { Component, Fragment } from 'react';
 import type { Trait } from '../../../../interface/application';
 import { momentDate } from '../../../../utils/common';
 import './index.less';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import i18n from '../../../../i18n';
 import { If } from '../../../../components/If';
 import { AiOutlineDelete, AiOutlinePlusCircle } from 'react-icons/ai';

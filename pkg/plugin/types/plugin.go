@@ -87,10 +87,11 @@ type JSONData struct {
 	Includes []*Includes `json:"includes"`
 	Category string      `json:"category"`
 	// Backend If the plugin has a backend component.
-	Backend     bool        `json:"backend"`
-	Proxy       bool        `json:"proxy"`
-	BackendType BackendType `json:"backendType"`
-	AuthType    AuthType    `json:"authType,omitempty"`
+	Backend     bool              `json:"backend"`
+	Proxy       bool              `json:"proxy"`
+	BackendType BackendType       `json:"backendType"`
+	AuthType    AuthType          `json:"authType,omitempty"`
+	AuthSecret  *KubernetesSecret `json:"authSecret,omitempty"`
 	// For the kube auth type, define the max scope permission for this plugin.
 	KubePermissions []rbacv1.PolicyRule `json:"kubePermissions,omitempty"`
 	// For the KubeService backend type
@@ -147,6 +148,13 @@ type KubernetesService struct {
 	Namespace string `json:"namespace"`
 	// If port is not specified, find the first port from the service
 	Port int32
+}
+
+// KubernetesSecret define one kubernetes secret
+type KubernetesSecret struct {
+	Name string `json:"name"`
+	// If namespace is not specified, find the service from the vela system namespace
+	Namespace string `json:"namespace"`
 }
 
 // AuthType The authentication type of the backend server

@@ -15,7 +15,7 @@ import type { WorkflowStepBase } from '../../interface/pipeline';
 import { replaceUrl } from '../../utils/common';
 import DrawerWithFooter from '../Drawer';
 import { If } from '../If';
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 import UISchema from '../UISchema';
 
 import { InputItems } from './input-item';

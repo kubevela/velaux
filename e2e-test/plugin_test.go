@@ -17,12 +17,11 @@ limitations under the License.
 package e2e_test
 
 import (
-	"fmt"
-
 	"cuelang.org/go/pkg/strings"
 	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
@@ -62,8 +61,18 @@ var _ = Describe("Test to request the dex plugin", func() {
 		res := get(baseDomain + "/dex/a")
 		var bcode bcode.Bcode
 		err := decodeResponseBody(res, &bcode)
-		fmt.Println(err.Error())
 		Expect(strings.HasPrefix(err.Error(), "response code is not 200")).Should(BeTrue())
 		Expect(cmp.Diff(bcode.BusinessCode, int32(404))).Should(BeEmpty())
+	})
+})
+
+var _ = Describe("Test to request the kube API", func() {
+	It("Test to request the dex", func() {
+		defer GinkgoRecover()
+		res := get(baseDomain + "/proxy/plugins/node-dashboard/api/v1/nodes")
+		var nodeList corev1.NodeList
+		err := decodeResponseBody(res, &nodeList)
+		Expect(err).Should(BeNil())
+		Expect(cmp.Diff(len(nodeList.Items), int32(2))).Should(BeEmpty())
 	})
 })

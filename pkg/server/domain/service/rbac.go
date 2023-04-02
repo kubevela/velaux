@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
 	"sync"
@@ -35,6 +36,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/auth"
 	"github.com/oam-dev/kubevela/pkg/utils"
 
+	"github.com/kubevela/velaux/pkg/plugin/router"
 	plugintypes "github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
@@ -49,6 +51,7 @@ import (
 var resourceActions map[string][]string
 var lock sync.Mutex
 var reg = regexp.MustCompile(`(?U)\{.*\}`)
+var defaultPluginResource = "plugin"
 
 // AdminRole is the admin role name
 const AdminRole = "admin"
@@ -376,9 +379,13 @@ func buildMap(resources []string, resourceNameMap map[string]string) map[string]
 	if len(resources) == 0 {
 		return nil
 	}
+	resourceName, exist := resourceNameMap[resources[0]]
+	if !exist {
+		resourceName = resources[0] + "Name"
+	}
 	return map[string]resourceMetadata{
 		resources[0]: {
-			pathName:     resourceNameMap[resources[0]],
+			pathName:     resourceName,
 			subResources: buildMap(resources[1:], resourceNameMap),
 		},
 	}
@@ -399,12 +406,16 @@ func mergeMap(source, target map[string]resourceMetadata) {
 // resource map like: plugin: {pathName: "pluginID", subResources:{cluster: {pathName: "clusterName",subResources:{node:{pathName:"nodeName"}}}}}
 func RegisterPluginResource(resource string, resourceNameMap map[string]string) {
 	m := buildMap(strings.Split(resource, "/"), resourceNameMap)
-	mergeMap(map[string]resourceMetadata{
+	sourceMap := map[string]resourceMetadata{
 		"plugin": {
-			pathName:     "pluginID",
+			pathName:     router.DefaultPluginResourceKey,
 			subResources: m,
 		},
-	}, ResourceMaps)
+	}
+	if strings.HasPrefix(resource, defaultPluginResource) {
+		sourceMap = m
+	}
+	mergeMap(sourceMap, ResourceMaps)
 	existResourcePaths = convertSources(ResourceMaps)
 }
 
@@ -696,17 +707,31 @@ func (p *rbacServiceImpl) CheckPerm(resource string, actions ...string) func(req
 // CheckPluginRequestPerm handle RBAC checking for the the http request to plugin backend
 // pathFormat: eg. nodes/{node}/status
 func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r2 *plugintypes.Route) func(req *http.Request, res http.ResponseWriter) bool {
-	if r2.Permission != nil {
-		RegisterPluginResource("plugin/"+r2.Permission.Resource, r2.ResourceMap)
-		registerResourceAction("plugin/"+r2.Permission.Resource, r2.Permission.Action)
-	}
-	f := func(req *http.Request, res http.ResponseWriter) bool {
-		if r2.Permission == nil {
-			return true
+	var resource = path.Join(defaultPluginResource, func() string {
+		if r2 == nil || r2.Permission == nil {
+			return ""
 		}
-		resource := r2.Permission.Resource
-		actions := []string{r2.Permission.Action}
+		return r2.Permission.Resource
+	}())
+	var action = func() string {
+		if r2 == nil || r2.Permission == nil {
+			return "*"
+		}
+		return r2.Permission.Action
+	}()
+	// Set the plugin resource key
+	r2.ResourceMap[defaultPluginResource] = router.DefaultPluginResourceKey
 
+	RegisterPluginResource(resource, r2.ResourceMap)
+	if action != "*" {
+		registerResourceAction(resource, action)
+	}
+
+	f := func(req *http.Request, res http.ResponseWriter) bool {
+		if httpParams == nil {
+			return false
+		}
+		actions := []string{action}
 		pathParameter := func(name string) string {
 			return httpParams.ByName(name)
 		}
@@ -753,6 +778,7 @@ func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r
 			bcode.ReturnHTTPError(req, res, bcode.ErrForbidden)
 			return false
 		}
+
 		if !ra.Match(permissions) {
 			bcode.ReturnHTTPError(req, res, bcode.ErrForbidden)
 			return false

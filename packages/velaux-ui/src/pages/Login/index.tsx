@@ -6,7 +6,7 @@ import LogoWhite from '../../assets/kubevela-logo-white.png';
 import Logo from '../../assets/kubevela-logo.png';
 import { If } from '../../components/If';
 import SwitchLanguage from '../../components/SwitchButton/index';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import './index.less';
 import type { DexConfig } from '../../interface/system';
