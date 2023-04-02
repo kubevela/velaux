@@ -44,5 +44,6 @@ ENV PATH=$PATH:/app/velaux
 COPY --from=server-builder /workspace/apiserver-${TARGETARCH} /app/velaux/server
 COPY --from=ui-builder /app/velaux/public /app/velaux/public
 COPY --from=ui-builder /app/velaux/plugins/app-demo/dist /app/velaux/plugins/app-demo
+COPY --from=ui-builder /app/velaux/plugins/node-dashboard/dist /app/velaux/plugins/node-dashboard
 
 CMD ["server"]

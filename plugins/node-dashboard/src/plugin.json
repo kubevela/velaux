@@ -52,7 +52,7 @@
   "includes": [
     {
       "workspace": {
-        "name": "platform-setting"
+        "name": "platform"
       },
       "type": "Workspace",
       "label": "Node Manage",
@@ -66,7 +66,7 @@
         "/plugins/%PLUGIN_ID%"
       ],
       "icon": "",
-      "catalog": "Resources"
+      "catalog": "Infrastructure"
     }
   ],
   "routes": [

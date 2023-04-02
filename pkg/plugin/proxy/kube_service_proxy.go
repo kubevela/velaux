@@ -106,7 +106,7 @@ func (k *kubeServiceProxy) Handler(req *http.Request, res http.ResponseWriter) {
 		}
 		// Setting the authentication
 		if types.Basic == k.plugin.AuthType && k.plugin.AuthSecret != nil {
-			if err := k.setBasicAuth(req, res); err != nil {
+			if err := k.setBasicAuth(req); err != nil {
 				klog.Errorf("can't set the basic auth, err:%s", err.Error())
 				return
 			}
@@ -116,7 +116,7 @@ func (k *kubeServiceProxy) Handler(req *http.Request, res http.ResponseWriter) {
 	rp.ServeHTTP(res, req)
 }
 
-func (k *kubeServiceProxy) setBasicAuth(req *http.Request, res http.ResponseWriter) error {
+func (k *kubeServiceProxy) setBasicAuth(req *http.Request) error {
 	if err := k.loadAuthSecret(req.Context()); err != nil {
 		return err
 	}
