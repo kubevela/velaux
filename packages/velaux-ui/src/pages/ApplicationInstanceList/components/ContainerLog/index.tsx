@@ -1,10 +1,11 @@
-import { Dialog, Grid, Checkbox, Dropdown, Menu, Button } from '@alifd/next';
+import { Dialog, Grid, Checkbox, Dropdown, Menu, Button, Icon } from '@alifd/next';
 import React, { Component } from 'react';
 
 import { If } from '../../../../components/If';
 import Translation from '../../../../components/Translation';
 import type { ContainerLogResponse, PodBase } from '../../../../interface/observation';
 import { momentDate, momentShortDate } from '../../../../utils/common';
+import { downloadStringFile } from '../../../../utils/utils';
 import locale from '../../../../utils/locale';
 import './index.less';
 import { listContainerLog } from '../../../../api/observation';
@@ -123,12 +124,8 @@ class ContainerLog extends Component<Props, State> {
     logs.map((line) => {
       logContent.push(line.content)
     });
-    const element = document.createElement("a");
-    const file = new Blob([logContent.join("\n")], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = pod?.metadata.name + "-" + containerName;
-    document.body.appendChild(element);
-    element.click();
+
+    downloadStringFile(logContent.join("\n"), pod?.metadata.name + "-" + containerName);
   };
 
   render() {
@@ -149,7 +146,7 @@ class ContainerLog extends Component<Props, State> {
             </Col>
             <Col span={12}>
             <Button style={{float: "right"}} type="normal" size="small" onClick={this.downloadLog}>
-              <Translation className="font-bold font-size-14">download</Translation>
+              <Icon type="download" />
             </Button>
             </Col>
           </Row>

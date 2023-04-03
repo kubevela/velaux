@@ -1,4 +1,4 @@
-import { Grid, Checkbox, Dropdown, Menu, Loading, Button } from '@alifd/next';
+import { Grid, Checkbox, Dropdown, Menu, Loading, Button, Icon } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import React, { Component, Fragment } from 'react';
 
@@ -6,6 +6,7 @@ import { listContainerLog } from '../../../../api/observation';
 import Translation from '../../../../components/Translation';
 import type { ContainerLogResponse, PodBase } from '../../../../interface/observation';
 import { momentDate, momentShortDate } from '../../../../utils/common';
+import { downloadStringFile } from '../../../../utils/utils';
 import './index.less';
 import { If } from '../../../../components/If';
 import { FaEllipsisV } from 'react-icons/fa';
@@ -146,12 +147,8 @@ class ContainerLog extends Component<Props, State> {
     logs.map((line) => {
       logContent.push(line.content);
     });
-    const element = document.createElement("a");
-    const file = new Blob([logContent.join("\n")], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = pod?.metadata.name + "-" + activeContainerName;
-    document.body.appendChild(element);
-    element.click();
+
+    downloadStringFile(logContent.join("\n"), pod?.metadata.name + "-" + activeContainerName);
   };
 
   render() {
@@ -161,7 +158,7 @@ class ContainerLog extends Component<Props, State> {
       <Fragment>
         <div className="application-logs-actions">
           <Button type="normal" size="small" onClick={this.downloadLog}>
-            <Translation className="font-bold font-size-14">download</Translation>
+            <Icon type="download"/>
           </Button>
           <Checkbox checked={showTimestamps} onChange={(v) => this.setState({ showTimestamps: v })}>
             <Translation className="font-bold font-size-14">Show timestamps</Translation>
