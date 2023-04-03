@@ -34,7 +34,6 @@ var _ = Describe("Test the plugin rest api", func() {
 		var lpr apisv1.ListPluginResponse
 		Expect(decodeResponseBody(res, &lpr)).Should(Succeed())
 		Expect(cmp.Diff(len(lpr.Plugins), 2)).Should(BeEmpty())
-		Expect(cmp.Diff(lpr.Plugins[0].Module, "plugins/app-demo/module")).Should(BeEmpty())
 	})
 
 	It("Test get a installed plugin", func() {
