@@ -4,13 +4,15 @@ import dts from 'rollup-plugin-dts';
 import esbuild from 'rollup-plugin-esbuild';
 import { externals } from 'rollup-plugin-node-externals';
 import json from '@rollup/plugin-json';
+import less from 'rollup-plugin-less';
+import image from '@rollup/plugin-image';
 
 const pkg = require('./package.json');
 
 export default [
   {
     input: 'src/types.ts',
-    plugins: [externals({ deps: true, packagePath: './package.json' }), resolve(), esbuild(), json()],
+    plugins: [externals({ deps: true, packagePath: './package.json' }), resolve(), esbuild(), json(), less(), image()],
     output: [
       {
         format: 'cjs',
@@ -30,6 +32,7 @@ export default [
   {
     input: './compiled/types.d.ts',
     plugins: [dts()],
+    external: [/\.less$/],
     output: {
       file: pkg.publishConfig.types,
       format: 'es',
