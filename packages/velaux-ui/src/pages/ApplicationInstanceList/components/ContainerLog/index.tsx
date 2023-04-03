@@ -1,10 +1,11 @@
-import { Dialog, Grid, Checkbox, Dropdown, Menu } from '@alifd/next';
+import { Dialog, Grid, Checkbox, Dropdown, Menu, Button, Icon } from '@alifd/next';
 import React, { Component } from 'react';
 
 import { If } from '../../../../components/If';
 import Translation from '../../../../components/Translation';
 import type { ContainerLogResponse, PodBase } from '../../../../interface/observation';
 import { momentDate, momentShortDate } from '../../../../utils/common';
+import { downloadStringFile } from '../../../../utils/utils';
 import locale from '../../../../utils/locale';
 import './index.less';
 import { listContainerLog } from '../../../../api/observation';
@@ -115,6 +116,18 @@ class ContainerLog extends Component<Props, State> {
     }
   };
 
+  downloadLog = () => {
+    const { pod, containerName = '' } = this.props;
+    const { logs } = this.state;
+    
+    let logContent: string[] = [];
+    logs.map((line) => {
+      logContent.push(line.content)
+    });
+
+    downloadStringFile(logContent.join("\n"), pod?.metadata.name + "-" + containerName);
+  };
+
   render() {
     const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous } = this.state;
     return (
@@ -126,7 +139,18 @@ class ContainerLog extends Component<Props, State> {
         onClose={this.props.onClose}
         overflowScroll
         v2
-        title={<Translation>Container Log</Translation>}
+        title={
+          <Row style={{ width: '100%' }}>
+            <Col span={12}>
+              <Translation>Container Log</Translation>
+            </Col>
+            <Col span={12}>
+            <Button style={{float: "right"}} type="normal" size="small" onClick={this.downloadLog}>
+              <Icon type="download" />
+            </Button>
+            </Col>
+          </Row>
+        }
         footer={
           <Row style={{ width: '100%' }}>
             <Col span={12}>
