@@ -77,17 +77,7 @@ const defaultWorkspaceMenus: Menu[] = [
     label: 'Pipelines',
     permission: { resource: 'project:?/pipeline:*', action: 'list' },
   },
-  {
-    type: MenuTypes.Workspace,
-    catalog: 'Resources',
-    workspace: 'continuous-delivery',
-    to: '/clusters',
-    icon: <AiOutlineCluster />,
-    label: 'Clusters',
-    name: 'cluster-list',
-    permission: { resource: 'cluster:*', action: 'list' },
-    relatedRoute: ['/clusters'],
-  },
+
   {
     workspace: 'continuous-delivery',
     type: MenuTypes.Workspace,
@@ -120,6 +110,17 @@ const defaultWorkspaceMenus: Menu[] = [
     name: 'definition-list',
     permission: { resource: 'definition:*', action: 'list' },
     relatedRoute: ['/definitions'],
+  },
+  {
+    type: MenuTypes.Workspace,
+    catalog: 'Infrastructure',
+    workspace: 'platform',
+    to: '/clusters',
+    icon: <AiOutlineCluster />,
+    label: 'Clusters',
+    name: 'cluster-list',
+    permission: { resource: 'cluster:*', action: 'list' },
+    relatedRoute: ['/clusters'],
   },
   {
     workspace: 'platform',
