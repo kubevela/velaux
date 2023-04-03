@@ -161,11 +161,6 @@ func (m *kubeapi) Get(ctx context.Context, entity datastore.Entity) error {
 	if err := json.Unmarshal(configMap.BinaryData["data"], entity); err != nil {
 		return datastore.NewDBError(err)
 	}
-	// TODO: REMOVE THIS
-	if entity.PrimaryKey() == "admin" && entity.TableName() == "vela_user" {
-		cb, err := json.Marshal(configMap)
-		klog.Warningf("user admin configmap info: %s, err: %v", string(cb), err)
-	}
 	return nil
 }
 
@@ -429,13 +424,6 @@ func (m *kubeapi) List(ctx context.Context, entity datastore.Entity, op *datasto
 			return nil, datastore.NewDBError(err)
 		}
 		list = append(list, ent)
-	}
-	// TODO: REMOVE THIS
-	if entity.TableName() == "vela_user" {
-		for _, item := range items {
-			cs, err := json.Marshal(item)
-			klog.Warningf("user listed", string(cs), err)
-		}
 	}
 	return list, nil
 }

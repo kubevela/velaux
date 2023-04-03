@@ -77,8 +77,6 @@ func (u *userServiceImpl) AdminConfigured(ctx context.Context) (apisv1.AdminConf
 	if len(users) == 0 {
 		return apisv1.AdminConfiguredResponse{Configured: false}, nil
 	}
-	// TODO: REMOVE THIS!
-	klog.Errorf("admin user already configured: %v", users[0].(*model.User).Name)
 	return apisv1.AdminConfiguredResponse{Configured: true}, nil
 }
 
