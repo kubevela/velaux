@@ -1,4 +1,4 @@
-import { Grid, Checkbox, Dropdown, Menu, Loading } from '@alifd/next';
+import { Grid, Checkbox, Dropdown, Menu, Loading, Button, Icon } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import React, { Component, Fragment } from 'react';
 
@@ -6,6 +6,7 @@ import { listContainerLog } from '../../../../api/observation';
 import Translation from '../../../../components/Translation';
 import type { ContainerLogResponse, PodBase } from '../../../../interface/observation';
 import { momentDate, momentShortDate } from '../../../../utils/common';
+import { downloadStringFile } from '../../../../utils/utils';
 import './index.less';
 import { If } from '../../../../components/If';
 import { FaEllipsisV } from 'react-icons/fa';
@@ -138,12 +139,27 @@ class ContainerLog extends Component<Props, State> {
     }
   };
 
+  downloadLog = () => {
+    const { pod, activeContainerName = '' } = this.props;
+    const { logs } = this.state;
+    
+    let logContent: string[] = [];
+    logs.map((line) => {
+      logContent.push(line.content);
+    });
+
+    downloadStringFile(logContent.join("\n"), pod?.metadata.name + "-" + activeContainerName);
+  };
+
   render() {
     const { Row, Col } = Grid;
     const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous, loading } = this.state;
     return (
       <Fragment>
         <div className="application-logs-actions">
+          <Button type="normal" size="small" onClick={this.downloadLog}>
+            <Icon type="download"/>
+          </Button>
           <Checkbox checked={showTimestamps} onChange={(v) => this.setState({ showTimestamps: v })}>
             <Translation className="font-bold font-size-14">Show timestamps</Translation>
           </Checkbox>

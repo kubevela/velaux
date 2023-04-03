@@ -210,3 +210,12 @@ export function getBrowserNameAndVersion() {
   //return eg:ie9.0 firefox34.0 chrome37.0
   return browserNV;
 }
+
+export function downloadStringFile(content: string, filename: string) {
+  const element = document.createElement("a");
+  const file = new Blob([content], {type: 'text/plain'});
+  element.href = URL.createObjectURL(file);
+  element.download = filename;
+  document.body.appendChild(element);
+  element.click();
+}
