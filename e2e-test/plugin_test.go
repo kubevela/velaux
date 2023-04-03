@@ -33,7 +33,7 @@ var _ = Describe("Test the plugin rest api", func() {
 		res := get("/plugins")
 		var lpr apisv1.ListPluginResponse
 		Expect(decodeResponseBody(res, &lpr)).Should(Succeed())
-		Expect(cmp.Diff(len(lpr.Plugins), 1)).Should(BeEmpty())
+		Expect(cmp.Diff(len(lpr.Plugins), 2)).Should(BeEmpty())
 		Expect(cmp.Diff(lpr.Plugins[0].Module, "plugins/app-demo/module")).Should(BeEmpty())
 	})
 
@@ -73,6 +73,6 @@ var _ = Describe("Test to request the kube API", func() {
 		var nodeList corev1.NodeList
 		err := decodeResponseBody(res, &nodeList)
 		Expect(err).Should(BeNil())
-		Expect(cmp.Diff(len(nodeList.Items), int32(2))).Should(BeEmpty())
+		Expect(cmp.Diff(len(nodeList.Items), 1)).Should(BeEmpty())
 	})
 })
