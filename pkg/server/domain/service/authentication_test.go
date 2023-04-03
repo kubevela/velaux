@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"os"
 	"reflect"
 	"strconv"
@@ -46,6 +45,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
 )

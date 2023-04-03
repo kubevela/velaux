@@ -100,7 +100,7 @@ func (u *userServiceImpl) InitAdmin(ctx context.Context, req apisv1.InitAdminReq
 	if _, err = u.CreateUser(ctx, createUserRequest); err != nil {
 		return apisv1.InitAdminResponse{}, err
 	}
-	klog.Info("first admin user initialized: ", req.Name)
+	klog.Info("first admin user initialized")
 	if err = u.InitDefaultProjectEnvTarget(ctx, model.DefaultInitNamespace, req.Name); err != nil {
 		return apisv1.InitAdminResponse{}, err
 	}
