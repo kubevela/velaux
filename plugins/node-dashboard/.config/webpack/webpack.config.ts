@@ -2,6 +2,7 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import ESLintPlugin from 'eslint-webpack-plugin';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import LiveReloadPlugin from 'webpack-livereload-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import path from 'path';
 import ReplaceInFileWebpackPlugin from 'replace-in-file-webpack-plugin';
 import { Configuration } from 'webpack';
@@ -73,12 +74,25 @@ const config = async (env): Promise<Configuration> => ({
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"]
+        use: ['style-loader', 'css-loader'],
       },
       {
         exclude: /(node_modules)/,
         test: /\.s[ac]ss$/,
         use: ['style-loader', 'css-loader', 'sass-loader'],
+      },
+      {
+        test: /\.less$/,
+        exclude: /node_modules/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+          },
+          {
+            loader: 'less-loader',
+          },
+        ],
       },
       {
         test: /\.(png|jpe?g|gif|svg)$/,
@@ -114,6 +128,9 @@ const config = async (env): Promise<Configuration> => ({
   },
 
   plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].[contenthash].css',
+    }),
     new CopyWebpackPlugin({
       patterns: [
         // If src/README.md exists use it; otherwise the root README

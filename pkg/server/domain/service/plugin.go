@@ -108,9 +108,17 @@ func (p *pluginImpl) InitPluginRole(ctx context.Context, plugin *types.Plugin) e
 	if err != nil {
 		return err
 	}
-	if err == nil && option == controllerutil.OperationResultCreated {
+	if option == controllerutil.OperationResultCreated {
 		klog.Infof("Install the kubernetes role for the plugin %s", plugin.ID)
 	}
+	if option == controllerutil.OperationResultUpdated {
+		klog.Infof("Update the kubernetes role for the plugin %s", plugin.ID)
+	}
+
+	if option == controllerutil.OperationResultNone {
+		klog.Infof("the kubernetes role for the plugin %s has not changed", plugin.ID)
+	}
+
 	roleBinding := &rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   GeneratePluginRoleName(plugin),

@@ -24,6 +24,18 @@
   "kubePermissions": [
     {
       "apiGroups": [
+        "",
+        "cluster.core.oam.dev"
+      ],
+      "resources": [
+        "clustergateways/proxy"
+      ],
+      "verbs": [
+        "*"
+      ]
+    },
+    {
+      "apiGroups": [
         ""
       ],
       "resources": [

@@ -111,6 +111,11 @@ func (k *kubeServiceProxy) Handler(req *http.Request, res http.ResponseWriter) {
 				return
 			}
 		}
+		for k, v := range req.URL.Query() {
+			for _, v1 := range v {
+				base.Query().Add(k, v1)
+			}
+		}
 	}
 	rp := &httputil.ReverseProxy{Director: director, ErrorLog: log.Default()}
 	rp.ServeHTTP(res, req)
