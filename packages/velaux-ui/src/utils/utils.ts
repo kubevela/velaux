@@ -2,7 +2,6 @@ import _ from 'lodash';
 
 import type { ComponentDefinitionsBase } from '../interface/application';
 import type { Endpoint } from '../interface/observation';
-import type { LoginUserInfo } from '../interface/user';
 
 
 type SelectGroupType = Array<{
@@ -152,18 +151,6 @@ export function getSelectLabel(
 
 export function getMatchParamObj(match: { params: any }, name: string) {
   return match.params && match.params[name];
-}
-
-export function isAdminUserCheck(userInfo: LoginUserInfo | undefined) {
-  const platformPermissions = userInfo?.platformPermissions || [];
-  const findAdminUser = _.find(platformPermissions, (item) => {
-    return item.name === 'admin';
-  });
-  if (findAdminUser) {
-    return true;
-  } else {
-    return false;
-  }
 }
 
 /**

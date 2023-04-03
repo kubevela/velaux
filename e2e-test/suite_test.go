@@ -49,7 +49,7 @@ const (
 	baseDomain    = "http://127.0.0.1:8001"
 	baseURL       = "http://127.0.0.1:8001/api/v1"
 	testNSprefix  = "api-test-"
-	fakeAdminName = "fake-admin"
+	fakeAdminName = "admin"
 )
 
 func TestE2eApiserverTest(t *testing.T) {
@@ -87,7 +87,7 @@ var _ = BeforeSuite(func() {
 		Expect(err).ShouldNot(HaveOccurred())
 	}()
 	By("wait for api server to start")
-	defaultAdminPassword := "adminPass123"
+	defaultAdminPassword := "VelaUX12345"
 	Eventually(
 		func() error {
 			password := os.Getenv("VELA_UX_PASSWORD")
@@ -146,7 +146,7 @@ var _ = BeforeSuite(func() {
 			err = json.NewDecoder(resp.Body).Decode(code)
 			Expect(err).Should(BeNil())
 			return fmt.Errorf("rest service not ready code:%d message:%s", resp.StatusCode, code.Message)
-		}, time.Second*600, time.Millisecond*200).Should(Succeed())
+		}, time.Second*60, time.Millisecond*200).Should(Succeed())
 	var err error
 	k8sClient, err = clients.GetKubeClient()
 	Expect(err).ShouldNot(HaveOccurred())

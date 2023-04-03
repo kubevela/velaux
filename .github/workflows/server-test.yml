@@ -164,7 +164,7 @@ jobs:
           make e2e-setup-core
           make start-addon-mock-server
           make load-image
-          make enable-addon
+          make enable-addon-no-replicas
           
       - name: Run server e2e test
         run: |
@@ -173,6 +173,10 @@ jobs:
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           docker run --rm -v `pwd`/e2e-plugins:/plugins oamdev/velaux:latest cp -r -a /app/velaux/plugins/app-demo /plugins/app-demo
           make e2e-server-test
+
+      - name: Test addon enable
+        run: |
+          make enable-addon
 
       - name: Upload coverage report
         uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
