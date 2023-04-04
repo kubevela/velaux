@@ -122,13 +122,6 @@ func (u systemInfoServiceImpl) UpdateSystemInfo(ctx context.Context, sysInfo v1.
 	}
 
 	if sysInfo.LoginType == model.LoginTypeDex {
-		admin := &model.User{Name: model.DefaultAdminUserName}
-		if err := u.Store.Get(ctx, admin); err != nil {
-			return nil, err
-		}
-		if admin.Email == "" {
-			return nil, bcode.ErrEmptyAdminEmail
-		}
 		connectors, err := utils.GetDexConnectors(ctx, u.KubeClient)
 		if err != nil {
 			return nil, err

@@ -37,4 +37,6 @@ var (
 	ErrDexNotFound = NewBcode(200, 14009, "the dex is not found")
 	// ErrEmptyAdminEmail is the error of empty admin email
 	ErrEmptyAdminEmail = NewBcode(400, 14010, "the admin email is empty, please set the admin email before using sso login")
+	// ErrNoAdminUser is the error of no admin user
+	ErrNoAdminUser = NewBcode(400, 14011, "the admin user is not found, please init the platform first")
 )

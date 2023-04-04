@@ -43,5 +43,5 @@ var ErrProjectRoleCheckFailure = NewBcode(400, 30008, "the specified role does't
 // ErrProjectUserExist means the user is already exist in this project
 var ErrProjectUserExist = NewBcode(400, 30009, "the user is already exist in this project")
 
-// ErrProjectOwnerIsNotExist means the project owner name is invalid
-var ErrProjectOwnerIsNotExist = NewBcode(400, 30010, "the project owner name is invalid")
+// ErrProjectOwnerInvalid means the project owner name is invalid
+var ErrProjectOwnerInvalid = NewBcode(400, 30010, "the project owner name is invalid")

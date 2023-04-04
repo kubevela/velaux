@@ -29,11 +29,8 @@ import (
 )
 
 var _ = Describe("Test target service functions", func() {
-	var (
-		targetService  *targetServiceImpl
-		projectService *projectServiceImpl
-		testProject    = "target-project"
-	)
+	var testProject = "target-project"
+
 	BeforeEach(func() {
 		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: "target-test-kubevela"})
 		Expect(ds).ToNot(BeNil())

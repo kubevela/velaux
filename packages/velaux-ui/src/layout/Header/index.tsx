@@ -28,11 +28,10 @@ import type { LoginUserInfo } from '../../interface/user';
 import { getData, setData } from '../../utils/cache';
 import locale from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
-import { getBrowserNameAndVersion, isAdminUserCheck } from '../../utils/utils';
+import { getBrowserNameAndVersion } from '../../utils/utils';
 import CloudShell from '../CloudShell';
 import { locationService } from '../../services/LocationService';
 
-import EditPlatFormUserDialog from './components/EditPlatFormUserDialog';
 import { LayoutMode, Workspace } from '@velaux/data';
 import { Dispatch } from 'redux';
 import { menuService } from '../../services/MenuService';
@@ -50,7 +49,6 @@ type Props = {
 
 type State = {
   platformSetting: boolean;
-  isEditAdminUser: boolean;
   grafanaConfigs?: Config[];
   workspaces: Workspace[];
 };
@@ -65,7 +63,6 @@ class Header extends Component<Props, State> {
     super(props);
     this.state = {
       platformSetting: false,
-      isEditAdminUser: false,
       workspaces: [],
     };
   }
@@ -158,7 +155,6 @@ class Header extends Component<Props, State> {
     this.props.dispatch({
       type: 'user/getLoginUserInfo',
       callback: () => {
-        this.isEditPlatForm();
         this.loadGrafanaIntegration();
         this.loadWorkspaces();
       },
@@ -221,24 +217,10 @@ class Header extends Component<Props, State> {
     this.setState({ platformSetting: true });
   };
 
-  isEditPlatForm = () => {
-    const { userInfo } = this.props;
-    const isAdminUser = isAdminUserCheck(userInfo);
-    if (isAdminUser && userInfo && !userInfo.email) {
-      this.setState({
-        isEditAdminUser: true,
-      });
-    }
-  };
-
-  onCloseEditAdminUser = () => {
-    this.setState({ isEditAdminUser: false });
-  };
-
   render() {
     const { Row } = Grid;
     const { systemInfo, dispatch, show, userInfo, mode, currentWorkspace } = this.props;
-    const { platformSetting, isEditAdminUser, grafanaConfigs, workspaces } = this.state;
+    const { platformSetting,  grafanaConfigs, workspaces } = this.state;
 
     return (
       <div className="layout-top-bar" id="layout-top-bar">
@@ -424,9 +406,6 @@ class Header extends Component<Props, State> {
               dispatch={dispatch}
             />
           )}
-        </If>
-        <If condition={isEditAdminUser}>
-          <EditPlatFormUserDialog userInfo={userInfo} onClose={this.onCloseEditAdminUser} />
         </If>
         <If condition={show}>
           <CloudShell />

@@ -22,6 +22,9 @@ import (
 	"os"
 	"time"
 
+	"k8s.io/client-go/kubernetes"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+
 	v1alpha1 "github.com/cloudtty/cloudtty/pkg/apis/cloudshell/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -29,8 +32,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"sigs.k8s.io/yaml"
 
 	kubevelatypes "github.com/oam-dev/kubevela/apis/types"
@@ -38,76 +39,25 @@ import (
 	pkgutils "github.com/oam-dev/kubevela/pkg/utils"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 var _ = Describe("Test cloudshell service function", func() {
-	var (
-		ds                datastore.DataStore
-		cloudShellService *cloudShellServiceImpl
-		userService       *userServiceImpl
-		projectService    *projectServiceImpl
-		envService        *envServiceImpl
-		err               error
-		database          string
-	)
-
 	BeforeEach(func() {
-		database = "cloudshell-test-kubevela"
-		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: database})
-		Expect(err).Should(Succeed())
-		envService = &envServiceImpl{
-			Store:      ds,
-			KubeClient: k8sClient,
+		InitTestEnv("cloudshell-test-kubevela")
+		cloudShellService.GenerateKubeConfig = func(ctx context.Context, cli kubernetes.Interface, cfg *clientcmdapi.Config, writer io.Writer, options ...auth.KubeConfigGenerateOption) (*clientcmdapi.Config, error) {
+			return &clientcmdapi.Config{}, nil
 		}
-		userService = &userServiceImpl{
-			Store:          ds,
-			SysService:     &systemInfoServiceImpl{Store: ds},
-			ProjectService: projectService,
-		}
-		projectService = &projectServiceImpl{
-			Store:     ds,
-			K8sClient: k8sClient,
-			RbacService: &rbacServiceImpl{
-				Store: ds,
-			},
-			TargetService: &targetServiceImpl{
-				Store:     ds,
-				K8sClient: k8sClient,
-			},
-			EnvService:  envService,
-			UserService: userService,
-		}
-		userService.ProjectService = projectService
-		userService.RbacService = projectService.RbacService
-		envService.ProjectService = projectService
+		cloudShellService.CACert = testEnv.ControlPlane.APIServer.CA
 
-		cloudShellService = &cloudShellServiceImpl{
-			KubeClient:     k8sClient,
-			KubeConfig:     cfg,
-			ProjectService: projectService,
-			TargetService: &targetServiceImpl{
-				Store:     ds,
-				K8sClient: k8sClient,
-			},
-			EnvService:  envService,
-			UserService: userService,
-			RBACService: projectService.RbacService,
-			GenerateKubeConfig: func(ctx context.Context, cli kubernetes.Interface, cfg *clientcmdapi.Config, writer io.Writer, options ...auth.KubeConfigGenerateOption) (*clientcmdapi.Config, error) {
-				return &clientcmdapi.Config{}, nil
-			},
-			CACert: testEnv.ControlPlane.APIServer.CA,
-		}
 	})
 
 	It("Test prepareKubeConfig", func() {
-		err = userService.Init(context.TODO())
+		ok, err := InitTestAdmin(userService)
 		Expect(err).Should(BeNil())
-		err = projectService.Init(context.TODO())
-		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 
 		By("test the developer users")
 		_, err = userService.CreateUser(context.TODO(), apisv1.CreateUserRequest{Name: "test-dev", Password: "test"})

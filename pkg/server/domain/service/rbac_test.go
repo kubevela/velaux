@@ -35,7 +35,6 @@ import (
 )
 
 var _ = Describe("Test rbac service", func() {
-	var ds datastore.DataStore
 	BeforeEach(func() {
 		var err error
 		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "rbac-test-kubevela"})
@@ -103,16 +102,16 @@ var _ = Describe("Test rbac service", func() {
 
 	It("Test checkPerm by admin user", func() {
 
-		err := ds.Add(context.TODO(), &model.User{Name: "admin", UserRoles: []string{"admin"}})
+		err := ds.Add(context.TODO(), &model.User{Name: FakeAdminName, UserRoles: []string{"admin"}})
 		Expect(err).Should(BeNil())
 
 		rbac := rbacServiceImpl{Store: ds}
 		req := &http.Request{}
-		req = req.WithContext(context.WithValue(req.Context(), &apisv1.CtxKeyUser, "admin"))
+		req = req.WithContext(context.WithValue(req.Context(), &apisv1.CtxKeyUser, FakeAdminName))
 		res := &restful.Response{}
 		pass := false
 		filter := &restful.FilterChain{
-			Target: restful.RouteFunction(func(req *restful.Request, res *restful.Response) {
+			Target: restful.RouteFunction(func(_ *restful.Request, _ *restful.Response) {
 				pass = true
 			}),
 		}

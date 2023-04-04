@@ -20,6 +20,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/kubevela/velaux/pkg/server/domain/service"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -72,11 +74,15 @@ var _ = Describe("Test Worker CR sync to datastore", func() {
 			Store:              ds,
 			Queue:              workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 			ProjectService:     crux.projectService,
+			UserService:        crux.userService,
 			ApplicationService: crux.applicationService,
 			TargetService:      crux.targetService,
 			WorkflowService:    crux.workflowService,
 			EnvService:         crux.envService,
 		}
+		ok, err := service.InitTestAdmin(crux.userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 		go appSync.Start(ctx, make(chan error))
 
 		By("create test app1 and check the syncing results")

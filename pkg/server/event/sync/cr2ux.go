@@ -60,6 +60,7 @@ type CR2UX struct {
 	ds                 datastore.DataStore
 	cli                client.Client
 	cache              sync.Map
+	userService        service.UserService
 	projectService     service.ProjectService
 	applicationService service.ApplicationService
 	workflowService    service.WorkflowService
@@ -102,7 +103,7 @@ func (c *CR2UX) syncAppCreatedByCLI(ctx context.Context, targetApp *v1beta1.Appl
 			return err
 		}
 		if dsApp.Project != nil {
-			if err = StoreProject(ctx, *dsApp.Project, ds, c.projectService); err != nil {
+			if err = StoreProject(ctx, *dsApp.Project, ds, c.projectService, c.userService); err != nil {
 				klog.Errorf("get or create project for sync process err %v", err)
 				return err
 			}

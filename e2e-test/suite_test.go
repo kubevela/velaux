@@ -36,7 +36,6 @@ import (
 
 	"github.com/kubevela/velaux/pkg/server"
 	"github.com/kubevela/velaux/pkg/server/config"
-	"github.com/kubevela/velaux/pkg/server/domain/service"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -47,9 +46,10 @@ var k8sClient client.Client
 var token string
 
 const (
-	baseDomain   = "http://127.0.0.1:8001"
-	baseURL      = "http://127.0.0.1:8001/api/v1"
-	testNSprefix = "api-test-"
+	baseDomain    = "http://127.0.0.1:8001"
+	baseURL       = "http://127.0.0.1:8001/api/v1"
+	testNSprefix  = "api-test-"
+	fakeAdminName = "admin"
 )
 
 func TestE2eApiserverTest(t *testing.T) {
@@ -87,18 +87,45 @@ var _ = BeforeSuite(func() {
 		Expect(err).ShouldNot(HaveOccurred())
 	}()
 	By("wait for api server to start")
+	defaultAdminPassword := "VelaUX12345"
 	Eventually(
 		func() error {
 			password := os.Getenv("VELA_UX_PASSWORD")
 			if password == "" {
-				password = service.InitAdminPassword
+				password = defaultAdminPassword
 			}
+			// init admin user
+			var initReq = apisv1.InitAdminRequest{
+				Name:     fakeAdminName,
+				Password: password,
+				Email:    "fake@email.com",
+			}
+			bodyByte, err := json.Marshal(initReq)
+			Expect(err).Should(BeNil())
+			initHtpReq, err := http.NewRequest("PUT", baseURL+"/auth/init_admin", bytes.NewBuffer(bodyByte))
+			Expect(err).Should(BeNil())
+			initHtpReq.Header.Set("Content-Type", "application/json")
+			res, err := http.DefaultClient.Do(initHtpReq)
+			if err != nil {
+				return err
+			}
+			// either 200 or "admin user is already configured"
+			if res.StatusCode != 200 {
+				body, err := io.ReadAll(res.Body)
+				Expect(err).Should(BeNil())
+				if !strings.Contains(string(body), "admin user is already configured") {
+					return fmt.Errorf("init admin failed: %s", string(body))
+				}
+			}
+
+			// login
 			var req = apisv1.LoginRequest{
-				Username: "admin",
+				Username: fakeAdminName,
 				Password: password,
 			}
-			bodyByte, err := json.Marshal(req)
+			bodyByte, err = json.Marshal(req)
 			Expect(err).Should(BeNil())
+
 			resp, err := http.Post(baseURL+"/auth/login", "application/json", bytes.NewBuffer(bodyByte))
 			if err != nil {
 				return err
@@ -119,7 +146,7 @@ var _ = BeforeSuite(func() {
 			err = json.NewDecoder(resp.Body).Decode(code)
 			Expect(err).Should(BeNil())
 			return fmt.Errorf("rest service not ready code:%d message:%s", resp.StatusCode, code.Message)
-		}, time.Second*20, time.Millisecond*200).Should(BeNil())
+		}, time.Second*60, time.Millisecond*200).Should(Succeed())
 	var err error
 	k8sClient, err = clients.GetKubeClient()
 	Expect(err).ShouldNot(HaveOccurred())

@@ -18,17 +18,12 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 
-	velatypes "github.com/oam-dev/kubevela/apis/types"
-	"github.com/oam-dev/kubevela/pkg/multicluster"
-	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
@@ -39,25 +34,24 @@ import (
 
 var _ = Describe("Test project service functions", func() {
 	var (
-		projectService   *projectServiceImpl
-		envImpl          *envServiceImpl
-		userService      *userServiceImpl
-		targetImpl       *targetServiceImpl
 		defaultNamespace = "project-default-ns1-test"
 	)
 	BeforeEach(func() {
 		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: "target-test-kubevela"})
 		Expect(ds).ToNot(BeNil())
 		Expect(err).Should(BeNil())
-		userService = &userServiceImpl{Store: ds, K8sClient: k8sClient}
 		var ns = corev1.Namespace{}
 		ns.Name = defaultNamespace
 		err = k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
 		projectService = NewTestProjectService(ds, k8sClient).(*projectServiceImpl)
-		envImpl = projectService.EnvService.(*envServiceImpl)
+		envService = projectService.EnvService.(*envServiceImpl)
 		userService = projectService.UserService.(*userServiceImpl)
-		targetImpl = projectService.TargetService.(*targetServiceImpl)
+		targetService = projectService.TargetService.(*targetServiceImpl)
+
+		ok, err := InitTestAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 
 		pp, err := projectService.ListProjects(context.TODO(), 0, 0)
 		Expect(err).Should(BeNil())
@@ -65,79 +59,21 @@ var _ = Describe("Test project service functions", func() {
 		for _, p := range pp.Projects {
 			_ = projectService.DeleteProject(context.TODO(), p.Name)
 		}
-		ctx := context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "admin")
-		envs, err := envImpl.ListEnvs(ctx, 0, 0, apisv1.ListEnvOptions{})
+		ctx := context.WithValue(context.TODO(), &apisv1.CtxKeyUser, FakeAdminName)
+		envs, err := envService.ListEnvs(ctx, 0, 0, apisv1.ListEnvOptions{})
 		Expect(err).Should(BeNil())
 		// reset all projects
 		for _, e := range envs.Envs {
-			_ = envImpl.DeleteEnv(context.TODO(), e.Name)
+			_ = envService.DeleteEnv(context.TODO(), e.Name)
 		}
-		targets, err := targetImpl.ListTargets(context.TODO(), 0, 0, "")
+		targets, err := targetService.ListTargets(context.TODO(), 0, 0, "")
 		Expect(err).Should(BeNil())
 		// reset all projects
 		for _, t := range targets.Targets {
-			_ = targetImpl.DeleteTarget(context.TODO(), t.Name)
+			_ = targetService.DeleteTarget(context.TODO(), t.Name)
 		}
 	})
-	It("Test project initialize function", func() {
 
-		// init admin user
-		var ns = corev1.Namespace{}
-		ns.Name = velatypes.DefaultKubeVelaNS
-		err := k8sClient.Create(context.TODO(), &ns)
-		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
-		err = userService.Init(context.TODO())
-		Expect(err).Should(BeNil())
-
-		// init default project
-		err = projectService.InitDefaultProjectEnvTarget(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, model.DefaultAdminUserName), defaultNamespace)
-		Expect(err).Should(BeNil())
-		By("test env created")
-		var namespace corev1.Namespace
-		Eventually(func() error {
-			return k8sClient.Get(context.TODO(), types.NamespacedName{Name: defaultNamespace}, &namespace)
-		}, time.Second*3, time.Microsecond*300).Should(BeNil())
-
-		Expect(cmp.Diff(namespace.Labels[oam.LabelNamespaceOfEnvName], model.DefaultInitName)).Should(BeEmpty())
-		Expect(cmp.Diff(namespace.Labels[oam.LabelNamespaceOfTargetName], model.DefaultInitName)).Should(BeEmpty())
-		Expect(cmp.Diff(namespace.Labels[oam.LabelControlPlaneNamespaceUsage], oam.VelaNamespaceUsageEnv)).Should(BeEmpty())
-		Expect(cmp.Diff(namespace.Labels[oam.LabelRuntimeNamespaceUsage], oam.VelaNamespaceUsageTarget)).Should(BeEmpty())
-
-		By("check project created")
-		dp, err := projectService.GetProject(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-		Expect(dp.Alias).Should(BeEquivalentTo("Default"))
-		Expect(dp.Description).Should(BeEquivalentTo(model.DefaultProjectDescription))
-
-		By("check env created")
-
-		env, err := envImpl.GetEnv(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-		Expect(env.Alias).Should(BeEquivalentTo("Default"))
-		Expect(env.Description).Should(BeEquivalentTo(model.DefaultEnvDescription))
-		Expect(env.Project).Should(BeEquivalentTo(model.DefaultInitName))
-		Expect(env.Targets).Should(BeEquivalentTo([]string{model.DefaultInitName}))
-		Expect(env.Namespace).Should(BeEquivalentTo(defaultNamespace))
-
-		By("check target created")
-
-		tg, err := targetImpl.GetTarget(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-		Expect(tg.Alias).Should(BeEquivalentTo("Default"))
-		Expect(tg.Description).Should(BeEquivalentTo(model.DefaultTargetDescription))
-		Expect(tg.Cluster).Should(BeEquivalentTo(&model.ClusterTarget{
-			ClusterName: multicluster.ClusterLocalName,
-			Namespace:   defaultNamespace,
-		}))
-		Expect(env.Targets).Should(BeEquivalentTo([]string{model.DefaultInitName}))
-		Expect(env.Namespace).Should(BeEquivalentTo(defaultNamespace))
-
-		err = targetImpl.DeleteTarget(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-		err = envImpl.DeleteEnv(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
-
-	})
 	It("Test Create project function", func() {
 		req := apisv1.CreateProjectRequest{
 			Name:        "test-project",
@@ -163,7 +99,7 @@ var _ = Describe("Test project service functions", func() {
 		base, err := projectService.UpdateProject(context.TODO(), "test-project", apisv1.UpdateProjectRequest{
 			Alias:       "Change alias",
 			Description: "Change description",
-			Owner:       "admin",
+			Owner:       FakeAdminName,
 		})
 		Expect(err).Should(BeNil())
 		Expect(base.Alias).Should(BeEquivalentTo("Change alias"))
@@ -196,7 +132,7 @@ var _ = Describe("Test project service functions", func() {
 			Description: "Change description",
 			Owner:       "admin-error",
 		})
-		Expect(err).Should(BeEquivalentTo(bcode.ErrProjectOwnerIsNotExist))
+		Expect(err).Should(BeEquivalentTo(bcode.ErrProjectOwnerInvalid))
 		err = projectService.DeleteProject(context.TODO(), "test-project")
 		Expect(err).Should(BeNil())
 	})
@@ -210,7 +146,7 @@ var _ = Describe("Test project service functions", func() {
 		Expect(err).Should(BeNil())
 
 		_, err = projectService.AddProjectUser(context.TODO(), "test-project", apisv1.AddProjectUserRequest{
-			UserName:  "admin",
+			UserName:  FakeAdminName,
 			UserRoles: []string{"project-admin"},
 		})
 		Expect(err).Should(BeNil())
@@ -230,17 +166,17 @@ var _ = Describe("Test project service functions", func() {
 		Expect(err).Should(BeNil())
 
 		_, err = projectService.AddProjectUser(context.TODO(), "test-project", apisv1.AddProjectUserRequest{
-			UserName:  "admin",
+			UserName:  FakeAdminName,
 			UserRoles: []string{"project-admin"},
 		})
 		Expect(err).Should(BeNil())
 
-		_, err = projectService.UpdateProjectUser(context.TODO(), "test-project", "admin", apisv1.UpdateProjectUserRequest{
+		_, err = projectService.UpdateProjectUser(context.TODO(), "test-project", FakeAdminName, apisv1.UpdateProjectUserRequest{
 			UserRoles: []string{"project-admin", "app-developer"},
 		})
 		Expect(err).Should(BeNil())
 
-		_, err = projectService.UpdateProjectUser(context.TODO(), "test-project", "admin", apisv1.UpdateProjectUserRequest{
+		_, err = projectService.UpdateProjectUser(context.TODO(), "test-project", FakeAdminName, apisv1.UpdateProjectUserRequest{
 			UserRoles: []string{"project-admin", "app-developer", "xxx"},
 		})
 		Expect(err).Should(BeEquivalentTo(bcode.ErrProjectRoleCheckFailure))
@@ -255,12 +191,12 @@ var _ = Describe("Test project service functions", func() {
 		Expect(err).Should(BeNil())
 
 		_, err = projectService.AddProjectUser(context.TODO(), "test-project", apisv1.AddProjectUserRequest{
-			UserName:  "admin",
+			UserName:  FakeAdminName,
 			UserRoles: []string{"project-admin"},
 		})
 		Expect(err).Should(BeNil())
 
-		err = projectService.DeleteProjectUser(context.TODO(), "test-project", "admin")
+		err = projectService.DeleteProjectUser(context.TODO(), "test-project", FakeAdminName)
 		Expect(err).Should(BeNil())
 		err = projectService.DeleteProject(context.TODO(), "test-project")
 		Expect(err).Should(BeNil())
