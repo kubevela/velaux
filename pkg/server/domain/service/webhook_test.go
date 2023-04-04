@@ -29,53 +29,17 @@ import (
 
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
-	"github.com/oam-dev/kubevela/pkg/utils/apply"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 var _ = Describe("Test application service function", func() {
-	var (
-		appService        *applicationServiceImpl
-		workflowService   *workflowServiceImpl
-		envService        *envServiceImpl
-		envBindingService *envBindingServiceImpl
-		targetService     *targetServiceImpl
-		definitionService *definitionServiceImpl
-		projectService    *projectServiceImpl
-		webhookService    *webhookServiceImpl
-	)
 
 	BeforeEach(func() {
-		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: "app-test-kubevela"})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
-		workflowService = &workflowServiceImpl{Store: ds, EnvService: envService}
-		definitionService = &definitionServiceImpl{KubeClient: k8sClient}
-		envBindingService = &envBindingServiceImpl{Store: ds, EnvService: envService, WorkflowService: workflowService, KubeClient: k8sClient, DefinitionService: definitionService}
-		targetService = &targetServiceImpl{Store: ds, K8sClient: k8sClient}
-		rbacService := &rbacServiceImpl{Store: ds}
-		projectService = &projectServiceImpl{Store: ds, K8sClient: k8sClient, RbacService: rbacService}
-		envService = &envServiceImpl{Store: ds, KubeClient: k8sClient, ProjectService: projectService}
-		appService = &applicationServiceImpl{
-			Store:             ds,
-			WorkflowService:   workflowService,
-			Apply:             apply.NewAPIApplicator(k8sClient),
-			KubeClient:        k8sClient,
-			EnvBindingService: envBindingService,
-			EnvService:        envService,
-			DefinitionService: definitionService,
-			TargetService:     targetService,
-			ProjectService:    projectService,
-		}
-		webhookService = &webhookServiceImpl{
-			Store:              ds,
-			ApplicationService: appService,
-		}
+		InitTestEnv("app-test-kubevela")
 	})
 
 	It("Test HandleApplicationWebhook function", func() {

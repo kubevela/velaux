@@ -26,8 +26,11 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/agiledragon/gomonkey/v2"
+	"github.com/agiledragon/gomonkey/v2"
 	"github.com/coreos/go-oidc"
+	"github.com/google/go-cmp/cmp"
+	"github.com/oam-dev/kubevela/pkg/multicluster"
+	"github.com/oam-dev/kubevela/pkg/oam"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -48,37 +51,25 @@ import (
 )
 
 var _ = Describe("Test authentication service functions", func() {
-	var (
-		authService    *authenticationServiceImpl
-		userService    *userServiceImpl
-		sysService     *systemInfoServiceImpl
-		projectService ProjectService
-		ds             datastore.DataStore
-	)
+	var defaultNamespace = model.DefaultInitNamespace
 
 	BeforeEach(func() {
-		var err error
-		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "auth-test-" + strconv.FormatInt(time.Now().UnixNano(), 10)})
-		Expect(ds).ToNot(BeNil())
+		InitTestEnv("auth-test-" + strconv.FormatInt(time.Now().UnixNano(), 10))
+		// Init admin to init default project for dex login test, which will use default project
+		ok, err := InitTestAdmin(userService)
 		Expect(err).Should(BeNil())
-		authService = &authenticationServiceImpl{KubeClient: k8sClient, Store: ds}
-		sysService = &systemInfoServiceImpl{Store: ds, KubeClient: k8sClient}
-		userService = &userServiceImpl{Store: ds, SysService: sysService}
-		projectService = NewTestProjectService(ds, k8sClient)
+		Expect(ok).Should(BeTrue())
 	})
+
 	It("Test Dex login", func() {
 		testIDToken := &oidc.IDToken{}
 		sub := "248289761001Abv"
-		patch := ApplyMethod(reflect.TypeOf(testIDToken), "Claims", func(_ *oidc.IDToken, v interface{}) error {
+		patch := gomonkey.ApplyMethod(reflect.TypeOf(testIDToken), "Claims", func(_ *oidc.IDToken, v interface{}) error {
 			return json.Unmarshal([]byte(fmt.Sprintf(`{"email":"test@test.com", "name":"show name", "sub": "%s"}`, sub)), v)
 		})
 		defer patch.Reset()
 
 		err := sysService.Init(context.TODO())
-		Expect(err).Should(BeNil())
-		err = userService.Init(context.TODO())
-		Expect(err).Should(BeNil())
-		err = projectService.Init(context.TODO())
 		Expect(err).Should(BeNil())
 
 		info, err := sysService.Get(context.TODO())
@@ -106,7 +97,7 @@ var _ = Describe("Test authentication service functions", func() {
 		newUser, err := userService.GetUser(context.TODO(), resp.Name)
 		Expect(err).Should(BeNil())
 		Expect(newUser.DexSub).Should(Equal(sub))
-		Expect(newUser.UserRoles).Should(Equal([]string{"admin"}))
+		Expect(newUser.UserRoles).Should(Equal([]string{model.RoleAdmin}))
 
 		projects, err := projectService.ListUserProjects(context.TODO(), sub)
 		Expect(err).Should(BeNil())
@@ -255,5 +246,79 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(config.ClientID).Should(Equal("velaux"))
 		Expect(config.ClientSecret).Should(Equal("velaux-secret"))
 		Expect(config.RedirectURL).Should(Equal("http://velaux.com/callback"))
+	})
+
+	It("Test init admin user", func() {
+		By("Remove all users")
+		users, err := ds.List(context.Background(), &model.User{}, &datastore.ListOptions{})
+		Expect(err).Should(BeNil())
+		for _, user := range users {
+			err := ds.Delete(context.Background(), user.(*model.User))
+			Expect(err).Should(BeNil())
+		}
+		resp, err := userService.AdminConfigured(context.Background())
+		Expect(err).Should(BeNil())
+		Expect(resp.Configured).Should(BeFalse())
+		initResp, err := userService.InitAdmin(context.Background(), apisv1.InitAdminRequest{
+			Name:     FakeAdminName,
+			Password: "ComplexPassword1",
+			Email:    "fake@kubevela.io",
+		})
+		Expect(err).Should(BeNil())
+		Expect(initResp.Success).Should(BeTrue())
+		By("try to init admin user again, should fail")
+		initResp, err = userService.InitAdmin(context.Background(), apisv1.InitAdminRequest{
+			Password: "TryInVein1",
+			Email:    "fake@kubevela.io",
+		})
+		Expect(err).Should(HaveOccurred())
+
+		By("Test after init admin, project/env/target is also initialized")
+
+		By("test env created")
+		var namespace corev1.Namespace
+
+		Eventually(func() error {
+			return k8sClient.Get(context.TODO(), types.NamespacedName{Name: defaultNamespace}, &namespace)
+		}, time.Second*3, time.Microsecond*300).Should(BeNil())
+
+		Expect(cmp.Diff(namespace.Labels[oam.LabelNamespaceOfEnvName], model.DefaultInitName)).Should(BeEmpty())
+		Expect(cmp.Diff(namespace.Labels[oam.LabelNamespaceOfTargetName], model.DefaultInitName)).Should(BeEmpty())
+		Expect(cmp.Diff(namespace.Labels[oam.LabelControlPlaneNamespaceUsage], oam.VelaNamespaceUsageEnv)).Should(BeEmpty())
+		Expect(cmp.Diff(namespace.Labels[oam.LabelRuntimeNamespaceUsage], oam.VelaNamespaceUsageTarget)).Should(BeEmpty())
+
+		By("check project created")
+		dp, err := projectService.GetProject(context.TODO(), model.DefaultInitName)
+		Expect(err).Should(BeNil())
+		Expect(dp.Alias).Should(BeEquivalentTo("Default"))
+		Expect(dp.Description).Should(BeEquivalentTo(model.DefaultProjectDescription))
+
+		By("check env created")
+
+		env, err := envService.GetEnv(context.TODO(), model.DefaultInitName)
+		Expect(err).Should(BeNil())
+		Expect(env.Alias).Should(BeEquivalentTo("Default"))
+		Expect(env.Description).Should(BeEquivalentTo(model.DefaultEnvDescription))
+		Expect(env.Project).Should(BeEquivalentTo(model.DefaultInitName))
+		Expect(env.Targets).Should(BeEquivalentTo([]string{model.DefaultInitName}))
+		Expect(env.Namespace).Should(BeEquivalentTo(defaultNamespace))
+
+		By("check target created")
+
+		tg, err := targetService.GetTarget(context.TODO(), model.DefaultInitName)
+		Expect(err).Should(BeNil())
+		Expect(tg.Alias).Should(BeEquivalentTo("Default"))
+		Expect(tg.Description).Should(BeEquivalentTo(model.DefaultTargetDescription))
+		Expect(tg.Cluster).Should(BeEquivalentTo(&model.ClusterTarget{
+			ClusterName: multicluster.ClusterLocalName,
+			Namespace:   defaultNamespace,
+		}))
+		Expect(env.Targets).Should(BeEquivalentTo([]string{model.DefaultInitName}))
+		Expect(env.Namespace).Should(BeEquivalentTo(defaultNamespace))
+
+		err = targetService.DeleteTarget(context.TODO(), model.DefaultInitName)
+		Expect(err).Should(BeNil())
+		err = envService.DeleteEnv(context.TODO(), model.DefaultInitName)
+		Expect(err).Should(BeNil())
 	})
 })

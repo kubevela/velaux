@@ -31,11 +31,11 @@ func init() {
 	RegisterModel(&PermissionTemplate{})
 }
 
-// DefaultAdminUserName default admin user name
-const DefaultAdminUserName = "admin"
-
 // DefaultAdminUserAlias default admin user alias
 const DefaultAdminUserAlias = "Administrator"
+
+// RoleAdmin admin role
+const RoleAdmin = "admin"
 
 // User is the model of user
 type User struct {
@@ -79,6 +79,16 @@ func (u *User) Index() map[string]interface{} {
 		index["dexSub"] = u.DexSub
 	}
 	return index
+}
+
+// IsAdmin return if the user have admin role
+func (u *User) IsAdmin() bool {
+	for _, role := range u.UserRoles {
+		if role == RoleAdmin {
+			return true
+		}
+	}
+	return false
 }
 
 // ProjectUser is the model of user in project

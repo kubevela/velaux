@@ -43,16 +43,7 @@ import (
 
 var appName = "app-workflow"
 var _ = Describe("Test workflow service functions", func() {
-	var (
-		workflowService *workflowServiceImpl
-		appService      *applicationServiceImpl
-		projectService  *projectServiceImpl
-		envService      *envServiceImpl
-		envBinding      *envBindingServiceImpl
-		targetService   *targetServiceImpl
-		testProject     = "workflow-project"
-		ds              datastore.DataStore
-	)
+	var testProject = "workflow-project"
 
 	BeforeEach(func() {
 		var err error
@@ -63,7 +54,7 @@ var _ = Describe("Test workflow service functions", func() {
 		projectService = &projectServiceImpl{Store: ds, RbacService: rbacService, K8sClient: k8sClient}
 		envService = &envServiceImpl{Store: ds, KubeClient: k8sClient, ProjectService: projectService}
 		targetService = &targetServiceImpl{Store: ds, K8sClient: k8sClient}
-		envBinding = &envBindingServiceImpl{
+		envBindingService = &envBindingServiceImpl{
 			Store:           ds,
 			WorkflowService: workflowService,
 			EnvService:      envService,
@@ -73,13 +64,13 @@ var _ = Describe("Test workflow service functions", func() {
 			KubeClient:        k8sClient,
 			Apply:             apply.NewAPIApplicator(k8sClient),
 			EnvService:        envService,
-			EnvBindingService: envBinding,
+			EnvBindingService: envBindingService,
 		}
 		appService = &applicationServiceImpl{Store: ds, KubeClient: k8sClient,
 			Apply:             apply.NewAPIApplicator(k8sClient),
 			ProjectService:    projectService,
 			EnvService:        envService,
-			EnvBindingService: envBinding,
+			EnvBindingService: envBindingService,
 			WorkflowService:   workflowService,
 		}
 	})
@@ -392,7 +383,7 @@ var _ = Describe("Test workflow service functions", func() {
 
 		_, err := envService.CreateEnv(context.TODO(), apisv1.CreateEnvRequest{Name: "resume"})
 		Expect(err).Should(BeNil())
-		_, err = envBinding.CreateEnvBinding(context.TODO(), &model.Application{Name: appName}, apisv1.CreateApplicationEnvbindingRequest{EnvBinding: apisv1.EnvBinding{Name: "resume"}})
+		_, err = envBindingService.CreateEnvBinding(context.TODO(), &model.Application{Name: appName}, apisv1.CreateApplicationEnvbindingRequest{EnvBinding: apisv1.EnvBinding{Name: "resume"}})
 		Expect(err).Should(BeNil())
 		ResumeWorkflow := "resume-workflow"
 		req := apisv1.CreateWorkflowRequest{
@@ -439,7 +430,7 @@ var _ = Describe("Test workflow service functions", func() {
 
 		_, err := envService.CreateEnv(context.TODO(), apisv1.CreateEnvRequest{Name: "terminate"})
 		Expect(err).Should(BeNil())
-		_, err = envBinding.CreateEnvBinding(context.TODO(), &model.Application{Name: appName}, apisv1.CreateApplicationEnvbindingRequest{EnvBinding: apisv1.EnvBinding{Name: "terminate"}})
+		_, err = envBindingService.CreateEnvBinding(context.TODO(), &model.Application{Name: appName}, apisv1.CreateApplicationEnvbindingRequest{EnvBinding: apisv1.EnvBinding{Name: "terminate"}})
 		Expect(err).Should(BeNil())
 		workflowName := "terminate-workflow"
 		req := apisv1.CreateWorkflowRequest{
@@ -484,7 +475,7 @@ var _ = Describe("Test workflow service functions", func() {
 		ctx := context.TODO()
 		_, err := envService.CreateEnv(context.TODO(), apisv1.CreateEnvRequest{Name: "rollback"})
 		Expect(err).Should(BeNil())
-		_, err = envBinding.CreateEnvBinding(context.TODO(), &model.Application{Name: appName}, apisv1.CreateApplicationEnvbindingRequest{EnvBinding: apisv1.EnvBinding{Name: "rollback"}})
+		_, err = envBindingService.CreateEnvBinding(context.TODO(), &model.Application{Name: appName}, apisv1.CreateApplicationEnvbindingRequest{EnvBinding: apisv1.EnvBinding{Name: "rollback"}})
 		Expect(err).Should(BeNil())
 		workflowName := "rollback-workflow"
 		req := apisv1.CreateWorkflowRequest{

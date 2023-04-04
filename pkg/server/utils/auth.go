@@ -19,15 +19,16 @@ package utils
 import (
 	"context"
 
+	"github.com/kubevela/velaux/pkg/server/domain/model"
+
 	"github.com/emicklei/go-restful/v3"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/endpoints/request"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/pkg/auth"
-	"github.com/oam-dev/kubevela/pkg/features"
 
-	"github.com/kubevela/velaux/pkg/server/domain/model"
+	"github.com/kubevela/velaux/pkg/features"
 )
 
 // KubeVelaProjectGroupPrefix the prefix kubevela project
@@ -59,17 +60,23 @@ func ContextWithUserInfo(ctx context.Context) context.Context {
 	} else {
 		userInfo.Groups = []string{UXDefaultGroup}
 	}
-	if userInfo.Name == model.DefaultAdminUserName && features.APIServerFeatureGate.Enabled(features.APIServerEnableAdminImpersonation) {
-		userInfo.Groups = []string{UXDefaultGroup}
+	userRole, ok := UserRoleFrom(ctx)
+	if ok && features.APIServerFeatureGate.Enabled(features.APIServerEnableAdminImpersonation) {
+		for _, role := range userRole {
+			if role == model.RoleAdmin {
+				userInfo.Groups = []string{UXDefaultGroup}
+			}
+		}
 	}
 	return request.WithUser(ctx, userInfo)
 }
 
 // SetUsernameAndProjectInRequestContext .
-func SetUsernameAndProjectInRequestContext(req *restful.Request, userName string, projectName string) {
+func SetUsernameAndProjectInRequestContext(req *restful.Request, userName string, projectName string, userRole []string) {
 	ctx := req.Request.Context()
 	ctx = WithUsername(ctx, userName)
 	ctx = WithProject(ctx, projectName)
+	ctx = WithUserRole(ctx, userRole)
 	req.Request = req.Request.WithContext(ctx)
 }
 

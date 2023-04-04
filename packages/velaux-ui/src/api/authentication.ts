@@ -1,11 +1,13 @@
 import {
-  authenticationLogin,
+  authenticationAdminConfigured,
   authenticationDexConfig,
-  authenticationSystemInfo,
+  authenticationInitAdmin,
+  authenticationLogin,
   authenticationLoginType,
+  authenticationSystemInfo,
   authenticationUserInfo,
 } from './productionLink';
-import { post, get, put } from './request';
+import { get, post, put } from './request';
 
 export function loginSSO(params: { code: string }) {
   const url = authenticationLogin;
@@ -35,4 +37,14 @@ export function updateSystemInfo(params: { enableCollection: boolean; loginType:
 export function getLoginUserInfo() {
   const url = authenticationUserInfo;
   return get(url, {}).then((res) => res);
+}
+
+export function isAdminConfigured() {
+  const url = authenticationAdminConfigured
+  return get(url, {}).then((res) => res);
+}
+
+export function initAdmin(params: { name: string; password: string; email: string }) {
+  const url = authenticationInitAdmin
+  return put(url, params).then((res) => res);
 }
