@@ -21,7 +21,7 @@
   "backend": true,
   "proxy": true,
   "backendType": "kube-service",
-  "serviceDiscover": {
+  "backendService": {
     "name": "test"
   },
   "dependencies": {

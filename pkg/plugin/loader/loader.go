@@ -49,8 +49,8 @@ var (
 	// ErrInvalidBackendTypeNoPermission -
 	ErrInvalidBackendTypeNoPermission = errors.New("the backend type is invalid in plugin.json, the kubePermissions field is required if the type is kube-api")
 
-	// ErrInvalidBackendTypeNoServiceDiscover -
-	ErrInvalidBackendTypeNoServiceDiscover = errors.New("the backend type is invalid in plugin.json, the serviceDiscover field is required if the type is kube-service")
+	// ErrInvalidBackendTypeNoBackendService -
+	ErrInvalidBackendTypeNoBackendService = errors.New("the backend type is invalid in plugin.json, the backendService field is required if the type is kube-service")
 
 	// ErrInvalidBackendAuth -
 	ErrInvalidBackendAuth = errors.New("backend auth only support the basic")
@@ -253,8 +253,8 @@ func validatePluginJSON(data types.JSONData) error {
 		return ErrInvalidBackendTypeNoPermission
 	}
 
-	if data.BackendType == types.KubeService && (data.ServiceDiscover == nil || data.ServiceDiscover.Name == "") {
-		return ErrInvalidBackendTypeNoServiceDiscover
+	if data.BackendType == types.KubeService && (data.BackendService == nil || data.BackendService.Name == "") {
+		return ErrInvalidBackendTypeNoBackendService
 	}
 
 	if data.AuthType != "" && data.AuthType == types.Basic {

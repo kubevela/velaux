@@ -350,7 +350,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     </Form.Item>
                   </Col>
                   <Col span={selectType === 'Gitlab' ? 4 : 5} style={{ padding: '8px' }}>
-                    <Form.Item label={<Translation>Token</Translation>} help="Github Personal access token">
+                    <Form.Item label={<Translation>Token</Translation>} help="Github personal access token">
                       <Input
                         {...init('token', {
                           rules: [

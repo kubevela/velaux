@@ -93,13 +93,13 @@ export const CanarySetting: React.FunctionComponent<Props> = (props: Props) => {
       onClose={props.onCancel}
       onOk={onSubmit}
       footerActions={canSetting ? ['ok', 'cancel'] : ['cancel']}
-      title={i18n.t('Canary Deploy Setting').toString()}
+      title={i18n.t('Canary Rollout Setting').toString()}
       visible
       width="600px"
     >
       <If condition={!canaryDeployDefinition}>
         <Message type="warning">
-          {i18n.t("The default canary is powered by Kruise Rollout, let's enable the Kruise Rollout addon first.")}
+          {i18n.t("The default canary rollout is powered by kruise-rollout addon, let's enable it first.")}
         </Message>
       </If>
       <If condition={canaryDeployDefinition}>
@@ -152,7 +152,7 @@ export const CanarySetting: React.FunctionComponent<Props> = (props: Props) => {
             </Form>
           </div>
         )}
-        {!canSetting && <Message type="warning">{i18n.t('There is no default deploy step.')}</Message>}
+        {!canSetting && <Message type="warning">{i18n.t('There is no deploy steps exist.')}</Message>}
       </If>
     </Dialog>
   );

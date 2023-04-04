@@ -95,10 +95,10 @@ type JSONData struct {
 	// For the kube auth type, define the max scope permission for this plugin.
 	KubePermissions []rbacv1.PolicyRule `json:"kubePermissions,omitempty"`
 	// For the KubeService backend type
-	ServiceDiscover *KubernetesService `json:"serviceDiscover"`
+	BackendService *KubernetesService `json:"backendService"`
 	// Routes define the route to proxy the backend server.
-	Routes      []*Route    `json:"routes,omitempty"`
-	Requirement Requirement `json:"requirement,omitempty"`
+	Routes      []*Route     `json:"routes,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 }
 
 // Includes means the menus that this plugin include.

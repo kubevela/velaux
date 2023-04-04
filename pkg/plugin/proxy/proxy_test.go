@@ -69,7 +69,7 @@ var _ = Describe("Test proxy", func() {
 			JSONData: types.JSONData{
 				ID:          "node-manage",
 				BackendType: types.KubeService,
-				ServiceDiscover: &types.KubernetesService{
+				BackendService: &types.KubernetesService{
 					Name: "test",
 				},
 				AuthType: types.Basic,

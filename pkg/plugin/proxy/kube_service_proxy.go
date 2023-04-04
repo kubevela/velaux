@@ -53,8 +53,8 @@ func NewKubeServiceProxy(kubeClient client.Client, plugin *types.Plugin) Backend
 func (k *kubeServiceProxy) Handler(req *http.Request, res http.ResponseWriter) {
 	if k.cacheTime.IsZero() || time.Now().After(k.cacheTime) {
 		var service corev1.Service
-		namespace := k.plugin.ServiceDiscover.Namespace
-		name := k.plugin.ServiceDiscover.Name
+		namespace := k.plugin.BackendService.Namespace
+		name := k.plugin.BackendService.Name
 		if namespace == "" {
 			namespace = kubevelatypes.DefaultKubeVelaNS
 		}
@@ -67,12 +67,12 @@ func (k *kubeServiceProxy) Handler(req *http.Request, res http.ResponseWriter) {
 			bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
 		}
 		matchPort := service.Spec.Ports[0].Port
-		if k.plugin.ServiceDiscover.Port != 0 {
+		if k.plugin.BackendService.Port != 0 {
 			havePort := false
 			for _, port := range service.Spec.Ports {
-				if k.plugin.ServiceDiscover.Port == port.Port {
+				if k.plugin.BackendService.Port == port.Port {
 					havePort = true
-					matchPort = k.plugin.ServiceDiscover.Port
+					matchPort = k.plugin.BackendService.Port
 					break
 				}
 			}
