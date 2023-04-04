@@ -19,7 +19,9 @@ package sync
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"sync"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -39,20 +41,35 @@ import (
 )
 
 var _ = Describe("Test CR convert to ux", func() {
+	var (
+		ds          datastore.DataStore
+		cr2ux       *CR2UX
+		userService service.UserService
+		dbNamespace string
+		err         error
+	)
+
 	BeforeEach(func() {
+		By("Preparing database")
+		dbNamespace = "test-sync-ns-" + strconv.FormatInt(time.Now().UnixNano(), 10)
+		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: dbNamespace})
+		Expect(ds).ToNot(BeNil())
+		Expect(err).Should(BeNil())
+
+		By("Preparing cr2ux")
+		cr2ux = newCR2UX(ds)
+		Expect(cr2ux).ShouldNot(BeNil())
+		userService = cr2ux.userService
+
+		ok, err := service.InitTestAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
 	})
 
 	It("Test get app with occupied app", func() {
-
-		By("Preparing database")
-		dbNamespace := "get-app-db-ns1-test"
-
 		apName1 := "example"
 		appNS1 := "get-app-test-ns1"
 		appNS2 := "get-app-test-ns2"
-		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: dbNamespace})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
 		var ns = corev1.Namespace{}
 		ns.Name = dbNamespace
 		err = k8sClient.Create(context.TODO(), &ns)
@@ -64,7 +81,6 @@ var _ = Describe("Test CR convert to ux", func() {
 
 		By("no app created, test the name")
 
-		cr2ux := newCR2UX(ds)
 		gotApp, gotAppName, err := cr2ux.getApp(context.Background(), apName1, appNS1)
 		Expect(gotAppName).Should(BeEquivalentTo(apName1))
 		Expect(gotApp).Should(BeNil())
@@ -95,14 +111,9 @@ var _ = Describe("Test CR convert to ux", func() {
 
 	It("Test app updated and delete app", func() {
 		ctx := context.Background()
-		By("Preparing database")
-		dbNamespace := "update-app-db-ns1-test"
-
 		apName1 := "example"
 		appNS1 := "update-app-test-ns1"
-		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: dbNamespace})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
+
 		var ns = corev1.Namespace{}
 		ns.Name = dbNamespace
 		err = k8sClient.Create(context.TODO(), &ns)
@@ -111,8 +122,6 @@ var _ = Describe("Test CR convert to ux", func() {
 		ns.ResourceVersion = ""
 		err = k8sClient.Create(context.TODO(), &ns)
 		Expect(err).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
-
-		cr2ux := newCR2UX(ds)
 
 		By("create test app1 and check the syncing results")
 		app1 := &v1beta1.Application{}
@@ -158,17 +167,11 @@ var _ = Describe("Test CR convert to ux", func() {
 	})
 
 	It("Test exist env", func() {
-		dbNamespace := "update-app-db-ns1-test"
-		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: dbNamespace})
-		Expect(err).Should(BeNil())
-
-		cr2ux := newCR2UX(ds)
-
 		projectName := "project-e"
 
 		_, err = cr2ux.projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{
 			Name:  projectName,
-			Owner: "admin",
+			Owner: service.FakeAdminName,
 		})
 		Expect(err).Should(BeNil())
 
@@ -220,17 +223,11 @@ var _ = Describe("Test CR convert to ux", func() {
 	})
 
 	It("Test to sync the project which existed env belongs", func() {
-		dbNamespace := "update-app-db-ns1-test"
-		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: dbNamespace})
-		Expect(err).Should(BeNil())
-
-		cr2ux := newCR2UX(ds)
-
 		projectName := "project-test"
 
 		_, err = cr2ux.projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{
 			Name:  projectName,
-			Owner: "admin",
+			Owner: service.FakeAdminName,
 		})
 		Expect(err).Should(BeNil())
 
@@ -269,13 +266,12 @@ func newCR2UX(ds datastore.DataStore) *CR2UX {
 	envService := service.NewTestEnvService(ds, k8sClient)
 	userService := service.NewTestUserService(ds, k8sClient)
 	workflowService := service.NewTestWorkflowService(ds, k8sClient)
-	err := userService.Init(context.TODO())
-	Expect(err).Should(BeNil())
 	return &CR2UX{
 		ds:                 ds,
 		cli:                k8sClient,
 		cache:              sync.Map{},
 		projectService:     projectService,
+		userService:        userService,
 		targetService:      targetService,
 		envService:         envService,
 		applicationService: applicationService,

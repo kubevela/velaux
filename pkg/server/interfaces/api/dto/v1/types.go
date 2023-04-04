@@ -1536,6 +1536,23 @@ type LoginUserInfoResponse struct {
 	ProjectPermissions  map[string][]PermissionBase `json:"projectPermissions"`
 }
 
+// AdminConfiguredResponse the response body of check admin configured
+type AdminConfiguredResponse struct {
+	Configured bool `json:"configured"`
+}
+
+// InitAdminRequest the request body of init admin
+type InitAdminRequest struct {
+	Name     string `json:"name" validate:"checkname"`
+	Password string `json:"password" validate:"checkpassword"`
+	Email    string `json:"email" validate:"checkemail"`
+}
+
+// InitAdminResponse the response body of init admin
+type InitAdminResponse struct {
+	Success bool `json:"success"`
+}
+
 // ChartRepoResponse the response body of  chart repo
 type ChartRepoResponse struct {
 	URL        string `json:"url"`

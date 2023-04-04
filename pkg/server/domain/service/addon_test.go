@@ -34,8 +34,6 @@ import (
 )
 
 var _ = Describe("addon service test", func() {
-	var ctx context.Context
-
 	BeforeEach(func() {
 		ctx = context.Background()
 		Expect(k8sClient.Create(ctx, &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: types.DefaultKubeVelaNS}})).Should(SatisfyAny(BeNil(), util.AlreadyExistMatcher{}))

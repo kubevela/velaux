@@ -35,25 +35,22 @@ import (
 	"github.com/oam-dev/kubevela/pkg/oam"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 var _ = Describe("Test env service functions", func() {
-	var (
-		envService *envServiceImpl
-		ds         datastore.DataStore
-	)
+
 	BeforeEach(func() {
-		var err error
-		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "env-test-kubevela"})
-		Expect(ds).ToNot(BeNil())
-		Expect(err).Should(BeNil())
-		rbacService := &rbacServiceImpl{Store: ds}
-		projectService := &projectServiceImpl{Store: ds, K8sClient: k8sClient, RbacService: rbacService}
-		envService = &envServiceImpl{KubeClient: k8sClient, Store: ds, ProjectService: projectService}
+		InitTestEnv("env-test-kubevela")
 	})
+
+	It("Init the platform", func() {
+		ok, err := InitTestAdmin(userService)
+		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
+	})
+
 	It("Test Create/Get/Delete Env function", func() {
 		// create target
 		err := ds.Add(context.TODO(), &model.Target{Name: "env-test"})
@@ -156,7 +153,7 @@ var _ = Describe("Test env service functions", func() {
 		Expect(err).Should(BeNil())
 
 		By("Test ListEnvs function")
-		_, err = envService.ListEnvs(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "admin"), 1, 1, apisv1.ListEnvOptions{})
+		_, err = envService.ListEnvs(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, FakeAdminName), 1, 1, apisv1.ListEnvOptions{})
 		Expect(err).Should(BeNil())
 	})
 

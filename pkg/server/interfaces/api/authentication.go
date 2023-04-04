@@ -83,6 +83,22 @@ func (c *authentication) GetWebServiceRoute() *restful.WebService {
 		Returns(200, "", apis.LoginUserInfoResponse{}).
 		Returns(400, "", bcode.Bcode{}).
 		Writes(apis.LoginUserInfoResponse{}))
+
+	ws.Route(ws.GET("/admin_configured").To(c.adminConfigured).
+		Doc("check admin is configured").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "", apis.AdminConfiguredResponse{}).
+		Returns(400, "", bcode.Bcode{}).
+		Writes(apis.AdminConfiguredResponse{}))
+
+	ws.Route(ws.PUT("/init_admin").To(c.configureAdmin).
+		Doc("initialize admin").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(apis.InitAdminRequest{}).
+		Returns(200, "", apis.InitAdminResponse{}).
+		Returns(400, "", bcode.Bcode{}).
+		Writes(apis.InitAdminResponse{}))
+
 	return ws
 }
 
@@ -183,6 +199,40 @@ func (c *authentication) getLoginUserInfo(req *restful.Request, res *restful.Res
 		return
 	}
 	if err := res.WriteEntity(info); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *authentication) adminConfigured(req *restful.Request, res *restful.Response) {
+	info, err := c.UserService.AdminConfigured(req.Request.Context())
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(info); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *authentication) configureAdmin(req *restful.Request, res *restful.Response) {
+	// check if admin is configured
+	var reqBody apis.InitAdminRequest
+	if err := req.ReadEntity(&reqBody); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := validate.Struct(&reqBody); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	resp, err := c.UserService.InitAdmin(req.Request.Context(), reqBody)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err = res.WriteEntity(resp); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}

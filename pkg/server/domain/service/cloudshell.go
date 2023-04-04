@@ -26,6 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
+
 	"github.com/cloudtty/cloudtty/pkg/apis/cloudshell/v1alpha1"
 	"github.com/ghodss/yaml"
 	corev1 "k8s.io/api/core/v1"
@@ -261,7 +263,7 @@ func (c *cloudShellServiceImpl) prepareKubeConfig(ctx context.Context) error {
 	}
 	groups = append(groups, utils.TemplateReaderGroup)
 
-	if pkgutils.StringsContain(user.UserRoles, "admin") {
+	if pkgutils.StringsContain(user.UserRoles, model.RoleAdmin) {
 		groups = append(groups, utils.KubeVelaAdminGroupPrefix+"admin")
 	}
 
@@ -418,4 +420,18 @@ func (c *cloudShellServiceImpl) managePrivilegesForProject(ctx context.Context, 
 	}
 	klog.Infof("GrantPrivileges: %s", writer.String())
 	return groupName, nil
+}
+
+// NewTestCloudShellService returns a test cloudshell service for testing
+func NewTestCloudShellService(ds datastore.DataStore, c client.Client, cfg *rest.Config) CloudShellService {
+	return &cloudShellServiceImpl{
+		KubeClient:     c,
+		KubeConfig:     cfg,
+		UserService:    NewTestUserService(ds, c),
+		RBACService:    &rbacServiceImpl{Store: ds, KubeClient: c},
+		ProjectService: NewTestProjectService(ds, c),
+		TargetService:  NewTestTargetService(ds, c),
+		EnvService:     NewTestEnvService(ds, c),
+	}
+
 }
