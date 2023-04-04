@@ -5,23 +5,53 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: read
+
 jobs:
+  bot:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
+        with:
+          repository: "oam-dev/kubevela-github-actions"
+          path: ./actions
+          ref: v0.4.2
+      - name: Setup Node.js
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+        with:
+          node-version: '14'
+          cache: 'npm'
+          cache-dependency-path: ./actions/package-lock.json
+      - name: Install Dependencies
+        run: npm ci --production --prefix ./actions
+      - name: Run Commands
+        uses: ./actions/commands
+        with:
+          token: ${{secrets.VELA_BOT_TOKEN}}
+          configPath: issue-commands
+
   backport:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     if: github.event.issue.pull_request && contains(github.event.comment.body, '/backport')
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
       - name: Extract Command
         id: command
-        uses: xt0rted/slash-command-action@v1
+        uses: xt0rted/slash-command-action@bf51f8f5f4ea3d58abc7eca58f77104182b23e88
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.VELA_BOT_TOKEN }}
           command: backport
           reaction: "true"
           reaction-type: "eyes"
           allow-edits: "false"
           permission-level: read
       - name: Handle Command
-        uses: actions/github-script@v4
+        uses: actions/github-script@98814c53be79b1d30f795b907e553d8679345975
         env:
           VERSION: ${{ steps.command.outputs.command-arguments }}
         with:
@@ -33,7 +63,7 @@ jobs:
               label = "backport " + version
             }
             // Add our backport label.
-            github.issues.addLabels({
+            github.rest.issues.addLabels({
               // Every pull request is an issue, but not every issue is a pull request.
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -42,11 +72,11 @@ jobs:
             })
             console.log("Added '" + label + "' label.")
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
         with:
           fetch-depth: 0
       - name: Open Backport PR
-        uses: zeebe-io/backport-action@v0.0.6
+        uses: zeebe-io/backport-action@a759fd2d7d3314c9bb57d97a0350a12e878d3c7a
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_workspace: ${{ github.workspace }}
