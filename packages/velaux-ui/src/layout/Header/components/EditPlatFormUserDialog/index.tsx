@@ -89,6 +89,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
           style={{ width: '600px' }}
           onOk={this.onInitAdmin}
           locale={locale().Dialog}
+          footerActions={['ok']}
           okProps={
             {
               loading: isLoading,
