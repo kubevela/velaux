@@ -724,6 +724,7 @@ func pipelineStep2WorkflowStep(step model.WorkflowStep) v1alpha1.WorkflowStep {
 			Outputs:    step.Outputs,
 			Properties: step.Properties.RawExtension(),
 		},
+		Mode:     step.Mode,
 		SubSteps: make([]v1alpha1.WorkflowStepBase, 0),
 	}
 	for _, subStep := range step.SubSteps {

@@ -999,6 +999,7 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 			workflowStep := workflowv1alpha1.WorkflowStep{
 				WorkflowStepBase: convertWorkflowModel2WorkflowSpec(step.WorkflowStepBase),
 			}
+			workflowStep.Mode = step.Mode
 			for _, subStep := range step.SubSteps {
 				workflowStep.SubSteps = append(workflowStep.SubSteps, convertWorkflowModel2WorkflowSpec(subStep))
 			}

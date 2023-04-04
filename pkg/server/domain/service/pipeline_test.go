@@ -76,6 +76,7 @@ var _ = Describe("Test pipeline service functions", func() {
 						Properties: &props,
 					},
 				},
+				Mode: "StepByStep",
 				WorkflowStepBase: model.WorkflowStepBase{
 					Name: "step-group",
 					Type: "step-group",
@@ -93,6 +94,7 @@ var _ = Describe("Test pipeline service functions", func() {
 		Expect(err).Should(BeNil())
 		Expect(pipeline.Name).Should(Equal(pipelineName))
 		Expect(pipeline.Spec.Steps[0].Name).Should(Equal("step-group"))
+		Expect(string(pipeline.Spec.Steps[0].Mode)).Should(Equal("StepByStep"))
 	})
 
 	It("list pipeline", func() {
