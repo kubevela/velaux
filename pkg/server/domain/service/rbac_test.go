@@ -247,7 +247,7 @@ var _ = Describe("Test rbac service", func() {
 		Expect(ResourceMaps["plugin"].subResources["cluster"].subResources["node"].pathName).Should(Equal("nodeName"))
 		var res = &httptest.ResponseRecorder{}
 		var req = &http.Request{Method: "GET", URL: &url.URL{Scheme: "http", Path: "/proxy/plugins/p1/api/v1/clusters/local/nodes/n1", Host: "127.0.0.1"}}
-		req = req.WithContext(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "admin"))
+		req = req.WithContext(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, FakeAdminName))
 		Expect(checker(req, res)).Should(Equal(true))
 
 		req = req.WithContext(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "test"))
