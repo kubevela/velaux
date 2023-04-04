@@ -89,7 +89,11 @@ class EditPlatFormUserDialog extends Component<Props, State> {
           style={{ width: '600px' }}
           onOk={this.onInitAdmin}
           locale={locale().Dialog}
-          footerActions={['ok']}
+          okProps={
+            {
+              loading: isLoading,
+            }
+          }
         >
           <Form loading={isLoading} {...formItemLayout} field={this.field}>
             <Row>
@@ -116,7 +120,6 @@ class EditPlatFormUserDialog extends Component<Props, State> {
                 </FormItem>
               </Col>
             </Row>
-
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Password</Translation>} required>
