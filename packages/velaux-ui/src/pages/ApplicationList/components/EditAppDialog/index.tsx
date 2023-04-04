@@ -26,7 +26,7 @@ class EditAppDialog extends React.Component<Props> {
       if (error) {
         return;
       }
-      const { description, alias, labels } = values;
+      const { description, alias, labels, annotations } = values;
       const { editItem } = this.props;
       if (editItem) {
         const params = {
@@ -34,6 +34,7 @@ class EditAppDialog extends React.Component<Props> {
           alias,
           description,
           labels,
+          annotations,
         };
 
         updateApplication(params).then((res) => {
@@ -119,6 +120,18 @@ class EditAppDialog extends React.Component<Props> {
                   <KV
                     {...init('labels', {
                       initValue: editItem?.labels,
+                    })}
+                    disabled={false}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <FormItem label={<Translation>Annotations</Translation>}>
+                  <KV
+                    {...init('annotations', {
+                      initValue: editItem?.annotations,
                     })}
                     disabled={false}
                   />

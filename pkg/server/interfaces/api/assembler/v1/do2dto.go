@@ -76,6 +76,7 @@ func ConvertAppModelToBase(app *model.Application, projects []*apisv1.ProjectBas
 		Description: app.Description,
 		Icon:        app.Icon,
 		Labels:      app.Labels,
+		Annotations: app.Annotations,
 		Project:     &apisv1.ProjectBase{Name: app.Project},
 		ReadOnly:    app.IsReadOnly(),
 	}

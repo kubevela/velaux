@@ -32,7 +32,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
-	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
@@ -561,6 +560,7 @@ func (c *applicationServiceImpl) UpdateApplication(ctx context.Context, app *mod
 	}
 	app.Alias = req.Alias
 	app.Description = req.Description
+	app.Annotations = req.Annotations
 
 	// Some built-in labels can not be updated
 	if app.Labels != nil && req.Labels != nil {
