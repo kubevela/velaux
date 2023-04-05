@@ -1,18 +1,19 @@
 import { Button } from '@alifd/next';
 import React from 'react';
 
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 import './index.less';
 import { If } from '../If';
-type Props = {
+export interface Props {
   title: string;
   subTitle?: string;
   extButtons?: [React.ReactNode];
   addButtonTitle?: string;
   addButtonClick?: () => void;
   buttonSize?: 'small' | 'medium' | 'large';
-};
-const ListTitle = function (props: Props) {
+}
+
+export const ListTitle = function (props: Props) {
   const { title, subTitle, extButtons, addButtonTitle, addButtonClick, buttonSize } = props;
 
   return (
@@ -43,5 +44,3 @@ const ListTitle = function (props: Props) {
     </div>
   );
 };
-
-export default ListTitle;

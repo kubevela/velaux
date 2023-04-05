@@ -5,11 +5,11 @@ import React, { Component, Fragment } from 'react';
 import { getConfigs, deleteConfig } from '../../api/config';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { ConfigTemplate, Config } from '../../interface/configs';
 import type { LoginUserInfo } from '../../interface/user';
 import { momentDate } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
 import './index.less';
 

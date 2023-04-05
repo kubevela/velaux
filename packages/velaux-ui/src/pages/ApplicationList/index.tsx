@@ -5,9 +5,9 @@ import React, { Component } from 'react';
 import { deleteApplication } from '../../api/application';
 import { getComponentDefinitions } from '../../api/definitions';
 import { If } from '../../components/If';
-import Title from '../../components/ListTitle';
+import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { ApplicationBase } from '../../interface/application';
 import type { LoginUserInfo } from '../../interface/user';
 
@@ -134,50 +134,43 @@ class Application extends Component<Props, State> {
     let existIndex = -1;
     labelValue.map((key, index) => {
       if (key == label) {
-        existIndex = index
-        return
+        existIndex = index;
+        return;
       }
     });
     if (existIndex == -1) {
-      labelValue.push(label)
+      labelValue.push(label);
     } else {
       labelValue = labelValue.splice(existIndex, existIndex);
     }
     this.setState({
-      labelValue
+      labelValue,
     });
-    this.getApplications({labels: labelValue.join(",")});
+    this.getApplications({ labels: labelValue.join(',') });
   };
 
   render() {
     const { applicationList, targets, dispatch, envs, userInfo } = this.props;
-    const {
-      showAddApplication,
-      componentDefinitions,
-      isLoading,
-      showEditApplication,
-      editItem,
-      labelValue,
-      showMode,
-    } = this.state;
-    let appLabels: string[] = []
+    const { showAddApplication, componentDefinitions, isLoading, showEditApplication, editItem, labelValue, showMode } =
+      this.state;
+    let appLabels: string[] = [];
     applicationList.map((app) => {
-      app.labels && Object.keys(app.labels).map((key: string) => {
-        if (key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
-          if (app.labels) { appLabels.push(key+"="+app.labels[key]) }
-        }
-      })
-    })
+      app.labels &&
+        Object.keys(app.labels).map((key: string) => {
+          if (key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev')) {
+            if (app.labels) {
+              appLabels.push(key + '=' + app.labels[key]);
+            }
+          }
+        });
+    });
     return (
       <div>
-        <Title
+        <ListTitle
           title="Applications"
           subTitle="Deploy and manage all your applications"
           extButtons={[
-            <Permission
-              request={{ resource: 'project:?/application:*', action: 'create' }}
-              project={'?'}
-            >
+            <Permission request={{ resource: 'project:?/application:*', action: 'create' }} project={'?'}>
               <Button
                 type="primary"
                 onClick={() => {
@@ -241,11 +234,7 @@ class Application extends Component<Props, State> {
         </If>
 
         <If condition={showEditApplication && editItem}>
-          <EditAppDialog
-            editItem={editItem}
-            onOK={this.closeEditAppDialog}
-            onClose={this.closeEditAppDialog}
-          />
+          <EditAppDialog editItem={editItem} onOK={this.closeEditAppDialog} onClose={this.closeEditAppDialog} />
         </If>
       </div>
     );

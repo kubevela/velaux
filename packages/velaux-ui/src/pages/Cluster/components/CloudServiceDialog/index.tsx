@@ -4,10 +4,10 @@ import React from 'react';
 import { getCloudClustersList } from '../../../../api/cluster';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import { ACKClusterStatus } from '../../../../utils/common';
 import { handleError } from '../../../../utils/errors';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 type Props = {
   visible: boolean;

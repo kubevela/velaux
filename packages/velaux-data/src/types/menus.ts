@@ -3,7 +3,7 @@ import { ResourceAction } from './permission';
 export interface Workspace {
   name: string;
   icon?: string | React.ReactNode;
-  label: string;
+  label?: string;
   rootRoute: string;
 }
 

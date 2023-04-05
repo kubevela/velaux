@@ -4,8 +4,8 @@ import React, { Component, Fragment } from 'react';
 
 import { getProjectTargetList } from '../../../../api/project';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
-import locale from '../../../../utils/locale';
+import { Translation } from '../../../../components/Translation';
+import { locale } from '../../../../utils/locale';
 import './index.less';
 
 type Props = {
@@ -73,11 +73,7 @@ class Targets extends Component<Props, State> {
         key: 'cluster',
         title: <Translation>Cluster/Namespace</Translation>,
         dataIndex: 'cluster',
-        cell: (
-          v: string,
-          i: number,
-          record: { cluster: { clusterName: string; namespace: string } },
-        ) => {
+        cell: (v: string, i: number, record: { cluster: { clusterName: string; namespace: string } }) => {
           const { cluster = { clusterName: '', namespace: '' } } = record;
           return <span>{`${cluster.clusterName}/${cluster.namespace}`}</span>;
         },

@@ -3,9 +3,9 @@ import React from 'react';
 
 import { createProject } from '../../../../api/project';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 const { Col, Row } = Grid;
 const FormItem = Form.Item;
@@ -65,12 +65,7 @@ class ProjectForm extends React.Component<Props, State> {
     const { showProjectInput } = this.state;
     return (
       <React.Fragment>
-        <FormItem
-          {...formItemLayout}
-          label={<Translation>Project</Translation>}
-          labelTextAlign="left"
-          required={true}
-        >
+        <FormItem {...formItemLayout} label={<Translation>Project</Translation>} labelTextAlign="left" required={true}>
           <If condition={!showProjectInput}>
             <div className="cluster-container">
               <Select
@@ -118,11 +113,7 @@ class ProjectForm extends React.Component<Props, State> {
                     />
                   </Form.Item>
                 </Col>
-                <Button
-                  className="cluster-option-btn"
-                  type="secondary"
-                  onClick={this.createProject}
-                >
+                <Button className="cluster-option-btn" type="secondary" onClick={this.createProject}>
                   <Translation>Submit</Translation>
                 </Button>
                 <Button

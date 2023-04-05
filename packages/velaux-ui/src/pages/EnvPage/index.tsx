@@ -3,12 +3,12 @@ import { connect } from 'dva';
 import React from 'react';
 
 import { If } from '../../components/If';
-import ListTitle from '../../components/ListTitle';
+import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { Env } from '../../interface/env';
 import type { LoginUserInfo } from '../../interface/user';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 import EnvDialog from './components/EnvDialog';
 import TableList from './components/List';
@@ -71,7 +71,7 @@ class EnvList extends React.Component<Props, State> {
       },
       () => {
         this.getEnvList();
-      },
+      }
     );
   };
 
@@ -101,7 +101,7 @@ class EnvList extends React.Component<Props, State> {
       },
       () => {
         this.getEnvList();
-      },
+      }
     );
   };
 

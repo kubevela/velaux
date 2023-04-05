@@ -3,13 +3,13 @@ import { Link } from 'dva/router';
 import React, { Fragment, Component } from 'react';
 
 import { deleteProject } from '../../api/project';
-import Title from '../../components/ListTitle';
+import { ListTitle as Title } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { NameAlias } from '../../interface/env';
 import type { Project } from '../../interface/project';
 import { momentDate } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import { connect } from 'dva';
 import { LoginUserInfo } from '../../interface/user';
 

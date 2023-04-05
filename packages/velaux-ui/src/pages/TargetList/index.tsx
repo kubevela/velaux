@@ -3,12 +3,12 @@ import { connect } from 'dva';
 import React from 'react';
 
 import { If } from '../../components/If';
-import ListTitle from '../../components/ListTitle';
+import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { Cluster } from '../../interface/cluster';
 import type { Target } from '../../interface/target';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 import TableList from './components/List';
 import TargetDialog from './components/TargetDialog';
@@ -84,7 +84,7 @@ class TargetList extends React.Component<Props, State> {
       },
       () => {
         this.getTargetList();
-      },
+      }
     );
   };
 
@@ -114,7 +114,7 @@ class TargetList extends React.Component<Props, State> {
       },
       () => {
         this.getTargetList();
-      },
+      }
     );
   };
 
@@ -127,11 +127,7 @@ class TargetList extends React.Component<Props, State> {
           title="Targets"
           subTitle="Define the targets that applications would deliver to"
           extButtons={[
-            <Permission
-              key={'new-target'}
-              request={{ resource: 'target:*', action: 'create' }}
-              project={''}
-            >
+            <Permission key={'new-target'} request={{ resource: 'target:*', action: 'create' }} project={''}>
               <Button
                 type="primary"
                 onClick={() => {

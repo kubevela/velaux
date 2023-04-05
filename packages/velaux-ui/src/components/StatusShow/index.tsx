@@ -3,10 +3,10 @@ import { Link } from 'dva/router';
 import React from 'react';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { ApplicationStatus, Condition } from '../../interface/application';
 import type { Resource } from '../../interface/observation';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import { If } from '../If';
 
 type Props = {

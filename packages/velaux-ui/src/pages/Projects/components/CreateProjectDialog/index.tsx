@@ -4,7 +4,7 @@ import React from 'react';
 import { createProject, updateProject } from '../../../../api/project';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { Project } from '../../../../interface/project';
 import type { User } from '../../../../interface/user';
@@ -142,11 +142,7 @@ class CreateConfig extends React.Component<Props, State> {
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={<Translation>Name</Translation>}
-                  labelTextAlign="left"
-                  required={true}
-                >
+                <FormItem label={<Translation>Name</Translation>} labelTextAlign="left" required={true}>
                   <Input
                     name="name"
                     placeholder={i18n.t('Please enter').toString()}
@@ -209,11 +205,7 @@ class CreateConfig extends React.Component<Props, State> {
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Description</Translation>}>
-                  <Input
-                    name="description"
-                    placeholder={i18n.t('Please enter').toString()}
-                    {...init('description')}
-                  />
+                  <Input name="description" placeholder={i18n.t('Please enter').toString()} {...init('description')} />
                 </FormItem>
               </Col>
             </Row>

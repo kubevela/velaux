@@ -4,11 +4,11 @@ import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
 
 import { deleteTarget } from '../../../../api/target';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import './index.less';
 import type { Project } from '../../../../interface/project';
 import type { Target } from '../../../../interface/target';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 import { Link } from 'dva/router';
 

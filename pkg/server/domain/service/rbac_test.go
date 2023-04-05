@@ -24,10 +24,13 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/julienschmidt/httprouter"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kubevela/velaux/pkg/plugin/router"
+	"github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -166,19 +169,6 @@ var _ = Describe("Test rbac service", func() {
 
 		rbac.CheckPerm("component", "list")(restful.NewRequest(req), res, filter)
 		Expect(res.StatusCode()).Should(Equal(int(bcode.ErrForbidden.HTTPCode)))
-
-		// add list application permission to role
-		// err = Store.Add(context.TODO(), &model.Permission{Project: projectName, Name: "application-list", Resources: []string{"project:*/application:*"}, Actions: []string{"list"}})
-		// Expect(err).Should(BeNil())
-		// _, err = rbac.UpdateRole(context.TODO(), projectName, "application-admin", apisv1.UpdateRoleRequest{
-		// 	Permissions: []string{"application-list", "application-manage"},
-		// })
-		// Expect(err).Should(BeNil())
-
-		// req.Form.Del("project")
-		// pass = false
-		// rbac.CheckPerm("application", "list")(restful.NewRequest(req), res, filter)
-		// Expect(pass).Should(BeTrue())
 	})
 
 	It("Test initDefaultRoleAndUsersForProject", func() {
@@ -210,6 +200,92 @@ var _ = Describe("Test rbac service", func() {
 		Expect(err).Should(BeNil())
 		Expect(base.Alias).Should(BeEquivalentTo("App Management Update"))
 	})
+	It("TestCheckPluginRequestPerm", func() {
+		defer GinkgoRecover()
+
+		// Add the test user
+		err := ds.Add(context.TODO(), &model.Permission{Name: "test", Resources: []string{"plugin:p1/cluster:local/node"}, Actions: []string{"*"}})
+		Expect(err).Should(BeNil())
+		err = ds.Add(context.TODO(), &model.Role{Name: "test", Permissions: []string{"test"}})
+		Expect(err).Should(BeNil())
+		err = ds.Add(context.TODO(), &model.User{Name: "test", UserRoles: []string{"test"}})
+		Expect(err).Should(BeNil())
+
+		// Add the test2 user that not have the permission
+		err = ds.Add(context.TODO(), &model.Permission{Name: "test2", Resources: []string{"plugin:p2/*"}, Actions: []string{"*"}})
+		Expect(err).Should(BeNil())
+		err = ds.Add(context.TODO(), &model.Role{Name: "test2", Permissions: []string{"test2"}})
+		Expect(err).Should(BeNil())
+		err = ds.Add(context.TODO(), &model.User{Name: "test2", UserRoles: []string{"test2"}})
+		Expect(err).Should(BeNil())
+
+		rbacService := rbacServiceImpl{Store: ds}
+		checker := rbacService.CheckPluginRequestPerm(httprouter.Params{
+			{
+				Key:   "clusterName",
+				Value: "local",
+			},
+			{
+				Key:   "nodeName",
+				Value: "n1",
+			},
+			{
+				Key:   router.DefaultPluginResourceKey,
+				Value: "p1",
+			},
+		}, &types.Route{
+			Path: "/api/v1/clusters/:clusterName/nodes/:node",
+			ResourceMap: map[string]string{
+				"cluster": "clusterName",
+				"node":    "nodeName",
+			},
+			Permission: &types.Permission{
+				Resource: "cluster/node",
+				Action:   "detail",
+			},
+		})
+		Expect(ResourceMaps["plugin"].subResources["cluster"].subResources["node"].pathName).Should(Equal("nodeName"))
+		var res = &httptest.ResponseRecorder{}
+		var req = &http.Request{Method: "GET", URL: &url.URL{Scheme: "http", Path: "/proxy/plugins/p1/api/v1/clusters/local/nodes/n1", Host: "127.0.0.1"}}
+		req = req.WithContext(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, FakeAdminName))
+		Expect(checker(req, res)).Should(Equal(true))
+
+		req = req.WithContext(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "test"))
+		Expect(checker(req, res)).Should(Equal(true))
+
+		req = req.WithContext(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "test2"))
+		Expect(checker(req, res)).Should(Equal(false))
+
+		checker = rbacService.CheckPluginRequestPerm(httprouter.Params{
+			{
+				Key:   "clusterName",
+				Value: "local",
+			},
+			{
+				Key:   "pvName",
+				Value: "p1",
+			},
+			{
+				Key:   router.DefaultPluginResourceKey,
+				Value: "p2",
+			},
+		}, &types.Route{
+			Path: "/api/v1/clusters/:clusterName/pv/:pvName",
+			ResourceMap: map[string]string{
+				"cluster": "clusterName",
+				"pv":      "pvName",
+			},
+			Permission: &types.Permission{
+				Resource: "cluster/pv",
+				Action:   "detail",
+			},
+		})
+		res = &httptest.ResponseRecorder{}
+		req = &http.Request{Method: "GET", URL: &url.URL{Scheme: "http", Path: "/proxy/plugins/p1/api/v1/clusters/local/pv/p1", Host: "127.0.0.1"}}
+		req = req.WithContext(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "test2"))
+		Expect(checker(req, res)).Should(Equal(true))
+	})
+
 })
 
 func testPathParameter(name string) string {
@@ -287,4 +363,19 @@ func TestRegisterResourceAction(t *testing.T) {
 	registerResourceAction("role", "list")
 	registerResourceAction("project/role", "list")
 	t.Log(resourceActions)
+}
+
+func TestRegisterPluginResource(t *testing.T) {
+	RegisterPluginResource("cluster/node", map[string]string{
+		"cluster": "clusterName",
+		"node":    "nodeName",
+	})
+	_, err := checkResourcePath("plugin/cluster/node")
+	assert.Equal(t, err, nil)
+	RegisterPluginResource("cluster/pv", map[string]string{
+		"cluster": "clusterName",
+		"pv":      "pvName",
+	})
+	_, err = checkResourcePath("plugin/cluster/pv")
+	assert.Equal(t, err, nil)
 }

@@ -3,10 +3,10 @@ import React, { Component } from 'react';
 
 import { getProjectRoles, getProjectPermissions, deleteProjectRoles } from '../../api/project';
 import { If } from '../../components/If';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { ProjectRoleBase } from '../../interface/project';
 import type { PermissionBase } from '../../interface/user';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 import ProjectMenu from './components/Menu';
 import ProjectPermPoliciesDetail from './components/ProjectPermPoliciesDetail';
@@ -119,15 +119,13 @@ class ProjectRoles extends Component<Props, State> {
         this.setState({
           activeRoleItem: activeRoleItem || { name: '' },
         });
-      },
+      }
     );
   };
 
   findActiveRoleItem = () => {
     const { projectRoles, activeRoleName } = this.state;
-    return (projectRoles || [{ name: '' }]).find(
-      (item: { name: string }) => item.name === activeRoleName,
-    );
+    return (projectRoles || [{ name: '' }]).find((item: { name: string }) => item.name === activeRoleName);
   };
 
   onCreate = (activeRoleName: string) => {
@@ -158,8 +156,7 @@ class ProjectRoles extends Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const { projectName, projectRoles, isAddRole, projectPermissions, isCreateProjectRoles } =
-      this.state;
+    const { projectName, projectRoles, isAddRole, projectPermissions, isCreateProjectRoles } = this.state;
     return (
       <Row className="project-roles-wrapper">
         <Col span="6">

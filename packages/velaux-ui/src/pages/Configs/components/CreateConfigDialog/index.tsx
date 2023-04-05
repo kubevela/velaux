@@ -8,12 +8,12 @@ import { createConfig, detailConfig, detailTemplate, listTemplates, updateConfig
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
 import type { Config, ConfigTemplate, ConfigTemplateDetail, NamespacedName } from '../../../../interface/configs';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 type Props = {
   visible: boolean;

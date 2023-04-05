@@ -10,14 +10,14 @@ import { AiOutlineCode, AiOutlineCopy } from 'react-icons/ai';
 
 import { listApplicationPodsDetails } from '../../../../api/observation';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { AddonBaseStatus } from '../../../../interface/addon';
 import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
 import type { PodBase, Container, Event } from '../../../../interface/observation';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkEnabledAddon } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { quantityToScalar } from '../../../../utils/utils';
 import ContainerLog from '../ContainerLog';
 import { HiOutlineNewspaper } from 'react-icons/hi';

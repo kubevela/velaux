@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { getChartVersions } from '../../api/repository';
 import i18n from '../../i18n';
 import type { ChartVersion, HelmRepo } from '../../interface/repository';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 type Props = {
   value?: any;
@@ -65,7 +65,7 @@ class HelmChartVersionSelect extends Component<Props, State> {
         repoType: helm.repoType,
         chart: helm.chart,
         secretName: repo?.secretName,
-        project: project
+        project: project,
       }).then((re: { versions: ChartVersion[] }) => {
         if (re) {
           this.setState({ versions: re.versions || [], loading: false, helm: helm });

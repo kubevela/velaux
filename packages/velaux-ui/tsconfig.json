@@ -27,7 +27,7 @@
   "include": [
     "src/**/*.ts*",
     "images.d.ts",
-    "types.ts"
+    "src/types.ts"
   ],
   // override for storybook which uses ts-node to compile main.ts / preview.ts files.
   "ts-node": {

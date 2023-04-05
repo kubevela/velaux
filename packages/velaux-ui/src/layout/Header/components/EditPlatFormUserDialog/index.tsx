@@ -1,11 +1,11 @@
 import { Dialog, Field, Form, Grid, Input, Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 import { AiOutlineEye } from 'react-icons/ai';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import { checkName, checkUserPassword } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
-import { initAdmin } from "../../../../api/authentication";
+import { locale } from '../../../../utils/locale';
+import { initAdmin } from '../../../../api/authentication';
 
 type Props = {
   onClose: () => void;
@@ -109,11 +109,7 @@ class EditPlatFormUserDialog extends Component<Props, State> {
                         {
                           required: true,
                           pattern: checkName,
-                          message: (
-                            <Translation>
-                              You must input a valid name
-                            </Translation>
-                          ),
+                          message: <Translation>You must input a valid name</Translation>,
                         },
                       ],
                     })}

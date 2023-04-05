@@ -5,7 +5,7 @@ import './index.less';
 import type { ShowMode } from '../..';
 import type { Env } from '../../../../interface/env';
 import type { Project } from '../../../../interface/project';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import i18n from '../../../../i18n';
 import { AiOutlineSearch } from 'react-icons/ai';
 

@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { getCharts } from '../../api/repository';
 import i18n from '../../i18n';
 import type { HelmRepo } from '../../interface/repository';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 type Props = {
   value?: any;
@@ -56,7 +56,7 @@ class HelmChartSelect extends Component<Props, State> {
       getCharts({ url: helm.url, repoType: helm.repoType, secretName: repo?.secretName, project: project }).then(
         (re: string[]) => {
           this.setState({ charts: re && Array.isArray(re) ? re : [], loading: false, helm: helm });
-        },
+        }
       );
     }
   };

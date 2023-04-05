@@ -14,7 +14,7 @@ import {
 import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type {
   ApplicationCompareResponse,
   ApplicationComponent,
@@ -24,7 +24,7 @@ import type {
 } from '../../../../interface/application';
 import type { Endpoint } from '../../../../interface/observation';
 import type { Target } from '../../../../interface/target';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { getLink } from '../../../../utils/utils';
 
 export type GatewayIP = {

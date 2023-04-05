@@ -7,7 +7,7 @@ import {
   rollbackApplicationWorkflowRecord,
   terminateApplicationWorkflowRecord,
 } from '../../../../api/application';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { WorkflowRecord, WorkflowStepStatus } from '../../../../interface/application';
 import './index.less';
 import i18n from '../../../../i18n';

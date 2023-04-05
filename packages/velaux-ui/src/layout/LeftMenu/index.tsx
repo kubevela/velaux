@@ -3,7 +3,7 @@ import { Link } from 'dva/router';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { locationService } from '../../services/LocationService';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
 import { menuService, LeftMenu } from '../../services/MenuService';

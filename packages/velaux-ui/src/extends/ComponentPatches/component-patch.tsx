@@ -8,10 +8,10 @@ import { AiOutlineDelete } from 'react-icons/ai';
 import { getApplicationComponent } from '../../api/application';
 import { CustomSelect } from '../../components/CustomSelect';
 import { If } from '../../components/If';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type { ApplicationComponent, ApplicationComponentBase, Trait } from '../../interface/application';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 const { Col, Row } = Grid;
 
 type Props = {

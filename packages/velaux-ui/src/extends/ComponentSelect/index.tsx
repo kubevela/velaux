@@ -5,7 +5,7 @@ import React from 'react';
 import { getApplicationComponents } from '../../api/application';
 import i18n from '../../i18n';
 import type { ApplicationComponentBase } from '../../interface/application';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 type Props = {
   value?: string[];
@@ -42,14 +42,12 @@ class ComponentSelect extends React.Component<Props, State> {
       })
         .then((res) => {
           if (res && res.components) {
-            const componentOptions = (res.components || []).map(
-              (item: ApplicationComponentBase) => {
-                return {
-                  label: `${item.name}(${item.alias || '-'})`,
-                  value: item.name,
-                };
-              },
-            );
+            const componentOptions = (res.components || []).map((item: ApplicationComponentBase) => {
+              return {
+                label: `${item.name}(${item.alias || '-'})`,
+                value: item.name,
+              };
+            });
             this.setState({
               componentOptions: componentOptions,
             });

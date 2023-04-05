@@ -2,7 +2,7 @@ import i18n from 'i18next';
 import React from 'react';
 
 import { CustomSelect } from '../../components/CustomSelect';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 type Props = {
   onChange: (value: any) => void;

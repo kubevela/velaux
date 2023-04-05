@@ -4,12 +4,12 @@ import React from 'react';
 import { createRole, updateRole } from '../../../../api/roles';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { RolesBase } from '../../../../interface/roles';
 import type { PermissionBase } from '../../../../interface/user';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { getSelectLabel } from '../../../../utils/utils';
 
 type Props = {
@@ -146,11 +146,7 @@ class RolesDialog extends React.Component<Props, State> {
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={<Translation>Name</Translation>}
-                  labelTextAlign="left"
-                  required={true}
-                >
+                <FormItem label={<Translation>Name</Translation>} labelTextAlign="left" required={true}>
                   <Input
                     name="name"
                     placeholder={i18n.t('Please enter').toString()}

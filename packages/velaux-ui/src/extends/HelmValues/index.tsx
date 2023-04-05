@@ -7,7 +7,7 @@ import React, { Component } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getChartValueFiles } from '../../api/repository';
 import HelmValueShow from '../../components/HelmValueShow';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { UIParam } from '../../interface/application';
 import type { HelmRepo } from '../../interface/repository';
 import KV from '../KV';
@@ -100,7 +100,7 @@ class HelmValues extends Component<Props, State> {
               this.setState({ values: newValues, valueFiles: re, helm: helm, loading: false });
             } catch (err) {}
           }
-        },
+        }
       );
     }
   };

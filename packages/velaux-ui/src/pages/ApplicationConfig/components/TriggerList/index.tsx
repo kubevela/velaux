@@ -7,7 +7,7 @@ import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import Item from '../../../../components/Item';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type {
   ApplicationComponentBase,
   ApplicationComponent,
@@ -16,7 +16,7 @@ import type {
 } from '../../../../interface/application';
 import { momentDate, showAlias } from '../../../../utils/common';
 import './index.less';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { AiOutlineDelete } from 'react-icons/ai';
 
 type Props = {

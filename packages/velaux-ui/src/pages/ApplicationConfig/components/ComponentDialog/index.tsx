@@ -12,7 +12,7 @@ import {
 } from '../../../../api/application';
 import { detailComponentDefinition } from '../../../../api/definitions';
 import DrawerWithFooter from '../../../../components/Drawer';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
 import type {
@@ -23,7 +23,7 @@ import type {
   ApplicationComponentBase,
 } from '../../../../interface/application';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { transComponentDefinitions } from '../../../../utils/utils';
 
 import './index.less';

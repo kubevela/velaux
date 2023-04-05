@@ -2,7 +2,7 @@ import { Dialog } from '@alifd/next';
 
 import i18n from '../i18n';
 
-import locale from './locale';
+import { locale } from './locale';
 
 class ResetLogin {
   private static singleton: ResetLogin;

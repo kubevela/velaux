@@ -3,8 +3,8 @@ import React from 'react';
 
 import { createClusterNamespace } from '../../../../api/cluster';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
-import locale from '../../../../utils/locale';
+import { Translation } from '../../../../components/Translation';
+import { locale } from '../../../../utils/locale';
 
 type Props = {
   cluster?: string;

@@ -3,7 +3,7 @@ import React from 'react';
 import { AiOutlineCloudUpload } from 'react-icons/ai';
 
 import DefinitionCode from '../../../../components/DefinitionCode';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import { checkName } from '../../../../utils/common';
 import NameSpaceForm from '../GeneralConfig/project-form';
