@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import React, { Component } from 'react';
 
 import Empty from '../../components/Empty';
-import Title from '../../components/ListTitle';
+import { ListTitle } from '../../components/ListTitle';
 import type { DefinitionMenuType } from '../../interface/definitions';
 import { getMatchParamObj } from '../../utils/utils';
 
@@ -66,11 +66,9 @@ class DefinitionsLayout extends Component<Props, State> {
     const { activeType } = this.state;
     return (
       <div className="definitions-wrapper">
-        <Title
+        <ListTitle
           title={'Definitions'}
-          subTitle={
-            'This is achieved by implementing its application model as programmable entities'
-          }
+          subTitle={'This is achieved by implementing its application model as programmable entities'}
         />
         <If condition={!activeType}>
           <Empty style={{ marginTop: '40px' }} />

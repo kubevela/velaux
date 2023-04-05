@@ -4,12 +4,12 @@ import React from 'react';
 import { createUser, updateUser } from '../../../../api/users';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { RolesBase } from '../../../../interface/roles';
 import type { User } from '../../../../interface/user';
 import { checkUserPassword, checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { getSelectLabel } from '../../../../utils/utils';
 
 type Props = {

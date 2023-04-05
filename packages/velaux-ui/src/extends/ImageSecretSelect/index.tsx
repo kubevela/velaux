@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { getImageRepos } from '../../api/repository';
 import i18n from '../../i18n';
 import type { ImageRegistry } from '../../interface/repository';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 type Props = {
   value?: any;

@@ -16,7 +16,7 @@ import {
 import Empty from '../../components/Empty';
 import { If } from '../../components/If';
 import PipelineGraph from '../../components/PipelineGraph';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { WorkflowStepStatus } from '../../interface/application';
 import type {
   PipelineDetail,

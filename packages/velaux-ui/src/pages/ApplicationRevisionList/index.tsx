@@ -5,12 +5,8 @@ import type { Dispatch } from 'redux';
 
 import { listRevisions } from '../../api/application';
 import { If } from '../../components/If';
-import type {
-  ApplicationDetail,
-  EnvBinding,
-  ApplicationRevision,
-} from '../../interface/application';
-import locale from '../../utils/locale';
+import type { ApplicationDetail, EnvBinding, ApplicationRevision } from '../../interface/application';
+import { locale } from '../../utils/locale';
 
 import { ShowRevision } from './components/Detail';
 import Header from './components/Header';
@@ -86,11 +82,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
     });
   };
 
-  updateQuery = (updateQuery: {
-    isChangeEnv?: boolean;
-    isChangeStatus?: boolean;
-    value: string;
-  }) => {
+  updateQuery = (updateQuery: { isChangeEnv?: boolean; isChangeStatus?: boolean; value: string }) => {
     const { isChangeEnv, isChangeStatus, value } = updateQuery;
     if (isChangeEnv) {
       this.setState({ envName: value }, () => {
@@ -110,7 +102,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
       },
       () => {
         this.getRevisionList();
-      },
+      }
     );
   };
 
@@ -127,11 +119,7 @@ class ApplicationRevisionList extends React.Component<Props, State> {
         <Header
           envBinding={envbinding}
           statusList={statusList}
-          updateQuery={(params: {
-            isChangeEnv?: boolean;
-            isChangeStatus?: boolean;
-            value: string;
-          }) => {
+          updateQuery={(params: { isChangeEnv?: boolean; isChangeStatus?: boolean; value: string }) => {
             this.updateQuery(params);
           }}
         />

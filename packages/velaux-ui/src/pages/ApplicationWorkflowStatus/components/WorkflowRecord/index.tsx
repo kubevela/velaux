@@ -31,7 +31,7 @@ import {
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import PipelineGraph from '../../../../components/PipelineGraph';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { WorkflowStepBase, WorkflowStepInputs, WorkflowStepOutputs } from '../../../../interface/pipeline';
 import { convertAny, momentDate, timeDiff } from '../../../../utils/common';

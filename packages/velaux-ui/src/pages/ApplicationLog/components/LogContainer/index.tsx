@@ -3,7 +3,7 @@ import Ansi from 'ansi-to-react';
 import React, { Component, Fragment } from 'react';
 
 import { listContainerLog } from '../../../../api/observation';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { ContainerLogResponse, PodBase } from '../../../../interface/observation';
 import { momentDate, momentShortDate } from '../../../../utils/common';
 import { downloadStringFile } from '../../../../utils/utils';

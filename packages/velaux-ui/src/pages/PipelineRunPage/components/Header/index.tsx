@@ -9,11 +9,11 @@ import { TiWarningOutline } from 'react-icons/ti';
 import { resumePipelineRun, runPipeline, stopPipelineRun, terminatePipelineRun } from '../../../../api/pipeline';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { PipelineDetail, PipelineRunBase, PipelineRunStatus } from '../../../../interface/pipeline';
 import { momentDate, timeDiff } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import RunStatusIcon from '../RunStatusIcon';
 import { Breadcrumb } from '../../../../components/Breadcrumb';
 

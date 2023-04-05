@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 
 const Empty = function () {
   return (

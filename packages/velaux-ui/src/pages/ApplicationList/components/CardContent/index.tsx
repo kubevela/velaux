@@ -11,12 +11,12 @@ import appSvg from '../../../../assets/application.svg';
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { ApplicationBase } from '../../../../interface/application';
 import type { Project } from '../../../../interface/project';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { momentDate } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
 const { Column } = Table;
 

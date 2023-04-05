@@ -5,9 +5,9 @@ import React, { Fragment } from 'react';
 import { getEnabledAddons, getAddonsList } from '../../api/addons';
 import { deleteCluster } from '../../api/cluster';
 import { If } from '../../components/If';
-import Title from '../../components/ListTitle';
+import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { Addon } from '../../interface/addon';
 
 import AddClusterDialog from './components/AddClusterDialog/index';
@@ -149,7 +149,7 @@ class Cluster extends React.Component<Props, State> {
     } = this.state;
     return (
       <div>
-        <Title
+        <ListTitle
           title="Clusters"
           subTitle="Setup Kubernetes clusters by adding an existing one or creating a new one via cloud provider"
           extButtons={[

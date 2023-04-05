@@ -9,7 +9,7 @@ import { Breadcrumb } from '../../../../components/Breadcrumb';
 import { deployApplication } from '../../../../api/application';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type {
   ApplicationDetail,
   ApplicationStatus,
@@ -20,7 +20,7 @@ import type {
 } from '../../../../interface/application';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
 import { Dispatch } from 'redux';
 

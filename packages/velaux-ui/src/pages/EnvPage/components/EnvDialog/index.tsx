@@ -1,15 +1,4 @@
-import {
-  Message,
-  Grid,
-  Dialog,
-  Form,
-  Input,
-  Field,
-  Select,
-  Loading,
-  Button,
-  Table,
-} from '@alifd/next';
+import { Message, Grid, Dialog, Form, Input, Field, Select, Loading, Button, Table } from '@alifd/next';
 import React from 'react';
 
 import { getClusterList } from '../../../../api/cluster';
@@ -18,7 +7,7 @@ import { listNamespaces } from '../../../../api/observation';
 import { getProjectTargetList } from '../../../../api/project';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { Cluster } from '../../../../interface/cluster';
 import type { Env } from '../../../../interface/env';
@@ -26,7 +15,7 @@ import type { Project } from '../../../../interface/project';
 import type { Target } from '../../../../interface/target';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
 import TargetDialog from '../../../TargetList/components/TargetDialog';
 
@@ -189,9 +178,7 @@ class EnvDialog extends React.Component<Props, State> {
   convertTarget = () => {
     const { targets } = this.state;
     return (targets || []).map((target: Target) => ({
-      label: `${target.alias || target.name}(${target.cluster?.clusterName}/${
-        target.cluster?.namespace
-      })`,
+      label: `${target.alias || target.name}(${target.cluster?.clusterName}/${target.cluster?.namespace})`,
       value: target.name,
     }));
   };
@@ -231,11 +218,7 @@ class EnvDialog extends React.Component<Props, State> {
     const projectOptions: Array<{ label: string; value: string }> = [];
     (projects || []).map((project) => {
       if (
-        checkPermission(
-          { resource: `project:${project.name}/environment:*`, action: 'create' },
-          project.name,
-          userInfo,
-        )
+        checkPermission({ resource: `project:${project.name}/environment:*`, action: 'create' }, project.name, userInfo)
       ) {
         projectOptions.push({
           label: project.alias ? `${project.alias}(${project.name})` : project.name,
@@ -248,13 +231,7 @@ class EnvDialog extends React.Component<Props, State> {
         <Dialog
           v2
           locale={locale().Dialog}
-          title={
-            isEdit ? (
-              <Translation>Edit Environment</Translation>
-            ) : (
-              <Translation>New Environment</Translation>
-            )
-          }
+          title={isEdit ? <Translation>Edit Environment</Translation> : <Translation>New Environment</Translation>}
           autoFocus={true}
           overflowScroll={true}
           visible={visible}
@@ -284,9 +261,7 @@ class EnvDialog extends React.Component<Props, State> {
                           required: true,
                           pattern: checkName,
                           message: (
-                            <Translation>
-                              Please enter a valid name contains only alphabetical words
-                            </Translation>
+                            <Translation>Please enter a valid name contains only alphabetical words</Translation>
                           ),
                         },
                       ],
@@ -318,9 +293,7 @@ class EnvDialog extends React.Component<Props, State> {
                   <Input
                     name="namespace"
                     disabled={isEdit}
-                    placeholder={i18n
-                      .t('By default, it is the same as the Environment name')
-                      .toString()}
+                    placeholder={i18n.t('By default, it is the same as the Environment name').toString()}
                     {...init('namespace', {
                       rules: [
                         {
@@ -342,9 +315,7 @@ class EnvDialog extends React.Component<Props, State> {
                         {
                           maxLength: 256,
                           message: (
-                            <Translation>
-                              Enter a description that contains less than 256 characters
-                            </Translation>
+                            <Translation>Enter a description that contains less than 256 characters</Translation>
                           ),
                         },
                       ],
@@ -406,11 +377,7 @@ class EnvDialog extends React.Component<Props, State> {
                   project={this.field.getValue('project')}
                 >
                   <Col className="flexright">
-                    <Button
-                      onClick={this.showNewTarget}
-                      type="secondary"
-                      style={{ marginBottom: '16px' }}
-                    >
+                    <Button onClick={this.showNewTarget} type="secondary" style={{ marginBottom: '16px' }}>
                       <Translation>New Target</Translation>
                     </Button>
                   </Col>
@@ -429,14 +396,8 @@ class EnvDialog extends React.Component<Props, State> {
                         return t.name;
                       }}
                     />
-                    <Table.Column
-                      dataIndex={'cluster.clusterName'}
-                      title={i18n.t('Cluster').toString()}
-                    />
-                    <Table.Column
-                      dataIndex={'cluster.namespace'}
-                      title={i18n.t('Namespace').toString()}
-                    />
+                    <Table.Column dataIndex={'cluster.clusterName'} title={i18n.t('Cluster').toString()} />
+                    <Table.Column dataIndex={'cluster.namespace'} title={i18n.t('Namespace').toString()} />
                   </Table>
                 </Col>
               </Row>

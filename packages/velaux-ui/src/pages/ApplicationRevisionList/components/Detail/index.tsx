@@ -7,12 +7,9 @@ import DefinitionCode from '../../../../components/DefinitionCode';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type {
-  ApplicationRevision,
-  ApplicationRevisionDetail,
-} from '../../../../interface/application';
+import type { ApplicationRevision, ApplicationRevisionDetail } from '../../../../interface/application';
 import type { ResourceTreeNode } from '../../../../interface/observation';
 
 type RevisionProps = {

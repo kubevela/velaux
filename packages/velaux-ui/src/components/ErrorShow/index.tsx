@@ -1,5 +1,5 @@
 import React, { ErrorInfo } from 'react';
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 
 interface Props {
   error: Error | null;

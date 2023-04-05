@@ -7,7 +7,7 @@ import { AiOutlineDelete } from 'react-icons/ai';
 import { If } from '../../components/If';
 import i18n from '../../i18n';
 import type { UIParam } from '../../interface/application';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 const { Row, Col } = Grid;
 

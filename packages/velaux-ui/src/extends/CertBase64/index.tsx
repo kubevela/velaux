@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid';
 
 import DefinitionCode from '../../components/DefinitionCode';
 import { If } from '../../components/If';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 type Props = {
   value?: any;
   id: string;

@@ -3,9 +3,9 @@ import { connect } from 'dva';
 import React from 'react';
 
 import { If } from '../../components/If';
-import Title from '../../components/ListTitle';
+import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { Addon, AddonBaseStatus } from '../../interface/addon';
 
 import CardContend from './components/card-conten/index';
@@ -117,20 +117,13 @@ class Addons extends React.Component<Props, State> {
   };
 
   render() {
-    const {
-      addonsList = [],
-      registryList = [],
-      dispatch,
-      loading,
-      addonListMessage,
-      enabledAddons,
-    } = this.props;
+    const { addonsList = [], registryList = [], dispatch, loading, addonListMessage, enabledAddons } = this.props;
 
     const isLoading = loading.models.addons;
     const { showAddonDetail, addonName, showRegistryManage, tagList, selectTags } = this.state;
     return (
       <div>
-        <Title
+        <ListTitle
           title="Addons"
           subTitle="Manages and extends platform capabilities"
           extButtons={[

@@ -9,7 +9,7 @@ import { updateTrait, createTrait, getApplicationComponent } from '../../../../a
 import { detailTraitDefinition, getTraitDefinitions } from '../../../../api/definitions';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
 import type { ApplicationComponent, DefinitionDetail, Trait } from '../../../../interface/application';

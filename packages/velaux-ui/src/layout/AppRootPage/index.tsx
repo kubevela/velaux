@@ -1,6 +1,6 @@
 import { AppPagePlugin } from '@velaux/data';
 import * as React from 'react';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import { locationService } from '../../services/LocationService';
 import { getPluginSrv, importAppPagePlugin } from '../../services/PluginService';
 

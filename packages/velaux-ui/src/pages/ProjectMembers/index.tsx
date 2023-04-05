@@ -4,10 +4,10 @@ import React, { Component, Fragment } from 'react';
 import { getProjectRoles, getProjectUsers, deleteProjectUser } from '../../api/project';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import type { ProjectMember, ProjectRoleBase } from '../../interface/project';
 import { momentDate } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import './index.less';
 
 import MemberDialog from './components/MemberDialog';

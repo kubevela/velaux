@@ -11,7 +11,7 @@ import {
   listApplicationServiceEndpoints,
 } from '../../api/observation';
 import { If } from '../../components/If';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type {
   ApplicationComponent,
@@ -27,7 +27,7 @@ import type { Target } from '../../interface/target';
 import type { LoginUserInfo } from '../../interface/user';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
 import Header from '../ApplicationInstanceList/components/Header';
 

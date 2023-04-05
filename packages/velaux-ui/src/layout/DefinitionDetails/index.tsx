@@ -4,7 +4,7 @@ import { Link } from 'dva/router';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import { Breadcrumb } from '../../components/Breadcrumb';
 import type { DefinitionMenuType } from '../../interface/definitions';
 import type { LoginUserInfo } from '../../interface/user';

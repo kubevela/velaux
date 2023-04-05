@@ -18,6 +18,7 @@ package api
 
 import (
 	"context"
+	"net/http"
 	"strings"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
+	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
@@ -103,40 +105,70 @@ func (c *authentication) GetWebServiceRoute() *restful.WebService {
 }
 
 func authCheckFilter(req *restful.Request, res *restful.Response, chain *restful.FilterChain) {
+	if authTokenCheck(req.Request, res.ResponseWriter) {
+		chain.ProcessFilter(req, res)
+	}
+}
+func authTokenCheck(req *http.Request, res http.ResponseWriter) bool {
 	// support getting the token from the cookie
 	var tokenValue string
-	tokenHeader := req.HeaderParameter("Authorization")
+	tokenHeader := req.Header.Get("Authorization")
 	if tokenHeader != "" {
 		splitted := strings.Split(tokenHeader, " ")
 		if len(splitted) != 2 {
-			bcode.ReturnError(req, res, bcode.ErrNotAuthorized)
-			return
+			bcode.ReturnHTTPError(req, res, bcode.ErrNotAuthorized)
+			return false
 		}
 		tokenValue = splitted[1]
 	}
 	if tokenValue == "" {
-		if strings.HasPrefix(req.Request.URL.Path, "/view") {
-			tokenValue = req.QueryParameter("token")
+		if strings.HasPrefix(req.URL.Path, "/view") {
+			tokenValue = req.URL.Query().Get("token")
 		}
 		if tokenValue == "" {
-			bcode.ReturnError(req, res, bcode.ErrNotAuthorized)
-			return
+			bcode.ReturnHTTPError(req, res, bcode.ErrNotAuthorized)
+			return false
 		}
 	}
-
 	token, err := service.ParseToken(tokenValue)
 	if err != nil {
-		bcode.ReturnError(req, res, err)
-		return
+		bcode.ReturnHTTPError(req, res, err)
+		return false
 	}
 	if token.GrantType != service.GrantTypeAccess {
-		bcode.ReturnError(req, res, bcode.ErrNotAccessToken)
-		return
+		bcode.ReturnHTTPError(req, res, bcode.ErrNotAccessToken)
+		return false
 	}
-	req.Request = req.Request.WithContext(context.WithValue(req.Request.Context(), &apis.CtxKeyUser, token.Username))
-	req.Request = req.Request.WithContext(context.WithValue(req.Request.Context(), &apis.CtxKeyToken, tokenValue))
+	newReq := req.WithContext(context.WithValue(req.Context(), &apis.CtxKeyUser, token.Username))
+	newReq = newReq.WithContext(context.WithValue(newReq.Context(), &apis.CtxKeyToken, tokenValue))
+	*req = *newReq
+	return true
+}
 
-	chain.ProcessFilter(req, res)
+// AuthTokenCheck Parse the token from the request
+func AuthTokenCheck(req *http.Request, res http.ResponseWriter, chain *utils.FilterChain) {
+	if authTokenCheck(req, res) {
+		chain.ProcessFilter(req, res)
+	}
+}
+
+// AuthUserCheck Checking the login user
+func AuthUserCheck(userService service.UserService) func(req *http.Request, res http.ResponseWriter, chain *utils.FilterChain) {
+	return func(req *http.Request, res http.ResponseWriter, chain *utils.FilterChain) {
+		// get login user info
+		userName, ok := req.Context().Value(&apis.CtxKeyUser).(string)
+		if !ok {
+			bcode.ReturnHTTPError(req, res, bcode.ErrUnauthorized)
+			return
+		}
+		user, err := userService.GetUser(req.Context(), userName)
+		if err != nil {
+			bcode.ReturnHTTPError(req, res, bcode.ErrUnauthorized)
+			return
+		}
+		req = req.WithContext(context.WithValue(req.Context(), &apis.CtxKeyUserModel, user))
+		chain.ProcessFilter(req, res)
+	}
 }
 
 func (c *authentication) login(req *restful.Request, res *restful.Response) {

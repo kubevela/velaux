@@ -18,3 +18,9 @@ package bcode
 
 // ErrPluginNotfound means the plugin does't install
 var ErrPluginNotfound = NewBcode(404, 18001, "the plugin is not exist")
+
+// ErrIsNotBackendPlugin -
+var ErrIsNotBackendPlugin = NewBcode(404, 18002, "the plugin is not backend plugin")
+
+// ErrIsNotProxyBackendPlugin -
+var ErrIsNotProxyBackendPlugin = NewBcode(404, 18003, "the plugin is not backend proxy plugin")

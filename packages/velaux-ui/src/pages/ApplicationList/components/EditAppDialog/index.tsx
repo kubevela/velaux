@@ -4,7 +4,7 @@ import React from 'react';
 
 import { updateApplication } from '../../../../api/application';
 import DrawerWithFooter from '../../../../components/Drawer';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import KV from '../../../../extends/KV';
 import type { ApplicationBase } from '../../../../interface/application';
 

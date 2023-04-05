@@ -1,0 +1,115 @@
+{
+  "type": "page-app",
+  "name": "Node Dashboard",
+  "id": "node-dashboard",
+  "info": {
+    "keywords": [
+      "app"
+    ],
+    "description": "Kubernetes node dashboard",
+    "author": {
+      "name": "KubeVela"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "backend": true,
+  "proxy": true,
+  "backendType": "kube-api",
+  "kubePermissions": [
+    {
+      "apiGroups": [
+        "",
+        "cluster.core.oam.dev"
+      ],
+      "resources": [
+        "clustergateways/proxy"
+      ],
+      "verbs": [
+        "*"
+      ]
+    },
+    {
+      "apiGroups": [
+        ""
+      ],
+      "resources": [
+        "nodes",
+        "nodes/status"
+      ],
+      "verbs": [
+        "get",
+        "list"
+      ]
+    },
+    {
+      "apiGroups": [
+        "",
+        "events.k8s.io"
+      ],
+      "resources": [
+        "events"
+      ],
+      "verbs": [
+        "get",
+        "list"
+      ]
+    }
+  ],
+  "includes": [
+    {
+      "workspace": {
+        "name": "platform"
+      },
+      "type": "Workspace",
+      "label": "Node Manage",
+      "name": "node-manage",
+      "to": "/plugins/%PLUGIN_ID%",
+      "permission": {
+        "resource": "node",
+        "action": "list"
+      },
+      "relatedRoute": [
+        "/plugins/%PLUGIN_ID%"
+      ],
+      "icon": "",
+      "catalog": "Infrastructure"
+    }
+  ],
+  "routes": [
+    {
+      "path": "/api/v1/nodes",
+      "permission": {
+        "resource": "node",
+        "action": "list"
+      }
+    },
+    {
+      "path": "/api/v1/events",
+      "permission": {
+        "resource": "event",
+        "action": "list"
+      }
+    },
+    {
+      "path": "/api/v1/nodes/:nodeName",
+      "method": "Put",
+      "permission": {
+        "resource": "node",
+        "action": "update"
+      },
+      "resourceMap": {
+        "node": "nodeName"
+      }
+    }
+  ],
+  "dependencies": {
+    "velauxDependency": ">=1.8.0",
+    "plugins": []
+  }
+}

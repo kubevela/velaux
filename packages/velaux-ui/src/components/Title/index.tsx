@@ -2,12 +2,12 @@ import { Grid } from '@alifd/next';
 import React from 'react';
 
 const { Col, Row } = Grid;
-export type Props = {
+export interface Props {
   title: string | React.ReactNode;
   actions: React.ReactNode[];
-};
+}
 
-const Title: React.FC<Props> = (props) => {
+export const Title: React.FC<Props> = (props) => {
   return (
     <Row>
       <Col span={12}>
@@ -23,5 +23,3 @@ const Title: React.FC<Props> = (props) => {
     </Row>
   );
 };
-
-export default Title;

@@ -3,11 +3,11 @@ import React from 'react';
 
 import { createProjectUsers, updateProjectUser } from '../../../../api/project';
 import DrawerWithFooter from '../../../../components/Drawer';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { ProjectMember, ProjectRoleBase } from '../../../../interface/project';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { getSelectLabel } from '../../../../utils/utils';
 
 type Props = {
@@ -147,11 +147,7 @@ class MemberDialog extends React.Component<Props, State> {
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={<Translation>Username</Translation>}
-                  labelTextAlign="left"
-                  required
-                >
+                <FormItem label={<Translation>Username</Translation>} labelTextAlign="left" required>
                   <Input
                     name="userName"
                     placeholder={i18n.t('Please enter').toString()}

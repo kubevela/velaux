@@ -4,7 +4,7 @@ import querystring from 'query-string';
 import React, { Fragment } from 'react';
 
 import { listApplicationPods, listApplicationPodsDetails } from '../../api/observation';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type {
   ApplicationComponent,
@@ -113,7 +113,7 @@ class ApplicationLog extends React.Component<Props, State> {
                 } else {
                   this.handlePodNameChange(res.podList[0].metadata.name);
                 }
-              },
+              }
             );
           } else {
             this.setState({
@@ -144,7 +144,7 @@ class ApplicationLog extends React.Component<Props, State> {
               },
               () => {
                 this.handleContainerNameChange(activeContainerName);
-              },
+              }
             );
           }
         })
@@ -152,12 +152,9 @@ class ApplicationLog extends React.Component<Props, State> {
     }
   };
   handleComponentNameChange = (value: string) => {
-    this.setState(
-      { activeComponentName: value, activePodName: '', activeContainerName: '' },
-      () => {
-        this.loadPodInstance();
-      },
-    );
+    this.setState({ activeComponentName: value, activePodName: '', activeContainerName: '' }, () => {
+      this.loadPodInstance();
+    });
   };
   handlePodNameChange = (value: any) => {
     const { podList } = this.state;
@@ -171,7 +168,7 @@ class ApplicationLog extends React.Component<Props, State> {
       },
       () => {
         this.loadPodDetail();
-      },
+      }
     );
   };
 
@@ -220,13 +217,7 @@ class ApplicationLog extends React.Component<Props, State> {
 
   render() {
     const { Row, Col } = Grid;
-    const {
-      pod,
-      activePodName,
-      activeContainerName,
-      activeComponentName,
-      isActiveContainerNameDisabled,
-    } = this.state;
+    const { pod, activePodName, activeContainerName, activeComponentName, isActiveContainerNameDisabled } = this.state;
     const podLabel = (
       <span>
         <Translation>Pod</Translation>:

@@ -6,7 +6,7 @@ import type { Dispatch } from 'redux';
 
 import { detailWorkflow, getWorkflowDefinitions, updateWorkflow } from '../../api/workflows';
 import Item from '../../components/Item';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import { WorkflowPrompt } from '../../components/WorkflowPrompt';
 import WorkflowStudio from '../../components/WorkflowStudio';
 import { WorkflowContext } from '../../context';
@@ -15,7 +15,7 @@ import type { ApplicationDetail, EnvBinding, Workflow, WorkflowMode } from '../.
 import type { DefinitionBase } from '../../interface/definitions';
 import type { WorkflowStep } from '../../interface/pipeline';
 import { showAlias } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 import './index.less';
 import classNames from 'classnames';

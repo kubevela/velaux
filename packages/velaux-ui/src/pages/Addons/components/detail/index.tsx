@@ -24,13 +24,13 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import Empty from '../../../../components/Empty';
 import Permission from '../../../../components/Permission';
 import StatusShow from '../../../../components/StatusShow';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
 import type { Addon, AddonStatus, EnableAddonRequest } from '../../../../interface/addon';
 import type { ApplicationStatus, UIParam } from '../../../../interface/application';
 import type { NameAlias } from '../../../../interface/env';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 import 'github-markdown-css/github-markdown-light.css';
 import './index.less';

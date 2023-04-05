@@ -2,9 +2,9 @@ import { Grid, Select, Input, Checkbox } from '@alifd/next';
 import React from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import './index.less';
 
 type Props = {

@@ -1,12 +1,12 @@
 import { Card } from '@alifd/next';
 import React, { Component } from 'react';
 
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 
 import './index.less';
 import { Link } from 'dva/router';
 
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 type Props = {
   envName: string;
@@ -81,11 +81,7 @@ class Menu extends Component<Props, any> {
             <Link
               key={item.key}
               to={item.to}
-              className={
-                item.key === activeKey || currentPath.startsWith(item.to)
-                  ? 'menu-item-active'
-                  : 'menu-item'
-              }
+              className={item.key === activeKey || currentPath.startsWith(item.to) ? 'menu-item-active' : 'menu-item'}
             >
               {item.label}
             </Link>

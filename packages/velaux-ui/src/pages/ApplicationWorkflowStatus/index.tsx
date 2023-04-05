@@ -7,7 +7,7 @@ import { detailWorkflow, getEnvWorkflowRecord } from '../../api/workflows';
 import Empty from '../../components/Empty';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type {
   ApplicationDetail,
@@ -19,7 +19,7 @@ import type {
 } from '../../interface/application';
 import type { WorkflowStepBase } from '../../interface/pipeline';
 import { beautifyTime } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 import ApplicationWorkflowRecord from './components/WorkflowRecord';
 

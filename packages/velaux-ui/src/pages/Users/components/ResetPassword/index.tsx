@@ -3,7 +3,7 @@ import React from 'react';
 
 import { updateUser } from '../../../../api/users';
 import DrawerWithFooter from '../../../../components/Drawer';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { User } from '../../../../interface/user';
 import { checkUserPassword } from '../../../../utils/common';

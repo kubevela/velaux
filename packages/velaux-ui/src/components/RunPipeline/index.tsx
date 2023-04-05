@@ -7,14 +7,14 @@ import { deletePipelineContext, listPipelineContexts, runPipeline } from '../../
 import i18n from '../../i18n';
 import type { KeyValue, PipelineListItem } from '../../interface/pipeline';
 import './index.less';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import { If } from '../If';
-import ListTitle from '../ListTitle';
+import { ListTitle } from '../ListTitle';
 
 import classNames from 'classnames';
 
 import Permission from '../Permission';
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 
 import NewContext from './new-context';
 
