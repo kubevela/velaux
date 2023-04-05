@@ -5,10 +5,10 @@ import { Dropdown, Menu, Grid, Card, Dialog } from '@alifd/next';
 
 import kubernetesSvg from '../../../../assets/kubernetes.svg';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { Cluster } from '../../../../interface/cluster';
 import type { LoginUserInfo } from '../../../../interface/user';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
 
 import { connect } from 'dva';
@@ -110,12 +110,7 @@ class CardContent extends React.Component<Props, State> {
                   <Row className="content-title">
                     <Col span={16} className="font-size-16 color1A1A1A">
                       <If condition={dashboardURL}>
-                        <a
-                          title={name}
-                          target="_blank"
-                          href={dashboardURL}
-                          rel="noopener noreferrer"
-                        >
+                        <a title={name} target="_blank" href={dashboardURL} rel="noopener noreferrer">
                           {showName}
                         </a>
                       </If>

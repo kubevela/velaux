@@ -12,7 +12,7 @@ import { loadPipeline, updatePipeline } from '../../api/pipeline';
 import { getWorkflowDefinitions } from '../../api/workflows';
 import { If } from '../../components/If';
 import RunPipeline from '../../components/RunPipeline';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import { WorkflowPrompt } from '../../components/WorkflowPrompt';
 import WorkflowStudio from '../../components/WorkflowStudio';
 import { WorkflowYAML } from '../../components/WorkflowYAML';
@@ -21,7 +21,7 @@ import i18n from '../../i18n';
 import type { WorkflowMode } from '../../interface/application';
 import type { DefinitionBase } from '../../interface/definitions';
 import type { PipelineDetail, WorkflowStep } from '../../interface/pipeline';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import { WorkflowModeOptions } from '../ApplicationWorkflowStudio';
 
 const { Row, Col } = Grid;

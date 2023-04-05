@@ -28,10 +28,13 @@ import (
 	restfulSpec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-openapi/spec"
+	"github.com/julienschmidt/httprouter"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/leaderelection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/apis/types"
 	pkgaddon "github.com/oam-dev/kubevela/pkg/addon"
@@ -40,6 +43,9 @@ import (
 	pkgUtils "github.com/oam-dev/kubevela/pkg/utils"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 
+	"github.com/kubevela/velaux/pkg/plugin/proxy"
+	"github.com/kubevela/velaux/pkg/plugin/router"
+	plugintypes "github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/config"
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	"github.com/kubevela/velaux/pkg/server/event"
@@ -61,7 +67,10 @@ const (
 	BuildPublicRoutePath = "/public/build"
 
 	// PluginPublicRoutePath the route prefix to request the plugin static files.
-	PluginPublicRoutePath = "/public/plugins"
+	PluginPublicRoutePath = "/public/plugins/"
+
+	// PluginProxyRoutePath the route prefix to request the plugin backend server.
+	PluginProxyRoutePath = "/proxy/plugins/"
 
 	// DexRoutePath the route prefix to request the dex service
 	DexRoutePath = "/dex"
@@ -82,8 +91,11 @@ type restServer struct {
 	beanContainer *container.Container
 	cfg           config.Config
 	dataStore     datastore.DataStore
-	dexProxy      *httputil.ReverseProxy
 	PluginService service.PluginService `inject:""`
+	KubeClient    client.Client         `inject:"kubeClient"`
+	KubeConfig    *rest.Config          `inject:"kubeConfig"`
+	RBACService   service.RBACService   `inject:""`
+	UserService   service.UserService   `inject:""`
 }
 
 // New create api server with config data
@@ -344,7 +356,10 @@ func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		s.staticFiles(res, req, "./")
 		return
 	case strings.HasPrefix(req.URL.Path, PluginPublicRoutePath):
-		s.getPluginAssets(res, req)
+		utils.NewFilterChain(s.getPluginAssets).ProcessFilter(req, res)
+		return
+	case strings.HasPrefix(req.URL.Path, PluginProxyRoutePath):
+		utils.NewFilterChain(s.proxyPluginBackend, api.AuthTokenCheck, api.AuthUserCheck(s.UserService)).ProcessFilter(req, res)
 		return
 	case strings.HasPrefix(req.URL.Path, DexRoutePath):
 		s.proxyDexService(res, req)
@@ -367,9 +382,9 @@ func (s *restServer) staticFiles(res http.ResponseWriter, req *http.Request, roo
 }
 
 // route: /public/plugins/{pluginId}/*
-func (s *restServer) getPluginAssets(res http.ResponseWriter, req *http.Request) {
+func (s *restServer) getPluginAssets(req *http.Request, res http.ResponseWriter) {
 	// Check the plugin
-	pathInfo := strings.SplitN(strings.Replace(req.URL.Path, "/public/plugins/", "", 1), "/", 2)
+	pathInfo := strings.SplitN(strings.Replace(req.URL.Path, PluginPublicRoutePath, "", 1), "/", 2)
 	if len(pathInfo) < 2 {
 		bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
 		return
@@ -390,25 +405,64 @@ func (s *restServer) getPluginAssets(res http.ResponseWriter, req *http.Request)
 	s.staticFiles(res, req, plugin.PluginDir)
 }
 
-func (s *restServer) proxyDexService(res http.ResponseWriter, req *http.Request) {
-	if s.dexProxy == nil {
-		if s.cfg.DexServerURL == "" {
-			bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
-			return
-		}
-		u, err := url.Parse(s.cfg.DexServerURL)
-		if err != nil {
-			bcode.ReturnHTTPError(req, res, err)
-			return
-		}
-		director := func(req *http.Request) {
-			req.URL.Scheme = u.Scheme
-			req.URL.Host = u.Host
-			req.URL.Path = strings.Replace(req.URL.Path, DexRoutePath, "", 1)
-		}
-		s.dexProxy = &httputil.ReverseProxy{Director: director}
+// route: /proxy/plugins/{pluginId}/*
+func (s *restServer) proxyPluginBackend(req *http.Request, res http.ResponseWriter) {
+	// Check the plugin
+	pathInfo := strings.SplitN(strings.Replace(req.URL.Path, PluginProxyRoutePath, "", 1), "/", 2)
+	if len(pathInfo) < 2 {
+		bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
+		return
 	}
-	s.dexProxy.ServeHTTP(res, req)
+	pluginID := pathInfo[0]
+	plugin, err := s.PluginService.GetPlugin(req.Context(), pluginID)
+	if err != nil {
+		bcode.ReturnHTTPError(req, res, err)
+		return
+	}
+	if !plugin.Backend {
+		bcode.ReturnHTTPError(req, res, bcode.ErrIsNotBackendPlugin)
+		return
+	}
+	if !plugin.Proxy {
+		bcode.ReturnHTTPError(req, res, bcode.ErrIsNotProxyBackendPlugin)
+		return
+	}
+	// Register the plugin route
+	router.GenerateHTTPRouter(plugin, PluginProxyRoutePath, s.pluginBackendProxyHandler).ServeHTTP(res, req)
+}
+
+func (s *restServer) pluginBackendProxyHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params, plugin *plugintypes.Plugin, route *plugintypes.Route) {
+	// Check permissions
+	if !s.RBACService.CheckPluginRequestPerm(p, route)(r, w) {
+		return
+	}
+	pro, err := proxy.NewBackendPluginProxy(plugin, s.KubeClient, s.KubeConfig)
+	if err != nil {
+		bcode.ReturnHTTPError(r, w, err)
+		return
+	}
+	r.URL.Path = strings.Replace(r.URL.Path, "/proxy/plugins/"+plugin.PluginID(), "", 1)
+	r = r.WithContext(context.WithValue(r.Context(), &proxy.RouteCtxKey, route))
+	pro.Handler(r, w)
+}
+
+func (s *restServer) proxyDexService(res http.ResponseWriter, req *http.Request) {
+	if s.cfg.DexServerURL == "" {
+		bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
+		return
+	}
+	u, err := url.Parse(s.cfg.DexServerURL)
+	if err != nil {
+		bcode.ReturnHTTPError(req, res, err)
+		return
+	}
+	director := func(req *http.Request) {
+		req.URL.Scheme = u.Scheme
+		req.URL.Host = u.Host
+		req.URL.Path = strings.Replace(req.URL.Path, DexRoutePath, "", 1)
+	}
+	dexProxy := &httputil.ReverseProxy{Director: director}
+	dexProxy.ServeHTTP(res, req)
 }
 
 func (s *restServer) startHTTP(ctx context.Context) error {

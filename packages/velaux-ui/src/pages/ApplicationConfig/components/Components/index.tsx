@@ -7,12 +7,12 @@ import terraform from '../../../../assets/terraform.svg';
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { ApplicationBase, ApplicationComponentBase, Trait } from '../../../../interface/application';
 import './index.less';
 import { showAlias } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { IoMdAdd } from 'react-icons/io';
 import { AiOutlineDelete } from 'react-icons/ai';
 

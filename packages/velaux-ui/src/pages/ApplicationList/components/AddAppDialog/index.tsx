@@ -7,14 +7,14 @@ import { createApplication } from '../../../../api/application';
 import { detailComponentDefinition } from '../../../../api/definitions';
 import { getEnvs } from '../../../../api/env';
 import DrawerWithFooter from '../../../../components/Drawer';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import type { DefinitionDetail } from '../../../../interface/application';
 import type { Env } from '../../../../interface/env';
 import type { Project } from '../../../../interface/project';
 import type { Target } from '../../../../interface/target';
 import type { LoginUserInfo } from '../../../../interface/user';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import EnvDialog from '../../../EnvPage/components/EnvDialog';
 import GeneralConfig from '../GeneralConfig';
 
@@ -111,16 +111,7 @@ class AppDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const {
-        description,
-        alias,
-        name,
-        icon = '',
-        componentType,
-        properties,
-        envBindings,
-        project,
-      } = values;
+      const { description, alias, name, icon = '', componentType, properties, envBindings, project } = values;
       const envbinding = envBindings?.map((env: string) => {
         return { name: env };
       });
@@ -222,8 +213,7 @@ class AppDialog extends React.Component<Props, State> {
   };
 
   changeStatus = (value: string) => {
-    const values: { componentType: string; envBindings: string[]; project: string } =
-      this.field.getValues();
+    const values: { componentType: string; envBindings: string[]; project: string } = this.field.getValues();
     const { envBindings } = values;
     if (value === 'isCreateComponent') {
       this.field.validateCallback(
@@ -253,7 +243,7 @@ class AppDialog extends React.Component<Props, State> {
           this.setState({
             dialogStats: value,
           });
-        },
+        }
       );
     } else if (value === 'isBasic') {
       this.setState({
@@ -315,7 +305,7 @@ class AppDialog extends React.Component<Props, State> {
       },
       () => {
         this.loadEnvs(this.setEnvValue);
-      },
+      }
     );
   };
   changeEnvDialog = (visible: boolean) => {
@@ -344,8 +334,7 @@ class AppDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
-    const { visible, setVisible, dispatch, projects, onClose, isDisableProject, userInfo } =
-      this.props;
+    const { visible, setVisible, dispatch, projects, onClose, isDisableProject, userInfo } = this.props;
     console.log(this.field);
     const { definitionDetail, dialogStats, envs, visibleEnvDialog } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
@@ -358,9 +347,7 @@ class AppDialog extends React.Component<Props, State> {
       };
     });
     const secondStep =
-      dialogStats === 'isCreateComponent' && definitionDetail && definitionDetail.uiSchema
-        ? true
-        : false;
+      dialogStats === 'isCreateComponent' && definitionDetail && definitionDetail.uiSchema ? true : false;
     init('test');
     return (
       <React.Fragment>
@@ -389,11 +376,7 @@ class AppDialog extends React.Component<Props, State> {
                 <Row>
                   <Col span={24} style={{ padding: '0 8px' }}>
                     <FormItem
-                      label={
-                        <Translation className="font-size-14 font-weight-bold">
-                          Main Component Type
-                        </Translation>
-                      }
+                      label={<Translation className="font-size-14 font-weight-bold">Main Component Type</Translation>}
                       required={true}
                       help={
                         <span>
@@ -426,11 +409,7 @@ class AppDialog extends React.Component<Props, State> {
                 <Row>
                   <Col span={24} style={{ padding: '0 8px' }}>
                     <FormItem
-                      label={
-                        <Translation className="font-size-14 font-weight-bold">
-                          Bind Environments
-                        </Translation>
-                      }
+                      label={<Translation className="font-size-14 font-weight-bold">Bind Environments</Translation>}
                       help={
                         <a
                           onClick={() => {

@@ -3,7 +3,7 @@ import React from 'react';
 
 import { updateProject } from '../../../../api/project';
 import DrawerWithFooter from '../../../../components/Drawer';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { Project } from '../../../../interface/project';
 import type { User } from '../../../../interface/user';
@@ -118,11 +118,7 @@ class GeneralDialog extends React.Component<Props, State> {
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem
-                  label={<Translation>Name</Translation>}
-                  labelTextAlign="left"
-                  required={true}
-                >
+                <FormItem label={<Translation>Name</Translation>} labelTextAlign="left" required={true}>
                   <Input
                     name="name"
                     disabled={isEditGeneral ? true : false}
@@ -174,9 +170,7 @@ class GeneralDialog extends React.Component<Props, State> {
                         {
                           required: true,
                           pattern: checkName,
-                          message: (
-                            <Translation>Please select a owner for this project</Translation>
-                          ),
+                          message: <Translation>Please select a owner for this project</Translation>,
                         },
                       ],
                     })}

@@ -4,7 +4,7 @@ import React, { useContext, useState } from 'react';
 import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 import { WorkflowEditContext } from '../../context';
 import type { InputItem, OutputItem } from '../../interface/application';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 const { Row, Col } = Grid;
 
 export const InputItemForm = (props: { value?: InputItem; onChange: (i: InputItem) => void }) => {

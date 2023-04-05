@@ -1,4 +1,4 @@
-import Title from '../../components/ListTitle';
+import { ListTitle as Title } from '../../components/ListTitle';
 
 import { Loading, Button, Table, Dialog, Message, Balloon } from '@alifd/next';
 import { connect } from 'dva';
@@ -15,14 +15,14 @@ import './index.less';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
 import RunPipeline from '../../components/RunPipeline';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type { AddonBaseStatus } from '../../interface/addon';
 import type { NameAlias } from '../../interface/env';
 import type { PipelineBase, PipelineListItem, PipelineRun, RunStateInfo } from '../../interface/pipeline';
 import type { LoginUserInfo } from '../../interface/user';
 import { beautifyTime, momentDate } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import RunStatusIcon from '../PipelineRunPage/components/RunStatusIcon';
 
 import CreatePipeline from './components/CreatePipeline';

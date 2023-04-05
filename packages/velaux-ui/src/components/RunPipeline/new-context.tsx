@@ -6,7 +6,7 @@ import KV from '../../extends/KV';
 import i18n from '../../i18n';
 import type { KeyValue, PipelineListItem } from '../../interface/pipeline';
 import { checkName } from '../../utils/common';
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 
 const { Row, Col } = Grid;
 
@@ -58,21 +58,17 @@ class NewContext extends React.Component<NewContextProps> {
         keyValues.push({ key: key, value: values.values[key] });
       });
       if (editMode) {
-        updatePipelineContext(project.name, name, { name: values.name, values: keyValues }).then(
-          (res) => {
-            if (res) {
-              this.props.onSuccess();
-            }
-          },
-        );
+        updatePipelineContext(project.name, name, { name: values.name, values: keyValues }).then((res) => {
+          if (res) {
+            this.props.onSuccess();
+          }
+        });
       } else {
-        createPipelineContext(project.name, name, { name: values.name, values: keyValues }).then(
-          (res) => {
-            if (res) {
-              this.props.onSuccess();
-            }
-          },
-        );
+        createPipelineContext(project.name, name, { name: values.name, values: keyValues }).then((res) => {
+          if (res) {
+            this.props.onSuccess();
+          }
+        });
       }
     });
   };

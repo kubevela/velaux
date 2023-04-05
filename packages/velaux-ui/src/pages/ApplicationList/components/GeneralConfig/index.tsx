@@ -4,7 +4,7 @@ import React from 'react';
 
 import { checkName } from '../../../../utils/common';
 import './index.less';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { Project } from '../../../../interface/project';
 import type { LoginUserInfo } from '../../../../interface/user';
@@ -38,11 +38,7 @@ class GeneralConfig extends React.Component<Props, State> {
     const projectOptions: Array<{ label: string; value: string }> = [];
     (projects || []).map((project) => {
       if (
-        checkPermission(
-          { resource: `project:${project.name}/application:*`, action: 'create' },
-          project.name,
-          userInfo,
-        )
+        checkPermission({ resource: `project:${project.name}/application:*`, action: 'create' }, project.name, userInfo)
       ) {
         if (project.name === 'default') {
           defaultProject = project.name;
@@ -69,11 +65,7 @@ class GeneralConfig extends React.Component<Props, State> {
         <Form {...formItemLayout} field={this.props.field}>
           <Row>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem
-                label={<Translation>Name</Translation>}
-                labelTextAlign="left"
-                required={true}
-              >
+              <FormItem label={<Translation>Name</Translation>} labelTextAlign="left" required={true}>
                 <Input
                   name="name"
                   maxLength={31}

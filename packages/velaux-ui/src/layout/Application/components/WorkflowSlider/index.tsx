@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import type { WorkflowRecord } from '../../../../interface/application';
 import WorkflowStep from '../WorkflowStep';
 import './index.less';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import { If } from '../../../../components/If';
 
 type Props = {
@@ -66,11 +66,7 @@ class WorkflowSlider extends Component<Props, State> {
       <Card className="slide-workflow-wrapper" contentHeight={'auto'} />;
     }
     return (
-      <Card
-        className="slide-workflow-wrapper"
-        contentHeight={'auto'}
-        id={recordItem.applicationRevision}
-      >
+      <Card className="slide-workflow-wrapper" contentHeight={'auto'} id={recordItem.applicationRevision}>
         <div className="slide-header">
           <span className="slide-header-name">
             {recordItem.workflowAlias || recordItem.workflowName}({recordItem.status})

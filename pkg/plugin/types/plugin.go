@@ -17,7 +17,9 @@ limitations under the License.
 package types
 
 import (
-	"encoding/json"
+	rbacv1 "k8s.io/api/rbac/v1"
+
+	"github.com/kubevela/velaux/pkg/server/domain/model"
 )
 
 // Plugin VelaUX plugin model
@@ -26,11 +28,11 @@ type Plugin struct {
 	PluginDir     string
 	Class         Class
 	DefaultNavURL string
-	Pinned        bool
-	Children      []*Plugin
 	// SystemJS fields
 	Module  string
 	BaseURL string
+	// Plugin Settings
+	Setting model.PluginSetting
 }
 
 // BuildInfo the plugin build info
@@ -78,17 +80,25 @@ type Requirement struct {
 
 // JSONData represents the plugin's plugin.json
 type JSONData struct {
-	ID           string      `json:"id"`
-	Type         Type        `json:"type"`
-	Name         string      `json:"name"`
-	Info         Info        `json:"info"`
-	Includes     []*Includes `json:"includes"`
-	Category     string      `json:"category"`
-	HideFromList bool        `json:"hideFromList,omitempty"`
-	Preload      bool        `json:"preload"`
-	Backend      bool        `json:"backend"`
-	Routes       []*Route    `json:"routes"`
-	Requirement  Requirement `json:"requirement"`
+	ID       string      `json:"id"`
+	Type     Type        `json:"type"`
+	Name     string      `json:"name"`
+	Info     Info        `json:"info"`
+	Includes []*Includes `json:"includes"`
+	Category string      `json:"category"`
+	// Backend If the plugin has a backend component.
+	Backend     bool              `json:"backend"`
+	Proxy       bool              `json:"proxy"`
+	BackendType BackendType       `json:"backendType"`
+	AuthType    AuthType          `json:"authType,omitempty"`
+	AuthSecret  *KubernetesSecret `json:"authSecret,omitempty"`
+	// For the kube auth type, define the max scope permission for this plugin.
+	KubePermissions []rbacv1.PolicyRule `json:"kubePermissions,omitempty"`
+	// For the KubeService backend type
+	BackendService *KubernetesService `json:"backendService"`
+	// Routes define the route to proxy the backend server.
+	Routes      []*Route     `json:"routes,omitempty"`
+	Requirement *Requirement `json:"requirement,omitempty"`
 }
 
 // Includes means the menus that this plugin include.
@@ -111,36 +121,74 @@ type Workspace struct {
 
 // Permission RBAC permission policy
 type Permission struct {
-	Resources []string `json:"resource"`
-	Actions   []string `json:"actions"`
+	Resource string `json:"resource"`
+	Action   string `json:"action"`
 }
 
 // Route describes a plugin route that is defined in
 // the plugin.json file for a plugin.
 type Route struct {
-	Path         string          `json:"path"`
-	Method       string          `json:"method"`
-	URL          string          `json:"url"`
-	URLParams    []URLParam      `json:"urlParams"`
-	Headers      []Header        `json:"headers"`
-	AuthType     string          `json:"authType"`
-	TokenAuth    *JWTTokenAuth   `json:"tokenAuth"`
-	JwtTokenAuth *JWTTokenAuth   `json:"jwtTokenAuth"`
-	Body         json.RawMessage `json:"body"`
+	// Route conditions.
+	// Path format like: /nodes/:nodeName
+	Path   string `json:"path"`
+	Method string `json:"method"`
+
+	// Permission checking
+	ResourceMap map[string]string `json:"resourceMap,omitempty"`
+	Permission  *Permission       `json:"permission,omitempty"`
+
+	// Proxy parameters
+	ProxyHeaders []Header `json:"headers,omitempty"`
+}
+
+// KubernetesService define one kubernetes service
+type KubernetesService struct {
+	Name string `json:"name"`
+	// If namespace is not specified, find the service from the vela system namespace
+	Namespace string `json:"namespace"`
+	// If port is not specified, find the first port from the service
+	Port int32
+}
+
+// KubernetesSecret define one kubernetes secret
+type KubernetesSecret struct {
+	Name string `json:"name"`
+	// If namespace is not specified, find the service from the vela system namespace
+	Namespace string `json:"namespace"`
+}
+
+// AuthType The authentication type of the backend server
+type AuthType string
+
+// BackendType the backend server type
+type BackendType string
+
+var (
+	// Basic Authentication is a method to provide a username and password when making a request.
+	Basic AuthType = "basic"
+)
+var (
+	// KubeAPI Proxy the Kubernetes API.
+	// this plugin need to define the permission of Kubernetes RBAC.
+	// When installing the plugin, Vela will create a Role and use this role to request the Kubernetes API.
+	KubeAPI BackendType = "kube-api"
+	// KubeService Discover the backend by the Kubernetes service.
+	KubeService BackendType = "kube-service"
+	// StaticServer Discover the backend by the plugin setting
+	StaticServer BackendType = "static-server"
+)
+
+// BasicAuth username
+type BasicAuth struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // Header describes an HTTP header that is forwarded with
 // the proxied request for a plugin route
 type Header struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
-}
-
-// URLParam describes query string parameters for
-// a url in a plugin route
-type URLParam struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 // JWTTokenAuth struct is both for normal Token Auth and JWT Token Auth with

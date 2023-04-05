@@ -5,7 +5,7 @@ import { getPolicyList } from '../../api/application';
 import { UISchemaContext } from '../../context';
 import i18n from '../../i18n';
 import type { ApplicationPolicyBase } from '../../interface/application';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 
 type Props = {
   onChange: (value: any) => void;

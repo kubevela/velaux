@@ -7,7 +7,7 @@ import { detailComponentDefinition } from '../../../../api/definitions';
 import { getPayloadType } from '../../../../api/payload';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type {
   Workflow,
@@ -18,7 +18,7 @@ import type {
   UpdateTriggerRequest,
 } from '../../../../interface/application';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 type Props = {
   visible: boolean;
@@ -81,9 +81,7 @@ class TriggerDialog extends React.Component<Props, State> {
     detailComponentDefinition({ name: value })
       .then((res) => {
         if (res) {
-          const findImageObj = (res.uiSchema || []).find(
-            (item: UIParam) => item.jsonKey === 'image',
-          );
+          const findImageObj = (res.uiSchema || []).find((item: UIParam) => item.jsonKey === 'image');
           const hasImage = findImageObj ? true : false;
           this.setState({
             hasImage,
@@ -354,12 +352,7 @@ class TriggerDialog extends React.Component<Props, State> {
               </If>
             </Col>
             <Col span={12} style={{ padding: '0 8px' }}>
-              <If
-                condition={
-                  this.field.getValue('type') === 'webhook' &&
-                  this.field.getValue('payloadType') === 'acr'
-                }
-              >
+              <If condition={this.field.getValue('type') === 'webhook' && this.field.getValue('payloadType') === 'acr'}>
                 <FormItem label={<Translation>Registry</Translation>}>
                   <Input
                     name="registry"
@@ -368,15 +361,12 @@ class TriggerDialog extends React.Component<Props, State> {
                       initValue: '',
                       rules: [
                         {
-                          pattern:
-                            '^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$',
+                          pattern: '^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$',
                           message: 'This is a invalid domain',
                         },
                       ],
                     })}
-                    placeholder={i18n.t(
-                      'For the ACR Enterprise Edition, you should set the domain of the registry.',
-                    )}
+                    placeholder={i18n.t('For the ACR Enterprise Edition, you should set the domain of the registry.')}
                   />
                 </FormItem>
               </If>
@@ -424,8 +414,7 @@ class TriggerDialog extends React.Component<Props, State> {
           </Row>
           <Message type="warning" animation={true} visible={this.isShowMessage()} title="Warning">
             <Translation>
-              Your component type does not support the image field, and the image update cannot be
-              performed
+              Your component type does not support the image field, and the image update cannot be performed
             </Translation>
           </Message>
         </Form>

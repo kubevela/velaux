@@ -2,19 +2,14 @@ import { Dialog, Field, Form, Grid, Input, Loading, Message, Select } from '@ali
 import { connect } from 'dva';
 import React from 'react';
 
-import {
-  createPipeline,
-  createPipelineContext,
-  listPipelineContexts,
-  loadPipeline,
-} from '../../../../api/pipeline';
+import { createPipeline, createPipelineContext, listPipelineContexts, loadPipeline } from '../../../../api/pipeline';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { PipelineListItem, PipelineDetail, KeyValue } from '../../../../interface/pipeline';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
 
 const FormItem = Form.Item;
@@ -121,11 +116,7 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
     const projectOptions: Array<{ label: string; value: string }> = [];
     (userInfo?.projects || []).map((project) => {
       if (
-        checkPermission(
-          { resource: `project:${project.name}/pipeline:*`, action: 'create' },
-          project.name,
-          userInfo,
-        )
+        checkPermission({ resource: `project:${project.name}/pipeline:*`, action: 'create' }, project.name, userInfo)
       ) {
         projectOptions.push({
           label: project.alias ? `${project.alias}(${project.name})` : project.name,
@@ -133,9 +124,7 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
         });
       }
     });
-    const message = contexts
-      ? i18n.t('Includes') + ` ${Object.keys(contexts).length} ` + i18n.t('contexts')
-      : '';
+    const message = contexts ? i18n.t('Includes') + ` ${Object.keys(contexts).length} ` + i18n.t('contexts') : '';
     return (
       <Dialog
         onOk={this.onSubmit}
@@ -151,10 +140,7 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
       >
         <Loading visible={loading || loadingContext}>
           <If condition={pipelineDetail && contexts}>
-            <Message
-              type="success"
-              title={i18n.t('Pipeline loaded successfully and is ready to clone.') + message}
-            />
+            <Message type="success" title={i18n.t('Pipeline loaded successfully and is ready to clone.') + message} />
             <Form field={this.field}>
               <Row wrap>
                 <Col span={8} style={{ padding: '0 8px' }}>

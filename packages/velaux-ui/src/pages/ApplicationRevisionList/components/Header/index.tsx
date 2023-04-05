@@ -3,7 +3,7 @@ import React from 'react';
 import i18n from '../../../../i18n';
 
 import type { EnvBinding } from '../../../../interface/application';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 interface Label {
   label: string;

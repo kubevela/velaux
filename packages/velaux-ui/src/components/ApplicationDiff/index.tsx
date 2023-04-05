@@ -5,7 +5,7 @@ import type { ApplicationCompareResponse } from '../../interface/application';
 import './index.less';
 import { DiffEditor } from '../DiffEditor';
 import { If } from '../If';
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 
 type ApplicationDiffProps = {
   baseName: string;

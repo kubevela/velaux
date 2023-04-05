@@ -18,10 +18,8 @@ package utils
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/kubevela/velaux/pkg/server/domain/model"
-
-	"github.com/emicklei/go-restful/v3"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/endpoints/request"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,6 +27,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/auth"
 
 	"github.com/kubevela/velaux/pkg/features"
+	"github.com/kubevela/velaux/pkg/server/domain/model"
 )
 
 // KubeVelaProjectGroupPrefix the prefix kubevela project
@@ -72,12 +71,12 @@ func ContextWithUserInfo(ctx context.Context) context.Context {
 }
 
 // SetUsernameAndProjectInRequestContext .
-func SetUsernameAndProjectInRequestContext(req *restful.Request, userName string, projectName string, userRole []string) {
-	ctx := req.Request.Context()
+func SetUsernameAndProjectInRequestContext(req *http.Request, userName string, projectName string, userRole []string) {
+	ctx := req.Context()
 	ctx = WithUsername(ctx, userName)
 	ctx = WithProject(ctx, projectName)
 	ctx = WithUserRole(ctx, userRole)
-	req.Request = req.Request.WithContext(ctx)
+	*req = *req.WithContext(ctx)
 }
 
 // NewAuthClient will carry UserInfo for mutating requests automatically

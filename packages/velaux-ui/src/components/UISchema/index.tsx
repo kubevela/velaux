@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 import type { ParamCondition, UIParam, UIParamValidate } from '../../interface/application';
 
 import type { Rule } from '@alifd/field';
@@ -32,7 +32,7 @@ import Strings from '../../extends/Strings';
 import Structs from '../../extends/Structs';
 import type { Definition } from '../../interface/addon';
 import { checkImageName, replaceUrl } from '../../utils/common';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import { getValue } from '../../utils/utils';
 import DefinitionCode from '../DefinitionCode';
 import { If } from '../If';

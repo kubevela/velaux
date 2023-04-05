@@ -3,7 +3,7 @@ import React, { Component, Fragment } from 'react';
 import { AiOutlineDelete } from 'react-icons/ai';
 
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { ProjectRoleBase } from '../../../../interface/project';
 import './index.less';
 

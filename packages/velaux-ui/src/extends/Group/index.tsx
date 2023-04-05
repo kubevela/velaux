@@ -2,8 +2,8 @@ import type { Field } from '@alifd/next';
 import { Icon, Loading, Grid, Switch, Dialog } from '@alifd/next';
 import React from 'react';
 
-import Translation from '../../components/Translation';
-import locale from '../../utils/locale';
+import { Translation } from '../../components/Translation';
+import { locale } from '../../utils/locale';
 import './index.less';
 import { If } from '../../components/If';
 
@@ -56,14 +56,7 @@ class Group extends React.Component<Props, State> {
   }
 
   initSwitchState = () => {
-    const {
-      jsonKey = '',
-      propertyValue = {},
-      alwaysShow = false,
-      required,
-      closed,
-      initClose,
-    } = this.props;
+    const { jsonKey = '', propertyValue = {}, alwaysShow = false, required, closed, initClose } = this.props;
     const findKey = Object.keys(propertyValue).find((item) => item === jsonKey);
     if (findKey || alwaysShow) {
       this.setState({ enable: true, closed: false || initClose, checked: true });
@@ -85,15 +78,7 @@ class Group extends React.Component<Props, State> {
   }
 
   render() {
-    const {
-      title,
-      description,
-      children,
-      hasToggleIcon,
-      loading,
-      required,
-      disableAddon = false,
-    } = this.props;
+    const { title, description, children, hasToggleIcon, loading, required, disableAddon = false } = this.props;
     const { closed, enable, checked } = this.state;
     return (
       <Loading visible={loading || false} style={{ width: '100%' }}>
@@ -120,8 +105,8 @@ class Group extends React.Component<Props, State> {
                             type: 'confirm',
                             content: (
                               <Translation>
-                                The configuration will be reset if the switch is turned off. Are you
-                                sure want to do this?
+                                The configuration will be reset if the switch is turned off. Are you sure want to do
+                                this?
                               </Translation>
                             ),
                             onOk: () => {
@@ -135,11 +120,7 @@ class Group extends React.Component<Props, State> {
                     />
                   </If>
                   <If condition={enable && hasToggleIcon}>
-                    <Icon
-                      onClick={this.toggleShowClass}
-                      className="icon"
-                      type={closed ? 'arrow-down' : 'arrow-up'}
-                    />
+                    <Icon onClick={this.toggleShowClass} className="icon" type={closed ? 'arrow-down' : 'arrow-up'} />
                   </If>
                 </Col>
               </Row>

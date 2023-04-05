@@ -7,7 +7,7 @@ import _ from 'lodash'; // eslint-disable-line lodash/import-scope
 import moment from 'moment'; // eslint-disable-line no-restricted-imports
 import react from 'react';
 import * as velauxData from '@velaux/data'; // eslint-disable-line no-restricted-imports
-import * as velauxUI from '@velaux/ui'; // eslint-disable-line no-restricted-imports
+import * as velauxUI from '../types'; // eslint-disable-line no-restricted-imports
 import * as ReactDom from 'react-dom';
 import * as DvaRouter from 'dva/router';
 import * as Redux from 'redux';

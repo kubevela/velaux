@@ -4,11 +4,11 @@ import React from 'react';
 import { createAddonRegistry, deleteAddonRegistry } from '../../../../api/addons';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import type { AddonRegistry } from '../../../../interface/addon';
 import { checkName } from '../../../../utils/common';
 import { handleError } from '../../../../utils/errors';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 
 const { Row, Col } = Grid;
 
@@ -228,18 +228,11 @@ class RegistryManageDialog extends React.Component<Props, State> {
             <Col>
               <div className="tableButton">
                 <If condition={!existExperimental}>
-                  <Button
-                    type="secondary"
-                    onClick={this.addExperimental}
-                    style={{ marginRight: '16px' }}
-                  >
+                  <Button type="secondary" onClick={this.addExperimental} style={{ marginRight: '16px' }}>
                     <Translation>Add Experimental Registry</Translation>
                   </Button>
                 </If>
-                <Permission
-                  request={{ resource: 'addonRegistry:*', action: 'create' }}
-                  project={''}
-                >
+                <Permission request={{ resource: 'addonRegistry:*', action: 'create' }} project={''}>
                   <Button type="secondary" onClick={this.showAddRegistry}>
                     <Translation>New</Translation>
                   </Button>
@@ -252,18 +245,10 @@ class RegistryManageDialog extends React.Component<Props, State> {
             <Table.Column width="80px" title={<Translation>Type</Translation>} dataIndex="type" />
             <Table.Column title={<Translation>URL</Translation>} dataIndex="url" />
             <If condition={registryDataSource.find((item) => item.type === 'Gitlab')}>
-              <Table.Column
-                width="100px"
-                title={<Translation>Repository name</Translation>}
-                dataIndex="repo"
-              />
+              <Table.Column width="100px" title={<Translation>Repository name</Translation>} dataIndex="repo" />
             </If>
 
-            <Table.Column
-              width="160px"
-              title={<Translation>Path(Bucket)</Translation>}
-              dataIndex="path"
-            />
+            <Table.Column width="160px" title={<Translation>Path(Bucket)</Translation>} dataIndex="path" />
             <Table.Column
               cell={renderAction}
               width="100px"
@@ -349,16 +334,9 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     </Form.Item>
                   </Col>
                 </If>
-                <If
-                  condition={
-                    selectType === 'Github' || selectType === 'Gitee' || selectType === 'Gitlab'
-                  }
-                >
+                <If condition={selectType === 'Github' || selectType === 'Gitee' || selectType === 'Gitlab'}>
                   <Col span={4} style={{ padding: '8px' }}>
-                    <Form.Item
-                      label={<Translation>Path</Translation>}
-                      help="The addon path in the repo"
-                    >
+                    <Form.Item label={<Translation>Path</Translation>} help="The addon path in the repo">
                       <Input
                         {...init('path', {
                           rules: [
@@ -372,10 +350,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                     </Form.Item>
                   </Col>
                   <Col span={selectType === 'Gitlab' ? 4 : 5} style={{ padding: '8px' }}>
-                    <Form.Item
-                      label={<Translation>Token</Translation>}
-                      help="Github Personal access token"
-                    >
+                    <Form.Item label={<Translation>Token</Translation>} help="Github personal access token">
                       <Input
                         {...init('token', {
                           rules: [
@@ -391,10 +366,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                 </If>
                 <If condition={selectType === 'OSS'}>
                   <Col span={4} style={{ padding: '8px' }}>
-                    <Form.Item
-                      label={<Translation>Bucket</Translation>}
-                      help="The bucket path in the oss repo"
-                    >
+                    <Form.Item label={<Translation>Bucket</Translation>} help="The bucket path in the oss repo">
                       <Input
                         {...init('path', {
                           rules: [
@@ -409,12 +381,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                   </Col>
                 </If>
                 <Col span={2} style={{ padding: '43px 8px 8px 8px' }}>
-                  <Button
-                    size="small"
-                    type="secondary"
-                    onClick={this.onOk}
-                    style={{ height: '36px' }}
-                  >
+                  <Button size="small" type="secondary" onClick={this.onOk} style={{ height: '36px' }}>
                     <Translation>Submit</Translation>
                   </Button>
                 </Col>

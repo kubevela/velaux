@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { If } from '../If';
-import Translation from '../Translation';
+import { Translation } from '../Translation';
 
 import './index.less';
 

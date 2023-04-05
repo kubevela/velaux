@@ -18,8 +18,8 @@ import { If } from '../../components/If';
 import Item from '../../components/Item';
 import NumItem from '../../components/NumItem';
 import Permission from '../../components/Permission';
-import Title from '../../components/Title';
-import Translation from '../../components/Translation';
+import { Title } from '../../components/Title';
+import { Translation } from '../../components/Translation';
 import { routerRedux, Link } from 'dva/router';
 import i18n from '../../i18n';
 import type {
@@ -38,7 +38,7 @@ import type {
 import { beautifyTime, momentDate, showAlias } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 import EditAppDialog from '../ApplicationList/components/EditAppDialog';
 
 import ComponentDialog from './components/ComponentDialog';

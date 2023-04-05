@@ -4,25 +4,16 @@ import * as yaml from 'js-yaml';
 import React from 'react';
 import { v4 as uuid } from 'uuid';
 
-import {
-  createPipeline,
-  createPipelineContext,
-  loadPipeline,
-  updatePipeline,
-} from '../../../../api/pipeline';
+import { createPipeline, createPipelineContext, loadPipeline, updatePipeline } from '../../../../api/pipeline';
 import type DefinitionCode from '../../../../components/DefinitionCode';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type {
-  PipelineBase,
-  PipelineDetail,
-  PipelineListItem,
-} from '../../../../interface/pipeline';
+import type { PipelineBase, PipelineDetail, PipelineListItem } from '../../../../interface/pipeline';
 import type { LoginUserInfo } from '../../../../interface/user';
 import { checkName } from '../../../../utils/common';
-import locale from '../../../../utils/locale';
+import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
 
 import { templates } from './pipeline-template';
@@ -62,19 +53,17 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
   componentDidMount() {
     const { pipeline } = this.props;
     if (pipeline) {
-      loadPipeline({ projectName: pipeline.project.name, pipelineName: pipeline.name }).then(
-        (res: PipelineDetail) => {
-          this.field.setValues({
-            name: res.name,
-            project: res.project.name,
-            alias: res.alias,
-            description: res.description,
-            steps: yaml.dump(res.spec.steps),
-            stepMode: res.spec.mode?.steps,
-            subStepMode: res.spec.mode?.subSteps,
-          });
-        },
-      );
+      loadPipeline({ projectName: pipeline.project.name, pipelineName: pipeline.name }).then((res: PipelineDetail) => {
+        this.field.setValues({
+          name: res.name,
+          project: res.project.name,
+          alias: res.alias,
+          description: res.description,
+          steps: yaml.dump(res.spec.steps),
+          stepMode: res.spec.mode?.steps,
+          subStepMode: res.spec.mode?.subSteps,
+        });
+      });
     }
   }
 
@@ -195,11 +184,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
     const projectOptions: Array<{ label: string; value: string }> = [];
     (userInfo?.projects || []).map((project) => {
       if (
-        checkPermission(
-          { resource: `project:${project.name}/pipeline:*`, action: 'create' },
-          project.name,
-          userInfo,
-        )
+        checkPermission({ resource: `project:${project.name}/pipeline:*`, action: 'create' }, project.name, userInfo)
       ) {
         if (project.name === 'default') {
           defaultProject = project.name;

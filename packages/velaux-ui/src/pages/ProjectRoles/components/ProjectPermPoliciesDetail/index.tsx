@@ -5,7 +5,7 @@ import { createProjectRoles, updateProjectRoles } from '../../../../api/project'
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import Translation from '../../../../components/Translation';
+import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { ProjectRoleBase } from '../../../../interface/project';
 import type { PermissionBase } from '../../../../interface/user';
@@ -115,10 +115,7 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
     const name = this.field.getValue('name');
     if (isCreateProjectRoles) {
       return (
-        <Permission
-          request={{ resource: `project:${projectName}/role:*`, action: 'create' }}
-          project={projectName}
-        >
+        <Permission request={{ resource: `project:${projectName}/role:*`, action: 'create' }} project={projectName}>
           <Button className="create-auth-btn" type="primary" onClick={this.onSubmit}>
             <Translation>{'Create'}</Translation>
           </Button>
@@ -193,11 +190,7 @@ class ProjectPermPoliciesDetail extends Component<Props, State> {
                   </FormItem>
                 </Col>
                 <Col span={12} style={{ padding: '16px 16px 0 30px' }}>
-                  <FormItem
-                    label={<Translation>Alias</Translation>}
-                    labelAlign="left"
-                    className="font-weight-400"
-                  >
+                  <FormItem label={<Translation>Alias</Translation>} labelAlign="left" className="font-weight-400">
                     <Input
                       name="alias"
                       placeholder={i18n.t('Please input the role alias').toString()}

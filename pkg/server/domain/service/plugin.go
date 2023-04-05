@@ -19,7 +19,13 @@ package service
 import (
 	"context"
 
+	rbacv1 "k8s.io/api/rbac/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	"github.com/oam-dev/kubevela/pkg/utils"
 
 	"github.com/kubevela/velaux/pkg/plugin/loader"
 	"github.com/kubevela/velaux/pkg/plugin/registry"
@@ -29,6 +35,8 @@ import (
 	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
+
+var pluginRolePrefix = "velaux-plugin:"
 
 // NewPluginService create a plugin service instance
 func NewPluginService(pluginConfig config.PluginConfig) PluginService {
@@ -44,6 +52,7 @@ type PluginService interface {
 	ListInstalledPlugins(ctx context.Context) []v1.PluginDTO
 	DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error)
 	GetPlugin(ctx context.Context, pluginID string) (*types.Plugin, error)
+	InitPluginRole(ctx context.Context, plugin *types.Plugin) error
 	Init(ctx context.Context) error
 }
 
@@ -51,6 +60,7 @@ type pluginImpl struct {
 	loader       *loader.Loader
 	registry     registry.Pool
 	pluginConfig config.PluginConfig
+	KubeClient   client.Client `inject:"kubeClient"`
 }
 
 func (p *pluginImpl) Init(ctx context.Context) error {
@@ -61,10 +71,77 @@ func (p *pluginImpl) Init(ctx context.Context) error {
 		}
 		klog.V(4).Infof("Loaded %d plugins from %s%s", len(plugins), s.Class, s.Paths)
 		for _, plugin := range plugins {
+			// Init the plugin role in the kubernetes.
+			if plugin.BackendType == types.KubeAPI && len(plugin.KubePermissions) > 0 {
+				if err := p.InitPluginRole(ctx, plugin); err != nil {
+					klog.Errorf("failed to init the cluster role for the plugin %s err: %s", plugin.PluginID(), err.Error())
+					continue
+				}
+			}
 			if err := p.registry.Add(ctx, plugin); err != nil {
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+// GeneratePluginRoleName generate the plugin role name.
+func GeneratePluginRoleName(plugin *types.Plugin) string {
+	return pluginRolePrefix + plugin.ID
+}
+
+// GeneratePluginSubjectName generate the plugin subject(group) name.
+func GeneratePluginSubjectName(plugin *types.Plugin) string {
+	return pluginRolePrefix + plugin.PluginID()
+}
+
+func (p *pluginImpl) InitPluginRole(ctx context.Context, plugin *types.Plugin) error {
+	role := &rbacv1.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   GeneratePluginRoleName(plugin),
+			Labels: map[string]string{},
+		},
+		Rules: plugin.KubePermissions,
+	}
+	option, err := utils.CreateOrUpdate(ctx, p.KubeClient, role)
+	if err != nil {
+		return err
+	}
+	if option == controllerutil.OperationResultCreated {
+		klog.Infof("Install the kubernetes role for the plugin %s", plugin.ID)
+	}
+	if option == controllerutil.OperationResultUpdated {
+		klog.Infof("Update the kubernetes role for the plugin %s", plugin.ID)
+	}
+
+	if option == controllerutil.OperationResultNone {
+		klog.Infof("the kubernetes role for the plugin %s has not changed", plugin.ID)
+	}
+
+	roleBinding := &rbacv1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   GeneratePluginRoleName(plugin),
+			Labels: map[string]string{},
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     GeneratePluginRoleName(plugin),
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind: "Group",
+				Name: GeneratePluginSubjectName(plugin),
+			},
+		},
+	}
+	option, err = utils.CreateOrUpdate(ctx, p.KubeClient, roleBinding)
+	if err != nil {
+		return err
+	}
+	if err == nil && option == controllerutil.OperationResultCreated {
+		klog.Infof("Install the kubernetes role binding for the plugin %s", plugin.ID)
 	}
 	return nil
 }
@@ -99,5 +176,15 @@ func pluginSources(config config.PluginConfig) []types.PluginSource {
 	return []types.PluginSource{
 		{Class: types.Core, Paths: []string{config.CorePluginPath}},
 		{Class: types.External, Paths: config.CustomPluginPath},
+	}
+}
+
+// NewTestPluginService only used by testing
+func NewTestPluginService(pluginConfig config.PluginConfig, kubeClient client.Client) PluginService {
+	return &pluginImpl{
+		loader:       loader.New(),
+		registry:     registry.NewInMemory(),
+		pluginConfig: pluginConfig,
+		KubeClient:   kubeClient,
 	}
 }

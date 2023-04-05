@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 
 import type { OutputItem } from '../../interface/application';
-import locale from '../../utils/locale';
+import { locale } from '../../utils/locale';
 const { Row, Col } = Grid;
 
 export const OutputItemForm = (props: { value?: OutputItem; onChange: (i: OutputItem) => void }) => {
