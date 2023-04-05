@@ -246,7 +246,7 @@ class ApplicationConfig extends Component<Props, State> {
 
   editAppPlan = () => {
     const { applicationDetail } = this.props;
-    const { alias = '', description = '', name = '', createTime = '', icon = '', labels } = applicationDetail || {};
+    const { alias = '', description = '', name = '', createTime = '', icon = '', labels, annotations } = applicationDetail || {};
     this.setState({
       editItem: {
         name,
@@ -255,6 +255,7 @@ class ApplicationConfig extends Component<Props, State> {
         createTime,
         icon,
         labels,
+        annotations,
       },
       showEditApplication: true,
     });

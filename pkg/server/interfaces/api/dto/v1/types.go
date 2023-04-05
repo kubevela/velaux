@@ -502,6 +502,7 @@ type UpdateApplicationRequest struct {
 	Description string            `json:"description" optional:"true"`
 	Icon        string            `json:"icon" optional:"true"`
 	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // CreateApplicationTriggerRequest create application trigger
