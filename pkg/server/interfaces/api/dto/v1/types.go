@@ -1856,8 +1856,8 @@ type ListContextValueResponse struct {
 	Contexts map[string][]model.Value `json:"contexts"`
 }
 
-// PluginDTO plugin base model
-type PluginDTO struct {
+// ManagedPluginDTO the model for the managed user
+type ManagedPluginDTO struct {
 	pluginTypes.JSONData
 	Class         pluginTypes.Class `json:"class"`
 	DefaultNavURL string            `json:"defaultNavURL"`
@@ -1866,9 +1866,30 @@ type PluginDTO struct {
 	BaseURL string `json:"baseURL"`
 }
 
+// PluginDTO the model for the common user.
+type PluginDTO struct {
+	ID   string           `json:"id"`
+	Type pluginTypes.Type `json:"type"`
+	// there are four sub types in the definition plugin type, includes: component, trait, policy ,and workflow-step.
+	SubType       string                  `json:"subType"`
+	Name          string                  `json:"name"`
+	Info          pluginTypes.Info        `json:"info"`
+	Includes      []*pluginTypes.Includes `json:"includes"`
+	Category      string                  `json:"category"`
+	DefaultNavURL string                  `json:"defaultNavURL"`
+	// SystemJS fields
+	Module  string `json:"module"`
+	BaseURL string `json:"baseURL"`
+}
+
 // ListPluginResponse -
 type ListPluginResponse struct {
 	Plugins []PluginDTO `json:"plugins"`
+}
+
+// ListManagedPluginResponse -
+type ListManagedPluginResponse struct {
+	Plugins []ManagedPluginDTO `json:"plugins"`
 }
 
 // PluginSettingResponse plugin setting response model

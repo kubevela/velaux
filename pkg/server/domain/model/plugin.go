@@ -24,6 +24,7 @@ func init() {
 type PluginSetting struct {
 	BaseModel
 	ID             string                 `json:"id"`
+	Enabled        bool                   `json:"enabled"`
 	JSONData       map[string]interface{} `json:"jsonData"`
 	SecureJSONData map[string]interface{} `json:"secureJsonData"`
 }

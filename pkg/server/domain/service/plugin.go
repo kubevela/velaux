@@ -49,8 +49,9 @@ func NewPluginService(pluginConfig config.PluginConfig) PluginService {
 
 // PluginService the plugin service provide some handler functions about the plugin
 type PluginService interface {
-	ListInstalledPlugins(ctx context.Context) []v1.PluginDTO
-	DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error)
+	ListInstalledPlugins(ctx context.Context) []v1.ManagedPluginDTO
+	DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error)
+	DetailEnabledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error)
 	GetPlugin(ctx context.Context, pluginID string) (*types.Plugin, error)
 	InitPluginRole(ctx context.Context, plugin *types.Plugin) error
 	Init(ctx context.Context) error
@@ -146,21 +147,21 @@ func (p *pluginImpl) InitPluginRole(ctx context.Context, plugin *types.Plugin) e
 	return nil
 }
 
-func (p *pluginImpl) ListInstalledPlugins(ctx context.Context) []v1.PluginDTO {
+func (p *pluginImpl) ListInstalledPlugins(ctx context.Context) []v1.ManagedPluginDTO {
 	plugins := p.registry.Plugins(ctx)
-	var pluginDTOs []v1.PluginDTO
+	var pluginDTOs []v1.ManagedPluginDTO
 	for _, p := range plugins {
-		pluginDTOs = append(pluginDTOs, assembler.PluginToDTO(*p))
+		pluginDTOs = append(pluginDTOs, assembler.PluginToManagedDTO(*p))
 	}
 	return pluginDTOs
 }
 
-func (p *pluginImpl) DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error) {
+func (p *pluginImpl) DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error) {
 	plugin, ok := p.registry.Plugin(ctx, pluginID)
 	if !ok {
 		return nil, bcode.ErrPluginNotfound
 	}
-	dto := assembler.PluginToDTO(*plugin)
+	dto := assembler.PluginToManagedDTO(*plugin)
 	return &dto, nil
 }
 
@@ -170,6 +171,10 @@ func (p *pluginImpl) GetPlugin(ctx context.Context, pluginID string) (*types.Plu
 		return nil, bcode.ErrPluginNotfound
 	}
 	return plugin, nil
+}
+
+func (p *pluginImpl) DetailEnabledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error) {
+	return nil, nil
 }
 
 func pluginSources(config config.PluginConfig) []types.PluginSource {

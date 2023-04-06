@@ -720,6 +720,9 @@ func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r
 		return r2.Permission.Action
 	}()
 	// Set the plugin resource key
+	if r2.ResourceMap == nil {
+		r2.ResourceMap = map[string]string{}
+	}
 	r2.ResourceMap[defaultPluginResource] = router.DefaultPluginResourceKey
 
 	RegisterPluginResource(resource, r2.ResourceMap)
