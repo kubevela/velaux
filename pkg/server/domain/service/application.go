@@ -891,6 +891,11 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 			},
 		},
 	}
+
+	for key, value := range appModel.Annotations {
+		app.ObjectMeta.Annotations[key] = value
+	}
+
 	originalApp := &v1beta1.Application{}
 	if err := c.KubeClient.Get(ctx, types.NamespacedName{
 		Name:      appModel.Name,
