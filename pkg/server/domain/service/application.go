@@ -326,10 +326,13 @@ func (c *applicationServiceImpl) GetApplicationStatusFromAllEnvs(ctx context.Con
 	for _, eb := range envBindings {
 		var application v1beta1.Application
 		env, err := c.EnvService.GetEnv(ctx, eb.Name)
+		if err != nil {
+			return nil, err
+		}
 		err = c.KubeClient.Get(ctx, types.NamespacedName{Namespace: env.Namespace, Name: eb.AppDeployName}, &application)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
-				return nil, nil
+				continue
 			}
 			return nil, err
 		}
@@ -1807,10 +1810,6 @@ func (c *applicationServiceImpl) RollbackWithRevision(ctx context.Context, appli
 	return &apisv1.ApplicationRollbackResponse{
 		WorkflowRecord: assembler.ConvertFromRecordModel(record).WorkflowRecordBase,
 	}, nil
-}
-
-func (c *envBindingServiceImpl) GetApplicationStatus() {
-
 }
 
 func dryRunApplication(ctx context.Context, c commonutil.Args, app *v1beta1.Application) (bytes.Buffer, error) {
