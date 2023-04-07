@@ -433,6 +433,16 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Writes(apis.ApplicationStatusResponse{}))
 
+	ws.Route(ws.GET("/{appName}/status").To(c.getApplicationStatusFromAllEnvs).
+		Doc("get application status from all envs").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(c.RbacService.CheckPerm("envBinding", "detail")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string")).
+		Returns(200, "OK", []*apis.ApplicationStatusResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes([]*apis.ApplicationStatusResponse{}))
+
 	ws.Route(ws.POST("/{appName}/envs/{envName}/recycle").To(c.recycleApplicationEnv).
 		Doc("recycle application env").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
@@ -1107,6 +1117,20 @@ func (c *application) getApplicationStatus(req *restful.Request, res *restful.Re
 	}
 
 	if err := res.WriteEntity(apis.ApplicationStatusResponse{Status: status, EnvName: req.PathParameter("envName")}); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) getApplicationStatusFromAllEnvs(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	status, err := c.ApplicationService.GetApplicationStatusFromAllEnvs(req.Request.Context(), app)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+
+	if err := res.WriteEntity(status); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
