@@ -43,3 +43,12 @@ func (p PluginSetting) TableName() string {
 func (p PluginSetting) ShortTableName() string {
 	return "plugin"
 }
+
+// Index return custom index
+func (p PluginSetting) Index() map[string]interface{} {
+	index := make(map[string]interface{})
+	if p.ID != "" {
+		index["name"] = p.ID
+	}
+	return index
+}

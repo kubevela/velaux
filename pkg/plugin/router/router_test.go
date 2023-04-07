@@ -17,13 +17,12 @@ limitations under the License.
 package router
 
 import (
+	"github.com/julienschmidt/httprouter"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
-
-	"github.com/julienschmidt/httprouter"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/kubevela/velaux/pkg/plugin/types"
 )

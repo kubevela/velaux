@@ -427,6 +427,10 @@ func (s *restServer) proxyPluginBackend(req *http.Request, res http.ResponseWrit
 		bcode.ReturnHTTPError(req, res, bcode.ErrIsNotProxyBackendPlugin)
 		return
 	}
+	if !plugin.Setting.Enabled {
+		bcode.ReturnHTTPError(req, res, bcode.ErrPluginNotEnabled)
+		return
+	}
 	// Register the plugin route
 	router.GenerateHTTPRouter(plugin, PluginProxyRoutePath, s.pluginBackendProxyHandler).ServeHTTP(res, req)
 }

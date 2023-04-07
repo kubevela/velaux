@@ -35,7 +35,7 @@ func NewManagePlugin() Interface {
 	return &ManagePlugin{}
 }
 
-// Plugin plugin web service
+// Plugin web service
 type Plugin struct {
 	RBACService   service.RBACService   `inject:""`
 	PluginService service.PluginService `inject:""`
@@ -53,9 +53,9 @@ func (p *Plugin) GetWebServiceRoute() *restful.WebService {
 	ws.Path(versionPrefix+"/plugins").
 		Consumes(restful.MIME_XML, restful.MIME_JSON).
 		Produces(restful.MIME_JSON, restful.MIME_XML).
-		Doc("api for Target manage")
+		Doc("api for plugin")
 
-	tags := []string{"Target"}
+	tags := []string{"Plugin"}
 
 	ws.Route(ws.GET("/").To(p.listEnabledPlugins).
 		Doc("List the enabled plugins").
@@ -64,7 +64,7 @@ func (p *Plugin) GetWebServiceRoute() *restful.WebService {
 		Returns(200, "OK", apis.ListPluginResponse{}).
 		Writes(apis.ListPluginResponse{}).Do(returns200, returns500))
 
-	ws.Route(ws.GET("/{pluginId}").To(p.detailEnabledPlugin).
+	ws.Route(ws.GET("/{pluginId}").To(p.detailPlugin).
 		Doc("Detail an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("plugin", "detail")).
@@ -75,14 +75,15 @@ func (p *Plugin) GetWebServiceRoute() *restful.WebService {
 	return ws
 }
 
+// GetWebServiceRoute get web service
 func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 	ws := new(restful.WebService)
 	ws.Path(versionPrefix+"/manage/plugins").
 		Consumes(restful.MIME_XML, restful.MIME_JSON).
 		Produces(restful.MIME_JSON, restful.MIME_XML).
-		Doc("api for Target manage")
+		Doc("api for plugin manage")
 
-	tags := []string{"Target"}
+	tags := []string{"Plugin"}
 
 	ws.Route(ws.GET("/").To(p.listInstalledPlugins).
 		Doc("List the installed plugins").
@@ -108,6 +109,7 @@ func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.POST("/{pluginId}/enable").To(p.enablePlugin).
 		Doc("Enable an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(apis.PluginEnableRequest{}).
 		Filter(p.RBACService.CheckPerm("plugin", "enable")).
 		Returns(200, "OK", apis.PluginDTO{}).
 		Writes(apis.PluginDTO{}).Do(returns200, returns500))
@@ -124,11 +126,29 @@ func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 }
 
 func (p *Plugin) listEnabledPlugins(req *restful.Request, res *restful.Response) {
-
+	plugins, err := p.PluginService.ListEnabledPlugins(req.Request.Context())
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	// Write back response data
+	if err := res.WriteEntity(apis.ListPluginResponse{Plugins: plugins}); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
 }
 
-func (p *Plugin) detailEnabledPlugin(req *restful.Request, res *restful.Response) {
-
+func (p *Plugin) detailPlugin(req *restful.Request, res *restful.Response) {
+	plugin, err := p.PluginService.DetailPlugin(req.Request.Context(), req.PathParameter("pluginId"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	// Write back response data
+	if err := res.WriteEntity(plugin); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
 }
 
 func (p *ManagePlugin) listInstalledPlugins(req *restful.Request, res *restful.Response) {
@@ -153,8 +173,51 @@ func (p *ManagePlugin) detailPlugin(req *restful.Request, res *restful.Response)
 	}
 }
 
-func (p *ManagePlugin) pluginSetting(req *restful.Request, res *restful.Response) {}
+func (p *ManagePlugin) pluginSetting(req *restful.Request, res *restful.Response) {
+	var reqBody apis.PluginSetRequest
+	if err := req.ReadEntity(&reqBody); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	plugin, err := p.PluginService.SetPlugin(req.Request.Context(), req.PathParameter("pluginId"), reqBody)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	// Write back response data
+	if err := res.WriteEntity(plugin); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
 
-func (p *ManagePlugin) enablePlugin(req *restful.Request, res *restful.Response) {}
+func (p *ManagePlugin) enablePlugin(req *restful.Request, res *restful.Response) {
+	var reqBody apis.PluginEnableRequest
+	if err := req.ReadEntity(&reqBody); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	plugin, err := p.PluginService.EnablePlugin(req.Request.Context(), req.PathParameter("pluginId"), reqBody)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	// Write back response data
+	if err := res.WriteEntity(plugin); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
 
-func (p *ManagePlugin) disablePlugin(req *restful.Request, res *restful.Response) {}
+func (p *ManagePlugin) disablePlugin(req *restful.Request, res *restful.Response) {
+	plugin, err := p.PluginService.DisablePlugin(req.Request.Context(), req.PathParameter("pluginId"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	// Write back response data
+	if err := res.WriteEntity(plugin); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}

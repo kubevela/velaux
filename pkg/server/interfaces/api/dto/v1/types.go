@@ -1856,7 +1856,7 @@ type ListContextValueResponse struct {
 	Contexts map[string][]model.Value `json:"contexts"`
 }
 
-// ManagedPluginDTO the model for the managed user
+// ManagedPluginDTO the model for the plugin manager.
 type ManagedPluginDTO struct {
 	pluginTypes.JSONData
 	Class         pluginTypes.Class `json:"class"`
@@ -1894,14 +1894,15 @@ type ListManagedPluginResponse struct {
 
 // PluginSettingResponse plugin setting response model
 type PluginSettingResponse struct {
-	PluginDTO
 	JSONData         map[string]interface{} `json:"jsonData"`
 	SecureJSONFields map[string]bool        `json:"secureJsonFields"`
 }
 
-// PluginSettingRequest plugin setting request model
-type PluginSettingRequest struct {
-	PluginDTO
+// PluginSetRequest plugin setting request model
+type PluginSetRequest struct {
 	JSONData       map[string]interface{} `json:"jsonData"`
 	SecureJSONData map[string]interface{} `json:"secureJsonData"`
 }
+
+// PluginEnableRequest plugin enable request model
+type PluginEnableRequest PluginSetRequest

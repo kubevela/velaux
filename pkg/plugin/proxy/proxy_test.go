@@ -52,7 +52,7 @@ var _ = Describe("Test proxy", func() {
 				},
 			},
 		}
-		pluginService := service.NewTestPluginService(config.PluginConfig{}, k8sClient)
+		pluginService := service.NewTestPluginService(config.PluginConfig{}, k8sClient, nil)
 		Expect(pluginService.InitPluginRole(context.TODO(), plugin)).To(BeNil())
 
 		proxy, err := NewBackendPluginProxy(plugin, k8sClient, cfg)
