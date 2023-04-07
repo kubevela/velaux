@@ -70,6 +70,7 @@ type ApplicationService interface {
 	ListApplications(ctx context.Context, listOptions apisv1.ListApplicationOptions) ([]*apisv1.ApplicationBase, error)
 	GetApplication(ctx context.Context, appName string) (*model.Application, error)
 	GetApplicationStatus(ctx context.Context, app *model.Application, envName string) (*common.AppStatus, error)
+	GetApplicationStatusFromAllEnvs(ctx context.Context, app *model.Application) ([]*apisv1.ApplicationStatusResponse, error)
 	DetailApplication(ctx context.Context, app *model.Application) (*apisv1.DetailApplicationResponse, error)
 	PublishApplicationTemplate(ctx context.Context, app *model.Application) (*apisv1.ApplicationTemplateBase, error)
 	CreateApplication(context.Context, apisv1.CreateApplicationRequest) (*apisv1.ApplicationBase, error)
@@ -313,6 +314,38 @@ func (c *applicationServiceImpl) GetApplicationStatus(ctx context.Context, appmo
 		app.Status.Phase = common.ApplicationDeleting
 	}
 	return &app.Status, nil
+}
+
+// GetApplicationStatusFromAllEnvs get applications status from all envs
+func (c *applicationServiceImpl) GetApplicationStatusFromAllEnvs(ctx context.Context, appmodel *model.Application) ([]*apisv1.ApplicationStatusResponse, error) {
+	envBindings, err := c.EnvBindingService.GetEnvBindings(ctx, appmodel)
+	if err != nil {
+		return nil, err
+	}
+	var res []*apisv1.ApplicationStatusResponse
+	for _, eb := range envBindings {
+		var application v1beta1.Application
+		env, err := c.EnvService.GetEnv(ctx, eb.Name)
+		if err != nil {
+			return nil, err
+		}
+		err = c.KubeClient.Get(ctx, types.NamespacedName{Namespace: env.Namespace, Name: eb.AppDeployName}, &application)
+		if err != nil {
+			if apierrors.IsNotFound(err) {
+				continue
+			}
+			return nil, err
+		}
+		if application.Generation > application.Status.ObservedGeneration {
+			application.Status.Phase = common.ApplicationStarting
+		}
+		if !application.DeletionTimestamp.IsZero() {
+			application.Status.Phase = common.ApplicationDeleting
+		}
+		res = append(res, &apisv1.ApplicationStatusResponse{EnvName: env.Name, Status: &application.Status})
+	}
+
+	return res, nil
 }
 
 // GetApplicationStatus get application CR from controller cluster
