@@ -285,6 +285,7 @@ class ApplicationConfig extends Component<Props, State> {
     this.setState({
       visibleComponent: true,
       isEditComponent: false,
+      componentName: '',
     });
   };
 
