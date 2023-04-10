@@ -4,7 +4,7 @@ import React from 'react';
 
 import './index.less';
 import { If } from '../../components/If';
-import Translation from '../../components/Translation';
+import { Translation } from '../../components/Translation';
 import { AiOutlineDelete } from 'react-icons/ai';
 
 type Props = {
