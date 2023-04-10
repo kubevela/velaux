@@ -18,7 +18,6 @@ package e2e_test
 
 import (
 	"cuelang.org/go/pkg/strings"
-	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -34,17 +33,70 @@ var _ = Describe("Test the plugin rest api", func() {
 		It("Test list installed plugins", func() {
 			defer GinkgoRecover()
 			res := get("/manage/plugins")
-			var lpr apisv1.ListPluginResponse
+			var lpr apisv1.ListManagedPluginResponse
 			Expect(decodeResponseBody(res, &lpr)).Should(Succeed())
-			Expect(cmp.Diff(len(lpr.Plugins), 2)).Should(BeEmpty())
+			Expect(len(lpr.Plugins)).Should(Equal(2))
+			Expect(lpr.Plugins[0].Enabled).Should(BeFalse())
 		})
 
-		It("Test get a installed plugin", func() {
+		It("Test detail a installed plugin", func() {
 			defer GinkgoRecover()
 			res := get("/manage/plugins/app-demo")
-			var dto apisv1.PluginDTO
+			var dto apisv1.ManagedPluginDTO
 			Expect(decodeResponseBody(res, &dto)).Should(Succeed())
-			Expect(cmp.Diff(dto.Module, "plugins/app-demo/module")).Should(BeEmpty())
+			Expect(dto.Module).Should(Equal("plugins/app-demo/module"))
+		})
+
+		It("Test enable/set/disable plugin", func() {
+			By("before enable")
+			res := get("/manage/plugins/app-demo")
+			var dto apisv1.ManagedPluginDTO
+			Expect(decodeResponseBody(res, &dto)).Should(Succeed())
+			Expect(dto.Enabled).Should(BeFalse())
+
+			By("enable")
+			enableReq := apisv1.PluginEnableRequest{
+				JSONData: map[string]interface{}{
+					"arg1": "value1",
+				},
+				SecureJSONData: map[string]interface{}{
+					"arg2": "value2",
+				},
+			}
+			res = post("/manage/plugins/app-demo/enable", enableReq)
+			Expect(decodeResponseBody(res, &dto)).Should(Succeed())
+			Expect(dto.Enabled).Should(BeTrue())
+			Expect(dto.JSONSetting["arg1"]).Should(Equal("value1"))
+			Expect(dto.SecureJSONFields["arg2"]).Should(Equal(true))
+
+			By("after enable, get")
+			res = get("/manage/plugins/app-demo")
+			Expect(decodeResponseBody(res, &dto)).Should(Succeed())
+			Expect(dto.Enabled).Should(BeTrue())
+			Expect(dto.JSONSetting["arg1"]).Should(Equal("value1"))
+			Expect(dto.SecureJSONFields["arg2"]).Should(Equal(true))
+
+			By("change the setting")
+			setReq := apisv1.PluginSetRequest{
+				JSONData: map[string]interface{}{
+					"arg1": "changedValue1",
+				},
+				SecureJSONData: map[string]interface{}{
+					"arg2":   "changedValue2",
+					"addArg": "addValue",
+				},
+			}
+			res = post("/manage/plugins/app-demo/setting", setReq)
+			Expect(decodeResponseBody(res, &dto)).Should(Succeed())
+			Expect(dto.Enabled).Should(BeTrue())
+			Expect(dto.JSONSetting["arg1"]).Should(Equal("changedValue1"))
+			Expect(dto.SecureJSONFields["arg2"]).Should(Equal(true))
+			Expect(dto.SecureJSONFields["addArg"]).Should(Equal(true))
+
+			By("disable the plugin")
+			res = post("/manage/plugins/app-demo/disable", nil)
+			Expect(decodeResponseBody(res, &dto)).Should(Succeed())
+			Expect(dto.Enabled).Should(BeFalse())
 		})
 	})
 
@@ -66,11 +118,11 @@ var _ = Describe("Test the plugin rest api", func() {
 			res = post("/manage/plugins/node-dashboard/enable", nil)
 			var dto apisv1.PluginDTO
 			Expect(decodeResponseBody(res, &dto)).Should(Succeed())
-			Expect(cmp.Diff(dto.ID, "node-dashboard")).Should(BeEmpty())
+			Expect(dto.ID).Should(Equal("node-dashboard"))
 
 			res = get(baseDomain + "/proxy/plugins/node-dashboard/api/v1/nodes")
 			Expect(decodeResponseBody(res, &nodeList)).Should(Succeed())
-			Expect(cmp.Diff(len(nodeList.Items), 1)).Should(BeEmpty())
+			Expect(len(nodeList.Items)).Should(Equal(1))
 		})
 	})
 
@@ -81,7 +133,7 @@ var _ = Describe("Test the plugin rest api", func() {
 			defer GinkgoRecover()
 			res := get(baseDomain + "/public/plugins/app-demo/module.js")
 			defer func() { _ = res.Body.Close() }()
-			Expect(cmp.Diff(res.StatusCode, 200)).Should(BeEmpty())
+			Expect(res.StatusCode).Should(Equal(200))
 		})
 	})
 
@@ -94,6 +146,6 @@ var _ = Describe("Test to request the dex plugin", func() {
 		var bcode bcode.Bcode
 		err := decodeResponseBody(res, &bcode)
 		Expect(strings.HasPrefix(err.Error(), "response code is not 200")).Should(BeTrue())
-		Expect(cmp.Diff(bcode.BusinessCode, int32(404))).Should(BeEmpty())
+		Expect(bcode.BusinessCode).Should(Equal(int32(404)))
 	})
 })

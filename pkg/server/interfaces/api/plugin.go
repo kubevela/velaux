@@ -96,14 +96,14 @@ func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 		Doc("Detail an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "detail")).
-		Returns(200, "OK", apis.PluginDTO{}).
+		Returns(200, "OK", apis.ManagedPluginDTO{}).
 		Writes(apis.PluginDTO{}).Do(returns200, returns500))
 
 	ws.Route(ws.POST("/{pluginId}/setting").To(p.pluginSetting).
 		Doc("Set an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "update")).
-		Returns(200, "OK", apis.PluginDTO{}).
+		Returns(200, "OK", apis.ManagedPluginDTO{}).
 		Writes(apis.PluginDTO{}).Do(returns200, returns500))
 
 	ws.Route(ws.POST("/{pluginId}/enable").To(p.enablePlugin).
@@ -111,14 +111,14 @@ func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(apis.PluginEnableRequest{}).
 		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
-		Returns(200, "OK", apis.PluginDTO{}).
+		Returns(200, "OK", apis.ManagedPluginDTO{}).
 		Writes(apis.PluginDTO{}).Do(returns200, returns500))
 
 	ws.Route(ws.POST("/{pluginId}/disable").To(p.disablePlugin).
 		Doc("Disable an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
-		Returns(200, "OK", apis.PluginDTO{}).
+		Returns(200, "OK", apis.ManagedPluginDTO{}).
 		Writes(apis.PluginDTO{}).Do(returns200, returns500))
 
 	ws.Filter(authCheckFilter)

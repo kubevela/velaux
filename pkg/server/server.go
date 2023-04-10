@@ -427,7 +427,12 @@ func (s *restServer) proxyPluginBackend(req *http.Request, res http.ResponseWrit
 		bcode.ReturnHTTPError(req, res, bcode.ErrIsNotProxyBackendPlugin)
 		return
 	}
-	if !plugin.Setting.Enabled {
+	setting, err := s.PluginService.GetPluginSetting(req.Context(), pluginID)
+	if err != nil {
+		bcode.ReturnHTTPError(req, res, err)
+		return
+	}
+	if !setting.Enabled {
 		bcode.ReturnHTTPError(req, res, bcode.ErrPluginNotEnabled)
 		return
 	}

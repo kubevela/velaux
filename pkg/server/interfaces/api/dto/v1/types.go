@@ -1862,8 +1862,9 @@ type ManagedPluginDTO struct {
 	Class         pluginTypes.Class `json:"class"`
 	DefaultNavURL string            `json:"defaultNavURL"`
 	// SystemJS fields
-	Module           string                 `json:"module"`
-	BaseURL          string                 `json:"baseURL"`
+	Module  string `json:"module"`
+	BaseURL string `json:"baseURL"`
+	// Settings
 	Enabled          bool                   `json:"enabled"`
 	JSONSetting      map[string]interface{} `json:"jsonSetting"`
 	SecureJSONFields map[string]bool        `json:"secureJsonFields"`

@@ -317,9 +317,9 @@ func PluginToDTO(p pluginTypes.Plugin) apisv1.PluginDTO {
 }
 
 // PluginToManagedDTO convert plugin to dto
-func PluginToManagedDTO(p pluginTypes.Plugin) apisv1.ManagedPluginDTO {
+func PluginToManagedDTO(p pluginTypes.Plugin, setting model.PluginSetting) apisv1.ManagedPluginDTO {
 	secureJSONFields := make(map[string]bool)
-	for k := range p.Setting.SecureJSONData {
+	for k := range setting.SecureJSONData {
 		secureJSONFields[k] = true
 	}
 	return apisv1.ManagedPluginDTO{
@@ -328,8 +328,8 @@ func PluginToManagedDTO(p pluginTypes.Plugin) apisv1.ManagedPluginDTO {
 		DefaultNavURL:    p.DefaultNavURL,
 		Module:           p.Module,
 		BaseURL:          p.BaseURL,
-		Enabled:          p.Setting.Enabled,
-		JSONSetting:      p.Setting.JSONData,
+		Enabled:          setting.Enabled,
+		JSONSetting:      setting.JSONData,
 		SecureJSONFields: secureJSONFields,
 	}
 }
