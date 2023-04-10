@@ -83,6 +83,7 @@ var _ = BeforeSuite(func() {
 	server := server.New(cfg)
 	Expect(server).ShouldNot(BeNil())
 	go func() {
+		defer GinkgoRecover()
 		err := server.Run(ctx, make(chan error))
 		Expect(err).ShouldNot(HaveOccurred())
 	}()

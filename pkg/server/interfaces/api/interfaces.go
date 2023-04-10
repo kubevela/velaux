@@ -75,6 +75,7 @@ func InitAPIBean() []interface{} {
 	RegisterAPI(NewEnabledAddon())
 	RegisterAPI(NewAddonRegistry())
 	RegisterAPI(NewPlugin())
+	RegisterAPI(NewManagePlugin())
 
 	// Config management
 	RegisterAPI(Config())

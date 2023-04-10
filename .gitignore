@@ -39,3 +39,5 @@ dist
 .pnp.*
 
 tsconfig.tsbuildinfo
+
+e2e-plugins

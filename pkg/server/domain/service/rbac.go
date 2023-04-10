@@ -306,6 +306,8 @@ var ResourceMaps = map[string]resourceMetadata{
 	"cloudshell":     {},
 	"config":         {},
 	"configTemplate": {},
+	"plugin":         {},
+	"managePlugin":   {},
 }
 
 var existResourcePaths = convertSources(ResourceMaps)
@@ -393,8 +395,12 @@ func buildMap(resources []string, resourceNameMap map[string]string) map[string]
 
 func mergeMap(source, target map[string]resourceMetadata) {
 	for k, v := range source {
-		if _, exist := target[k]; exist {
-			mergeMap(source[k].subResources, target[k].subResources)
+		if rm, exist := target[k]; exist {
+			if rm.subResources == nil {
+				rm.subResources = make(map[string]resourceMetadata)
+			}
+			mergeMap(source[k].subResources, rm.subResources)
+			target[k] = rm
 		} else {
 			target[k] = v
 		}
@@ -704,7 +710,7 @@ func (p *rbacServiceImpl) CheckPerm(resource string, actions ...string) func(req
 	return f
 }
 
-// CheckPluginRequestPerm handle RBAC checking for the the http request to plugin backend
+// CheckPluginRequestPerm handle RBAC checking for the http request to plugin backend
 // pathFormat: eg. nodes/{node}/status
 func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r2 *plugintypes.Route) func(req *http.Request, res http.ResponseWriter) bool {
 	var resource = path.Join(defaultPluginResource, func() string {

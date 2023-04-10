@@ -48,7 +48,7 @@ func (p PluginSetting) ShortTableName() string {
 func (p PluginSetting) Index() map[string]interface{} {
 	index := make(map[string]interface{})
 	if p.ID != "" {
-		index["name"] = p.ID
+		index["id"] = p.ID
 	}
 	return index
 }

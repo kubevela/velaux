@@ -71,7 +71,7 @@ type pluginImpl struct {
 	loader       *loader.Loader
 	registry     registry.Pool
 	pluginConfig config.PluginConfig
-	Store        datastore.DataStore `inject:"dataStore"`
+	Store        datastore.DataStore `inject:"datastore"`
 	KubeClient   client.Client       `inject:"kubeClient"`
 }
 
