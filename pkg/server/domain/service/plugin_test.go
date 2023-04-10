@@ -50,7 +50,10 @@ var _ = Describe("Test plugin service", func() {
 	It("Test get/enable/disable/set the plugin", func() {
 		plugin, err := pluginService.GetPlugin(ctx, "backend-kube-service")
 		Expect(err).Should(BeNil())
-		Expect(plugin.Setting.Enabled).Should(BeFalse())
+		Expect(plugin.ID).Should(Equal("backend-kube-service"))
+		setting, err := pluginService.GetPluginSetting(ctx, "backend-kube-service")
+		Expect(err).Should(BeNil())
+		Expect(setting.Enabled).Should(BeFalse())
 		_, err = pluginService.DisablePlugin(ctx, "backend-kube-service")
 		Expect(err).ShouldNot(BeNil())
 		Expect(err).Should(Equal(bcode.ErrPluginAlreadyDisabled))
@@ -63,11 +66,11 @@ var _ = Describe("Test plugin service", func() {
 			},
 		})
 		Expect(err).Should(BeNil())
-		plugin, err = pluginService.GetPlugin(ctx, "backend-kube-service")
+		setting, err = pluginService.GetPluginSetting(ctx, "backend-kube-service")
 		Expect(err).Should(BeNil())
-		Expect(plugin.Setting.Enabled).Should(BeTrue())
-		Expect(plugin.Setting.JSONData["key1"]).Should(Equal("val1"))
-		Expect(plugin.Setting.SecureJSONData["topSecret"]).Should(Equal("topSecretVal"))
+		Expect(setting.Enabled).Should(BeTrue())
+		Expect(setting.JSONData["key1"]).Should(Equal("val1"))
+		Expect(setting.SecureJSONData["topSecret"]).Should(Equal("topSecretVal"))
 
 		By("Test set the plugin")
 		_, err = pluginService.SetPlugin(ctx, "backend-kube-service", v1.PluginSetRequest{
@@ -79,11 +82,11 @@ var _ = Describe("Test plugin service", func() {
 			},
 		})
 		Expect(err).Should(BeNil())
-		plugin, err = pluginService.GetPlugin(ctx, "backend-kube-service")
+		setting, err = pluginService.GetPluginSetting(ctx, "backend-kube-service")
 		Expect(err).Should(BeNil())
-		Expect(plugin.Setting.Enabled).Should(BeTrue())
-		Expect(plugin.Setting.JSONData["key1"]).Should(Equal("val2"))
-		Expect(plugin.Setting.SecureJSONData["topSecret"]).Should(Equal("topSecretVal2"))
+		Expect(setting.Enabled).Should(BeTrue())
+		Expect(setting.JSONData["key1"]).Should(Equal("val2"))
+		Expect(setting.SecureJSONData["topSecret"]).Should(Equal("topSecretVal2"))
 
 		By("Test list enabled plugins")
 		plugins, err := pluginService.ListEnabledPlugins(ctx)
