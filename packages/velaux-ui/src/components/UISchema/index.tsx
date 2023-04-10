@@ -29,6 +29,7 @@ import PolicySelect from '../../extends/PolicySelect';
 import SecretKeySelect from '../../extends/SecretKeySelect';
 import SecretSelect from '../../extends/SecretSelect';
 import Strings from '../../extends/Strings';
+import Numbers from '../../extends/Numbers';
 import Structs from '../../extends/Structs';
 import type { Definition } from '../../interface/addon';
 import { checkImageName, replaceUrl } from '../../utils/common';
@@ -624,6 +625,17 @@ class UISchema extends Component<Props, State> {
           case 'Strings':
             return getGroup(
               <Strings
+                disabled={disableEdit}
+                key={param.jsonKey}
+                {...init(param.jsonKey, {
+                  initValue: initValue,
+                  rules: convertRule(param.validate),
+                })}
+              />
+            );
+          case 'Numbers':
+            return getGroup(
+              <Numbers
                 disabled={disableEdit}
                 key={param.jsonKey}
                 {...init(param.jsonKey, {
