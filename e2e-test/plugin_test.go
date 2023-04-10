@@ -19,11 +19,12 @@ package e2e_test
 import (
 	"cuelang.org/go/pkg/strings"
 	"github.com/google/go-cmp/cmp"
-	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
-	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+
+	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
+	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 var _ = Describe("Test the plugin rest api", func() {
