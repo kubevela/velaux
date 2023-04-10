@@ -328,6 +328,7 @@ func PluginToManagedDTO(p pluginTypes.Plugin) apisv1.ManagedPluginDTO {
 		DefaultNavURL:    p.DefaultNavURL,
 		Module:           p.Module,
 		BaseURL:          p.BaseURL,
+		Enabled:          p.Setting.Enabled,
 		JSONSetting:      p.Setting.JSONData,
 		SecureJSONFields: secureJSONFields,
 	}

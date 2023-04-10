@@ -400,6 +400,7 @@ func mergeMap(source, target map[string]resourceMetadata) {
 				rm.subResources = make(map[string]resourceMetadata)
 			}
 			mergeMap(source[k].subResources, rm.subResources)
+			rm.pathName = source[k].pathName
 			target[k] = rm
 		} else {
 			target[k] = v
@@ -713,6 +714,7 @@ func (p *rbacServiceImpl) CheckPerm(resource string, actions ...string) func(req
 // CheckPluginRequestPerm handle RBAC checking for the http request to plugin backend
 // pathFormat: eg. nodes/{node}/status
 func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r2 *plugintypes.Route) func(req *http.Request, res http.ResponseWriter) bool {
+	// request plugin:* by default?
 	var resource = path.Join(defaultPluginResource, func() string {
 		if r2 == nil || r2.Permission == nil {
 			return ""
@@ -755,6 +757,8 @@ func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r
 			bcode.ReturnHTTPError(req, res, bcode.ErrUnauthorized)
 			return false
 		}
+		// resource: plugin/cluster/node
+		// path: plugin:p1/cluster:cluster1/node:node1
 		path, err := checkResourcePath(resource)
 		if err != nil {
 			klog.Errorf("check resource path failure %s", err.Error())
