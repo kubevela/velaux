@@ -21,7 +21,7 @@ interface Props {
   onCancel(): void;
 }
 
-const generateCanaryDeployGroup = (step: WorkflowStep, batch: number, mode: WorkflowMode): WorkflowStep => {
+const generateCanaryDeployGroup = (step: WorkflowStep, batch: number): WorkflowStep => {
   const interval = Math.round(100 / batch);
   const steps: WorkflowStep[] = [];
   const policies: string[] | null = step.properties ? step.properties['policies'] : null;
@@ -39,10 +39,6 @@ const generateCanaryDeployGroup = (step: WorkflowStep, batch: number, mode: Work
       batchStep.properties['policies'] = _.cloneDeep(policies);
     }
     const approveStep: WorkflowStep = { name: 'approve-' + i, alias: 'Approve ' + i, type: 'suspend' };
-    if (mode === 'DAG' && i > 0) {
-      batchStep.dependsOn = ['approve-' + i];
-      approveStep.dependsOn = ['batch-' + (i - 1)];
-    }
     if (i > 0) {
       steps.push(approveStep);
     }
@@ -51,6 +47,7 @@ const generateCanaryDeployGroup = (step: WorkflowStep, batch: number, mode: Work
   return {
     type: 'step-group',
     name: step.name + '-canary',
+    mode: 'StepByStep',
     subSteps: steps,
   };
 };
@@ -74,7 +71,7 @@ export const CanarySetting: React.FunctionComponent<Props> = (props: Props) => {
     const newSteps = props.workflow?.steps?.map((step) => {
       if (step.type === DeployModes.Deploy) {
         const batch = getStepBatch(step.name);
-        return generateCanaryDeployGroup(step, batch, props.workflow?.subMode || 'DAG');
+        return generateCanaryDeployGroup(step, batch);
       }
       return step;
     });

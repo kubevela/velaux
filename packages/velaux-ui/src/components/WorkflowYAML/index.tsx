@@ -1,6 +1,6 @@
 import { Message } from '@alifd/next';
 import * as yaml from 'js-yaml';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { WorkflowStep } from '../../interface/pipeline';
 import DefinitionCode from '../DefinitionCode';
@@ -13,7 +13,14 @@ type Props = {
 };
 export const WorkflowYAML = (props: Props) => {
   const id = 'workflow:' + props.name;
-  const content = yaml.dump(props.steps);
+  const [content, setContent] = useState<string>();
+  useEffect(() => {
+    try {
+      const c = yaml.dump(props.steps);
+      setContent(c);
+    } catch {}
+  }, [props.steps]);
+
   return (
     <div>
       <Message type="help">

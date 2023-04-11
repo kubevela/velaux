@@ -471,10 +471,15 @@ type AppDryRunResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
-// ApplicationStatusResponse application status response body
+// ApplicationStatusResponse application env status response body
 type ApplicationStatusResponse struct {
 	EnvName string            `json:"envName"`
 	Status  *common.AppStatus `json:"status"`
+}
+
+// ApplicationStatusListResponse the all env status of an application
+type ApplicationStatusListResponse struct {
+	Status []*ApplicationStatusResponse `json:"status"`
 }
 
 // ApplicationStatisticsResponse application statistics response body
@@ -1037,6 +1042,7 @@ type UpdateWorkflowRequest struct {
 // WorkflowStep workflow step config
 type WorkflowStep struct {
 	WorkflowStepBase `json:",inline"`
+	Mode             string             `json:"mode,omitempty" validate:"checkMode"`
 	SubSteps         []WorkflowStepBase `json:"subSteps,omitempty"`
 }
 

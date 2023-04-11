@@ -1,4 +1,4 @@
-import type { Condition, InputItem, OutputItem, WorkflowStepStatus } from './application';
+import type { Condition, InputItem, OutputItem, WorkflowMode, WorkflowStepStatus } from './application';
 import type { NameAlias } from './env';
 
 export interface CreatePipelineRequest {
@@ -116,12 +116,13 @@ export interface WorkflowStepBase {
 }
 
 export interface WorkflowStep extends WorkflowStepBase {
+  mode?: WorkflowMode;
   subSteps?: WorkflowStepBase[];
 }
 
 interface PipelineRunMode {
-  steps?: 'DAG' | 'StepByStep';
-  subSteps?: 'DAG' | 'StepByStep';
+  steps?: WorkflowMode;
+  subSteps?: WorkflowMode;
 }
 
 export type RunPhase =

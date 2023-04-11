@@ -129,7 +129,7 @@ class StepForm extends Component<Props, State> {
         onOk={this.onSubmit}
         extButtons={[
           <Button key={'cancel'} style={{ marginRight: '16px' }} onClick={onClose}>
-            Cancel
+            <Translation>Cancel</Translation>
           </Button>,
         ]}
       >

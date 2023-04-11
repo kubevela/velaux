@@ -1,4 +1,4 @@
-import { Button, Dialog, Message, Radio } from '@alifd/next';
+import { Button, Dialog, Message, Radio, Loading } from '@alifd/next';
 import React, { Component } from 'react';
 import { Link, routerRedux } from 'dva/router';
 import { dryRunApplication } from '../../../../api/application';
@@ -6,7 +6,13 @@ import { ApplicationDryRun } from '../../../../components/ApplicationDryRun';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { ApplicationDetail, ApplicationDryRunResponse, Workflow } from '../../../../interface/application';
+import type {
+  ApplicationDetail,
+  ApplicationDryRunResponse,
+  ApplicationEnvStatus,
+  ApplicationStatus,
+  Workflow,
+} from '../../../../interface/application';
 import type { APIError } from '../../../../utils/errors';
 import { locale } from '../../../../utils/locale';
 import './index.less';
@@ -18,10 +24,12 @@ const { Group: RadioGroup } = Radio;
 interface Props {
   appName: string;
   applicationDetail: ApplicationDetail;
+  applicationAllStatus?: ApplicationEnvStatus[];
   onClose: () => void;
   onOK: (workflowName?: string, force?: boolean) => void;
   workflows?: Workflow[];
   dispatch: Dispatch;
+  loading: boolean;
 }
 
 interface State {
@@ -130,10 +138,14 @@ class DeployConfigDialog extends Component<Props, State> {
   };
 
   render() {
-    const { workflows, onClose, applicationDetail } = this.props;
+    const { workflows, onClose, applicationDetail, applicationAllStatus, loading } = this.props;
     const { workflowName, dryRunLoading, showDryRunResult, dryRunResult, dryRunResultState, dryRunMessage } =
       this.state;
     const sourceOfTrust = applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
+    const envStatus: Record<string, ApplicationStatus> = {};
+    applicationAllStatus?.map((status) => {
+      envStatus[status.envName] = status.status;
+    });
     return (
       <React.Fragment>
         <Dialog
@@ -165,29 +177,43 @@ class DeployConfigDialog extends Component<Props, State> {
               </Translation>
             </Message>
           </If>
-          <RadioGroup value={workflowName} onChange={this.onChange}>
-            {workflows?.map((workflow) => {
-              const haveCanaryDeploy = checkCanaryDeployStep(workflow);
-              return (
-                <Radio
-                  key={workflow.name}
-                  id={workflow.name}
-                  value={workflow.name}
-                  onClick={() => {
-                    this.onChange(workflow.name);
-                  }}
-                >
-                  {workflow.alias ? workflow.alias : workflow.name}
-                  <div className="deploy-workflow-select-item">
-                    {haveCanaryDeploy ? (
-                      <div className="deploy-notice">
-                        <Translation>Canary Deploy</Translation>
-                      </div>
-                    ) : (
-                      <div className="deploy-notice">
-                        <div>
-                          <Translation>Default Deploy</Translation>
+          <Loading visible={loading} style={{ width: '100%' }}>
+            <RadioGroup value={workflowName} onChange={this.onChange}>
+              {workflows?.map((workflow) => {
+                const haveCanaryDeploy = checkCanaryDeployStep(workflow);
+                const status = envStatus[workflow.envName] ? envStatus[workflow.envName].status : 'UnDeployed';
+                return (
+                  <Radio
+                    key={workflow.name}
+                    id={workflow.name}
+                    value={workflow.name}
+                    onClick={() => {
+                      this.onChange(workflow.name);
+                    }}
+                  >
+                    <div className="deploy-workflow-select-item-title">
+                      {workflow.alias ? workflow.alias : workflow.name}
+                      {haveCanaryDeploy ? (
+                        <div className="deploy-notice">
+                          <Translation>Canary Rollout</Translation>
                         </div>
+                      ) : (
+                        <div className="deploy-notice">
+                          <Translation>Default Rollout</Translation>
+                        </div>
+                      )}
+                    </div>
+                    <div className="deploy-workflow-select-item">
+                      <div className="status">
+                        <Translation>Status</Translation>: <Translation>{status}</Translation>
+                      </div>
+                      <If
+                        condition={
+                          !haveCanaryDeploy &&
+                          envStatus[workflow.envName] &&
+                          envStatus[workflow.envName].status === 'running'
+                        }
+                      >
                         <div className="enable-canary-deploy">
                           <Button
                             size="small"
@@ -201,41 +227,41 @@ class DeployConfigDialog extends Component<Props, State> {
                               this.props.onClose();
                             }}
                           >
-                            <Translation>Enable Canary Deploy</Translation>
+                            <Translation>Enable Canary Rollout</Translation>
                           </Button>
                         </div>
-                      </div>
-                    )}
-                    <span className="env">
-                      <Translation>Environment</Translation>:
-                      <Link to={`/applications/${applicationDetail.name}/envbinding/${workflow.envName}/workflow`}>
-                        {workflow.envName}
-                      </Link>
-                    </span>
-                  </div>
-                </Radio>
-              );
-            })}
-          </RadioGroup>
-          <If condition={dryRunResultState == 'success'}>
-            <Message type="success">
-              <Translation>Dry run successfully</Translation>
-              <a style={{ marginLeft: '16px' }} onClick={this.onShowDryRunResult}>
-                <Translation>Review the result</Translation>
-              </a>
-            </Message>
-          </If>
-          <If condition={dryRunResultState == 'failure'}>
-            <Message type="error">
-              {dryRunMessage}
-              {dryRunResult && (
+                      </If>
+                      <span className="env">
+                        <Translation>Environment</Translation>:
+                        <Link to={`/applications/${applicationDetail.name}/envbinding/${workflow.envName}/workflow`}>
+                          {workflow.envName}
+                        </Link>
+                      </span>
+                    </div>
+                  </Radio>
+                );
+              })}
+            </RadioGroup>
+            <If condition={dryRunResultState == 'success'}>
+              <Message type="success">
+                <Translation>Dry run successfully</Translation>
                 <a style={{ marginLeft: '16px' }} onClick={this.onShowDryRunResult}>
                   <Translation>Review the result</Translation>
                 </a>
-              )}
-            </Message>
-          </If>
-          {showDryRunResult && this.renderDryRunResult()}
+              </Message>
+            </If>
+            <If condition={dryRunResultState == 'failure'}>
+              <Message type="error">
+                {dryRunMessage}
+                {dryRunResult && (
+                  <a style={{ marginLeft: '16px' }} onClick={this.onShowDryRunResult}>
+                    <Translation>Review the result</Translation>
+                  </a>
+                )}
+              </Message>
+            </If>
+            {showDryRunResult && this.renderDryRunResult()}
+          </Loading>
         </Dialog>
       </React.Fragment>
     );

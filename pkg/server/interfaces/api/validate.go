@@ -53,6 +53,9 @@ func init() {
 	if err := validate.RegisterValidation("checkpassword", ValidatePassword); err != nil {
 		panic(err)
 	}
+	if err := validate.RegisterValidation("checkMode", ValidateWorkflowMode); err != nil {
+		panic(err)
+	}
 }
 
 // ValidatePayloadType check PayloadType
@@ -114,4 +117,16 @@ func ValidatePassword(fl validator.FieldLevel) bool {
 		}
 	}
 	return letter && num
+}
+
+// ValidateWorkflowMode the sub step mode can be empty.
+func ValidateWorkflowMode(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+	if value == "" {
+		return true
+	}
+	if value == "DAG" || value == "StepByStep" {
+		return true
+	}
+	return false
 }

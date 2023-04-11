@@ -12,11 +12,11 @@ import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import type {
   ApplicationDetail,
-  ApplicationStatus,
   ApplicationStatistics,
   Workflow,
   WorkflowRecord,
   ApplicationDeployResponse,
+  ApplicationEnvStatus,
 } from '../../../../interface/application';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
@@ -30,7 +30,7 @@ interface Props {
   currentPath: string;
   appName: string;
   applicationDetail?: ApplicationDetail;
-  applicationStatus?: { status?: ApplicationStatus };
+  applicationAllStatus?: ApplicationEnvStatus[];
   workflows?: Workflow[];
   dispatch: Dispatch;
 }
@@ -49,13 +49,26 @@ class ApplicationHeader extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      loading: true,
+      loading: false,
       showDeployConfig: false,
     };
   }
 
   onDeployConfig = () => {
+    this.loadApplicationStatus();
     this.setState({ showDeployConfig: true });
+  };
+
+  loadApplicationStatus = async () => {
+    const { appName, dispatch } = this.props;
+    this.setState({ loading: true });
+    dispatch({
+      type: 'application/getApplicationAllStatus',
+      payload: { appName: appName },
+      callback: () => {
+        this.setState({ loading: false });
+      },
+    });
   };
 
   onGetApplicationDetails = async () => {
@@ -116,8 +129,8 @@ class ApplicationHeader extends Component<Props, State> {
   componentWillUnmount() {}
 
   render() {
-    const { applicationDetail, currentPath, workflows, appName, dispatch } = this.props;
-    const { showDeployConfig } = this.state;
+    const { applicationDetail, applicationAllStatus, currentPath, workflows, appName, dispatch } = this.props;
+    const { showDeployConfig, loading } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     let item = <Translation>{`app-${activeKey}`}</Translation>;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
@@ -177,6 +190,8 @@ class ApplicationHeader extends Component<Props, State> {
         <If condition={showDeployConfig}>
           {applicationDetail && (
             <DeployConfig
+              loading={loading}
+              applicationAllStatus={applicationAllStatus}
               applicationDetail={applicationDetail}
               onClose={() => {
                 this.setState({ showDeployConfig: false });

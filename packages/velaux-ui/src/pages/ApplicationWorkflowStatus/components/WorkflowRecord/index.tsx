@@ -539,7 +539,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                     )}
                   </div>
                 </Tab.Item>
-                <Tab.Item title="Properties" key={'properties'}>
+                <Tab.Item title={i18n.t('Properties').toString()} key={'properties'}>
                   <div className="step-info padding16">
                     <tbody>
                       {properties &&
@@ -554,7 +554,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                     </tbody>
                   </div>
                 </Tab.Item>
-                <Tab.Item title="Outputs" key={'outputs'}>
+                <Tab.Item title={i18n.t('Outputs')} key={'outputs'}>
                   <If condition={!outputLoading && (!outputs || !outputs.values || outputs.values.length == 0)}>
                     <Empty hideIcon message={'There are no outputs.'} />
                   </If>
@@ -581,7 +581,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
                     </div>
                   </Loading>
                 </Tab.Item>
-                <Tab.Item title="Inputs" key={'inputs'}>
+                <Tab.Item title={i18n.t('Inputs')} key={'inputs'}>
                   <If condition={!inputLoading && (!inputs || !inputs?.values || inputs.values.length == 0)}>
                     <Empty hideIcon message={'There are no inputs.'} />
                   </If>

@@ -13,11 +13,24 @@
       border: 1px solid var(--primary-color) !important;
     }
   }
+  .deploy-workflow-select-item-title {
+    display: inline-flex;
+    .deploy-notice {
+      color: var(--grey-300);
+      display: flex;
+      align-items: center;
+      margin-left: var(--spacing-4);
+    }
+  }
   .deploy-workflow-select-item {
     display: flex;
     padding: var(--spacing-4) 0;
     justify-content: space-between;
     flex-flow: row nowrap;
+    align-items: center;
+    .status {
+      display: inline;
+    }
     .env {
       flex-grow: 1;
       width: 100px;
@@ -25,11 +38,6 @@
       justify-content: end;
       align-items: center;
     }
-  }
-  .deploy-notice {
-    color: var(--grey-300);
-    display: flex;
-    align-items: center;
     .enable-canary-deploy {
       margin-left: var(--spacing-4);
     }

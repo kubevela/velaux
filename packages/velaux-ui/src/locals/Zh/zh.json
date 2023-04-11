@@ -623,12 +623,18 @@
   "Are you sure to rerun this Pipeline?": "确定要重新运行流水线吗？",
   "Show Values File": "查看 Value 文件",
   "Showing all projects you are permitted": "你拥有权限的所有项目",
-  "More": "显示更多",
+  "More": "更多",
   "Hide": "收起",
   "Admin Username": "管理员账号名称",
   "The default canary rollout is powered by kruise-rollout addon, let's enable it first.": "金丝雀发布默认由 kruise-rollout 插件提供支持，请先启用该插件。",
   "You can also edit the workflow directly to switch to canary deploy mode.": "直接编辑工作流也可以切换为金丝雀发布模式。",
   "There is no deploy steps exist.": "工作流缺少 Deploy 步骤。",
   "Batch Setting": "批次设置",
-  "Canary Rollout Setting": "金丝雀发布设置"
+  "Canary Rollout Setting": "金丝雀发布设置",
+  "Enable Canary Rollout": "启用金丝雀发布",
+  "Select Workflow": "选择工作流",
+  "Canary Rollout": "金丝雀发布",
+  "Default Rollout": "常规发布",
+  "UnDeployed": "未部署",
+  "Advanced Configs": "高级配置"
 }

@@ -261,6 +261,7 @@ class PipelineStudio extends React.Component<Props, State> {
               }}
             >
               <WorkflowStudio
+                subMode={pipeline.spec.mode?.subSteps}
                 definitions={definitions}
                 steps={_.cloneDeep(pipeline.spec.steps)}
                 onChange={this.onChange}

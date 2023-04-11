@@ -6,6 +6,7 @@ import Draggable from 'react-draggable';
 import { AiOutlinePlayCircle } from 'react-icons/ai';
 import { FiStopCircle } from 'react-icons/fi';
 import type { Dispatch } from 'redux';
+import { WorkflowMode } from '../../interface/application';
 
 import { WorkflowEditContext } from '../../context';
 import type { DefinitionBase } from '../../interface/definitions';
@@ -18,6 +19,7 @@ import TypeSelect from './type-select';
 
 type Props = {
   steps?: WorkflowStep[];
+  subMode?: WorkflowMode;
   definitions?: DefinitionBase[];
   dispatch?: Dispatch<any>;
   onChange: (steps: WorkflowStep[]) => void;
@@ -25,6 +27,7 @@ type Props = {
 type State = {
   steps: StepEdit[];
   addIndex: number;
+  subIndex: number;
   subStep?: boolean;
   stepInterval: number;
   changed: boolean;
@@ -42,7 +45,7 @@ class WorkflowStudio extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const steps = this.renderSteps(props);
-    this.state = { steps: steps, stepInterval: 100, addIndex: 0, changed: false };
+    this.state = { steps: steps, stepInterval: 100, addIndex: 0, subIndex: 0, changed: false };
   }
 
   componentDidUpdate(prevProps: Readonly<Props>) {
@@ -54,7 +57,10 @@ class WorkflowStudio extends React.Component<Props, State> {
   renderSteps = (props: Props) => {
     const steps =
       props.steps?.map((step) => {
-        const se: StepEdit = Object.assign(step, { nodeType: 'step', width: 260 });
+        const se: StepEdit = Object.assign({ nodeType: 'step', width: 260 }, step);
+        if (step.subSteps) {
+          se.subSteps = _.cloneDeep(step.subSteps);
+        }
         return se;
       }) || [];
     steps.unshift({ nodeType: 'start', width: 100, name: 'start', type: '' });
@@ -88,12 +94,12 @@ class WorkflowStudio extends React.Component<Props, State> {
   };
 
   addStep = (step: WorkflowStepBase) => {
-    const { addIndex, steps, subStep } = this.state;
+    const { addIndex, subIndex, steps, subStep } = this.state;
     if (!subStep) {
       steps.splice(addIndex, 0, { ...step, nodeType: 'step', width: 260, incomplete: true });
     } else {
       if (steps[addIndex].subSteps) {
-        steps[addIndex].subSteps?.push(step);
+        steps[addIndex].subSteps?.splice(subIndex, 0, step);
       } else {
         steps[addIndex].subSteps = [step];
       }
@@ -103,6 +109,7 @@ class WorkflowStudio extends React.Component<Props, State> {
         steps: steps,
         changed: true,
         addIndex: 0,
+        subIndex: 0,
         subStep: false,
       },
       this.onChange
@@ -143,7 +150,7 @@ class WorkflowStudio extends React.Component<Props, State> {
 
   render() {
     const { steps, stepInterval, addIndex, showStep, subStep } = this.state;
-    const { definitions } = this.props;
+    const { definitions, subMode } = this.props;
     return (
       <div
         className={classNames('run-studio')}
@@ -186,6 +193,7 @@ class WorkflowStudio extends React.Component<Props, State> {
                     return (
                       <div key={step.nodeType + step.name} style={{ position: 'relative' }}>
                         <Step
+                          subMode={subMode}
                           probeState={{ stepWidth: step.width, stepInterval: stepInterval }}
                           step={step}
                           group={step.type == 'step-group'}
@@ -194,8 +202,8 @@ class WorkflowStudio extends React.Component<Props, State> {
                           onNodeClick={(s, sub) => {
                             this.setState({ showStep: s, subStep: sub });
                           }}
-                          onAddSubStep={() => {
-                            this.setState({ addIndex: index, subStep: true });
+                          onAddSubStep={(subIndex) => {
+                            this.setState({ addIndex: index, subIndex: subIndex, subStep: true });
                           }}
                           onDelete={this.onDeleteStep}
                         />
@@ -222,7 +230,7 @@ class WorkflowStudio extends React.Component<Props, State> {
           <TypeSelect
             checkStepName={this.checkStepName}
             onClose={() => {
-              this.setState({ addIndex: 0, subStep: false });
+              this.setState({ addIndex: 0, subIndex: 0, subStep: false });
             }}
             addSub={subStep}
             addStep={this.addStep}

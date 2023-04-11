@@ -48,6 +48,9 @@ export function getApplicationDetails(params: any) {
 export function getApplicationStatus(params: { name: string; envName: string }) {
   return get(`${url}/${params.name}/envs/${params.envName}/status`, params).then((res) => res);
 }
+export function getApplicationAllStatus(params: { name: string }) {
+  return get(`${url}/${params.name}/status`, params).then((res) => res);
+}
 
 export function deleteApplication(params: { name: string }) {
   return rdelete(url + '/' + params.name, params);
@@ -58,17 +61,12 @@ export function getApplicationComponents(params: { appName: string }) {
   return get(`${url}/${appName}/components`, {}).then((res) => res);
 }
 
-export function createApplicationComponent(
-  params: ApplicationComponentConfig,
-  query: { appName: string },
-) {
+export function createApplicationComponent(params: ApplicationComponentConfig, query: { appName: string }) {
   return post(`${url}/${query.appName}/components`, params).then((res) => res);
 }
 
 export function getComponentDetails(params: any) {
-  return post(`${url}/${params.name}/components/${params.componentName}`, params).then(
-    (res) => res,
-  );
+  return post(`${url}/${params.name}/components/${params.componentName}`, params).then((res) => res);
 }
 
 export function deployApplication(params: ApplicationDeployRequest, customError?: boolean) {
@@ -134,16 +132,12 @@ export function createTrait(params: Trait, query: TraitQuery) {
 
 export function updateTrait(params: Trait, query: TraitQuery) {
   const { appName, componentName, traitType } = query;
-  return put(`${url}/${appName}/components/${componentName}/traits/${traitType}`, params).then(
-    (res) => res,
-  );
+  return put(`${url}/${appName}/components/${componentName}/traits/${traitType}`, params).then((res) => res);
 }
 
 export function deleteTrait(query: TraitQuery) {
   const { appName, componentName, traitType } = query;
-  return rdelete(`${url}/${appName}/components/${componentName}/traits/${traitType}`, {}).then(
-    (res) => res,
-  );
+  return rdelete(`${url}/${appName}/components/${componentName}/traits/${traitType}`, {}).then((res) => res);
 }
 
 export function listRevisions(query: ListRevisionQuery) {
@@ -171,22 +165,14 @@ export function getApplicationWorkflowRecord(params: { appName: string }) {
 
 export function updateComponentProperties(
   params: ApplicationComponentConfig,
-  query: { appName: string; componentName: string },
+  query: { appName: string; componentName: string }
 ) {
-  return put(`${url}/${query.appName}/components/${query.componentName}`, params).then(
-    (res) => res,
-  );
+  return put(`${url}/${query.appName}/components/${query.componentName}`, params).then((res) => res);
 }
 
-export function resumeApplicationWorkflowRecord(params: {
-  appName: string;
-  workflowName: string;
-  recordName: string;
-}) {
+export function resumeApplicationWorkflowRecord(params: { appName: string; workflowName: string; recordName: string }) {
   const { appName, workflowName, recordName } = params;
-  return get(`${url}/${appName}/workflows/${workflowName}/records/${recordName}/resume`, {}).then(
-    (res) => res,
-  );
+  return get(`${url}/${appName}/workflows/${workflowName}/records/${recordName}/resume`, {}).then((res) => res);
 }
 
 export function rollbackApplicationWorkflowRecord(params: {
@@ -195,9 +181,7 @@ export function rollbackApplicationWorkflowRecord(params: {
   recordName: string;
 }) {
   const { appName, workflowName, recordName } = params;
-  return get(`${url}/${appName}/workflows/${workflowName}/records/${recordName}/rollback`, {}).then(
-    (res) => res,
-  );
+  return get(`${url}/${appName}/workflows/${workflowName}/records/${recordName}/rollback`, {}).then((res) => res);
 }
 
 export function terminateApplicationWorkflowRecord(params: {
@@ -206,10 +190,7 @@ export function terminateApplicationWorkflowRecord(params: {
   recordName: string;
 }) {
   const { appName, workflowName, recordName } = params;
-  return get(
-    `${url}/${appName}/workflows/${workflowName}/records/${recordName}/terminate`,
-    {},
-  ).then((res) => res);
+  return get(`${url}/${appName}/workflows/${workflowName}/records/${recordName}/terminate`, {}).then((res) => res);
 }
 
 export function getApplicationTriggers(params: { appName: string }) {
@@ -226,10 +207,7 @@ export function createTrigger(params: CreateTriggerRequest, query: { appName: st
   return post(`${url}/${appName}/triggers`, params).then((res) => res);
 }
 
-export function updateTrigger(
-  params: UpdateTriggerRequest,
-  query: { appName: string; token: string },
-) {
+export function updateTrigger(params: UpdateTriggerRequest, query: { appName: string; token: string }) {
   const { appName, token } = query;
   return put(`${url}/${appName}/triggers/${token}`, params).then((res) => res);
 }
@@ -240,9 +218,7 @@ export function deleteTrigger(params: { appName: string; token: string }) {
 }
 
 export function deleteComponent(query: { appName: string; componentName: string }) {
-  return rdelete(`${url}/${query.appName}/components/${query.componentName}`, {}).then(
-    (res) => res,
-  );
+  return rdelete(`${url}/${query.appName}/components/${query.componentName}`, {}).then((res) => res);
 }
 
 export function compareApplication(appName: string, params: ApplicationCompareRequest) {

@@ -73,7 +73,7 @@ export const InputItems = (props: { value?: InputItem[]; id: string; onChange: (
     <div id={props.id} className="input-items">
       {items?.map((item, index) => {
         return (
-          <div className="item">
+          <div className="item" key={'input' + index}>
             <InputItemForm
               key={item.from}
               value={item}

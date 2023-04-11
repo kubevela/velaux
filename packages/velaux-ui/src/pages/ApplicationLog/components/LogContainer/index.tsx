@@ -142,13 +142,13 @@ class ContainerLog extends Component<Props, State> {
   downloadLog = () => {
     const { pod, activeContainerName = '' } = this.props;
     const { logs } = this.state;
-    
+
     let logContent: string[] = [];
     logs.map((line) => {
       logContent.push(line.content);
     });
 
-    downloadStringFile(logContent.join("\n"), pod?.metadata.name + "-" + activeContainerName);
+    downloadStringFile(logContent.join('\n'), pod?.metadata.name + '-' + activeContainerName);
   };
 
   render() {
@@ -157,8 +157,8 @@ class ContainerLog extends Component<Props, State> {
     return (
       <Fragment>
         <div className="application-logs-actions">
-          <Button type="normal" size="small" onClick={this.downloadLog}>
-            <Icon type="download"/>
+          <Button className="download" type="normal" size="small" onClick={this.downloadLog}>
+            <Icon type="download" />
           </Button>
           <Checkbox checked={showTimestamps} onChange={(v) => this.setState({ showTimestamps: v })}>
             <Translation className="font-bold font-size-14">Show timestamps</Translation>

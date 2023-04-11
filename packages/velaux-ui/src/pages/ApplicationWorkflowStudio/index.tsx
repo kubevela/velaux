@@ -230,14 +230,18 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                   <Translation>Unsaved changes</Translation>
                 </div>
               )}
-              <MenuButton style={{ marginRight: 'var(--spacing-4)' }} autoWidth={false} label="More">
+              <MenuButton
+                style={{ marginRight: 'var(--spacing-4)' }}
+                autoWidth={false}
+                label={i18n.t('More').toString()}
+              >
                 <MenuButton.Item
                   onClick={() => {
                     locationService.partial({ setCanary: true });
                     this.setState({ setCanary: true });
                   }}
                 >
-                  <Translation>Canary Setting</Translation>
+                  <Translation>Canary Rollout Setting</Translation>
                 </MenuButton.Item>
               </MenuButton>
               <Form.Item label={i18n.t('Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
@@ -277,7 +281,12 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
               workflow: workflow as WorkflowData,
             }}
           >
-            <WorkflowStudio definitions={definitions} steps={steps} onChange={this.onChange} />
+            <WorkflowStudio
+              subMode={workflow.subMode}
+              definitions={definitions}
+              steps={steps}
+              onChange={this.onChange}
+            />
           </WorkflowContext.Provider>
         )}
         {workflow && editMode === 'yaml' && (

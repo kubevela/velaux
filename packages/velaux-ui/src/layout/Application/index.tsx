@@ -1,7 +1,6 @@
 import { Loading, Grid } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
-
 import EnvTabs from './components/EnvTabs';
 import Header from './components/Header';
 import Menus from './components/Menus';
@@ -53,6 +52,7 @@ class ApplicationLayout extends Component<Props, any> {
           this.loadApplicationEnvbinding();
           this.loadApplicationWorkflows();
           this.loadApplicationPolicies();
+          this.loadApplicationStatus();
         });
       },
     });
@@ -103,6 +103,16 @@ class ApplicationLayout extends Component<Props, any> {
     } = this.props.match;
     this.props.dispatch({
       type: 'application/getApplicationWorkflows',
+      payload: { appName: appName },
+    });
+  };
+
+  loadApplicationStatus = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationAllStatus',
       payload: { appName: appName },
     });
   };

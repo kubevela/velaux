@@ -104,6 +104,11 @@ export interface ApplicationRollbackResponse {
   record: WorkflowRecordBase;
 }
 
+export interface ApplicationEnvStatus {
+  envName: string;
+  status: ApplicationStatus;
+}
+
 export interface ApplicationStatus {
   conditions: Condition[];
   status:
