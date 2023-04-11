@@ -51,7 +51,8 @@ type Workflow struct {
 // WorkflowStep defines how to execute a workflow step.
 type WorkflowStep struct {
 	WorkflowStepBase `json:",inline" bson:",inline"`
-	SubSteps         []WorkflowStepBase `json:"subSteps,omitempty"`
+	Mode             workflowv1alpha1.WorkflowMode `json:"mode,omitempty"`
+	SubSteps         []WorkflowStepBase            `json:"subSteps,omitempty"`
 }
 
 // WorkflowStepBase is the step base of workflow

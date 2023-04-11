@@ -17,7 +17,7 @@ require (
 	github.com/cloudtty/cloudtty v0.2.0
 	github.com/containerd/containerd v1.6.18 // indirect
 	github.com/coreos/go-oidc v2.2.1+incompatible
-	github.com/crossplane/crossplane-runtime v0.14.1-0.20210722005935-0b469fcc77cd // indirect
+	github.com/crossplane/crossplane-runtime v0.16.1 // indirect
 	github.com/cue-exp/kubevelafix v0.0.0-20220922150317-aead819d979d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
@@ -52,7 +52,7 @@ require (
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
 	github.com/kubevela/pkg v0.0.0-20230224072506-9ff31b249aa8
 	github.com/kubevela/prism v1.7.0-alpha.1
-	github.com/kubevela/workflow v0.4.1-0.20230227023118-8eae143050d4
+	github.com/kubevela/workflow v0.5.1-0.20230404061444-a4f3ec81fca7
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 	github.com/oam-dev/cluster-gateway v1.7.0-alpha.1
