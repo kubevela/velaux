@@ -16,7 +16,7 @@ limitations under the License.
 
 package bcode
 
-// ErrPluginNotfound means the plugin does't install
+// ErrPluginNotfound means the plugin isn't installed
 var ErrPluginNotfound = NewBcode(404, 18001, "the plugin is not exist")
 
 // ErrIsNotBackendPlugin -
@@ -24,3 +24,12 @@ var ErrIsNotBackendPlugin = NewBcode(404, 18002, "the plugin is not backend plug
 
 // ErrIsNotProxyBackendPlugin -
 var ErrIsNotProxyBackendPlugin = NewBcode(404, 18003, "the plugin is not backend proxy plugin")
+
+// ErrPluginAlreadyEnabled -
+var ErrPluginAlreadyEnabled = NewBcode(400, 18004, "the plugin is already enabled")
+
+// ErrPluginAlreadyDisabled -
+var ErrPluginAlreadyDisabled = NewBcode(400, 18005, "the plugin is already disabled")
+
+// ErrPluginNotEnabled -
+var ErrPluginNotEnabled = NewBcode(400, 18006, "the plugin is not enabled")

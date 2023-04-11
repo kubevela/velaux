@@ -24,6 +24,7 @@ func init() {
 type PluginSetting struct {
 	BaseModel
 	ID             string                 `json:"id"`
+	Enabled        bool                   `json:"enabled"`
 	JSONData       map[string]interface{} `json:"jsonData"`
 	SecureJSONData map[string]interface{} `json:"secureJsonData"`
 }
@@ -41,4 +42,13 @@ func (p PluginSetting) TableName() string {
 // ShortTableName is the compressed version of table name for kubeapi storage and others
 func (p PluginSetting) ShortTableName() string {
 	return "plugin"
+}
+
+// Index return custom index
+func (p PluginSetting) Index() map[string]interface{} {
+	index := make(map[string]interface{})
+	if p.ID != "" {
+		index["id"] = p.ID
+	}
+	return index
 }

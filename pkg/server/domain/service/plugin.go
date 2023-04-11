@@ -18,6 +18,10 @@ package service
 
 import (
 	"context"
+	"errors"
+
+	"github.com/kubevela/velaux/pkg/server/domain/model"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,9 +53,20 @@ func NewPluginService(pluginConfig config.PluginConfig) PluginService {
 
 // PluginService the plugin service provide some handler functions about the plugin
 type PluginService interface {
-	ListInstalledPlugins(ctx context.Context) []v1.PluginDTO
-	DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error)
+	// For plugin management
+	ListInstalledPlugins(ctx context.Context) []v1.ManagedPluginDTO
+	DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error)
+	EnablePlugin(ctx context.Context, pluginID string, params v1.PluginEnableRequest) (*v1.ManagedPluginDTO, error)
+	DisablePlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error)
+	SetPlugin(ctx context.Context, pluginID string, params v1.PluginSetRequest) (*v1.ManagedPluginDTO, error)
+
+	// For plugin user
+	DetailPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error)
+	ListEnabledPlugins(ctx context.Context) ([]v1.PluginDTO, error)
+
+	// For internal usage
 	GetPlugin(ctx context.Context, pluginID string) (*types.Plugin, error)
+	GetPluginSetting(ctx context.Context, pluginID string) (*model.PluginSetting, error)
 	InitPluginRole(ctx context.Context, plugin *types.Plugin) error
 	Init(ctx context.Context) error
 }
@@ -60,7 +75,8 @@ type pluginImpl struct {
 	loader       *loader.Loader
 	registry     registry.Pool
 	pluginConfig config.PluginConfig
-	KubeClient   client.Client `inject:"kubeClient"`
+	Store        datastore.DataStore `inject:"datastore"`
+	KubeClient   client.Client       `inject:"kubeClient"`
 }
 
 func (p *pluginImpl) Init(ctx context.Context) error {
@@ -146,21 +162,35 @@ func (p *pluginImpl) InitPluginRole(ctx context.Context, plugin *types.Plugin) e
 	return nil
 }
 
-func (p *pluginImpl) ListInstalledPlugins(ctx context.Context) []v1.PluginDTO {
+func (p *pluginImpl) ListInstalledPlugins(ctx context.Context) []v1.ManagedPluginDTO {
 	plugins := p.registry.Plugins(ctx)
-	var pluginDTOs []v1.PluginDTO
-	for _, p := range plugins {
-		pluginDTOs = append(pluginDTOs, assembler.PluginToDTO(*p))
+	var pluginDTOs []v1.ManagedPluginDTO
+	for _, pl := range plugins {
+		setting := model.PluginSetting{
+			ID: pl.PluginID(),
+		}
+		err := p.Store.Get(ctx, &setting)
+		if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
+			klog.Errorf("failed to get the plugin setting for plugin %s err: %s", pl.PluginID(), err.Error())
+		}
+		pluginDTOs = append(pluginDTOs, assembler.PluginToManagedDTO(*pl, setting))
 	}
 	return pluginDTOs
 }
 
-func (p *pluginImpl) DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error) {
+func (p *pluginImpl) DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error) {
 	plugin, ok := p.registry.Plugin(ctx, pluginID)
 	if !ok {
 		return nil, bcode.ErrPluginNotfound
 	}
-	dto := assembler.PluginToDTO(*plugin)
+	setting := model.PluginSetting{
+		ID: pluginID,
+	}
+	err := p.Store.Get(ctx, &setting)
+	if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
+		return nil, err
+	}
+	dto := assembler.PluginToManagedDTO(*plugin, setting)
 	return &dto, nil
 }
 
@@ -172,6 +202,129 @@ func (p *pluginImpl) GetPlugin(ctx context.Context, pluginID string) (*types.Plu
 	return plugin, nil
 }
 
+func (p *pluginImpl) GetPluginSetting(ctx context.Context, pluginID string) (*model.PluginSetting, error) {
+	setting := model.PluginSetting{
+		ID: pluginID,
+	}
+	err := p.Store.Get(ctx, &setting)
+	if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
+		return nil, err
+	}
+	return &setting, nil
+}
+
+// DetailPlugin detail the plugin.
+func (p *pluginImpl) DetailPlugin(ctx context.Context, pluginID string) (*v1.PluginDTO, error) {
+	plugin, ok := p.registry.Plugin(ctx, pluginID)
+	if !ok {
+		return nil, bcode.ErrPluginNotfound
+	}
+	dto := assembler.PluginToDTO(*plugin)
+	return &dto, nil
+}
+
+// EnablePlugin enable the plugin.
+func (p *pluginImpl) EnablePlugin(ctx context.Context, pluginID string, params v1.PluginEnableRequest) (*v1.ManagedPluginDTO, error) {
+	plugin, ok := p.registry.Plugin(ctx, pluginID)
+	if !ok {
+		return nil, bcode.ErrPluginNotfound
+	}
+	setting := model.PluginSetting{
+		ID: plugin.PluginID(),
+	}
+	err := p.Store.Get(ctx, &setting)
+	if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
+		return nil, err
+	}
+	if setting.Enabled {
+		return nil, bcode.ErrPluginAlreadyEnabled
+	}
+	setting.Enabled = true
+	setting.JSONData = params.JSONData
+	setting.SecureJSONData = params.SecureJSONData
+	method := p.Store.Put
+	if errors.Is(err, datastore.ErrRecordNotExist) {
+		method = p.Store.Add
+	}
+	err = method(ctx, &setting)
+	if err != nil {
+		return nil, err
+	}
+	dto := assembler.PluginToManagedDTO(*plugin, setting)
+	return &dto, nil
+}
+
+// DisablePlugin disable plugin
+func (p *pluginImpl) DisablePlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error) {
+	plugin, ok := p.registry.Plugin(ctx, pluginID)
+	if !ok {
+		return nil, bcode.ErrPluginNotfound
+	}
+	setting := model.PluginSetting{
+		ID: plugin.PluginID(),
+	}
+	err := p.Store.Get(ctx, &setting)
+	if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
+		return nil, err
+	}
+	if !setting.Enabled {
+		return nil, bcode.ErrPluginAlreadyDisabled
+	}
+	setting.Enabled = false
+	// Other fields behavior is not defined. For now other fields will be kept. We can re-enable the plugin with the same config.
+	err = p.Store.Put(ctx, &setting)
+	if err != nil {
+		return nil, err
+	}
+	dto := assembler.PluginToManagedDTO(*plugin, setting)
+	return &dto, nil
+}
+
+// SetPlugin set plugin config, only success when plugin is enabled
+func (p *pluginImpl) SetPlugin(ctx context.Context, pluginID string, params v1.PluginSetRequest) (*v1.ManagedPluginDTO, error) {
+	plugin, ok := p.registry.Plugin(ctx, pluginID)
+	if !ok {
+		return nil, bcode.ErrPluginNotfound
+	}
+	setting := model.PluginSetting{
+		ID: plugin.PluginID(),
+	}
+	err := p.Store.Get(ctx, &setting)
+	if err != nil {
+		return nil, err
+	}
+	if !setting.Enabled {
+		return nil, bcode.ErrPluginAlreadyDisabled
+	}
+	setting.JSONData = params.JSONData
+	setting.SecureJSONData = params.SecureJSONData
+	err = p.Store.Put(ctx, &setting)
+	if err != nil {
+		return nil, err
+	}
+	dto := assembler.PluginToManagedDTO(*plugin, setting)
+	return &dto, nil
+}
+
+func (p *pluginImpl) ListEnabledPlugins(ctx context.Context) ([]v1.PluginDTO, error) {
+	plugins := p.registry.Plugins(ctx)
+	var pluginDTOs []v1.PluginDTO
+	pluginSettings, err := p.Store.List(ctx, &model.PluginSetting{}, nil)
+	if err != nil {
+		return pluginDTOs, err
+	}
+	for _, p := range plugins {
+		for _, ps := range pluginSettings {
+			if p.PluginID() == ps.(*model.PluginSetting).ID {
+				if ps.(*model.PluginSetting).Enabled {
+					pluginDTOs = append(pluginDTOs, assembler.PluginToDTO(*p))
+				}
+			}
+		}
+	}
+	return pluginDTOs, nil
+}
+
 func pluginSources(config config.PluginConfig) []types.PluginSource {
 	return []types.PluginSource{
 		{Class: types.Core, Paths: []string{config.CorePluginPath}},
@@ -180,11 +333,12 @@ func pluginSources(config config.PluginConfig) []types.PluginSource {
 }
 
 // NewTestPluginService only used by testing
-func NewTestPluginService(pluginConfig config.PluginConfig, kubeClient client.Client) PluginService {
+func NewTestPluginService(pluginConfig config.PluginConfig, kubeClient client.Client, store datastore.DataStore) PluginService {
 	return &pluginImpl{
 		loader:       loader.New(),
 		registry:     registry.NewInMemory(),
 		pluginConfig: pluginConfig,
+		Store:        store,
 		KubeClient:   kubeClient,
 	}
 }

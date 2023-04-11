@@ -32,17 +32,18 @@ import (
 	"github.com/kubevela/velaux/pkg/plugin/router"
 	"github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 var _ = Describe("Test rbac service", func() {
 	BeforeEach(func() {
-		var err error
-		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: "rbac-test-kubevela"})
-		Expect(ds).ToNot(BeNil())
+		InitTestEnv("rbac-test-kubevela")
+		ctx = context.Background()
+		ok, err := InitTestAdmin(userService)
 		Expect(err).Should(BeNil())
+		Expect(ok).Should(BeTrue())
+		Expect(rbacService.Init(ctx)).Should(BeNil())
 	})
 	It("Test check resource", func() {
 		path, err := checkResourcePath("project")
@@ -104,10 +105,6 @@ var _ = Describe("Test rbac service", func() {
 	})
 
 	It("Test checkPerm by admin user", func() {
-
-		err := ds.Add(context.TODO(), &model.User{Name: FakeAdminName, UserRoles: []string{"admin"}})
-		Expect(err).Should(BeNil())
-
 		rbac := rbacServiceImpl{Store: ds}
 		req := &http.Request{}
 		req = req.WithContext(context.WithValue(req.Context(), &apisv1.CtxKeyUser, FakeAdminName))
@@ -284,6 +281,85 @@ var _ = Describe("Test rbac service", func() {
 		req = &http.Request{Method: "GET", URL: &url.URL{Scheme: "http", Path: "/proxy/plugins/p1/api/v1/clusters/local/pv/p1", Host: "127.0.0.1"}}
 		req = req.WithContext(context.WithValue(context.TODO(), &apisv1.CtxKeyUser, "test2"))
 		Expect(checker(req, res)).Should(Equal(true))
+	})
+
+})
+
+var _ = Describe("MergeMap", func() {
+	defer GinkgoRecover()
+	Context("when the source map is empty", func() {
+		It("should not modify the target map", func() {
+			source := make(map[string]resourceMetadata)
+			target := map[string]resourceMetadata{
+				"node": {pathName: "nodeName"},
+			}
+			mergeMap(source, target)
+			Expect(target).To(HaveLen(1))
+			Expect(target["node"].pathName).To(Equal("nodeName"))
+		})
+	})
+
+	Context("when the target map is empty", func() {
+		It("should modify target just like source", func() {
+			source := map[string]resourceMetadata{
+				"node": {pathName: "nodeName"},
+			}
+			target := make(map[string]resourceMetadata)
+			mergeMap(source, target)
+			Expect(target).To(HaveLen(1))
+			Expect(target["node"].pathName).To(Equal("nodeName"))
+		})
+	})
+
+	Context("when the both are not empty", func() {
+		When("have no conflict", func() {
+			source := map[string]resourceMetadata{
+				"node": {pathName: "nodeName"},
+			}
+			target := map[string]resourceMetadata{
+				"cluster": {pathName: "clusterName"},
+			}
+			mergeMap(source, target)
+			Expect(target).To(HaveLen(2))
+			Expect(target["node"].pathName).To(Equal("nodeName"))
+			Expect(target["cluster"].pathName).To(Equal("clusterName"))
+		})
+
+		When("have nested field", func() {
+			source := map[string]resourceMetadata{
+				"node": {pathName: "nodeName"},
+			}
+			target := map[string]resourceMetadata{
+				"cluster": {subResources: map[string]resourceMetadata{
+					"node": {pathName: "nodeName"},
+				}},
+			}
+			mergeMap(source, target)
+			Expect(target).To(HaveLen(2))
+			Expect(target["cluster"].subResources).To(HaveLen(1))
+			Expect(target["cluster"].subResources["node"].pathName).To(Equal("nodeName"))
+			Expect(target["node"].pathName).To(Equal("nodeName"))
+		})
+
+		When("merge nested field and subResource is nil and pathName is empty", func() {
+			source := map[string]resourceMetadata{
+				"plugin": {pathName: "pluginName", subResources: map[string]resourceMetadata{
+					"cluster": {pathName: "clusterName", subResources: map[string]resourceMetadata{
+						"node": {pathName: "nodeName"},
+					},
+					},
+				},
+				},
+			}
+			target := map[string]resourceMetadata{
+				"plugin": {subResources: nil, pathName: ""},
+			}
+			mergeMap(source, target)
+			Expect(target).To(HaveLen(1))
+			Expect(target["plugin"].subResources).To(HaveLen(1))
+			Expect(target["plugin"].subResources["cluster"].subResources).To(HaveLen(1))
+			Expect(target["plugin"].subResources["cluster"].subResources["node"].pathName).To(Equal("nodeName"))
+		})
 	})
 
 })

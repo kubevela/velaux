@@ -303,10 +303,33 @@ func convertBool(b *bool) bool {
 // PluginToDTO convert plugin to dto
 func PluginToDTO(p pluginTypes.Plugin) apisv1.PluginDTO {
 	return apisv1.PluginDTO{
-		JSONData:      p.JSONData,
-		Class:         p.Class,
+		ID:            p.ID,
+		Name:          p.Name,
+		Category:      p.Category,
+		Type:          p.Type,
+		SubType:       p.SubType,
+		Info:          p.Info,
+		Includes:      p.Includes,
 		DefaultNavURL: p.DefaultNavURL,
 		Module:        p.Module,
 		BaseURL:       p.BaseURL,
+	}
+}
+
+// PluginToManagedDTO convert plugin to dto
+func PluginToManagedDTO(p pluginTypes.Plugin, setting model.PluginSetting) apisv1.ManagedPluginDTO {
+	secureJSONFields := make(map[string]bool)
+	for k := range setting.SecureJSONData {
+		secureJSONFields[k] = true
+	}
+	return apisv1.ManagedPluginDTO{
+		JSONData:         p.JSONData,
+		Class:            p.Class,
+		DefaultNavURL:    p.DefaultNavURL,
+		Module:           p.Module,
+		BaseURL:          p.BaseURL,
+		Enabled:          setting.Enabled,
+		JSONSetting:      setting.JSONData,
+		SecureJSONFields: secureJSONFields,
 	}
 }

@@ -1,0 +1,55 @@
+{
+  "type": "page-app",
+  "name": "Backend Kube API",
+  "id": "backend-kube-api-node",
+  "info": {
+    "keywords": [
+      "app"
+    ],
+    "description": "The app demo plugin",
+    "author": {
+      "name": "KubeVela"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "screenshots": [],
+    "version": "0.0.1",
+    "updated": "2023-03-30"
+  },
+  "backend": true,
+  "proxy": true,
+  "backendType": "kube-api",
+  "routes": [
+    {
+      "path": "/nodes/:node",
+      "method": "GET",
+      "proxyHeaders": [
+        {
+          "name": "Authorization",
+          "value": "Bearer test"
+        }
+      ]
+    }
+  ],
+  "kubePermissions": [
+    {
+      "apiGroups": [
+        ""
+      ],
+      "resources": [
+        "nodes",
+        "nodes/status"
+      ],
+      "verbs": [
+        "get",
+        "list"
+      ]
+    }
+  ],
+  "dependencies": {
+    "velauxDependency": ">=1.8.0",
+    "plugins": []
+  }
+}

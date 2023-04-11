@@ -75,6 +75,7 @@ var (
 	cloudShellService *cloudShellServiceImpl
 	configService     *configServiceImpl
 	webhookService    *webhookServiceImpl
+	pluginService     *pluginImpl
 
 	ds datastore.DataStore
 )
@@ -109,6 +110,7 @@ func InitTestDB(name string) {
 func InitTestEnv(dbName string) {
 	InitTestDB(dbName)
 	InitAllServices(ds)
+	ctx = context.Background()
 }
 
 var _ = BeforeSuite(func(done Done) {

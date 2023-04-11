@@ -1856,11 +1856,31 @@ type ListContextValueResponse struct {
 	Contexts map[string][]model.Value `json:"contexts"`
 }
 
-// PluginDTO plugin base model
-type PluginDTO struct {
+// ManagedPluginDTO the model for the plugin manager.
+type ManagedPluginDTO struct {
 	pluginTypes.JSONData
 	Class         pluginTypes.Class `json:"class"`
 	DefaultNavURL string            `json:"defaultNavURL"`
+	// SystemJS fields
+	Module  string `json:"module"`
+	BaseURL string `json:"baseURL"`
+	// Settings
+	Enabled          bool                   `json:"enabled"`
+	JSONSetting      map[string]interface{} `json:"jsonSetting"`
+	SecureJSONFields map[string]bool        `json:"secureJsonFields"`
+}
+
+// PluginDTO the model for the common user.
+type PluginDTO struct {
+	ID   string           `json:"id"`
+	Type pluginTypes.Type `json:"type"`
+	// there are four sub types in the definition plugin type, includes: component, trait, policy ,and workflow-step.
+	SubType       string                  `json:"subType"`
+	Name          string                  `json:"name"`
+	Info          pluginTypes.Info        `json:"info"`
+	Includes      []*pluginTypes.Includes `json:"includes"`
+	Category      string                  `json:"category"`
+	DefaultNavURL string                  `json:"defaultNavURL"`
 	// SystemJS fields
 	Module  string `json:"module"`
 	BaseURL string `json:"baseURL"`
@@ -1871,16 +1891,22 @@ type ListPluginResponse struct {
 	Plugins []PluginDTO `json:"plugins"`
 }
 
+// ListManagedPluginResponse -
+type ListManagedPluginResponse struct {
+	Plugins []ManagedPluginDTO `json:"plugins"`
+}
+
 // PluginSettingResponse plugin setting response model
 type PluginSettingResponse struct {
-	PluginDTO
 	JSONData         map[string]interface{} `json:"jsonData"`
 	SecureJSONFields map[string]bool        `json:"secureJsonFields"`
 }
 
-// PluginSettingRequest plugin setting request model
-type PluginSettingRequest struct {
-	PluginDTO
+// PluginSetRequest plugin setting request model
+type PluginSetRequest struct {
 	JSONData       map[string]interface{} `json:"jsonData"`
 	SecureJSONData map[string]interface{} `json:"secureJsonData"`
 }
+
+// PluginEnableRequest plugin enable request model
+type PluginEnableRequest PluginSetRequest

@@ -306,6 +306,8 @@ var ResourceMaps = map[string]resourceMetadata{
 	"cloudshell":     {},
 	"config":         {},
 	"configTemplate": {},
+	"plugin":         {},
+	"managePlugin":   {},
 }
 
 var existResourcePaths = convertSources(ResourceMaps)
@@ -393,8 +395,13 @@ func buildMap(resources []string, resourceNameMap map[string]string) map[string]
 
 func mergeMap(source, target map[string]resourceMetadata) {
 	for k, v := range source {
-		if _, exist := target[k]; exist {
-			mergeMap(source[k].subResources, target[k].subResources)
+		if rm, exist := target[k]; exist {
+			if rm.subResources == nil {
+				rm.subResources = make(map[string]resourceMetadata)
+			}
+			mergeMap(source[k].subResources, rm.subResources)
+			rm.pathName = source[k].pathName
+			target[k] = rm
 		} else {
 			target[k] = v
 		}
@@ -704,9 +711,10 @@ func (p *rbacServiceImpl) CheckPerm(resource string, actions ...string) func(req
 	return f
 }
 
-// CheckPluginRequestPerm handle RBAC checking for the the http request to plugin backend
+// CheckPluginRequestPerm handle RBAC checking for the http request to plugin backend
 // pathFormat: eg. nodes/{node}/status
 func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r2 *plugintypes.Route) func(req *http.Request, res http.ResponseWriter) bool {
+	// request plugin:* by default?
 	var resource = path.Join(defaultPluginResource, func() string {
 		if r2 == nil || r2.Permission == nil {
 			return ""
@@ -720,6 +728,9 @@ func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r
 		return r2.Permission.Action
 	}()
 	// Set the plugin resource key
+	if r2.ResourceMap == nil {
+		r2.ResourceMap = map[string]string{}
+	}
 	r2.ResourceMap[defaultPluginResource] = router.DefaultPluginResourceKey
 
 	RegisterPluginResource(resource, r2.ResourceMap)
@@ -746,6 +757,8 @@ func (p *rbacServiceImpl) CheckPluginRequestPerm(httpParams httprouter.Params, r
 			bcode.ReturnHTTPError(req, res, bcode.ErrUnauthorized)
 			return false
 		}
+		// resource: plugin/cluster/node
+		// path: plugin:p1/cluster:cluster1/node:node1
 		path, err := checkResourcePath(resource)
 		if err != nil {
 			klog.Errorf("check resource path failure %s", err.Error())

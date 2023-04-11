@@ -18,8 +18,6 @@ package types
 
 import (
 	rbacv1 "k8s.io/api/rbac/v1"
-
-	"github.com/kubevela/velaux/pkg/server/domain/model"
 )
 
 // Plugin VelaUX plugin model
@@ -31,8 +29,6 @@ type Plugin struct {
 	// SystemJS fields
 	Module  string
 	BaseURL string
-	// Plugin Settings
-	Setting model.PluginSetting
 }
 
 // BuildInfo the plugin build info
@@ -80,8 +76,10 @@ type Requirement struct {
 
 // JSONData represents the plugin's plugin.json
 type JSONData struct {
-	ID       string      `json:"id"`
-	Type     Type        `json:"type"`
+	ID   string `json:"id"`
+	Type Type   `json:"type"`
+	// there are four sub types in the definition plugin type, includes: component, trait, policy ,and workflow-step.
+	SubType  string      `json:"subType"`
 	Name     string      `json:"name"`
 	Info     Info        `json:"info"`
 	Includes []*Includes `json:"includes"`
