@@ -194,8 +194,8 @@ func (w *Workflow) listWorkflowRecordsFromEnv(req *restful.Request, res *restful
 			wfRecorders = append(wfRecorders, records.Records...)
 		}
 	}
-
-	if err := res.WriteEntity(wfRecorders); err != nil {
+	resp := apis.ListWorkflowRecordsResponse{Records: wfRecorders, Total: int64(len(wfRecorders))}
+	if err := res.WriteEntity(resp); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}

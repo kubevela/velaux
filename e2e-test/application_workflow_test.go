@@ -155,6 +155,7 @@ var _ = Describe("Test application workflow rest api", func() {
 		var lrr apisv1.ListWorkflowRecordsResponse
 		Expect(decodeResponseBody(res, &lrr)).Should(Succeed())
 		Expect(lrr.Total).Should(Equal(int64(1)))
+		Expect(len(lrr.Records)).Should(Equal(int64(1)))
 	})
 
 	It("Detail the record", func() {
