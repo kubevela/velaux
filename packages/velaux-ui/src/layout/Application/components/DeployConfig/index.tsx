@@ -33,8 +33,8 @@ interface Props {
   applicationAllStatus?: ApplicationEnvStatus[];
   onClose: () => void;
   onOK: (workflowName?: string, force?: boolean) => void;
-  workflows?: Workflow[];
-  envBindings?: EnvBinding[];
+  workflows: Workflow[];
+  envBindings: EnvBinding[];
   dispatch: Dispatch;
   loading: boolean;
 }
@@ -69,11 +69,15 @@ function checkCanaryDeployStep(w: Workflow): boolean {
 class DeployConfigDialog extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    let defaultEnv = props.envName;
+    if (!defaultEnv && props.envBindings.length > 0) {
+      defaultEnv = props.envBindings[0].name;
+    }
     this.state = {
       workflowName: '',
       dryRunLoading: false,
       showDryRunResult: false,
-      env: props.envName,
+      env: defaultEnv,
     };
   }
 
@@ -142,7 +146,7 @@ class DeployConfigDialog extends Component<Props, State> {
     const createReq: CreateWorkflowRequest = _.cloneDeep(base);
     createReq.name = createReq.name + '-canary';
     createReq.alias = createReq.alias?.replace('Workflow', 'Canary Workflow');
-
+    createReq.default = false;
     createWorkflow({ appName: applicationDetail.name }, createReq).then((res) => {
       if (res) {
         this.loadApplicationWorkflows();
@@ -195,9 +199,6 @@ class DeployConfigDialog extends Component<Props, State> {
         return { label: showAlias(env), value: env.name };
       }) || [];
 
-    if (!env && envOptions.length > 0) {
-      this.setState({ env: envOptions[0].value });
-    }
     const workflowOptions = workflows?.filter((w) => w.envName === env);
 
     const status = env && envStatus[env] ? envStatus[env].status : 'Undeployed';

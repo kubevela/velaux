@@ -192,7 +192,7 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
         </Row>
         <If condition={showDeployConfig}>
-          {applicationDetail && (
+          {applicationDetail && envbinding && workflows && (
             <DeployConfig
               loading={loading}
               envName={envName}

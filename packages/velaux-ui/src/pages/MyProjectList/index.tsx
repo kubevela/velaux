@@ -1,10 +1,9 @@
-import { Table, Button, Dialog, Message } from '@alifd/next';
+import { Table, Dialog, Message } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Fragment, Component } from 'react';
 
 import { deleteProject } from '../../api/project';
 import { ListTitle as Title } from '../../components/ListTitle';
-import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
 import type { NameAlias } from '../../interface/env';
 import type { Project } from '../../interface/project';
@@ -12,6 +11,7 @@ import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import { connect } from 'dva';
 import { LoginUserInfo } from '../../interface/user';
+import i18n from '../../i18n';
 
 type Props = {
   dispatch: ({}) => void;
@@ -110,29 +110,6 @@ class MyProjectList extends Component<Props, State> {
           return <span>{v && v.alias ? `${v.alias}(${v.name})` : v.name}</span>;
         },
       },
-      {
-        key: 'operation',
-        title: <Translation>Actions</Translation>,
-        dataIndex: 'operation',
-        cell: (v: string, i: number, record: Project) => {
-          return (
-            <Fragment>
-              <Permission request={{ resource: `project:${record.name}`, action: 'delete' }} project={`${record.name}`}>
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
-                  onClick={() => {
-                    this.onDelete(record);
-                  }}
-                >
-                  <Translation>Delete</Translation>
-                </Button>
-              </Permission>
-            </Fragment>
-          );
-        },
-      },
     ];
 
     const { Column } = Table;
@@ -141,7 +118,10 @@ class MyProjectList extends Component<Props, State> {
     return (
       <Fragment>
         <div className="project-list-content">
-          <Title title="My Projects" subTitle="Showing the all projects that you have permissions" />
+          <Title
+            title="My Projects"
+            subTitle={i18n.t('Project allow isolate the user permissions and applications.')}
+          />
           <Table locale={locale().Table} dataSource={userInfo?.projects} loading={isLoading}>
             {columns.map((col, key) => (
               <Column {...col} key={key} align={'left'} />
