@@ -169,6 +169,36 @@ func (w *Workflow) listWorkflowRecords(req *restful.Request, res *restful.Respon
 	}
 }
 
+func (w *Workflow) listWorkflowRecordsFromEnv(req *restful.Request, res *restful.Response) {
+	page, pageSize, err := utils.ExtractPagingParams(req, minPageSize, maxPageSize)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	env := req.PathParameter("envName")
+	allWfs, err := w.WorkflowService.ListApplicationWorkflow(req.Request.Context(), app)
+	var wfRecorders []apis.WorkflowRecord
+
+	for _, wf := range allWfs {
+		if wf.EnvName == env {
+			records, err := w.WorkflowService.ListWorkflowRecords(req.Request.Context(), &model.Workflow{AppPrimaryKey: app.Name, Name: wf.Name}, page, pageSize)
+			if err != nil {
+				bcode.ReturnError(req, res, err)
+				return
+			}
+			for _, record := range records.Records {
+				wfRecorders = append(wfRecorders, record)
+			}
+		}
+	}
+
+	if err := res.WriteEntity(wfRecorders); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
 func (w *Workflow) detailWorkflowRecord(req *restful.Request, res *restful.Response) {
 	workflow := req.Request.Context().Value(&apis.CtxKeyWorkflow).(*model.Workflow)
 	record, err := w.WorkflowService.DetailWorkflowRecord(req.Request.Context(), workflow, req.PathParameter("record"))
