@@ -150,6 +150,14 @@ var _ = Describe("Test application workflow rest api", func() {
 		Expect(adr.WorkflowRecord.Name).ShouldNot(BeEmpty())
 	})
 
+	It("Get the workflow records from an env", func() {
+		res := get(fmt.Sprintf("/applications/%s/envs/%s/records", appName, envName))
+		var lrr apisv1.ListWorkflowRecordsResponse
+		Expect(decodeResponseBody(res, &lrr)).Should(Succeed())
+		Expect(lrr.Total).Should(Equal(int64(1)))
+		Expect(len(lrr.Records)).Should(Equal(1))
+	})
+
 	It("Detail the record", func() {
 		res := get(fmt.Sprintf("/applications/%s/workflows/%s/records", appName, repository.ConvertWorkflowName(envName)))
 		var lrr apisv1.ListWorkflowRecordsResponse

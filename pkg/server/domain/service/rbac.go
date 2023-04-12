@@ -233,6 +233,11 @@ var ResourceMaps = map[string]resourceMetadata{
 					},
 					"envBinding": {
 						pathName: "envName",
+						subResources: map[string]resourceMetadata{
+							"record": {
+								pathName: "record",
+							},
+						},
 					},
 					"trigger": {},
 				},

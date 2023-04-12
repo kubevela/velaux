@@ -72,6 +72,7 @@ type WorkflowService interface {
 	DeleteWorkflowByApp(ctx context.Context, app *model.Application) error
 	CreateOrUpdateWorkflow(ctx context.Context, app *model.Application, req apisv1.CreateWorkflowRequest) (*apisv1.DetailWorkflowResponse, error)
 	UpdateWorkflow(ctx context.Context, workflow *model.Workflow, req apisv1.UpdateWorkflowRequest) (*apisv1.DetailWorkflowResponse, error)
+	ListWorkflowRecordsFromEnv(ctx context.Context, app *model.Application, envName string, page, pageSize int) (*apisv1.ListWorkflowRecordsResponse, error)
 
 	GetWorkflowRecord(ctx context.Context, workflow *model.Workflow, recordName string) (*model.WorkflowRecord, error)
 	CreateWorkflowRecord(ctx context.Context, appModel *model.Application, app *v1beta1.Application, workflow *model.Workflow) (*model.WorkflowRecord, error)
@@ -309,6 +310,61 @@ func (w *workflowServiceImpl) ListWorkflowRecords(ctx context.Context, workflow 
 		}
 	}
 	count, err := w.Store.Count(ctx, &record, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp.Total = count
+
+	return resp, nil
+}
+
+// ListWorkflowRecords list workflow record
+func (w *workflowServiceImpl) ListWorkflowRecordsFromEnv(ctx context.Context, app *model.Application, envName string, page, pageSize int) (*apisv1.ListWorkflowRecordsResponse, error) {
+	var workflow = model.Workflow{
+		AppPrimaryKey: app.PrimaryKey(),
+	}
+
+	resList, err := w.Store.List(ctx, &workflow, &datastore.ListOptions{
+		FilterOptions: datastore.FilterOptions{
+			In: []datastore.InQueryOption{{Key: "envName", Values: []string{envName}}},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var wfNames []string
+	for _, workflow := range resList {
+		wm := workflow.(*model.Workflow)
+		wfNames = append(wfNames, wm.Name)
+	}
+
+	var record = model.WorkflowRecord{
+		AppPrimaryKey: app.Name,
+	}
+
+	filterOptions := datastore.FilterOptions{In: []datastore.InQueryOption{{Key: "workflowName", Values: wfNames}}}
+
+	records, err := w.Store.List(ctx, &record, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{
+		{Key: "createTime", Order: datastore.SortOrderAscending}},
+		FilterOptions: filterOptions,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &apisv1.ListWorkflowRecordsResponse{
+		Records: []apisv1.WorkflowRecord{},
+	}
+
+	for _, raw := range records {
+		record, ok := raw.(*model.WorkflowRecord)
+		if ok {
+			resp.Records = append(resp.Records, *assembler.ConvertFromRecordModel(record))
+		}
+	}
+
+	count, err := w.Store.Count(ctx, &record, &filterOptions)
 	if err != nil {
 		return nil, err
 	}

@@ -169,6 +169,25 @@ func (w *Workflow) listWorkflowRecords(req *restful.Request, res *restful.Respon
 	}
 }
 
+func (w *Workflow) listWorkflowRecordsFromEnv(req *restful.Request, res *restful.Response) {
+	page, pageSize, err := utils.ExtractPagingParams(req, minPageSize, maxPageSize)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	env := req.PathParameter("envName")
+	wfs, err := w.WorkflowService.ListWorkflowRecordsFromEnv(req.Request.Context(), app, env, page, pageSize)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(wfs); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
 func (w *Workflow) detailWorkflowRecord(req *restful.Request, res *restful.Response) {
 	workflow := req.Request.Context().Value(&apis.CtxKeyWorkflow).(*model.Workflow)
 	record, err := w.WorkflowService.DetailWorkflowRecord(req.Request.Context(), workflow, req.PathParameter("record"))
