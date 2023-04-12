@@ -177,25 +177,12 @@ func (w *Workflow) listWorkflowRecordsFromEnv(req *restful.Request, res *restful
 	}
 	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
 	env := req.PathParameter("envName")
-	allWfs, err := w.WorkflowService.ListApplicationWorkflow(req.Request.Context(), app)
+	wfs, err := w.WorkflowService.ListWorkflowRecordsFromEnv(req.Request.Context(), app, env, page, pageSize)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
-	var wfRecorders []apis.WorkflowRecord
-
-	for _, wf := range allWfs {
-		if wf.EnvName == env {
-			records, err := w.WorkflowService.ListWorkflowRecords(req.Request.Context(), &model.Workflow{AppPrimaryKey: app.Name, Name: wf.Name}, page, pageSize)
-			if err != nil {
-				bcode.ReturnError(req, res, err)
-				return
-			}
-			wfRecorders = append(wfRecorders, records.Records...)
-		}
-	}
-	resp := apis.ListWorkflowRecordsResponse{Records: wfRecorders, Total: int64(len(wfRecorders))}
-	if err := res.WriteEntity(resp); err != nil {
+	if err := res.WriteEntity(wfs); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
