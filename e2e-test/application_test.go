@@ -109,7 +109,6 @@ var _ = Describe("Test application rest api", func() {
 
 	It("Test update app", func() {
 		defer GinkgoRecover()
-		prepareEnv("dev-env")
 		var req = apisv1.UpdateApplicationRequest{
 			Alias:       "test-app",
 			Description: "this is a test app",
@@ -117,7 +116,7 @@ var _ = Describe("Test application rest api", func() {
 			Labels:      map[string]string{"test": "true"},
 			Annotations: map[string]string{"test": "true"},
 		}
-		res := put("/applications", req)
+		res := put("/applications/"+appName, req)
 		var appBase apisv1.ApplicationBase
 		Expect(decodeResponseBody(res, &appBase)).Should(Succeed())
 		Expect(cmp.Diff(appBase.Alias, req.Alias)).Should(BeEmpty())
