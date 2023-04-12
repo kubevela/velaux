@@ -17,9 +17,10 @@ limitations under the License.
 package v1
 
 import (
+	"github.com/kubevela/workflow/api/v1alpha1"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
-	"github.com/kubevela/workflow/api/v1alpha1"
 )
 
 // CreateEnvBindingModel assemble the EnvBinding model from DTO

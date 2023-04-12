@@ -3,7 +3,7 @@ import { Dialog, Form, Grid, Message, NumberPicker } from '@alifd/next';
 import { DeployModes } from '@velaux/data';
 import _ from 'lodash';
 import i18n from '../../../../i18n';
-import { Workflow, WorkflowMode } from '../../../../interface/application';
+import { Workflow } from '../../../../interface/application';
 import { WorkflowStep } from '../../../../interface/pipeline';
 import { locale } from '../../../../utils/locale';
 import './index.less';
