@@ -151,7 +151,7 @@ var _ = Describe("Test application workflow rest api", func() {
 	})
 
 	It("Get the workflow records from an env", func() {
-		res := get(fmt.Sprintf("/applications/%s/envs/%s/workflows/records", appName, envName))
+		res := get(fmt.Sprintf("/applications/%s/envs/%s/records", appName, envName))
 		var lrr apisv1.ListWorkflowRecordsResponse
 		Expect(decodeResponseBody(res, &lrr)).Should(Succeed())
 		Expect(lrr.Total).Should(Equal(int64(1)))
