@@ -5,11 +5,7 @@ import i18next from 'i18next';
 import React from 'react';
 
 import { deployApplication } from '../../api/application';
-import {
-  listApplicationResourceTree,
-  listApplicationServiceAppliedResources,
-  listApplicationServiceEndpoints,
-} from '../../api/observation';
+import { listApplicationResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
 import { If } from '../../components/If';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
@@ -22,7 +18,7 @@ import type {
   ComponentStatus,
   ApplicationDeployResponse,
 } from '../../interface/application';
-import type { Endpoint, AppliedResource } from '../../interface/observation';
+import type { AppliedResource } from '../../interface/observation';
 import type { Target } from '../../interface/target';
 import type { LoginUserInfo } from '../../interface/user';
 import type { APIError } from '../../utils/errors';
@@ -53,7 +49,6 @@ type Props = {
 
 type State = {
   loading: boolean;
-  endpoints?: Endpoint[];
   target?: Target;
   componentName?: string;
   resources: AppliedResource[];
@@ -108,7 +103,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         payload: { appName: appName, envName: envName },
         callback: (res: any) => {
           if (res.status) {
-            this.loadApplicationEndpoints();
             this.loadApplicationAppliedResources();
           }
         },
@@ -131,40 +125,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       params: { envName },
     } = this.props.match;
     return envbinding.find((env) => env.name === envName);
-  };
-
-  loadApplicationEndpoints = async () => {
-    const { applicationDetail } = this.props;
-    const {
-      params: { appName },
-    } = this.props.match;
-    const { target, componentName } = this.state;
-    const env = this.getEnvbindingByName();
-    if (applicationDetail && applicationDetail.name && env) {
-      const param = {
-        appName: env.appDeployName || appName,
-        appNs: env.appDeployNamespace,
-        componentName: componentName,
-        cluster: '',
-        clusterNs: '',
-      };
-      if (target) {
-        param.cluster = target.cluster?.clusterName || '';
-        param.clusterNs = target.cluster?.namespace || '';
-      }
-      this.setState({ endpointLoading: true });
-      listApplicationServiceEndpoints(param)
-        .then((re) => {
-          if (re && re.endpoints) {
-            this.setState({ endpoints: re.endpoints });
-          } else {
-            this.setState({ endpoints: [] });
-          }
-        })
-        .finally(() => {
-          this.setState({ endpointLoading: false });
-        });
-    }
   };
 
   loadApplicationAppliedResources = async () => {
@@ -240,38 +200,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     }
   };
 
-  loadApplicationWorkflows = async () => {
-    const {
-      params: { appName },
-    } = this.props.match;
-    this.props.dispatch({
-      type: 'application/getApplicationWorkflows',
-      payload: { appName: appName },
-    });
-  };
-
-  loadApplicationPolicies = async () => {
-    const {
-      params: { appName },
-    } = this.props.match;
-    this.props.dispatch({
-      type: 'application/getApplicationPolicies',
-      payload: { appName: appName },
-    });
-  };
-
-  loadApplicationEnvbinding = async () => {
-    const {
-      params: { appName },
-    } = this.props.match;
-    if (appName) {
-      this.props.dispatch({
-        type: 'application/getApplicationEnvbinding',
-        payload: { appName: appName },
-      });
-    }
-  };
-
   updateQuery = (params: { target?: string; component?: string }) => {
     const targets = this.getTargets()?.filter((item) => item.name == params.target);
     let target: Target | undefined = undefined;
@@ -279,7 +207,6 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       target = targets[0];
     }
     this.setState({ target: target, componentName: params.component }, () => {
-      this.loadApplicationEndpoints();
       this.loadApplicationAppliedResources();
     });
   };
@@ -347,8 +274,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     const {
       params: { appName, envName },
     } = this.props.match;
-    const { loading, endpointLoading, resourceLoading, endpoints, resources, componentName, deployLoading, mode } =
-      this.state;
+    const { loading, endpointLoading, resourceLoading, resources, componentName, deployLoading, mode } = this.state;
     let componentStatus = applicationStatus?.services;
     if (componentName) {
       componentStatus = componentStatus?.filter((item) => item.name == componentName);
@@ -386,15 +312,9 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             envName={envName}
             appName={appName}
             disableStatusShow={true}
-            endpoints={endpoints}
             applicationDetail={applicationDetail}
             applicationStatus={applicationStatus}
             components={components}
-            updateEnvs={() => {
-              this.loadApplicationEnvbinding();
-              this.loadApplicationWorkflows();
-              this.loadApplicationPolicies();
-            }}
             updateQuery={(params: { target?: string; component?: string }) => {
               this.updateQuery(params);
             }}

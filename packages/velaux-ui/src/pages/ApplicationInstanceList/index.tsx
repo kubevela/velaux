@@ -5,7 +5,7 @@ import querystring from 'query-string';
 import React from 'react';
 
 import { deployApplication } from '../../api/application';
-import { listApplicationPods, listCloudResources, listApplicationServiceEndpoints } from '../../api/observation';
+import { listApplicationPods, listCloudResources } from '../../api/observation';
 import { If } from '../../components/If';
 import StatusShow from '../../components/StatusShow';
 import { Translation } from '../../components/Translation';
@@ -17,7 +17,7 @@ import type {
   ApplicationStatus,
   EnvBinding,
 } from '../../interface/application';
-import type { PodBase, CloudResource, Configuration, Endpoint } from '../../interface/observation';
+import type { PodBase, CloudResource, Configuration } from '../../interface/observation';
 import type { Target } from '../../interface/target';
 import type { LoginUserInfo } from '../../interface/user';
 import { momentDate } from '../../utils/common';
@@ -54,7 +54,6 @@ type State = {
   openRowKeys: [];
   cloudInstance?: CloudInstance[];
   showStatus: boolean;
-  endpoints?: Endpoint[];
   deployLoading: boolean;
 };
 
@@ -112,68 +111,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
         payload: { appName: appName, envName: envName },
         callback: (re: any) => {
           this.loadAppInstances();
-          if (re) {
-            const status: ApplicationStatus = re.status;
-            if (status && status.appliedResources) {
-              this.loadApplicationEndpoints();
-            }
-          }
         },
-      });
-    }
-  };
-
-  loadApplicationEndpoints = async () => {
-    const { applicationDetail } = this.props;
-    const {
-      params: { appName },
-    } = this.props.match;
-    const { target, componentName } = this.state;
-    const env = this.getEnvbindingByName();
-    if (applicationDetail && applicationDetail.name && env) {
-      const param = {
-        appName: env.appDeployName || appName,
-        appNs: env.appDeployNamespace,
-        componentName: componentName,
-        cluster: '',
-        clusterNs: '',
-      };
-      if (target) {
-        param.cluster = target.cluster?.clusterName || '';
-        param.clusterNs = target.cluster?.namespace || '';
-      }
-      this.setState({ loading: true });
-      listApplicationServiceEndpoints(param)
-        .then((re) => {
-          if (re && re.endpoints) {
-            this.setState({ endpoints: re.endpoints });
-          } else {
-            this.setState({ endpoints: [] });
-          }
-        })
-        .finally(() => {
-          this.setState({ loading: false });
-        });
-    }
-  };
-
-  loadApplicationWorkflows = async () => {
-    const {
-      params: { appName },
-    } = this.props.match;
-    this.props.dispatch({
-      type: 'application/getApplicationWorkflows',
-      payload: { appName: appName },
-    });
-  };
-  loadApplicationEnvbinding = async () => {
-    const {
-      params: { appName },
-    } = this.props.match;
-    if (appName) {
-      this.props.dispatch({
-        type: 'application/getApplicationEnvbinding',
-        payload: { appName: appName },
       });
     }
   };
@@ -405,7 +343,6 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     }
     this.setState({ target: target, componentName: params.component }, () => {
       this.loadAppInstances();
-      this.loadApplicationEndpoints();
     });
   };
 
@@ -501,7 +438,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
 
   render() {
     const { applicationStatus, applicationDetail, components, userInfo } = this.props;
-    const { podList, loading, showStatus, cloudInstance, endpoints, deployLoading } = this.state;
+    const { podList, loading, showStatus, cloudInstance, deployLoading } = this.state;
     const columns = this.getColumns();
     const envbinding = this.getEnvbindingByName();
     const expandedRowRender = (record: PodBase) => {
@@ -533,11 +470,6 @@ class ApplicationInstanceList extends React.Component<Props, State> {
           components={components}
           envName={envName}
           appName={appName}
-          endpoints={endpoints}
-          updateEnvs={() => {
-            this.loadApplicationEnvbinding();
-            this.loadApplicationWorkflows();
-          }}
           applicationDetail={applicationDetail}
           applicationStatus={applicationStatus}
           updateQuery={(params: { target?: string; component?: string }) => {

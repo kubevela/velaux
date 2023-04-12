@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { AiOutlineCopy } from 'react-icons/ai';
 import { HiOutlineRefresh } from 'react-icons/hi';
+import { listApplicationServiceEndpoints } from '../../../../api/observation';
 
 import {
   recycleApplicationEnvbinding,
@@ -34,17 +35,16 @@ export type GatewayIP = {
 };
 
 type Props = {
+  // For the search
   targets?: Target[];
+  components?: ApplicationComponent[];
+  updateQuery?: (params: { target?: string; component?: string }) => void;
   applicationStatus?: ApplicationStatus;
   applicationDetail?: ApplicationDetail;
-  components?: ApplicationComponent[];
   envName: string;
   appName: string;
   envbinding?: EnvBinding;
   disableStatusShow?: boolean;
-  endpoints?: Endpoint[];
-  updateQuery: (params: { target?: string; component?: string }) => void;
-  updateEnvs: () => void;
   refresh: () => void;
   dispatch: ({}) => void;
 };
@@ -59,6 +59,8 @@ type State = {
   component?: string;
   compare?: ApplicationCompareResponse;
   visibleApplicationDiff: boolean;
+  endpoints?: Endpoint[];
+  loading?: boolean;
 };
 
 class Header extends Component<Props, State> {
@@ -75,14 +77,89 @@ class Header extends Component<Props, State> {
   }
   componentDidMount() {
     this.compareCurrentWithCluster(this.props.appName, this.props.envName);
+    this.loadApplicationEndpoints();
   }
 
   shouldComponentUpdate(nextProps: Props) {
     if (nextProps.appName + nextProps.envName != this.props.appName + this.props.envName) {
       this.compareCurrentWithCluster(this.props.appName, nextProps.envName);
+      this.loadApplicationEndpoints();
     }
     return true;
   }
+
+  getTarget = () => {
+    const { targets } = this.props;
+    const { target } = this.state;
+    if (targets && target) {
+      const t = targets.find((item) => item.name === target);
+      return t;
+    }
+    return;
+  };
+  loadApplicationEndpoints = async () => {
+    const { applicationDetail, appName, envbinding } = this.props;
+    const { component } = this.state;
+    const target = this.getTarget();
+
+    if (applicationDetail && applicationDetail.name && envbinding) {
+      const param = {
+        appName: envbinding.appDeployName || appName,
+        appNs: envbinding.appDeployNamespace,
+        componentName: component,
+        cluster: '',
+        clusterNs: '',
+      };
+      if (target) {
+        param.cluster = target.cluster?.clusterName || '';
+        param.clusterNs = target.cluster?.namespace || '';
+      }
+      this.setState({ loading: true });
+      listApplicationServiceEndpoints(param)
+        .then((re) => {
+          if (re && re.endpoints) {
+            this.setState({ endpoints: re.endpoints });
+          } else {
+            this.setState({ endpoints: [] });
+          }
+        })
+        .finally(() => {
+          this.setState({ loading: false });
+        });
+    }
+  };
+
+  loadApplicationWorkflows = async () => {
+    const { appName } = this.props;
+    this.props.dispatch({
+      type: 'application/getApplicationWorkflows',
+      payload: { appName: appName },
+    });
+  };
+
+  loadApplicationPolicies = async () => {
+    const { appName } = this.props;
+    this.props.dispatch({
+      type: 'application/getApplicationPolicies',
+      payload: { appName: appName },
+    });
+  };
+
+  loadApplicationEnvbinding = async () => {
+    const { appName } = this.props;
+    if (appName) {
+      this.props.dispatch({
+        type: 'application/getApplicationEnvbinding',
+        payload: { appName: appName },
+      });
+    }
+  };
+
+  updateEnvbindingList = () => {
+    this.loadApplicationEnvbinding();
+    this.loadApplicationWorkflows();
+    this.loadApplicationPolicies();
+  };
 
   compareCurrentWithCluster = (appName: string, envName: string) => {
     const { applicationStatus } = this.props;
@@ -99,13 +176,19 @@ class Header extends Component<Props, State> {
 
   handleTargetChange = (value: string) => {
     this.setState({ target: value }, () => {
-      this.props.updateQuery({ component: this.state.component, target: this.state.target });
+      if (this.props.updateQuery) {
+        this.props.updateQuery({ component: this.state.component, target: this.state.target });
+      }
+      this.loadApplicationEndpoints();
     });
   };
 
   handleComponentChange = (value: string) => {
     this.setState({ component: value }, () => {
-      this.props.updateQuery({ component: this.state.component, target: this.state.target });
+      if (this.props.updateQuery) {
+        this.props.updateQuery({ component: this.state.component, target: this.state.target });
+      }
+      this.loadApplicationEndpoints();
     });
   };
 
@@ -133,6 +216,7 @@ class Header extends Component<Props, State> {
                 dispatch(routerRedux.push(`/applications`));
               } else {
                 refresh();
+                this.loadApplicationEndpoints();
               }
             }
           });
@@ -146,12 +230,12 @@ class Header extends Component<Props, State> {
     Dialog.confirm({
       content: i18n.t('Are you sure you want to delete the current environment binding?').toString(),
       onOk: () => {
-        const { applicationDetail, envName, updateEnvs, dispatch } = this.props;
+        const { applicationDetail, envName, dispatch } = this.props;
         if (applicationDetail) {
           deleteApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then((re) => {
             if (re) {
               Message.success(i18n.t('Environment binding deleted successfully'));
-              updateEnvs();
+              this.updateEnvbindingList();
               dispatch(routerRedux.push(`/applications/${applicationDetail.name}/config`));
             }
           });
@@ -182,8 +266,8 @@ class Header extends Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { appName, envName, components, applicationDetail } = this.props;
-    const { recycleLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff } = this.state;
-    const { targets, applicationStatus, endpoints, disableStatusShow } = this.props;
+    const { recycleLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff, endpoints } = this.state;
+    const { targets, applicationStatus, disableStatusShow } = this.props;
     const targetOptions = (targets || []).map((item: Target) => ({
       label: item.alias || item.name,
       value: item.name,
@@ -207,31 +291,36 @@ class Header extends Component<Props, State> {
       return 'warning';
     };
     const projectName = applicationDetail && applicationDetail.project?.name;
+    const span = 10 + (targetOptions.length > 0 ? 0 : 4) + (componentOptions.length > 0 ? 0 : 4);
     return (
       <div>
         <Row wrap={true} className="border-radius-8">
-          <Col xl={4} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
-            <Select
-              locale={locale().Select}
-              mode="single"
-              onChange={this.handleTargetChange}
-              dataSource={targetOptions}
-              label={i18n.t('Target').toString()}
-              placeholder={i18n.t('Target Selector').toString()}
-              hasClear
-            />
-          </Col>
-          <Col xl={4} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
-            <Select
-              locale={locale().Select}
-              mode="single"
-              onChange={this.handleComponentChange}
-              dataSource={componentOptions}
-              label={i18n.t('Component').toString()}
-              placeholder={i18n.t('Component Selector').toString()}
-              hasClear
-            />
-          </Col>
+          {targetOptions.length > 0 && (
+            <Col xl={4} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
+              <Select
+                locale={locale().Select}
+                mode="single"
+                onChange={this.handleTargetChange}
+                dataSource={targetOptions}
+                label={i18n.t('Target').toString()}
+                placeholder={i18n.t('Target Selector').toString()}
+                hasClear
+              />
+            </Col>
+          )}
+          {componentOptions.length > 0 && (
+            <Col xl={4} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
+              <Select
+                locale={locale().Select}
+                mode="single"
+                onChange={this.handleComponentChange}
+                dataSource={componentOptions}
+                label={i18n.t('Component').toString()}
+                placeholder={i18n.t('Component Selector').toString()}
+                hasClear
+              />
+            </Col>
+          )}
           <Col xl={6} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
             <If condition={applicationStatus}>
               <Message type={getAppStatusShowType(applicationStatus?.status)} size="medium" style={{ padding: '8px' }}>
@@ -246,7 +335,7 @@ class Header extends Component<Props, State> {
               </Message>
             </If>
           </Col>
-          <Col xl={10} m={12} xs={24} className="flexright" style={{ marginBottom: '16px', padding: '0 8px' }}>
+          <Col xl={span} m={12} xs={24} className="flexright" style={{ marginBottom: '16px', padding: '0 8px' }}>
             <If condition={compare && compare.isDiff}>
               <Button type="secondary" onClick={this.showApplicationDiff}>
                 <span className="circle circle-failure" />
