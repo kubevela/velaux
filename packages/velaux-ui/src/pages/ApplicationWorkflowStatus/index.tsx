@@ -8,6 +8,7 @@ import Empty from '../../components/Empty';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
+import Header from '../ApplicationInstanceList/components/Header';
 import i18n from '../../i18n';
 import type {
   ApplicationDetail,
@@ -135,7 +136,7 @@ class ApplicationWorkflow extends React.Component<Props, State> {
   runApplicationWorkflow = () => {};
 
   render() {
-    const { applicationDetail, dispatch } = this.props;
+    const { applicationDetail, dispatch, applicationStatus } = this.props;
     const {
       params: { record, appName, envName },
     } = this.props.match;
@@ -173,6 +174,18 @@ class ApplicationWorkflow extends React.Component<Props, State> {
     }
     return (
       <div className="run-layout">
+        <Header
+          envbinding={this.getEnvbindingByName()}
+          envName={envName}
+          appName={appName}
+          disableStatusShow={true}
+          applicationDetail={applicationDetail}
+          applicationStatus={applicationStatus}
+          refresh={() => {
+            this.loadApplicationStatus();
+          }}
+          dispatch={this.props.dispatch}
+        />
         <Card contentHeight={'auto'}>
           <Row>
             <Col span={6}>
