@@ -1,6 +1,7 @@
-import { Button, Dialog, Message, Radio, Loading } from '@alifd/next';
+import { Button, Dialog, Message, Radio, Loading, Select, Form } from '@alifd/next';
 import React, { Component } from 'react';
-import { Link, routerRedux } from 'dva/router';
+import _ from 'lodash';
+import { routerRedux } from 'dva/router';
 import { dryRunApplication } from '../../../../api/application';
 import { ApplicationDryRun } from '../../../../components/ApplicationDryRun';
 import { If } from '../../../../components/If';
@@ -11,6 +12,8 @@ import type {
   ApplicationDryRunResponse,
   ApplicationEnvStatus,
   ApplicationStatus,
+  CreateWorkflowRequest,
+  EnvBinding,
   Workflow,
 } from '../../../../interface/application';
 import type { APIError } from '../../../../utils/errors';
@@ -18,16 +21,20 @@ import { locale } from '../../../../utils/locale';
 import './index.less';
 import { Dispatch } from 'redux';
 import { DeployModes } from '@velaux/data';
+import { showAlias } from '../../../../utils/common';
+import { createWorkflow } from '../../../../api/workflows';
 
 const { Group: RadioGroup } = Radio;
 
 interface Props {
   appName: string;
+  envName?: string;
   applicationDetail: ApplicationDetail;
   applicationAllStatus?: ApplicationEnvStatus[];
   onClose: () => void;
   onOK: (workflowName?: string, force?: boolean) => void;
   workflows?: Workflow[];
+  envBindings?: EnvBinding[];
   dispatch: Dispatch;
   loading: boolean;
 }
@@ -39,6 +46,7 @@ interface State {
   showDryRunResult: boolean;
   dryRunResultState?: 'success' | 'failure';
   dryRunMessage?: string;
+  env?: string;
 }
 
 function checkCanaryDeployStep(w: Workflow): boolean {
@@ -65,6 +73,7 @@ class DeployConfigDialog extends Component<Props, State> {
       workflowName: '',
       dryRunLoading: false,
       showDryRunResult: false,
+      env: props.envName,
     };
   }
 
@@ -121,6 +130,40 @@ class DeployConfigDialog extends Component<Props, State> {
     this.setState({ workflowName: name });
   };
 
+  onCreateCanaryRolloutWorkflow = () => {
+    const { applicationDetail, workflows } = this.props;
+    const { env } = this.state;
+    const base = workflows?.find((w) => w.envName == env);
+    if (!base) {
+      Message.warning(i18n.t('There is no workflow belong to the selected environment'));
+      return;
+    }
+
+    const createReq: CreateWorkflowRequest = _.cloneDeep(base);
+    createReq.name = createReq.name + '-canary';
+    createReq.alias = createReq.alias?.replace('Workflow', 'Canary Workflow');
+
+    createWorkflow({ appName: applicationDetail.name }, createReq).then((res) => {
+      if (res) {
+        this.loadApplicationWorkflows();
+        this.props.dispatch(
+          routerRedux.push(
+            `/applications/${applicationDetail.name}/envbinding/${env}/workflow/${createReq.name}/studio?setCanary`
+          )
+        );
+        this.props.onClose();
+      }
+    });
+  };
+
+  loadApplicationWorkflows = async () => {
+    const { applicationDetail } = this.props;
+    this.props.dispatch({
+      type: 'application/getApplicationWorkflows',
+      payload: { appName: applicationDetail.name },
+    });
+  };
+
   renderDryRunResult = () => {
     const { dryRunResult } = this.state;
     if (dryRunResult) {
@@ -138,14 +181,28 @@ class DeployConfigDialog extends Component<Props, State> {
   };
 
   render() {
-    const { workflows, onClose, applicationDetail, applicationAllStatus, loading } = this.props;
-    const { workflowName, dryRunLoading, showDryRunResult, dryRunResult, dryRunResultState, dryRunMessage } =
+    const { workflows, onClose, applicationDetail, applicationAllStatus, envBindings, loading, envName } = this.props;
+    const { workflowName, dryRunLoading, showDryRunResult, dryRunResult, dryRunResultState, dryRunMessage, env } =
       this.state;
     const sourceOfTrust = applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
     const envStatus: Record<string, ApplicationStatus> = {};
     applicationAllStatus?.map((status) => {
       envStatus[status.envName] = status.status;
     });
+
+    const envOptions =
+      envBindings?.map((env) => {
+        return { label: showAlias(env), value: env.name };
+      }) || [];
+
+    if (!env && envOptions.length > 0) {
+      this.setState({ env: envOptions[0].value });
+    }
+    const workflowOptions = workflows?.filter((w) => w.envName === env);
+
+    const status = env && envStatus[env] ? envStatus[env].status : 'Undeployed';
+
+    const haveCanaryRollout = workflowOptions?.find((workflow) => checkCanaryDeployStep(workflow)) ? true : false;
     return (
       <React.Fragment>
         <Dialog
@@ -178,15 +235,43 @@ class DeployConfigDialog extends Component<Props, State> {
             </Message>
           </If>
           <Loading visible={loading} style={{ width: '100%' }}>
+            <Form.Item labelAlign="left" label={<Translation>Environment</Translation>}>
+              <Select
+                dataSource={envOptions}
+                onChange={(e) => {
+                  const d = workflows?.find((w) => w.envName === e && w.default);
+                  this.setState({ env: e, workflowName: d ? d.name : '' });
+                }}
+                defaultValue={envName || (envOptions?.length > 0 ? envOptions[0].value : '')}
+              ></Select>
+            </Form.Item>
+            <div className="deploy-workflow-select-item">
+              <div className="status">
+                <Translation>Status</Translation>: <Translation>{status}</Translation>
+              </div>
+
+              {!haveCanaryRollout && (
+                <div className="enable-canary-deploy">
+                  <Button size="small" type="secondary" onClick={this.onCreateCanaryRolloutWorkflow}>
+                    <Translation>Enable Canary Rollout</Translation>
+                  </Button>
+                </div>
+              )}
+            </div>
+            {haveCanaryRollout && status != 'running' && (
+              <Message type="notice">
+                <Translation>The canary rollout workflow is available when the application is running</Translation>
+              </Message>
+            )}
             <RadioGroup value={workflowName} onChange={this.onChange}>
-              {workflows?.map((workflow) => {
+              {workflowOptions?.map((workflow) => {
                 const haveCanaryDeploy = checkCanaryDeployStep(workflow);
-                const status = envStatus[workflow.envName] ? envStatus[workflow.envName].status : 'UnDeployed';
                 return (
                   <Radio
                     key={workflow.name}
                     id={workflow.name}
                     value={workflow.name}
+                    disabled={status != 'running' && haveCanaryDeploy}
                     onClick={() => {
                       this.onChange(workflow.name);
                     }}
@@ -202,41 +287,6 @@ class DeployConfigDialog extends Component<Props, State> {
                           <Translation>Default Rollout</Translation>
                         </div>
                       )}
-                    </div>
-                    <div className="deploy-workflow-select-item">
-                      <div className="status">
-                        <Translation>Status</Translation>: <Translation>{status}</Translation>
-                      </div>
-                      <If
-                        condition={
-                          !haveCanaryDeploy &&
-                          envStatus[workflow.envName] &&
-                          envStatus[workflow.envName].status === 'running'
-                        }
-                      >
-                        <div className="enable-canary-deploy">
-                          <Button
-                            size="small"
-                            type="secondary"
-                            onClick={() => {
-                              this.props.dispatch(
-                                routerRedux.push(
-                                  `/applications/${applicationDetail.name}/envbinding/${workflow.envName}/workflow/studio?setCanary`
-                                )
-                              );
-                              this.props.onClose();
-                            }}
-                          >
-                            <Translation>Enable Canary Rollout</Translation>
-                          </Button>
-                        </div>
-                      </If>
-                      <span className="env">
-                        <Translation>Environment</Translation>:
-                        <Link to={`/applications/${applicationDetail.name}/envbinding/${workflow.envName}/workflow`}>
-                          {workflow.envName}
-                        </Link>
-                      </span>
                     </div>
                   </Radio>
                 );

@@ -197,6 +197,17 @@ export interface UpdateWorkflowRequest {
   default?: boolean;
 }
 
+export interface CreateWorkflowRequest {
+  name: string;
+  envName: string;
+  alias?: string;
+  description?: string;
+  mode: WorkflowMode;
+  subMode: WorkflowMode;
+  steps: WorkflowStep[];
+  default?: boolean;
+}
+
 export interface Trait {
   alias?: string;
   description?: string;
@@ -318,7 +329,7 @@ export interface Workflow {
   enable: boolean;
   mode: WorkflowMode;
   subMode: WorkflowMode;
-  steps?: WorkflowStep[];
+  steps: WorkflowStep[];
 }
 
 export interface UpdateComponentProperties {

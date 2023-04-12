@@ -27,7 +27,7 @@ const generateCanaryDeployGroup = (step: WorkflowStep, batch: number): WorkflowS
   const policies: string[] | null = step.properties ? step.properties['policies'] : null;
   for (let i = 0; i < batch; i++) {
     const batchStep: WorkflowStep = {
-      name: 'batch-' + i,
+      name: step.name + '-batch-' + i,
       alias: 'Batch ' + i,
       type: DeployModes.CanaryDeploy,
       properties: {
@@ -38,7 +38,7 @@ const generateCanaryDeployGroup = (step: WorkflowStep, batch: number): WorkflowS
     if (policies && batchStep.properties) {
       batchStep.properties['policies'] = _.cloneDeep(policies);
     }
-    const approveStep: WorkflowStep = { name: 'approve-' + i, alias: 'Approve ' + i, type: 'suspend' };
+    const approveStep: WorkflowStep = { name: step.name + '-approve-' + i, alias: 'Approve ' + i, type: 'suspend' };
     if (i > 0) {
       steps.push(approveStep);
     }

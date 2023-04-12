@@ -886,12 +886,12 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 
 	env, err := c.EnvService.GetEnv(ctx, envName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to load the environment: %w", err)
 	}
 
 	envbinding, err := c.EnvBindingService.GetEnvBinding(ctx, appModel, envName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to load the env binding: %w", err)
 	}
 	labels := make(map[string]string)
 	for key, value := range appModel.Labels {
@@ -1558,8 +1558,14 @@ func (c *applicationServiceImpl) CompareApp(ctx context.Context, appModel *model
 	switch {
 	case compareReq.CompareRevisionWithRunning != nil:
 		compareTarget = getRunningApp()
-	case compareReq.CompareRevisionWithLatest != nil || compareReq.CompareLatestWithRunning != nil:
+	case compareReq.CompareRevisionWithLatest != nil:
 		compareTarget, err = c.renderOAMApplication(ctx, appModel, "", envNameByRevision, "")
+		if err != nil {
+			klog.Errorf("failed to build the latest application %s", err.Error())
+			break
+		}
+	case compareReq.CompareLatestWithRunning != nil:
+		compareTarget, err = c.renderOAMApplication(ctx, appModel, "", compareReq.CompareLatestWithRunning.Env, "")
 		if err != nil {
 			klog.Errorf("failed to build the latest application %s", err.Error())
 			break

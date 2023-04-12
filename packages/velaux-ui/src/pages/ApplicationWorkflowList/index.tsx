@@ -5,7 +5,7 @@ import React from 'react';
 import { AiFillDelete } from 'react-icons/ai';
 import type { Dispatch } from 'redux';
 
-import { deleteWorkflow, listWorkflow } from '../../api/workflows';
+import { deleteWorkflow } from '../../api/workflows';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
@@ -18,6 +18,7 @@ type Props = {
   revisions: [];
   applicationDetail?: ApplicationDetail;
   envbinding?: EnvBinding[];
+  workflows: Workflow[];
   dispatch: Dispatch<any>;
   match: {
     params: {
@@ -26,9 +27,7 @@ type Props = {
   };
 };
 
-type State = {
-  workflowList: Workflow[];
-};
+type State = {};
 
 @connect((store: any) => {
   return { ...store.application };
@@ -36,30 +35,19 @@ type State = {
 class ApplicationWorkflowList extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      workflowList: [],
-    };
+    this.state = {};
   }
 
-  componentDidMount() {
-    this.getWorkflowList();
-  }
+  componentDidMount() {}
 
-  getWorkflowList = async () => {
-    const { applicationDetail } = this.props;
-    if (applicationDetail) {
-      const params = {
-        appName: applicationDetail?.name,
-      };
-
-      listWorkflow(params).then((res) => {
-        if (res) {
-          this.setState({
-            workflowList: res.workflows || [],
-          });
-        }
-      });
-    }
+  loadApplicationWorkflows = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationWorkflows',
+      payload: { appName: appName },
+    });
   };
 
   onDeleteWorkflow = (name: string) => {
@@ -74,8 +62,8 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
             name: name,
           }).then((res) => {
             if (res) {
-              Message.success(i18n.t('The Workflow removed successfully'));
-              this.getWorkflowList();
+              Message.success(i18n.t('Workflow removed successfully'));
+              this.loadApplicationWorkflows();
             }
           });
         },
@@ -85,27 +73,33 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
   };
 
   render() {
-    const { workflowList } = this.state;
-    const { applicationDetail } = this.props;
+    const { applicationDetail, workflows } = this.props;
     const projectName = applicationDetail?.project?.name;
     return (
       <div>
-        <Message type="notice" style={{ marginBottom: '8px' }}>
-          <Translation>One environment corresponds to one workflow</Translation>
-        </Message>
-        <Table dataSource={workflowList}>
-          <Table.Column dataIndex="name" title={i18n.t('Name').toString()} />
+        <Table dataSource={workflows}>
+          <Table.Column
+            dataIndex="name"
+            title={i18n.t('Name').toString()}
+            cell={(v: string, i: number, w: Workflow) => {
+              return (
+                <Link to={`/applications/${applicationDetail?.name}/envbinding/${w.envName}/workflow/${v}/studio`}>
+                  {v}
+                </Link>
+              );
+            }}
+          />
           <Table.Column
             dataIndex="envName"
             title={i18n.t('Environment').toString()}
             cell={(v: string) => {
-              return <Link to={`/applications/${applicationDetail?.name}/envbinding/${v}/workflow/studio`}>{v}</Link>;
+              return <Link to={`/applications/${applicationDetail?.name}/envbinding/${v}/workflow`}>{v}</Link>;
             }}
           />
           <Table.Column dataIndex="mode" title={i18n.t('Mode').toString()} />
           <Table.Column
             dataIndex="steps"
-            title={i18n.t('Step Number').toString()}
+            title={i18n.t('Step Count').toString()}
             cell={(steps: []) => {
               return steps ? steps.length : 0;
             }}
@@ -130,7 +124,7 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
             cell={(v: string, i: number, w: Workflow) => {
               return (
                 <div>
-                  <If condition={v === w.envName + '-workflow'}>
+                  <If condition={v != 'workflow-' + w.envName}>
                     <Permission
                       project={projectName}
                       resource={{

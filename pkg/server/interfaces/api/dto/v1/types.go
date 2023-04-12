@@ -1019,14 +1019,14 @@ type PolicyDefinition struct {
 
 // CreateWorkflowRequest create workflow  request
 type CreateWorkflowRequest struct {
-	Name        string         `json:"name"  validate:"checkname"`
-	Alias       string         `json:"alias"  validate:"checkalias" optional:"true"`
+	Name        string         `json:"name" validate:"checkname"`
+	Alias       string         `json:"alias" validate:"checkalias" optional:"true"`
 	Description string         `json:"description" optional:"true"`
 	Steps       []WorkflowStep `json:"steps,omitempty"`
 	Mode        string         `json:"mode" validate:"oneof=DAG StepByStep"`
 	SubMode     string         `json:"subMode" validate:"oneof=DAG StepByStep"`
 	Default     *bool          `json:"default"`
-	EnvName     string         `json:"envName"`
+	EnvName     string         `json:"envName" validate:"checkname"`
 }
 
 // UpdateWorkflowRequest update or create application workflow

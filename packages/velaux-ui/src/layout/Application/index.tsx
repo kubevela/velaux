@@ -134,7 +134,7 @@ class ApplicationLayout extends Component<Props, any> {
     }
     return (
       <div className="app-layout">
-        <Header dispatch={dispatch} appName={appName} currentPath={url} />
+        <Header dispatch={dispatch} appName={appName} envName={envName} currentPath={url} />
         <EnvTabs dispatch={dispatch} appName={appName} activeKey={envName ? envName : 'basisConfig'} />
         <Row className="padding16 main">
           <div className="menu">

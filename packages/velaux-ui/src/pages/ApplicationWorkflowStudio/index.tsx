@@ -30,7 +30,7 @@ const ButtonGroup = Button.Group;
 
 type Props = {
   dispatch: Dispatch<any>;
-  match: { params: { appName: string; envName: string } };
+  match: { params: { appName: string; envName: string; workflowName: string } };
   applicationDetail?: ApplicationDetail;
   envbinding: EnvBinding[];
 };
@@ -92,12 +92,19 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
 
   loadWorkflow = () => {
     const {
-      params: { appName },
+      params: { appName, workflowName },
     } = this.props.match;
-    const env = this.getEnvbindingByName();
-    if (env && env.workflow.name) {
-      detailWorkflow({ appName: appName, name: env.workflow.name }).then((res: Workflow) => {
-        this.setState({ workflow: res, mode: res.mode, subMode: res.subMode, steps: res.steps });
+    detailWorkflow({ appName: appName, name: workflowName }).then((res: Workflow) => {
+      this.setState({ workflow: res, mode: res.mode, subMode: res.subMode, steps: res.steps });
+    });
+  };
+
+  loadApplicationWorkflows = async () => {
+    const { applicationDetail } = this.props;
+    if (applicationDetail) {
+      this.props.dispatch({
+        type: 'application/getApplicationWorkflows',
+        payload: { appName: applicationDetail.name },
       });
     }
   };
@@ -143,8 +150,9 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
       )
         .then((res) => {
           if (res) {
-            Message.success('Workflow updated successfully');
+            Message.success(i18n.t('Workflow updated successfully'));
             this.loadWorkflow();
+            this.loadApplicationWorkflows();
             this.setState({ changed: false });
           }
         })

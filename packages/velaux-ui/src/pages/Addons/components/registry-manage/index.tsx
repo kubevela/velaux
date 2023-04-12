@@ -244,10 +244,9 @@ class RegistryManageDialog extends React.Component<Props, State> {
             <Table.Column width="150px" title={<Translation>Name</Translation>} dataIndex="name" />
             <Table.Column width="80px" title={<Translation>Type</Translation>} dataIndex="type" />
             <Table.Column title={<Translation>URL</Translation>} dataIndex="url" />
-            <If condition={registryDataSource.find((item) => item.type === 'Gitlab')}>
-              <Table.Column width="100px" title={<Translation>Repository name</Translation>} dataIndex="repo" />
-            </If>
-
+            {registryDataSource.find((item) => item.type === 'Gitlab') && (
+              <Table.Column width="100px" title={<Translation>Repository Name</Translation>} dataIndex="repo" />
+            )}
             <Table.Column width="160px" title={<Translation>Path(Bucket)</Translation>} dataIndex="path" />
             <Table.Column
               cell={renderAction}
@@ -317,7 +316,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                 <If condition={selectType === 'Gitlab'}>
                   <Col span={3} style={{ padding: '8px' }}>
                     <Form.Item
-                      label={<Translation>Repository name</Translation>}
+                      label={<Translation>Repository Name</Translation>}
                       required
                       help="Repository name in gitlab"
                     >

@@ -163,6 +163,20 @@ export function getApplicationWorkflowRecord(params: { appName: string }) {
   return get(`${url}/${params.appName}/records`, params).then((res) => res);
 }
 
+export function getApplicationEnvRecords(params: {
+  appName: string;
+  envName: string;
+  pageSize?: number;
+  page?: number;
+}) {
+  return get(`${url}/${params.appName}/envs/${params.envName}/records`, {
+    params: {
+      pageSize: params.pageSize || 20,
+      page: params.page || 1,
+    },
+  }).then((res) => res);
+}
+
 export function updateComponentProperties(
   params: ApplicationComponentConfig,
   query: { appName: string; componentName: string }

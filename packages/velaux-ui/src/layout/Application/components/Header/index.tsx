@@ -17,6 +17,7 @@ import type {
   WorkflowRecord,
   ApplicationDeployResponse,
   ApplicationEnvStatus,
+  EnvBinding,
 } from '../../../../interface/application';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
@@ -29,9 +30,11 @@ const { Row, Col } = Grid;
 interface Props {
   currentPath: string;
   appName: string;
+  envName?: string;
   applicationDetail?: ApplicationDetail;
   applicationAllStatus?: ApplicationEnvStatus[];
   workflows?: Workflow[];
+  envbinding?: EnvBinding[];
   dispatch: Dispatch;
 }
 
@@ -95,7 +98,7 @@ class ApplicationHeader extends Component<Props, State> {
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
-            Message.success('Application deployed successfully');
+            Message.success(i18n.t('Application deployed successfully'));
             this.onGetApplicationDetails();
             if (re.record && re.record.name && dispatch) {
               dispatch(
@@ -129,7 +132,8 @@ class ApplicationHeader extends Component<Props, State> {
   componentWillUnmount() {}
 
   render() {
-    const { applicationDetail, applicationAllStatus, currentPath, workflows, appName, dispatch } = this.props;
+    const { applicationDetail, applicationAllStatus, currentPath, workflows, envbinding, appName, envName, dispatch } =
+      this.props;
     const { showDeployConfig, loading } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     let item = <Translation>{`app-${activeKey}`}</Translation>;
@@ -191,8 +195,10 @@ class ApplicationHeader extends Component<Props, State> {
           {applicationDetail && (
             <DeployConfig
               loading={loading}
+              envName={envName}
               applicationAllStatus={applicationAllStatus}
               applicationDetail={applicationDetail}
+              envBindings={envbinding}
               onClose={() => {
                 this.setState({ showDeployConfig: false });
               }}

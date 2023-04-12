@@ -1,9 +1,10 @@
-import { Select, Grid, Card, Loading, Button } from '@alifd/next';
+import { Select, Grid, Card, Loading, Button, MenuButton } from '@alifd/next';
 import { connect } from 'dva';
 import { routerRedux, Link } from 'dva/router';
 import React from 'react';
 import type { Dispatch } from 'redux';
-import { detailWorkflow, getEnvWorkflowRecord } from '../../api/workflows';
+import { detailWorkflow } from '../../api/workflows';
+import { getApplicationEnvRecords } from '../../api/application';
 import Empty from '../../components/Empty';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
@@ -32,6 +33,7 @@ type Props = {
   applicationDetail?: ApplicationDetail;
   applicationStatus?: ApplicationStatus;
   envbinding: EnvBinding[];
+  workflows: Workflow[];
 };
 
 type State = {
@@ -99,29 +101,27 @@ class ApplicationWorkflow extends React.Component<Props, State> {
 
   loadWorkflowRecord = () => {
     const {
-      params: { appName, record },
+      params: { appName, record, envName },
     } = this.props.match;
     const { dispatch } = this.props;
     const env = this.getEnvbindingByName();
     if (env && env.workflow.name) {
-      getEnvWorkflowRecord({ appName: appName, workflowName: env.workflow.name }).then(
-        (res: { records: WorkflowRecord[] }) => {
-          if (res) {
-            const records = res.records.reverse();
-            this.setState({ records: records || [], showRecordName: '' });
-            if (record && res.records.find((re) => re.name === record)) {
-              this.setState({ showRecordName: record });
-            } else if (Array.isArray(records) && records.length > 0) {
-              this.setState({ showRecordName: records[0].name });
-              dispatch(
-                routerRedux.push(`/applications/${appName}/envbinding/${env.name}/workflow/records/${records[0].name}`)
-              );
-              return;
-            }
+      getApplicationEnvRecords({ appName: appName, envName: envName }).then((res: { records: WorkflowRecord[] }) => {
+        if (res) {
+          const records = res.records.reverse();
+          this.setState({ records: records || [], showRecordName: '' });
+          if (record && res.records.find((re) => re.name === record)) {
+            this.setState({ showRecordName: record });
+          } else if (Array.isArray(records) && records.length > 0) {
+            this.setState({ showRecordName: records[0].name });
+            dispatch(
+              routerRedux.push(`/applications/${appName}/envbinding/${env.name}/workflow/records/${records[0].name}`)
+            );
+            return;
           }
-          return;
         }
-      );
+        return;
+      });
     }
   };
 
@@ -136,11 +136,13 @@ class ApplicationWorkflow extends React.Component<Props, State> {
   runApplicationWorkflow = () => {};
 
   render() {
-    const { applicationDetail, dispatch, applicationStatus } = this.props;
+    const { applicationDetail, dispatch, applicationStatus, workflows } = this.props;
     const {
       params: { record, appName, envName },
     } = this.props.match;
     const { records, showRecordName, stepStatus, workflow } = this.state;
+
+    const envWorkflows = workflows.filter((w) => w.envName === envName);
 
     if (!applicationDetail || !workflow) {
       return <Loading visible={true} />;
@@ -221,11 +223,30 @@ class ApplicationWorkflow extends React.Component<Props, State> {
                     action: 'update',
                   }}
                 >
-                  <Link to={`/applications/${appName}/envbinding/${envName}/workflow/studio`}>
-                    <Button type="primary">
-                      <Translation>Launch Workflow Studio</Translation>
-                    </Button>
-                  </Link>
+                  {envWorkflows.length == 1 && (
+                    <Link to={`/applications/${appName}/envbinding/${envName}/workflow/${envWorkflows[0].name}/studio`}>
+                      <Button type="primary">
+                        <Translation>Launch Workflow Studio</Translation>
+                      </Button>
+                    </Link>
+                  )}
+                  {envWorkflows.length > 1 && (
+                    <MenuButton
+                      autoWidth={false}
+                      type="primary"
+                      label={<Translation>Launch Workflow Studio</Translation>}
+                    >
+                      {envWorkflows.map((w) => {
+                        return (
+                          <MenuButton.Item key={w.name}>
+                            <Link to={`/applications/${appName}/envbinding/${envName}/workflow/${w.name}/studio`}>
+                              {w.alias}
+                            </Link>
+                          </MenuButton.Item>
+                        );
+                      })}
+                    </MenuButton>
+                  )}
                 </Permission>
               </If>
             </Col>

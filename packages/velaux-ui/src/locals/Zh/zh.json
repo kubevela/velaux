@@ -635,6 +635,11 @@
   "Select Workflow": "选择工作流",
   "Canary Rollout": "金丝雀发布",
   "Default Rollout": "常规发布",
-  "UnDeployed": "未部署",
-  "Advanced Configs": "高级配置"
+  "Undeployed": "未部署",
+  "Advanced Configs": "高级配置",
+  "Step Count": "步骤数量",
+  "Workflow updated successfully": "工作流更新成功",
+  "Workflow removed successfully": "工作流删除成功",
+  "The canary rollout workflow is available when the application is running": "金丝雀发布工作流仅在应用处于运行态时可用",
+  "This workflow needs your approving": "工作流执行需要你审批"
 }

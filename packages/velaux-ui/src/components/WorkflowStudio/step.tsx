@@ -75,9 +75,9 @@ export const Step = (props: StepProps) => {
           )}
           {step.subSteps?.map((subStep, index) => {
             return (
-              <div>
+              <div key={subStep.name + '-step'}>
                 <div
-                  key={subStep.name}
+                  key={subStep.name + '-status'}
                   className="step-status"
                   onClick={(event) => {
                     onNodeClick(subStep, true);

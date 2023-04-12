@@ -386,7 +386,9 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
               </If>
               <If condition={showRecord?.status === 'suspending'}>
                 <div className={classNames('suspend-actions')}>
-                  <div className="desc">This Workflow need you approve.</div>
+                  <div className="desc">
+                    <Translation>This workflow needs your approving</Translation>
+                  </div>
                   <Button.Group>
                     <Button
                       type="secondary"

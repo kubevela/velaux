@@ -39,10 +39,11 @@ export const Step = (props: StepProps) => {
       <If condition={group}>
         <div className="step-title">{step.name || step.id}</div>
         <div className="groups" style={{ width: stepWidth + 'px', minHeight: '70px' }}>
-          {step.subSteps?.map((subStep) => {
+          {step.subSteps?.map((subStep, index) => {
             return (
               <div
                 className="step-status"
+                key={'step-' + (subStep.id || subStep.name) + index}
                 onClick={(event) => {
                   onNodeClick(subStep);
                   event.stopPropagation();
