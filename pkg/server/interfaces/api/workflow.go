@@ -178,6 +178,10 @@ func (w *Workflow) listWorkflowRecordsFromEnv(req *restful.Request, res *restful
 	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
 	env := req.PathParameter("envName")
 	allWfs, err := w.WorkflowService.ListApplicationWorkflow(req.Request.Context(), app)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
 	var wfRecorders []apis.WorkflowRecord
 
 	for _, wf := range allWfs {
@@ -187,9 +191,7 @@ func (w *Workflow) listWorkflowRecordsFromEnv(req *restful.Request, res *restful
 				bcode.ReturnError(req, res, err)
 				return
 			}
-			for _, record := range records.Records {
-				wfRecorders = append(wfRecorders, record)
-			}
+			wfRecorders = append(wfRecorders, records.Records...)
 		}
 	}
 
