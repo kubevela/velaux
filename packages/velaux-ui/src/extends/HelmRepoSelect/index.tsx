@@ -53,7 +53,6 @@ class HelmRepoSelect extends Component<Props, State> {
     const { project } = this.props;
     const defaultRepos = [{ url: 'https://charts.bitnami.com/bitnami', type: 'helm' }];
     this.setState({ loading: true, repos: repoType === 'helm' ? defaultRepos : [] });
-    console.log(repoType);
     getChartRepos({ project: project }).then((res) => {
       let repos: HelmRepo[] = [];
       if (res && res.repos) {

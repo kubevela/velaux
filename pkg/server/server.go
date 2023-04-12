@@ -468,7 +468,6 @@ func (s *restServer) proxyDexService(res http.ResponseWriter, req *http.Request)
 	director := func(req *http.Request) {
 		req.URL.Scheme = u.Scheme
 		req.URL.Host = u.Host
-		req.URL.Path = strings.Replace(req.URL.Path, DexRoutePath, "", 1)
 	}
 	dexProxy := &httputil.ReverseProxy{Director: director}
 	dexProxy.ServeHTTP(res, req)

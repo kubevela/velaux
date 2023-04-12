@@ -167,6 +167,8 @@ class CreateConfigDialog extends React.Component<Props, State> {
                   this.props.onSuccess();
                 },
               });
+            } else {
+              this.props.onSuccess();
             }
           }
         })
@@ -321,7 +323,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
               </Col>
             </Row>
 
-            <If condition={project && !template}>
+            {project && !template && (
               <Row>
                 <Col span={24} style={{ padding: '0 8px' }}>
                   <FormItem required label={<Translation>Template</Translation>}>
@@ -354,7 +356,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
                   </FormItem>
                 </Col>
               </Row>
-            </If>
+            )}
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <Loading visible={templateLoading} style={{ width: '100%' }}>

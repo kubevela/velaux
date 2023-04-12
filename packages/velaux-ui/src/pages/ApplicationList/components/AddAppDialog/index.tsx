@@ -335,7 +335,6 @@ class AppDialog extends React.Component<Props, State> {
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
     const { visible, setVisible, dispatch, projects, onClose, isDisableProject, userInfo } = this.props;
-    console.log(this.field);
     const { definitionDetail, dialogStats, envs, visibleEnvDialog } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
