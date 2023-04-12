@@ -455,12 +455,12 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Writes(apis.EmptyResponse{}))
 
-	ws.Route(ws.GET("/{appName}/envs/{envName}/workflows/records").To(c.WorkflowAPI.listWorkflowRecordsFromEnv).
+	ws.Route(ws.GET("/{appName}/envs/{envName}/records").To(c.WorkflowAPI.listWorkflowRecordsFromEnv).
 		Doc("query application workflow execution record of one environment").
 		Param(ws.PathParameter("appName", "identifier of the application.").DataType("string").Required(true)).
 		Param(ws.PathParameter("envName", "identifier of the environment.").DataType("string").Required(true)).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Filter(c.RbacService.CheckPerm("envBinding", "list")).
+		Filter(c.RbacService.CheckPerm("envBinding/record", "list")).
 		Filter(c.appCheckFilter).
 		Filter(c.envCheckFilter).
 		Param(ws.QueryParameter("page", "query the page number").DataType("integer")).
