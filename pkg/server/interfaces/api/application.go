@@ -439,9 +439,9 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Filter(c.RbacService.CheckPerm("envBinding", "detail")).
 		Filter(c.appCheckFilter).
 		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string")).
-		Returns(200, "OK", []*apis.ApplicationStatusResponse{}).
+		Returns(200, "OK", apis.ApplicationStatusListResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
-		Writes([]*apis.ApplicationStatusResponse{}))
+		Writes(apis.ApplicationStatusListResponse{}))
 
 	ws.Route(ws.POST("/{appName}/envs/{envName}/recycle").To(c.recycleApplicationEnv).
 		Doc("recycle application env").
@@ -1130,7 +1130,7 @@ func (c *application) getApplicationStatusFromAllEnvs(req *restful.Request, res 
 		return
 	}
 
-	if err := res.WriteEntity(status); err != nil {
+	if err := res.WriteEntity(apis.ApplicationStatusListResponse{Status: status}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}

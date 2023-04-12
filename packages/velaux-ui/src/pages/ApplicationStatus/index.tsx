@@ -1,7 +1,6 @@
 import { Table, Card, Loading, Balloon, Button, Message, Dialog, Tag, Tab } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
-import i18next from 'i18next';
 import React from 'react';
 
 import { deployApplication } from '../../api/application';
@@ -230,7 +229,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
-            Message.success(i18next.t('Application deployed successfully'));
+            Message.success(i18n.t('Application deployed successfully'));
             this.setState({ deployLoading: false });
             this.loadApplicationStatus();
             if (re.record && re.record.name && dispatch) {
@@ -243,7 +242,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         .catch((err: APIError) => {
           if (err.BusinessCode === 10004) {
             Dialog.confirm({
-              content: i18next.t('Workflow is executing. Do you want to force a restart?').toString(),
+              content: i18n.t('Workflow is executing. Do you want to force a restart?').toString(),
               onOk: () => {
                 this.onDeploy(true);
               },
@@ -257,7 +256,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
           }
         });
     } else {
-      Message.warning(i18next.t('Please wait'));
+      Message.warning(i18n.t('Please wait'));
     }
   };
 

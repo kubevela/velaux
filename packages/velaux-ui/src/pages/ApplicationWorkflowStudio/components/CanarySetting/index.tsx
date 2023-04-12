@@ -3,7 +3,7 @@ import { Dialog, Form, Grid, Message, NumberPicker } from '@alifd/next';
 import { DeployModes } from '@velaux/data';
 import _ from 'lodash';
 import i18n from '../../../../i18n';
-import { Workflow, WorkflowMode } from '../../../../interface/application';
+import { Workflow } from '../../../../interface/application';
 import { WorkflowStep } from '../../../../interface/pipeline';
 import { locale } from '../../../../utils/locale';
 import './index.less';
@@ -21,13 +21,13 @@ interface Props {
   onCancel(): void;
 }
 
-const generateCanaryDeployGroup = (step: WorkflowStep, batch: number, mode: WorkflowMode): WorkflowStep => {
+const generateCanaryDeployGroup = (step: WorkflowStep, batch: number): WorkflowStep => {
   const interval = Math.round(100 / batch);
   const steps: WorkflowStep[] = [];
   const policies: string[] | null = step.properties ? step.properties['policies'] : null;
   for (let i = 0; i < batch; i++) {
     const batchStep: WorkflowStep = {
-      name: 'batch-' + i,
+      name: step.name + '-batch-' + i,
       alias: 'Batch ' + i,
       type: DeployModes.CanaryDeploy,
       properties: {
@@ -38,11 +38,7 @@ const generateCanaryDeployGroup = (step: WorkflowStep, batch: number, mode: Work
     if (policies && batchStep.properties) {
       batchStep.properties['policies'] = _.cloneDeep(policies);
     }
-    const approveStep: WorkflowStep = { name: 'approve-' + i, alias: 'Approve ' + i, type: 'suspend' };
-    if (mode === 'DAG' && i > 0) {
-      batchStep.dependsOn = ['approve-' + i];
-      approveStep.dependsOn = ['batch-' + (i - 1)];
-    }
+    const approveStep: WorkflowStep = { name: step.name + '-approve-' + i, alias: 'Approve ' + i, type: 'suspend' };
     if (i > 0) {
       steps.push(approveStep);
     }
@@ -51,6 +47,7 @@ const generateCanaryDeployGroup = (step: WorkflowStep, batch: number, mode: Work
   return {
     type: 'step-group',
     name: step.name + '-canary',
+    mode: 'StepByStep',
     subSteps: steps,
   };
 };
@@ -74,7 +71,7 @@ export const CanarySetting: React.FunctionComponent<Props> = (props: Props) => {
     const newSteps = props.workflow?.steps?.map((step) => {
       if (step.type === DeployModes.Deploy) {
         const batch = getStepBatch(step.name);
-        return generateCanaryDeployGroup(step, batch, props.workflow?.subMode || 'DAG');
+        return generateCanaryDeployGroup(step, batch);
       }
       return step;
     });

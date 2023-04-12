@@ -11,9 +11,12 @@ import { showAlias } from '../../utils/common';
 import { If } from '../If';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { IoMdAdd } from 'react-icons/io';
+import { Translation } from '../../components/Translation';
+import { WorkflowMode } from '../../interface/application';
 
 export interface StepProps {
   step: WorkflowStep;
+  subMode?: WorkflowMode;
   output: boolean;
   input: boolean;
   probeState: {
@@ -23,13 +26,14 @@ export interface StepProps {
   group: boolean;
   onNodeClick: (step: WorkflowStep, sub: boolean) => void;
   onDelete: (stepName: string) => void;
-  onAddSubStep: () => void;
+  onAddSubStep: (index: number) => void;
 }
 
 export const Step = (props: StepProps) => {
-  const { step, output, input, onNodeClick, group, onDelete, onAddSubStep } = props;
+  const { step, output, input, onNodeClick, group, onDelete, onAddSubStep, subMode } = props;
   const { stepWidth, stepInterval } = props.probeState;
   const [isActive, setActive] = useState(false);
+  const mode: WorkflowMode = step.mode || subMode || 'DAG';
   return (
     <div
       className={classNames('step', { active: isActive }, { group: group })}
@@ -64,35 +68,49 @@ export const Step = (props: StepProps) => {
           </span>
         </div>
         <div className="groups" style={{ width: stepWidth + 'px' }}>
-          {step.subSteps?.map((subStep) => {
+          {mode && (
+            <div className="mode">
+              <Translation>Mode</Translation>:<Translation>{mode}</Translation>
+            </div>
+          )}
+          {step.subSteps?.map((subStep, index) => {
             return (
-              <div
-                key={subStep.name}
-                className="step-status"
-                onClick={(event) => {
-                  onNodeClick(subStep, true);
-                  event.stopPropagation();
-                }}
-              >
-                <StepTypeIcon type={subStep.type} />
-                <div className="step-name">{subStep.alias || subStep.name}</div>
+              <div key={subStep.name + '-step'}>
                 <div
-                  className="step-delete"
+                  key={subStep.name + '-status'}
+                  className="step-status"
                   onClick={(event) => {
-                    onDelete(subStep.name);
+                    onNodeClick(subStep, true);
                     event.stopPropagation();
                   }}
                 >
-                  <AiOutlineDelete size={14} />
+                  <StepTypeIcon type={subStep.type} />
+                  <div className="step-name">{subStep.alias || subStep.name}</div>
+                  <div
+                    className="step-delete"
+                    onClick={(event) => {
+                      onDelete(subStep.name);
+                      event.stopPropagation();
+                    }}
+                  >
+                    <AiOutlineDelete size={14} />
+                  </div>
                 </div>
+                {mode == 'StepByStep' && (
+                  <div className="sub-step-add" onClick={() => onAddSubStep(index + 1)}>
+                    <IoMdAdd size={14} />
+                  </div>
+                )}
               </div>
             );
           })}
-          <div className="step-status sub-step-add" onClick={onAddSubStep}>
-            <div className="step-name">
-              <IoMdAdd size={14} />
+          {(mode === 'DAG' || !step.subSteps) && (
+            <div className="step-status sub-step-add" onClick={() => onAddSubStep(step.subSteps?.length || 0)}>
+              <div className="step-name">
+                <IoMdAdd size={14} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </If>
       <If condition={!group}>

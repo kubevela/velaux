@@ -1,7 +1,6 @@
 import { Loading, Grid } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
-
 import EnvTabs from './components/EnvTabs';
 import Header from './components/Header';
 import Menus from './components/Menus';
@@ -53,6 +52,7 @@ class ApplicationLayout extends Component<Props, any> {
           this.loadApplicationEnvbinding();
           this.loadApplicationWorkflows();
           this.loadApplicationPolicies();
+          this.loadApplicationStatus();
         });
       },
     });
@@ -107,6 +107,16 @@ class ApplicationLayout extends Component<Props, any> {
     });
   };
 
+  loadApplicationStatus = async () => {
+    const {
+      params: { appName },
+    } = this.props.match;
+    this.props.dispatch({
+      type: 'application/getApplicationAllStatus',
+      payload: { appName: appName },
+    });
+  };
+
   render() {
     const { activeName } = this.state;
     const { children, dispatch, applicationDetail } = this.props;
@@ -124,7 +134,7 @@ class ApplicationLayout extends Component<Props, any> {
     }
     return (
       <div className="app-layout">
-        <Header dispatch={dispatch} appName={appName} currentPath={url} />
+        <Header dispatch={dispatch} appName={appName} envName={envName} currentPath={url} />
         <EnvTabs dispatch={dispatch} appName={appName} activeKey={envName ? envName : 'basisConfig'} />
         <Row className="padding16 main">
           <div className="menu">

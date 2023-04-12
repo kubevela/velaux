@@ -4,6 +4,7 @@ import {
   createApplication,
   getApplicationDetails,
   getApplicationStatus,
+  getApplicationAllStatus,
   getApplicationComponents,
   getPolicyList,
   getApplicationEnvbinding,
@@ -18,6 +19,7 @@ export default {
     applicationList: [],
     applicationDetail: {},
     applicationStatus: {},
+    applicationAllStatus: [],
     projectList: [],
     clusterList: [],
     searchAppName: '',
@@ -57,6 +59,12 @@ export default {
       return {
         ...state,
         applicationStatus: payload.status,
+      };
+    },
+    updateApplicationAllStatus(state, { type, payload }) {
+      return {
+        ...state,
+        applicationAllStatus: payload.status,
       };
     },
     updateComponents(state, { type, payload }) {
@@ -140,6 +148,14 @@ export default {
       const { appName, envName } = action.payload;
       const result = yield call(getApplicationStatus, { name: appName, envName: envName });
       yield put({ type: 'updateApplicationStatus', payload: result });
+      if (action.callback) {
+        action.callback(result);
+      }
+    },
+    *getApplicationAllStatus(action, { call, put }) {
+      const { appName, envName } = action.payload;
+      const result = yield call(getApplicationAllStatus, { name: appName, envName: envName });
+      yield put({ type: 'updateApplicationAllStatus', payload: result });
       if (action.callback) {
         action.callback(result);
       }

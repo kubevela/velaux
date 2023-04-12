@@ -33,9 +33,8 @@
       background-color: var(--color-workflow-step-bg);
       border-top-left-radius: 6px;
       border-top-right-radius: 6px;
-      box-shadow: inset 0 1px 0 var(--color-border-default),
-        inset 1px 0 0 var(--color-border-default), inset -1px 0 0 var(--color-border-default),
-        0 -1px 2px var(--color-workflow-step-header-shadow);
+      box-shadow: inset 0 1px 0 var(--color-border-default), inset 1px 0 0 var(--color-border-default),
+        inset -1px 0 0 var(--color-border-default), 0 -1px 2px var(--color-workflow-step-header-shadow);
       transition: background-color ease-out 0.12s, box-shadow ease-out 0.12s;
       &:after {
         position: absolute;
@@ -45,8 +44,8 @@
         height: 16px;
         margin-left: 16px;
         border-bottom-left-radius: 6px;
-        box-shadow: inset 1px 0 0 var(--color-border-default),
-          inset 0 -1px 0 var(--color-border-default), -1px 3px var(--color-workflow-step-bg);
+        box-shadow: inset 1px 0 0 var(--color-border-default), inset 0 -1px 0 var(--color-border-default),
+          -1px 3px var(--color-workflow-step-bg);
         transition: box-shadow ease-out 0.12s;
         content: '';
       }
@@ -54,8 +53,10 @@
     .groups {
       position: relative;
       padding: var(--padding-common);
-      transition: background-color ease-out 0.12s, border-color ease-out 0.12s,
-        box-shadow ease-out 0.12s;
+      transition: background-color ease-out 0.12s, border-color ease-out 0.12s, box-shadow ease-out 0.12s;
+      .mode {
+        text-align: center;
+      }
     }
     .workflow-step-port {
       position: absolute;

@@ -30,7 +30,7 @@ const ButtonGroup = Button.Group;
 
 type Props = {
   dispatch: Dispatch<any>;
-  match: { params: { appName: string; envName: string } };
+  match: { params: { appName: string; envName: string; workflowName: string } };
   applicationDetail?: ApplicationDetail;
   envbinding: EnvBinding[];
 };
@@ -92,12 +92,19 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
 
   loadWorkflow = () => {
     const {
-      params: { appName },
+      params: { appName, workflowName },
     } = this.props.match;
-    const env = this.getEnvbindingByName();
-    if (env && env.workflow.name) {
-      detailWorkflow({ appName: appName, name: env.workflow.name }).then((res: Workflow) => {
-        this.setState({ workflow: res, mode: res.mode, subMode: res.subMode, steps: res.steps });
+    detailWorkflow({ appName: appName, name: workflowName }).then((res: Workflow) => {
+      this.setState({ workflow: res, mode: res.mode, subMode: res.subMode, steps: res.steps });
+    });
+  };
+
+  loadApplicationWorkflows = async () => {
+    const { applicationDetail } = this.props;
+    if (applicationDetail) {
+      this.props.dispatch({
+        type: 'application/getApplicationWorkflows',
+        payload: { appName: applicationDetail.name },
       });
     }
   };
@@ -143,8 +150,9 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
       )
         .then((res) => {
           if (res) {
-            Message.success('Workflow updated successfully');
+            Message.success(i18n.t('Workflow updated successfully'));
             this.loadWorkflow();
+            this.loadApplicationWorkflows();
             this.setState({ changed: false });
           }
         })
@@ -230,14 +238,18 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
                   <Translation>Unsaved changes</Translation>
                 </div>
               )}
-              <MenuButton style={{ marginRight: 'var(--spacing-4)' }} autoWidth={false} label="More">
+              <MenuButton
+                style={{ marginRight: 'var(--spacing-4)' }}
+                autoWidth={false}
+                label={i18n.t('More').toString()}
+              >
                 <MenuButton.Item
                   onClick={() => {
                     locationService.partial({ setCanary: true });
                     this.setState({ setCanary: true });
                   }}
                 >
-                  <Translation>Canary Setting</Translation>
+                  <Translation>Canary Rollout Setting</Translation>
                 </MenuButton.Item>
               </MenuButton>
               <Form.Item label={i18n.t('Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
@@ -277,7 +289,12 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
               workflow: workflow as WorkflowData,
             }}
           >
-            <WorkflowStudio definitions={definitions} steps={steps} onChange={this.onChange} />
+            <WorkflowStudio
+              subMode={workflow.subMode}
+              definitions={definitions}
+              steps={steps}
+              onChange={this.onChange}
+            />
           </WorkflowContext.Provider>
         )}
         {workflow && editMode === 'yaml' && (

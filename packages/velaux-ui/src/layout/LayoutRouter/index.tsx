@@ -170,7 +170,7 @@ export default function Router() {
       />
       <Route
         exact
-        path="/applications/:appName/envbinding/:envName/workflow/studio"
+        path="/applications/:appName/envbinding/:envName/workflow/:workflowName/studio"
         render={(props: any) => {
           return (
             <ApplicationLayout {...props}>

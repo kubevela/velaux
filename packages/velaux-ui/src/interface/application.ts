@@ -104,6 +104,11 @@ export interface ApplicationRollbackResponse {
   record: WorkflowRecordBase;
 }
 
+export interface ApplicationEnvStatus {
+  envName: string;
+  status: ApplicationStatus;
+}
+
 export interface ApplicationStatus {
   conditions: Condition[];
   status:
@@ -184,6 +189,17 @@ export interface WorkflowStepStatus extends StepStatus {
 export type WorkflowMode = 'StepByStep' | 'DAG';
 
 export interface UpdateWorkflowRequest {
+  alias?: string;
+  description?: string;
+  mode: WorkflowMode;
+  subMode: WorkflowMode;
+  steps: WorkflowStep[];
+  default?: boolean;
+}
+
+export interface CreateWorkflowRequest {
+  name: string;
+  envName: string;
   alias?: string;
   description?: string;
   mode: WorkflowMode;
@@ -313,7 +329,7 @@ export interface Workflow {
   enable: boolean;
   mode: WorkflowMode;
   subMode: WorkflowMode;
-  steps?: WorkflowStep[];
+  steps: WorkflowStep[];
 }
 
 export interface UpdateComponentProperties {

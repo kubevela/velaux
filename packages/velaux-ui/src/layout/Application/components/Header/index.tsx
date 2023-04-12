@@ -12,11 +12,12 @@ import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import type {
   ApplicationDetail,
-  ApplicationStatus,
   ApplicationStatistics,
   Workflow,
   WorkflowRecord,
   ApplicationDeployResponse,
+  ApplicationEnvStatus,
+  EnvBinding,
 } from '../../../../interface/application';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
@@ -29,9 +30,11 @@ const { Row, Col } = Grid;
 interface Props {
   currentPath: string;
   appName: string;
+  envName?: string;
   applicationDetail?: ApplicationDetail;
-  applicationStatus?: { status?: ApplicationStatus };
+  applicationAllStatus?: ApplicationEnvStatus[];
   workflows?: Workflow[];
+  envbinding?: EnvBinding[];
   dispatch: Dispatch;
 }
 
@@ -49,13 +52,26 @@ class ApplicationHeader extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      loading: true,
+      loading: false,
       showDeployConfig: false,
     };
   }
 
   onDeployConfig = () => {
+    this.loadApplicationStatus();
     this.setState({ showDeployConfig: true });
+  };
+
+  loadApplicationStatus = async () => {
+    const { appName, dispatch } = this.props;
+    this.setState({ loading: true });
+    dispatch({
+      type: 'application/getApplicationAllStatus',
+      payload: { appName: appName },
+      callback: () => {
+        this.setState({ loading: false });
+      },
+    });
   };
 
   onGetApplicationDetails = async () => {
@@ -82,7 +98,7 @@ class ApplicationHeader extends Component<Props, State> {
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
-            Message.success('Application deployed successfully');
+            Message.success(i18n.t('Application deployed successfully'));
             this.onGetApplicationDetails();
             if (re.record && re.record.name && dispatch) {
               dispatch(
@@ -116,8 +132,9 @@ class ApplicationHeader extends Component<Props, State> {
   componentWillUnmount() {}
 
   render() {
-    const { applicationDetail, currentPath, workflows, appName, dispatch } = this.props;
-    const { showDeployConfig } = this.state;
+    const { applicationDetail, applicationAllStatus, currentPath, workflows, envbinding, appName, envName, dispatch } =
+      this.props;
+    const { showDeployConfig, loading } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     let item = <Translation>{`app-${activeKey}`}</Translation>;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
@@ -175,9 +192,13 @@ class ApplicationHeader extends Component<Props, State> {
           </Col>
         </Row>
         <If condition={showDeployConfig}>
-          {applicationDetail && (
+          {applicationDetail && envbinding && workflows && (
             <DeployConfig
+              loading={loading}
+              envName={envName}
+              applicationAllStatus={applicationAllStatus}
               applicationDetail={applicationDetail}
+              envBindings={envbinding}
               onClose={() => {
                 this.setState({ showDeployConfig: false });
               }}

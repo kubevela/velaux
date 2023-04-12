@@ -1,6 +1,6 @@
 import { Select } from '@alifd/next';
-import { connect } from 'dva';
 import React from 'react';
+import { UISchemaContext } from '../../context';
 
 import { getApplicationComponents } from '../../api/application';
 import i18n from '../../i18n';
@@ -12,16 +12,12 @@ type Props = {
   id: string;
   onChange: (value: string[]) => void;
   disabled: boolean;
-  appName?: string;
 };
 
 type State = {
   componentOptions: Array<{ label: string; value: string }>;
 };
 
-@connect((store: any) => {
-  return { ...store.uischema };
-})
 class ComponentSelect extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -35,7 +31,7 @@ class ComponentSelect extends React.Component<Props, State> {
   };
 
   fetchComponentList = async () => {
-    const { appName } = this.props;
+    const { appName = '' } = this.context;
     if (appName) {
       getApplicationComponents({
         appName: appName,
@@ -89,5 +85,7 @@ class ComponentSelect extends React.Component<Props, State> {
     );
   }
 }
+
+ComponentSelect.contextType = UISchemaContext;
 
 export default ComponentSelect;

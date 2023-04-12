@@ -168,6 +168,7 @@ func ConvertFromRecordModel(record *model.WorkflowRecord) *apisv1.WorkflowRecord
 func ConvertFromWorkflowStepModel(step model.WorkflowStep) apisv1.WorkflowStep {
 	apiStep := apisv1.WorkflowStep{
 		WorkflowStepBase: ConvertFromWorkflowStepBaseModel(step.WorkflowStepBase),
+		Mode:             string(step.Mode),
 		SubSteps:         make([]apisv1.WorkflowStepBase, 0),
 	}
 	if step.Properties != nil {

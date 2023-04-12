@@ -969,7 +969,7 @@ class UISchema extends Component<Props, State> {
     });
     const formItemLayout = {
       labelCol: {
-        fixedSpan: 10,
+        fixedSpan: 5,
       },
       wrapperCol: {
         span: 14,
