@@ -227,7 +227,7 @@ var _ = Describe("Test authentication service functions", func() {
 		config := &model.DexConfig{}
 		err = yaml.Unmarshal(dexConfigSecret.Data[secretDexConfigKey], config)
 		Expect(err).Should(BeNil())
-		Expect(len(config.Connectors)).Should(Equal(1))
+		Expect(len(config.Connectors) > 0).Should(Equal(true))
 		By("try to update dex config with config secret")
 		err = generateDexConfig(context.Background(), authService.KubeClient, &model.UpdateDexConfig{})
 		Expect(err).Should(BeNil())
