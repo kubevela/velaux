@@ -18,7 +18,7 @@ import SelectSearch from './components/SelectSearch';
 
 type Props = {
   dispatch: ({}) => {};
-  applicationList: ApplicationBase[];
+  applicationList?: ApplicationBase[];
   targets?: [];
   envs?: [];
   history: any;
@@ -154,7 +154,7 @@ class Application extends Component<Props, State> {
     const { showAddApplication, componentDefinitions, isLoading, showEditApplication, editItem, labelValue, showMode } =
       this.state;
     let appLabels: string[] = [];
-    applicationList.map((app) => {
+    applicationList?.map((app) => {
       app.labels &&
         Object.keys(app.labels).map((key: string) => {
           if (key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev')) {
