@@ -1,5 +1,4 @@
 import type { NameAlias } from './env';
-import type { Project } from './project';
 
 export type User = {
   name: string;
@@ -20,9 +19,17 @@ export interface LoginUserInfo {
   createTime?: string;
   lastLoginTime?: string;
   disabled?: boolean;
-  projects: Project[];
+  projects: UserProject[];
   platformPermissions?: PermissionBase[];
   projectPermissions?: Record<string, PermissionBase[]>;
+}
+
+export interface UserProject {
+  name: string;
+  alias?: string;
+  owner: string;
+  joinTime: string;
+  roles?: NameAlias[];
 }
 
 export interface PermissionBase {

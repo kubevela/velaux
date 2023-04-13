@@ -281,7 +281,7 @@ class Header extends Component<Props, State> {
             <Permission request={{ resource: 'systemSetting', action: 'update' }}>
               <Link to="/settings">
                 <div className="vela-item">
-                  <AiFillSetting size={18} title={'Platform Setting'} />
+                  <AiFillSetting size={18} title={'Platform Settings'} />
                 </div>
               </Link>
             </Permission>

@@ -87,7 +87,7 @@ const defaultWorkspaceMenus: Menu[] = [
     type: MenuTypes.Workspace,
     icon: <AiFillProject></AiFillProject>,
     name: 'projects',
-    label: 'My Projects',
+    label: 'Projects',
     to: '/projects',
     relatedRoute: ['/projects'],
   },

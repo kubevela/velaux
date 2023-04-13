@@ -318,7 +318,7 @@ class PlatformSetting extends React.Component<Props, State> {
                 </Form.Item>
                 <If condition={this.field.getValue('loginType') == 'dex'}>
                   <a href={this.generateDexAddress()} target="_blank" rel="noopener noreferrer">
-                    <Translation>Click me to open the dex log in page</Translation>
+                    <Translation>Click me to open the dex login page</Translation>
                   </a>
                 </If>
               </Col>

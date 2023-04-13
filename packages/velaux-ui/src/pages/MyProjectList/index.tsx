@@ -1,4 +1,4 @@
-import { Table, Dialog, Message } from '@alifd/next';
+import { Table, Dialog, Message, Tag } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Fragment, Component } from 'react';
 
@@ -95,19 +95,36 @@ class MyProjectList extends Component<Props, State> {
         },
       },
       {
-        key: 'createTime',
-        title: <Translation>Create Time</Translation>,
-        dataIndex: 'createTime',
-        cell: (v: string) => {
-          return <span>{momentDate(v)}</span>;
-        },
-      },
-      {
         key: 'owner',
         title: <Translation>Owner</Translation>,
         dataIndex: 'owner',
         cell: (v: NameAlias) => {
           return <span>{v && v.alias ? `${v.alias}(${v.name})` : v.name}</span>;
+        },
+      },
+      {
+        key: 'joinTime',
+        title: <Translation>Join Time</Translation>,
+        dataIndex: 'joinTime',
+        cell: (v: string) => {
+          return <span>{momentDate(v)}</span>;
+        },
+      },
+      {
+        key: 'roles',
+        title: <Translation>Roles</Translation>,
+        dataIndex: 'roles',
+        cell: (v: NameAlias[]) => {
+          if (!v) {
+            return <span></span>;
+          }
+          return (
+            <div>
+              {v.map((role) => {
+                return <Tag key={role.name}>{role.alias || role.name}</Tag>;
+              })}
+            </div>
+          );
         },
       },
     ];
@@ -118,7 +135,7 @@ class MyProjectList extends Component<Props, State> {
     return (
       <Fragment>
         <div className="project-list-content">
-          <Title title="My Projects" subTitle={i18n.t('Project are used for users and applications isolation')} />
+          <Title title="Projects" subTitle={i18n.t('Project are used for users and applications isolation')} />
           <Table locale={locale().Table} dataSource={userInfo?.projects} loading={isLoading}>
             {columns.map((col, key) => (
               <Column {...col} key={key} align={'left'} />
