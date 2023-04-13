@@ -18,6 +18,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -46,16 +47,15 @@ var _ = Describe("Test target service functions", func() {
 	It("Test UpdateSystemInfo", func() {
 		err := systemService.Store.Add(context.TODO(), &model.User{Name: "test-admin", Email: "test@email", UserRoles: []string{model.RoleAdmin}})
 		Expect(err).Should(BeNil())
-		_, err = systemService.UpdateSystemInfo(context.TODO(), v1.SystemInfoRequest{LoginType: "dex"})
-		Expect(err).Should(Equal(bcode.ErrNoDexConnector))
-
-		var cc corev1.Secret
-		Expect(yaml.Unmarshal([]byte(connectorConfig), &cc)).Should(BeNil())
-		cc.Namespace = velatypes.DefaultKubeVelaNS
-		Expect(k8sClient.Create(context.TODO(), &cc)).Should(BeNil())
-
 		s, err := systemService.UpdateSystemInfo(context.TODO(), v1.SystemInfoRequest{LoginType: "dex"})
-		Expect(err).Should(BeNil())
+		if errors.Is(err, bcode.ErrNoDexConnector) {
+			var cc corev1.Secret
+			Expect(yaml.Unmarshal([]byte(connectorConfig), &cc)).Should(BeNil())
+			cc.Namespace = velatypes.DefaultKubeVelaNS
+			Expect(k8sClient.Create(context.TODO(), &cc)).Should(BeNil())
+			s, err = systemService.UpdateSystemInfo(context.TODO(), v1.SystemInfoRequest{LoginType: "dex"})
+			Expect(err).Should(BeNil())
+		}
 		Expect(s.LoginType).Should(Equal("dex"))
 		var secret corev1.Secret
 		Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Name: dexConfigName, Namespace: velatypes.DefaultKubeVelaNS}, &secret)).Should(BeNil())
@@ -67,8 +67,7 @@ var _ = Describe("Test target service functions", func() {
 
 var connectorConfig = `apiVersion: v1
 data:
-  github: eyJjbGllbnRJRCI6ImdpdGh1YiIsImNsaWVudFNlY3JldCI6ImdpdGh1YiIsInJlZGlyZWN0VVJJIjoiaHR0cDovLzQ3LjkzLjI1LjIzMDo4MDAwL2RleC9jYWxsYmFjayJ9
-  input-properties: eyJnaXRodWIiOnsiY2xpZW50SUQiOiJnaXRodWIiLCJjbGllbnRTZWNyZXQiOiJnaXRodWIiLCJyZWRpcmVjdFVSSSI6Imh0dHA6Ly80Ny45My4yNS4yMzA6ODAwMC9kZXgvY2FsbGJhY2sifSwidHlwZSI6ImdpdGh1YiJ9
+  github: eyJjbGllbnRJRCI6ImdpdGh1YiIsImNsaWVudFNlY3JldCI6ImdpdGh1YiIsInJlZGlyZWN0VVJJIjoiaHR0cDovLzEyNy4wLjAuMS9kZXgvY2FsbGJhY2sifQ==
 kind: Secret
 metadata:
   annotations:

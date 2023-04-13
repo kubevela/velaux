@@ -231,9 +231,6 @@ var _ = Describe("Test authentication service functions", func() {
 		By("try to update dex config with config secret")
 		err = generateDexConfig(context.Background(), authService.KubeClient, &model.UpdateDexConfig{})
 		Expect(err).Should(BeNil())
-
-		// Clear the test data
-		Expect(k8sClient.Delete(ctx, c)).Should(BeNil())
 	})
 
 	It("Test get dex config", func() {
