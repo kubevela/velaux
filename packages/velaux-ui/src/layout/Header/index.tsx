@@ -17,7 +17,6 @@ import grafanaImg from '../../assets/grafana.svg';
 import logo from '../../assets/kubevela-logo-white.png';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
-import PlatformSetting from '../../components/PlatformSetting';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
@@ -213,14 +212,10 @@ class Header extends Component<Props, State> {
     });
   };
 
-  showPlatformSetting = () => {
-    this.setState({ platformSetting: true });
-  };
-
   render() {
     const { Row } = Grid;
-    const { systemInfo, dispatch, show, userInfo, mode, currentWorkspace } = this.props;
-    const { platformSetting,  grafanaConfigs, workspaces } = this.state;
+    const { show, userInfo, mode, currentWorkspace } = this.props;
+    const { grafanaConfigs, workspaces } = this.state;
 
     return (
       <div className="layout-top-bar" id="layout-top-bar">
@@ -284,9 +279,11 @@ class Header extends Component<Props, State> {
               </div>
             </Permission>
             <Permission request={{ resource: 'systemSetting', action: 'update' }}>
-              <div className="vela-item" onClick={this.showPlatformSetting}>
-                <AiFillSetting size={18} title={'Platform Setting'} />
-              </div>
+              <Link to="/settings">
+                <div className="vela-item">
+                  <AiFillSetting size={18} title={'Platform Setting'} />
+                </div>
+              </Link>
             </Permission>
 
             <div className="vela-item">
@@ -392,21 +389,6 @@ class Header extends Component<Props, State> {
             </div>
           </div>
         </Row>
-        <If condition={platformSetting}>
-          {systemInfo && (
-            <PlatformSetting
-              platformSetting={platformSetting}
-              systemInfo={systemInfo}
-              onClose={() => {
-                this.setState({ platformSetting: false });
-              }}
-              syncPlatformSetting={() => {
-                this.loadSystemInfo();
-              }}
-              dispatch={dispatch}
-            />
-          )}
-        </If>
         <If condition={show}>
           <CloudShell />
         </If>

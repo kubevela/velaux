@@ -298,7 +298,7 @@
   "Container Image": "容器镜像",
   "Which image would you like to use for your service": "请在部署之前完成容器镜像准备并上传到镜像仓库中",
   "Continuous Delivery": "持续交付",
-  "Extension": "扩展",
+  "Extension": "平台扩展",
   "Resources": "资源",
   "Environments": "环境列表",
   "Search by Project": "基于项目筛选",
@@ -456,7 +456,7 @@
   "Roles": "角色",
   "Members": "成员",
   "General": "基本信息",
-  "Settings": "配置",
+  "Settings": "设置",
   "This application is managed by the addon, and it is readonly": "该应用由插件管理，仅提供可视化",
   "Please check the component properties": "请检查组件配置参数",
   "LastLoginTime": "上次登录时间",
@@ -645,5 +645,8 @@
   "Project are used for users and applications isolation": "项目用于隔离用户和应用",
   "Infrastructure": "基础设施",
   "Offering templated and extensible configuration management capabilities.": "提供模版化、可扩展的配置管理能力",
-  "Please make sure this addon is not used anywhere and related applications recycled.": "卸载前请确认插件不再使用且相关应用已回收。"
+  "Please make sure this addon is not used anywhere and related applications recycled.": "卸载前请确认插件不再使用且相关应用已回收。",
+  "Admin Dashboard": "管理员面板",
+  "Click me to open the dex log in page": "点击我打开 Dex 登录页面",
+  "Setting the default projects for the dex login user": "设置 Dex 登录用户的默认项目"
 }
