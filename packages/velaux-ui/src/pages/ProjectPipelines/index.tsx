@@ -346,7 +346,10 @@ class ProjectPipelines extends Component<Props, State> {
           title=""
           subTitle=""
           extButtons={[
-            <Permission request={{ resource: `project:${projectName}/pipeline:*`, action: 'create' }} project={'?'}>
+            <Permission
+              request={{ resource: `project:${projectName}/pipeline:*`, action: 'create' }}
+              project={projectName}
+            >
               <If condition={addonEnabled}>
                 <Button
                   type="primary"
@@ -381,9 +384,11 @@ class ProjectPipelines extends Component<Props, State> {
           </Loading>
         </If>
         <If condition={!addonEnabled}>
-          <div className="addon-notice">
-            Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> Addon that powers Pipeline.
-          </div>
+          <Permission request={{ resource: 'addon', action: 'enable' }}>
+            <div className="addon-notice">
+              Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> Addon that powers Pipeline.
+            </div>
+          </Permission>
         </If>
 
         <If condition={showRunPipeline}>

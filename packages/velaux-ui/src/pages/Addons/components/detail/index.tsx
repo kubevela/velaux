@@ -188,7 +188,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
 
   onDisable = () => {
     Dialog.confirm({
-      content: 'Please make sure that the Addon is no longer in use and the related application has been recycled.',
+      content: i18n.t(
+        'Please make sure that the Addon is no longer in use and the related application has been recycled.'
+      ),
       onOk: this.disableAddon,
       locale: locale().Dialog,
     });

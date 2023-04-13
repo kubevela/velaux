@@ -645,5 +645,6 @@
   "Project allow isolate the user permissions and applications.": "项目用于隔离用户权限和应用",
   "Setting": "设置",
   "Infrastructure": "基础设施",
-  "Provide templated, extensibility configuration management capabilities.": "提供模版化，可扩展的配置管理能力"
+  "Provide templated, extensibility configuration management capabilities.": "提供模版化，可扩展的配置管理能力",
+  "Please make sure that the Addon is no longer in use and the related application has been recycled.": "卸载前请确认插件不再使用，相关应用已完成回收。"
 }

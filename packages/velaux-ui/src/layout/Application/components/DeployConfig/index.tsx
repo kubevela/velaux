@@ -23,6 +23,7 @@ import { Dispatch } from 'redux';
 import { DeployModes } from '@velaux/data';
 import { showAlias } from '../../../../utils/common';
 import { createWorkflow } from '../../../../api/workflows';
+import Permission from '../../../../components/Permission';
 
 const { Group: RadioGroup } = Radio;
 
@@ -252,11 +253,19 @@ class DeployConfigDialog extends Component<Props, State> {
               </div>
 
               {!haveCanaryRollout && (
-                <div className="enable-canary-deploy">
-                  <Button size="small" type="secondary" onClick={this.onCreateCanaryRolloutWorkflow}>
-                    <Translation>Enable Canary Rollout</Translation>
-                  </Button>
-                </div>
+                <Permission
+                  project={applicationDetail.project}
+                  request={{
+                    resource: `project:${applicationDetail.project}/application:${applicationDetail.name}/workflow:*`,
+                    action: 'create',
+                  }}
+                >
+                  <div className="enable-canary-deploy">
+                    <Button size="small" type="secondary" onClick={this.onCreateCanaryRolloutWorkflow}>
+                      <Translation>Enable Canary Rollout</Translation>
+                    </Button>
+                  </div>
+                </Permission>
               )}
             </div>
             {haveCanaryRollout && status != 'running' && (
