@@ -573,7 +573,7 @@
   "Select a policy type": "选择策略类型",
   "Select an environment": "选择环境",
   "Please select a workflow first": "请先选择一个工作流",
-  "The common developer no need assign the platform roles.": "普通开发者无需分配平台角色，仅需要在项目中分配项目决赛即可。",
+  "The common developer no need assign the platform roles.": "普通开发者无需分配平台角色，仅需要在项目中分配项目角色即可。",
   "My Projects": "我的项目",
   "Override": "配置覆盖",
   "Deliver Once": "一次性部署",
@@ -642,5 +642,8 @@
   "Workflow removed successfully": "工作流删除成功",
   "The canary rollout workflow is available when the application is running": "金丝雀发布工作流仅在应用处于运行态时可用",
   "This workflow needs your approving": "工作流执行需要你审批",
-  "Project allow isolate the user permissions and applications.": "项目用于隔离用户权限和应用"
+  "Project allow isolate the user permissions and applications.": "项目用于隔离用户权限和应用",
+  "Setting": "设置",
+  "Infrastructure": "基础设施",
+  "Provide templated, extensibility configuration management capabilities.": "提供模版化，可扩展的配置管理能力"
 }
