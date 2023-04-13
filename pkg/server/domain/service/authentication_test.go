@@ -195,7 +195,7 @@ var _ = Describe("Test authentication service functions", func() {
 			},
 		})
 		Expect(err).Should(BeNil())
-		err = k8sClient.Create(context.Background(), &corev1.Secret{
+		c := &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "a",
 				Namespace: "vela-system",
@@ -211,7 +211,8 @@ var _ = Describe("Test authentication service functions", func() {
 				"ldap": `{"clientID":"clientID","clientSecret":"clientSecret"}`,
 			},
 			Type: corev1.SecretTypeOpaque,
-		})
+		}
+		err = k8sClient.Create(context.Background(), c)
 		Expect(err).Should(BeNil())
 		By("try to update dex config without config secret")
 		connectors, err := utils.GetDexConnectors(context.Background(), authService.KubeClient)
@@ -230,6 +231,9 @@ var _ = Describe("Test authentication service functions", func() {
 		By("try to update dex config with config secret")
 		err = generateDexConfig(context.Background(), authService.KubeClient, &model.UpdateDexConfig{})
 		Expect(err).Should(BeNil())
+
+		// Clear the test data
+		Expect(k8sClient.Delete(ctx, c)).Should(BeNil())
 	})
 
 	It("Test get dex config", func() {

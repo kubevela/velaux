@@ -46,7 +46,7 @@ var _ = Describe("Test target service functions", func() {
 	It("Test UpdateSystemInfo", func() {
 		err := systemService.Store.Add(context.TODO(), &model.User{Name: "test-admin", Email: "test@email", UserRoles: []string{model.RoleAdmin}})
 		Expect(err).Should(BeNil())
-		s, err := systemService.UpdateSystemInfo(context.TODO(), v1.SystemInfoRequest{LoginType: "dex"})
+		_, err = systemService.UpdateSystemInfo(context.TODO(), v1.SystemInfoRequest{LoginType: "dex"})
 		Expect(err).Should(Equal(bcode.ErrNoDexConnector))
 
 		var cc corev1.Secret
@@ -54,7 +54,7 @@ var _ = Describe("Test target service functions", func() {
 		cc.Namespace = velatypes.DefaultKubeVelaNS
 		Expect(k8sClient.Create(context.TODO(), &cc)).Should(BeNil())
 
-		s, err = systemService.UpdateSystemInfo(context.TODO(), v1.SystemInfoRequest{LoginType: "dex"})
+		s, err := systemService.UpdateSystemInfo(context.TODO(), v1.SystemInfoRequest{LoginType: "dex"})
 		Expect(err).Should(BeNil())
 		Expect(s.LoginType).Should(Equal("dex"))
 		var secret corev1.Secret

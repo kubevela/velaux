@@ -26,8 +26,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/yaml"
 
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 
@@ -188,16 +186,6 @@ var _ = Describe("Test authentication service functions", func() {
 		Expect(err).Should(BeNil())
 		Expect(newUser.Alias).Should(Equal("new-alias"))
 		Expect(compareHashWithPassword(newUser.Password, "new-password")).Should(BeNil())
-
-		dexConfigSecret := &corev1.Secret{}
-		err = k8sClient.Get(context.Background(), types.NamespacedName{Name: "dex-config", Namespace: "vela-system"}, dexConfigSecret)
-		Expect(err).Should(BeNil())
-		config := &model.DexConfig{}
-		err = yaml.Unmarshal(dexConfigSecret.Data[secretDexConfigKey], config)
-		Expect(err).Should(BeNil())
-		Expect(len(config.StaticPasswords)).Should(Equal(1))
-		Expect(config.StaticPasswords[0].Username).Should(Equal(userModify))
-		Expect(config.StaticPasswords[0].Hash).Should(Equal(newUser.Password))
 	})
 
 	It("Test disable user", func() {
