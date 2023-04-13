@@ -213,7 +213,7 @@ class PlatformSetting extends React.Component<Props, State> {
       this.props.onClose();
       this.props.dispatch(
         routerRedux.push({
-          pathname: '/configs/config-dex-connector/config',
+          pathname: '/configs/dex-connector/config',
         })
       );
     } else if (businessGuideCode === 14010) {
