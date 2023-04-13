@@ -19,10 +19,11 @@ package repository
 import (
 	"context"
 
-	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/kubevela/velaux/pkg/server/domain/model"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 )
 
 var _ = Describe("Test user functions", func() {
