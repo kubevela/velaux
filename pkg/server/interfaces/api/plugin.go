@@ -60,14 +60,12 @@ func (p *Plugin) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/").To(p.listEnabledPlugins).
 		Doc("List the enabled plugins").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Filter(p.RBACService.CheckPerm("plugin", "list")).
 		Returns(200, "OK", apis.ListPluginResponse{}).
 		Writes(apis.ListPluginResponse{}).Do(returns200, returns500))
 
 	ws.Route(ws.GET("/{pluginId}").To(p.detailPlugin).
 		Doc("Detail an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Filter(p.RBACService.CheckPerm("plugin", "detail")).
 		Returns(200, "OK", apis.PluginDTO{}).
 		Writes(apis.PluginDTO{}).Do(returns200, returns500))
 

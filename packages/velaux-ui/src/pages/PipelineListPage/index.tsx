@@ -392,9 +392,11 @@ class PipelineListPage extends Component<Props, State> {
           </Loading>
         </If>
         <If condition={!addonEnabled}>
-          <div className="addon-notice">
-            Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> Addon that powers Pipeline.
-          </div>
+          <Permission request={{ resource: 'addon', action: 'enable' }}>
+            <div className="addon-notice">
+              Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> addon to power pipeline.
+            </div>
+          </Permission>
         </If>
 
         <If condition={showRunPipeline}>

@@ -118,10 +118,7 @@ class MyProjectList extends Component<Props, State> {
     return (
       <Fragment>
         <div className="project-list-content">
-          <Title
-            title="My Projects"
-            subTitle={i18n.t('Project allow isolate the user permissions and applications.')}
-          />
+          <Title title="My Projects" subTitle={i18n.t('Project are used for users and applications isolation')} />
           <Table locale={locale().Table} dataSource={userInfo?.projects} loading={isLoading}>
             {columns.map((col, key) => (
               <Column {...col} key={key} align={'left'} />
