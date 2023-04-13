@@ -1,4 +1,4 @@
-import { Grid, Select, Input, Checkbox } from '@alifd/next';
+import { Checkbox, Grid, Input, Select, } from '@alifd/next';
 import React from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 
@@ -13,6 +13,7 @@ type Props = {
   onTagChange: (tags: string[]) => void;
   tagList?: Array<{ tag: string; num: number }>;
   registries?: [];
+  extButtons?: [React.ReactNode];
 };
 
 type State = {
@@ -66,15 +67,15 @@ class SelectSearch extends React.Component<Props, State> {
   render() {
     const { Row, Col } = Grid;
     const { Option } = Select;
-    const { registries } = this.props;
+    const { registries, extButtons } = this.props;
     const queryPlaceholder = i18n.t('Search by Name and Description etc').toString();
     const { registryValue, inputValue } = this.state;
 
     return (
       <div className="border-radius-8 addon-search">
         <div>
-          <Row wrap={true}>
-            <Col m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+          <Row wrap={true} gutter={12}>
+            <Col l={8} m={8} s={12} xxs={24}>
               <Select
                 locale={locale().Select}
                 mode="single"
@@ -96,7 +97,7 @@ class SelectSearch extends React.Component<Props, State> {
               </Select>
             </Col>
 
-            <Col m={8} s={12} xxs={24} style={{ padding: '0 8px' }}>
+            <Col l={8} m={8} s={12} xxs={24}>
               <Input
                 innerAfter={<AiOutlineSearch onClick={this.handleClickSearch} style={{ margin: 4 }} />}
                 placeholder={queryPlaceholder}
@@ -106,6 +107,15 @@ class SelectSearch extends React.Component<Props, State> {
                 value={inputValue}
                 className="item"
               />
+            </Col>
+
+            <Col l={8} m={8} s={12} xxs={24}>
+              <div className={'ext-btn'} >
+                {extButtons &&
+                  extButtons.map((item) => {
+                    return item;
+                  })}
+              </div>
             </Col>
           </Row>
           <div className="tag-search">

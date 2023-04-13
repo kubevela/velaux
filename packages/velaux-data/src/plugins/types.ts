@@ -115,3 +115,10 @@ export class VelaUXPlugin<T extends PluginMeta = PluginMeta> {
     this.meta = {} as T;
   }
 }
+
+export type PluginEnableRequest = {
+  name: string
+  jsonData: KeyValue
+  secureJsonData: KeyValue
+}
+

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { getAddonsList, getAddonRegistriesList, getEnabledAddons } from '../api/addons';
+import {getAddonRegistriesList, getAddonsList, getEnabledAddons} from '../api/addons';
+
 export default {
   namespace: 'addons',
   state: {
@@ -9,20 +10,20 @@ export default {
     enabledAddons: [],
   },
   reducers: {
-    updateAddonsList(state, { type, payload }) {
+    updateAddonsList(state, {type, payload}) {
       return {
         ...state,
         addonsList: payload.addons || [],
         addonListMessage: payload.message,
       };
     },
-    updateAddonRegistriesList(state, { type, payload }) {
+    updateAddonRegistriesList(state, {type, payload}) {
       return {
         ...state,
         registryList: payload || [],
       };
     },
-    updateEnabledAddons(state, { type, payload }) {
+    updateEnabledAddons(state, {type, payload}) {
       return {
         ...state,
         enabledAddons: payload.enabledAddons || [],
@@ -30,28 +31,28 @@ export default {
     },
   },
   effects: {
-    *getAddonsList(action, { call, put }) {
+    * getAddonsList(action, {call, put}) {
       const result = yield call(getAddonsList, action.payload);
       if (result) {
-        yield put({ type: 'updateAddonsList', payload: result });
+        yield put({type: 'updateAddonsList', payload: result});
         if (action.callback) {
           action.callback(result);
         }
       }
     },
-    *getEnabledAddons(action, { call, put }) {
+    * getEnabledAddons(action, {call, put}) {
       const result = yield call(getEnabledAddons, action.payload);
       if (result) {
-        yield put({ type: 'updateEnabledAddons', payload: result });
+        yield put({type: 'updateEnabledAddons', payload: result});
         if (action.callback) {
           action.callback(result);
         }
       }
     },
-    *getAddonRegistriesList(action, { call, put }) {
+    * getAddonRegistriesList(action, {call, put}) {
       const result = yield call(getAddonRegistriesList, action.payload);
       const registries = result ? result.registries : [];
-      yield put({ type: 'updateAddonRegistriesList', payload: registries || [] });
+      yield put({type: 'updateAddonRegistriesList', payload: registries || []});
     },
   },
 };

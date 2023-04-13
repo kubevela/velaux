@@ -1,4 +1,4 @@
-import { Loading, Message, Button } from '@alifd/next';
+import { Button, Loading, Message, Tab } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
 
@@ -7,6 +7,7 @@ import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
 import type { Addon, AddonBaseStatus } from '../../interface/addon';
+import { PluginMeta } from "@velaux/data";
 
 import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
@@ -15,12 +16,18 @@ import SelectSearch from './components/search/index';
 
 type Props = {
   dispatch: ({}) => {};
+  loading: any;
+  match?: any;
+
+  // addon props
   addonsList: Addon[];
   registryList: [];
   addonListMessage: string;
-  loading: any;
-  match?: any;
   enabledAddons?: AddonBaseStatus[];
+
+  // plugin props
+  pluginList: PluginMeta[];
+  enabledPlugins?: PluginMeta[];
 };
 
 type State = {
@@ -32,7 +39,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.addons, loading: store.loading };
+  return { ...store.addons, ...store.plugins, loading: store.loading };
 })
 class Addons extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -49,6 +56,7 @@ class Addons extends React.Component<Props, State> {
     this.getAddonsList();
     this.getAddonRegistriesList();
     this.getEnabledAddon();
+    this.getPluginList()
   }
 
   getAddonsList = async (params = {}) => {
@@ -65,6 +73,12 @@ class Addons extends React.Component<Props, State> {
     });
   };
 
+  getPluginList = async (params = {}) => {
+    this.props.dispatch({
+      type: 'plugins/getPluginList',
+      payload: params,
+    });
+  }
   generateTagList = () => {
     const { addonsList } = this.props;
     const tagMap: Map<string, number> = new Map<string, number>();
@@ -116,71 +130,130 @@ class Addons extends React.Component<Props, State> {
     });
   };
 
-  render() {
-    const { addonsList = [], registryList = [], dispatch, loading, addonListMessage, enabledAddons } = this.props;
+  enablePlugin(name: string) {
+    this.props.dispatch({
+      type: 'plugins/enablePlugin',
+      payload: { name },
+    });
+  }
 
-    const isLoading = loading.models.addons;
+  disablePlugin(name: string) {
+    this.props.dispatch({
+      type: 'plugins/disablePlugin',
+      payload: { name },
+    });
+  }
+
+
+  render() {
+    const {
+      addonsList = [],
+      registryList = [],
+      dispatch,
+      loading,
+      addonListMessage,
+      enabledAddons,
+      pluginList = [],
+      enabledPlugins = [],
+    } = this.props;
+
+    const addonLoading = loading.models.addons;
+    const pluginLoading = loading.models.plugins;
     const { showAddonDetail, addonName, showRegistryManage, tagList, selectTags } = this.state;
+    const clickPlugin: (id: string) => void = (id: string) => {
+      const plugin = pluginList?.find((item) => item.id === id);
+      if (!plugin) {
+        return;
+      }
+      if (enabledPlugins?.find((item) => item.id === id)) {
+        this.disablePlugin(plugin.id);
+      } else {
+        this.enablePlugin(plugin.id);
+      }
+    }
+
     return (
       <div>
         <ListTitle
-          title="Addons"
-          subTitle="Manages and extends platform capabilities"
-          extButtons={[
-            <Permission request={{ resource: 'addonRegistry:*', action: 'list' }} project={''}>
-              <Button
-                type="primary"
-                onClick={() => {
-                  this.setState({ showRegistryManage: true });
+          title="Addons and VelaUX Plugins"
+          subTitle="Manages extended platform capabilities for KubeVela and VelaUX."
+        />
+
+        <Tab>
+          <Tab.Item title="Addons">
+            <SelectSearch
+              dispatch={dispatch}
+              tagList={tagList}
+              registries={registryList}
+              listFunction={this.getAddonsList}
+              onTagChange={(tags: string[]) => {
+                this.setState({ selectTags: tags });
+              }}
+              extButtons={[
+                <Permission request={{ resource: 'addonRegistry:*', action: 'list' }} project={''}>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      this.setState({ showRegistryManage: true });
+                    }}
+                  >
+                    <Translation>Addon Registries</Translation>
+                  </Button>
+                </Permission>,
+              ]}
+            />
+            <Loading visible={addonLoading} style={{ width: '100%' }}>
+              <If condition={addonListMessage}>
+                <Message style={{ marginBottom: '16px' }} type="warning">
+                  {addonListMessage}
+                </Message>
+              </If>
+              <CardContend
+                type={'addon'}
+                addonLists={addonsList}
+                selectTags={selectTags}
+                enabledAddons={enabledAddons}
+                clickAddon={this.openAddonDetail}
+              />
+            </Loading>
+            <If condition={showAddonDetail}>
+              <AddonDetailDialog
+                onClose={this.closeAddonDetail}
+                showAddon={this.onShowAddon}
+                dispatch={dispatch}
+                addonName={addonName}
+              />
+            </If>
+            <If condition={showRegistryManage}>
+              <RegistryManageDialog
+                visible={showRegistryManage}
+                onClose={() => {
+                  this.getAddonsList();
+                  this.setState({ showRegistryManage: false });
                 }}
-              >
-                <Translation>Addon Registries</Translation>
-              </Button>
-            </Permission>,
-          ]}
-        />
-        <SelectSearch
-          dispatch={dispatch}
-          tagList={tagList}
-          registries={registryList}
-          listFunction={this.getAddonsList}
-          onTagChange={(tags: string[]) => {
-            this.setState({ selectTags: tags });
-          }}
-        />
-        <Loading visible={isLoading} style={{ width: '100%' }}>
-          <If condition={addonListMessage}>
-            <Message style={{ marginBottom: '16px' }} type="warning">
-              {addonListMessage}
-            </Message>
-          </If>
-          <CardContend
-            addonLists={addonsList}
-            selectTags={selectTags}
-            enabledAddons={enabledAddons}
-            clickAddon={this.openAddonDetail}
-          />
-        </Loading>
-        <If condition={showAddonDetail}>
-          <AddonDetailDialog
-            onClose={this.closeAddonDetail}
-            showAddon={this.onShowAddon}
-            dispatch={dispatch}
-            addonName={addonName}
-          />
-        </If>
-        <If condition={showRegistryManage}>
-          <RegistryManageDialog
-            visible={showRegistryManage}
-            onClose={() => {
-              this.getAddonsList();
-              this.setState({ showRegistryManage: false });
-            }}
-            syncRegistries={this.getAddonRegistriesList}
-            registries={registryList}
-            dispatch={dispatch}
-          />
-        </If>
+                syncRegistries={this.getAddonRegistriesList}
+                registries={registryList}
+                dispatch={dispatch}
+              />
+            </If>
+          </Tab.Item>
+          <Tab.Item title="VelaUX Plugins">
+            <Loading visible={pluginLoading} style={{ width: '100%' }}>
+              <If condition={addonListMessage}>
+                <Message style={{ marginBottom: '16px' }} type="warning">
+                  {addonListMessage}
+                </Message>
+              </If>
+              <CardContend
+                type={'plugin'}
+                pluginList={pluginList}
+                clickPlugin={clickPlugin}
+                enabledPlugins={enabledPlugins}
+              />
+            </Loading>
+          </Tab.Item>
+        </Tab>
+
       </div>
     );
   }

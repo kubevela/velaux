@@ -5,8 +5,14 @@
   "file path": "文件路径",
   "Add item": "添加项",
   "Clear": "清除",
+<<<<<<< HEAD
   "Clusters": "集群",
   "Addons": "插件",
+=======
+  "Clusters": "集群列表",
+  "Addons": "插件管理",
+  "Addons and VelaUX Plugins": "KubeVela/VelaUX 插件",
+>>>>>>> c8f5cf2 (Add plugin enable/disable sub-page)
   "Reset": "重置",
   "Please enter": "请输入",
   "App Name-": "应用名称-",
@@ -324,7 +330,7 @@
   "content cannot be empty": "内容不可为空",
   "You can define parameters such as region or zone": "你可以定义例如区域或可用区等参数",
   "Addon Registries": "插件仓库",
-  "Manages and extends platform capabilities": "管理与扩展平台能力",
+  "Manages extended platform capabilities for KubeVela and VelaUX.": "管理 KubeVela 和 VelaUX 的平台扩展能力",
   "The addon registry type": "插件仓库类型",
   "Only support github repo url（master branch）": "仅支持 GitHub repo（主分支） 链接",
   "Are you sure to delete?": "确认要删除吗？",

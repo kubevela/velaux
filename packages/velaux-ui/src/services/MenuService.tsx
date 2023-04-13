@@ -96,7 +96,7 @@ const defaultWorkspaceMenus: Menu[] = [
     type: MenuTypes.Workspace,
     to: '/addons',
     icon: <BsPlugin></BsPlugin>,
-    label: 'Addons',
+    label: 'Addons & Plugins',
     name: 'addon-list',
     permission: { resource: 'addon:*', action: 'list' },
     relatedRoute: ['/addons'],
