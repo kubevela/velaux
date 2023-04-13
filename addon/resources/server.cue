@@ -52,7 +52,7 @@ _httpsTrait: *[ if parameter["secretName"] != _|_ && parameter["domain"] != _|_ 
 	}}] | []
 
 server: {
-	name: "apiserver"
+	name: "server"
 	type: "webservice"
 	properties: {
 		if parameter["repo"] == _|_ {

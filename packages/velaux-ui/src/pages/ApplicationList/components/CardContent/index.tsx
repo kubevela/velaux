@@ -195,7 +195,7 @@ class CardContent extends React.Component<Props, State> {
       },
       {
         key: 'labels',
-        title: <Translation>Tags</Translation>,
+        title: <Translation>Labels</Translation>,
         dataIndex: 'labels',
         cell: (label: Record<string, string>, i: number, v: ApplicationBase) => {
           const { showLabelMode } = this.state;
@@ -204,7 +204,7 @@ class CardContent extends React.Component<Props, State> {
           return (
             <div>
               <div className={more ? '' : 'table-content-label'}>
-                {Object.keys(label).map((key) => {
+                {Object.keys(label)?.map((key) => {
                   if (label && key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev')) {
                     displayLabels++;
                     return (
