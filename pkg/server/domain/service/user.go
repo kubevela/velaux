@@ -314,19 +314,6 @@ func (u *userServiceImpl) UpdateUser(ctx context.Context, user *model.User, req 
 	if err := u.Store.Put(ctx, user); err != nil {
 		return nil, err
 	}
-	if user.IsAdmin() {
-		if err := generateDexConfig(ctx, u.K8sClient, &model.UpdateDexConfig{
-			StaticPasswords: []model.StaticPassword{
-				{
-					Email:    user.Email,
-					Hash:     user.Password,
-					Username: user.Name,
-				},
-			},
-		}); err != nil {
-			return nil, err
-		}
-	}
 	return convertUserBase(user), nil
 }
 

@@ -27,6 +27,7 @@ import (
 	"github.com/oam-dev/kubevela/version"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
+	"github.com/kubevela/velaux/pkg/server/domain/repository"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
@@ -129,9 +130,22 @@ func (u systemInfoServiceImpl) UpdateSystemInfo(ctx context.Context, sysInfo v1.
 		if len(connectors) < 1 {
 			return nil, bcode.ErrNoDexConnector
 		}
+		users, err := repository.ListAdminUsers(ctx, u.Store)
+		if err != nil {
+			return nil, err
+		}
+		var passwords []model.StaticPassword
+		for _, user := range users {
+			passwords = append(passwords, model.StaticPassword{
+				Email:    user.Email,
+				Hash:     user.Password,
+				Username: user.Name,
+			})
+		}
 		if err := generateDexConfig(ctx, u.KubeClient, &model.UpdateDexConfig{
-			VelaAddress: sysInfo.VelaAddress,
-			Connectors:  connectors,
+			VelaAddress:     sysInfo.VelaAddress,
+			StaticPasswords: passwords,
+			Connectors:      connectors,
 		}); err != nil {
 			return nil, fmt.Errorf("fail to generate the dex config: %w", err)
 		}
