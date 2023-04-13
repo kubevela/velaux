@@ -386,7 +386,7 @@ class ProjectPipelines extends Component<Props, State> {
         <If condition={!addonEnabled}>
           <Permission request={{ resource: 'addon', action: 'enable' }}>
             <div className="addon-notice">
-              Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> Addon that powers Pipeline.
+              Please enable the <Link to="/addons/vela-workflow">vela-workflow</Link> addon to power pipeline.
             </div>
           </Permission>
         </If>

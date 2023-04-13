@@ -94,7 +94,7 @@ class ConfigsLayout extends Component<Props, State> {
       <div className="configs-wrapper">
         <ListTitle
           title={'Configs'}
-          subTitle={'Provide templated, extensibility configuration management capabilities.'}
+          subTitle={'Offering templated and extensible configuration management capabilities.'}
         />
         <If condition={!activeName}>
           <Empty style={{ marginTop: '40px' }} />

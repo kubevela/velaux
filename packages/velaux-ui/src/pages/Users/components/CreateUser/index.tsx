@@ -245,7 +245,9 @@ class CreateUser extends React.Component<Props, State> {
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
                 <FormItem
-                  help={i18n.t('The common developer no need assign the platform roles.').toString()}
+                  help={i18n
+                    .t('Application developers should be assigned project roles instead of platform roles.')
+                    .toString()}
                   label={<Translation>Platform Roles</Translation>}
                   labelTextAlign="left"
                 >
