@@ -45,6 +45,7 @@ type State = {
   runLoading?: boolean;
   activeKey: string | number;
   workflow?: Workflow;
+  currentRecord?: WorkflowRecord;
 };
 
 @connect((store: any) => {
@@ -62,7 +63,6 @@ class ApplicationWorkflow extends React.Component<Props, State> {
 
   componentDidMount() {
     this.loadApplicationStatus();
-    this.loadWorkflow();
     this.loadWorkflowRecord();
   }
 
@@ -71,7 +71,6 @@ class ApplicationWorkflow extends React.Component<Props, State> {
       this.setState({ records: [], showRecordName: '' }, () => {
         this.loadWorkflowRecord();
       });
-      this.loadWorkflow();
     }
   }
 
@@ -91,9 +90,9 @@ class ApplicationWorkflow extends React.Component<Props, State> {
     const {
       params: { appName },
     } = this.props.match;
-    const env = this.getEnvbindingByName();
-    if (env && env.workflow.name) {
-      detailWorkflow({ appName: appName, name: env.workflow.name }).then((res) => {
+    const { currentRecord } = this.state;
+    if (currentRecord) {
+      detailWorkflow({ appName: appName, name: currentRecord.workflowName }).then((res) => {
         this.setState({ workflow: res });
       });
     }
@@ -105,13 +104,14 @@ class ApplicationWorkflow extends React.Component<Props, State> {
     } = this.props.match;
     const { dispatch } = this.props;
     const env = this.getEnvbindingByName();
-    if (env && env.workflow.name) {
+    if (env) {
       getApplicationEnvRecords({ appName: appName, envName: envName }).then((res: { records: WorkflowRecord[] }) => {
         if (res) {
           const records = res.records.reverse();
           this.setState({ records: records || [], showRecordName: '' });
-          if (record && res.records.find((re) => re.name === record)) {
-            this.setState({ showRecordName: record });
+          const currentRecord = res.records.find((re) => re.name === record);
+          if (currentRecord) {
+            this.setState({ showRecordName: record, currentRecord: currentRecord }, this.loadWorkflow);
           } else if (Array.isArray(records) && records.length > 0) {
             this.setState({ showRecordName: records[0].name });
             dispatch(
