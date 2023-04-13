@@ -1,12 +1,15 @@
 {
     "name": "@velaux/theme",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "author": "KubeVela",
     "scripts": {
         "build": "yarn sass2less && node bin/build.js",
         "sass2less": "sass2less variables.scss variables.less"
     },
-    "main": "index.js",
+    "files": [
+        "./dist/**"
+    ],
+    "main": "dist/next.js",
     "devDependencies": {
         "@types/react-dom": "^17.0.2",
         "autoprefixer": "^7.1.4",
@@ -34,6 +37,8 @@
     },
     "license": "Apache 2.0",
     "publishConfig": {
-        "registry": "https://registry.npmjs.org"
+        "registry": "https://registry.npmjs.org",
+        "access": "public",
+        "main": "dist/next.js"
     }
 }
