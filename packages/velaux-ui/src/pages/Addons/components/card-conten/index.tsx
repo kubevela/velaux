@@ -8,12 +8,13 @@ import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import type { Addon, AddonBaseStatus } from '../../../../interface/addon';
 import { intersectionArray } from '../../../../utils/common';
-import type { PluginMeta } from '@velaux/data';
+import type { KeyValue, PluginMeta } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 
 type State = {
   extendDotVisible: boolean;
   choseIndex: number;
+  iconValid: KeyValue<boolean>;
 };
 
 type Props = {
@@ -88,8 +89,61 @@ class CardContent extends React.Component<Props, State> {
     this.state = {
       extendDotVisible: false,
       choseIndex: 0,
+      iconValid: {},
     };
   }
+
+  componentDidMount() {
+    const { addonLists, pluginList } = this.props;
+    if (addonLists) {
+      addonLists.forEach((addon) => {
+        this.checkImage(addon.name, addon.icon);
+      });
+    }
+    if (pluginList) {
+      pluginList.forEach((plugin) => {
+        this.checkImage(plugin.name, plugin.info.logos.small);
+      });
+    }
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>) {
+    const { addonLists, pluginList } = this.props;
+    if (addonLists && addonLists !== prevProps.addonLists) {
+      addonLists.forEach((addon) => {
+        this.checkImage(addon.name, addon.icon);
+      });
+    }
+    if (pluginList && pluginList !== prevProps.pluginList) {
+      pluginList.forEach((plugin) => {
+        this.checkImage(plugin.name, plugin.info.logos.small);
+      });
+    }
+  }
+
+  checkImage = (name: string, icon?: string) => {
+    if (icon && icon !== 'none' && icon !== '') {
+      const img = new Image();
+      img.src = icon;
+      img.onload = () => {
+        this.setState((preState) => {
+          preState.iconValid[name] = true;
+          return preState;
+        });
+      }
+      img.onerror = () => {
+        this.setState((preState) => {
+          preState.iconValid[name] = false;
+          return preState;
+        });
+      }
+    } else {
+      this.setState((preState) => {
+        preState.iconValid[name] = false;
+        return preState;
+      });
+    }
+  };
 
   render() {
     const { Row, Col } = Grid;
@@ -143,6 +197,30 @@ class CardContent extends React.Component<Props, State> {
       }
     }
 
+    const renderIcon = (name: string, icon?: string) => {
+      if (this.state.iconValid[name]) {
+        return <img src={icon} />;
+      } else {
+        return (
+          <div
+            style={{
+              display: 'inline-block',
+              verticalAlign: 'middle',
+              padding: `2px 4px`,
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              backgroundColor: '#fff',
+              textAlign: 'center',
+              lineHeight: '60px',
+            }}
+          >
+            <span style={{ color: '#1b58f4', fontSize: `2em` }}>{nameUpper(name)}</span>
+          </div>
+        );
+      }
+    }
+
     let itemList: item[];
     let enabledItemList: enabledItem[];
     itemList = (type === "addon" ? addonLists?.map(toItem) : pluginList?.map(toItem)) || [];
@@ -180,26 +258,7 @@ class CardContent extends React.Component<Props, State> {
                       type === 'addon' && clickAddon ? () => clickAddon(name) : undefined
                     }>
                       <div className="cluster-card-top flexcenter">
-                        <If condition={icon && icon != 'none' && icon != ''}>
-                          <img src={icon} />
-                        </If>
-                        <If condition={!icon || icon === 'none' || icon === ''}>
-                          <div
-                            style={{
-                              display: 'inline-block',
-                              verticalAlign: 'middle',
-                              padding: `2px 4px`,
-                              width: '60px',
-                              height: '60px',
-                              borderRadius: '50%',
-                              backgroundColor: '#fff',
-                              textAlign: 'center',
-                              lineHeight: '60px',
-                            }}
-                          >
-                            <span style={{ color: '#1b58f4', fontSize: `2em` }}>{nameUpper(name)}</span>
-                          </div>
-                        </If>
+                        {renderIcon(name, icon)}
                       </div>
                     </a>
                     <div className="content-wraper background-F9F8FF">
