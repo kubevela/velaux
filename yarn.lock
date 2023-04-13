@@ -6079,8 +6079,8 @@ __metadata:
     "@types/react-router-dom": ^5.3.3
     "@typescript-eslint/eslint-plugin": ^4.33.0
     "@typescript-eslint/parser": ^4.33.0
-    "@velaux/data": 0.0.2
-    "@velaux/ui": 0.0.2
+    "@velaux/data": 0.0.4
+    "@velaux/ui": 0.0.4
     copy-webpack-plugin: ^10.0.0
     css-loader: 6.7.1
     eslint: ^7.32.0
@@ -6137,8 +6137,8 @@ __metadata:
     "@types/react-router-dom": ^5.3.3
     "@typescript-eslint/eslint-plugin": ^4.33.0
     "@typescript-eslint/parser": ^4.33.0
-    "@velaux/data": 0.0.2
-    "@velaux/ui": 0.0.2
+    "@velaux/data": 0.0.4
+    "@velaux/ui": 0.0.4
     copy-webpack-plugin: ^10.0.0
     css-loader: 6.7.1
     eslint: ^7.32.0
@@ -6173,7 +6173,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@velaux/data@0.0.2, @velaux/data@workspace:packages/velaux-data":
+"@velaux/data@0.0.4, @velaux/data@^0.0.4, @velaux/data@workspace:packages/velaux-data":
   version: 0.0.0-use.local
   resolution: "@velaux/data@workspace:packages/velaux-data"
   dependencies:
@@ -6235,7 +6235,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@velaux/ui@0.0.2, @velaux/ui@workspace:packages/velaux-ui":
+"@velaux/ui@0.0.4, @velaux/ui@workspace:packages/velaux-ui":
   version: 0.0.0-use.local
   resolution: "@velaux/ui@workspace:packages/velaux-ui"
   dependencies:
@@ -6266,7 +6266,7 @@ __metadata:
     "@types/rollup-plugin-less": 1.1.2
     "@types/uuid": ^8.3.4
     "@types/webpack-env": 1.18.0
-    "@velaux/data": 0.0.2
+    "@velaux/data": ^0.0.4
     "@velaux/theme": 0.0.2
     ansi-to-html: ^0.7.2
     ansi-to-react: ^6.1.6
