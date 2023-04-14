@@ -106,7 +106,9 @@ var _ = Describe("Test rbac service", func() {
 
 	It("Test checkPerm by admin user", func() {
 		rbac := rbacServiceImpl{Store: ds}
-		req := &http.Request{}
+		req := &http.Request{
+			URL: &url.URL{},
+		}
 		req = req.WithContext(context.WithValue(req.Context(), &apisv1.CtxKeyUser, FakeAdminName))
 		res := &restful.Response{}
 		pass := false
@@ -146,6 +148,7 @@ var _ = Describe("Test rbac service", func() {
 		header.Set("Content-Type", "application/json")
 		req := &http.Request{
 			Header: header,
+			URL:    &url.URL{},
 		}
 		req = req.WithContext(context.WithValue(req.Context(), &apisv1.CtxKeyUser, "dev"))
 		req.Form = url.Values{}

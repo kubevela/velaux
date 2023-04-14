@@ -411,18 +411,37 @@ func (w *workflowServiceImpl) DetailWorkflowRecord(ctx context.Context, workflow
 
 // nolint:gocyclo
 func (w *workflowServiceImpl) SyncWorkflowRecord(ctx context.Context, appPrimaryKey, recordName string, app *v1beta1.Application, workflowContext map[string]string) error {
+	// if the workflow is restarted, sync the old unfinished workflow record
+	unfinished := &model.WorkflowRecord{
+		Finished:      "false",
+		AppPrimaryKey: appPrimaryKey,
+	}
+	// list all unfinished workflow records and sync with revision
+	unfinishedRecords, err := w.Store.List(ctx, unfinished, &datastore.ListOptions{})
+	if err != nil {
+		return err
+	}
+	for _, item := range unfinishedRecords {
+		record := item.(*model.WorkflowRecord)
+		// sync from application status
+		if record.Name == recordName {
+			if err := w.syncRecordFromApplicationStatus(ctx, app, record, workflowContext, appPrimaryKey); err != nil {
+				klog.Errorf("failed to sync workflow record %s from application status %s", record.Name, err.Error())
+			}
+			continue
+		}
+		// sync from application revision
+		if err := w.syncRecordFromApplicationRevision(ctx, record); err != nil {
+			klog.Errorf("failed to sync workflow record %s from application revision %s", record.Name, err.Error())
+		}
+	}
+
+	return nil
+}
+
+func (w *workflowServiceImpl) syncRecordFromApplicationStatus(ctx context.Context, app *v1beta1.Application, record *model.WorkflowRecord, workflowContext map[string]string, appPrimaryKey string) error {
 	if app == nil || app.Annotations == nil || app.Status.Workflow == nil {
 		return nil
-	}
-	var record = &model.WorkflowRecord{
-		AppPrimaryKey: appPrimaryKey,
-		Name:          recordName,
-	}
-	if err := w.Store.Get(ctx, record); err != nil {
-		if errors.Is(err, datastore.ErrRecordNotExist) {
-			return bcode.ErrWorkflowRecordNotExist
-		}
-		return err
 	}
 	var revision = &model.ApplicationRevision{AppPrimaryKey: appPrimaryKey, Version: record.RevisionPrimaryKey}
 	if err := w.Store.Get(ctx, revision); err != nil {
@@ -449,7 +468,8 @@ func (w *workflowServiceImpl) SyncWorkflowRecord(ctx context.Context, appPrimary
 		record.ContextValue = cm.Data
 	}
 
-	stepStatus := make(map[string]*model.WorkflowStepStatus, len(status.Steps))
+	stepStatus := make(map[string]model.StepStatus, 0)
+	workflowStepStatus := make([]model.WorkflowStepStatus, 0)
 	stepAlias := make(map[string]string)
 	for _, step := range record.Steps {
 		stepAlias[step.Name] = step.Alias
@@ -458,31 +478,28 @@ func (w *workflowServiceImpl) SyncWorkflowRecord(ctx context.Context, appPrimary
 		}
 	}
 	for _, step := range status.Steps {
-		stepStatus[step.Name] = &model.WorkflowStepStatus{
-			StepStatus:     convert.FromCRWorkflowStepStatus(step.StepStatus, stepAlias[step.Name]),
-			SubStepsStatus: make([]model.StepStatus, 0),
-		}
+		stepStatus[step.Name] = convert.FromCRWorkflowStepStatus(step.StepStatus, stepAlias[step.Name])
+		wStatus := model.WorkflowStepStatus{StepStatus: stepStatus[step.Name]}
 		for _, sub := range step.SubStepsStatus {
-			stepStatus[step.Name].SubStepsStatus = append(stepStatus[step.Name].SubStepsStatus, convert.FromCRWorkflowStepStatus(sub, stepAlias[sub.Name]))
+			stepStatus[sub.Name] = convert.FromCRWorkflowStepStatus(sub, stepAlias[sub.Name])
+			wStatus.SubStepsStatus = append(wStatus.SubStepsStatus, stepStatus[sub.Name])
 		}
+		workflowStepStatus = append(workflowStepStatus, wStatus)
 	}
 	for i, step := range record.Steps {
-		if stepStatus[step.Name] != nil {
-			record.Steps[i] = *stepStatus[step.Name]
-		} else {
-			record.Steps[i].Phase = ""
-			record.Steps[i].Message = ""
-			record.Steps[i].Reason = ""
-			record.Steps[i].FirstExecuteTime = time.Time{}
-			record.Steps[i].LastExecuteTime = time.Time{}
+		if s, ok := stepStatus[step.Name]; ok {
+			record.Steps[i].StepStatus = s
+		}
+		for j, sub := range step.SubStepsStatus {
+			if s, ok := stepStatus[sub.Name]; ok {
+				record.Steps[i].SubStepsStatus[j] = s
+			}
 		}
 	}
 
 	// the auto generated workflow steps should be sync
 	if (len(record.Steps) == 0) && len(status.Steps) > 0 {
-		for k := range stepStatus {
-			record.Steps = append(record.Steps, *stepStatus[k])
-		}
+		record.Steps = append(record.Steps, workflowStepStatus...)
 	}
 
 	record.Finished = strconv.FormatBool(status.Finished)
@@ -502,58 +519,42 @@ func (w *workflowServiceImpl) SyncWorkflowRecord(ctx context.Context, appPrimary
 	if record.Finished == "true" {
 		klog.InfoS("successfully sync workflow status", "oam app name", app.Name, "workflow name", record.WorkflowName, "record name", record.Name, "status", record.Status, "sync source", app.Name)
 	}
-
-	unfinished := &model.WorkflowRecord{
-		Finished: "false",
-	}
-	// list all unfinished workflow records and sync with revision
-	unfinishedRecords, err := w.Store.List(ctx, unfinished, &datastore.ListOptions{})
-	if err != nil {
-		return err
-	}
-	for _, item := range unfinishedRecords {
-		record := item.(*model.WorkflowRecord)
-		var revision = &model.ApplicationRevision{AppPrimaryKey: record.AppPrimaryKey, Version: record.RevisionPrimaryKey}
-		if err := w.Store.Get(ctx, revision); err != nil {
-			if errors.Is(err, datastore.ErrRecordNotExist) {
-				// If the application revision is not exist, the record do not need be synced
-				record.Finished = "true"
-				record.Status = model.RevisionStatusFail
-				if err := w.Store.Put(ctx, record); err != nil {
-					klog.Errorf("failed to set the workflow status is failure %s", err.Error())
-				}
-				continue
-			}
-			klog.Errorf("failed to get the application revision from database %s", err.Error())
-			continue
-		}
-		var appRevision v1beta1.ApplicationRevision
-		if err := w.KubeClient.Get(ctx, types.NamespacedName{Namespace: app.Namespace, Name: revision.RevisionCRName}, &appRevision); err != nil {
-			if apierrors.IsNotFound(err) {
-				klog.Warningf("can't find the application revision %s/%s, set the record status to terminated", revision.RevisionCRName, app.Namespace)
-				record.Finished = "true"
-				record.Status = model.RevisionStatusTerminated
-				if err := w.Store.Put(ctx, record); err != nil {
-					klog.Errorf("failed to set the record status to terminated %s", err.Error())
-				}
-				continue
-			}
-			klog.Warningf("failed to get the application revision %s", err.Error())
-			continue
-		}
-		if appRevision.Status.Workflow != nil {
-			appRevision.Spec.Application.Status.Workflow = appRevision.Status.Workflow
-			if !appRevision.Spec.Application.Status.Workflow.Finished {
-				appRevision.Spec.Application.Status.Workflow.Finished = true
-				appRevision.Spec.Application.Status.Workflow.Terminated = true
-			}
-		}
-		if err := w.SyncWorkflowRecord(ctx, record.AppPrimaryKey, record.Name, &appRevision.Spec.Application, appRevision.Status.WorkflowContext); err != nil {
-			klog.ErrorS(err, "failed to sync workflow status", "oam app name", app.Name, "workflow name", record.WorkflowName, "record name", record.Name)
-			continue
-		}
-	}
 	return nil
+}
+
+func (w *workflowServiceImpl) syncRecordFromApplicationRevision(ctx context.Context, record *model.WorkflowRecord) error {
+	var revision = &model.ApplicationRevision{AppPrimaryKey: record.AppPrimaryKey, Version: record.RevisionPrimaryKey}
+	if err := w.Store.Get(ctx, revision); err != nil {
+		if errors.Is(err, datastore.ErrRecordNotExist) {
+			// If the application revision is not exist, the record do not need be synced
+			record.Finished = "true"
+			record.Status = model.RevisionStatusFail
+			if err := w.Store.Put(ctx, record); err != nil {
+				return fmt.Errorf(("failed to set the record status to terminated: %s"), err.Error())
+			}
+		}
+		return fmt.Errorf(("failed to get the application revision from database: %s"), err.Error())
+	}
+	var appRevision v1beta1.ApplicationRevision
+	if err := w.KubeClient.Get(ctx, types.NamespacedName{Namespace: record.Namespace, Name: revision.RevisionCRName}, &appRevision); err != nil {
+		if apierrors.IsNotFound(err) {
+			klog.Warningf("can't find the application revision %s/%s, set the record status to terminated", revision.RevisionCRName, record.Namespace)
+			record.Finished = "true"
+			record.Status = model.RevisionStatusTerminated
+			if err := w.Store.Put(ctx, record); err != nil {
+				return fmt.Errorf(("failed to set the record status to terminated: %s"), err.Error())
+			}
+		}
+		return fmt.Errorf(("failed to get the application revision: %s"), err.Error())
+	}
+	if appRevision.Status.Workflow != nil {
+		appRevision.Spec.Application.Status.Workflow = appRevision.Status.Workflow
+		if !appRevision.Spec.Application.Status.Workflow.Finished {
+			appRevision.Spec.Application.Status.Workflow.Finished = true
+			appRevision.Spec.Application.Status.Workflow.Terminated = true
+		}
+	}
+	return w.syncRecordFromApplicationStatus(ctx, &appRevision.Spec.Application, record, appRevision.Status.WorkflowContext, record.AppPrimaryKey)
 }
 
 func generateRevisionStatus(phase workflowv1alpha1.WorkflowRunPhase) string {
@@ -596,13 +597,6 @@ func (w *workflowServiceImpl) CreateWorkflowRecord(ctx context.Context, appModel
 				Type:  step.Type,
 			},
 			SubStepsStatus: subStatus,
-		}
-		for _, sub := range step.SubSteps {
-			steps[i].SubStepsStatus = append(steps[i].SubStepsStatus, model.StepStatus{
-				Name:  sub.Name,
-				Alias: sub.Alias,
-				Type:  sub.Type,
-			})
 		}
 	}
 
@@ -722,10 +716,6 @@ func (w *workflowServiceImpl) ResumeRecord(ctx context.Context, appModel *model.
 		return err
 	}
 
-	if err := w.SyncWorkflowRecord(ctx, appModel.PrimaryKey(), recordName, oamApp, nil); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -735,9 +725,6 @@ func (w *workflowServiceImpl) TerminateRecord(ctx context.Context, appModel *mod
 		return err
 	}
 	if err := operation.TerminateWorkflow(ctx, w.KubeClient, oamApp); err != nil {
-		return err
-	}
-	if err := w.SyncWorkflowRecord(ctx, appModel.PrimaryKey(), recordName, oamApp, nil); err != nil {
 		return err
 	}
 

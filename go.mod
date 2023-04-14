@@ -9,7 +9,7 @@ require (
 	github.com/agiledragon/gomonkey/v2 v2.4.0
 	github.com/alibabacloud-go/cs-20151215/v3 v3.0.32 // indirect
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.4 // indirect
-	github.com/alibabacloud-go/tea v1.1.19 // indirect
+	github.com/alibabacloud-go/tea v1.1.20 // indirect
 	github.com/aryann/difflib v0.0.0-20210328193216-ff5ff6dc229b // indirect
 	github.com/barnettZQG/inject v0.0.1
 	github.com/briandowns/spinner v1.11.1 // indirect
@@ -22,7 +22,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/emicklei/go-restful-openapi/v2 v2.9.1
-	github.com/emicklei/go-restful/v3 v3.8.0
+	github.com/emicklei/go-restful/v3 v3.10.2
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d // indirect
@@ -34,7 +34,7 @@ require (
 	github.com/form3tech-oss/jwt-go v3.2.3+incompatible
 	github.com/getkin/kin-openapi v0.107.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/go-git/go-git/v5 v5.5.1 // indirect
+	github.com/go-git/go-git/v5 v5.6.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-openapi/spec v0.20.7
 	github.com/go-playground/validator/v10 v10.9.0
@@ -47,12 +47,12 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/gosuri/uitable v0.0.4 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.12.0 // indirect
+	github.com/hashicorp/hcl/v2 v2.16.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
-	github.com/kubevela/pkg v0.0.0-20230224072506-9ff31b249aa8
+	github.com/kubevela/pkg v0.0.0-20230316114047-e2b41b377bac
 	github.com/kubevela/prism v1.7.0-alpha.1
-	github.com/kubevela/workflow v0.5.1-0.20230404061444-a4f3ec81fca7
+	github.com/kubevela/workflow v0.5.1-0.20230412142923-1f15ba091699
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 	github.com/oam-dev/cluster-gateway v1.7.0-alpha.1
@@ -67,20 +67,20 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.0 // indirect
-	github.com/spf13/cobra v1.6.0
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/tidwall/gjson v1.14.4
 	github.com/wercker/stern v0.0.0-20190705090245-4fa46dd6987f // indirect
 	github.com/wonderflow/cert-manager-api v1.0.4-0.20210304051430-e08aa76f6c5f // indirect
 	github.com/xanzy/go-gitlab v0.80.0 // indirect
-	github.com/xlab/treeprint v1.1.0 // indirect
+	github.com/xlab/treeprint v1.2.0 // indirect
 	go.mongodb.org/mongo-driver v1.11.2
 	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/crypto v0.6.0
-	golang.org/x/oauth2 v0.3.0
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/oauth2 v0.6.0
+	golang.org/x/term v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools v2.2.0+incompatible
@@ -106,7 +106,7 @@ require (
 	sigs.k8s.io/yaml v1.3.0
 )
 
-require github.com/oam-dev/kubevela v1.8.0-alpha.2.0.20230307081937-79f1d5cb0386
+require github.com/oam-dev/kubevela v1.8.0-rc.1.0.20230414094557-fcd721ffed60
 
 require (
 	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
@@ -130,8 +130,8 @@ require (
 	github.com/Masterminds/squirrel v1.5.3 // indirect
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
-	github.com/ProtonMail/go-crypto v0.0.0-20221026131551-cf6655e29de4 // indirect
-	github.com/acomagu/bufpipe v1.0.3 // indirect
+	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
+	github.com/acomagu/bufpipe v1.0.4 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 // indirect
@@ -170,7 +170,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
-	github.com/go-git/go-billy/v5 v5.3.1 // indirect
+	github.com/go-git/go-billy/v5 v5.4.1 // indirect
 	github.com/go-gorp/gorp/v3 v3.0.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
@@ -234,7 +234,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
 	github.com/openshift/library-go v0.0.0-20221111030555-73ed40c0a938 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
-	github.com/pjbgf/sha1cd v0.2.3 // indirect
+	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/pquerna/cachecontrol v0.1.0 // indirect
 	github.com/prometheus/common v0.39.0 // indirect
@@ -256,7 +256,7 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
-	github.com/zclconf/go-cty v1.10.0 // indirect
+	github.com/zclconf/go-cty v1.12.1 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.4 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.4 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.4 // indirect
@@ -274,9 +274,9 @@ require (
 	go.starlark.net v0.0.0-20221020143700-22309ac47eac // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -330,6 +330,7 @@ replace (
 	cloud.google.com/go => cloud.google.com/go v0.100.2
 	github.com/docker/cli => github.com/docker/cli v20.10.9+incompatible
 	github.com/docker/docker => github.com/moby/moby v20.10.20+incompatible
+	github.com/emicklei/go-restful/v3 => github.com/emicklei/go-restful/v3 v3.8.0
 	github.com/wercker/stern => github.com/oam-dev/stern v1.13.2
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.20.0
 	go.opentelemetry.io/otel => go.opentelemetry.io/otel v0.20.0
