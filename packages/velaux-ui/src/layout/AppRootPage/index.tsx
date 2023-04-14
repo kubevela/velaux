@@ -7,6 +7,7 @@ import { getPluginSrv, importAppPagePlugin } from '../../services/PluginService'
 interface Props {
   pluginId: string;
 }
+
 export function AppRootPage({ pluginId }: Props) {
   const [app, setApp] = React.useState<AppPagePlugin>();
   React.useEffect(() => {
@@ -27,6 +28,27 @@ export function AppRootPage({ pluginId }: Props) {
   );
 }
 
+export function AppConfigPage({ pluginId }: Props) {
+  const [app, setApp] = React.useState<AppPagePlugin>();
+  React.useEffect(() => {
+    loadAppPlugin(pluginId, setApp);
+  }, [pluginId]);
+  if (!app || !app.configPages) {
+    return (
+      <div>
+        <Translation>No config app page component found</Translation>
+      </div>
+    )
+  }
+
+  console.log(app)
+  return (
+    <div>
+      <app.configPages.body plugin={app} query={{}} />
+    </div>
+  )
+}
+
 async function loadAppPlugin(
   pluginId: string,
   setApp: React.Dispatch<React.SetStateAction<AppPagePlugin | undefined>>
@@ -42,5 +64,7 @@ async function loadAppPlugin(
           console.log(err);
         });
     }
-  } catch (err) {}
+  } catch (err) {
+    console.log(err)
+  }
 }

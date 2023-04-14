@@ -4,6 +4,7 @@ import RouterView from './router';
 import { createModel } from './store';
 import { locationService } from './services/LocationService';
 import './i18n';
+export * from './api/';
 
 const app = dva({
   history: locationService.getHistory(),

@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Button } from '@velaux/ui';
 import { PluginConfigPageProps, AppPluginMeta, PluginMeta } from '@velaux/data';
+import { enablePlugin } from "@velaux/ui";
+import { PluginEnableRequest } from "@velaux/data";
 
 export type AppPluginSettings = {};
 
@@ -55,6 +57,16 @@ export const AppConfig = ({ plugin }: AppConfigProps) => {
 
 const updatePluginAndReload = async (pluginId: string, data: Partial<PluginMeta>) => {
   try {
+    const params: PluginEnableRequest = {
+      id: pluginId,
+      jsonData: data.jsonData? data.jsonData : {},
+      secureJsonData: data.secureJsonData? data.secureJsonData : {},
+    }
+    await enablePlugin(params).then((res) => {
+      console.log(res);
+    }).catch((err) => {
+      console.log(err);
+    })
     //await updatePlugin(pluginId, data);
 
     // Reloading the page as the changes made here wouldn't be propagated to the actual plugin otherwise.

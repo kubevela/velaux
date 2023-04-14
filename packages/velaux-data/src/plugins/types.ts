@@ -100,14 +100,11 @@ export class VelaUXPlugin<T extends PluginMeta = PluginMeta> {
   loadError?: boolean;
 
   // Show configuration tabs on the plugin page
-  configPages?: Array<PluginConfigPage<T>>;
+  configPages?: PluginConfigPage<T>;
 
   // Tabs on the plugin page
   addConfigPage(tab: PluginConfigPage<T>) {
-    if (!this.configPages) {
-      this.configPages = [];
-    }
-    this.configPages.push(tab);
+    this.configPages=tab;
     return this;
   }
 
@@ -117,8 +114,12 @@ export class VelaUXPlugin<T extends PluginMeta = PluginMeta> {
 }
 
 export type PluginEnableRequest = {
-  name: string
+  id: string
   jsonData: KeyValue
   secureJsonData: KeyValue
 }
 
+export type PluginInstallRequest = {
+  id: string
+  url: string
+}

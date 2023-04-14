@@ -5,14 +5,8 @@
   "file path": "文件路径",
   "Add item": "添加项",
   "Clear": "清除",
-<<<<<<< HEAD
   "Clusters": "集群",
-  "Addons": "插件",
-=======
-  "Clusters": "集群列表",
-  "Addons": "插件管理",
   "Addons and VelaUX Plugins": "KubeVela/VelaUX 插件",
->>>>>>> c8f5cf2 (Add plugin enable/disable sub-page)
   "Reset": "重置",
   "Please enter": "请输入",
   "App Name-": "应用名称-",

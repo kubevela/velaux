@@ -2,7 +2,7 @@ import { getDomain } from '../utils/common';
 
 import { managePlugin } from './productionLink';
 import { get, post } from './request';
-import { PluginEnableRequest } from "@velaux/data";
+import { PluginEnableRequest, PluginInstallRequest } from "@velaux/data";
 
 const baseURLOject = getDomain();
 const base = baseURLOject.MOCK || baseURLOject.APIBASE;
@@ -12,9 +12,21 @@ export function getPluginList(params: any) {
 }
 
 export function enablePlugin(params: PluginEnableRequest) {
-  return post(`${base + managePlugin}/${params.name}/enable`, params);
+  return post(`${base + managePlugin}/${params.id}/enable`, params);
 }
 
-export function disablePlugin(params: { name: string }) {
-  return post(`${base + managePlugin}/${params.name}/disable`, params);
+export function disablePlugin(params: { id: string }) {
+  return post(`${base + managePlugin}/${params.id}/disable`, params);
+}
+
+export function setPlugin(params: PluginEnableRequest) {
+  return post(`${base + managePlugin}/${params.id}/setting`, params);
+}
+
+export function installPlugin(params: PluginInstallRequest) {
+  return post(`${base + managePlugin}/${params.id}/install`, { url: params.url });
+}
+
+export function uninstallPlugin(params: { id: string }) {
+  return post(`${base + managePlugin}/${params.id}/uninstall`, {});
 }

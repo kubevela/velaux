@@ -36,8 +36,8 @@ import DefinitionDetails from '../DefinitionDetails';
 import DefinitionsLayout from '../Definitions';
 import ProjectLayout from '../Project';
 import MyProjectList from '../../pages/MyProjectList';
-import { AppRootPage } from '../AppRootPage';
 import PlatformSetting from '../../pages/PlatformSetting';
+import { AppRootPage,AppConfigPage } from '../AppRootPage';
 
 export default function Router() {
   return (
@@ -402,6 +402,13 @@ export default function Router() {
         path="/plugins/:pluginId"
         render={(props: any) => {
           return <AppRootPage pluginId={props.match.params.pluginId}></AppRootPage>;
+        }}
+      />
+      <Route
+        exact
+        path={"/plugin-config/:pluginId"}
+        render={(props: any) => {
+          return <AppConfigPage pluginId={props.match.params.pluginId}></AppConfigPage>;
         }}
       />
       <Route path="/notFound" component={NotFound} />

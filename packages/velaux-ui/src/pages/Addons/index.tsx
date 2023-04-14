@@ -13,6 +13,7 @@ import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
 import RegistryManageDialog from './components/registry-manage/index';
 import SelectSearch from './components/search/index';
+import Plugin from "./components/plugin";
 
 type Props = {
   dispatch: ({}) => {};
@@ -130,18 +131,36 @@ class Addons extends React.Component<Props, State> {
     });
   };
 
-  enablePlugin(name: string) {
+  installPlugin = (id: string, url: string) => {
+    this.props.dispatch({
+      type: 'plugins/installPlugin',
+      payload: { id, url },
+    });
+  }
+  uninstallPlugin = (id: string) => {
+    this.props.dispatch({
+      type: 'plugins/uninstallPlugin',
+      payload: { id },
+    });
+
+  }
+
+  enablePlugin = (id: string) => {
     this.props.dispatch({
       type: 'plugins/enablePlugin',
-      payload: { name },
+      payload: { id },
     });
   }
 
-  disablePlugin(name: string) {
+  disablePlugin = (id: string) => {
     this.props.dispatch({
       type: 'plugins/disablePlugin',
-      payload: { name },
+      payload: { id },
     });
+  }
+
+  configPlugin = (id: string) => {
+
   }
 
 
@@ -160,17 +179,6 @@ class Addons extends React.Component<Props, State> {
     const addonLoading = loading.models.addons;
     const pluginLoading = loading.models.plugins;
     const { showAddonDetail, addonName, showRegistryManage, tagList, selectTags } = this.state;
-    const clickPlugin: (id: string) => void = (id: string) => {
-      const plugin = pluginList?.find((item) => item.id === id);
-      if (!plugin) {
-        return;
-      }
-      if (enabledPlugins?.find((item) => item.id === id)) {
-        this.disablePlugin(plugin.id);
-      } else {
-        this.enablePlugin(plugin.id);
-      }
-    }
 
     return (
       <div>
@@ -239,17 +247,15 @@ class Addons extends React.Component<Props, State> {
           </Tab.Item>
           <Tab.Item title="VelaUX Plugins">
             <Loading visible={pluginLoading} style={{ width: '100%' }}>
-              <If condition={addonListMessage}>
-                <Message style={{ marginBottom: '16px' }} type="warning">
-                  {addonListMessage}
-                </Message>
-              </If>
-              <CardContend
-                type={'plugin'}
-                pluginList={pluginList}
-                clickPlugin={clickPlugin}
+              <Plugin
                 enabledPlugins={enabledPlugins}
-              />
+                pluginList={pluginList}
+                onEnable={this.enablePlugin}
+                onDisable={this.disablePlugin}
+                onInstall={this.installPlugin}
+                onUninstall={this.uninstallPlugin}
+                // onConfig={this.configPlugin}
+              ></Plugin>
             </Loading>
           </Tab.Item>
         </Tab>
