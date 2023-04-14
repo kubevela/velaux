@@ -36,6 +36,7 @@ export interface ApplicationBase {
   readOnly?: boolean;
   icon?: string;
   labels?: Record<string, string>;
+  annotations?: Record<string, string>;
 }
 
 export interface DefinitionDetail {
