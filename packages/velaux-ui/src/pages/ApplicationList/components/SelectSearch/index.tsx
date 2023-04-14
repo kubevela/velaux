@@ -4,7 +4,7 @@ import React from 'react';
 import './index.less';
 import type { ShowMode } from '../..';
 import type { Env } from '../../../../interface/env';
-import type { Project } from '../../../../interface/project';
+import type { UserProject } from '../../../../interface/user';
 import { locale } from '../../../../utils/locale';
 import i18n from '../../../../i18n';
 import { AiOutlineSearch } from 'react-icons/ai';
@@ -13,7 +13,7 @@ const { Row, Col } = Grid;
 
 type Props = {
   dispatch: ({}) => {};
-  projects?: Project[];
+  projects?: UserProject[];
   envs?: Env[];
   appLabels?: string[];
   labelValue?: string[];

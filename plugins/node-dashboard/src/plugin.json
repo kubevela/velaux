@@ -64,7 +64,7 @@
   "includes": [
     {
       "workspace": {
-        "name": "platform"
+        "name": "admin"
       },
       "type": "Workspace",
       "label": "Node Manage",

@@ -16,9 +16,9 @@ import type { DexConfig, SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
 import { locale } from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
-import { CustomSelect } from '../CustomSelect';
-import { If } from '../If';
-import Item from '../Item';
+import { CustomSelect } from '../../components/CustomSelect';
+import { If } from '../../components/If';
+import Item from '../../components/Item';
 import { Dispatch } from 'redux';
 
 const { Col, Row } = Grid;
@@ -28,7 +28,6 @@ type Props = {
   syncPlatformSetting: () => void;
   systemInfo: SystemInfo;
   userInfo?: LoginUserInfo;
-  platformSetting: boolean;
   dispatch: Dispatch;
 };
 
@@ -290,29 +289,10 @@ class PlatformSetting extends React.Component<Props, State> {
   };
 
   render() {
-    const { onClose, platformSetting, systemInfo } = this.props;
+    const { systemInfo } = this.props;
     const { defaultProjectItems } = this.state;
     return (
-      <Dialog
-        v2
-        locale={locale().Dialog}
-        visible={platformSetting}
-        title={i18n.t('Platform Setting').toString()}
-        autoFocus={true}
-        overflowScroll={true}
-        style={{ width: '800px' }}
-        onClose={onClose}
-        footer={
-          <div>
-            <Button onClick={onClose}>
-              <Translation>Close</Translation>
-            </Button>
-            <Button style={{ marginLeft: '16px' }} type="primary" onClick={this.onUpdate}>
-              <Translation>Update</Translation>
-            </Button>
-          </div>
-        }
-      >
+      <div className="container">
         <Form field={this.field} labelCol={{ fixedSpan: 8 }} wrapperCol={{ span: 16 }}>
           <Card
             style={{ marginBottom: '16px' }}
@@ -338,7 +318,7 @@ class PlatformSetting extends React.Component<Props, State> {
                 </Form.Item>
                 <If condition={this.field.getValue('loginType') == 'dex'}>
                   <a href={this.generateDexAddress()} target="_blank" rel="noopener noreferrer">
-                    <Translation>Click me to test open the dex page.</Translation>
+                    <Translation>Click me to open the dex login page</Translation>
                   </a>
                 </If>
               </Col>
@@ -357,7 +337,7 @@ class PlatformSetting extends React.Component<Props, State> {
                 </Form.Item>
               </Col>
               <Col span={24}>
-                <Form.Item label={i18n.t('Default projects for the dex login user').toString()}>
+                <Form.Item label={i18n.t('Setting the default projects for the dex login user').toString()}>
                   <div className="flexright" style={{ marginBottom: '8px' }}>
                     <Button onClick={this.onAddItem}>
                       <AiOutlinePlus />
@@ -438,7 +418,7 @@ class PlatformSetting extends React.Component<Props, State> {
             />
           </Card>
         </Form>
-      </Dialog>
+      </div>
     );
   }
 }

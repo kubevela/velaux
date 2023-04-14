@@ -6,14 +6,13 @@ import { checkName } from '../../../../utils/common';
 import './index.less';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { Project } from '../../../../interface/project';
-import type { LoginUserInfo } from '../../../../interface/user';
+import type { LoginUserInfo, UserProject } from '../../../../interface/user';
 import { checkPermission } from '../../../../utils/permission';
 
 type Props = {
   visible: boolean;
   field: Field;
-  projects?: Project[];
+  projects?: UserProject[];
   isDisableProject?: boolean;
   userInfo?: LoginUserInfo;
   setVisible: (visible: boolean) => void;

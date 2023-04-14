@@ -37,6 +37,7 @@ import DefinitionsLayout from '../Definitions';
 import ProjectLayout from '../Project';
 import MyProjectList from '../../pages/MyProjectList';
 import { AppRootPage } from '../AppRootPage';
+import PlatformSetting from '../../pages/PlatformSetting';
 
 export default function Router() {
   return (
@@ -389,6 +390,12 @@ export default function Router() {
               <UiSchema {...props} />
             </DefinitionDetails>
           );
+        }}
+      />
+      <Route
+        path="/settings"
+        render={(props: any) => {
+          return <PlatformSetting {...props}></PlatformSetting>;
         }}
       />
       <Route

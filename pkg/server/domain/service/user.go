@@ -207,6 +207,15 @@ func (u *userServiceImpl) DetailUser(ctx context.Context, user *model.User) (*ap
 		klog.Warningf("list platform roles failure %s", err.Error())
 	}
 	detailUser := convertUserModel(user, roles)
+	_, projects, err := u.GenerateUserProjects(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	detailUser.Projects = projects
+	return detailUser, nil
+}
+
+func (u *userServiceImpl) GenerateUserProjects(ctx context.Context, user *model.User) ([]datastore.Entity, []*apisv1.UserProjectBase, error) {
 	pUser := &model.ProjectUser{
 		Username: user.Name,
 	}
@@ -214,8 +223,9 @@ func (u *userServiceImpl) DetailUser(ctx context.Context, user *model.User) (*ap
 		SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+	var projects []*apisv1.UserProjectBase
 	for _, v := range projectUsers {
 		pu, ok := v.(*model.ProjectUser)
 		if ok {
@@ -224,10 +234,31 @@ func (u *userServiceImpl) DetailUser(ctx context.Context, user *model.User) (*ap
 				klog.Errorf("failed to delete project(%s) info: %s", pu.ProjectName, err.Error())
 				continue
 			}
-			detailUser.Projects = append(detailUser.Projects, project)
+			roles, _ := u.RbacService.ListRole(ctx, project.Name, 0, 0)
+			var roleAlias = make(map[string]string)
+			for _, r := range roles.Roles {
+				roleAlias[r.Name] = r.Alias
+			}
+			projects = append(projects, &apisv1.UserProjectBase{
+				Name:        project.Name,
+				Alias:       project.Alias,
+				Owner:       project.Owner,
+				Description: project.Description,
+				JoinTime:    pu.CreateTime,
+				Roles: func() []apisv1.NameAlias {
+					var roles []apisv1.NameAlias
+					for _, r := range pu.UserRoles {
+						roles = append(roles, apisv1.NameAlias{
+							Name:  r,
+							Alias: roleAlias[r],
+						})
+					}
+					return roles
+				}(),
+			})
 		}
 	}
-	return detailUser, nil
+	return projectUsers, projects, nil
 }
 
 // DeleteUser delete user
@@ -398,18 +429,19 @@ func (u *userServiceImpl) DetailLoginUserInfo(ctx context.Context) (*apisv1.Logi
 		klog.Errorf("get login user model failure %s", err.Error())
 		return nil, bcode.ErrUnauthorized
 	}
-	projects, err := u.ProjectService.ListUserProjects(ctx, userName)
+	projectModels, userProjects, err := u.GenerateUserProjects(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 	var projectPermissions = make(map[string][]apisv1.PermissionBase)
-	for _, project := range projects {
-		perms, err := u.RbacService.GetUserPermissions(ctx, user, project.Name, false)
+	for _, p := range projectModels {
+		project := p.(*model.ProjectUser)
+		perms, err := u.RbacService.GetUserPermissions(ctx, user, project.ProjectName, false)
 		if err != nil {
-			klog.Errorf("list user %s perm policies from project %s failure %s", user.Name, project.Name, err.Error())
+			klog.Errorf("list user %s perm policies from project %s failure %s", user.Name, project.ProjectName, err.Error())
 			continue
 		}
-		projectPermissions[project.Name] = func() (list []apisv1.PermissionBase) {
+		projectPermissions[project.ProjectName] = func() (list []apisv1.PermissionBase) {
 			for _, perm := range perms {
 				list = append(list, apisv1.PermissionBase{
 					Name:       perm.Name,
@@ -440,16 +472,16 @@ func (u *userServiceImpl) DetailLoginUserInfo(ctx context.Context) (*apisv1.Logi
 			UpdateTime: perm.UpdateTime,
 		})
 	}
+
 	return &apisv1.LoginUserInfoResponse{
 		UserBase:            *convertUserBase(user),
-		Projects:            projects,
+		Projects:            userProjects,
 		ProjectPermissions:  projectPermissions,
 		PlatformPermissions: platformPermissions,
 	}, nil
 }
 
 func convertUserModel(user *model.User, roles *apisv1.ListRolesResponse) *apisv1.DetailUserResponse {
-
 	var nameAlias = make(map[string]string)
 	if roles != nil {
 		for _, role := range roles.Roles {
@@ -464,7 +496,7 @@ func convertUserModel(user *model.User, roles *apisv1.ListRolesResponse) *apisv1
 			}
 			return
 		}(),
-		Projects: make([]*apisv1.ProjectBase, 0),
+		Projects: make([]*apisv1.UserProjectBase, 0),
 	}
 }
 

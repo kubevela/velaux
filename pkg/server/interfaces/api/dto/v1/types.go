@@ -1394,8 +1394,18 @@ type DexConfigResponse struct {
 // DetailUserResponse is the response of user detail
 type DetailUserResponse struct {
 	UserBase
-	Projects []*ProjectBase `json:"projects"`
-	Roles    []NameAlias    `json:"roles"`
+	Projects []*UserProjectBase `json:"projects"`
+	Roles    []NameAlias        `json:"roles"`
+}
+
+// UserProjectBase user project base model
+type UserProjectBase struct {
+	Name        string      `json:"name"`
+	Alias       string      `json:"alias"`
+	Description string      `json:"description"`
+	JoinTime    time.Time   `json:"joinTime"`
+	Owner       NameAlias   `json:"owner,omitempty"`
+	Roles       []NameAlias `json:"roles"`
 }
 
 // ProjectUserBase project user base
@@ -1539,7 +1549,7 @@ type CreatePermissionRequest struct {
 // LoginUserInfoResponse the response body of login user info
 type LoginUserInfoResponse struct {
 	UserBase
-	Projects            []*ProjectBase              `json:"projects"`
+	Projects            []*UserProjectBase          `json:"projects"`
 	PlatformPermissions []PermissionBase            `json:"platformPermissions"`
 	ProjectPermissions  map[string][]PermissionBase `json:"projectPermissions"`
 }

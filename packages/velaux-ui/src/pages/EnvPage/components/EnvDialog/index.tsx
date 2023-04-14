@@ -11,9 +11,8 @@ import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { Cluster } from '../../../../interface/cluster';
 import type { Env } from '../../../../interface/env';
-import type { Project } from '../../../../interface/project';
 import type { Target } from '../../../../interface/target';
-import type { LoginUserInfo } from '../../../../interface/user';
+import type { LoginUserInfo, UserProject } from '../../../../interface/user';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
@@ -23,7 +22,7 @@ type Props = {
   project?: string;
   isEdit?: boolean;
   visible: boolean;
-  projects: Project[];
+  projects: UserProject[];
 
   envItem?: Env;
   userInfo?: LoginUserInfo;
