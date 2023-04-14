@@ -271,6 +271,9 @@ func (p *pluginImpl) EnablePlugin(ctx context.Context, pluginID string, params v
 // InstallPlugin install the plugin from url and enable it automatically.
 func (p *pluginImpl) InstallPlugin(ctx context.Context, pluginID string, params v1.InstallPluginRequest) (*v1.ManagedPluginDTO, error) {
 	var destFolder = filepath.Join("plugins", pluginID)
+	if strings.Contains(pluginID, "..") || strings.Contains(pluginID, "/") {
+		return nil, errors.New("pluginID should not contain .. or /")
+	}
 	err := downloadAndDecompressTarGz(ctx, params.URL, destFolder, params.Options)
 	if err != nil {
 		return nil, fmt.Errorf("failed to download and decompress the plugin(%s) package from %s: %w", pluginID, params.URL, err)
@@ -325,6 +328,9 @@ func decompressTarGzTo(gzipReader *gzip.Reader, destFolder string) error {
 		if err != nil {
 			return fmt.Errorf("error reading tar entry: %v", err)
 		}
+		if strings.Contains(header.Name, "..") {
+			continue
+		}
 
 		pathParts := strings.Split(header.Name, string(filepath.Separator))
 		var relPath string
@@ -337,6 +343,7 @@ func decompressTarGzTo(gzipReader *gzip.Reader, destFolder string) error {
 			continue
 		}
 		targetPath := filepath.Join(destFolder, relPath)
+		targetPath, _ = filepath.Abs(targetPath)
 		switch header.Typeflag {
 		case tar.TypeDir:
 			if err := os.MkdirAll(targetPath, 0755); err != nil {
