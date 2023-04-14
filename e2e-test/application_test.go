@@ -22,6 +22,8 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
