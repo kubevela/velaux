@@ -34,6 +34,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/addon"
 	"github.com/oam-dev/kubevela/pkg/cloudprovider"
 	"github.com/oam-dev/kubevela/pkg/config"
+	velacommon "github.com/oam-dev/kubevela/pkg/utils/common"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
 
 	pluginTypes "github.com/kubevela/velaux/pkg/plugin/types"
@@ -1926,3 +1927,10 @@ type PluginSetRequest struct {
 
 // PluginEnableRequest plugin enable request model
 type PluginEnableRequest PluginSetRequest
+
+// InstallPluginRequest requests for installation of VelaUX plugin
+type InstallPluginRequest struct {
+	URL     string                 `json:"url"`
+	Disable bool                   `json:"disable,omitempty"`
+	Options *velacommon.HTTPOption `json:"options,omitempty"`
+}

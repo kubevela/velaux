@@ -292,7 +292,7 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	istio.io/api v0.0.0-20220512212136-561ffec82582 // indirect
 	istio.io/gogo-genproto v0.0.0-20211208193508-5ab4acc9eb1e // indirect
-	k8s.io/klog v1.0.0 // indirect
+	k8s.io/klog v1.0.0
 	k8s.io/kube-openapi v0.0.0-20220803162953-67bda5d908f1 // indirect
 	oras.land/oras-go v1.2.0 // indirect
 	sigs.k8s.io/apiserver-network-proxy v0.0.30 // indirect

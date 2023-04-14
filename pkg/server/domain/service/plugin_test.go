@@ -17,7 +17,14 @@ limitations under the License.
 package service
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -103,3 +110,110 @@ var _ = Describe("Test plugin service", func() {
 
 	})
 })
+
+func TestShouldRemoveTopLevelFolder(t *testing.T) {
+
+	testCases := []struct {
+		filename       string
+		expectedResult bool
+		expectError    bool
+	}{
+		{
+			filename:       "testdata/single_top_level_folder.tar.gz",
+			expectedResult: false,
+			expectError:    false,
+		},
+		{
+			filename:       "testdata/multiple.tar.gz",
+			expectedResult: true,
+			expectError:    false,
+		},
+		{
+			filename:       "testdata/invalid_file.tar",
+			expectedResult: false,
+			expectError:    true,
+		},
+	}
+
+	for _, tc := range testCases {
+		tarReader, err := getTarReaderFromFile(tc.filename)
+		if err != nil {
+			t.Fatalf("error getting tar reader: %v", err)
+		}
+
+		result, err := shouldRemoveTopLevelFolder(tarReader)
+
+		if tc.expectError {
+			if err == nil {
+				t.Errorf("expected error, but got no error")
+			}
+		} else {
+			if err != nil {
+				t.Errorf("expected no error, but got error: %v", err)
+			}
+
+			if result != tc.expectedResult {
+				t.Errorf("expected result %v, but got %v, canse %s", tc.expectedResult, result, tc.filename)
+			}
+		}
+	}
+}
+
+func TestDecompressTarGzTo(t *testing.T) {
+	file, err := os.Open("testdata/single_top_level_folder.tar.gz")
+	if err != nil {
+		t.Error(err)
+	}
+
+	gzipReader, err := gzip.NewReader(file)
+	if err != nil {
+		t.Error(err)
+	}
+	destPath := "testdata/a-b"
+	err = decompressTarGzTo(gzipReader, destPath)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = os.Stat(filepath.Join(destPath, "file1.txt"))
+	if err != nil {
+		t.Error(err)
+	}
+	os.RemoveAll(destPath)
+
+	file, err = os.Open("testdata/multiple.tar.gz")
+	if err != nil {
+		t.Error(err)
+	}
+
+	gzipReader, err = gzip.NewReader(file)
+	if err != nil {
+		t.Error(err)
+	}
+	destPath = "testdata/ab2"
+	err = decompressTarGzTo(gzipReader, destPath)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = os.Stat(filepath.Join(destPath, "file1.txt"))
+	if err != nil {
+		t.Error(err)
+	}
+	os.RemoveAll(destPath)
+}
+
+func getTarReaderFromFile(filename string) (*tar.Reader, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, fmt.Errorf("error opening tar file: %v", err)
+	}
+
+	if strings.HasSuffix(filename, ".gz") {
+		gzipReader, err := gzip.NewReader(file)
+		if err != nil {
+			return nil, fmt.Errorf("error creating gzip reader: %v", err)
+		}
+		return tar.NewReader(gzipReader), nil
+	}
+
+	return tar.NewReader(file), nil
+}

@@ -75,7 +75,7 @@ func New() *Loader {
 	}
 }
 
-// Load load plugins from the specified path.
+// Load loads plugins from the specified path.
 func (l *Loader) Load(class types.Class, paths []string, ignore map[string]struct{}) ([]*types.Plugin, error) {
 	pluginJSONPaths, err := l.pluginFinder.Find(paths)
 	if err != nil {
