@@ -926,7 +926,9 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 	}
 
 	for key, value := range appModel.Annotations {
-		app.ObjectMeta.Annotations[key] = value
+		if _, exists := app.ObjectMeta.Annotations[key]; !exists {
+			app.ObjectMeta.Annotations[key] = value
+		}
 	}
 
 	originalApp := &v1beta1.Application{}
