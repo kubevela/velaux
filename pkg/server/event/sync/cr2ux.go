@@ -83,10 +83,13 @@ func (c *CR2UX) syncAppCreatedByUX(ctx context.Context, targetApp *v1beta1.Appli
 	if appPrimaryKey == "" {
 		return fmt.Errorf("appName is empty in application %s", targetApp.Name)
 	}
-	if targetApp.Annotations == nil || targetApp.Annotations[oam.AnnotationPublishVersion] == "" {
-		klog.Warningf("app %s/%s has no publish version, skip sync workflow status", targetApp.Namespace, targetApp.Name)
+	var recordName string
+	if targetApp.Status.Workflow != nil {
+		recordName = strings.Replace(targetApp.Status.Workflow.AppRevision, ":", "-", 1)
+	} else {
+		klog.Warningf("app %s/%s has no revision in status, skip sync workflow status", targetApp.Namespace, targetApp.Name)
+		return nil
 	}
-	recordName := targetApp.Annotations[oam.AnnotationPublishVersion]
 	if err := c.workflowService.SyncWorkflowRecord(ctx, appPrimaryKey, recordName, targetApp, nil); err != nil {
 		klog.ErrorS(err, "failed to sync workflow status", "oam app name", targetApp.Name, "workflow name", oam.GetPublishVersion(targetApp), "record name", recordName)
 		return err
@@ -157,13 +160,12 @@ func (c *CR2UX) syncAppCreatedByCLI(ctx context.Context, targetApp *v1beta1.Appl
 		klog.Infof("application %s/%s revision %s synced successful", targetApp.Name, targetApp.Namespace, syncedVersion)
 	}
 
-	recordName := oam.GetPublishVersion(targetApp)
-	if recordName == "" {
-		if targetApp.Status.Workflow != nil {
-			recordName = strings.Replace(targetApp.Status.Workflow.AppRevision, ":", "-", 1)
-		} else {
-			klog.Warningf("app %s/%s has no publish version or revision in status, skip sync workflow status", targetApp.Namespace, targetApp.Name)
-		}
+	var recordName string
+	if targetApp.Status.Workflow != nil {
+		recordName = strings.Replace(targetApp.Status.Workflow.AppRevision, ":", "-", 1)
+	} else {
+		klog.Warningf("app %s/%s has no revision in status, skip sync workflow status", targetApp.Namespace, targetApp.Name)
+		return nil
 	}
 	return c.workflowService.SyncWorkflowRecord(ctx, c.getAppMetaName(ctx, targetApp.Name, targetApp.Namespace), recordName, targetApp, nil)
 }
