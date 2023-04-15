@@ -304,10 +304,12 @@ func (p *pluginImpl) UninstallPlugin(ctx context.Context, pluginID string) error
 	if err != nil && !errors.Is(err, bcode.ErrPluginAlreadyDisabled) {
 		return err
 	}
-
+	err = p.registry.Remove(ctx, pluginID)
+	if err != nil {
+		return err
+	}
 	_ = os.RemoveAll(destFolder)
 	klog.V(4).Infof("Plugin %s removed from folder %s", pluginID, destFolder)
-
 	return nil
 }
 
