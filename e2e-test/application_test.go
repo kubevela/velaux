@@ -107,6 +107,24 @@ var _ = Describe("Test application rest api", func() {
 		Expect(cmp.Diff(appBase.Labels["test"], req.Labels["test"])).Should(BeEmpty())
 	})
 
+	It("Test update app", func() {
+		defer GinkgoRecover()
+		var req = apisv1.UpdateApplicationRequest{
+			Alias:       "test-app",
+			Description: "this is a test app",
+			Icon:        "",
+			Labels:      map[string]string{"test": "true"},
+			Annotations: map[string]string{"test": "true"},
+		}
+		res := put("/applications/"+appName, req)
+		var appBase apisv1.ApplicationBase
+		Expect(decodeResponseBody(res, &appBase)).Should(Succeed())
+		Expect(cmp.Diff(appBase.Alias, req.Alias)).Should(BeEmpty())
+		Expect(cmp.Diff(appBase.Description, req.Description)).Should(BeEmpty())
+		Expect(cmp.Diff(appBase.Labels["test"], req.Labels["test"])).Should(BeEmpty())
+		Expect(cmp.Diff(appBase.Annotations["test"], req.Annotations["test"])).Should(BeEmpty())
+	})
+
 	It("Test listing applications by label", func() {
 		defer GinkgoRecover()
 		res := get("/applications?env=dev-env&labels=labelselector=true")

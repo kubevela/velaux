@@ -416,6 +416,7 @@ type ApplicationBase struct {
 	UpdateTime  time.Time         `json:"updateTime"`
 	Icon        string            `json:"icon"`
 	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 	ReadOnly    bool              `json:"readOnly,omitempty"`
 }
 
@@ -508,6 +509,7 @@ type UpdateApplicationRequest struct {
 	Description string            `json:"description" optional:"true"`
 	Icon        string            `json:"icon" optional:"true"`
 	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // CreateApplicationTriggerRequest create application trigger

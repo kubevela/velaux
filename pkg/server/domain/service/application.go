@@ -594,6 +594,7 @@ func (c *applicationServiceImpl) UpdateApplication(ctx context.Context, app *mod
 	}
 	app.Alias = req.Alias
 	app.Description = req.Description
+	app.Annotations = req.Annotations
 
 	// Some built-in labels can not be updated
 	if app.Labels != nil && req.Labels != nil {
@@ -923,6 +924,13 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 			},
 		},
 	}
+
+	for key, value := range appModel.Annotations {
+		if _, exists := app.ObjectMeta.Annotations[key]; !exists {
+			app.ObjectMeta.Annotations[key] = value
+		}
+	}
+
 	originalApp := &v1beta1.Application{}
 	if err := c.KubeClient.Get(ctx, types.NamespacedName{
 		Name:      appModel.Name,
