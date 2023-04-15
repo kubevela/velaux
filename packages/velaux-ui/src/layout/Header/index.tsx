@@ -12,8 +12,6 @@ import {
   AiOutlineQuestionCircle,
 } from 'react-icons/ai';
 
-import { getConfigs } from '../../api/config';
-import grafanaImg from '../../assets/grafana.svg';
 import logo from '../../assets/kubevela-logo-white.png';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
@@ -26,7 +24,6 @@ import type { SystemInfo } from '../../interface/system';
 import type { LoginUserInfo } from '../../interface/user';
 import { getData, setData } from '../../utils/cache';
 import { locale } from '../../utils/locale';
-import { checkPermission } from '../../utils/permission';
 import { getBrowserNameAndVersion } from '../../utils/utils';
 import CloudShell from '../CloudShell';
 import { locationService } from '../../services/LocationService';
@@ -97,17 +94,6 @@ class Header extends Component<Props, State> {
     });
   };
 
-  loadGrafanaIntegration = () => {
-    const { userInfo } = this.props;
-    if (checkPermission({ resource: 'config', action: 'list' }, '', userInfo)) {
-      getConfigs('grafana').then((res) => {
-        if (res && res.configs) {
-          this.setState({ grafanaConfigs: res.configs });
-        }
-      });
-    }
-  };
-
   telemetryDataCollection = async () => {
     const { systemInfo } = this.props;
     if (!getData(TelemetryDataCollectionKey) && systemInfo?.enableCollection) {
@@ -154,7 +140,6 @@ class Header extends Component<Props, State> {
     this.props.dispatch({
       type: 'user/getLoginUserInfo',
       callback: () => {
-        this.loadGrafanaIntegration();
         this.loadWorkspaces();
       },
     });
@@ -215,7 +200,7 @@ class Header extends Component<Props, State> {
   render() {
     const { Row } = Grid;
     const { show, userInfo, mode, currentWorkspace } = this.props;
-    const { grafanaConfigs, workspaces } = this.state;
+    const { workspaces } = this.state;
 
     return (
       <div className="layout-top-bar" id="layout-top-bar">
@@ -240,19 +225,6 @@ class Header extends Component<Props, State> {
           </div>
           <div style={{ flex: '1 1 0%' }}>
             <div className="workspace-items">
-              {grafanaConfigs?.map((config) => {
-                if (config.properties && config.properties.endpoint) {
-                  return (
-                    <div key={'config' + config.name} className="item" title={config.description}>
-                      <a target="_blank" href={config.properties.endpoint} rel="noopener noreferrer">
-                        <img src={grafanaImg} />
-                        <span>{config.alias || config.name}</span>
-                      </a>
-                    </div>
-                  );
-                }
-                return null;
-              })}
               {workspaces.map((ws) => {
                 return (
                   <Link
