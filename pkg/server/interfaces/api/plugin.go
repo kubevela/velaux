@@ -198,7 +198,7 @@ func (p *ManagePlugin) uninstallPlugin(req *restful.Request, res *restful.Respon
 		return
 	}
 	// Write back response data
-	if err := res.WriteEntity(struct{}{}); err != nil {
+	if err := res.WriteEntity(apis.EmptyResponse{}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
