@@ -63,6 +63,7 @@ type PluginService interface {
 	ListInstalledPlugins(ctx context.Context) []v1.ManagedPluginDTO
 	DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error)
 	InstallPlugin(ctx context.Context, pluginID string, params v1.InstallPluginRequest) (*v1.ManagedPluginDTO, error)
+	UninstallPlugin(ctx context.Context, pluginID string) error
 	EnablePlugin(ctx context.Context, pluginID string, params v1.PluginEnableRequest) (*v1.ManagedPluginDTO, error)
 	DisablePlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error)
 	SetPlugin(ctx context.Context, pluginID string, params v1.PluginSetRequest) (*v1.ManagedPluginDTO, error)
@@ -124,6 +125,14 @@ func GeneratePluginRoleName(plugin *types.Plugin) string {
 // GeneratePluginSubjectName generate the plugin subject(group) name.
 func GeneratePluginSubjectName(plugin *types.Plugin) string {
 	return pluginRolePrefix + plugin.PluginID()
+}
+
+func (p *pluginImpl) generatePluginFolder(pluginID string) string {
+	var path = "plugins"
+	if len(p.pluginConfig.CustomPluginPath) > 0 {
+		path = p.pluginConfig.CustomPluginPath[0]
+	}
+	return filepath.Join(path, pluginID)
 }
 
 func (p *pluginImpl) InitPluginRole(ctx context.Context, plugin *types.Plugin) error {
@@ -270,7 +279,7 @@ func (p *pluginImpl) EnablePlugin(ctx context.Context, pluginID string, params v
 
 // InstallPlugin install the plugin from url and enable it automatically.
 func (p *pluginImpl) InstallPlugin(ctx context.Context, pluginID string, params v1.InstallPluginRequest) (*v1.ManagedPluginDTO, error) {
-	var destFolder = filepath.Join("plugins", pluginID)
+	var destFolder = p.generatePluginFolder(pluginID)
 	if strings.Contains(pluginID, "..") || strings.Contains(pluginID, "/") {
 		return nil, errors.New("pluginID should not contain .. or /")
 	}
@@ -285,6 +294,23 @@ func (p *pluginImpl) InstallPlugin(ctx context.Context, pluginID string, params 
 	return p.EnablePlugin(ctx, pluginID, v1.PluginEnableRequest{})
 }
 
+// UninstallPlugin will disable and remove the plugin files.
+func (p *pluginImpl) UninstallPlugin(ctx context.Context, pluginID string) error {
+	var destFolder = p.generatePluginFolder(pluginID)
+	if strings.Contains(pluginID, "..") || strings.Contains(pluginID, "/") {
+		return errors.New("pluginID should not contain .. or /")
+	}
+	_, err := p.DisablePlugin(ctx, pluginID)
+	if err != nil && !errors.Is(err, bcode.ErrPluginAlreadyDisabled) {
+		return err
+	}
+
+	_ = os.RemoveAll(destFolder)
+	klog.V(4).Infof("Plugin %s removed from folder %s", pluginID, destFolder)
+
+	return nil
+}
+
 func shouldRemoveTopLevelFolder(tarReader *tar.Reader) (bool, error) {
 	entries := make(map[string]bool)
 	for {
@@ -293,7 +319,7 @@ func shouldRemoveTopLevelFolder(tarReader *tar.Reader) (bool, error) {
 			break
 		}
 		if err != nil {
-			return false, fmt.Errorf("error reading tar entry: %v", err)
+			return false, fmt.Errorf("error reading tar entry: %w", err)
 		}
 		pathParts := strings.Split(strings.TrimPrefix(header.Name, "."+string(filepath.Separator)), string(filepath.Separator))
 		entries[pathParts[0]] = true
@@ -306,7 +332,7 @@ func shouldRemoveTopLevelFolder(tarReader *tar.Reader) (bool, error) {
 
 func decompressTarGzTo(gzipReader *gzip.Reader, destFolder string) error {
 	// make sure the folder exist
-	_ = os.MkdirAll(destFolder, 0755)
+	_ = os.MkdirAll(destFolder, 0750)
 
 	// Check the tar structure to determine whether to remove the top-level folder
 	gzipContent, err := io.ReadAll(gzipReader)
@@ -322,11 +348,11 @@ func decompressTarGzTo(gzipReader *gzip.Reader, destFolder string) error {
 	tarReader = tar.NewReader(bytes.NewBuffer(gzipContent))
 	for {
 		header, err := tarReader.Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("error reading tar entry: %v", err)
+			return fmt.Errorf("error reading tar entry: %w", err)
 		}
 		if strings.Contains(header.Name, "..") {
 			continue
@@ -346,18 +372,23 @@ func decompressTarGzTo(gzipReader *gzip.Reader, destFolder string) error {
 		targetPath, _ = filepath.Abs(targetPath)
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(targetPath, 0755); err != nil {
-				return fmt.Errorf("error creating directory: %v", err)
+			if err := os.MkdirAll(targetPath, 0750); err != nil {
+				return fmt.Errorf("error creating directory: %w", err)
 			}
 		case tar.TypeReg:
 			outFile, err := os.Create(targetPath)
 			if err != nil {
-				return fmt.Errorf("error creating file: %v", err)
+				return fmt.Errorf("error creating file: %w", err)
 			}
-
-			if _, err := io.Copy(outFile, tarReader); err != nil {
-				_ = outFile.Close()
-				return fmt.Errorf("error writing file: %v", err)
+			for {
+				_, err := io.CopyN(outFile, tarReader, 1024)
+				if err != nil {
+					if errors.Is(err, io.EOF) {
+						break
+					}
+					_ = outFile.Close()
+					return fmt.Errorf("error writing file: %w", err)
+				}
 			}
 			_ = outFile.Close()
 		}
@@ -375,7 +406,7 @@ func downloadAndDecompressTarGz(ctx context.Context, url, destFolder string, opt
 
 	gzipReader, err := gzip.NewReader(resp.Body)
 	if err != nil {
-		return fmt.Errorf("error creating gzip reader: %v", err)
+		return fmt.Errorf("error creating gzip reader: %w", err)
 	}
 	defer gzipReader.Close()
 

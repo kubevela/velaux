@@ -112,6 +112,13 @@ func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 		Returns(200, "OK", apis.ManagedPluginDTO{}).
 		Writes(apis.PluginDTO{}).Do(returns200, returns500))
 
+	ws.Route(ws.POST("/{pluginId}/uninstall").To(p.uninstallPlugin).
+		Doc("Uninstall one specific plugin").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
+		Returns(200, "OK", struct{}{}).
+		Writes(apis.PluginDTO{}).Do(returns200, returns500))
+
 	ws.Route(ws.POST("/{pluginId}/enable").To(p.enablePlugin).
 		Doc("Enable an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
@@ -179,6 +186,19 @@ func (p *ManagePlugin) installPlugin(req *restful.Request, res *restful.Response
 	}
 	// Write back response data
 	if err := res.WriteEntity(plugin); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (p *ManagePlugin) uninstallPlugin(req *restful.Request, res *restful.Response) {
+	err := p.PluginService.UninstallPlugin(req.Request.Context(), req.PathParameter("pluginId"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	// Write back response data
+	if err := res.WriteEntity(struct{}{}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
