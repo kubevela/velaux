@@ -34,11 +34,14 @@ const (
 	APIServerEnableImpersonation featuregate.Feature = "EnableImpersonation"
 	// APIServerEnableAdminImpersonation whether to disable User admin impersonation for APIServer
 	APIServerEnableAdminImpersonation featuregate.Feature = "EnableAdminImpersonation"
+	// APIServerEnableCacheJSFile whether to cache the JS file to memory
+	APIServerEnableCacheJSFile featuregate.Feature = "EnableCacheJSFile"
 )
 
 func init() {
 	runtime.Must(APIServerMutableFeatureGate.Add(map[featuregate.Feature]featuregate.FeatureSpec{
 		APIServerEnableImpersonation:      {Default: false, PreRelease: featuregate.Alpha},
 		APIServerEnableAdminImpersonation: {Default: true, PreRelease: featuregate.Alpha},
+		APIServerEnableCacheJSFile:        {Default: false, PreRelease: featuregate.Alpha},
 	}))
 }
