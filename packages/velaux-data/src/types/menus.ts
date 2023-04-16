@@ -24,6 +24,7 @@ export interface Menu {
   name: string;
   label: string;
   to: string;
+  href?: string;
   relatedRoute: Route[];
   icon?: string | React.ReactNode;
   permission?: ResourceAction;

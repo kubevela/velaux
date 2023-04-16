@@ -45,7 +45,7 @@ _httpsTrait: *[ if parameter["secretName"] != _|_ && parameter["domain"] != _|_ 
 	type: "https-route"
 	properties: {
 		domains: [ parameter["domain"]]
-		rules: [{port: 80}]
+		rules: [{port: 8000}]
 		secrets: [{
 			name: parameter["secretName"]
 		}]

@@ -9,6 +9,12 @@ import type { LoginUserInfo } from '../../interface/user';
 import { menuService, LeftMenu } from '../../services/MenuService';
 
 import './index.less';
+import { checkPermission } from '../../types';
+import { getConfigs } from '../../api/config';
+import { Config } from '../../interface/configs';
+import { MenuTypes } from '@velaux/data';
+import { MdOutlineMonitorHeart } from 'react-icons/md';
+import { If } from '../../components/If';
 interface Props {
   userInfo?: LoginUserInfo;
   systemInfo?: SystemInfo;
@@ -17,13 +23,42 @@ interface Props {
 const LeftMenuModule = (props: Props) => {
   const path = locationService.getPathName();
   const [menus, setMenus] = useState<LeftMenu[]>();
+  const [grafanaConfigs, setGrafanaConfigs] = useState<Config[]>();
+  useEffect(() => {
+    if (checkPermission({ resource: 'config', action: 'list' }, '', props.userInfo)) {
+      getConfigs('grafana').then((res) => {
+        if (res) {
+          setGrafanaConfigs(res.configs || []);
+        }
+      });
+    }
+  }, [props.userInfo]);
+
   useEffect(() => {
     menuService.loadPluginMenus().then(() => {
       const workspace = menuService.loadCurrentWorkspace();
       const menus = workspace && props.userInfo ? menuService.loadMenus(workspace, props.userInfo) : [];
+      if (grafanaConfigs) {
+        const grafanaLeftMenu: LeftMenu = { catalog: 'Grafana', menus: [] };
+        grafanaConfigs.map((g) => {
+          if (g.properties && g.properties['endpoint']) {
+            grafanaLeftMenu.menus.push({
+              name: g.name,
+              workspace: 'extension',
+              label: g.alias || g.name,
+              to: '',
+              href: g.properties['endpoint'],
+              relatedRoute: [],
+              type: MenuTypes.Workspace,
+              icon: <MdOutlineMonitorHeart></MdOutlineMonitorHeart>,
+            });
+          }
+        });
+        menus.push(grafanaLeftMenu);
+      }
       setMenus(menus);
     });
-  }, [props.userInfo, path]);
+  }, [props.userInfo, path, grafanaConfigs]);
 
   if (!props.userInfo) {
     return <div />;
@@ -33,21 +68,36 @@ const LeftMenuModule = (props: Props) => {
     const ele: JSX.Element[] = [];
     if (item.menus && item.menus.length > 0) {
       item.menus.map((childrenItem) => {
+        const item = (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            {childrenItem.icon}
+            <span className={'menu-item-text'}>
+              <Translation>{childrenItem.label}</Translation>
+            </span>
+          </div>
+        );
         const childrenArr = (
           <li className="nav-item" key={childrenItem.name}>
-            <Link to={childrenItem.to} className={childrenItem.active ? 'menu-item-active' : 'menu-item'}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
+            <If condition={childrenItem.href}>
+              <a
+                rel="noopener noreferrer"
+                target="_blank"
+                className={childrenItem.active ? 'menu-item-active' : 'menu-item'}
+                href={childrenItem.href}
               >
-                {childrenItem.icon}
-                <span className={'menu-item-text'}>
-                  <Translation>{childrenItem.label}</Translation>
-                </span>
-              </div>
-            </Link>
+                {item}
+              </a>
+            </If>
+            <If condition={childrenItem.to && !childrenItem.href}>
+              <Link to={childrenItem.to} className={childrenItem.active ? 'menu-item-active' : 'menu-item'}>
+                {item}
+              </Link>
+            </If>
           </li>
         );
         ele.push(childrenArr);
