@@ -1,7 +1,6 @@
 {
   "name": "@velaux/ui",
-  "version": "1.8.0",
-  "private": true,
+  "version": "0.0.4",
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json && rollup -c rollup.config.ts",
     "test": "ts-mocha -p tsconfig.test.json src/**/**.test.ts",
@@ -21,11 +20,14 @@
       "path": "./node_modules/cz-customizable"
     }
   },
-  "types": "src/types.ts",
-  "main": "src/index.ts",
   "directories": {
     "src": "./src"
   },
+  "files": [
+    "dist/**"
+  ],
+  "main": "dist/types.js",
+  "types": "dist/types.d.ts",
   "publishConfig": {
     "main": "dist/types.js",
     "module": "dist/esm/types.js",
@@ -50,8 +52,8 @@
     "@alifd/theme-2": "0.4.4",
     "@kubernetes/client-node": "0.18.1",
     "@sentry/browser": "7.45.0",
-    "@velaux/data": "0.0.1",
-    "@velaux/theme": "0.0.1",
+    "@velaux/data": "^0.0.4",
+    "@velaux/theme": "0.0.2",
     "ansi-to-html": "^0.7.2",
     "ansi-to-react": "^6.1.6",
     "axios": "0.24.0",
