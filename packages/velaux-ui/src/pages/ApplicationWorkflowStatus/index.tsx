@@ -107,7 +107,7 @@ class ApplicationWorkflow extends React.Component<Props, State> {
     if (env) {
       getApplicationEnvRecords({ appName: appName, envName: envName }).then((res: { records: WorkflowRecord[] }) => {
         if (res) {
-          const records = res.records.reverse();
+          const records = res.records;
           this.setState({ records: records || [], showRecordName: '' });
           const currentRecord = res.records.find((re) => re.name === record);
           if (currentRecord) {
@@ -194,6 +194,7 @@ class ApplicationWorkflow extends React.Component<Props, State> {
               <Select
                 value={showRecordName}
                 locale={locale().Select}
+                autoWidth={false}
                 placeholder={i18n.t('Switch the workflow record')}
                 onChange={(selectRecord: string) => {
                   this.setState({ showRecordName: selectRecord }, () => {

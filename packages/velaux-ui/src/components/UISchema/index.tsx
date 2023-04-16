@@ -969,7 +969,7 @@ class UISchema extends Component<Props, State> {
     });
     const formItemLayout = {
       labelCol: {
-        fixedSpan: 5,
+        fixedSpan: 9,
       },
       wrapperCol: {
         span: 14,
@@ -986,12 +986,7 @@ class UISchema extends Component<Props, State> {
             <Divider />
             <If condition={showAdvancedButton}>
               <Form {...formItemLayout} style={{ width: '100%' }} fullWidth={true}>
-                <Form.Item
-                  labelAlign="left"
-                  colon={true}
-                  label={<Translation>Advanced Parameters</Translation>}
-                  labelWidth="200px"
-                >
+                <Form.Item labelAlign="left" colon={true} label={<Translation>Advanced Parameters</Translation>}>
                   <Switch onChange={this.onChangeAdvanced} size="small" checked={advanced} />
                 </Form.Item>
               </Form>
