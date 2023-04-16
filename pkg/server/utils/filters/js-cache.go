@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/golang/groupcache/lru"
+	"k8s.io/klog/v2"
 
 	"github.com/kubevela/velaux/pkg/server/utils"
 )
@@ -70,7 +71,9 @@ func (c *cacheData) Write(w http.ResponseWriter) {
 	}
 	w.Header().Set(HeaderHitCache, "true")
 	w.WriteHeader(c.code)
-	w.Write(c.data.Bytes())
+	if _, err := w.Write(c.data.Bytes()); err != nil {
+		klog.Errorf("failed to write the cache content, err: %s", err.Error())
+	}
 }
 
 // CacheWriter generate the cache item the response body and status
@@ -79,18 +82,22 @@ type CacheWriter struct {
 	cacheData *cacheData
 }
 
+// Header cache the header
 func (c *CacheWriter) Header() http.Header {
 	header := c.writer.Header()
 	c.cacheData.header = header
 	return header
 }
 
+// Write cache the data
 func (c *CacheWriter) Write(b []byte) (int, error) {
 	if _, err := c.cacheData.data.Write(b); err != nil {
 		return -1, err
 	}
 	return c.writer.Write(b)
 }
+
+// WriteHeader cache the status code
 func (c *CacheWriter) WriteHeader(statusCode int) {
 	c.writer.WriteHeader(statusCode)
 	c.cacheData.code = statusCode

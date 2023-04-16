@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/emicklei/go-restful/v3"
+	"k8s.io/klog/v2"
 
 	"github.com/kubevela/velaux/pkg/server/utils"
 )
@@ -34,7 +35,11 @@ func Gzip(req *http.Request, res http.ResponseWriter, chain *utils.FilterChain) 
 			res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		defer w.Close()
+		defer func() {
+			if err = w.Close(); err != nil {
+				klog.Errorf("failed to close the compressing writer, err: %s", err.Error())
+			}
+		}()
 		chain.ProcessFilter(req, w)
 		return
 	}
@@ -53,12 +58,12 @@ func wantsCompressedResponse(httpRequest *http.Request, httpWriter http.Response
 	// use in order of appearance
 	if gi == -1 {
 		return zi != -1, restful.ENCODING_DEFLATE
-	} else if zi == -1 {
-		return gi != -1, restful.ENCODING_GZIP
-	} else {
-		if gi < zi {
-			return true, restful.ENCODING_GZIP
-		}
-		return true, restful.ENCODING_DEFLATE
 	}
+	if zi == -1 {
+		return gi != -1, restful.ENCODING_GZIP
+	}
+	if gi < zi {
+		return true, restful.ENCODING_GZIP
+	}
+	return true, restful.ENCODING_DEFLATE
 }
