@@ -5,6 +5,7 @@ export enum PluginType {
   PageApp = 'page-app',
   Definition = 'definition',
 }
+
 interface PluginMetaInfoLink {
   name: string;
   url: string;
@@ -50,7 +51,7 @@ export interface PluginInclude {
   catalog?: string;
 }
 
-export interface PluginMeta<T extends KeyValue = {}> {
+export interface PluginMeta<T extends KeyValue = {}> extends PluginLink {
   id: string;
   name: string;
   type: PluginType;
@@ -76,6 +77,13 @@ export interface PluginMeta<T extends KeyValue = {}> {
   enterprise?: boolean;
   latestVersion?: string;
   live?: boolean;
+}
+
+/**
+ * Represents a plugin and link to get plugin tarball
+ */
+export interface PluginLink {
+  url: string
 }
 
 export interface PluginConfigPageProps<T extends PluginMeta> {
@@ -104,7 +112,7 @@ export class VelaUXPlugin<T extends PluginMeta = PluginMeta> {
 
   // Tabs on the plugin page
   addConfigPage(tab: PluginConfigPage<T>) {
-    this.configPages=tab;
+    this.configPages = tab;
     return this;
   }
 
@@ -120,6 +128,11 @@ export type PluginEnableRequest = {
 }
 
 export type PluginInstallRequest = {
+  id: string
+  url: string
+}
+
+export type UXPlugin = {
   id: string
   url: string
 }

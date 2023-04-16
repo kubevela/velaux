@@ -16,30 +16,20 @@ export default {
         enabledPlugins: enabledPlugins,
       };
     },
-    addPluginToCache(state, {type, payload}) {
+    addOrUpdatePlugin(state, {type, payload}) {
       // add the plugin to pluginList if not exist
       const pluginList = state.pluginList;
       const plugin = payload;
-      if (!pluginList.find(p => p.id === plugin.id)) {
-        pluginList.push(plugin);
-      }
+      const newPluginList = pluginList.map((p) => {
+        if (p.id === plugin.id) {
+          return plugin;
+        } else {
+          return p;
+        }
+      })
       return {
         ...state,
-        pluginList: pluginList,
-      }
-    },
-    removePluginFromCache(state, {type, payload}) {
-      // remove the plugin from pluginList if exist
-      const pluginList = state.pluginList;
-      const plugin = payload;
-      const index = pluginList.findIndex(p => p.id === plugin.id);
-      if (index !== -1) {
-        const removedPlugin = pluginList.splice(index, 1);
-        console.log('remove', removedPlugin)
-      }
-      return {
-        ...state,
-        pluginList: pluginList,
+        pluginList: newPluginList,
       }
     },
     addPluginToEnableList(state, {type, payload}) {
@@ -56,47 +46,88 @@ export default {
     },
     removePluginFromEnableList(state, {type, payload}) {
       // remove the plugin from enabledPlugins if exist
-      const enabledPlugins = state.enabledPlugins;
       const plugin = payload;
-      const index = enabledPlugins.findIndex(p => p.id === plugin.id);
-      if (index !== -1) {
-        enabledPlugins.splice(index, 1);
+      const newEnabledPlugins = state.enabledPlugins.filter((p) => p.id !== plugin.id);
+
+      return {
+        ...state,
+        enabledPlugins: newEnabledPlugins,
+      };
+    },
+    addBatchPluginToCache(state, {type, payload}) {
+      // add the plugin to pluginList if not exist
+      const pluginList = state.pluginList;
+      // make a copy to newPluginList
+      const newPluginList = pluginList.slice();
+      for (const plugin of payload) {
+        if (!newPluginList.find(p => p.id === plugin.id)) {
+          newPluginList.push(plugin);
+        }
       }
       return {
         ...state,
-        enabledPlugins: enabledPlugins,
+        pluginList: newPluginList,
       }
-    }
+    },
+    removePluginDetail(state, {type, payload}) {
+      // remove the plugin from pluginList if exist
+      const pluginList = state.pluginList;
+      const {id} = payload;
+      const newPluginList = pluginList.map((p) => {
+        if (p.id === id) {
+          return {
+            id: p.id,
+            url: p.url,
+          }
+        } else {
+          return p;
+        }
+      })
+      return {
+        ...state,
+        pluginList: newPluginList,
+      }
+    },
   },
   effects: {
     * installPlugin(action, {call, put}) {
       const res = yield call(installPlugin, action.payload);
-      console.log(res)
-      yield put({type: 'addPluginToCache', payload: res});
+      if (res.info) {
+        yield put({type: 'addOrUpdatePlugin', payload: res});
+        if (action.callback) {
+          action.callback();
+        }
+      }
     },
     * uninstallPlugin(action, {call, put}) {
-      const res = yield call(uninstallPlugin, action.payload);
-      console.log(res)
-      yield put({type: 'removePluginFromCache', payload: {id: action.payload.id}});
-
+      yield call(uninstallPlugin, action.payload);
+      yield put({type: 'removePluginDetail', payload: action.payload})
+      if (action.callback) {
+        action.callback();
+      }
     },
     * getPluginList(action, {call, put}) {
       const res = yield call(getPluginList, action.payload);
-      console.log("getPluginList", res)
       if (res) {
         yield put({type: 'updatePluginList', payload: res});
       }
     },
     * enablePlugin(action, {call, put}) {
       const res = yield call(enablePlugin, action.payload);
-      if (res) {
+      if (res.info) {
         yield put({type: 'addPluginToEnableList', payload: res});
+      }
+      if (action.callback) {
+        action.callback();
       }
     },
     * disablePlugin(action, {call, put}) {
       const res = yield call(disablePlugin, action.payload);
       if (res) {
         yield put({type: 'removePluginFromEnableList', payload: res});
+      }
+      if (action.callback) {
+        action.callback();
       }
     }
   }

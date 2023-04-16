@@ -1,9 +1,11 @@
 import React from 'react';
+import { connect } from 'dva';
 import './index.less';
 
-import { Button, Dialog, List } from "@alifd/next";
+import { Box, Button, Dialog, List, Message } from "@alifd/next";
 import type { KeyValue, PluginMeta } from '@velaux/data';
 import PluginConfig from "../plugin-config";
+import i18n from "../../../../i18n";
 import Empty from "../../../../components/Empty";
 
 type State = {
@@ -13,17 +15,16 @@ type State = {
 };
 
 type Props = {
+  dispatch: ({}) => {};
   pluginList?: PluginMeta[];
   enabledPlugins?: PluginMeta[];
-
-  onInstall: (id: string, url: string) => void;
-  onUninstall: (id: string) => void;
-  onEnable: (id: string) => void;
-  onDisable: (id: string) => void;
-  // onConfig: (id: string) => void;
+  errorMessage?: string;
 };
 
 
+@connect((store: any) => {
+  return { ...store.plugins };
+})
 class Plugin extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -33,11 +34,56 @@ class Plugin extends React.Component<Props, State> {
     };
   }
 
+  installPlugin(id: string, url: string) {
+    this.props.dispatch({
+      type: 'plugins/installPlugin',
+      payload: { id, url },
+      callback: () => {
+        Message.success(i18n.t("Install Success. Enabled automatically."));
+        this.render()
+      }
+    });
+  }
+
+  uninstallPlugin(id: string) {
+    this.props.dispatch({
+      type: 'plugins/uninstallPlugin',
+      payload: { id },
+      callback: () => {
+        Message.success(i18n.t("Uninstall Success."));
+        this.render()
+      }
+    });
+
+  }
+
+  enablePlugin(id: string) {
+    this.props.dispatch({
+      type: 'plugins/enablePlugin',
+      payload: { id },
+      callback: () => {
+        Message.success(i18n.t("Enable Success."));
+      }
+    });
+  }
+
+  disablePlugin(id: string) {
+    this.props.dispatch({
+      type: 'plugins/disablePlugin',
+      payload: { id },
+      callback: () => {
+        Message.success(i18n.t("Disable Success."));
+      }
+    });
+  }
+
   componentDidMount() {
     const { pluginList } = this.props;
     if (pluginList) {
       pluginList.forEach((plugin) => {
-        this.checkImage(plugin.name, plugin.info.logos.small);
+        if (plugin.name && plugin.info?.logos?.small) {
+          this.checkImage(plugin.name, plugin.info.logos.small);
+        }
       });
     }
   }
@@ -46,7 +92,9 @@ class Plugin extends React.Component<Props, State> {
     const { pluginList } = this.props;
     if (pluginList && pluginList !== prevProps.pluginList) {
       pluginList.forEach((plugin) => {
-        this.checkImage(plugin.name, plugin.info.logos.small);
+        if (plugin.name && plugin.info?.logos?.small) {
+          this.checkImage(plugin.name, plugin.info.logos.small);
+        }
       });
     }
   }
@@ -76,19 +124,11 @@ class Plugin extends React.Component<Props, State> {
   };
 
   render() {
-    const { pluginList, enabledPlugins, onInstall, onDisable, onUninstall, } = this.props;
+    const { pluginList, enabledPlugins, } = this.props;
     const { currentPlugin, showConfig } = this.state;
 
     return (
       <div>
-        <Button onClick={
-          () => {
-            onInstall("node-dashboard", "https://kubevela-assets.oss-cn-beijing.aliyuncs.com/node-dashboard.tar.gz")
-          }
-        }>
-          Install node-dashboard
-        </Button>
-
         <Dialog
           title={`${currentPlugin ? currentPlugin.name : ""} Configuration`}
           visible={showConfig}
@@ -113,43 +153,49 @@ class Plugin extends React.Component<Props, State> {
               <List.Item key={plugin.id} className="plugin-row">
                 <div
                   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                  <div>{plugin.name}</div>
+                  <div>{plugin.id}</div>
                   <div>
+                    <Box spacing={8} direction="row">
                     {isInstalled && isEnabled && (
-                      <Button onClick={() => {
-                        console.log('plugin', plugin)
-                        this.setState({
-                          currentPlugin: plugin,
-                          showConfig: true,
-                        }, () => {
-                          console.log('currentPlugin', this.state.currentPlugin)
-                        })
-                      }}>Config</Button>
+                        <Button onClick={() => {
+                          console.log('plugin', plugin)
+                          this.setState({
+                            currentPlugin: plugin,
+                            showConfig: true,
+                          }, () => {
+                            console.log('currentPlugin', this.state.currentPlugin)
+                          })
+                        }}>Config</Button>
                     )}
+
                     {!isInstalled && (
-                      <Button type="primary" onClick={() => onInstall(plugin.id, "")}>
-                        Install
-                      </Button>
+                        <Button type="primary" onClick={() => this.installPlugin(plugin.id, plugin.url)}>
+                          Install
+                        </Button>
                     )}
+
                     {isInstalled && !isEnabled && (
-                      <Button type={"primary"} onClick={() => {
-                        console.log('hit `Enable` plugin', plugin)
-                        this.setState({
-                          currentPlugin: plugin,
-                          showConfig: true,
-                        }, () => {
-                          console.log('currentPlugin', this.state.currentPlugin)
-                        })
-                      }}>Enable</Button>
+                        <Button type={"primary"} onClick={() => {
+                          console.log('hit `Enable` plugin', plugin)
+                          this.setState({
+                            currentPlugin: plugin,
+                            showConfig: true,
+                          }, () => {
+                            console.log('currentPlugin', this.state.currentPlugin)
+                          })
+                        }}>Enable</Button>
                     )}
+
                     {isInstalled && isEnabled && (
-                      <Button onClick={() => onDisable(plugin.id)}>Disable</Button>
+                        <Button onClick={() => this.disablePlugin(plugin.id)}>Disable</Button>
                     )}
+
                     {isInstalled && !isEnabled && (
-                      <Button warning onClick={() => onUninstall(plugin.id)}>
-                        Uninstall
-                      </Button>
+                        <Button warning onClick={() => this.uninstallPlugin(plugin.id)}>
+                          Uninstall
+                        </Button>
                     )}
+                    </Box>
                   </div>
                 </div>
               </List.Item>
@@ -158,7 +204,7 @@ class Plugin extends React.Component<Props, State> {
         </List>
       </div>
     );
-  }
+  };
 }
 
 export default Plugin;

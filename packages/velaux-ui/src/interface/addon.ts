@@ -1,5 +1,6 @@
 import type { ApplicationStatus, UIParam } from './application';
 import type { NameAlias } from './env';
+import { KeyValue } from "@velaux/data";
 
 export interface Addon {
   name: string;
@@ -20,6 +21,7 @@ export interface Addon {
     vela?: string;
     kubernetes?: string;
   };
+  uxPlugins?: KeyValue<string>
 }
 
 export interface AddonStatus {

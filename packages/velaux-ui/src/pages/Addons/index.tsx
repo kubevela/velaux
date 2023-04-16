@@ -131,39 +131,6 @@ class Addons extends React.Component<Props, State> {
     });
   };
 
-  installPlugin = (id: string, url: string) => {
-    this.props.dispatch({
-      type: 'plugins/installPlugin',
-      payload: { id, url },
-    });
-  }
-  uninstallPlugin = (id: string) => {
-    this.props.dispatch({
-      type: 'plugins/uninstallPlugin',
-      payload: { id },
-    });
-
-  }
-
-  enablePlugin = (id: string) => {
-    this.props.dispatch({
-      type: 'plugins/enablePlugin',
-      payload: { id },
-    });
-  }
-
-  disablePlugin = (id: string) => {
-    this.props.dispatch({
-      type: 'plugins/disablePlugin',
-      payload: { id },
-    });
-  }
-
-  configPlugin = (id: string) => {
-
-  }
-
-
   render() {
     const {
       addonsList = [],
@@ -172,8 +139,6 @@ class Addons extends React.Component<Props, State> {
       loading,
       addonListMessage,
       enabledAddons,
-      pluginList = [],
-      enabledPlugins = [],
     } = this.props;
 
     const addonLoading = loading.models.addons;
@@ -248,13 +213,7 @@ class Addons extends React.Component<Props, State> {
           <Tab.Item title="VelaUX Plugins">
             <Loading visible={pluginLoading} style={{ width: '100%' }}>
               <Plugin
-                enabledPlugins={enabledPlugins}
-                pluginList={pluginList}
-                onEnable={this.enablePlugin}
-                onDisable={this.disablePlugin}
-                onInstall={this.installPlugin}
-                onUninstall={this.uninstallPlugin}
-                // onConfig={this.configPlugin}
+                dispatch={dispatch}
               ></Plugin>
             </Loading>
           </Tab.Item>

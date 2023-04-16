@@ -64,6 +64,7 @@ const LeftMenuModule = (props: Props) => {
     return <div />;
   }
 
+  let fallBackCatalog=0;
   const childrenSlider = menus?.map((item) => {
     const ele: JSX.Element[] = [];
     if (item.menus && item.menus.length > 0) {
@@ -105,7 +106,7 @@ const LeftMenuModule = (props: Props) => {
     }
     if (ele.length > 0) {
       return (
-        <li className="nav-container" key={item.catalog}>
+        <li className="nav-container" key={item.catalog?item.catalog:fallBackCatalog++}>
           {item.catalog && (
             <div className="main-nav padding-left-32">
               <Translation>{item.catalog}</Translation>
