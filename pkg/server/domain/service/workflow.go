@@ -344,9 +344,8 @@ func (w *workflowServiceImpl) ListWorkflowRecordsFromEnv(ctx context.Context, ap
 	}
 
 	filterOptions := datastore.FilterOptions{In: []datastore.InQueryOption{{Key: "workflowName", Values: wfNames}}}
-
 	records, err := w.Store.List(ctx, &record, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{
-		{Key: "createTime", Order: datastore.SortOrderAscending}},
+		{Key: "createTime", Order: datastore.SortOrderDescending}},
 		FilterOptions: filterOptions,
 	})
 	if err != nil {

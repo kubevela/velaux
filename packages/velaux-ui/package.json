@@ -26,7 +26,7 @@
   "files": [
     "dist/**"
   ],
-  "main": "dist/types.js",
+  "main": "src/index.ts",
   "types": "dist/types.d.ts",
   "publishConfig": {
     "main": "dist/types.js",

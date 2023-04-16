@@ -181,7 +181,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const { onComponentClose, isEditComponent, project, componentName, appName } = this.props;
     const { isCreateComponentLoading, isUpdateComponentLoading } = this.state;
     return (
-      <div>
+      <div className="footer-actions">
         <Button type="secondary" onClick={onComponentClose} className="margin-right-10">
           {i18n.t('Cancel').toString()}
         </Button>
