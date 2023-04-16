@@ -318,7 +318,7 @@ func shouldRemoveTopLevelFolder(tarReader *tar.Reader) (bool, error) {
 	entries := make(map[string]bool)
 	for {
 		header, err := tarReader.Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -380,6 +380,7 @@ func decompressTarGzTo(gzipReader *gzip.Reader, destFolder string) error {
 			}
 		case tar.TypeReg:
 
+			//nolint:gosec
 			outFile, err := os.Create(targetPath)
 			if err != nil {
 				return fmt.Errorf("error creating file: %w", err)
@@ -412,6 +413,7 @@ func downloadAndDecompressTarGz(ctx context.Context, url, destFolder string, opt
 	if err != nil {
 		return fmt.Errorf("error creating gzip reader: %w", err)
 	}
+	//nolint:errcheck
 	defer gzipReader.Close()
 
 	return decompressTarGzTo(gzipReader, destFolder)
