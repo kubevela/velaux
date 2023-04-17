@@ -41,7 +41,6 @@ export function AppConfigPage({ pluginId }: Props) {
     )
   }
 
-  console.log(app)
   return (
     <div>
       <app.configPages.body plugin={app} query={{}} />

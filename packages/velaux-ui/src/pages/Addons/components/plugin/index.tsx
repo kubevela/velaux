@@ -139,7 +139,7 @@ class Plugin extends React.Component<Props, State> {
         >
           {(() => {
             if (currentPlugin) {
-              return <PluginConfig plugin={currentPlugin} />;
+              return <PluginConfig plugin={currentPlugin} />
             }
             return <Empty />
           })()}
@@ -156,7 +156,7 @@ class Plugin extends React.Component<Props, State> {
                   <div>{plugin.id}</div>
                   <div>
                     <Box spacing={8} direction="row">
-                    {isInstalled && isEnabled && (
+                      {isInstalled && isEnabled && (
                         <Button onClick={() => {
                           console.log('plugin', plugin)
                           this.setState({
@@ -166,15 +166,15 @@ class Plugin extends React.Component<Props, State> {
                             console.log('currentPlugin', this.state.currentPlugin)
                           })
                         }}>Config</Button>
-                    )}
+                      )}
 
-                    {!isInstalled && (
+                      {!isInstalled && (
                         <Button type="primary" onClick={() => this.installPlugin(plugin.id, plugin.url)}>
                           Install
                         </Button>
-                    )}
+                      )}
 
-                    {isInstalled && !isEnabled && (
+                      {isInstalled && !isEnabled && (
                         <Button type={"primary"} onClick={() => {
                           console.log('hit `Enable` plugin', plugin)
                           this.setState({
@@ -184,17 +184,17 @@ class Plugin extends React.Component<Props, State> {
                             console.log('currentPlugin', this.state.currentPlugin)
                           })
                         }}>Enable</Button>
-                    )}
+                      )}
 
-                    {isInstalled && isEnabled && (
+                      {isInstalled && isEnabled && (
                         <Button onClick={() => this.disablePlugin(plugin.id)}>Disable</Button>
-                    )}
+                      )}
 
-                    {isInstalled && !isEnabled && (
+                      {isInstalled && !isEnabled && (
                         <Button warning onClick={() => this.uninstallPlugin(plugin.id)}>
                           Uninstall
                         </Button>
-                    )}
+                      )}
                     </Box>
                   </div>
                 </div>

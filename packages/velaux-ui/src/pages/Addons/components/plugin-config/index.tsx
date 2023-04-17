@@ -26,7 +26,7 @@ class PluginConfig extends React.Component<Props, State> {
       <div className="plugin-config">
         <AppConfigPage pluginId={plugin.id}></AppConfigPage>;
       </div>
-    );
+    )
   }
 
 }

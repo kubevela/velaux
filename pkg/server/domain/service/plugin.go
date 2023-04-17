@@ -32,6 +32,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/utils/common"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -317,7 +318,7 @@ func shouldRemoveTopLevelFolder(tarReader *tar.Reader) (bool, error) {
 	entries := make(map[string]bool)
 	for {
 		header, err := tarReader.Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -378,6 +379,8 @@ func decompressTarGzTo(gzipReader *gzip.Reader, destFolder string) error {
 				return fmt.Errorf("error creating directory: %w", err)
 			}
 		case tar.TypeReg:
+
+			//nolint:gosec
 			outFile, err := os.Create(targetPath)
 			if err != nil {
 				return fmt.Errorf("error creating file: %w", err)
@@ -410,6 +413,7 @@ func downloadAndDecompressTarGz(ctx context.Context, url, destFolder string, opt
 	if err != nil {
 		return fmt.Errorf("error creating gzip reader: %w", err)
 	}
+	// nolint:errcheck
 	defer gzipReader.Close()
 
 	return decompressTarGzTo(gzipReader, destFolder)

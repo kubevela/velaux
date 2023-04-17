@@ -5,3 +5,5 @@ export * from './utils/common';
 export * from './utils/permission';
 export * from './utils/locale';
 export * from './api/plugin';
+export * from './interface';
+export * from './api/';

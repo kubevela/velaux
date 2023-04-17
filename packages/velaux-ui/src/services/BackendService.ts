@@ -1,6 +1,6 @@
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import { Message } from '@alifd/next';
 import axios from 'axios';
+import { Message } from '@alifd/next';
 import { getDomain } from '../utils/common';
 import { getMessage } from '../api/status';
 import ResetLogin from '../utils/resetLogin';
@@ -37,15 +37,20 @@ async function getRefreshTokenFunc() {
 
 export interface BackendSrv {
   getAxiosInstance: () => AxiosInstance;
+
   post<R, P>(url: string, params?: P, customError?: boolean): Promise<R>;
+
   get<R, P>(url: string, params?: P, customError?: boolean): Promise<R>;
+
   delete<R, P>(url: string, params?: P, customError?: boolean): Promise<R>;
+
   put<R, P>(url: string, params?: P, customError?: boolean): Promise<R>;
 }
 
 /** @internal */
 export class BackendWrapper implements BackendSrv {
   private axiosInstance: AxiosInstance;
+
   constructor() {
     this.axiosInstance = axios.create({
       baseURL: baseURL,
@@ -128,6 +133,7 @@ export class BackendWrapper implements BackendSrv {
       }
     );
   }
+
   getAxiosInstance(): AxiosInstance {
     return this.axiosInstance;
   }
@@ -144,6 +150,7 @@ export class BackendWrapper implements BackendSrv {
   }
 
   get(url: string, params?: any, customError?: boolean) {
+    console.log('get', url, params,)
     return this.axiosInstance
       .get(baseURL + url, params)
       .then((res) => {
