@@ -23,15 +23,25 @@ interface Props {
 
 const generateCanaryDeployGroup = (step: WorkflowStep, batch: number): WorkflowStep => {
   const interval = Math.round(100 / batch);
-  const steps: WorkflowStep[] = [];
   const policies: string[] | null = step.properties ? step.properties['policies'] : null;
-  for (let i = 0; i < batch; i++) {
+  const steps: WorkflowStep[] = [
+    {
+      name: 'prepare-canary',
+      alias: 'Prepare Canary',
+      type: DeployModes.CanaryDeploy,
+      properties: {
+        weight: 0,
+        policies: _.cloneDeep(policies),
+      },
+    },
+  ];
+  for (let i = 1; i <= batch; i++) {
     const batchStep: WorkflowStep = {
       name: step.name + '-batch-' + i,
       alias: 'Batch ' + i,
       type: DeployModes.CanaryDeploy,
       properties: {
-        weight: i == batch - 1 ? 100 : interval * (i + 1),
+        weight: i == batch ? 100 : interval * i,
         policies: [],
       },
     };
