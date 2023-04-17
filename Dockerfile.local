@@ -1,12 +1,4 @@
-ARG BASE_IMAGE
-
-FROM node:16-alpine as ui-builder
-ARG VERSION
-WORKDIR /app/velaux
-ADD . .
-ENV VERSION=${VERSION}
-RUN apk add --no-cache git && yarn install && yarn build
-
+ARG BASE_IMAG
 # Build the manager binary
 FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.19-alpine@sha256:2381c1e5f8350a901597d633b2e517775eeac7a6682be39225a93b22cfd0f8bb as server-builder
 ARG GOPROXY
@@ -41,6 +33,6 @@ WORKDIR /app/velaux
 ARG TARGETARCH
 ENV PATH=$PATH:/app/velaux
 COPY --from=server-builder /workspace/apiserver-${TARGETARCH} /app/velaux/server
-COPY --from=ui-builder /app/velaux/public /app/velaux/public
+COPY ./public /app/velaux/public
 
 CMD ["server"]

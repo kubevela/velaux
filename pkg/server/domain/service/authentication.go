@@ -18,6 +18,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -379,6 +380,26 @@ func restartDex(ctx context.Context, kubeClient client.Client) error {
 			return nil
 		}
 		return err
+	}
+	for i, comp := range dexApp.Spec.Components {
+		if comp.Name == keyDex {
+			var v model.JSONStruct
+			err := json.Unmarshal(comp.Properties.Raw, &v)
+			if err != nil {
+				return err
+			}
+			// restart the dex server
+			if _, ok := v["values"]; ok {
+				v["values"].(map[string]interface{})["env"] = map[string]string{
+					"TIME_STAMP": time.Now().Format(time.RFC3339),
+				}
+			}
+			dexApp.Spec.Components[i].Properties = v.RawExtension()
+			if err := kubeClient.Update(ctx, dexApp); err != nil {
+				return err
+			}
+			break
+		}
 	}
 	oam.SetPublishVersion(dexApp, apiutils.GenerateVersion("addon"))
 	return kubeClient.Update(ctx, dexApp)

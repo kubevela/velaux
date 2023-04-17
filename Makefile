@@ -134,3 +134,11 @@ check-diff: reviewable
 
 run-server:
 	go run ./cmd/server/main.go
+
+build-ui:
+	@$(INFO) Building UI
+	yarn build
+
+build-test-image: build-ui
+	@$(INFO) Building image
+	docker build -t velaux:latest -f Dockerfile.local .
