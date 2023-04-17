@@ -231,52 +231,61 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
               style={{
                 display: 'flex',
                 justifyContent: 'end',
+                flexWrap: 'wrap',
               }}
             >
+              <div
+                style={{
+                  display: 'flex',
+                  width: '100%',
+                  justifyContent: 'end',
+                }}
+              >
+                <MenuButton
+                  style={{ marginRight: 'var(--spacing-4)' }}
+                  autoWidth={false}
+                  label={i18n.t('More').toString()}
+                >
+                  <MenuButton.Item
+                    onClick={() => {
+                      locationService.partial({ setCanary: true });
+                      this.setState({ setCanary: true });
+                    }}
+                  >
+                    <Translation>Canary Rollout Setting</Translation>
+                  </MenuButton.Item>
+                </MenuButton>
+                <Form.Item label={i18n.t('Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
+                  <Select
+                    locale={locale().Select}
+                    defaultValue="StepByStep"
+                    value={mode}
+                    dataSource={WorkflowModeOptions}
+                    onChange={(value) => {
+                      this.setState({ mode: value, changed: this.state.mode !== value });
+                    }}
+                  />
+                </Form.Item>
+                <Form.Item label={i18n.t('Sub Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
+                  <Select
+                    locale={locale().Select}
+                    defaultValue="DAG"
+                    value={subMode}
+                    onChange={(value) => {
+                      this.setState({ subMode: value, changed: this.state.subMode !== value });
+                    }}
+                    dataSource={WorkflowModeOptions}
+                  />
+                </Form.Item>
+                <Button disabled={!changed} loading={saveLoading} type="primary" onClick={this.onSave}>
+                  <Translation>Save</Translation>
+                </Button>
+              </div>
               {changed && (
                 <div className="notice-changes">
                   <Translation>Unsaved changes</Translation>
                 </div>
               )}
-              <MenuButton
-                style={{ marginRight: 'var(--spacing-4)' }}
-                autoWidth={false}
-                label={i18n.t('More').toString()}
-              >
-                <MenuButton.Item
-                  onClick={() => {
-                    locationService.partial({ setCanary: true });
-                    this.setState({ setCanary: true });
-                  }}
-                >
-                  <Translation>Canary Rollout Setting</Translation>
-                </MenuButton.Item>
-              </MenuButton>
-              <Form.Item label={i18n.t('Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
-                <Select
-                  locale={locale().Select}
-                  defaultValue="StepByStep"
-                  value={mode}
-                  dataSource={WorkflowModeOptions}
-                  onChange={(value) => {
-                    this.setState({ mode: value, changed: this.state.mode !== value });
-                  }}
-                />
-              </Form.Item>
-              <Form.Item label={i18n.t('Sub Mode').toString()} labelAlign="inset" style={{ marginRight: '8px' }}>
-                <Select
-                  locale={locale().Select}
-                  defaultValue="DAG"
-                  value={subMode}
-                  onChange={(value) => {
-                    this.setState({ subMode: value, changed: this.state.subMode !== value });
-                  }}
-                  dataSource={WorkflowModeOptions}
-                />
-              </Form.Item>
-              <Button disabled={!changed} loading={saveLoading} type="primary" onClick={this.onSave}>
-                <Translation>Save</Translation>
-              </Button>
             </Col>
           </Row>
         </Card>
