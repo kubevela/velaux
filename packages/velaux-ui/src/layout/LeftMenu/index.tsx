@@ -38,7 +38,7 @@ const LeftMenuModule = (props: Props) => {
     menuService.loadPluginMenus().then(() => {
       const workspace = menuService.loadCurrentWorkspace();
       const menus = workspace && props.userInfo ? menuService.loadMenus(workspace, props.userInfo) : [];
-      if (grafanaConfigs) {
+      if (grafanaConfigs && workspace?.name === 'extension') {
         const grafanaLeftMenu: LeftMenu = { catalog: 'Grafana', menus: [] };
         grafanaConfigs.map((g) => {
           if (g.properties && g.properties['endpoint']) {

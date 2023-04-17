@@ -65,17 +65,9 @@ class PlatformSetting extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    this.loadSystemInfo();
     this.listProjects();
     this.onGetDexConfig();
-    this.field.setValues({
-      loginType: this.props.systemInfo.loginType,
-      enableCollection: this.props.systemInfo.enableCollection,
-    });
-    const items: Array<{ id: string; name: string; roles: string[] }> = [];
-    this.props.systemInfo.dexUserDefaultProjects?.map((item) => {
-      items.push({ id: uuid(), ...item });
-    });
-    this.setState({ defaultProjectItems: items });
   }
 
   onGetDexConfig = () => {
@@ -85,6 +77,23 @@ class PlatformSetting extends React.Component<Props, State> {
           dexConfig: res,
         });
       }
+    });
+  };
+
+  loadSystemInfo = () => {
+    this.props.dispatch({
+      type: 'user/getSystemInfo',
+      callback: (systemInfo: SystemInfo) => {
+        this.field.setValues({
+          loginType: systemInfo.loginType,
+          enableCollection: systemInfo.enableCollection,
+        });
+        const items: Array<{ id: string; name: string; roles: string[] }> = [];
+        systemInfo.dexUserDefaultProjects?.map((item) => {
+          items.push({ id: uuid(), ...item });
+        });
+        this.setState({ defaultProjectItems: items });
+      },
     });
   };
 
@@ -131,8 +140,8 @@ class PlatformSetting extends React.Component<Props, State> {
       updateSystemInfo(param)
         .then((res) => {
           if (res) {
-            Message.success(i18n.t('Update the platform configuration success'));
-            this.props.syncPlatformSetting();
+            Message.success(i18n.t('Platform settings updated successfully'));
+            this.loadSystemInfo();
           }
         })
         .catch((err) => {
@@ -209,7 +218,6 @@ class PlatformSetting extends React.Component<Props, State> {
     const { businessGuideCode } = this.state;
     if (businessGuideCode === 12011) {
       this.dialogGuideDex?.hide();
-      this.props.onClose();
       this.props.dispatch(
         routerRedux.push({
           pathname: '/configs/dex-connector/config',
@@ -217,7 +225,6 @@ class PlatformSetting extends React.Component<Props, State> {
       );
     } else if (businessGuideCode === 14010) {
       this.dialogGuideUser?.hide();
-      this.props.onClose();
       this.props.dispatch(
         routerRedux.push({
           pathname: '/users',
@@ -293,6 +300,18 @@ class PlatformSetting extends React.Component<Props, State> {
     const { defaultProjectItems } = this.state;
     return (
       <div className="container">
+        <Card locale={locale().Card} contentHeight="auto" style={{ marginBottom: 'var(--spacing-4)' }}>
+          <div className="setting-version">
+            <Row>
+              <Col span={12}>
+                <Item label="Version" value={systemInfo.systemVersion?.velaVersion}></Item>
+              </Col>
+              <Col span={12}>
+                <Item label="GitVersion" value={systemInfo.systemVersion?.gitVersion}></Item>
+              </Col>
+            </Row>
+          </div>
+        </Card>
         <Form field={this.field} labelCol={{ fixedSpan: 8 }} wrapperCol={{ span: 16 }}>
           <Card
             style={{ marginBottom: '16px' }}
@@ -417,6 +436,11 @@ class PlatformSetting extends React.Component<Props, State> {
               }
             />
           </Card>
+          <div className="flexright">
+            <Button type="primary" onClick={this.onUpdate}>
+              <Translation>Submit</Translation>
+            </Button>
+          </div>
         </Form>
       </div>
     );
