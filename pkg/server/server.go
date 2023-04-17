@@ -39,10 +39,11 @@ import (
 	"github.com/oam-dev/kubevela/apis/types"
 	pkgaddon "github.com/oam-dev/kubevela/pkg/addon"
 	pkgconfig "github.com/oam-dev/kubevela/pkg/config"
-	"github.com/oam-dev/kubevela/pkg/features"
+
 	pkgUtils "github.com/oam-dev/kubevela/pkg/utils"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 
+	"github.com/kubevela/velaux/pkg/features"
 	"github.com/kubevela/velaux/pkg/plugin/proxy"
 	"github.com/kubevela/velaux/pkg/plugin/router"
 	plugintypes "github.com/kubevela/velaux/pkg/plugin/types"
@@ -57,6 +58,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 	"github.com/kubevela/velaux/pkg/server/utils/container"
+	"github.com/kubevela/velaux/pkg/server/utils/filters"
 )
 
 const (
@@ -348,15 +350,22 @@ func enrichSwaggerObject(swo *spec.Swagger) {
 }
 
 func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	staticFilters := []utils.FilterFunction{}
+	if features.APIServerFeatureGate.Enabled(features.APIServerEnableCacheJSFile) {
+		staticFilters = append(staticFilters, filters.JSCache)
+	}
+	staticFilters = append(staticFilters, filters.Gzip)
 	switch {
 	case strings.HasPrefix(req.URL.Path, SwaggerConfigRoutePath):
 		s.webContainer.ServeHTTP(res, req)
 		return
 	case strings.HasPrefix(req.URL.Path, BuildPublicRoutePath):
-		s.staticFiles(res, req, "./")
+		utils.NewFilterChain(func(req *http.Request, res http.ResponseWriter) {
+			s.staticFiles(res, req, "./")
+		}, staticFilters...).ProcessFilter(req, res)
 		return
 	case strings.HasPrefix(req.URL.Path, PluginPublicRoutePath):
-		utils.NewFilterChain(s.getPluginAssets).ProcessFilter(req, res)
+		utils.NewFilterChain(s.getPluginAssets, staticFilters...).ProcessFilter(req, res)
 		return
 	case strings.HasPrefix(req.URL.Path, PluginProxyRoutePath):
 		utils.NewFilterChain(s.proxyPluginBackend, api.AuthTokenCheck, api.AuthUserCheck(s.UserService)).ProcessFilter(req, res)
@@ -373,7 +382,9 @@ func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 		// Rewrite to index.html, which means this route is handled by frontend.
 		req.URL.Path = "/"
-		s.staticFiles(res, req, BuildPublicPath)
+		utils.NewFilterChain(func(req *http.Request, res http.ResponseWriter) {
+			s.staticFiles(res, req, BuildPublicPath)
+		}, staticFilters...).ProcessFilter(req, res)
 	}
 }
 
