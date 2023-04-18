@@ -1,0 +1,31 @@
+{
+  "type": "page-app",
+  "name": "Backend Kube Service",
+  "id": "backend-kube-service",
+  "info": {
+    "keywords": [
+      "app"
+    ],
+    "description": "The app demo plugin",
+    "author": {
+      "name": "KubeVela"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "screenshots": [],
+    "version": "0.0.1",
+    "updated": "2023-03-30"
+  },
+  "backend": true,
+  "proxy": true,
+  "backendType": "kube-service",
+  "backendService": {
+    "name": "test"
+  },
+  "dependencies": {
+    "velauxDependency": ">=1.8.0",
+    "plugins": []
+  }
+}

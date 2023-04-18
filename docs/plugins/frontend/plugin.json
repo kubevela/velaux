@@ -1,0 +1,41 @@
+{
+  "type": "page-app",
+  "name": "Frontend",
+  "id": "frontend",
+  "info": {
+    "keywords": [
+      "app"
+    ],
+    "description": "The app demo plugin",
+    "author": {
+      "name": "KubeVela"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "screenshots": [],
+    "version": "0.0.1",
+    "updated": "2023-03-30"
+  },
+  "includes": [
+    {
+      "workspace": {
+        "name": "continuous-delivery"
+      },
+      "type": "Workspace",
+      "label": "Custom App",
+      "name": "custom-app",
+      "to": "/plugins/frontend",
+      "relatedRoute": [
+        "/plugins/frontend"
+      ],
+      "icon": "",
+      "catalog": "Continuous Delivery"
+    }
+  ],
+  "dependencies": {
+    "velauxDependency": ">=1.8.0",
+    "plugins": []
+  }
+}

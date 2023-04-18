@@ -52,7 +52,7 @@ _httpsTrait: *[ if parameter["secretName"] != _|_ && parameter["domain"] != _|_ 
 	}}] | []
 
 server: {
-	name: "server"
+	name: "velaux-server"
 	type: "webservice"
 	properties: {
 		if parameter["repo"] == _|_ {
@@ -71,7 +71,7 @@ server: {
 			exposeType: parameter["serviceType"]
 		}
 
-		cmd: ["server", "--datastore-type=" + parameter["dbType"]] + database + dbURL + enableImpersonation
+		cmd: ["server", "--datastore-type=" + parameter["dbType"], "--feature-gates=EnableCacheJSFile=true"] + database + dbURL + enableImpersonation
 		ports: [
 			{
 				port:     8000
