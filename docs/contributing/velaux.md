@@ -111,6 +111,10 @@ Add following config in `settings.json`
 }
 ```
 
+## Develop the plugin
+
+Reference: [How to build a plugin](./how-to-build-plugin)
+
 ## References
 
 * UI framework: [@alifd/next](https://fusion.design/)
