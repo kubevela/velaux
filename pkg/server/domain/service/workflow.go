@@ -410,6 +410,15 @@ func (w *workflowServiceImpl) DetailWorkflowRecord(ctx context.Context, workflow
 
 // nolint:gocyclo
 func (w *workflowServiceImpl) SyncWorkflowRecord(ctx context.Context, appPrimaryKey, recordName string, app *v1beta1.Application, workflowContext map[string]string) error {
+	// get workflow record
+	r := &model.WorkflowRecord{
+		Name:          recordName,
+		AppPrimaryKey: appPrimaryKey,
+	}
+	if err := w.Store.Get(ctx, r); err != nil {
+		return err
+	}
+	records := []*model.WorkflowRecord{r}
 	// if the workflow is restarted, sync the old unfinished workflow record
 	unfinished := &model.WorkflowRecord{
 		Finished:      "false",
@@ -422,6 +431,11 @@ func (w *workflowServiceImpl) SyncWorkflowRecord(ctx context.Context, appPrimary
 	}
 	for _, item := range unfinishedRecords {
 		record := item.(*model.WorkflowRecord)
+		if record.Name != recordName {
+			records = append(records, record)
+		}
+	}
+	for _, record := range records {
 		revision := &model.ApplicationRevision{AppPrimaryKey: appPrimaryKey, Version: record.RevisionPrimaryKey}
 		if err := w.Store.Get(ctx, revision); err != nil {
 			if errors.Is(err, datastore.ErrRecordNotExist) {
@@ -442,7 +456,7 @@ func (w *workflowServiceImpl) SyncWorkflowRecord(ctx context.Context, appPrimary
 			}
 			continue
 		}
-		if revision.RevisionCRName != "" {
+		if revision.RevisionCRName != "" && record.CreateTime.Before(r.CreateTime) {
 			// sync from application revision
 			if err := w.syncRecordFromApplicationRevision(ctx, record, revision); err != nil {
 				klog.Errorf("failed to sync workflow record %s from application revision %s", record.Name, err.Error())
@@ -520,7 +534,7 @@ func (w *workflowServiceImpl) syncRecordFromApplicationStatus(ctx context.Contex
 	}
 
 	revision.Status = generateRevisionStatus(status.Phase)
-	if app.Status.LatestRevision != nil {
+	if app.Status.LatestRevision != nil && revision.RevisionCRName == "" {
 		revision.RevisionCRName = app.Status.LatestRevision.Name
 	}
 	if err := w.Store.Put(ctx, revision); err != nil {

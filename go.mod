@@ -106,7 +106,7 @@ require (
 	sigs.k8s.io/yaml v1.3.0
 )
 
-require github.com/oam-dev/kubevela v1.8.0-rc.1.0.20230414094557-fcd721ffed60
+require github.com/oam-dev/kubevela v1.8.1-0.20230418085840-007901f9f1d5
 
 require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
