@@ -1,4 +1,4 @@
-import {disablePlugin, enablePlugin, getPluginList, installPlugin, uninstallPlugin} from "../api/plugin";
+import {detailPlugin, disablePlugin, enablePlugin, getPluginList, installPlugin, uninstallPlugin} from "../api/plugin";
 
 export default {
   namespace: 'plugins',
@@ -93,6 +93,8 @@ export default {
     * installPlugin(action, {call, put}) {
       const res = yield call(installPlugin, action.payload);
       if (res.info) {
+        // There's no url in returned plugin object, so we need to set it after calling
+        res.url = action.payload.url
         yield put({type: 'addOrUpdatePlugin', payload: res});
         if (action.callback) {
           action.callback();
@@ -110,6 +112,12 @@ export default {
       const res = yield call(getPluginList, action.payload);
       if (res) {
         yield put({type: 'updatePluginList', payload: res});
+      }
+    },
+    * detailPlugin(action, {call, put}) {
+      const res = yield call(detailPlugin, action.payload);
+      if (res) {
+        yield put({type: 'addOrUpdatePlugin', payload: res});
       }
     },
     * enablePlugin(action, {call, put}) {

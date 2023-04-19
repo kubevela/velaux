@@ -16,6 +16,8 @@ import SelectSearch from './components/search/index';
 import Plugin from "./components/plugin";
 
 type Props = {
+  history: any;
+  plugin: boolean
   dispatch: ({}) => {};
   loading: any;
   match?: any;
@@ -45,6 +47,7 @@ type State = {
 class Addons extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    console.log('props', props)
     this.state = {
       showAddonDetail: false,
       addonName: '',
@@ -80,6 +83,7 @@ class Addons extends React.Component<Props, State> {
       payload: params,
     });
   }
+
   generateTagList = () => {
     const { addonsList } = this.props;
     const tagMap: Map<string, number> = new Map<string, number>();
@@ -135,10 +139,12 @@ class Addons extends React.Component<Props, State> {
     const {
       addonsList = [],
       registryList = [],
+      history,
       dispatch,
       loading,
       addonListMessage,
       enabledAddons,
+      plugin
     } = this.props;
 
     const addonLoading = loading.models.addons;
@@ -152,8 +158,8 @@ class Addons extends React.Component<Props, State> {
           subTitle="Manages extended platform capabilities for KubeVela and VelaUX."
         />
 
-        <Tab>
-          <Tab.Item title="Addons">
+        <Tab defaultActiveKey={plugin ? 'plugin' : 'addon'}>
+          <Tab.Item title="Addons" key={'addon'}>
             <SelectSearch
               dispatch={dispatch}
               tagList={tagList}
@@ -210,10 +216,11 @@ class Addons extends React.Component<Props, State> {
               />
             </If>
           </Tab.Item>
-          <Tab.Item title="VelaUX Plugins">
+          <Tab.Item title="VelaUX Plugins" key={'plugin'}>
             <Loading visible={pluginLoading} style={{ width: '100%' }}>
               <Plugin
                 dispatch={dispatch}
+                history={history}
               ></Plugin>
             </Loading>
           </Tab.Item>

@@ -11,6 +11,10 @@ export function getPluginList(params: any) {
   return get(base + managePlugin, { params: params }).then((res) => res);
 }
 
+export function detailPlugin(params: { id: string }) {
+  return get(`${base + managePlugin}/${params.id}`, { params: params }).then((res) => res);
+}
+
 export function enablePlugin(params: PluginEnableRequest) {
   return post(`${base + managePlugin}/${params.id}/enable`, params);
 }

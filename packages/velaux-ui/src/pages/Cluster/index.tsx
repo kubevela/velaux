@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import React, { Fragment } from 'react';
 
 import { getEnabledAddons, getAddonsList } from '../../api/addons';
+
 import { deleteCluster } from '../../api/cluster';
 import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';

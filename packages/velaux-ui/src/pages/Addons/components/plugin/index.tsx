@@ -3,7 +3,8 @@ import { connect } from 'dva';
 import './index.less';
 
 import { Box, Button, Dialog, List, Message } from "@alifd/next";
-import type { KeyValue, PluginMeta } from '@velaux/data';
+import type { KeyValue, PluginMeta, } from '@velaux/data';
+import { PluginType } from "@velaux/data";
 import PluginConfig from "../plugin-config";
 import i18n from "../../../../i18n";
 import Empty from "../../../../components/Empty";
@@ -19,6 +20,12 @@ type Props = {
   pluginList?: PluginMeta[];
   enabledPlugins?: PluginMeta[];
   errorMessage?: string;
+  history?: {
+    push: (path: string, state?: any) => void;
+    location: {
+      pathname: string;
+    };
+  };
 };
 
 
@@ -123,8 +130,33 @@ class Plugin extends React.Component<Props, State> {
     }
   };
 
+  handleConfigClose = () => {
+    const plugin = this.state.currentPlugin
+    if (!plugin || !plugin.id) {
+      return
+    }
+    this.props.dispatch({
+      type: 'plugins/detailPlugin',
+      payload: { id: plugin.id },
+    })
+    this.setState({
+      showConfig: false,
+    })
+
+  }
+
+  handleGoToPage = (plugin: PluginMeta) => {
+    const { id } = plugin;
+    this.props.history?.push(`/plugins/${id}`)
+  }
+
+  handleGoToPluginConfig = (plugin: PluginMeta) => {
+    const { id } = plugin;
+    this.props.history?.push(`/plugin-config/${id}`)
+  }
+
   render() {
-    const { pluginList, enabledPlugins, } = this.props;
+    const { pluginList, enabledPlugins } = this.props;
     const { currentPlugin, showConfig } = this.state;
 
     return (
@@ -153,19 +185,17 @@ class Plugin extends React.Component<Props, State> {
               <List.Item key={plugin.id} className="plugin-row">
                 <div
                   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                  <div>{plugin.id}</div>
+                  <a onClick={() => {
+                    if (plugin.type === PluginType.PageApp) {
+                      this.handleGoToPage(plugin)
+                    }
+                  }}>
+                    <div>{plugin.id}</div>
+                  </a>
                   <div>
                     <Box spacing={8} direction="row">
                       {isInstalled && isEnabled && (
-                        <Button onClick={() => {
-                          console.log('plugin', plugin)
-                          this.setState({
-                            currentPlugin: plugin,
-                            showConfig: true,
-                          }, () => {
-                            console.log('currentPlugin', this.state.currentPlugin)
-                          })
-                        }}>Config</Button>
+                        <Button onClick={() => this.handleGoToPluginConfig(plugin)}>Config</Button>
                       )}
 
                       {!isInstalled && (
@@ -175,19 +205,11 @@ class Plugin extends React.Component<Props, State> {
                       )}
 
                       {isInstalled && !isEnabled && (
-                        <Button type={"primary"} onClick={() => {
-                          console.log('hit `Enable` plugin', plugin)
-                          this.setState({
-                            currentPlugin: plugin,
-                            showConfig: true,
-                          }, () => {
-                            console.log('currentPlugin', this.state.currentPlugin)
-                          })
-                        }}>Enable</Button>
+                        <Button type={"primary"} onClick={() => this.handleGoToPluginConfig(plugin)}>Enable</Button>
                       )}
 
                       {isInstalled && isEnabled && (
-                        <Button onClick={() => this.disablePlugin(plugin.id)}>Disable</Button>
+                        <Button warning onClick={() => this.disablePlugin(plugin.id)}>Disable</Button>
                       )}
 
                       {isInstalled && !isEnabled && (
@@ -195,6 +217,7 @@ class Plugin extends React.Component<Props, State> {
                           Uninstall
                         </Button>
                       )}
+
                     </Box>
                   </div>
                 </div>
@@ -204,7 +227,8 @@ class Plugin extends React.Component<Props, State> {
         </List>
       </div>
     );
-  };
+  }
+  ;
 }
 
 export default Plugin;

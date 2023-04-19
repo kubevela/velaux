@@ -13,7 +13,7 @@ import { BsFileEarmarkPerson, BsFillFileCodeFill, BsHddNetworkFill, BsPlugin } f
 import { RiUserSettingsFill } from 'react-icons/ri';
 import { MdConfirmationNumber } from 'react-icons/md';
 import { ApplicationBase, EnvBinding } from '../interface/application';
-import { Workspace, Menu, MenuTypes } from '@velaux/data';
+import { Menu, MenuTypes, Workspace } from '@velaux/data';
 import { locationService } from './LocationService';
 import { LoginUserInfo } from '../interface/user';
 import { checkPermission } from '../utils/permission';
@@ -99,7 +99,7 @@ const defaultWorkspaceMenus: Menu[] = [
     label: 'Addons & Plugins',
     name: 'addon-list',
     permission: { resource: 'addon:*', action: 'list' },
-    relatedRoute: ['/addons'],
+    relatedRoute: ['/addons', '/plugins', '/plugin-config'],
   },
   {
     workspace: 'extension',
@@ -184,10 +184,15 @@ export type LeftMenu = {
  */
 export interface MenuService {
   loadWorkspaces(user?: LoginUserInfo): Workspace[];
+
   loadCurrentWorkspace(): Workspace | undefined;
+
   loadMenus(workspace: Workspace, user: LoginUserInfo): LeftMenu[];
+
   loadProjectMenus(p: Project): Menu[];
+
   loadApplicationEnvMenus(p: Project, app: ApplicationBase, env: EnvBinding): Menu[];
+
   loadPluginMenus(): Promise<Menu[]>;
 }
 
@@ -196,6 +201,7 @@ export class MenuWrapper implements MenuService {
   private menus: Menu[];
   private workspaces: Workspace[];
   private pluginLoaded: boolean;
+
   constructor() {
     this.menus = _.cloneDeep(defaultWorkspaceMenus);
     this.workspaces = _.cloneDeep(defaultWorkspaces);
@@ -238,6 +244,7 @@ export class MenuWrapper implements MenuService {
   getWorkspace(name: string): Workspace | undefined {
     return this.workspaces.find((w) => w.name == name);
   }
+
   // This function should be called after calling the loadPluginMenus function
   loadCurrentWorkspace(): Workspace | undefined {
     let w: Workspace | undefined = undefined;
@@ -284,9 +291,11 @@ export class MenuWrapper implements MenuService {
     });
     return matched;
   }
+
   loadProjectMenus(p: Project): Menu[] {
     return [];
   }
+
   loadApplicationEnvMenus(p: Project, app: ApplicationBase, env: EnvBinding): Menu[] {
     return [];
   }
