@@ -150,7 +150,6 @@ export class BackendWrapper implements BackendSrv {
   }
 
   get(url: string, params?: any, customError?: boolean) {
-    console.log('get', url, params,)
     return this.axiosInstance
       .get(baseURL + url, params)
       .then((res) => {
