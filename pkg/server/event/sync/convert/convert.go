@@ -221,6 +221,13 @@ func FromCRWorkflowRecord(app *v1beta1.Application, workflow model.Workflow, rev
 				Type:  step.Type,
 			},
 		}
+		for _, subStep := range step.SubSteps {
+			steps[i].SubStepsStatus = append(steps[i].SubStepsStatus, model.StepStatus{
+				Name:  subStep.Name,
+				Alias: subStep.Alias,
+				Type:  subStep.Type,
+			})
+		}
 	}
 	return &model.WorkflowRecord{
 		WorkflowName:       workflow.Name,

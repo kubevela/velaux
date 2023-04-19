@@ -1759,22 +1759,29 @@ func (c *applicationServiceImpl) resetApp(ctx context.Context, targetApp *v1beta
 }
 
 func (c *applicationServiceImpl) RollbackWithRevision(ctx context.Context, application *model.Application, revisionVersion string) (*apisv1.ApplicationRollbackResponse, error) {
-	revision, err := c.DetailRevision(ctx, application.Name, revisionVersion)
+	revisionDetail, err := c.DetailRevision(ctx, application.Name, revisionVersion)
 	if err != nil {
 		return nil, err
 	}
+	revision := revisionDetail.ApplicationRevision
 	appCR, err := c.GetApplicationCRInEnv(ctx, application, revision.EnvName)
 	if err != nil {
 		return nil, err
 	}
 	var publishVersion = utils.GenerateVersion(revision.WorkflowName)
 	noRevision := false
+	revisionCRName := revision.RevisionCRName
 	var rollbackApplication *v1beta1.Application
 	if appCR != nil {
 		// The RevisionCRName is incorrect in the old version, ignore it.
 		if revision.RevisionCRName == revision.Version || revision.RevisionCRName == "" {
 			noRevision = true
 		} else {
+			// clear the revisionCR name
+			revision.RevisionCRName = ""
+			if err := c.Store.Put(ctx, &revision); err != nil {
+				return nil, err
+			}
 			_, appCR, err := app.RollbackApplicationWithRevision(context.WithValue(ctx, &app.RevisionContextKey, utils.WithProject(ctx, "")), c.KubeClient, appCR.Name, appCR.Namespace, revision.RevisionCRName, publishVersion)
 			if err != nil {
 				switch {
@@ -1783,6 +1790,10 @@ func (c *applicationServiceImpl) RollbackWithRevision(ctx context.Context, appli
 				case errors.Is(err, app.ErrRevisionNotChange):
 					return nil, bcode.ErrApplicationRevisionConflict
 				default:
+					revision.RevisionCRName = revisionCRName
+					if err := c.Store.Put(ctx, &revision); err != nil {
+						return nil, err
+					}
 					return nil, err
 				}
 			}
