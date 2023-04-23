@@ -130,7 +130,10 @@ func (a *ApplicationSync) Start(ctx context.Context, errorChan chan error) {
 			klog.Infof("delete the application (%s/%s) metadata successfully", app.Namespace, app.Name)
 		},
 	}
-	informer.AddEventHandler(handlers)
+	_, err = informer.AddEventHandler(handlers)
+	if err != nil {
+		klog.ErrorS(err, "failed to add event handler for application sync")
+	}
 	klog.Info("app syncing started")
 	informer.Run(ctx.Done())
 }
