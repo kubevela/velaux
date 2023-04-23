@@ -2,6 +2,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"strconv"
+	"vela/config"
 )
 
 metadata: {
@@ -50,6 +51,10 @@ template: {
 				"protocol-use-http": strconv.FormatBool(parameter.useHTTP)
 			}
 		}
+	}
+
+  validation: config.#ImageRegistry & {
+		$params: parameter
 	}
 
 	parameter: {
