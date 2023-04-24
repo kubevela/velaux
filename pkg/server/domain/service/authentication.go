@@ -492,8 +492,14 @@ func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 			klog.Errorf("failed to get the system info %s", err.Error())
 		}
 		user := &model.User{
-			Email:         claims.Email,
-			Name:          strings.ToLower(claims.Sub),
+			Email: claims.Email,
+			Name: func() string {
+				sub := strings.ToLower(claims.Sub)
+				if len(sub) > datastore.PrimaryKeyMaxLength {
+					return sub[:datastore.PrimaryKeyMaxLength]
+				}
+				return sub
+			}(),
 			DexSub:        claims.Sub,
 			Alias:         claims.Name,
 			LastLoginTime: time.Now(),
