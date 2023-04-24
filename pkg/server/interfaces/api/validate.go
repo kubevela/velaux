@@ -23,6 +23,7 @@ import (
 	"github.com/go-playground/validator/v10"
 
 	"github.com/kubevela/velaux/pkg/server/domain/service"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 )
 
 var validate = validator.New()
@@ -72,7 +73,7 @@ func ValidatePayloadType(fl validator.FieldLevel) bool {
 // ValidateName custom check name field
 func ValidateName(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
-	if len(value) > 31 || len(value) < 2 {
+	if len(value) > datastore.PrimaryKeyMaxLength || len(value) < 2 {
 		return false
 	}
 	return nameRegexp.MatchString(value)
