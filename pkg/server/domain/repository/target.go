@@ -26,7 +26,6 @@ import (
 	"github.com/oam-dev/kubevela/pkg/multicluster"
 	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/utils"
-	velaerr "github.com/oam-dev/kubevela/pkg/utils/errors"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
@@ -38,28 +37,15 @@ func CreateTargetNamespace(ctx context.Context, k8sClient client.Client, cluster
 	if clusterName == "" || namespace == "" {
 		return bcode.ErrTargetInvalidWithEmptyClusterOrNamespace
 	}
-	err := utils.CreateOrUpdateNamespace(multicluster.ContextWithClusterName(ctx, clusterName), k8sClient, namespace, utils.MergeOverrideLabels(map[string]string{
+	return utils.CreateOrUpdateNamespace(multicluster.ContextWithClusterName(ctx, clusterName), k8sClient, namespace, utils.MergeOverrideLabels(map[string]string{
 		oam.LabelRuntimeNamespaceUsage: oam.VelaNamespaceUsageTarget,
-	}), utils.MergeNoConflictLabels(map[string]string{
 		oam.LabelNamespaceOfTargetName: targetName,
 	}))
-	if velaerr.IsLabelConflict(err) {
-		klog.Errorf("update namespace for target err %v", err)
-		return bcode.ErrTargetNamespaceAlreadyBound
-	}
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // DeleteTargetNamespace delete the namespace of the target
 func DeleteTargetNamespace(ctx context.Context, k8sClient client.Client, clusterName, namespace, targetName string) error {
 	err := utils.UpdateNamespace(multicluster.ContextWithClusterName(ctx, clusterName), k8sClient, namespace,
-		// check no conflict label first to make sure the namespace belong to the target, then override it
-		utils.MergeNoConflictLabels(map[string]string{
-			oam.LabelNamespaceOfTargetName: targetName,
-		}),
 		utils.MergeOverrideLabels(map[string]string{
 			oam.LabelRuntimeNamespaceUsage: "",
 			oam.LabelNamespaceOfTargetName: "",
