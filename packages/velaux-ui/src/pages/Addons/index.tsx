@@ -147,6 +147,7 @@ class Addons extends React.Component<Props, State> {
       plugin
     } = this.props;
 
+    console.log(loading)
     const addonLoading = loading.models.addons;
     const pluginLoading = loading.models.plugins;
     const { showAddonDetail, addonName, showRegistryManage, tagList, selectTags } = this.state;

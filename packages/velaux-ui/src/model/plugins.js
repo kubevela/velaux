@@ -57,16 +57,22 @@ export default {
     addBatchPluginToCache(state, {type, payload}) {
       // add the plugin to pluginList if not exist
       const pluginList = state.pluginList;
+      const enabledPlugins = state.enabledPlugins
       // make a copy to newPluginList
       const newPluginList = pluginList.slice();
       for (const plugin of payload) {
         if (!newPluginList.find(p => p.id === plugin.id)) {
           newPluginList.push(plugin);
+          if(plugin.enabled){
+            enabledPlugins.push(plugin);
+          }
         }
       }
+      console.log(newPluginList,enabledPlugins);
       return {
         ...state,
         pluginList: newPluginList,
+        enabledPlugins: enabledPlugins,
       }
     },
     removePluginDetail(state, {type, payload}) {
@@ -111,7 +117,7 @@ export default {
     * getPluginList(action, {call, put}) {
       const res = yield call(getPluginList, action.payload);
       if (res) {
-        yield put({type: 'updatePluginList', payload: res});
+        yield put({type: 'addBatchPluginToCache', payload: res.plugins});
       }
     },
     * detailPlugin(action, {call, put}) {

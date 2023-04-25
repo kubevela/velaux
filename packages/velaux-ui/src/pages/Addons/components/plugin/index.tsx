@@ -2,12 +2,12 @@ import React from 'react';
 import { connect } from 'dva';
 import './index.less';
 
-import { Box, Button, Dialog, List, Message } from "@alifd/next";
+import { Grid, Message } from "@alifd/next";
 import type { KeyValue, PluginMeta, } from '@velaux/data';
-import { PluginType } from "@velaux/data";
-import PluginConfig from "../plugin-config";
 import i18n from "../../../../i18n";
+import { If } from "../../../../components/If";
 import Empty from "../../../../components/Empty";
+import PluginCard from "../plugin-card";
 
 type State = {
   iconValid: KeyValue<boolean>;
@@ -17,7 +17,7 @@ type State = {
 
 type Props = {
   dispatch: ({}) => {};
-  pluginList?: PluginMeta[];
+  pluginList: PluginMeta[];
   enabledPlugins?: PluginMeta[];
   errorMessage?: string;
   history?: {
@@ -28,6 +28,17 @@ type Props = {
   };
 };
 
+function pluginEnabled(p: PluginMeta) {
+  return p.enabled;
+}
+
+function pluginInstalled(p: PluginMeta) {
+  return !!p.info
+}
+
+function pluginUninstalled(p: PluginMeta) {
+  return !pluginInstalled(p)
+}
 
 @connect((store: any) => {
   return { ...store.plugins };
@@ -39,6 +50,10 @@ class Plugin extends React.Component<Props, State> {
       iconValid: {},
       showConfig: false,
     };
+  }
+
+  static defaultProps = {
+    pluginList: [],
   }
 
   installPlugin(id: string, url: string) {
@@ -93,6 +108,7 @@ class Plugin extends React.Component<Props, State> {
         }
       });
     }
+    this.sortedPlugins()
   }
 
   componentDidUpdate(prevProps: Readonly<Props>) {
@@ -130,105 +146,59 @@ class Plugin extends React.Component<Props, State> {
     }
   };
 
-  handleConfigClose = () => {
-    const plugin = this.state.currentPlugin
-    if (!plugin || !plugin.id) {
-      return
-    }
-    this.props.dispatch({
-      type: 'plugins/detailPlugin',
-      payload: { id: plugin.id },
+
+  sortedPlugins = () => {
+    // put enabled plugin first, then installed plugin, then others
+    const { pluginList } = this.props
+    let enabledPlugins = pluginList.filter(pluginEnabled)
+    let uninstalledPlugins = pluginList.filter(pluginUninstalled)
+    let installedPlugins = pluginList.filter((p) => {
+      return pluginInstalled(p) && !pluginEnabled(p)
     })
-    this.setState({
-      showConfig: false,
-    })
-
-  }
-
-  handleGoToPage = (plugin: PluginMeta) => {
-    const { id } = plugin;
-    this.props.history?.push(`/plugins/${id}`)
-  }
-
-  handleGoToPluginConfig = (plugin: PluginMeta) => {
-    const { id } = plugin;
-    this.props.history?.push(`/plugin-config/${id}`)
+    return [...enabledPlugins, ...installedPlugins, ...uninstalledPlugins]
   }
 
   render() {
     const { pluginList, enabledPlugins } = this.props;
-    const { currentPlugin, showConfig } = this.state;
+    console.log(pluginList)
+    const { Row, Col } = Grid;
 
     return (
       <div>
-        <Dialog
-          title={`${currentPlugin ? currentPlugin.name : ""} Configuration`}
-          visible={showConfig}
-          footerActions={[]}
-          onClose={() => this.setState({ showConfig: false })}
-          style={{ width: '80%', height: '80%', overflow: 'auto' }}
-          closeMode={['close', 'esc', 'mask']}
-        >
-          {(() => {
-            if (currentPlugin) {
-              return <PluginConfig plugin={currentPlugin} />
-            }
-            return <Empty />
-          })()}
-        </Dialog>
-        <List className="plugin-list">
-          {pluginList?.map((plugin) => {
-            const isEnabled = enabledPlugins?.some((p) => p.id === plugin.id);
-            const isInstalled = !!plugin.info;
+        <If condition={pluginList}>
+          <div style={{ marginTop: '20px' }}>
+            <Row wrap={true} gutter={16}>
+              {pluginList && this.sortedPlugins().map((plugin: PluginMeta, index: number) => {
+                return (
+                  <Col xl={4} l={6} m={8} s={12} key={index}>
+                    <div style={{ marginBottom: '20px' }}>
+                      <PluginCard
+                        id={plugin.id}
+                        icon={plugin.info?.logos?.small}
+                        enabled={enabledPlugins?.some((p) => p.id === plugin.id)}
+                        installed={!!plugin.info}
+                        description={plugin.info?.description}
+                        tags={[]}
+                        history={this.props.history}
+                        url={plugin.url}
+                      />
+                    </div>
+                  </Col>
+                )
+              })
+              }
+            </Row>
+          </div>
 
-            return (
-              <List.Item key={plugin.id} className="plugin-row">
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                  <a onClick={() => {
-                    if (plugin.type === PluginType.PageApp) {
-                      this.handleGoToPage(plugin)
-                    }
-                  }}>
-                    <div>{plugin.id}</div>
-                  </a>
-                  <div>
-                    <Box spacing={8} direction="row">
-                      {isInstalled && isEnabled && (
-                        <Button onClick={() => this.handleGoToPluginConfig(plugin)}>Config</Button>
-                      )}
+        </If>
+        <If condition={!pluginList || pluginList.length == 0}>
+          <Empty style={{ minHeight: '400px' }} />
+        </If>
 
-                      {!isInstalled && (
-                        <Button type="primary" onClick={() => this.installPlugin(plugin.id, plugin.url)}>
-                          Install
-                        </Button>
-                      )}
-
-                      {isInstalled && !isEnabled && (
-                        <Button type={"primary"} onClick={() => this.handleGoToPluginConfig(plugin)}>Enable</Button>
-                      )}
-
-                      {isInstalled && isEnabled && (
-                        <Button warning onClick={() => this.disablePlugin(plugin.id)}>Disable</Button>
-                      )}
-
-                      {isInstalled && !isEnabled && (
-                        <Button warning onClick={() => this.uninstallPlugin(plugin.id)}>
-                          Uninstall
-                        </Button>
-                      )}
-
-                    </Box>
-                  </div>
-                </div>
-              </List.Item>
-            );
-          })}
-        </List>
       </div>
     );
-  }
-  ;
+  };
 }
 
 export default Plugin;
+

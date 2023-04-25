@@ -1,6 +1,6 @@
 import { PluginMeta } from '@velaux/data';
 import { getBackendSrv } from '../BackendService';
-import {managePlugin} from "../../api/productionLink";
+import { managePlugin } from "../../api/productionLink";
 
 const cache: Record<string, string> = {};
 const initializedAt: number = Date.now();

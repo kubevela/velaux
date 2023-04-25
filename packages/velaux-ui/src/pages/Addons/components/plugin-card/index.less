@@ -1,0 +1,25 @@
+.plugin-card {
+  color: black;
+  height: fit-content;
+  background: #eeeeee;
+  border: 0;
+
+  :hover {
+    background-color: #e0e0e0;
+  }
+  .plugin-card-content{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .plugin-desc{
+      height: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  .install-btn{
+    float: right;
+  }
+}
