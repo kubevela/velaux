@@ -27,10 +27,6 @@ type Props = {
   registryList: [];
   addonListMessage: string;
   enabledAddons?: AddonBaseStatus[];
-
-  // plugin props
-  pluginList: PluginMeta[];
-  enabledPlugins?: PluginMeta[];
 };
 
 type State = {
@@ -47,7 +43,6 @@ type State = {
 class Addons extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    console.log('props', props)
     this.state = {
       showAddonDetail: false,
       addonName: '',
@@ -60,7 +55,6 @@ class Addons extends React.Component<Props, State> {
     this.getAddonsList();
     this.getAddonRegistriesList();
     this.getEnabledAddon();
-    this.getPluginList()
   }
 
   getAddonsList = async (params = {}) => {
@@ -147,7 +141,6 @@ class Addons extends React.Component<Props, State> {
       plugin
     } = this.props;
 
-    console.log(loading)
     const addonLoading = loading.models.addons;
     const pluginLoading = loading.models.plugins;
     const { showAddonDetail, addonName, showRegistryManage, tagList, selectTags } = this.state;
@@ -159,8 +152,10 @@ class Addons extends React.Component<Props, State> {
           subTitle="Manages extended platform capabilities for KubeVela and VelaUX."
         />
 
-        <Tab defaultActiveKey={plugin ? 'plugin' : 'addon'}>
-          <Tab.Item title="Addons" key={'addon'}>
+        <Tab defaultActiveKey={plugin ? 'plugins' : 'addons'}
+             onChange={key => history.push('/' + key)}
+        >
+          <Tab.Item title="Addons" key={'addons'}>
             <SelectSearch
               dispatch={dispatch}
               tagList={tagList}
@@ -217,7 +212,7 @@ class Addons extends React.Component<Props, State> {
               />
             </If>
           </Tab.Item>
-          <Tab.Item title="VelaUX Plugins" key={'plugin'}>
+          <Tab.Item title="VelaUX Plugins" key={'plugins'}>
             <Loading visible={pluginLoading} style={{ width: '100%' }}>
               <Plugin
                 dispatch={dispatch}

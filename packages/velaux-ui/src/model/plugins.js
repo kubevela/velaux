@@ -58,17 +58,27 @@ export default {
       // add the plugin to pluginList if not exist
       const pluginList = state.pluginList;
       const enabledPlugins = state.enabledPlugins
+      console.log(pluginList)
+      console.log('payload', payload)
       // make a copy to newPluginList
       const newPluginList = pluginList.slice();
+      // merge payload to newPluginList
       for (const plugin of payload) {
-        if (!newPluginList.find(p => p.id === plugin.id)) {
+        let idx = newPluginList.findIndex(p => p.id === plugin.id)
+        if (idx === -1) {
+          console.log(plugin, 'added')
           newPluginList.push(plugin);
-          if(plugin.enabled){
+          if (plugin.enabled) {
             enabledPlugins.push(plugin);
           }
+        } else {
+          const _old = newPluginList[idx]
+          const _new = {..._old, ...plugin}
+          console.log(plugin, 'enabled')
+          enabledPlugins[idx] = _new
         }
       }
-      console.log(newPluginList,enabledPlugins);
+      console.log(newPluginList, enabledPlugins);
       return {
         ...state,
         pluginList: newPluginList,
@@ -97,14 +107,19 @@ export default {
   },
   effects: {
     * installPlugin(action, {call, put}) {
-      const res = yield call(installPlugin, action.payload);
-      if (res.info) {
-        // There's no url in returned plugin object, so we need to set it after calling
-        res.url = action.payload.url
-        yield put({type: 'addOrUpdatePlugin', payload: res});
-        if (action.callback) {
-          action.callback();
+      try {
+        const res = yield call(installPlugin, action.payload);
+        if (res && res.info) {
+          // There's no url in returned plugin object, so we need to set it after calling
+          res.url = action.payload.url
+          yield put({type: 'addOrUpdatePlugin', payload: res});
+          yield put({type: 'addPluginToEnableList', payload: res});
+          if (action.callback) {
+            action.callback();
+          }
         }
+      } catch (e) {
+        console.log('Error in installPlugin:', e)
       }
     },
     * uninstallPlugin(action, {call, put}) {
@@ -116,6 +131,7 @@ export default {
     },
     * getPluginList(action, {call, put}) {
       const res = yield call(getPluginList, action.payload);
+      console.log(res)
       if (res) {
         yield put({type: 'addBatchPluginToCache', payload: res.plugins});
       }

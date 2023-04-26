@@ -7,13 +7,14 @@ import _ from 'lodash'; // eslint-disable-line lodash/import-scope
 import moment from 'moment'; // eslint-disable-line no-restricted-imports
 import react from 'react';
 import * as velauxData from '@velaux/data'; // eslint-disable-line no-restricted-imports
+import { AppPagePlugin, PluginLink, PluginMeta, PluginType } from '@velaux/data';
 import * as velauxUI from '../types'; // eslint-disable-line no-restricted-imports
+import { Addon } from '../types';
 import * as ReactDom from 'react-dom';
 import * as DvaRouter from 'dva/router';
 import * as Redux from 'redux';
 import builtInPlugins from './plugin/BuiltInPlugins';
 import { getPluginInfo, locateWithCache, registerPluginInCache } from './plugin/PluginCache';
-import { PluginMeta, AppPagePlugin, PluginType } from '@velaux/data';
 import { getBackendSrv } from './BackendService';
 
 /**
@@ -86,12 +87,15 @@ export function importAppPagePlugin(meta: PluginMeta): Promise<AppPagePlugin> {
  */
 export interface PluginService {
   listAppPagePlugins(): Promise<PluginMeta[]>;
-  loadPlugin(pluginID: string): Promise<PluginMeta>;
+
+  loadMeta(pluginID: string): Promise<PluginMeta | PluginLink>;
 }
 
 /** @internal */
 export class PluginWrapper implements PluginService {
-  constructor() {}
+  constructor() {
+  }
+
   listAppPagePlugins(): Promise<PluginMeta[]> {
     return getBackendSrv()
       .get('/api/v1/plugins')
@@ -103,14 +107,26 @@ export class PluginWrapper implements PluginService {
         return Promise.reject(new Error('Unknown Plugins'));
       });
   }
-  loadPlugin(pluginID: string): Promise<PluginMeta> {
-    return getPluginInfo(pluginID);
+
+  async loadMeta(pluginID: string): Promise<PluginMeta> {
+    let sourceAddon: Addon | undefined = undefined
+
+
+    const meta = await getPluginInfo(pluginID);
+    if (sourceAddon) {
+      meta.addon = sourceAddon
+    }
+    return Promise.resolve(meta)
+
+    return Promise.reject(new Error('Unknown Plugins'))
   }
 }
 
 /**
  * @private
  */
-let pluginService: PluginService = new PluginWrapper();
+let
+  pluginService: PluginService = new PluginWrapper();
 
-export const getPluginSrv = (): PluginService => pluginService;
+export const
+  getPluginSrv = (): PluginService => pluginService;

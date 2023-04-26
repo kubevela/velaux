@@ -50,11 +50,21 @@ class Plugin extends React.Component<Props, State> {
       iconValid: {},
       showConfig: false,
     };
+
+    this.installPlugin = this.installPlugin.bind(this);
   }
 
   static defaultProps = {
     pluginList: [],
   }
+
+  getPluginList = async (params = {}) => {
+    this.props.dispatch({
+      type: 'plugins/getPluginList',
+      payload: params,
+    });
+  }
+
 
   installPlugin(id: string, url: string) {
     this.props.dispatch({
@@ -62,7 +72,6 @@ class Plugin extends React.Component<Props, State> {
       payload: { id, url },
       callback: () => {
         Message.success(i18n.t("Install Success. Enabled automatically."));
-        this.render()
       }
     });
   }
@@ -73,10 +82,8 @@ class Plugin extends React.Component<Props, State> {
       payload: { id },
       callback: () => {
         Message.success(i18n.t("Uninstall Success."));
-        this.render()
       }
     });
-
   }
 
   enablePlugin(id: string) {
@@ -100,15 +107,17 @@ class Plugin extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const { pluginList } = this.props;
-    if (pluginList) {
-      pluginList.forEach((plugin) => {
-        if (plugin.name && plugin.info?.logos?.small) {
-          this.checkImage(plugin.name, plugin.info.logos.small);
-        }
-      });
-    }
-    this.sortedPlugins()
+    this.getPluginList().then(() => {
+      const { pluginList } = this.props;
+      if (pluginList) {
+        pluginList.forEach((plugin) => {
+          if (plugin.name && plugin.info?.logos?.small) {
+            this.checkImage(plugin.name, plugin.info.logos.small);
+          }
+        });
+      }
+      this.sortedPlugins()
+    })
   }
 
   componentDidUpdate(prevProps: Readonly<Props>) {
@@ -160,7 +169,6 @@ class Plugin extends React.Component<Props, State> {
 
   render() {
     const { pluginList, enabledPlugins } = this.props;
-    console.log(pluginList)
     const { Row, Col } = Grid;
 
     return (
@@ -181,6 +189,7 @@ class Plugin extends React.Component<Props, State> {
                         tags={[]}
                         history={this.props.history}
                         url={plugin.url}
+                        onInstall={this.installPlugin}
                       />
                     </div>
                   </Col>
@@ -201,4 +210,3 @@ class Plugin extends React.Component<Props, State> {
 }
 
 export default Plugin;
-

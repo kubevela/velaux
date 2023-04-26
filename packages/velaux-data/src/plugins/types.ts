@@ -1,5 +1,6 @@
 import { ComponentType } from 'react';
 import { KeyValue, MenuType, ResourceAction, Workspace } from '..';
+import { Addon } from '../../../velaux-ui'
 
 export enum PluginType {
   PageApp = 'page-app',
@@ -51,7 +52,7 @@ export interface PluginInclude {
   catalog?: string;
 }
 
-export interface PluginMeta<T extends KeyValue = {}> extends PluginLink {
+export interface PluginMeta<T extends KeyValue = {}> extends PluginLink, SourceAddon {
   id: string;
   name: string;
   type: PluginType;
@@ -83,8 +84,17 @@ export interface PluginMeta<T extends KeyValue = {}> extends PluginLink {
  * Represents a plugin and link to get plugin tarball
  */
 export interface PluginLink {
+  name: string
   url: string
 }
+
+/**
+ * Represents a plugin linked to
+ */
+export interface SourceAddon {
+  addon: Addon
+}
+
 
 export interface PluginConfigPageProps<T extends PluginMeta> {
   plugin: VelaUXPlugin<T>;

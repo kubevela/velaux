@@ -3,7 +3,9 @@ import { FaLink } from 'react-icons/fa';
 
 import './index.less';
 
-import { Card, Grid, Tag } from '@alifd/next';
+import { Box, Button, Card, Grid, Tag } from '@alifd/next';
+import i18n from "i18next";
+import { checkImage } from "../../../../utils/icon";
 
 type State = {
   iconValid: boolean
@@ -25,6 +27,7 @@ type Props = {
       pathname: string;
     };
   };
+  onInstall: (id: string, url: string) => void
 };
 
 
@@ -36,43 +39,34 @@ class PluginCard extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      iconValid: true
+      iconValid: false,
     };
   }
 
-  checkImage = (icon?: string) => {
-    if (icon && icon !== 'none' && icon !== '') {
-      const img = new Image();
-      img.src = icon;
-      img.onload = () => {
-        this.setState((preState) => {
-          return { ...preState, iconValid: true };
-        });
-      }
-      img.onerror = () => {
-        this.setState((preState) => {
-          return { ...preState, iconValid: false };
-        });
-      }
-    } else {
-      this.setState((preState) => {
-        return { ...preState, iconValid: false };
-      });
-    }
-  };
+  setValid = (valid: boolean) => {
+    this.setState((preState) => {
+      return { ...preState, iconValid: valid }
+    })
+  }
 
   componentDidMount() {
-    this.checkImage(this.props.icon);
+    if (this.props.icon) {
+      checkImage(this.props.icon, this.setValid)
+    }
   }
 
   componentDidUpdate(prevProps: Readonly<Props>) {
-    if (prevProps.icon !== this.props.icon) {
-      this.checkImage(this.props.icon);
+    if (prevProps.icon !== this.props.icon && this.props.icon) {
+      checkImage(this.props.icon, this.setValid)
     }
   }
 
   handleGoToPage = (id: string) => {
     this.props.history?.push(`/plugins/${id}`)
+  }
+
+  handleInstall = (id: string, url: string) => {
+    this.props.onInstall(id, url)
   }
 
   handleGoToPluginConfig = (id: string) => {
@@ -91,8 +85,6 @@ class PluginCard extends React.Component<Props, State> {
       installed,
       url,
     } = this.props;
-    console.log(url)
-
     const nameUpper = (name: string) => {
       return name
         .split('-')
@@ -141,13 +133,13 @@ class PluginCard extends React.Component<Props, State> {
       <div className={'plugin-card'}>
         <a onClick={() => this.handleGoToPluginConfig(id)}>
           <Card style={{ background: 'transparent', borderStyle: 'none', color: 'black' }} contentHeight={180}>
-            <Row align={"center"}>
-              <Col l={8}>
+            <Box align={"center"} spacing={16} direction={'row'}>
+              <Box >
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   {renderIcon(id, icon)}
                 </div>
-              </Col>
-              <Col l={16}>
+              </Box>
+              <Box >
                 {enabled &&
                     <a onClick={(e) => {
                       e.stopPropagation();
@@ -159,21 +151,41 @@ class PluginCard extends React.Component<Props, State> {
                 {
                   !enabled && <div style={{ fontSize: '20px' }}>{id}</div>
                 }
-              </Col>
-            </Row>
+              </Box>
+            </Box>
             <div className={'plugin-card-content'}>
               <Row id={'desc'} className={'plugin-desc'}>
                 <h4 className={'font-size-14'}>{description ? description : "No descriptions"}</h4>
               </Row>
-              <Row id={'tags'} gutter={8}>
-                  <div style={{ fontSize: '14px' }}>
+              <Row id={'tags'} gutter={1}>
+                <Col span={
+                  (url && url !== "" && !installed) ? 18 : 24
+                }>
+                  <Box direction={'row'} wrap={true} spacing={[4, 4]}>
                     {tags.map((t: string) => {
                         return (
-                          <Tag type="normal">{t}</Tag>
+                          <Tag size={'small'} className={'tag'} type={t === 'enabled'||t === 'installed' ? 'primary' : 'normal'} color={
+                            t === 'installed'||t === 'enabled'? 'green' : ''
+                          }>{t}</Tag>
                         );
                       }
                     )}
-                  </div>
+                    <Tag size={'small'} type="normal">{'test1'}</Tag>
+                    <Tag size={'small'} type="normal">{'test2'}</Tag>
+                    <Tag size={'small'} type="normal">{'test3'}</Tag>
+                    <Tag size={'small'} type="normal">{'test4'}</Tag>
+                  </Box>
+                </Col>
+                {url && url !== "" && !installed &&
+                    <Col span={6}>
+                      <Box align={'flex-end'}>
+                        <Button className={'no-hover'} type={"primary"}  onClick={(e) => {
+                          e.stopPropagation();
+                          this.handleInstall(id, url)
+                        }}>{i18n.t('Install')}</Button>
+                      </Box>
+                    </Col>
+                }
               </Row>
             </div>
           </Card>
