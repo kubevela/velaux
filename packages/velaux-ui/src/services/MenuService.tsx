@@ -99,7 +99,7 @@ const defaultWorkspaceMenus: Menu[] = [
     label: 'Addons & Plugins',
     name: 'addon-list',
     permission: { resource: 'addon:*', action: 'list' },
-    relatedRoute: ['/addons', '/plugins', '/plugin-config'],
+    relatedRoute: ['/addons', '/plugins'],
   },
   {
     workspace: 'extension',

@@ -163,7 +163,6 @@ class Plugin extends React.Component<Props, State> {
     let installedPlugins = pluginList.filter((p) => {
       return pluginInstalled(p) && !pluginEnabled(p)
     })
-    console.log(enabledPlugins, installedPlugins, uninstalledPlugins)
     return [...enabledPlugins, ...installedPlugins, ...uninstalledPlugins]
   }
 

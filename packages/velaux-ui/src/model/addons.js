@@ -44,12 +44,6 @@ export default {
           if (addon.uxPlugins && Object.keys(addon.uxPlugins).length > 0) {
             for (const [key, value] of Object.entries(addon.uxPlugins)) {
               uxPlugins.push({id: key, url: value, addon: addon})
-              // Add ten test data
-              if (key === 'node-dashboard') {
-                for (let i = 0; i < 10; i++) {
-                  uxPlugins.push({id: key + i, url: value, addon: addon})
-                }
-              }
             }
           }
         }

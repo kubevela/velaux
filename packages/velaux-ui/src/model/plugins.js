@@ -25,24 +25,19 @@ export default {
     addOrUpdateBatchPlugins(state, {type, payload}) {
       // add the plugin to pluginList if not exist
       const pluginList = state.pluginList;
-      console.log(pluginList)
-      console.log('payload', payload)
       // make a copy to newPluginList
       const newPluginList = pluginList.slice();
       // merge payload to newPluginList
       for (const plugin of payload) {
         let idx = newPluginList.findIndex(p => p.id === plugin.id)
         if (idx === -1) {
-          console.log(plugin, 'added')
           newPluginList.push(plugin);
         } else {
           const _old = newPluginList[idx]
           const _new = {..._old, ...plugin}
-          console.log(plugin, 'updated')
           newPluginList[idx] = _new
         }
       }
-      console.log(newPluginList);
       return {
         ...state,
         pluginList: newPluginList,

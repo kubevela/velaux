@@ -1,7 +1,7 @@
 import { AppPagePlugin, PluginMeta } from '@velaux/data';
 import * as React from 'react';
-import { Translation } from '../../components/Translation';
-import { locationService } from '../../services/LocationService';
+import { Translation } from '../../components';
+import { locationService } from '../../services';
 import { getPluginSrv, importAppPagePlugin } from '../../services/PluginService';
 import { Box, Button, Divider, Grid, Loading, Tab } from "@alifd/next";
 import './index.less'
@@ -43,6 +43,7 @@ const types = {
 function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
   const [valid, setValid] = React.useState(false)
   const [app, setApp] = React.useState<AppPagePlugin>();
+  const [jsonData, setJsonData] = React.useState(app?.meta.jsonData??[])
 
   const _meta = pluginList.filter(item => item.id === pluginId)[0]
   const updateMeta = (previousState: any, action: any) => {
@@ -149,7 +150,7 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
           }</h1>
           <Row className={'basic-info font-size-16'}>
             <Col>
-              <div>Version</div>
+              <div className={'info-item-title'}>Version</div>
               <div>{meta.info.version}</div>
             </Col>
             <Col>
@@ -157,7 +158,7 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
             </Col>
             <Col>
               <Box direction={'column'}>
-                <div>Author</div>
+                <div className={'info-item-title'}>Author</div>
                 <div>{meta.info.author?.name ?? "Unknown"}</div>
               </Box>
             </Col>
@@ -165,9 +166,9 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
               <Divider direction="ver" style={{ height: '100%' }} />
             </Col>
             <Col className={'info-item'}>
-              <div>Status</div>
+              <div className={'info-item-title'}>Status</div>
               <div>{
-                meta.enabled ? <Translation>Enabled</Translation> : <Translation>Disabled</Translation>
+                meta.enabled ? <Translation className={''}>Enabled</Translation> : <Translation>Disabled</Translation>
               }</div>
             </Col>
           </Row>

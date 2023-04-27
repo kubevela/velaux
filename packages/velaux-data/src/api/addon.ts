@@ -1,5 +1,5 @@
-import type { ApplicationStatus, UIParam } from '../../../velaux-ui/src/interface/application';
-import type { NameAlias } from '../../../velaux-ui/src/interface/env';
+import type { ApplicationStatus, UIParam } from './application';
+import type { NameAlias } from './env';
 import { KeyValue } from "@velaux/data";
 
 export interface Addon {

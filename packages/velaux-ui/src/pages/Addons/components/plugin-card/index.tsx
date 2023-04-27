@@ -74,7 +74,7 @@ class PluginCard extends React.Component<Props, State> {
 
   handleGoToPluginConfig = (id: string) => {
     if (this.props.installed) {
-      this.props.history?.push(`/plugin-config/${id}`)
+      this.props.history?.push(`/plugins/${id}/config`)
     }
   }
 
@@ -128,11 +128,19 @@ class PluginCard extends React.Component<Props, State> {
       }
     }
 
+    function getTags() {
+      let ts = [...tags, ...(sourceAddon?.tags ?? [])]
+      if (sourceAddon) {
+        ts.unshift(`from: ${sourceAddon.name}`)
+      }
+      return ts
+    }
+
     return (
       <div className={'plugin-card'}>
         <a onClick={() => this.handleGoToPluginConfig(id)}>
           <Card style={{ border: 'none' }} contentHeight={180}>
-            <Box direction={'column'} >
+            <Box direction={'column'}>
               <Box align={"center"} spacing={8} direction={'row'}>
                 <Box>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -155,13 +163,14 @@ class PluginCard extends React.Component<Props, State> {
               </Box>
               <Box flex={['auto']} className={'plugin-card-content'} direction={'column'} justify={'space-between'}>
                 <Box id={'desc'} className={'plugin-desc'}>
-                  <h4
-                    className={'font-size-14 font-color-keep'}>{description ?? (sourceAddon?.description ? sourceAddon?.description + ` (from addon ${sourceAddon?.name})` : "No descriptions")}</h4>
+                  <h4 className={'font-size-14 font-color-keep'}>
+                    {description ?? (sourceAddon?.description ?? "No descriptions")}
+                  </h4>
                 </Box>
                 <Row id={'tags'} gutter={1}>
                   <Col span={18}>
                     <Box direction={'row'} wrap={true} spacing={[4, 4]}>
-                      {[...tags, ...sourceAddon?.tags ?? []].map((t: string) => {
+                      {getTags().map((t: string) => {
                           return (
                             <div className={'hover-none'}>
                               <Tag size={'small'} className={'tag'} type={'normal'}>{t}</Tag>

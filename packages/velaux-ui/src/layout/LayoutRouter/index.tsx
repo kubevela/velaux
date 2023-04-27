@@ -406,15 +406,15 @@ export default function Router() {
         }}
       />
       <Route
-        path="/plugins/:pluginId"
+        path="/plugins/:pluginId/config"
         render={(props: any) => {
-          return <AppRootPage pluginId={props.match.params.pluginId}></AppRootPage>;
+          return <AppConfigPage pluginId={props.match.params.pluginId}></AppConfigPage>;
         }}
       />
       <Route
-        path="/plugin-config/:pluginId"
+        path="/plugins/:pluginId"
         render={(props: any) => {
-          return <AppConfigPage pluginId={props.match.params.pluginId}></AppConfigPage>;
+          return <AppRootPage pluginId={props.match.params.pluginId}></AppRootPage>;
         }}
       />
       <Route path="/notFound" component={NotFound} />
