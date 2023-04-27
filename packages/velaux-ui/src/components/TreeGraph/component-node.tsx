@@ -165,7 +165,6 @@ export const ComponentNode = (props: ComponentNodeProps) => {
       </Balloon>
     );
   };
-  console.log("--traits--", traits)
   const graphNode = (
     <div
       className={classNames('graph-node', 'graph-node-resource', {
@@ -203,15 +202,15 @@ export const ComponentNode = (props: ComponentNodeProps) => {
 
       <If condition={traits.length > 0}>
         <div className={classNames('label-traits')}>
-          {traits && (                                                                                                                                                                                                                                                                                                                                                                                        
+          {traits && traits.length > 0 && traits[0] && (                                                                                                                                                                                                                                                                                                                                                                                        
             <Tag animation={true}>
               <span
                 className={classNames('circle', {
-                  'circle-success': traits[0]?.healthy,
-                  'circle-failure': !traits[0]?.healthy,
+                  'circle-success': traits[0].healthy,
+                  'circle-failure': !traits[0].healthy,
                 })}
               />
-              {traits[0]?.type}
+              {traits[0].type}
             </Tag>
           )}
           <If condition={traits?.length > 1}>
