@@ -37,7 +37,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.addons, ...store.plugins, loading: store.loading };
+  return { ...store.addons, loading: store.loading };
 })
 class Addons extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -69,13 +69,6 @@ class Addons extends React.Component<Props, State> {
       },
     });
   };
-
-  getPluginList = async (params = {}) => {
-    this.props.dispatch({
-      type: 'plugins/getPluginList',
-      payload: params,
-    });
-  }
 
   generateTagList = () => {
     const { addonsList } = this.props;

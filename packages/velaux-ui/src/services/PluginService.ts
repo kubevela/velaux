@@ -9,7 +9,6 @@ import react from 'react';
 import * as velauxData from '@velaux/data'; // eslint-disable-line no-restricted-imports
 import { AppPagePlugin, PluginLink, PluginMeta, PluginType } from '@velaux/data';
 import * as velauxUI from '../types'; // eslint-disable-line no-restricted-imports
-import { Addon } from '../types';
 import * as ReactDom from 'react-dom';
 import * as DvaRouter from 'dva/router';
 import * as Redux from 'redux';
@@ -109,16 +108,7 @@ export class PluginWrapper implements PluginService {
   }
 
   async loadMeta(pluginID: string): Promise<PluginMeta> {
-    let sourceAddon: Addon | undefined = undefined
-
-
-    const meta = await getPluginInfo(pluginID);
-    if (sourceAddon) {
-      meta.addon = sourceAddon
-    }
-    return Promise.resolve(meta)
-
-    return Promise.reject(new Error('Unknown Plugins'))
+    return getPluginInfo(pluginID);
   }
 }
 

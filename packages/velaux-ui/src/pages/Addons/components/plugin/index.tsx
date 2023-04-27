@@ -18,7 +18,6 @@ type State = {
 type Props = {
   dispatch: ({}) => {};
   pluginList: PluginMeta[];
-  enabledPlugins?: PluginMeta[];
   errorMessage?: string;
   history?: {
     push: (path: string, state?: any) => void;
@@ -169,7 +168,7 @@ class Plugin extends React.Component<Props, State> {
   }
 
   render() {
-    const { pluginList, enabledPlugins } = this.props;
+    const { pluginList } = this.props;
     const { Row, Col } = Grid;
 
     return (
@@ -184,7 +183,7 @@ class Plugin extends React.Component<Props, State> {
                       <PluginCard
                         id={plugin.id}
                         icon={plugin.info?.logos?.small}
-                        enabled={enabledPlugins?.some((p) => p.id === plugin.id)}
+                        enabled={plugin.enabled}
                         installed={!!plugin.info}
                         description={plugin.info?.description}
                         tags={[]}
