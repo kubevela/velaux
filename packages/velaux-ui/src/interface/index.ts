@@ -4,5 +4,5 @@ export * from './application';
 export * from './env';
 export * from './cluster';
 export * from './user';
-export * from './addon';
+export * from '@velaux/data/src/api/addon';
 export * from './configs';

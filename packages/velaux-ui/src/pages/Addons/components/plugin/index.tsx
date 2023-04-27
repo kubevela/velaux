@@ -186,6 +186,7 @@ class Plugin extends React.Component<Props, State> {
                         enabled={plugin.enabled}
                         installed={!!plugin.info}
                         description={plugin.info?.description}
+                        sourceAddon={plugin.addon}
                         tags={[]}
                         history={this.props.history}
                         url={plugin.url}

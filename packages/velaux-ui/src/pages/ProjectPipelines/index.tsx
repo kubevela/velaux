@@ -14,7 +14,7 @@ import Permission from '../../components/Permission';
 import RunPipeline from '../../components/RunPipeline';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import type { AddonBaseStatus } from '../../interface/addon';
+import type { AddonBaseStatus } from '@velaux/data/src/api/addon';
 import type { NameAlias } from '../../interface/env';
 import type { PipelineBase, PipelineListItem, PipelineRun, RunStateInfo } from '../../interface/pipeline';
 import type { LoginUserInfo } from '../../interface/user';

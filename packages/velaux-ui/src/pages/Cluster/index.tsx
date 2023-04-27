@@ -9,7 +9,7 @@ import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { Addon } from '../../interface/addon';
+import type { Addon } from '@velaux/data/src/api/addon';
 
 import AddClusterDialog from './components/AddClusterDialog/index';
 import CardContend from './components/CardContent/index';

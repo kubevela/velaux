@@ -1,6 +1,6 @@
 import { ComponentType } from 'react';
 import { KeyValue, MenuType, ResourceAction, Workspace } from '..';
-import { Addon } from '../../../velaux-ui'
+import { Addon } from '../api'
 
 export enum PluginType {
   PageApp = 'page-app',

@@ -4,7 +4,6 @@ export default {
   namespace: 'plugins',
   state: {
     pluginList: [],
-    enabledPlugins: [],
   },
   reducers: {
     addOrUpdatePlugin(state, {type, payload}) {
@@ -26,7 +25,6 @@ export default {
     addOrUpdateBatchPlugins(state, {type, payload}) {
       // add the plugin to pluginList if not exist
       const pluginList = state.pluginList;
-      const enabledPlugins = state.enabledPlugins
       console.log(pluginList)
       console.log('payload', payload)
       // make a copy to newPluginList
@@ -37,9 +35,6 @@ export default {
         if (idx === -1) {
           console.log(plugin, 'added')
           newPluginList.push(plugin);
-          if (plugin.enabled) {
-            enabledPlugins.push(plugin);
-          }
         } else {
           const _old = newPluginList[idx]
           const _new = {..._old, ...plugin}
@@ -47,11 +42,10 @@ export default {
           newPluginList[idx] = _new
         }
       }
-      console.log(newPluginList, enabledPlugins);
+      console.log(newPluginList);
       return {
         ...state,
         pluginList: newPluginList,
-        enabledPlugins: enabledPlugins,
       }
     },
     removePluginDetail(state, {type, payload}) {

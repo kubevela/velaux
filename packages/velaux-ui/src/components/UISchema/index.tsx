@@ -31,7 +31,7 @@ import SecretSelect from '../../extends/SecretSelect';
 import Strings from '../../extends/Strings';
 import Numbers from '../../extends/Numbers';
 import Structs from '../../extends/Structs';
-import type { Definition } from '../../interface/addon';
+import type { Definition } from '@velaux/data/src/api/addon';
 import { checkImageName, replaceUrl } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import { getValue } from '../../utils/utils';

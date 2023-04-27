@@ -7,6 +7,7 @@ import { Box, Button, Card, Grid, Tag } from '@alifd/next';
 import i18n from "i18next";
 import { checkImage } from "../../../../utils/icon";
 import { If } from '../../../../components/If';
+import { Addon } from "@velaux/ui";
 
 type State = {
   iconValid: boolean
@@ -18,6 +19,7 @@ type Props = {
   installed?: boolean
   icon?: string
   description?: string
+  sourceAddon?: Addon;
   url?: string
 
   // default empty array
@@ -84,6 +86,7 @@ class PluginCard extends React.Component<Props, State> {
       icon,
       tags,
       description,
+      sourceAddon,
       enabled,
       installed,
       url,
@@ -129,75 +132,70 @@ class PluginCard extends React.Component<Props, State> {
       <div className={'plugin-card'}>
         <a onClick={() => this.handleGoToPluginConfig(id)}>
           <Card style={{ border: 'none' }} contentHeight={180}>
-            <Box align={"center"} spacing={8} direction={'row'}>
-              <Box>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  {renderIcon(id, icon)}
-                </div>
+            <Box direction={'column'} >
+              <Box align={"center"} spacing={8} direction={'row'}>
+                <Box>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {renderIcon(id, icon)}
+                  </div>
+                </Box>
+                <Box>
+                  {enabled &&
+                      <a onClick={(e) => {
+                        e.stopPropagation();
+                        this.handleGoToPage(id)
+                      }}>
+                        <span style={{ fontSize: '20px' }}>{id}</span><FaLink />
+                      </a>
+                  }
+                  {
+                    !enabled && <div className={'font-color-keep'} style={{ fontSize: '20px' }}>{id}</div>
+                  }
+                </Box>
               </Box>
-              <Box>
-                {enabled &&
-                    <a onClick={(e) => {
-                      e.stopPropagation();
-                      this.handleGoToPage(id)
-                    }}>
-                      <span style={{ fontSize: '20px' }}>{id}</span><FaLink />
-                    </a>
-                }
-                {
-                  !enabled && <div className={'font-color-keep'} style={{ fontSize: '20px' }}>{id}</div>
-                }
+              <Box flex={['auto']} className={'plugin-card-content'} direction={'column'} justify={'space-between'}>
+                <Box id={'desc'} className={'plugin-desc'}>
+                  <h4
+                    className={'font-size-14 font-color-keep'}>{description ?? (sourceAddon?.description ? sourceAddon?.description + ` (from addon ${sourceAddon?.name})` : "No descriptions")}</h4>
+                </Box>
+                <Row id={'tags'} gutter={1}>
+                  <Col span={18}>
+                    <Box direction={'row'} wrap={true} spacing={[4, 4]}>
+                      {[...tags, ...sourceAddon?.tags ?? []].map((t: string) => {
+                          return (
+                            <div className={'hover-none'}>
+                              <Tag size={'small'} className={'tag'} type={'normal'}>{t}</Tag>
+                            </div>
+                          );
+                        }
+                      )}
+                    </Box>
+                  </Col>
+                  <Col span={6}>
+                    {url && url !== "" && !installed &&
+                        <Box align={'flex-end'}>
+                          <Button className={'hover-auto'} type={"primary"} onClick={(e) => {
+                            e.stopPropagation();
+                            this.handleInstall(id, url)
+                          }}>{i18n.t('Install')}</Button>
+                        </Box>
+                    }
+                    {installed &&
+                        <Box direction={'row'} justify={"flex-end"} align={"center"} style={{ marginLeft: 'auto' }}>
+                          <If condition={enabled}>
+                            <span className="circle circle-success" />
+                            <span className={'font-color-info'}>Enabled</span>
+                          </If>
+                          <If condition={!enabled}>
+                            <span className="circle circle-success" />
+                            <span className={'font-color-info'}>Installed</span>
+                          </If>
+                        </Box>
+                    }
+                  </Col>
+                </Row>
               </Box>
             </Box>
-            <div className={'plugin-card-content'}>
-              <Row id={'desc'} className={'plugin-desc'}>
-                <h4 className={'font-size-14 font-color-keep'}>{description ? description : "No descriptions"}</h4>
-              </Row>
-              <Row id={'tags'} gutter={1}>
-                <Col span={18}>
-                  <Box direction={'row'} wrap={true} spacing={[4, 4]}>
-                    {tags.map((t: string) => {
-                        return (
-                          <div className={'hover-none'}>
-                            <Tag size={'small'} className={'tag'} type={'normal'}>{t}</Tag>
-                          </div>
-                        );
-                      }
-                    )}
-                    {
-                      [1, 2, 3, 4].map((i) => {
-                        return (
-                          <div className={'hover-none'}>
-                            <Tag size={'small'} className={'tag'} type={'normal'}>{'test' + i}</Tag>
-                          </div>
-                        )
-                      })}
-                  </Box>
-                </Col>
-                <Col span={6}>
-                  {url && url !== "" && !installed &&
-                      <Box align={'flex-end'}>
-                        <Button className={'hover-auto'} type={"primary"} onClick={(e) => {
-                          e.stopPropagation();
-                          this.handleInstall(id, url)
-                        }}>{i18n.t('Install')}</Button>
-                      </Box>
-                  }
-                  {installed &&
-                      <Box direction={'row'} justify={"flex-end"} align={"center"} style={{ marginLeft: 'auto' }}>
-                        <If condition={enabled}>
-                          <span className="circle circle-success" />
-                          <span className={'font-color-info'}>Enabled</span>
-                        </If>
-                        <If condition={!enabled}>
-                          <span className="circle circle-success" />
-                          <span className={'font-color-info'}>Installed</span>
-                        </If>
-                      </Box>
-                  }
-                </Col>
-              </Row>
-            </div>
           </Card>
         </a>
       </div>

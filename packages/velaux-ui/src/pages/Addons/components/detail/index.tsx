@@ -27,7 +27,7 @@ import StatusShow from '../../../../components/StatusShow';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
-import type { Addon, AddonStatus, EnableAddonRequest } from '../../../../interface/addon';
+import type { Addon, AddonStatus, EnableAddonRequest } from '@velaux/data/src/api/addon';
 import type { ApplicationStatus, UIParam } from '../../../../interface/application';
 import type { NameAlias } from '../../../../interface/env';
 import { locale } from '../../../../utils/locale';
