@@ -74,8 +74,8 @@ export default {
         } else {
           const _old = newPluginList[idx]
           const _new = {..._old, ...plugin}
-          console.log(plugin, 'enabled')
-          enabledPlugins[idx] = _new
+          console.log(plugin, 'updated')
+          newPluginList[idx] = _new
         }
       }
       console.log(newPluginList, enabledPlugins);

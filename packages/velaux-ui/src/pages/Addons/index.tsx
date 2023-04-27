@@ -7,7 +7,6 @@ import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
 import type { Addon, AddonBaseStatus } from '../../interface/addon';
-import { PluginMeta } from "@velaux/data";
 
 import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
@@ -184,7 +183,6 @@ class Addons extends React.Component<Props, State> {
                 </Message>
               </If>
               <CardContend
-                type={'addon'}
                 addonLists={addonsList}
                 selectTags={selectTags}
                 enabledAddons={enabledAddons}

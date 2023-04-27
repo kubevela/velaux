@@ -6,6 +6,7 @@ import './index.less';
 import { Box, Button, Card, Grid, Tag } from '@alifd/next';
 import i18n from "i18next";
 import { checkImage } from "../../../../utils/icon";
+import { If } from '../../../../components/If';
 
 type State = {
   iconValid: boolean
@@ -70,7 +71,9 @@ class PluginCard extends React.Component<Props, State> {
   }
 
   handleGoToPluginConfig = (id: string) => {
-    this.props.history?.push(`/plugin-config/${id}`)
+    if (this.props.installed) {
+      this.props.history?.push(`/plugin-config/${id}`)
+    }
   }
 
 
@@ -111,7 +114,7 @@ class PluginCard extends React.Component<Props, State> {
               width: '60px',
               height: '60px',
               borderRadius: '50%',
-              backgroundColor: '#fff',
+              backgroundColor: '#ebf0ff',
               textAlign: 'center',
               lineHeight: '60px',
             }}
@@ -122,24 +125,17 @@ class PluginCard extends React.Component<Props, State> {
       }
     }
 
-    if (enabled && !tags.some((t) => t == "enabled")) {
-      tags.unshift("enabled")
-    }
-    if (installed && !enabled && !tags.some((t) => t == "installed")) {
-      tags.unshift("installed")
-    }
-
     return (
       <div className={'plugin-card'}>
         <a onClick={() => this.handleGoToPluginConfig(id)}>
-          <Card style={{ background: 'transparent', borderStyle: 'none', color: 'black' }} contentHeight={180}>
-            <Box align={"center"} spacing={16} direction={'row'}>
-              <Box >
+          <Card style={{ border: 'none' }} contentHeight={180}>
+            <Box align={"center"} spacing={8} direction={'row'}>
+              <Box>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   {renderIcon(id, icon)}
                 </div>
               </Box>
-              <Box >
+              <Box>
                 {enabled &&
                     <a onClick={(e) => {
                       e.stopPropagation();
@@ -149,43 +145,57 @@ class PluginCard extends React.Component<Props, State> {
                     </a>
                 }
                 {
-                  !enabled && <div style={{ fontSize: '20px' }}>{id}</div>
+                  !enabled && <div className={'font-color-keep'} style={{ fontSize: '20px' }}>{id}</div>
                 }
               </Box>
             </Box>
             <div className={'plugin-card-content'}>
               <Row id={'desc'} className={'plugin-desc'}>
-                <h4 className={'font-size-14'}>{description ? description : "No descriptions"}</h4>
+                <h4 className={'font-size-14 font-color-keep'}>{description ? description : "No descriptions"}</h4>
               </Row>
               <Row id={'tags'} gutter={1}>
-                <Col span={
-                  (url && url !== "" && !installed) ? 18 : 24
-                }>
+                <Col span={18}>
                   <Box direction={'row'} wrap={true} spacing={[4, 4]}>
                     {tags.map((t: string) => {
                         return (
-                          <Tag size={'small'} className={'tag'} type={t === 'enabled'||t === 'installed' ? 'primary' : 'normal'} color={
-                            t === 'installed'||t === 'enabled'? 'green' : ''
-                          }>{t}</Tag>
+                          <div className={'hover-none'}>
+                            <Tag size={'small'} className={'tag'} type={'normal'}>{t}</Tag>
+                          </div>
                         );
                       }
                     )}
-                    <Tag size={'small'} type="normal">{'test1'}</Tag>
-                    <Tag size={'small'} type="normal">{'test2'}</Tag>
-                    <Tag size={'small'} type="normal">{'test3'}</Tag>
-                    <Tag size={'small'} type="normal">{'test4'}</Tag>
+                    {
+                      [1, 2, 3, 4].map((i) => {
+                        return (
+                          <div className={'hover-none'}>
+                            <Tag size={'small'} className={'tag'} type={'normal'}>{'test' + i}</Tag>
+                          </div>
+                        )
+                      })}
                   </Box>
                 </Col>
-                {url && url !== "" && !installed &&
-                    <Col span={6}>
+                <Col span={6}>
+                  {url && url !== "" && !installed &&
                       <Box align={'flex-end'}>
-                        <Button className={'no-hover'} type={"primary"}  onClick={(e) => {
+                        <Button className={'hover-auto'} type={"primary"} onClick={(e) => {
                           e.stopPropagation();
                           this.handleInstall(id, url)
                         }}>{i18n.t('Install')}</Button>
                       </Box>
-                    </Col>
-                }
+                  }
+                  {installed &&
+                      <Box direction={'row'} justify={"flex-end"} align={"center"} style={{ marginLeft: 'auto' }}>
+                        <If condition={enabled}>
+                          <span className="circle circle-success" />
+                          <span className={'font-color-info'}>Enabled</span>
+                        </If>
+                        <If condition={!enabled}>
+                          <span className="circle circle-success" />
+                          <span className={'font-color-info'}>Installed</span>
+                        </If>
+                      </Box>
+                  }
+                </Col>
               </Row>
             </div>
           </Card>

@@ -11,8 +11,8 @@ import { checkImage, renderIcon } from "../../utils/icon";
 interface Props {
   pluginId: string;
   dispatch: any;
-  loading: any;
   pluginList: PluginMeta[];
+  loading: any;
 }
 
 function RootPage({ pluginId }: Props) {
@@ -36,12 +36,38 @@ function RootPage({ pluginId }: Props) {
   );
 }
 
-function ConfigPage({ pluginId, dispatch, loading, pluginList }: Props) {
+const types = {
+  UPDATE_META: 'UPDATE_META'
+}
+
+function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
   const [valid, setValid] = React.useState(false)
   const [app, setApp] = React.useState<AppPagePlugin>();
-  console.log( pluginId, dispatch, loading, pluginList )
-  console.log('pluginList', pluginList)
-  const meta = pluginList.filter(item => item.id === pluginId)[0]
+
+  const _meta = pluginList.filter(item => item.id === pluginId)[0]
+  const updateMeta = (previousState: any, action: any) => {
+    if (action.type == types.UPDATE_META) {
+      return { ...previousState, ...action.payload }
+    }
+    throw new Error('Unknown action type')
+  }
+  const [meta, dispatchMeta] = React.useReducer(updateMeta, _meta);
+
+  // Get PluginMeta
+  React.useEffect(() => {
+    if (!meta) {
+      getPluginSrv().loadMeta(pluginId).then(
+        (m) => {
+          dispatchMeta({
+            type: types.UPDATE_META,
+            payload: m
+          })
+        }
+      )
+    }
+  }, [meta, pluginId])
+
+  // Get whole plugin by PluginMeta
   React.useEffect(() => {
     if (!meta) {
       return
@@ -53,14 +79,16 @@ function ConfigPage({ pluginId, dispatch, loading, pluginList }: Props) {
       .catch((err) => {
         console.log(err);
       });
-  }, [meta, pluginId]);
-  if (!app || !app.configPages) {
+  }, [meta]);
+
+  if (!meta || !app || !app.configPages || !app.configPages.body) {
     return (
       <div>
         <Translation>No config app page component found</Translation>
       </div>
     )
   }
+
   // const meta = app.meta
   const { Col, Row } = Grid
 
@@ -68,12 +96,11 @@ function ConfigPage({ pluginId, dispatch, loading, pluginList }: Props) {
   const isInstalled = !!meta.info
 
   const enablePlugin = (id: string) => {
-    console.log('dispatch', dispatch)
     dispatch({
       type: 'plugins/enablePlugin',
       payload: { id },
       callback: () => {
-        location.reload()
+        meta.enabled = true
       }
     });
   }
@@ -82,11 +109,10 @@ function ConfigPage({ pluginId, dispatch, loading, pluginList }: Props) {
       type: 'plugins/disablePlugin',
       payload: { id },
       callback: () => {
-        location.reload()
+        meta.enabled = false
       }
     });
   }
-
   const uninstallPlugin = (id: string) => {
     dispatch({
       type: 'plugins/uninstallPlugin',
@@ -97,8 +123,12 @@ function ConfigPage({ pluginId, dispatch, loading, pluginList }: Props) {
       }
     });
   }
-  const pluginLoading = loading.models.plugins || false
-  checkImage(meta.info.logos.large, (valid) => {
+
+  const handleGotoPlugins = () =>{
+    const history = locationService.getHistory()
+    history.push('/plugins')
+  }
+  checkImage(meta.info?.logos.large, (valid) => {
     setValid(valid)
   })
 
@@ -106,13 +136,17 @@ function ConfigPage({ pluginId, dispatch, loading, pluginList }: Props) {
 
   return (
     <>
-      <Loading visible={pluginLoading} style={{ width: '100%' }} />
+      <Loading visible={loading.models.plugins ?? false} fullScreen={true} />
       <Box className={'page-header'} direction={'row'} spacing={12}>
         <span className={'page-header-logo'}>
-          {renderIcon(meta.id, valid, meta.info.logos.large)}
+          {renderIcon(meta.id, valid, meta.info?.logos.large)}
         </span>
         <Box direction={'column'}>
-          <h1 className={'page-header-title'}>{meta.name}</h1>
+          <h1 className={'page-header-title'}>{
+            <>
+              <a onClick={handleGotoPlugins}>Plugins</a> / {meta.name}
+            </>
+          }</h1>
           <Row className={'basic-info font-size-16'}>
             <Col>
               <div>Version</div>
@@ -177,8 +211,9 @@ async function loadAppPlugin(
   try {
     const app = await getPluginSrv().loadMeta(pluginId);
     if (app && 'type' in app) {
-      importAppPagePlugin(app)
+      return importAppPagePlugin(app)
         .then((pageApp) => {
+          console.log('pageApp', pageApp)
           setApp(pageApp);
         })
         .catch((err) => {
