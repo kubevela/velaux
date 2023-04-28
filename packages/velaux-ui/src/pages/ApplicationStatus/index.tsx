@@ -306,6 +306,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       <div className="application-status-wrapper">
         <Loading visible={loading && endpointLoading} style={{ width: '100%' }}>
           <Header
+            userInfo={userInfo}
             envbinding={this.getEnvbindingByName()}
             targets={this.getTargets()}
             envName={envName}

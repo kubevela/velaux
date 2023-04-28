@@ -466,6 +466,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       <div>
         <Header
           envbinding={envbinding}
+          userInfo={userInfo}
           targets={this.getTargets()}
           components={components}
           envName={envName}
