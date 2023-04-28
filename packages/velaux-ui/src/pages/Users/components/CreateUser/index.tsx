@@ -196,7 +196,7 @@ class CreateUser extends React.Component<Props, State> {
               </Col>
             </Row>
             <Row>
-              <If condition={!isEditUser}>
+              {!isEditUser && (
                 <Col span={12} style={{ padding: '0 8px' }}>
                   <FormItem label={<Translation>Password</Translation>} required>
                     <Input
@@ -220,7 +220,7 @@ class CreateUser extends React.Component<Props, State> {
                     />
                   </FormItem>
                 </Col>
-              </If>
+              )}
               <Col span={12} style={{ padding: '0 8px' }}>
                 <FormItem label={<Translation>Email</Translation>} required>
                   <Input
