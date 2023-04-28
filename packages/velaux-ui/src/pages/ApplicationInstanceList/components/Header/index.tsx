@@ -27,6 +27,8 @@ import type { Endpoint } from '../../../../interface/observation';
 import type { Target } from '../../../../interface/target';
 import { locale } from '../../../../utils/locale';
 import { getLink } from '../../../../utils/utils';
+import { checkPermission } from '../../../../utils/permission';
+import { LoginUserInfo } from '../../../../interface/user';
 
 export type GatewayIP = {
   ip: string;
@@ -47,6 +49,7 @@ type Props = {
   disableStatusShow?: boolean;
   refresh: () => void;
   dispatch: ({}) => void;
+  userInfo?: LoginUserInfo;
 };
 
 type State = {
@@ -162,9 +165,21 @@ class Header extends Component<Props, State> {
   };
 
   compareCurrentWithCluster = (appName: string, envName: string) => {
-    const { applicationStatus } = this.props;
+    const { applicationStatus, applicationDetail, userInfo } = this.props;
     if (!applicationStatus) {
       this.setState({ compare: undefined });
+      return;
+    }
+    if (
+      !checkPermission(
+        {
+          resource: `project:${applicationDetail?.project?.name}/application:${applicationDetail?.name}`,
+          action: 'compare',
+        },
+        applicationDetail?.project?.name,
+        userInfo
+      )
+    ) {
       return;
     }
     compareApplication(appName, { compareLatestWithRunning: { env: envName } }).then(

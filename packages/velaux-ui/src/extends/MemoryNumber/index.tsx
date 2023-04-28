@@ -34,7 +34,7 @@ class MemoryNumber extends React.Component<Props, State> {
         id={id}
         min="0"
         disabled={disabled}
-        addonTextAfter="MB"
+        addonTextAfter="Mi"
         htmlType="number"
         onChange={this.onChange}
         value={initValue && initValue}
