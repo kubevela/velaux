@@ -467,7 +467,8 @@ class PolicyDialog extends React.Component<Props, State> {
       this.uiSchemaRef.current?.validate(callback);
     };
     const init = this.field.init;
-    const span = selectedPolicyItem && selectedPolicyItem?.name == 'custom' ? 8 : 12;
+    const showType = (selectedPolicyItem && selectedPolicyItem?.name == 'custom') || policy != undefined;
+    const span = showType ? 8 : 12;
     return (
       <DrawerWithFooter
         title={policy ? i18n.t('Update Policy') : i18n.t('New Policy')}
@@ -478,7 +479,7 @@ class PolicyDialog extends React.Component<Props, State> {
       >
         <Form field={this.field}>
           <Card contentHeight="auto" title={i18n.t('Select a policy type').toString()}>
-            <If condition={!policy}>
+            {!policy && (
               <Row wrap={true}>
                 {items.map((item) => {
                   return (
@@ -496,12 +497,12 @@ class PolicyDialog extends React.Component<Props, State> {
                   );
                 })}
               </Row>
-            </If>
-            <If condition={selectedPolicyItem}>
+            )}
+            {selectedPolicyItem && (
               <Row wrap={true}>
-                {selectedPolicyItem && selectedPolicyItem?.name == 'custom' && (
+                {showType && (
                   <Col span={span} style={{ padding: '0 8px' }}>
-                    <Form.Item label="Policy Type" required>
+                    <Form.Item label={i18n.t('Policy Type')} required>
                       <Select
                         {...init('type', {
                           rules: [
@@ -569,7 +570,7 @@ class PolicyDialog extends React.Component<Props, State> {
                   </Form.Item>
                 </Col>
               </Row>
-            </If>
+            )}
             <If condition={selectedPolicyItem?.properties}>
               <Message style={{ marginTop: '8px' }} type="success">
                 <Translation>This policy already have the default properties</Translation>
