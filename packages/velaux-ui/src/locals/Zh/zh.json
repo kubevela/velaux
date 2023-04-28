@@ -51,6 +51,8 @@
   "Policies": "策略",
   "Policy": "策略",
   "New Policy": "新增策略",
+  "Policy Type": "策略类型",
+  "Update Policy": "编辑策略",
   "Warning": "部署异常",
   "EnvironmentPlan": "环境规划",
   "BasisConfig": "基准配置",
