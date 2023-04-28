@@ -69,7 +69,7 @@ export interface PluginMeta<T extends KeyValue = {}> extends PluginLink, SourceA
   includes?: PluginInclude[];
 
   // Filled in by the backend
-  jsonData?: T;
+  jsonSetting?: T;
   secureJsonData?: KeyValue;
   secureJsonFields?: KeyValue<boolean>;
   enabled?: boolean;

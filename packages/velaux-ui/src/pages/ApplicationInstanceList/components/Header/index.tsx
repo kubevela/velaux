@@ -28,7 +28,7 @@ import type { Target } from '../../../../../../velaux-data/src/api/target';
 import { locale } from '../../../../utils/locale';
 import { getLink } from '../../../../utils/utils';
 import { checkPermission } from '../../../../utils/permission';
-import { LoginUserInfo } from '../../../../interface/user';
+import { LoginUserInfo } from '@velaux/ui';
 
 export type GatewayIP = {
   ip: string;

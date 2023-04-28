@@ -1,5 +1,6 @@
 import type { Condition, InputItem, OutputItem, WorkflowMode, WorkflowStepStatus } from './application';
 import type { NameAlias } from './env';
+import { KeyValue } from "../types";
 
 export interface CreatePipelineRequest {
   name: string;
@@ -73,11 +74,6 @@ export interface PipelineRunBase extends PipelineRunMeta {
   contextName?: string;
   contextValues?: KeyValue[];
   spec: PipelineRunSpec;
-}
-
-export interface KeyValue {
-  key: string;
-  value: string;
 }
 
 export interface PipelineRunBriefing {

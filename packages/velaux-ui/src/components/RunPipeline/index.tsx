@@ -5,7 +5,8 @@ import { BiCopyAlt } from 'react-icons/bi';
 
 import { deletePipelineContext, listPipelineContexts, runPipeline } from '../../api/pipeline';
 import i18n from '../../i18n';
-import type { KeyValue, PipelineListItem } from '../../../../velaux-data/src/api/pipeline';
+import type { PipelineListItem } from '../../../../velaux-data/src/api/pipeline';
+
 import './index.less';
 import { locale } from '../../utils/locale';
 import { If } from '../If';
@@ -17,6 +18,7 @@ import Permission from '../Permission';
 import { Translation } from '../Translation';
 
 import NewContext from './new-context';
+import { KeyValue } from "@velaux/data";
 
 export interface PipelineProps {
   pipeline: PipelineListItem;

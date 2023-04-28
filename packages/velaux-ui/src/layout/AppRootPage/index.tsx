@@ -7,7 +7,6 @@ import { Box, Button, Divider, Grid, Loading, Message, Tab } from "@alifd/next";
 import './index.less'
 import { connect } from "dva";
 import { checkImage, renderIcon } from "../../utils/icon";
-import { KeyValue } from "@velaux/ui";
 
 interface Props {
   pluginId: string;
@@ -37,7 +36,7 @@ function RootPage({ pluginId }: Props) {
   );
 }
 
-enum types  {
+enum types {
   UPDATE_META
 }
 
@@ -45,42 +44,6 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
 
   const [valid, setValid] = React.useState(false)
   const [app, setApp] = React.useState<AppPagePlugin>();
-  const [jsonData, setJsonData] = React.useState(app?.meta.jsonData ?? {})
-  const [secureJsonData, setSecureJsonData] = React.useState(app?.meta.secureJsonData ?? {})
-  console.log(jsonData)
-  const handleJSONChange = (key: string, value: any) => {
-    setJsonData(jsonData.map((item: KeyValue) => {
-      if (item.key === key) {
-        item.value = value
-      }
-      return item
-    }))
-  }
-  const handleSecureJSONChange = (key: string, value: any) => {
-    setSecureJsonData(secureJsonData.map((item: KeyValue) => {
-      if (item.key === key) {
-        item.value = value
-      }
-      return item
-    }))
-  }
-  console.log(handleJSONChange, handleSecureJSONChange)
-
-  const saveSetting = () => {
-    console.log('saveSetting', jsonData, secureJsonData)
-    dispatch({
-      type: 'plugins/setPlugin',
-      payload: {
-        id: pluginId,
-        jsonData: jsonData,
-        secureJsonData: secureJsonData,
-      },
-      callback: () => {
-        Message.success('Setting saved')
-      }
-    })
-  }
-
   const _meta = pluginList.filter(item => item.id === pluginId)[0]
   const updateMeta = (previousState: any, action: any) => {
     if (action.type == types.UPDATE_META) {
@@ -89,6 +52,37 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
     throw new Error('Unknown action type')
   }
   const [meta, dispatchMeta] = React.useReducer(updateMeta, _meta);
+
+  const handleJSONChange = (key: string, value: any) => {
+    const newJsonData = { ...meta.jsonSetting }
+    newJsonData[key] = value
+    meta.jsonSetting = newJsonData
+    setApp({ ...app, meta: meta } as AppPagePlugin)
+    console.log('handleJSONChange', meta)
+  }
+  const handleSecureJSONChange = (key: string, value: any) => {
+    const newSecureJsonData = { ...meta.secureJsonData }
+    newSecureJsonData[key] = value
+    meta.secureJsonData = newSecureJsonData
+    setApp({ ...app, meta: meta } as AppPagePlugin)
+    console.log('handleSecureJSONChange', meta)
+  }
+
+  const saveSetting = () => {
+    console.log('saveSetting', meta.jsonSetting, meta.secureJsonData)
+    dispatch({
+      type: 'plugins/setPlugin',
+      payload: {
+        id: pluginId,
+        jsonData: meta.jsonSetting,
+        secureJsonData: meta.secureJsonData,
+      },
+      callback: () => {
+        Message.success('Setting saved')
+      }
+    })
+  }
+
 
   // Get PluginMeta
   React.useEffect(() => {
@@ -241,7 +235,8 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
       </Box>
       <Tab>
         <Tab.Item title={'Config'}>
-          <AppConfigPage plugin={app} query={{}} onJSONDataChange={handleJSONChange} onSecureJSONDataChange={handleSecureJSONChange}/>
+          <AppConfigPage plugin={app} query={{}} onJSONDataChange={handleJSONChange}
+                         onSecureJSONDataChange={handleSecureJSONChange} />
         </Tab.Item>
       </Tab>
     </>
