@@ -188,70 +188,70 @@ func (c *webhookServiceImpl) patchComponentProperties(ctx context.Context, compo
 }
 
 func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.ApplicationTrigger, app *model.Application) (interface{}, error) {
-	if c.req.Action == "" {
-		for comp, properties := range c.req.Upgrade {
-			component := &model.ApplicationComponent{
-				AppPrimaryKey: webhookTrigger.AppPrimaryKey,
-				Name:          comp,
-			}
-			if err := c.w.Store.Get(ctx, component); err != nil {
-				if errors.Is(err, datastore.ErrRecordNotExist) {
-					return nil, bcode.ErrApplicationComponentNotExist
-				}
-				return nil, err
-			}
-			if err := c.w.patchComponentProperties(ctx, component, properties.RawExtension()); err != nil {
-				return nil, err
-			}
+	workflow := &model.Workflow{
+		AppPrimaryKey: webhookTrigger.AppPrimaryKey,
+		Name:          webhookTrigger.WorkflowName,
+	}
+	c.w.Store.Get(ctx, workflow)
+	switch c.req.Action {
+	case "approve":
+		if err := c.w.WorkflowService.ResumeRecord(ctx, app, workflow, "", c.req.Step); err != nil {
+			return nil, err
 		}
-		return c.w.ApplicationService.Deploy(ctx, app, apisv1.ApplicationDeployRequest{
-			WorkflowName: webhookTrigger.WorkflowName,
-			Note:         "triggered by webhook custom",
-			TriggerType:  apisv1.TriggerTypeWebhook,
-			Force:        true,
-			CodeInfo:     c.req.CodeInfo,
-		})
-	} else {
-		workflow := &model.Workflow{
+		return "workflow resumed successfully", nil
+	case "terminate":
+		if err := c.w.WorkflowService.TerminateRecord(ctx, app, workflow, ""); err != nil {
+			return nil, err
+		}
+		return "workflow terminated successfully", nil
+	case "rollback":
+		workflowRecord := &model.WorkflowRecord{
 			AppPrimaryKey: webhookTrigger.AppPrimaryKey,
-			Name:          webhookTrigger.WorkflowName,
+			WorkflowName:  webhookTrigger.WorkflowName,
 		}
-		c.w.Store.Get(ctx, workflow)
-		switch c.req.Action {
-		case "approve":
-			if err := c.w.WorkflowService.ResumeRecord(ctx, app, workflow, "", c.req.Step); err != nil {
-				return nil, err
+		runningRecords, err := c.w.Store.List(ctx, workflowRecord, &datastore.ListOptions{
+			Page:     1,
+			PageSize: 1,
+			SortBy:   []datastore.SortOption{{Key: "StartTime", Order: datastore.SortOrderDescending}},
+			FilterOptions: datastore.FilterOptions{
+				In: []datastore.InQueryOption{{Key: "status", Values: []string{"suspending", "running"}}},
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+		res, err := c.w.WorkflowService.RollbackRecord(ctx, app, workflow, runningRecords[0].PrimaryKey(), "")
+		if err != nil {
+			return nil, err
+		}
+		return res, nil
+	case "execute", "":
+		{
+			for comp, properties := range c.req.Upgrade {
+				component := &model.ApplicationComponent{
+					AppPrimaryKey: webhookTrigger.AppPrimaryKey,
+					Name:          comp,
+				}
+				if err := c.w.Store.Get(ctx, component); err != nil {
+					if errors.Is(err, datastore.ErrRecordNotExist) {
+						return nil, bcode.ErrApplicationComponentNotExist
+					}
+					return nil, err
+				}
+				if err := c.w.patchComponentProperties(ctx, component, properties.RawExtension()); err != nil {
+					return nil, err
+				}
 			}
-			return "workflow resumed successfully", nil
-		case "terminate":
-			if err := c.w.WorkflowService.TerminateRecord(ctx, app, workflow, ""); err != nil {
-				return nil, err
-			}
-			return "workflow terminated successfully", nil
-		case "rollback":
-			workflowRecord := &model.WorkflowRecord{
-				AppPrimaryKey: webhookTrigger.AppPrimaryKey,
-				WorkflowName:  webhookTrigger.WorkflowName,
-			}
-			runningRecords, err := c.w.Store.List(ctx, workflowRecord, &datastore.ListOptions{
-				Page:     1,
-				PageSize: 1,
-				SortBy:   []datastore.SortOption{{Key: "StartTime", Order: datastore.SortOrderDescending}},
-				FilterOptions: datastore.FilterOptions{
-					In: []datastore.InQueryOption{{Key: "status", Values: []string{"suspending", "running"}}},
-				},
+			return c.w.ApplicationService.Deploy(ctx, app, apisv1.ApplicationDeployRequest{
+				WorkflowName: webhookTrigger.WorkflowName,
+				Note:         "triggered by webhook custom",
+				TriggerType:  apisv1.TriggerTypeWebhook,
+				Force:        true,
+				CodeInfo:     c.req.CodeInfo,
 			})
-			if err != nil {
-				return nil, err
-			}
-			res, err := c.w.WorkflowService.RollbackRecord(ctx, app, workflow, runningRecords[0].PrimaryKey(), "")
-			if err != nil {
-				return nil, err
-			}
-			return res, nil
-		default:
-			return "invalid workflow action", nil
 		}
+	default:
+		return nil, fmt.Errorf("action is not supported")
 	}
 }
 
