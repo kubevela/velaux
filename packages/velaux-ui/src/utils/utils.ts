@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
-import type { ComponentDefinitionsBase } from '../interface/application';
-import type { Endpoint } from '../interface/observation';
+import type { ComponentDefinitionsBase } from '../../../velaux-data/src/api/application';
+import type { Endpoint } from '../../../velaux-data/src/api/observation';
 
 
 type SelectGroupType = Array<{

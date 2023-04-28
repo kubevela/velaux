@@ -21,7 +21,7 @@ import type {
   ApplicationComponent,
   ApplicationComponentConfig,
   ApplicationComponentBase,
-} from '../../../../interface/application';
+} from '../../../../../../velaux-data/src/api/application';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { transComponentDefinitions } from '../../../../utils/utils';

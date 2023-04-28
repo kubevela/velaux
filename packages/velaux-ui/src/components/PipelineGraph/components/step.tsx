@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
-import type { WorkflowStepStatus } from '../../../interface/application';
+import type { WorkflowStepStatus } from '../../../../../velaux-data/src/api/application';
 import { timeDiff } from '../../../utils/common';
 import { If } from '../../If';
 

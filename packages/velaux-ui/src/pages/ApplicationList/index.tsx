@@ -8,8 +8,8 @@ import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { ApplicationBase } from '../../interface/application';
-import type { LoginUserInfo } from '../../interface/user';
+import type { ApplicationBase } from '../../../../velaux-data/src/api/application';
+import type { LoginUserInfo } from '../../../../velaux-data/src/api/user';
 
 import AppDialog from './components/AddAppDialog';
 import CardContend from './components/CardContent';

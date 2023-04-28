@@ -6,8 +6,8 @@ import { deleteTarget } from '../../../../api/target';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import './index.less';
-import type { Project } from '../../../../interface/project';
-import type { Target } from '../../../../interface/target';
+import type { Project } from '../../../../../../velaux-data/src/api/project';
+import type { Target } from '../../../../../../velaux-data/src/api/target';
 import { locale } from '../../../../utils/locale';
 
 import { Link } from 'dva/router';

@@ -3,8 +3,8 @@ import React from 'react';
 
 import './index.less';
 import type { ShowMode } from '../..';
-import type { Env } from '../../../../interface/env';
-import type { UserProject } from '../../../../interface/user';
+import type { Env } from '../../../../../../velaux-data/src/api/env';
+import type { UserProject } from '../../../../../../velaux-data/src/api/user';
 import { locale } from '../../../../utils/locale';
 import i18n from '../../../../i18n';
 import { AiOutlineSearch } from 'react-icons/ai';

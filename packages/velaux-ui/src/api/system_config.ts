@@ -1,4 +1,4 @@
-import type { UpdateSystemInfo } from '../interface/system';
+import type { UpdateSystemInfo } from '../../../velaux-data/src/api/system';
 import { getDomain } from '../utils/common';
 
 import { get, put } from './request';

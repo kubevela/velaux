@@ -4,7 +4,7 @@ import React from 'react';
 import { createPipelineContext, updatePipelineContext } from '../../api/pipeline';
 import KV from '../../extends/KV';
 import i18n from '../../i18n';
-import type { KeyValue, PipelineListItem } from '../../interface/pipeline';
+import type { KeyValue, PipelineListItem } from '../../../../velaux-data/src/api/pipeline';
 import { checkName } from '../../utils/common';
 import { Translation } from '../Translation';
 

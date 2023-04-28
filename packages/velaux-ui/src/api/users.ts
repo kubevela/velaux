@@ -1,4 +1,4 @@
-import type { User } from '../interface/user';
+import type { User } from '../../../velaux-data/src/api/user';
 
 import { users, cloudShell } from './productionLink';
 import { post, get, rdelete, put } from './request';

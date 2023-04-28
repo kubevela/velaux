@@ -10,7 +10,7 @@ import { If } from '../../components/If';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import type { ApplicationDetail, EnvBinding, Workflow } from '../../interface/application';
+import type { ApplicationDetail, EnvBinding, Workflow } from '../../../../velaux-data/src/api/application';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 

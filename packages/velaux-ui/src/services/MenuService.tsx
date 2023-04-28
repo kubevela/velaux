@@ -1,4 +1,4 @@
-import { Project } from '../interface/project';
+import { Project } from '../../../velaux-data/src/api/project';
 import * as React from 'react';
 import _ from 'lodash';
 import { FaLayerGroup } from 'react-icons/fa';
@@ -12,10 +12,10 @@ import {
 import { BsFileEarmarkPerson, BsFillFileCodeFill, BsHddNetworkFill, BsPlugin } from 'react-icons/bs';
 import { RiUserSettingsFill } from 'react-icons/ri';
 import { MdConfirmationNumber } from 'react-icons/md';
-import { ApplicationBase, EnvBinding } from '../interface/application';
+import { ApplicationBase, EnvBinding } from '../../../velaux-data/src/api/application';
 import { Menu, MenuTypes, Workspace } from '@velaux/data';
 import { locationService } from './LocationService';
-import { LoginUserInfo } from '../interface/user';
+import { LoginUserInfo } from '../../../velaux-data/src/api/user';
 import { checkPermission } from '../utils/permission';
 import { getPluginSrv } from './PluginService';
 

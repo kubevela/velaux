@@ -99,6 +99,8 @@ export interface SourceAddon {
 export interface PluginConfigPageProps<T extends PluginMeta> {
   plugin: VelaUXPlugin<T>;
   query: KeyValue; // The URL query parameters
+  onJSONDataChange: (key: string, value: any) => void;
+  onSecureJSONDataChange: (key: string, value: any) => void;
 }
 
 export interface PluginConfigPage<T extends PluginMeta> {

@@ -18,8 +18,8 @@ import type {
   Workflow,
   WorkflowRecord,
   WorkflowStepStatus,
-} from '../../interface/application';
-import type { WorkflowStepBase } from '../../interface/pipeline';
+} from '../../../../velaux-data/src/api/application';
+import type { WorkflowStepBase } from '../../../../velaux-data/src/api/pipeline';
 import { beautifyTime } from '../../utils/common';
 import { locale } from '../../utils/locale';
 

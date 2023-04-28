@@ -36,8 +36,7 @@
     },
     "resolutions": {
         "@types/react": "17.0.14",
-        "@types/react-dom": "17.0.14",
-        "@velaux-plugins/vela-adopter": "portal:/Users/qiaozp/repo/vela-adopter"
+        "@types/react-dom": "17.0.14"
     },
     "devDependencies": {
         "@babel/core": "7.20.5",

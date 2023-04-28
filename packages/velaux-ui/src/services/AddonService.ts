@@ -1,4 +1,4 @@
-import { Addon } from '../interface'
+import { Addon } from '@velaux/data'
 import { getBackendSrv } from "./BackendService";
 
 export interface AddonService {

@@ -6,7 +6,7 @@ import { AiOutlinePlus } from 'react-icons/ai';
 import { v4 as uuid } from 'uuid';
 
 import { getApplicationComponents } from '../../api/application';
-import type { ApplicationComponentBase } from '../../interface/application';
+import type { ApplicationComponentBase } from '../../../../velaux-data/src/api/application';
 
 import type { ComponentPatchData } from './component-patch';
 import ComponentPatch from './component-patch';

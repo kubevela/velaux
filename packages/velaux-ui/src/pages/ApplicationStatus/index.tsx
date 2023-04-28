@@ -16,10 +16,10 @@ import type {
   EnvBinding,
   ComponentStatus,
   ApplicationDeployResponse,
-} from '../../interface/application';
-import type { AppliedResource } from '../../interface/observation';
-import type { Target } from '../../interface/target';
-import type { LoginUserInfo } from '../../interface/user';
+} from '../../../../velaux-data/src/api/application';
+import type { AppliedResource } from '../../../../velaux-data/src/api/observation';
+import type { Target } from '../../../../velaux-data/src/api/target';
+import type { LoginUserInfo } from '../../../../velaux-data/src/api/user';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import { locale } from '../../utils/locale';

@@ -4,7 +4,7 @@ import { AiOutlineDelete } from 'react-icons/ai';
 
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
-import type { ProjectRoleBase } from '../../../../interface/project';
+import type { ProjectRoleBase } from '../../../../../../velaux-data/src/api/project';
 import './index.less';
 
 type Props = {

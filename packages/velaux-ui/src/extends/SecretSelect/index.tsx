@@ -4,7 +4,7 @@ import React from 'react';
 
 import { listCloudResourceSecrets } from '../../api/observation';
 import { CustomSelect } from '../../components/CustomSelect';
-import type { Secret } from '../../interface/observation';
+import type { Secret } from '../../../../velaux-data/src/api/observation';
 import { locale } from '../../utils/locale';
 
 type Props = {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import { Translation } from '../Translation';
-import type { ParamCondition, UIParam, UIParamValidate } from '../../interface/application';
+import type { ParamCondition, UIParam, UIParamValidate } from '../../../../velaux-data/src/api/application';
 
 import type { Rule } from '@alifd/field';
 import { Form, Input, Select, Field, Switch, Grid, Divider } from '@alifd/next';

@@ -22,9 +22,9 @@ import type {
   ApplicationDetail,
   ApplicationStatus,
   EnvBinding,
-} from '../../../../interface/application';
-import type { Endpoint } from '../../../../interface/observation';
-import type { Target } from '../../../../interface/target';
+} from '../../../../../../velaux-data/src/api/application';
+import type { Endpoint } from '../../../../../../velaux-data/src/api/observation';
+import type { Target } from '../../../../../../velaux-data/src/api/target';
 import { locale } from '../../../../utils/locale';
 import { getLink } from '../../../../utils/utils';
 import { checkPermission } from '../../../../utils/permission';

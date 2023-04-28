@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React, { useContext, useState } from 'react';
 import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 import { WorkflowEditContext } from '../../context';
-import type { InputItem, OutputItem } from '../../interface/application';
+import type { InputItem, OutputItem } from '../../../../velaux-data/src/api/application';
 import { locale } from '../../utils/locale';
 const { Row, Col } = Grid;
 

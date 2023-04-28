@@ -1,4 +1,4 @@
-import type { Target } from '../interface/target';
+import type { Target } from '../../../velaux-data/src/api/target';
 import type { QueryTarget } from '../model/target';
 import { getDomain } from '../utils/common';
 

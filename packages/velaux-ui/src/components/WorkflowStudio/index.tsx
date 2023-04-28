@@ -6,11 +6,11 @@ import Draggable from 'react-draggable';
 import { AiOutlinePlayCircle } from 'react-icons/ai';
 import { FiStopCircle } from 'react-icons/fi';
 import type { Dispatch } from 'redux';
-import { WorkflowMode } from '../../interface/application';
+import { WorkflowMode } from '../../../../velaux-data/src/api/application';
 
 import { WorkflowEditContext } from '../../context';
-import type { DefinitionBase } from '../../interface/definitions';
-import type { WorkflowStep, WorkflowStepBase } from '../../interface/pipeline';
+import type { DefinitionBase } from '../../../../velaux-data/src/api/definitions';
+import type { WorkflowStep, WorkflowStepBase } from '../../../../velaux-data/src/api/pipeline';
 
 import { Edge } from './edge';
 import { Step } from './step';

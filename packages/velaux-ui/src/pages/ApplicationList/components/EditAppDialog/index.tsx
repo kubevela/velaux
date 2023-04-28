@@ -6,7 +6,7 @@ import { updateApplication } from '../../../../api/application';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { Translation } from '../../../../components/Translation';
 import KV from '../../../../extends/KV';
-import type { ApplicationBase } from '../../../../interface/application';
+import type { ApplicationBase } from '../../../../../../velaux-data/src/api/application';
 
 type Props = {
   editItem?: ApplicationBase;

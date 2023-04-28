@@ -17,7 +17,7 @@ import Empty from '../../components/Empty';
 import { If } from '../../components/If';
 import PipelineGraph from '../../components/PipelineGraph';
 import { Translation } from '../../components/Translation';
-import type { WorkflowStepStatus } from '../../interface/application';
+import type { WorkflowStepStatus } from '../../../../velaux-data/src/api/application';
 import type {
   PipelineDetail,
   PipelineRunBase,
@@ -25,7 +25,7 @@ import type {
   WorkflowStep,
   WorkflowStepInputs,
   WorkflowStepOutputs,
-} from '../../interface/pipeline';
+} from '../../../../velaux-data/src/api/pipeline';
 import { convertAny, timeDiff } from '../../utils/common';
 
 import Header from './components/Header';

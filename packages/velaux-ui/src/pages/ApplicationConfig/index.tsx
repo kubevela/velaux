@@ -34,7 +34,7 @@ import type {
   ApplicationBase,
   ApplicationComponentBase,
   ApplicationPolicyBase,
-} from '../../interface/application';
+} from '../../../../velaux-data/src/api/application';
 import { beautifyTime, momentDate, showAlias } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';

@@ -1,5 +1,5 @@
 import { getEnvs } from '../api/env';
-import type { Env, EnvListResponse } from '../interface/env';
+import type { Env, EnvListResponse } from '../../../velaux-data/src/api/env';
 
 export interface Query {
   query?: string;

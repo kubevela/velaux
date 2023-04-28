@@ -5,12 +5,12 @@ import React, { Fragment, Component } from 'react';
 import { deleteProject } from '../../api/project';
 import { ListTitle as Title } from '../../components/ListTitle';
 import { Translation } from '../../components/Translation';
-import type { NameAlias } from '../../interface/env';
-import type { Project } from '../../interface/project';
+import type { NameAlias } from '../../../../velaux-data/src/api/env';
+import type { Project } from '../../../../velaux-data/src/api/project';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import { connect } from 'dva';
-import { LoginUserInfo } from '../../interface/user';
+import { LoginUserInfo } from '../../../../velaux-data/src/api/user';
 import i18n from '../../i18n';
 
 type Props = {

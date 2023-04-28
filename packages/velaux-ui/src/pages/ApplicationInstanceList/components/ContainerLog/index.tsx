@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
-import type { ContainerLogResponse, PodBase } from '../../../../interface/observation';
+import type { ContainerLogResponse, PodBase } from '../../../../../../velaux-data/src/api/observation';
 import { momentDate, momentShortDate } from '../../../../utils/common';
 import { downloadStringFile } from '../../../../utils/utils';
 import { locale } from '../../../../utils/locale';

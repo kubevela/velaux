@@ -6,7 +6,7 @@ import Header from './components/Header';
 import Menus from './components/Menus';
 
 import './index.less';
-import type { ApplicationDetail } from '../../interface/application';
+import type { ApplicationDetail } from '../../../../velaux-data/src/api/application';
 import { Dispatch } from 'redux';
 
 const { Row } = Grid;

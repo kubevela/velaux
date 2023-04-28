@@ -1,4 +1,4 @@
-import { RolesCreateBase } from '../interface/roles';
+import { RolesCreateBase } from '../../../velaux-data/src/api/roles';
 import { getDomain } from '../utils/common';
 
 import { project_mock } from './devLink';

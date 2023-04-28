@@ -3,7 +3,7 @@ import { Form, Field, Button } from '@alifd/next';
 import React from 'react';
 
 import UISchema from '../../components/UISchema';
-import type { UIParam, GroupOption } from '../../interface/application';
+import type { UIParam, GroupOption } from '../../../../velaux-data/src/api/application';
 import ArrayItemGroup from '../ArrayItemGroup';
 
 import './index.less';

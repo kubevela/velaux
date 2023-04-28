@@ -9,8 +9,8 @@ import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { ApplicationRevision, ApplicationRevisionDetail } from '../../../../interface/application';
-import type { ResourceTreeNode } from '../../../../interface/observation';
+import type { ApplicationRevision, ApplicationRevisionDetail } from '../../../../../../velaux-data/src/api/application';
+import type { ResourceTreeNode } from '../../../../../../velaux-data/src/api/observation';
 
 type RevisionProps = {
   appName: string;

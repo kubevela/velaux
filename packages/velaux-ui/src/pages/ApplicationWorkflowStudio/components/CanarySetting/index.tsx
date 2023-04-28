@@ -3,12 +3,12 @@ import { Dialog, Form, Grid, Message, NumberPicker } from '@alifd/next';
 import { DeployModes } from '@velaux/data';
 import _ from 'lodash';
 import i18n from '../../../../i18n';
-import { Workflow } from '../../../../interface/application';
-import { WorkflowStep } from '../../../../interface/pipeline';
+import { Workflow } from '../../../../../../velaux-data/src/api/application';
+import { WorkflowStep } from '../../../../../../velaux-data/src/api/pipeline';
 import { locale } from '../../../../utils/locale';
 import './index.less';
 import Item from '../../../../components/Item';
-import { DefinitionBase } from '../../../../interface/definitions';
+import { DefinitionBase } from '../../../../../../velaux-data/src/api/definitions';
 import { If } from '../../../../components/If';
 import { locationService } from '../../../../services/LocationService';
 

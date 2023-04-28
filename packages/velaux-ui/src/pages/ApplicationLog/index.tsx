@@ -11,8 +11,8 @@ import type {
   ApplicationDetail,
   ApplicationStatus,
   EnvBinding,
-} from '../../interface/application';
-import type { PodBase, Container } from '../../interface/observation';
+} from '../../../../velaux-data/src/api/application';
+import type { PodBase, Container } from '../../../../velaux-data/src/api/observation';
 
 import LogContainer from './components/LogContainer';
 

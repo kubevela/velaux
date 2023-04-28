@@ -3,10 +3,11 @@ import * as React from 'react';
 import { Translation } from '../../components';
 import { locationService } from '../../services';
 import { getPluginSrv, importAppPagePlugin } from '../../services/PluginService';
-import { Box, Button, Divider, Grid, Loading, Tab } from "@alifd/next";
+import { Box, Button, Divider, Grid, Loading, Message, Tab } from "@alifd/next";
 import './index.less'
 import { connect } from "dva";
 import { checkImage, renderIcon } from "../../utils/icon";
+import { KeyValue } from "@velaux/ui";
 
 interface Props {
   pluginId: string;
@@ -36,14 +37,49 @@ function RootPage({ pluginId }: Props) {
   );
 }
 
-const types = {
-  UPDATE_META: 'UPDATE_META'
+enum types  {
+  UPDATE_META
 }
 
 function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
+
   const [valid, setValid] = React.useState(false)
   const [app, setApp] = React.useState<AppPagePlugin>();
-  const [jsonData, setJsonData] = React.useState(app?.meta.jsonData??[])
+  const [jsonData, setJsonData] = React.useState(app?.meta.jsonData ?? {})
+  const [secureJsonData, setSecureJsonData] = React.useState(app?.meta.secureJsonData ?? {})
+  console.log(jsonData)
+  const handleJSONChange = (key: string, value: any) => {
+    setJsonData(jsonData.map((item: KeyValue) => {
+      if (item.key === key) {
+        item.value = value
+      }
+      return item
+    }))
+  }
+  const handleSecureJSONChange = (key: string, value: any) => {
+    setSecureJsonData(secureJsonData.map((item: KeyValue) => {
+      if (item.key === key) {
+        item.value = value
+      }
+      return item
+    }))
+  }
+  console.log(handleJSONChange, handleSecureJSONChange)
+
+  const saveSetting = () => {
+    console.log('saveSetting', jsonData, secureJsonData)
+    dispatch({
+      type: 'plugins/setPlugin',
+      payload: {
+        id: pluginId,
+        jsonData: jsonData,
+        secureJsonData: secureJsonData,
+      },
+      callback: () => {
+        Message.success('Setting saved')
+      }
+    })
+  }
 
   const _meta = pluginList.filter(item => item.id === pluginId)[0]
   const updateMeta = (previousState: any, action: any) => {
@@ -102,6 +138,7 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
       payload: { id },
       callback: () => {
         meta.enabled = true
+        Message.success('Plugin enabled')
       }
     });
   }
@@ -111,6 +148,7 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
       payload: { id },
       callback: () => {
         meta.enabled = false
+        Message.success('Plugin disabled')
       }
     });
   }
@@ -125,7 +163,7 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
     });
   }
 
-  const handleGotoPlugins = () =>{
+  const handleGotoPlugins = () => {
     const history = locationService.getHistory()
     history.push('/plugins')
   }
@@ -181,8 +219,13 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
                   <Button type={'primary'} onClick={() => enablePlugin(pluginId)}>Enable</Button>
                 </Col>
             }
+            {isEnabled &&
+                <Col>
+                  <Button type={'primary'} onClick={saveSetting}>Save & Reload</Button>
+                </Col>
+            }
             {
-              isInstalled && isEnabled &&
+              isEnabled &&
                 <Col>
                   <Button warning={true} onClick={() => disablePlugin(pluginId)}>Disable</Button>
                 </Col>
@@ -198,7 +241,7 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
       </Box>
       <Tab>
         <Tab.Item title={'Config'}>
-          <AppConfigPage plugin={app} query={{}} />
+          <AppConfigPage plugin={app} query={{}} onJSONDataChange={handleJSONChange} onSecureJSONDataChange={handleSecureJSONChange}/>
         </Tab.Item>
       </Tab>
     </>

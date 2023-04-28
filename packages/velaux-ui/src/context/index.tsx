@@ -1,7 +1,7 @@
 import React from 'react';
 
-import type { WorkflowMode } from '../interface/application';
-import type { WorkflowStep } from '../interface/pipeline';
+import type { WorkflowMode } from '../../../velaux-data/src/api/application';
+import type { WorkflowStep } from '../../../velaux-data/src/api/pipeline';
 
 export interface UISchemaContextState {
   appName?: string;

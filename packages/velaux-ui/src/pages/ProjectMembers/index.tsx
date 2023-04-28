@@ -5,7 +5,7 @@ import { getProjectRoles, getProjectUsers, deleteProjectUser } from '../../api/p
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { ProjectMember, ProjectRoleBase } from '../../interface/project';
+import type { ProjectMember, ProjectRoleBase } from '../../../../velaux-data/src/api/project';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import './index.less';

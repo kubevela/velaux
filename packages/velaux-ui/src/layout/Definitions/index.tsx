@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 
 import Empty from '../../components/Empty';
 import { ListTitle } from '../../components/ListTitle';
-import type { DefinitionMenuType } from '../../interface/definitions';
+import type { DefinitionMenuType } from '../../../../velaux-data/src/api/definitions';
 import { getMatchParamObj } from '../../utils/utils';
 
 import Menu from './components/Menu';

@@ -6,7 +6,7 @@ import type {
   WorkflowRecord,
   WorkflowRecordBase,
   WorkflowStepStatus,
-} from '../../../../interface/application';
+} from '../../../../../../velaux-data/src/api/application';
 
 import { Card, Button, Tab, Loading, Grid, Message } from '@alifd/next';
 import Ansi from 'ansi-to-react';
@@ -33,7 +33,7 @@ import { If } from '../../../../components/If';
 import PipelineGraph from '../../../../components/PipelineGraph';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { WorkflowStepBase, WorkflowStepInputs, WorkflowStepOutputs } from '../../../../interface/pipeline';
+import type { WorkflowStepBase, WorkflowStepInputs, WorkflowStepOutputs } from '../../../../../../velaux-data/src/api/pipeline';
 import { convertAny, momentDate, timeDiff } from '../../../../utils/common';
 import RunStatusIcon from '../../../PipelineRunPage/components/RunStatusIcon';
 import { HiOutlineRefresh } from 'react-icons/hi';

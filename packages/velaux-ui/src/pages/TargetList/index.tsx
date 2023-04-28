@@ -6,15 +6,15 @@ import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { Cluster } from '../../interface/cluster';
-import type { Target } from '../../interface/target';
+import type { Cluster } from '@velaux/data/src/api/cluster';
+import type { Target } from '../../../../velaux-data/src/api/target';
 import { locale } from '../../utils/locale';
 
 import TableList from './components/List';
 import TargetDialog from './components/TargetDialog';
 
 import './index.less';
-import type { LoginUserInfo } from '../../interface/user';
+import type { LoginUserInfo } from '../../../../velaux-data/src/api/user';
 
 type Props = {
   targets?: [];

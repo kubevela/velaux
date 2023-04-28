@@ -9,7 +9,7 @@ import SwitchLanguage from '../../components/SwitchButton/index';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import './index.less';
-import type { DexConfig } from '../../interface/system';
+import type { DexConfig } from '../../../../velaux-data/src/api/system';
 import { checkName, checkUserPassword } from '../../utils/common';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 import EditPlatFormUserDialog from "../../layout/Header/components/EditPlatFormUserDialog";

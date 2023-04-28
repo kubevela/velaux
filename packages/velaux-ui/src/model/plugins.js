@@ -1,4 +1,12 @@
-import {detailPlugin, disablePlugin, enablePlugin, getPluginList, installPlugin, uninstallPlugin} from "../api/plugin";
+import {
+  detailPlugin,
+  disablePlugin,
+  enablePlugin,
+  getPluginList,
+  installPlugin,
+  setPlugin,
+  uninstallPlugin
+} from "../api/plugin";
 
 export default {
   namespace: 'plugins',
@@ -102,6 +110,15 @@ export default {
     * enablePlugin(action, {call, put}) {
       const res = yield call(enablePlugin, action.payload);
       if (res.info) {
+        yield put({type: 'addOrUpdatePlugin', payload: res});
+      }
+      if (action.callback) {
+        action.callback();
+      }
+    },
+    * setPlugin(action, {call, put}) {
+      const res = yield call(setPlugin, action.payload);
+      if (res) {
         yield put({type: 'addOrUpdatePlugin', payload: res});
       }
       if (action.callback) {

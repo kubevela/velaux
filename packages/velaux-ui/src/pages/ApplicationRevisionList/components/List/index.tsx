@@ -20,8 +20,8 @@ import type {
   ApplicationDetail,
   ApplicationRevision,
   ApplicationRollbackResponse,
-} from '../../../../interface/application';
-import type { NameAlias } from '../../../../interface/env';
+} from '../../../../../../velaux-data/src/api/application';
+import type { NameAlias } from '../../../../../../velaux-data/src/api/env';
 import { momentDate, showAlias } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { statusList } from '../../constants';

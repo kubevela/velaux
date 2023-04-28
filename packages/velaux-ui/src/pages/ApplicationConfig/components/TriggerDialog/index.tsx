@@ -16,7 +16,7 @@ import type {
   ApplicationComponentBase,
   CreateTriggerRequest,
   UpdateTriggerRequest,
-} from '../../../../interface/application';
+} from '../../../../../../velaux-data/src/api/application';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 
