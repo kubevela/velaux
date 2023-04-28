@@ -3,7 +3,6 @@ import React from 'react';
 
 import { createUser, updateUser } from '../../../../api/users';
 import DrawerWithFooter from '../../../../components/Drawer';
-import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { RolesBase } from '../../../../interface/roles';
