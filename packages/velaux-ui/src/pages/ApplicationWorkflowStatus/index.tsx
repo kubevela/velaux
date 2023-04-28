@@ -24,6 +24,7 @@ import { beautifyTime } from '../../utils/common';
 import { locale } from '../../utils/locale';
 
 import ApplicationWorkflowRecord from './components/WorkflowRecord';
+import { LoginUserInfo } from '../../interface/user';
 
 const { Row, Col } = Grid;
 
@@ -34,6 +35,7 @@ type Props = {
   applicationStatus?: ApplicationStatus;
   envbinding: EnvBinding[];
   workflows: Workflow[];
+  userInfo?: LoginUserInfo;
 };
 
 type State = {
@@ -49,7 +51,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.application };
+  return { ...store.application, ...store.user };
 })
 class ApplicationWorkflow extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -136,7 +138,7 @@ class ApplicationWorkflow extends React.Component<Props, State> {
   runApplicationWorkflow = () => {};
 
   render() {
-    const { applicationDetail, dispatch, applicationStatus, workflows } = this.props;
+    const { applicationDetail, dispatch, applicationStatus, workflows, userInfo } = this.props;
     const {
       params: { record, appName, envName },
     } = this.props.match;
@@ -177,6 +179,7 @@ class ApplicationWorkflow extends React.Component<Props, State> {
     return (
       <div className="run-layout">
         <Header
+          userInfo={userInfo}
           envbinding={this.getEnvbindingByName()}
           envName={envName}
           appName={appName}
