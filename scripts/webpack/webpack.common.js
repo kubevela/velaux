@@ -26,7 +26,9 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.es6', '.js', '.json', '.svg'],
     modules: ['node_modules', path.resolve('public')],
-
+    alias: {
+      '/font': path.resolve(__dirname, '../../packages/velaux-theme/dist/font'),
+    },
     fallback: {
       buffer: false,
       fs: false,

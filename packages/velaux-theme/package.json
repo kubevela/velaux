@@ -18,6 +18,7 @@
         "css-split-webpack-plugin": "^0.2.5",
         "extract-text-webpack-plugin": "next",
         "fast-sass-loader": "2.0.1",
+        "file-loader": "^6.2.0",
         "less-plugin-sass2less": "^1.x",
         "pnp-webpack-plugin": "1.7.0",
         "postcss-calc": "^7.0.4",

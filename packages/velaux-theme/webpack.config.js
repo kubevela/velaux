@@ -101,6 +101,18 @@ module.exports = function ({ minimize = false }) {
             use: scss({ minimize }).slice(1),
           }),
         },
+        {
+          test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
+          use: {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'font',
+              publicPath: '/font',
+              name: '[name].[ext]',
+              esModule: false
+            }
+          }
+        },
       ],
     },
     plugins: [
