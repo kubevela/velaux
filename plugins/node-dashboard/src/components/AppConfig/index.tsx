@@ -1,15 +1,13 @@
 import * as React from 'react';
-import { Button } from '@velaux/ui';
-import { PluginConfigPageProps, AppPluginMeta, PluginMeta } from '@velaux/data';
-import { enablePlugin } from "@velaux/ui";
-import { PluginEnableRequest } from "@velaux/data";
+import { Button ,enablePlugin  } from '@velaux/ui';
+import { PluginConfigPageProps, AppPluginMeta, PluginMeta ,PluginEnableRequest } from '@velaux/data';
 
 export type AppPluginSettings = {};
 
 export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<AppPluginSettings>> {}
 
 export const AppConfig = ({ plugin }: AppConfigProps) => {
-  const { enabled, jsonData } = plugin.meta;
+  const { enabled, jsonSetting } = plugin.meta;
 
   return (
     <div className="gf-form-group">
@@ -24,7 +22,7 @@ export const AppConfig = ({ plugin }: AppConfigProps) => {
               onClick={() =>
                 updatePluginAndReload(plugin.meta.id, {
                   enabled: true,
-                  jsonData,
+                  jsonSetting
                 })
               }
             >
@@ -42,7 +40,7 @@ export const AppConfig = ({ plugin }: AppConfigProps) => {
               onClick={() =>
                 updatePluginAndReload(plugin.meta.id, {
                   enabled: false,
-                  jsonData,
+                  jsonSetting
                 })
               }
             >
@@ -59,7 +57,7 @@ const updatePluginAndReload = async (pluginId: string, data: Partial<PluginMeta>
   try {
     const params: PluginEnableRequest = {
       id: pluginId,
-      jsonData: data.jsonData? data.jsonData : {},
+      jsonData: data.jsonSetting? data.jsonSetting : {},
       secureJsonData: data.secureJsonData? data.secureJsonData : {},
     }
     await enablePlugin(params).then((res) => {

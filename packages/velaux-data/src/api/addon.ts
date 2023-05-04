@@ -1,6 +1,6 @@
 import type { ApplicationStatus, UIParam } from './application';
 import type { NameAlias } from './env';
-import { KeyValue } from "@velaux/data";
+import { KeyValue } from "../types";
 
 export interface Addon {
   name: string;

@@ -107,53 +107,9 @@ class Plugin extends React.Component<Props, State> {
 
   componentDidMount() {
     this.getPluginList().then(() => {
-      const { pluginList } = this.props;
-      if (pluginList) {
-        pluginList.forEach((plugin) => {
-          if (plugin.name && plugin.info?.logos?.small) {
-            this.checkImage(plugin.name, plugin.info.logos.small);
-          }
-        });
-      }
       this.sortedPlugins()
     })
   }
-
-  componentDidUpdate(prevProps: Readonly<Props>) {
-    const { pluginList } = this.props;
-    if (pluginList && pluginList !== prevProps.pluginList) {
-      pluginList.forEach((plugin) => {
-        if (plugin.name && plugin.info?.logos?.small) {
-          this.checkImage(plugin.name, plugin.info.logos.small);
-        }
-      });
-    }
-  }
-
-  checkImage = (name: string, icon?: string) => {
-    if (icon && icon !== 'none' && icon !== '') {
-      const img = new Image();
-      img.src = icon;
-      img.onload = () => {
-        this.setState((preState) => {
-          preState.iconValid[name] = true;
-          return preState;
-        });
-      }
-      img.onerror = () => {
-        this.setState((preState) => {
-          preState.iconValid[name] = false;
-          return preState;
-        });
-      }
-    } else {
-      this.setState((preState) => {
-        preState.iconValid[name] = false;
-        return preState;
-      });
-    }
-  };
-
 
   sortedPlugins = () => {
     // put enabled plugin first, then installed plugin, then others

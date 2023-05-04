@@ -37,10 +37,6 @@ export default {
         yield put({type: 'updateAddonsList', payload: result});
         let uxPlugins = []
         for (const addon of result.addons) {
-          // TODO: remove this hack
-          if (addon.name === 'example' && addon.uxPlugins) {
-            addon.uxPlugins['node-dashboard'] = "https://kubevela-docs.oss-accelerate.aliyuncs.com/binary/example/node-dashboad.tar.gz"
-          }
           if (addon.uxPlugins && Object.keys(addon.uxPlugins).length > 0) {
             for (const [key, value] of Object.entries(addon.uxPlugins)) {
               uxPlugins.push({id: key, url: value, addon: addon})

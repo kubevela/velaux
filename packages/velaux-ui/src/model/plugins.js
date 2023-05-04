@@ -96,7 +96,6 @@ export default {
     },
     * getPluginList(action, {call, put}) {
       const res = yield call(getPluginList, action.payload);
-      console.log(res)
       if (res) {
         yield put({type: 'addOrUpdateBatchPlugins', payload: res.plugins});
       }

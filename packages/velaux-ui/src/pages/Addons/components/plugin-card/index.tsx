@@ -5,9 +5,9 @@ import './index.less';
 
 import { Box, Button, Card, Grid, Tag } from '@alifd/next';
 import i18n from "i18next";
-import { checkImage } from "../../../../utils/icon";
 import { If } from '../../../../components/If';
 import { Addon } from "@velaux/ui";
+import { renderIcon } from "@velaux/ui/src/utils/icon";
 
 type State = {
   iconValid: boolean
@@ -54,13 +54,11 @@ class PluginCard extends React.Component<Props, State> {
 
   componentDidMount() {
     if (this.props.icon) {
-      checkImage(this.props.icon, this.setValid)
     }
   }
 
   componentDidUpdate(prevProps: Readonly<Props>) {
     if (prevProps.icon !== this.props.icon && this.props.icon) {
-      checkImage(this.props.icon, this.setValid)
     }
   }
 
@@ -91,42 +89,6 @@ class PluginCard extends React.Component<Props, State> {
       installed,
       url,
     } = this.props;
-    const nameUpper = (name: string) => {
-      return name
-        .split('-')
-        .map((sep) => {
-          if (sep.length > 0) {
-            return sep.toUpperCase()[0];
-          }
-          return sep;
-        })
-        .toString()
-        .replace(',', '');
-    };
-
-    const renderIcon = (name: string, icon?: string) => {
-      if (this.state.iconValid) {
-        return <img src={icon} />;
-      } else {
-        return (
-          <div
-            style={{
-              display: 'inline-block',
-              verticalAlign: 'middle',
-              padding: `2px 4px`,
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              backgroundColor: '#ebf0ff',
-              textAlign: 'center',
-              lineHeight: '60px',
-            }}
-          >
-            <span style={{ color: '#1b58f4', fontSize: `2em` }}>{nameUpper(name)}</span>
-          </div>
-        );
-      }
-    }
 
     function getTags() {
       let ts = [...tags, ...(sourceAddon?.tags ?? [])]
@@ -137,9 +99,21 @@ class PluginCard extends React.Component<Props, State> {
     }
 
     return (
-      <div className={'plugin-card'}>
-        <a onClick={() => this.handleGoToPluginConfig(id)}>
-          <Card style={{ border: 'none' }} contentHeight={180}>
+
+      <div className={
+        'plugin-card'
+      }>
+        <a onClick={() =>
+          this
+            .handleGoToPluginConfig(id)
+        }>
+          <Card style={{
+            border: 'none'
+          }
+
+          } contentHeight={
+            180
+          }>
             <Box direction={'column'}>
               <Box align={"center"} spacing={8} direction={'row'}>
                 <Box>
@@ -161,12 +135,14 @@ class PluginCard extends React.Component<Props, State> {
                   }
                 </Box>
               </Box>
-              <Box flex={['auto']} className={'plugin-card-content'} direction={'column'} justify={'space-between'}>
+              <Box className={'plugin-card-content'} direction={'column'} justify={'space-between'} style={{height: '100%'}}>
                 <Box id={'desc'} className={'plugin-desc'}>
                   <h4 className={'font-size-14 font-color-keep'}>
                     {description ?? (sourceAddon?.description ?? "No descriptions")}
                   </h4>
                 </Box>
+              </Box>
+              <Box className={'plugin-card-footer'}>
                 <Row id={'tags'} gutter={1}>
                   <Col span={18}>
                     <Box direction={'row'} wrap={true} spacing={[4, 4]}>
@@ -209,7 +185,8 @@ class PluginCard extends React.Component<Props, State> {
         </a>
       </div>
 
-    );
+    )
+      ;
   }
 }
 

@@ -6,7 +6,7 @@ import { getPluginSrv, importAppPagePlugin } from '../../services/PluginService'
 import { Box, Button, Divider, Grid, Loading, Message, Tab } from "@alifd/next";
 import './index.less'
 import { connect } from "dva";
-import { checkImage, renderIcon } from "../../utils/icon";
+import { renderIcon } from "../../utils/icon";
 
 interface Props {
   pluginId: string;
@@ -41,8 +41,6 @@ enum types {
 }
 
 function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
-
-  const [valid, setValid] = React.useState(false)
   const [app, setApp] = React.useState<AppPagePlugin>();
   const _meta = pluginList.filter(item => item.id === pluginId)[0]
   const updateMeta = (previousState: any, action: any) => {
@@ -58,18 +56,15 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
     newJsonData[key] = value
     meta.jsonSetting = newJsonData
     setApp({ ...app, meta: meta } as AppPagePlugin)
-    console.log('handleJSONChange', meta)
   }
   const handleSecureJSONChange = (key: string, value: any) => {
     const newSecureJsonData = { ...meta.secureJsonData }
     newSecureJsonData[key] = value
     meta.secureJsonData = newSecureJsonData
     setApp({ ...app, meta: meta } as AppPagePlugin)
-    console.log('handleSecureJSONChange', meta)
   }
 
   const saveSetting = () => {
-    console.log('saveSetting', meta.jsonSetting, meta.secureJsonData)
     dispatch({
       type: 'plugins/setPlugin',
       payload: {
@@ -161,85 +156,84 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
     const history = locationService.getHistory()
     history.push('/plugins')
   }
-  checkImage(meta.info?.logos.large, (valid) => {
-    setValid(valid)
-  })
-
   const AppConfigPage = app.configPages.body
 
   return (
-    <>
+    <Box>
       <Loading visible={loading.models.plugins ?? false} fullScreen={true} />
-      <Box className={'page-header'} direction={'row'} spacing={12}>
+      <Box className={'container'}>
+        <Box className={'page-header'} direction={'row'} spacing={12}>
         <span className={'page-header-logo'}>
-          {renderIcon(meta.id, valid, meta.info?.logos.large)}
+          {renderIcon(meta.id, meta.info?.logos.large, "80px")}
         </span>
-        <Box direction={'column'}>
-          <h1 className={'page-header-title'}>{
-            <>
-              <a onClick={handleGotoPlugins}>Plugins</a> / {meta.name}
-            </>
-          }</h1>
-          <Row className={'basic-info font-size-16'}>
-            <Col>
-              <div className={'info-item-title'}>Version</div>
-              <div>{meta.info.version}</div>
-            </Col>
-            <Col>
-              <Divider direction="ver" style={{ height: '100%' }} />
-            </Col>
-            <Col>
-              <Box direction={'column'}>
-                <div className={'info-item-title'}>Author</div>
-                <div>{meta.info.author?.name ?? "Unknown"}</div>
+          <Box direction={'column'}>
+            <h1 className={'page-header-title'}>{
+              <>
+                <a onClick={handleGotoPlugins}>Plugins</a> / {meta.name}
+              </>
+            }</h1>
+
+            <h4 className={'font-size-14'}>{meta.info.description ?? "No descriptions"}</h4>
+          </Box>
+          <Box style={{ marginLeft: 'auto' }} align={'flex-end'} direction={'row'} justify={'flex-end'}>
+            <Box justify={"space-between"} style={{ height: '100%' }}>
+              <Row className={'basic-info font-size-16'} justify={'end'}>
+                <Col>
+                  <div className={'info-item-title'}>Version</div>
+                  <div>{meta.info.version}</div>
+                </Col>
+                <Col>
+                  <Divider direction="ver" style={{ height: '100%' }} />
+                </Col>
+                <Col>
+                  <Box direction={'column'}>
+                    <div className={'info-item-title'}>Author</div>
+                    <div>{meta.info.author?.name ?? "Unknown"}</div>
+                  </Box>
+                </Col>
+                <Col>
+                  <Divider direction="ver" style={{ height: '100%' }} />
+                </Col>
+                <Col className={'info-item'}>
+                  <div className={'info-item-title'}>Status</div>
+                  <div>{
+                    meta.enabled ? <Translation className={''}>Enabled</Translation> :
+                      <Translation>Disabled</Translation>
+                  }</div>
+                </Col>
+              </Row>
+              <Box direction={'row'} justify={"flex-end"} spacing={8}>
+                {isInstalled && !isEnabled &&
+                    <Button type={'primary'} onClick={() => enablePlugin(pluginId)}>Enable</Button>
+                }
+                {isEnabled &&
+                    <Button type={'primary'} onClick={saveSetting}>Save</Button>
+                }
+                {
+                  isEnabled &&
+                    <Button warning={true} onClick={() => disablePlugin(pluginId)}>Disable</Button>
+                }
+                {
+                  !isEnabled && isInstalled &&
+                    <Button warning={true} onClick={() => uninstallPlugin(pluginId)}>Uninstall</Button>
+                }
               </Box>
-            </Col>
-            <Col>
-              <Divider direction="ver" style={{ height: '100%' }} />
-            </Col>
-            <Col className={'info-item'}>
-              <div className={'info-item-title'}>Status</div>
-              <div>{
-                meta.enabled ? <Translation className={''}>Enabled</Translation> : <Translation>Disabled</Translation>
-              }</div>
-            </Col>
-          </Row>
-          <h4 className={'font-size-14'}>{meta.info.description ?? "No descriptions"}</h4>
-        </Box>
-        <Box style={{ marginLeft: 'auto' }} align={'flex-end'} direction={'row'} justify={'flex-end'}>
-          <Row gutter={8}>
-            {isInstalled && !isEnabled &&
-                <Col>
-                  <Button type={'primary'} onClick={() => enablePlugin(pluginId)}>Enable</Button>
-                </Col>
-            }
-            {isEnabled &&
-                <Col>
-                  <Button type={'primary'} onClick={saveSetting}>Save & Reload</Button>
-                </Col>
-            }
-            {
-              isEnabled &&
-                <Col>
-                  <Button warning={true} onClick={() => disablePlugin(pluginId)}>Disable</Button>
-                </Col>
-            }
-            {
-              !isEnabled && isInstalled &&
-                <Col>
-                  <Button warning={true} onClick={() => uninstallPlugin(pluginId)}>Uninstall</Button>
-                </Col>
-            }
-          </Row>
+            </Box>
+          </Box>
         </Box>
       </Box>
-      <Tab>
-        <Tab.Item title={'Config'}>
-          <AppConfigPage plugin={app} query={{}} onJSONDataChange={handleJSONChange}
-                         onSecureJSONDataChange={handleSecureJSONChange} />
-        </Tab.Item>
-      </Tab>
-    </>
+      <Box className={'container'}>
+        <Tab>
+          <Tab.Item title={'Config'}>
+            <Box style={{ backgroundColor: '#FFF',padding: '0 10px'}}>
+              <AppConfigPage plugin={app} query={{}} onJSONDataChange={handleJSONChange}
+                             onSecureJSONDataChange={handleSecureJSONChange} />
+            </Box>
+          </Tab.Item>
+        </Tab>
+      </Box>
+
+    </Box>
   )
 }
 
@@ -252,7 +246,6 @@ async function loadAppPlugin(
     if (app && 'type' in app) {
       return importAppPagePlugin(app)
         .then((pageApp) => {
-          console.log('pageApp', pageApp)
           setApp(pageApp);
         })
         .catch((err) => {
