@@ -31,6 +31,7 @@ import (
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
+	assembler "github.com/kubevela/velaux/pkg/server/interfaces/api/assembler/v1"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
@@ -192,18 +193,40 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 		AppPrimaryKey: webhookTrigger.AppPrimaryKey,
 		Name:          webhookTrigger.WorkflowName,
 	}
-	c.w.Store.Get(ctx, workflow)
+	if err := c.w.Store.Get(ctx, workflow); err != nil {
+		return nil, err
+	}
 	switch c.req.Action {
 	case "approve":
 		if err := c.w.WorkflowService.ResumeRecord(ctx, app, workflow, "", c.req.Step); err != nil {
 			return nil, err
 		}
-		return "workflow resumed successfully", nil
+		record := model.WorkflowRecord{
+			AppPrimaryKey: workflow.AppPrimaryKey,
+			WorkflowName:  workflow.Name,
+		}
+		records, err := c.w.Store.List(ctx, &record, &datastore.ListOptions{Page: 1, PageSize: 1, SortBy: []datastore.SortOption{
+			{Key: "createTime", Order: datastore.SortOrderDescending},
+		}})
+		if err != nil {
+			return nil, err
+		}
+		return &assembler.ConvertFromRecordModel(records[0].(*model.WorkflowRecord)).WorkflowRecordBase, nil
 	case "terminate":
 		if err := c.w.WorkflowService.TerminateRecord(ctx, app, workflow, ""); err != nil {
 			return nil, err
 		}
-		return "workflow terminated successfully", nil
+		record := model.WorkflowRecord{
+			AppPrimaryKey: workflow.AppPrimaryKey,
+			WorkflowName:  workflow.Name,
+		}
+		records, err := c.w.Store.List(ctx, &record, &datastore.ListOptions{Page: 1, PageSize: 1, SortBy: []datastore.SortOption{
+			{Key: "createTime", Order: datastore.SortOrderDescending},
+		}})
+		if err != nil {
+			return nil, err
+		}
+		return &assembler.ConvertFromRecordModel(records[0].(*model.WorkflowRecord)).WorkflowRecordBase, nil
 	case "rollback":
 		workflowRecord := &model.WorkflowRecord{
 			AppPrimaryKey: webhookTrigger.AppPrimaryKey,
@@ -214,7 +237,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 			PageSize: 1,
 			SortBy:   []datastore.SortOption{{Key: "StartTime", Order: datastore.SortOrderDescending}},
 			FilterOptions: datastore.FilterOptions{
-				In: []datastore.InQueryOption{{Key: "status", Values: []string{"suspending", "running"}}},
+				In: []datastore.InQueryOption{{Key: "status", Values: []string{"suspending"}}},
 			},
 		})
 		if err != nil {
@@ -251,7 +274,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 			})
 		}
 	default:
-		return nil, fmt.Errorf("action is not supported")
+		return nil, bcode.ErrInvalidWebhookPayloadBody
 	}
 }
 

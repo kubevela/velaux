@@ -26,6 +26,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
@@ -34,6 +35,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
+	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 )
 
 var _ = Describe("Test application service function", func() {
@@ -128,6 +130,251 @@ var _ = Describe("Test application service function", func() {
 		Expect(revision.CodeInfo.Commit).Should(Equal("test-commit"))
 		Expect(revision.CodeInfo.Branch).Should(Equal("test-branch"))
 		Expect(revision.CodeInfo.User).Should(Equal("test-user"))
+
+		By("Test HandleApplicationWebhook function with custom payload and execute as action type")
+		executeReq := apisv1.HandleApplicationTriggerWebhookRequest{
+			Upgrade: map[string]*model.JSONStruct{
+				"component-name-webhook": {
+					"image": "test-image",
+					"test1": map[string]string{
+						"test2": "test3",
+					},
+				},
+			},
+			CodeInfo: &model.CodeInfo{
+				Commit: "test-commit",
+				Branch: "test-branch",
+				User:   "test-user",
+			},
+			Action: "execute",
+		}
+		body, err = json.Marshal(executeReq)
+		Expect(err).Should(BeNil())
+		httpreq, err = http.NewRequest("post", "/", bytes.NewBuffer(body))
+		httpreq.Header.Add(restful.HEADER_ContentType, "application/json")
+		Expect(err).Should(BeNil())
+		res, err = webhookService.HandleApplicationWebhook(context.TODO(), triggers[0].Token, restful.NewRequest(httpreq))
+		Expect(err).Should(BeNil())
+		appDeployRes = res.(*apisv1.ApplicationDeployResponse)
+		comp, err = appService.GetApplicationComponent(context.TODO(), appModel, "component-name-webhook")
+		Expect(err).Should(BeNil())
+		Expect((*comp.Properties)["image"]).Should(Equal("test-image"))
+		Expect((*comp.Properties)["test1"]).Should(Equal(map[string]interface{}{
+			"test2": "test3",
+		}))
+
+		revision = &model.ApplicationRevision{
+			AppPrimaryKey: "test-app-webhook",
+			Version:       appDeployRes.Version,
+		}
+		err = webhookService.Store.Get(context.TODO(), revision)
+		Expect(err).Should(BeNil())
+		Expect(revision.CodeInfo.Commit).Should(Equal("test-commit"))
+		Expect(revision.CodeInfo.Branch).Should(Equal("test-branch"))
+		Expect(revision.CodeInfo.User).Should(Equal("test-user"))
+
+		By("Test HandleApplicationWebhook function with custom payload and approve as action type")
+
+		_, err = envService.CreateEnv(context.TODO(), apisv1.CreateEnvRequest{Name: "resume"})
+		Expect(err).Should(BeNil())
+		_, err = envBindingService.CreateEnvBinding(context.TODO(), &model.Application{Name: appName}, apisv1.CreateApplicationEnvbindingRequest{EnvBinding: apisv1.EnvBinding{Name: "resume"}})
+		Expect(err).Should(BeNil())
+		ResumeWorkflow := "resume-workflow"
+		approveWorkflowReq := apisv1.CreateWorkflowRequest{
+			Name:        ResumeWorkflow,
+			Description: "this is a workflow",
+			EnvName:     "resume",
+		}
+
+		base, err := workflowService.CreateOrUpdateWorkflow(context.TODO(), &model.Application{
+			Name: appName,
+		}, approveWorkflowReq)
+		Expect(err).Should(BeNil())
+		Expect(base.Name).Should(Equal(approveWorkflowReq.Name))
+
+		app, err := createTestSuspendApp(ctx, appName, "resume", "revision-resume1", ResumeWorkflow, "workflow-resume-1", workflowService.KubeClient)
+		Expect(err).Should(BeNil())
+
+		_, err = workflowService.CreateWorkflowRecord(context.TODO(), &model.Application{
+			Name: appName,
+		}, app, &model.Workflow{Name: ResumeWorkflow})
+		Expect(err).Should(BeNil())
+
+		err = workflowService.createTestApplicationRevision(ctx, &model.ApplicationRevision{
+			AppPrimaryKey:  appName,
+			Version:        "revision-resume1",
+			RevisionCRName: "revision-resume1",
+			Status:         model.RevisionStatusRunning,
+		})
+		Expect(err).Should(BeNil())
+
+		suspendAppTriggers, err := appService.ListApplicationTriggers(context.TODO(), &model.Application{
+			Name: app.Name,
+		})
+		Expect(err).Should(BeNil())
+
+		approveReq := apisv1.HandleApplicationTriggerWebhookRequest{
+			Action: "approve",
+			Step:   "suspend",
+		}
+		body, err = json.Marshal(approveReq)
+		Expect(err).Should(BeNil())
+		httpreq, err = http.NewRequest("post", "/", bytes.NewBuffer(body))
+		httpreq.Header.Add(restful.HEADER_ContentType, "application/json")
+		Expect(err).Should(BeNil())
+		_, err = webhookService.HandleApplicationWebhook(context.TODO(), suspendAppTriggers[0].Token, restful.NewRequest(httpreq))
+		Expect(err).Should(BeNil())
+
+		err = workflowService.SyncWorkflowRecord(ctx, appName, "workflow-resume-1", app, nil)
+		Expect(err).Should(BeNil())
+
+		record, err := workflowService.DetailWorkflowRecord(ctx, &model.Workflow{Name: ResumeWorkflow, AppPrimaryKey: appName}, "workflow-resume-1")
+		Expect(err).Should(BeNil())
+		Expect(len(record.Steps)).Should(Equal(1))
+		Expect(record.Steps[0].Phase).Should(Equal(workflowv1alpha1.WorkflowStepPhaseRunning))
+
+		By("Test HandleApplicationWebhook function with custom payload and terminate as action type")
+		_, err = envService.CreateEnv(context.TODO(), apisv1.CreateEnvRequest{Name: "terminate"})
+		Expect(err).Should(BeNil())
+		_, err = envBindingService.CreateEnvBinding(context.TODO(), &model.Application{Name: appName}, apisv1.CreateApplicationEnvbindingRequest{EnvBinding: apisv1.EnvBinding{Name: "terminate"}})
+		Expect(err).Should(BeNil())
+		workflowName := "terminate-workflow"
+		terminateWorkflowreq := apisv1.CreateWorkflowRequest{
+			Name:        workflowName,
+			Description: "this is a workflow",
+			EnvName:     "terminate",
+		}
+		workflow := &model.Workflow{Name: workflowName, EnvName: "terminate"}
+		base, err = workflowService.CreateOrUpdateWorkflow(context.TODO(), &model.Application{
+			Name: appName,
+		}, terminateWorkflowreq)
+		Expect(err).Should(BeNil())
+		Expect(base.Name).Should(Equal(terminateWorkflowreq))
+
+		app, err = createTestSuspendApp(ctx, appName, "terminate", "revision-terminate1", workflow.Name, "test-workflow-2-1", workflowService.KubeClient)
+		Expect(err).Should(BeNil())
+
+		_, err = workflowService.CreateWorkflowRecord(context.TODO(), &model.Application{
+			Name: appName,
+		}, app, workflow)
+		Expect(err).Should(BeNil())
+
+		err = workflowService.createTestApplicationRevision(ctx, &model.ApplicationRevision{
+			AppPrimaryKey: appName,
+			Version:       "revision-terminate1",
+			Status:        model.RevisionStatusRunning,
+		})
+		Expect(err).Should(BeNil())
+
+		suspendAppTriggers, err = appService.ListApplicationTriggers(context.TODO(), &model.Application{
+			Name: app.Name,
+		})
+		Expect(err).Should(BeNil())
+
+		terminateReq := apisv1.HandleApplicationTriggerWebhookRequest{
+			Action: "approve",
+			Step:   "suspend",
+		}
+		body, err = json.Marshal(terminateReq)
+		Expect(err).Should(BeNil())
+		httpreq, err = http.NewRequest("post", "/", bytes.NewBuffer(body))
+		httpreq.Header.Add(restful.HEADER_ContentType, "application/json")
+		Expect(err).Should(BeNil())
+		_, err = webhookService.HandleApplicationWebhook(context.TODO(), suspendAppTriggers[0].Token, restful.NewRequest(httpreq))
+		Expect(err).Should(BeNil())
+
+		err = k8sClient.Get(ctx, client.ObjectKey{Name: appName, Namespace: "terminate"}, app)
+		Expect(err).Should(BeNil())
+		err = workflowService.SyncWorkflowRecord(ctx, appName, "test-workflow-2-1", app, nil)
+		Expect(err).Should(BeNil())
+
+		record, err = workflowService.DetailWorkflowRecord(ctx, workflow, "test-workflow-2-1")
+		Expect(err).Should(BeNil())
+		Expect(len(record.Steps)).Should(Equal(1))
+		Expect(record.Steps[0].Phase).Should(Equal(workflowv1alpha1.WorkflowStepPhaseFailed))
+
+		By("Test HandleApplicationWebhook function with custom payload and rollback as action type")
+		ctx := context.TODO()
+		_, err = envService.CreateEnv(context.TODO(), apisv1.CreateEnvRequest{Name: "rollback"})
+		Expect(err).Should(BeNil())
+		_, err = envBindingService.CreateEnvBinding(context.TODO(), &model.Application{Name: appName}, apisv1.CreateApplicationEnvbindingRequest{EnvBinding: apisv1.EnvBinding{Name: "rollback"}})
+		Expect(err).Should(BeNil())
+		workflowName = "rollback-workflow"
+		rollbackWorkflowReq := apisv1.CreateWorkflowRequest{
+			Name:        workflowName,
+			Description: "this is a workflow",
+			EnvName:     "rollback",
+		}
+		workflow = &model.Workflow{Name: workflowName, EnvName: "rollback"}
+		base, err = workflowService.CreateOrUpdateWorkflow(context.TODO(), &model.Application{
+			Name: appName,
+		}, rollbackWorkflowReq)
+		Expect(err).Should(BeNil())
+		Expect(base.Name).Should(Equal(rollbackWorkflowReq.Name))
+
+		app, err = createTestSuspendApp(ctx, appName, "rollback", "revision-rollback1", workflow.Name, "test-workflow-2-2", workflowService.KubeClient)
+		Expect(err).Should(BeNil())
+
+		_, err = workflowService.CreateWorkflowRecord(context.TODO(), &model.Application{
+			Name: appName,
+		}, app, workflow)
+		Expect(err).Should(BeNil())
+
+		err = workflowService.createTestApplicationRevision(ctx, &model.ApplicationRevision{
+			AppPrimaryKey: appName,
+			Version:       "revision-rollback1",
+			Status:        model.RevisionStatusRunning,
+			WorkflowName:  workflow.Name,
+			EnvName:       "rollback",
+		})
+		Expect(err).Should(BeNil())
+		err = workflowService.createTestApplicationRevision(ctx, &model.ApplicationRevision{
+			AppPrimaryKey:  appName,
+			Version:        "revision-rollback0",
+			ApplyAppConfig: `{"apiVersion":"core.oam.dev/v1beta1","kind":"Application","metadata":{"annotations":{"app.oam.dev/workflowName":"test-workflow-2-2","app.oam.dev/deployVersion":"revision-rollback1","vela.io/publish-version":"workflow-rollback1"},"name":"first-vela-app","namespace":"default"},"spec":{"components":[{"name":"express-server","properties":{"image":"crccheck/hello-world","port":8000},"traits":[{"properties":{"domain":"testsvc.example.com","http":{"/":8000}},"type":"ingress-1-20"}],"type":"webservice"}]}}`,
+			Status:         model.RevisionStatusComplete,
+			WorkflowName:   workflow.Name,
+			EnvName:        "rollback",
+		})
+		Expect(err).Should(BeNil())
+
+		suspendAppTriggers, err = appService.ListApplicationTriggers(context.TODO(), &model.Application{
+			Name: app.Name,
+		})
+		Expect(err).Should(BeNil())
+
+		rollbackReq := apisv1.HandleApplicationTriggerWebhookRequest{
+			Action: "rollback",
+			Step:   "suspend",
+		}
+		body, err = json.Marshal(rollbackReq)
+		Expect(err).Should(BeNil())
+		httpreq, err = http.NewRequest("post", "/", bytes.NewBuffer(body))
+		httpreq.Header.Add(restful.HEADER_ContentType, "application/json")
+		Expect(err).Should(BeNil())
+		_, err = webhookService.HandleApplicationWebhook(context.TODO(), suspendAppTriggers[0].Token, restful.NewRequest(httpreq))
+		Expect(err).Should(BeNil())
+
+		recordsNum, err := workflowService.Store.Count(ctx, &model.WorkflowRecord{
+			AppPrimaryKey:      appName,
+			WorkflowName:       workflow.Name,
+			RevisionPrimaryKey: "revision-rollback0",
+		}, nil)
+		Expect(err).Should(BeNil())
+		Expect(recordsNum).Should(Equal(int64(1)))
+
+		By("Test HandleApplicationWebhook function with custom payload and invalid action type")
+		invalidActionReq := apisv1.HandleApplicationTriggerWebhookRequest{
+			Action: "invalid",
+			Step:   "suspend",
+		}
+		body, err = json.Marshal(invalidActionReq)
+		Expect(err).Should(BeNil())
+		httpreq, err = http.NewRequest("post", "/", bytes.NewBuffer(body))
+		httpreq.Header.Add(restful.HEADER_ContentType, "application/json")
+		Expect(err).Should(BeNil())
+		_, err = webhookService.HandleApplicationWebhook(context.TODO(), triggers[0].Token, restful.NewRequest(httpreq))
+		Expect(err).Should(Equal(bcode.ErrInvalidWebhookPayloadBody))
 
 		By("Test HandleApplicationWebhook function with ACR payload")
 		acrTrigger, err := appService.CreateApplicationTrigger(context.TODO(), appModel, apisv1.CreateApplicationTriggerRequest{
