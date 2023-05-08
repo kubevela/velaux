@@ -74,9 +74,9 @@ e2e-setup-core: install-vela install-core install-addon
 
 .PHONY: install-vela
 install-vela: 
-	curl -fsSl https://kubevela.io/script/install.sh | bash -s v1.9.0-alpha.2
+	curl -fsSl https://kubevela.io/script/install.sh | bash -s v1.9.0-alpha.3
 install-core:
-	vela install -y
+	vela install -v v1.9.0-alpha.2 -y
 install-addon:
 	vela addon enable fluxcd
 	vela addon enable vela-workflow --override-definitions
