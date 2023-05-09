@@ -41,8 +41,13 @@ func JSCache(req *http.Request, res http.ResponseWriter, chain *utils.FilterChai
 	if matchCacheCondition(req) {
 		if value, ok := jsFileCache.Get(req.URL.String()); ok {
 			if cacheData, ok := value.(*cacheData); ok {
-				cacheData.Write(res)
-				return
+				if cacheData.data.Len() == 0 {
+					klog.Warningf("Cache data is empty, url: %s", req.URL.String())
+					jsFileCache.Remove(req.URL.String())
+				} else {
+					cacheData.Write(res)
+					return
+				}
 			}
 		}
 	}
