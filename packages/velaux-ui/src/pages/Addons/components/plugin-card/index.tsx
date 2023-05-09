@@ -6,7 +6,7 @@ import './index.less';
 import { Box, Button, Card, Grid, Tag } from '@alifd/next';
 import i18n from "i18next";
 import { If } from '../../../../components/If';
-import { Addon } from "@velaux/ui";
+import { Addon } from "@velaux/data";
 import { renderIcon } from "@velaux/ui/src/utils/icon";
 
 type State = {

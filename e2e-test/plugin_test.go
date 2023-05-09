@@ -17,6 +17,8 @@ limitations under the License.
 package e2e_test
 
 import (
+	"fmt"
+
 	"cuelang.org/go/pkg/strings"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -25,6 +27,13 @@ import (
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
+
+func enablePlugin(id string) {
+	res := post(fmt.Sprintf("/manage/plugins/%s/enable", id), nil)
+	var dto apisv1.PluginDTO
+	Expect(decodeResponseBody(res, &dto)).Should(Succeed())
+	Expect(dto.ID).Should(Equal(id))
+}
 
 var _ = Describe("Test the plugin rest api", func() {
 	Context("Test manage plugin API", func() {
@@ -114,11 +123,7 @@ var _ = Describe("Test the plugin rest api", func() {
 			Expect(strings.Contains(err.Error(), "the plugin is not enabled")).Should(BeTrue())
 
 			By("After enable the plugin, request the plugin API should return 200")
-
-			res = post("/manage/plugins/node-dashboard/enable", nil)
-			var dto apisv1.PluginDTO
-			Expect(decodeResponseBody(res, &dto)).Should(Succeed())
-			Expect(dto.ID).Should(Equal("node-dashboard"))
+			enablePlugin("node-dashboard")
 
 			res = get(baseDomain + "/proxy/plugins/node-dashboard/api/v1/nodes")
 			Expect(decodeResponseBody(res, &nodeList)).Should(Succeed())
@@ -131,7 +136,16 @@ var _ = Describe("Test the plugin rest api", func() {
 
 		It("Test to get the module file", func() {
 			defer GinkgoRecover()
+			By("Before enable the plugin, request the plugin API should return 400")
+
 			res := get(baseDomain + "/public/plugins/app-demo/module.js")
+			defer func() { _ = res.Body.Close() }()
+			Expect(res.StatusCode).Should(Equal(400))
+
+			By("After enable the plugin, request the plugin API should return 200")
+			enablePlugin("app-demo")
+
+			res = get(baseDomain + "/public/plugins/app-demo/module.js")
 			defer func() { _ = res.Body.Close() }()
 			Expect(res.StatusCode).Should(Equal(200))
 		})

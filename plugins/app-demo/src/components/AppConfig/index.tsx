@@ -7,7 +7,7 @@ export type AppPluginSettings = {};
 export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<AppPluginSettings>> {}
 
 export const AppConfig = ({ plugin }: AppConfigProps) => {
-  const { enabled, jsonData } = plugin.meta;
+  const { enabled, jsonSetting } = plugin.meta;
 
   return (
     <div className="gf-form-group">
@@ -22,7 +22,7 @@ export const AppConfig = ({ plugin }: AppConfigProps) => {
               onClick={() =>
                 updatePluginAndReload(plugin.meta.id, {
                   enabled: true,
-                  jsonData,
+                  jsonSetting,
                 })
               }
             >
@@ -40,7 +40,7 @@ export const AppConfig = ({ plugin }: AppConfigProps) => {
               onClick={() =>
                 updatePluginAndReload(plugin.meta.id, {
                   enabled: false,
-                  jsonData,
+                  jsonSetting,
                 })
               }
             >

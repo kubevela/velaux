@@ -1,11 +1,9 @@
 import React from 'react';
 import './index.less';
-import type { KeyValue, PluginMeta } from '@velaux/data';
+import type { PluginMeta } from '@velaux/data';
 import { AppConfigPage } from "@velaux/ui/src/layout/AppRootPage";
 
-type State = {
-  iconValid: KeyValue<boolean>;
-};
+type State = {};
 
 type Props = {
   plugin: PluginMeta
@@ -15,9 +13,7 @@ type Props = {
 class PluginConfig extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      iconValid: {},
-    };
+    this.state = {};
   }
 
   render() {

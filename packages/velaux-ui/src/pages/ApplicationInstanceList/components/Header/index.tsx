@@ -1,4 +1,4 @@
-import { Grid, Select, Button, Dialog, Message, Menu, Dropdown } from '@alifd/next';
+import { Button, Dialog, Dropdown, Grid, Menu, Message, Select } from '@alifd/next';
 import { Link, routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
@@ -8,27 +8,27 @@ import { HiOutlineRefresh } from 'react-icons/hi';
 import { listApplicationServiceEndpoints } from '../../../../api/observation';
 
 import {
-  recycleApplicationEnvbinding,
-  deleteApplicationEnvbinding,
   compareApplication,
+  deleteApplicationEnvbinding,
+  recycleApplicationEnvbinding,
 } from '../../../../api/application';
 import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
-import { Translation } from '../../../../components/Translation';
+import { Translation } from '../../../../components';
 import type {
   ApplicationCompareResponse,
   ApplicationComponent,
   ApplicationDetail,
   ApplicationStatus,
+  Endpoint,
   EnvBinding,
-} from '../../../../../../velaux-data/src/api/application';
-import type { Endpoint } from '../../../../../../velaux-data/src/api/observation';
-import type { Target } from '../../../../../../velaux-data/src/api/target';
+  Target,
+} from '@velaux/data/src';
 import { locale } from '../../../../utils/locale';
 import { getLink } from '../../../../utils/utils';
 import { checkPermission } from '../../../../utils/permission';
-import { LoginUserInfo } from '@velaux/ui';
+import { LoginUserInfo } from '@velaux/data';
 
 export type GatewayIP = {
   ip: string;
@@ -78,6 +78,7 @@ class Header extends Component<Props, State> {
       visibleApplicationDiff: false,
     };
   }
+
   componentDidMount() {
     this.compareCurrentWithCluster(this.props.appName, this.props.envName);
     this.loadApplicationEndpoints();

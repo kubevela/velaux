@@ -3,17 +3,13 @@ import { connect } from 'dva';
 import './index.less';
 
 import { Grid, Message } from "@alifd/next";
-import type { KeyValue, PluginMeta, } from '@velaux/data';
+import type { PluginMeta, } from '@velaux/data';
 import i18n from "../../../../i18n";
 import { If } from "../../../../components/If";
 import Empty from "../../../../components/Empty";
 import PluginCard from "../plugin-card";
 
-type State = {
-  iconValid: KeyValue<boolean>;
-  currentPlugin?: PluginMeta;
-  showConfig: boolean;
-};
+type State = {};
 
 type Props = {
   dispatch: ({}) => {};
@@ -45,10 +41,7 @@ function pluginUninstalled(p: PluginMeta) {
 class Plugin extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      iconValid: {},
-      showConfig: false,
-    };
+    this.state = {};
 
     this.installPlugin = this.installPlugin.bind(this);
   }
