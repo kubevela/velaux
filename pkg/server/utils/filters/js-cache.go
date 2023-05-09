@@ -42,7 +42,7 @@ func JSCache(req *http.Request, res http.ResponseWriter, chain *utils.FilterChai
 		if value, ok := jsFileCache.Get(req.URL.String()); ok {
 			if cacheData, ok := value.(*cacheData); ok {
 				if cacheData.data.Len() == 0 {
-					klog.Warningf("Cache data is empty, url: %s", req.URL.String())
+					klog.Warningf("Cache data is empty")
 					jsFileCache.Remove(req.URL.String())
 				} else {
 					cacheData.Write(res)
@@ -59,7 +59,7 @@ func JSCache(req *http.Request, res http.ResponseWriter, chain *utils.FilterChai
 		if cacheWriter.cacheData.code == http.StatusOK {
 			jsFileCache.Add(req.URL.String(), cacheWriter.cacheData)
 		} else {
-			klog.Warningf("Skip cache the js file, code: %d, url: %s", cacheWriter.cacheData.code, req.URL.String())
+			klog.Warningf("Skip cache the js file, code: %d", cacheWriter.cacheData.code)
 		}
 		return
 	}
