@@ -51,7 +51,11 @@ func JSCache(req *http.Request, res http.ResponseWriter, chain *utils.FilterChai
 		res.Header().Set(HeaderHitCache, "false")
 		cacheWriter := &CacheWriter{writer: res, cacheData: &cacheData{}}
 		chain.ProcessFilter(req, cacheWriter)
-		jsFileCache.Add(req.URL.String(), cacheWriter.cacheData)
+		if cacheWriter.cacheData.code == http.StatusOK {
+			jsFileCache.Add(req.URL.String(), cacheWriter.cacheData)
+		} else {
+			klog.Warningf("Skip cache the js file, code: %d, url: %s", cacheWriter.cacheData.code, req.URL.String())
+		}
 		return
 	}
 	chain.ProcessFilter(req, res)

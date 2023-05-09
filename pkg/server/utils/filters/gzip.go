@@ -32,6 +32,7 @@ func Gzip(req *http.Request, res http.ResponseWriter, chain *utils.FilterChain) 
 	if doCompress {
 		w, err := restful.NewCompressingResponseWriter(res, encoding)
 		if err != nil {
+			klog.Errorf("failed to create the compressing writer, err: %s", err.Error())
 			res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
