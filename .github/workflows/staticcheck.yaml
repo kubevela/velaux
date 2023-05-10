@@ -1,4 +1,4 @@
-name: staticcheck
+name: Static Check
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
           do_not_skip: '["workflow_dispatch", "schedule", "push"]'
           concurrent_skipping: false
 
-  build:
+  check:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
