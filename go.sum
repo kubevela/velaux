@@ -196,8 +196,9 @@ github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMn
 github.com/clbanning/mxj/v2 v2.5.5 h1:oT81vUeEiQQ/DcHbzSytRngP6Ky9O+L+0Bw0zSJag9E=
 github.com/clbanning/mxj/v2 v2.5.5/go.mod h1:hNiWqW14h+kc+MdF9C6/YoRfjEJoR3ou6tn/Qo+ve2s=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
-github.com/cloudflare/circl v1.1.0 h1:bZgT/A+cikZnKIwn7xL2OBj012Bmvho/o6RpRvv3GKY=
 github.com/cloudflare/circl v1.1.0/go.mod h1:prBCrKB9DV4poKZY1l9zBXg2QJY7mvgRvtMxxK7fi4I=
+github.com/cloudflare/circl v1.3.3 h1:fE/Qz0QdIGqeWfnwq0RE0R7MI51s0M2E4Ga9kq5AEMs=
+github.com/cloudflare/circl v1.3.3/go.mod h1:5XYMA4rFBvNIrhs50XuiBJ15vF2pZn4nnUKZrLbUZFA=
 github.com/cloudtty/cloudtty v0.2.0 h1:QvDbb2hZl7nSfLDrKkbjIixjkW6seSVBX3N/GRmioyM=
 github.com/cloudtty/cloudtty v0.2.0/go.mod h1:RRVb8fLrfpzjsLFqaUk74ouRvZ2drVCvSN3ZzidHju8=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
@@ -884,8 +885,8 @@ github.com/oam-dev/cluster-gateway v1.9.0-alpha.2 h1:412Yhe6BoNVgeomv0tvJaOeKl6v
 github.com/oam-dev/cluster-gateway v1.9.0-alpha.2/go.mod h1:MbBn0E1eGWXqSsnrOb2aKLnGcyvg34Lz9/Q+B1uGEpE=
 github.com/oam-dev/cluster-register v1.0.4-0.20220928064144-5f76a9d7ca8c h1:RE/33gzs9hoyegcTaUXDG/hayffJ197ljMUGNP6I/5A=
 github.com/oam-dev/cluster-register v1.0.4-0.20220928064144-5f76a9d7ca8c/go.mod h1:nKEUMfuEB8pHKsaSah9IA+UQzezrPYebBdRozyNtlZc=
-github.com/oam-dev/kubevela v1.9.0-alpha.1.0.20230421061936-dab1618eef7d h1:aG0xFUxtd4EOuntG9OBdEimf5bUdBmUQXJhB9HsqwrE=
-github.com/oam-dev/kubevela v1.9.0-alpha.1.0.20230421061936-dab1618eef7d/go.mod h1:TdgEoyV50TGYKrXKCZ8H7U0VLZlgicZ5cimDoKUYCqs=
+github.com/oam-dev/kubevela v1.8.1 h1:pR9XXlC58UrTzUzOYFPvMf6uOWx6pHlxPp3luWsL7Jc=
+github.com/oam-dev/kubevela v1.8.1/go.mod h1:vrEm8xO7b5yAfyB8GOuSKPWimFelQUcRsAdPTwnqY34=
 github.com/oam-dev/stern v1.13.2 h1:jlGgtJbKmIVhzkH44ft5plkgs8XEfvxbFrQdX60CQR4=
 github.com/oam-dev/stern v1.13.2/go.mod h1:0pLjZt0amXE/ErF16Rdrgd98H2owN8Hmn3/7CX5+AeA=
 github.com/oam-dev/terraform-config-inspect v0.0.0-20210418082552-fc72d929aa28 h1:tD8HiFKnt0jnwdTWjeqUnfnUYLD/+Nsmj8ZGIxqDWiU=
