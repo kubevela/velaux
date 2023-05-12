@@ -406,15 +406,6 @@ func (s *restServer) getPluginAssets(req *http.Request, res http.ResponseWriter)
 		bcode.ReturnHTTPError(req, res, err)
 		return
 	}
-	setting, err := s.PluginService.GetPluginSetting(req.Context(), pluginID)
-	if err != nil {
-		bcode.ReturnHTTPError(req, res, err)
-		return
-	}
-	if !setting.Enabled {
-		bcode.ReturnHTTPError(req, res, bcode.ErrPluginNotEnabled)
-		return
-	}
 	// Generate the static file path
 	path, err := utils.CleanRelativePath(pathInfo[1])
 	if err != nil {
