@@ -240,6 +240,9 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 				In: []datastore.InQueryOption{{Key: "status", Values: []string{"suspending"}}},
 			},
 		})
+		if len(runningRecords) == 0 {
+			return nil, fmt.Errorf("no running records")
+		}
 		if err != nil {
 			return nil, err
 		}
