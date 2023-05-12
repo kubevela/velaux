@@ -350,7 +350,7 @@ func enrichSwaggerObject(swo *spec.Swagger) {
 }
 
 func (s *restServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	staticFilters := []utils.FilterFunction{}
+	var staticFilters []utils.FilterFunction
 	if features.APIServerFeatureGate.Enabled(features.APIServerEnableCacheJSFile) {
 		staticFilters = append(staticFilters, filters.JSCache)
 	}

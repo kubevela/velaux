@@ -67,6 +67,7 @@ func (m *mongodb) Add(ctx context.Context, entity datastore.Entity) error {
 		return datastore.ErrTableNameEmpty
 	}
 	entity.SetCreateTime(time.Now())
+	entity.SetUpdateTime(time.Now())
 	if err := m.Get(ctx, entity); err == nil {
 		return datastore.ErrRecordExist
 	}

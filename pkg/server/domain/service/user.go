@@ -228,35 +228,42 @@ func (u *userServiceImpl) GenerateUserProjects(ctx context.Context, user *model.
 	var projects []*apisv1.UserProjectBase
 	for _, v := range projectUsers {
 		pu, ok := v.(*model.ProjectUser)
-		if ok {
-			project, err := u.ProjectService.DetailProject(ctx, pu.ProjectName)
-			if err != nil {
-				klog.Errorf("failed to delete project(%s) info: %s", pu.ProjectName, err.Error())
-				continue
-			}
-			roles, _ := u.RbacService.ListRole(ctx, project.Name, 0, 0)
-			var roleAlias = make(map[string]string)
-			for _, r := range roles.Roles {
-				roleAlias[r.Name] = r.Alias
-			}
-			projects = append(projects, &apisv1.UserProjectBase{
-				Name:        project.Name,
-				Alias:       project.Alias,
-				Owner:       project.Owner,
-				Description: project.Description,
-				JoinTime:    pu.CreateTime,
-				Roles: func() []apisv1.NameAlias {
-					var roles []apisv1.NameAlias
-					for _, r := range pu.UserRoles {
-						roles = append(roles, apisv1.NameAlias{
-							Name:  r,
-							Alias: roleAlias[r],
-						})
-					}
-					return roles
-				}(),
-			})
+		if !ok {
+			klog.Errorf("failed to convert project user")
+			continue
 		}
+		project, err := u.ProjectService.DetailProject(ctx, pu.ProjectName)
+		if err != nil {
+			klog.Errorf("failed to delete project(%s) info: %s", pu.ProjectName, err.Error())
+			continue
+		}
+		roles, err := u.RbacService.ListRole(ctx, project.Name, 0, 0)
+		if err != nil {
+			klog.Errorf("failed to list project(%s) roles: %s", project.Name, err.Error())
+			continue
+		}
+
+		var roleAlias = make(map[string]string)
+		for _, r := range roles.Roles {
+			roleAlias[r.Name] = r.Alias
+		}
+		projects = append(projects, &apisv1.UserProjectBase{
+			Name:        project.Name,
+			Alias:       project.Alias,
+			Owner:       project.Owner,
+			Description: project.Description,
+			JoinTime:    pu.CreateTime,
+			Roles: func() []apisv1.NameAlias {
+				var roles []apisv1.NameAlias
+				for _, r := range pu.UserRoles {
+					roles = append(roles, apisv1.NameAlias{
+						Name:  r,
+						Alias: roleAlias[r],
+					})
+				}
+				return roles
+			}(),
+		})
 	}
 	return projectUsers, projects, nil
 }
