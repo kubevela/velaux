@@ -33,11 +33,12 @@ import (
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 
+	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
-	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 )
 
 var _ = Describe("Test application service function", func() {
@@ -265,7 +266,7 @@ var _ = Describe("Test application service function", func() {
 		httpreq, err = http.NewRequest("post", "/", bytes.NewBuffer(body))
 		httpreq.Header.Add(restful.HEADER_ContentType, "application/json")
 		Expect(err).Should(BeNil())
-		res, err = webhookService.HandleApplicationWebhook(context.TODO(), resumeTrigeres[0].Token, restful.NewRequest(httpreq))
+		_, err = webhookService.HandleApplicationWebhook(context.TODO(), resumeTrigeres[0].Token, restful.NewRequest(httpreq))
 		Expect(err).Should(BeNil())
 
 		err = workflowService.SyncWorkflowRecord(ctx, appName, "workflow-resume-1", app, nil)
@@ -337,7 +338,7 @@ var _ = Describe("Test application service function", func() {
 		httpreq, err = http.NewRequest("post", "/", bytes.NewBuffer(body))
 		httpreq.Header.Add(restful.HEADER_ContentType, "application/json")
 		Expect(err).Should(BeNil())
-		res, err = webhookService.HandleApplicationWebhook(context.TODO(), terminateTrigeres[0].Token, restful.NewRequest(httpreq))
+		_, err = webhookService.HandleApplicationWebhook(context.TODO(), terminateTrigeres[0].Token, restful.NewRequest(httpreq))
 		Expect(err).Should(BeNil())
 
 		err = k8sClient.Get(ctx, client.ObjectKey{Name: appName, Namespace: "terminate-webhook"}, app)
@@ -423,7 +424,7 @@ var _ = Describe("Test application service function", func() {
 		httpreq, err = http.NewRequest("post", "/", bytes.NewBuffer(body))
 		httpreq.Header.Add(restful.HEADER_ContentType, "application/json")
 		Expect(err).Should(BeNil())
-		res, err = webhookService.HandleApplicationWebhook(context.TODO(), rollbackTrigeres[0].Token, restful.NewRequest(httpreq))
+		_, err = webhookService.HandleApplicationWebhook(context.TODO(), rollbackTrigeres[0].Token, restful.NewRequest(httpreq))
 		Expect(err).Should(BeNil())
 
 		recordsNum, err := workflowService.Store.Count(ctx, &model.WorkflowRecord{
