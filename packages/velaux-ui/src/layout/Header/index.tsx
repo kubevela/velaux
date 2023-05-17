@@ -275,8 +275,7 @@ class Header extends Component<Props, State> {
             <If condition={userInfo}>
               <Dropdown
                 trigger={
-                  <div className="user-item vela-item" title={userInfo?.alias ? userInfo.alias : userInfo?.name}>
-                    <svg
+                  <div className="user-item vela-item" title={userInfo?.alias ? userInfo.alias : userInfo?.name}><svg
                       viewBox="0 0 1024 1024"
                       version="1.1"
                       xmlns="http://www.w3.org/2000/svg"

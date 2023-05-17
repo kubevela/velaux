@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaLink } from 'react-icons/fa';
+import { HiOutlineExternalLink } from "react-icons/hi"
 
 import './index.less';
 
@@ -72,7 +72,7 @@ class PluginCard extends React.Component<Props, State> {
 
   handleGoToPluginConfig = (id: string) => {
     if (this.props.installed) {
-      this.props.history?.push(`/plugins/${id}/config`)
+      this.props.history?.push(`/manage/plugins/${id}/config`)
     }
   }
 
@@ -107,35 +107,38 @@ class PluginCard extends React.Component<Props, State> {
           this
             .handleGoToPluginConfig(id)
         }>
-          <Card style={{
-            border: 'none'
-          }
-
-          } contentHeight={
-            180
-          }>
+          <Card style={{ border: 'none' }} contentHeight={180}>
             <Box direction={'column'}>
-              <Box align={"center"} spacing={8} direction={'row'}>
-                <Box>
+              <Box align={"flex-start"} direction={"row"}>
+                <Box align={"center"} spacing={8} direction={'row'}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     {renderIcon(id, icon)}
                   </div>
-                </Box>
-                <Box>
                   {enabled &&
                       <a onClick={(e) => {
                         e.stopPropagation();
-                        this.handleGoToPage(id)
+                        this.handleGoToPluginConfig(id)
                       }}>
-                        <span style={{ fontSize: '20px' }}>{id}</span><FaLink />
+                        <span style={{ fontSize: '20px' }}>{id}</span>
                       </a>
                   }
                   {
                     !enabled && <div className={'font-color-keep'} style={{ fontSize: '20px' }}>{id}</div>
                   }
                 </Box>
+                <div style={{ marginLeft: 'auto' ,marginTop: '4px'}}>
+                  {enabled &&
+                      <a onClick={(e) => {
+                        e.stopPropagation();
+                        this.handleGoToPage(id)
+                      }}>
+                        <span style={{ fontSize: '16px' }}><HiOutlineExternalLink /></span>
+                      </a>
+                  }
+                </div>
               </Box>
-              <Box className={'plugin-card-content'} direction={'column'} justify={'space-between'} style={{height: '100%'}}>
+              <Box className={'plugin-card-content'} direction={'column'} justify={'space-between'}
+                   style={{ height: '100%' }}>
                 <Box id={'desc'} className={'plugin-desc'}>
                   <h4 className={'font-size-14 font-color-keep'}>
                     {description ?? (sourceAddon?.description ?? "No descriptions")}

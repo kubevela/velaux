@@ -99,7 +99,7 @@ const defaultWorkspaceMenus: Menu[] = [
     label: 'Addons',
     name: 'addon-list',
     permission: { resource: 'addon:*', action: 'list' },
-    relatedRoute: ['/addons', '/plugins'],
+    relatedRoute: ['/addons', /\/manage\/plugins.*/],
   },
   {
     workspace: 'extension',
@@ -194,6 +194,8 @@ export interface MenuService {
   loadApplicationEnvMenus(p: Project, app: ApplicationBase, env: EnvBinding): Menu[];
 
   loadPluginMenus(): Promise<Menu[]>;
+
+  resetPluginMenus(): void;
 }
 
 /** @internal */
@@ -241,6 +243,11 @@ export class MenuWrapper implements MenuService {
       });
   };
 
+  resetPluginMenus = () => {
+    this.pluginLoaded = false;
+    this.menus = _.cloneDeep(defaultWorkspaceMenus);
+    this.workspaces = _.cloneDeep(defaultWorkspaces);
+  }
   getWorkspace(name: string): Workspace | undefined {
     return this.workspaces.find((w) => w.name == name);
   }
@@ -249,7 +256,7 @@ export class MenuWrapper implements MenuService {
   loadCurrentWorkspace(): Workspace | undefined {
     let w: Workspace | undefined = undefined;
     this.menus.map((m) => {
-      if (this.matchMenu(m)) {
+      if (!w && this.matchMenu(m)) {
         w = this.getWorkspace(m.workspace);
       }
     });

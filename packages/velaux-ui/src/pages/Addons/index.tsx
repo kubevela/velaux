@@ -145,8 +145,9 @@ class Addons extends React.Component<Props, State> {
         />
 
         <Tab defaultActiveKey={plugin ? 'plugins' : 'addons'}
-             onChange={key => history.push('/' + key)}
-        >
+             onChange={key => {
+               history.push('/' + (key == 'plugins' ? "manage/" : "") + key)
+             }}>
           <Tab.Item title="Addons" key={'addons'}>
             <SelectSearch
               dispatch={dispatch}

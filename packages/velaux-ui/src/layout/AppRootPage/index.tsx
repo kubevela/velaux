@@ -64,21 +64,6 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
     setApp({ ...app, meta: meta } as AppPagePlugin)
   }
 
-  const saveSetting = () => {
-    dispatch({
-      type: 'plugins/setPlugin',
-      payload: {
-        id: pluginId,
-        jsonData: meta.jsonSetting,
-        secureJsonData: meta.secureJsonData,
-      },
-      callback: () => {
-        Message.success('Setting saved')
-      }
-    })
-  }
-
-
   // Get PluginMeta
   React.useEffect(() => {
     if (!meta) {
@@ -121,16 +106,35 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
   const isEnabled = meta.enabled
   const isInstalled = !!meta.info
 
-  const enablePlugin = (id: string) => {
+  const saveSetting = () => {
+    dispatch({
+      type: 'plugins/setPlugin',
+      payload: {
+        id: pluginId,
+        jsonData: meta.jsonSetting,
+        secureJsonData: meta.secureJsonData,
+      },
+      callback: () => {
+        Message.success('Setting saved')
+      }
+    })
+  }
+
+  const saveAndEnable = () => {
     dispatch({
       type: 'plugins/enablePlugin',
-      payload: { id },
+      payload: {
+        id: pluginId,
+        jsonData: meta.jsonSetting,
+        secureJsonData: meta.secureJsonData,
+      },
       callback: () => {
         meta.enabled = true
         Message.success('Plugin enabled')
       }
     });
   }
+
   const disablePlugin = (id: string) => {
     dispatch({
       type: 'plugins/disablePlugin',
@@ -154,7 +158,7 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
 
   const handleGotoPlugins = () => {
     const history = locationService.getHistory()
-    history.push('/plugins')
+    history.push('/manage/plugins')
   }
   const AppConfigPage = app.configPages.body
 
@@ -197,25 +201,16 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
                 <Col className={'info-item'}>
                   <div className={'info-item-title'}>Status</div>
                   <div>{
-                    meta.enabled ? <Translation className={''}>Enabled</Translation> :
-                      <Translation>Disabled</Translation>
+                    meta.enabled ? <Translation className={'status-enabled'}>Enabled</Translation> :
+                      <Translation className={'status-disabled'}>Disabled</Translation>
                   }</div>
                 </Col>
               </Row>
               <Box direction={'row'} justify={"flex-end"} spacing={8}>
-                {isInstalled && !isEnabled &&
-                    <Button type={'primary'} onClick={() => enablePlugin(pluginId)}>Enable</Button>
-                }
-                {isEnabled &&
-                    <Button type={'primary'} onClick={saveSetting}>Save</Button>
-                }
                 {
-                  isEnabled &&
-                    <Button warning={true} onClick={() => disablePlugin(pluginId)}>Disable</Button>
-                }
-                {
-                  !isEnabled && isInstalled &&
-                    <Button warning={true} onClick={() => uninstallPlugin(pluginId)}>Uninstall</Button>
+                  isInstalled &&
+                    <Button disabled={meta?.addon === undefined} warning={true}
+                            onClick={() => uninstallPlugin(pluginId)}>Uninstall</Button>
                 }
               </Box>
             </Box>
@@ -225,9 +220,23 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
       <Box className={'container'}>
         <Tab>
           <Tab.Item title={'Config'}>
-            <Box style={{ backgroundColor: '#FFF',padding: '0 10px'}}>
+            <Box style={{ backgroundColor: '#FFF', padding: '0 10px' }}>
               <AppConfigPage plugin={app} query={{}} onJSONDataChange={handleJSONChange}
                              onSecureJSONDataChange={handleSecureJSONChange} />
+              <Box direction={"row"} justify={'center'} spacing={10} margin={20}>
+                {!isEnabled &&
+                    <Button type={'normal'} onClick={saveSetting}>Save</Button>
+                }
+                {!isEnabled &&
+                    <Button type={'primary'} onClick={saveAndEnable}>Save & Enable</Button>
+                }
+                {isEnabled &&
+                    <Button type={'primary'} onClick={saveSetting}>Save</Button>
+                }
+                {isEnabled &&
+                    <Button type={'normal'} warning={true} onClick={() => disablePlugin(pluginId)}>Disable</Button>
+                }
+              </Box>
             </Box>
           </Tab.Item>
         </Tab>

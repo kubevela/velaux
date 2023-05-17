@@ -1,23 +1,24 @@
 import { connect } from 'dva';
 import { Link } from 'dva/router';
-import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { locationService } from '../../services/LocationService';
 import { Translation } from '../../components/Translation';
 import type { SystemInfo } from '../../../../velaux-data/src/api/system';
 import type { LoginUserInfo } from '../../../../velaux-data/src/api/user';
-import { menuService, LeftMenu } from '../../services/MenuService';
+import { LeftMenu, menuService } from '../../services/MenuService';
 
 import './index.less';
 import { checkPermission } from '../../types';
 import { getConfigs } from '../../api/config';
 import { Config } from '../../../../velaux-data/src/api/configs';
-import { MenuTypes } from '@velaux/data';
+import { MenuTypes, PluginMeta } from '@velaux/data';
 import { MdOutlineMonitorHeart } from 'react-icons/md';
 import { If } from '../../components/If';
+
 interface Props {
   userInfo?: LoginUserInfo;
   systemInfo?: SystemInfo;
+  pluginList: PluginMeta[];
 }
 
 const LeftMenuModule = (props: Props) => {
@@ -35,6 +36,7 @@ const LeftMenuModule = (props: Props) => {
   }, [props.userInfo]);
 
   useEffect(() => {
+    menuService.resetPluginMenus()
     menuService.loadPluginMenus().then(() => {
       const workspace = menuService.loadCurrentWorkspace();
       const menus = workspace && props.userInfo ? menuService.loadMenus(workspace, props.userInfo) : [];
@@ -58,13 +60,13 @@ const LeftMenuModule = (props: Props) => {
       }
       setMenus(menus);
     });
-  }, [props.userInfo, path, grafanaConfigs]);
+  }, [props.userInfo, path, grafanaConfigs, props.pluginList]);
 
   if (!props.userInfo) {
     return <div />;
   }
 
-  let fallBackCatalog=0;
+  let fallBackCatalog = 0;
   const childrenSlider = menus?.map((item) => {
     const ele: JSX.Element[] = [];
     if (item.menus && item.menus.length > 0) {
@@ -106,7 +108,7 @@ const LeftMenuModule = (props: Props) => {
     }
     if (ele.length > 0) {
       return (
-        <li className="nav-container" key={item.catalog?item.catalog:fallBackCatalog++}>
+        <li className="nav-container" key={item.catalog ? item.catalog : fallBackCatalog++}>
           {item.catalog && (
             <div className="main-nav padding-left-32">
               <Translation>{item.catalog}</Translation>
@@ -130,7 +132,7 @@ const LeftMenuModule = (props: Props) => {
 
 export default connect(
   (store: any) => {
-    return { ...store.user };
+    return { ...store.user, ...store.plugins };
   },
   undefined,
   undefined,

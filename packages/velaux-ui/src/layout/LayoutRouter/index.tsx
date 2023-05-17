@@ -400,13 +400,13 @@ export default function Router() {
       />
       <Route
         exact={true}
-        path="/plugins"
+        path="/manage/plugins"
         render={(props: any) => {
           return <Addons plugin={true} {...props}></Addons>;
         }}
       />
       <Route
-        path="/plugins/:pluginId/config"
+        path="/manage/plugins/:pluginId/config"
         render={(props: any) => {
           return <AppConfigPage pluginId={props.match.params.pluginId}></AppConfigPage>;
         }}
