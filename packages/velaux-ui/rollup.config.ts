@@ -30,7 +30,7 @@ export default [
     ],
   },
   {
-    input: './compiled/velaux-ui/src/types.d.ts',
+    input: './compiled/types.d.ts',
     plugins: [dts()],
     external: [/\.less$/],
     output: {
