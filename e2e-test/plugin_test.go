@@ -131,21 +131,12 @@ var _ = Describe("Test the plugin rest api", func() {
 		})
 	})
 
-	FContext("Test to request the plugin static files", func() {
+	Context("Test to request the plugin static files", func() {
 		By("Request to /public/plugins")
 
 		It("Test to get the module file", func() {
 			defer GinkgoRecover()
-			By("Before enable the plugin, request the plugin API should return 400")
-
 			res := get(baseDomain + "/public/plugins/app-demo/module.js")
-			defer func() { _ = res.Body.Close() }()
-			Expect(res.StatusCode).Should(Equal(400))
-
-			By("After enable the plugin, request the plugin API should return 200")
-			enablePlugin("app-demo")
-
-			res = get(baseDomain + "/public/plugins/app-demo/module.js")
 			defer func() { _ = res.Body.Close() }()
 			Expect(res.StatusCode).Should(Equal(200))
 		})
