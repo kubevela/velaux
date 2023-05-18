@@ -78,6 +78,12 @@ make reviewable
 
 ### Test the code
 
+For testing server kubebuilder and its dependency tools are required. To install them you can use:
+
+```shell
+make setup-test-server
+```
+
 Frontend:
 
 ```shell

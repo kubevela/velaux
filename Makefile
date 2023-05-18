@@ -104,6 +104,16 @@ e2e-server-test:
 unit-test-server:
 	go test -gcflags=all=-l -coverprofile=coverage.txt $(shell go list ./pkg/... ./cmd/...)
 
+setup-test-server:
+	curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(shell go env GOOS)/$(shell go env GOARCH)
+	chmod +x kubebuilder
+	sudo mv kubebuilder /usr/local/bin/
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+	${eval OUTPUT = $(shell ${GOBIN}/setup-envtest --bin-dir /tmp use)}
+	${eval BIN_PATH=$(lastword $(subst Path:, ,${OUTPUT}))}
+	sudo mkdir -p /usr/local/kubebuilder/bin
+	sudo mv ${BIN_PATH}/* /usr/local/kubebuilder/bin
+
 build-swagger:
 	go run ./cmd/server/main.go build-swagger ./docs/apidoc/swagger.json
 
