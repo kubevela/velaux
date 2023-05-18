@@ -41,8 +41,13 @@ func JSCache(req *http.Request, res http.ResponseWriter, chain *utils.FilterChai
 	if matchCacheCondition(req) {
 		if value, ok := jsFileCache.Get(req.URL.String()); ok {
 			if cacheData, ok := value.(*cacheData); ok {
-				cacheData.Write(res)
-				return
+				if cacheData.data.Len() == 0 {
+					klog.Warningf("Cache data is empty")
+					jsFileCache.Remove(req.URL.String())
+				} else {
+					cacheData.Write(res)
+					return
+				}
 			}
 		}
 	}
@@ -51,7 +56,11 @@ func JSCache(req *http.Request, res http.ResponseWriter, chain *utils.FilterChai
 		res.Header().Set(HeaderHitCache, "false")
 		cacheWriter := &CacheWriter{writer: res, cacheData: &cacheData{}}
 		chain.ProcessFilter(req, cacheWriter)
-		jsFileCache.Add(req.URL.String(), cacheWriter.cacheData)
+		if cacheWriter.cacheData.code == http.StatusOK {
+			jsFileCache.Add(req.URL.String(), cacheWriter.cacheData)
+		} else {
+			klog.Warningf("Skip cache the js file, code: %d", cacheWriter.cacheData.code)
+		}
 		return
 	}
 	chain.ProcessFilter(req, res)
