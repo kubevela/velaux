@@ -18,9 +18,7 @@ import WorkflowStudio from '../../components/WorkflowStudio';
 import { WorkflowYAML } from '../../components/WorkflowYAML';
 import { WorkflowContext } from '../../context';
 import i18n from '../../i18n';
-import type { WorkflowMode } from '../../../../velaux-data/src/api/application';
-import type { DefinitionBase } from '../../../../velaux-data/src/api/definitions';
-import type { PipelineDetail, WorkflowStep } from '../../../../velaux-data/src/api/pipeline';
+import type { WorkflowMode , DefinitionBase , PipelineDetail, WorkflowStep } from '@velaux/data';
 import { locale } from '../../utils/locale';
 import { WorkflowModeOptions } from '../ApplicationWorkflowStudio';
 

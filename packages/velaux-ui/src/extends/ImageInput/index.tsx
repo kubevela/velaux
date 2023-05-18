@@ -11,7 +11,7 @@ import { TbBrandDocker } from 'react-icons/tb';
 import { getImageInfo } from '../../api/repository';
 import dockerLogo from '../../assets/docker.svg';
 import { If } from '../../components/If';
-import type { ImageInfo } from '../../../../velaux-data/src/api/repository';
+import type { ImageInfo } from '@velaux/data';
 import { beautifyTime, beautifyBinarySize } from '../../utils/common';
 import ImageSecretSelect from '../ImageSecretSelect';
 const { Col, Row } = Grid;

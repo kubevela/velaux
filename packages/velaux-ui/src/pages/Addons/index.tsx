@@ -6,7 +6,7 @@ import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { Addon, AddonBaseStatus } from '@velaux/data/src/api/addon';
+import type { Addon, AddonBaseStatus } from '@velaux/data';
 
 import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';

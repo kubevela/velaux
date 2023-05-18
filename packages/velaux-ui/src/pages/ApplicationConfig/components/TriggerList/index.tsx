@@ -13,7 +13,7 @@ import type {
   ApplicationComponent,
   Trigger,
   ApplicationDetail,
-} from '../../../../../../velaux-data/src/api/application';
+} from '@velaux/data';
 import { momentDate, showAlias } from '../../../../utils/common';
 import './index.less';
 import { locale } from '../../../../utils/locale';

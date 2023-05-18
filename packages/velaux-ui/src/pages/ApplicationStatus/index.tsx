@@ -16,10 +16,7 @@ import type {
   EnvBinding,
   ComponentStatus,
   ApplicationDeployResponse,
-} from '../../../../velaux-data/src/api/application';
-import type { AppliedResource } from '../../../../velaux-data/src/api/observation';
-import type { Target } from '../../../../velaux-data/src/api/target';
-import type { LoginUserInfo } from '../../../../velaux-data/src/api/user';
+ AppliedResource , Target , LoginUserInfo } from '@velaux/data';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import { locale } from '../../utils/locale';

@@ -4,8 +4,7 @@ import React from 'react';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import { Translation } from '../../components/Translation';
-import type { ApplicationStatus, Condition } from '../../../../velaux-data/src/api/application';
-import type { Resource } from '../../../../velaux-data/src/api/observation';
+import type { ApplicationStatus, Condition , Resource } from '@velaux/data';
 import { locale } from '../../utils/locale';
 import { If } from '../If';
 

@@ -2,8 +2,7 @@ import { connect } from 'dva';
 import React, { Component, Fragment } from 'react';
 
 import Permission from '../../components/Permission';
-import type { Project } from '../../../../velaux-data/src/api/project';
-import type { User } from '../../../../velaux-data/src/api/user';
+import type { Project , User } from '@velaux/data';
 
 import ConfigDistributionPage from './components/ConfigDistribution';
 import Configs from './components/Configs';

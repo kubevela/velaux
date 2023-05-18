@@ -11,7 +11,7 @@ import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { PipelineDetail, PipelineRunBase, PipelineRunStatus } from '../../../../../../velaux-data/src/api/pipeline';
+import type { PipelineDetail, PipelineRunBase, PipelineRunStatus } from '@velaux/data';
 import { momentDate, timeDiff } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import RunStatusIcon from '../RunStatusIcon';

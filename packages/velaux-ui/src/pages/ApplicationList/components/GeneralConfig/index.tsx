@@ -6,7 +6,7 @@ import { checkName } from '../../../../utils/common';
 import './index.less';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { LoginUserInfo, UserProject } from '../../../../../../velaux-data/src/api/user';
+import type { LoginUserInfo, UserProject } from '@velaux/data';
 import { checkPermission } from '../../../../utils/permission';
 
 type Props = {

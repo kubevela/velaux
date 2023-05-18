@@ -1,7 +1,7 @@
 import { Button, Dialog, Message } from '@alifd/next';
 import * as React from 'react';
 
-import type { ApplicationCompareResponse } from '../../../../velaux-data/src/api/application';
+import type { ApplicationCompareResponse } from '@velaux/data';
 import './index.less';
 import { DiffEditor } from '../DiffEditor';
 import { If } from '../If';

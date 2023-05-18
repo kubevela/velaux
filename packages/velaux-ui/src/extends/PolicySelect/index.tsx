@@ -4,7 +4,7 @@ import React from 'react';
 import { getPolicyList } from '../../api/application';
 import { UISchemaContext } from '../../context';
 import i18n from '../../i18n';
-import type { ApplicationPolicyBase } from '../../../../velaux-data/src/api/application';
+import type { ApplicationPolicyBase } from '@velaux/data';
 import { locale } from '../../utils/locale';
 
 type Props = {

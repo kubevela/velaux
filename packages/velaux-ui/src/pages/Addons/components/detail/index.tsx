@@ -27,16 +27,13 @@ import StatusShow from '../../../../components/StatusShow';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
-import type { Addon, AddonStatus, EnableAddonRequest } from '@velaux/data/src/api/addon';
-import type { ApplicationStatus, UIParam } from '../../../../../../velaux-data/src/api/application';
-import type { NameAlias } from '../../../../../../velaux-data/src/api/env';
+import type { Addon, AddonStatus, EnableAddonRequest , ApplicationStatus, UIParam , NameAlias , Endpoint } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 
 import 'github-markdown-css/github-markdown-light.css';
 import './index.less';
 import { Link } from 'dva/router';
 
-import type { Endpoint } from '../../../../../../velaux-data/src/api/observation';
 import { getLink } from '../../../../utils/utils';
 import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 

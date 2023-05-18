@@ -23,12 +23,11 @@ import type {
   EnvBinding,
   UpdatePolicyRequest,
   Workflow,
-} from '../../../../../../velaux-data/src/api/application';
+ DefinitionBase } from '@velaux/data';
 
 import './index.less';
 import classNames from 'classnames';
 
-import type { DefinitionBase } from '../../../../../../velaux-data/src/api/definitions';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import UISchema from '../../../../components/UISchema';

@@ -11,9 +11,7 @@ import { WorkflowPrompt } from '../../components/WorkflowPrompt';
 import WorkflowStudio from '../../components/WorkflowStudio';
 import { WorkflowContext } from '../../context';
 import type { WorkflowData } from '../../context/index';
-import type { ApplicationDetail, EnvBinding, Workflow, WorkflowMode } from '../../../../velaux-data/src/api/application';
-import type { DefinitionBase } from '../../../../velaux-data/src/api/definitions';
-import type { WorkflowStep } from '../../../../velaux-data/src/api/pipeline';
+import type { ApplicationDetail, EnvBinding, Workflow, WorkflowMode , DefinitionBase , WorkflowStep } from '@velaux/data';
 import { showAlias } from '../../utils/common';
 import { locale } from '../../utils/locale';
 

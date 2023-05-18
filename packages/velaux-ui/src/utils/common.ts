@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import type { AddonBaseStatus } from '@velaux/data/src/api/addon';
+import type { AddonBaseStatus } from '@velaux/data';
 
 type Navigator = {
   language: string;

@@ -1,7 +1,7 @@
 import React from 'react';
 import Draggable from 'react-draggable';
 
-import type { WorkflowStepStatus } from '../../../../velaux-data/src/api/application';
+import type { WorkflowStepStatus } from '@velaux/data';
 
 import './index.less';
 import { Step } from './components/step';

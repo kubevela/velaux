@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 
 import { WorkflowContext, WorkflowEditContext } from '../../context';
 import i18n from '../../i18n';
-import type { WorkflowStep, WorkflowStepBase } from '../../../../velaux-data/src/api/pipeline';
+import type { WorkflowStep, WorkflowStepBase } from '@velaux/data';
 import { showAlias } from '../../utils/common';
 import { locale } from '../../utils/locale';
 

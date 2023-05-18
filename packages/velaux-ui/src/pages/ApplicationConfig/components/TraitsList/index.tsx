@@ -1,7 +1,7 @@
 import { Card, Grid, Dialog } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
-import type { Trait } from '../../../../../../velaux-data/src/api/application';
+import type { Trait } from '@velaux/data';
 import { momentDate } from '../../../../utils/common';
 import './index.less';
 import { locale } from '../../../../utils/locale';

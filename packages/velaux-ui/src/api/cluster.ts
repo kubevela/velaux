@@ -1,4 +1,4 @@
-import type { CreateCluster } from '@velaux/data/src/api/cluster';
+import type { CreateCluster } from '@velaux/data';
 import { getDomain } from '../utils/common';
 
 import {

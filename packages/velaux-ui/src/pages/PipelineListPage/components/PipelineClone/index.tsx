@@ -6,8 +6,7 @@ import { createPipeline, createPipelineContext, listPipelineContexts, loadPipeli
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { PipelineListItem, PipelineDetail } from '../../../../../../velaux-data/src/api/pipeline';
-import type { LoginUserInfo } from '../../../../../../velaux-data/src/api/user';
+import type { PipelineListItem, PipelineDetail , LoginUserInfo } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';

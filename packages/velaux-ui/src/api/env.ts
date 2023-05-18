@@ -1,4 +1,4 @@
-import type { CreateEnvRequest } from '../../../velaux-data/src/api/env';
+import type { CreateEnvRequest } from '@velaux/data';
 import type { QueryTarget } from '../model/target';
 import { getDomain } from '../utils/common';
 

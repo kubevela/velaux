@@ -9,7 +9,7 @@ import type {
   UpdatePolicyRequest,
   UpdateTriggerRequest,
   CreateTriggerRequest,
-} from '../../../velaux-data/src/api/application';
+} from '@velaux/data';
 import { getDomain } from '../utils/common';
 
 import { application } from './productionLink';

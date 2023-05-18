@@ -1,14 +1,11 @@
 import * as React from 'react';
 import { Dialog, Form, Grid, Message, NumberPicker } from '@alifd/next';
-import { DeployModes } from '@velaux/data';
+import { DeployModes , Workflow , WorkflowStep , DefinitionBase } from '@velaux/data';
 import _ from 'lodash';
 import i18n from '../../../../i18n';
-import { Workflow } from '../../../../../../velaux-data/src/api/application';
-import { WorkflowStep } from '../../../../../../velaux-data/src/api/pipeline';
 import { locale } from '../../../../utils/locale';
 import './index.less';
 import Item from '../../../../components/Item';
-import { DefinitionBase } from '../../../../../../velaux-data/src/api/definitions';
 import { If } from '../../../../components/If';
 import { locationService } from '../../../../services/LocationService';
 

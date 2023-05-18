@@ -5,7 +5,7 @@ import { createAddonRegistry, deleteAddonRegistry } from '../../../../api/addons
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
-import type { AddonRegistry } from '@velaux/data/src/api/addon';
+import type { AddonRegistry } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 import { handleError } from '../../../../utils/errors';
 import { locale } from '../../../../utils/locale';

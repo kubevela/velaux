@@ -1,7 +1,6 @@
 import { getLoginUserInfo } from '../api/authentication';
 import { loadSystemInfo } from '../api/system_config';
-import type { SystemInfo } from '../../../velaux-data/src/api/system';
-import type { LoginUserInfo } from '../../../velaux-data/src/api/user';
+import type { SystemInfo , LoginUserInfo } from '@velaux/data';
 
 const user: any = {
   namespace: 'user',

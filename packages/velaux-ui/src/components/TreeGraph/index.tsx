@@ -7,7 +7,7 @@ import kubevela from '../../assets/KubeVela-01.svg';
 import kubernetes from '../../assets/kubernetes.svg';
 import pod from '../../assets/resources/pod.svg';
 import i18n from '../../i18n';
-import type { ResourceTreeNode } from '../../../../velaux-data/src/api/observation';
+import type { ResourceTreeNode } from '@velaux/data';
 
 import './index.less';
 import classNames from 'classnames';

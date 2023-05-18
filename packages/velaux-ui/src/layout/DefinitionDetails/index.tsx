@@ -6,8 +6,7 @@ import React, { Component, Fragment } from 'react';
 
 import { Translation } from '../../components/Translation';
 import { Breadcrumb } from '../../components/Breadcrumb';
-import type { DefinitionMenuType } from '../../../../velaux-data/src/api/definitions';
-import type { LoginUserInfo } from '../../../../velaux-data/src/api/user';
+import type { DefinitionMenuType , LoginUserInfo } from '@velaux/data';
 
 import './index.less';
 import classNames from 'classnames';

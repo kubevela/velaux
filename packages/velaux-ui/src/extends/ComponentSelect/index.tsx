@@ -4,7 +4,7 @@ import { UISchemaContext } from '../../context';
 
 import { getApplicationComponents } from '../../api/application';
 import i18n from '../../i18n';
-import type { ApplicationComponentBase } from '../../../../velaux-data/src/api/application';
+import type { ApplicationComponentBase } from '@velaux/data';
 import { locale } from '../../utils/locale';
 
 type Props = {

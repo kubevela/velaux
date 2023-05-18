@@ -9,7 +9,7 @@ import type { GraphNode, GraphEdge, TraitGraphNode, Line } from './interface';
 import { describeComponents, getGraphSize, ResourceIcon } from './utils';
 
 import './component-node.less';
-import type { TraitStatus } from '../../../../velaux-data/src/api/application';
+import type { TraitStatus } from '@velaux/data';
 import { If } from '../If';
 
 export interface ComponentNodeProps {

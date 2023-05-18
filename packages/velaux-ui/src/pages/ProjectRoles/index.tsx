@@ -4,8 +4,7 @@ import React, { Component } from 'react';
 import { getProjectRoles, getProjectPermissions, deleteProjectRoles } from '../../api/project';
 import { If } from '../../components/If';
 import { Translation } from '../../components/Translation';
-import type { ProjectRoleBase } from '../../../../velaux-data/src/api/project';
-import type { PermissionBase } from '../../../../velaux-data/src/api/user';
+import type { ProjectRoleBase , PermissionBase } from '@velaux/data';
 import { locale } from '../../utils/locale';
 
 import ProjectMenu from './components/Menu';

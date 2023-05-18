@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
-import type { WorkflowStep } from '../../../../velaux-data/src/api/pipeline';
+import type { WorkflowStep } from '@velaux/data';
 
 import { StepTypeIcon } from './step-icon';
 
@@ -12,7 +12,7 @@ import { If } from '../If';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { IoMdAdd } from 'react-icons/io';
 import { Translation } from '../../components/Translation';
-import { WorkflowMode } from '../../../../velaux-data/src/api/application';
+import { WorkflowMode } from '@velaux/data';
 
 export interface StepProps {
   step: WorkflowStep;

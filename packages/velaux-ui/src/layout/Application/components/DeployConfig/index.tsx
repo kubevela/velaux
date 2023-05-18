@@ -15,7 +15,7 @@ import type {
   CreateWorkflowRequest,
   EnvBinding,
   Workflow,
-} from '../../../../../../velaux-data/src/api/application';
+} from '@velaux/data';
 import type { APIError } from '../../../../utils/errors';
 import { locale } from '../../../../utils/locale';
 import './index.less';

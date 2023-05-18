@@ -5,7 +5,7 @@ import { updateUser } from '../../../../api/users';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { User } from '../../../../../../velaux-data/src/api/user';
+import type { User } from '@velaux/data';
 import { checkUserPassword } from '../../../../utils/common';
 
 type Props = {

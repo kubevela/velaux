@@ -10,7 +10,7 @@ import { CustomSelect } from '../../components/CustomSelect';
 import { If } from '../../components/If';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import type { ApplicationComponent, ApplicationComponentBase, Trait } from '../../../../velaux-data/src/api/application';
+import type { ApplicationComponent, ApplicationComponentBase, Trait } from '@velaux/data';
 import { locale } from '../../utils/locale';
 const { Col, Row } = Grid;
 

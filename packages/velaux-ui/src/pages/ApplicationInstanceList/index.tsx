@@ -16,10 +16,7 @@ import type {
   ApplicationDetail,
   ApplicationStatus,
   EnvBinding,
-} from '../../../../velaux-data/src/api/application';
-import type { PodBase, CloudResource, Configuration } from '../../../../velaux-data/src/api/observation';
-import type { Target } from '../../../../velaux-data/src/api/target';
-import type { LoginUserInfo } from '../../../../velaux-data/src/api/user';
+ PodBase, CloudResource, Configuration , Target , LoginUserInfo } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';

@@ -1,7 +1,7 @@
 import { Dialog } from '@alifd/next';
 import * as React from 'react';
 
-import type { ApplicationDryRunResponse } from '../../../../velaux-data/src/api/application';
+import type { ApplicationDryRunResponse } from '@velaux/data';
 
 import './index.less';
 import { v4 as uuid } from 'uuid';

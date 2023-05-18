@@ -24,7 +24,7 @@ import type {
   Endpoint,
   EnvBinding,
   Target,
-} from '@velaux/data/src';
+} from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 import { getLink } from '../../../../utils/utils';
 import { checkPermission } from '../../../../utils/permission';

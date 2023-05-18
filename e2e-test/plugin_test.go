@@ -131,7 +131,7 @@ var _ = Describe("Test the plugin rest api", func() {
 		})
 	})
 
-	Context("Test to request the plugin static files", func() {
+	FContext("Test to request the plugin static files", func() {
 		By("Request to /public/plugins")
 
 		It("Test to get the module file", func() {

@@ -12,8 +12,7 @@ import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
-import type { ApplicationComponent, DefinitionDetail, Trait } from '../../../../../../velaux-data/src/api/application';
-import type { DefinitionBase } from '../../../../../../velaux-data/src/api/definitions';
+import type { ApplicationComponent, DefinitionDetail, Trait , DefinitionBase } from '@velaux/data';
 
 type Props = {
   project: string;

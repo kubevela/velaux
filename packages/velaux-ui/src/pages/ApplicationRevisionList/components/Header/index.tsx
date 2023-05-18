@@ -2,7 +2,7 @@ import { Grid, Select } from '@alifd/next';
 import React from 'react';
 import i18n from '../../../../i18n';
 
-import type { EnvBinding } from '../../../../../../velaux-data/src/api/application';
+import type { EnvBinding } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 
 interface Label {

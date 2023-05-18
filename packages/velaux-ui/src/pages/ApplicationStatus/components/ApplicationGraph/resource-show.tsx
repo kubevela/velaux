@@ -7,7 +7,7 @@ import DefinitionCode from '../../../../components/DefinitionCode';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
-import type { ResourceTreeNode, ResourceObject } from '../../../../../../velaux-data/src/api/observation';
+import type { ResourceTreeNode, ResourceObject } from '@velaux/data';
 
 type ResourceProps = {
   resource: ResourceTreeNode;

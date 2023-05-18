@@ -1,7 +1,7 @@
 import { Card, Icon } from '@alifd/next';
 import React, { Component } from 'react';
 
-import type { WorkflowRecord } from '../../../../../../velaux-data/src/api/application';
+import type { WorkflowRecord } from '@velaux/data';
 import WorkflowStep from '../WorkflowStep';
 import './index.less';
 import { Translation } from '../../../../components/Translation';

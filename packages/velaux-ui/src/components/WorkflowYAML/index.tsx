@@ -2,7 +2,7 @@ import { Message } from '@alifd/next';
 import * as yaml from 'js-yaml';
 import React, { useEffect, useState } from 'react';
 
-import type { WorkflowStep } from '../../../../velaux-data/src/api/pipeline';
+import type { WorkflowStep } from '@velaux/data';
 import DefinitionCode from '../DefinitionCode';
 import { Translation } from '../Translation';
 

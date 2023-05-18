@@ -7,11 +7,10 @@ import React, { Component, Fragment } from 'react';
 import { getDefinitionsList, updateDefinitionStatus } from '../../api/definitions';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { DefinitionBase } from '../../../../velaux-data/src/api/definitions';
+import type { DefinitionBase , LoginUserInfo } from '@velaux/data';
 
 // import { momentDate } from '../../utils/common';
 
-import type { LoginUserInfo } from '../../../../velaux-data/src/api/user';
 import { locale } from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
 

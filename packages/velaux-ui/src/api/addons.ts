@@ -1,4 +1,4 @@
-import type { EnableAddonRequest } from '@velaux/data/src/api/addon';
+import type { EnableAddonRequest } from '@velaux/data';
 import { getDomain } from '../utils/common';
 
 import { addons, addonRegistries, enabledAddon } from './productionLink';
