@@ -17,6 +17,10 @@ import { If } from '../If';
 import { Translation } from '../Translation';
 import UISchema from '../UISchema';
 
+import { PluginRoot } from '../../components/Plugin';
+import { PluginMeta } from '@velaux/data';
+import { getPluginSrv } from '../../services/PluginService';
+
 import { InputItems } from './input-item';
 import { OutputItems } from './output-item';
 import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
@@ -32,6 +36,7 @@ type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
   propertiesMode: 'native' | 'code';
+  plugin?: PluginMeta | null,
 };
 
 class StepForm extends Component<Props, State> {
@@ -43,6 +48,7 @@ class StepForm extends Component<Props, State> {
     this.state = {
       definitionLoading: false,
       propertiesMode: 'native',
+      plugin: null,
     };
     this.field = new Field(this, {
       onChange: (name: string, value: string) => {
@@ -61,6 +67,18 @@ class StepForm extends Component<Props, State> {
       this.field.setValues({ properties: JSON.parse(properties) });
     }
     this.onDetailDefinition(type);
+    this.loadDefinitionPlugins(type);
+  };
+
+  loadDefinitionPlugins = (type) => {
+    return getPluginSrv()
+      .listDefinitionPlugins()
+      .then((plugins) => {
+        const plugin = plugins.find(o => o?.id === type + "-workflowstep");
+        this.setState({
+          plugin: plugin || null
+        });
+      });
   };
 
   setValues = (values: any | null) => {
@@ -110,7 +128,7 @@ class StepForm extends Component<Props, State> {
     const { Row, Col } = Grid;
     const FormItem = Form.Item;
     const { onClose, isSubStep } = this.props;
-    const { definitionDetail, propertiesMode } = this.state;
+    const { definitionDetail, propertiesMode, plugin } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
@@ -119,6 +137,9 @@ class StepForm extends Component<Props, State> {
     const mode = isSubStep ? workflow.subMode : workflow.mode;
 
     const groupStep = this.field.getValue('type') == 'step-group';
+
+
+
     return (
       <DrawerWithFooter
         title={<Translation>{'Edit Step'}</Translation>}
@@ -143,7 +164,7 @@ class StepForm extends Component<Props, State> {
                   required={true}
                   hasToggleIcon={true}
                 >
-                  <If condition={definitionDetail}>
+                  <If condition={definitionDetail && !plugin}>
                     <FormItem required={true}>
                       <If condition={definitionDetail && definitionDetail.uiSchema}>
                         <div className="flexright">
@@ -188,6 +209,16 @@ class StepForm extends Component<Props, State> {
                         />
                       </UISchemaContext.Provider>
                     </FormItem>
+                  </If>
+                  <If condition={plugin}>
+                    <PluginRoot pluginId={plugin?.id} {...init(`properties`, {
+                      rules: [
+                        {
+                          validator: validator,
+                          message: i18n.t('Please check the properties of this workflow step'),
+                        },
+                      ],
+                    })} ref={this.uiSchemaRef} />
                   </If>
                 </Group>
               </Col>

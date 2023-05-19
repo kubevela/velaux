@@ -31,6 +31,9 @@ import classNames from 'classnames';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import UISchema from '../../../../components/UISchema';
+import { PluginRoot } from '../../../../components/Plugin';
+import { PluginMeta } from '@velaux/data';
+import { getPluginSrv } from '../../../../services/PluginService';
 
 import type { Rule } from '@alifd/next/lib/field';
 import { connect } from 'dva';
@@ -47,7 +50,7 @@ type Props = {
   policy?: ApplicationPolicyDetail;
   onClose: () => void;
   onOK: () => void;
-  dispatch?: ({}) => {};
+  dispatch?: ({ }) => {};
 };
 
 type PolicyItem = {
@@ -67,6 +70,7 @@ type State = {
   definitionDetailLoading: boolean;
   definitions?: DefinitionBase[];
   propertiesMode: 'native' | 'code';
+  plugins: PluginMeta[];
 };
 
 @connect()
@@ -154,6 +158,7 @@ class PolicyDialog extends React.Component<Props, State> {
       createPolicyLoading: false,
       definitionDetailLoading: false,
       propertiesMode: 'native',
+      plugins: []
     };
     this.field = new Field(this, {
       onChange: (name: string, value: any) => {
@@ -168,6 +173,7 @@ class PolicyDialog extends React.Component<Props, State> {
   componentDidMount() {
     this.setUISchemaContext();
     const { policy } = this.props;
+    this.loadDefinitionPlugins();
     if (policy) {
       let selected = false;
       this.state.items.map((item) => {
@@ -194,6 +200,16 @@ class PolicyDialog extends React.Component<Props, State> {
       this.loadPolicyDefinitionDetail(policy.type);
     }
   }
+
+  loadDefinitionPlugins = () => {
+    return getPluginSrv()
+      .listDefinitionPlugins()
+      .then((plugins) => {
+        this.setState({
+          plugins: plugins
+        });
+      });
+  };
 
   handleTypeChange = (value: string) => {
     this.removeProperties(() => {
@@ -460,14 +476,16 @@ class PolicyDialog extends React.Component<Props, State> {
   };
 
   render() {
-    const { onClose, policy } = this.props;
-    const { items, selectedPolicyItem, definitionDetailLoading, policyDefinitionDetail, propertiesMode } = this.state;
+    const { onClose, policy, project } = this.props;
+    const { items, selectedPolicyItem, plugins, definitionDetailLoading, policyDefinitionDetail, propertiesMode } = this.state;
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
     const init = this.field.init;
     const showType = (selectedPolicyItem && selectedPolicyItem?.name == 'custom') || policy != undefined;
     const span = showType ? 8 : 12;
+    const usePlugin = selectedPolicyItem && plugins.find(o => o?.id === selectedPolicyItem?.type + "-policy");
+    const plugin = plugins.find(o => o?.id === selectedPolicyItem?.type + "-policy");
     return (
       <DrawerWithFooter
         title={policy ? i18n.t('Update Policy') : i18n.t('New Policy')}
@@ -670,26 +688,38 @@ class PolicyDialog extends React.Component<Props, State> {
                 }
               >
                 <Form.Item required={true}>
-                  <UISchema
-                    key={policyDefinitionDetail?.name}
-                    {...init(`properties`, {
+                  <If condition={!usePlugin}>
+                    <UISchema
+                      key={policyDefinitionDetail?.name}
+                      {...init(`properties`, {
+                        rules: [
+                          {
+                            validator: validator,
+                            message: i18n.t('Please check the properties of this policy'),
+                          },
+                        ],
+                      })}
+                      enableCodeEdit={propertiesMode === 'code'}
+                      uiSchema={policyDefinitionDetail && policyDefinitionDetail.uiSchema}
+                      definition={{
+                        type: 'policy',
+                        name: policyDefinitionDetail?.name || '',
+                        description: policyDefinitionDetail?.description || '',
+                      }}
+                      ref={this.uiSchemaRef}
+                      mode={'new'}
+                    />
+                  </If>
+                  <If condition={usePlugin}>
+                    <PluginRoot pluginId={plugin?.id} project={project} {...init(`properties`, {
                       rules: [
                         {
                           validator: validator,
                           message: i18n.t('Please check the properties of this policy'),
                         },
                       ],
-                    })}
-                    enableCodeEdit={propertiesMode === 'code'}
-                    uiSchema={policyDefinitionDetail && policyDefinitionDetail.uiSchema}
-                    definition={{
-                      type: 'policy',
-                      name: policyDefinitionDetail?.name || '',
-                      description: policyDefinitionDetail?.description || '',
-                    }}
-                    ref={this.uiSchemaRef}
-                    mode={'new'}
-                  />
+                    })} ref={this.uiSchemaRef} />
+                  </If>
                 </Form.Item>
                 <If condition={!policyDefinitionDetail}>
                   <Message type="notice">
