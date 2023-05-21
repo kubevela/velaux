@@ -27,7 +27,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
-	batchv1beta1 "k8s.io/api/batch/v1beta1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -227,7 +227,7 @@ var _ = Describe("Test velaQL rest api", func() {
 			return nil
 		}, 3*time.Second).WithTimeout(time.Minute).Should(BeNil())
 
-		newWorkload := new(batchv1beta1.CronJob)
+		newWorkload := new(batchv1.CronJob)
 		Eventually(func() error {
 			return k8sClient.Get(context.Background(), client.ObjectKey{Name: component2Name, Namespace: namespace}, newWorkload)
 		}, 3*time.Second).WithTimeout(time.Minute).Should(BeNil())
@@ -499,7 +499,7 @@ spec:
     cue:
       template: |
         output: {
-                apiVersion: "batch/v1beta1"
+                apiVersion: "batch/v1"
                 kind:       "CronJob"
                 metadata: name: context.name
                 spec: {
