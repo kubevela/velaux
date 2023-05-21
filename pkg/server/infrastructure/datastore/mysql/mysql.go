@@ -18,6 +18,7 @@ package mysql
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	mysqlgorm "gorm.io/driver/mysql"
@@ -44,40 +45,40 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 
 // Add add data model
 func (m *mysql) Add(ctx context.Context, entity datastore.Entity) error {
-	return nil
+	return fmt.Errorf("method to be implemented")
 }
 
 // BatchAdd batch add entity, this operation has some atomicity.
 func (m *mysql) BatchAdd(ctx context.Context, entities []datastore.Entity) error {
-	return nil
+	return fmt.Errorf("method to be implemented")
 }
 
 // Get get data model
 func (m *mysql) Get(ctx context.Context, entity datastore.Entity) error {
-	return nil
+	return fmt.Errorf("method to be implemented")
 }
 
 // Put update data model
 func (m *mysql) Put(ctx context.Context, entity datastore.Entity) error {
-	return nil
+	return fmt.Errorf("method to be implemented")
 }
 
 // IsExist determine whether data exists.
 func (m *mysql) IsExist(ctx context.Context, entity datastore.Entity) (bool, error) {
-	return true, nil
+	return true, fmt.Errorf("method to be implemented")
 }
 
 // Delete delete data
 func (m *mysql) Delete(ctx context.Context, entity datastore.Entity) error {
-	return nil
+	return fmt.Errorf("method to be implemented")
 }
 
 // List list entity function
 func (m *mysql) List(ctx context.Context, entity datastore.Entity, op *datastore.ListOptions) ([]datastore.Entity, error) {
-	return nil, nil
+	return nil, fmt.Errorf("method to be implemented")
 }
 
 // Count counts entities
 func (m *mysql) Count(ctx context.Context, entity datastore.Entity, filterOptions *datastore.FilterOptions) (int64, error) {
-	return 53, nil
+	return 0, fmt.Errorf("method to be implemented")
 }
