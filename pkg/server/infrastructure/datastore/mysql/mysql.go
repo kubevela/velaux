@@ -20,9 +20,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	mysqlgorm "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 )
 
 type mysql struct {
@@ -30,6 +31,7 @@ type mysql struct {
 	database string
 }
 
+// New new mongodb datastore instance
 func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error) {
 	db, err := gorm.Open(mysqlgorm.Open(cfg.URL), &gorm.Config{})
 	if err != nil {
