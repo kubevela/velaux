@@ -196,7 +196,8 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 	if err := c.w.Store.Get(ctx, workflow); err != nil {
 		return nil, err
 	}
-	switch c.req.Action {
+	action := c.req.Action
+	switch action {
 	case "approve":
 		if err := c.w.WorkflowService.ResumeRecord(ctx, app, workflow, "", c.req.Step); err != nil {
 			return nil, err
