@@ -29,6 +29,8 @@ import (
 
 	"github.com/oam-dev/kubevela/pkg/policy/envbinding"
 
+	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	assembler "github.com/kubevela/velaux/pkg/server/interfaces/api/assembler/v1"
@@ -49,6 +51,18 @@ type webhookServiceImpl struct {
 
 // WebhookHandlers is the webhook handlers
 var WebhookHandlers []string
+
+// TODO : add these vars to workflowv1alpha1
+const (
+	// ActionApprove approve a workflow step
+	ActionApprove = "approve"
+	// ActionRollback rollback a workflow step
+	ActionRollback = "rollback"
+	// ActionTerminate terminate a workflow step
+	ActionTerminate = "terminate"
+	// ActionExecute execute a workflow step
+	ActionExecute = "execute"
+)
 
 // NewWebhookService new webhook service
 func NewWebhookService() WebhookService {
@@ -196,9 +210,9 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 	if err := c.w.Store.Get(ctx, workflow); err != nil {
 		return nil, err
 	}
-	action := c.req.Action
-	switch action {
-	case "approve":
+
+	switch c.req.Action {
+	case ActionApprove:
 		if err := c.w.WorkflowService.ResumeRecord(ctx, app, workflow, "", c.req.Step); err != nil {
 			return nil, err
 		}
@@ -213,7 +227,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 			return nil, err
 		}
 		return &assembler.ConvertFromRecordModel(records[0].(*model.WorkflowRecord)).WorkflowRecordBase, nil
-	case "terminate":
+	case ActionTerminate:
 		if err := c.w.WorkflowService.TerminateRecord(ctx, app, workflow, ""); err != nil {
 			return nil, err
 		}
@@ -228,7 +242,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 			return nil, err
 		}
 		return &assembler.ConvertFromRecordModel(records[0].(*model.WorkflowRecord)).WorkflowRecordBase, nil
-	case "rollback":
+	case ActionRollback:
 		workflowRecord := &model.WorkflowRecord{
 			AppPrimaryKey: webhookTrigger.AppPrimaryKey,
 			WorkflowName:  webhookTrigger.WorkflowName,
@@ -238,7 +252,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 			PageSize: 1,
 			SortBy:   []datastore.SortOption{{Key: "StartTime", Order: datastore.SortOrderDescending}},
 			FilterOptions: datastore.FilterOptions{
-				In: []datastore.InQueryOption{{Key: "status", Values: []string{"suspending"}}},
+				In: []datastore.InQueryOption{{Key: "status", Values: []string{string(workflowv1alpha1.WorkflowStepPhaseSuspending)}}},
 			},
 		})
 		if len(runningRecords) == 0 {
@@ -252,7 +266,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 			return nil, err
 		}
 		return res, nil
-	case "execute", "":
+	case ActionExecute, "":
 		{
 			for comp, properties := range c.req.Upgrade {
 				component := &model.ApplicationComponent{
