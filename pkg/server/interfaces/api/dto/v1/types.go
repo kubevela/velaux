@@ -556,6 +556,8 @@ type ListApplicationTriggerResponse struct {
 
 // HandleApplicationTriggerWebhookRequest handles application trigger webhook request
 type HandleApplicationTriggerWebhookRequest struct {
+	Action   string                       `json:"action,omitempty"`
+	Step     string                       `json:"step,omitempty"`
 	Upgrade  map[string]*model.JSONStruct `json:"upgrade,omitempty"`
 	CodeInfo *model.CodeInfo              `json:"codeInfo,omitempty"`
 }

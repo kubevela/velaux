@@ -29,8 +29,11 @@ import (
 
 	"github.com/oam-dev/kubevela/pkg/policy/envbinding"
 
+	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
+	assembler "github.com/kubevela/velaux/pkg/server/interfaces/api/assembler/v1"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
@@ -43,10 +46,23 @@ type WebhookService interface {
 type webhookServiceImpl struct {
 	Store              datastore.DataStore `inject:"datastore"`
 	ApplicationService ApplicationService  `inject:""`
+	WorkflowService    WorkflowService     `inject:""`
 }
 
 // WebhookHandlers is the webhook handlers
 var WebhookHandlers []string
+
+// TODO : add these vars to workflowv1alpha1
+const (
+	// ActionApprove approve a workflow step
+	ActionApprove = "approve"
+	// ActionRollback rollback a workflow step
+	ActionRollback = "rollback"
+	// ActionTerminate terminate a workflow step
+	ActionTerminate = "terminate"
+	// ActionExecute execute a workflow step
+	ActionExecute = "execute"
+)
 
 // NewWebhookService new webhook service
 func NewWebhookService() WebhookService {
@@ -187,28 +203,97 @@ func (c *webhookServiceImpl) patchComponentProperties(ctx context.Context, compo
 }
 
 func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.ApplicationTrigger, app *model.Application) (interface{}, error) {
-	for comp, properties := range c.req.Upgrade {
-		component := &model.ApplicationComponent{
-			AppPrimaryKey: webhookTrigger.AppPrimaryKey,
-			Name:          comp,
-		}
-		if err := c.w.Store.Get(ctx, component); err != nil {
-			if errors.Is(err, datastore.ErrRecordNotExist) {
-				return nil, bcode.ErrApplicationComponentNotExist
-			}
-			return nil, err
-		}
-		if err := c.w.patchComponentProperties(ctx, component, properties.RawExtension()); err != nil {
-			return nil, err
-		}
+	workflow := &model.Workflow{
+		AppPrimaryKey: webhookTrigger.AppPrimaryKey,
+		Name:          webhookTrigger.WorkflowName,
 	}
-	return c.w.ApplicationService.Deploy(ctx, app, apisv1.ApplicationDeployRequest{
-		WorkflowName: webhookTrigger.WorkflowName,
-		Note:         "triggered by webhook custom",
-		TriggerType:  apisv1.TriggerTypeWebhook,
-		Force:        true,
-		CodeInfo:     c.req.CodeInfo,
-	})
+	if err := c.w.Store.Get(ctx, workflow); err != nil {
+		return nil, err
+	}
+
+	switch c.req.Action {
+	case ActionApprove:
+		if err := c.w.WorkflowService.ResumeRecord(ctx, app, workflow, "", c.req.Step); err != nil {
+			return nil, err
+		}
+		record := model.WorkflowRecord{
+			AppPrimaryKey: workflow.AppPrimaryKey,
+			WorkflowName:  workflow.Name,
+		}
+		records, err := c.w.Store.List(ctx, &record, &datastore.ListOptions{Page: 1, PageSize: 1, SortBy: []datastore.SortOption{
+			{Key: "createTime", Order: datastore.SortOrderDescending},
+		}})
+		if err != nil {
+			return nil, err
+		}
+		return &assembler.ConvertFromRecordModel(records[0].(*model.WorkflowRecord)).WorkflowRecordBase, nil
+	case ActionTerminate:
+		if err := c.w.WorkflowService.TerminateRecord(ctx, app, workflow, ""); err != nil {
+			return nil, err
+		}
+		record := model.WorkflowRecord{
+			AppPrimaryKey: workflow.AppPrimaryKey,
+			WorkflowName:  workflow.Name,
+		}
+		records, err := c.w.Store.List(ctx, &record, &datastore.ListOptions{Page: 1, PageSize: 1, SortBy: []datastore.SortOption{
+			{Key: "createTime", Order: datastore.SortOrderDescending},
+		}})
+		if err != nil {
+			return nil, err
+		}
+		return &assembler.ConvertFromRecordModel(records[0].(*model.WorkflowRecord)).WorkflowRecordBase, nil
+	case ActionRollback:
+		workflowRecord := &model.WorkflowRecord{
+			AppPrimaryKey: webhookTrigger.AppPrimaryKey,
+			WorkflowName:  webhookTrigger.WorkflowName,
+		}
+		runningRecords, err := c.w.Store.List(ctx, workflowRecord, &datastore.ListOptions{
+			Page:     1,
+			PageSize: 1,
+			SortBy:   []datastore.SortOption{{Key: "StartTime", Order: datastore.SortOrderDescending}},
+			FilterOptions: datastore.FilterOptions{
+				In: []datastore.InQueryOption{{Key: "status", Values: []string{string(workflowv1alpha1.WorkflowStepPhaseSuspending)}}},
+			},
+		})
+		if len(runningRecords) == 0 {
+			return nil, fmt.Errorf("no running records")
+		}
+		if err != nil {
+			return nil, err
+		}
+		res, err := c.w.WorkflowService.RollbackRecord(ctx, app, workflow, runningRecords[0].PrimaryKey(), "")
+		if err != nil {
+			return nil, err
+		}
+		return res, nil
+	case ActionExecute, "":
+		{
+			for comp, properties := range c.req.Upgrade {
+				component := &model.ApplicationComponent{
+					AppPrimaryKey: webhookTrigger.AppPrimaryKey,
+					Name:          comp,
+				}
+				if err := c.w.Store.Get(ctx, component); err != nil {
+					if errors.Is(err, datastore.ErrRecordNotExist) {
+						return nil, bcode.ErrApplicationComponentNotExist
+					}
+					return nil, err
+				}
+				if err := c.w.patchComponentProperties(ctx, component, properties.RawExtension()); err != nil {
+					return nil, err
+				}
+			}
+			return c.w.ApplicationService.Deploy(ctx, app, apisv1.ApplicationDeployRequest{
+				WorkflowName: webhookTrigger.WorkflowName,
+				Note:         "triggered by webhook custom",
+				TriggerType:  apisv1.TriggerTypeWebhook,
+				Force:        true,
+				CodeInfo:     c.req.CodeInfo,
+			})
+		}
+	default:
+		return nil, bcode.ErrInvalidWebhookPayloadBody
+	}
 }
 
 func (c *customHandlerImpl) install() {
