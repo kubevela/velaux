@@ -1,5 +1,6 @@
 import { PluginMeta } from '@velaux/data';
 import { getBackendSrv } from '../BackendService';
+import { managePlugin } from "../../api/productionLink";
 
 const cache: Record<string, string> = {};
 const initializedAt: number = Date.now();
@@ -26,7 +27,7 @@ export function getPluginInfo(id: string): Promise<PluginMeta> {
     return Promise.resolve(v);
   }
   return getBackendSrv()
-    .get(`/api/v1/plugins/${id}`)
+    .get(`${managePlugin}/${id}`)
     .then((settings: any) => {
       pluginInfoCache[pluginId] = settings;
       return settings;

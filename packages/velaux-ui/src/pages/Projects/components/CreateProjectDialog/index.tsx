@@ -6,8 +6,7 @@ import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { Project } from '../../../../interface/project';
-import type { User } from '../../../../interface/user';
+import type { Project , User } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 
 type Props = {

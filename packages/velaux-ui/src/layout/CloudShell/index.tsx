@@ -5,7 +5,7 @@ import { AiOutlineFullscreen } from 'react-icons/ai';
 
 import { prepareCloudShell } from '../../api/users';
 import { If } from '../../components/If';
-import type { CloudShellPrepare } from '../../interface/user';
+import type { CloudShellPrepare } from '@velaux/data';
 import { getToken } from '../../utils/storage';
 import './index.less';
 

@@ -1,5 +1,4 @@
-import type { TraitStatus } from '../../interface/application';
-import type { ResourceTreeNode } from '../../interface/observation';
+import type { TraitStatus , ResourceTreeNode } from '@velaux/data';
 
 export interface TreeNode {
   resource: ResourceTreeNode;

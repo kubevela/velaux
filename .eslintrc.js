@@ -39,7 +39,7 @@ module.exports = {
       },
     ],
     'no-duplicate-imports': 'off',
-    '@typescript-eslint/no-duplicate-imports': 'warn',
+    "import/no-duplicates": "warn",
     'react/no-deprecated': 'off',
     'react/no-unknown-property': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',

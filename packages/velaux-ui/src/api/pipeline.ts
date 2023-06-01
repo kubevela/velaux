@@ -1,4 +1,4 @@
-import type { CreatePipelineRequest } from '../interface/pipeline';
+import type { CreatePipelineRequest } from '@velaux/data';
 import { getDomain } from '../utils/common';
 
 import { get, post, put, rdelete } from './request';

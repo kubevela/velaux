@@ -1,4 +1,4 @@
-import type { UIParam } from '../interface/application';
+import type { UIParam } from '@velaux/data';
 import { getDomain } from '../utils/common';
 
 import { definition } from './productionLink';

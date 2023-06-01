@@ -7,8 +7,7 @@ import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { ProjectRoleBase } from '../../../../interface/project';
-import type { PermissionBase } from '../../../../interface/user';
+import type { ProjectRoleBase , PermissionBase } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 import './index.less';
 

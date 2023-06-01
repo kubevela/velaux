@@ -8,7 +8,7 @@ import {
   terminateApplicationWorkflowRecord,
 } from '../../../../api/application';
 import { Translation } from '../../../../components/Translation';
-import type { WorkflowRecord, WorkflowStepStatus } from '../../../../interface/application';
+import type { WorkflowRecord, WorkflowStepStatus } from '@velaux/data';
 import './index.less';
 import i18n from '../../../../i18n';
 import { If } from '../../../../components/If';

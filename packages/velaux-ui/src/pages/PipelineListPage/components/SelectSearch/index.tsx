@@ -5,7 +5,7 @@ import './index.less';
 import type { ShowMode } from '../..';
 import { If } from '../../../../components/If';
 import i18n from '../../../../i18n';
-import type { UserProject } from '../../../../interface/user';
+import type { UserProject } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { HiOutlineRefresh } from 'react-icons/hi';

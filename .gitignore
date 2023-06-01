@@ -43,3 +43,4 @@ tsconfig.tsbuildinfo
 e2e-plugins
 
 npm-artifacts
+bin

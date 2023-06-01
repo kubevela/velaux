@@ -8,8 +8,7 @@ import React, { Component } from 'react';
 import { getChartValueFiles } from '../../api/repository';
 import HelmValueShow from '../../components/HelmValueShow';
 import { Translation } from '../../components/Translation';
-import type { UIParam } from '../../interface/application';
-import type { HelmRepo } from '../../interface/repository';
+import type { UIParam , HelmRepo } from '@velaux/data';
 import KV from '../KV';
 
 type Props = {

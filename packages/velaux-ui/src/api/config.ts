@@ -3,8 +3,7 @@ import type {
   CreateConfigRequest,
   NamespacedName,
   UpdateConfigRequest,
-} from '../interface/configs';
-import type { ProjectName } from '../interface/project';
+ ProjectName } from '@velaux/data';
 import { getDomain } from '../utils/common';
 
 import { configs, configTemplates, project } from './productionLink';

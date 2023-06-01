@@ -4,9 +4,11 @@ import React from 'react';
 import { createPipelineContext, updatePipelineContext } from '../../api/pipeline';
 import KV from '../../extends/KV';
 import i18n from '../../i18n';
-import type { KeyValue, PipelineListItem } from '../../interface/pipeline';
+import type {  PipelineListItem } from '@velaux/data';
+
 import { checkName } from '../../utils/common';
 import { Translation } from '../Translation';
+import { KeyValue } from "@velaux/data";
 
 const { Row, Col } = Grid;
 
@@ -58,13 +60,13 @@ class NewContext extends React.Component<NewContextProps> {
         keyValues.push({ key: key, value: values.values[key] });
       });
       if (editMode) {
-        updatePipelineContext(project.name, name, { name: values.name, values: keyValues }).then((res) => {
+        updatePipelineContext(project.name, name, { name: values.name, values: keyValues as {key: string, value: string}[] }).then((res) => {
           if (res) {
             this.props.onSuccess();
           }
         });
       } else {
-        createPipelineContext(project.name, name, { name: values.name, values: keyValues }).then((res) => {
+        createPipelineContext(project.name, name, { name: values.name, values: keyValues as {key: string, value: string}[] }).then((res) => {
           if (res) {
             this.props.onSuccess();
           }

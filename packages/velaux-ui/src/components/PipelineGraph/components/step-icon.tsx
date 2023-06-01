@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { WorkflowStepStatus } from '../../../interface/application';
+import type { WorkflowStepStatus } from '@velaux/data';
 
 export function renderStepStatusIcon(status: WorkflowStepStatus) {
   switch (status.phase) {

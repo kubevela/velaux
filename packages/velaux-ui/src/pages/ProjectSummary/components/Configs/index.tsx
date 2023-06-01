@@ -4,7 +4,7 @@ import React, { Component, Fragment } from 'react';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
-import type { Config, TargetClusterStatus } from '../../../../interface/configs';
+import type { Config, TargetClusterStatus } from '@velaux/data';
 import { momentDate } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import './index.less';

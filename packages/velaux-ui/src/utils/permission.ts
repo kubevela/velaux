@@ -1,4 +1,4 @@
-import type { LoginUserInfo, PermissionBase } from '../interface/user';
+import type { LoginUserInfo, PermissionBase } from '@velaux/data';
 
 export interface ResourceAction {
   resource: string;

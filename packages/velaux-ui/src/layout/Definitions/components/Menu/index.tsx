@@ -2,7 +2,7 @@ import { Icon, Grid } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Component } from 'react';
 
-import type { DefinitionMenuType } from '../../../../interface/definitions';
+import type { DefinitionMenuType } from '@velaux/data';
 import './index.less';
 
 type Props = {

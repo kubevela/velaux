@@ -1,4 +1,4 @@
-import { Project } from '../interface/project';
+import { Project , ApplicationBase, EnvBinding , Menu, MenuTypes, Workspace , LoginUserInfo } from '@velaux/data';
 import * as React from 'react';
 import _ from 'lodash';
 import { FaLayerGroup } from 'react-icons/fa';
@@ -12,10 +12,7 @@ import {
 import { BsFileEarmarkPerson, BsFillFileCodeFill, BsHddNetworkFill, BsPlugin } from 'react-icons/bs';
 import { RiUserSettingsFill } from 'react-icons/ri';
 import { MdConfirmationNumber } from 'react-icons/md';
-import { ApplicationBase, EnvBinding } from '../interface/application';
-import { Workspace, Menu, MenuTypes } from '@velaux/data';
 import { locationService } from './LocationService';
-import { LoginUserInfo } from '../interface/user';
 import { checkPermission } from '../utils/permission';
 import { getPluginSrv } from './PluginService';
 
@@ -99,7 +96,7 @@ const defaultWorkspaceMenus: Menu[] = [
     label: 'Addons',
     name: 'addon-list',
     permission: { resource: 'addon:*', action: 'list' },
-    relatedRoute: ['/addons'],
+    relatedRoute: ['/addons', /\/manage\/plugins.*/],
   },
   {
     workspace: 'extension',
@@ -184,11 +181,18 @@ export type LeftMenu = {
  */
 export interface MenuService {
   loadWorkspaces(user?: LoginUserInfo): Workspace[];
+
   loadCurrentWorkspace(): Workspace | undefined;
+
   loadMenus(workspace: Workspace, user: LoginUserInfo): LeftMenu[];
+
   loadProjectMenus(p: Project): Menu[];
+
   loadApplicationEnvMenus(p: Project, app: ApplicationBase, env: EnvBinding): Menu[];
+
   loadPluginMenus(): Promise<Menu[]>;
+
+  resetPluginMenus(): void;
 }
 
 /** @internal */
@@ -196,6 +200,7 @@ export class MenuWrapper implements MenuService {
   private menus: Menu[];
   private workspaces: Workspace[];
   private pluginLoaded: boolean;
+
   constructor() {
     this.menus = _.cloneDeep(defaultWorkspaceMenus);
     this.workspaces = _.cloneDeep(defaultWorkspaces);
@@ -235,14 +240,20 @@ export class MenuWrapper implements MenuService {
       });
   };
 
+  resetPluginMenus = () => {
+    this.pluginLoaded = false;
+    this.menus = _.cloneDeep(defaultWorkspaceMenus);
+    this.workspaces = _.cloneDeep(defaultWorkspaces);
+  }
   getWorkspace(name: string): Workspace | undefined {
     return this.workspaces.find((w) => w.name == name);
   }
+
   // This function should be called after calling the loadPluginMenus function
   loadCurrentWorkspace(): Workspace | undefined {
     let w: Workspace | undefined = undefined;
     this.menus.map((m) => {
-      if (this.matchMenu(m)) {
+      if (!w && this.matchMenu(m)) {
         w = this.getWorkspace(m.workspace);
       }
     });
@@ -284,9 +295,11 @@ export class MenuWrapper implements MenuService {
     });
     return matched;
   }
+
   loadProjectMenus(p: Project): Menu[] {
     return [];
   }
+
   loadApplicationEnvMenus(p: Project, app: ApplicationBase, env: EnvBinding): Menu[] {
     return [];
   }

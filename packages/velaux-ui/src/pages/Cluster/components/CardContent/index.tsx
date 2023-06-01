@@ -6,8 +6,7 @@ import { Dropdown, Menu, Grid, Card, Dialog } from '@alifd/next';
 import kubernetesSvg from '../../../../assets/kubernetes.svg';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
-import type { Cluster } from '../../../../interface/cluster';
-import type { LoginUserInfo } from '../../../../interface/user';
+import type { Cluster , LoginUserInfo } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
 

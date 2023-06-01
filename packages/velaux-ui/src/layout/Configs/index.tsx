@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 
 import Empty from '../../components/Empty';
 import { ListTitle } from '../../components/ListTitle';
-import type { ConfigTemplate } from '../../interface/configs';
+import type { ConfigTemplate } from '@velaux/data';
 import { getMatchParamObj } from '../../utils/utils';
 
 import Menu from './components/Menu';

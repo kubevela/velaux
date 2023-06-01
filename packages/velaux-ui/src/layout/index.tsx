@@ -4,7 +4,7 @@ import LayoutRouter from './LayoutRouter';
 import LeftMenu from './LeftMenu';
 import Header from './Header';
 import './index.less';
-import { LayoutMode, Workspace, LayoutModes } from '@velaux/data';
+import { LayoutMode, LayoutModes, Workspace } from '@velaux/data';
 import { locationService } from '../services/LocationService';
 import { menuService } from '../services/MenuService';
 import { ErrorBoundary } from '../components/ErrorBoundary';

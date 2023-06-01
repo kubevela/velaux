@@ -13,7 +13,7 @@ import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
 import UISchema from '../../components/UISchema';
 import i18n from '../../i18n';
-import type { UIParam } from '../../interface/application';
+import type { UIParam } from '@velaux/data';
 import { locale } from '../../utils/locale';
 
 import './index.less';

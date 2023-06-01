@@ -7,7 +7,7 @@ import { Grid, Card, Tag, Balloon } from '@alifd/next';
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
-import type { Addon, AddonBaseStatus } from '../../../../interface/addon';
+import type { Addon, AddonBaseStatus } from '@velaux/data';
 import { intersectionArray } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 

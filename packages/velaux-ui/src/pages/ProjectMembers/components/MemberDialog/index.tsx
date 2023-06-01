@@ -5,7 +5,7 @@ import { createProjectUsers, updateProjectUser } from '../../../../api/project';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { ProjectMember, ProjectRoleBase } from '../../../../interface/project';
+import type { ProjectMember, ProjectRoleBase } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { getSelectLabel } from '../../../../utils/utils';

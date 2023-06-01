@@ -1,4 +1,4 @@
-import { Loading, Message, Button } from '@alifd/next';
+import { Button, Loading, Message, Tab } from '@alifd/next';
 import { connect } from 'dva';
 import React from 'react';
 
@@ -6,20 +6,25 @@ import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { Addon, AddonBaseStatus } from '../../interface/addon';
+import type { Addon, AddonBaseStatus } from '@velaux/data';
 
 import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
 import RegistryManageDialog from './components/registry-manage/index';
 import SelectSearch from './components/search/index';
+import Plugin from "./components/plugin";
 
 type Props = {
+  history: any;
+  plugin: boolean
   dispatch: ({}) => {};
+  loading: any;
+  match?: any;
+
+  // addon props
   addonsList: Addon[];
   registryList: [];
   addonListMessage: string;
-  loading: any;
-  match?: any;
   enabledAddons?: AddonBaseStatus[];
 };
 
@@ -117,70 +122,98 @@ class Addons extends React.Component<Props, State> {
   };
 
   render() {
-    const { addonsList = [], registryList = [], dispatch, loading, addonListMessage, enabledAddons } = this.props;
+    const {
+      addonsList = [],
+      registryList = [],
+      history,
+      dispatch,
+      loading,
+      addonListMessage,
+      enabledAddons,
+      plugin
+    } = this.props;
 
-    const isLoading = loading.models.addons;
+    const addonLoading = loading.models.addons;
+    const pluginLoading = loading.models.plugins;
     const { showAddonDetail, addonName, showRegistryManage, tagList, selectTags } = this.state;
+
     return (
       <div>
         <ListTitle
-          title="Addons"
-          subTitle="Manages and extends platform capabilities"
-          extButtons={[
-            <Permission request={{ resource: 'addonRegistry:*', action: 'list' }} project={''}>
-              <Button
-                type="primary"
-                onClick={() => {
-                  this.setState({ showRegistryManage: true });
+          title="Addons and VelaUX Plugins"
+          subTitle="Manages extended platform capabilities for KubeVela and VelaUX."
+        />
+
+        <Tab defaultActiveKey={plugin ? 'plugins' : 'addons'}
+             onChange={key => {
+               history.push('/' + (key == 'plugins' ? "manage/" : "") + key)
+             }}>
+          <Tab.Item title="Addons" key={'addons'}>
+            <SelectSearch
+              dispatch={dispatch}
+              tagList={tagList}
+              registries={registryList}
+              listFunction={this.getAddonsList}
+              onTagChange={(tags: string[]) => {
+                this.setState({ selectTags: tags });
+              }}
+              extButtons={[
+                <Permission request={{ resource: 'addonRegistry:*', action: 'list' }} project={''}>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      this.setState({ showRegistryManage: true });
+                    }}
+                  >
+                    <Translation>Addon Registries</Translation>
+                  </Button>
+                </Permission>,
+              ]}
+            />
+            <Loading visible={addonLoading} style={{ width: '100%' }}>
+              <If condition={addonListMessage}>
+                <Message style={{ marginBottom: '16px' }} type="warning">
+                  {addonListMessage}
+                </Message>
+              </If>
+              <CardContend
+                addonLists={addonsList}
+                selectTags={selectTags}
+                enabledAddons={enabledAddons}
+                clickAddon={this.openAddonDetail}
+              />
+            </Loading>
+            <If condition={showAddonDetail}>
+              <AddonDetailDialog
+                onClose={this.closeAddonDetail}
+                showAddon={this.onShowAddon}
+                dispatch={dispatch}
+                addonName={addonName}
+              />
+            </If>
+            <If condition={showRegistryManage}>
+              <RegistryManageDialog
+                visible={showRegistryManage}
+                onClose={() => {
+                  this.getAddonsList();
+                  this.setState({ showRegistryManage: false });
                 }}
-              >
-                <Translation>Addon Registries</Translation>
-              </Button>
-            </Permission>,
-          ]}
-        />
-        <SelectSearch
-          dispatch={dispatch}
-          tagList={tagList}
-          registries={registryList}
-          listFunction={this.getAddonsList}
-          onTagChange={(tags: string[]) => {
-            this.setState({ selectTags: tags });
-          }}
-        />
-        <Loading visible={isLoading} style={{ width: '100%' }}>
-          <If condition={addonListMessage}>
-            <Message style={{ marginBottom: '16px' }} type="warning">
-              {addonListMessage}
-            </Message>
-          </If>
-          <CardContend
-            addonLists={addonsList}
-            selectTags={selectTags}
-            enabledAddons={enabledAddons}
-            clickAddon={this.openAddonDetail}
-          />
-        </Loading>
-        <If condition={showAddonDetail}>
-          <AddonDetailDialog
-            onClose={this.closeAddonDetail}
-            showAddon={this.onShowAddon}
-            dispatch={dispatch}
-            addonName={addonName}
-          />
-        </If>
-        <If condition={showRegistryManage}>
-          <RegistryManageDialog
-            visible={showRegistryManage}
-            onClose={() => {
-              this.getAddonsList();
-              this.setState({ showRegistryManage: false });
-            }}
-            syncRegistries={this.getAddonRegistriesList}
-            registries={registryList}
-            dispatch={dispatch}
-          />
-        </If>
+                syncRegistries={this.getAddonRegistriesList}
+                registries={registryList}
+                dispatch={dispatch}
+              />
+            </If>
+          </Tab.Item>
+          <Tab.Item title="VelaUX Plugins" key={'plugins'}>
+            <Loading visible={pluginLoading} style={{ width: '100%' }}>
+              <Plugin
+                dispatch={dispatch}
+                history={history}
+              ></Plugin>
+            </Loading>
+          </Tab.Item>
+        </Tab>
+
       </div>
     );
   }

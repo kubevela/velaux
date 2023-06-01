@@ -16,10 +16,7 @@ import type {
   ApplicationDetail,
   ApplicationStatus,
   EnvBinding,
-} from '../../interface/application';
-import type { PodBase, CloudResource, Configuration } from '../../interface/observation';
-import type { Target } from '../../interface/target';
-import type { LoginUserInfo } from '../../interface/user';
+ PodBase, CloudResource, Configuration , Target , LoginUserInfo } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';

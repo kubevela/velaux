@@ -7,9 +7,7 @@ import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { NameAlias } from '../../interface/env';
-import type { RolesBase } from '../../interface/roles';
-import type { User } from '../../interface/user';
+import type { NameAlias , RolesBase , User } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 

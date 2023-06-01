@@ -15,7 +15,7 @@ import nacosImg from '../../../../assets/nacos.svg';
 import prometheusImg from '../../../../assets/prometheus.svg';
 import ssoImg from '../../../../assets/sso.svg';
 import terraformImg from '../../../../assets/terraform.svg';
-import type { ConfigTemplate } from '../../../../interface/configs';
+import type { ConfigTemplate } from '@velaux/data';
 import './index.less';
 
 const imgDate = [

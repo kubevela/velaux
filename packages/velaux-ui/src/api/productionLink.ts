@@ -23,3 +23,5 @@ export const platformPermissions = `/api/v1/permissions`;
 export const configs = `/api/v1/configs`;
 export const configTemplates = `/api/v1/config_templates`;
 export const cloudShell = `/api/v1/cloudshell`;
+export const plugin = `/api/v1/plugins`;
+export const managePlugin = `/api/v1/manage/plugins`;

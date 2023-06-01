@@ -11,7 +11,7 @@ import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
-import type { Config, ConfigTemplate, ConfigTemplateDetail, NamespacedName } from '../../../../interface/configs';
+import type { Config, ConfigTemplate, ConfigTemplateDetail, NamespacedName } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 

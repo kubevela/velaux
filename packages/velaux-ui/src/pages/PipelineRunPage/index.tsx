@@ -17,15 +17,14 @@ import Empty from '../../components/Empty';
 import { If } from '../../components/If';
 import PipelineGraph from '../../components/PipelineGraph';
 import { Translation } from '../../components/Translation';
-import type { WorkflowStepStatus } from '../../interface/application';
-import type {
+import type { WorkflowStepStatus ,
   PipelineDetail,
   PipelineRunBase,
   PipelineRunStatus,
   WorkflowStep,
   WorkflowStepInputs,
   WorkflowStepOutputs,
-} from '../../interface/pipeline';
+} from '@velaux/data';
 import { convertAny, timeDiff } from '../../utils/common';
 
 import Header from './components/Header';

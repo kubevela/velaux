@@ -6,11 +6,11 @@ import { createPipeline, createPipelineContext, listPipelineContexts, loadPipeli
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { PipelineListItem, PipelineDetail, KeyValue } from '../../../../interface/pipeline';
-import type { LoginUserInfo } from '../../../../interface/user';
+import type { PipelineListItem, PipelineDetail , LoginUserInfo } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
+import {KeyValue} from '@velaux/data';
 
 const FormItem = Form.Item;
 
@@ -93,7 +93,7 @@ class ClonePipeline extends React.Component<PipelineProps, State> {
             if (res) {
               if (contexts) {
                 Object.keys(contexts).map((key) => {
-                  createPipelineContext(project, name, { name: key, values: contexts[key] });
+                  createPipelineContext(project, name, { name: key, values: contexts[key] as {key: string, value: string}[] });
                 });
               }
               Message.success(i18n.t('Pipeline cloned successfully'));

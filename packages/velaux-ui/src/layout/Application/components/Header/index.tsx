@@ -18,7 +18,7 @@ import type {
   ApplicationDeployResponse,
   ApplicationEnvStatus,
   EnvBinding,
-} from '../../../../interface/application';
+} from '@velaux/data';
 import type { APIError } from '../../../../utils/errors';
 import { handleError } from '../../../../utils/errors';
 import { locale } from '../../../../utils/locale';

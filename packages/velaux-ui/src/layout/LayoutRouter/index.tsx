@@ -1,4 +1,4 @@
-import { Route, Switch, Redirect } from 'dva/router';
+import { Redirect, Route, Switch } from 'dva/router';
 import React from 'react';
 
 import Addons from '../../pages/Addons/index';
@@ -36,8 +36,8 @@ import DefinitionDetails from '../DefinitionDetails';
 import DefinitionsLayout from '../Definitions';
 import ProjectLayout from '../Project';
 import MyProjectList from '../../pages/MyProjectList';
-import { AppRootPage } from '../AppRootPage';
 import PlatformSetting from '../../pages/PlatformSetting';
+import { AppConfigPage, AppRootPage } from '../AppRootPage';
 
 export default function Router() {
   return (
@@ -396,6 +396,19 @@ export default function Router() {
         path="/settings"
         render={(props: any) => {
           return <PlatformSetting {...props}></PlatformSetting>;
+        }}
+      />
+      <Route
+        exact={true}
+        path="/manage/plugins"
+        render={(props: any) => {
+          return <Addons plugin={true} {...props}></Addons>;
+        }}
+      />
+      <Route
+        path="/manage/plugins/:pluginId/config"
+        render={(props: any) => {
+          return <AppConfigPage pluginId={props.match.params.pluginId}></AppConfigPage>;
         }}
       />
       <Route

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import { Translation } from '../Translation';
-import type { ParamCondition, UIParam, UIParamValidate } from '../../interface/application';
+import type { ParamCondition, UIParam, UIParamValidate , Definition } from '@velaux/data';
 
 import type { Rule } from '@alifd/field';
 import { Form, Input, Select, Field, Switch, Grid, Divider } from '@alifd/next';
@@ -31,7 +31,6 @@ import SecretSelect from '../../extends/SecretSelect';
 import Strings from '../../extends/Strings';
 import Numbers from '../../extends/Numbers';
 import Structs from '../../extends/Structs';
-import type { Definition } from '../../interface/addon';
 import { checkImageName, replaceUrl } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import { getValue } from '../../utils/utils';

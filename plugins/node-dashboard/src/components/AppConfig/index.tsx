@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { Button } from '@velaux/ui';
-import { PluginConfigPageProps, AppPluginMeta, PluginMeta } from '@velaux/data';
+import { Button ,enablePlugin  } from '@velaux/ui';
+import { PluginConfigPageProps, AppPluginMeta, PluginMeta ,PluginEnableRequest } from '@velaux/data';
 
 export type AppPluginSettings = {};
 
 export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<AppPluginSettings>> {}
 
 export const AppConfig = ({ plugin }: AppConfigProps) => {
-  const { enabled, jsonData } = plugin.meta;
+  const { enabled, jsonSetting } = plugin.meta;
 
   return (
     <div className="gf-form-group">
@@ -22,7 +22,7 @@ export const AppConfig = ({ plugin }: AppConfigProps) => {
               onClick={() =>
                 updatePluginAndReload(plugin.meta.id, {
                   enabled: true,
-                  jsonData,
+                  jsonSetting
                 })
               }
             >
@@ -40,7 +40,7 @@ export const AppConfig = ({ plugin }: AppConfigProps) => {
               onClick={() =>
                 updatePluginAndReload(plugin.meta.id, {
                   enabled: false,
-                  jsonData,
+                  jsonSetting
                 })
               }
             >
@@ -55,6 +55,16 @@ export const AppConfig = ({ plugin }: AppConfigProps) => {
 
 const updatePluginAndReload = async (pluginId: string, data: Partial<PluginMeta>) => {
   try {
+    const params: PluginEnableRequest = {
+      id: pluginId,
+      jsonData: data.jsonSetting? data.jsonSetting : {},
+      secureJsonData: data.secureJsonData? data.secureJsonData : {},
+    }
+    await enablePlugin(params).then((res) => {
+      console.log(res);
+    }).catch((err) => {
+      console.log(err);
+    })
     //await updatePlugin(pluginId, data);
 
     // Reloading the page as the changes made here wouldn't be propagated to the actual plugin otherwise.

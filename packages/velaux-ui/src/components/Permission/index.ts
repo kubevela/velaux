@@ -1,7 +1,7 @@
 import { connect } from 'dva';
 import type React from 'react';
 
-import type { LoginUserInfo } from '../../interface/user';
+import type { LoginUserInfo } from '@velaux/data';
 import type { ResourceAction } from '../../utils/permission';
 import { checkPermission } from '../../utils/permission';
 

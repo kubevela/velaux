@@ -1,5 +1,5 @@
 import { listTemplates } from '../api/config';
-import type { ConfigTemplate, ListTemplateResponse } from '../interface/configs';
+import type { ConfigTemplate, ListTemplateResponse } from '@velaux/data';
 
 interface ConfigState {
   configTemplates: ConfigTemplate[];

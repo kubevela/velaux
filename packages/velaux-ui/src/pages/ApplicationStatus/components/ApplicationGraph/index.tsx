@@ -9,8 +9,7 @@ import type {
   EnvBinding,
   ApplicationComponent,
   ComponentStatus,
-} from '../../../../interface/application';
-import type { AppliedResource, ResourceTreeNode } from '../../../../interface/observation';
+ AppliedResource, ResourceTreeNode } from '@velaux/data';
 
 import { ShowResource } from './resource-show';
 

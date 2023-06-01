@@ -6,7 +6,7 @@ import { BiError } from 'react-icons/bi';
 import { FaStopCircle } from 'react-icons/fa';
 
 import { If } from '../../../../components/If';
-import type { RunPhase } from '../../../../interface/pipeline';
+import type { RunPhase } from '@velaux/data';
 
 const RunStatusIcon = (props: { status?: RunPhase }) => {
   const { status } = props;

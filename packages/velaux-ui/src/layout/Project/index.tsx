@@ -6,8 +6,7 @@ import React, { Component, Fragment } from 'react';
 import { Translation } from '../../components/Translation';
 import { Breadcrumb } from '../../components/Breadcrumb';
 import './index.less';
-import type { ProjectDetail } from '../../interface/project';
-import type { LoginUserInfo } from '../../interface/user';
+import type { ProjectDetail , LoginUserInfo } from '@velaux/data';
 import { checkPermission } from '../../utils/permission';
 
 import classNames from 'classnames';

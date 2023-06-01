@@ -1,0 +1,53 @@
+.plugin-card {
+  color: black;
+  height: fit-content;
+  border: none;
+  .next-card {
+    border: none;
+    border-radius: 8px;
+  }
+
+  :hover {
+    background-color: #eeeeee;
+  }
+
+  .plugin-card-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .plugin-desc {
+      height: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .install-btn {
+    float: right;
+  }
+
+  .tag {
+    font-size: 10px;
+  }
+
+  .hover-auto {
+    pointer-events: auto;
+  }
+
+  .hover-none {
+    pointer-events: none;
+  }
+
+  span {
+    pointer-events: none
+  }
+}
+
+.font-color-keep{
+  color: #141414;
+}
+
+.font-color-info{
+  color: #585d66;
+}

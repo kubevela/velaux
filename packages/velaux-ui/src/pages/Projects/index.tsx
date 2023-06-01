@@ -8,9 +8,7 @@ import { If } from '../../components/If';
 import { ListTitle as Title } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { NameAlias } from '../../interface/env';
-import type { Project } from '../../interface/project';
-import type { User } from '../../interface/user';
+import type { NameAlias , Project , User } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 

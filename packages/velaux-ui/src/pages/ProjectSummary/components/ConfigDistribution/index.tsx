@@ -3,12 +3,11 @@ import React, { Component, Fragment } from 'react';
 
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
-import type { ConfigDistribution } from '../../../../interface/configs';
+import type { ConfigDistribution , WorkflowStepStatus } from '@velaux/data';
 import { momentDate } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import './index.less';
 import { deleteProjectConfigDistribution, getProjectConfigDistributions } from '../../../../api/config';
-import type { WorkflowStepStatus } from '../../../../interface/application';
 import { HiOutlineRefresh } from 'react-icons/hi';
 
 type Props = {

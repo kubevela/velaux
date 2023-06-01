@@ -18,10 +18,7 @@ import Permission from '../../components/Permission';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import type { AddonBaseStatus } from '../../interface/addon';
-import type { Config } from '../../interface/configs';
-import type { SystemInfo } from '../../interface/system';
-import type { LoginUserInfo } from '../../interface/user';
+import type { AddonBaseStatus , Config , SystemInfo , LoginUserInfo } from '@velaux/data';
 import { getData, setData } from '../../utils/cache';
 import { locale } from '../../utils/locale';
 import { getBrowserNameAndVersion } from '../../utils/utils';
@@ -275,8 +272,7 @@ class Header extends Component<Props, State> {
             <If condition={userInfo}>
               <Dropdown
                 trigger={
-                  <div className="user-item vela-item" title={userInfo?.alias ? userInfo.alias : userInfo?.name}>
-                    <svg
+                  <div className="user-item vela-item" title={userInfo?.alias ? userInfo.alias : userInfo?.name}><svg
                       viewBox="0 0 1024 1024"
                       version="1.1"
                       xmlns="http://www.w3.org/2000/svg"

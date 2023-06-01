@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React, { useState } from 'react';
 import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 
-import type { OutputItem } from '../../interface/application';
+import type { OutputItem } from '@velaux/data';
 import { locale } from '../../utils/locale';
 const { Row, Col } = Grid;
 

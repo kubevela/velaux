@@ -1,4 +1,4 @@
-import type { ResourceObject } from '../../interface/observation';
+import type { ResourceObject } from '@velaux/data';
 
 export interface KubernetesObject extends ResourceObject {
   apiVersion: string;

@@ -9,8 +9,7 @@ import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { ApplicationRevision, ApplicationRevisionDetail } from '../../../../interface/application';
-import type { ResourceTreeNode } from '../../../../interface/observation';
+import type { ApplicationRevision, ApplicationRevisionDetail , ResourceTreeNode } from '@velaux/data';
 
 type RevisionProps = {
   appName: string;

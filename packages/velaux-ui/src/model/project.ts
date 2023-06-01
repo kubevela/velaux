@@ -1,5 +1,5 @@
 import { getProjectDetail } from '../api/project';
-import type { Project, ProjectDetail } from '../interface/project';
+import type { Project, ProjectDetail } from '@velaux/data';
 
 interface ProjectDetailState {
   projectDetails: ProjectDetail;

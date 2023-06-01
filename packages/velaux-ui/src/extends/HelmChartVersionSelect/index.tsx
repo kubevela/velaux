@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 
 import { getChartVersions } from '../../api/repository';
 import i18n from '../../i18n';
-import type { ChartVersion, HelmRepo } from '../../interface/repository';
+import type { ChartVersion, HelmRepo } from '@velaux/data';
 import { locale } from '../../utils/locale';
 
 type Props = {

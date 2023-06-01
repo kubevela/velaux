@@ -1,10 +1,12 @@
 import { ComponentType } from 'react';
 import { KeyValue, MenuType, ResourceAction, Workspace } from '..';
+import { Addon } from '../api'
 
 export enum PluginType {
   PageApp = 'page-app',
   Definition = 'definition',
 }
+
 interface PluginMetaInfoLink {
   name: string;
   url: string;
@@ -50,7 +52,7 @@ export interface PluginInclude {
   catalog?: string;
 }
 
-export interface PluginMeta<T extends KeyValue = {}> {
+export interface PluginMeta<T extends KeyValue = {}> extends PluginLink, SourceAddon {
   id: string;
   name: string;
   type: PluginType;
@@ -67,7 +69,7 @@ export interface PluginMeta<T extends KeyValue = {}> {
   includes?: PluginInclude[];
 
   // Filled in by the backend
-  jsonData?: T;
+  jsonSetting?: T;
   secureJsonData?: KeyValue;
   secureJsonFields?: KeyValue<boolean>;
   enabled?: boolean;
@@ -78,9 +80,27 @@ export interface PluginMeta<T extends KeyValue = {}> {
   live?: boolean;
 }
 
+/**
+ * Represents a plugin and link to get plugin tarball
+ */
+export interface PluginLink {
+  name: string
+  url: string
+}
+
+/**
+ * Represents a plugin linked to
+ */
+export interface SourceAddon {
+  addon: Addon
+}
+
+
 export interface PluginConfigPageProps<T extends PluginMeta> {
   plugin: VelaUXPlugin<T>;
   query: KeyValue; // The URL query parameters
+  onJSONDataChange: (key: string, value: any) => void;
+  onSecureJSONDataChange: (key: string, value: any) => void;
 }
 
 export interface PluginConfigPage<T extends PluginMeta> {
@@ -100,18 +120,31 @@ export class VelaUXPlugin<T extends PluginMeta = PluginMeta> {
   loadError?: boolean;
 
   // Show configuration tabs on the plugin page
-  configPages?: Array<PluginConfigPage<T>>;
+  configPages?: PluginConfigPage<T>;
 
   // Tabs on the plugin page
   addConfigPage(tab: PluginConfigPage<T>) {
-    if (!this.configPages) {
-      this.configPages = [];
-    }
-    this.configPages.push(tab);
+    this.configPages = tab;
     return this;
   }
 
   constructor() {
     this.meta = {} as T;
   }
+}
+
+export type PluginEnableRequest = {
+  id: string
+  jsonData: KeyValue
+  secureJsonData: KeyValue
+}
+
+export type PluginInstallRequest = {
+  id: string
+  url: string
+}
+
+export type UXPlugin = {
+  id: string
+  url: string
 }

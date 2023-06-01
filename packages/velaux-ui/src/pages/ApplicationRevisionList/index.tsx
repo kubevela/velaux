@@ -5,7 +5,7 @@ import type { Dispatch } from 'redux';
 
 import { listRevisions } from '../../api/application';
 import { If } from '../../components/If';
-import type { ApplicationDetail, EnvBinding, ApplicationRevision } from '../../interface/application';
+import type { ApplicationDetail, EnvBinding, ApplicationRevision } from '@velaux/data';
 import { locale } from '../../utils/locale';
 
 import { ShowRevision } from './components/Detail';

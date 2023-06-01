@@ -7,9 +7,7 @@ import { createApplicationEnvbinding, updateApplicationEnvbinding } from '../../
 import { getEnvs } from '../../../../api/env';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
-import type { ApplicationDetail, EnvBinding } from '../../../../interface/application';
-import type { Env } from '../../../../interface/env';
-import type { LoginUserInfo } from '../../../../interface/user';
+import type { ApplicationDetail, EnvBinding , Env , LoginUserInfo } from '@velaux/data';
 import EnvDialog from '../../../../pages/EnvPage/components/EnvDialog';
 import { showAlias } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';

@@ -17,24 +17,31 @@ limitations under the License.
 package service
 
 import (
+	"archive/tar"
+	"bytes"
+	"compress/gzip"
 	"context"
 	"errors"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
 
-	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
-
+	"github.com/oam-dev/kubevela/pkg/utils"
+	"github.com/oam-dev/kubevela/pkg/utils/common"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"github.com/oam-dev/kubevela/pkg/utils"
-
 	"github.com/kubevela/velaux/pkg/plugin/loader"
 	"github.com/kubevela/velaux/pkg/plugin/registry"
 	"github.com/kubevela/velaux/pkg/plugin/types"
 	"github.com/kubevela/velaux/pkg/server/config"
+	"github.com/kubevela/velaux/pkg/server/domain/model"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	assembler "github.com/kubevela/velaux/pkg/server/interfaces/api/assembler/v1"
 	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
@@ -56,6 +63,8 @@ type PluginService interface {
 	// For plugin management
 	ListInstalledPlugins(ctx context.Context) []v1.ManagedPluginDTO
 	DetailInstalledPlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error)
+	InstallPlugin(ctx context.Context, pluginID string, params v1.InstallPluginRequest) (*v1.ManagedPluginDTO, error)
+	UninstallPlugin(ctx context.Context, pluginID string) error
 	EnablePlugin(ctx context.Context, pluginID string, params v1.PluginEnableRequest) (*v1.ManagedPluginDTO, error)
 	DisablePlugin(ctx context.Context, pluginID string) (*v1.ManagedPluginDTO, error)
 	SetPlugin(ctx context.Context, pluginID string, params v1.PluginSetRequest) (*v1.ManagedPluginDTO, error)
@@ -81,22 +90,29 @@ type pluginImpl struct {
 
 func (p *pluginImpl) Init(ctx context.Context) error {
 	for _, s := range pluginSources(p.pluginConfig) {
-		plugins, err := p.loader.Load(s.Class, s.Paths, nil)
-		if err != nil {
+		if err := p.LoadNewPlugin(ctx, s); err != nil {
 			return err
 		}
-		klog.V(4).Infof("Loaded %d plugins from %s%s", len(plugins), s.Class, s.Paths)
-		for _, plugin := range plugins {
-			// Init the plugin role in the kubernetes.
-			if plugin.BackendType == types.KubeAPI && len(plugin.KubePermissions) > 0 {
-				if err := p.InitPluginRole(ctx, plugin); err != nil {
-					klog.Errorf("failed to init the cluster role for the plugin %s err: %s", plugin.PluginID(), err.Error())
-					continue
-				}
+	}
+	return nil
+}
+
+func (p *pluginImpl) LoadNewPlugin(ctx context.Context, s types.PluginSource) error {
+	plugins, err := p.loader.Load(s.Class, s.Paths, nil)
+	if err != nil {
+		return err
+	}
+	klog.V(4).Infof("Loaded %d plugins from %s%s", len(plugins), s.Class, s.Paths)
+	for _, plugin := range plugins {
+		// Init the plugin role in the kubernetes.
+		if plugin.BackendType == types.KubeAPI && len(plugin.KubePermissions) > 0 {
+			if err := p.InitPluginRole(ctx, plugin); err != nil {
+				klog.Errorf("failed to init the cluster role for the plugin %s err: %s", plugin.PluginID(), err.Error())
+				continue
 			}
-			if err := p.registry.Add(ctx, plugin); err != nil {
-				return err
-			}
+		}
+		if err := p.registry.Add(ctx, plugin); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -110,6 +126,14 @@ func GeneratePluginRoleName(plugin *types.Plugin) string {
 // GeneratePluginSubjectName generate the plugin subject(group) name.
 func GeneratePluginSubjectName(plugin *types.Plugin) string {
 	return pluginRolePrefix + plugin.PluginID()
+}
+
+func (p *pluginImpl) generatePluginFolder(pluginID string) string {
+	var path = "plugins"
+	if len(p.pluginConfig.CustomPluginPath) > 0 {
+		path = p.pluginConfig.CustomPluginPath[0]
+	}
+	return filepath.Join(path, pluginID)
 }
 
 func (p *pluginImpl) InitPluginRole(ctx context.Context, plugin *types.Plugin) error {
@@ -252,6 +276,147 @@ func (p *pluginImpl) EnablePlugin(ctx context.Context, pluginID string, params v
 	}
 	dto := assembler.PluginToManagedDTO(*plugin, setting)
 	return &dto, nil
+}
+
+// InstallPlugin install the plugin from url and enable it automatically.
+func (p *pluginImpl) InstallPlugin(ctx context.Context, pluginID string, params v1.InstallPluginRequest) (*v1.ManagedPluginDTO, error) {
+	var destFolder = p.generatePluginFolder(pluginID)
+	if strings.Contains(pluginID, "..") || strings.Contains(pluginID, "/") {
+		return nil, errors.New("pluginID should not contain .. or /")
+	}
+	err := downloadAndDecompressTarGz(ctx, params.URL, destFolder, params.Options)
+	if err != nil {
+		return nil, fmt.Errorf("failed to download and decompress the plugin(%s) package from %s: %w", pluginID, params.URL, err)
+	}
+	err = p.LoadNewPlugin(ctx, types.PluginSource{Class: types.External, Paths: []string{destFolder}})
+	if err != nil {
+		return nil, fmt.Errorf("failed load the plugin(%s): %w", pluginID, err)
+	}
+	return p.EnablePlugin(ctx, pluginID, v1.PluginEnableRequest{})
+}
+
+// UninstallPlugin will disable and remove the plugin files.
+func (p *pluginImpl) UninstallPlugin(ctx context.Context, pluginID string) error {
+	var destFolder = p.generatePluginFolder(pluginID)
+	if strings.Contains(pluginID, "..") || strings.Contains(pluginID, "/") {
+		return errors.New("pluginID should not contain .. or /")
+	}
+	_, err := p.DisablePlugin(ctx, pluginID)
+	if err != nil && !errors.Is(err, bcode.ErrPluginAlreadyDisabled) {
+		return err
+	}
+	err = p.registry.Remove(ctx, pluginID)
+	if err != nil {
+		return err
+	}
+	_ = os.RemoveAll(destFolder)
+	klog.V(4).Infof("Plugin %s removed from folder %s", pluginID, destFolder)
+	return nil
+}
+
+func shouldRemoveTopLevelFolder(tarReader *tar.Reader) (bool, error) {
+	entries := make(map[string]bool)
+	for {
+		header, err := tarReader.Next()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			return false, fmt.Errorf("error reading tar entry: %w", err)
+		}
+		pathParts := strings.Split(strings.TrimPrefix(header.Name, "."+string(filepath.Separator)), string(filepath.Separator))
+		entries[pathParts[0]] = true
+		if len(entries) > 1 {
+			return false, nil
+		}
+	}
+	return len(entries) == 1, nil
+}
+
+func decompressTarGzTo(gzipReader *gzip.Reader, destFolder string) error {
+	// make sure the folder exist
+	_ = os.MkdirAll(destFolder, 0750)
+
+	// Check the tar structure to determine whether to remove the top-level folder
+	gzipContent, err := io.ReadAll(gzipReader)
+	if err != nil {
+		return err
+	}
+	tarReader := tar.NewReader(bytes.NewBuffer(gzipContent))
+	removeTopLevelFolder, err := shouldRemoveTopLevelFolder(tarReader)
+	if err != nil {
+		return err
+	}
+
+	tarReader = tar.NewReader(bytes.NewBuffer(gzipContent))
+	for {
+		header, err := tarReader.Next()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("error reading tar entry: %w", err)
+		}
+		if strings.Contains(header.Name, "..") {
+			continue
+		}
+
+		pathParts := strings.Split(header.Name, string(filepath.Separator))
+		var relPath string
+		if removeTopLevelFolder && len(pathParts) > 1 {
+			relPath = filepath.Join(pathParts[1:]...)
+		} else {
+			relPath = filepath.Join(pathParts...)
+		}
+		if strings.HasPrefix(relPath, "._") {
+			continue
+		}
+		targetPath := filepath.Join(destFolder, relPath)
+		targetPath, _ = filepath.Abs(targetPath)
+		switch header.Typeflag {
+		case tar.TypeDir:
+			if err := os.MkdirAll(targetPath, 0750); err != nil {
+				return fmt.Errorf("error creating directory: %w", err)
+			}
+		case tar.TypeReg:
+
+			//nolint:gosec
+			outFile, err := os.Create(targetPath)
+			if err != nil {
+				return fmt.Errorf("error creating file: %w", err)
+			}
+			for {
+				_, err := io.CopyN(outFile, tarReader, 1024)
+				if err != nil {
+					if errors.Is(err, io.EOF) {
+						break
+					}
+					_ = outFile.Close()
+					return fmt.Errorf("error writing file: %w", err)
+				}
+			}
+			_ = outFile.Close()
+		}
+	}
+	return nil
+}
+
+func downloadAndDecompressTarGz(ctx context.Context, url, destFolder string, opts *common.HTTPOption) error {
+	resp, err := common.HTTPGetResponse(ctx, url, opts)
+	if err != nil {
+		return err
+	}
+	//nolint:errcheck
+	defer resp.Body.Close()
+
+	gzipReader, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return fmt.Errorf("error creating gzip reader: %w", err)
+	}
+	// nolint:errcheck
+	defer gzipReader.Close()
+
+	return decompressTarGzTo(gzipReader, destFolder)
 }
 
 // DisablePlugin disable plugin

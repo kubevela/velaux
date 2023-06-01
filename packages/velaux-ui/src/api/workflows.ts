@@ -1,4 +1,4 @@
-import type { UpdateWorkflowRequest } from '../interface/application';
+import type { UpdateWorkflowRequest } from '@velaux/data';
 import { getDomain } from '../utils/common';
 
 import { application, definition } from './productionLink';

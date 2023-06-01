@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { If } from '../../../../components/If';
 import Item from '../../../../components/Item';
 import Permission from '../../../../components/Permission';
-import type { ApplicationDetail, ApplicationPolicyBase, EnvBinding } from '../../../../interface/application';
+import type { ApplicationDetail, ApplicationPolicyBase, EnvBinding } from '@velaux/data';
 import { beautifyTime, momentDate } from '../../../../utils/common';
 import './index.less';
 import Empty from '../../../../components/Empty';

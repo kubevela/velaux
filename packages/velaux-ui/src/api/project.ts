@@ -7,7 +7,7 @@ import type {
   ProjectRole,
   ProjectUserCreate,
   ProjectUserQuery,
-} from '../interface/project';
+} from '@velaux/data';
 import { getDomain } from '../utils/common';
 
 import { project_mock } from './devLink';

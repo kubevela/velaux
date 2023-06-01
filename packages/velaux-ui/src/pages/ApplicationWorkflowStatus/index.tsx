@@ -18,13 +18,12 @@ import type {
   Workflow,
   WorkflowRecord,
   WorkflowStepStatus,
-} from '../../interface/application';
-import type { WorkflowStepBase } from '../../interface/pipeline';
+ WorkflowStepBase } from '@velaux/data';
 import { beautifyTime } from '../../utils/common';
 import { locale } from '../../utils/locale';
 
 import ApplicationWorkflowRecord from './components/WorkflowRecord';
-import { LoginUserInfo } from '../../interface/user';
+import { LoginUserInfo } from '@velaux/data';
 
 const { Row, Col } = Grid;
 
