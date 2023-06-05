@@ -23,7 +23,8 @@ import type {
   EnvBinding,
   UpdatePolicyRequest,
   Workflow,
- DefinitionBase } from '@velaux/data';
+  DefinitionBase
+} from '@velaux/data';
 
 import './index.less';
 import classNames from 'classnames';
@@ -484,8 +485,10 @@ class PolicyDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const showType = (selectedPolicyItem && selectedPolicyItem?.name == 'custom') || policy != undefined;
     const span = showType ? 8 : 12;
-    const usePlugin = selectedPolicyItem && plugins.find(o => o?.id === selectedPolicyItem?.type + "-policy");
+
     const plugin = plugins.find(o => o?.id === selectedPolicyItem?.type + "-policy");
+    const usePlugin = selectedPolicyItem && plugin;
+
     return (
       <DrawerWithFooter
         title={policy ? i18n.t('Update Policy') : i18n.t('New Policy')}
@@ -711,14 +714,18 @@ class PolicyDialog extends React.Component<Props, State> {
                     />
                   </If>
                   <If condition={usePlugin}>
-                    <PluginRoot pluginId={plugin?.id} project={project} {...init(`properties`, {
-                      rules: [
-                        {
-                          validator: validator,
-                          message: i18n.t('Please check the properties of this policy'),
-                        },
-                      ],
-                    })} ref={this.uiSchemaRef} />
+                    <PluginRoot
+                      pluginId={plugin ? plugin.id : ""}
+                      project={project}
+                      {...init(`properties`, {
+                        rules: [
+                          {
+                            validator: validator,
+                            message: i18n.t('Please check the properties of this policy'),
+                          },
+                        ],
+                      })}
+                      ref={this.uiSchemaRef} />
                   </If>
                 </Form.Item>
                 <If condition={!policyDefinitionDetail}>

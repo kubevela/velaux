@@ -1,10 +1,27 @@
-import { DefinitionPlugin, DefinitionRootProps } from '@velaux/data';
+import { DefinitionPlugin } from '@velaux/data';
 import * as React from 'react';
 import { Translation } from '../../components/Translation';
 import { getPluginSrv, importDefinitionPlugin } from '../../services/PluginService';
 
+interface Props {
+  pluginId: string;
 
-function PluginRootFunction({ pluginId, ...rest }: DefinitionRootProps, ref) {
+  project?: string;
+
+  // form props
+  "data-meta"?: string;
+
+  id: string;
+
+  onChange: Function;
+
+  value?: any;
+
+  ref: React.ForwardedRef<any>
+}
+
+
+function PluginRootFunction({ pluginId, ...rest }: Props) {
   const [app, setApp] = React.useState<DefinitionPlugin>();
   React.useEffect(() => {
     loadDefinitionPlugin(pluginId, setApp);
@@ -19,7 +36,7 @@ function PluginRootFunction({ pluginId, ...rest }: DefinitionRootProps, ref) {
 
   return (
     <div>
-      <app.root meta={app.meta} {...rest} ref={ref} />
+      <app.root meta={app.meta} {...rest} />
     </div>
   );
 }
@@ -30,7 +47,7 @@ async function loadDefinitionPlugin(
   setApp: React.Dispatch<React.SetStateAction<DefinitionPlugin | undefined>>
 ) {
   try {
-    const pluginInfo = await getPluginSrv().loadPlugin(pluginId);
+    const pluginInfo = await getPluginSrv().loadMeta(pluginId);
     if (pluginInfo) {
       importDefinitionPlugin(pluginInfo)
         .then((definitionPlugin) => {

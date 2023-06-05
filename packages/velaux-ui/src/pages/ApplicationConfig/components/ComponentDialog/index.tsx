@@ -335,9 +335,9 @@ class ComponentDialog extends React.Component<Props, State> {
     };
 
     const componentType: string = this.field.getValue('componentType') || '';
-    const usePlugin = componentType && plugins.find(o => o?.id === componentType + "-component");
     const plugin = plugins.find(o => o?.id === componentType + "-component");
-
+    const usePlugin = componentType && plugin;
+   
     return (
       <DrawerWithFooter
         title={this.showComponentTitle()}
@@ -519,14 +519,18 @@ class ComponentDialog extends React.Component<Props, State> {
                 />
               </If>
               <If condition={usePlugin}>
-                <PluginRoot pluginId={plugin?.id} project={project} {...init(`properties`, {
-                  rules: [
-                    {
-                      validator: validator,
-                      message: i18n.t('Please check the component properties'),
-                    },
-                  ],
-                })} ref={this.uiSchemaRef} />
+                <PluginRoot
+                  pluginId={plugin ? plugin.id : ""}
+                  project={project}
+                  {...init(`properties`, {
+                    rules: [
+                      {
+                        validator: validator,
+                        message: i18n.t('Please check the component properties'),
+                      },
+                    ],
+                  })}
+                  ref={this.uiSchemaRef} />
               </If>
             </Row>
           </Card>

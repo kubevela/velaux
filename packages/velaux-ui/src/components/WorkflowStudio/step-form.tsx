@@ -10,7 +10,7 @@ import Group from '../../extends/Group';
 import './index.less';
 import { StepSelect } from '../../extends/StepSelect';
 import i18n from '../../i18n';
-import type { DefinitionDetail , WorkflowStepBase } from '@velaux/data';
+import type { DefinitionDetail, WorkflowStepBase } from '@velaux/data';
 import { replaceUrl } from '../../utils/common';
 import DrawerWithFooter from '../Drawer';
 import { If } from '../If';
@@ -70,7 +70,7 @@ class StepForm extends Component<Props, State> {
     this.loadDefinitionPlugins(type);
   };
 
-  loadDefinitionPlugins = (type) => {
+  loadDefinitionPlugins = (type: string) => {
     return getPluginSrv()
       .listDefinitionPlugins()
       .then((plugins) => {
@@ -211,14 +211,17 @@ class StepForm extends Component<Props, State> {
                     </FormItem>
                   </If>
                   <If condition={plugin}>
-                    <PluginRoot pluginId={plugin?.id} {...init(`properties`, {
-                      rules: [
-                        {
-                          validator: validator,
-                          message: i18n.t('Please check the properties of this workflow step'),
-                        },
-                      ],
-                    })} ref={this.uiSchemaRef} />
+                    <PluginRoot
+                      pluginId={plugin ? plugin?.id : ""}
+                      {...init(`properties`, {
+                        rules: [
+                          {
+                            validator: validator,
+                            message: i18n.t('Please check the properties of this workflow step'),
+                          },
+                        ],
+                      })}
+                      ref={this.uiSchemaRef} />
                   </If>
                 </Group>
               </Col>

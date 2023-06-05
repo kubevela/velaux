@@ -1,5 +1,5 @@
 import { ComponentType } from 'react';
-import { PluginMeta, VelaUXPlugin } from '.';
+import { PluginMeta, VelaUXPlugin } from './types';
 import { KeyValue } from '../types/data';
 
 
@@ -10,24 +10,22 @@ export interface DefinitionPluginMeta<T extends KeyValue = KeyValue> extends Plu
 export interface DefinitionRootProps<T extends KeyValue = KeyValue> {
   meta: DefinitionPluginMeta<T>;
  
-  pluginId: string;
-
   project?: string;
 
   // form props
-  "data-meta": string;
+  "data-meta"?: string;
 
   id: string;
 
   onChange: Function;
 
-  value: any;
+  value?: any;
 
   ref: any;
 }
 
 export class DefinitionPlugin<T extends KeyValue = KeyValue> extends VelaUXPlugin<DefinitionPluginMeta<T>> {
-  // Content under: /a/${plugin-id}/*
+  // Content in plugin*
   root?: ComponentType<DefinitionRootProps<T>>;
 
   /**
@@ -38,11 +36,9 @@ export class DefinitionPlugin<T extends KeyValue = KeyValue> extends VelaUXPlugi
   init(meta: DefinitionPluginMeta) {}
 
   /**
-   * Set the component displayed under:
-   *   /a/${plugin-id}/*
+   * Set the component displayed*
    *
-   * If the NavModel is configured, the page will have a managed frame, otheriwse it has full control.
-   */
+   * */
   setRootPage(root: ComponentType<DefinitionRootProps<T>>) {
     this.root = root;
     return this;

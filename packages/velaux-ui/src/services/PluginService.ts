@@ -7,7 +7,7 @@ import _ from 'lodash'; // eslint-disable-line lodash/import-scope
 import moment from 'moment'; // eslint-disable-line no-restricted-imports
 import react from 'react';
 import * as velauxData from '@velaux/data'; // eslint-disable-line no-restricted-imports
-import { AppPagePlugin, PluginLink, PluginMeta, PluginType, DefinitionPlugin } from '@velaux/data';
+import { AppPagePlugin, PluginMeta, PluginType, DefinitionPlugin } from '@velaux/data';
 import * as velauxUI from '../types'; // eslint-disable-line no-restricted-imports
 import * as ReactDom from 'react-dom';
 import * as DvaRouter from 'dva/router';
@@ -95,9 +95,10 @@ export function importDefinitionPlugin(meta: PluginMeta): Promise<DefinitionPlug
  */
 export interface PluginService {
   listAppPagePlugins(): Promise<PluginMeta[]>;
+
   listDefinitionPlugins(): Promise<PluginMeta[]>;
 
-  loadMeta(pluginID: string): Promise<PluginMeta | PluginLink>;
+  loadMeta(pluginID: string): Promise<PluginMeta>;
 }
 
 /** @internal */

@@ -12,7 +12,7 @@ import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
-import type { ApplicationComponent, DefinitionDetail, Trait , DefinitionBase } from '@velaux/data';
+import type { ApplicationComponent, DefinitionDetail, Trait, DefinitionBase } from '@velaux/data';
 
 import { PluginRoot } from '../../../../components/Plugin';
 import { PluginMeta } from '@velaux/data';
@@ -294,11 +294,11 @@ class TraitDialog extends React.Component<Props, State> {
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
+
     const traitType: string = this.field.getValue('type');
-
-    const usePlugin = traitType && plugins.find(o => o?.id === traitType + "-trait");
     const plugin = plugins.find(o => o?.id === traitType + "-trait");
-
+    const usePlugin = traitType && plugin;
+   
     return (
       <DrawerWithFooter
         title={this.showTraitTitle()}
@@ -439,14 +439,18 @@ class TraitDialog extends React.Component<Props, State> {
                         />
                       </If>
                       <If condition={usePlugin}>
-                        <PluginRoot pluginId={plugin?.id} project={project} {...init(`properties`, {
-                          rules: [
-                            {
-                              validator: validator,
-                              message: i18n.t('Please check trait deploy properties'),
-                            },
-                          ],
-                        })} ref={this.uiSchemaRef} />
+                        <PluginRoot
+                          pluginId={plugin ? plugin.id : ""}
+                          project={project}
+                          {...init(`properties`, {
+                            rules: [
+                              {
+                                validator: validator,
+                                message: i18n.t('Please check trait deploy properties'),
+                              },
+                            ],
+                          })}
+                          ref={this.uiSchemaRef} />
                       </If>
                     </FormItem>
                   </If>
