@@ -7,7 +7,7 @@ import _ from 'lodash'; // eslint-disable-line lodash/import-scope
 import moment from 'moment'; // eslint-disable-line no-restricted-imports
 import react from 'react';
 import * as velauxData from '@velaux/data'; // eslint-disable-line no-restricted-imports
-import { AppPagePlugin, PluginMeta, PluginType, DefinitionPlugin } from '@velaux/data';
+import { AppPagePlugin, PluginMeta, PluginType } from '@velaux/data';
 import * as velauxUI from '../types'; // eslint-disable-line no-restricted-imports
 import * as ReactDom from 'react-dom';
 import * as DvaRouter from 'dva/router';
@@ -80,23 +80,12 @@ export function importAppPagePlugin(meta: PluginMeta): Promise<AppPagePlugin> {
   });
 }
 
-export function importDefinitionPlugin(meta: PluginMeta): Promise<DefinitionPlugin> {
-  return importPluginModule(meta.module, meta.info?.version).then((pluginExports) => {
-    const plugin = pluginExports.plugin ? (pluginExports.plugin as DefinitionPlugin) : new DefinitionPlugin();
-    plugin.init(meta);
-    plugin.meta = meta;
-    return plugin;
-  });
-}
-
 /**
  * @public
  * A wrapper to generate the menu configs
  */
 export interface PluginService {
-  listAppPagePlugins(): Promise<PluginMeta[]>;
-
-  listDefinitionPlugins(): Promise<PluginMeta[]>;
+  listAppPagePlugins(type: PluginType): Promise<PluginMeta[]>;
 
   loadMeta(pluginID: string): Promise<PluginMeta>;
 }
@@ -106,24 +95,13 @@ export class PluginWrapper implements PluginService {
   constructor() {
   }
 
-  listAppPagePlugins(): Promise<PluginMeta[]> {
+  listAppPagePlugins(type = PluginType.PageApp): Promise<PluginMeta[]> {
     return getBackendSrv()
       .get('/api/v1/plugins')
       .then((res: any) => {
         if (res) {
           const plugins = res.plugins ? (res.plugins as PluginMeta[]) : [];
-          return Promise.resolve(plugins.filter((p) => p.type === PluginType.PageApp));
-        }
-        return Promise.reject(new Error('Unknown Plugins'));
-      });
-  }
-  listDefinitionPlugins(): Promise<PluginMeta[]> {
-    return getBackendSrv()
-      .get('/api/v1/plugins')
-      .then((res: any) => {
-        if (res) {
-          const plugins = res.plugins ? (res.plugins as PluginMeta[]) : [];
-          return Promise.resolve(plugins.filter((p) => p.type === PluginType.Definition));
+          return Promise.resolve(plugins.filter((p) => p.type === type));
         }
         return Promise.reject(new Error('Unknown Plugins'));
       });

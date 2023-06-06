@@ -11,7 +11,20 @@ export interface AppRootProps<T extends KeyValue = KeyValue> {
   /**
    * base URL segment for an app, /app/pluginId
    */
-  basename: string; // The URL path to this page
+  basename?: string; // The URL path to this page
+
+  project?: string;
+
+  // form props
+  "data-meta"?: string;
+
+  id?: string;
+
+  onChange?: Function;
+
+  value?: any;
+
+  ref: any;
 }
 
 export class AppPagePlugin<T extends KeyValue = KeyValue> extends VelaUXPlugin<AppPluginMeta<T>> {

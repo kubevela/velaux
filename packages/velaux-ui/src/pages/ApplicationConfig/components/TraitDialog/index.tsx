@@ -14,8 +14,8 @@ import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
 import type { ApplicationComponent, DefinitionDetail, Trait, DefinitionBase } from '@velaux/data';
 
-import { PluginRoot } from '../../../../components/Plugin';
-import { PluginMeta } from '@velaux/data';
+import { DefinitinPluginRoot } from '../../../../layout/AppRootPage';
+import { PluginMeta, PluginType } from '@velaux/data';
 import { getPluginSrv } from '../../../../services/PluginService';
 
 type Props = {
@@ -90,7 +90,7 @@ class TraitDialog extends React.Component<Props, State> {
 
   loadDefinitionPlugins = () => {
     return getPluginSrv()
-      .listDefinitionPlugins()
+      .listAppPagePlugins(PluginType.Definition)
       .then((plugins) => {
         this.setState({
           plugins: plugins
@@ -439,7 +439,7 @@ class TraitDialog extends React.Component<Props, State> {
                         />
                       </If>
                       <If condition={usePlugin}>
-                        <PluginRoot
+                        <DefinitinPluginRoot
                           pluginId={plugin ? plugin.id : ""}
                           project={project}
                           {...init(`properties`, {

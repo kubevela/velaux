@@ -26,8 +26,8 @@ import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { transComponentDefinitions } from '../../../../utils/utils';
 
-import { PluginRoot } from '../../../../components/Plugin';
-import { PluginMeta } from '@velaux/data';
+import { DefinitinPluginRoot } from '../../../../layout/AppRootPage';
+import { PluginMeta, PluginType } from '@velaux/data';
 import { getPluginSrv } from '../../../../services/PluginService';
 
 import './index.less';
@@ -111,7 +111,7 @@ class ComponentDialog extends React.Component<Props, State> {
 
   loadDefinitionPlugins = () => {
     return getPluginSrv()
-      .listDefinitionPlugins()
+      .listAppPagePlugins(PluginType.Definition)
       .then((plugins) => {
         this.setState({
           plugins: plugins
@@ -337,7 +337,7 @@ class ComponentDialog extends React.Component<Props, State> {
     const componentType: string = this.field.getValue('componentType') || '';
     const plugin = plugins.find(o => o?.id === componentType + "-component");
     const usePlugin = componentType && plugin;
-   
+
     return (
       <DrawerWithFooter
         title={this.showComponentTitle()}
@@ -519,7 +519,7 @@ class ComponentDialog extends React.Component<Props, State> {
                 />
               </If>
               <If condition={usePlugin}>
-                <PluginRoot
+                <DefinitinPluginRoot
                   pluginId={plugin ? plugin.id : ""}
                   project={project}
                   {...init(`properties`, {

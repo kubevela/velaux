@@ -32,9 +32,9 @@ import classNames from 'classnames';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import UISchema from '../../../../components/UISchema';
-import { PluginRoot } from '../../../../components/Plugin';
-import { PluginMeta } from '@velaux/data';
+import { PluginMeta, PluginType } from '@velaux/data';
 import { getPluginSrv } from '../../../../services/PluginService';
+import { DefinitinPluginRoot } from '../../../../layout/AppRootPage';
 
 import type { Rule } from '@alifd/next/lib/field';
 import { connect } from 'dva';
@@ -204,7 +204,7 @@ class PolicyDialog extends React.Component<Props, State> {
 
   loadDefinitionPlugins = () => {
     return getPluginSrv()
-      .listDefinitionPlugins()
+      .listAppPagePlugins(PluginType.Definition)
       .then((plugins) => {
         this.setState({
           plugins: plugins
@@ -714,7 +714,7 @@ class PolicyDialog extends React.Component<Props, State> {
                     />
                   </If>
                   <If condition={usePlugin}>
-                    <PluginRoot
+                    <DefinitinPluginRoot
                       pluginId={plugin ? plugin.id : ""}
                       project={project}
                       {...init(`properties`, {

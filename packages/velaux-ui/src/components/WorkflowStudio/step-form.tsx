@@ -17,8 +17,8 @@ import { If } from '../If';
 import { Translation } from '../Translation';
 import UISchema from '../UISchema';
 
-import { PluginRoot } from '../../components/Plugin';
-import { PluginMeta } from '@velaux/data';
+import {  DefinitinPluginRoot } from '../../layout/AppRootPage';
+import { PluginMeta, PluginType } from '@velaux/data';
 import { getPluginSrv } from '../../services/PluginService';
 
 import { InputItems } from './input-item';
@@ -72,7 +72,7 @@ class StepForm extends Component<Props, State> {
 
   loadDefinitionPlugins = (type: string) => {
     return getPluginSrv()
-      .listDefinitionPlugins()
+      .listAppPagePlugins( PluginType.Definition)
       .then((plugins) => {
         const plugin = plugins.find(o => o?.id === type + "-workflowstep");
         this.setState({
@@ -211,7 +211,7 @@ class StepForm extends Component<Props, State> {
                     </FormItem>
                   </If>
                   <If condition={plugin}>
-                    <PluginRoot
+                    <DefinitinPluginRoot
                       pluginId={plugin ? plugin?.id : ""}
                       {...init(`properties`, {
                         rules: [
