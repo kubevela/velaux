@@ -16,12 +16,10 @@ interface Props {
   onChange: Function;
 
   value?: any;
-
-  ref: React.ForwardedRef<any>
 }
 
 
-function PluginRootFunction({ pluginId, ...rest }: Props) {
+function PluginRootFunction({ pluginId, ...rest }: Props, ref: React.ForwardedRef<any>) {
   const [app, setApp] = React.useState<DefinitionPlugin>();
   React.useEffect(() => {
     loadDefinitionPlugin(pluginId, setApp);
@@ -36,7 +34,7 @@ function PluginRootFunction({ pluginId, ...rest }: Props) {
 
   return (
     <div>
-      <app.root meta={app.meta} {...rest} />
+      <app.root meta={app.meta} {...rest} ref={ref}/>
     </div>
   );
 }
