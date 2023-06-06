@@ -127,7 +127,7 @@ class TriggerList extends Component<Props, State> {
       let body;
       for (let key in customTriggerBody) {
         if(key == customTriggerType) {
-          body = customTriggerBody[customTriggerType];
+          body = customTriggerBody[key];
         }
       }
       command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL} -d '${JSON.stringify(body)}'`;
