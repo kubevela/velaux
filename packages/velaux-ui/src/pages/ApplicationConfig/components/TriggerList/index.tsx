@@ -124,12 +124,7 @@ class TriggerList extends Component<Props, State> {
           step : 'suspend'
         }
       }
-      let body;
-      for (let key in customTriggerBody) {
-        if(key == customTriggerType) {
-          body = customTriggerBody[key];
-        }
-      }
+      let body =  customTriggerType ? customTriggerBody[customTriggerType] : " ";
       command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL} -d '${JSON.stringify(body)}'`;
     }
 
@@ -299,12 +294,7 @@ class TriggerList extends Component<Props, State> {
                 />
               </Col>
             </Row>
-            <Row>
-              <Tab size="small" shape="capsule">
-              {(customTriggerTypes).map((item: string) => (
-                  <Tab.Item onClick={()=>{this.handleCustomTriggerTab(item)}} key={item} title={item}>
-                  <Col span={24} className="curlCode">
-                  <h4>
+            <h4>
                     <Translation>Curl Command</Translation>
                     <CopyToClipboard
                       onCopy={() => {
@@ -315,6 +305,11 @@ class TriggerList extends Component<Props, State> {
                       {copy}
                     </CopyToClipboard>
                   </h4>
+            <Row>
+              <Tab size="small" shape="wrapped">
+              {(customTriggerTypes).map((item: string) => (
+                  <Tab.Item className="justify-tabs-tab" onClick={()=>{this.handleCustomTriggerTab(item)}} key={item} title={item}>
+                  <Col span={24} className="curlCode">
                   <code>{command}</code>
                   <span>
                     <Translation>Please set the properties that need to be changed, such as `image`, `step`.</Translation>
