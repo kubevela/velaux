@@ -97,7 +97,7 @@ class TriggerList extends Component<Props, State> {
     let command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL}`;
 
     if (showTrigger?.payloadType == 'custom' && component) {
-      const customTriggerBody: {[x:string]:Object} = {
+      const customTriggerBody: {[x: string]: Object} = {
         execute: {
           action: 'execute',
           upgrade: {
