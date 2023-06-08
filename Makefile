@@ -1,3 +1,6 @@
+include makefiles/const.mk
+include makefiles/build.mk
+
 GOLANGCILINT_VERSION ?= 1.49.0
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
