@@ -1,4 +1,4 @@
-import { Card, Dialog, Grid, Message } from '@alifd/next';
+import { Card, Dialog, Grid, Message , Tab } from '@alifd/next';
 import React, { Component } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
@@ -32,7 +32,9 @@ type Props = {
 type State = {
   showTrigger?: Trigger;
   component?: ApplicationComponent;
+  customTriggerType?: string;
 };
+
 class TriggerList extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -49,6 +51,7 @@ class TriggerList extends Component<Props, State> {
     const { components } = this.props;
     this.loadComponentDetail(trigger.componentName || (components.length > 0 ? components[0].name : ''));
     this.setState({ showTrigger: trigger });
+    this.setState({ customTriggerType: 'execute' });
   };
 
   loadComponentDetail = (componentName: string) => {
@@ -79,31 +82,52 @@ class TriggerList extends Component<Props, State> {
     });
   };
 
+  handleCustomTriggerTab = (token: string) => {
+    this.setState({ customTriggerType: token });
+  }
+
   render() {
     const { Row, Col } = Grid;
     const { triggers, applicationDetail } = this.props;
 
-    const { showTrigger, component } = this.state;
+    const { showTrigger, component, customTriggerType } = this.state;
 
     const domain = `${window.location.protocol}//${window.location.host}`;
     const webHookURL = `${domain}/api/v1/webhook/${showTrigger?.token}`;
     let command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL}`;
 
     if (showTrigger?.payloadType == 'custom' && component) {
-      const body = {
-        upgrade: {
-          [component.name]: {
-            image: component.properties && component.properties.image,
+      const customTriggerBody: {[x: string]: Object} = {
+        execute: {
+          action: 'execute',
+          upgrade: {
+            [component.name]: {
+              image: component.properties && component.properties.image,
+            },
+          },
+          codeInfo: {
+            commit: '',
+            branch: '',
+            user: '',
           },
         },
-        codeInfo: {
-          commit: '',
-          branch: '',
-          user: '',
+        approve:{
+          action: 'approve',
+          step : 'suspend'
         },
-      };
+        terminate:{
+          action: 'terminate',
+          step : 'suspend'
+        },
+        rollback :{
+          action: 'rollback',
+          step : 'suspend'
+        }
+      }
+      let body =  customTriggerType ? customTriggerBody[customTriggerType] : " ";
       command = `curl -X POST -H 'content-type: application/json' --url ${webHookURL} -d '${JSON.stringify(body)}'`;
     }
+
     const copy = (
       <span style={{ lineHeight: '16px', marginLeft: '8px' }}>
         <svg
@@ -129,6 +153,7 @@ class TriggerList extends Component<Props, State> {
         </svg>
       </span>
     );
+    const customTriggerTypes = ['execute', 'approve', 'terminate', 'rollback'];
     const projectName = applicationDetail && applicationDetail.project?.name;
     return (
       <div className="list-warper">
@@ -269,24 +294,31 @@ class TriggerList extends Component<Props, State> {
                 />
               </Col>
             </Row>
+            <h4>
+                    <Translation>Curl Command</Translation>
+                    <CopyToClipboard
+                      onCopy={() => {
+                        Message.success('Copy successfully');
+                      }}
+                      text={command}
+                    >
+                      {copy}
+                    </CopyToClipboard>
+                  </h4>
             <Row>
-              <Col span={24} className="curlCode">
-                <h4>
-                  <Translation>Curl Command</Translation>
-                  <CopyToClipboard
-                    onCopy={() => {
-                      Message.success('Copy successfully');
-                    }}
-                    text={command}
-                  >
-                    {copy}
-                  </CopyToClipboard>
-                </h4>
-                <code>{command}</code>
-                <span>
-                  <Translation>Please set the properties that need to be changed, such as `image`</Translation>
-                </span>
-              </Col>
+              <Tab size="small" shape="wrapped">
+              {(customTriggerTypes).map((item: string) => (
+                  <Tab.Item className="justify-tabs-tab" onClick={()=>{this.handleCustomTriggerTab(item)}} key={item} title={item}>
+                  <Col span={24} className="curlCode">
+                  <code>{command}</code>
+                  <span>
+                    <Translation>Please set the properties that need to be changed, such as `image`, `step`.</Translation>
+                    <Message type='notice'> If action is not provided then it will by default execute the workflow.</Message>
+                  </span>
+                </Col>
+                  </Tab.Item>
+              ))}
+              </Tab>
             </Row>
           </Dialog>
         </If>
