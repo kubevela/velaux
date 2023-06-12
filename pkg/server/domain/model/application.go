@@ -33,13 +33,13 @@ func init() {
 // Application application delivery model
 type Application struct {
 	BaseModel
-	Name        string            `json:"name"`
+	Name        string            `json:"name" gorm:"primaryKey"`
 	Alias       string            `json:"alias"`
 	Project     string            `json:"project"`
 	Description string            `json:"description"`
 	Icon        string            `json:"icon"`
-	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
+	Labels      map[string]string `json:"labels,omitempty" gorm:"serializer:json"`
+	Annotations map[string]string `json:"annotations,omitempty" gorm:"serializer:json"`
 }
 
 // TableName return custom table name
@@ -117,27 +117,27 @@ type ComponentSelector struct {
 // ApplicationComponent component database model
 type ApplicationComponent struct {
 	BaseModel
-	AppPrimaryKey string            `json:"appPrimaryKey"`
+	AppPrimaryKey string            `json:"appPrimaryKey" gorm:"primaryKey"`
 	Description   string            `json:"description,omitempty"`
-	Labels        map[string]string `json:"labels,omitempty"`
+	Labels        map[string]string `json:"labels,omitempty" gorm:"serializer:json"`
 	Icon          string            `json:"icon,omitempty"`
 	Creator       string            `json:"creator"`
-	Name          string            `json:"name"`
+	Name          string            `json:"name" gorm:"primaryKey"`
 	Alias         string            `json:"alias"`
 	Type          string            `json:"type"`
 	Main          bool              `json:"main"`
 	// ExternalRevision specified the component revisionName
 	ExternalRevision string                       `json:"externalRevision,omitempty"`
-	Properties       *JSONStruct                  `json:"properties,omitempty"`
-	DependsOn        []string                     `json:"dependsOn,omitempty"`
-	Inputs           workflowv1alpha1.StepInputs  `json:"inputs,omitempty"`
-	Outputs          workflowv1alpha1.StepOutputs `json:"outputs,omitempty"`
+	Properties       *JSONStruct                  `json:"properties,omitempty" gorm:"serializer:json"`
+	DependsOn        []string                     `json:"dependsOn,omitempty" gorm:"serializer:json"`
+	Inputs           workflowv1alpha1.StepInputs  `json:"inputs,omitempty" gorm:"serializer:json"`
+	Outputs          workflowv1alpha1.StepOutputs `json:"outputs,omitempty" gorm:"serializer:json"`
 	// Traits define the trait of one component, the type must be array to keep the order.
-	Traits []ApplicationTrait `json:"traits,omitempty"`
+	Traits []ApplicationTrait `json:"traits,omitempty" gorm:"serializer:json"`
 	// scopes in ApplicationComponent defines the component-level scopes
 	// the format is <scope-type:scope-instance-name> pairs, the key represents type of `ScopeDefinition` while the value represent the name of scope instance.
-	Scopes       map[string]string             `json:"scopes,omitempty"`
-	WorkloadType common.WorkloadTypeDescriptor `json:"workloadType,omitempty"`
+	Scopes       map[string]string             `json:"scopes,omitempty" gorm:"serializer:json"`
+	WorkloadType common.WorkloadTypeDescriptor `json:"workloadType,omitempty" gorm:"serializer:json"`
 }
 
 // TableName return custom table name
@@ -176,13 +176,13 @@ func (a *ApplicationComponent) Index() map[string]interface{} {
 // ApplicationPolicy app policy
 type ApplicationPolicy struct {
 	BaseModel
-	AppPrimaryKey string      `json:"appPrimaryKey"`
-	Name          string      `json:"name"`
+	AppPrimaryKey string      `json:"appPrimaryKey" gorm:"primaryKey"`
+	Name          string      `json:"name" gorm:"primaryKey"`
 	Alias         string      `json:"alias"`
 	Description   string      `json:"description"`
 	Type          string      `json:"type"`
 	Creator       string      `json:"creator"`
-	Properties    *JSONStruct `json:"properties,omitempty"`
+	Properties    *JSONStruct `json:"properties,omitempty" gorm:"serializer:json"`
 	// EnvName if it is not empty, the policy is only belong to this environment
 	// For auto created policies, this field will be assigned a value
 	EnvName string `json:"envName"`
@@ -226,7 +226,7 @@ type ApplicationTrait struct {
 	Alias       string      `json:"alias"`
 	Description string      `json:"description"`
 	Type        string      `json:"type"`
-	Properties  *JSONStruct `json:"properties,omitempty"`
+	Properties  *JSONStruct `json:"properties,omitempty" gorm:"serializer:json"`
 	CreateTime  time.Time   `json:"createTime"`
 	UpdateTime  time.Time   `json:"updateTime"`
 }
@@ -255,8 +255,8 @@ var WorkflowStepPhaseStopped workflowv1alpha1.WorkflowStepPhase = "stopped"
 // ApplicationRevision be created when an application initiates deployment and describes the phased version of the application.
 type ApplicationRevision struct {
 	BaseModel
-	AppPrimaryKey   string `json:"appPrimaryKey"`
-	Version         string `json:"version"`
+	AppPrimaryKey   string `json:"appPrimaryKey" gorm:"primaryKey"`
+	Version         string `json:"version" gorm:"primaryKey"`
 	RollbackVersion string `json:"rollbackVersion,omitempty"`
 	// ApplyAppConfig Stores the application configuration during the current deploy.
 	ApplyAppConfig string `json:"applyAppConfig,omitempty"`
@@ -281,9 +281,9 @@ type ApplicationRevision struct {
 	// EnvName is the env name of this application revision
 	EnvName string `json:"envName"`
 	// CodeInfo is the code info of this application revision
-	CodeInfo *CodeInfo `json:"codeInfo,omitempty"`
+	CodeInfo *CodeInfo `json:"codeInfo,omitempty" gorm:"serializer:json"`
 	// ImageInfo is the image info of this application revision
-	ImageInfo *ImageInfo `json:"imageInfo,omitempty"`
+	ImageInfo *ImageInfo `json:"imageInfo,omitempty" gorm:"serializer:json"`
 }
 
 // CodeInfo is the code info for webhook request
@@ -384,7 +384,7 @@ type ApplicationTrigger struct {
 	Name          string `json:"name"`
 	Alias         string `json:"alias,omitempty"`
 	Description   string `json:"description,omitempty"`
-	Token         string `json:"token"`
+	Token         string `json:"token" gorm:"primaryKey"`
 	Type          string `json:"type"`
 	PayloadType   string `json:"payloadType"`
 	ComponentName string `json:"componentName"`

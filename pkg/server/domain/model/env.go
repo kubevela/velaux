@@ -23,7 +23,7 @@ func init() {
 // Env models the data of env in database
 type Env struct {
 	BaseModel
-	Name        string `json:"name"`
+	Name        string `json:"name" gorm:"primaryKey"`
 	Alias       string `json:"alias"`
 	Description string `json:"description,omitempty"`
 
@@ -34,7 +34,7 @@ type Env struct {
 
 	// Targets defines the name of delivery target that belongs to this env
 	// In one project, a delivery target can only belong to one env.
-	Targets []string `json:"targets,omitempty"`
+	Targets []string `json:"targets,omitempty" gorm:"serializer:json"`
 }
 
 // TableName return custom table name

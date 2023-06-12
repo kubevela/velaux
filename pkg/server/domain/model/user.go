@@ -47,7 +47,7 @@ type User struct {
 	Disabled      bool      `json:"disabled"`
 	LastLoginTime time.Time `json:"lastLoginTime,omitempty"`
 	// UserRoles binding the platform level roles
-	UserRoles []string `json:"userRoles"`
+	UserRoles []string `json:"userRoles" gorm:"serializer:json"`
 	DexSub    string   `json:"dexSub,omitempty"`
 }
 
@@ -97,7 +97,7 @@ type ProjectUser struct {
 	Username    string `json:"username"`
 	ProjectName string `json:"projectName"`
 	// UserRoles binding the project level roles
-	UserRoles []string `json:"userRoles"`
+	UserRoles []string `json:"userRoles" gorm:"serializer:json"`
 }
 
 // TableName return custom table name
@@ -140,7 +140,7 @@ type Role struct {
 	Name        string   `json:"name"`
 	Alias       string   `json:"alias"`
 	Project     string   `json:"project,omitempty"`
-	Permissions []string `json:"permissions"`
+	Permissions []string `json:"permissions" gorm:"serializer:json"`
 }
 
 // Permission is a model for a new RBAC mode.
@@ -149,12 +149,12 @@ type Permission struct {
 	Name      string   `json:"name"`
 	Alias     string   `json:"alias"`
 	Project   string   `json:"project,omitempty"`
-	Resources []string `json:"resources"`
-	Actions   []string `json:"actions"`
+	Resources []string `json:"resources" gorm:"serializer:json"`
+	Actions   []string `json:"actions" gorm:"serializer:json"`
 	// Effect option values: Allow,Deny
 	Effect    string     `json:"effect"`
-	Principal *Principal `json:"principal,omitempty"`
-	Condition *Condition `json:"condition,omitempty"`
+	Principal *Principal `json:"principal,omitempty" gorm:"serializer:json"`
+	Condition *Condition `json:"condition,omitempty" gorm:"serializer:json"`
 }
 
 // Principal is a model for a new RBAC mode.
@@ -234,14 +234,14 @@ func (p *Permission) Index() map[string]interface{} {
 // PermissionTemplate is a model for a new RBAC mode.
 type PermissionTemplate struct {
 	BaseModel
-	Name  string `json:"name"`
+	Name  string `json:"name" gorm:"primaryKey"`
 	Alias string `json:"alias"`
 	// Scope options: project or platform
 	Scope     string     `json:"scope"`
-	Resources []string   `json:"resources"`
-	Actions   []string   `json:"actions"`
+	Resources []string   `json:"resources" gorm:"serializer:json"`
+	Actions   []string   `json:"actions" gorm:"serializer:json"`
 	Effect    string     `json:"effect"`
-	Condition *Condition `json:"condition,omitempty"`
+	Condition *Condition `json:"condition,omitempty" gorm:"serializer:json"`
 }
 
 // TableName return custom table name

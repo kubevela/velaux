@@ -23,6 +23,7 @@ import (
 	mysqlgorm "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 )
 
@@ -36,6 +37,10 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 	db, err := gorm.Open(mysqlgorm.Open(cfg.URL), &gorm.Config{})
 	if err != nil {
 		return nil, err
+	}
+
+	for _, v := range model.GetRegisterModels() {
+		db.AutoMigrate(v)
 	}
 
 	m := &mysql{
