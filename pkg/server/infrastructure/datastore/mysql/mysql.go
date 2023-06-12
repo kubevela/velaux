@@ -40,7 +40,9 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 	}
 
 	for _, v := range model.GetRegisterModels() {
-		db.AutoMigrate(v)
+		if err := db.AutoMigrate(v); err != nil {
+			return nil, err
+		}
 	}
 
 	m := &mysql{
