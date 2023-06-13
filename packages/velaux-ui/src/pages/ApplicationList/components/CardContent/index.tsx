@@ -1,5 +1,4 @@
 import { connect } from 'dva';
-import type { MouseEvent } from 'react';
 import React from 'react';
 import './index.less';
 import { Link } from 'dva/router';
@@ -56,15 +55,6 @@ class CardContent extends React.Component<Props, State> {
       showLabelMode: showLabelMode,
     };
   }
-
-  handleClick = (index: number, e: MouseEvent) => {
-    e.preventDefault();
-    const { extendDotVisible } = this.state;
-    this.setState({
-      extendDotVisible: !extendDotVisible,
-      choseIndex: index,
-    });
-  };
 
   onDeleteAppPlan = (name: string) => {
     this.props.deleteAppPlan(name);
@@ -191,6 +181,7 @@ class CardContent extends React.Component<Props, State> {
           return <span>{v}</span>;
         },
       },
+
       {
         key: 'labels',
         title: <Translation>Labels</Translation>,
@@ -202,8 +193,8 @@ class CardContent extends React.Component<Props, State> {
           return (
             <div>
               <div className={more ? '' : 'table-content-label'}>
-                {Object.keys(label)?.map((key) => {
-                  if (label && key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev')) {
+                {label && Object.keys(label)?.map((key) => {
+                  if (label && key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev') < 0) {
                     displayLabels++;
                     return (
                       <div>
