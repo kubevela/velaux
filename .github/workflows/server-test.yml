@@ -66,6 +66,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y golang-ginkgo-dev
 
+      - name : Set up MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql database: 'kubevela'
+          mysql root password: 'kubevelaSQL123'
+
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@d26215f71b2ce60420a2a3776a25893d11a65f85 # 1.9.0
         with:

@@ -40,12 +40,12 @@ const RoleAdmin = "admin"
 // User is the model of user
 type User struct {
 	BaseModel
-	Name          string    `json:"name"`
+	Name          string    `json:"name" gorm:"primaryKey"`
 	Email         string    `json:"email"`
 	Alias         string    `json:"alias,omitempty"`
 	Password      string    `json:"password,omitempty"`
 	Disabled      bool      `json:"disabled"`
-	LastLoginTime time.Time `json:"lastLoginTime,omitempty"`
+	LastLoginTime time.Time `json:"lastLoginTime,omitempty" gorm:"default:'2020-01-01'"`
 	// UserRoles binding the platform level roles
 	UserRoles []string `json:"userRoles" gorm:"serializer:json"`
 	DexSub    string   `json:"dexSub,omitempty"`
@@ -94,8 +94,8 @@ func (u *User) IsAdmin() bool {
 // ProjectUser is the model of user in project
 type ProjectUser struct {
 	BaseModel
-	Username    string `json:"username"`
-	ProjectName string `json:"projectName"`
+	Username    string `json:"username" gorm:"primaryKey"`
+	ProjectName string `json:"projectName" gorm:"primaryKey"`
 	// UserRoles binding the project level roles
 	UserRoles []string `json:"userRoles" gorm:"serializer:json"`
 }
@@ -137,7 +137,7 @@ type CustomClaims struct {
 // Role is a model for a new RBAC mode.
 type Role struct {
 	BaseModel
-	Name        string   `json:"name"`
+	Name        string   `json:"name" gorm:"primaryKey"`
 	Alias       string   `json:"alias"`
 	Project     string   `json:"project,omitempty"`
 	Permissions []string `json:"permissions" gorm:"serializer:json"`
@@ -146,9 +146,9 @@ type Role struct {
 // Permission is a model for a new RBAC mode.
 type Permission struct {
 	BaseModel
-	Name      string   `json:"name"`
+	Name      string   `json:"name" gorm:"primaryKey"`
 	Alias     string   `json:"alias"`
-	Project   string   `json:"project,omitempty"`
+	Project   string   `json:"project,omitempty" gorm:"primaryKey"`
 	Resources []string `json:"resources" gorm:"serializer:json"`
 	Actions   []string `json:"actions" gorm:"serializer:json"`
 	// Effect option values: Allow,Deny

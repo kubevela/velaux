@@ -116,8 +116,8 @@ type WorkflowRecord struct {
 	RevisionPrimaryKey string               `json:"revisionPrimaryKey"`
 	Name               string               `json:"name" gorm:"primaryKey"`
 	Namespace          string               `json:"namespace"`
-	StartTime          time.Time            `json:"startTime,omitempty"`
-	EndTime            time.Time            `json:"endTime,omitempty"`
+	StartTime          time.Time            `json:"startTime,omitempty" gorm:"default:'2020-01-01'"`
+	EndTime            time.Time            `json:"endTime,omitempty" gorm:"default:'2020-01-01'"`
 	Finished           string               `json:"finished"`
 	Steps              []WorkflowStepStatus `json:"steps,omitempty" gorm:"serializer:json"`
 	Status             string               `json:"status"`
