@@ -20,6 +20,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
+// PluginProxyRoutePath the route prefix to request the plugin backend server.
 const PluginProxyRoutePath = "/proxy/plugins/"
 
 // Plugin VelaUX plugin model
