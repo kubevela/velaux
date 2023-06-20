@@ -73,7 +73,7 @@ const (
 	PluginPublicRoutePath = "/public/plugins/"
 
 	// PluginProxyRoutePath the route prefix to request the plugin backend server.
-	PluginProxyRoutePath = "/proxy/plugins/"
+	PluginProxyRoutePath = plugintypes.PluginProxyRoutePath
 
 	// DexRoutePath the route prefix to request the dex service
 	DexRoutePath = "/dex"
@@ -454,7 +454,7 @@ func (s *restServer) proxyPluginBackend(req *http.Request, res http.ResponseWrit
 		return
 	}
 	// Register the plugin route
-	router.GenerateHTTPRouter(plugin, PluginProxyRoutePath, s.pluginBackendProxyHandler).ServeHTTP(res, req)
+	router.GetPluginHandler(plugin, s.pluginBackendProxyHandler).ServeHTTP(res, req)
 }
 
 func (s *restServer) pluginBackendProxyHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params, plugin *plugintypes.Plugin, route *plugintypes.Route) {

@@ -20,6 +20,8 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
+const PluginProxyRoutePath = "/proxy/plugins/"
+
 // Plugin VelaUX plugin model
 type Plugin struct {
 	JSONData
