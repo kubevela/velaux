@@ -22,8 +22,9 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-// SQLNamer naming strategy for gorm
+// SQLNamer overrides the default naming conventions used by gorm
 type SQLNamer struct {
+	// DefaultNamingStrategy to use the methods of the default NamingStrategy of gorm if modification not needed
 	DefaultNamingStrategy schema.NamingStrategy
 }
 
@@ -37,7 +38,7 @@ func (namer SQLNamer) SchemaName(table string) string {
 	return namer.DefaultNamingStrategy.SchemaName(table)
 }
 
-// ColumnName convert string to column name
+// ColumnName overrides the DefaultNamingStrategy.ColumnName as it converts the column names to snake-case, but we need them in lowercase
 func (namer SQLNamer) ColumnName(table, column string) string {
 	return strings.ToLower(column)
 }

@@ -39,7 +39,7 @@ type mysql struct {
 	database string
 }
 
-// New new mongodb datastore instance
+// New new mysql datastore instance
 func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error) {
 	db, err := gorm.Open(mysqlgorm.Open(cfg.URL), &gorm.Config{
 		NamingStrategy: sqlnamer.SQLNamer{},
@@ -84,11 +84,11 @@ func (m *mysql) Add(ctx context.Context, entity datastore.Entity) error {
 
 // BatchAdd batch add entity, this operation has some atomicity.
 func (m *mysql) BatchAdd(ctx context.Context, entities []datastore.Entity) error {
-	notRollback := make(map[string]int)
+	notRollback := make(map[string]bool)
 	for i, saveEntity := range entities {
 		if err := m.Add(ctx, saveEntity); err != nil {
 			if errors.Is(err, datastore.ErrRecordExist) {
-				notRollback[saveEntity.PrimaryKey()] = 1
+				notRollback[saveEntity.PrimaryKey()] = true
 			}
 			for _, deleteEntity := range entities[:i] {
 				if _, exit := notRollback[deleteEntity.PrimaryKey()]; !exit {
