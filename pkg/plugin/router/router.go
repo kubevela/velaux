@@ -48,11 +48,18 @@ func newDefaultRouter(h Handle, plugin *types.Plugin) *defaultRouter {
 	return &defaultRouter{h: h, plugin: plugin}
 }
 
-// GenerateHTTPRouter create and return the plugin backend router
-func GenerateHTTPRouter(plugin *types.Plugin, pathPrefix string, h Handle) http.Handler {
+// GetPluginHandler get the plugin backend router, if not exist, will create and cache it
+func GetPluginHandler(plugin *types.Plugin, h Handle) http.Handler {
 	if r, e := cachePluginRouter[plugin.PluginID()]; e {
 		return r
 	}
+	router := GeneratePluginHandler(plugin, h)
+	cachePluginRouter[plugin.PluginID()] = router
+	return router
+}
+
+// GeneratePluginHandler create and return the plugin backend router
+func GeneratePluginHandler(plugin *types.Plugin, h Handle) http.Handler {
 	var router http.Handler
 	if len(plugin.Routes) == 0 {
 		klog.Warningf("plugin %s don't define the routes, will proxy all path requests and not check the permission.", plugin.PluginID())
@@ -60,7 +67,7 @@ func GenerateHTTPRouter(plugin *types.Plugin, pathPrefix string, h Handle) http.
 	} else {
 		r := httprouter.New()
 		for _, route := range plugin.Routes {
-			routePath := path.Join(pathPrefix+"/:"+DefaultPluginResourceKey, route.Path)
+			routePath := path.Join(types.PluginProxyRoutePath+"/:"+DefaultPluginResourceKey, route.Path)
 			method := route.Method
 			if method == "" {
 				method = "GET"
@@ -72,6 +79,5 @@ func GenerateHTTPRouter(plugin *types.Plugin, pathPrefix string, h Handle) http.
 		}
 		router = r
 	}
-	cachePluginRouter[plugin.PluginID()] = router
 	return router
 }

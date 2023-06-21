@@ -31,11 +31,11 @@ import (
 func TestDefaultGenerateHTTPRouter(t *testing.T) {
 	var res = &httptest.ResponseRecorder{}
 	var req = &http.Request{Method: "GET", URL: &url.URL{Scheme: "http", Path: "/proxy/plugins/default-router/test", Host: "127.0.0.1"}}
-	defaultRouter := GenerateHTTPRouter(&types.Plugin{
+	defaultRouter := GetPluginHandler(&types.Plugin{
 		JSONData: types.JSONData{
 			ID: "default-router",
 		},
-	}, "/proxy/plugins", func(w http.ResponseWriter, r1 *http.Request, p1 httprouter.Params, p2 *types.Plugin, r2 *types.Route) {
+	}, func(w http.ResponseWriter, r1 *http.Request, p1 httprouter.Params, p2 *types.Plugin, r2 *types.Route) {
 		if r1.URL.Path == "/proxy/plugins/default-router/test" {
 			w.WriteHeader(403)
 			return
@@ -50,7 +50,7 @@ func TestRouteGenerateHTTPRouter(t *testing.T) {
 	var req = &http.Request{Method: "GET", URL: &url.URL{Scheme: "http", Path: "/proxy/plugins/route-router/nodes/t", Host: "127.0.0.1"}}
 	var reqMethodNotAllow = &http.Request{Method: "PUT", URL: &url.URL{Scheme: "http", Path: "/proxy/plugins/route-router/nodes/t", Host: "127.0.0.1"}}
 	var req404 = &http.Request{Method: "GET", URL: &url.URL{Scheme: "http", Path: "/proxy/plugins/route-router/nodes", Host: "127.0.0.1"}}
-	router := GenerateHTTPRouter(&types.Plugin{
+	router := GetPluginHandler(&types.Plugin{
 		JSONData: types.JSONData{
 			ID: "route-router",
 			Routes: []*types.Route{
@@ -64,7 +64,7 @@ func TestRouteGenerateHTTPRouter(t *testing.T) {
 				},
 			},
 		},
-	}, "/proxy/plugins", func(w http.ResponseWriter, r1 *http.Request, p1 httprouter.Params, p2 *types.Plugin, r2 *types.Route) {
+	}, func(w http.ResponseWriter, r1 *http.Request, p1 httprouter.Params, p2 *types.Plugin, r2 *types.Route) {
 		assert.Equal(t, p1.ByName("node"), "t")
 		assert.Equal(t, len(r2.ProxyHeaders), 1)
 		assert.Equal(t, r2.ProxyHeaders[0].Name, "Authorization")
