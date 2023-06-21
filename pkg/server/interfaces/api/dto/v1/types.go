@@ -357,8 +357,8 @@ type ListClusterResponse struct {
 
 // ListCloudClusterResponse list cloud clusters
 type ListCloudClusterResponse struct {
-	//Clusters []cloudprovider.CloudCluster `json:"clusters"`
-	//Total    int                          `json:"total"`
+	// Clusters []cloudprovider.CloudCluster `json:"clusters"`
+	// Total    int                          `json:"total"`
 }
 
 // CreateCloudClusterResponse return values for cloud cluster create request

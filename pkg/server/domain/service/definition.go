@@ -88,6 +88,7 @@ const (
 	kindWorkflowStepDefinition = "WorkflowStepDefinition"
 	kindPolicyDefinition       = "PolicyDefinition"
 
+	// LabelDefinitionScope is the label key for definition scope, with this key, we know if the definition is for Application or WorkflowRun
 	LabelDefinitionScope = "custom.definition.oam.dev/scope"
 )
 
