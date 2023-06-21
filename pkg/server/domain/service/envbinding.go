@@ -21,6 +21,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/kubevela/pkg/util/slices"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
@@ -87,7 +89,7 @@ func (e *envBindingServiceImpl) GetEnvBinding(ctx context.Context, app *model.Ap
 func CheckAppEnvBindingsContainTarget(envBindings []*apisv1.EnvBindingBase, targetName string) (bool, error) {
 	var filteredList []*apisv1.EnvBindingBase
 	for _, envBinding := range envBindings {
-		if pkgUtils.StringsContain(envBinding.TargetNames, targetName) {
+		if slices.Contains(envBinding.TargetNames, targetName) {
 			filteredList = append(filteredList, envBinding)
 		}
 	}

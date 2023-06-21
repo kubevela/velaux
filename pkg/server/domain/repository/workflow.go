@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kubevela/velaux/pkg/server/utils"
+
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
@@ -289,7 +291,7 @@ func compareWorkflowSteps(old, new steps) steps {
 		}
 	}
 
-	_, needDeleted, needAdded := pkgUtils.ThreeWaySliceCompare(oldTargets, newTargets)
+	_, needDeleted, needAdded := utils.ThreeWaySliceCompare(oldTargets, newTargets)
 	var workflowSteps []*workflowStep
 
 	var deployCloudResourcePolicyExist = false
@@ -298,7 +300,7 @@ func compareWorkflowSteps(old, new steps) steps {
 		var deletedPolicyCount = 0
 		for i := range oldStep.policies {
 			p := oldStep.policies[i]
-			if pkgUtils.SliceIncludeSlice(needDeleted, cacheTarget(oldStep.stepType, p.targets)) {
+			if utils.SliceIncludeSlice(needDeleted, cacheTarget(oldStep.stepType, p.targets)) {
 				p.state = deleteState
 				deletedPolicyCount++
 			}
@@ -317,7 +319,7 @@ func compareWorkflowSteps(old, new steps) steps {
 		newStep := new[j]
 		for i := range newStep.policies {
 			p := newStep.policies[i]
-			if pkgUtils.SliceIncludeSlice(needAdded, cacheTarget(newStep.stepType, p.targets)) {
+			if utils.SliceIncludeSlice(needAdded, cacheTarget(newStep.stepType, p.targets)) {
 				if p.policyType == v1alpha1.EnvBindingPolicyType && deployCloudResourcePolicyExist {
 					p.state = updateState
 				} else {

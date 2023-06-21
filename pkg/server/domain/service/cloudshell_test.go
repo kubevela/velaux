@@ -22,6 +22,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/kubevela/pkg/util/slices"
+
 	"k8s.io/client-go/kubernetes"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
@@ -36,7 +38,6 @@ import (
 
 	kubevelatypes "github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/auth"
-	pkgutils "github.com/oam-dev/kubevela/pkg/utils"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -131,8 +132,8 @@ var _ = Describe("Test cloudshell service function", func() {
 			var identity auth.Identity
 			err = yaml.Unmarshal([]byte(cm.Data["identity"]), &identity)
 			Expect(err).Should(BeNil())
-			Expect(pkgutils.StringsContain(identity.Groups, utils.KubeVelaAdminGroupPrefix+"admin")).Should(BeTrue())
-			Expect(pkgutils.StringsContain(identity.Groups, utils.TemplateReaderGroup)).Should(BeTrue())
+			Expect(slices.Contains(identity.Groups, utils.KubeVelaAdminGroupPrefix+"admin")).Should(BeTrue())
+			Expect(slices.Contains(identity.Groups, utils.TemplateReaderGroup)).Should(BeTrue())
 		}
 
 		checkConfig()

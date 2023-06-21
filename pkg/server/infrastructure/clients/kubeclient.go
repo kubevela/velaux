@@ -28,7 +28,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/oam-dev/kubevela/pkg/auth"
-	"github.com/oam-dev/kubevela/pkg/oam/discoverymapper"
 	"github.com/oam-dev/kubevela/pkg/utils/common"
 
 	apiConfig "github.com/kubevela/velaux/pkg/server/config"
@@ -89,19 +88,6 @@ func GetKubeConfig() (*rest.Config, error) {
 		return nil, fmt.Errorf("please call SetKubeConfig first")
 	}
 	return kubeConfig, nil
-}
-
-// GetDiscoverMapper get discover mapper
-func GetDiscoverMapper() (discoverymapper.DiscoveryMapper, error) {
-	conf, err := GetKubeConfig()
-	if err != nil {
-		return nil, err
-	}
-	dm, err := discoverymapper.New(conf)
-	if err != nil {
-		return nil, err
-	}
-	return dm, nil
 }
 
 // GetPackageDiscover get package discover

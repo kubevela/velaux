@@ -32,7 +32,6 @@ import (
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/addon"
-	"github.com/oam-dev/kubevela/pkg/cloudprovider"
 	"github.com/oam-dev/kubevela/pkg/config"
 	velacommon "github.com/oam-dev/kubevela/pkg/utils/common"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
@@ -358,8 +357,8 @@ type ListClusterResponse struct {
 
 // ListCloudClusterResponse list cloud clusters
 type ListCloudClusterResponse struct {
-	Clusters []cloudprovider.CloudCluster `json:"clusters"`
-	Total    int                          `json:"total"`
+	//Clusters []cloudprovider.CloudCluster `json:"clusters"`
+	//Total    int                          `json:"total"`
 }
 
 // CreateCloudClusterResponse return values for cloud cluster create request

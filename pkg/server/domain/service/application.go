@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kubevela/pkg/util/slices"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -42,7 +43,6 @@ import (
 	"github.com/oam-dev/kubevela/pkg/appfile"
 	"github.com/oam-dev/kubevela/pkg/appfile/dryrun"
 	"github.com/oam-dev/kubevela/pkg/oam"
-	"github.com/oam-dev/kubevela/pkg/oam/discoverymapper"
 	pkgUtils "github.com/oam-dev/kubevela/pkg/utils"
 	"github.com/oam-dev/kubevela/pkg/utils/app"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
@@ -211,7 +211,7 @@ func (c *applicationServiceImpl) ListApplications(ctx context.Context, listOptio
 		return []*apisv1.ApplicationBase{}, nil
 	}
 	if len(listOptions.Projects) > 0 {
-		if !pkgUtils.SliceIncludeSlice(availableProjectNames, listOptions.Projects) {
+		if !utils.SliceIncludeSlice(availableProjectNames, listOptions.Projects) {
 			return []*apisv1.ApplicationBase{}, nil
 		}
 	}
@@ -1714,7 +1714,7 @@ func (c *applicationServiceImpl) resetApp(ctx context.Context, targetApp *v1beta
 		targetCompNames = append(targetCompNames, comp.Name)
 	}
 
-	readyToUpdate, readyToDelete, readyToAdd := pkgUtils.ThreeWaySliceCompare(originCompNames, targetCompNames)
+	readyToUpdate, readyToDelete, readyToAdd := utils.ThreeWaySliceCompare(originCompNames, targetCompNames)
 
 	// delete new app's components
 	for _, compName := range readyToDelete {
@@ -1732,7 +1732,7 @@ func (c *applicationServiceImpl) resetApp(ctx context.Context, targetApp *v1beta
 
 	for _, comp := range targetComps {
 		// add or update new app's components from old app
-		if pkgUtils.StringsContain(readyToAdd, comp.Name) || pkgUtils.StringsContain(readyToUpdate, comp.Name) {
+		if slices.Contains(readyToAdd, comp.Name) || slices.Contains(readyToUpdate, comp.Name) {
 			compModel, err := convert.FromCRComponent(appPrimaryKey, comp)
 			if err != nil {
 				return &apisv1.AppResetResponse{}, bcode.ErrInvalidProperties
@@ -1862,11 +1862,7 @@ func dryRunApplication(ctx context.Context, c commonutil.Args, app *v1beta1.Appl
 	if err != nil {
 		return buff, err
 	}
-	dm, err := discoverymapper.New(config)
-	if err != nil {
-		return buff, err
-	}
-	dryRunOpt := dryrun.NewDryRunOption(newClient, config, dm, pd, objects, true)
+	dryRunOpt := dryrun.NewDryRunOption(newClient, config, pd, objects, true)
 	dryRunOpt.GenerateAppFile = func(ctx context.Context, app *v1beta1.Application) (*appfile.Appfile, error) {
 		generateCtx := utils.WithProject(ctx, "")
 		return dryRunOpt.Parser.GenerateAppFileFromApp(generateCtx, app)
@@ -1912,16 +1908,12 @@ func compare(ctx context.Context, c commonutil.Args, targetApp *v1beta1.Applicat
 	if err != nil {
 		return nil, buff, err
 	}
-	dm, err := discoverymapper.New(config)
-	if err != nil {
-		return nil, buff, err
-	}
 	var objs []oam.Object
 	client, err := c.GetClient()
 	if err != nil {
 		return nil, buff, err
 	}
-	liveDiffOption := dryrun.NewLiveDiffOption(client, config, dm, pd, objs)
+	liveDiffOption := dryrun.NewLiveDiffOption(client, config, pd, objs)
 	diffResult, err := liveDiffOption.DiffApps(ctx, baseApp, targetApp)
 	if err != nil {
 		return nil, buff, err

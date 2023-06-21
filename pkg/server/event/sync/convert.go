@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kubevela/pkg/util/slices"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
@@ -30,7 +32,6 @@ import (
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	apitypes "github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/oam"
-	pkgutils "github.com/oam-dev/kubevela/pkg/utils"
 	"github.com/oam-dev/kubevela/pkg/workflow/step"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
@@ -187,7 +188,7 @@ func (c *CR2UX) generateEnv(ctx context.Context, defaultProject string, envNames
 	if len(existEnvs) > 0 {
 		env := existEnvs[0].(*model.Env)
 		for name, project := range envTargetNames {
-			if !pkgutils.StringsContain(env.Targets, name) && project == env.Project {
+			if !slices.Contains(env.Targets, name) && project == env.Project {
 				env.Targets = append(env.Targets, name)
 			}
 		}

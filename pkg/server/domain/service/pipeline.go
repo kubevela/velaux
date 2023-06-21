@@ -28,6 +28,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kubevela/pkg/util/slices"
+
 	"github.com/fatih/color"
 	"github.com/kubevela/pkg/util/k8s"
 	"github.com/kubevela/workflow/api/v1alpha1"
@@ -189,7 +191,7 @@ func (p pipelineServiceImpl) ListPipelines(ctx context.Context, req apis.ListPip
 	}
 	queryProjects := req.Projects
 	if len(req.Projects) > 0 {
-		if !pkgutils.SliceIncludeSlice(availableProjectNames, req.Projects) {
+		if !utils.SliceIncludeSlice(availableProjectNames, req.Projects) {
 			return &apis.ListPipelineResponse{}, nil
 		}
 	}
@@ -214,7 +216,7 @@ func (p pipelineServiceImpl) ListPipelines(ctx context.Context, req apis.ListPip
 	res := apis.ListPipelineResponse{}
 	for _, _p := range pipelines {
 		pipeline := _p.(*model.Pipeline)
-		if !pkgutils.StringsContain(availableProjectNames, pipeline.Project) {
+		if !slices.Contains(availableProjectNames, pipeline.Project) {
 			continue
 		}
 		if fuzzyMatch(pipeline, req.Query) {

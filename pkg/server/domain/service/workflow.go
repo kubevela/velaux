@@ -26,6 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spf13/cast"
+
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -780,7 +782,7 @@ func (w *workflowServiceImpl) RollbackRecord(ctx context.Context, appModel *mode
 		if len(revisions) == 0 {
 			return nil, bcode.ErrApplicationNoReadyRevision
 		}
-		revisionVersion = pkgUtils.ToString(revisions[0].Index()["version"])
+		revisionVersion = cast.ToString(revisions[0].Index()["version"])
 		klog.Infof("select lastest complete revision %s", revisionVersion)
 	}
 
