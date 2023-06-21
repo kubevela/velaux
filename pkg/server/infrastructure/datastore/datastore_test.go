@@ -20,14 +20,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"strings"
+	"time"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/kubevela/velaux/pkg/server/domain/model"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/kubeapi"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mongodb"
-	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mysql"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,11 +35,15 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/utils/pointer"
-	"math/rand"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"strings"
-	"time"
+
+	"github.com/kubevela/velaux/pkg/server/domain/model"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/kubeapi"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mongodb"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mysql"
 )
 
 func initMysqlTestDs() (datastore.DataStore, error) {
@@ -50,9 +52,9 @@ func initMysqlTestDs() (datastore.DataStore, error) {
 		return nil, err
 	}
 	for _, v := range model.GetRegisterModels() {
-		dbDelete := db.Where("1 = 1").Delete(v)
-		if dbDelete.Error != nil {
-			return nil, dbDelete.Error
+		err := db.Migrator().DropTable(&v)
+		if err != nil {
+			return nil, err
 		}
 	}
 	mysqlDriver, err := mysql.New(context.TODO(), datastore.Config{

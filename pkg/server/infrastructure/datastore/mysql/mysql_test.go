@@ -37,8 +37,8 @@ var _ = BeforeSuite(func(done Done) {
 	db, err := gorm.Open(mysqlgorm.Open("root:kubevelaSQL123@tcp(127.0.0.1:3306)/kubevela?parseTime=True"), &gorm.Config{})
 	Expect(err).ToNot(HaveOccurred())
 	for _, v := range model.GetRegisterModels() {
-		dbDelete := db.Where("1 = 1").Delete(v)
-		Expect(dbDelete.Error).ToNot(HaveOccurred())
+		err := db.Migrator().DropTable(&v)
+		Expect(err).ToNot(HaveOccurred())
 	}
 	mysqlDriver, err = New(context.TODO(), datastore.Config{
 		URL:      "root:kubevelaSQL123@tcp(127.0.0.1:3306)/kubevela?parseTime=True",
