@@ -307,6 +307,7 @@ func PluginToDTO(p pluginTypes.Plugin) apisv1.PluginDTO {
 	return apisv1.PluginDTO{
 		ID:            p.ID,
 		Name:          p.Name,
+		Placement:     p.Placement,
 		Category:      p.Category,
 		Type:          p.Type,
 		SubType:       p.SubType,

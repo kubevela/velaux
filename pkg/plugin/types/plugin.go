@@ -79,11 +79,12 @@ type JSONData struct {
 	ID   string `json:"id"`
 	Type Type   `json:"type"`
 	// there are four sub types in the definition plugin type, includes: component, trait, policy ,and workflow-step.
-	SubType  string      `json:"subType"`
-	Name     string      `json:"name"`
-	Info     Info        `json:"info"`
-	Includes []*Includes `json:"includes"`
-	Category string      `json:"category"`
+	SubType   string      `json:"subType"`
+	Name      string      `json:"name"`
+	Placement string      `json:"placement"`
+	Info      Info        `json:"info"`
+	Includes  []*Includes `json:"includes"`
+	Category  string      `json:"category"`
 	// Backend If the plugin has a backend component.
 	Backend     bool              `json:"backend"`
 	Proxy       bool              `json:"proxy"`

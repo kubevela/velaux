@@ -296,7 +296,7 @@ class TraitDialog extends React.Component<Props, State> {
     };
 
     const traitType: string = this.field.getValue('type');
-    const plugin = plugins.find(o => o?.id === traitType + "-trait");
+    const plugin = plugins.find(o => o?.placement === "definition.trait." + traitType);
     const usePlugin = traitType && plugin;
    
     return (
