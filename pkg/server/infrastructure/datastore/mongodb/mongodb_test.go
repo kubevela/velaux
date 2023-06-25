@@ -58,7 +58,7 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 	Expect(mongodbDriver).ToNot(BeNil())
 	By("create mongodb driver success")
 
-}, 120)
+}, NodeTimeout(2*time.Minute))
 
 var _ = Describe("Test mongodb datastore driver", func() {
 

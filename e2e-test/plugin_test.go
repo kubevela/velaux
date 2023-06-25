@@ -36,9 +36,7 @@ func enablePlugin(id string) {
 }
 
 var _ = Describe("Test the plugin rest api", func() {
-	Context("Test manage plugin API", func() {
-		By("Request to /manage/plugins")
-
+	Context("Test manage plugin API. Request to /manage/plugins", func() {
 		It("Test list installed plugins", func() {
 			defer GinkgoRecover()
 			res := get("/manage/plugins")
@@ -109,9 +107,7 @@ var _ = Describe("Test the plugin rest api", func() {
 		})
 	})
 
-	Context("Test plugin API", func() {
-		By("Request to /proxy/plugins")
-
+	Context("Test plugin API. Request to /proxy/plugins", func() {
 		It("Test to request the kube API", func() {
 			defer GinkgoRecover()
 			By("Before enable the plugin, request the plugin API should return 400")
@@ -131,9 +127,7 @@ var _ = Describe("Test the plugin rest api", func() {
 		})
 	})
 
-	Context("Test to request the plugin static files", func() {
-		By("Request to /public/plugins")
-
+	Context("Test to request the plugin static files. Request to /public/plugins", func() {
 		It("Test to get the module file", func() {
 			defer GinkgoRecover()
 			res := get(baseDomain + "/public/plugins/app-demo/module.js")
