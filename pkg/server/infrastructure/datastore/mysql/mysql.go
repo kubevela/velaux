@@ -50,13 +50,13 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 	}
 
 	for _, v := range model.GetRegisterModels() {
-		if err := db.AutoMigrate(v); err != nil {
+		if err := db.WithContext(ctx).AutoMigrate(v); err != nil {
 			return nil, err
 		}
 	}
 
 	m := &mysql{
-		client:   *db,
+		client:   *db.WithContext(ctx),
 		database: cfg.Database,
 	}
 	return m, nil
@@ -73,7 +73,7 @@ func (m *mysql) Add(ctx context.Context, entity datastore.Entity) error {
 	entity.SetCreateTime(time.Now())
 	entity.SetUpdateTime(time.Now())
 
-	if dbAdd := m.client.Create(entity); dbAdd.Error != nil {
+	if dbAdd := m.client.WithContext(ctx).Create(entity); dbAdd.Error != nil {
 		if match := errors.Is(dbAdd.Error, gorm.ErrDuplicatedKey); match {
 			return datastore.ErrRecordExist
 		}
@@ -114,7 +114,7 @@ func (m *mysql) Get(ctx context.Context, entity datastore.Entity) error {
 		return datastore.ErrTableNameEmpty
 	}
 
-	if dbGet := m.client.First(entity); dbGet.Error != nil {
+	if dbGet := m.client.WithContext(ctx).First(entity); dbGet.Error != nil {
 		if errors.Is(dbGet.Error, gorm.ErrRecordNotFound) {
 			return datastore.ErrRecordNotExist
 		}
@@ -132,7 +132,7 @@ func (m *mysql) Put(ctx context.Context, entity datastore.Entity) error {
 		return datastore.ErrTableNameEmpty
 	}
 	entity.SetUpdateTime(time.Now())
-	if dbPut := m.client.Model(entity).Updates(entity); dbPut.Error != nil {
+	if dbPut := m.client.WithContext(ctx).Model(entity).Updates(entity); dbPut.Error != nil {
 		if errors.Is(dbPut.Error, gorm.ErrRecordNotFound) {
 			return datastore.ErrRecordNotExist
 		}
@@ -150,7 +150,7 @@ func (m *mysql) IsExist(ctx context.Context, entity datastore.Entity) (bool, err
 		return false, datastore.ErrTableNameEmpty
 	}
 
-	if dbExist := m.client.First(entity); dbExist.Error != nil {
+	if dbExist := m.client.WithContext(ctx).First(entity); dbExist.Error != nil {
 		if errors.Is(dbExist.Error, gorm.ErrRecordNotFound) {
 			return false, nil
 		}
@@ -173,7 +173,7 @@ func (m *mysql) Delete(ctx context.Context, entity datastore.Entity) error {
 		return err
 	}
 
-	if dbDelete := m.client.Model(entity).Delete(entity); dbDelete.Error != nil {
+	if dbDelete := m.client.WithContext(ctx).Model(entity).Delete(entity); dbDelete.Error != nil {
 		klog.Errorf("delete document failure %w", dbDelete.Error)
 		return datastore.NewDBError(dbDelete.Error)
 	}
@@ -260,7 +260,7 @@ func (m *mysql) List(ctx context.Context, entity datastore.Entity, op *datastore
 		})
 	}
 	var list []datastore.Entity
-	rows, err := m.client.Model(entity).Clauses(clauses...).Rows()
+	rows, err := m.client.WithContext(ctx).Model(entity).Clauses(clauses...).Rows()
 	if err != nil {
 		return nil, datastore.NewDBError(err)
 	}
@@ -274,7 +274,7 @@ func (m *mysql) List(ctx context.Context, entity datastore.Entity, op *datastore
 		if err != nil {
 			return nil, datastore.NewDBError(err)
 		}
-		err = m.client.ScanRows(rows, &item)
+		err = m.client.WithContext(ctx).ScanRows(rows, &item)
 		if err != nil {
 			return nil, datastore.NewDBError(fmt.Errorf("row scan failure %w", err))
 		}
@@ -310,7 +310,7 @@ func (m *mysql) Count(ctx context.Context, entity datastore.Entity, filterOption
 			Exprs: exprs,
 		})
 	}
-	if dbCount := m.client.Model(entity).Clauses(clauses...).Count(&count); dbCount.Error != nil {
+	if dbCount := m.client.WithContext(ctx).Model(entity).Clauses(clauses...).Count(&count); dbCount.Error != nil {
 		return 0, datastore.NewDBError(dbCount.Error)
 	}
 	return count, nil
