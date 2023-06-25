@@ -173,7 +173,7 @@ func (m *mysql) Delete(ctx context.Context, entity datastore.Entity) error {
 		return err
 	}
 
-	if dbDelete := m.client.Unscoped().Model(entity).Delete(entity); dbDelete.Error != nil {
+	if dbDelete := m.client.Model(entity).Delete(entity); dbDelete.Error != nil {
 		klog.Errorf("delete document failure %w", dbDelete.Error)
 		return datastore.NewDBError(dbDelete.Error)
 	}
@@ -181,10 +181,15 @@ func (m *mysql) Delete(ctx context.Context, entity datastore.Entity) error {
 	return nil
 }
 
+// _toColumnName converts keys of the models to lowercase as the column name are in lowercase in the database
+func _toColumnName(columnName string) string {
+	return strings.ToLower(columnName)
+}
+
 func _applyFilterOptions(clauses []clause.Expression, filterOptions datastore.FilterOptions) []clause.Expression {
 	for _, queryOp := range filterOptions.Queries {
 		clauses = append(clauses, clause.Like{
-			Column: strings.ToLower(queryOp.Key),
+			Column: _toColumnName(queryOp.Key),
 			Value:  fmt.Sprintf("%%%s%%", queryOp.Query),
 		})
 	}
@@ -194,13 +199,13 @@ func _applyFilterOptions(clauses []clause.Expression, filterOptions datastore.Fi
 			values[i] = v
 		}
 		clauses = append(clauses, clause.IN{
-			Column: strings.ToLower(queryOp.Key),
+			Column: _toColumnName(queryOp.Key),
 			Values: values,
 		})
 	}
 	for _, queryOp := range filterOptions.IsNotExist {
 		clauses = append(clauses, clause.Eq{
-			Column: strings.ToLower(queryOp.Key),
+			Column: _toColumnName(queryOp.Key),
 			Value:  "",
 		})
 	}
@@ -247,7 +252,7 @@ func (m *mysql) List(ctx context.Context, entity datastore.Entity, op *datastore
 				Column: clause.Column{
 					Name: strings.ToLower(v.Key),
 				},
-				Desc: (v.Order == -1),
+				Desc: v.Order == datastore.SortOrderDescending,
 			})
 		}
 		clauses = append(clauses, clause.OrderBy{
