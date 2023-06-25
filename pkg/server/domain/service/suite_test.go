@@ -19,12 +19,13 @@ package service
 import (
 	"context"
 	"fmt"
-	v1alpha12 "github.com/cloudtty/cloudtty/pkg/apis/cloudshell/v1alpha1"
 	"math/rand"
 	"os"
 	"strconv"
 	"testing"
 	"time"
+
+	v1alpha12 "github.com/cloudtty/cloudtty/pkg/apis/cloudshell/v1alpha1"
 
 	"github.com/kubevela/workflow/api/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"

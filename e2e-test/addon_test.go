@@ -229,7 +229,7 @@ var _ = Describe("Test addon rest api", func() {
 				var newaddonStatus apisv1.AddonStatusResponse
 				g.Expect(decodeResponseBody(status, &newaddonStatus)).Should(Succeed())
 				g.Expect(newaddonStatus.Name).Should(BeEquivalentTo("bar"))
-				g.Expect(newaddonStatus.InstalledVersion).Should(BeEquivalentTo("v1.0.0"))
+				g.Expect(newaddonStatus.InstalledVersion).Should(BeEquivalentTo("1.0.0"))
 			}, 30*time.Second, 300*time.Millisecond).Should(Succeed())
 		})
 	})
@@ -248,7 +248,7 @@ var _ = Describe("Test addon rest api", func() {
 				var newaddonStatus apisv1.AddonStatusResponse
 				g.Expect(decodeResponseBody(status, &newaddonStatus)).Should(Succeed())
 				g.Expect(newaddonStatus.Name).Should(BeEquivalentTo("mock-dep-addon"))
-				g.Expect(newaddonStatus.InstalledVersion).Should(BeEquivalentTo("v1.0.0"))
+				g.Expect(newaddonStatus.InstalledVersion).Should(BeEquivalentTo("1.0.0"))
 				g.Expect(newaddonStatus.Phase).Should(BeEquivalentTo(apisv1.AddonPhaseEnabled))
 			}, 30*time.Second, 300*time.Millisecond).Should(Succeed())
 		})

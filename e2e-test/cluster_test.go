@@ -108,7 +108,7 @@ var _ = Describe("Test cluster rest api", func() {
 
 	})
 
-	PContext("Test cloud cluster rest api", func() {
+	Context("Test cloud cluster rest api", func() {
 
 		var clusterName string
 
@@ -121,7 +121,7 @@ var _ = Describe("Test cluster rest api", func() {
 			Expect(decodeResponseBody(resp, nil)).Should(Succeed())
 		})
 
-		PIt("Test list aliyun cloud cluster and connect", func() {
+		It("Test list aliyun cloud cluster and connect", func() {
 			AccessKeyID := os.Getenv("ALIYUN_ACCESS_KEY_ID")
 			AccessKeySecret := os.Getenv("ALIYUN_ACCESS_KEY_SECRET")
 			resp := post("/clusters/cloud-clusters/aliyun/?page=1&pageSize=5", v1.AccessKeyRequest{
@@ -130,18 +130,18 @@ var _ = Describe("Test cluster rest api", func() {
 			})
 			clusterResp := &v1.ListCloudClusterResponse{}
 			Expect(decodeResponseBody(resp, clusterResp)).Should(Succeed())
-			//Expect(len(clusterResp.Clusters)).ShouldNot(Equal(0))
-			//
-			//ClusterID := clusterResp.Clusters[0].ID
-			//resp = post("/clusters/cloud-clusters/aliyun/connect", v1.ConnectCloudClusterRequest{
-			//	AccessKeyID:     AccessKeyID,
-			//	AccessKeySecret: AccessKeySecret,
-			//	ClusterID:       ClusterID,
-			//	Name:            clusterName,
-			//})
-			//clusterBase := &v1.ClusterBase{}
-			//Expect(decodeResponseBody(resp, clusterBase)).Should(Succeed())
-			//Expect(clusterBase.Status).Should(Equal("Healthy"))
+			Expect(len(clusterResp.Clusters)).ShouldNot(Equal(0))
+
+			ClusterID := clusterResp.Clusters[0].ID
+			resp = post("/clusters/cloud-clusters/aliyun/connect", v1.ConnectCloudClusterRequest{
+				AccessKeyID:     AccessKeyID,
+				AccessKeySecret: AccessKeySecret,
+				ClusterID:       ClusterID,
+				Name:            clusterName,
+			})
+			clusterBase := &v1.ClusterBase{}
+			Expect(decodeResponseBody(resp, clusterBase)).Should(Succeed())
+			Expect(clusterBase.Status).Should(Equal("Healthy"))
 		})
 
 	})

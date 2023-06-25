@@ -107,7 +107,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/kubevela/workflow v0.6.0
 	github.com/oam-dev/kubevela v1.9.1
-	github.com/onsi/ginkgo v1.16.5
+	github.com/onsi/ginkgo/v2 v2.11.0
 )
 
 require (
@@ -122,8 +122,9 @@ require (
 	github.com/aliyun/credentials-go v1.1.2 // indirect
 	github.com/clbanning/mxj/v2 v2.5.5 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.14.3 // indirect
+	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
 	github.com/jellydator/ttlcache/v3 v3.0.1 // indirect
-	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.4 // indirect
 	github.com/tjfoc/gmsm v1.3.2 // indirect
 	github.com/vbatts/tar-split v0.11.3 // indirect
@@ -230,7 +231,6 @@ require (
 	github.com/mpvl/unique v0.0.0-20150818121801-cbe035fff7de // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
-	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc3 // indirect
 	github.com/openshift/library-go v0.0.0-20230327085348-8477ec72b725 // indirect
@@ -283,7 +283,6 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
-	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gorm.io/gorm v1.25.1
 	k8s.io/klog v1.0.0 // indirect
