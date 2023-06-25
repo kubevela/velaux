@@ -27,17 +27,21 @@ import (
 	v12 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kubevela/pkg/util/rand"
 	prismclusterv1alpha1 "github.com/kubevela/prism/pkg/apis/cluster/v1alpha1"
+	"github.com/oam-dev/terraform-controller/api/types"
 	"github.com/oam-dev/terraform-controller/api/v1beta1"
 
 	"github.com/oam-dev/kubevela/pkg/multicluster"
 	"github.com/oam-dev/kubevela/pkg/utils"
+	"github.com/oam-dev/kubevela/pkg/utils/util"
 
+	"github.com/kubevela/velaux/pkg/cloudprovider"
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
@@ -230,14 +234,56 @@ func createClusterModelFromRequest(req apis.CreateClusterRequest, oldCluster *mo
 	return newCluster
 }
 
-// createKubeCluster -
-// Deprecated
-func (c *clusterServiceImpl) createKubeCluster(ctx context.Context, req apis.CreateClusterRequest) (*apis.ClusterBase, error) {
-	return nil, nil
+func (c *clusterServiceImpl) createKubeCluster(ctx context.Context, req apis.CreateClusterRequest, providerCluster *cloudprovider.CloudCluster) (*apis.ClusterBase, error) {
+	var err error
+	cluster := createClusterModelFromRequest(req, nil)
+	if cluster.Name == multicluster.ClusterLocalName {
+		return nil, bcode.ErrLocalClusterReserved
+	}
+	t := time.Now()
+	cluster.SetCreateTime(t)
+	cluster.SetUpdateTime(t)
+	if providerCluster != nil {
+		cluster.Provider = model.ProviderInfo{
+			Provider:    providerCluster.Provider,
+			ClusterName: providerCluster.Name,
+			ClusterID:   providerCluster.ID,
+			Zone:        providerCluster.Zone,
+			ZoneID:      providerCluster.ZoneID,
+			RegionID:    providerCluster.RegionID,
+			VpcID:       providerCluster.VpcID,
+			Labels:      providerCluster.Labels,
+		}
+		cluster.DashboardURL = providerCluster.DashBoardURL
+	}
+	if err = c.Store.Get(ctx, cluster); err == nil {
+		return nil, bcode.ErrClusterAlreadyExistInDataStore
+	} else if !errors.Is(err, datastore.ErrRecordNotExist) {
+		return nil, err
+	}
+	if req.KubeConfig != "" {
+		cluster.APIServerURL, err = joinClusterByKubeConfigString(context.WithValue(ctx, multicluster.KubeConfigContext, c.KubeConfig), c.K8sClient, req.Name, req.KubeConfig)
+		if err != nil {
+			return nil, err
+		}
+		c.setClusterStatusAndResourceInfo(ctx, cluster)
+		if err = c.Store.Add(ctx, cluster); err != nil {
+			c.rollbackJoinedKubeCluster(ctx, cluster)
+			if errors.Is(err, datastore.ErrRecordExist) {
+				return nil, bcode.ErrClusterAlreadyExistInDataStore
+			}
+			return nil, err
+		}
+		return newClusterBaseFromCluster(cluster), nil
+	}
+	if req.KubeConfigSecret != "" {
+		return nil, bcode.ErrKubeConfigSecretNotSupport
+	}
+	return nil, bcode.ErrKubeConfigAndSecretIsNotSet
 }
 
 func (c *clusterServiceImpl) CreateKubeCluster(ctx context.Context, req apis.CreateClusterRequest) (*apis.ClusterBase, error) {
-	return c.createKubeCluster(ctx, req)
+	return c.createKubeCluster(ctx, req, nil)
 }
 
 func (c *clusterServiceImpl) GetKubeCluster(ctx context.Context, clusterName string) (*apis.DetailClusterResponse, error) {
@@ -446,28 +492,115 @@ func (c *clusterServiceImpl) getClusterResourceInfoFromK8s(ctx context.Context, 
 	return clusterResourceInfo, nil
 }
 
-// ListCloudClusters -
-// Deprecated
 func (c *clusterServiceImpl) ListCloudClusters(ctx context.Context, provider string, req apis.AccessKeyRequest, pageNumber int, pageSize int) (*apis.ListCloudClusterResponse, error) {
-	return nil, nil
+	p, err := cloudprovider.GetClusterProvider(provider, req.AccessKeyID, req.AccessKeySecret, c.K8sClient)
+	if err != nil {
+		klog.Errorf("failed to get cluster provider: %s", err.Error())
+		return nil, bcode.ErrInvalidCloudClusterProvider
+	}
+	clusters, total, err := p.ListCloudClusters(pageNumber, pageSize)
+	if err != nil {
+		if p.IsInvalidKey(err) {
+			return nil, bcode.ErrInvalidAccessKeyOrSecretKey
+		}
+		klog.Errorf("failed to list cloud clusters: %s", err.Error())
+		return nil, bcode.ErrGetCloudClusterFailure
+	}
+	resp := &apis.ListCloudClusterResponse{
+		Clusters: []cloudprovider.CloudCluster{},
+		Total:    total,
+	}
+	for _, cluster := range clusters {
+		resp.Clusters = append(resp.Clusters, *cluster)
+	}
+	return resp, nil
 }
 
-// ConnectCloudCluster
-// Deprecated
 func (c *clusterServiceImpl) ConnectCloudCluster(ctx context.Context, provider string, req apis.ConnectCloudClusterRequest) (*apis.ClusterBase, error) {
-	return nil, nil
+	p, err := cloudprovider.GetClusterProvider(provider, req.AccessKeyID, req.AccessKeySecret, c.K8sClient)
+	if err != nil {
+		klog.Errorf("failed to get cluster provider: %s", err.Error())
+		return nil, bcode.ErrInvalidCloudClusterProvider
+	}
+	kubeConfig, err := p.GetClusterKubeConfig(req.ClusterID)
+	if err != nil {
+		klog.Errorf("failed to get cluster kubeConfig: %s", err.Error())
+		return nil, bcode.ErrGetCloudClusterFailure
+	}
+	cluster, err := p.GetClusterInfo(req.ClusterID)
+	if err != nil {
+		if p.IsInvalidKey(err) {
+			return nil, bcode.ErrInvalidAccessKeyOrSecretKey
+		}
+		klog.Errorf("failed to get cluster info: %s", err.Error())
+		return nil, bcode.ErrGetCloudClusterFailure
+	}
+	createReq := apis.CreateClusterRequest{
+		Name:        req.Name,
+		Alias:       req.Alias,
+		Description: req.Description,
+		Icon:        req.Icon,
+		Labels:      req.Labels,
+		KubeConfig:  kubeConfig,
+	}
+	return c.createKubeCluster(ctx, createReq, cluster)
 }
 
-// CreateCloudCluster
-// Deprecated
 func (c *clusterServiceImpl) CreateCloudCluster(ctx context.Context, provider string, req apis.CreateCloudClusterRequest) (*apis.CreateCloudClusterResponse, error) {
-	return nil, nil
+	p, err := cloudprovider.GetClusterProvider(provider, req.AccessKeyID, req.AccessKeySecret, c.K8sClient)
+	if err != nil {
+		klog.Errorf("failed to get cluster provider: %s", err.Error())
+		return nil, bcode.ErrInvalidCloudClusterProvider
+	}
+	_, err = p.CreateCloudCluster(ctx, req.Name, req.Zone, req.WorkerNumber, req.CPUCoresPerWorker, req.MemoryPerWorker)
+	if err != nil {
+		if kerrors.IsAlreadyExists(err) {
+			return nil, bcode.ErrCloudClusterAlreadyExists
+		}
+		klog.Errorf("failed to bootstrap terraform configuration: %s", err.Error())
+		return nil, bcode.ErrBootstrapTerraformConfiguration
+	}
+	return c.GetCloudClusterCreationStatus(ctx, provider, req.Name)
 }
 
-// getCloudClusterCreationStatus -
-// Deprecated
+func (c *clusterServiceImpl) convertTerraformConfigurationStateIntoCloudClusterCreationStatus(cfg v1beta1.Configuration) (status string, clusterID string, err error) {
+	status = string(cfg.Status.Apply.State)
+	if status == "" {
+		return "Initializing", "", nil
+	}
+	if cfg.DeletionTimestamp != nil {
+		return "Deleting", "", nil
+	}
+	if status == string(types.Available) {
+		cid, ok := cfg.Status.Apply.Outputs["CLUSTER_ID"]
+		if !ok {
+			status = "ClusterIDNotFound"
+			return status, "", bcode.ErrClusterIDNotFoundInTerraformConfiguration
+		}
+		return status, cid.Value, nil
+	}
+	return status, "", nil
+}
+
 func (c *clusterServiceImpl) getCloudClusterCreationStatus(ctx context.Context, provider string, cloudClusterName string) (*apis.CreateCloudClusterResponse, *v1beta1.Configuration, error) {
-	return nil, nil, nil
+	terraformConfigurationName := cloudprovider.GetCloudClusterFullName(provider, cloudClusterName)
+	cfg := &v1beta1.Configuration{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      terraformConfigurationName,
+			Namespace: util.GetRuntimeNamespace(),
+		},
+	}
+	if err := c.K8sClient.Get(ctx, client.ObjectKeyFromObject(cfg), cfg); err != nil {
+		if kerrors.IsNotFound(err) {
+			return nil, nil, bcode.ErrTerraformConfigurationNotFound
+		}
+		return nil, nil, err
+	}
+	status, clusterID, err := c.convertTerraformConfigurationStateIntoCloudClusterCreationStatus(*cfg)
+	if err != nil {
+		return nil, cfg, err
+	}
+	return &apis.CreateCloudClusterResponse{Name: cloudClusterName, Status: status, ClusterID: clusterID}, cfg, nil
 }
 
 func (c *clusterServiceImpl) GetCloudClusterCreationStatus(ctx context.Context, provider string, cloudClusterName string) (*apis.CreateCloudClusterResponse, error) {
@@ -475,10 +608,21 @@ func (c *clusterServiceImpl) GetCloudClusterCreationStatus(ctx context.Context, 
 	return resp, err
 }
 
-// ListCloudClusterCreation -
-// Deprecated
 func (c *clusterServiceImpl) ListCloudClusterCreation(ctx context.Context, provider string) (*apis.ListCloudClusterCreationResponse, error) {
-	return nil, nil
+	cfgs := v1beta1.ConfigurationList{}
+	if err := c.K8sClient.List(ctx, &cfgs, client.HasLabels{cloudprovider.CloudClusterCreatorLabelKey}, client.InNamespace(util.GetRuntimeNamespace())); err != nil {
+		return nil, err
+	}
+	var creations []apis.CreateCloudClusterResponse
+	for _, cfg := range cfgs.Items {
+		prefix := "cloud-cluster-" + provider + "-"
+		if strings.HasPrefix(cfg.Name, prefix) {
+			status, clusterID, _ := c.convertTerraformConfigurationStateIntoCloudClusterCreationStatus(cfg)
+			name := strings.TrimPrefix(cfg.Name, prefix)
+			creations = append(creations, apis.CreateCloudClusterResponse{Name: name, Status: status, ClusterID: clusterID})
+		}
+	}
+	return &apis.ListCloudClusterCreationResponse{Creations: creations}, nil
 }
 
 func (c *clusterServiceImpl) DeleteCloudClusterCreation(ctx context.Context, provider string, cloudClusterName string) (*apis.CreateCloudClusterResponse, error) {

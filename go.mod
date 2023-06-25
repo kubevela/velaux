@@ -103,6 +103,9 @@ require (
 require github.com/oam-dev/kubevela v1.9.1-0.20230621054853-6e9063d40c4c
 
 require (
+	github.com/alibabacloud-go/cs-20151215/v3 v3.0.35
+	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.4
+	github.com/alibabacloud-go/tea v1.2.0
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
 	github.com/julienschmidt/httprouter v1.3.0
@@ -110,9 +113,19 @@ require (
 
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230106234847-43070de90fa1 // indirect
+	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 // indirect
+	github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68 // indirect
+	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect
+	github.com/alibabacloud-go/openapi-util v0.1.0 // indirect
+	github.com/alibabacloud-go/tea-utils v1.3.1 // indirect
+	github.com/alibabacloud-go/tea-utils/v2 v2.0.1 // indirect
+	github.com/alibabacloud-go/tea-xml v1.1.2 // indirect
+	github.com/aliyun/credentials-go v1.1.2 // indirect
+	github.com/clbanning/mxj/v2 v2.5.5 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.14.3 // indirect
 	github.com/jellydator/ttlcache/v3 v3.0.1 // indirect
 	github.com/perimeterx/marshmallow v1.1.4 // indirect
+	github.com/tjfoc/gmsm v1.3.2 // indirect
 	github.com/vbatts/tar-split v0.11.3 // indirect
 )
 
