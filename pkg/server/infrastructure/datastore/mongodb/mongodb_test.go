@@ -24,7 +24,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -34,7 +34,7 @@ import (
 )
 
 var mongodbDriver datastore.DataStore
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func(ctx SpecContext) {
 	rand.Seed(time.Now().UnixNano())
 	By("bootstrapping mongodb test environment")
 	clientOpts := options.Client().ApplyURI("mongodb://localhost:27017")
@@ -57,7 +57,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(mongodbDriver).ToNot(BeNil())
 	By("create mongodb driver success")
-	close(done)
+
 }, 120)
 
 var _ = Describe("Test mongodb datastore driver", func() {

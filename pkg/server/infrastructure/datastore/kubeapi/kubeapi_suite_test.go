@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -46,7 +46,7 @@ var testEnv *envtest.Environment
 var testScheme = runtime.NewScheme()
 var kubeStore datastore.DataStore
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func(ctx SpecContext) {
 	rand.Seed(time.Now().UnixNano())
 	By("bootstrapping test environment")
 
@@ -76,8 +76,8 @@ var _ = BeforeSuite(func(done Done) {
 	kubeStore, err = New(context.TODO(), datastore.Config{Database: "test"}, k8sClient)
 	Expect(err).Should(BeNil())
 	Expect(kubeStore).ToNot(BeNil())
-	close(done)
-}, 240)
+
+}, NodeTimeout(time.Minute))
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")

@@ -47,15 +47,13 @@ require (
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
 	github.com/kubevela/pkg v1.8.1-0.20230613075152-2cef0c31b14e
-	github.com/kubevela/prism v1.7.0-alpha.1
-	github.com/kubevela/workflow v0.5.1-0.20230412142923-1f15ba091699
+	github.com/kubevela/prism v1.7.0-alpha.1.0.20230403030519-b7e45f7f842e
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 	github.com/oam-dev/cluster-gateway v1.9.0-alpha.2
 	github.com/oam-dev/cluster-register v1.0.4-0.20230424040021-147f7c1fefe5 // indirect
 	github.com/oam-dev/terraform-config-inspect v0.0.0-20210418082552-fc72d929aa28 // indirect
 	github.com/oam-dev/terraform-controller v0.7.10
-	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.27.8
 	github.com/openkruise/kruise-api v1.4.0 // indirect
 	github.com/pkg/errors v0.9.1
@@ -100,8 +98,6 @@ require (
 	sigs.k8s.io/yaml v1.3.0
 )
 
-require github.com/oam-dev/kubevela v1.9.1-0.20230621054853-6e9063d40c4c
-
 require (
 	github.com/alibabacloud-go/cs-20151215/v3 v3.0.35
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.4
@@ -109,6 +105,9 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/kubevela/workflow v0.6.0
+	github.com/oam-dev/kubevela v1.9.1
+	github.com/onsi/ginkgo v1.16.5
 )
 
 require (
@@ -124,6 +123,7 @@ require (
 	github.com/clbanning/mxj/v2 v2.5.5 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.14.3 // indirect
 	github.com/jellydator/ttlcache/v3 v3.0.1 // indirect
+	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.4 // indirect
 	github.com/tjfoc/gmsm v1.3.2 // indirect
 	github.com/vbatts/tar-split v0.11.3 // indirect

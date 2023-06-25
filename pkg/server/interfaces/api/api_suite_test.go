@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"k8s.io/client-go/rest"
@@ -48,7 +48,7 @@ func TestAPIInterface(t *testing.T) {
 	RunSpecs(t, "APIInterface Suite")
 }
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func(ctx SpecContext) {
 	rand.Seed(time.Now().UnixNano())
 	By("bootstrapping Sync test environment")
 
@@ -74,8 +74,8 @@ var _ = BeforeSuite(func(done Done) {
 	By("new kube client success")
 	clients.SetKubeClient(k8sClient)
 	Expect(err).Should(BeNil())
-	close(done)
-}, 240)
+
+}, NodeTimeout(time.Minute))
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
