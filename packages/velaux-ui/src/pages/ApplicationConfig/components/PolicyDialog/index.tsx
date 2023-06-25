@@ -486,7 +486,7 @@ class PolicyDialog extends React.Component<Props, State> {
     const showType = (selectedPolicyItem && selectedPolicyItem?.name == 'custom') || policy != undefined;
     const span = showType ? 8 : 12;
 
-    const plugin = plugins.find(o => o?.placement === "definition.policy." + selectedPolicyItem?.type);
+    const plugin = plugins.find(o => o?.position === "definition.policy." + selectedPolicyItem?.type);
     const usePlugin = selectedPolicyItem && plugin;
 
     return (

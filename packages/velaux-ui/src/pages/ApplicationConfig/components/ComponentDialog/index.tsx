@@ -335,7 +335,7 @@ class ComponentDialog extends React.Component<Props, State> {
     };
 
     const componentType: string = this.field.getValue('componentType') || '';
-    const plugin = plugins.find(o => o?.placement === "definition.component." + componentType);
+    const plugin = plugins.find(o => o?.position === "definition.component." + componentType);
     const usePlugin = componentType && plugin;
 
     return (

@@ -74,8 +74,7 @@ class StepForm extends Component<Props, State> {
     return getPluginSrv()
       .listAppPagePlugins( PluginType.Definition)
       .then((plugins) => {
-       
-        const plugin = plugins.find(o => o?.placement ===  "definition.workflowstep." + type);
+        const plugin = plugins.find(o => o?.position === "definition.workflow_step." + type);
         this.setState({
           plugin: plugin || null
         });
