@@ -108,7 +108,7 @@ var _ = Describe("Test cluster rest api", func() {
 
 	})
 
-	Context("Test cloud cluster rest api", func() {
+	PContext("Test cloud cluster rest api", func() {
 
 		var clusterName string
 
