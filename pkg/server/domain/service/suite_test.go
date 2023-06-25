@@ -19,6 +19,7 @@ package service
 import (
 	"context"
 	"fmt"
+	v1alpha12 "github.com/cloudtty/cloudtty/pkg/apis/cloudshell/v1alpha1"
 	"math/rand"
 	"os"
 	"strconv"
@@ -134,6 +135,8 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 	cfg.Timeout = time.Minute * 2
 	scheme := common.Scheme
 	err = v1alpha1.AddToScheme(scheme)
+	Expect(err).ShouldNot(HaveOccurred())
+	err = v1alpha12.AddToScheme(scheme)
 	Expect(err).ShouldNot(HaveOccurred())
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme})
 	Expect(err).Should(BeNil())
