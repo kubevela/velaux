@@ -92,10 +92,6 @@ func initKubeapiTestDs() (datastore.DataStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	AfterSuite(func() {
-		err = testEnv.Stop()
-		Expect(err).ToNot(HaveOccurred())
-	})
 	return kubeStore, nil
 }
 
