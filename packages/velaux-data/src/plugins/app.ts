@@ -10,7 +10,7 @@ export interface PluginRootProps<T extends KeyValue = KeyValue> {
   meta: AppPluginMeta<T>;
 }
 
-export interface AppRootProps<T extends KeyValue = KeyValue> extends PluginRootProps <T> {
+export interface PageRootProps<T extends KeyValue = KeyValue> extends PluginRootProps <T> {
   /**
    * base URL segment for an app, /app/pluginId
    */
@@ -34,9 +34,10 @@ export interface DefinitionRootProps<T extends KeyValue = KeyValue> extends Plug
   ref: any;
 }
 
+type AppRootProps<T> = PageRootProps<T> | DefinitionRootProps<T>;
 export class AppPagePlugin<T extends KeyValue = KeyValue> extends VelaUXPlugin<AppPluginMeta<T>> {
   // Content under: /a/${plugin-id}/*
-  root?: ComponentType<AppRootProps<T> | DefinitionRootProps<T>>;
+  root?: ComponentType<AppRootProps<T>>;
 
   /**
    * Called after the module has loaded, and before the app is used.
@@ -51,7 +52,7 @@ export class AppPagePlugin<T extends KeyValue = KeyValue> extends VelaUXPlugin<A
    *
    * If the NavModel is configured, the page will have a managed frame, otheriwse it has full control.
    */
-  setRootPage(root: ComponentType<AppRootProps<T> | DefinitionRootProps<T>>) {
+  setRootPage(root: ComponentType<AppRootProps<T>>) {
     this.root = root;
     return this;
   }
