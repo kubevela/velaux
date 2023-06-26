@@ -34,7 +34,7 @@ export interface DefinitionRootProps<T extends KeyValue = KeyValue> extends Plug
   ref: any;
 }
 
-type AppRootProps<T> = PageRootProps<T> | DefinitionRootProps<T>;
+export type AppRootProps<T> = PageRootProps<T> | DefinitionRootProps<T>;
 export class AppPagePlugin<T extends KeyValue = KeyValue> extends VelaUXPlugin<AppPluginMeta<T>> {
   // Content under: /a/${plugin-id}/*
   root?: ComponentType<AppRootProps<T>>;
