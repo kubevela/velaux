@@ -27,7 +27,6 @@ import (
 
 	"github.com/kubevela/workflow/pkg/cue/packages"
 
-	"github.com/oam-dev/kubevela/pkg/oam/discoverymapper"
 	"github.com/oam-dev/kubevela/pkg/velaql"
 
 	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
@@ -44,23 +43,16 @@ type VelaQLService interface {
 type velaQLServiceImpl struct {
 	KubeClient client.Client `inject:"kubeClient"`
 	KubeConfig *rest.Config  `inject:"kubeConfig"`
-	dm         discoverymapper.DiscoveryMapper
 	pd         *packages.PackageDiscover
 }
 
 // NewVelaQLService new velaQL service
 func NewVelaQLService() VelaQLService {
-	dm, err := clients.GetDiscoverMapper()
-	if err != nil {
-		klog.Fatalf("get discover mapper failure %s", err.Error())
-	}
-
 	pd, err := clients.GetPackageDiscover()
 	if err != nil {
 		klog.Fatalf("get package discover failure %s", err.Error())
 	}
 	return &velaQLServiceImpl{
-		dm: dm,
 		pd: pd,
 	}
 }
@@ -72,7 +64,7 @@ func (v *velaQLServiceImpl) QueryView(ctx context.Context, velaQL string) (*apis
 		return nil, bcode.ErrParseVelaQL
 	}
 
-	queryValue, err := velaql.NewViewHandler(v.KubeClient, v.KubeConfig, v.dm, v.pd).QueryView(utils.ContextWithUserInfo(ctx), query)
+	queryValue, err := velaql.NewViewHandler(v.KubeClient, v.KubeConfig, v.pd).QueryView(utils.ContextWithUserInfo(ctx), query)
 	if err != nil {
 		klog.Errorf("fail to query the view %s", err.Error())
 		return nil, bcode.ErrViewQuery

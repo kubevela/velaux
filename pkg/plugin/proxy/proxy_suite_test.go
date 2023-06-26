@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,7 +46,7 @@ var k8sClient client.Client
 var testEnv *envtest.Environment
 var testScheme = runtime.NewScheme()
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func(ctx SpecContext) {
 	rand.Seed(time.Now().UnixNano())
 	By("bootstrapping test environment")
 
@@ -74,8 +74,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	Expect(k8sClient.Create(context.TODO(), &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: kubevelatypes.DefaultKubeVelaNS}})).Should(BeNil())
 
-	close(done)
-}, 240)
+}, NodeTimeout(time.Minute))
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")

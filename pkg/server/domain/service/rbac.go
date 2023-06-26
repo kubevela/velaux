@@ -29,12 +29,11 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/julienschmidt/httprouter"
-	"k8s.io/klog/v2"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
+	"github.com/kubevela/pkg/util/slices"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/auth"
-	"github.com/oam-dev/kubevela/pkg/utils"
+	"k8s.io/klog/v2"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kubevela/velaux/pkg/plugin/router"
 	plugintypes "github.com/kubevela/velaux/pkg/plugin/types"
@@ -445,7 +444,7 @@ func registerResourceAction(resource string, actions ...string) {
 	resource = path
 	if _, exist := resourceActions[resource]; exist {
 		for _, action := range actions {
-			if !utils.StringsContain(resourceActions[resource], action) {
+			if !slices.Contains(resourceActions[resource], action) {
 				resourceActions[resource] = append(resourceActions[resource], action)
 			}
 		}
@@ -925,7 +924,7 @@ func (p *rbacServiceImpl) ListRole(ctx context.Context, projectName string, page
 		}
 	}
 
-	policies, err := p.listPermPolices(ctx, projectName, utils.MapKey2Array(policySet))
+	policies, err := p.listPermPolices(ctx, projectName, apiserverutils.MapKey2Array(policySet))
 	if err != nil {
 		klog.Errorf("list perm policies failure %s", err.Error())
 	}
@@ -1049,7 +1048,7 @@ func (p *rbacServiceImpl) SyncDefaultRoleAndUsersForProject(ctx context.Context,
 			Effect:    permissionTemp.Effect,
 		}
 		if perm, exist := permissionMap[permissionTemp.Name]; exist {
-			if !utils.EqualSlice(perm.Resources, permissionTemp.Resources) || utils.EqualSlice(perm.Actions, permissionTemp.Actions) {
+			if !apiserverutils.EqualSlice(perm.Resources, permissionTemp.Resources) || apiserverutils.EqualSlice(perm.Actions, permissionTemp.Actions) {
 				if err := p.Store.Put(ctx, permission); err != nil {
 					return err
 				}
@@ -1188,7 +1187,7 @@ func (r *RequestResourceAction) SetActions(actions []string) {
 
 func (r *RequestResourceAction) match(policy *model.Permission) bool {
 	// match actions, the policy actions will include the actions of request
-	if !utils.SliceIncludeSlice(policy.Actions, r.actions) && !utils.StringsContain(policy.Actions, "*") {
+	if !apiserverutils.SliceIncludeSlice(policy.Actions, r.actions) && !slices.Contains(policy.Actions, "*") {
 		return false
 	}
 	// match resources

@@ -22,6 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kubevela/pkg/util/stringtools"
+
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
@@ -33,7 +35,6 @@ import (
 	"github.com/oam-dev/kubevela/pkg/multicluster"
 	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/policy"
-	"github.com/oam-dev/kubevela/pkg/utils/schema"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
@@ -98,7 +99,7 @@ func FromCRWorkflow(ctx context.Context, cli client.Client, appPrimaryKey string
 		AppPrimaryKey: appPrimaryKey,
 		EnvName:       envName,
 		Name:          name,
-		Alias:         fmt.Sprintf("%s Workflow", schema.FirstUpper(envName)),
+		Alias:         fmt.Sprintf("%s Workflow", stringtools.Capitalize(envName)),
 		Description:   model.AutoGenDesc,
 		Default:       &defaultWorkflow,
 	}

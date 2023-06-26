@@ -25,6 +25,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spf13/cast"
+
 	"github.com/tidwall/gjson"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -34,8 +36,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	pkgUtils "github.com/oam-dev/kubevela/pkg/utils"
 
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 )
@@ -499,12 +499,12 @@ func convertIndex2Labels(index map[string]interface{}) map[string]string {
 	}
 	ret := make(map[string]string, len(index))
 	for k, v := range index {
-		value := pkgUtils.ToString(v)
+		value := cast.ToString(v)
 		if value == "" {
 			klog.Warningf("unable to cast %#v of type %T to string", v, v)
 			continue
 		}
-		ret[k] = pkgUtils.ToString(v)
+		ret[k] = cast.ToString(v)
 	}
 	return ret
 }

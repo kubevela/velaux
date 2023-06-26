@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/kubevela/velaux/pkg/cloudprovider"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -32,7 +34,6 @@ import (
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/addon"
-	"github.com/oam-dev/kubevela/pkg/cloudprovider"
 	"github.com/oam-dev/kubevela/pkg/config"
 	velacommon "github.com/oam-dev/kubevela/pkg/utils/common"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"

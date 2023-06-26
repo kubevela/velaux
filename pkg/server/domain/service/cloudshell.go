@@ -26,6 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kubevela/pkg/util/slices"
+
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 
 	"github.com/cloudtty/cloudtty/pkg/apis/cloudshell/v1alpha1"
@@ -43,7 +45,6 @@ import (
 
 	kubevelatypes "github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/auth"
-	pkgutils "github.com/oam-dev/kubevela/pkg/utils"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -263,7 +264,7 @@ func (c *cloudShellServiceImpl) prepareKubeConfig(ctx context.Context) error {
 	}
 	groups = append(groups, utils.TemplateReaderGroup)
 
-	if pkgutils.StringsContain(user.UserRoles, model.RoleAdmin) {
+	if slices.Contains(user.UserRoles, model.RoleAdmin) {
 		groups = append(groups, utils.KubeVelaAdminGroupPrefix+"admin")
 	}
 

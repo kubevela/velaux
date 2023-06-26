@@ -24,6 +24,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/kubevela/pkg/util/profiling"
+
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/fatih/color"
 	"github.com/go-openapi/spec"
@@ -33,7 +35,6 @@ import (
 	"github.com/kubevela/velaux/cmd/server/app/options"
 	"github.com/kubevela/velaux/pkg/server"
 
-	"github.com/oam-dev/kubevela/pkg/utils"
 	"github.com/oam-dev/kubevela/version"
 )
 
@@ -111,9 +112,7 @@ func Run(s *options.ServerRunOptions) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if s.GenericServerRunOptions.PprofAddr != "" {
-		go utils.EnablePprof(s.GenericServerRunOptions.PprofAddr, errChan)
-	}
+	go profiling.StartProfilingServer(errChan)
 
 	go func() {
 		if err := run(ctx, s, errChan); err != nil {

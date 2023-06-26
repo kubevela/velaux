@@ -20,15 +20,18 @@ import (
 	"context"
 	"errors"
 
-	"k8s.io/klog/v2"
+	pkgutils "github.com/oam-dev/kubevela/pkg/utils"
 
-	"github.com/oam-dev/kubevela/pkg/utils"
+	"github.com/kubevela/pkg/util/slices"
+	"k8s.io/klog/v2"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
+
+	"github.com/kubevela/velaux/pkg/server/utils"
 )
 
 // DataStoreApp is a memory struct that describes the model of an application in datastore
@@ -161,7 +164,7 @@ func StoreComponents(ctx context.Context, appPrimaryKey string, expComps []*mode
 		if comp.Creator != model.AutoGenComp {
 			continue
 		}
-		if !utils.StringsContain(readyToDelete, comp.Name) {
+		if !slices.Contains(readyToDelete, comp.Name) {
 			continue
 		}
 		if err := ds.Delete(ctx, comp); err != nil {
@@ -174,7 +177,7 @@ func StoreComponents(ctx context.Context, appPrimaryKey string, expComps []*mode
 
 	// add or update new app's components for datastore
 	for _, comp := range expComps {
-		if utils.StringsContain(readyToAdd, comp.Name) {
+		if slices.Contains(readyToAdd, comp.Name) {
 			err = ds.Add(ctx, comp)
 		} else {
 			if old := existComponentMap[comp.Name]; old != nil {
@@ -183,7 +186,7 @@ func StoreComponents(ctx context.Context, appPrimaryKey string, expComps []*mode
 			err = ds.Put(ctx, comp)
 		}
 		if err != nil {
-			klog.Warningf("convert comp %s for app %s into datastore failure %s", comp.Name, utils.Sanitize(appPrimaryKey), err.Error())
+			klog.Warningf("convert comp %s for app %s into datastore failure %s", comp.Name, pkgutils.Sanitize(appPrimaryKey), err.Error())
 			return err
 		}
 	}
@@ -221,7 +224,7 @@ func StorePolicy(ctx context.Context, appPrimaryKey string, expPolicies []*model
 		if plc.Creator != model.AutoGenPolicy {
 			continue
 		}
-		if !utils.StringsContain(readyToDelete, plc.Name) {
+		if !slices.Contains(readyToDelete, plc.Name) {
 			continue
 		}
 		if err := ds.Delete(ctx, plc); err != nil {
@@ -234,7 +237,7 @@ func StorePolicy(ctx context.Context, appPrimaryKey string, expPolicies []*model
 
 	// add or update new app's policies for datastore
 	for _, plc := range expPolicies {
-		if utils.StringsContain(readyToAdd, plc.Name) {
+		if slices.Contains(readyToAdd, plc.Name) {
 			err = ds.Add(ctx, plc)
 		} else {
 			if existPolicy := policyMap[plc.Name]; existPolicy != nil {
@@ -243,7 +246,7 @@ func StorePolicy(ctx context.Context, appPrimaryKey string, expPolicies []*model
 			err = ds.Put(ctx, plc)
 		}
 		if err != nil {
-			klog.Warningf("convert policy %s for app %s into datastore failure %s", plc.Name, utils.Sanitize(appPrimaryKey), err.Error())
+			klog.Warningf("convert policy %s for app %s into datastore failure %s", plc.Name, pkgutils.Sanitize(appPrimaryKey), err.Error())
 			return err
 		}
 	}

@@ -23,6 +23,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/kubevela/pkg/util/stringtools"
+
 	"github.com/oam-dev/kubevela/pkg/utils/addon"
 	"github.com/oam-dev/kubevela/pkg/utils/filters"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
@@ -38,9 +40,9 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/kubevela/pkg/util/slices"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
-	"github.com/oam-dev/kubevela/pkg/utils"
 
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
@@ -85,6 +87,9 @@ const (
 	kindTraitDefinition        = "TraitDefinition"
 	kindWorkflowStepDefinition = "WorkflowStepDefinition"
 	kindPolicyDefinition       = "PolicyDefinition"
+
+	// LabelDefinitionScope is the label key for definition scope, with this key, we know if the definition is for Application or WorkflowRun
+	LabelDefinitionScope = "custom.definition.oam.dev/scope"
 )
 
 // NewDefinitionService new definition service
@@ -120,7 +125,7 @@ func (d *definitionServiceImpl) listDefinitions(ctx context.Context, list *unstr
 			filterScope = "Application"
 		}
 		matchLabels.MatchExpressions = append(matchLabels.MatchExpressions, metav1.LabelSelectorRequirement{
-			Key:      types.LabelDefinitionScope,
+			Key:      LabelDefinitionScope,
 			Operator: metav1.LabelSelectorOpNotIn,
 			Values:   []string{filterScope},
 		})
@@ -441,7 +446,7 @@ func renderDefaultUISchema(apiSchema *openapi3.Schema) []*schema.UIParameter {
 	var params []*schema.UIParameter
 	for key, property := range apiSchema.Properties {
 		if property.Value != nil {
-			param := renderUIParameter(key, schema.FirstUpper(key), property, apiSchema.Required)
+			param := renderUIParameter(key, stringtools.Capitalize(key), property, apiSchema.Required)
 			params = append(params, param)
 		}
 	}
@@ -490,17 +495,18 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	if property.Value.Properties != nil {
 		parameter.SubParameters = renderDefaultUISchema(property.Value)
 	}
-	if property.Value.AdditionalProperties != nil {
-		parameter.SubParameters = renderDefaultUISchema(property.Value.AdditionalProperties.Value)
+	var ap = property.Value.AdditionalProperties
+	if ap.Has != nil && *ap.Has && ap.Schema != nil && ap.Schema.Value != nil {
+		value := ap.Schema.Value
+		parameter.SubParameters = renderDefaultUISchema(value)
 		var enable = true
-		value := property.Value.AdditionalProperties.Value
-		parameter.AdditionalParameter = renderUIParameter(value.Title, schema.FirstUpper(value.Title), property.Value.AdditionalProperties, value.Required)
+		parameter.AdditionalParameter = renderUIParameter(value.Title, stringtools.Capitalize(value.Title), property.Value.AdditionalProperties.Schema, value.Required)
 		parameter.Additional = &enable
 	}
 	parameter.Validate = &schema.Validate{}
 	parameter.Validate.DefaultValue = property.Value.Default
 	for _, enum := range property.Value.Enum {
-		parameter.Validate.Options = append(parameter.Validate.Options, schema.Option{Label: schema.RenderLabel(enum), Value: enum})
+		parameter.Validate.Options = append(parameter.Validate.Options, schema.Option{Label: RenderLabel(enum), Value: enum})
 	}
 	parameter.JSONKey = key
 	parameter.Description = property.Value.Description
@@ -511,7 +517,19 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	parameter.Validate.Min = property.Value.Min
 	parameter.Validate.MinLength = property.Value.MinLength
 	parameter.Validate.Pattern = property.Value.Pattern
-	parameter.Validate.Required = utils.StringsContain(required, property.Value.Title)
+	parameter.Validate.Required = slices.Contains(required, property.Value.Title)
 	parameter.Sort = 100
 	return &parameter
+}
+
+// RenderLabel render option label
+func RenderLabel(source interface{}) string {
+	switch v := source.(type) {
+	case int:
+		return fmt.Sprintf("%d", v)
+	case string:
+		return stringtools.Capitalize(v)
+	default:
+		return stringtools.Capitalize(fmt.Sprintf("%v", v))
+	}
 }

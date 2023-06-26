@@ -23,7 +23,7 @@ import (
 	"net/url"
 
 	kubevelatypes "github.com/oam-dev/kubevela/apis/types"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/rbac/v1"

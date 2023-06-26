@@ -27,6 +27,7 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/kubevela/pkg/util/slices"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/auth"
@@ -123,7 +124,7 @@ func (p *envServiceImpl) ListEnvs(ctx context.Context, page, pageSize int, listO
 		return &apisv1.ListEnvResponse{Envs: []*apisv1.Env{}, Total: 0}, nil
 	}
 	if listOption.Project != "" {
-		if !util.StringsContain(availableProjectNames, listOption.Project) {
+		if !slices.Contains(availableProjectNames, listOption.Project) {
 			return &apisv1.ListEnvResponse{Envs: []*apisv1.Env{}, Total: 0}, nil
 		}
 	}
@@ -208,7 +209,7 @@ func (p *envServiceImpl) UpdateEnv(ctx context.Context, name string, req apisv1.
 	}
 	var targets []*model.Target
 	if len(req.Targets) > 0 {
-		_, _, deleted := util.ThreeWaySliceCompare(req.Targets, env.Targets)
+		_, _, deleted := utils.ThreeWaySliceCompare(req.Targets, env.Targets)
 		if len(deleted) > 0 {
 			count, err := p.GetAppCountInEnv(ctx, env)
 			if err != nil {

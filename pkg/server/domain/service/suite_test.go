@@ -25,8 +25,10 @@ import (
 	"testing"
 	"time"
 
+	v1alpha12 "github.com/cloudtty/cloudtty/pkg/apis/cloudshell/v1alpha1"
+
 	"github.com/kubevela/workflow/api/v1alpha1"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -113,7 +115,7 @@ func InitTestEnv(dbName string) {
 	ctx = context.Background()
 }
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func(ctx SpecContext) {
 	rand.Seed(time.Now().UnixNano())
 	By("bootstrapping test environment")
 
@@ -135,6 +137,8 @@ var _ = BeforeSuite(func(done Done) {
 	scheme := common.Scheme
 	err = v1alpha1.AddToScheme(scheme)
 	Expect(err).ShouldNot(HaveOccurred())
+	err = v1alpha12.AddToScheme(scheme)
+	Expect(err).ShouldNot(HaveOccurred())
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme})
 	Expect(err).Should(BeNil())
 	Expect(k8sClient).ToNot(BeNil())
@@ -143,9 +147,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).Should(BeNil())
 
 	initDefinitions(k8sClient)
-
-	close(done)
-}, 240)
+}, NodeTimeout(time.Minute))
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
