@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	mysqlgorm "gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -31,7 +31,7 @@ import (
 )
 
 var mysqlDriver datastore.DataStore
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func(ctx SpecContext) {
 	rand.Seed(time.Now().UnixNano())
 	By("bootstrapping mysql test environment")
 	db, err := gorm.Open(mysqlgorm.Open("root:kubevelaSQL123@tcp(127.0.0.1:3306)/kubevela?parseTime=True"), &gorm.Config{})
@@ -47,5 +47,4 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(mysqlDriver).ToNot(BeNil())
 	By("create mysql driver success")
-	close(done)
-}, 120)
+}, NodeTimeout(2*time.Minute))
