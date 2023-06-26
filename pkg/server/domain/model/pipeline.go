@@ -38,11 +38,11 @@ type WorkflowSpec struct {
 // Pipeline is the model of pipeline
 type Pipeline struct {
 	BaseModel
-	Spec        WorkflowSpec
-	Name        string `json:"name"`
-	Project     string `json:"project"`
-	Alias       string `json:"alias"`
-	Description string `json:"description"`
+	Spec        WorkflowSpec `gorm:"serializer:json"`
+	Name        string       `json:"name" gorm:"primaryKey"`
+	Project     string       `json:"project" gorm:"primaryKey"`
+	Alias       string       `json:"alias"`
+	Description string       `json:"description"`
 }
 
 // PrimaryKey return custom primary key
@@ -81,9 +81,9 @@ type Value struct {
 // PipelineContext is pipeline's context groups
 type PipelineContext struct {
 	BaseModel
-	PipelineName string             `json:"pipelineName"`
-	ProjectName  string             `json:"projectName"`
-	Contexts     map[string][]Value `json:"contexts"`
+	PipelineName string             `json:"pipelineName" gorm:"primaryKey"`
+	ProjectName  string             `json:"projectName" gorm:"primaryKey"`
+	Contexts     map[string][]Value `json:"contexts" gorm:"serializer:json"`
 }
 
 // TableName return custom table name

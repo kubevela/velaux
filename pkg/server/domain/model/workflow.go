@@ -37,15 +37,15 @@ const UnFinished = "false"
 // Workflow application delivery database model
 type Workflow struct {
 	BaseModel
-	Name        string `json:"name"`
+	Name        string `json:"name" gorm:"primaryKey"`
 	Alias       string `json:"alias"`
 	Description string `json:"description"`
 	// Workflow used by the default
 	Default       *bool                                `json:"default"`
-	AppPrimaryKey string                               `json:"appPrimaryKey"`
+	AppPrimaryKey string                               `json:"appPrimaryKey" gorm:"primaryKey"`
 	EnvName       string                               `json:"envName"`
-	Mode          workflowv1alpha1.WorkflowExecuteMode `json:"mode,omitempty"`
-	Steps         []WorkflowStep                       `json:"steps,omitempty"`
+	Mode          workflowv1alpha1.WorkflowExecuteMode `json:"mode,omitempty" gorm:"serializer:json"`
+	Steps         []WorkflowStep                       `json:"steps,omitempty" gorm:"serializer:json"`
 }
 
 // WorkflowStep defines how to execute a workflow step.
@@ -114,16 +114,16 @@ type WorkflowRecord struct {
 	AppPrimaryKey string `json:"appPrimaryKey"`
 	// RevisionPrimaryKey: should be assigned the version(PublishVersion)
 	RevisionPrimaryKey string               `json:"revisionPrimaryKey"`
-	Name               string               `json:"name"`
+	Name               string               `json:"name" gorm:"primaryKey"`
 	Namespace          string               `json:"namespace"`
-	StartTime          time.Time            `json:"startTime,omitempty"`
-	EndTime            time.Time            `json:"endTime,omitempty"`
+	StartTime          time.Time            `json:"startTime,omitempty" gorm:"default:'2020-01-01'"`
+	EndTime            time.Time            `json:"endTime,omitempty" gorm:"default:'2020-01-01'"`
 	Finished           string               `json:"finished"`
-	Steps              []WorkflowStepStatus `json:"steps,omitempty"`
+	Steps              []WorkflowStepStatus `json:"steps,omitempty" gorm:"serializer:json"`
 	Status             string               `json:"status"`
 	Message            string               `json:"message"`
 	Mode               string               `json:"mode"`
-	ContextValue       map[string]string    `json:"contextValue,omitempty"`
+	ContextValue       map[string]string    `json:"contextValue,omitempty" gorm:"serializer:json"`
 }
 
 // WorkflowStepStatus is the workflow step status database model

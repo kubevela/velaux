@@ -24,12 +24,12 @@ func init() {
 // It includes kubernetes clusters or cloud service providers
 type Target struct {
 	BaseModel
-	Name        string                 `json:"name"`
+	Name        string                 `json:"name" gorm:"primaryKey"`
 	Alias       string                 `json:"alias,omitempty"`
 	Project     string                 `json:"project"`
 	Description string                 `json:"description,omitempty"`
-	Cluster     *ClusterTarget         `json:"cluster,omitempty"`
-	Variable    map[string]interface{} `json:"variable,omitempty"`
+	Cluster     *ClusterTarget         `json:"cluster,omitempty" gorm:"serializer:json"`
+	Variable    map[string]interface{} `json:"variable,omitempty" gorm:"serializer:json"`
 }
 
 // TableName return custom table name

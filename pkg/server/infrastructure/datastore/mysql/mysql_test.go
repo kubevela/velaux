@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mongodb
+package mysql
 
 import (
 	"context"
@@ -23,35 +23,28 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	mysqlgorm "gorm.io/driver/mysql"
+	"gorm.io/gorm"
 
+	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 )
 
-var mongodbDriver datastore.DataStore
+var mysqlDriver datastore.DataStore
 var _ = BeforeSuite(func(ctx SpecContext) {
 	rand.Seed(time.Now().UnixNano())
-	By("bootstrapping mongodb test environment")
-	clientOpts := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, err := mongo.Connect(context.TODO(), clientOpts)
+	By("bootstrapping mysql test environment")
+	db, err := gorm.Open(mysqlgorm.Open("root:kubevelaSQL123@tcp(127.0.0.1:3306)/kubevela?parseTime=True"), &gorm.Config{})
 	Expect(err).ToNot(HaveOccurred())
-	err = client.Database("kubevela").Drop(context.TODO())
-	Expect(err).ToNot(HaveOccurred())
-
-	mongodbDriver, err = New(context.TODO(), datastore.Config{
-		URL:      "mongodb://localhost:27017",
+	for _, v := range model.GetRegisterModels() {
+		err := db.Migrator().DropTable(&v)
+		Expect(err).ToNot(HaveOccurred())
+	}
+	mysqlDriver, err = New(context.TODO(), datastore.Config{
+		URL:      "root:kubevelaSQL123@tcp(127.0.0.1:3306)/kubevela?parseTime=True",
 		Database: "kubevela",
 	})
 	Expect(err).ToNot(HaveOccurred())
-	Expect(mongodbDriver).ToNot(BeNil())
-
-	mongodbDriver, err = New(context.TODO(), datastore.Config{
-		URL:      "localhost:27017",
-		Database: "kubevela",
-	})
-	Expect(err).ToNot(HaveOccurred())
-	Expect(mongodbDriver).ToNot(BeNil())
-	By("create mongodb driver success")
-
+	Expect(mysqlDriver).ToNot(BeNil())
+	By("create mysql driver success")
 }, NodeTimeout(2*time.Minute))

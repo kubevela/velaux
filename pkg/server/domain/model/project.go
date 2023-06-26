@@ -23,7 +23,7 @@ func init() {
 // Project basic model
 type Project struct {
 	BaseModel
-	Name        string `json:"name"`
+	Name        string `json:"name" gorm:"primaryKey"`
 	Alias       string `json:"alias"`
 	Owner       string `json:"owner"`
 	Description string `json:"description,omitempty"`

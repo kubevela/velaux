@@ -53,14 +53,14 @@ var (
 // Cluster describes the model of cluster in apiserver
 type Cluster struct {
 	BaseModel
-	Name             string            `json:"name"`
+	Name             string            `json:"name" gorm:"primaryKey"`
 	Alias            string            `json:"alias"`
 	Description      string            `json:"description"`
 	Icon             string            `json:"icon"`
-	Labels           map[string]string `json:"labels"`
+	Labels           map[string]string `json:"labels" gorm:"serializer:json"`
 	Status           string            `json:"status"`
 	Reason           string            `json:"reason"`
-	Provider         ProviderInfo      `json:"provider"`
+	Provider         ProviderInfo      `json:"provider" gorm:"serializer:json"`
 	APIServerURL     string            `json:"apiServerURL"`
 	DashboardURL     string            `json:"dashboardURL"`
 	KubeConfig       string            `json:"kubeConfig"`

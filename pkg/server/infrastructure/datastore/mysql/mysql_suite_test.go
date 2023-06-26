@@ -14,16 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package datastore_test
+package mysql
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 )
 
-func TestDatastore(t *testing.T) {
+func TestMySQL(t *testing.T) {
+	_, err := New(context.TODO(), datastore.Config{
+		URL:      "root:kubevelaSQL123@tcp(127.0.0.1:3306)/kubevela?parseTime=True",
+		Database: "kubevela",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Datastore Suite")
+	RunSpecs(t, "MySQL Suite")
 }

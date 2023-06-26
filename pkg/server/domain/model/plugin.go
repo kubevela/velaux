@@ -23,10 +23,10 @@ func init() {
 // PluginSetting save the setting data of the plugin
 type PluginSetting struct {
 	BaseModel
-	ID             string                 `json:"id"`
+	ID             string                 `json:"id" gorm:"primaryKey"`
 	Enabled        bool                   `json:"enabled"`
-	JSONData       map[string]interface{} `json:"jsonData"`
-	SecureJSONData map[string]interface{} `json:"secureJsonData"`
+	JSONData       map[string]interface{} `json:"jsonData" gorm:"serializer:json"`
+	SecureJSONData map[string]interface{} `json:"secureJsonData" gorm:"serializer:json"`
 }
 
 // PrimaryKey return custom primary key

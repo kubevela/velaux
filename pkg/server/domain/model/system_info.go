@@ -33,12 +33,12 @@ const (
 type SystemInfo struct {
 	BaseModel
 	SignedKey                   string        `json:"signedKey"`
-	InstallID                   string        `json:"installID"`
+	InstallID                   string        `json:"installID" gorm:"primaryKey"`
 	EnableCollection            bool          `json:"enableCollection"`
-	StatisticInfo               StatisticInfo `json:"statisticInfo,omitempty"`
+	StatisticInfo               StatisticInfo `json:"statisticInfo,omitempty" gorm:"serializer:json"`
 	LoginType                   string        `json:"loginType"`
-	DexUserDefaultProjects      []ProjectRef  `json:"projects"`
-	DexUserDefaultPlatformRoles []string      `json:"dexUserDefaultPlatformRoles"`
+	DexUserDefaultProjects      []ProjectRef  `json:"projects" gorm:"serializer:json"`
+	DexUserDefaultPlatformRoles []string      `json:"dexUserDefaultPlatformRoles" gorm:"serializer:json"`
 }
 
 // ProjectRef set the project name and roles

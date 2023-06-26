@@ -25,10 +25,10 @@ func init() {
 // EnvBinding application env binding
 type EnvBinding struct {
 	BaseModel
-	AppPrimaryKey   string           `json:"appPrimaryKey"`
+	AppPrimaryKey   string           `json:"appPrimaryKey" gorm:"primaryKey"`
 	AppDeployName   string           `json:"appDeployName"`
-	Name            string           `json:"name"`
-	ComponentsPatch []ComponentPatch `json:"componentsPatchs"`
+	Name            string           `json:"name" gorm:"primaryKey"`
+	ComponentsPatch []ComponentPatch `json:"componentsPatchs" gorm:"serializer:json"`
 }
 
 // ComponentPatch Define differential patches for components in the environment.
