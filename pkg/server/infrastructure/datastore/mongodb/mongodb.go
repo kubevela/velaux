@@ -42,7 +42,7 @@ const PrimaryKey = "_name"
 
 // New new mongodb datastore instance
 func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error) {
-	if !strings.HasPrefix(cfg.URL, "mongodb://") {
+	if !(strings.HasPrefix(cfg.URL, "mongodb://") || strings.HasPrefix(cfg.URL, "mongodb+srv://")) {
 		cfg.URL = fmt.Sprintf("mongodb://%s", cfg.URL)
 	}
 	clientOpts := options.Client().ApplyURI(cfg.URL)
