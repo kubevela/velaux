@@ -6,18 +6,18 @@ export interface AppPluginMeta<T extends KeyValue = KeyValue> extends PluginMeta
   // TODO anything specific to apps?
 }
 
-export interface PluginRootProps<T extends KeyValue = KeyValue> {
+export interface PluginRootProps<T extends KeyValue = KeyValue>{
   meta: AppPluginMeta<T>;
 }
 
-export interface PageRootProps<T extends KeyValue = KeyValue> extends PluginRootProps <T> {
+export interface PageRootProps<T extends KeyValue = KeyValue>{
   /**
    * base URL segment for an app, /app/pluginId
    */
   basename: string; // The URL path to this page
 }
 
-export interface DefinitionRootProps<T extends KeyValue = KeyValue> extends PluginRootProps <T> {
+export interface DefinitionRootProps<T extends KeyValue = KeyValue> extends PluginRootProps<T> {
   // form props
   "data-meta"?: string;
 
@@ -25,16 +25,19 @@ export interface DefinitionRootProps<T extends KeyValue = KeyValue> extends Plug
 
   id?: string;
 
-  onChange: Function;
+  onChange?: Function;
 
-  registerForm: Function;
+  registerForm?: Function;
 
-  value: any;
+  value?: any;
 
-  ref: any;
+  ref?: any;
 }
 
-export type AppRootProps<T> = PageRootProps<T> | DefinitionRootProps<T>;
+export interface AppRootProps<T extends KeyValue = KeyValue> extends DefinitionRootProps<T>, PageRootProps<T>{
+  
+}
+
 export class AppPagePlugin<T extends KeyValue = KeyValue> extends VelaUXPlugin<AppPluginMeta<T>> {
   // Content under: /a/${plugin-id}/*
   root?: ComponentType<AppRootProps<T>>;
