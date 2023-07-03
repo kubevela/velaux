@@ -10,7 +10,7 @@ export interface PluginRootProps<T extends KeyValue = KeyValue>{
   meta: AppPluginMeta<T>;
 }
 
-export interface PageRootProps<T extends KeyValue = KeyValue>{
+export interface PageRootProps<T extends KeyValue = KeyValue> extends PluginRootProps<T>{
   /**
    * base URL segment for an app, /app/pluginId
    */
