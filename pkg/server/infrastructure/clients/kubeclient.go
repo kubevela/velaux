@@ -19,6 +19,7 @@ package clients
 import (
 	"fmt"
 
+	cloudshellv1alpha1 "github.com/cloudtty/cloudtty/pkg/apis/cloudshell/v1alpha1"
 	pkgmulticluster "github.com/kubevela/pkg/multicluster"
 	"github.com/kubevela/workflow/api/v1alpha1"
 	"github.com/kubevela/workflow/pkg/cue/packages"
@@ -74,6 +75,10 @@ func GetKubeClient() (client.Client, error) {
 		return nil, fmt.Errorf("please call SetKubeConfig first")
 	}
 	err := v1alpha1.AddToScheme(common.Scheme)
+	if err != nil {
+		return nil, err
+	}
+	err = cloudshellv1alpha1.AddToScheme(common.Scheme)
 	if err != nil {
 		return nil, err
 	}
