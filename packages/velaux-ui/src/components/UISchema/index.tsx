@@ -192,9 +192,6 @@ class UISchema extends Component<Props, State> {
       if (condition.action == 'enable' || !condition.action) {
         enableConditionCount += 1;
       }
-      if (value == undefined) {
-        return;
-      }
       switch (condition.op) {
         case 'in':
           if (Array.isArray(condition.value) && condition.value.includes(value)) {
@@ -976,7 +973,7 @@ class UISchema extends Component<Props, State> {
     };
 
     const showAdvancedButton = couldBeDisabledParamCount != couldShowParamCount || requiredParamCount === 0;
-    return (
+    return ( 
       <Form field={this.form} className="ui-schema-container">
         <If condition={disableRenderRow}>{items}</If>
         <If condition={!disableRenderRow}>
