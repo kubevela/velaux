@@ -11,7 +11,7 @@ require (
 	github.com/barnettZQG/inject v0.0.1
 	github.com/briandowns/spinner v1.23.0 // indirect
 	github.com/chartmuseum/helm-push v0.10.4 // indirect
-	github.com/cloudtty/cloudtty v0.2.0
+	github.com/cloudtty/cloudtty v0.5.0
 	github.com/containerd/containerd v1.7.2 // indirect
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/crossplane/crossplane-runtime v0.19.2 // indirect
