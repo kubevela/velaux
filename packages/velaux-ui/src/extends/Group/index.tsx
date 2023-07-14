@@ -57,7 +57,7 @@ class Group extends React.Component<Props, State> {
 
   initSwitchState = () => {
     const { jsonKey = '', propertyValue = {}, alwaysShow = false, required, closed, initClose } = this.props;
-    const findKey = Object.keys(propertyValue).find((item) => item === jsonKey);
+    const findKey = propertyValue && Object.keys(propertyValue).find((item) => item === jsonKey);
     if (findKey || alwaysShow) {
       this.setState({ enable: true, closed: false || initClose, checked: true });
     } else if (required) {
