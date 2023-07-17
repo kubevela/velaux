@@ -145,10 +145,10 @@ func (dt *targetServiceImpl) CreateTarget(ctx context.Context, req apisv1.Create
 	if err := dt.Store.Get(ctx, &project); err != nil {
 		return nil, bcode.ErrProjectIsNotExist
 	}
-	target := convertCreateReqToTargetModel(req)
 	if req.Cluster == nil {
 		req.Cluster = &apisv1.ClusterTarget{ClusterName: multicluster.ClusterLocalName, Namespace: req.Name}
 	}
+	target := convertCreateReqToTargetModel(req)
 	createTargetCtx := utils.WithProject(ctx, "")
 	if err := repository.CreateTargetNamespace(createTargetCtx, dt.K8sClient, req.Cluster.ClusterName, req.Cluster.Namespace, req.Name); err != nil {
 		return nil, err
