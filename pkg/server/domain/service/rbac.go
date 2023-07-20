@@ -912,7 +912,7 @@ func (p *rbacServiceImpl) UpdateRole(ctx context.Context, projectName, roleName 
 	return assembler.ConvertRole2DTO(&role, policies), nil
 }
 
-func (p *rbacServiceImpl) ListRole(ctx context.Context, projectName string, page, pageSize int) (*apisv1.ListRolesResponse, error) {
+func (p *rbacServiceImpl) ListRole(ctx context.Context, projectName string, _, _ int) (*apisv1.ListRolesResponse, error) {
 	roles, count, err := repository.ListRoles(ctx, p.Store, projectName, 0, 0)
 	if err != nil {
 		return nil, err
