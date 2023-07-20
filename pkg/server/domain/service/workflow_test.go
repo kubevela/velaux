@@ -416,7 +416,7 @@ var _ = Describe("Test workflow service functions", func() {
 
 		err = workflowService.ResumeWorkflow(ctx, &model.Application{
 			Name: appName,
-		}, &model.Workflow{Name: ResumeWorkflow, EnvName: "resume"}, "workflow-resume-1", "")
+		}, &model.Workflow{Name: ResumeWorkflow, EnvName: "resume"}, "workflow-resume-1")
 		Expect(err).Should(BeNil())
 
 		err = workflowService.SyncWorkflowRecord(ctx, appName, "workflow-resume-1", app, nil)
@@ -465,7 +465,7 @@ var _ = Describe("Test workflow service functions", func() {
 
 		err = workflowService.TerminateWorkflow(ctx, &model.Application{
 			Name: appName,
-		}, workflow, "test-workflow-2-1")
+		}, workflow)
 		Expect(err).Should(BeNil())
 
 		err = k8sClient.Get(ctx, client.ObjectKey{Name: appName, Namespace: "terminate"}, app)
