@@ -39,7 +39,7 @@ func (namer SQLNamer) SchemaName(table string) string {
 }
 
 // ColumnName overrides the DefaultNamingStrategy.ColumnName as it converts the column names to snake-case, but we need them in lowercase
-func (namer SQLNamer) ColumnName(table, column string) string {
+func (namer SQLNamer) ColumnName(_, column string) string {
 	return strings.ToLower(column)
 }
 

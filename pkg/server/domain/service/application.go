@@ -44,7 +44,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/appfile/dryrun"
 	"github.com/oam-dev/kubevela/pkg/oam"
 	pkgUtils "github.com/oam-dev/kubevela/pkg/utils"
-	"github.com/oam-dev/kubevela/pkg/utils/app"
+	appUtil "github.com/oam-dev/kubevela/pkg/utils/app"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 	commonutil "github.com/oam-dev/kubevela/pkg/utils/common"
 
@@ -389,8 +389,8 @@ func (c *applicationServiceImpl) GetApplicationCR(ctx context.Context, appModel 
 	return apps, nil
 }
 
-// PublishApplicationTemplate publish app template
-func (c *applicationServiceImpl) PublishApplicationTemplate(ctx context.Context, app *model.Application) (*apisv1.ApplicationTemplateBase, error) {
+// PublishApplicationTemplate publish appUtil template
+func (c *applicationServiceImpl) PublishApplicationTemplate(_ context.Context, _ *model.Application) (*apisv1.ApplicationTemplateBase, error) {
 	// TODO:
 	return nil, nil
 }
@@ -404,7 +404,7 @@ func (c *applicationServiceImpl) CreateApplication(ctx context.Context, req apis
 		Icon:        req.Icon,
 		Labels:      req.Labels,
 	}
-	// check app name.
+	// check appUtil name.
 	exist, err := c.Store.IsExist(ctx, &application)
 	if err != nil {
 		klog.Errorf("check application name is exist failure %s", err.Error())
@@ -450,7 +450,7 @@ func (c *applicationServiceImpl) CreateApplication(ctx context.Context, req apis
 		}
 		return nil, err
 	}
-	// render app base info.
+	// render appUtil base info.
 	base := assembler.ConvertAppModelToBase(&application, []*apisv1.ProjectBase{project})
 	return base, nil
 }
@@ -499,7 +499,7 @@ func (c *applicationServiceImpl) DeleteApplicationTrigger(ctx context.Context, a
 		if errors.Is(err, datastore.ErrRecordNotExist) {
 			return bcode.ErrApplicationTriggerNotExist
 		}
-		klog.Warningf("delete app trigger failure %s", err.Error())
+		klog.Warningf("delete appUtil trigger failure %s", err.Error())
 		return err
 	}
 	return nil
@@ -515,7 +515,7 @@ func (c *applicationServiceImpl) UpdateApplicationTrigger(ctx context.Context, a
 		if errors.Is(err, datastore.ErrRecordNotExist) {
 			return nil, bcode.ErrApplicationTriggerNotExist
 		}
-		klog.Warningf("get app trigger failure %s", err.Error())
+		klog.Warningf("get appUtil trigger failure %s", err.Error())
 		return nil, err
 	}
 	// checking the workflow
@@ -655,7 +655,7 @@ func (c *applicationServiceImpl) ListRecords(ctx context.Context, appName string
 	return resp, nil
 }
 
-func (c *applicationServiceImpl) ListComponents(ctx context.Context, app *model.Application, op apisv1.ListApplicationComponentOptions) ([]*apisv1.ComponentBase, error) {
+func (c *applicationServiceImpl) ListComponents(ctx context.Context, app *model.Application, _ apisv1.ListApplicationComponentOptions) ([]*apisv1.ComponentBase, error) {
 	var component = model.ApplicationComponent{
 		AppPrimaryKey: app.PrimaryKey(),
 	}
@@ -681,7 +681,7 @@ func (c *applicationServiceImpl) ListComponents(ctx context.Context, app *model.
 	return list, nil
 }
 
-// DetailComponent detail app component
+// DetailComponent detail appUtil component
 func (c *applicationServiceImpl) DetailComponent(ctx context.Context, app *model.Application, compName string) (*apisv1.DetailComponentResponse, error) {
 	var component = model.ApplicationComponent{
 		AppPrimaryKey: app.PrimaryKey(),
@@ -716,7 +716,7 @@ func (c *applicationServiceImpl) ListPolicies(ctx context.Context, app *model.Ap
 	return list, nil
 }
 
-// DetailPolicy detail app policy
+// DetailPolicy detail appUtil policy
 func (c *applicationServiceImpl) DetailPolicy(ctx context.Context, app *model.Application, policyName string) (*apisv1.DetailPolicyResponse, error) {
 	var policy = model.ApplicationPolicy{
 		AppPrimaryKey: app.PrimaryKey(),
@@ -736,7 +736,7 @@ func (c *applicationServiceImpl) DetailPolicy(ctx context.Context, app *model.Ap
 	}, nil
 }
 
-// Deploy deploys app to cluster
+// Deploy deploys appUtil to cluster
 // means to render oam application config and apply to cluster.
 // An event record is generated for each deploy.
 func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Application, req apisv1.ApplicationDeployRequest) (*apisv1.ApplicationDeployResponse, error) {
@@ -770,7 +770,7 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 		list, err := c.Store.List(ctx, &lastVersion, &datastore.ListOptions{
 			PageSize: 1, Page: 1, SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}}})
 		if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
-			klog.Errorf("query app latest revision failure %s", err.Error())
+			klog.Errorf("query appUtil latest revision failure %s", err.Error())
 			return nil, bcode.ErrDeployConflict
 		}
 		if len(list) > 0 {
@@ -788,7 +788,7 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 				status = revision.Status
 			}
 			if status != model.RevisionStatusComplete && status != model.RevisionStatusTerminated && status != model.RevisionStatusFail {
-				klog.Warningf("last app revision can not complete %s/%s,the current status is %s", list[0].(*model.ApplicationRevision).AppPrimaryKey, list[0].(*model.ApplicationRevision).Version, status)
+				klog.Warningf("last appUtil revision can not complete %s/%s,the current status is %s", list[0].(*model.ApplicationRevision).AppPrimaryKey, list[0].(*model.ApplicationRevision).Version, status)
 				return nil, bcode.ErrDeployConflict
 			}
 		}
@@ -830,7 +830,7 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 			klog.Warningf("update deploy event failure %s", err.Error())
 		}
 
-		klog.Errorf("deploy app %s failure %s", app.PrimaryKey(), err.Error())
+		klog.Errorf("deploy appUtil %s failure %s", app.PrimaryKey(), err.Error())
 		return nil, bcode.ErrDeployApplyFail
 	}
 
@@ -840,10 +840,10 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 		klog.Warningf("create workflow record failure %s", err.Error())
 	}
 
-	// step6: update app revision status
+	// step6: update appUtil revision status
 	appRevision.Status = model.RevisionStatusRunning
 	if err := c.Store.Put(ctx, appRevision); err != nil {
-		klog.Warningf("update app revision failure %s", err.Error())
+		klog.Warningf("update appUtil revision failure %s", err.Error())
 	}
 
 	// step7: change the source of trust
@@ -852,7 +852,7 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 	}
 	app.Labels[velatypes.LabelSourceOfTruth] = velatypes.FromUX
 	if err := c.Store.Put(ctx, app); err != nil {
-		klog.Warningf("failed to update app %s", err.Error())
+		klog.Warningf("failed to update appUtil %s", err.Error())
 	}
 
 	res := &apisv1.ApplicationDeployResponse{
@@ -906,7 +906,7 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 	if deployAppName == "" {
 		deployAppName = appModel.Name
 	}
-	var app = &v1beta1.Application{
+	var application = &v1beta1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
 			APIVersion: "core.oam.dev/v1beta1",
@@ -926,8 +926,8 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 	}
 
 	for key, value := range appModel.Annotations {
-		if _, exists := app.ObjectMeta.Annotations[key]; !exists {
-			app.ObjectMeta.Annotations[key] = value
+		if _, exists := application.ObjectMeta.Annotations[key]; !exists {
+			application.ObjectMeta.Annotations[key] = value
 		}
 	}
 
@@ -936,7 +936,7 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 		Name:      appModel.Name,
 		Namespace: env.Namespace,
 	}, originalApp); err == nil {
-		app.ResourceVersion = originalApp.ResourceVersion
+		application.ResourceVersion = originalApp.ResourceVersion
 	}
 
 	var component = model.ApplicationComponent{
@@ -987,7 +987,7 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 		if component.Properties != nil {
 			bc.Properties = component.Properties.RawExtension()
 		}
-		app.Spec.Components = append(app.Spec.Components, bc)
+		application.Spec.Components = append(application.Spec.Components, bc)
 	}
 
 	for _, policy := range policies {
@@ -998,10 +998,10 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 		if policy.Properties != nil {
 			appPolicy.Properties = policy.Properties.RawExtension()
 		}
-		app.Spec.Policies = append(app.Spec.Policies, appPolicy)
+		application.Spec.Policies = append(application.Spec.Policies, appPolicy)
 	}
 	if workflow != nil {
-		app.Annotations[oam.AnnotationWorkflowName] = workflow.Name
+		application.Annotations[oam.AnnotationWorkflowName] = workflow.Name
 		var steps []workflowv1alpha1.WorkflowStep
 		for _, step := range workflow.Steps {
 			workflowStep := workflowv1alpha1.WorkflowStep{
@@ -1013,12 +1013,12 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 			}
 			steps = append(steps, workflowStep)
 		}
-		app.Spec.Workflow = &v1beta1.Workflow{
+		application.Spec.Workflow = &v1beta1.Workflow{
 			Steps: steps,
 			Mode:  &workflow.Mode,
 		}
 	}
-	return app, nil
+	return application, nil
 }
 
 func convertWorkflowModel2WorkflowSpec(step model.WorkflowStepBase) workflowv1alpha1.WorkflowStepBase {
@@ -1089,32 +1089,32 @@ func (c *applicationServiceImpl) DeleteApplication(ctx context.Context, app *mod
 	for _, component := range components {
 		err := c.Store.Delete(ctx, &model.ApplicationComponent{AppPrimaryKey: app.PrimaryKey(), Name: component.Name})
 		if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
-			klog.Errorf("delete component %s in app %s failure %s", component.Name, app.Name, err.Error())
+			klog.Errorf("delete component %s in appUtil %s failure %s", component.Name, app.Name, err.Error())
 		}
 	}
 
 	for _, policy := range policies {
 		err := c.Store.Delete(ctx, &model.ApplicationPolicy{AppPrimaryKey: app.PrimaryKey(), Name: policy.Name})
 		if err != nil && errors.Is(err, datastore.ErrRecordNotExist) {
-			klog.Errorf("delete policy %s in app %s failure %s", policy.Name, app.Name, err.Error())
+			klog.Errorf("delete policy %s in appUtil %s failure %s", policy.Name, app.Name, err.Error())
 		}
 	}
 
 	for _, entity := range revisions {
 		revision := entity.(*model.ApplicationRevision)
 		if err := c.Store.Delete(ctx, &model.ApplicationRevision{AppPrimaryKey: app.PrimaryKey(), Version: revision.Version}); err != nil {
-			klog.Errorf("delete revision %s in app %s failure %s", revision.Version, app.Name, err.Error())
+			klog.Errorf("delete revision %s in appUtil %s failure %s", revision.Version, app.Name, err.Error())
 		}
 	}
 
 	for _, trigger := range triggers {
 		if err := c.Store.Delete(ctx, &model.ApplicationTrigger{AppPrimaryKey: app.PrimaryKey(), Name: trigger.Name, Token: trigger.Token}); err != nil {
-			klog.Errorf("delete trigger %s in app %s failure %s", trigger.Name, app.Name, err.Error())
+			klog.Errorf("delete trigger %s in appUtil %s failure %s", trigger.Name, app.Name, err.Error())
 		}
 	}
 
 	if err := c.EnvBindingService.BatchDeleteEnvBinding(ctx, app); err != nil {
-		klog.Errorf("delete envbindings in app %s failure %s", app.Name, err.Error())
+		klog.Errorf("delete envbindings in appUtil %s failure %s", app.Name, err.Error())
 	}
 
 	return c.Store.Delete(ctx, app)
@@ -1135,7 +1135,7 @@ func (c *applicationServiceImpl) GetApplicationComponent(ctx context.Context, ap
 	return &component, nil
 }
 
-func (c *applicationServiceImpl) UpdateComponent(ctx context.Context, app *model.Application, component *model.ApplicationComponent, req apisv1.UpdateApplicationComponentRequest) (*apisv1.ComponentBase, error) {
+func (c *applicationServiceImpl) UpdateComponent(ctx context.Context, _ *model.Application, component *model.ApplicationComponent, req apisv1.UpdateApplicationComponentRequest) (*apisv1.ComponentBase, error) {
 	if req.Alias != nil {
 		component.Alias = *req.Alias
 	}
@@ -1223,7 +1223,7 @@ func (c *applicationServiceImpl) createComponent(ctx context.Context, app *model
 		if errors.Is(err, datastore.ErrRecordExist) {
 			return nil, bcode.ErrApplicationComponentExist
 		}
-		klog.Warningf("add component for app %s failure %s", pkgUtils.Sanitize(app.PrimaryKey()), err.Error())
+		klog.Warningf("add component for appUtil %s failure %s", pkgUtils.Sanitize(app.PrimaryKey()), err.Error())
 		return nil, err
 	}
 	// update the env workflow, the automatically generated workflow is determined by the component type.
@@ -1264,7 +1264,7 @@ func (c *applicationServiceImpl) DeleteComponent(ctx context.Context, app *model
 		if errors.Is(err, datastore.ErrRecordNotExist) {
 			return bcode.ErrApplicationComponentNotExist
 		}
-		klog.Warningf("delete app component %s failure %s", app.PrimaryKey(), err.Error())
+		klog.Warningf("delete appUtil component %s failure %s", app.PrimaryKey(), err.Error())
 		return err
 	}
 	if err := repository.UpdateAppEnvWorkflow(ctx, c.KubeClient, c.Store, app); err != nil {
@@ -1293,7 +1293,7 @@ func (c *applicationServiceImpl) CreatePolicy(ctx context.Context, app *model.Ap
 		if errors.Is(err, datastore.ErrRecordExist) {
 			return nil, bcode.ErrApplicationPolicyExist
 		}
-		klog.Warningf("add policy for app %s failure %s", app.PrimaryKey(), err.Error())
+		klog.Warningf("add policy for appUtil %s failure %s", app.PrimaryKey(), err.Error())
 		return nil, err
 	}
 	if err = c.handlePolicyBindingWorkflowStep(ctx, app, createPolicy.Name, createPolicy.WorkflowPolicyBindings); err != nil {
@@ -1320,7 +1320,7 @@ func (c *applicationServiceImpl) DeletePolicy(ctx context.Context, app *model.Ap
 		if errors.Is(err, datastore.ErrRecordNotExist) {
 			return bcode.ErrApplicationPolicyNotExist
 		}
-		klog.Warningf("delete app policy %s failure %s", app.PrimaryKey(), err.Error())
+		klog.Warningf("delete appUtil policy %s failure %s", app.PrimaryKey(), err.Error())
 		return err
 	}
 	return c.handlePolicyBindingWorkflowStep(ctx, app, policyName, nil)
@@ -1336,7 +1336,7 @@ func (c *applicationServiceImpl) UpdatePolicy(ctx context.Context, app *model.Ap
 		if errors.Is(err, datastore.ErrRecordNotExist) {
 			return nil, bcode.ErrApplicationPolicyNotExist
 		}
-		klog.Warningf("update app policy %s failure %s", app.PrimaryKey(), err.Error())
+		klog.Warningf("update appUtil policy %s failure %s", app.PrimaryKey(), err.Error())
 		return nil, err
 	}
 	policy.Type = policyUpdate.Type
@@ -1397,10 +1397,7 @@ func (c *applicationServiceImpl) DeleteApplicationTrait(ctx context.Context, app
 	for i, trait := range comp.Traits {
 		if trait.Type == traitType {
 			comp.Traits = append(comp.Traits[:i], comp.Traits[i+1:]...)
-			if err := c.Store.Put(ctx, &comp); err != nil {
-				return err
-			}
-			return nil
+			return c.Store.Put(ctx, &comp)
 		}
 	}
 	return bcode.ErrTraitNotExist
@@ -1501,7 +1498,7 @@ func (c *applicationServiceImpl) Statistics(ctx context.Context, app *model.Appl
 	var targetMap = make(map[string]int)
 	envbinding, err := c.EnvBindingService.GetEnvBindings(ctx, app)
 	if err != nil {
-		klog.Errorf("query app envbinding failure %s", err.Error())
+		klog.Errorf("query appUtil envbinding failure %s", err.Error())
 	}
 	for _, env := range envbinding {
 		for _, target := range env.TargetNames {
@@ -1558,7 +1555,7 @@ func (c *applicationServiceImpl) CompareApp(ctx context.Context, appModel *model
 		}
 		base, envNameByRevision, err = c.getAppModelFromRevision(ctx, appModel.Name, revision)
 		if err != nil {
-			klog.Errorf("failed to get the app model from the revision %s", err.Error())
+			klog.Errorf("failed to get the appUtil model from the revision %s", err.Error())
 			break
 		}
 	}
@@ -1611,7 +1608,7 @@ func (c *applicationServiceImpl) CompareApp(ctx context.Context, appModel *model
 	args.SetClient(c.KubeClient)
 	diffResult, buff, err := compare(ctx, args, compareTarget, base)
 	if err != nil {
-		klog.Errorf("fail to compare the app %s", err.Error())
+		klog.Errorf("fail to compare the appUtil %s", err.Error())
 		compareResponse.IsDiff = false
 		return compareResponse, nil
 	}
@@ -1620,7 +1617,7 @@ func (c *applicationServiceImpl) CompareApp(ctx context.Context, appModel *model
 	return compareResponse, nil
 }
 
-// ResetAppToLatestRevision reset app's component to last revision
+// ResetAppToLatestRevision reset appUtil's component to last revision
 func (c *applicationServiceImpl) ResetAppToLatestRevision(ctx context.Context, appName string) (*apisv1.AppResetResponse, error) {
 	targetApp, _, err := c.getAppModelFromRevision(ctx, appName, "")
 	if err != nil {
@@ -1716,7 +1713,7 @@ func (c *applicationServiceImpl) resetApp(ctx context.Context, targetApp *v1beta
 
 	readyToUpdate, readyToDelete, readyToAdd := utils.ThreeWaySliceCompare(originCompNames, targetCompNames)
 
-	// delete new app's components
+	// delete new appUtil's components
 	for _, compName := range readyToDelete {
 		var component = model.ApplicationComponent{
 			AppPrimaryKey: appPrimaryKey,
@@ -1726,12 +1723,12 @@ func (c *applicationServiceImpl) resetApp(ctx context.Context, targetApp *v1beta
 			if errors.Is(err, datastore.ErrRecordNotExist) {
 				continue
 			}
-			klog.Warningf("delete app %s comp %s failure %s", appPrimaryKey, compName, err.Error())
+			klog.Warningf("delete appUtil %s comp %s failure %s", appPrimaryKey, compName, err.Error())
 		}
 	}
 
 	for _, comp := range targetComps {
-		// add or update new app's components from old app
+		// add or update new appUtil's components from old appUtil
 		if slices.Contains(readyToAdd, comp.Name) || slices.Contains(readyToUpdate, comp.Name) {
 			compModel, err := convert.FromCRComponent(appPrimaryKey, comp)
 			if err != nil {
@@ -1746,11 +1743,11 @@ func (c *applicationServiceImpl) resetApp(ctx context.Context, targetApp *v1beta
 				if errors.Is(err, datastore.ErrRecordExist) {
 					err := c.Store.Put(ctx, &compModel)
 					if err != nil {
-						klog.Warningf("update comp %s  for app %s failure %s", comp.Name, pkgUtils.Sanitize(appPrimaryKey), err.Error())
+						klog.Warningf("update comp %s  for appUtil %s failure %s", comp.Name, pkgUtils.Sanitize(appPrimaryKey), err.Error())
 					}
 					return &apisv1.AppResetResponse{IsReset: true}, err
 				}
-				klog.Warningf("add comp %s  for app %s failure %s", comp.Name, pkgUtils.Sanitize(appPrimaryKey), err.Error())
+				klog.Warningf("add comp %s  for appUtil %s failure %s", comp.Name, pkgUtils.Sanitize(appPrimaryKey), err.Error())
 				return &apisv1.AppResetResponse{}, err
 			}
 		}
@@ -1782,12 +1779,12 @@ func (c *applicationServiceImpl) RollbackWithRevision(ctx context.Context, appli
 			if err := c.Store.Put(ctx, &revision); err != nil {
 				return nil, err
 			}
-			_, appCR, err := app.RollbackApplicationWithRevision(context.WithValue(ctx, &app.RevisionContextKey, utils.WithProject(ctx, "")), c.KubeClient, appCR.Name, appCR.Namespace, revision.RevisionCRName, publishVersion)
+			_, appCR, err := appUtil.RollbackApplicationWithRevision(context.WithValue(ctx, &appUtil.RevisionContextKey, utils.WithProject(ctx, "")), c.KubeClient, appCR.Name, appCR.Namespace, revision.RevisionCRName, publishVersion)
 			if err != nil {
 				switch {
-				case errors.Is(err, app.ErrNotMatchRevision):
+				case errors.Is(err, appUtil.ErrNotMatchRevision):
 					noRevision = true
-				case errors.Is(err, app.ErrRevisionNotChange):
+				case errors.Is(err, appUtil.ErrRevisionNotChange):
 					return nil, bcode.ErrApplicationRevisionConflict
 				default:
 					revision.RevisionCRName = revisionCRName
@@ -1815,7 +1812,7 @@ func (c *applicationServiceImpl) RollbackWithRevision(ctx context.Context, appli
 		}
 		err = c.Apply.Apply(ctx, rollBackApp)
 		if err != nil {
-			klog.Errorf("rollback the app %s failure %s", application.PrimaryKey(), err.Error())
+			klog.Errorf("rollback the appUtil %s failure %s", application.PrimaryKey(), err.Error())
 			return nil, err
 		}
 		rollbackApplication = rollBackApp
@@ -1845,7 +1842,7 @@ func dryRunApplication(ctx context.Context, c commonutil.Args, app *v1beta1.Appl
 	}
 	result, err := yaml.Marshal(app)
 	if err != nil {
-		return buff, fmt.Errorf("marshal app: %w", err)
+		return buff, fmt.Errorf("marshal appUtil: %w", err)
 	}
 	buff.Write(result)
 
@@ -1877,7 +1874,7 @@ func dryRunApplication(ctx context.Context, c commonutil.Args, app *v1beta1.Appl
 	return buff, nil
 }
 
-// ignoreSomeParams ignore some parameters before comparing the app changes.
+// ignoreSomeParams ignore some parameters before comparing the appUtil changes.
 // ignore the workflow spec
 func ignoreSomeParams(o *v1beta1.Application) {
 	var defaultApplication = v1beta1.Application{}

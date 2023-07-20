@@ -662,7 +662,7 @@ type HandleApplicationTriggerJFrogRequest struct {
 
 // JFrogWebhookData is the data of JFrog webhook request
 type JFrogWebhookData struct {
-	URL       string
+	URL       string `json:"url"`
 	ImageName string `json:"image_name"`
 	Name      string `json:"name"`
 	Path      string `json:"path"`

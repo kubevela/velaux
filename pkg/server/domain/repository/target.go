@@ -44,7 +44,7 @@ func CreateTargetNamespace(ctx context.Context, k8sClient client.Client, cluster
 }
 
 // DeleteTargetNamespace delete the namespace of the target
-func DeleteTargetNamespace(ctx context.Context, k8sClient client.Client, clusterName, namespace, targetName string) error {
+func DeleteTargetNamespace(ctx context.Context, k8sClient client.Client, clusterName, namespace string) error {
 	err := utils.UpdateNamespace(multicluster.ContextWithClusterName(ctx, clusterName), k8sClient, namespace,
 		utils.MergeOverrideLabels(map[string]string{
 			oam.LabelRuntimeNamespaceUsage: "",

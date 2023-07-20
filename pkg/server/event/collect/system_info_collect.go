@@ -61,7 +61,7 @@ type InfoCalculateCronJob struct {
 }
 
 // Start start the worker
-func (i *InfoCalculateCronJob) Start(ctx context.Context, errChan chan error) {
+func (i *InfoCalculateCronJob) Start(ctx context.Context, _ chan error) {
 	i.start(CrontabSpec)
 	defer i.cron.Stop()
 	<-ctx.Done()
@@ -115,10 +115,7 @@ func (i InfoCalculateCronJob) run() error {
 		return nil
 	}
 
-	if err := i.calculateAndUpdate(ctx, *info); err != nil {
-		return err
-	}
-	return nil
+	return i.calculateAndUpdate(ctx, *info)
 }
 
 func (i InfoCalculateCronJob) calculateAndUpdate(ctx context.Context, systemInfo model.SystemInfo) error {
@@ -150,10 +147,7 @@ func (i InfoCalculateCronJob) calculateAndUpdate(ctx context.Context, systemInfo
 	}
 
 	systemInfo.StatisticInfo = statisticInfo
-	if err := i.Store.Put(ctx, &systemInfo); err != nil {
-		return err
-	}
-	return nil
+	return i.Store.Put(ctx, &systemInfo)
 }
 
 func (i InfoCalculateCronJob) calculateAppInfo(ctx context.Context) (int, []string, []string, []string, []string, error) {

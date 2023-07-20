@@ -63,10 +63,7 @@ func CreateEnv(ctx context.Context, kubeClient client.Client, ds datastore.DataS
 		klog.Errorf("update namespace label failure %s", err.Error())
 		return bcode.ErrEnvNamespaceFail
 	}
-	if err = ds.Add(ctx, env); err != nil {
-		return err
-	}
-	return nil
+	return ds.Add(ctx, env)
 }
 
 // GetEnv get the environment

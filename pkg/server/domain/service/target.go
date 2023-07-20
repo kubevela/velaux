@@ -121,7 +121,7 @@ func (dt *targetServiceImpl) DeleteTarget(ctx context.Context, targetName string
 	if err != nil {
 		return err
 	}
-	if err = repository.DeleteTargetNamespace(ctx, dt.K8sClient, ddt.Cluster.ClusterName, ddt.Cluster.Namespace, targetName); err != nil {
+	if err = repository.DeleteTargetNamespace(ctx, dt.K8sClient, ddt.Cluster.ClusterName, ddt.Cluster.Namespace); err != nil {
 		return err
 	}
 	if err = managePrivilegesForTarget(ctx, dt.K8sClient, ddt, true); err != nil {

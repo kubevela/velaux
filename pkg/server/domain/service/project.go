@@ -217,10 +217,7 @@ func (p *projectServiceImpl) DeleteProject(ctx context.Context, name string) err
 		return err
 	}
 
-	if err := managePrivilegesForProject(ctx, p.K8sClient, &model.Project{Name: name}, true); err != nil {
-		return err
-	}
-	return nil
+	return managePrivilegesForProject(ctx, p.K8sClient, &model.Project{Name: name}, true)
 }
 
 // CreateProject create project
@@ -460,7 +457,7 @@ func (p *projectServiceImpl) UpdateProjectUser(ctx context.Context, projectName 
 	return ConvertProjectUserModel2Base(&projectUser, user), nil
 }
 
-func (p *projectServiceImpl) ListTerraformProviders(ctx context.Context, projectName string) ([]*apisv1.TerraformProvider, error) {
+func (p *projectServiceImpl) ListTerraformProviders(ctx context.Context, _ string) ([]*apisv1.TerraformProvider, error) {
 	l := &terraformapi.ProviderList{}
 	listCtx := apiutils.WithProject(ctx, "")
 	if err := p.K8sClient.List(listCtx, l, client.InNamespace(types.ProviderNamespace)); err != nil {
