@@ -1,6 +1,8 @@
 include makefiles/const.mk
 include makefiles/build.mk
 
+all: docker-build
+
 .PHONY: golangci
 golangci:
 ifeq ($(shell $(GLOBAL_GOLANGCILINT) version --format short), $(GOLANGCILINT_VERSION))
