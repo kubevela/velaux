@@ -196,10 +196,7 @@ func (c *webhookServiceImpl) patchComponentProperties(ctx context.Context, compo
 		return err
 	}
 	component.Properties = prop
-	if err := c.Store.Put(ctx, component); err != nil {
-		return err
-	}
-	return nil
+	return c.Store.Put(ctx, component)
 }
 
 func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.ApplicationTrigger, app *model.Application) (interface{}, error) {
@@ -213,7 +210,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 
 	switch c.req.Action {
 	case ActionApprove:
-		if err := c.w.WorkflowService.ResumeRecord(ctx, app, workflow, "", c.req.Step); err != nil {
+		if err := c.w.WorkflowService.ResumeWorkflow(ctx, app, workflow, c.req.Step); err != nil {
 			return nil, err
 		}
 		record := model.WorkflowRecord{
@@ -228,7 +225,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 		}
 		return &assembler.ConvertFromRecordModel(records[0].(*model.WorkflowRecord)).WorkflowRecordBase, nil
 	case ActionTerminate:
-		if err := c.w.WorkflowService.TerminateRecord(ctx, app, workflow, ""); err != nil {
+		if err := c.w.WorkflowService.TerminateWorkflow(ctx, app, workflow); err != nil {
 			return nil, err
 		}
 		record := model.WorkflowRecord{

@@ -51,9 +51,9 @@ var ErrUpstreamNotFound = NewBcode(502, 502, "Upstream not found")
 
 // Bcode business error code
 type Bcode struct {
-	HTTPCode     int32 `json:"-"`
-	BusinessCode int32
-	Message      string
+	HTTPCode     int32  `json:"-"`
+	BusinessCode int32  `json:"BusinessCode"`
+	Message      string `json:"Message"`
 }
 
 func (b *Bcode) Error() string {

@@ -492,7 +492,7 @@ func (c *clusterServiceImpl) getClusterResourceInfoFromK8s(ctx context.Context, 
 	return clusterResourceInfo, nil
 }
 
-func (c *clusterServiceImpl) ListCloudClusters(ctx context.Context, provider string, req apis.AccessKeyRequest, pageNumber int, pageSize int) (*apis.ListCloudClusterResponse, error) {
+func (c *clusterServiceImpl) ListCloudClusters(_ context.Context, provider string, req apis.AccessKeyRequest, pageNumber int, pageSize int) (*apis.ListCloudClusterResponse, error) {
 	p, err := cloudprovider.GetClusterProvider(provider, req.AccessKeyID, req.AccessKeySecret, c.K8sClient)
 	if err != nil {
 		klog.Errorf("failed to get cluster provider: %s", err.Error())

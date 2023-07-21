@@ -21,7 +21,6 @@ import (
 
 	"k8s.io/client-go/util/workqueue"
 
-	"github.com/kubevela/velaux/pkg/server/config"
 	"github.com/kubevela/velaux/pkg/server/event/collect"
 	"github.com/kubevela/velaux/pkg/server/event/sync"
 )
@@ -34,7 +33,7 @@ type Worker interface {
 }
 
 // InitEvent init all event worker
-func InitEvent(cfg config.Config) []interface{} {
+func InitEvent() []interface{} {
 	application := &sync.ApplicationSync{
 		Queue: workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 	}

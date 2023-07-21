@@ -89,8 +89,8 @@ func NewEntity(in Entity) (Entity, error) {
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	new := reflect.New(t)
-	return new.Interface().(Entity), nil
+	newEntity := reflect.New(t)
+	return newEntity.Interface().(Entity), nil
 }
 
 // SortOrder is the order of sort

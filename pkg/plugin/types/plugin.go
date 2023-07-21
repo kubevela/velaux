@@ -148,7 +148,7 @@ type KubernetesService struct {
 	// If namespace is not specified, find the service from the vela system namespace
 	Namespace string `json:"namespace"`
 	// If port is not specified, find the first port from the service
-	Port int32
+	Port int32 `json:"port"`
 }
 
 // KubernetesSecret define one kubernetes secret

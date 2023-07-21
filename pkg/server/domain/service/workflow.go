@@ -81,8 +81,8 @@ type WorkflowService interface {
 	ListWorkflowRecords(ctx context.Context, workflow *model.Workflow, page, pageSize int) (*apisv1.ListWorkflowRecordsResponse, error)
 	DetailWorkflowRecord(ctx context.Context, workflow *model.Workflow, recordName string) (*apisv1.DetailWorkflowRecordResponse, error)
 	SyncWorkflowRecord(ctx context.Context, appKey, recordName string, app *v1beta1.Application, workflowContext map[string]string) error
-	ResumeRecord(ctx context.Context, appModel *model.Application, workflow *model.Workflow, recordName, stepName string) error
-	TerminateRecord(ctx context.Context, appModel *model.Application, workflow *model.Workflow, recordName string) error
+	ResumeWorkflow(ctx context.Context, appModel *model.Application, workflow *model.Workflow, stepName string) error
+	TerminateWorkflow(ctx context.Context, appModel *model.Application, workflow *model.Workflow) error
 	RollbackRecord(ctx context.Context, appModel *model.Application, workflow *model.Workflow, recordName, revisionName string) (*apisv1.WorkflowRecordBase, error)
 	GetWorkflowRecordLog(ctx context.Context, record *model.WorkflowRecord, step string) (apisv1.GetPipelineRunLogResponse, error)
 	GetWorkflowRecordOutput(ctx context.Context, workflow *model.Workflow, record *model.WorkflowRecord, stepName string) (apisv1.GetPipelineRunOutputResponse, error)
@@ -243,7 +243,7 @@ func (w *workflowServiceImpl) UpdateWorkflow(ctx context.Context, workflow *mode
 }
 
 // DetailWorkflow detail workflow
-func (w *workflowServiceImpl) DetailWorkflow(ctx context.Context, workflow *model.Workflow) (*apisv1.DetailWorkflowResponse, error) {
+func (w *workflowServiceImpl) DetailWorkflow(_ context.Context, workflow *model.Workflow) (*apisv1.DetailWorkflowResponse, error) {
 	return &apisv1.DetailWorkflowResponse{
 		WorkflowBase: assembler.ConvertWorkflowBase(workflow),
 	}, nil
@@ -737,29 +737,21 @@ func (w *workflowServiceImpl) GetWorkflowRecord(ctx context.Context, workflow *m
 	return res[0].(*model.WorkflowRecord), nil
 }
 
-func (w *workflowServiceImpl) ResumeRecord(ctx context.Context, appModel *model.Application, workflow *model.Workflow, recordName, stepName string) error {
+func (w *workflowServiceImpl) ResumeWorkflow(ctx context.Context, appModel *model.Application, workflow *model.Workflow, stepName string) error {
 	oamApp, err := w.checkRecordRunning(ctx, appModel, workflow.EnvName)
 	if err != nil {
 		return err
 	}
 
-	if err := operation.ResumeWorkflow(ctx, w.KubeClient, oamApp, stepName); err != nil {
-		return err
-	}
-
-	return nil
+	return operation.ResumeWorkflow(ctx, w.KubeClient, oamApp, stepName)
 }
 
-func (w *workflowServiceImpl) TerminateRecord(ctx context.Context, appModel *model.Application, workflow *model.Workflow, recordName string) error {
+func (w *workflowServiceImpl) TerminateWorkflow(ctx context.Context, appModel *model.Application, workflow *model.Workflow) error {
 	oamApp, err := w.checkRecordRunning(ctx, appModel, workflow.EnvName)
 	if err != nil {
 		return err
 	}
-	if err := operation.TerminateWorkflow(ctx, w.KubeClient, oamApp); err != nil {
-		return err
-	}
-
-	return nil
+	return operation.TerminateWorkflow(ctx, w.KubeClient, oamApp)
 }
 
 func (w *workflowServiceImpl) RollbackRecord(ctx context.Context, appModel *model.Application, workflow *model.Workflow, recordName, revisionVersion string) (*apisv1.WorkflowRecordBase, error) {
@@ -911,7 +903,9 @@ func (w *workflowServiceImpl) GetWorkflowRecordLog(ctx context.Context, record *
 				return apisv1.GetPipelineRunLogResponse{LogSource: source}, bcode.ErrReadSourceLog
 			}
 			//nolint:errcheck
-			defer readCloser.Close()
+			defer func() {
+				_ = readCloser.Close()
+			}()
 			if _, err := io.Copy(&logsBuilder, readCloser); err != nil {
 				klog.Errorf("copy logs from url %s failed: %v", logConfig.Source.URL, err)
 				return apisv1.GetPipelineRunLogResponse{LogSource: source}, bcode.ErrReadSourceLog
@@ -926,7 +920,7 @@ func (w *workflowServiceImpl) GetWorkflowRecordLog(ctx context.Context, record *
 	}, nil
 }
 
-func (w *workflowServiceImpl) GetWorkflowRecordOutput(ctx context.Context, workflow *model.Workflow, record *model.WorkflowRecord, stepName string) (apisv1.GetPipelineRunOutputResponse, error) {
+func (w *workflowServiceImpl) GetWorkflowRecordOutput(_ context.Context, workflow *model.Workflow, record *model.WorkflowRecord, stepName string) (apisv1.GetPipelineRunOutputResponse, error) {
 	outputsSpec := make(map[string]workflowv1alpha1.StepOutputs)
 	stepOutputs := make([]apisv1.StepOutputBase, 0)
 
@@ -972,7 +966,7 @@ func (w *workflowServiceImpl) GetWorkflowRecordOutput(ctx context.Context, workf
 	return apisv1.GetPipelineRunOutputResponse{StepOutputs: stepOutputs}, nil
 }
 
-func (w *workflowServiceImpl) GetWorkflowRecordInput(ctx context.Context, workflow *model.Workflow, record *model.WorkflowRecord, stepName string) (apisv1.GetPipelineRunInputResponse, error) {
+func (w *workflowServiceImpl) GetWorkflowRecordInput(_ context.Context, workflow *model.Workflow, record *model.WorkflowRecord, stepName string) (apisv1.GetPipelineRunInputResponse, error) {
 	// valueFromStep know which step the value came from
 	valueFromStep := make(map[string]string)
 	inputsSpec := make(map[string]workflowv1alpha1.StepInputs)

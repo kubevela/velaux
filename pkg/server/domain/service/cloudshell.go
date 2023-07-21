@@ -135,11 +135,11 @@ func (c *cloudShellServiceImpl) Prepare(ctx context.Context) (*apisv1.CloudShell
 		if err := c.prepareKubeConfig(ctx); err != nil {
 			return res, fmt.Errorf("failed to prepare the kubeconfig for the user: %w", err)
 		}
-		new, err := c.newCloudShell(ctx)
+		newCS, err := c.newCloudShell(ctx)
 		if err != nil {
 			return res, err
 		}
-		if err := c.KubeClient.Create(ctx, new); err != nil {
+		if err := c.KubeClient.Create(ctx, newCS); err != nil {
 			if meta.IsNoMatchError(err) {
 				return nil, bcode.ErrCloudShellAddonNotEnabled
 			}

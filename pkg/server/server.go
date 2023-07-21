@@ -185,7 +185,7 @@ func (s *restServer) buildIoCContainer() error {
 	}
 
 	// event
-	if err := s.beanContainer.Provides(event.InitEvent(s.cfg)...); err != nil {
+	if err := s.beanContainer.Provides(event.InitEvent()...); err != nil {
 		return fmt.Errorf("fail to provides the event bean to the container: %w", err)
 	}
 

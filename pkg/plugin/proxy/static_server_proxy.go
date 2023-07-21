@@ -26,6 +26,6 @@ type staticServerProxy struct {
 	plugin *types.Plugin
 }
 
-func (k *staticServerProxy) Handler(req *http.Request, res http.ResponseWriter) {
+func (k *staticServerProxy) Handler(_ *http.Request, _ http.ResponseWriter) {
 	// TODO:
 }

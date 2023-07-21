@@ -211,7 +211,7 @@ func (a *authenticationServiceImpl) generateJWTToken(username, grantType string,
 	return token.SignedString([]byte(signedKey))
 }
 
-func (a *authenticationServiceImpl) RefreshToken(ctx context.Context, refreshToken string) (*apisv1.RefreshTokenResponse, error) {
+func (a *authenticationServiceImpl) RefreshToken(_ context.Context, refreshToken string) (*apisv1.RefreshTokenResponse, error) {
 	claim, err := ParseToken(refreshToken)
 	if err != nil {
 		if errors.Is(err, bcode.ErrTokenExpired) {

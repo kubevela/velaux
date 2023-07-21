@@ -20,11 +20,9 @@ import (
 	"testing"
 
 	"gotest.tools/assert"
-
-	"github.com/kubevela/velaux/pkg/server/config"
 )
 
 func TestInitEvent(t *testing.T) {
-	InitEvent(config.Config{})
+	InitEvent()
 	assert.Equal(t, len(workers), 2)
 }

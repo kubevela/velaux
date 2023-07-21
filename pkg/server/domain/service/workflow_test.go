@@ -378,7 +378,7 @@ var _ = Describe("Test workflow service functions", func() {
 		Expect(record.Status).Should(Equal(string(workflowv1alpha1.WorkflowStateInitializing)))
 	})
 
-	It("Test ResumeRecord function", func() {
+	It("Test ResumeWorkflow function", func() {
 		ctx := context.TODO()
 
 		_, err := envService.CreateEnv(context.TODO(), apisv1.CreateEnvRequest{Name: "resume"})
@@ -414,9 +414,9 @@ var _ = Describe("Test workflow service functions", func() {
 		})
 		Expect(err).Should(BeNil())
 
-		err = workflowService.ResumeRecord(ctx, &model.Application{
+		err = workflowService.ResumeWorkflow(ctx, &model.Application{
 			Name: appName,
-		}, &model.Workflow{Name: ResumeWorkflow, EnvName: "resume"}, "workflow-resume-1", "")
+		}, &model.Workflow{Name: ResumeWorkflow, EnvName: "resume"}, "")
 		Expect(err).Should(BeNil())
 
 		err = workflowService.SyncWorkflowRecord(ctx, appName, "workflow-resume-1", app, nil)
@@ -428,7 +428,7 @@ var _ = Describe("Test workflow service functions", func() {
 		Expect(record.Steps[0].Phase).Should(Equal(workflowv1alpha1.WorkflowStepPhaseRunning))
 	})
 
-	It("Test TerminateRecord function", func() {
+	It("Test TerminateWorkflow function", func() {
 		ctx := context.TODO()
 
 		_, err := envService.CreateEnv(context.TODO(), apisv1.CreateEnvRequest{Name: "terminate"})
@@ -463,9 +463,9 @@ var _ = Describe("Test workflow service functions", func() {
 		})
 		Expect(err).Should(BeNil())
 
-		err = workflowService.TerminateRecord(ctx, &model.Application{
+		err = workflowService.TerminateWorkflow(ctx, &model.Application{
 			Name: appName,
-		}, workflow, "test-workflow-2-1")
+		}, workflow)
 		Expect(err).Should(BeNil())
 
 		err = k8sClient.Get(ctx, client.ObjectKey{Name: appName, Namespace: "terminate"}, app)

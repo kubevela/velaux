@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-GOLANGCILINT_VERSION ?= 1.49.0
+GOLANGCILINT_VERSION ?= 1.53.3
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -17,6 +17,7 @@ VELAUX_VERSION ?= main
 # Repo info
 GIT_COMMIT          ?= git-$(shell git rev-parse --short HEAD)
 GIT_COMMIT_LONG     ?= $(shell git rev-parse HEAD)
+VELAUX_IMAGE        ?= velaux:$(VELAUX_VERSION)
 VELAUX_VERSION_KEY    := github.com/kubevela/velaux/version.VelaVersion
 VELAUX_GITVERSION_KEY := github.com/kubevela/velaux/version.GitRevision
 LDFLAGS             ?= "-s -w -X $(VELAUX_VERSION_KEY)=$(VELAUX_VERSION) -X $(VELAUX_GITVERSION_KEY)=$(GIT_COMMIT)"

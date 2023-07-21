@@ -912,7 +912,7 @@ func (p *rbacServiceImpl) UpdateRole(ctx context.Context, projectName, roleName 
 	return assembler.ConvertRole2DTO(&role, policies), nil
 }
 
-func (p *rbacServiceImpl) ListRole(ctx context.Context, projectName string, page, pageSize int) (*apisv1.ListRolesResponse, error) {
+func (p *rbacServiceImpl) ListRole(ctx context.Context, projectName string, _, _ int) (*apisv1.ListRolesResponse, error) {
 	roles, count, err := repository.ListRoles(ctx, p.Store, projectName, 0, 0)
 	if err != nil {
 		return nil, err
@@ -945,7 +945,7 @@ func (p *rbacServiceImpl) ListRole(ctx context.Context, projectName string, page
 }
 
 // ListPermissionTemplate TODO:
-func (p *rbacServiceImpl) ListPermissionTemplate(ctx context.Context, projectName string) ([]apisv1.PermissionTemplateBase, error) {
+func (p *rbacServiceImpl) ListPermissionTemplate(_ context.Context, _ string) ([]apisv1.PermissionTemplateBase, error) {
 	return nil, nil
 }
 
@@ -1149,7 +1149,7 @@ func (r *ResourceName) String() string {
 	strBuilder := &strings.Builder{}
 	current := r
 	for current != nil && current.Type != "" {
-		strBuilder.WriteString(fmt.Sprintf("%s:%s/", current.Type, current.Value))
+		fmt.Fprintf(strBuilder, "%s:%s/", current.Type, current.Value)
 		current = current.Next
 	}
 	return strings.TrimSuffix(strBuilder.String(), "/")

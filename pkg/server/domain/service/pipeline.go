@@ -327,11 +327,7 @@ func (p pipelineServiceImpl) DeletePipeline(ctx context.Context, pl apis.Pipelin
 		klog.Errorf("delete pipeline all context failure: %s", err.Error())
 		return err
 	}
-	if err := p.Store.Delete(ctx, pipeline); err != nil {
-		return err
-	}
-
-	return nil
+	return p.Store.Delete(ctx, pipeline)
 }
 
 func (p pipelineRunServiceImpl) GetPipelineRunOutput(ctx context.Context, pipelineRun apis.PipelineRun, stepName string) (apis.GetPipelineRunOutputResponse, error) {
@@ -910,9 +906,10 @@ func getLastRun(runs []v1alpha1.WorkflowRun) *v1alpha1.WorkflowRun {
 	last := runs[0]
 	lastStartTime := last.Status.StartTime.Time
 	for _, wfr := range runs {
-		wfr.Status.StartTime.After(lastStartTime)
-		last = wfr
-		lastStartTime = wfr.Status.StartTime.Time
+		if wfr.Status.StartTime.After(lastStartTime) {
+			last = wfr
+			lastStartTime = wfr.Status.StartTime.Time
+		}
 	}
 	// We don't need managed fields, save some bandwidth
 	last.ManagedFields = nil
@@ -1277,7 +1274,7 @@ func (p pipelineRunServiceImpl) TerminatePipelineRun(ctx context.Context, meta a
 	return wfUtils.TerminateWorkflow(ctx, p.KubeClient, &run)
 }
 
-func checkPipelineSpec(spec model.WorkflowSpec) error {
+func checkPipelineSpec(_ model.WorkflowSpec) error {
 	return nil
 }
 

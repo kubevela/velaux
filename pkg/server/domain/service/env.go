@@ -97,11 +97,7 @@ func (p *envServiceImpl) DeleteEnv(ctx context.Context, envName string) error {
 		return err
 	}
 
-	if err := managePrivilegesForEnvironment(ctx, p.KubeClient, env, true); err != nil {
-		return err
-	}
-
-	return nil
+	return managePrivilegesForEnvironment(ctx, p.KubeClient, env, true)
 }
 
 // ListEnvs list envs
