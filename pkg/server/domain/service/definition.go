@@ -496,7 +496,7 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 		parameter.SubParameters = renderDefaultUISchema(property.Value)
 	}
 	var ap = property.Value.AdditionalProperties
-	if ap.Has != nil && *ap.Has && ap.Schema != nil && ap.Schema.Value != nil {
+	if ap.Schema != nil && ap.Schema.Value != nil {
 		value := ap.Schema.Value
 		parameter.SubParameters = renderDefaultUISchema(value)
 		var enable = true
