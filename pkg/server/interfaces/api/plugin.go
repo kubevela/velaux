@@ -61,13 +61,14 @@ func (p *Plugin) GetWebServiceRoute() *restful.WebService {
 		Doc("List the enabled plugins").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "OK", apis.ListPluginResponse{}).
-		Writes(apis.ListPluginResponse{}).Do(returns200, returns500))
+		Writes(apis.ListPluginResponse{}).Do(returns500))
 
 	ws.Route(ws.GET("/{pluginId}").To(p.detailPlugin).
 		Doc("Detail an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
 		Returns(200, "OK", apis.PluginDTO{}).
-		Writes(apis.PluginDTO{}).Do(returns200, returns500))
+		Writes(apis.PluginDTO{}).Do(returns500))
 
 	ws.Filter(authCheckFilter)
 	return ws
@@ -88,51 +89,57 @@ func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "list")).
 		Returns(200, "OK", apis.ListPluginResponse{}).
-		Writes(apis.ListManagedPluginResponse{}).Do(returns200, returns500))
+		Writes(apis.ListPluginResponse{}).Do(returns500))
 
 	ws.Route(ws.GET("/{pluginId}").To(p.detailPlugin).
 		Doc("Detail an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "detail")).
+		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
 		Returns(200, "OK", apis.ManagedPluginDTO{}).
-		Writes(apis.PluginDTO{}).Do(returns200, returns500))
+		Writes(apis.PluginDTO{}).Do(returns500))
 
 	ws.Route(ws.POST("/{pluginId}/setting").To(p.pluginSetting).
 		Doc("Set an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "update")).
+		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
 		Returns(200, "OK", apis.ManagedPluginDTO{}).
-		Writes(apis.PluginDTO{}).Do(returns200, returns500))
+		Writes(apis.PluginDTO{}).Do(returns500))
 
 	ws.Route(ws.POST("/{pluginId}/install").To(p.installPlugin).
 		Doc("Install one specific plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(apis.InstallPluginRequest{}).
 		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
+		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
 		Returns(200, "OK", apis.ManagedPluginDTO{}).
-		Writes(apis.PluginDTO{}).Do(returns200, returns500))
+		Writes(apis.PluginDTO{}).Do(returns500))
 
 	ws.Route(ws.POST("/{pluginId}/uninstall").To(p.uninstallPlugin).
 		Doc("Uninstall one specific plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
+		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
 		Returns(200, "OK", struct{}{}).
-		Writes(apis.PluginDTO{}).Do(returns200, returns500))
+		Writes(apis.PluginDTO{}).Do(returns500))
 
 	ws.Route(ws.POST("/{pluginId}/enable").To(p.enablePlugin).
 		Doc("Enable an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(apis.PluginEnableRequest{}).
 		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
+		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
 		Returns(200, "OK", apis.ManagedPluginDTO{}).
-		Writes(apis.PluginDTO{}).Do(returns200, returns500))
+		Writes(apis.PluginDTO{}).Do(returns500))
 
 	ws.Route(ws.POST("/{pluginId}/disable").To(p.disablePlugin).
 		Doc("Disable an installed plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
+		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
 		Returns(200, "OK", apis.ManagedPluginDTO{}).
-		Writes(apis.PluginDTO{}).Do(returns200, returns500))
+		Writes(apis.PluginDTO{}).Do(returns500))
 
 	ws.Filter(authCheckFilter)
 	return ws
@@ -205,6 +212,7 @@ func (p *ManagePlugin) uninstallPlugin(req *restful.Request, res *restful.Respon
 }
 
 func (p *ManagePlugin) detailPlugin(req *restful.Request, res *restful.Response) {
+
 	plugin, err := p.PluginService.DetailInstalledPlugin(req.Request.Context(), req.PathParameter("pluginId"))
 	if err != nil {
 		bcode.ReturnError(req, res, err)

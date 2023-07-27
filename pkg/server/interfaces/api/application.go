@@ -466,7 +466,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("page", "query the page number").DataType("integer")).
 		Param(ws.QueryParameter("pageSize", "query the page size number").DataType("integer")).
 		Returns(200, "OK", apis.ListWorkflowRecordsResponse{}).
-		Writes(apis.ListWorkflowRecordsResponse{}).Do(returns200, returns500))
+		Writes(apis.ListWorkflowRecordsResponse{}).Do(returns500))
 
 	ws.Route(ws.GET("/{appName}/workflows").To(c.WorkflowAPI.listApplicationWorkflows).
 		Doc("list application workflow").
@@ -475,7 +475,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Param(ws.PathParameter("appName", "identifier of the application.").DataType("string").Required(true)).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "OK", apis.ListWorkflowResponse{}).
-		Writes(apis.ListWorkflowResponse{}).Do(returns200, returns500))
+		Writes(apis.ListWorkflowResponse{}).Do(returns500))
 
 	ws.Route(ws.POST("/{appName}/workflows").To(c.WorkflowAPI.createOrUpdateApplicationWorkflow).
 		Doc("create application workflow").
@@ -486,7 +486,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Param(ws.PathParameter("appName", "identifier of the application.").DataType("string").Required(true)).
 		Returns(200, "create success", apis.DetailWorkflowResponse{}).
 		Returns(400, "create failure", bcode.Bcode{}).
-		Writes(apis.DetailWorkflowResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailWorkflowResponse{}).Do(returns500))
 
 	ws.Route(ws.GET("/{appName}/workflows/{workflowName}").To(c.WorkflowAPI.detailWorkflow).
 		Doc("detail application workflow").
@@ -498,7 +498,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(c.WorkflowAPI.workflowCheckFilter).
 		Returns(200, "create success", apis.DetailWorkflowResponse{}).
-		Writes(apis.DetailWorkflowResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailWorkflowResponse{}).Do(returns500))
 
 	ws.Route(ws.PUT("/{appName}/workflows/{workflowName}").To(c.WorkflowAPI.updateWorkflow).
 		Doc("update application workflow config").
@@ -510,7 +510,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Param(ws.PathParameter("workflowName", "identifier of the workflow").DataType("string")).
 		Reads(apis.UpdateWorkflowRequest{}).
 		Returns(200, "OK", apis.DetailWorkflowResponse{}).
-		Writes(apis.DetailWorkflowResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailWorkflowResponse{}).Do(returns500))
 
 	ws.Route(ws.DELETE("/{appName}/workflows/{workflowName}").To(c.WorkflowAPI.deleteWorkflow).
 		Doc("deletet workflow").
@@ -520,7 +520,6 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Filter(c.WorkflowAPI.workflowCheckFilter).
 		Param(ws.PathParameter("appName", "identifier of the application.").DataType("string").Required(true)).
 		Param(ws.PathParameter("workflowName", "identifier of the workflow").DataType("string")).
-		Returns(200, "OK", apis.EmptyResponse{}).
 		Writes(apis.EmptyResponse{}).Do(returns200, returns500))
 
 	ws.Route(ws.GET("/{appName}/workflows/{workflowName}/records").To(c.WorkflowAPI.listWorkflowRecords).
@@ -534,7 +533,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("page", "query the page number").DataType("integer")).
 		Param(ws.QueryParameter("pageSize", "query the page size number").DataType("integer")).
 		Returns(200, "OK", apis.ListWorkflowRecordsResponse{}).
-		Writes(apis.ListWorkflowRecordsResponse{}).Do(returns200, returns500))
+		Writes(apis.ListWorkflowRecordsResponse{}).Do(returns500))
 
 	ws.Route(ws.GET("/{appName}/workflows/{workflowName}/records/{record}").To(c.WorkflowAPI.detailWorkflowRecord).
 		Doc("query application workflow execution record detail").
@@ -546,7 +545,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Filter(c.appCheckFilter).
 		Filter(c.WorkflowAPI.workflowCheckFilter).
 		Returns(200, "OK", apis.DetailWorkflowRecordResponse{}).
-		Writes(apis.DetailWorkflowRecordResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailWorkflowRecordResponse{}).Do(returns500))
 
 	ws.Route(ws.GET("/{appName}/workflows/{workflowName}/records/{record}/resume").To(c.WorkflowAPI.resumeWorkflowRecord).
 		Doc("resume suspend workflow record").
@@ -684,16 +683,19 @@ func (c *application) createApplication(req *restful.Request, res *restful.Respo
 	// Verify the validity of parameters
 	var createReq apis.CreateApplicationRequest
 	if err := req.ReadEntity(&createReq); err != nil {
+		klog.Info("param err ", err)
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	if err := validate.Struct(&createReq); err != nil {
+		klog.Info("validate struct err ", err)
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	// Call the domain layer code
 	appBase, err := c.ApplicationService.CreateApplication(req.Request.Context(), createReq)
 	if err != nil {
+		klog.Info("Failure: ", err.Error())
 		klog.Errorf("create application failure %s", err.Error())
 		bcode.ReturnError(req, res, err)
 		return

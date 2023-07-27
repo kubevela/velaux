@@ -56,7 +56,7 @@ func (c *Cluster) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("pageSize", "PageSize for paging").DataType("integer").DefaultValue("20")).
 		Returns(200, "OK", apis.ListClusterResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
-		Writes(apis.ListClusterResponse{}).Do(returns200, returns500))
+		Writes(apis.ListClusterResponse{}).Do(returns500))
 
 	ws.Route(ws.POST("/").To(c.createKubeCluster).
 		Doc("create cluster").
