@@ -1046,23 +1046,19 @@ func (c *application) updateApplication(req *restful.Request, res *restful.Respo
 	// Verify the validity of parameters
 	var updateReq apis.UpdateApplicationRequest
 	if err := req.ReadEntity(&updateReq); err != nil {
-		klog.Info("read entity err", err)
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	if err := validate.Struct(&updateReq); err != nil {
-		klog.Info("Validate err", err)
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	base, err := c.ApplicationService.UpdateApplication(req.Request.Context(), app, updateReq)
 	if err != nil {
-		klog.Info("update app err", err)
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	if err := res.WriteEntity(base); err != nil {
-		klog.Info("write entity err", err)
 		bcode.ReturnError(req, res, err)
 		return
 	}
