@@ -100,8 +100,7 @@ func (dt *Target) GetWebServiceRoute() *restful.WebService {
 		Filter(dt.targetCheckFilter).
 		Filter(dt.RbacService.CheckPerm("target", "delete")).
 		Param(ws.PathParameter("targetName", "identifier of the Target").DataType("string")).
-		Returns(200, "OK", apis.EmptyResponse{}).
-		Writes(apis.EmptyResponse{}).Do(returns500))
+		Writes(apis.EmptyResponse{}).Do(returns200, returns500))
 
 	ws.Filter(authCheckFilter)
 	return ws

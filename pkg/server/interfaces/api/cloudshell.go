@@ -65,9 +65,8 @@ func (c *CloudShell) GetWebServiceRoute() *restful.WebService {
 		Doc("destroy the user's cloud shell environment").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(c.RbacService.CheckPerm("cloudshell", "delete")).
-		Returns(200, "OK", apis.EmptyResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
-		Writes(apis.EmptyResponse{}).Do(returns500))
+		Writes(apis.EmptyResponse{}).Do(returns200, returns500))
 
 	ws.Filter(authCheckFilter)
 	return ws
@@ -128,9 +127,8 @@ func (c *CloudShellView) GetWebServiceRoute() *restful.WebService {
 		Doc("prepare the user's cloud shell environment").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(c.RbacService.CheckPerm("cloudshell", "create")).
-		Returns(200, "OK", apis.EmptyResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
-		Writes(apis.EmptyResponse{}).Do(returns500))
+		Writes(apis.EmptyResponse{}).Do(returns200, returns500))
 
 	ws.Route(ws.GET("/{subpath:*}").To(c.proxy).
 		Doc("prepare the user's cloud shell environment").
@@ -138,9 +136,8 @@ func (c *CloudShellView) GetWebServiceRoute() *restful.WebService {
 		Operation("proxyPath").
 		Param(ws.PathParameter("subpath", "subpath").DataType("string")).
 		Filter(c.RbacService.CheckPerm("cloudshell", "create")).
-		Returns(200, "OK", apis.EmptyResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
-		Writes(apis.EmptyResponse{}).Do(returns500))
+		Writes(apis.EmptyResponse{}).Do(returns200, returns500))
 
 	ws.Filter(authCheckFilter)
 	return ws

@@ -112,6 +112,7 @@ func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(apis.InstallPluginRequest{}).
 		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
+		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
 		Returns(200, "OK", apis.ManagedPluginDTO{}).
 		Writes(apis.PluginDTO{}).Do(returns500))
 
@@ -119,6 +120,7 @@ func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 		Doc("Uninstall one specific plugin").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
+		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
 		Returns(200, "OK", struct{}{}).
 		Writes(apis.PluginDTO{}).Do(returns500))
 

@@ -520,8 +520,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Filter(c.WorkflowAPI.workflowCheckFilter).
 		Param(ws.PathParameter("appName", "identifier of the application.").DataType("string").Required(true)).
 		Param(ws.PathParameter("workflowName", "identifier of the workflow").DataType("string")).
-		Returns(200, "OK", apis.EmptyResponse{}).
-		Writes(apis.EmptyResponse{}).Do(returns500))
+		Writes(apis.EmptyResponse{}).Do(returns200, returns500))
 
 	ws.Route(ws.GET("/{appName}/workflows/{workflowName}/records").To(c.WorkflowAPI.listWorkflowRecords).
 		Doc("query application workflow execution record").
