@@ -64,7 +64,7 @@ func (dt *Target) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("pageSize", "PageSize for paging").DataType("integer")).
 		Param(ws.QueryParameter("project", "list targets by project name").DataType("string")).
 		Returns(200, "OK", apis.ListTargetResponse{}).
-		Writes(apis.ListTargetResponse{}).Do(returns200, returns500))
+		Writes(apis.ListTargetResponse{}).Do(returns500))
 
 	ws.Route(ws.POST("/").To(dt.createTarget).
 		Doc("create Target").
@@ -73,7 +73,7 @@ func (dt *Target) GetWebServiceRoute() *restful.WebService {
 		Filter(dt.RbacService.CheckPerm("target", "create")).
 		Returns(200, "create success", apis.DetailTargetResponse{}).
 		Returns(400, "create failure", bcode.Bcode{}).
-		Writes(apis.DetailTargetResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailTargetResponse{}).Do(returns500))
 
 	ws.Route(ws.GET("/{targetName}").To(dt.detailTarget).
 		Doc("detail Target").
@@ -82,7 +82,7 @@ func (dt *Target) GetWebServiceRoute() *restful.WebService {
 		Filter(dt.targetCheckFilter).
 		Filter(dt.RbacService.CheckPerm("target", "detail")).
 		Returns(200, "create success", apis.DetailTargetResponse{}).
-		Writes(apis.DetailTargetResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailTargetResponse{}).Do(returns500))
 
 	ws.Route(ws.PUT("/{targetName}").To(dt.updateTarget).
 		Doc("update application Target config").
@@ -92,7 +92,7 @@ func (dt *Target) GetWebServiceRoute() *restful.WebService {
 		Reads(apis.UpdateTargetRequest{}).
 		Filter(dt.RbacService.CheckPerm("target", "update")).
 		Returns(200, "OK", apis.DetailTargetResponse{}).
-		Writes(apis.DetailTargetResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailTargetResponse{}).Do(returns500))
 
 	ws.Route(ws.DELETE("/{targetName}").To(dt.deleteTarget).
 		Doc("deletet Target").
@@ -101,7 +101,7 @@ func (dt *Target) GetWebServiceRoute() *restful.WebService {
 		Filter(dt.RbacService.CheckPerm("target", "delete")).
 		Param(ws.PathParameter("targetName", "identifier of the Target").DataType("string")).
 		Returns(200, "OK", apis.EmptyResponse{}).
-		Writes(apis.EmptyResponse{}).Do(returns200, returns500))
+		Writes(apis.EmptyResponse{}).Do(returns500))
 
 	ws.Filter(authCheckFilter)
 	return ws

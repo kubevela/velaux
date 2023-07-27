@@ -54,7 +54,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("ownerAddon", "query by which addon created the definition").DataType("string")).
 		Param(ws.QueryParameter("scope", "query by the specified scope like WorkflowRun or Application").DataType("string")).
 		Returns(200, "OK", apis.ListDefinitionResponse{}).
-		Writes(apis.ListDefinitionResponse{}).Do(returns200, returns500))
+		Writes(apis.ListDefinitionResponse{}).Do(returns500))
 
 	ws.Route(ws.GET("/{definitionName}").To(d.detailDefinition).
 		Doc("Detail a definition").
@@ -63,7 +63,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("type", "query the definition type").DataType("string")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "create successfully", apis.DetailDefinitionResponse{}).
-		Writes(apis.DetailDefinitionResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailDefinitionResponse{}).Do(returns500))
 
 	ws.Route(ws.PUT("/{definitionName}/uischema").To(d.updateUISchema).
 		Doc("Update the UI schema for a definition").
@@ -72,7 +72,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string").Required(true)).
 		Reads(apis.UpdateUISchemaRequest{}).
 		Returns(200, "update successfully", schema.UISchema{}).
-		Writes(apis.DetailDefinitionResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailDefinitionResponse{}).Do(returns500))
 
 	ws.Route(ws.PUT("/{definitionName}/status").To(d.updateDefinitionStatus).
 		Doc("Update the status for a definition").
@@ -81,7 +81,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string").Required(true)).
 		Reads(apis.UpdateDefinitionStatusRequest{}).
 		Returns(200, "update successfully", schema.UISchema{}).
-		Writes(apis.DetailDefinitionResponse{}).Do(returns200, returns500))
+		Writes(apis.DetailDefinitionResponse{}).Do(returns500))
 
 	ws.Filter(authCheckFilter)
 	return ws
