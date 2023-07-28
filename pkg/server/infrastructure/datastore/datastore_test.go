@@ -31,6 +31,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	mysqlgorm "gorm.io/driver/mysql"
+	postgresorm "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -44,6 +45,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/kubeapi"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mongodb"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mysql"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/postgres"
 )
 
 func initMysqlTestDs() (datastore.DataStore, error) {
@@ -65,6 +67,49 @@ func initMysqlTestDs() (datastore.DataStore, error) {
 		return nil, err
 	}
 	return mysqlDriver, nil
+}
+
+func initPostgresTestDs() (datastore.DataStore, error) {
+	db, err := gorm.Open(postgresorm.Open("postgres://kubevela:Kubevela-123@127.0.0.1:5432/kubevela?sslmode=disable&client_encoding=UTF-8&connect_timeout=1"), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range model.GetRegisterModels() {
+		err := db.Migrator().DropTable(&v)
+		if err != nil {
+			return nil, err
+		}
+	}
+	postgresDriver, err := postgres.New(context.TODO(), datastore.Config{
+		URL:      "postgres://kubevela:Kubevela-123@127.0.0.1:5432/kubevela?sslmode=disable&client_encoding=UTF-8&connect_timeout=1",
+		Database: "kubevela",
+	})
+	if err != nil {
+		return nil, err
+	}
+	return postgresDriver, nil
+}
+
+// initOpenGaussTestDs Postgres Driver is also compatible with OpenGaussian databases
+func initOpenGaussTestDs() (datastore.DataStore, error) {
+	db, err := gorm.Open(postgresorm.Open("postgres://gaussdb:Kubevela-123@127.0.0.1:15432/kubevela?sslmode=disable&client_encoding=UTF-8&connect_timeout=1"), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range model.GetRegisterModels() {
+		err := db.Migrator().DropTable(&v)
+		if err != nil {
+			return nil, err
+		}
+	}
+	openGaussDriver, err := postgres.New(context.TODO(), datastore.Config{
+		URL:      "postgres://gaussdb:Kubevela-123@127.0.0.1:15432/kubevela?sslmode=disable&client_encoding=UTF-8&connect_timeout=1",
+		Database: "kubevela",
+	})
+	if err != nil {
+		return nil, err
+	}
+	return openGaussDriver, nil
 }
 
 func initKubeapiTestDs() (datastore.DataStore, error) {
@@ -151,6 +196,8 @@ var _ = Describe("Test datastore methods", func() {
 	DriverTest(initMysqlTestDs)
 	DriverTest(initMongodbTestDs)
 	DriverTest(initKubeapiTestDs)
+	DriverTest(initOpenGaussTestDs)
+	DriverTest(initPostgresTestDs)
 })
 
 func DriverTest(initTestDs func() (datastore.DataStore, error)) {

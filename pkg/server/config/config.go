@@ -103,7 +103,7 @@ func NewConfig() *Config {
 func (s *Config) Validate() []error {
 	var errs []error
 
-	if s.Datastore.Type != "mongodb" && s.Datastore.Type != "kubeapi" {
+	if s.Datastore.Type != "mongodb" && s.Datastore.Type != "kubeapi" && s.Datastore.Type != "postgres" {
 		errs = append(errs, fmt.Errorf("not support datastore type %s", s.Datastore.Type))
 	}
 
