@@ -55,6 +55,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/kubeapi"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mongodb"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mysql"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/postgres"
 	"github.com/kubevela/velaux/pkg/server/interfaces/api"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
@@ -146,6 +147,11 @@ func (s *restServer) buildIoCContainer() error {
 		ds, err = mysql.New(context.Background(), s.cfg.Datastore)
 		if err != nil {
 			return fmt.Errorf("create mysql datastore instance failure %w", err)
+		}
+	case "postgres":
+		ds, err = postgres.New(context.Background(), s.cfg.Datastore)
+		if err != nil {
+			return fmt.Errorf("create postgres datastore instance failure %w", err)
 		}
 	default:
 		return fmt.Errorf("not support datastore type %s", s.cfg.Datastore.Type)
