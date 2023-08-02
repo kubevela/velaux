@@ -349,8 +349,8 @@ func (u *configServiceImpl) GetConfig(ctx context.Context, project, name string)
 		if errors.Is(err, config.ErrSensitiveConfig) {
 			return nil, bcode.ErrSensitiveConfig
 		}
-		if errors.Is(err, config.ErrConfigNotFound) {
-			// Try to get global config
+		if errors.Is(err, config.ErrConfigNotFound) && !isGlobal(project) {
+			// Try to get global config if the config is not found in the project scope.
 			return u.GetConfig(ctx, NoProject, name)
 		}
 		return nil, err
