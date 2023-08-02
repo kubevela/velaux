@@ -48,6 +48,17 @@ type ConfigService interface {
 	ListConfigDistributions(ctx context.Context, project string) ([]*config.Distribution, error)
 }
 
+var (
+	// GlobalConfigNamespace is the namespace for global config, global config should be seen by all projects
+	GlobalConfigNamespace = types.DefaultKubeVelaNS
+	// NoProject is the project name to pass when query global config
+	NoProject = ""
+)
+
+func isGlobal(project string) bool {
+	return project == NoProject
+}
+
 // NewConfigService returns a config use case
 func NewConfigService() ConfigService {
 	return &configServiceImpl{}
@@ -62,8 +73,8 @@ type configServiceImpl struct {
 
 // ListTemplates list the config templates
 func (u *configServiceImpl) ListTemplates(ctx context.Context, project, scope string) ([]*apis.ConfigTemplate, error) {
-	listCtx := utils.WithProject(ctx, "")
-	queryTemplates, err := u.Factory.ListTemplates(listCtx, types.DefaultKubeVelaNS, scope)
+	listCtx := utils.WithProject(ctx, NoProject)
+	queryTemplates, err := u.Factory.ListTemplates(listCtx, GlobalConfigNamespace, scope)
 	if err != nil {
 		return nil, err
 	}
@@ -99,9 +110,9 @@ func (u *configServiceImpl) ListTemplates(ctx context.Context, project, scope st
 // GetTemplate detail a template
 func (u *configServiceImpl) GetTemplate(ctx context.Context, tem config.NamespacedName) (*apis.ConfigTemplateDetail, error) {
 	if tem.Namespace == "" {
-		tem.Namespace = types.DefaultKubeVelaNS
+		tem.Namespace = GlobalConfigNamespace
 	}
-	getCtx := utils.WithProject(ctx, "")
+	getCtx := utils.WithProject(ctx, NoProject)
 	template, err := u.Factory.LoadTemplate(getCtx, tem.Name, tem.Namespace)
 	if err != nil {
 		if errors.Is(err, config.ErrTemplateNotFound) {
@@ -128,8 +139,8 @@ func (u *configServiceImpl) GetTemplate(ctx context.Context, tem config.Namespac
 }
 
 func (u *configServiceImpl) CreateConfig(ctx context.Context, project string, req apis.CreateConfigRequest) (*apis.Config, error) {
-	ns := types.DefaultKubeVelaNS
-	if project != "" {
+	ns := GlobalConfigNamespace
+	if !isGlobal(project) {
 		pro, err := u.ProjectService.GetProject(ctx, project)
 		if err != nil {
 			return nil, err
@@ -138,7 +149,7 @@ func (u *configServiceImpl) CreateConfig(ctx context.Context, project string, re
 	}
 	exist, err := u.Factory.IsExist(ctx, ns, req.Name)
 	if err != nil {
-		klog.Errorf("check config name is exist failure %s", err.Error())
+		klog.Errorf("check config name exist fail %s", err.Error())
 		return nil, bcode.ErrConfigExist
 	}
 	if exist {
@@ -149,7 +160,7 @@ func (u *configServiceImpl) CreateConfig(ctx context.Context, project string, re
 		return nil, err
 	}
 	if req.Template.Namespace == "" {
-		req.Template.Namespace = types.DefaultKubeVelaNS
+		req.Template.Namespace = GlobalConfigNamespace
 	}
 	configItem, err := u.Factory.ParseConfig(ctx, config.NamespacedName(req.Template), config.Metadata{
 		NamespacedName: config.NamespacedName{Name: req.Name, Namespace: ns},
@@ -169,8 +180,8 @@ func (u *configServiceImpl) CreateConfig(ctx context.Context, project string, re
 }
 
 func (u *configServiceImpl) UpdateConfig(ctx context.Context, project string, name string, req apis.UpdateConfigRequest) (*apis.Config, error) {
-	ns := types.DefaultKubeVelaNS
-	if project != "" {
+	ns := GlobalConfigNamespace
+	if !isGlobal(project) {
 		pro, err := u.ProjectService.GetProject(ctx, project)
 		if err != nil {
 			return nil, err
@@ -217,8 +228,8 @@ func (u *configServiceImpl) ListConfigs(ctx context.Context, project string, tem
 	var list []*apis.Config
 	scope := ""
 	var projectNamespace string
-	listCtx := utils.WithProject(ctx, "")
-	if project != "" {
+	listCtx := utils.WithProject(ctx, NoProject)
+	if !isGlobal(project) {
 		scope = "project"
 		pro, err := u.ProjectService.GetProject(ctx, project)
 		if err != nil {
@@ -235,7 +246,7 @@ func (u *configServiceImpl) ListConfigs(ctx context.Context, project string, tem
 		}
 	}
 
-	configs, err := u.Factory.ListConfigs(listCtx, types.DefaultKubeVelaNS, template, scope, true)
+	configs, err := u.Factory.ListConfigs(listCtx, GlobalConfigNamespace, template, scope, true)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +294,7 @@ func (u *configServiceImpl) CreateConfigDistribution(ctx context.Context, projec
 	})
 }
 
-// ListDistributeConfigs list the all distributions
+// ListConfigDistributions list the all distributions
 func (u *configServiceImpl) ListConfigDistributions(ctx context.Context, project string) ([]*config.Distribution, error) {
 	pro, err := u.ProjectService.GetProject(ctx, project)
 	if err != nil {
@@ -324,8 +335,8 @@ func convertConfig(project string, config config.Config) *apis.Config {
 }
 
 func (u *configServiceImpl) GetConfig(ctx context.Context, project, name string) (*apis.Config, error) {
-	ns := types.DefaultKubeVelaNS
-	if project != "" {
+	ns := GlobalConfigNamespace
+	if !isGlobal(project) {
 		pro, err := u.ProjectService.GetProject(ctx, project)
 		if err != nil {
 			return nil, err
@@ -335,21 +346,25 @@ func (u *configServiceImpl) GetConfig(ctx context.Context, project, name string)
 
 	it, err := u.Factory.GetConfig(ctx, ns, name, true)
 	if err != nil {
-		if errors.Is(err, config.ErrSensitiveConfig) {
+		switch {
+		case errors.Is(err, config.ErrSensitiveConfig):
 			return nil, bcode.ErrSensitiveConfig
-		}
-		if errors.Is(err, config.ErrConfigNotFound) {
+		case errors.Is(err, config.ErrConfigNotFound):
+			if !isGlobal(project) {
+				// Try to get global config if the config is not found in the project scope.
+				return u.GetConfig(ctx, NoProject, name)
+			}
 			return nil, bcode.ErrConfigNotFound
+		default:
+			return nil, err
 		}
-		return nil, err
 	}
-
 	return convertConfig(project, *it), nil
 }
 
 func (u *configServiceImpl) DeleteConfig(ctx context.Context, project, name string) error {
-	ns := types.DefaultKubeVelaNS
-	if project != "" {
+	ns := GlobalConfigNamespace
+	if !isGlobal(project) {
 		pro, err := u.ProjectService.GetProject(ctx, project)
 		if err != nil {
 			return err

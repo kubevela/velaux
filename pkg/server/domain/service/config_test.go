@@ -101,6 +101,69 @@ template: {
 	}
 }
 `
+var (
+	helmTemplateName = "helm-repository"
+	helmTemplate     = `
+import (
+	"vela/config"
+)
+
+metadata: {
+	name:        "helm-repository"
+	alias:       "Helm Repository"
+	description: "Config information to authenticate helm chart repository"
+	sensitive:   false
+	scope:       "project"
+}
+
+template: {
+	output: {
+		apiVersion: "v1"
+		kind:       "Secret"
+		metadata: {
+			name:      context.name
+			namespace: context.namespace
+			labels: {
+				"config.oam.dev/catalog":       "velacore-config"
+				"config.oam.dev/type":          "helm-repository"
+				"config.oam.dev/multi-cluster": "true"
+				"config.oam.dev/sub-type":      "helm"
+			}
+		}
+		type: "Opaque"
+		stringData: {
+			url: parameter.url
+			if parameter.username != _|_ {
+				username: parameter.username
+			}
+			if parameter.password != _|_ {
+				password: parameter.password
+			}
+
+		}
+		data: {
+			if parameter.caFile != _|_ {
+				caFile: parameter.caFile
+			}
+		}
+	}
+    // skip the validation here for config.#HelmRepository requires the repository actually exists which can be flaky in unit test 
+	//validation: config.#HelmRepository & {
+	//			 $params: parameter
+	//}
+
+	parameter: {
+		// +usage=The public url of the helm chart repository.
+		url: string
+		// +usage=The username of basic auth repo.
+		username?: string
+		// +usage=The password of basic auth repo.
+		password?: string
+		// +usage=The ca certificate of helm repository. Please encode this data with base64.
+		caFile?: string
+	}
+}`
+)
 
 var _ = Describe("Test config service", func() {
 	var factory config.Factory
@@ -180,9 +243,42 @@ var _ = Describe("Test config service", func() {
 		Expect(len(list)).To(Equal(0))
 	})
 
-	It("Test detail a config", func() {
-		_, err := configService.GetConfig(context.TODO(), "", "alibaba-test")
-		Expect(err).To(Equal(bcode.ErrSensitiveConfig))
+	Context("Test get config", func() {
+		It("Simple get", func() {
+			_, err := configService.GetConfig(context.TODO(), "", "alibaba-test")
+			Expect(err).To(Equal(bcode.ErrSensitiveConfig))
+		})
+
+		It("Get config in project and fall back to get global config", func() {
+			By("apply helm template")
+			tem, err := factory.ParseTemplate(helmTemplateName, []byte(helmTemplate))
+			Expect(err).To(BeNil())
+			Expect(factory.CreateOrUpdateConfigTemplate(context.Background(), types.DefaultKubeVelaNS, tem)).To(BeNil())
+
+			By("create a project")
+			_, err = projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{Name: "some-project"})
+			Expect(err).To(BeNil())
+			defer func() {
+				Expect(projectService.DeleteProject(context.Background(), "some-project")).To(BeNil())
+			}()
+			By("create a common global config")
+			_, err = configService.CreateConfig(context.TODO(), NoProject, v1.CreateConfigRequest{
+				Name: "helm-test",
+				Template: v1.NamespacedName{
+					Name: helmTemplateName,
+				},
+				Properties: `{"username":"test","password":"test","url":"https://helm.kubevela.com/charts"}`,
+			})
+			Expect(err).To(BeNil())
+			defer func() {
+				Expect(configService.DeleteConfig(context.Background(), NoProject, "helm-test")).To(BeNil())
+			}()
+			By("try to get the config in project, should success")
+			config, err := configService.GetConfig(context.TODO(), "some-project", "helm-test")
+			Expect(err).To(BeNil())
+			Expect(config.Name).To(Equal("helm-test"))
+		})
+
 	})
 
 	It("Test delete a config", func() {
