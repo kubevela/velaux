@@ -258,6 +258,9 @@ var _ = Describe("Test config service", func() {
 			By("create a project")
 			_, err = projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{Name: "some-project"})
 			Expect(err).To(BeNil())
+			defer func() {
+				Expect(projectService.DeleteProject(context.Background(), "some-project")).To(BeNil())
+			}()
 			By("create a common global config")
 			_, err = configService.CreateConfig(context.TODO(), NoProject, v1.CreateConfigRequest{
 				Name: "helm-test",
@@ -267,6 +270,9 @@ var _ = Describe("Test config service", func() {
 				Properties: `{"username":"test","password":"test","url":"https://helm.kubevela.com/charts"}`,
 			})
 			Expect(err).To(BeNil())
+			defer func() {
+				Expect(configService.DeleteConfig(context.Background(), NoProject, "helm-test")).To(BeNil())
+			}()
 			By("try to get the config in project, should success")
 			config, err := configService.GetConfig(context.TODO(), "some-project", "helm-test")
 			Expect(err).To(BeNil())
