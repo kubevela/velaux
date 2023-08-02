@@ -346,16 +346,19 @@ func (u *configServiceImpl) GetConfig(ctx context.Context, project, name string)
 
 	it, err := u.Factory.GetConfig(ctx, ns, name, true)
 	if err != nil {
-		if errors.Is(err, config.ErrSensitiveConfig) {
+		switch {
+		case errors.Is(err, config.ErrSensitiveConfig):
 			return nil, bcode.ErrSensitiveConfig
+		case errors.Is(err, config.ErrConfigNotFound):
+			if !isGlobal(project) {
+				// Try to get global config if the config is not found in the project scope.
+				return u.GetConfig(ctx, NoProject, name)
+			}
+			return nil, bcode.ErrConfigNotFound
+		default:
+			return nil, err
 		}
-		if errors.Is(err, config.ErrConfigNotFound) && !isGlobal(project) {
-			// Try to get global config if the config is not found in the project scope.
-			return u.GetConfig(ctx, NoProject, name)
-		}
-		return nil, err
 	}
-
 	return convertConfig(project, *it), nil
 }
 
