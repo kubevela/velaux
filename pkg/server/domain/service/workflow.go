@@ -445,7 +445,7 @@ func (w *workflowServiceImpl) SyncWorkflowRecord(ctx context.Context, appPrimary
 				record.Finished = "true"
 				record.Status = model.RevisionStatusFail
 				if err := w.Store.Put(ctx, record); err != nil {
-					return fmt.Errorf(("failed to set the record status to terminated: %s"), err.Error())
+					return fmt.Errorf("failed to set the record status to terminated: %s", err.Error())
 				}
 				return bcode.ErrApplicationRevisionNotExist
 			}

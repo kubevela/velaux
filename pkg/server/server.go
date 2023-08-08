@@ -253,7 +253,9 @@ func (s *restServer) setupLeaderElection(errChan chan error) (*leaderelection.Le
 				go event.StartEventWorker(ctx, errChan)
 			},
 			OnStoppedLeading: func() {
-				errChan <- fmt.Errorf("leader lost %s", s.cfg.LeaderConfig.ID)
+				if s.cfg.ExitOnLostLeader {
+					errChan <- fmt.Errorf("leader lost %s", s.cfg.LeaderConfig.ID)
+				}
 			},
 			OnNewLeader: func(identity string) {
 				if identity == s.cfg.LeaderConfig.ID {
