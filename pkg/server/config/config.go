@@ -58,6 +58,9 @@ type Config struct {
 	PluginConfig PluginConfig
 
 	DexServerURL string
+
+	// ExitOnLostLeader will exit the process if this server lost the leader election, set this to true for debugging
+	ExitOnLostLeader bool
 }
 
 // PluginConfig the plugin directory config
@@ -95,7 +98,8 @@ func NewConfig() *Config {
 			CorePluginPath:   "core-plugins",
 			CustomPluginPath: []string{"plugins"},
 		},
-		DexServerURL: "http://dex.vela-system:5556",
+		DexServerURL:     "http://dex.vela-system:5556",
+		ExitOnLostLeader: true,
 	}
 }
 
@@ -127,5 +131,6 @@ func (s *Config) AddFlags(fs *pflag.FlagSet, c *Config) {
 	fs.StringVar(&s.WorkflowVersion, "workflow-version", c.WorkflowVersion, "the version of workflow to meet controller requirement.")
 	fs.StringVar(&s.DexServerURL, "dex-server", c.DexServerURL, "the URL of the dex server.")
 	fs.StringArrayVar(&s.PluginConfig.CustomPluginPath, "plugin-path", c.PluginConfig.CustomPluginPath, "the path of the plugin directory")
+	fs.BoolVar(&s.ExitOnLostLeader, "exit-on-lost-leader", c.ExitOnLostLeader, "exit the process if this server lost the leader election")
 	profiling.AddFlags(fs)
 }

@@ -97,7 +97,14 @@ func (a *ApplicationSync) Start(ctx context.Context, errorChan chan error) {
 			}
 			app := item.(*v1beta1.Application)
 			if err := cu.AddOrUpdate(ctx, app); err != nil {
-				klog.Errorf("fail to add or update application %s: %s", app.Name, err.Error())
+				failTimes := a.Queue.NumRequeues(app)
+				klog.Errorf("fail to add or update application %s: %s, requeue times: %d", app.Name, err.Error(), failTimes)
+				if failTimes < 5 {
+					a.Queue.AddRateLimited(app)
+				} else {
+					klog.Errorf("fail to add or update application %s: %s, requeue times reach the limit(%d), give up", app.Name, err.Error(), failTimes)
+					a.Queue.Forget(app)
+				}
 			}
 			a.Queue.Done(app)
 		}
