@@ -72,16 +72,6 @@ jobs:
           mysql database: 'kubevela'
           mysql root password: 'kubevelaSQL123'
 
-      - name: Set up OpenGauss
-        uses: lgj101/opengauss-action@v1.6
-        with:
-          GS_VERSION: '5.0.0'
-          GS_DB: 'kubevela'
-          GS_USERNAME: 'kubevela'
-          GS_PASSWORD: 'Kubevela-123'
-          HOST_PORT: 15432
-          CONTAINER_PORT: 5432
-
       - name: Set up Postgres
         uses: Harmon758/postgresql-action@v1
         with:

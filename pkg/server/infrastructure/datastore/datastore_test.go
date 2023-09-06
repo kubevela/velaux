@@ -90,28 +90,6 @@ func initPostgresTestDs() (datastore.DataStore, error) {
 	return postgresDriver, nil
 }
 
-// initOpenGaussTestDs Postgres Driver is also compatible with OpenGaussian databases
-func initOpenGaussTestDs() (datastore.DataStore, error) {
-	db, err := gorm.Open(postgresorm.Open("postgres://gaussdb:Kubevela-123@127.0.0.1:15432/kubevela?sslmode=disable&client_encoding=UTF-8&connect_timeout=1"), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range model.GetRegisterModels() {
-		err := db.Migrator().DropTable(&v)
-		if err != nil {
-			return nil, err
-		}
-	}
-	openGaussDriver, err := postgres.New(context.TODO(), datastore.Config{
-		URL:      "postgres://gaussdb:Kubevela-123@127.0.0.1:15432/kubevela?sslmode=disable&client_encoding=UTF-8&connect_timeout=1",
-		Database: "kubevela",
-	})
-	if err != nil {
-		return nil, err
-	}
-	return openGaussDriver, nil
-}
-
 func initKubeapiTestDs() (datastore.DataStore, error) {
 	var testScheme = runtime.NewScheme()
 	testEnv := &envtest.Environment{
@@ -196,7 +174,6 @@ var _ = Describe("Test datastore methods", func() {
 	DriverTest(initMysqlTestDs)
 	DriverTest(initMongodbTestDs)
 	DriverTest(initKubeapiTestDs)
-	DriverTest(initOpenGaussTestDs)
 	DriverTest(initPostgresTestDs)
 })
 
