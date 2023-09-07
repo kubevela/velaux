@@ -18,13 +18,15 @@ package postgres
 
 import (
 	"context"
+
+	postgresorm "gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/sql"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/sqlnamer"
-	postgresorm "gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 type postgres struct {

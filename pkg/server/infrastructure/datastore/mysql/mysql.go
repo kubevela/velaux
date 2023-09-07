@@ -18,13 +18,15 @@ package mysql
 
 import (
 	"context"
+
+	mysqlgorm "gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/sql"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/sqlnamer"
-	mysqlgorm "gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 type mysql struct {
