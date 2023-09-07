@@ -30,7 +30,7 @@ import (
 )
 
 type mysql struct {
-	delegate sql.Driver
+	sql.Driver
 }
 
 // New new mysql datastore instance
@@ -50,49 +50,9 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 	}
 
 	m := &mysql{
-		delegate: sql.Driver{
+		Driver: sql.Driver{
 			Client: *db.WithContext(ctx),
 		},
 	}
 	return m, nil
-}
-
-// Add add data model
-func (m *mysql) Add(ctx context.Context, entity datastore.Entity) error {
-	return m.delegate.Add(ctx, entity)
-}
-
-// BatchAdd batch add entity, this operation has some atomicity.
-func (m *mysql) BatchAdd(ctx context.Context, entities []datastore.Entity) error {
-	return m.delegate.BatchAdd(ctx, entities)
-}
-
-// Get get data model
-func (m *mysql) Get(ctx context.Context, entity datastore.Entity) error {
-	return m.delegate.Get(ctx, entity)
-}
-
-// Put update data model
-func (m *mysql) Put(ctx context.Context, entity datastore.Entity) error {
-	return m.delegate.Put(ctx, entity)
-}
-
-// IsExist determine whether data exists.
-func (m *mysql) IsExist(ctx context.Context, entity datastore.Entity) (bool, error) {
-	return m.delegate.IsExist(ctx, entity)
-}
-
-// Delete delete data
-func (m *mysql) Delete(ctx context.Context, entity datastore.Entity) error {
-	return m.delegate.Delete(ctx, entity)
-}
-
-// List list entity function
-func (m *mysql) List(ctx context.Context, entity datastore.Entity, op *datastore.ListOptions) ([]datastore.Entity, error) {
-	return m.delegate.List(ctx, entity, op)
-}
-
-// Count counts entities
-func (m *mysql) Count(ctx context.Context, entity datastore.Entity, filterOptions *datastore.FilterOptions) (int64, error) {
-	return m.delegate.Count(ctx, entity, filterOptions)
 }

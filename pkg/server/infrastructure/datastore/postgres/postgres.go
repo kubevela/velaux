@@ -30,7 +30,7 @@ import (
 )
 
 type postgres struct {
-	delegate sql.Driver
+	sql.Driver
 }
 
 // New postgres datastore instance
@@ -52,50 +52,10 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 		}
 	}
 
-	m := &postgres{
-		delegate: sql.Driver{
+	p := &postgres{
+		Driver: sql.Driver{
 			Client: *db.WithContext(ctx),
 		},
 	}
-	return m, nil
-}
-
-// Add add data model
-func (m *postgres) Add(ctx context.Context, entity datastore.Entity) error {
-	return m.delegate.Add(ctx, entity)
-}
-
-// BatchAdd batch add entity, this operation has some atomicity.
-func (m *postgres) BatchAdd(ctx context.Context, entities []datastore.Entity) error {
-	return m.delegate.BatchAdd(ctx, entities)
-}
-
-// Get get data model
-func (m *postgres) Get(ctx context.Context, entity datastore.Entity) error {
-	return m.delegate.Get(ctx, entity)
-}
-
-// Put update data model
-func (m *postgres) Put(ctx context.Context, entity datastore.Entity) error {
-	return m.delegate.Put(ctx, entity)
-}
-
-// IsExist determine whether data exists.
-func (m *postgres) IsExist(ctx context.Context, entity datastore.Entity) (bool, error) {
-	return m.delegate.IsExist(ctx, entity)
-}
-
-// Delete delete data
-func (m *postgres) Delete(ctx context.Context, entity datastore.Entity) error {
-	return m.delegate.Delete(ctx, entity)
-}
-
-// List list entity function
-func (m *postgres) List(ctx context.Context, entity datastore.Entity, op *datastore.ListOptions) ([]datastore.Entity, error) {
-	return m.delegate.List(ctx, entity, op)
-}
-
-// Count counts entities
-func (m *postgres) Count(ctx context.Context, entity datastore.Entity, filterOptions *datastore.FilterOptions) (int64, error) {
-	return m.delegate.Count(ctx, entity, filterOptions)
+	return p, nil
 }
