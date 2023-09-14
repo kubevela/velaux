@@ -38,6 +38,7 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 	db, err := gorm.Open(mysqlgorm.Open(cfg.URL), &gorm.Config{
 		NamingStrategy: sqlnamer.SQLNamer{},
 		Logger:         logger.Default.LogMode(logger.Silent),
+		TranslateError: true,
 	})
 	if err != nil {
 		return nil, err
