@@ -40,6 +40,7 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 		NamingStrategy:                           sqlnamer.SQLNamer{},
 		DisableForeignKeyConstraintWhenMigrating: true,
 		Logger:                                   logger.Default.LogMode(logger.Error),
+		TranslateError:                           true,
 	})
 
 	if err != nil {
