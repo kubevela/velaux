@@ -34,10 +34,10 @@ import (
 
 // OAMApplicationService oam_application service
 type OAMApplicationService interface {
-	CreateOrUpdateOAMApplication(context.Context, apisv1.ApplicationRequest, string, string) error
+	CreateOrUpdateOAMApplication(context.Context, apisv1.ApplicationRequest, string, string, string) error
 	GetOAMApplication(context.Context, string, string) (*apisv1.ApplicationResponse, error)
 	DeleteOAMApplication(context.Context, string, string) error
-	DryRunOAMApplication(context.Context, apisv1.ApplicationRequest, string, string) error
+	DryRunOAMApplication(context.Context, apisv1.ApplicationRequest, string, string, string) error
 }
 
 // NewOAMApplicationService new oam_application service
@@ -51,7 +51,7 @@ type oamApplicationServiceImpl struct {
 }
 
 // CreateOrUpdateOAMApplication create or update application
-func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Context, request apisv1.ApplicationRequest, name, namespace string) error {
+func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Context, request apisv1.ApplicationRequest, name, namespace string, publishVersion string) error {
 	ns := new(v1.Namespace)
 	err := o.KubeClient.Get(ctx, client.ObjectKey{Name: namespace}, ns)
 	if kerrors.IsNotFound(err) {
@@ -61,10 +61,18 @@ func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Cont
 		}
 	}
 
+	annotations := map[string]string{}
+	if publishVersion != "" {
+		annotations["app.oam.dev/publishVersion"] = publishVersion
+	} else {
+		annotations = nil
+	}
+
 	app := &v1beta1.Application{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: annotations,
 		},
 		Spec: v1beta1.ApplicationSpec{
 			Components: request.Components,
@@ -111,7 +119,7 @@ func (o oamApplicationServiceImpl) DeleteOAMApplication(ctx context.Context, nam
 }
 
 // DryRunOAMApplication dryRun create or update application
-func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, request apisv1.ApplicationRequest, name, namespace string) error {
+func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, request apisv1.ApplicationRequest, name, namespace string, publishVersion string) error {
 	ns := new(v1.Namespace)
 	err := o.KubeClient.Get(ctx, client.ObjectKey{Name: namespace}, ns)
 	if kerrors.IsNotFound(err) {
@@ -121,14 +129,22 @@ func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, req
 		}
 	}
 
+	annotations := map[string]string{}
+	if publishVersion != "" {
+		annotations["app.oam.dev/publishVersion"] = publishVersion
+	} else {
+		annotations = nil
+	}
+
 	app := &v1beta1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
 			APIVersion: "core.oam.dev/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:        name,
+			Namespace:   namespace,
+			Annotations: annotations,
 		},
 		Spec: v1beta1.ApplicationSpec{
 			Components: request.Components,

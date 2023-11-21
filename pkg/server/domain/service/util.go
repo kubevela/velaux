@@ -32,7 +32,7 @@ func guaranteePolicyExist(c []string, policy string) ([]string, bool) {
 	return append(c, policy), true
 }
 
-// guaranteePolicyNotExist check the slice whether caontain the target policy, if yes delete
+// guaranteePolicyNotExist check the slice whether contain the target policy, if yes delete
 // and tell invoker whether should update the policy
 func guaranteePolicyNotExist(c []string, policy string) ([]string, bool) {
 	res := make([]string, len(c))
