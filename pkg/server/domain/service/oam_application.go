@@ -131,8 +131,6 @@ func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, req
 	annotations := map[string]string{}
 	if publishVersion != "" {
 		annotations["app.oam.dev/publishVersion"] = publishVersion
-	} else {
-		annotations = nil
 	}
 
 	app := &v1beta1.Application{
@@ -172,5 +170,6 @@ func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, req
 	}
 
 	existApp.Spec = app.Spec
+	existApp.ObjectMeta.Annotations = annotations
 	return o.KubeClient.Update(ctx, existApp, client.DryRunAll)
 }
