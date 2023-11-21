@@ -64,8 +64,6 @@ func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Cont
 	annotations := map[string]string{}
 	if publishVersion != "" {
 		annotations["app.oam.dev/publishVersion"] = publishVersion
-	} else {
-		annotations = nil
 	}
 
 	app := &v1beta1.Application{
@@ -91,6 +89,7 @@ func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Cont
 	}
 
 	existApp.Spec = app.Spec
+	existApp.ObjectMeta.Annotations = annotations
 	return o.KubeClient.Update(ctx, existApp)
 }
 
