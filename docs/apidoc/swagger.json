@@ -8758,9 +8758,6 @@
 				},
 				"runtimeCluster": {
 					"type": "boolean"
-				},
-				"runtime_cluster": {
-					"type": "boolean"
 				}
 			}
 		},

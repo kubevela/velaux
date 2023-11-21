@@ -101,7 +101,7 @@ class Cluster extends React.Component<Props, State> {
       (enableAddon || []).forEach((ele: { name: string; phase: boolean }) => {
         addonList.forEach((item: Addon) => {
           const isMatchName = ele.name === item.name;
-          const deploy = item.deployTo || { runtimeCluster: false, runtime_cluster: false };
+          const deploy = item.deployTo || { runtimeCluster: false };
           if (isMatchName && deploy.runtimeCluster) {
             addonMessage.push({ name: item.name, path: item.url || '' });
           }
