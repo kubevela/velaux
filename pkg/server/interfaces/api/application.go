@@ -494,7 +494,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Filter(c.appCheckFilter).
 		Filter(c.WorkflowAPI.workflowCheckFilter).
 		Param(ws.PathParameter("appName", "identifier of the application.").DataType("string").Required(true)).
-		Param(ws.PathParameter("workflowName", "identifier of the workfloc.").DataType("string")).
+		Param(ws.PathParameter("workflowName", "identifier of the workflow.").DataType("string")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(c.WorkflowAPI.workflowCheckFilter).
 		Returns(200, "create success", apis.DetailWorkflowResponse{}).
@@ -513,7 +513,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Writes(apis.DetailWorkflowResponse{}).Do(returns500))
 
 	ws.Route(ws.DELETE("/{appName}/workflows/{workflowName}").To(c.WorkflowAPI.deleteWorkflow).
-		Doc("deletet workflow").
+		Doc("delete workflow").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(c.RbacService.CheckPerm("application/workflow", "delete")).
 		Filter(c.appCheckFilter).

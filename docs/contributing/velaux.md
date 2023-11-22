@@ -103,6 +103,9 @@ make e2e-server-test
 make build-swagger
 ```
 
+if you prefer v3 version of OpenAPI schema, please convert it 
+at [here](https://converter.swagger.io/#/Converter/convertByContent)
+
 ### Config yarn2 in vscode
 
 Add following config in `settings.json`

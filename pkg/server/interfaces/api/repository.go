@@ -115,7 +115,7 @@ func (h repository) GetWebServiceRoute() *restful.WebService {
 		Param(ws.PathParameter("version", "version of the helm chart").DataType("string").Required(true)).
 		Param(ws.QueryParameter("repoUrl", "helm repository url").DataType("string")).
 		Param(ws.QueryParameter("secretName", "secret of the repo").DataType("string")).
-		Returns(200, "OK", map[string]interface{}{}).
+		Returns(200, "OK", v1.Properties{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Writes(map[string]interface{}{}))
 
