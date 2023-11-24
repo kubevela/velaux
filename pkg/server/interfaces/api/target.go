@@ -95,7 +95,7 @@ func (dt *Target) GetWebServiceRoute() *restful.WebService {
 		Writes(apis.DetailTargetResponse{}).Do(returns500))
 
 	ws.Route(ws.DELETE("/{targetName}").To(dt.deleteTarget).
-		Doc("deletet Target").
+		Doc("delete Target").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(dt.targetCheckFilter).
 		Filter(dt.RbacService.CheckPerm("target", "delete")).
