@@ -91,7 +91,7 @@ jobs:
         with:
           version: 3.1.0
           kubebuilderOnly: false
-          kubernetesVersion: v1.21.2
+          kubernetesVersion: v1.22.17
 
       - name: Run api server unit test
         run: make unit-test-server
