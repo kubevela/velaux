@@ -91,7 +91,7 @@ jobs:
         with:
           version: 3.1.0
           kubebuilderOnly: false
-          kubernetesVersion: v1.21.2
+          kubernetesVersion: v1.22.17
 
       - name: Run api server unit test
         run: make unit-test-server
@@ -110,7 +110,7 @@ jobs:
     if: needs.detect-noop.outputs.noop != 'true'
     strategy:
       matrix:
-        k8s-version: ["v1.21", "v1.26"]
+        k8s-version: ["v1.22", "v1.26"]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k8s-version }}
       cancel-in-progress: true
