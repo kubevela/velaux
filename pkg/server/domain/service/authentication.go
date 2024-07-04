@@ -449,6 +449,14 @@ func (a *authenticationServiceImpl) GetLoginType(ctx context.Context) (*apisv1.G
 	}, nil
 }
 
+func getSub(claims *model.Claims) string {
+	sub := strings.ToLower(claims.Sub)
+	if len(sub) > datastore.PrimaryKeyMaxLength {
+		return sub[:datastore.PrimaryKeyMaxLength]
+	}
+	return sub
+}
+
 func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 	var claims struct {
 		Email string `json:"email"`
@@ -492,14 +500,8 @@ func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 			klog.Errorf("failed to get the system info %s", err.Error())
 		}
 		user := &model.User{
-			Email: claims.Email,
-			Name: func() string {
-				sub := strings.ToLower(claims.Sub)
-				if len(sub) > datastore.PrimaryKeyMaxLength {
-					return sub[:datastore.PrimaryKeyMaxLength]
-				}
-				return sub
-			}(),
+			Email:         claims.Email,
+			Name:          getSub(claims),
 			DexSub:        claims.Sub,
 			Alias:         claims.Name,
 			LastLoginTime: time.Now(),
@@ -514,7 +516,7 @@ func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 		if systemInfo != nil {
 			for _, project := range systemInfo.DexUserDefaultProjects {
 				_, err := d.projectService.AddProjectUser(ctx, project.Name, apisv1.AddProjectUserRequest{
-					UserName:  strings.ToLower(claims.Sub),
+					UserName:  getSub(claims),
 					UserRoles: project.Roles,
 				})
 				if err != nil {
