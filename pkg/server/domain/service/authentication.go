@@ -449,12 +449,12 @@ func (a *authenticationServiceImpl) GetLoginType(ctx context.Context) (*apisv1.G
 	}, nil
 }
 
-func getSub(claims *model.Claims) string {
-	sub := strings.ToLower(claims.Sub)
+func getUserName(sub string) string {
+	username := strings.ToLower(sub)
 	if len(sub) > datastore.PrimaryKeyMaxLength {
 		return sub[:datastore.PrimaryKeyMaxLength]
 	}
-	return sub
+	return username
 }
 
 func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
@@ -501,7 +501,7 @@ func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 		}
 		user := &model.User{
 			Email:         claims.Email,
-			Name:          getSub(claims),
+			Name:          getUserName(claims.Sub),
 			DexSub:        claims.Sub,
 			Alias:         claims.Name,
 			LastLoginTime: time.Now(),
@@ -516,7 +516,7 @@ func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 		if systemInfo != nil {
 			for _, project := range systemInfo.DexUserDefaultProjects {
 				_, err := d.projectService.AddProjectUser(ctx, project.Name, apisv1.AddProjectUserRequest{
-					UserName:  getSub(claims),
+					UserName:  getUserName(claims.Sub),
 					UserRoles: project.Roles,
 				})
 				if err != nil {
