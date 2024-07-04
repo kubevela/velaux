@@ -15,7 +15,7 @@ on:
 
 env:
   # Common versions
-  GO_VERSION: '1.19'
+  GO_VERSION: '1.22'
 
 permissions:
   contents: read
@@ -23,7 +23,7 @@ permissions:
 jobs:
 
   detect-noop:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       noop: ${{ steps.noop.outputs.should_skip }}
     steps:
@@ -37,7 +37,7 @@ jobs:
         continue-on-error: true
 
   server-unit-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
@@ -91,7 +91,7 @@ jobs:
         with:
           version: 3.1.0
           kubebuilderOnly: false
-          kubernetesVersion: v1.21.2
+          kubernetesVersion: v1.26
 
       - name: Run api server unit test
         run: make unit-test-server
@@ -105,7 +105,7 @@ jobs:
           name: codecov-umbrella
 
   server-e2e-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ detect-noop ]
     if: needs.detect-noop.outputs.noop != 'true'
     strategy:
