@@ -12,17 +12,17 @@ on:
       - release-*
 env:
   # Common versions
-  GO_VERSION: '1.19'
+  GO_VERSION: '1.22.0'
   
 jobs:
   detect-noop:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       noop: ${{ steps.noop.outputs.should_skip }}
     steps:
       - name: Detect No-op Changes
         id: noop
-        uses: fkirc/skip-duplicate-actions@v3.3.0
+        uses: fkirc/skip-duplicate-actions@v5.3.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           paths_ignore: '["**.md", "**.mdx", "**.png", "**.jpg"]'
@@ -30,14 +30,14 @@ jobs:
           concurrent_skipping: false
 
   check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
     - name: Set up Go
-      uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568
+      uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7
       with:
         go-version: ${{ env.GO_VERSION }}
       id: go
