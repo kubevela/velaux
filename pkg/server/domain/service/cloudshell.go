@@ -381,7 +381,7 @@ func (c *cloudShellServiceImpl) newCloudShell(ctx context.Context) (*v1alpha1.Cl
 
 func checkReadOnly(projectName string, permissions []*model.Permission) bool {
 	ra := &RequestResourceAction{}
-	ra.SetResourceWithName("project:{projectName}/application:*", func(name string) string {
+	ra.SetResourceWithName("project:{projectName}/application:*", func(name string) string { //nolint:revive,unused
 		return projectName
 	})
 	ra.SetActions([]string{"deploy"})

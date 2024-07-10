@@ -122,7 +122,7 @@ func (a *ApplicationSync) Start(ctx context.Context, errorChan chan error) {
 		AddFunc: func(obj interface{}) {
 			addOrUpdateHandler(obj)
 		},
-		UpdateFunc: func(oldObj, obj interface{}) {
+		UpdateFunc: func(oldObj, obj interface{}) { //nolint:revive,unused
 			addOrUpdateHandler(obj)
 		},
 		DeleteFunc: func(obj interface{}) {

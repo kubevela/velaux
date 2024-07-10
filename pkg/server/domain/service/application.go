@@ -19,9 +19,9 @@ package service
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
-	"math/rand"
 	"sort"
 	"strings"
 	"time"

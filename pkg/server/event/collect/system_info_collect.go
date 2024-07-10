@@ -76,7 +76,7 @@ func (i *InfoCalculateCronJob) start(cronSpec string) {
 	_, _ = c.AddFunc(cronSpec, func() {
 
 		// ExponentialBackoff retry this job
-		err := retry.OnError(waitBackOff, func(err error) bool {
+		err := retry.OnError(waitBackOff, func(err error) bool { //nolint:revive,unused
 			// always retry
 			return true
 		}, func() error {

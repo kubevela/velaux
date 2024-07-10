@@ -696,7 +696,7 @@ func getResourceLogs(ctx context.Context, config *rest.Config, cli client.Client
 
 	order := make([]string, 0)
 	sort.Strings(order)
-	logMap.Range(func(key, value any) bool {
+	logMap.Range(func(key, value any) bool { //nolint:revive,unused
 		order = append(order, key.(string))
 		return true
 	})

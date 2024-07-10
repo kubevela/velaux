@@ -161,7 +161,7 @@ func (c *CloudShellView) proxy(req *restful.Request, res *restful.Response) {
 		proxy.Upgrader = &websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
-			CheckOrigin: func(req *http.Request) bool {
+			CheckOrigin: func(req *http.Request) bool { //nolint:revive,unused
 				return true
 			},
 		}
