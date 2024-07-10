@@ -1669,12 +1669,13 @@ func (c *applicationServiceImpl) DryRunAppOrRevision(ctx context.Context, appMod
 }
 
 func genWebhookToken() string {
-	rand.Seed(time.Now().UnixNano())
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
 	runes := []rune("abcdefghijklmnopqrstuvwxyz0123456789")
 
 	b := make([]rune, defaultTokenLen)
 	for i := range b {
-		b[i] = runes[rand.Intn(len(runes))] // #nosec
+		b[i] = runes[rng.Intn(len(runes))] // #nosec
 	}
 	return string(b)
 }
