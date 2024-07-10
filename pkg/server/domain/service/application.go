@@ -19,9 +19,9 @@ package service
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	"errors"
 	"fmt"
+	"math/rand"
 	"sort"
 	"strings"
 	"time"
@@ -1669,13 +1669,13 @@ func (c *applicationServiceImpl) DryRunAppOrRevision(ctx context.Context, appMod
 }
 
 func genWebhookToken() string {
-	source := rand.NewSource(time.Now().UnixNano())
-	rng := rand.New(source)
+	source := rand.NewSource(time.Now().UnixNano()) //nolint:gosec
+	rng := rand.New(source)                         //nolint:gosec
 	runes := []rune("abcdefghijklmnopqrstuvwxyz0123456789")
 
 	b := make([]rune, defaultTokenLen)
 	for i := range b {
-		b[i] = runes[rng.Intn(len(runes))] // #nosec
+		b[i] = runes[rng.Intn(len(runes))] //nolint:gosec
 	}
 	return string(b)
 }
