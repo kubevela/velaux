@@ -235,7 +235,7 @@ func (a *authenticationServiceImpl) RefreshToken(_ context.Context, refreshToken
 
 // ParseToken parses and verifies a token
 func ParseToken(tokenString string) (*model.CustomClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &model.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &model.CustomClaims{}, func(token *jwt.Token) (interface{}, error) { //nolint:revive,unused
 		return []byte(signedKey), nil
 	})
 	if err != nil {
