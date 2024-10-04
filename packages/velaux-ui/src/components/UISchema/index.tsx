@@ -134,6 +134,7 @@ class UISchema extends Component<Props, State> {
     if (this.props.registerForm) {
       this.props.registerForm(this.form);
     }
+    this.initFormValues();
     this.state = {
       secretKeys: [],
       advanced: props.advanced || false,
@@ -174,6 +175,32 @@ class UISchema extends Component<Props, State> {
       }
       callback();
     });
+  };
+
+  initFormValues = () => {
+    // Extract default values from the UI schema
+    const extractDefaultValues = (uiSchema) => {
+      const initialValues = {};
+      
+      // Loop through the UI schema and extract default values
+      uiSchema?.forEach((param) => {
+        if (param.validate?.defaultValue !== undefined) {
+          initialValues[param.jsonKey] = param.validate.defaultValue;
+        }
+      });
+  
+      return initialValues;
+    };
+  
+    const defaultValues = extractDefaultValues(this.props.uiSchema);
+  
+    // Initialize the form with default values
+    if (defaultValues) {
+      const { onChange } = this.props;
+      if (onChange) {
+        onChange(defaultValues);
+      }
+    }
   };
 
   conditionAllowRender = (conditions?: ParamCondition[]) => {
