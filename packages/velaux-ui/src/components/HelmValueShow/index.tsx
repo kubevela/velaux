@@ -14,6 +14,8 @@ const HelmValueShow: React.FC<Props> = (props: Props) => {
   const [valueFile, setValueFile] = React.useState<string>('values.yaml');
   return (
     <Dialog
+      style={{ width: '60vw' }}
+      closeMode="close,mask"
       className={'helmValueDialog'}
       overflowScroll={true}
       visible={true}
