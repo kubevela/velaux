@@ -11,9 +11,11 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: thehanimo/pr-title-checker@v1.4.2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           pass_on_octokit_error: true
-          configuration_path: ".github/pr-title-checker-config.json"
+          configuration_path: '.github/pr-title-checker-config.json'
