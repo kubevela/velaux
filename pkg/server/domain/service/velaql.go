@@ -25,11 +25,8 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kubevela/workflow/pkg/cue/packages"
-
 	"github.com/oam-dev/kubevela/pkg/velaql"
 
-	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
@@ -43,18 +40,11 @@ type VelaQLService interface {
 type velaQLServiceImpl struct {
 	KubeClient client.Client `inject:"kubeClient"`
 	KubeConfig *rest.Config  `inject:"kubeConfig"`
-	pd         *packages.PackageDiscover
 }
 
 // NewVelaQLService new velaQL service
 func NewVelaQLService() VelaQLService {
-	pd, err := clients.GetPackageDiscover()
-	if err != nil {
-		klog.Fatalf("get package discover failure %s", err.Error())
-	}
-	return &velaQLServiceImpl{
-		pd: pd,
-	}
+	return &velaQLServiceImpl{}
 }
 
 // QueryView get the view query results
@@ -64,7 +54,7 @@ func (v *velaQLServiceImpl) QueryView(ctx context.Context, velaQL string) (*apis
 		return nil, bcode.ErrParseVelaQL
 	}
 
-	queryValue, err := velaql.NewViewHandler(v.KubeClient, v.KubeConfig, v.pd).QueryView(utils.ContextWithUserInfo(ctx), query)
+	queryValue, err := velaql.NewViewHandler(v.KubeClient, v.KubeConfig).QueryView(utils.ContextWithUserInfo(ctx), query)
 	if err != nil {
 		klog.Errorf("fail to query the view %s", err.Error())
 		return nil, bcode.ErrViewQuery
