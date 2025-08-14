@@ -33,7 +33,7 @@ RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     go build -a -ldflags "-s -w -X github.com/oam-dev/kubevela/version.VelaVersion=${VERSION:-undefined} -X github.com/oam-dev/kubevela/version.GitRevision=${GITVERSION:-undefined}" \
     -o apiserver-${TARGETARCH} cmd/server/main.go
 
-FROM ${BASE_IMAGE:-alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501}
+FROM ${BASE_IMAGE:-alpine}
 # This is required by daemon connecting with cri
 RUN apk add --no-cache ca-certificates bash expat
 
