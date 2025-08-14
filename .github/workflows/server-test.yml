@@ -43,13 +43,14 @@ jobs:
 
     steps:
       - name: Set up Go
-        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
         with:
           go-version: ${{ env.GO_VERSION }}
         id: go
 
       - name: Check out code into the Go module directory
-        uses: actions/checkout@6ccd57f4c5d15bdc2fef309bd9fb6cc9db2ef1c6
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
         with:
           submodules: true
 
@@ -73,7 +74,7 @@ jobs:
           mysql root password: 'kubevelaSQL123'
 
       - name: Set up Postgres
-        uses: Harmon758/postgresql-action@v1
+        uses: Harmon758/postgresql-action@0be19fa37850b22cb4c9bbf28a03abbf44abd863
         with:
           postgresql version: '11'
           postgresql db: 'kubevela'
@@ -81,7 +82,7 @@ jobs:
           postgresql password: 'Kubevela-123'
 
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@5a87bd81f88e2a8b195f8b7b656f5cda1350815a # 1.11.0
+        uses: supercharge/mongodb-github-action@90004df786821b6308fb02299e5835d0dae05d0d # 1.12.0
         with:
           mongodb-version: '5.0'
 
@@ -97,7 +98,7 @@ jobs:
         run: make unit-test-server
 
       - name: Upload coverage report
-        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
@@ -117,18 +118,18 @@ jobs:
 
     steps:
       - name: Set up Go
-        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
         with:
           go-version: ${{ env.GO_VERSION }}
         id: go
 
       - name: Check out code into the Go module directory
-        uses: actions/checkout@6ccd57f4c5d15bdc2fef309bd9fb6cc9db2ef1c6
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
           submodules: true
       - name: Build docker image
         id: docker_build
-        uses: docker/build-push-action@1a162644f9a7e87d8f4b053101d1d9a712edc18c
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: ./
           build-args: |
@@ -193,7 +194,7 @@ jobs:
           make enable-addon
 
       - name: Upload coverage report
-        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: /tmp/e2e_apiserver_test.out

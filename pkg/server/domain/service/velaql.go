@@ -60,9 +60,8 @@ func (v *velaQLServiceImpl) QueryView(ctx context.Context, velaQL string) (*apis
 		return nil, bcode.ErrViewQuery
 	}
 
-	resp := apis.VelaQLViewResponse{}
-	err = queryValue.UnmarshalTo(&resp)
-	if err != nil {
+	resp := make(apis.VelaQLViewResponse)
+	if err := queryValue.UnmarshalTo(&resp); err != nil {
 		klog.Errorf("decode the velaQL response to json failure %s", err.Error())
 		return nil, bcode.ErrParseQuery2Json
 	}
