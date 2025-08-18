@@ -15,7 +15,7 @@ on:
 
 env:
   # Common versions
-  GO_VERSION: '1.22.0'
+  GO_VERSION: '1.23.8'
 
 permissions:
   contents: read
@@ -90,9 +90,9 @@ jobs:
       - name: install Kubebuilder
         uses: RyanSiu1995/kubebuilder-action@e7e4de1c1eaf1d089b9a186f7526239acadf0b40
         with:
-          version: 3.1.0
+          version: 4.1.0
           kubebuilderOnly: false
-          kubernetesVersion: v1.26.0
+          kubernetesVersion: v1.31.0
 
       - name: Run api server unit test
         run: make unit-test-server
@@ -101,7 +101,7 @@ jobs:
         uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.txt
+          files: ./coverage.txt
           flags: apiserver-unittests
           name: codecov-umbrella
 
@@ -111,7 +111,7 @@ jobs:
     if: needs.detect-noop.outputs.noop != 'true'
     strategy:
       matrix:
-        k8s-version: ["v1.26"]
+        k8s-version: ["v1.31"]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k8s-version }}
       cancel-in-progress: true
@@ -147,7 +147,7 @@ jobs:
       - name: Calculate K3d args
         run: |
           EGRESS_ARG=""
-          if [[ "${{ matrix.k8s-version }}" == v1.26 ]]; then
+          if [[ "${{ matrix.k8s-version }}" == v1.31 ]]; then
             EGRESS_ARG="--k3s-arg --egress-selector-mode=disabled@server:0"
           fi
           echo "EGRESS_ARG=${EGRESS_ARG}" >> $GITHUB_ENV 
