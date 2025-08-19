@@ -12,7 +12,7 @@ on:
       - release-*
 env:
   # Common versions
-  GO_VERSION: '1.22.0'
+  GO_VERSION: '1.23.8'
   
 jobs:
   detect-noop:
