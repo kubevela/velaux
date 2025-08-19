@@ -51,7 +51,7 @@ e2e-setup-core: install-vela install-core install-addon
 
 .PHONY: install-vela
 install-vela: 
-	curl -fsSl https://kubevela.io/script/install.sh | bash -s v1.9.0-alpha.3
+	curl -fsSL https://kubevela.io/script/install.sh | bash -s 1.10.3
 install-core:
 	vela install --file https://kubevela.github.io/charts/vela-core-1.9.0.tgz --version 1.9.0 -y
 install-addon:
