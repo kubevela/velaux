@@ -54,12 +54,21 @@ install-vela:
 	curl -fsSL https://kubevela.io/script/install.sh | bash -s 1.10.3
 install-core:
 	vela install --file https://kubevela.github.io/charts/vela-core-1.9.0.tgz --version 1.9.0 -y
-install-addon:
-	vela addon enable fluxcd
-	vela addon enable vela-workflow --override-definitions
+
+# one time registry fix after upgrading to vela 1.10.x
+addon-registry-fix:
+	vela addon registry delete KubeVela || true
+	vela addon registry add KubeVela --type helm --endpoint=https://kubevela.github.io/catalog/official
+	vela addon registry add experimental --type helm --endpoint=https://kubevela.github.io/catalog/experimental
+
+install-addon: addon-registry-fix
+	vela addon list
+	vela addon enable fluxcd -y
+	vela addon enable vela-workflow -y --override-definitions
 	kubectl wait --for=condition=Ready pod -l app=source-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app=helm-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=vela-workflow -n vela-system --timeout=600s
+
 
 start-addon-mock-server:
 	go run ./e2e-test/addon &
