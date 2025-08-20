@@ -64,9 +64,12 @@ jobs:
       - name: Install golangci-lint
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.59.1
-      - name: Run golangci-lint (concurrency limited)
+      - name: Run golangci-lint on cmd
         run: |
-          golangci-lint run --concurrency=1 --timeout=10m --fast ./...
+          golangci-lint run --concurrency=1 --timeout=10m --fast ./cmd/...
+      - name: Run golangci-lint on pkg
+        run: |
+          golangci-lint run --concurrency=1 --timeout=10m --fast ./pkg/...
       - name: Install staticcheck
         run: |
           go install honnef.co/go/tools/cmd/staticcheck@latest
