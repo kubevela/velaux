@@ -24,11 +24,11 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/kubevela/workflow/api/v1alpha1"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 	"github.com/oam-dev/kubevela/pkg/utils/common"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -235,7 +235,7 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 			g.Expect(pipeline.Name).Should(Equal(pipelineName))
 			g.Expect(pipeline.Description).Should(Equal(description))
 			g.Expect(pipeline.PipelineInfo.LastRun).ShouldNot(BeNil())
-			g.Expect(pipeline.PipelineInfo.RunStat.Total).Should(Equal(apisv1.RunStatInfo{Total: 1, Success: 1}))
+			g.Expect(pipeline.PipelineInfo.RunStat.Total).Should(Equal(apisv1.RunStatInfo{Total: 1, Success: 1, Fail: 0}))
 			g.Expect(len(pipeline.PipelineInfo.RunStat.Week)).Should(Equal(7))
 		}, 10*time.Second, 1*time.Second).Should(Succeed())
 	})
