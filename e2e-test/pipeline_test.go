@@ -235,7 +235,14 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 			g.Expect(pipeline.Name).Should(Equal(pipelineName))
 			g.Expect(pipeline.Description).Should(Equal(description))
 			g.Expect(pipeline.PipelineInfo.LastRun).ShouldNot(BeNil())
-			g.Expect(pipeline.PipelineInfo.RunStat.Total).Should(Equal(apisv1.RunStatInfo{Total: 1, Success: 1, Fail: 0}))
+			// Debug: Print actual run stats and last run status
+			stat := pipeline.PipelineInfo.RunStat.Total
+			GinkgoWriter.Printf("Pipeline RunStat: Total=%d, Success=%d, Fail=%d\n", stat.Total, stat.Success, stat.Fail)
+			if pipeline.PipelineInfo.LastRun != nil {
+				GinkgoWriter.Printf("LastRun Status: %v\n", pipeline.PipelineInfo.LastRun.Status)
+				GinkgoWriter.Printf("LastRun Message: %v\n", pipeline.PipelineInfo.LastRun.Status.Message)
+			}
+			g.Expect(pipeline.PipelineInfo.RunStat).Should(Equal(apisv1.RunStatInfo{Total: 1, Success: 1, Fail: 0}))
 			g.Expect(len(pipeline.PipelineInfo.RunStat.Week)).Should(Equal(7))
 		}, 10*time.Second, 1*time.Second).Should(Succeed())
 	})
@@ -259,6 +266,7 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 			res := get("/projects/" + projectName1 + "/pipelines/" + pipelineName + "/runs/" + pipelineRunName + "/status")
 			var status v1alpha1.WorkflowRunStatus
 			g.Expect(decodeResponseBody(res, &status)).Should(Succeed())
+			GinkgoWriter.Printf("Pipeline Run Status: Finished=%v, Phase=%v, Message=%v\n", status.Finished, status.Phase, status.Message)
 			g.Expect(status.Finished).Should(Equal(true))
 			g.Expect(status.Phase).Should(Equal(v1alpha1.WorkflowStateSucceeded))
 			g.Expect(status.Message).Should(BeEmpty())
@@ -293,6 +301,7 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 		var logs apisv1.GetPipelineRunLogResponse
 		Expect(decodeResponseBody(res, &logs)).Should(Succeed())
 		Expect(logs.Name).Should(Equal(logStep))
+		GinkgoWriter.Printf("Pipeline Run Log for step '%s': %s\n", logStep, logs.Log)
 		Expect(logs.Log).ShouldNot(BeEmpty())
 	})
 
