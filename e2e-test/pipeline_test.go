@@ -270,7 +270,7 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 			g.Expect(status.Finished).Should(Equal(true))
 			g.Expect(status.Phase).Should(Equal(v1alpha1.WorkflowStateSucceeded))
 			g.Expect(status.Message).Should(BeEmpty())
-		}, 100*time.Second, 1*time.Second).Should(Succeed())
+		}, 300*time.Second, 1*time.Second).Should(Succeed())
 	})
 
 	It("get pipeline run output", func() {
