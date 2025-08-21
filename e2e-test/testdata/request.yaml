@@ -42,6 +42,7 @@ spec:
                                                                                                                 result: isJSON && json.Unmarshal(http.response.body) != _|_ ? json : value
                                                                                                                 // Suppress marshal errors so step never fails
                                                                                                                 _marshalErrorGuard: json.Unmarshal(http.response.body) | {}
+                                                                                                                output: result
                                                                                                         }
         parameter: {
                 url:    string
