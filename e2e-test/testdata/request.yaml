@@ -35,7 +35,7 @@ spec:
                 }
         }
                                                                                                         response: {
-                                                                                                                value: http.response.body
+                                                                                                                value?: http.response.body
                                                                                                                 isJSON: string.HasPrefix(http.response.body, "{") || string.HasPrefix(http.response.body, "[")
                                                                                                                 // Only attempt to unmarshal if isJSON is true, and suppress all errors
                                                                                                                 json: isJSON && json.Unmarshal(http.response.body) != _|_ ? json.Unmarshal(http.response.body) : _
