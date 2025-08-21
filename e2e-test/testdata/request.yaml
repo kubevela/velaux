@@ -34,12 +34,12 @@ spec:
                         }
                 }
         }
-                                                                                response: {
-                                                                                        value: http.response.body
-                                                                                        isJSON: string.HasPrefix(http.response.body, "{") || string.HasPrefix(http.response.body, "[")
-                                                                                        json: isJSON ? json.Unmarshal(http.response.body) : _
-                                                                                        result: isJSON ? json : value
-                                                                                }
+                                                                                                        response: {
+                                                                                                                value: http.response.body
+                                                                                                                isJSON: string.HasPrefix(http.response.body, "{") || string.HasPrefix(http.response.body, "[")
+                                                                                                                json: isJSON && json.Unmarshal(http.response.body) != _|_ ? json.Unmarshal(http.response.body) : _
+                                                                                                                result: isJSON && json.Unmarshal(http.response.body) != _|_ ? json : value
+                                                                                                        }
         parameter: {
                 url:    string
                 method: *"GET" | "POST" | "PUT" | "DELETE"
