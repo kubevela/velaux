@@ -34,11 +34,12 @@ spec:
                         }
                 }
         }
-                                response: {
-                                        value: http.response.body
-                                        json: json.Unmarshal(http.response.body)
-                                        isJSON: json.Unmarshal(http.response.body) != _|_
-                                }
+                                                        response: {
+                                                                value: http.response.body
+                                                                json: json.Unmarshal(http.response.body)
+                                                                isJSON: json.Unmarshal(http.response.body) != _|_
+                                                                result: isJSON ? json : value
+                                                        }
         parameter: {
                 url:    string
                 method: *"GET" | "POST" | "PUT" | "DELETE"
