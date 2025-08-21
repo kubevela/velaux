@@ -15,7 +15,7 @@ spec:
                 "encoding/json"
         )
 
-        http: op.http.#Do & {
+        http: (op.http.#Do & {
                 method: parameter.method
                 url:    parameter.url
                 request: {
@@ -26,7 +26,7 @@ spec:
                                 header: parameter.header
                         }
                 }
-        }
+        }) | {}
         fail: op.#Steps & {
                 if http.response.statusCode > 400 {
                         requestFail: op.#Fail & {
