@@ -28,13 +28,24 @@ spec:
                 }
         }
         fail: op.#Steps & {
-                if http.response.statusCode > 400 {
-                        requestFail: op.#Fail & {
-                                message: "request of \(parameter.url) is fail: \(http.response.statusCode)"
-                        }
-                }
+          if http.response.statusCode > 400 {
+            requestFail: op.#Fail & {
+              message: "Request to \(parameter.url) failed with status code: \(http.response.statusCode)"
+            }
+          }
         }
-        response: response: json.Unmarshal(bytes(http.response.body))
+
+        // Safely unmarshal the response body if it's defined
+        response?: {
+          if http.response.body != _|_ {
+            decoded: json.Unmarshal(bytes(http.response.body))
+          }
+        }
+
+        // Output the raw response body for debugging
+        output: http.response.body
+
+        // Input parameters
         parameter: {
                 url:    string
                 method: *"GET" | "POST" | "PUT" | "DELETE"
