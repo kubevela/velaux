@@ -264,6 +264,10 @@ func decodeResponseBody(resp *http.Response, dst interface{}) error {
 		return fmt.Errorf("response body is nil")
 	}
 	defer resp.Body.Close()
+
+	fmt.Println("------received response for unmarshalling------")
+	fmt.Println(resp)
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -272,7 +276,7 @@ func decodeResponseBody(resp *http.Response, dst interface{}) error {
 		err = json.Unmarshal(body, dst)
 		if err != nil {
 			fmt.Println("------received body for unmarshalling------")
-			fmt.Println(body)
+			fmt.Println(string(body))
 			fmt.Println("------response body unmarshalling failed with the following error------")
 			fmt.Println(err)
 			return err

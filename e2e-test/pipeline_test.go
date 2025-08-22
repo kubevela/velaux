@@ -289,12 +289,6 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 		var input apisv1.GetPipelineRunInputResponse
 
 		fmt.Println("------response body------")
-		body, err := io.ReadAll(res.Body)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(string(body))
-		}
 
 		Expect(decodeResponseBody(res, &input)).Should(Succeed())
 		Expect(input.StepInputs).Should(HaveLen(1))
