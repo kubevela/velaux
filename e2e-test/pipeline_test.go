@@ -19,7 +19,6 @@ package e2e_test
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 	"time"
