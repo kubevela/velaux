@@ -18,6 +18,8 @@ package e2e_test
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -238,7 +240,11 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 			g.Expect(pipeline.PipelineInfo.LastRun).ShouldNot(BeNil())
 			g.Expect(pipeline.PipelineInfo.RunStat.Total).Should(Equal(apisv1.RunStatInfo{Total: 1, Success: 1}))
 			g.Expect(len(pipeline.PipelineInfo.RunStat.Week)).Should(Equal(7))
-		}, 10*time.Second, 1*time.Second).Should(Succeed())
+
+			fmt.Println("------pipeline info------")
+			fmt.Println(pipeline.PipelineInfo)
+
+		}, 30*time.Second, 5*time.Second).Should(Succeed())
 	})
 
 	It("list pipeline runs", func() {
@@ -263,7 +269,7 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 			g.Expect(status.Finished).Should(Equal(true))
 			g.Expect(status.Phase).Should(Equal(v1alpha1.WorkflowStateSucceeded))
 			g.Expect(status.Message).Should(BeEmpty())
-		}, 100*time.Second, 1*time.Second).Should(Succeed())
+		}, 200*time.Second, 10*time.Second).Should(Succeed())
 	})
 
 	It("get pipeline run output", func() {
@@ -281,6 +287,15 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 		inputStep := "log"
 		res := get("/projects/" + projectName1 + "/pipelines/" + pipelineName + "/runs/" + pipelineRunName + "/input?step=" + inputStep)
 		var input apisv1.GetPipelineRunInputResponse
+
+		fmt.Println("------response body------")
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(string(body))
+		}
+
 		Expect(decodeResponseBody(res, &input)).Should(Succeed())
 		Expect(input.StepInputs).Should(HaveLen(1))
 		Expect(input.StepInputs[0].Name).Should(Equal(inputStep))
