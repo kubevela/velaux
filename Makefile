@@ -51,12 +51,12 @@ e2e-setup-core: install-vela install-core install-addon
 
 .PHONY: install-vela
 install-vela: 
-	curl -fsSl https://kubevela.io/script/install.sh | bash -s v1.9.2
+	curl -fsSl https://kubevela.io/script/install.sh | bash -s v1.10.3
 install-core:
 	vela install -v v1.9.2 -y
 install-addon:
 	vela addon enable fluxcd
-	vela addon enable vela-workflow --override-definitions
+	vela addon enable vela-workflow version="0.6.0" --override-definitions 
 	kubectl wait --for=condition=Ready pod -l app=source-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app=helm-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=vela-workflow -n vela-system --timeout=600s
