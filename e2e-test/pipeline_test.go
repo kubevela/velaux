@@ -18,8 +18,6 @@ package e2e_test
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -60,7 +58,7 @@ func init() {
 	}
 }
 
-var _ = Describe("Test the rest api about the pipeline", func() {
+var _ = Describe("Test the rest api about the pipeline", Ordered, func() {
 	var (
 		projectName1    = testNSprefix + strconv.FormatInt(time.Now().UnixNano(), 10)
 		pipelineName    = "test-pipeline"
@@ -238,20 +236,8 @@ var _ = Describe("Test the rest api about the pipeline", func() {
 			g.Expect(pipeline.Name).Should(Equal(pipelineName))
 			g.Expect(pipeline.Description).Should(Equal(description))
 			g.Expect(pipeline.PipelineInfo.LastRun).ShouldNot(BeNil())
-
-			fmt.Println("------response body------")
-			body, err := io.ReadAll(res.Body)
-			if err != nil {
-				fmt.Println(err)
-			} else {
-				fmt.Println(string(body))
-			}
-			fmt.Println("------pipeline info------")
-			fmt.Println(pipeline.PipelineInfo)
-
 			g.Expect(pipeline.PipelineInfo.RunStat.Total).Should(Equal(apisv1.RunStatInfo{Total: 1, Success: 1}))
 			g.Expect(len(pipeline.PipelineInfo.RunStat.Week)).Should(Equal(7))
-
 		}, 30*time.Second, 5*time.Second).Should(Succeed())
 	})
 
