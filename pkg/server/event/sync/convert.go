@@ -145,9 +145,6 @@ func (c *CR2UX) ConvertApp2DatastoreApp(ctx context.Context, targetApp *v1beta1.
 		dsApp.Policies = append(dsApp.Policies, &plcModel)
 	}
 
-	// fmt.Println("------target app info------")
-	// fmt.Println(targetApp)
-
 	// 7. convert the revision
 	if revision := convert.FromCRApplicationRevision(ctx, cli, targetApp, *dsApp.Workflow, dsApp.Env.Name); revision != nil {
 		dsApp.Revision = revision
