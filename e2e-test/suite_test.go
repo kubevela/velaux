@@ -264,10 +264,9 @@ func decodeResponseBody(resp *http.Response, dst interface{}) error {
 		return fmt.Errorf("response body is nil")
 	}
 	defer resp.Body.Close()
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("error reading response body: %v", err)
+		return err
 	}
 	if dst != nil {
 		err = json.Unmarshal(body, dst)
