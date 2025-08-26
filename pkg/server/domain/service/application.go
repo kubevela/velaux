@@ -153,9 +153,9 @@ func listApp(ctx context.Context, ds datastore.DataStore, listOptions apisv1.Lis
 			continue
 		}
 		if listOptions.Query != "" &&
-			!(strings.Contains(appModel.Alias, listOptions.Query) ||
-				strings.Contains(appModel.Name, listOptions.Query) ||
-				strings.Contains(appModel.Description, listOptions.Query)) {
+			!strings.Contains(appModel.Alias, listOptions.Query) &&
+			strings.Contains(appModel.Name, listOptions.Query) &&
+			strings.Contains(appModel.Description, listOptions.Query) {
 			continue
 		}
 		if listOptions.TargetName != "" {
@@ -926,8 +926,8 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 	}
 
 	for key, value := range appModel.Annotations {
-		if _, exists := application.ObjectMeta.Annotations[key]; !exists {
-			application.ObjectMeta.Annotations[key] = value
+		if _, exists := application.Annotations[key]; !exists {
+			application.Annotations[key] = value
 		}
 	}
 
