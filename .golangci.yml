@@ -1,3 +1,5 @@
+version: 2
+
 run:
   timeout: 10m
   concurrency: 2
@@ -99,24 +101,31 @@ linters-settings:
   # fieldalignment:
   #   suggest-new: true
 
+formatters:
+  enable:
+    - goimports
+    - gofmt
+  settings:
+    goimports:
+      local-prefixes: github.com/kubevela/velaux
+    gofmt:
+      simplify: true
+
+
 linters:
   enable:
     - govet
     - gocyclo
     - gocritic
     - goconst
-    - goimports
-    - gofmt
     - revive
     - unconvert
     - misspell
     - nakedret
-    - exportloopref
     - unused
-    - gosimple
     - staticcheck
-    # If you want the old maligned behavior, also enable:
-    # - fieldalignment
+    - copyloopvar
+    - intrange
   disable:
     - rowserrcheck
     - sqlclosecheck
