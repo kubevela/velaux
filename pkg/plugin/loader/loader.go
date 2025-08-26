@@ -183,7 +183,7 @@ func setImages(p *types.Plugin) {
 	p.Info.Logos.Small = pluginLogoURL(p.Type, p.Info.Logos.Small, p.BaseURL)
 	p.Info.Logos.Large = pluginLogoURL(p.Type, p.Info.Logos.Large, p.BaseURL)
 
-	for i := 0; i < len(p.Info.Screenshots); i++ {
+	for i := range p.Info.Screenshots {
 		p.Info.Screenshots[i].Path = evalRelativePluginURLPath(p.Info.Screenshots[i].Path, p.BaseURL, p.Type)
 	}
 }
