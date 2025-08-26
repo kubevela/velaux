@@ -1,18 +1,6 @@
 run:
   timeout: 10m
 
-  skip-files:
-    - "zz_generated\\..+\\.go$"
-    - ".*_test.go$"
-
-  skip-dirs:
-    - "hack"
-    - "e2e"
-
-output:
-  # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
-  format: colored-line-number
-
 linters-settings:
   errcheck:
     # report about not checking of errors in type assetions: `a := b.(MyStruct)`;
@@ -23,10 +11,11 @@ linters-settings:
     # default is false: such cases aren't reported by default.
     check-blank: false
 
-    # [deprecated] comma-separated list of pairs of the form pkg:regex
+    # comma-separated list of pairs of the form pkg:regex
     # the regex is used to ignore names within pkg. (default "fmt:.*").
-    # see https://github.com/kisielk/errcheck#the-deprecated-method for details
-    ignore: fmt:.*,io/ioutil:^Read.*
+    exclude-functions:
+      - fmt.*
+      - io/ioutil:^Read.*
 
   exhaustive:
     # indicates that switch statements are to be considered exhaustive if a
@@ -41,6 +30,9 @@ linters-settings:
   revive:
     # minimal confidence for issues, default is 0.8
     min-confidence: 0.8
+    rules:
+      - name: unused-parameter
+        disabled: true
 
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
@@ -109,7 +101,6 @@ linters-settings:
 
 linters:
   enable:
-    - megacheck
     - govet
     - gocyclo
     - gocritic
@@ -121,11 +112,10 @@ linters:
     - misspell
     - nakedret
     - exportloopref
+    - unused
+    - gosimple
+    - staticcheck
   disable:
-    - deadcode
-    - scopelint
-    - structcheck
-    - varcheck
     - rowserrcheck
     - sqlclosecheck
     - errchkjson
@@ -137,8 +127,28 @@ linters:
 
 
 issues:
+
+  exclude-files:
+    - "zz_generated\\..+\\.go$"
+    - ".*_test.go$"
+
+  exclude-dirs:
+    - "hack"
+    - "e2e"
+
   # Excluding configuration per-path and per-linter
   exclude-rules:
+    - path: .*\.go
+      linters:
+        - errcheck
+      text: "fmt\\."
+
+    # Ignore unchecked errors from io/ioutil functions starting with Read
+    - path: .*\.go
+      linters:
+        - errcheck
+      text: "io/ioutil.*Read"
+      
     # Exclude some linters from running on tests files.
     - path: _test(ing)?\.go
       linters:
@@ -154,6 +164,13 @@ issues:
       text: "(unnamedResult|exitAfterDefer)"
       linters:
         - gocritic
+
+    # Gosmopolitan complains of internationalization issues on the file that actually defines
+    # the translation.
+    - path: i18n\.go
+      text: "Han"
+      linters:
+        - gosmopolitan
 
     # These are performance optimisations rather than style issues per se.
     # They warn when function arguments or range values copy a lot of memory
