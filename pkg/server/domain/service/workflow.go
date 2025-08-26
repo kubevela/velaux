@@ -442,7 +442,7 @@ func (w *workflowServiceImpl) SyncWorkflowRecord(ctx context.Context, appPrimary
 		if err := w.Store.Get(ctx, revision); err != nil {
 			if errors.Is(err, datastore.ErrRecordNotExist) {
 				// If the application revision is not exist, the record do not need be synced
-				record.Finished = "true"
+				record.Finished = True
 				record.Status = model.RevisionStatusFail
 				if err := w.Store.Put(ctx, record); err != nil {
 					return fmt.Errorf("failed to set the record status to terminated: %s", err.Error())
@@ -544,7 +544,7 @@ func (w *workflowServiceImpl) syncRecordFromApplicationStatus(ctx context.Contex
 		return err
 	}
 
-	if record.Finished == "true" {
+	if record.Finished == True {
 		klog.InfoS("successfully sync workflow status", "oam app name", app.Name, "workflow name", record.WorkflowName, "record name", record.Name, "status", record.Status, "sync source", app.Name)
 	}
 	return nil
@@ -566,7 +566,7 @@ func (w *workflowServiceImpl) syncRecordFromApplicationRevision(ctx context.Cont
 	if err := w.KubeClient.Get(ctx, types.NamespacedName{Namespace: record.Namespace, Name: revision.RevisionCRName}, &appRevision); err != nil {
 		if apierrors.IsNotFound(err) {
 			klog.Warningf("can't find the application revision %s/%s, set the record status to terminated", revision.RevisionCRName, record.Namespace)
-			record.Finished = "true"
+			record.Finished = True
 			record.Status = model.RevisionStatusTerminated
 			if err := w.Store.Put(ctx, record); err != nil {
 				return fmt.Errorf(("failed to set the record status to terminated: %s"), err.Error())
@@ -698,7 +698,7 @@ func resetRevisionsAndRecords(ctx context.Context, ds datastore.DataStore, appNa
 				continue
 			}
 			record.Status = model.RevisionStatusTerminated
-			record.Finished = "true"
+			record.Finished = True
 			for i, step := range record.Steps {
 				if step.Phase == workflowv1alpha1.WorkflowStepPhaseRunning {
 					record.Steps[i].Phase = model.WorkflowStepPhaseStopped

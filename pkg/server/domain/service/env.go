@@ -351,9 +351,9 @@ func managePrivilegesForEnvironment(ctx context.Context, cli client.Client, env 
 	p := &auth.ApplicationPrivilege{Cluster: types.ClusterLocalName, Namespace: env.Namespace}
 	identity := &auth.Identity{Groups: []string{utils.KubeVelaProjectGroupPrefix + env.Project}}
 	writer := &bytes.Buffer{}
-	f, msg := auth.GrantPrivileges, "GrantPrivileges"
+	f, msg := auth.GrantPrivileges, grantMsg
 	if revoke {
-		f, msg = auth.RevokePrivileges, "RevokePrivileges"
+		f, msg = auth.RevokePrivileges, revokeMsg
 	}
 	if err := f(ctx, cli, []auth.PrivilegeDescription{p}, identity, writer); err != nil {
 		return err

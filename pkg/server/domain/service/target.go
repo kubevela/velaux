@@ -255,9 +255,9 @@ func managePrivilegesForTarget(ctx context.Context, cli client.Client, target *m
 	p := &auth.ScopedPrivilege{Cluster: target.Cluster.ClusterName, Namespace: target.Cluster.Namespace}
 	identity := &auth.Identity{Groups: []string{utils.KubeVelaProjectGroupPrefix + target.Project}}
 	writer := &bytes.Buffer{}
-	f, msg := auth.GrantPrivileges, "GrantPrivileges"
+	f, msg := auth.GrantPrivileges, grantMsg
 	if revoke {
-		f, msg = auth.RevokePrivileges, "RevokePrivileges"
+		f, msg = auth.RevokePrivileges, revokeMsg
 	}
 	if err := f(ctx, cli, []auth.PrivilegeDescription{p}, identity, writer); err != nil {
 		klog.Warningf("error encountered for %s: %s", msg, err.Error())

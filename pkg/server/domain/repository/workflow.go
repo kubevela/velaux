@@ -274,7 +274,7 @@ func compareWorkflowSteps(old, new steps) steps {
 		if t == DeployCloudResource {
 			var re []string
 			for _, t := range targets {
-				re = append(re, fmt.Sprintf("c-"+t))
+				re = append(re, "c-"+t)
 			}
 			return re
 		}
