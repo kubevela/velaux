@@ -1,5 +1,7 @@
 run:
   timeout: 10m
+  concurrency: 2
+  tests: false
 
 linters-settings:
   errcheck:
@@ -47,10 +49,6 @@ linters-settings:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 30
 
-  maligned:
-    # print struct with more effective memory layout or not, false by default
-    suggest-new: true
-
   dupl:
     # tokens count to trigger issue, 150 by default
     threshold: 100
@@ -80,7 +78,6 @@ linters-settings:
     check-exported: false
 
   nakedret:
-    # make an issue if func has more lines of code than this setting and it has naked returns; default is 30
     max-func-lines: 30
 
   gocritic:
@@ -88,9 +85,8 @@ linters-settings:
     # Empty list by default. See https://github.com/go-critic/go-critic#usage -> section "Tags".
     enabled-tags:
       - performance
-
-    settings: # settings passed to gocritic
-      captLocal: # must be valid enabled check name
+    settings:
+      captLocal:
         paramsOnly: true
       rangeValCopy:
         sizeThreshold: 32
@@ -99,6 +95,10 @@ linters-settings:
     # Allow only slices initialized with a length of zero. Default is false.
     always: false
 
+  # maligned was removed upstream. If you want similar checks, enable fieldalignment:
+  # fieldalignment:
+  #   suggest-new: true
+
 linters:
   enable:
     - govet
@@ -106,7 +106,7 @@ linters:
     - gocritic
     - goconst
     - goimports
-    - gofmt  # We enable this as well as goimports for its simplify mode.
+    - gofmt
     - revive
     - unconvert
     - misspell
@@ -115,6 +115,8 @@ linters:
     - unused
     - gosimple
     - staticcheck
+    # If you want the old maligned behavior, also enable:
+    # - fieldalignment
   disable:
     - rowserrcheck
     - sqlclosecheck
@@ -125,9 +127,7 @@ linters:
     - unused
   fast: false
 
-
 issues:
-
   exclude-files:
     - "zz_generated\\..+\\.go$"
     - ".*_test.go$"
@@ -135,6 +135,9 @@ issues:
   exclude-dirs:
     - "hack"
     - "e2e"
+    - "node_modules"
+    - "generated"
+
 
   # Excluding configuration per-path and per-linter
   exclude-rules:
