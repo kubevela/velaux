@@ -165,8 +165,6 @@ var _ = Describe("Test env service functions", func() {
 	})
 })
 
-
-
 func checkEqual(old, new []string) bool {
 	if old == nil && new == nil {
 		return true
