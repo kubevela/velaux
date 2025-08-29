@@ -20,8 +20,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"reflect"
-	"sort"
 
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
@@ -169,18 +167,6 @@ func (p *envServiceImpl) ListEnvs(ctx context.Context, page, pageSize int, listO
 
 func (p *envServiceImpl) ListEnvCount(ctx context.Context, listOption apisv1.ListEnvOptions) (int64, error) {
 	return p.Store.Count(ctx, &model.Env{Project: listOption.Project}, nil)
-}
-
-func checkEqual(old, new []string) bool {
-	if old == nil && new == nil {
-		return true
-	}
-	if old == nil || new == nil {
-		return false
-	}
-	sort.Strings(old)
-	sort.Strings(new)
-	return reflect.DeepEqual(old, new)
 }
 
 // UpdateEnv update an env for request
@@ -365,9 +351,9 @@ func managePrivilegesForEnvironment(ctx context.Context, cli client.Client, env 
 	p := &auth.ApplicationPrivilege{Cluster: types.ClusterLocalName, Namespace: env.Namespace}
 	identity := &auth.Identity{Groups: []string{utils.KubeVelaProjectGroupPrefix + env.Project}}
 	writer := &bytes.Buffer{}
-	f, msg := auth.GrantPrivileges, "GrantPrivileges"
+	f, msg := auth.GrantPrivileges, grantMsg
 	if revoke {
-		f, msg = auth.RevokePrivileges, "RevokePrivileges"
+		f, msg = auth.RevokePrivileges, revokeMsg
 	}
 	if err := f(ctx, cli, []auth.PrivilegeDescription{p}, identity, writer); err != nil {
 		return err

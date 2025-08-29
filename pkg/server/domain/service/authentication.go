@@ -54,6 +54,8 @@ const (
 	secretDexConfigKey = "config.yaml"
 	dexAddonName       = "addon-dex"
 	jwtIssuer          = "vela-issuer"
+	grantMsg           = "GrantPrivileges"
+	revokeMsg          = "RevokePrivileges"
 
 	// GrantTypeAccess is the grant type for access token
 	GrantTypeAccess = "access"

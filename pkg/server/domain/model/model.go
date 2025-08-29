@@ -150,7 +150,7 @@ func deepCopy(src interface{}) interface{} {
 
 	val := reflect.ValueOf(src).Elem()
 	nVal := dst.Elem()
-	for i := 0; i < val.NumField(); i++ {
+	for i := range val.NumField() {
 		nvField := nVal.Field(i)
 		nvField.Set(val.Field(i))
 	}

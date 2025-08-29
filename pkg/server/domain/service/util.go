@@ -86,7 +86,8 @@ func InterfaceSlice(slice interface{}) ([]interface{}, error) {
 		return nil, nil
 	}
 	ret := make([]interface{}, s.Len())
-	for i := 0; i < s.Len(); i++ {
+	n := s.Len()
+	for i := range n {
 		ret[i] = s.Index(i).Interface()
 	}
 	return ret, nil

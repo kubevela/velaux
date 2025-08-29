@@ -34,7 +34,7 @@ import (
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
-var _ = Describe("Test the application synchronizing", func() {
+var _ = Describe("Test the application synchronizing", Ordered, func() {
 	var appName = "test-synchronizing"
 	It("Test create an application", func() {
 		var app v1beta1.Application

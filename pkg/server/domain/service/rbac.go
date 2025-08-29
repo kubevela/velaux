@@ -1224,9 +1224,9 @@ func managePrivilegesForAdminUser(ctx context.Context, cli client.Client, roleNa
 	p := &auth.ScopedPrivilege{Cluster: types.ClusterLocalName}
 	identity := &auth.Identity{Groups: []string{apiserverutils.KubeVelaAdminGroupPrefix + roleName}}
 	writer := &bytes.Buffer{}
-	f, msg := auth.GrantPrivileges, "GrantPrivileges"
+	f, msg := auth.GrantPrivileges, grantMsg
 	if revoke {
-		f, msg = auth.RevokePrivileges, "RevokePrivileges"
+		f, msg = auth.RevokePrivileges, revokeMsg
 	}
 	if err := f(ctx, cli, []auth.PrivilegeDescription{p}, identity, writer); err != nil {
 		return err

@@ -2,6 +2,8 @@ module github.com/kubevela/velaux
 
 go 1.23.8
 
+toolchain go1.24.1
+
 require (
 	cuelang.org/go v0.9.2
 	github.com/AlecAivazis/survey/v2 v2.1.1 // indirect

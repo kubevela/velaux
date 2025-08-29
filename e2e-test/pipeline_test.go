@@ -58,7 +58,7 @@ func init() {
 	}
 }
 
-var _ = Describe("Test the rest api about the pipeline", func() {
+var _ = Describe("Test the rest api about the pipeline", Ordered, func() {
 	var (
 		projectName1    = testNSprefix + strconv.FormatInt(time.Now().UnixNano(), 10)
 		pipelineName    = "test-pipeline"

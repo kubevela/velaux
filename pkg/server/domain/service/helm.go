@@ -198,7 +198,7 @@ func flattenKey(prefix string, src map[string]interface{}, dest map[string]inter
 		case map[string]interface{}:
 			flattenKey(prefix+k, child, dest)
 		case []interface{}:
-			for i := 0; i < len(child); i++ {
+			for i := range child {
 				dest[prefix+k+"."+strconv.Itoa(i)] = child[i]
 			}
 		default:

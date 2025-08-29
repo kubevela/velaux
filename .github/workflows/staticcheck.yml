@@ -12,7 +12,7 @@ on:
       - release-*
 env:
   # Common versions
-  GO_VERSION: '1.22.0'
+  GO_VERSION: '1.23.8'
   
 jobs:
   detect-noop:
@@ -38,17 +38,21 @@ jobs:
         node-version: '16'
         cache: 'yarn'
     - name: Set up Go
+      id: go
       uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7
       with:
         go-version: ${{ env.GO_VERSION }}
-      id: go
     - name: Install Yarn
       run: npm install --global yarn
-    - name: upgrade yarn
+    - name: Upgrade Yarn
       run: yarn set version 3.6.0
-    - run: yarn install
-    - run: yarn lint
-      name: Check Frontend Code Style
-    - run: yarn test
-    - run: make check-diff
-      name: Check Server Code Style
+    - name: Yarn Install
+      run: yarn install
+    - name: Lint Frontend Code
+      run: yarn lint
+    - name: Check Frontend Code Style
+      run: yarn lint
+    - name: Test Frontend
+      run: yarn test
+    - name: Check Server Code Style
+      run: make check-diff

@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-GOLANGCILINT_VERSION ?= 1.59.1
+GOLANGCILINT_VERSION ?= 1.60.1
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))

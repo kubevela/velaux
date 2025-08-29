@@ -71,12 +71,12 @@ var ossHandler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request
 			}
 		}
 		data, err := xml.Marshal(res)
-		error := map[string]error{"error": err}
+		errMap := map[string]error{"error": err}
 		// Make and parse the data
 		t, err := template.New("").Parse(string(data))
 		if err != nil {
 			// Render the data
-			_ = t.Execute(rw, error)
+			_ = t.Execute(rw, errMap)
 		}
 		// Render the data
 		_ = t.Execute(rw, data)
@@ -86,12 +86,12 @@ var ossHandler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request
 		for _, p := range paths {
 			if queryPath == p.path {
 				file, err := testData.ReadFile(path.Join("testdata", queryPath))
-				error := map[string]error{"error": err}
+				errMap := map[string]error{"error": err}
 				// Make and parse the data
 				t, err := template.New("").Parse(string(file))
 				if err != nil {
 					// Render the data
-					_ = t.Execute(rw, error)
+					_ = t.Execute(rw, errMap)
 				}
 				found = true
 				_ = t.Execute(rw, file)
@@ -143,7 +143,7 @@ var helmHandler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Reques
 }
 
 func init() {
-	_ = fs.WalkDir(testData, "testdata", func(path string, d fs.DirEntry, err error) error {
+	_ = fs.WalkDir(testData, "testdata", func(path string, d fs.DirEntry, _ error) error {
 		path = strings.TrimPrefix(path, "testdata/")
 		path = strings.TrimPrefix(path, "testdata")
 
