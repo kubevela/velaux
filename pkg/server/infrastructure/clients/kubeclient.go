@@ -94,7 +94,6 @@ func GetKubeConfig() (*rest.Config, error) {
 	return kubeConfig, nil
 }
 
-
 // GetDiscoveryClient return a discovery client
 func GetDiscoveryClient() (*discovery.DiscoveryClient, error) {
 	conf, err := GetKubeConfig()
