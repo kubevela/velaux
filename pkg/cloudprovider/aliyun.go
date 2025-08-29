@@ -83,7 +83,7 @@ func (provider *AliyunCloudProvider) decodeClusterURL(masterURL string) (url str
 	IntranetAPIServerEndpoint string `json:"intranet_api_server_endpoint"`
 }) {
 	if err := json.Unmarshal([]byte(masterURL), &url); err != nil {
-		klog.Info("failed to unmarshal masterUrl %s", masterURL)
+		klog.Infof("failed to unmarshal masterUrl %s", masterURL)
 	}
 	return
 }

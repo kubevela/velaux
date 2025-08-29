@@ -135,7 +135,7 @@ func (l *Loader) loadPlugins(class types.Class, pluginJSONPaths []string, existi
 }
 
 func (l *Loader) readPluginJSON(pluginJSONPath string) (types.JSONData, error) {
-	klog.V(4).Info("Loading plugin, path: %s", pluginJSONPath)
+	klog.V(4).Infof("Loading plugin, path: %s", pluginJSONPath)
 
 	if !strings.EqualFold(filepath.Ext(pluginJSONPath), ".json") {
 		return types.JSONData{}, ErrInvalidPluginJSONFilePath

@@ -27,6 +27,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+
 	"cuelang.org/go/cue"
 
 	"github.com/kubevela/pkg/util/slices"
