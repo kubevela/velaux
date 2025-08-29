@@ -1,6 +1,6 @@
 module github.com/kubevela/velaux
 
-go 1.23.8
+go 1.23
 
 require (
 	cuelang.org/go v0.9.2
@@ -348,6 +348,7 @@ replace (
 	cloud.google.com/go => cloud.google.com/go v0.100.2
 	github.com/docker/cli => github.com/docker/cli v20.10.9+incompatible
 	github.com/docker/docker => github.com/moby/moby v20.10.20+incompatible
+	github.com/docker/distribution => github.com/docker/distribution v2.8.3+incompatible
 	github.com/emicklei/go-restful/v3 => github.com/emicklei/go-restful/v3 v3.8.0
 	github.com/wercker/stern => github.com/oam-dev/stern v1.13.2
 	go.uber.org/atomic => go.uber.org/atomic v1.9.0
