@@ -93,7 +93,7 @@ func DeleteApplicationEnvPolicies(ctx context.Context, store datastore.DataStore
 	}
 	for _, policy := range policies {
 		if err := store.Delete(ctx, policy); err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
-			klog.Errorf("fail to clear the policies belong to the env %w", err)
+			klog.Errorf("fail to clear the policies belong to the env: %s", err.Error())
 			continue
 		}
 	}
