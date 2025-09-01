@@ -42,6 +42,11 @@ type velaQLServiceImpl struct {
 	KubeConfig *rest.Config  `inject:"kubeConfig"`
 }
 
+// NewVelaQLService new velaQL service
+func NewVelaQLService() VelaQLService {
+	return &velaQLServiceImpl{}
+}
+
 // QueryView get the view query results
 func (v *velaQLServiceImpl) QueryView(ctx context.Context, velaQL string) (*apis.VelaQLViewResponse, error) {
 	query, err := velaql.ParseVelaQL(velaQL)
