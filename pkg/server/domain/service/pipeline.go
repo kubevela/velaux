@@ -555,10 +555,11 @@ func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.St
 		if outputValue.Err() != nil {
 			continue
 		}
-		s, err := outputValue.String()
+		jsonBytes, err := outputValue.MarshalJSON()
 		if err != nil {
 			continue
 		}
+		s := string(jsonBytes)
 		values = append(values, apis.OutputVar{
 			Name:      output.Name,
 			ValueFrom: output.ValueFrom,
@@ -584,10 +585,11 @@ func getStepInputs(step v1alpha1.StepStatus, inputsSpec map[string]v1alpha1.Step
 		if outputValue.Err() != nil {
 			continue
 		}
-		s, err := outputValue.String()
+		jsonBytes, err := outputValue.MarshalJSON()
 		if err != nil {
 			continue
 		}
+		s := string(jsonBytes)
 		values = append(values, apis.InputVar{
 			Value:        s,
 			From:         input.From,
