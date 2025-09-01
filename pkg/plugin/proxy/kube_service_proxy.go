@@ -59,12 +59,12 @@ func (k *kubeServiceProxy) Handler(req *http.Request, res http.ResponseWriter) {
 			namespace = kubevelatypes.DefaultKubeVelaNS
 		}
 		if err := k.kubeClient.Get(req.Context(), apitypes.NamespacedName{Namespace: namespace, Name: name}, &service); err != nil {
-			klog.Errorf("failed to discover the backend service:%s/%s err:%s ", name, namespace, err.Error())
+			klog.Errorf("failed to discover the backend service:%s/%s err:%s", name, namespace, err.Error())
 			bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
 			return
 		}
 		if len(service.Spec.Ports) == 0 {
-			klog.Errorf("there is no port in the backend service:%s/%s err:%s ", name, namespace)
+			klog.Errorf("there is no port in the backend service:%s/%s", name, namespace)
 			bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
 			return
 		}
@@ -79,13 +79,13 @@ func (k *kubeServiceProxy) Handler(req *http.Request, res http.ResponseWriter) {
 				}
 			}
 			if !havePort {
-				klog.Errorf("there is no port same with the configured port in the backend service:%s/%s err:%s ", name, namespace)
+				klog.Errorf("there is no port same with the configured port in the backend service:%s/%s", name, namespace)
 				bcode.ReturnHTTPError(req, res, bcode.ErrNotFound)
 				return
 			}
 		}
 		if service.Spec.ClusterIP == "" {
-			klog.Errorf("there is no port same with the configured port in the backend service:%s/%s err:%s ", name, namespace)
+			klog.Errorf("backend service has no cluster IP:%s/%s", name, namespace)
 			bcode.ReturnHTTPError(req, res, bcode.ErrUpstreamNotFound)
 			return
 		}
