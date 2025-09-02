@@ -85,14 +85,16 @@ unit-test-server-ci:
 	@$(INFO) Running server unit tests
 	# Run non-service packages with go test in parallel for speed
 	go test -gcflags=all=-l -coverprofile=coverage-other.txt $$(go list ./pkg/... ./cmd/... | grep -v pkg/server/domain/service)
-	$$(go env GOPATH)/bin/ginkgo -v --procs=1 --focus="service" --coverprofile=coverage-service.txt ./pkg/server/domain/service
+	
+	# Run the service package using ginkgo with serial execution
+	$$(go env GOPATH)/bin/ginkgo -v --procs=1 --focus="serial" --coverprofile=coverage-service.txt ./pkg/server/domain/service
+	
 	# Merge coverage files
 	echo "mode: set" > coverage.txt
 	tail -n +2 coverage-other.txt >> coverage.txt || true
 	tail -n +2 coverage-service.txt >> coverage.txt || true
 	rm -f coverage-other.txt coverage-service.txt
 	@$(OK) Server unit tests completed
-
 # Test database management
 .PHONY: test-db-up
 test-db-up:
