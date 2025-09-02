@@ -56,7 +56,8 @@ var testEnv *envtest.Environment
 
 func TestService(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Service Suite")
+	// Run tests serially to avoid race conditions and state conflicts
+	RunSpecs(t, "Service Suite", Label("serial"))
 }
 
 // claim all services, ds, kubeClient

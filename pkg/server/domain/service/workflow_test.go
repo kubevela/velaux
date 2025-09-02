@@ -42,7 +42,7 @@ import (
 )
 
 var appName = "app-workflow"
-var _ = Describe("Test workflow service functions", func() {
+var _ = Describe("Test workflow service functions", Ordered, func() {
 	var testProject = "workflow-project"
 
 	BeforeEach(func() {

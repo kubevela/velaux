@@ -51,7 +51,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/utils"
 )
 
-var _ = Describe("Test authentication service functions", func() {
+var _ = Describe("Test authentication service functions", Ordered, func() {
 	var defaultNamespace = model.DefaultInitNamespace
 
 	BeforeEach(func() {
