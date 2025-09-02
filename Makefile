@@ -82,8 +82,8 @@ unit-test-server:
 	@$(INFO) Running server unit tests
 	# Run most packages in parallel (excluding service package)
 	go test -gcflags=all=-l -coverprofile=coverage-other.txt $$(go list ./pkg/... ./cmd/... | grep -v pkg/server/domain/service)
-	# Run the service package using ginkgo with serial execution
-	$$(go env GOPATH)/bin/ginkgo -v --procs=1 --focus="serial" --coverprofile=coverage-service.txt ./pkg/server/domain/service
+	# Run the service package with go test in serial mode (our tests are configured with Label("serial") and Ordered)
+	go test -gcflags=all=-l -coverprofile=coverage-service.txt -v -p 1 ./pkg/server/domain/service
 	# Merge coverage files
 	echo "mode: set" > coverage.txt
 	tail -n +2 coverage-other.txt >> coverage.txt || true
