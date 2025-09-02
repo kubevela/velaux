@@ -70,12 +70,6 @@ var _ = Describe("Test authentication service functions", func() {
 			fmt.Printf("[DEBUG] Running in CI environment: %s\n", ci)
 		}
 
-		// Skip gomonkey tests in CI environment due to potential issues with mocking
-		if os.Getenv("CI") != "" {
-			fmt.Printf("[INFO] Skipping gomonkey test in CI environment due to potential mocking issues\n")
-			Skip("Skipping gomonkey test in CI environment")
-		}
-
 		fmt.Printf("[DEBUG] Creating test IDToken for gomonkey patching\n")
 		testIDToken := &oidc.IDToken{}
 		sub := "248289761001Abv"
