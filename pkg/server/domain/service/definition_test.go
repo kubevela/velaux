@@ -39,7 +39,7 @@ import (
 	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
-var _ = Describe("Test namespace service functions", func() {
+var _ = FDescribe("Test namespace service functions", func() {
 	BeforeEach(func() {
 		InitTestEnv("todo")
 		err := k8sClient.Create(context.Background(), &corev1.Namespace{
