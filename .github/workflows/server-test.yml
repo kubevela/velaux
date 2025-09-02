@@ -62,9 +62,9 @@ jobs:
 
       - name: Install ginkgo
         run: |
-          sudo sed -i 's/azure\.//' /etc/apt/sources.list
-          sudo apt-get update
-          sudo apt-get install -y golang-ginkgo-dev
+          go install github.com/onsi/ginkgo/v2/ginkgo@v2.23.4
+          echo "Ginkgo version:"
+          $(go env GOPATH)/bin/ginkgo version
 
       - name : Set up MySQL
         uses: mirromutth/mysql-action@v1.1
