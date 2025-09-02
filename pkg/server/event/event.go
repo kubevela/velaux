@@ -21,9 +21,10 @@ import (
 
 	"k8s.io/client-go/util/workqueue"
 
+	v1beta1 "github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+
 	"github.com/kubevela/velaux/pkg/server/event/collect"
 	"github.com/kubevela/velaux/pkg/server/event/sync"
-	v1beta1 "github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 )
 
 var workers []Worker
