@@ -808,7 +808,7 @@ func (p pipelineServiceImpl) getPipelineInfo(ctx context.Context, wf *model.Pipe
 	if err != nil {
 		if meta.IsNoMatchError(err) {
 			weekStat := make([]apis.RunStatInfo, 0)
-			for i := 0; i < 7; i++ {
+			for range 7 {
 				weekStat = append(weekStat, apis.RunStatInfo{})
 			}
 			return &apis.PipelineInfo{
@@ -851,7 +851,7 @@ func getRunStat(runs []v1alpha1.WorkflowRun) apis.RunStat {
 	}
 	// returned int x means the (x+1)/7 days of the week, valid number is 0-6
 	inThisWeek := func(run v1alpha1.WorkflowRun) (int, bool) {
-		startTime := run.Status.StartTime.Time.Unix()
+		startTime := run.Status.StartTime.Unix()
 		// one week, note this is not week of natual, but week of unix timestamp
 		if today-startTime < 604800 {
 			return 6 - int((today-startTime)/86400), true
@@ -1158,8 +1158,8 @@ func workflowRun2PipelineRun(run v1alpha1.WorkflowRun, project *model.Project, c
 			if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
 				return nil, err
 			}
-			pipelineRun.PipelineRunBase.ContextName = ctxName
-			pipelineRun.PipelineRunBase.ContextValues = ctx.Values
+			pipelineRun.ContextName = ctxName
+			pipelineRun.ContextValues = ctx.Values
 		}
 	}
 	return pipelineRun, nil
