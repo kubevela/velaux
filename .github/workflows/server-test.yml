@@ -94,7 +94,16 @@ jobs:
           kubernetesVersion: v1.26.0
 
       - name: Run api server unit test
-        run: make unit-test-server
+        run: |
+          # Run most packages in parallel
+          go test -gcflags=all=-l -coverprofile=coverage-other.txt $(go list ./pkg/... ./cmd/... | grep -v pkg/server/domain/service)
+          # Run the service package using ginkgo with serial execution
+          $(go env GOPATH)/bin/ginkgo -v --procs=1 --focus="serial" --coverprofile=coverage-service.txt ./pkg/server/domain/service
+          # Merge coverage files
+          echo "mode: set" > coverage.txt
+          tail -n +2 coverage-other.txt >> coverage.txt
+          tail -n +2 coverage-service.txt >> coverage.txt
+          rm coverage-other.txt coverage-service.txt
 
       - name: Upload coverage report
         uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
