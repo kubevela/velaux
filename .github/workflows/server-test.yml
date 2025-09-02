@@ -94,8 +94,7 @@ jobs:
           kubernetesVersion: v1.26.0
 
       - name: Run api server unit test
-        run: make unit-test-server
-
+        run: make unit-test-server-ci
       - name: Upload coverage report
         uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
         with:
