@@ -81,6 +81,26 @@ e2e-server-test:
 unit-test-server:
 	go test -gcflags=all=-l -coverprofile=coverage.txt $(shell go list ./pkg/... ./cmd/...)
 
+# Test database management
+.PHONY: test-db-up
+test-db-up:
+	@$(INFO) Starting test databases with docker-compose
+	docker-compose -f docker-compose.test.yml up -d
+	@$(INFO) Waiting for databases to be ready...
+	@sleep 5
+	@docker-compose -f docker-compose.test.yml ps
+	@$(OK) Test databases are running
+
+.PHONY: test-db-down
+test-db-down:
+	@$(INFO) Stopping test databases
+	docker-compose -f docker-compose.test.yml down -v
+	@$(OK) Test databases stopped
+
+.PHONY: test-db-logs
+test-db-logs:
+	docker-compose -f docker-compose.test.yml logs -f
+
 setup-test-server:
 	curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(shell go env GOOS)/$(shell go env GOARCH)
 	chmod +x kubebuilder
