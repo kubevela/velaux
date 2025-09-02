@@ -79,7 +79,7 @@ e2e-server-test:
 	@$(OK) tests pass
 
 unit-test-server:
-	go test -gcflags=all=-l -coverprofile=coverage.txt $(shell go list ./pkg/... ./cmd/...)
+	go test -gcflags=all=-l -coverprofile=coverage.txt $(shell go list ./pkg/... ./cmd/...) --verbose
 
 # Test database management
 .PHONY: test-db-up
