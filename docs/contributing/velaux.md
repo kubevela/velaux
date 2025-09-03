@@ -93,7 +93,7 @@ yarn test
 Server:
 
 ```shell
-make unit-test-server
+make unit-test-server-local
 make e2e-server-test
 ```
 

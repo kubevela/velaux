@@ -78,7 +78,8 @@ e2e-server-test:
 	go test -v -coverpkg=./... -coverprofile=/tmp/e2e_apiserver_test.out ./e2e-test
 	@$(OK) tests pass
 
-unit-test-server:
+# NOTE:: use this for local testing if on Mac because of gomonkey package issues
+unit-test-server-local:
 	go test -gcflags=all=-l -coverprofile=coverage.txt $(shell go list ./pkg/... ./cmd/...)
 
 unit-test-server-ci:
