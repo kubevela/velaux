@@ -52,7 +52,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 	github.com/oam-dev/cluster-gateway v1.9.2-0.20250629203450-2b04dd452b7a
 	github.com/oam-dev/cluster-register v1.0.4-0.20250624042630-618dfa13eb5b // indirect
-	github.com/oam-dev/terraform-config-inspect v0.0.0-20210418082552-fc72d929aa28 // indirect
+	github.com/oam-dev/terraform-config-inspect v0.0.0-20250902214508-15aa973b0d00 // indirect
 	github.com/oam-dev/terraform-controller v0.8.1-0.20250707044258-c0557127de25
 	github.com/onsi/gomega v1.36.2
 	github.com/openkruise/kruise-api v1.4.0 // indirect
