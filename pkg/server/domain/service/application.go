@@ -31,6 +31,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
@@ -1851,8 +1852,7 @@ func dryRunApplication(ctx context.Context, c commonutil.Args, app *v1beta1.Appl
 	if err != nil {
 		return buff, err
 	}
-	var objects []oam.Object
-	pd, err := c.GetPackageDiscover()
+	var objects []*unstructured.Unstructured
 	if err != nil {
 		return buff, err
 	}
@@ -1860,7 +1860,7 @@ func dryRunApplication(ctx context.Context, c commonutil.Args, app *v1beta1.Appl
 	if err != nil {
 		return buff, err
 	}
-	dryRunOpt := dryrun.NewDryRunOption(newClient, config, pd, objects, true)
+	dryRunOpt := dryrun.NewDryRunOption(newClient, config, objects, true)
 	dryRunOpt.GenerateAppFile = func(ctx context.Context, app *v1beta1.Application) (*appfile.Appfile, error) {
 		generateCtx := utils.WithProject(ctx, "")
 		return dryRunOpt.Parser.GenerateAppFileFromApp(generateCtx, app)
@@ -1898,20 +1898,16 @@ func compare(ctx context.Context, c commonutil.Args, targetApp *v1beta1.Applicat
 	if err != nil {
 		return nil, buff, err
 	}
-	pd, err := c.GetPackageDiscover()
-	if err != nil {
-		return nil, buff, err
-	}
 	config, err := c.GetConfig()
 	if err != nil {
 		return nil, buff, err
 	}
-	var objs []oam.Object
+	var objs []*unstructured.Unstructured
 	client, err := c.GetClient()
 	if err != nil {
 		return nil, buff, err
 	}
-	liveDiffOption := dryrun.NewLiveDiffOption(client, config, pd, objs)
+	liveDiffOption := dryrun.NewLiveDiffOption(client, config, objs)
 	diffResult, err := liveDiffOption.DiffApps(ctx, baseApp, targetApp)
 	if err != nil {
 		return nil, buff, err

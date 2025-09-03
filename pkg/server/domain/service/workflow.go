@@ -26,6 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"cuelang.org/go/cue"
+
 	"github.com/spf13/cast"
 
 	corev1 "k8s.io/api/core/v1"
@@ -38,7 +40,6 @@ import (
 
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	wfContext "github.com/kubevela/workflow/pkg/context"
-	"github.com/kubevela/workflow/pkg/cue/model/value"
 	wfTypes "github.com/kubevela/workflow/pkg/types"
 	wfUtils "github.com/kubevela/workflow/pkg/utils"
 
@@ -1040,7 +1041,7 @@ func getWorkflowStepBase(record model.WorkflowRecord, step string) apisv1.StepBa
 
 func getLogConfigFromStep(ctxValue map[string]string, step string) (*wfTypes.LogConfig, error) {
 	wc := wfContext.WorkflowContext{}
-	if err := wc.LoadFromConfigMap(corev1.ConfigMap{
+	if err := wc.LoadFromConfigMap(context.TODO(), corev1.ConfigMap{
 		Data: ctxValue,
 	}); err != nil {
 		return nil, err
@@ -1062,19 +1063,19 @@ func getLogConfigFromStep(ctxValue map[string]string, step string) (*wfTypes.Log
 	return &stepConfig, nil
 }
 
-func getDataFromContext(ctxValue map[string]string) (*value.Value, error) {
+func getDataFromContext(ctxValue map[string]string) (cue.Value, error) {
 	wc := wfContext.WorkflowContext{}
-	if err := wc.LoadFromConfigMap(corev1.ConfigMap{
+	if err := wc.LoadFromConfigMap(context.TODO(), corev1.ConfigMap{
 		Data: ctxValue,
 	}); err != nil {
-		return nil, err
+		return cue.Value{}, err
 	}
 	v, err := wc.GetVar()
 	if err != nil {
-		return nil, err
+		return cue.Value{}, err
 	}
-	if v.Error() != nil {
-		return nil, v.Error()
+	if v.Err() != nil {
+		return cue.Value{}, v.Err()
 	}
 	return v, nil
 }

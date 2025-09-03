@@ -35,7 +35,7 @@ import (
 	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
@@ -95,7 +95,7 @@ func initKubeapiTestDs() (datastore.DataStore, error) {
 	testEnv := &envtest.Environment{
 		ControlPlaneStartTimeout: time.Minute * 3,
 		ControlPlaneStopTimeout:  time.Minute,
-		UseExistingCluster:       pointer.Bool(false),
+		UseExistingCluster:       ptr.To(false),
 	}
 	cfg, err := testEnv.Start()
 	if err != nil {

@@ -50,7 +50,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
-var _ = Describe("Test application service function", func() {
+var _ = Describe("Test application service function", Ordered, func() {
 	var (
 		testProject        = "app-project"
 		testApp            = "test-app"

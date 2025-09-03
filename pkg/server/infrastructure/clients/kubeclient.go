@@ -22,7 +22,6 @@ import (
 	cloudshellv1alpha1 "github.com/cloudtty/cloudtty/pkg/apis/cloudshell/v1alpha1"
 	pkgmulticluster "github.com/kubevela/pkg/multicluster"
 	"github.com/kubevela/workflow/api/v1alpha1"
-	"github.com/kubevela/workflow/pkg/cue/packages"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -93,21 +92,6 @@ func GetKubeConfig() (*rest.Config, error) {
 		return nil, fmt.Errorf("please call SetKubeConfig first")
 	}
 	return kubeConfig, nil
-}
-
-// GetPackageDiscover get package discover
-func GetPackageDiscover() (*packages.PackageDiscover, error) {
-	conf, err := GetKubeConfig()
-	if err != nil {
-		return nil, err
-	}
-	pd, err := packages.NewPackageDiscover(conf)
-	if err != nil {
-		if !packages.IsCUEParseErr(err) {
-			return nil, err
-		}
-	}
-	return pd, nil
 }
 
 // GetDiscoveryClient return a discovery client

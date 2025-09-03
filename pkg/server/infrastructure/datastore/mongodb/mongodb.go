@@ -96,7 +96,7 @@ func (m *mongodb) BatchAdd(ctx context.Context, entities []datastore.Entity) err
 				if _, exit := notRollback[deleteEntity.PrimaryKey()]; !exit {
 					if err := m.Delete(ctx, deleteEntity); err != nil {
 						if !errors.Is(err, datastore.ErrRecordNotExist) {
-							klog.Errorf("rollback delete entity failure %w", err)
+							klog.Errorf("rollback delete entity failure %v", err)
 						}
 					}
 				}
@@ -186,7 +186,7 @@ func (m *mongodb) Delete(ctx context.Context, entity datastore.Entity) error {
 	})
 	_, err := collection.DeleteOne(ctx, makeNameFilter(entity.PrimaryKey()), opts)
 	if err != nil {
-		klog.Errorf("delete document failure %w", err)
+		klog.Errorf("delete document failure %v", err)
 		return datastore.NewDBError(err)
 	}
 	return nil
