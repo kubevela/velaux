@@ -1,6 +1,6 @@
 module github.com/kubevela/velaux
 
-go 1.23
+go 1.23.8
 
 require (
 	cuelang.org/go v0.9.2
