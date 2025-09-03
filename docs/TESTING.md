@@ -78,7 +78,7 @@ The test databases use the following configuration (matching the CI environment)
 
 2. **Run the unit tests:**
    ```bash
-   make unit-test-server
+   make unit-test-server-local
    ```
 
 3. **Stop the databases when done:**
@@ -99,7 +99,7 @@ go test -v ./pkg/...
 go test -race ./pkg/...
 
 # Generate coverage report
-make unit-test-server
+make unit-test-server-local
 go tool cover -html=coverage.txt -o coverage.html
 open coverage.html  # macOS
 ```
@@ -204,7 +204,7 @@ echo "Starting test databases..."
 make test-db-up
 
 echo "Running tests..."
-make unit-test-server
+make unit-test-server-local
 
 echo "Cleaning up..."
 make test-db-down
