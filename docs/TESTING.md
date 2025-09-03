@@ -1,5 +1,4 @@
 # VelaUX Testing Guide
-
 This guide provides instructions for running tests locally for the VelaUX project.
 
 ## Table of Contents
