@@ -105,7 +105,7 @@ require (
 	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/kubevela/workflow v0.6.3-0.20250717221743-56b80cee4121
-	github.com/oam-dev/kubevela v1.10.4-0.20250731144656-b5a9925042ce
+	github.com/oam-dev/kubevela v1.10.4-0.20250902220058-6fbeb6887fa0
 	github.com/onsi/ginkgo/v2 v2.23.3
 	gorm.io/driver/postgres v1.5.2
 )
