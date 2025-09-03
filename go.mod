@@ -47,7 +47,7 @@ require (
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
 	github.com/kubevela/pkg v1.9.3-0.20250625225831-a2894a62a307
-	github.com/kubevela/prism v1.7.0-alpha.1.0.20230403030519-b7e45f7f842e
+	github.com/kubevela/prism v1.7.1-0.20250630043108-b668c767c88b
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 	github.com/oam-dev/cluster-gateway v1.9.2-0.20250629203450-2b04dd452b7a
