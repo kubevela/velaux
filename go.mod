@@ -349,7 +349,7 @@ replace (
 	github.com/docker/distribution => github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker => github.com/moby/moby v20.10.20+incompatible
 	github.com/emicklei/go-restful/v3 => github.com/emicklei/go-restful/v3 v3.8.0
-	github.com/wercker/stern => github.com/oam-dev/stern v1.13.2
+	github.com/wercker/stern => github.com/oam-dev/stern v1.13.3-0.20250828063553-e1dd6271d131
 	go.uber.org/atomic => go.uber.org/atomic v1.9.0
 	oras.land/oras-go => oras.land/oras-go v1.2.0
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client => sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.36
