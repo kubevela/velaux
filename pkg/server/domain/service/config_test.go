@@ -179,7 +179,7 @@ var _ = Describe("Test config service", func() {
 		}
 	})
 	It("Test apply terraform template", func() {
-		tem, err := factory.ParseTemplate("alibaba-provider", []byte(alibabaTerraformTemplate))
+		tem, err := factory.ParseTemplate(context.TODO() ,"alibaba-provider", []byte(alibabaTerraformTemplate))
 		Expect(err).To(BeNil())
 		Expect(factory.CreateOrUpdateConfigTemplate(context.Background(), types.DefaultKubeVelaNS, tem)).To(BeNil())
 	})
@@ -251,7 +251,7 @@ var _ = Describe("Test config service", func() {
 
 		It("Get config in project and fall back to get global config", func() {
 			By("apply helm template")
-			tem, err := factory.ParseTemplate(helmTemplateName, []byte(helmTemplate))
+			tem, err := factory.ParseTemplate(context.TODO(), helmTemplateName, []byte(helmTemplate))
 			Expect(err).To(BeNil())
 			Expect(factory.CreateOrUpdateConfigTemplate(context.Background(), types.DefaultKubeVelaNS, tem)).To(BeNil())
 
