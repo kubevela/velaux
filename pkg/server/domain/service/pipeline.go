@@ -28,12 +28,13 @@ import (
 	"sync"
 	"time"
 
+	"cuelang.org/go/cue"
+
 	"github.com/kubevela/pkg/util/slices"
 
 	"github.com/fatih/color"
 	"github.com/kubevela/pkg/util/k8s"
 	"github.com/kubevela/workflow/api/v1alpha1"
-	"github.com/kubevela/workflow/pkg/cue/model/value"
 	wfTypes "github.com/kubevela/workflow/pkg/types"
 	wfUtils "github.com/kubevela/workflow/pkg/utils"
 	"github.com/modern-go/concurrent"
@@ -349,7 +350,7 @@ func (p pipelineRunServiceImpl) GetPipelineRunOutput(ctx context.Context, pipeli
 	if ctxBackend == nil {
 		return apis.GetPipelineRunOutputResponse{}, nil
 	}
-	v, err := wfUtils.GetDataFromContext(ctx, p.KubeClient, ctxBackend.Name, pipelineRun.PipelineRunName, ctxBackend.Namespace)
+	v, err := wfUtils.GetDataFromContext(ctx, ctxBackend.Name, pipelineRun.PipelineRunName, ctxBackend.Namespace)
 	if err != nil {
 		klog.Errorf("get data from context backend failed: %v", err)
 		return apis.GetPipelineRunOutputResponse{}, bcode.ErrGetContextBackendData
@@ -411,7 +412,7 @@ func (p pipelineRunServiceImpl) GetPipelineRunInput(ctx context.Context, pipelin
 	if ctxBackend == nil {
 		return apis.GetPipelineRunInputResponse{}, nil
 	}
-	v, err := wfUtils.GetDataFromContext(ctx, p.KubeClient, ctxBackend.Name, pipelineRun.PipelineRunName, ctxBackend.Namespace)
+	v, err := wfUtils.GetDataFromContext(ctx, ctxBackend.Name, pipelineRun.PipelineRunName, ctxBackend.Namespace)
 	if err != nil {
 		klog.Errorf("get data from context backend failed: %v", err)
 		return apis.GetPipelineRunInputResponse{}, bcode.ErrGetContextBackendData
@@ -476,7 +477,7 @@ func (p pipelineRunServiceImpl) GetPipelineRunLog(ctx context.Context, pipelineR
 		return apis.GetPipelineRunLogResponse{}, nil
 	}
 
-	logConfig, err := wfUtils.GetLogConfigFromStep(ctx, p.KubeClient, pipelineRun.Status.ContextBackend.Name, pipelineRun.PipelineName, project.GetNamespace(), step)
+	logConfig, err := wfUtils.GetLogConfigFromStep(ctx, pipelineRun.Status.ContextBackend.Name, pipelineRun.PipelineName, project.GetNamespace(), step)
 	if err != nil {
 		if strings.Contains(err.Error(), "no log config found") {
 			return apis.GetPipelineRunLogResponse{
@@ -539,7 +540,7 @@ func getStepBase(run apis.PipelineRun, step string) apis.StepBase {
 	return apis.StepBase{}
 }
 
-func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.StepOutputs, v *value.Value) apis.StepOutputBase {
+func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.StepOutputs, v cue.Value) apis.StepOutputBase {
 	o := apis.StepOutputBase{
 		StepBase: apis.StepBase{
 			Name:  step.Name,
@@ -550,14 +551,15 @@ func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.St
 	}
 	values := make([]apis.OutputVar, 0)
 	for _, output := range outputsSpec[step.Name] {
-		outputValue, err := v.LookupValue(output.Name)
+		outputValue := v.LookupPath(cue.ParsePath(output.Name))
+		if outputValue.Err() != nil {
+			continue
+		}
+		jsonBytes, err := outputValue.MarshalJSON()
 		if err != nil {
 			continue
 		}
-		s, err := outputValue.String()
-		if err != nil {
-			continue
-		}
+		s := string(jsonBytes)
 		values = append(values, apis.OutputVar{
 			Name:      output.Name,
 			ValueFrom: output.ValueFrom,
@@ -568,7 +570,7 @@ func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.St
 	return o
 }
 
-func getStepInputs(step v1alpha1.StepStatus, inputsSpec map[string]v1alpha1.StepInputs, v *value.Value, valueFromStep map[string]string) apis.StepInputBase {
+func getStepInputs(step v1alpha1.StepStatus, inputsSpec map[string]v1alpha1.StepInputs, v cue.Value, valueFromStep map[string]string) apis.StepInputBase {
 	o := apis.StepInputBase{
 		StepBase: apis.StepBase{
 			Name:  step.Name,
@@ -579,14 +581,15 @@ func getStepInputs(step v1alpha1.StepStatus, inputsSpec map[string]v1alpha1.Step
 	}
 	values := make([]apis.InputVar, 0)
 	for _, input := range inputsSpec[step.Name] {
-		outputValue, err := v.LookupValue(input.From)
+		outputValue := v.LookupPath(cue.ParsePath(input.From))
+		if outputValue.Err() != nil {
+			continue
+		}
+		jsonBytes, err := outputValue.MarshalJSON()
 		if err != nil {
 			continue
 		}
-		s, err := outputValue.String()
-		if err != nil {
-			continue
-		}
+		s := string(jsonBytes)
 		values = append(values, apis.InputVar{
 			Value:        s,
 			From:         input.From,

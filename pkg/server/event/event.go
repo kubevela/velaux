@@ -21,6 +21,8 @@ import (
 
 	"k8s.io/client-go/util/workqueue"
 
+	v1beta1 "github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+
 	"github.com/kubevela/velaux/pkg/server/event/collect"
 	"github.com/kubevela/velaux/pkg/server/event/sync"
 )
@@ -35,7 +37,7 @@ type Worker interface {
 // InitEvent init all event worker
 func InitEvent() []interface{} {
 	application := &sync.ApplicationSync{
-		Queue: workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		Queue: workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1beta1.Application]()),
 	}
 	collect := &collect.InfoCalculateCronJob{}
 	workers = append(workers, application, collect)

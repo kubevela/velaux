@@ -67,7 +67,7 @@ func (m *Driver) BatchAdd(ctx context.Context, entities []datastore.Entity) erro
 				if _, exit := notRollback[deleteEntity.PrimaryKey()]; !exit {
 					if err := m.Delete(ctx, deleteEntity); err != nil {
 						if !errors.Is(err, datastore.ErrRecordNotExist) {
-							klog.Errorf("rollback delete entity failure %w", err)
+							klog.Errorf("rollback delete entity failure %v", err)
 						}
 					}
 				}
@@ -147,7 +147,7 @@ func (m *Driver) Delete(ctx context.Context, entity datastore.Entity) error {
 	}
 
 	if dbDelete := m.Client.WithContext(ctx).Model(entity).Delete(entity); dbDelete.Error != nil {
-		klog.Errorf("delete document failure %w", dbDelete.Error)
+		klog.Errorf("delete document failure %v", dbDelete.Error)
 		return datastore.NewDBError(dbDelete.Error)
 	}
 

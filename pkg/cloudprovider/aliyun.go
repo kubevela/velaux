@@ -31,7 +31,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog/v2"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/pkg/utils/util"
@@ -52,8 +52,8 @@ type AliyunCloudProvider struct {
 // NewAliyunCloudProvider create aliyun cloud provider
 func NewAliyunCloudProvider(accessKeyID string, accessKeySecret string, k8sClient client.Client) (*AliyunCloudProvider, error) {
 	config := &openapi.Config{
-		AccessKeyId:     pointer.String(accessKeyID),
-		AccessKeySecret: pointer.String(accessKeySecret),
+		AccessKeyId:     ptr.To(accessKeyID),
+		AccessKeySecret: ptr.To(accessKeySecret),
 	}
 	config.Endpoint = tea.String(aliyunAPIEndpoint)
 	c, err := cs20151215.NewClient(config)
@@ -83,7 +83,7 @@ func (provider *AliyunCloudProvider) decodeClusterURL(masterURL string) (url str
 	IntranetAPIServerEndpoint string `json:"intranet_api_server_endpoint"`
 }) {
 	if err := json.Unmarshal([]byte(masterURL), &url); err != nil {
-		klog.Info("failed to unmarshal masterUrl %s", masterURL)
+		klog.Infof("failed to unmarshal masterUrl %s", masterURL)
 	}
 	return
 }
@@ -102,8 +102,8 @@ func getString(s *string) string {
 // ListCloudClusters list clusters with page info, return clusters, total count and error
 func (provider *AliyunCloudProvider) ListCloudClusters(pageNumber int, pageSize int) ([]*CloudCluster, int, error) {
 	describeClustersV1Request := &cs20151215.DescribeClustersV1Request{
-		PageSize:   pointer.Int64(int64(pageSize)),
-		PageNumber: pointer.Int64(int64(pageNumber)),
+		PageSize:   ptr.To(int64(pageSize)),
+		PageNumber: ptr.To(int64(pageNumber)),
 	}
 	resp, err := provider.DescribeClustersV1(describeClustersV1Request)
 	if err != nil {
@@ -136,7 +136,7 @@ func (provider *AliyunCloudProvider) ListCloudClusters(pageNumber int, pageSize 
 // GetClusterKubeConfig get cluster kubeconfig by clusterID
 func (provider *AliyunCloudProvider) GetClusterKubeConfig(clusterID string) (string, error) {
 	req := &cs20151215.DescribeClusterUserKubeconfigRequest{}
-	resp, err := provider.DescribeClusterUserKubeconfig(pointer.String(clusterID), req)
+	resp, err := provider.DescribeClusterUserKubeconfig(ptr.To(clusterID), req)
 	if err != nil {
 		return "", err
 	}
@@ -145,7 +145,7 @@ func (provider *AliyunCloudProvider) GetClusterKubeConfig(clusterID string) (str
 
 // GetClusterInfo retrieves cluster info by clusterID
 func (provider *AliyunCloudProvider) GetClusterInfo(clusterID string) (*CloudCluster, error) {
-	resp, err := provider.DescribeClusterDetail(pointer.String(clusterID))
+	resp, err := provider.DescribeClusterDetail(ptr.To(clusterID))
 	if err != nil {
 		return nil, err
 	}
