@@ -46,7 +46,7 @@ require (
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
 	github.com/kubevela/pkg v1.9.3-0.20251007211343-a91fd1f290c6
-	github.com/kubevela/prism v1.7.1-0.20250630043108-b668c767c88b
+	github.com/kubevela/prism v1.8.0
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 	github.com/oam-dev/cluster-gateway v1.9.2-0.20250629203450-2b04dd452b7a
@@ -351,6 +351,7 @@ replace (
 	github.com/docker/distribution => github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker => github.com/moby/moby v20.10.20+incompatible
 	github.com/emicklei/go-restful/v3 => github.com/emicklei/go-restful/v3 v3.8.0
+	github.com/kubevela/prism => github.com/roguepikachu/prism v1.8.0
 	github.com/oam-dev/kubevela => github.com/Chaitanyareddy0702/kubevela v1.11.0
 	github.com/wercker/stern => github.com/oam-dev/stern v1.13.3-0.20250828063553-e1dd6271d131
 	go.uber.org/atomic => go.uber.org/atomic v1.9.0
