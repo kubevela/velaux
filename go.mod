@@ -15,7 +15,6 @@ require (
 	github.com/containerd/containerd v1.7.27 // indirect
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/crossplane/crossplane-runtime v1.16.0 // indirect
-	github.com/cue-exp/kubevelafix v0.0.0-20220922150317-aead819d979d // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emicklei/go-restful-openapi/v2 v2.9.1
 	github.com/emicklei/go-restful/v3 v3.12.0
@@ -46,7 +45,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.18.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
-	github.com/kubevela/pkg v1.9.3-0.20250625225831-a2894a62a307
+	github.com/kubevela/pkg v1.9.3-0.20251007211343-a91fd1f290c6
 	github.com/kubevela/prism v1.7.1-0.20250630043108-b668c767c88b
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
@@ -104,8 +103,8 @@ require (
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8
 	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/kubevela/workflow v0.6.3-0.20250717221743-56b80cee4121
-	github.com/oam-dev/kubevela v1.10.4-0.20250902220058-6fbeb6887fa0
+	github.com/kubevela/workflow v0.6.3-0.20251007211423-415593c3cee0
+	github.com/oam-dev/kubevela v1.11.0
 	github.com/onsi/ginkgo/v2 v2.23.3
 	gorm.io/driver/postgres v1.5.2
 )
@@ -352,6 +351,7 @@ replace (
 	github.com/docker/distribution => github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker => github.com/moby/moby v20.10.20+incompatible
 	github.com/emicklei/go-restful/v3 => github.com/emicklei/go-restful/v3 v3.8.0
+	github.com/oam-dev/kubevela => github.com/Chaitanyareddy0702/kubevela v1.11.0
 	github.com/wercker/stern => github.com/oam-dev/stern v1.13.3-0.20250828063553-e1dd6271d131
 	go.uber.org/atomic => go.uber.org/atomic v1.9.0
 	oras.land/oras-go => oras.land/oras-go v1.2.0
