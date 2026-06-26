@@ -52,12 +52,13 @@ func InitServiceBean(c config.Config) []interface{} {
 	velaQLService := NewVelaQLService()
 	expressionService := NewExpressionService(c.EnableCelExpressions)
 	reportService := NewReportService()
-	needInitData = []DataInit{pluginService, clusterService, rbacService, targetService, systemInfoService, addonService, reportService.(DataInit)}
+	groupMappingService := NewGroupMappingService()
+	needInitData = []DataInit{pluginService, clusterService, rbacService, targetService, systemInfoService, addonService, reportService.(DataInit), groupMappingService}
 	return []interface{}{
 		clusterService, rbacService, projectService, envService, targetService, workflowService, oamApplicationService, definitionService, addonService, envBindingService, systemInfoService, helmService, userService,
 		authenticationService, configService, applicationService, webhookService, pipelineService, pipelineRunService,
 		contextService, NewImageService(), NewCloudShellService(), pluginService, velaQLService, expressionService, NewCustomisationService(), reportService,
-		NewPackageService(), NewDefKitService(), NewSharedWorkflowService(),
+		NewPackageService(), NewDefKitService(), NewSharedWorkflowService(), groupMappingService,
 	}
 }
 
