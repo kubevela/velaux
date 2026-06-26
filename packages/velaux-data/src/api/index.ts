@@ -14,3 +14,4 @@ export * from './roles';
 export * from './system';
 export * from './target';
 export * from './user';
+export * from './group_mapping';

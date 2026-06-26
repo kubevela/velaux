@@ -239,7 +239,7 @@ class PlatformSetting extends React.Component<Props, State> {
     const newRedirectURl = encodeURIComponent(redirectURL);
     return `${this.field.getValue(
       'velaAddress'
-    )}/dex/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access&state=velaux`;
+    )}/dex/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+groups+offline_access&state=velaux`;
   };
 
   onAddItem = () => {

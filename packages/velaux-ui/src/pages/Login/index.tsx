@@ -134,7 +134,7 @@ export default class LoginPage extends Component<Props, State> {
     if (this.state.dexConfig) {
       const { clientID, issuer, redirectURL } = this.state.dexConfig;
       const newRedirectURl = encodeURIComponent(redirectURL);
-      const dexClientURL = `${issuer}/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+offline_access&state=velaux`;
+      const dexClientURL = `${issuer}/auth?client_id=${clientID}&redirect_uri=${newRedirectURl}&response_type=code&scope=openid+profile+email+groups+offline_access&state=velaux`;
       window.location.href = dexClientURL;
     }
   };
