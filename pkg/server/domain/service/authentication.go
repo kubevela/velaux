@@ -75,11 +75,12 @@ type AuthenticationService interface {
 }
 
 type authenticationServiceImpl struct {
-	SysService     SystemInfoService   `inject:""`
-	UserService    UserService         `inject:""`
-	ProjectService ProjectService      `inject:""`
-	Store          datastore.DataStore `inject:"datastore"`
-	KubeClient     client.Client       `inject:"kubeClient"`
+	SysService          SystemInfoService   `inject:""`
+	UserService         UserService         `inject:""`
+	ProjectService      ProjectService      `inject:""`
+	GroupMappingService GroupMappingService `inject:""`
+	Store               datastore.DataStore `inject:"datastore"`
+	KubeClient          client.Client       `inject:"kubeClient"`
 }
 
 // NewAuthenticationService new authentication service
@@ -92,10 +93,11 @@ type authHandler interface {
 }
 
 type dexHandlerImpl struct {
-	idToken           *oidc.IDToken
-	Store             datastore.DataStore
-	projectService    ProjectService
-	systemInfoService SystemInfoService
+	idToken             *oidc.IDToken
+	Store               datastore.DataStore
+	projectService      ProjectService
+	systemInfoService   SystemInfoService
+	groupMappingService GroupMappingService
 }
 
 type localHandlerImpl struct {
@@ -134,10 +136,11 @@ func (a *authenticationServiceImpl) newDexHandler(ctx context.Context, req apisv
 		return nil, err
 	}
 	return &dexHandlerImpl{
-		idToken:           idToken,
-		Store:             a.Store,
-		projectService:    a.ProjectService,
-		systemInfoService: a.SysService,
+		idToken:             idToken,
+		Store:               a.Store,
+		projectService:      a.ProjectService,
+		systemInfoService:   a.SysService,
+		groupMappingService: a.GroupMappingService,
 	}, nil
 }
 
@@ -466,6 +469,8 @@ func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 		Name string `json:"name"`
 		// Subject - Identifier for the End-User at the Issuer.
 		Sub string `json:"sub"`
+		// Groups are the OIDC groups the user belongs to, typically provided by Dex.
+		Groups []string `json:"groups"`
 	}
 	if err := d.idToken.Claims(&claims); err != nil {
 		return nil, err
@@ -527,6 +532,14 @@ func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 			}
 		}
 		userBase = convertUserBase(user)
+	}
+
+	// Sync group-based project/role mappings from the velaux-rbac-cm ConfigMap
+	if d.groupMappingService != nil && len(claims.Groups) > 0 {
+		if err := d.groupMappingService.SyncUserGroupMappings(ctx, userBase.Name, claims.Groups); err != nil {
+			klog.Errorf("failed to sync group mappings for user %s: %s", userBase.Name, err.Error())
+			// Don't fail login on group mapping sync errors
+		}
 	}
 
 	return userBase, nil

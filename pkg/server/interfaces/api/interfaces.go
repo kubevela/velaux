@@ -99,6 +99,7 @@ func InitAPIBean() []interface{} {
 
 	// RBAC
 	RegisterAPI(NewRBAC())
+	RegisterAPI(NewGroupMapping())
 	var beans []interface{}
 	for i := range registeredAPI {
 		beans = append(beans, registeredAPI[i])
