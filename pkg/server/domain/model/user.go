@@ -139,7 +139,7 @@ type Role struct {
 	BaseModel
 	Name        string   `json:"name" gorm:"primaryKey"`
 	Alias       string   `json:"alias"`
-	Project     string   `json:"project,omitempty"`
+	Project     string   `json:"project,omitempty" gorm:"primaryKey"`
 	Permissions []string `json:"permissions" gorm:"serializer:json"`
 }
 
