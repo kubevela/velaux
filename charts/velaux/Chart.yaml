@@ -1,0 +1,23 @@
+apiVersion: v2
+name: velaux
+description: A Helm chart for VelaUX, the KubeVela User Experience (UX) dashboard and APIServer
+type: application
+
+# version is the chart version, bump on every chart change.
+version: 0.1.0
+
+# appVersion tracks the VelaUX application version. Used as the default image tag.
+appVersion: "v1.9.5"
+
+home: https://kubevela.io
+icon: https://static.kubevela.net/images/logos/KubeVela%20-03.png
+sources:
+  - https://github.com/kubevela/velaux
+keywords:
+  - kubevela
+  - velaux
+  - dashboard
+  - oam
+maintainers:
+  - name: Kubevela
+    url: https://kubevela.io
