@@ -1,0 +1,144 @@
+# Default values for velaux.
+# This is a YAML-formatted file.
+
+# -- Number of VelaUX server replicas.
+replicaCount: 1
+
+image:
+  # -- Image repository. The addon uses "oamdev/velaux".
+  repository: oamdev/velaux
+  # -- Optional image registry/hub prefix, e.g. "acr.kubevela.net". Prepended to repository when set.
+  registry: ""
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Image tag. Defaults to the chart appVersion when empty.
+  tag: ""
+
+# -- Image pull secrets for private registries.
+imagePullSecrets: []
+# - name: my-registry-secret
+
+# -- Override the chart name.
+nameOverride: ""
+# -- Override the fully qualified app name.
+fullnameOverride: ""
+
+datastore:
+  # -- Datastore backend: "kubeapi" (default, no external DB), "mongodb", "postgres" or "mysql".
+  type: kubeapi
+  # -- Database name. For the kubeapi type this is the namespace used to store data.
+  # For mongodb it is the database name. For postgres/mysql the db name is taken from the URL.
+  database: ""
+  # -- Connection URL for external datastores (mongodb/postgres/mysql). Ignored for kubeapi.
+  # Prefer urlExistingSecret so credentials are not stored in values.
+  # postgres example: "postgres://user:pass@host:5432/dbname?sslmode=require"
+  url: ""
+  # -- Source the connection URL from an existing Secret instead of `url`.
+  # Recommended for CloudNativePG (CNPG): point at the cluster's generated app Secret,
+  # whose "uri" key already holds a ready-to-use postgresql:// connection string.
+  urlExistingSecret:
+    # -- Name of the Secret holding the connection URL. Empty disables this.
+    name: ""
+    # -- Key within the Secret that holds the URL (CNPG's app secret exposes "uri").
+    key: uri
+  # CloudNativePG (CNPG) integration: let this chart provision the PostgreSQL cluster.
+  cnpg:
+    # -- Provision a CNPG Cluster and use it as the datastore. Implies datastore.type=postgres
+    # and sources the URL from the cluster's generated "<name>-app" Secret (key "uri").
+    # Requires the CNPG operator to be installed in the cluster.
+    enabled: false
+    # -- Cluster name. Defaults to "<release>-velaux-pg". Its app Secret is "<name>-app".
+    name: ""
+    # -- Number of PostgreSQL instances (1 = no HA).
+    instances: 3
+    # -- Name of the database and owner role created via initdb bootstrap.
+    database: velaux
+    owner: velaux
+    storage:
+      # -- Volume size per instance.
+      size: 5Gi
+      # -- StorageClass name. Empty uses the cluster default.
+      storageClass: ""
+    # -- Override the PostgreSQL container image. Empty uses the CNPG operator default.
+    imageName: ""
+    # -- Extra fields merged into the CNPG Cluster spec (e.g. backup, resources, affinity).
+    extraSpec: {}
+
+# -- Enable impersonation of the login user when calling the Kubernetes API.
+enableImpersonation: false
+
+# -- Extra feature gates passed to the server, e.g. ["EnableWebhook=true"].
+# EnableCacheJSFile=true is always set by the chart.
+extraFeatureGates: []
+
+# -- Extra command-line args appended to the server container.
+extraArgs: []
+
+serviceAccount:
+  # -- Create the ServiceAccount, its token Secret, and the cluster-admin ClusterRoleBinding.
+  create: true
+  # -- Name of the ServiceAccount. The VelaUX addon uses "kubevela-ux".
+  name: kubevela-ux
+  # -- Annotations to add to the ServiceAccount.
+  annotations: {}
+
+rbac:
+  # -- Create the ClusterRoleBinding that grants VelaUX cluster-admin (as the addon does).
+  # VelaUX needs broad access to manage applications across the cluster.
+  create: true
+
+service:
+  # -- Service type: ClusterIP, NodePort or LoadBalancer.
+  type: ClusterIP
+  # -- Service port.
+  port: 8000
+  # -- Node port used when type is NodePort.
+  nodePort: 30000
+  # -- Extra annotations for the Service.
+  annotations: {}
+
+ingress:
+  # -- Enable an Ingress for VelaUX.
+  enabled: false
+  # -- IngressClass name, e.g. "nginx" or "traefik".
+  className: ""
+  # -- Extra annotations for the Ingress.
+  annotations: {}
+  # -- Hostname to expose VelaUX on.
+  host: ""
+  # -- Ingress path.
+  path: /
+  # -- Ingress path type.
+  pathType: Prefix
+  tls:
+    # -- Enable TLS on the Ingress.
+    enabled: false
+    # -- Name of the TLS Secret containing the certificate.
+    secretName: ""
+
+# -- Resource requests and limits for the server container.
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 256Mi
+
+# -- Pod annotations.
+podAnnotations: {}
+
+# -- Pod-level security context.
+podSecurityContext: {}
+
+# -- Container-level security context.
+securityContext: {}
+
+# -- Node selector for pod scheduling.
+nodeSelector: {}
+
+# -- Tolerations for pod scheduling.
+tolerations: []
+
+# -- Affinity rules for pod scheduling.
+affinity: {}
