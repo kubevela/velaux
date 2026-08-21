@@ -1,7 +1,7 @@
 # This file is a github code protect rule follow the codeowners https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/about-code-owners#example-of-a-codeowners-file
 
-*  @barnettZQG @wonderflow @chivalryq @roguepikachu
+*  @barnettZQG @wonderflow @chivalryq @roguepikachu @briankane @jerrinfrancis
 
-pkg @barnettZQG @chivalryq @wangyikewxgm @yangsoon @FogDong @roguepikachu
+pkg @barnettZQG @chivalryq @wangyikewxgm @yangsoon @FogDong @roguepikachu @briankane @jerrinfrancis
 
-packages @barnettZQG @chivalryq @roguepikachu
+packages @barnettZQG @chivalryq @roguepikachu @briankane @jerrinfrancis
