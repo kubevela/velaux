@@ -16,6 +16,8 @@ on:
 env:
   # Common versions
   GO_VERSION: '1.23.8'
+  # Kubernetes version envtest runs the control plane at, for the unit tests
+  ENVTEST_K8S_VERSION: '1.26.0'
 
 permissions:
   contents: read
@@ -85,13 +87,14 @@ jobs:
         with:
           mongodb-version: '5.0'
 
-        # TODO need update action version to resolve node 12 deprecated.
-      - name: install Kubebuilder
-        uses: RyanSiu1995/kubebuilder-action@e7e4de1c1eaf1d089b9a186f7526239acadf0b40
-        with:
-          version: 3.1.0
-          kubebuilderOnly: false
-          kubernetesVersion: v1.26.0
+      - name: Install envtest binaries
+        run: |
+          # Pinned to the tip of controller-runtime's release-0.19 branch, matching
+          # sigs.k8s.io/controller-runtime v0.19.7 in go.mod.
+          go install sigs.k8s.io/controller-runtime/tools/setup-envtest@v0.0.0-20250308055145-5fe7bb3edc86
+          ASSETS=$($(go env GOPATH)/bin/setup-envtest use ${{ env.ENVTEST_K8S_VERSION }} -p path)
+          echo "KUBEBUILDER_ASSETS=${ASSETS}" >> $GITHUB_ENV
+          ls -l "${ASSETS}"
 
       - name: Run api server unit test
         run: make unit-test-server-ci
@@ -109,7 +112,7 @@ jobs:
     if: needs.detect-noop.outputs.noop != 'true'
     strategy:
       matrix:
-        k8s-version: ["v1.26"]
+        k8s-version: ["v1.31"]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k8s-version }}
       cancel-in-progress: true
@@ -145,7 +148,7 @@ jobs:
       - name: Calculate K3d args
         run: |
           EGRESS_ARG=""
-          if [[ "${{ matrix.k8s-version }}" == v1.26 ]]; then
+          if [[ "${{ matrix.k8s-version }}" == v1.31 ]]; then
             EGRESS_ARG="--k3s-arg --egress-selector-mode=disabled@server:0"
           fi
           echo "EGRESS_ARG=${EGRESS_ARG}" >> $GITHUB_ENV 
