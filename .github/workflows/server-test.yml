@@ -16,8 +16,9 @@ on:
 env:
   # Common versions
   GO_VERSION: '1.23.8'
-  # Kubernetes version envtest runs the control plane at, for the unit tests
-  ENVTEST_K8S_VERSION: '1.26.0'
+  # Kubernetes version envtest runs the control plane at, for the unit tests.
+  # Kept on the same minor as the e2e cluster below and as k8s.io/* v0.31.10 in go.mod.
+  ENVTEST_K8S_VERSION: '1.31.0'
 
 permissions:
   contents: read
@@ -112,7 +113,7 @@ jobs:
     if: needs.detect-noop.outputs.noop != 'true'
     strategy:
       matrix:
-        k8s-version: ["v1.31"]
+        k8s-version: ["v1.31.9"]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k8s-version }}
       cancel-in-progress: true
@@ -148,7 +149,7 @@ jobs:
       - name: Calculate K3d args
         run: |
           EGRESS_ARG=""
-          if [[ "${{ matrix.k8s-version }}" == v1.31 ]]; then
+          if [[ "${{ matrix.k8s-version }}" == v1.31.9 ]]; then
             EGRESS_ARG="--k3s-arg --egress-selector-mode=disabled@server:0"
           fi
           echo "EGRESS_ARG=${EGRESS_ARG}" >> $GITHUB_ENV 

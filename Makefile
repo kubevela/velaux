@@ -46,14 +46,19 @@ else
 GOIMPORTS=$(shell which goimports)
 endif
 
+# KubeVela CLI and core version the e2e suite runs against. v1.11.0 builds on
+# k8s.io/* v0.31.10, the same line as go.mod here and as the K3s cluster in
+# .github/workflows/server-test.yml.
+VELA_VERSION ?= v1.11.0
+
 .PHONY: e2e-setup-core
 e2e-setup-core: install-vela install-core install-addon
 
 .PHONY: install-vela
-install-vela: 
-	curl -fsSl https://kubevela.io/script/install.sh | bash -s v1.10.3
+install-vela:
+	curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors https://kubevela.io/script/install.sh | bash -s $(VELA_VERSION)
 install-core:
-	vela install -v v1.9.2 -y
+	vela install -v $(VELA_VERSION) -y
 install-addon:
 	vela addon enable fluxcd
 	vela addon enable vela-workflow version="0.6.0" --override-definitions
