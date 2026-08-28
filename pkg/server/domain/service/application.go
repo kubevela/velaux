@@ -26,8 +26,9 @@ import (
 	"strings"
 	"time"
 
+	oamv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
+
 	"github.com/kubevela/pkg/util/slices"
-	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -1003,9 +1004,9 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 	}
 	if workflow != nil {
 		application.Annotations[oam.AnnotationWorkflowName] = workflow.Name
-		var steps []workflowv1alpha1.WorkflowStep
+		var steps []oamv1alpha1.WorkflowStep
 		for _, step := range workflow.Steps {
-			workflowStep := workflowv1alpha1.WorkflowStep{
+			workflowStep := oamv1alpha1.WorkflowStep{
 				WorkflowStepBase: convertWorkflowModel2WorkflowSpec(step.WorkflowStepBase),
 			}
 			workflowStep.Mode = step.Mode
@@ -1022,8 +1023,8 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 	return application, nil
 }
 
-func convertWorkflowModel2WorkflowSpec(step model.WorkflowStepBase) workflowv1alpha1.WorkflowStepBase {
-	var workflowStep = workflowv1alpha1.WorkflowStepBase{
+func convertWorkflowModel2WorkflowSpec(step model.WorkflowStepBase) oamv1alpha1.WorkflowStepBase {
+	var workflowStep = oamv1alpha1.WorkflowStepBase{
 		Name:      step.Name,
 		Type:      step.Type,
 		Inputs:    step.Inputs,
@@ -1031,7 +1032,7 @@ func convertWorkflowModel2WorkflowSpec(step model.WorkflowStepBase) workflowv1al
 		If:        step.If,
 		Timeout:   step.Timeout,
 		DependsOn: step.DependsOn,
-		Meta: &workflowv1alpha1.WorkflowStepMeta{
+		Meta: &oamv1alpha1.WorkflowStepMeta{
 			Alias: step.Alias,
 		},
 	}

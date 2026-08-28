@@ -24,6 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	oamv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	"github.com/kubevela/workflow/api/v1alpha1"
 
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
@@ -110,14 +111,14 @@ var _ = Describe("Test application workflow rest api", func() {
 					"name": "demo",
 				},
 				DependsOn: []string{"create-config"},
-				Outputs: v1alpha1.StepOutputs{{
+				Outputs: oamv1alpha1.StepOutputs{{
 					ValueFrom: "output.config.configName",
 					Name:      "configName",
 				}},
 			}, {
 				Name: "delete-config",
 				Type: "delete-config",
-				Inputs: v1alpha1.StepInputs{
+				Inputs: oamv1alpha1.StepInputs{
 					{
 						From:         "configName",
 						ParameterKey: "name",
