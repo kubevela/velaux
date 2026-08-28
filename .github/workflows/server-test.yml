@@ -195,6 +195,18 @@ jobs:
         run: |
           make enable-addon
 
+      - name: Dump cluster state on failure
+        if: failure()
+        run: |
+          kubectl get nodes -o wide || true
+          kubectl get pods -A -o wide || true
+          kubectl -n vela-system get svc,endpoints || true
+          kubectl -n vela-system describe deployment kubevela-vela-core || true
+          kubectl -n vela-system logs -l app.kubernetes.io/name=vela-core --tail=200 || true
+          kubectl get validatingwebhookconfigurations -o wide || true
+          kubectl get events -A --sort-by=.lastTimestamp --field-selector type!=Normal || true
+          helm list -A || true
+
       - name: Upload coverage report
         uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673
         with:

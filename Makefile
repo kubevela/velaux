@@ -46,6 +46,25 @@ else
 GOIMPORTS=$(shell which goimports)
 endif
 
+# Enabling an addon creates an Application, which the apiserver validates through
+# vela-core's webhook. The first such call has to warm the controller up and can
+# miss its 10s deadline -- "failed calling webhook ...: context deadline exceeded"
+# -- so retry instead of failing the whole run on a cold start.
+RETRY_TIMES ?= 5
+RETRY_SLEEP ?= 15
+
+define retry
+	@{ \
+	for i in $$(seq 1 $(RETRY_TIMES)); do \
+		if $(1); then exit 0; fi ;\
+		echo "attempt $$i/$(RETRY_TIMES) failed, retrying in $(RETRY_SLEEP)s: $(1)" ;\
+		sleep $(RETRY_SLEEP) ;\
+	done ;\
+	echo "gave up after $(RETRY_TIMES) attempts: $(1)" ;\
+	exit 1 ;\
+	}
+endef
+
 # KubeVela CLI and core version the e2e suite runs against. v1.11.0 builds on
 # k8s.io/* v0.31.10, the same line as go.mod here and as the K3s cluster in
 # .github/workflows/server-test.yml.
@@ -60,8 +79,9 @@ install-vela:
 install-core:
 	vela install -v $(VELA_VERSION) -y
 install-addon:
-	vela addon enable fluxcd
-	vela addon enable vela-workflow version="0.6.0" --override-definitions
+	kubectl rollout status deployment/kubevela-vela-core -n vela-system --timeout=300s
+	$(call retry,vela addon enable fluxcd)
+	$(call retry,vela addon enable vela-workflow version="0.6.0" --override-definitions)
 	kubectl wait --for=condition=Ready pod -l app=source-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app=helm-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=vela-workflow -n vela-system --timeout=600s
