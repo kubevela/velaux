@@ -653,5 +653,7 @@
   "Admin Dashboard": "管理面板",
   "Click me to open the dex login page": "点击我打开 Dex 登录页面",
   "Setting the default projects for the dex login user": "设置 Dex 登录用户的默认项目",
-  "Join Time": "加入时间"
+  "Join Time": "加入时间",
+  "Trait": "运维特征",
+  "Details": "详情"
 }

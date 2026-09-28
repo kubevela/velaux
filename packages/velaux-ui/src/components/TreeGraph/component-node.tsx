@@ -6,11 +6,13 @@ import React, { useState } from 'react';
 import { Translation } from '../Translation';
 
 import type { GraphNode, GraphEdge, TraitGraphNode, Line } from './interface';
-import { describeComponents, getGraphSize, ResourceIcon } from './utils';
+import { componentSummary, getGraphSize, ResourceIcon } from './utils';
 
 import './component-node.less';
 import type { TraitStatus } from '@velaux/data';
 import { If } from '../If';
+import { detailEntries } from '../../utils/status';
+import { StatusTooltip, statusTooltipPopupClass } from '../StatusTooltip';
 
 export interface ComponentNodeProps {
   node: GraphNode;
@@ -113,12 +115,15 @@ function renderTraitTree(traits: TraitStatus[]) {
           </div>
         );
 
-        if (trait.message) {
+        if (trait.message || detailEntries(trait.details).length > 0) {
           return (
-            <Balloon trigger={traitNode}>
-              <div>
-                <p className="line">{`Message: ${trait.message}`}</p>
-              </div>
+            <Balloon trigger={traitNode} closable={false} popupClassName={statusTooltipPopupClass}>
+              <StatusTooltip
+                title={trait.type}
+                healthy={trait.healthy}
+                message={trait.message}
+                details={trait.details}
+              />
             </Balloon>
           );
         }
@@ -156,12 +161,14 @@ export const ComponentNode = (props: ComponentNodeProps) => {
   const [showTrait, setShowTrait] = useState(props.showTrait);
   const WithBalloon = (graphNode: React.ReactNode) => {
     return (
-      <Balloon trigger={graphNode}>
-        <div>
-          {describeComponents(node).map((line: any) => {
-            return <p className="line">{line}</p>;
-          })}
-        </div>
+      <Balloon trigger={graphNode} closable={false} popupClassName={statusTooltipPopupClass}>
+        <StatusTooltip
+          title={node.resource.component?.componentType || node.resource.name}
+          healthy={node.resource.service?.healthy}
+          summary={componentSummary(node)}
+          message={node.resource.service?.message}
+          details={node.resource.service?.details}
+        />
       </Balloon>
     );
   };

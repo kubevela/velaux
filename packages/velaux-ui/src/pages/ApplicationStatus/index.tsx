@@ -6,6 +6,7 @@ import React from 'react';
 import { deployApplication } from '../../api/application';
 import { listApplicationResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
 import { If } from '../../components/If';
+import { StatusDetails } from '../../components/StatusDetails';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type {
@@ -21,6 +22,7 @@ import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import { locale } from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
+import { componentStatusKey, hasStatusDetails } from '../../utils/status';
 import Header from '../ApplicationInstanceList/components/Header';
 
 import './index.less';
@@ -336,7 +338,10 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                       <Table
                         locale={locale().Table}
                         className="customTable"
-                        dataSource={componentStatus}
+                        dataSource={componentStatus?.map((item) => ({ ...item, statusKey: componentStatusKey(item) }))}
+                        primaryKey="statusKey"
+                        rowExpandable={hasStatusDetails}
+                        expandedRowRender={(record: ComponentStatus) => <StatusDetails status={record} />}
                         style={{ minWidth: '1000px' }}
                       >
                         <Table.Column
