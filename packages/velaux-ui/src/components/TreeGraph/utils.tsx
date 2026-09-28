@@ -1,5 +1,8 @@
 import * as React from 'react';
 
+import { summaryEntries } from '../../utils/status';
+import type { DetailEntry } from '../../utils/status';
+
 
 import cRole from '../../assets/resources/c-role.svg';
 import cm from '../../assets/resources/cm.svg';
@@ -77,19 +80,13 @@ export function describeTarget(node: GraphNode) {
   return [`Cluster: ${node.resource.name}`];
 }
 
-export function describeComponents(node: GraphNode) {
-  const lines = [
-    `Name: ${node.resource.name}`,
-    `Alias: ${node.resource.component?.alias}`,
-    `Type: ${node.resource.component?.componentType}`,
-    `DependsOn: ${node.resource.component?.dependsOn || []}`,
-    `Namespace: ${node.resource?.namespace}`,
-    `Cluster: ${node.resource.service?.cluster || 'local'}`,
-  ];
-  if (node.resource.service?.message) {
-    lines.push(`Message: ${node.resource.service?.message}`);
-  }
-  return lines;
+export function componentSummary(node: GraphNode): DetailEntry[] {
+  return summaryEntries([
+    ['Alias', node.resource.component?.alias],
+    ['DependsOn', node.resource.component?.dependsOn],
+    ['Namespace', node.resource?.namespace],
+    ['Cluster', node.resource.service?.cluster || 'local'],
+  ]);
 }
 
 export function treeNodeKey(node: TreeNode & { uid?: string }) {

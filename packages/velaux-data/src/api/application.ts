@@ -136,7 +136,9 @@ export interface ComponentStatus {
   name: string;
   namespace: string;
   healthy: boolean;
+  workloadHealthy?: boolean;
   message: string;
+  details?: Record<string, string>;
   traits?: TraitStatus[];
   cluster: string;
   workloadDefinition: {
@@ -220,8 +222,10 @@ export interface Trait {
 
 export interface TraitStatus {
   type: string;
-  healthy: string;
+  healthy: boolean;
+  pending?: boolean;
   message: string;
+  details?: Record<string, string>;
 }
 
 export interface ApplicationComponentBase {
