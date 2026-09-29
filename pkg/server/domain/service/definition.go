@@ -518,8 +518,19 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	parameter.Validate.MinLength = property.Value.MinLength
 	parameter.Validate.Pattern = property.Value.Pattern
 	parameter.Validate.Required = slices.Contains(required, property.Value.Title)
+	parameter.Validate.Immutable = isImmutable(property.Value)
 	parameter.Sort = 100
 	return &parameter
+}
+
+// extensionImmutable marks a parameter KubeVela's Application webhook refuses to
+// change once deployed: a +immutable field in the definition, as KubeVela writes
+// it into the parameter schema (its schema.ExtensionImmutable).
+const extensionImmutable = "x-immutable"
+
+func isImmutable(s *openapi3.Schema) bool {
+	immutable, _ := s.Extensions[extensionImmutable].(bool)
+	return immutable
 }
 
 // RenderLabel render option label
