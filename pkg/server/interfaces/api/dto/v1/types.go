@@ -948,6 +948,11 @@ type DefinitionBase struct {
 	Component    *v1beta1.ComponentDefinitionSpec    `json:"component,omitempty"`
 	Policy       *v1beta1.PolicyDefinitionSpec       `json:"policy,omitempty"`
 	WorkflowStep *v1beta1.WorkflowStepDefinitionSpec `json:"workflowStep,omitempty"`
+	// Abstract marks a definition that may only be extended, never used by an
+	// Application directly.
+	Abstract bool `json:"abstract,omitempty"`
+	// Extends names the definition this one is built on.
+	Extends string `json:"extends,omitempty"`
 }
 
 // CreatePolicyRequest create app policy

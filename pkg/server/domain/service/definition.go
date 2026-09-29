@@ -161,6 +161,11 @@ func (d *definitionServiceImpl) listDefinitions(ctx context.Context, list *unstr
 			klog.Errorf("convert definition to base failure %s", err.Error())
 			continue
 		}
+		// KubeVela refuses an Application that names an abstract definition, so it
+		// is listed only for those asking for every definition, as a hidden one is.
+		if definition.Abstract && !ops.QueryAll {
+			continue
+		}
 		defs = append(defs, definition)
 	}
 	return defs, nil
@@ -203,6 +208,9 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 			return "enable"
 		}(),
 	}
+	// Read from the object, not the typed spec: older KubeVela types predate them.
+	definition.Abstract, _, _ = unstructured.NestedBool(def.Object, "spec", "abstract")
+	definition.Extends, _, _ = unstructured.NestedString(def.Object, "spec", "extends")
 	// Set OwnerAddon field
 	for _, ownerRef := range def.GetOwnerReferences() {
 		if strings.HasPrefix(ownerRef.Name, addon.AddonAppPrefix) {

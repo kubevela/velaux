@@ -1,4 +1,4 @@
-import { Table, Button, Message } from '@alifd/next';
+import { Table, Button, Message, Tag } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
@@ -166,8 +166,22 @@ class Definitions extends Component<Props, State> {
         key: 'name',
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
-        cell: (v: string) => {
-          return <Link to={`/definitions/${definitionType}/${v}/ui-schema`}>{v}</Link>;
+        cell: (v: string, i: number, record: DefinitionBase) => {
+          return (
+            <span className="definition-name">
+              <Link to={`/definitions/${definitionType}/${v}/ui-schema`}>{v}</Link>
+              {record.abstract && (
+                <Tag size="small" className="definition-abstract">
+                  <Translation>Abstract</Translation>
+                </Tag>
+              )}
+              {record.extends && (
+                <span className="definition-extends">
+                  <Translation>extends</Translation> {record.extends}
+                </span>
+              )}
+            </span>
+          );
         },
       },
       {

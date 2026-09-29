@@ -26,4 +26,9 @@ export interface DefinitionBase {
   };
   policy?: any;
   workflowStep?: any;
+  // abstract marks a definition that may only be extended, never used by an
+  // Application directly.
+  abstract?: boolean;
+  // extends names the definition this one is built on.
+  extends?: string;
 }
