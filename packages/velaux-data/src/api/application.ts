@@ -130,6 +130,18 @@ export interface ApplicationStatus {
   };
   services?: ComponentStatus[];
   appliedResources: Resource[];
+  dependencies?: ComponentDependency[];
+}
+
+// One component another depends on, as the Application's status reports it:
+// named in dependsOn, read through inputs, or read by a property expression,
+// with the cluster and namespace an expression names.
+export interface ComponentDependency {
+  component: string;
+  dependsOn: string;
+  source: 'dependsOn' | 'inputs' | 'expression';
+  cluster?: string;
+  namespace?: string;
 }
 
 export interface ComponentStatus {

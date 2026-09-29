@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { Translation } from '../Translation';
 
 import type { GraphNode, GraphEdge, TraitGraphNode, Line } from './interface';
-import { componentSummary, getGraphSize, ResourceIcon } from './utils';
+import { componentSections, componentSummary, getGraphSize, ResourceIcon } from './utils';
 
 import './component-node.less';
 import type { TraitStatus } from '@velaux/data';
@@ -167,6 +167,7 @@ export const ComponentNode = (props: ComponentNodeProps) => {
           healthy={node.resource.service?.healthy}
           summary={componentSummary(node)}
           message={node.resource.service?.message}
+          sections={componentSections(node)}
           details={node.resource.service?.details}
         />
       </Balloon>

@@ -2,6 +2,8 @@ import { Button } from '@alifd/next';
 import React from 'react';
 
 import { TreeGraph } from '../../../../components/TreeGraph';
+import { dependencyItems } from '../../../../utils/dependencies';
+import type { DependencyItem } from '../../../../utils/dependencies';
 import type { TreeNode } from '../../../../components/TreeGraph/interface';
 import type {
   ApplicationDetail,
@@ -72,7 +74,11 @@ class ApplicationGraph extends React.Component<Props, State> {
     return tree;
   }
 
-  convertComponentNode(service: ComponentStatus, component?: ApplicationComponent): TreeNode {
+  convertComponentNode(
+    service: ComponentStatus,
+    component?: ApplicationComponent,
+    dependencies?: DependencyItem[]
+  ): TreeNode {
     const node: TreeNode = {
       nodeType: 'component',
       resource: {
@@ -83,6 +89,7 @@ class ApplicationGraph extends React.Component<Props, State> {
         cluster: service.cluster,
         service: service,
       },
+      dependencies: dependencies,
     };
     return node;
   }
@@ -143,8 +150,10 @@ class ApplicationGraph extends React.Component<Props, State> {
       const { applicationStatus, components } = this.props;
       const services = (applicationStatus && applicationStatus.services) || [];
       const componentMap = new Map<string, ApplicationComponent>();
+      const types: Record<string, string> = {};
       components?.map((com) => {
         componentMap.set(com.name, com);
+        types[com.name] = com.componentType;
       });
       services.map((s) => {
         const cluster = s.cluster || 'local';
@@ -156,10 +165,11 @@ class ApplicationGraph extends React.Component<Props, State> {
         const clusterNode = clusterTree.get(name);
         if (clusterNode) {
           const component = componentMap.get(s.name);
+          const dependencies = dependencyItems(s.name, applicationStatus?.dependencies, types);
           if (!clusterNode.leafNodes) {
-            clusterNode.leafNodes = [this.convertComponentNode(s, component)];
+            clusterNode.leafNodes = [this.convertComponentNode(s, component, dependencies)];
           } else {
-            clusterNode.leafNodes = clusterNode.leafNodes.concat(this.convertComponentNode(s, component));
+            clusterNode.leafNodes = clusterNode.leafNodes.concat(this.convertComponentNode(s, component, dependencies));
           }
         }
       });

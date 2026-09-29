@@ -13,20 +13,46 @@ import './index.less';
 // this popup class rather than from the graph's stylesheet.
 export const statusTooltipPopupClass = 'status-tooltip-popup';
 
+// TooltipSection is a part of the tooltip folded away behind its title and a
+// count until asked for.
+export interface TooltipSection {
+  title: string;
+  count: number;
+  content: React.ReactNode;
+}
+
 export interface StatusTooltipProps {
   title: string;
   healthy?: boolean;
   summary?: DetailEntry[];
   message?: string;
+  sections?: TooltipSection[];
   details?: Record<string, string>;
 }
 
-// StatusTooltip summarises a component or trait on the graph, with its status
-// details folded away until asked for.
+function CollapsibleSection(props: TooltipSection) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="status-tooltip-section">
+      <button type="button" className="status-tooltip-toggle" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <AiOutlineRight className={classNames('status-tooltip-chevron', { open })} />
+        <Translation>{props.title}</Translation>
+        <span className="status-tooltip-count">{props.count}</span>
+      </button>
+      {open && <div className="status-tooltip-section-content">{props.content}</div>}
+    </div>
+  );
+}
+
+// StatusTooltip summarises a component or trait on the graph, with its
+// sections, then its status details, folded away until asked for.
 export const StatusTooltip = (props: StatusTooltipProps) => {
-  const [showDetails, setShowDetails] = useState(false);
   const details = detailEntries(props.details);
   const summary = props.summary || [];
+  const sections = [...(props.sections || [])];
+  if (details.length > 0) {
+    sections.push({ title: 'Details', count: details.length, content: <DetailList entries={details} /> });
+  }
   return (
     <div className="status-tooltip">
       <div className="status-tooltip-header">
@@ -40,21 +66,9 @@ export const StatusTooltip = (props: StatusTooltipProps) => {
       </div>
       {summary.length > 0 && <DetailList entries={summary} />}
       {props.message && <div className="status-tooltip-message">{props.message}</div>}
-      {details.length > 0 && (
-        <div className="status-tooltip-details">
-          <button
-            type="button"
-            className="status-tooltip-toggle"
-            aria-expanded={showDetails}
-            onClick={() => setShowDetails(!showDetails)}
-          >
-            <AiOutlineRight className={classNames('status-tooltip-chevron', { open: showDetails })} />
-            <Translation>Details</Translation>
-            <span className="status-tooltip-count">{details.length}</span>
-          </button>
-          {showDetails && <DetailList entries={details} />}
-        </div>
-      )}
+      {sections.map((section) => (
+        <CollapsibleSection key={section.title} {...section} />
+      ))}
     </div>
   );
 };
