@@ -26,6 +26,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	oamv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	wfTypes "github.com/kubevela/workflow/pkg/types"
 	. "github.com/onsi/ginkgo/v2"
@@ -1030,9 +1031,9 @@ func createTestSuspendApp(ctx context.Context, appName, envName, revisionVersion
 				Scopes:     map[string]string{},
 			}},
 			Workflow: &v1beta1.Workflow{
-				Steps: []workflowv1alpha1.WorkflowStep{
+				Steps: []oamv1alpha1.WorkflowStep{
 					{
-						WorkflowStepBase: workflowv1alpha1.WorkflowStepBase{
+						WorkflowStepBase: oamv1alpha1.WorkflowStepBase{
 							Type: wfTypes.WorkflowStepTypeSuspend,
 							Name: "first",
 						},

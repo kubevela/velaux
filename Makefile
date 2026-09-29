@@ -46,15 +46,30 @@ else
 GOIMPORTS=$(shell which goimports)
 endif
 
+# KubeVela CLI and core version the e2e suite runs against. v1.11.0 builds on
+# k8s.io/* v0.31.10, the same line as go.mod here and as the K3s cluster in
+# .github/workflows/server-test.yml.
+VELA_VERSION ?= v1.11.0
+
+# Enabling an addon creates an Application, which the apiserver sends to
+# vela-core's validating webhook. Validation parses the appfile and renders each
+# component's CUE, which for the 8-component fluxcd addon takes ~12s against the
+# chart's default 500m CPU limit -- past the chart's default 10s admission
+# timeout (admissionWebhookTimeout), so the apiserver gives up on a webhook that
+# then answers successfully. Give the webhook headroom and the controller enough
+# CPU to stay well inside it. CI tuning only; it does not change what is tested.
+VELA_INSTALL_FLAGS ?= --set admissionWebhookTimeout=30 --set resources.limits.cpu=2000m
+
 .PHONY: e2e-setup-core
 e2e-setup-core: install-vela install-core install-addon
 
 .PHONY: install-vela
-install-vela: 
-	curl -fsSl https://kubevela.io/script/install.sh | bash -s v1.10.3
+install-vela:
+	curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors https://kubevela.io/script/install.sh | bash -s $(VELA_VERSION)
 install-core:
-	vela install -v v1.9.2 -y
+	vela install -v $(VELA_VERSION) -y $(VELA_INSTALL_FLAGS)
 install-addon:
+	kubectl rollout status deployment/kubevela-vela-core -n vela-system --timeout=300s
 	vela addon enable fluxcd
 	vela addon enable vela-workflow version="0.6.0" --override-definitions
 	kubectl wait --for=condition=Ready pod -l app=source-controller -n flux-system --timeout=600s

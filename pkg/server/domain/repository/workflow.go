@@ -23,9 +23,10 @@ import (
 	"fmt"
 	"strings"
 
+	oamv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
+
 	"github.com/kubevela/velaux/pkg/server/utils"
 
-	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -507,7 +508,7 @@ func createOverrideConfigForTerraformComponent(env *model.Env, target *model.Tar
 
 // GenEnvWorkflowStepsAndPolicies will generate workflow steps and policies for an env and application
 func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Client, ds datastore.DataStore, env *model.Env, app *model.Application) ([]model.WorkflowStep, []datastore.Entity) {
-	var workflowSteps []workflowv1alpha1.WorkflowStep
+	var workflowSteps []oamv1alpha1.WorkflowStep
 	var policies []datastore.Entity
 	components, err := ds.List(ctx, &model.ApplicationComponent{AppPrimaryKey: app.PrimaryKey()}, nil)
 	if err != nil {
@@ -539,8 +540,8 @@ func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Clien
 		// gen workflow step and policies for all targets
 		for i := range targets {
 			target := targets[i].(*model.Target)
-			step := workflowv1alpha1.WorkflowStep{
-				WorkflowStepBase: workflowv1alpha1.WorkflowStepBase{
+			step := oamv1alpha1.WorkflowStep{
+				WorkflowStepBase: oamv1alpha1.WorkflowStepBase{
 					Name: target.Name + "-cloud-resource",
 					Type: DeployCloudResource,
 					Properties: util.Object2RawExtension(map[string]string{
@@ -569,8 +570,8 @@ func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Clien
 			if target.Cluster == nil {
 				continue
 			}
-			step := workflowv1alpha1.WorkflowStep{
-				WorkflowStepBase: workflowv1alpha1.WorkflowStepBase{
+			step := oamv1alpha1.WorkflowStep{
+				WorkflowStepBase: oamv1alpha1.WorkflowStepBase{
 					Name: target.Name,
 					Type: step.DeployWorkflowStep,
 					Properties: util.Object2RawExtension(map[string]interface{}{
