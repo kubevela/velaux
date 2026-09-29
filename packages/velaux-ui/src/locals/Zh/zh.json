@@ -658,5 +658,6 @@
   "Namespaces": "命名空间",
   "Quota": "配额",
   "Usable from": "可用于",
-  "Quota, first match applies": "配额（按首个匹配项）"
+  "Quota, first match applies": "配额（按首个匹配项）",
+  "Application deployed, with warnings": "应用已部署，但有警告"
 }

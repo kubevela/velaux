@@ -7,6 +7,7 @@ import React, { Component } from 'react';
 import { Breadcrumb } from '../../../../components/Breadcrumb';
 
 import { deployApplication } from '../../../../api/application';
+import { notifyDeployed } from '../../../../utils/deploy';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
@@ -98,7 +99,7 @@ class ApplicationHeader extends Component<Props, State> {
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
-            Message.success(i18n.t('Application deployed successfully'));
+            notifyDeployed(re);
             this.onGetApplicationDetails();
             if (re.record && re.record.name && dispatch) {
               dispatch(

@@ -99,6 +99,9 @@ export interface ApplicationDeployRequest {
 
 export interface ApplicationDeployResponse extends ApplicationRevision {
   record?: WorkflowRecordBase;
+  // What the API server returned with the admitted Application, such as a
+  // notice that a namespace nears a definition's quota.
+  warnings?: string[];
 }
 
 export interface ApplicationRollbackResponse {

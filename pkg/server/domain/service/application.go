@@ -52,6 +52,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
 	"github.com/kubevela/velaux/pkg/server/event/sync/convert"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	assembler "github.com/kubevela/velaux/pkg/server/interfaces/api/assembler/v1"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -823,7 +824,8 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 		}
 	}
 	// step4: apply to controller cluster
-	err = c.Apply.Apply(ctx, oamApp)
+	applyCtx, warnings := clients.WithWarnings(ctx)
+	err = c.Apply.Apply(applyCtx, oamApp)
 	if err != nil {
 		appRevision.Status = model.RevisionStatusFail
 		appRevision.Reason = err.Error()
@@ -832,7 +834,7 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 		}
 
 		klog.Errorf("deploy appUtil %s failure %s", app.PrimaryKey(), err.Error())
-		return nil, bcode.ErrDeployApplyFail
+		return nil, deployApplyError(err)
 	}
 
 	// step5: create workflow record
@@ -858,12 +860,25 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 
 	res := &apisv1.ApplicationDeployResponse{
 		ApplicationRevisionBase: c.convertRevisionModelToBase(ctx, appRevision),
+		Warnings:                warnings.List(),
 	}
 	if record != nil {
 		res.WorkflowRecord = assembler.ConvertFromRecordModel(record).WorkflowRecordBase
 	}
 
 	return res, nil
+}
+
+// deployApplyError is the error a deploy reports when the Application cannot be
+// applied. When the API server refuses it, as an admission webhook does over a
+// restricted type or an exceeded quota, its reason is the user's to see.
+// KubeVela's Application webhook refuses with a Bad Request.
+func deployApplyError(err error) error {
+	var status apierrors.APIStatus
+	if (apierrors.IsBadRequest(err) || apierrors.IsForbidden(err) || apierrors.IsInvalid(err)) && errors.As(err, &status) {
+		return bcode.ErrDeployApplyFail.SetMessage(status.Status().Message)
+	}
+	return bcode.ErrDeployApplyFail
 }
 
 func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appModel *model.Application, reqWorkflowName, envName, version string) (*v1beta1.Application, error) {

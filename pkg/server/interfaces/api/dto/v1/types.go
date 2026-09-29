@@ -1184,6 +1184,9 @@ type ApplicationDeployRequest struct {
 type ApplicationDeployResponse struct {
 	ApplicationRevisionBase `json:",inline"`
 	WorkflowRecord          WorkflowRecordBase `json:"record"`
+	// Warnings are what the API server returned with the admitted Application,
+	// such as an admission webhook's notice that a namespace nears its quota.
+	Warnings []string `json:"warnings,omitempty"`
 }
 
 // ApplicationRollbackResponse the response body that rollback with the revision

@@ -17,16 +17,23 @@ limitations under the License.
 package service
 
 import (
+	"errors"
 	"testing"
 
+	pkgerrors "github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/utils/ptr"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/pkg/oam"
+
+	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
 func componentDefinition(name string, restrictions map[string]interface{}, annotations map[string]string) unstructured.Unstructured {
@@ -85,4 +92,28 @@ func TestConvertDefinitionBaseRestrictions(t *testing.T) {
 			assert.Equal(t, tc.want, base.Restrictions)
 		})
 	}
+}
+
+func TestDeployApplyError(t *testing.T) {
+	// As KubeVela's Application webhook refuses, wrapped as the applicator wraps it.
+	webhook := pkgerrors.Wrap(apierrors.NewBadRequest(`admission webhook "applications.core.oam.dev" denied the request: `+"\n"+
+		`  1) "spec.components[0].type": ComponentDefinition "gold-web" is restricted and cannot be used from namespace "team-dev". (requestUID=14b46999)`), "cannot create object")
+	var code *bcode.Bcode
+	require.ErrorAs(t, deployApplyError(webhook), &code)
+	assert.Equal(t, bcode.ErrDeployApplyFail.BusinessCode, code.BusinessCode)
+	assert.Contains(t, code.Message, `ComponentDefinition "gold-web" is restricted and cannot be used from namespace "team-dev"`)
+	assert.NotContains(t, code.Message, "cannot create object")
+
+	denied := apierrors.NewForbidden(schema.GroupResource{Group: "core.oam.dev", Resource: "applications"}, "app",
+		errors.New(`admission webhook "validating.core.oam.dev.v1beta1.applications" denied the request: spec.components[0].type: Forbidden: ComponentDefinition "webservice" is restricted and cannot be used from namespace "prod"`))
+	require.ErrorAs(t, deployApplyError(denied), &code)
+	assert.Contains(t, code.Message, `ComponentDefinition "webservice" is restricted and cannot be used from namespace "prod"`)
+
+	invalid := apierrors.NewInvalid(schema.GroupKind{Group: "core.oam.dev", Kind: "Application"}, "app", field.ErrorList{
+		field.Forbidden(field.NewPath("spec", "components").Index(0).Child("type"), `this would exceed the quota for component type "webservice" in namespace "tenant-a"`),
+	})
+	require.ErrorAs(t, deployApplyError(invalid), &code)
+	assert.Contains(t, code.Message, `this would exceed the quota for component type "webservice" in namespace "tenant-a"`)
+
+	assert.Equal(t, bcode.ErrDeployApplyFail, deployApplyError(errors.New("dial tcp 10.0.0.1:443: i/o timeout")))
 }
