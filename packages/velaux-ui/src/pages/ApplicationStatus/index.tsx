@@ -16,7 +16,10 @@ import type {
   EnvBinding,
   ComponentStatus,
   ApplicationDeployResponse,
- AppliedResource , Target , LoginUserInfo } from '@velaux/data';
+  AppliedResource,
+  Target,
+  LoginUserInfo,
+} from '@velaux/data';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import { locale } from '../../utils/locale';

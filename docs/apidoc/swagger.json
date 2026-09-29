@@ -13054,6 +13054,9 @@
 					"$ref": "#/definitions/v1beta1.PolicyDefinitionSpec"
 				},
 				"status": {
+				"policyScope": {
+					"type": "string"
+				},
 					"type": "string"
 				},
 				"trait": {

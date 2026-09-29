@@ -130,6 +130,20 @@ export interface ApplicationStatus {
   };
   services?: ComponentStatus[];
   appliedResources: Resource[];
+  appliedApplicationPolicies?: AppliedApplicationPolicy[];
+}
+
+// AppliedApplicationPolicy is how one application-scoped policy fared on the
+// Application's last render: named in spec.policies (explicit), or applied to
+// every Application in its namespace (global).
+export interface AppliedApplicationPolicy {
+  name: string;
+  type?: string;
+  namespace?: string;
+  source?: 'global' | 'explicit';
+  applied: boolean;
+  error?: boolean;
+  message?: string;
 }
 
 export interface ComponentStatus {

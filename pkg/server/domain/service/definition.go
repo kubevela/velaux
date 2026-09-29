@@ -25,6 +25,7 @@ import (
 
 	"github.com/kubevela/pkg/util/stringtools"
 
+	"github.com/oam-dev/kubevela/pkg/appfile"
 	"github.com/oam-dev/kubevela/pkg/utils/addon"
 	"github.com/oam-dev/kubevela/pkg/utils/filters"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
@@ -161,6 +162,11 @@ func (d *definitionServiceImpl) listDefinitions(ctx context.Context, list *unstr
 			klog.Errorf("convert definition to base failure %s", err.Error())
 			continue
 		}
+		// A global policy applies itself, and KubeVela fails an Application that
+		// names one, so it is listed only for those asking for every definition.
+		if definition.Policy != nil && definition.Policy.Global && !ops.QueryAll {
+			continue
+		}
 		defs = append(defs, definition)
 	}
 	return defs, nil
@@ -239,6 +245,7 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 			return nil, errors.Wrap(err, "invalid trait definition")
 		}
 		definition.Policy = &policyDef.Spec
+		definition.PolicyScope = policyScope(def.GetName(), policyDef.Spec.Scope)
 	}
 	return definition, nil
 }
@@ -531,5 +538,17 @@ func RenderLabel(source interface{}) string {
 		return stringtools.Capitalize(v)
 	default:
 		return stringtools.Capitalize(fmt.Sprintf("%v", v))
+	}
+}
+
+// policyScope classifies a policy as KubeVela does, for its policy's type.
+func policyScope(policyType string, scope v1beta1.PolicyScope) string {
+	switch {
+	case appfile.IsBuiltinPolicyType(policyType):
+		return "Builtin"
+	case scope == v1beta1.ApplicationScope:
+		return "Application"
+	default:
+		return "Workload"
 	}
 }

@@ -949,6 +949,10 @@ type DefinitionBase struct {
 	Component    *v1beta1.ComponentDefinitionSpec    `json:"component,omitempty"`
 	Policy       *v1beta1.PolicyDefinitionSpec       `json:"policy,omitempty"`
 	WorkflowStep *v1beta1.WorkflowStepDefinitionSpec `json:"workflowStep,omitempty"`
+	// PolicyScope is how KubeVela applies a policy: Builtin, consumed by
+	// KubeVela itself; Workload, rendered with the Application's components; or
+	// Application, applied to the Application as a whole before it renders.
+	PolicyScope string `json:"policyScope,omitempty"`
 }
 
 // CreatePolicyRequest create app policy
