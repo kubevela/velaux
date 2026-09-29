@@ -26,4 +26,34 @@ export interface DefinitionBase {
   };
   policy?: any;
   workflowStep?: any;
+  restrictions?: DefinitionRestrictions;
+}
+
+export interface LabelSelectorRequirement {
+  key: string;
+  operator: 'In' | 'NotIn' | 'Exists' | 'DoesNotExist';
+  values?: string[];
+}
+
+export interface LabelSelector {
+  matchLabels?: Record<string, string>;
+  matchExpressions?: LabelSelectorRequirement[];
+}
+
+// NamespaceQuota caps how many times the namespaces it matches may use a
+// definition: warn flags the level, limit refuses beyond it. An entry naming no
+// namespaces is the default for every namespace no earlier entry matched.
+export interface NamespaceQuota {
+  namespaces?: string[];
+  namespaceSelector?: LabelSelector;
+  warn?: number;
+  limit?: number;
+}
+
+// DefinitionRestrictions are the namespaces whose Applications may use a
+// definition, by name or glob, or by the Namespace's labels, and its quota.
+export interface DefinitionRestrictions {
+  namespaces?: string[];
+  namespaceSelector?: LabelSelector;
+  quota?: NamespaceQuota[];
 }

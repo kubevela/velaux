@@ -949,6 +949,10 @@ type DefinitionBase struct {
 	Component    *v1beta1.ComponentDefinitionSpec    `json:"component,omitempty"`
 	Policy       *v1beta1.PolicyDefinitionSpec       `json:"policy,omitempty"`
 	WorkflowStep *v1beta1.WorkflowStepDefinitionSpec `json:"workflowStep,omitempty"`
+	// Restrictions are the namespaces that may use the definition and its quota,
+	// as the Application webhook enforces them: spec.restrictions combined with
+	// the restrict-namespaces annotation. Absent means unrestricted.
+	Restrictions *common.DefinitionRestrictions `json:"restrictions,omitempty"`
 }
 
 // CreatePolicyRequest create app policy

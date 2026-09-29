@@ -6,8 +6,9 @@ import React, { Component, Fragment } from 'react';
 
 import { getDefinitionsList, updateDefinitionStatus } from '../../api/definitions';
 import Permission from '../../components/Permission';
+import { RestrictionTags } from '../../components/RestrictionTags';
 import { Translation } from '../../components/Translation';
-import type { DefinitionBase , LoginUserInfo } from '@velaux/data';
+import type { DefinitionBase, DefinitionRestrictions, LoginUserInfo } from '@velaux/data';
 
 // import { momentDate } from '../../utils/common';
 
@@ -185,6 +186,12 @@ class Definitions extends Component<Props, State> {
           const colorClass = (findStatus && findStatus.color) || '';
           return <span className={`${colorClass}`}>{findStatus && findStatus.status}</span>;
         },
+      },
+      {
+        key: 'restrictions',
+        title: <Translation>Restrictions</Translation>,
+        dataIndex: 'restrictions',
+        cell: (v?: DefinitionRestrictions) => <RestrictionTags restrictions={v} />,
       },
       // {
       //   key: 'createTime',

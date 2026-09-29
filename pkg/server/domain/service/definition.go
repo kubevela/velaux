@@ -25,6 +25,7 @@ import (
 
 	"github.com/kubevela/pkg/util/stringtools"
 
+	"github.com/oam-dev/kubevela/pkg/definition/nsrestrict"
 	"github.com/oam-dev/kubevela/pkg/utils/addon"
 	"github.com/oam-dev/kubevela/pkg/utils/filters"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
@@ -202,6 +203,7 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 			}
 			return "enable"
 		}(),
+		Restrictions: nsrestrict.OfUnstructured(def),
 	}
 	// Set OwnerAddon field
 	for _, ownerRef := range def.GetOwnerReferences() {

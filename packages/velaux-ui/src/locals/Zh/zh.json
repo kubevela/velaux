@@ -653,5 +653,10 @@
   "Admin Dashboard": "管理面板",
   "Click me to open the dex login page": "点击我打开 Dex 登录页面",
   "Setting the default projects for the dex login user": "设置 Dex 登录用户的默认项目",
-  "Join Time": "加入时间"
+  "Join Time": "加入时间",
+  "Restrictions": "使用限制",
+  "Namespaces": "命名空间",
+  "Quota": "配额",
+  "Usable from": "可用于",
+  "Quota, first match applies": "配额（按首个匹配项）"
 }

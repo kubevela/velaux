@@ -13053,6 +13053,9 @@
 				"policy": {
 					"$ref": "#/definitions/v1beta1.PolicyDefinitionSpec"
 				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
+				},
 				"status": {
 					"type": "string"
 				},
@@ -13481,6 +13484,9 @@
 				},
 				"policy": {
 					"$ref": "#/definitions/v1beta1.PolicyDefinitionSpec"
+				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
 				},
 				"schema": {
 					"type": "string"
