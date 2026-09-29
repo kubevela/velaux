@@ -166,6 +166,15 @@ type ListEnabledAddonResponse struct {
 type AddonBaseStatus struct {
 	Name  string     `json:"name"`
 	Phase AddonPhase `json:"phase"`
+	// ManagedBy is the Application whose addon component installed the addon;
+	// the addon is enabled, upgraded and disabled there, not here.
+	ManagedBy *AddonManager `json:"managedBy,omitempty"`
+}
+
+// AddonManager names the Application that manages an addon
+type AddonManager struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 // DetailAddonResponse defines the format for showing the addon details
