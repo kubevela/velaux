@@ -655,5 +655,7 @@
   "Setting the default projects for the dex login user": "设置 Dex 登录用户的默认项目",
   "Join Time": "加入时间",
   "Trait": "运维特征",
-  "Details": "详情"
+  "Details": "详情",
+  "Pending": "等待中",
+  "Pending: waits for the workload to be healthy": "等待中：等待工作负载健康后生效"
 }

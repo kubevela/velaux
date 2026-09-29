@@ -16,6 +16,8 @@ export const statusTooltipPopupClass = 'status-tooltip-popup';
 export interface StatusTooltipProps {
   title: string;
   healthy?: boolean;
+  // pending is a trait waiting for its workload, shown in place of its health.
+  pending?: boolean;
   summary?: DetailEntry[];
   message?: string;
   details?: Record<string, string>;
@@ -31,11 +33,18 @@ export const StatusTooltip = (props: StatusTooltipProps) => {
     <div className="status-tooltip">
       <div className="status-tooltip-header">
         <span className="status-tooltip-title">{props.title}</span>
-        {props.healthy !== undefined && (
-          <span className={classNames('status-tooltip-health', { unhealthy: !props.healthy })}>
-            <span className={classNames('circle', props.healthy ? 'circle-success' : 'circle-warning')} />
-            <Translation>{props.healthy ? 'Healthy' : 'UnHealthy'}</Translation>
+        {props.pending ? (
+          <span className="status-tooltip-health pending">
+            <span className="circle circle-pending" />
+            <Translation>Pending</Translation>
           </span>
+        ) : (
+          props.healthy !== undefined && (
+            <span className={classNames('status-tooltip-health', { unhealthy: !props.healthy })}>
+              <span className={classNames('circle', props.healthy ? 'circle-success' : 'circle-warning')} />
+              <Translation>{props.healthy ? 'Healthy' : 'UnHealthy'}</Translation>
+            </span>
+          )
         )}
       </div>
       {summary.length > 0 && <DetailList entries={summary} />}

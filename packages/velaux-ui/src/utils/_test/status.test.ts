@@ -3,7 +3,7 @@ import { assert } from 'chai';
 
 import type { ComponentStatus } from '@velaux/data';
 
-import { componentStatusKey, detailEntries, hasStatusDetails, summaryEntries } from '../status';
+import { componentStatusKey, detailEntries, hasStatusDetails, summaryEntries, traitState } from '../status';
 
 function component(fields: Partial<ComponentStatus>): ComponentStatus {
   return {
@@ -65,5 +65,12 @@ describe('test status details', () => {
         { key: 'Needs', value: 'db, cache' },
       ]
     );
+  });
+
+  it('reads a pending trait as pending, not failed', () => {
+    assert.equal(traitState({ healthy: true }), 'healthy');
+    assert.equal(traitState({ healthy: false }), 'unhealthy');
+    assert.equal(traitState({ healthy: false, pending: true }), 'pending');
+    assert.equal(traitState({ healthy: false, pending: false }), 'unhealthy');
   });
 });

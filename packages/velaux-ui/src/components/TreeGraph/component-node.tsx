@@ -11,7 +11,7 @@ import { componentSummary, getGraphSize, ResourceIcon } from './utils';
 import './component-node.less';
 import type { TraitStatus } from '@velaux/data';
 import { If } from '../If';
-import { detailEntries } from '../../utils/status';
+import { detailEntries, traitState, traitStateCircle } from '../../utils/status';
 import { StatusTooltip, statusTooltipPopupClass } from '../StatusTooltip';
 
 export interface ComponentNodeProps {
@@ -103,12 +103,7 @@ function renderTraitTree(traits: TraitStatus[]) {
           >
             <div className={classNames('trait')}>
               <div>
-                <span
-                  className={classNames('circle', {
-                    'circle-success': trait.healthy,
-                    'circle-failure': !trait.healthy,
-                  })}
-                />
+                <span className={classNames('circle', traitStateCircle[traitState(trait)])} />
                 {label}
               </div>
             </div>
@@ -121,6 +116,7 @@ function renderTraitTree(traits: TraitStatus[]) {
               <StatusTooltip
                 title={trait.type}
                 healthy={trait.healthy}
+                pending={trait.pending}
                 message={trait.message}
                 details={trait.details}
               />
@@ -211,12 +207,7 @@ export const ComponentNode = (props: ComponentNodeProps) => {
         <div className={classNames('label-traits')}>
           {traits && traits.length > 0 && traits[0] && (                                                                                                                                                                                                                                                                                                                                                                                        
             <Tag animation={true}>
-              <span
-                className={classNames('circle', {
-                  'circle-success': traits[0].healthy,
-                  'circle-failure': !traits[0].healthy,
-                })}
-              />
+              <span className={classNames('circle', traitStateCircle[traitState(traits[0])])} />
               {traits[0].type}
             </Tag>
           )}

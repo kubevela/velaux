@@ -32,3 +32,21 @@ export function summaryEntries(fields: Array<[string, string | string[] | undefi
     .map(([key, value]) => ({ key, value: Array.isArray(value) ? value.join(', ') : value || '' }))
     .filter((entry) => entry.value !== '');
 }
+
+export type TraitState = 'healthy' | 'pending' | 'unhealthy';
+
+// traitState is how a trait reads. A trait waiting for its workload before it
+// applies is pending, which KubeVela reports as not yet healthy, so pending wins.
+export function traitState(trait: { healthy: boolean; pending?: boolean }): TraitState {
+  if (trait.pending) {
+    return 'pending';
+  }
+  return trait.healthy ? 'healthy' : 'unhealthy';
+}
+
+// traitStateCircle is the status dot for a trait state.
+export const traitStateCircle: Record<TraitState, string> = {
+  healthy: 'circle-success',
+  pending: 'circle-pending',
+  unhealthy: 'circle-failure',
+};
