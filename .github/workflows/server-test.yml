@@ -85,13 +85,10 @@ jobs:
         with:
           mongodb-version: '5.0'
 
-        # TODO need update action version to resolve node 12 deprecated.
-      - name: install Kubebuilder
-        uses: RyanSiu1995/kubebuilder-action@e7e4de1c1eaf1d089b9a186f7526239acadf0b40
-        with:
-          version: 3.1.0
-          kubebuilderOnly: false
-          kubernetesVersion: v1.26.0
+      - name: Install envtest binaries
+        run: |
+          go install sigs.k8s.io/controller-runtime/tools/setup-envtest@v0.0.0-20250308055145-5fe7bb3edc86 # release-0.19
+          echo "KUBEBUILDER_ASSETS=$("$(go env GOPATH)/bin/setup-envtest" use 1.26.1 -p path)" >> "$GITHUB_ENV"
 
       - name: Run api server unit test
         run: make unit-test-server-ci
@@ -104,14 +101,16 @@ jobs:
           name: codecov-umbrella
 
   server-e2e-tests:
+    # Branch protection requires this check by name. A job's name cannot read
+    # env, so the version is repeated here: bump both, and the required check.
+    name: server-e2e-tests (v1.26)
     runs-on: ubuntu-22.04
     needs: [ detect-noop ]
     if: needs.detect-noop.outputs.noop != 'true'
-    strategy:
-      matrix:
-        k8s-version: ["v1.26"]
+    env:
+      K8S_VERSION: v1.26
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k8s-version }}
+      group: ${{ github.workflow }}-${{ github.ref }}-server-e2e-tests
       cancel-in-progress: true
 
     steps:
@@ -145,22 +144,22 @@ jobs:
       - name: Calculate K3d args
         run: |
           EGRESS_ARG=""
-          if [[ "${{ matrix.k8s-version }}" == v1.26 ]]; then
+          if [[ "$K8S_VERSION" == v1.26 ]]; then
             EGRESS_ARG="--k3s-arg --egress-selector-mode=disabled@server:0"
           fi
           echo "EGRESS_ARG=${EGRESS_ARG}" >> $GITHUB_ENV 
 
       - name: Setup K3d (Hub)
-        uses: nolar/setup-k3d-k3s@293b8e5822a20bc0d5bcdd4826f1a665e72aba96
+        uses: nolar/setup-k3d-k3s@62c9d1bd2bc843275c85d2e7dcd696edc1160eee # v1.1.0
         with:
-          version: ${{ matrix.k8s-version }}
+          channel: ${{ env.K8S_VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           k3d-args: ${{ env.EGRESS_ARG }}
 
       - name: Setup K3d (Worker)
-        uses: nolar/setup-k3d-k3s@293b8e5822a20bc0d5bcdd4826f1a665e72aba96
+        uses: nolar/setup-k3d-k3s@62c9d1bd2bc843275c85d2e7dcd696edc1160eee # v1.1.0
         with:
-          version: ${{ matrix.k8s-version }}
+          channel: ${{ env.K8S_VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           k3d-name: worker
           k3d-args: --kubeconfig-update-default=false --network=k3d-k3s-default ${{ env.EGRESS_ARG }}
