@@ -12,7 +12,8 @@ import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
-import type { ApplicationComponent, DefinitionDetail, Trait , DefinitionBase } from '@velaux/data';
+import type { ApplicationComponent, DefinitionDetail, Trait, DefinitionBase, EnvBinding } from '@velaux/data';
+import { deployNamespaces, isUsable } from '../../../../utils/restrictions';
 
 type Props = {
   project: string;
@@ -27,6 +28,9 @@ type Props = {
   upDateTemporaryTrait: (trait: Trait) => void;
   onOK: () => void;
   onClose: () => void;
+  // envbinding are where the application deploys, whose namespaces a trait
+  // type's restrictions are checked against.
+  envbinding: EnvBinding[];
   dispatch?: any;
 };
 
@@ -101,7 +105,10 @@ class TraitDialog extends React.Component<Props, State> {
   onGetTraitDefinitions = async () => {
     const { component } = this.state;
     if (component?.definition) {
-      getTraitDefinitions({ appliedWorkload: component?.definition.workload.type }).then(
+      getTraitDefinitions({
+        appliedWorkload: component?.definition.workload.type,
+        namespaces: deployNamespaces(this.props.envbinding),
+      }).then(
         (res: { definitions?: DefinitionBase[] }) => {
           if (res) {
             const podDisruptive: any = {};
@@ -183,10 +190,7 @@ class TraitDialog extends React.Component<Props, State> {
 
   transTraitDefinitions() {
     const { traitDefinitions } = this.state;
-    return (traitDefinitions || []).map((item: { name: string }) => ({
-      label: item.name,
-      value: item.name,
-    }));
+    return (traitDefinitions || []).filter(isUsable).map((item) => ({ label: item.name, value: item.name }));
   }
 
   onDetailsTraitDefinition = (value: string, callback?: () => void) => {

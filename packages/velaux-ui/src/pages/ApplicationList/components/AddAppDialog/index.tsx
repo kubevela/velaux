@@ -4,13 +4,16 @@ import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React from 'react';
 import { createApplication } from '../../../../api/application';
-import { detailComponentDefinition } from '../../../../api/definitions';
+import { detailComponentDefinition, getComponentDefinitions } from '../../../../api/definitions';
 import { getEnvs } from '../../../../api/env';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
-import type { DefinitionDetail , Env , Target , LoginUserInfo, UserProject } from '@velaux/data';
+import type { DefinitionDetail, DefinitionBase, Env, Target, LoginUserInfo, UserProject } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
+import { deployNamespaces } from '../../../../utils/restrictions';
+import type { DeployTarget } from '../../../../utils/restrictions';
+import { transComponentDefinitions } from '../../../../utils/utils';
 import EnvDialog from '../../../EnvPage/components/EnvDialog';
 import GeneralConfig from '../GeneralConfig';
 
@@ -36,13 +39,11 @@ type State = {
   project?: string;
   visibleEnvDialog: boolean;
   createLoading: boolean;
+  // Component types as the selected environments' namespaces may use them.
+  componentDefinitions?: DefinitionBase[];
 };
 
 type Callback = (envName: string) => void;
-type SelectGroupType = Array<{
-  label: string;
-  children: Array<{ label: string; value: string }>;
-}>;
 
 @connect(() => {
   return {};
@@ -68,6 +69,9 @@ class AppDialog extends React.Component<Props, State> {
             this.loadEnvs();
             this.field.setValue('envBindings', []);
           });
+        }
+        if (name === 'envBindings') {
+          this.loadComponentDefinitions();
         }
       },
     });
@@ -158,47 +162,27 @@ class AppDialog extends React.Component<Props, State> {
     }
   };
 
-  transComponentDefinitions() {
-    const { componentDefinitions } = this.props;
-    const defaultCoreDataSource = ['k8s-objects', 'task', 'webservice', 'worker'];
-    const cloud: SelectGroupType = [
-      {
-        label: 'Cloud',
-        children: [],
-      },
-    ];
-    const core: SelectGroupType = [
-      {
-        label: 'Core',
-        children: [],
-      },
-    ];
-    const custom: SelectGroupType = [
-      {
-        label: 'Custom',
-        children: [],
-      },
-    ];
-    (componentDefinitions || []).map((item: { name: string; workloadType: string }) => {
-      if (item.workloadType === 'configurations.terraform.core.oam.dev') {
-        cloud[0].children.push({
-          label: item.name,
-          value: item.name,
-        });
-      } else if (defaultCoreDataSource.includes(item.name)) {
-        core[0].children.push({
-          label: item.name,
-          value: item.name,
-        });
-      } else {
-        custom[0].children.push({
-          label: item.name,
-          value: item.name,
-        });
+  // selectedTargets are the environments chosen to bind, where the application's
+  // component types' restrictions are checked.
+  selectedTargets(): DeployTarget[] {
+    const selected: string[] = this.field.getValue('envBindings') || [];
+    return (this.state.envs || [])
+      .filter((env) => selected.includes(env.name))
+      .map((env) => ({ name: env.name, alias: env.alias, appDeployNamespace: env.namespace }));
+  }
+
+  loadComponentDefinitions = () => {
+    const namespaces = deployNamespaces(this.selectedTargets());
+    if (namespaces.length === 0) {
+      this.setState({ componentDefinitions: undefined });
+      return;
+    }
+    getComponentDefinitions(namespaces).then((res) => {
+      if (res) {
+        this.setState({ componentDefinitions: res.definitions });
       }
     });
-    return [...core, ...custom, ...cloud];
-  }
+  };
 
   onDetailComponentDefinition = (value: string) => {
     detailComponentDefinition({ name: value }).then((re) => {
@@ -313,6 +297,7 @@ class AppDialog extends React.Component<Props, State> {
     const envBindings: string[] = this.field.getValue('envBindings');
     (envBindings || []).push(envBinding);
     this.field.setValues({ envBindings });
+    this.loadComponentDefinitions();
   };
 
   removeProperties = () => {
@@ -395,7 +380,9 @@ class AppDialog extends React.Component<Props, State> {
                             },
                           ],
                         })}
-                        dataSource={this.transComponentDefinitions()}
+                        dataSource={transComponentDefinitions(
+                          this.state.componentDefinitions || this.props.componentDefinitions
+                        )}
                         onChange={this.handleChange}
                       />
                     </FormItem>

@@ -64,3 +64,23 @@ export function describeQuota(r?: DefinitionRestrictions): string[] {
   const quota = r?.quota || [];
   return quota.map((q) => `${describeMatcher(q, quota.length === 1)}: ${describeLevels(q)}`);
 }
+
+// DeployTarget is what a picker needs of an environment an application deploys
+// to: its name and the namespace the Application is created in.
+export interface DeployTarget {
+  name: string;
+  alias?: string;
+  appDeployNamespace: string;
+}
+
+// deployNamespaces lists the namespaces an application's Applications live in,
+// the ones a definition's restrictions are checked against.
+export function deployNamespaces(envs?: DeployTarget[]): string[] {
+  return Array.from(new Set((envs || []).map((env) => env.appDeployNamespace).filter((ns) => !!ns))).sort();
+}
+
+// isUsable reports whether a definition's restrictions let every namespace it
+// was asked about use it. Type pickers show only these.
+export function isUsable(def: { unusableIn?: string[] }): boolean {
+  return (def.unusableIn || []).length === 0;
+}

@@ -953,6 +953,9 @@ type DefinitionBase struct {
 	// as the Application webhook enforces them: spec.restrictions combined with
 	// the restrict-namespaces annotation. Absent means unrestricted.
 	Restrictions *common.DefinitionRestrictions `json:"restrictions,omitempty"`
+	// UnusableIn are the namespaces asked about whose Applications the
+	// restrictions keep from using the definition.
+	UnusableIn []string `json:"unusableIn,omitempty"`
 }
 
 // CreatePolicyRequest create app policy

@@ -11,6 +11,7 @@ import { WorkflowPrompt } from '../../components/WorkflowPrompt';
 import WorkflowStudio from '../../components/WorkflowStudio';
 import { WorkflowContext } from '../../context';
 import type { WorkflowData } from '../../context/index';
+import { deployNamespaces } from '../../utils/restrictions';
 import type { ApplicationDetail, EnvBinding, Workflow, WorkflowMode , DefinitionBase , WorkflowStep } from '@velaux/data';
 import { showAlias } from '../../utils/common';
 import { locale } from '../../utils/locale';
@@ -80,6 +81,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Readonly<Props>): void {
     if (prevProps.match !== this.props.match || prevProps.envbinding !== this.props.envbinding) {
       this.loadWorkflow();
+      this.loadWorkflowDefinitions();
     }
     const search = locationService.getSearchObject();
     const setCanary = search && search['setCanary'] == true ? true : false;
@@ -108,13 +110,20 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
   };
 
   loadWorkflowDefinitions = () => {
-    getWorkflowDefinitions('Application').then((res: any) => {
+    getWorkflowDefinitions('Application', deployNamespaces(this.deployTargets())).then((res: any) => {
       if (res) {
         this.setState({
           definitions: res && res.definitions,
         });
       }
     });
+  };
+
+  // deployTargets is the environment this workflow deploys to, where its step
+  // types' restrictions are checked; the studio lists only the usable ones.
+  deployTargets = (): EnvBinding[] => {
+    const env = this.getEnvbindingByName();
+    return env ? [env] : [];
   };
 
   getEnvbindingByName = () => {

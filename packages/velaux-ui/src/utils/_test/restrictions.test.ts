@@ -1,7 +1,14 @@
 import 'mocha';
 import { assert } from 'chai';
 
-import { describeNamespaces, describeQuota, describeSelector, restrictsNamespaces } from '../restrictions';
+import {
+  deployNamespaces,
+  describeNamespaces,
+  describeQuota,
+  describeSelector,
+  isUsable,
+  restrictsNamespaces,
+} from '../restrictions';
 
 describe('test definition restrictions', () => {
   it('tells whether namespaces are restricted', () => {
@@ -58,5 +65,24 @@ describe('test definition restrictions', () => {
       ['labels tier=gold: warn at 16, limit 20', 'sandbox-*: not allowed', 'any other namespace: warn at 5']
     );
     assert.deepEqual(describeQuota({ quota: [{ limit: 10 }] }), ['every namespace: limit 10']);
+  });
+
+  it('collects the namespaces an application deploys to, once each', () => {
+    assert.deepEqual(deployNamespaces(undefined), []);
+    assert.deepEqual(
+      deployNamespaces([
+        { name: 'dev', appDeployNamespace: 'team-dev' },
+        { name: 'prod', appDeployNamespace: 'team-prod' },
+        { name: 'qa', appDeployNamespace: 'team-dev' },
+        { name: 'new', appDeployNamespace: '' },
+      ]),
+      ['team-dev', 'team-prod']
+    );
+  });
+
+  it('tells whether every namespace asked about may use a definition', () => {
+    assert.isTrue(isUsable({}));
+    assert.isTrue(isUsable({ unusableIn: [] }));
+    assert.isFalse(isUsable({ unusableIn: ['team-dev'] }));
   });
 });

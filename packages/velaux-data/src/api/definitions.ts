@@ -27,6 +27,9 @@ export interface DefinitionBase {
   policy?: any;
   workflowStep?: any;
   restrictions?: DefinitionRestrictions;
+  // unusableIn are the namespaces asked about whose Applications the
+  // restrictions keep from using the definition.
+  unusableIn?: string[];
 }
 
 export interface LabelSelectorRequirement {

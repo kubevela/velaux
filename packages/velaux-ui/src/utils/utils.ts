@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { isUsable } from './restrictions';
 
 import type { ComponentDefinitionsBase,Endpoint  } from '@velaux/data';
 
@@ -61,6 +62,8 @@ export function quantityToScalar(quantity: string): number | bigint {
   }
 }
 
+// transComponentDefinitions groups component types for a picker, leaving out
+// those the application's namespaces may not use.
 export function transComponentDefinitions(componentDefinitions: ComponentDefinitionsBase[]) {
   const defaultCoreDataSource = ['k8s-objects', 'task', 'webservice', 'worker'];
   const cloud: SelectGroupType = [
@@ -81,22 +84,13 @@ export function transComponentDefinitions(componentDefinitions: ComponentDefinit
       children: [],
     },
   ];
-  (componentDefinitions || []).map((item: { name: string; workloadType?: string }) => {
+  (componentDefinitions || []).filter(isUsable).map((item: { name: string; workloadType?: string }) => {
     if (item.workloadType === 'configurations.terraform.core.oam.dev') {
-      cloud[0].children.push({
-        label: item.name,
-        value: item.name,
-      });
+      cloud[0].children.push({ label: item.name, value: item.name });
     } else if (defaultCoreDataSource.includes(item.name)) {
-      core[0].children.push({
-        label: item.name,
-        value: item.name,
-      });
+      core[0].children.push({ label: item.name, value: item.name });
     } else {
-      custom[0].children.push({
-        label: item.name,
-        value: item.name,
-      });
+      custom[0].children.push({ label: item.name, value: item.name });
     }
   });
   return [...core, ...custom, ...cloud];

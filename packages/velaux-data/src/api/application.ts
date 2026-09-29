@@ -418,6 +418,7 @@ export interface ApplicationQuery {
 export interface ComponentDefinitionsBase {
   name: string;
   workloadType?: string;
+  unusableIn?: string[];
 }
 
 export interface ApplicationPolicyBase {

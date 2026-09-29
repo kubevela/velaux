@@ -4225,6 +4225,12 @@
 						"description": "query by the specified scope like WorkflowRun or Application",
 						"name": "scope",
 						"in": "query"
+					},
+					{
+						"type": "string",
+						"description": "comma-separated namespaces to report each definition's usability in, as unusableIn",
+						"name": "namespaces",
+						"in": "query"
 					}
 				],
 				"responses": {
@@ -13068,6 +13074,12 @@
 				"trait": {
 					"$ref": "#/definitions/v1beta1.TraitDefinitionSpec"
 				},
+				"unusableIn": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
 				"workflowStep": {
 					"$ref": "#/definitions/v1beta1.WorkflowStepDefinitionSpec"
 				},
@@ -13507,6 +13519,12 @@
 					"type": "array",
 					"items": {
 						"$ref": "#/definitions/schema.UIParameter"
+					}
+				},
+				"unusableIn": {
+					"type": "array",
+					"items": {
+						"type": "string"
 					}
 				},
 				"workflowStep": {

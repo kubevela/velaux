@@ -17,22 +17,28 @@ limitations under the License.
 package service
 
 import (
+	"context"
 	"errors"
 	"testing"
 
 	pkgerrors "github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/pkg/oam"
 
+	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
@@ -116,4 +122,39 @@ func TestDeployApplyError(t *testing.T) {
 	assert.Contains(t, code.Message, `this would exceed the quota for component type "webservice" in namespace "tenant-a"`)
 
 	assert.Equal(t, bcode.ErrDeployApplyFail, deployApplyError(errors.New("dial tcp 10.0.0.1:443: i/o timeout")))
+}
+
+func TestMarkUnusableIn(t *testing.T) {
+	reads := 0
+	reader := fake.NewClientBuilder().WithObjects(
+		&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "gold-a", Labels: map[string]string{"tier": "gold"}}},
+		&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "bronze-b", Labels: map[string]string{"tier": "bronze"}}},
+	).WithInterceptorFuncs(interceptor.Funcs{Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+		reads++
+		return c.Get(ctx, key, obj, opts...)
+	}}).Build()
+	defs := []*apisv1.DefinitionBase{
+		{Name: "open"},
+		{Name: "quota-only", Restrictions: &common.DefinitionRestrictions{Quota: []common.NamespaceQuota{{Limit: ptr.To[int32](1)}}}},
+		{Name: "tenants", Restrictions: &common.DefinitionRestrictions{Namespaces: []string{"tenant-*"}}},
+		{Name: "gold", Restrictions: &common.DefinitionRestrictions{NamespaceSelector: &metav1.LabelSelector{MatchLabels: map[string]string{"tier": "gold"}}}},
+		{Name: "gold-or-tenant", Restrictions: &common.DefinitionRestrictions{
+			Namespaces:        []string{"tenant-*"},
+			NamespaceSelector: &metav1.LabelSelector{MatchLabels: map[string]string{"tier": "gold"}},
+		}},
+	}
+	markUnusableIn(context.Background(), reader, defs, []string{"tenant-x", "gold-a", "bronze-b", "missing"})
+
+	got := map[string][]string{}
+	for _, def := range defs {
+		got[def.Name] = def.UnusableIn
+	}
+	assert.Equal(t, map[string][]string{
+		"open":           nil,
+		"quota-only":     nil,
+		"tenants":        {"gold-a", "bronze-b", "missing"},
+		"gold":           {"tenant-x", "bronze-b", "missing"},
+		"gold-or-tenant": {"bronze-b", "missing"},
+	}, got)
+	assert.Equal(t, 4, reads, "each namespace a selector needs is read once")
 }

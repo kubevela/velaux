@@ -42,6 +42,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kubevela/pkg/util/slices"
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 
@@ -66,6 +67,8 @@ const DefinitionHidden = "true"
 
 type definitionServiceImpl struct {
 	KubeClient client.Client `inject:"kubeClient"`
+	// ServerKubeClient reads with VelaUX's own identity, not the user's.
+	ServerKubeClient client.Client `inject:"serverKubeClient"`
 }
 
 // DefinitionQueryOption define a set of query options
@@ -75,11 +78,13 @@ type DefinitionQueryOption struct {
 	OwnerAddon       string `json:"sourceAddon"`
 	QueryAll         bool   `json:"queryAll"`
 	Scope            string `json:"scope"`
+	// Namespaces are the namespaces to report each definition's usability in.
+	Namespaces []string `json:"namespaces"`
 }
 
 // String return cache key string
 func (d DefinitionQueryOption) String() string {
-	return fmt.Sprintf("type:%s/appliedWorkloads:%s/ownerAddon:%s/queryAll:%v", d.Type, d.AppliedWorkloads, d.OwnerAddon, d.QueryAll)
+	return fmt.Sprintf("type:%s/appliedWorkloads:%s/ownerAddon:%s/queryAll:%v/namespaces:%s", d.Type, d.AppliedWorkloads, d.OwnerAddon, d.QueryAll, strings.Join(d.Namespaces, ","))
 }
 
 const (
@@ -164,7 +169,49 @@ func (d *definitionServiceImpl) listDefinitions(ctx context.Context, list *unstr
 		}
 		defs = append(defs, definition)
 	}
+	if len(ops.Namespaces) > 0 {
+		markUnusableIn(ctx, d.ServerKubeClient, defs, ops.Namespaces)
+	}
 	return defs, nil
+}
+
+// matchesNamespaceName reports whether one of the restrictions' names or globs
+// admits ns, which settles it without the Namespace's labels.
+func matchesNamespaceName(r *common.DefinitionRestrictions, ns string) bool {
+	return len(r.Namespaces) > 0 && nsrestrict.Allows(&common.DefinitionRestrictions{Namespaces: r.Namespaces}, ns, nil)
+}
+
+// markUnusableIn records, on each definition, which of the namespaces its
+// restrictions keep from using it, matched as the Application webhook matches
+// them. A Namespace's labels are read only when a selector needs them, once
+// each, with VelaUX's own identity: the webhook reads them with its own, so
+// what the user may read must not change the answer. A namespace that cannot
+// be read satisfies no selector, as in the webhook.
+func markUnusableIn(ctx context.Context, reader client.Reader, defs []*apisv1.DefinitionBase, namespaces []string) {
+	labels := map[string]map[string]string{}
+	labelsOf := func(name string) map[string]string {
+		if l, read := labels[name]; read {
+			return l
+		}
+		var ns v1.Namespace
+		if err := reader.Get(ctx, client.ObjectKey{Name: name}, &ns); err != nil {
+			klog.V(4).Infof("cannot read namespace %s to match definition restrictions: %v", name, err)
+		}
+		labels[name] = ns.Labels
+		return ns.Labels
+	}
+	for _, def := range defs {
+		r := def.Restrictions
+		for _, ns := range namespaces {
+			var nsLabels map[string]string
+			if r != nil && r.NamespaceSelector != nil && !matchesNamespaceName(r, ns) {
+				nsLabels = labelsOf(ns)
+			}
+			if !nsrestrict.Allows(r, ns, nsLabels) {
+				def.UnusableIn = append(def.UnusableIn, ns)
+			}
+		}
+	}
 }
 
 func getKindAndVersion(defType string) (apiVersion, kind string, err error) {

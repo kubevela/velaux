@@ -14,6 +14,7 @@ import {
   getApplicationStatistics,
 } from '../../api/application';
 import { getComponentDefinitions } from '../../api/definitions';
+import { deployNamespaces } from '../../utils/restrictions';
 import { If } from '../../components/If';
 import Item from '../../components/Item';
 import NumItem from '../../components/NumItem';
@@ -120,6 +121,12 @@ class ApplicationConfig extends Component<Props, State> {
     this.onGetApplicationTrigger();
     this.onGetComponentDefinitions();
     this.loadAppStatistics();
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (deployNamespaces(prevProps.envbinding).join(',') !== deployNamespaces(this.props.envbinding).join(',')) {
+      this.onGetComponentDefinitions();
+    }
   }
 
   onGetApplicationTrigger() {
@@ -359,7 +366,7 @@ class ApplicationConfig extends Component<Props, State> {
   };
 
   onGetComponentDefinitions = async () => {
-    getComponentDefinitions().then((res) => {
+    getComponentDefinitions(deployNamespaces(this.props.envbinding)).then((res) => {
       if (res) {
         this.setState({
           componentDefinitions: res && res.definitions,
@@ -734,6 +741,7 @@ class ApplicationConfig extends Component<Props, State> {
             isEditTrait={isEditTrait}
             traitItem={traitItem}
             temporaryTraitList={temporaryTraitList}
+            envbinding={envbinding || []}
             onClose={this.onClose}
             onOK={this.onOk}
             createTemporaryTrait={(trait: Trait) => {
