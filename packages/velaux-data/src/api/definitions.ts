@@ -60,3 +60,17 @@ export interface DefinitionRestrictions {
   namespaceSelector?: LabelSelector;
   quota?: NamespaceQuota[];
 }
+
+// NamespaceUsage is one namespace's use of a definition, counted as the
+// Application webhook counts it, against the quota entry governing it.
+export interface NamespaceUsage {
+  namespace: string;
+  used: number;
+  warn?: number;
+  limit?: number;
+  state: 'ok' | 'warn' | 'over' | 'exempt' | 'unlimited';
+}
+
+export interface DefinitionUsageResponse {
+  usage?: NamespaceUsage[];
+}

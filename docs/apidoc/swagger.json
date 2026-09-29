@@ -4385,6 +4385,54 @@
 				}
 			}
 		},
+		"/api/v1/definitions/{definitionName}/usage": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"definition"
+				],
+				"summary": "Report each namespace's use of a component or trait definition against its quota",
+				"operationId": "definitionUsage",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the definition",
+						"name": "definitionName",
+						"in": "path",
+						"required": true
+					},
+					{
+						"enum": [
+							"component",
+							"trait"
+						],
+						"type": "string",
+						"description": "the definition type",
+						"name": "type",
+						"in": "query",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.DefinitionUsageResponse"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
 		"/api/v1/enabled_addon": {
 			"get": {
 				"consumes": [
@@ -13088,6 +13136,19 @@
 				}
 			}
 		},
+		"v1.DefinitionUsageResponse": {
+			"required": [
+				"usage"
+			],
+			"properties": {
+				"usage": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.NamespaceUsage"
+					}
+				}
+			}
+		},
 		"v1.Descriptor": {
 			"required": [
 				"mediaType",
@@ -15070,6 +15131,33 @@
 				},
 				"name": {
 					"type": "string"
+				}
+			}
+		},
+		"v1.NamespaceUsage": {
+			"required": [
+				"namespace",
+				"used",
+				"state"
+			],
+			"properties": {
+				"limit": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"state": {
+					"type": "string"
+				},
+				"used": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"warn": {
+					"type": "integer",
+					"format": "int32"
 				}
 			}
 		},

@@ -76,6 +76,11 @@ export function getTraitDefinitions(params: { appliedWorkload: string; namespace
   }).then((res) => res);
 }
 
+export function getDefinitionUsage(params: { name: string; type: 'component' | 'trait' }) {
+  const _url = `${base + definition}/${params.name}/usage`;
+  return get(_url, { params: { type: params.type } }).then((res) => res);
+}
+
 export function detailTraitDefinition(params: { name: string }) {
   const _url = `${base + definition}/${params.name}`;
   return get(_url, { params: { type: 'trait' } }).then((res) => res);

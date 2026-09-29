@@ -8,6 +8,7 @@ import {
   describeSelector,
   isUsable,
   restrictsNamespaces,
+  usageState,
 } from '../restrictions';
 
 describe('test definition restrictions', () => {
@@ -84,5 +85,13 @@ describe('test definition restrictions', () => {
     assert.isTrue(isUsable({}));
     assert.isTrue(isUsable({ unusableIn: [] }));
     assert.isFalse(isUsable({ unusableIn: ['team-dev'] }));
+  });
+
+  it('words how a namespace uses a definition against its quota', () => {
+    assert.deepEqual(usageState('ok'), { label: 'Within quota', type: 'success' });
+    assert.deepEqual(usageState('warn'), { label: 'At warn level', type: 'warning' });
+    assert.deepEqual(usageState('over'), { label: 'Over limit', type: 'error' });
+    assert.deepEqual(usageState('exempt'), { label: 'Exempt', type: 'normal' });
+    assert.deepEqual(usageState('unlimited'), { label: 'No quota', type: 'normal' });
   });
 });

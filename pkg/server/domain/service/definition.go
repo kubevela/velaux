@@ -56,6 +56,8 @@ type DefinitionService interface {
 	ListDefinitions(ctx context.Context, ops DefinitionQueryOption) ([]*apisv1.DefinitionBase, error)
 	// DetailDefinition get definition detail
 	DetailDefinition(ctx context.Context, name, defType string) (*apisv1.DetailDefinitionResponse, error)
+	// DefinitionUsage reports each namespace's use of a component or trait definition against its quota
+	DefinitionUsage(ctx context.Context, name, defType string) (*apisv1.DefinitionUsageResponse, error)
 	// AddDefinitionUISchema add or update custom definition ui schema
 	AddDefinitionUISchema(ctx context.Context, name, defType string, schema []*schema.UIParameter) ([]*schema.UIParameter, error)
 	// UpdateDefinitionStatus update the status of definition

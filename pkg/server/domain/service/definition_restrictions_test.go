@@ -36,6 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/pkg/oam"
 
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -157,4 +158,54 @@ func TestMarkUnusableIn(t *testing.T) {
 		"gold-or-tenant": {"bronze-b", "missing"},
 	}, got)
 	assert.Equal(t, 4, reads, "each namespace a selector needs is read once")
+}
+
+func TestDefinitionUsage(t *testing.T) {
+	def := componentDefinition("web", map[string]interface{}{
+		"quota": []interface{}{
+			map[string]interface{}{"namespaceSelector": map[string]interface{}{"matchLabels": map[string]interface{}{"tier": "gold"}}, "warn": int64(3), "limit": int64(4)},
+			map[string]interface{}{"namespaces": []interface{}{"sandbox"}, "limit": int64(0)},
+			map[string]interface{}{"warn": int64(2)},
+		},
+	}, nil)
+	app := func(ns, name string, components ...common.ApplicationComponent) v1beta1.Application {
+		return v1beta1.Application{
+			ObjectMeta: metav1.ObjectMeta{Namespace: ns, Name: name},
+			Spec:       v1beta1.ApplicationSpec{Components: components},
+		}
+	}
+	web := common.ApplicationComponent{Type: "web"}
+	apps := []v1beta1.Application{
+		app("gold-a", "one", web, web, common.ApplicationComponent{Type: "worker"}),
+		app("gold-a", "two", common.ApplicationComponent{Type: "web@v2"}),
+		app("gold-a", "three", common.ApplicationComponent{Type: "web"}, web),
+		app("bronze", "one", web),
+		app("bronze", "two", web),
+		app("sandbox", "one", web),
+		app("exempt", "one", web, web, web),
+		app("vela-system", "one", web),
+		app("unused", "one", common.ApplicationComponent{Type: "worker"}),
+	}
+	namespaces := map[string]corev1.Namespace{
+		"gold-a": {ObjectMeta: metav1.ObjectMeta{Name: "gold-a", Labels: map[string]string{"tier": "gold"}}},
+		"exempt": {ObjectMeta: metav1.ObjectMeta{Name: "exempt", Annotations: map[string]string{oam.AnnotationQuotaExempt: "true"}}},
+	}
+
+	usage := definitionUsage(&def, "component", "web", apps, namespaces)
+	assert.Equal(t, []apisv1.NamespaceUsage{
+		{Namespace: "bronze", Used: 2, Warn: ptr.To[int32](2), State: apisv1.UsageStateWarn},
+		{Namespace: "exempt", Used: 3, Warn: ptr.To[int32](2), State: apisv1.UsageStateExempt},
+		{Namespace: "gold-a", Used: 5, Warn: ptr.To[int32](3), Limit: ptr.To[int32](4), State: apisv1.UsageStateOver},
+		{Namespace: "sandbox", Used: 1, Limit: ptr.To[int32](0), State: apisv1.UsageStateOver},
+		{Namespace: "vela-system", Used: 1, State: apisv1.UsageStateUnlimited},
+	}, usage)
+
+	trait := componentDefinition("scaler", map[string]interface{}{"quota": []interface{}{map[string]interface{}{"limit": int64(5)}}}, nil)
+	withTraits := []v1beta1.Application{app("dev", "one",
+		common.ApplicationComponent{Type: "web", Traits: []common.ApplicationTrait{{Type: "scaler"}}},
+		common.ApplicationComponent{Type: "web", Traits: []common.ApplicationTrait{{Type: "scaler@v1"}, {Type: "gateway"}}},
+	)}
+	assert.Equal(t, []apisv1.NamespaceUsage{
+		{Namespace: "dev", Used: 2, Limit: ptr.To[int32](5), State: apisv1.UsageStateOK},
+	}, definitionUsage(&trait, "trait", "scaler", withTraits, nil))
 }

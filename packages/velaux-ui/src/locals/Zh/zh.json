@@ -659,5 +659,15 @@
   "Quota": "配额",
   "Usable from": "可用于",
   "Quota, first match applies": "配额（按首个匹配项）",
-  "Application deployed, with warnings": "应用已部署，但有警告"
+  "Application deployed, with warnings": "应用已部署，但有警告",
+  "Usage": "用量",
+  "Used": "已用",
+  "Warn at": "警告阈值",
+  "Limit": "上限",
+  "State": "状态",
+  "Within quota": "配额内",
+  "At warn level": "达到警告阈值",
+  "Over limit": "超出上限",
+  "Exempt": "豁免",
+  "No quota": "无配额"
 }

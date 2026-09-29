@@ -16,6 +16,7 @@ import { locale } from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
 
 import SelectSearch from './components/SelectSearch';
+import { UsageDialog } from './components/UsageDialog';
 
 import './index.less';
 import { checkPermission } from '../../utils/permission';
@@ -35,6 +36,8 @@ type State = {
   isLoading: boolean;
   searchValue: string;
   searchList: DefinitionBase[];
+  // usageOf is the definition whose quota usage is shown.
+  usageOf?: DefinitionBase;
 };
 
 @connect((store: any) => {
@@ -161,7 +164,7 @@ class Definitions extends Component<Props, State> {
   };
 
   render() {
-    const { definitionType, isLoading, searchValue } = this.state;
+    const { definitionType, isLoading, searchValue, usageOf } = this.state;
     const columns = [
       {
         key: 'name',
@@ -226,6 +229,20 @@ class Definitions extends Component<Props, State> {
                   {this.showStatus(record)}
                 </Button>
               </Permission>
+              {(definitionType === 'component' || definitionType === 'trait') &&
+                (record.restrictions?.quota || []).length > 0 && (
+                  <Permission request={{ resource: `definition:${record.name}`, action: 'detail' }} project={''}>
+                    <Button
+                      text
+                      size={'medium'}
+                      component={'a'}
+                      style={{ marginLeft: '12px' }}
+                      onClick={() => this.setState({ usageOf: record })}
+                    >
+                      <Translation>Usage</Translation>
+                    </Button>
+                  </Permission>
+                )}
             </Fragment>
           );
         },
@@ -254,6 +271,13 @@ class Definitions extends Component<Props, State> {
             <Column {...col} key={key} align={'left'} />
           ))}
         </Table>
+        {usageOf && (definitionType === 'component' || definitionType === 'trait') && (
+          <UsageDialog
+            definition={usageOf}
+            definitionType={definitionType}
+            onClose={() => this.setState({ usageOf: undefined })}
+          />
+        )}
       </div>
     );
   }

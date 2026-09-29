@@ -1,4 +1,4 @@
-import type { DefinitionRestrictions, LabelSelector, NamespaceQuota } from '@velaux/data';
+import type { DefinitionRestrictions, LabelSelector, NamespaceQuota, NamespaceUsage } from '@velaux/data';
 
 // restrictsNamespaces reports whether a definition limits which namespaces may
 // use it. A block carrying only a quota limits none.
@@ -83,4 +83,24 @@ export function deployNamespaces(envs?: DeployTarget[]): string[] {
 // was asked about use it. Type pickers show only these.
 export function isUsable(def: { unusableIn?: string[] }): boolean {
   return (def.unusableIn || []).length === 0;
+}
+
+// usageState words how a namespace's use of a definition compares with its
+// quota, with the tone to show it in.
+export function usageState(state: NamespaceUsage['state']): {
+  label: string;
+  type: 'success' | 'warning' | 'error' | 'normal';
+} {
+  switch (state) {
+    case 'ok':
+      return { label: 'Within quota', type: 'success' };
+    case 'warn':
+      return { label: 'At warn level', type: 'warning' };
+    case 'over':
+      return { label: 'Over limit', type: 'error' };
+    case 'exempt':
+      return { label: 'Exempt', type: 'normal' };
+    default:
+      return { label: 'No quota', type: 'normal' };
+  }
 }

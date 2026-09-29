@@ -67,6 +67,15 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Returns(200, "create successfully", apis.DetailDefinitionResponse{}).
 		Writes(apis.DetailDefinitionResponse{}).Do(returns500))
 
+	ws.Route(ws.GET("/{definitionName}/usage").To(d.definitionUsage).
+		Doc("Report each namespace's use of a component or trait definition against its quota").
+		Filter(d.RbacService.CheckPerm("definition", "detail")).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait"})).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.DefinitionUsageResponse{}).
+		Writes(apis.DefinitionUsageResponse{}).Do(returns500))
+
 	ws.Route(ws.PUT("/{definitionName}/uischema").To(d.updateUISchema).
 		Doc("Update the UI schema for a definition").
 		Filter(d.RbacService.CheckPerm("definition", "update")).
@@ -112,6 +121,18 @@ func (d *definition) listDefinitions(req *restful.Request, res *restful.Response
 		return
 	}
 	if err := res.WriteEntity(apis.ListDefinitionResponse{Definitions: definitions}); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (d *definition) definitionUsage(req *restful.Request, res *restful.Response) {
+	usage, err := d.DefinitionService.DefinitionUsage(req.Request.Context(), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(usage); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
