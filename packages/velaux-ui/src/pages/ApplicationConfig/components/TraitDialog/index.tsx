@@ -28,6 +28,9 @@ type Props = {
   onOK: () => void;
   onClose: () => void;
   dispatch?: any;
+  // deployed says the application has been deployed, which is when its
+  // immutable parameters lock.
+  deployed?: boolean;
 };
 
 type State = {
@@ -430,6 +433,7 @@ class TraitDialog extends React.Component<Props, State> {
                         }}
                         ref={this.uiSchemaRef}
                         mode={this.props.isEditTrait ? 'edit' : 'new'}
+                        deployed={this.props.deployed}
                       />
                     </FormItem>
                   </If>

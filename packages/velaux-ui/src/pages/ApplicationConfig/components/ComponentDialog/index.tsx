@@ -43,6 +43,9 @@ type Props = {
   onComponentOK: () => void;
   onComponentClose: () => void;
   dispatch?: any;
+  // deployed says the application has been deployed, which is when its
+  // immutable parameters lock.
+  deployed?: boolean;
 };
 
 type State = {
@@ -496,6 +499,7 @@ class ComponentDialog extends React.Component<Props, State> {
                   }}
                   ref={this.uiSchemaRef}
                   mode={isEditComponent ? 'edit' : 'new'}
+                  deployed={this.props.deployed}
                 />
               </If>
             </Row>
