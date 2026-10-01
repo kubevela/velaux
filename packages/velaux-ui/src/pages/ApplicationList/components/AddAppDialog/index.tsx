@@ -11,7 +11,7 @@ import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import type { DefinitionDetail, DefinitionBase, Env, Target, LoginUserInfo, UserProject } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
-import { deployNamespaces } from '../../../../utils/restrictions';
+import { deployNamespaces, isUsable } from '../../../../utils/restrictions';
 import type { DeployTarget } from '../../../../utils/restrictions';
 import { transComponentDefinitions } from '../../../../utils/utils';
 import EnvDialog from '../../../EnvPage/components/EnvDialog';
@@ -185,6 +185,19 @@ class AppDialog extends React.Component<Props, State> {
     getComponentDefinitions(namespaces).then((res) => {
       if (res && request === this.definitionsRequest) {
         this.setState({ componentDefinitions: res.definitions });
+        // A type chosen before the environments, such as the default, may be
+        // one they cannot use; move to the first they can rather than submit a
+        // refusal.
+        const chosen = this.field.getValue<string>('componentType');
+        const usable = (res.definitions || []).filter(isUsable).map((d: DefinitionBase) => d.name);
+        if (!chosen || !usable.includes(chosen)) {
+          if (usable.length > 0) {
+            this.handleChange(usable[0]);
+          } else {
+            this.field.setValue('componentType', undefined);
+            this.setState({ definitionDetail: undefined });
+          }
+        }
       }
     });
   };
