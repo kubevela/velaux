@@ -63,7 +63,7 @@ export function quantityToScalar(quantity: string): number | bigint {
 }
 
 // transComponentDefinitions groups component types for a picker, leaving out
-// those the application's namespaces may not use.
+// those the application's namespaces may not use, and any group left empty.
 export function transComponentDefinitions(componentDefinitions: ComponentDefinitionsBase[]) {
   const defaultCoreDataSource = ['k8s-objects', 'task', 'webservice', 'worker'];
   const cloud: SelectGroupType = [
@@ -93,7 +93,7 @@ export function transComponentDefinitions(componentDefinitions: ComponentDefinit
       custom[0].children.push({ label: item.name, value: item.name });
     }
   });
-  return [...core, ...custom, ...cloud];
+  return [...core, ...custom, ...cloud].filter((group) => group.children.length > 0);
 }
 
 export function getLink(endpointObj: Endpoint) {
