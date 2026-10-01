@@ -365,9 +365,21 @@ class ApplicationConfig extends Component<Props, State> {
     );
   };
 
+  // definitionsRequest numbers the component definition requests, so only the
+  // latest may set the list: an earlier one asked about other namespaces.
+  definitionsRequest = 0;
+
   onGetComponentDefinitions = async () => {
-    getComponentDefinitions(deployNamespaces(this.props.envbinding)).then((res) => {
-      if (res) {
+    const namespaces = deployNamespaces(this.props.envbinding);
+    const request = ++this.definitionsRequest;
+    // Until the environments load there is no namespace to check restrictions
+    // against, and an unfiltered list offers types the webhook then refuses.
+    if (namespaces.length === 0) {
+      this.setState({ componentDefinitions: [] });
+      return;
+    }
+    getComponentDefinitions(namespaces).then((res) => {
+      if (res && request === this.definitionsRequest) {
         this.setState({
           componentDefinitions: res && res.definitions,
         });

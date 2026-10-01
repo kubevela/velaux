@@ -109,9 +109,21 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
     }
   };
 
+  // definitionsRequest numbers the step definition requests, so only the latest
+  // may set the list: an earlier one asked about other namespaces.
+  definitionsRequest = 0;
+
   loadWorkflowDefinitions = () => {
-    getWorkflowDefinitions('Application', deployNamespaces(this.deployTargets())).then((res: any) => {
-      if (res) {
+    const namespaces = deployNamespaces(this.deployTargets());
+    const request = ++this.definitionsRequest;
+    // Until the environment loads there is no namespace to check restrictions
+    // against, and an unfiltered list offers steps the webhook then refuses.
+    if (namespaces.length === 0) {
+      this.setState({ definitions: [] });
+      return;
+    }
+    getWorkflowDefinitions('Application', namespaces).then((res: any) => {
+      if (res && request === this.definitionsRequest) {
         this.setState({
           definitions: res && res.definitions,
         });

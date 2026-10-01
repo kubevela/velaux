@@ -171,14 +171,19 @@ class AppDialog extends React.Component<Props, State> {
       .map((env) => ({ name: env.name, alias: env.alias, appDeployNamespace: env.namespace }));
   }
 
+  // definitionsRequest numbers the component definition requests, so only the
+  // latest may set the list: an earlier one asked about other environments.
+  definitionsRequest = 0;
+
   loadComponentDefinitions = () => {
     const namespaces = deployNamespaces(this.selectedTargets());
+    const request = ++this.definitionsRequest;
     if (namespaces.length === 0) {
       this.setState({ componentDefinitions: undefined });
       return;
     }
     getComponentDefinitions(namespaces).then((res) => {
-      if (res) {
+      if (res && request === this.definitionsRequest) {
         this.setState({ componentDefinitions: res.definitions });
       }
     });
