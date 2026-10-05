@@ -488,7 +488,7 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	subType := ""
 	if property.Value.Items != nil {
 		if property.Value.Items.Value != nil {
-			subType = (*property.Value.Items.Value.Type)[0]
+			subType = schemaType(property.Value.Items.Value)
 		}
 		parameter.SubParameters = renderDefaultUISchema(property.Value.Items.Value)
 	}
@@ -511,7 +511,7 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	parameter.JSONKey = key
 	parameter.Description = property.Value.Description
 	parameter.Label = label
-	parameter.UIType = schema.GetDefaultUIType((*property.Value.Type)[0], len(parameter.Validate.Options) != 0, subType, len(property.Value.Properties) > 0)
+	parameter.UIType = schema.GetDefaultUIType(schemaType(property.Value), len(parameter.Validate.Options) != 0, subType, len(property.Value.Properties) > 0)
 	parameter.Validate.Max = property.Value.Max
 	parameter.Validate.MaxLength = property.Value.MaxLength
 	parameter.Validate.Min = property.Value.Min
@@ -520,6 +520,15 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	parameter.Validate.Required = slices.Contains(required, property.Value.Title)
 	parameter.Sort = 100
 	return &parameter
+}
+
+// schemaType is a schema's first type, or empty for one that sets none, as CUE
+// emits for an open value such as `{...}` or `[string]: _`.
+func schemaType(s *openapi3.Schema) string {
+	if s.Type == nil || len(*s.Type) == 0 {
+		return ""
+	}
+	return (*s.Type)[0]
 }
 
 // RenderLabel render option label
