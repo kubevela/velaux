@@ -19,9 +19,11 @@ package service
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"sort"
 	"strings"
 	"time"
@@ -1717,6 +1719,34 @@ func (c *applicationServiceImpl) Statistics(ctx context.Context, app *model.Appl
 	}, nil
 }
 
+// specDiffers compares two Applications as ignoreSomeParams normalises them,
+// their specs and the annotations that change the render, as JSON, so neither
+// key order nor the spacing of stored properties counts.
+func specDiffers(deployed, current *v1beta1.Application) (bool, error) {
+	normal := func(app *v1beta1.Application) (interface{}, error) {
+		app = app.DeepCopy()
+		ignoreSomeParams(app)
+		raw, err := json.Marshal(struct {
+			Annotations map[string]string       `json:"annotations,omitempty"`
+			Spec        v1beta1.ApplicationSpec `json:"spec"`
+		}{app.Annotations, app.Spec})
+		if err != nil {
+			return nil, err
+		}
+		var out interface{}
+		return out, json.Unmarshal(raw, &out)
+	}
+	a, err := normal(deployed)
+	if err != nil {
+		return false, err
+	}
+	b, err := normal(current)
+	if err != nil {
+		return false, err
+	}
+	return !reflect.DeepEqual(a, b), nil
+}
+
 // CompareApp compare application
 func (c *applicationServiceImpl) CompareApp(ctx context.Context, appModel *model.Application, compareReq apisv1.AppCompareReq) (*apisv1.AppCompareResponse, error) {
 	var base, compareTarget *v1beta1.Application
@@ -1801,20 +1831,24 @@ func (c *applicationServiceImpl) CompareApp(ctx context.Context, appModel *model
 		return compareResponse, nil
 	}
 
-	args := commonutil.Args{
-		Schema: commonutil.Scheme,
-	}
-	_ = args.SetConfig(c.KubeConfig)
-	args.SetClient(c.KubeClient)
-	diffResult, buff, err := compare(ctx, args, compareTarget, base)
+	// The Applications' specs are compared, not their rendered resources: a
+	// render outside the controller has no placement, so a source keyed on where
+	// a component lands would read the wrong namespace.
+	differs, err := specDiffers(base, compareTarget)
+	return compareOutcome(compareResponse, differs, err), nil
+}
+
+// compareOutcome is a comparison's answer: whether the two differ, or, where the
+// comparison failed, why. Either way both Applications stay in it.
+func compareOutcome(resp *apisv1.AppCompareResponse, differs bool, err error) *apisv1.AppCompareResponse {
 	if err != nil {
-		klog.Errorf("fail to compare the appUtil %s", err.Error())
-		compareResponse.IsDiff = false
-		return compareResponse, nil
+		klog.Errorf("fail to compare the application: %s", err.Error())
+		resp.IsDiff = false
+		resp.Error = err.Error()
+		return resp
 	}
-	compareResponse.IsDiff = diffResult.DiffType != ""
-	compareResponse.DiffReport = buff.String()
-	return compareResponse, nil
+	resp.IsDiff = differs
+	return resp
 }
 
 // ResetAppToLatestRevision reset appUtil's component to last revision
@@ -2076,11 +2110,30 @@ func dryRunApplication(ctx context.Context, c commonutil.Args, app *v1beta1.Appl
 
 // ignoreSomeParams ignore some parameters before comparing the appUtil changes.
 // ignore the workflow spec
+// renderAnnotations are the Application annotations that change how KubeVela
+// renders it, which a comparison keeps.
+var renderAnnotations = []string{
+	oam.AnnotationCelExpressions,
+	oam.AnnotationAutoUpdate,
+	oam.AnnotationFilterAnnotationKeys,
+	oam.AnnotationFilterLabelKeys,
+}
+
+// ignoreSomeParams reduces an Application to what decides its render: its name,
+// namespace, spec and renderAnnotations, with components and policies sorted.
 func ignoreSomeParams(o *v1beta1.Application) {
 	var defaultApplication = v1beta1.Application{}
 	defaultApplication.Spec = o.Spec
 	defaultApplication.Name = o.Name
 	defaultApplication.Namespace = o.Namespace
+	for _, key := range renderAnnotations {
+		if v, ok := o.Annotations[key]; ok {
+			if defaultApplication.Annotations == nil {
+				defaultApplication.Annotations = map[string]string{}
+			}
+			defaultApplication.Annotations[key] = v
+		}
+	}
 
 	sort.Slice(defaultApplication.Spec.Policies, func(i, j int) bool {
 		return defaultApplication.Spec.Policies[i].Name < defaultApplication.Spec.Policies[j].Name
@@ -2089,31 +2142,6 @@ func ignoreSomeParams(o *v1beta1.Application) {
 		return defaultApplication.Spec.Components[i].Name < defaultApplication.Spec.Components[j].Name
 	})
 	*o = defaultApplication
-}
-
-func compare(ctx context.Context, c commonutil.Args, targetApp *v1beta1.Application, baseApp *v1beta1.Application) (*dryrun.DiffEntry, bytes.Buffer, error) {
-	var buff = bytes.Buffer{}
-	_, err := c.GetClient()
-	if err != nil {
-		return nil, buff, err
-	}
-	config, err := c.GetConfig()
-	if err != nil {
-		return nil, buff, err
-	}
-	var objs []*unstructured.Unstructured
-	client, err := c.GetClient()
-	if err != nil {
-		return nil, buff, err
-	}
-	liveDiffOption := dryrun.NewLiveDiffOption(client, config, objs)
-	diffResult, err := liveDiffOption.DiffApps(ctx, baseApp, targetApp)
-	if err != nil {
-		return nil, buff, err
-	}
-	reportDiffOpt := dryrun.NewReportDiffOption(10, &buff)
-	reportDiffOpt.PrintDiffReport(diffResult)
-	return diffResult, buff, nil
 }
 
 // NewTestApplicationService create the application service instance for testing

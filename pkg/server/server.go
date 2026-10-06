@@ -29,6 +29,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-openapi/spec"
 	"github.com/julienschmidt/httprouter"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/leaderelection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
@@ -56,6 +57,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mongodb"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/mysql"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/postgres"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/kubevelagates"
 	"github.com/kubevela/velaux/pkg/server/interfaces/api"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
@@ -216,6 +218,17 @@ func (s *restServer) Run(ctx context.Context, errChan chan error) error {
 	if err := s.buildIoCContainer(); err != nil {
 		return err
 	}
+
+	// KubeVela code VelaUX runs itself follows the controller's feature gates.
+	kubeClient, err := clients.GetKubeClient()
+	if err != nil {
+		return err
+	}
+	gates := &kubevelagates.Syncer{Reader: kubeClient, Namespace: types.DefaultKubeVelaNS, Gate: utilfeature.DefaultMutableFeatureGate}
+	if err := gates.Sync(ctx); err != nil {
+		klog.ErrorS(err, "Failed to read the KubeVela feature gates")
+	}
+	go gates.Run(ctx, time.Minute)
 
 	// init database
 	if err := service.InitData(ctx); err != nil {

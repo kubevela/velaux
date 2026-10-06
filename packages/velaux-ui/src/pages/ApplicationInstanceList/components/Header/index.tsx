@@ -363,9 +363,13 @@ class Header extends Component<Props, State> {
         </EnvironmentSlot>
         <EnvironmentSlot id={environmentSlots.actions}>
           {this.props.extra}
-          <If condition={compare && compare.isDiff}>
-            <Button type="secondary" onClick={this.showApplicationDiff}>
-              <span className="circle circle-failure" />
+          <If condition={compare && (compare.isDiff || !!compare.error)}>
+            <Button
+              type="secondary"
+              onClick={this.showApplicationDiff}
+              title={compare?.error ? i18n.t('Could not compare with what runs').toString() : undefined}
+            >
+              <span className={`circle ${compare?.error ? 'circle-warning' : 'circle-failure'}`} />
               Diff
             </Button>
           </If>

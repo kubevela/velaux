@@ -23,6 +23,7 @@ import ApplicationWorkflowStudio from '../../pages/ApplicationWorkflowStudio';
 import Clusters from '../../pages/Cluster/index';
 import SharedWorkflows from '../../pages/SharedWorkflows';
 import SharedWorkflowStudio from '../../pages/SharedWorkflowStudio';
+import Reports from '../../pages/Reports';
 import Configs from '../../pages/Configs';
 import Definitions from '../../pages/Definitions';
 import EnvPage from '../../pages/EnvPage';
@@ -389,6 +390,13 @@ export default function Router() {
         path={['/shared-workflows/new', '/shared-workflows/:scope/:name']}
         render={(props: any) => {
           return <SharedWorkflowStudio {...props} />;
+        }}
+      />
+      <Route
+        exact
+        path="/reports"
+        render={(props: any) => {
+          return <Reports {...props} />;
         }}
       />
       <Route

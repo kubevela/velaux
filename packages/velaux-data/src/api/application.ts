@@ -638,6 +638,9 @@ export interface ApplicationPolicyDetail extends ApplicationPolicyBase {
 
 export interface ApplicationCompareResponse {
   isDiff: boolean;
+  // error says why the two could not be compared; isDiff is then false
+  // because nothing is known, not because nothing differs.
+  error?: string;
   diffReport: string;
   baseAppYAML: string;
   targetAppYAML: string;
