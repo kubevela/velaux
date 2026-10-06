@@ -5,14 +5,23 @@ import { Link } from 'dva/router';
 import React from 'react';
 import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
-import { updateTrait, createTrait, getApplicationComponent } from '../../../../api/application';
+import {
+  updateTrait,
+  createTrait,
+  getApplicationComponent,
+  getExpressionEnv,
+  setExpressionOptIn,
+} from '../../../../api/application';
+import type { ExpressionContext } from '../../../../components/UISchema';
+import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
 import { detailTraitDefinition, getTraitDefinitions } from '../../../../api/definitions';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
-import type { ApplicationComponent, DefinitionDetail, Trait , DefinitionBase } from '@velaux/data';
+import type { ApplicationComponent, DefinitionDetail, Trait, DefinitionBase, EnvBinding } from '@velaux/data';
+import { deployNamespaces, isUsable } from '../../../../utils/restrictions';
 
 type Props = {
   project: string;
@@ -27,10 +36,17 @@ type Props = {
   upDateTemporaryTrait: (trait: Trait) => void;
   onOK: () => void;
   onClose: () => void;
+  // envbinding are where the application deploys, whose namespaces a trait
+  // type's restrictions are checked against.
+  envbinding: EnvBinding[];
   dispatch?: any;
+  // deployed says the application has been deployed, which is when its
+  // immutable parameters lock.
+  deployed?: boolean;
 };
 
 type State = {
+  expressionEnv?: ExpressionEnv;
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
   isLoading: boolean;
@@ -55,7 +71,48 @@ class TraitDialog extends React.Component<Props, State> {
     this.uiSchemaRef = React.createRef();
   }
 
+  loadExpressionEnv = async () => {
+    const { appName } = this.props;
+    if (!appName) {
+      return;
+    }
+    try {
+      const env: ExpressionEnv = await getExpressionEnv(appName, 'trait');
+      this.setState({ expressionEnv: env });
+    } catch (e) {
+      this.setState({ expressionEnv: undefined });
+    }
+  };
+
+  setExpressionOptIn = async (on: boolean): Promise<boolean> => {
+    const { appName } = this.props;
+    if (!appName) {
+      return false;
+    }
+    try {
+      await setExpressionOptIn(appName, on);
+    } catch (e) {
+      return false;
+    }
+    await this.loadExpressionEnv();
+    return true;
+  };
+
+  expressionContext = (): ExpressionContext | undefined => {
+    const { appName } = this.props;
+    if (!appName) {
+      return undefined;
+    }
+    return {
+      appName,
+      surface: 'trait',
+      env: this.state.expressionEnv,
+      onOptIn: this.setExpressionOptIn,
+    };
+  };
+
   componentDidMount() {
+    this.loadExpressionEnv();
     this.onGetComponentInfo(() => {
       this.onGetTraitDefinitions();
       const { isEditTrait, traitItem, appName, project, dispatch } = this.props;
@@ -101,22 +158,23 @@ class TraitDialog extends React.Component<Props, State> {
   onGetTraitDefinitions = async () => {
     const { component } = this.state;
     if (component?.definition) {
-      getTraitDefinitions({ appliedWorkload: component?.definition.workload.type }).then(
-        (res: { definitions?: DefinitionBase[] }) => {
-          if (res) {
-            const podDisruptive: any = {};
-            res.definitions?.map((def) => {
-              if (def.trait?.podDisruptive) {
-                podDisruptive[def.name] = true;
-              }
-            });
-            this.setState({
-              traitDefinitions: res && res.definitions,
-              podDisruptive: podDisruptive,
-            });
-          }
+      getTraitDefinitions({
+        appliedWorkload: component?.definition.workload.type,
+        namespaces: deployNamespaces(this.props.envbinding),
+      }).then((res: { definitions?: DefinitionBase[] }) => {
+        if (res) {
+          const podDisruptive: any = {};
+          res.definitions?.map((def) => {
+            if (def.trait?.podDisruptive) {
+              podDisruptive[def.name] = true;
+            }
+          });
+          this.setState({
+            traitDefinitions: res && res.definitions,
+            podDisruptive: podDisruptive,
+          });
         }
-      );
+      });
     }
   };
 
@@ -183,10 +241,7 @@ class TraitDialog extends React.Component<Props, State> {
 
   transTraitDefinitions() {
     const { traitDefinitions } = this.state;
-    return (traitDefinitions || []).map((item: { name: string }) => ({
-      label: item.name,
-      value: item.name,
-    }));
+    return (traitDefinitions || []).filter(isUsable).map((item) => ({ label: item.name, value: item.name }));
   }
 
   onDetailsTraitDefinition = (value: string, callback?: () => void) => {
@@ -195,10 +250,10 @@ class TraitDialog extends React.Component<Props, State> {
       .then((re) => {
         if (re) {
           this.setState({ definitionDetail: re, definitionLoading: false });
-          this.setDefaultProperties(re)
-            if (callback) {
-              callback();
-            }
+          this.setDefaultProperties(re);
+          if (callback) {
+            callback();
+          }
         }
       })
       .catch(() => this.setState({ definitionLoading: false }));
@@ -207,13 +262,13 @@ class TraitDialog extends React.Component<Props, State> {
   setDefaultProperties = (definitionDetail: any) => {
     const properties = definitionDetail.schema?.properties;
     if (properties) {
-        const defaultValues: Record<string, any> = {};
-        for (const key in properties) {
-            if (properties[key].default !== undefined) {
-                defaultValues[key] = properties[key].default;
-            }
+      const defaultValues: Record<string, any> = {};
+      for (const key in properties) {
+        if (properties[key].default !== undefined) {
+          defaultValues[key] = properties[key].default;
         }
-        this.field.setValues({ properties: defaultValues });
+      }
+      this.field.setValues({ properties: defaultValues });
     }
   };
 
@@ -430,6 +485,8 @@ class TraitDialog extends React.Component<Props, State> {
                         }}
                         ref={this.uiSchemaRef}
                         mode={this.props.isEditTrait ? 'edit' : 'new'}
+                        deployed={this.props.deployed}
+                        expressions={this.expressionContext()}
                       />
                     </FormItem>
                   </If>

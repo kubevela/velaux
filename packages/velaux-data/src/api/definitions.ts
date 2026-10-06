@@ -29,4 +29,56 @@ export interface DefinitionBase {
   // policyScope is how KubeVela applies a policy: Builtin, consumed by KubeVela
   // itself; Workload, rendered with the components; or Application.
   policyScope?: 'Builtin' | 'Workload' | 'Application';
+  restrictions?: DefinitionRestrictions;
+  // unusableIn are the namespaces asked about whose Applications the
+  // restrictions keep from using the definition.
+  unusableIn?: string[];
+  // abstract marks a definition that may only be extended, never used by an
+  // Application directly.
+  abstract?: boolean;
+  // extends names the definition this one is built on.
+  extends?: string;
+}
+
+export interface LabelSelectorRequirement {
+  key: string;
+  operator: 'In' | 'NotIn' | 'Exists' | 'DoesNotExist';
+  values?: string[];
+}
+
+export interface LabelSelector {
+  matchLabels?: Record<string, string>;
+  matchExpressions?: LabelSelectorRequirement[];
+}
+
+// NamespaceQuota caps how many times the namespaces it matches may use a
+// definition: warn flags the level, limit refuses beyond it. An entry naming no
+// namespaces is the default for every namespace no earlier entry matched.
+export interface NamespaceQuota {
+  namespaces?: string[];
+  namespaceSelector?: LabelSelector;
+  warn?: number;
+  limit?: number;
+}
+
+// DefinitionRestrictions are the namespaces whose Applications may use a
+// definition, by name or glob, or by the Namespace's labels, and its quota.
+export interface DefinitionRestrictions {
+  namespaces?: string[];
+  namespaceSelector?: LabelSelector;
+  quota?: NamespaceQuota[];
+}
+
+// NamespaceUsage is one namespace's use of a definition, counted as the
+// Application webhook counts it, against the quota entry governing it.
+export interface NamespaceUsage {
+  namespace: string;
+  used: number;
+  warn?: number;
+  limit?: number;
+  state: 'ok' | 'warn' | 'over' | 'exempt' | 'unlimited';
+}
+
+export interface DefinitionUsageResponse {
+  usage?: NamespaceUsage[];
 }

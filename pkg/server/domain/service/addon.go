@@ -182,7 +182,7 @@ func (u *addonServiceImpl) GetAddon(ctx context.Context, name string, registry s
 		return nil, bcode.ErrAddonNotExist
 	}
 
-	addon.UISchema = renderAddonCustomUISchema(ctx, u.KubeClient, name, renderDefaultUISchema(addon.APISchema))
+	addon.UISchema = renderAddonCustomUISchema(ctx, u.KubeClient, name, addonDefaultUISchema(addon))
 
 	a, err := AddonImpl2AddonRes(addon, u.KubeConfig)
 	if err != nil {
@@ -288,7 +288,7 @@ func (u *addonServiceImpl) ListAddons(ctx context.Context, registry, query strin
 
 	for _, addon := range addons {
 		// render default ui schema
-		addon.UISchema = renderDefaultUISchema(addon.APISchema)
+		addon.UISchema = addonDefaultUISchema(addon)
 	}
 
 	var addonResources []*apis.DetailAddonResponse
@@ -586,4 +586,13 @@ func renderAddonCustomUISchema(ctx context.Context, cli client.Client, addonName
 		return defaultSchema
 	}
 	return patchSchema(defaultSchema, schema)
+}
+
+// addonDefaultUISchema is the form generated from the addon's parameter, or
+// one derived from its OpenAPI schema where none was generated.
+func addonDefaultUISchema(addon *pkgaddon.UIData) []*schema.UIParameter {
+	if addon.DefaultUISchema != nil {
+		return addon.DefaultUISchema
+	}
+	return renderDefaultUISchema(addon.APISchema)
 }

@@ -243,3 +243,20 @@ export function compareApplication(appName: string, params: ApplicationCompareRe
 export function dryRunApplication(appName: string, params: ApplicationDryRunRequest) {
   return post(`${url}/${appName}/dry-run`, params, true).then((res) => res);
 }
+
+// getExpressionEnv lists what a $( ) expression in the application can read on
+// a surface: component, trait or workflowstep.
+export function getExpressionEnv(appName: string, surface: string) {
+  return get(`${url}/${appName}/expressions/env`, { params: { surface }, customError: true }).then((res) => res);
+}
+
+// checkExpression checks the $( ) expressions of a property value.
+export function checkExpression(appName: string, params: { surface: string; value: string; kind?: string }) {
+  return post(`${url}/${appName}/expressions/check`, params, true).then((res) => res);
+}
+
+// setExpressionOptIn turns the application's reading of $( ) expressions on
+// or off, from its next deploy.
+export function setExpressionOptIn(appName: string, enabled: boolean) {
+  return put(`${url}/${appName}/expressions`, { enabled }).then((res) => res);
+}

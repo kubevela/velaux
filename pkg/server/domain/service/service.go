@@ -50,11 +50,12 @@ func InitServiceBean(c config.Config) []interface{} {
 	contextService := NewContextService()
 	pluginService := NewPluginService(c.PluginConfig)
 	velaQLService := NewVelaQLService()
+	expressionService := NewExpressionService(c.EnableCelExpressions)
 	needInitData = []DataInit{pluginService, clusterService, rbacService, targetService, systemInfoService, addonService}
 	return []interface{}{
 		clusterService, rbacService, projectService, envService, targetService, workflowService, oamApplicationService, definitionService, addonService, envBindingService, systemInfoService, helmService, userService,
 		authenticationService, configService, applicationService, webhookService, pipelineService, pipelineRunService,
-		contextService, NewImageService(), NewCloudShellService(), pluginService, velaQLService,
+		contextService, NewImageService(), NewCloudShellService(), pluginService, velaQLService, expressionService,
 	}
 }
 
