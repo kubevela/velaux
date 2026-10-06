@@ -258,6 +258,9 @@ type ConfigTemplateDetail struct {
 	ConfigTemplate
 	APISchema *openapi3.Schema `json:"schema"`
 	UISchema  schema.UISchema  `json:"uiSchema"`
+	// OutputSchema is a source definition's `schema`: the value an
+	// Application reads with $(source.<name>).
+	OutputSchema *openapi3.Schema `json:"outputSchema,omitempty"`
 }
 
 // Config define the metadata of a config
@@ -537,12 +540,15 @@ type ApplicationStatisticsResponse struct {
 
 // CreateApplicationRequest create application request body
 type CreateApplicationRequest struct {
-	Name        string                  `json:"name" validate:"checkname"`
-	Alias       string                  `json:"alias" validate:"checkalias" optional:"true"`
-	Project     string                  `json:"project" validate:"checkname"`
-	Description string                  `json:"description" optional:"true"`
-	Icon        string                  `json:"icon"`
-	Labels      map[string]string       `json:"labels,omitempty"`
+	Name        string            `json:"name" validate:"checkname"`
+	Alias       string            `json:"alias" validate:"checkalias" optional:"true"`
+	Project     string            `json:"project" validate:"checkname"`
+	Description string            `json:"description" optional:"true"`
+	Icon        string            `json:"icon"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	// Annotations are set on the application as created, such as
+	// app.oam.dev/cel-expressions to have it read $( ) expressions.
+	Annotations map[string]string       `json:"annotations,omitempty"`
 	EnvBinding  []*EnvBinding           `json:"envBinding,omitempty"`
 	Component   *CreateComponentRequest `json:"component"`
 }
@@ -957,6 +963,9 @@ type DetailDefinitionResponse struct {
 	DefinitionBase
 	APISchema *openapi3.Schema `json:"schema"`
 	UISchema  schema.UISchema  `json:"uiSchema"`
+	// OutputSchema is a source definition's `schema`: the value an
+	// Application reads with $(source.<name>).
+	OutputSchema *openapi3.Schema `json:"outputSchema,omitempty"`
 }
 
 // UpdateUISchemaRequest the request body struct about updated ui schema
@@ -990,6 +999,7 @@ type DefinitionBase struct {
 	Component    *v1beta1.ComponentDefinitionSpec    `json:"component,omitempty"`
 	Policy       *v1beta1.PolicyDefinitionSpec       `json:"policy,omitempty"`
 	WorkflowStep *v1beta1.WorkflowStepDefinitionSpec `json:"workflowStep,omitempty"`
+	Source       *v1beta1.SourceDefinitionSpec       `json:"source,omitempty"`
 	// PolicyScope is how KubeVela applies a policy: Builtin, consumed by
 	// KubeVela itself; Workload, rendered with the Application's components; or
 	// Application, applied to the Application as a whole before it renders.
@@ -1052,6 +1062,46 @@ type CreatePolicyRequest struct {
 
 	// Bind this policy to workflow
 	WorkflowPolicyBindings []WorkflowPolicyBinding `json:"workflowPolicyBind"`
+}
+
+// SourceBase is a source of an application: an external value its
+// properties read with $(source.<name>).
+type SourceBase struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+	// Properties is the source's parameter, as a JSON object.
+	Properties *model.JSONStruct `json:"properties,omitempty"`
+	// AutoUpdate is whether a change to the source's value re-dispatches what
+	// reads it; unset follows the controller's default.
+	AutoUpdate *bool `json:"autoUpdate,omitempty"`
+}
+
+// ListApplicationSourceResponse lists the sources of an application
+type ListApplicationSourceResponse struct {
+	Sources []*SourceBase `json:"sources"`
+}
+
+// CreateSourceRequest adds a source to an application
+type CreateSourceRequest struct {
+	// Name is the binding expressions read it by, $(source.<name>), so a CEL
+	// identifier: clusterInfo, not cluster-info.
+	Name string `json:"name" validate:"checkidentifier"`
+	Type string `json:"type" validate:"checkname"`
+	// Properties json data
+	Properties string `json:"properties"`
+	// AutoUpdate is the binding's own say; unset follows the controller's default,
+	// which a deploy's publishVersion pin holds. True stays live under the pin.
+	AutoUpdate *bool `json:"autoUpdate,omitempty"`
+}
+
+// UpdateSourceRequest changes the type or parameter of an application source
+type UpdateSourceRequest struct {
+	Type string `json:"type" validate:"checkname"`
+	// Properties json data
+	Properties string `json:"properties"`
+	// AutoUpdate is the binding's own say; unset follows the controller's default,
+	// which a deploy's publishVersion pin holds. True stays live under the pin.
+	AutoUpdate *bool `json:"autoUpdate,omitempty"`
 }
 
 // WorkflowPolicyBinding define the relation binding relationShip between policy and workflowStep
@@ -2070,6 +2120,9 @@ type ExpressionCheckRequest struct {
 	// Kind is the type the parameter expects: string, integer, number,
 	// boolean, or empty for any.
 	Kind string `json:"kind,omitempty"`
+	// Source names the source the value is written in, on the source surface:
+	// it reads only the sources declared before it.
+	Source string `json:"source,omitempty"`
 }
 
 // ExpressionCheckResponse reports on a property value's expressions.

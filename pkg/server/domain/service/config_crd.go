@@ -116,6 +116,10 @@ func (u *configServiceImpl) configCRs(ctx context.Context, namespace, template s
 	}
 	var out []configv1alpha1.Config
 	for _, c := range list.Items {
+		// A source's cached value is stored as a Config; it is not one anyone wrote.
+		if _, cached := c.Labels[types.LabelSourceDefinitionName]; cached {
+			continue
+		}
 		if template == "" || (c.Spec.TemplateRef != nil && c.Spec.TemplateRef.Name == template) {
 			out = append(out, c)
 		}

@@ -45,6 +45,8 @@ export interface DefinitionDetail {
   uiSchema: UIParam[];
   labels: Record<string, string>;
   status: string;
+  // outputSchema is a source definition's schema: the value $(source.<name>) reads.
+  outputSchema?: any;
 }
 
 export interface UIParam {
@@ -470,6 +472,17 @@ export interface ApplicationPolicyBase {
   type: string;
   updateTime: string;
   envName?: string;
+}
+
+// ApplicationSource is an external value the application's properties read
+// with $(source.<name>).
+export interface ApplicationSource {
+  name: string;
+  type: string;
+  properties?: Record<string, any>;
+  // autoUpdate is whether a change to the source's value re-dispatches what
+  // reads it; unset follows the controller's default.
+  autoUpdate?: boolean;
 }
 
 export interface ApplicationPolicyDetail extends ApplicationPolicyBase {

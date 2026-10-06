@@ -24,6 +24,7 @@ import (
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 )
 
@@ -41,6 +42,10 @@ type Application struct {
 	Icon        string            `json:"icon"`
 	Labels      map[string]string `json:"labels,omitempty" gorm:"serializer:json"`
 	Annotations map[string]string `json:"annotations,omitempty" gorm:"serializer:json"`
+	// Sources are read by the application's properties with $(source.<name>).
+	// They are kept as the CR spells them, so the fields VelaUX does not edit
+	// survive a sync.
+	Sources []v1beta1.ApplicationSource `json:"sources,omitempty" gorm:"serializer:json"`
 }
 
 // TableName return custom table name

@@ -151,6 +151,60 @@ var _ = Describe("Test application service function", Ordered, func() {
 		Expect(err).Should(BeNil())
 	})
 
+	It("Test annotations given at creation reach the application", func() {
+		ctx := context.TODO()
+		_, err := appService.CreateApplication(ctx, v1.CreateApplicationRequest{
+			Name: "annotated-app", Project: testProject,
+			Annotations: map[string]string{"app.oam.dev/cel-expressions": "true"},
+			EnvBinding:  []*v1.EnvBinding{{Name: "app-dev"}},
+			Component:   &v1.CreateComponentRequest{Name: "web", ComponentType: "webservice", Properties: `{"image":"nginx"}`},
+		})
+		Expect(err).Should(BeNil())
+		appModel, err := appService.GetApplication(ctx, "annotated-app")
+		Expect(err).Should(BeNil())
+		Expect(appModel.Annotations).Should(HaveKeyWithValue("app.oam.dev/cel-expressions", "true"))
+		Expect(appService.DeleteApplication(ctx, appModel)).Should(BeNil())
+	})
+
+	It("Test application sources", func() {
+		ctx := context.TODO()
+		appModel, err := appService.GetApplication(ctx, testApp)
+		Expect(err).Should(BeNil())
+
+		source, err := appService.CreateSource(ctx, appModel, v1.CreateSourceRequest{Name: "db", Type: "db-lookup", Properties: `{"secret":"db-creds"}`})
+		Expect(err).Should(BeNil())
+		Expect(source.Properties.Properties()).Should(Equal(map[string]interface{}{"secret": "db-creds"}))
+		_, err = appService.CreateSource(ctx, appModel, v1.CreateSourceRequest{Name: "db", Type: "db-lookup"})
+		Expect(err).Should(Equal(bcode.ErrApplicationSourceExist))
+		_, err = appService.CreateSource(ctx, appModel, v1.CreateSourceRequest{Name: "bad", Type: "db-lookup", Properties: `[1]`})
+		Expect(err).Should(Equal(bcode.ErrInvalidProperties))
+
+		By("a source is stored with the application")
+		appModel, err = appService.GetApplication(ctx, testApp)
+		Expect(err).Should(BeNil())
+		Expect(appService.ListSources(ctx, appModel)).Should(HaveLen(1))
+
+		live := true
+		updated, err := appService.UpdateSource(ctx, appModel, "db", v1.UpdateSourceRequest{Type: "db-lookup", Properties: `{"secret":"other"}`, AutoUpdate: &live})
+		Expect(err).Should(BeNil())
+		Expect(*updated.AutoUpdate).Should(BeTrue())
+		_, err = appService.UpdateSource(ctx, appModel, "missing", v1.UpdateSourceRequest{Type: "db-lookup"})
+		Expect(err).Should(Equal(bcode.ErrApplicationSourceNotExist))
+
+		By("the rendered Application carries the sources")
+		oamApp, err := appService.renderOAMApplication(ctx, appModel, "", "app-dev", "")
+		Expect(err).Should(BeNil())
+		Expect(oamApp.Spec.Sources).Should(HaveLen(1))
+		Expect(string(oamApp.Spec.Sources[0].Properties.Raw)).Should(MatchJSON(`{"secret":"other"}`))
+		Expect(*oamApp.Spec.Sources[0].AutoUpdate).Should(BeTrue(), "the binding's autoUpdate reaches the Application")
+
+		Expect(appService.DeleteSource(ctx, appModel, "db")).Should(BeNil())
+		Expect(appService.DeleteSource(ctx, appModel, "db")).Should(Equal(bcode.ErrApplicationSourceNotExist))
+		appModel, err = appService.GetApplication(ctx, testApp)
+		Expect(err).Should(BeNil())
+		Expect(appModel.Sources).Should(BeEmpty())
+	})
+
 	It("Test ListApplications function", func() {
 		_, err := appService.ListApplications(context.WithValue(context.TODO(), &v1.CtxKeyUser, FakeAdminName), v1.ListApplicationOptions{})
 		Expect(err).Should(BeNil())

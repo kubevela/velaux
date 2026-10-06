@@ -49,7 +49,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		// TODO: provide project scope api for query definition list
 		// Filter(d.RbacService.CheckPerm("definition", "list")).
-		Param(ws.QueryParameter("type", "query the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy"})).
+		Param(ws.QueryParameter("type", "query the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy", "source"})).
 		Param(ws.QueryParameter("queryAll", "query all definitions include hidden in UI").DataType("boolean").DefaultValue("false")).
 		Param(ws.QueryParameter("appliedWorkload", "if specified, query the trait definition applied to the workload").DataType("string")).
 		Param(ws.QueryParameter("ownerAddon", "query by which addon created the definition").DataType("string")).
