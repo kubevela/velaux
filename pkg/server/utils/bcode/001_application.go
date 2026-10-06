@@ -108,3 +108,12 @@ var ErrApplicationSourceExist = NewBcode(400, 10029, "application source is exis
 
 // ErrApplicationSourceNotExist means the application has no source of that name
 var ErrApplicationSourceNotExist = NewBcode(404, 10030, "application source is not exist")
+
+// ErrApplicationNotDeployed the application has not been deployed to the environment
+var ErrApplicationNotDeployed = NewBcode(404, 10031, "the application is not deployed to this environment")
+
+// ErrInvalidReconcileInterval the reconcile interval is not a duration of at least 10s
+var ErrInvalidReconcileInterval = NewBcode(400, 10032, "the reconcile interval must be a duration of at least 10s, such as 5m")
+
+// ErrInvalidRestartSchedule the workflow restart schedule is not a time or an interval
+var ErrInvalidRestartSchedule = NewBcode(400, 10033, "the restart schedule must be empty, an RFC3339 time or a positive interval")

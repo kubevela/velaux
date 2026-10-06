@@ -3,14 +3,16 @@ import { Link, routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { AiOutlineCopy } from 'react-icons/ai';
+import { AiOutlineCopy, AiOutlinePauseCircle, AiOutlinePlayCircle } from 'react-icons/ai';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import { listApplicationServiceEndpoints } from '../../../../api/observation';
 
 import {
   compareApplication,
   deleteApplicationEnvbinding,
+  pauseApplicationEnvbinding,
   recycleApplicationEnvbinding,
+  resumeApplicationEnvbinding,
 } from '../../../../api/application';
 import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 import { If } from '../../../../components/If';
@@ -57,6 +59,7 @@ type Props = {
 
 type State = {
   recycleLoading: boolean;
+  pauseLoading: boolean;
   deleteLoading: boolean;
   refreshLoading: boolean;
   showStatus: boolean;
@@ -74,6 +77,7 @@ class Header extends Component<Props, State> {
     super(props);
     this.state = {
       recycleLoading: false,
+      pauseLoading: false,
       deleteLoading: false,
       refreshLoading: false,
       showStatus: false,
@@ -245,6 +249,41 @@ class Header extends Component<Props, State> {
     });
   };
 
+  // setPaused pauses or resumes the controller's reconciliation of this env's
+  // Application. Pausing asks first, since nothing rolls out until a resume.
+  setPaused = (paused: boolean) => {
+    const { applicationDetail, envName, refresh, dispatch } = this.props;
+    if (!applicationDetail) {
+      return;
+    }
+    const apply = () => {
+      this.setState({ pauseLoading: true });
+      const call = paused ? pauseApplicationEnvbinding : resumeApplicationEnvbinding;
+      call({ appName: applicationDetail.name, envName: envName })
+        .then((re) => {
+          if (re) {
+            Message.success(i18n.t(paused ? 'Reconciliation paused' : 'Reconciliation resumed'));
+            refresh();
+            dispatch({ type: 'application/getApplicationAllStatus', payload: { appName: applicationDetail.name } });
+          }
+        })
+        .finally(() => this.setState({ pauseLoading: false }));
+    };
+    if (!paused) {
+      apply();
+      return;
+    }
+    Dialog.confirm({
+      content: i18n
+        .t(
+          'Pause reconciliation here? The controller stops applying changes, correcting drift and running the workflow in this environment until you resume.'
+        )
+        .toString(),
+      onOk: apply,
+      locale: locale().Dialog,
+    });
+  };
+
   deleteEnv = async () => {
     Dialog.confirm({
       content: i18n.t('Are you sure you want to delete the current environment binding?').toString(),
@@ -284,7 +323,8 @@ class Header extends Component<Props, State> {
 
   render() {
     const { appName, envName, components, applicationDetail } = this.props;
-    const { recycleLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff, endpoints } = this.state;
+    const { recycleLoading, pauseLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff, endpoints } =
+      this.state;
     const { targets, applicationStatus, disableStatusShow } = this.props;
     const targetOptions = (targets || []).map((item: Target) => ({
       label: item.alias || item.name,
@@ -433,6 +473,26 @@ class Header extends Component<Props, State> {
                   onClick={this.deleteEnv}
                 >
                   <Translation>Delete</Translation>
+                </Button>
+              </Permission>
+            </If>
+            <If condition={applicationStatus && applicationStatus.status && applicationStatus.status != 'deleting'}>
+              <Permission
+                request={{
+                  resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
+                  action: applicationStatus?.paused ? 'resume' : 'pause',
+                }}
+                project={projectName}
+              >
+                <Button
+                  type="secondary"
+                  className="environment-toolbar-icon-btn"
+                  loading={pauseLoading}
+                  disabled={applicationDetail?.readOnly}
+                  onClick={() => this.setPaused(!applicationStatus?.paused)}
+                >
+                  {applicationStatus?.paused ? <AiOutlinePlayCircle /> : <AiOutlinePauseCircle />}
+                  <Translation>{applicationStatus?.paused ? 'Resume' : 'Pause'}</Translation>
                 </Button>
               </Permission>
             </If>

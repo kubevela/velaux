@@ -33,6 +33,7 @@ import Header from '../ApplicationInstanceList/components/Header';
 import './index.less';
 import ApplicationGraph from './components/ApplicationGraph';
 import SourceStatusList from './components/SourceStatusList';
+import Reconciliation from './components/Reconciliation';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 type Props = {
@@ -333,6 +334,20 @@ class ApplicationStatusPage extends React.Component<Props, State> {
           <Tab.Item title={i18n.t('Overview').toString()} key="overview">
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
+                {applicationStatus && (
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Reconciliation</Translation>
+                    </div>
+                    <Reconciliation
+                      appName={appName}
+                      envName={envName}
+                      projectName={applicationDetail?.project?.name}
+                      status={applicationStatus}
+                      onChanged={this.loadApplicationStatus}
+                    />
+                  </section>
+                )}
                 <If condition={componentStatus}>
                   <section className="status-section">
                     <div className="status-section-title">

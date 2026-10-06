@@ -144,6 +144,26 @@ export function recycleApplicationEnvbinding(params: { appName: string; envName:
   return post(`${url}/${params.appName}/envs/${params.envName}/recycle`, {}).then((res) => res);
 }
 
+export function pauseApplicationEnvbinding(params: { appName: string; envName: string }) {
+  return post(`${url}/${params.appName}/envs/${params.envName}/pause`, {}).then((res) => res);
+}
+
+export function setReconcileInterval(params: { appName: string; envName: string; interval: string }) {
+  return put(`${url}/${params.appName}/envs/${params.envName}/reconcile-interval`, { interval: params.interval });
+}
+
+export function restartApplicationWorkflow(params: { appName: string; envName: string; schedule: string }) {
+  return post(`${url}/${params.appName}/envs/${params.envName}/restart-workflow`, { schedule: params.schedule });
+}
+
+export function cancelWorkflowRestart(params: { appName: string; envName: string }) {
+  return rdelete(`${url}/${params.appName}/envs/${params.envName}/restart-workflow`, {});
+}
+
+export function resumeApplicationEnvbinding(params: { appName: string; envName: string }) {
+  return post(`${url}/${params.appName}/envs/${params.envName}/resume`, {}).then((res) => res);
+}
+
 export function getApplicationComponent(appName: string, componentName: string) {
   return get(`${url}/${appName}/components/${componentName}`, {}).then((res) => res);
 }

@@ -27,6 +27,7 @@ import (
 	"time"
 
 	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
+	"github.com/kubevela/pkg/controller/reconciler"
 	"github.com/kubevela/pkg/util/slices"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -73,6 +74,10 @@ type ApplicationService interface {
 	ListApplications(ctx context.Context, listOptions apisv1.ListApplicationOptions) ([]*apisv1.ApplicationBase, error)
 	GetApplication(ctx context.Context, appName string) (*model.Application, error)
 	GetApplicationStatus(ctx context.Context, app *model.Application, envName string) (*apisv1.ApplicationStatus, error)
+	SetApplicationPaused(ctx context.Context, app *model.Application, envName string, paused bool) error
+	SetReconcileInterval(ctx context.Context, app *model.Application, envName string, interval string) error
+	RestartWorkflow(ctx context.Context, app *model.Application, envName string, schedule string) error
+	CancelWorkflowRestart(ctx context.Context, app *model.Application, envName string) error
 	GetApplicationStatusFromAllEnvs(ctx context.Context, app *model.Application) ([]*apisv1.ApplicationStatusResponse, error)
 	DetailApplication(ctx context.Context, app *model.Application) (*apisv1.DetailApplicationResponse, error)
 	PublishApplicationTemplate(ctx context.Context, app *model.Application) (*apisv1.ApplicationTemplateBase, error)
@@ -351,6 +356,11 @@ func applicationStatusFrom(obj *unstructured.Unstructured) (*apisv1.ApplicationS
 		}
 	}
 	status.Dependencies = dependenciesOf(obj, raw)
+	status.Paused = reconciler.IsPaused(obj)
+	annotations := obj.GetAnnotations()
+	status.ReconcileInterval = annotations[oam.AnnotationReconcileInterval]
+	status.RestartWorkflow = annotations[oam.AnnotationWorkflowRestart]
+	status.AutoUpdate = annotations[oam.AnnotationAutoUpdate] == True
 	if obj.GetGeneration() > status.ObservedGeneration {
 		status.Phase = common.ApplicationStarting
 	}

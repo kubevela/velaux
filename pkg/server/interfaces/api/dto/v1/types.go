@@ -547,6 +547,28 @@ type ApplicationStatus struct {
 	// its dependsOn, those whose outputs its inputs read, and those its property
 	// expressions read.
 	Dependencies []ComponentDependency `json:"dependencies,omitempty"`
+	// Paused is whether the controller skips the Application: it carries the
+	// controller.core.oam.dev/pause label.
+	Paused bool `json:"paused,omitempty"`
+	// ReconcileInterval is the Application's own resync period, where it sets one.
+	ReconcileInterval string `json:"reconcileInterval,omitempty"`
+	// RestartWorkflow is a pending or recurring workflow restart: "true", a time
+	// or an interval. status.workflowRestartScheduledAt is when it next runs.
+	RestartWorkflow string `json:"restartWorkflow,omitempty"`
+	// AutoUpdate is whether the Application follows definition changes. KubeVela
+	// refuses it beside the publishVersion every VelaUX deploy sets.
+	AutoUpdate bool `json:"autoUpdate,omitempty"`
+}
+
+// ReconcileIntervalRequest sets an Application's resync period; empty clears it.
+type ReconcileIntervalRequest struct {
+	Interval string `json:"interval"`
+}
+
+// RestartWorkflowRequest restarts an Application's workflow: now when empty, at
+// an RFC3339 time, or after every completion when an interval.
+type RestartWorkflowRequest struct {
+	Schedule string `json:"schedule"`
 }
 
 // ComponentDependency is one component another depends on, as the
