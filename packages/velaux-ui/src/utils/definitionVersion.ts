@@ -48,3 +48,17 @@ export function latestLabel(newest?: DefinitionRevision): string {
   const number = `v${newest.revision}`;
   return isNamed(newest) ? `latest (${newest.version.replace(/^v/, '')} / ${number})` : `latest (${number})`;
 }
+
+// inUseLabel names the revision a type resolves to: the latest, or the pinned
+// version, matched by its name with or without the v, or by its number.
+export function inUseLabel(version: string | undefined, revisions: DefinitionRevision[]): string {
+  if (!version) {
+    return latestLabel(revisions[0]);
+  }
+  const wanted = version.startsWith('v') ? version : `v${version}`;
+  const found = revisions.find((r) => r.version === wanted || `v${r.revision}` === wanted);
+  if (!found) {
+    return version;
+  }
+  return isNamed(found) ? `${found.version.replace(/^v/, '')} / v${found.revision}` : `v${found.revision}`;
+}

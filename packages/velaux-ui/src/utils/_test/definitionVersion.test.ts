@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
-import { isNamed, joinType, latestLabel, splitType, versionLabel } from '../definitionVersion';
+import type { DefinitionRevision } from '../definitionVersion';
+import { inUseLabel, isNamed, joinType, latestLabel, splitType, versionLabel } from '../definitionVersion';
 
 describe('definition versions', () => {
   it('splits a pinned type and joins it back', () => {
@@ -26,5 +27,28 @@ describe('latest', () => {
   it('tells a named version from a bare revision', () => {
     expect(isNamed({ revision: 5, version: 'v1.1.0', hash: '', createTime: '' })).to.equal(true);
     expect(isNamed({ revision: 3, version: 'v3', hash: '', createTime: '' })).to.equal(false);
+  });
+});
+
+describe('inUseLabel', () => {
+  const revisions: DefinitionRevision[] = [
+    { revision: 5, version: 'v1.1.0', hash: 'e', createTime: '' },
+    { revision: 4, version: 'v1.0.0', hash: 'd', createTime: '' },
+    { revision: 3, version: 'v3', hash: 'c', createTime: '' },
+  ];
+  it('follows the latest when no version is pinned', () => {
+    expect(inUseLabel(undefined, revisions)).to.equal('latest (1.1.0 / v5)');
+    expect(inUseLabel(undefined, [])).to.equal('latest');
+  });
+  it('names a pinned version with its revision, however it is written', () => {
+    expect(inUseLabel('v1.0.0', revisions)).to.equal('1.0.0 / v4');
+    expect(inUseLabel('1.0.0', revisions)).to.equal('1.0.0 / v4');
+    expect(inUseLabel('v4', revisions)).to.equal('1.0.0 / v4');
+  });
+  it('names a pinned revision with no version name by its number', () => {
+    expect(inUseLabel('v3', revisions)).to.equal('v3');
+  });
+  it('shows a pinned version it cannot find as written', () => {
+    expect(inUseLabel('v9', revisions)).to.equal('v9');
   });
 });

@@ -9,6 +9,8 @@ export type DependencyDirection = 'outbound' | 'inbound';
 export interface DependencyItem {
   name: string;
   direction: DependencyDirection;
+  // kind is source for a source binding the component reads; a component otherwise.
+  kind?: 'source';
   type?: string;
   where?: string;
   inferred?: string;

@@ -105,7 +105,7 @@ class CardContent extends React.Component<Props, State> {
             <ResourceCard
               key={name}
               tone={tone}
-              badge={status === 'Unhealthy' ? 'UnHealthy' : status || 'Unknown'}
+              badge={status || 'Unknown'}
               icon={<img src={icon && icon !== 'none' ? icon : kubernetesSvg} />}
               title={title}
               subtitle={alias && alias !== name ? name : undefined}

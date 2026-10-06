@@ -48,6 +48,10 @@ export function getApplicationDetails(params: any) {
 export function getApplicationStatus(params: { name: string; envName: string }) {
   return get(`${url}/${params.name}/envs/${params.envName}/status`, params).then((res) => res);
 }
+// getApplicationDataFlows is what moves between the sources and components an env deploys.
+export function getApplicationDataFlows(params: { name: string; envName: string }) {
+  return get(`${url}/${params.name}/envs/${params.envName}/dataflows`, {}).then((res) => res);
+}
 export function getApplicationAllStatus(params: { name: string }) {
   return get(`${url}/${params.name}/status`, params).then((res) => res);
 }

@@ -3,12 +3,17 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import type { GraphNode } from './interface';
-import { componentSections, componentSummary, ResourceIcon } from './utils';
+import { componentSections, componentSummary } from './utils';
 import { layoutTraits, maxTraitRows, traitArea } from './traits';
 
 import './component-node.less';
 import type { TraitStatus } from '@velaux/data';
+import { BsBox } from 'react-icons/bs';
+
 import { StatusBadge } from '../StatusBadge';
+
+import { DefinitionLine } from './definition-line';
+import { placeAt } from './layout';
 import { traitState, traitStateCircle } from '../../utils/status';
 import { traitTooltip } from './tooltip';
 import { StatusTooltip, statusTooltipPopupClass } from '../StatusTooltip';
@@ -62,21 +67,18 @@ export const ComponentNode = (props: ComponentNodeProps) => {
   return (
     <div
       className={classNames('graph-node', 'graph-node-resource', 'graph-node-component', {
-        'warning-status': !node.resource.service?.healthy,
+        'graph-node-edge': true,
+        'tone-healthy': !!node.resource.service?.healthy,
+        'tone-unhealthy': !node.resource.service?.healthy,
         'traits-open': hidden.length > 0 && showTrait,
       })}
       style={{
-        // 50 = (nodeWidth - 220)/2
-        left: node.x - 50,
-        top: node.y,
-        width: node.width,
-        height: node.height,
-        transform: `translate(-80px, 0px)`,
+        ...placeAt(node, true),
       }}
     >
       {WithBalloon(
         <div className={classNames('icon')}>
-          <ResourceIcon kind={node.resource.component?.componentType.substring(0, 1).toUpperCase() || ''} />
+          <BsBox />
         </div>
       )}
       <div className="component-node-body">
@@ -90,7 +92,7 @@ export const ComponentNode = (props: ComponentNodeProps) => {
                 <StatusBadge tone="unhealthy" label="Unhealthy" />
               )}
             </div>
-            <div className="kind">{node.resource.component?.componentType}</div>
+            <DefinitionLine kind="component" type={node.resource.component?.componentType} />
           </div>
         )}
         {shown.length > 0 && (

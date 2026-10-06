@@ -10,7 +10,7 @@ import Group from '../../extends/Group';
 import './index.less';
 import { StepSelect } from '../../extends/StepSelect';
 import i18n from '../../i18n';
-import type { DefinitionDetail , WorkflowStepBase } from '@velaux/data';
+import type { DefinitionDetail, WorkflowStepBase } from '@velaux/data';
 import { replaceUrl } from '../../utils/common';
 import DrawerWithFooter from '../Drawer';
 import { If } from '../If';

@@ -30,7 +30,7 @@ describe('trait chip layout', () => {
   });
 
   it('sizes a component node by its rows of traits', () => {
-    expect(componentNodeHeight(0)).to.equal(44);
+    expect(componentNodeHeight(0)).to.equal(60);
     expect(componentNodeHeight(2)).to.be.greaterThan(componentNodeHeight(1));
   });
 });

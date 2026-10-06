@@ -5,7 +5,7 @@ import React from 'react';
 
 import { deployApplication } from '../../api/application';
 import { notifyDeployed } from '../../utils/deploy';
-import { listApplicationResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
+import { listEnvResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
 import { If } from '../../components/If';
 import { StatusBadge } from '../../components/StatusBadge';
 import { StatusDetails } from '../../components/StatusDetails';
@@ -234,8 +234,8 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     } = this.props.match;
     if (applicationDetail && applicationDetail.name && env && !resourceLoading) {
       const param = {
-        appName: env.appDeployName || appName,
-        appNs: env.appDeployNamespace,
+        appName: appName,
+        envName: env.name,
         componentName: componentName,
         cluster: '',
         clusterNs: '',
@@ -247,7 +247,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       if (!silent) {
         this.setState({ resourceLoading: true });
       }
-      listApplicationResourceTree(param)
+      listEnvResourceTree(param)
         .then((re) => {
           if (re && re.resources) {
             this.setState({ resources: re.resources });
@@ -624,6 +624,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                   application={applicationDetail}
                   env={env}
                   resources={resources}
+                  components={components}
                   graphType="resource-graph"
                 />
               </If>

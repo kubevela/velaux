@@ -480,6 +480,33 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Writes(apis.ApplicationStatusResponse{}))
 
+	ws.Route(ws.GET("/{appName}/envs/{envName}/dataflows").To(c.getApplicationDataFlows).
+		Doc("what moves between the sources and components an env deploys").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(c.RbacService.CheckPerm("envBinding", "detail")).
+		Filter(c.appCheckFilter).
+		Filter(c.envCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string")).
+		Param(ws.PathParameter("envName", "identifier of the application envbinding").DataType("string")).
+		Returns(200, "OK", apis.ApplicationDataFlowsResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.ApplicationDataFlowsResponse{}))
+
+	ws.Route(ws.GET("/{appName}/envs/{envName}/resource-tree").To(c.getApplicationResourceTree).
+		Doc("the resources an env deploys, with kstatus health for the kinds KubeVela does not check itself").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(c.RbacService.CheckPerm("envBinding", "detail")).
+		Filter(c.appCheckFilter).
+		Filter(c.envCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string")).
+		Param(ws.PathParameter("envName", "identifier of the application envbinding").DataType("string")).
+		Param(ws.QueryParameter("componentName", "only the resources of this component").DataType("string")).
+		Param(ws.QueryParameter("cluster", "only the resources on this cluster").DataType("string")).
+		Param(ws.QueryParameter("clusterNs", "only the resources in this namespace of the cluster").DataType("string")).
+		Returns(200, "OK", apis.VelaQLViewResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.VelaQLViewResponse{}))
+
 	ws.Route(ws.GET("/{appName}/status").To(c.getApplicationStatusFromAllEnvs).
 		Doc("get application status from all envs").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
@@ -1426,6 +1453,34 @@ func (c *application) getApplicationStatus(req *restful.Request, res *restful.Re
 	if err := res.WriteEntity(apis.ApplicationStatusResponse{Status: status, EnvName: req.PathParameter("envName")}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
+	}
+}
+
+func (c *application) getApplicationDataFlows(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	flows, err := c.ApplicationService.GetApplicationDataFlows(req.Request.Context(), app, req.PathParameter("envName"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(flows); err != nil {
+		bcode.ReturnError(req, res, err)
+	}
+}
+
+func (c *application) getApplicationResourceTree(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	tree, err := c.ApplicationService.GetApplicationResourceTree(req.Request.Context(), app, req.PathParameter("envName"), service.ResourceTreeOptions{
+		Component:        req.QueryParameter("componentName"),
+		Cluster:          req.QueryParameter("cluster"),
+		ClusterNamespace: req.QueryParameter("clusterNs"),
+	})
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(tree); err != nil {
+		bcode.ReturnError(req, res, err)
 	}
 }
 

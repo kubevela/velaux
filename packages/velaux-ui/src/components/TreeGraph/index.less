@@ -12,10 +12,17 @@
     padding-right: 1em;
     padding-left: 3.5em;
     background: #fff;
-    border: 1px solid transparent;
-    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
     cursor: pointer;
-    transition: all 0.2s linear;
+    // Only the hover eases: a node moves in step with its edges, which are
+    // drawn where it lands.
+    transition: border-color 0.2s linear, box-shadow 0.2s linear;
+    &:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
 
     .name {
       display: flex;
@@ -109,7 +116,8 @@
       }
     }
     .name {
-      line-height: 30px;
+      padding: 6px 0;
+      line-height: 24px;
       .actions {
         .next-icon {
           &:hover {
@@ -120,6 +128,15 @@
     }
   }
 
+  // A component's or source's left edge is its status, in its badge's tone.
+  .graph-node.graph-node-edge {
+    border-left: 3px solid var(--tone);
+    .icon {
+      color: var(--primary-color);
+      font-size: 18px;
+    }
+  }
+
   .graph-node.error-status {
     border: solid 0.2em var(--danger-color);
   }
@@ -127,23 +144,77 @@
     border: solid 0.2em var(--warning-color);
   }
 
-  .graph-edge {
-    .graph-edge-line {
-      position: absolute;
-      z-index: -1;
-      border-top: 1px dashed #666;
-      transition: all 0.2s linear;
-
-      &:last-child {
-        &::after {
-          position: absolute;
-          top: -10px;
-          color: #a3a3a3;
-          font-size: 10px;
-          transform: rotate(180deg);
-          content: '\25BA';
-        }
+  // A flow is a label riding its edge: a small pill over the line, not a box.
+  .graph-node-flow {
+    z-index: 1;
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 6px;
+    color: var(--primary-color);
+    font-size: 11px;
+    line-height: 16px;
+    background: #fff;
+    border: 1px solid var(--primary-color);
+    border-radius: 9px;
+    box-shadow: none;
+    cursor: help;
+    &:hover {
+      color: #fff;
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      box-shadow: none;
+    }
+    .flow-count {
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    &.flow-dependsOn {
+      color: #64748b;
+      border-color: #cbd5e1;
+      &:hover {
+        color: #fff;
+        background: #64748b;
+        border-color: #64748b;
       }
+    }
+  }
+  .graph-node.unused-status {
+    opacity: 0.6;
+  }
+  // Edges are one SVG layer under the nodes: smoothed paths whose dashes flow
+  // from source to target, and arrowheads that turn with the line.
+  .graph-edges {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .graph-edge-path {
+    fill: none;
+    stroke: #64748b;
+    stroke-width: 1.75;
+    stroke-dasharray: 6 5;
+    animation: graph-edge-flow 0.9s linear infinite;
+    &.graph-edge-link {
+      stroke: var(--primary-color, #1b58f4);
+      stroke-width: 2;
+    }
+  }
+  .graph-edge-head {
+    fill: #64748b;
+    &.graph-edge-head-link {
+      fill: var(--primary-color, #1b58f4);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .graph-edge-path {
+      animation: none;
     }
   }
   .line {
@@ -191,4 +262,107 @@
   display: inline-flex;
   color: #a3a3a3;
   cursor: help;
+}
+
+// A flow's values in its hover, which renders outside the graph.
+.flow-list {
+  margin: 0;
+  padding-left: 16px;
+  color: #334155;
+  font-size: 12px;
+  font-family: Menlo, Monaco, monospace;
+  li {
+    word-break: break-all;
+  }
+}
+
+// A dash pattern of 11 moves one pattern length forward, so the dashes march
+// toward the arrowhead.
+@keyframes graph-edge-flow {
+  from {
+    stroke-dashoffset: 11;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+// A node's slot names it for measuring and adds no box of its own.
+.graph-node-slot {
+  display: contents;
+}
+
+// The component that applied a resource, under its kind, and the trait that
+// applied it, leading on from it.
+.resource-origin {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 16px;
+  .resource-origin-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    min-width: 0;
+    svg {
+      flex: none;
+      color: var(--primary-color);
+    }
+  }
+  // A dot follows its name, kept in view however the name is cut short.
+  .circle {
+    flex: none;
+    margin-left: 2px;
+  }
+  .resource-origin-component {
+    overflow: hidden;
+    color: #334155;
+    font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .resource-origin-type {
+    overflow: hidden;
+    color: #94a3b8;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .resource-origin-trait {
+    padding-left: 2px;
+    .resource-origin-lead {
+      color: #94a3b8;
+    }
+    .resource-origin-type {
+      color: #475569;
+    }
+  }
+}
+
+// A pod's logs link and ready count, side by side under its name.
+.graph-tree .graph-node-pod .pod-status {
+  gap: 8px;
+}
+
+// A resource's name with its health dot after it, padded clear of its border;
+// the name gives way before the dot.
+.graph-tree .graph-node-resource > .name {
+  padding: 4px 0;
+  .resource-node-name {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    min-width: 0;
+    color: #0f172a;
+    font-weight: 500;
+    span:first-child {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .circle {
+      flex: none;
+    }
+  }
 }
