@@ -63,6 +63,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("project", "search base on project name").DataType("string")).
 		Param(ws.QueryParameter("env", "search base on env name").DataType("string")).
 		Param(ws.QueryParameter("targetName", "Name of the application delivery target").DataType("string")).
+		Param(ws.QueryParameter("withStatus", "Fill each application's status summary").DataType("boolean")).
 		// This api will filter the app by user's permissions
 		// Filter(c.RbacService.CheckPerm("application", "list")).
 		Returns(200, "OK", apis.ListApplicationResponse{}).
@@ -808,6 +809,7 @@ func (c *application) listApplications(req *restful.Request, res *restful.Respon
 		TargetName: req.QueryParameter("targetName"),
 		Query:      req.QueryParameter("query"),
 		Labels:     labels,
+		WithStatus: req.QueryParameter("withStatus") == "true",
 	})
 	if err != nil {
 		bcode.ReturnError(req, res, err)

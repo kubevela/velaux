@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { getDefinitionsList, updateDefinitionStatus } from '../../api/definitions';
 import Permission from '../../components/Permission';
 import { RestrictionTags } from '../../components/RestrictionTags';
+import { StatusBadge } from '../../components/StatusBadge';
 import { Translation } from '../../components/Translation';
 import type { DefinitionBase, DefinitionRestrictions, LoginUserInfo } from '@velaux/data';
 
@@ -217,8 +218,9 @@ class Definitions extends Component<Props, State> {
           const findStatus = _.find(enumStatusList, (item) => {
             return item.name === v;
           });
-          const colorClass = (findStatus && findStatus.color) || '';
-          return <span className={`${colorClass}`}>{findStatus && findStatus.status}</span>;
+          return findStatus ? (
+            <StatusBadge tone={findStatus.name === 'enable' ? 'healthy' : 'neutral'} label={findStatus.status} />
+          ) : null;
         },
       },
       {

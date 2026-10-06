@@ -232,6 +232,14 @@ func (c *applicationServiceImpl) ListApplications(ctx context.Context, listOptio
 	var list []*apisv1.ApplicationBase
 	for _, app := range apps {
 		appBase := assembler.ConvertAppModelToBase(app, projects)
+		if listOptions.WithStatus {
+			statuses, err := c.GetApplicationStatusFromAllEnvs(ctx, app)
+			if err != nil {
+				klog.Warningf("summarising the status of application %s: %s", app.Name, err.Error())
+			} else {
+				appBase.Status = SummariseAppStatus(statuses)
+			}
+		}
 		list = append(list, appBase)
 	}
 	sort.Slice(list, func(i, j int) bool {

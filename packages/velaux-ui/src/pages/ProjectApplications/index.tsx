@@ -7,7 +7,7 @@ import { getComponentDefinitions } from '../../api/definitions';
 import { getEnvs } from '../../api/env';
 import { getProjectTargetList } from '../../api/project';
 import { If } from '../../components/If';
-import type { ApplicationBase, ApplicationQuery , LoginUserInfo } from '@velaux/data';
+import type { ApplicationBase, ApplicationQuery, LoginUserInfo } from '@velaux/data';
 import type { ShowMode } from '../ApplicationList';
 import AppDialog from '../ApplicationList/components/AddAppDialog';
 import CardContend from '../ApplicationList/components/CardContent';
@@ -78,13 +78,14 @@ class ProjectApplications extends Component<Props, State> {
 
   listApplication = async (queryData?: ApplicationQuery) => {
     const { params = { projectName: '' } } = this.props.match;
-    const { query = '', env = '', targetName = '', labels = '', } = queryData || {};
+    const { query = '', env = '', targetName = '', labels = '' } = queryData || {};
     const queryParams: ApplicationQuery = {
       query,
       env,
       targetName,
       labels,
       project: params.projectName,
+      withStatus: true,
     };
     this.setState({ isLoading: true });
     getApplicationList(queryParams)
@@ -168,19 +169,19 @@ class ProjectApplications extends Component<Props, State> {
     let existIndex = -1;
     labelValue.map((key, index) => {
       if (key == label) {
-        existIndex = index
-        return
+        existIndex = index;
+        return;
       }
     });
     if (existIndex == -1) {
-      labelValue.push(label)
+      labelValue.push(label);
     } else {
       labelValue = labelValue.splice(existIndex, existIndex);
     }
     this.setState({
-      labelValue
+      labelValue,
     });
-    this.listApplication({labels: labelValue.join(",")});
+    this.listApplication({ labels: labelValue.join(',') });
   };
 
   render() {
@@ -198,14 +199,17 @@ class ProjectApplications extends Component<Props, State> {
     } = this.state;
     const { params = { projectName: '' } } = this.props.match;
     const { projectName } = params;
-    let appLabels: string[] = []
+    let appLabels: string[] = [];
     applicationList.map((app) => {
-      app.labels && Object.keys(app.labels).map((key: string) => {
-        if (key.indexOf("ux.oam.dev") < 0 && key.indexOf("app.oam.dev")) {
-          if (app.labels) { appLabels.push(key+"="+app.labels[key]) }
-        }
-      })
-    })
+      app.labels &&
+        Object.keys(app.labels).map((key: string) => {
+          if (key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev')) {
+            if (app.labels) {
+              appLabels.push(key + '=' + app.labels[key]);
+            }
+          }
+        });
+    });
 
     return (
       <Fragment>

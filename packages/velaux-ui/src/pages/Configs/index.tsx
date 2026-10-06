@@ -5,6 +5,7 @@ import React, { Component, Fragment } from 'react';
 import { getConfigs, deleteConfig } from '../../api/config';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
+import { StatusBadge } from '../../components/StatusBadge';
 import { Translation } from '../../components/Translation';
 import type { ConfigTemplate, Config, LoginUserInfo } from '@velaux/data';
 import { momentDate } from '../../utils/common';
@@ -174,8 +175,12 @@ class Configs extends Component<Props, State> {
           if (config.legacy) {
             return <span>-</span>;
           }
-          const color = v === 'Available' ? 'green' : v === 'Error' ? 'red' : 'orange';
-          const tag = <Tag color={color}>{v || 'Pending'}</Tag>;
+          const tone = v === 'Available' ? 'healthy' : v === 'Error' ? 'failed' : 'progressing';
+          const tag = (
+            <span>
+              <StatusBadge tone={tone} label={v || 'Pending'} />
+            </span>
+          );
           return config.message ? <Balloon.Tooltip trigger={tag}>{config.message}</Balloon.Tooltip> : tag;
         },
       },
