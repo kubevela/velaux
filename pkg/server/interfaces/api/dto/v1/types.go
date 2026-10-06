@@ -166,6 +166,15 @@ type ListEnabledAddonResponse struct {
 type AddonBaseStatus struct {
 	Name  string     `json:"name"`
 	Phase AddonPhase `json:"phase"`
+	// ManagedBy is the Application whose addon component installed the addon;
+	// the addon is enabled, upgraded and disabled there, not here.
+	ManagedBy *AddonManager `json:"managedBy,omitempty"`
+}
+
+// AddonManager names the Application that manages an addon
+type AddonManager struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 // DetailAddonResponse defines the format for showing the addon details
@@ -239,6 +248,9 @@ type ConfigTemplate struct {
 	Scope       string    `json:"scope"`
 	Sensitive   bool      `json:"sensitive"`
 	CreateTime  time.Time `json:"createTime"`
+	// Legacy marks a template kept as a config-template ConfigMap rather than a
+	// ConfigTemplate.
+	Legacy bool `json:"legacy,omitempty"`
 }
 
 // ConfigTemplateDetail define the format for detail the config template
@@ -262,6 +274,13 @@ type Config struct {
 	Shared      bool                          `json:"shared"`
 	Secret      *corev1.Secret                `json:"-"`
 	Targets     []*config.ClusterTargetStatus `json:"targets"`
+	// Legacy marks a config kept as a Secret VelaUX writes rather than a Config
+	// the controller renders.
+	Legacy bool `json:"legacy,omitempty"`
+	// Phase and Message are a Config's status: Available once rendered, or the
+	// reason it could not be.
+	Phase   string `json:"phase,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 // ListConfigResponse is the response body for listing the configs
