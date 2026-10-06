@@ -13,6 +13,7 @@ import { treeNodeKey } from '../../../../components/TreeGraph/utils';
 import { placementKey, sourceLinks, sourceReads } from './sources';
 import { flowNodes } from './flows';
 import { getApplicationDataFlows } from '../../../../api/application';
+import { ProjectContext } from '../../../../context';
 import type {
   ApplicationDetail,
   ApplicationStatus,
@@ -295,17 +296,20 @@ class ApplicationGraph extends React.Component<Props, State> {
           />
         </div>
         <div className={classNames('graph-container')}>
-          <TreeGraph
-            onResourceDetailClick={this.onResourceDetailClick}
-            appName={application?.name || ''}
-            envName={env?.name || ''}
-            node={data}
-            zoom={zoom}
-            nodesep={graphType === 'resource-graph' ? 50 : 80}
-          />
+          <ProjectContext.Provider value={application?.project?.name || ''}>
+            <TreeGraph
+              onResourceDetailClick={this.onResourceDetailClick}
+              appName={application?.name || ''}
+              envName={env?.name || ''}
+              node={data}
+              zoom={zoom}
+              nodesep={graphType === 'resource-graph' ? 50 : 80}
+            />
+          </ProjectContext.Provider>
           <If condition={showResource && resource}>
             {resource && (
               <ShowResource
+                project={application?.project?.name || ''}
                 onClose={() => {
                   this.setState({ showResource: false, resource: undefined });
                 }}

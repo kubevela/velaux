@@ -76,15 +76,18 @@ export function deleteWorkflow(params: { appName: string; name: string }) {
 }
 
 // namespaces, when given, have each definition report in unusableIn those its
-// restrictions keep from using it.
-export function getWorkflowDefinitions(scope?: 'Application' | 'WorkflowRun', namespaces?: string[]) {
+// restrictions keep from using it. project adds its own definitions to the
+// global ones; '' is the global ones alone.
+export function getWorkflowDefinitions(project: string, scope?: 'Application' | 'WorkflowRun', namespaces?: string[]) {
   const url = base + `${definition}`;
-  return get(url, { params: { type: 'workflowstep', scope: scope, namespaces: namespaces?.join(',') } }).then(
-    (res) => res
-  );
+  return get(url, {
+    params: { type: 'workflowstep', scope: scope, namespaces: namespaces?.join(','), ...(project ? { project } : {}) },
+  }).then((res) => res);
 }
 
-export function detailWorkflowDefinition(params: { name: string }) {
+export function detailWorkflowDefinition(params: { project: string; name: string }) {
   const url = base + `${definition}/${params.name}`;
-  return get(url, { params: { type: 'workflowstep' } }).then((res) => res);
+  return get(url, { params: { type: 'workflowstep', ...(params.project ? { project: params.project } : {}) } }).then(
+    (res) => res
+  );
 }

@@ -87,7 +87,7 @@ class StepForm extends Component<Props, State> {
 
   onDetailDefinition = (value: string, callback?: () => void) => {
     this.setState({ definitionLoading: true });
-    detailWorkflowDefinition({ name: value })
+    detailWorkflowDefinition({ project: this.context?.projectName || '', name: value })
       .then((re) => {
         if (re) {
           this.setState({ definitionDetail: re, definitionLoading: false });

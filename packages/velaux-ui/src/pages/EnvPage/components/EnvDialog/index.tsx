@@ -181,7 +181,7 @@ class EnvDialog extends React.Component<Props, State> {
 
   loadNamespaces = async (cluster: string | undefined) => {
     if (cluster) {
-      listNamespaces({ cluster: cluster }).then((re) => {
+      listNamespaces({ cluster: cluster, project: this.field.getValue('project') || this.props.project }).then((re) => {
         if (re && re.list) {
           const namespaces = re.list.map((item: any) => {
             return { label: item.metadata.name, value: item.metadata.name };

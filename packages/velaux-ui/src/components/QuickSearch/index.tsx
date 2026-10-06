@@ -1,3 +1,4 @@
+import { connect } from 'dva';
 import React from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 import type { LoginUserInfo } from '@velaux/data';
@@ -8,6 +9,7 @@ import { getDefinitionsList } from '../../api/definitions';
 import { getEnvs } from '../../api/env';
 import { getProjectList } from '../../api/project';
 import { getTarget } from '../../api/target';
+import { definitionPlaceQuery } from '../../utils/definitionPlace';
 import i18n from '../../i18n';
 import { locationService } from '../../services/LocationService';
 import { menuService } from '../../services/MenuService';
@@ -28,6 +30,7 @@ const definitionTypes: Array<'component' | 'trait' | 'policy' | 'workflowstep'> 
 
 type Props = {
   userInfo?: LoginUserInfo;
+  currentProject?: { current: string; resolved: boolean };
 };
 
 type State = {
@@ -64,7 +67,8 @@ function saveRecent(list: SearchItem[]) {
 // targets, definitions and config templates, read once when it first opens.
 // With nothing typed it offers what was opened recently first.
 class QuickSearch extends React.Component<Props, State> {
-  loaded = false;
+  // loaded is the project the index was loaded for; definitions differ by it.
+  loaded?: string;
   input = React.createRef<HTMLInputElement>();
 
   constructor(props: Props) {
@@ -106,10 +110,15 @@ class QuickSearch extends React.Component<Props, State> {
     }
   };
 
+  // project is the one picked in the top bar, whose own definitions are found.
+  project = () => (this.props.currentProject?.resolved ? this.props.currentProject.current : '');
+
   open = () => {
     this.setState({ open: true, query: '', active: 0 }, () => this.input.current?.focus());
-    if (!this.loaded) {
-      this.loaded = true;
+    const project = this.project();
+    if (this.loaded !== project) {
+      this.loaded = project;
+      this.setState({ items: [] });
       this.load();
     }
   };
@@ -170,14 +179,15 @@ class QuickSearch extends React.Component<Props, State> {
         (res?.targets || []).map((t: any) => ({ group: 'Targets', label: t.name, detail: t.alias, to: '/targets' }))
       )
     );
+    const project = this.project();
     definitionTypes.forEach((type) =>
-      getDefinitionsList({ definitionType: type, queryAll: false }).then((res: any) =>
+      getDefinitionsList({ project, definitionType: type, queryAll: false }).then((res: any) =>
         this.add(
           (res?.definitions || []).map((d: any) => ({
             group: 'Definitions',
             label: d.name,
-            detail: type,
-            to: `/definitions/${type}/${d.name}/ui-schema`,
+            detail: d.scope === 'project' ? `${type} · ${i18n.t('Project').toString()}` : type,
+            to: `/definitions/${type}/${d.name}/ui-schema${definitionPlaceQuery({ project, where: d.scope })}`,
           }))
         )
       )
@@ -292,4 +302,4 @@ class QuickSearch extends React.Component<Props, State> {
   }
 }
 
-export default QuickSearch;
+export default connect((store: any) => ({ currentProject: store.currentProject }))(QuickSearch);

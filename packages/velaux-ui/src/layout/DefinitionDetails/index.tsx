@@ -7,6 +7,7 @@ import React, { Component, Fragment } from 'react';
 
 import { Translation } from '../../components/Translation';
 import { Breadcrumb } from '../../components/Breadcrumb';
+import { definitionPlaceFrom, definitionPlaceQuery } from '../../utils/definitionPlace';
 import type { DefinitionMenuType, LoginUserInfo } from '@velaux/data';
 
 import './index.less';
@@ -16,6 +17,7 @@ const { Row, Col } = Grid;
 
 type Props = {
   activeId: string;
+  location: { search: string };
   match: {
     params: {
       definitionName: string;
@@ -34,24 +36,25 @@ class DefinitionDetailsLayout extends Component<Props> {
   getNavList = () => {
     const { params = { definitionType: '', definitionName: '' } } = this.props.match;
     const { definitionType, definitionName } = params;
+    const query = definitionPlaceQuery(definitionPlaceFrom(this.props.location.search));
     const list = [
       {
         id: 'doc',
         icon: <AiOutlineRead />,
         name: <Translation>Documentation</Translation>,
-        to: `/definitions/${definitionType}/${definitionName}/doc`,
+        to: `/definitions/${definitionType}/${definitionName}/doc${query}`,
       },
       {
         id: 'file',
         icon: <AiOutlineCode />,
         name: <Translation>CUE Source</Translation>,
-        to: `/definitions/${definitionType}/${definitionName}/file`,
+        to: `/definitions/${definitionType}/${definitionName}/file${query}`,
       },
       {
         id: 'uiSchema',
         icon: <AiOutlineLayout />,
         name: <Translation>UI Schema</Translation>,
-        to: `/definitions/${definitionType}/${definitionName}/ui-schema`,
+        to: `/definitions/${definitionType}/${definitionName}/ui-schema${query}`,
       },
     ];
 

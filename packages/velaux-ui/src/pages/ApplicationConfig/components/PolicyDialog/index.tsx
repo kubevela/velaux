@@ -459,7 +459,7 @@ class PolicyDialog extends React.Component<Props, State> {
   };
 
   loadPolicyDefinitions = () => {
-    getPolicyDefinitions(deployNamespaces(this.props.envbinding)).then((res) => {
+    getPolicyDefinitions(this.props.project, deployNamespaces(this.props.envbinding)).then((res) => {
       this.setState({ definitions: res.definitions });
     });
   };
@@ -468,7 +468,7 @@ class PolicyDialog extends React.Component<Props, State> {
   // pinned to or the latest.
   loadPolicyDefinitionDetail = (policyType: string, version?: string) => {
     this.setState({ definitionDetailLoading: true });
-    detailPolicyDefinition({ name: policyType, revision: version })
+    detailPolicyDefinition({ project: this.props.project, name: policyType, revision: version })
       .then((res) => {
         if (res) {
           this.setState({ policyDefinitionDetail: res });
@@ -551,6 +551,7 @@ class PolicyDialog extends React.Component<Props, State> {
                   <Form.Item label={i18n.t('Version').toString()}>
                     <VersionSelect
                       definitionType="policy"
+                      project={this.props.project}
                       name={policyType}
                       value={this.field.getValue('policyVersion')}
                       onChange={(version?: string) => {

@@ -144,13 +144,15 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
       this.setState({ definitions: [] });
       return;
     }
-    getWorkflowDefinitions('Application', namespaces).then((res: any) => {
-      if (res && request === this.definitionsRequest) {
-        this.setState({
-          definitions: res && res.definitions,
-        });
+    getWorkflowDefinitions(this.props.applicationDetail?.project?.name || '', 'Application', namespaces).then(
+      (res: any) => {
+        if (res && request === this.definitionsRequest) {
+          this.setState({
+            definitions: res && res.definitions,
+          });
+        }
       }
-    });
+    );
   };
 
   // deployTargets is the environment this workflow deploys to, where its step

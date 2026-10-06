@@ -401,6 +401,13 @@ export default function Router() {
       />
       <Route
         exact
+        path="/project-configs"
+        render={(props: any) => {
+          return <Configs {...props} scope="project" />;
+        }}
+      />
+      <Route
+        exact
         path="/configs"
         render={(props: any) => {
           return <Configs {...props} />;

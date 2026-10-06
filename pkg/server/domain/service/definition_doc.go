@@ -142,7 +142,11 @@ func (d *definitionServiceImpl) DefinitionCUE(ctx context.Context, name, defType
 	def := pkgdef.Definition{}
 	def.SetAPIVersion(apiVersion)
 	def.SetKind(kind)
-	if err := d.KubeClient.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: name}, &def.Unstructured); err != nil {
+	place, err := d.placeOf(ctx, kind, name)
+	if err != nil {
+		return nil, err
+	}
+	if err := place.cli.Get(ctx, client.ObjectKey{Namespace: place.namespace, Name: name}, &def.Unstructured); err != nil {
 		if apierrors.IsNotFound(err) {
 			return nil, bcode.ErrDefinitionNotFound
 		}
@@ -159,9 +163,17 @@ func (d *definitionServiceImpl) DefinitionCUE(ctx context.Context, name, defType
 // example-url taken out: docgen would fetch it with no bound, so the caller
 // fetches it instead.
 func (d *definitionServiceImpl) capabilityOf(ctx context.Context, name, defType string) (*types.Capability, string, error) {
-	key := client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: name}
+	// A type with no definition kind is refused below, as one with no
+	// documentation.
+	place := definitionPlace{namespace: types.DefaultKubeVelaNS, cli: d.KubeClient}
+	if _, kind, err := getKindAndVersion(defType); err == nil {
+		if place, err = d.placeOf(ctx, kind, name); err != nil {
+			return nil, "", err
+		}
+	}
+	key := client.ObjectKey{Namespace: place.namespace, Name: name}
 	get := func(obj client.Object) (string, error) {
-		if err := d.KubeClient.Get(ctx, key, obj); err != nil {
+		if err := place.cli.Get(ctx, key, obj); err != nil {
 			if apierrors.IsNotFound(err) {
 				return "", bcode.ErrDefinitionNotFound
 			}

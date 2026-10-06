@@ -173,3 +173,27 @@ func TestSourceCacheConfigsAreNotListed(t *testing.T) {
 	}
 	assert.Equal(t, []string{"cluster-info"}, names, "a source's cached value is not a config anyone wrote")
 }
+
+func TestProjectTemplateUISchemaIsItsOwn(t *testing.T) {
+	uiSchema := func(namespace, label string) *corev1.ConfigMap {
+		return &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{Name: "config-uischema-team-info", Namespace: namespace},
+			Data:       map[string]string{types.UISchema: `[{"jsonKey":"clusterName","label":"` + label + `"}]`},
+		}
+	}
+	svc, _ := configCRDService(t,
+		&configv1alpha1.ConfigTemplate{
+			ObjectMeta: metav1.ObjectMeta{Name: "team-info", Namespace: "shop"},
+			Spec:       configv1alpha1.ConfigTemplateSpec{Template: clusterInfoTemplate, Scope: "project", Alias: "Team info"},
+		},
+		uiSchema("shop", "Shop's cluster"),
+		uiSchema(types.DefaultKubeVelaNS, "Someone else's"),
+	)
+	detail, err := svc.GetTemplate(context.Background(), config.NamespacedName{Name: "team-info", Namespace: "shop"})
+	require.NoError(t, err)
+	labels := map[string]string{}
+	for _, p := range detail.UISchema {
+		labels[p.JSONKey] = p.Label
+	}
+	assert.Equal(t, "Shop's cluster", labels["clusterName"], "the UI schema beside the template, in its namespace")
+}

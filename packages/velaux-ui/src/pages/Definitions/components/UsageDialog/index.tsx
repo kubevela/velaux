@@ -8,10 +8,13 @@ import { RestrictionTags } from '../../../../components/RestrictionTags';
 import { Translation } from '../../../../components/Translation';
 import { locale } from '../../../../utils/locale';
 import { usageState } from '../../../../utils/restrictions';
+import type { DefinitionPlace } from '../../../../utils/definitionPlace';
 
 type Props = {
   definition: DefinitionBase;
   definitionType: 'component' | 'trait';
+  // place is where the definition is, as the list shows it.
+  place: DefinitionPlace;
   onClose: () => void;
 };
 
@@ -24,11 +27,12 @@ const stateColors: Record<string, string | undefined> = { success: 'green', warn
 export const UsageDialog = (props: Props) => {
   const [usage, setUsage] = useState<NamespaceUsage[]>([]);
   const [loading, setLoading] = useState(true);
+  const { project, where } = props.place;
   useEffect(() => {
-    getDefinitionUsage({ name: props.definition.name, type: props.definitionType })
+    getDefinitionUsage({ project, where, name: props.definition.name, type: props.definitionType })
       .then((res) => setUsage((res && res.usage) || []))
       .finally(() => setLoading(false));
-  }, [props.definition.name, props.definitionType]);
+  }, [props.definition.name, props.definitionType, project, where]);
   return (
     <Dialog
       v2

@@ -115,6 +115,7 @@ class Header extends Component<Props, State> {
 
     if (applicationDetail && applicationDetail.name && envbinding) {
       const param = {
+        project: applicationDetail?.project?.name || '',
         appName: envbinding.appDeployName || appName,
         appNs: envbinding.appDeployNamespace,
         componentName: component,

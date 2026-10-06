@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+
+import { ProjectContext } from '../../context';
 
 import { listDefinitionRevisions } from '../../api/definitions';
 import type { DefinitionRevision } from '../../utils/definitionVersion';
@@ -9,13 +11,13 @@ import { inUseLabel, splitType } from '../../utils/definitionVersion';
 const loaded = new Map<string, { at: number; revisions: Promise<DefinitionRevision[]> }>();
 const fresh = 60 * 1000;
 
-function revisionsFor(kind: string, name: string): Promise<DefinitionRevision[]> {
-  const key = `${kind}/${name}`;
+function revisionsFor(project: string, kind: string, name: string): Promise<DefinitionRevision[]> {
+  const key = `${project}/${kind}/${name}`;
   const hit = loaded.get(key);
   if (hit && Date.now() - hit.at < fresh) {
     return hit.revisions;
   }
-  const revisions = listDefinitionRevisions({ name, type: kind })
+  const revisions = listDefinitionRevisions({ project, name, type: kind })
     .then((res: any) => (res?.revisions || []) as DefinitionRevision[])
     .catch(() => []);
   loaded.set(key, { at: Date.now(), revisions });
@@ -23,19 +25,21 @@ function revisionsFor(kind: string, name: string): Promise<DefinitionRevision[]>
 }
 
 // useInUseLabel is the revision a type resolves to, once its definition's
-// revisions are read: the latest, or the version it is pinned to.
+// revisions are read: the latest, or the version it is pinned to. The
+// project's own definition, from ProjectContext, comes before a global one.
 export function useInUseLabel(kind: 'component' | 'source' | 'trait', type?: string): string {
+  const project = useContext(ProjectContext);
   const { name, version } = splitType(type);
   const [revisions, setRevisions] = useState<DefinitionRevision[] | undefined>();
   useEffect(() => {
     let live = true;
     if (name) {
-      revisionsFor(kind, name).then((list) => live && setRevisions(list));
+      revisionsFor(project, kind, name).then((list) => live && setRevisions(list));
     }
     return () => {
       live = false;
     };
-  }, [kind, name]);
+  }, [project, kind, name]);
   return revisions ? inUseLabel(version, revisions) : version || 'latest';
 }
 

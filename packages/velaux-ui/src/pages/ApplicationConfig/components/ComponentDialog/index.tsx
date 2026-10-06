@@ -240,7 +240,7 @@ class ComponentDialog extends React.Component<Props, State> {
   // onDetailsComponentDefinition loads a component type's form, at the version
   // it is pinned to or the latest.
   onDetailsComponentDefinition = (value: string, version?: string) => {
-    detailComponentDefinition({ name: value, revision: version })
+    detailComponentDefinition({ project: this.props.project, name: value, revision: version })
       .then((re) => {
         if (re) {
           this.setState({ definitionDetail: re, loading: false });
@@ -446,6 +446,7 @@ class ComponentDialog extends React.Component<Props, State> {
                   >
                     <VersionSelect
                       definitionType="component"
+                      project={this.props.project}
                       name={this.field.getValue('componentType')}
                       value={this.field.getValue('componentVersion')}
                       onChange={(version?: string) => {

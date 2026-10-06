@@ -107,7 +107,7 @@ class SourceDialog extends React.Component<Props, State> {
       this.setState({ definitions: [] });
       return;
     }
-    getSourceDefinitions(namespaces).then((res) => {
+    getSourceDefinitions(this.props.project, namespaces).then((res) => {
       if (res) {
         this.setState({ definitions: (res.definitions || []).filter(isUsable) });
       }
@@ -172,7 +172,7 @@ class SourceDialog extends React.Component<Props, State> {
       return;
     }
     this.setState({ loading: true });
-    detailSourceDefinition({ name: type, revision: version })
+    detailSourceDefinition({ project: this.props.project, name: type, revision: version })
       .then((res) => {
         if (res) {
           this.setState({ definition: res });
@@ -268,6 +268,7 @@ class SourceDialog extends React.Component<Props, State> {
                 <Form.Item label={i18n.t('Version').toString()}>
                   <VersionSelect
                     definitionType="source"
+                    project={this.props.project}
                     name={this.field.getValue('type')}
                     value={this.field.getValue('sourceVersion')}
                     onChange={(version?: string) => {

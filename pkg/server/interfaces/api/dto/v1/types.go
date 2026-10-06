@@ -1066,7 +1066,14 @@ type UpdateDefinitionStatusRequest struct {
 
 // DefinitionBase is the definition base model
 type DefinitionBase struct {
-	Name        string            `json:"name"`
+	Name string `json:"name"`
+	// Namespace is where the definition is; Scope says whether that is its
+	// project's ("project") or the system namespace ("global").
+	Namespace string `json:"namespace,omitempty"`
+	Scope     string `json:"scope,omitempty"`
+	// Overridden marks a global definition the project has one of its own name
+	// for, which KubeVela runs in the project's namespace in its place.
+	Overridden  bool              `json:"overridden,omitempty"`
 	Alias       string            `json:"alias"`
 	Description string            `json:"description"`
 	Icon        string            `json:"icon"`

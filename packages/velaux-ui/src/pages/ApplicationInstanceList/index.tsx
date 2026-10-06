@@ -179,6 +179,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
     const envs = envbinding.filter((item) => item.name == envName);
     if (applicationDetail && applicationDetail.name && envs.length > 0) {
       const param = {
+        project: applicationDetail?.project?.name || '',
         appName: envs[0].appDeployName || appName,
         appNs: envs[0].appDeployNamespace,
         componentName: componentName,

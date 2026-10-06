@@ -30,3 +30,6 @@ var ErrInvalidDefinitionUISchema = NewBcode(400, 70004, "invalid custom defnitio
 
 // ErrDefinitionDocUnavailable no documentation could be generated for the definition
 var ErrDefinitionDocUnavailable = NewBcode(400, 70005, "no documentation could be generated for this definition")
+
+// ErrDefinitionScope the scope is neither project nor global
+var ErrDefinitionScope = NewBcode(400, 70006, "a definition's scope is project or global")

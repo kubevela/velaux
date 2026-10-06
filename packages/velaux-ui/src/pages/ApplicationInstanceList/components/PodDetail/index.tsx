@@ -151,6 +151,7 @@ class PodDetail extends React.Component<Props, State> {
 
   loadPodDetail = async () => {
     listApplicationPodsDetails({
+      project: this.props.application?.project?.name || '',
       name: this.props.pod.metadata.name || '',
       namespace: this.props.pod.metadata.namespace || '',
       cluster: this.props.pod.cluster || '',
@@ -351,6 +352,7 @@ class PodDetail extends React.Component<Props, State> {
               this.setState({ showContainerLog: false, containerName: '' });
             }}
             pod={pod}
+            project={this.props.application?.project?.name || ''}
             containerName={containerName}
             clusterName={clusterName}
           />

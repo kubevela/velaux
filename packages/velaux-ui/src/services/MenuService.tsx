@@ -123,6 +123,17 @@ const defaultWorkspaceMenus: Menu[] = [
   {
     catalog: 'Delivery',
     workspace: 'continuous-delivery',
+    type: MenuTypes.Workspace,
+    to: '/project-configs',
+    icon: <MdConfirmationNumber />,
+    label: 'Configs',
+    name: 'project-configs',
+    permission: { resource: 'project:?/config:*', action: 'list' },
+    relatedRoute: ['/project-configs'],
+  },
+  {
+    catalog: 'Delivery',
+    workspace: 'continuous-delivery',
     to: '/envs',
     type: MenuTypes.Workspace,
     icon: <AiFillEnvironment></AiFillEnvironment>,

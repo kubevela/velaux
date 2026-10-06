@@ -8,6 +8,12 @@ export interface DefinitionMenuType {
 }
 
 export interface DefinitionBase {
+  // namespace is where the definition is; scope says whether that is its
+  // project's or the system namespace.
+  namespace?: string;
+  scope?: 'project' | 'global';
+  // overridden: a global definition the project has one of its name for.
+  overridden?: boolean;
   name: string;
   alias?: string;
   description?: string;

@@ -10,6 +10,7 @@ import DefinitionCode from '../../components/DefinitionCode';
 import Empty from '../../components/Empty';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
+import { definitionPlaceFrom, definitionResource } from '../../utils/definitionPlace';
 import { Translation } from '../../components/Translation';
 import UISchema from '../../components/UISchema';
 import i18n from '../../i18n';
@@ -25,6 +26,7 @@ type Props = {
       definitionType: string;
     };
   };
+  location: { search: string };
 };
 
 type State = {
@@ -60,6 +62,7 @@ class UiSchema extends Component<Props, State> {
   getUISchemaDefinition = async () => {
     const { definitionName, definitionType } = this.state;
     const params = {
+      ...definitionPlaceFrom(this.props.location.search),
       name: definitionName,
       type: definitionType,
     };
@@ -108,6 +111,7 @@ class UiSchema extends Component<Props, State> {
   updateUISchema = () => {
     const { definitionName, definitionType, uiSchema } = this.state;
     const params = {
+      ...definitionPlaceFrom(this.props.location.search),
       name: definitionName,
       definitionType,
       uiSchema,
@@ -246,10 +250,10 @@ class UiSchema extends Component<Props, State> {
               <section className="margin-top-20 text-align-center">
                 <Permission
                   request={{
-                    resource: `definition:${definitionName}`,
+                    resource: definitionResource(definitionPlaceFrom(this.props.location.search), definitionName),
                     action: 'update',
                   }}
-                  project={''}
+                  project={definitionPlaceFrom(this.props.location.search).project}
                 >
                   <Button type="primary" loading={updateUISchemaLoading} onClick={this.updateUISchema}>
                     <Translation>Save & Online</Translation>

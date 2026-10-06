@@ -167,6 +167,7 @@ class TraitDialog extends React.Component<Props, State> {
     const { component } = this.state;
     if (component?.definition) {
       getTraitDefinitions({
+        project: this.props.project,
         appliedWorkload: component?.definition.workload.type,
         namespaces: deployNamespaces(this.props.envbinding),
       }).then((res: { definitions?: DefinitionBase[] }) => {
@@ -262,7 +263,7 @@ class TraitDialog extends React.Component<Props, State> {
   // pinned to or the latest.
   onDetailsTraitDefinition = (value: string, version?: string) => {
     this.setState({ definitionLoading: true });
-    detailTraitDefinition({ name: value, revision: version })
+    detailTraitDefinition({ project: this.props.project, name: value, revision: version })
       .then((re) => {
         if (re) {
           this.setState({ definitionDetail: re, definitionLoading: false });
@@ -422,6 +423,7 @@ class TraitDialog extends React.Component<Props, State> {
               <FormItem label={<Translation>Version</Translation>}>
                 <VersionSelect
                   definitionType="trait"
+                  project={this.props.project}
                   name={this.field.getValue('type')}
                   value={this.field.getValue('traitVersion')}
                   onChange={(version?: string) => {
