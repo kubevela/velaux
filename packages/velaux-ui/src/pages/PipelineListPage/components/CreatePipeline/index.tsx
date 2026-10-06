@@ -6,11 +6,11 @@ import { v4 as uuid } from 'uuid';
 
 import { createPipeline, createPipelineContext, loadPipeline, updatePipeline } from '../../../../api/pipeline';
 import type DefinitionCode from '../../../../components/DefinitionCode';
-import DrawerWithFooter from '../../../../components/Drawer';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { PipelineBase, PipelineDetail, PipelineListItem , LoginUserInfo } from '@velaux/data';
+import type { PipelineBase, PipelineDetail, PipelineListItem, LoginUserInfo } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
@@ -25,6 +25,8 @@ export interface PipelineProps {
   onSuccess?: (pipeline: PipelineBase) => void;
   userInfo?: LoginUserInfo;
   pipeline?: PipelineListItem;
+  // project is the tenant a new pipeline starts in, the one picked globally.
+  project?: string;
 }
 
 type State = {
@@ -185,7 +187,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
       if (
         checkPermission({ resource: `project:${project.name}/pipeline:*`, action: 'create' }, project.name, userInfo)
       ) {
-        if (project.name === 'default') {
+        if (project.name === (this.props.project || 'default')) {
           defaultProject = project.name;
         }
         projectOptions.push({
@@ -197,7 +199,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
     const modeOptions = [{ value: 'StepByStep' }, { value: 'DAG' }];
     const { loading } = this.state;
     return (
-      <DrawerWithFooter
+      <ModalWithFooter
         title={i18n.t(!editMode ? 'New Pipeline' : 'Edit Pipeline')}
         onClose={this.props.onClose}
         onOk={this.onSubmit}
@@ -324,7 +326,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
             </If>
           </Row>
         </Form>
-      </DrawerWithFooter>
+      </ModalWithFooter>
     );
   }
 }

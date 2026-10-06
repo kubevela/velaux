@@ -5,7 +5,8 @@ import { connect } from 'dva';
 
 import { createSource, getExpressionEnv, setExpressionOptIn, updateSource } from '../../../../api/application';
 import { detailSourceDefinition, getSourceDefinitions } from '../../../../api/definitions';
-import DrawerWithFooter from '../../../../components/Drawer';
+import { AwaitingType } from '../../../../components/AwaitingType';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
@@ -84,6 +85,30 @@ class SourceDialog extends React.Component<Props, State> {
     this.uiSchemaRef = React.createRef();
   }
 
+  // componentDidUpdate lists the types again once the application's
+  // environments, and so the namespaces to check them against, have loaded.
+  componentDidUpdate(prev: Props) {
+    if (deployNamespaces(prev.envbinding).join(',') !== deployNamespaces(this.props.envbinding).join(',')) {
+      this.loadDefinitions();
+    }
+  }
+
+  // loadDefinitions lists the source types usable in every namespace the
+  // application deploys to. Without a namespace to check, an unfiltered list
+  // offers types the webhook then refuses, so none are offered.
+  loadDefinitions = () => {
+    const namespaces = deployNamespaces(this.props.envbinding);
+    if (namespaces.length === 0) {
+      this.setState({ definitions: [] });
+      return;
+    }
+    getSourceDefinitions(namespaces).then((res) => {
+      if (res) {
+        this.setState({ definitions: (res.definitions || []).filter(isUsable) });
+      }
+    });
+  };
+
   componentDidMount() {
     const { dispatch, appName, project, source } = this.props;
     if (dispatch) {
@@ -91,14 +116,7 @@ class SourceDialog extends React.Component<Props, State> {
       dispatch({ type: 'uischema/setProject', payload: project });
     }
     this.loadExpressionEnv();
-    const namespaces = deployNamespaces(this.props.envbinding);
-    // Without a namespace to check, an unfiltered list offers types the webhook
-    // then refuses.
-    getSourceDefinitions(namespaces.length > 0 ? namespaces : undefined).then((res) => {
-      if (res) {
-        this.setState({ definitions: namespaces.length > 0 ? (res.definitions || []).filter(isUsable) : [] });
-      }
-    });
+    this.loadDefinitions();
     if (source) {
       this.field.setValues({
         name: source.name,
@@ -192,11 +210,11 @@ class SourceDialog extends React.Component<Props, State> {
     };
     const name = this.field.getValue<string>('name') || (source && source.name) || '<name>';
     const fields = sourceFields(name, definition?.outputSchema);
+    // The source's type comes first; the rest waits for it.
+    const ready = source != undefined || !!this.field.getValue('type');
     return (
-      <DrawerWithFooter
+      <ModalWithFooter
         title={source ? i18n.t('Update Source') : i18n.t('New Source')}
-        placement="right"
-        width={800}
         onClose={onClose}
         extButtons={
           <Permission
@@ -226,99 +244,112 @@ class SourceDialog extends React.Component<Props, State> {
                   />
                 </Form.Item>
               </Col>
-              <Col span={12} style={{ padding: '0 8px' }}>
-                <Form.Item label={i18n.t('Name').toString()} required>
-                  <Input
-                    {...init('name', {
-                      rules: [
+            </Row>
+            <AwaitingType ready={ready}>
+              <Row wrap={true}>
+                <Col span={12} style={{ padding: '0 8px' }}>
+                  <Form.Item label={i18n.t('Name').toString()} required>
+                    <Input
+                      {...init('name', {
+                        rules: [
+                          {
+                            required: true,
+                            pattern: sourceNamePattern,
+                            message: i18n.t('Letters, digits and underscores, as in clusterInfo').toString(),
+                          },
+                        ],
+                      })}
+                      disabled={source != undefined}
+                      locale={locale().Input}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={12} style={{ padding: '0 8px' }}>
+                  <Form.Item
+                    label={i18n.t('Auto Update').toString()}
+                    help={i18n
+                      .t('Whether a change to the value updates what reads it, without a new deploy')
+                      .toString()}
+                  >
+                    <Select
+                      {...init('autoUpdate', { initValue: 'default' })}
+                      locale={locale().Select}
+                      dataSource={[
                         {
-                          required: true,
-                          pattern: sourceNamePattern,
-                          message: i18n.t('Letters, digits and underscores, as in clusterInfo').toString(),
+                          label: i18n.t('Default: the cluster setting, held by a deploy').toString(),
+                          value: 'default',
                         },
-                      ],
-                    })}
-                    disabled={source != undefined}
-                    locale={locale().Input}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={12} style={{ padding: '0 8px' }}>
-                <Form.Item
-                  label={i18n.t('Auto Update').toString()}
-                  help={i18n.t('Whether a change to the value updates what reads it, without a new deploy').toString()}
-                >
-                  <Select
-                    {...init('autoUpdate', { initValue: 'default' })}
-                    locale={locale().Select}
-                    dataSource={[
-                      { label: i18n.t('Default: the cluster setting, held by a deploy').toString(), value: 'default' },
-                      { label: i18n.t('On: refresh live').toString(), value: 'on' },
-                      { label: i18n.t('Off: wait for the next deploy').toString(), value: 'off' },
-                    ]}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
+                        { label: i18n.t('On: refresh live').toString(), value: 'on' },
+                        { label: i18n.t('Off: wait for the next deploy').toString(), value: 'off' },
+                      ]}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </AwaitingType>
             <If condition={definition?.description}>
               <Message type="help">{definition?.description}</Message>
             </If>
           </Card>
-          <Loading visible={loading} style={{ width: '100%' }}>
-            <Card contentHeight="auto" style={{ marginTop: '8px' }} title={i18n.t('Source Properties').toString()}>
-              <If condition={definition && (definition.uiSchema || []).length === 0}>
-                <Message type="notice">
-                  <Translation>This source takes no parameters.</Translation>
-                </Message>
-              </If>
-              <If condition={definition && (definition.uiSchema || []).length > 0}>
-                <Form.Item required={true}>
-                  <UISchema
-                    key={definition?.name}
-                    {...init('properties', {
-                      rules: [{ validator: validator, message: i18n.t('Please check the properties of this source') }],
-                    })}
-                    uiSchema={definition?.uiSchema}
-                    definition={{
-                      type: 'source',
-                      name: definition?.name || '',
-                      description: definition?.description || '',
-                    }}
-                    ref={this.uiSchemaRef}
-                    mode={source ? 'edit' : 'new'}
-                    expressions={this.expressionContext()}
-                  />
-                </Form.Item>
-              </If>
-              <If condition={!definition}>
-                <Message type="notice">
-                  <Translation>Please select the source type first.</Translation>
-                </Message>
-              </If>
-            </Card>
-            <If condition={fields.length > 0}>
-              <Card
-                contentHeight="auto"
-                style={{ marginTop: '8px' }}
-                title={i18n.t('Readable Fields').toString()}
-                subTitle={i18n.t('Properties read these with $( ) expressions').toString()}
-              >
-                <Table dataSource={fields} size="small" hasBorder={false} locale={locale().Table}>
-                  <Table.Column
-                    title={i18n.t('Expression').toString()}
-                    dataIndex="path"
-                    cell={(v: string) => <code>{`$(${v})`}</code>}
-                  />
-                  <Table.Column title={i18n.t('Type').toString()} dataIndex="type" width={140} />
-                  <Table.Column title={i18n.t('Description').toString()} dataIndex="description" />
-                </Table>
+          <AwaitingType ready={ready}>
+            <Loading visible={loading} style={{ width: '100%' }}>
+              <Card contentHeight="auto" style={{ marginTop: '8px' }} title={i18n.t('Source Properties').toString()}>
+                <If condition={definition && (definition.uiSchema || []).length === 0}>
+                  <Message type="notice">
+                    <Translation>This source takes no parameters.</Translation>
+                  </Message>
+                </If>
+                <If condition={definition && (definition.uiSchema || []).length > 0}>
+                  <Form.Item required={true}>
+                    <UISchema
+                      key={definition?.name}
+                      {...init('properties', {
+                        rules: [
+                          { validator: validator, message: i18n.t('Please check the properties of this source') },
+                        ],
+                      })}
+                      uiSchema={definition?.uiSchema}
+                      definition={{
+                        type: 'source',
+                        name: definition?.name || '',
+                        description: definition?.description || '',
+                      }}
+                      ref={this.uiSchemaRef}
+                      mode={source ? 'edit' : 'new'}
+                      expressions={this.expressionContext()}
+                    />
+                  </Form.Item>
+                </If>
+                <If condition={!definition}>
+                  <Message type="notice">
+                    <Translation>Please select the source type first.</Translation>
+                  </Message>
+                </If>
               </Card>
-            </If>
-          </Loading>
+              <If condition={fields.length > 0}>
+                <Card
+                  contentHeight="auto"
+                  style={{ marginTop: '8px' }}
+                  title={i18n.t('Readable Fields').toString()}
+                  subTitle={i18n.t('Properties read these with $( ) expressions').toString()}
+                >
+                  <Table dataSource={fields} size="small" hasBorder={false} locale={locale().Table}>
+                    <Table.Column
+                      title={i18n.t('Expression').toString()}
+                      dataIndex="path"
+                      cell={(v: string) => <code>{`$(${v})`}</code>}
+                    />
+                    <Table.Column title={i18n.t('Type').toString()} dataIndex="type" width={140} />
+                    <Table.Column title={i18n.t('Description').toString()} dataIndex="description" />
+                  </Table>
+                </Card>
+              </If>
+            </Loading>
+          </AwaitingType>
         </Form>
-      </DrawerWithFooter>
+      </ModalWithFooter>
     );
   }
 }

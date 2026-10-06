@@ -7,6 +7,7 @@
 
 // The search sits centred above the page.
 .layout-topbar {
+  position: relative;
   display: flex;
   flex: none;
   align-items: center;
@@ -72,4 +73,12 @@
 }
 .next-dialog .next-dialog-body {
   padding-top: 20px;
+}
+
+// The top bar's right end: the tenant every view is scoped to.
+.layout-topbar-end {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
 }

@@ -151,6 +151,35 @@ var _ = Describe("Test application service function", Ordered, func() {
 		Expect(err).Should(BeNil())
 	})
 
+	It("Test a new application with no component sets its workflow mode", func() {
+		ctx := context.TODO()
+		_, err := appService.CreateApplication(ctx, v1.CreateApplicationRequest{
+			Name: "bare-app", Project: testProject,
+			Labels:       map[string]string{"controller.core.oam.dev/pause": "true"},
+			Annotations:  map[string]string{"app.oam.dev/reconcile-interval": "10m"},
+			EnvBinding:   []*v1.EnvBinding{{Name: "app-dev"}},
+			WorkflowMode: "DAG",
+		})
+		Expect(err).Should(BeNil())
+
+		app := &model.Application{Name: "bare-app"}
+		Expect(appService.Store.Get(ctx, app)).Should(BeNil())
+		Expect(app.Labels).Should(HaveKeyWithValue("controller.core.oam.dev/pause", "true"))
+		Expect(app.Annotations).Should(HaveKeyWithValue("app.oam.dev/reconcile-interval", "10m"))
+
+		wf := &model.Workflow{Name: repository.ConvertWorkflowName("app-dev"), AppPrimaryKey: app.PrimaryKey()}
+		Expect(appService.Store.Get(ctx, wf)).Should(BeNil())
+		Expect(string(wf.Mode.Steps)).Should(Equal("DAG"), "the mode chosen at creation")
+
+		_, err = appService.CreateApplication(ctx, v1.CreateApplicationRequest{
+			Name: "bad-mode-app", Project: testProject, EnvBinding: []*v1.EnvBinding{{Name: "app-dev"}}, WorkflowMode: "Sideways",
+		})
+		Expect(err).ShouldNot(BeNil())
+
+		// The suite's later specs count the project's applications.
+		Expect(appService.DeleteApplication(ctx, app)).Should(BeNil())
+	})
+
 	It("Test annotations given at creation reach the application", func() {
 		ctx := context.TODO()
 		_, err := appService.CreateApplication(ctx, v1.CreateApplicationRequest{

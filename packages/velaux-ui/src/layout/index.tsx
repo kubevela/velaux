@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import LayoutRouter from './LayoutRouter';
 import LeftMenu from './LeftMenu';
 import Header from './Header';
+import { ProjectPicker } from '../components/ProjectPicker';
 import QuickSearch from '../components/QuickSearch';
 import './index.less';
 import { LayoutMode, LayoutModes, Workspace } from '@velaux/data';
@@ -70,6 +71,9 @@ export default function MainLayout(props: any) {
                 {mode !== LayoutModes.NeatPro && (
                   <div className="layout-topbar">
                     <QuickSearch userInfo={props.userInfo} />
+                    <div className="layout-topbar-end">
+                      <ProjectPicker />
+                    </div>
                   </div>
                 )}
                 <div className="layout-content">

@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 
 import {
+  byHealth,
+  envPhase,
+  phaseLabel,
+  phaseTone,
   componentRatio,
+  healthCounts,
   healthOf,
   pausedEnvs,
   summariseStatuses,
@@ -61,5 +66,40 @@ describe('pausedEnvs', () => {
         { envName: 'staging' },
       ])
     ).to.deep.equal(['prod']);
+  });
+});
+
+describe('health filter', () => {
+  const apps = [
+    { name: 'a', status: { health: 'healthy' } },
+    { name: 'b', status: { health: 'healthy' } },
+    { name: 'c', status: { health: 'failed' } },
+    { name: 'd' },
+  ] as any[];
+
+  it('counts the applications in each health, and all of them', () => {
+    expect(healthCounts(apps)).to.deep.equal({ all: 4, healthy: 2, failed: 1, undeployed: 1 });
+  });
+
+  it('keeps the applications in the chosen health, all of them for all', () => {
+    expect(byHealth(apps, 'healthy').map((a) => a.name)).to.deep.equal(['a', 'b']);
+    expect(byHealth(apps, 'undeployed').map((a) => a.name)).to.deep.equal(['d']);
+    expect(byHealth(apps, 'all').length).to.equal(4);
+  });
+});
+
+describe('envPhase', () => {
+  it("reads one env's phase, and labels and colours it", () => {
+    const statuses = [
+      { envName: 'prod', status: { status: 'running' } },
+      { envName: 'dev', status: { status: 'workflowFailed' } },
+    ];
+    expect(envPhase(statuses, 'prod')).to.equal('running');
+    expect(envPhase(statuses, 'missing')).to.equal(undefined);
+    expect(phaseLabel('running')).to.equal('Running');
+    expect(phaseLabel(undefined)).to.equal('Init');
+    expect(phaseTone('running')).to.equal('healthy');
+    expect(phaseTone('workflowFailed')).to.equal('failed');
+    expect(phaseTone('rendering')).to.equal('progressing');
   });
 });

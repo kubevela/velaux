@@ -1,5 +1,6 @@
 import { Dialog } from '@alifd/next';
 import React, { useState } from 'react';
+import { RelativeTime } from '../../../../components/RelativeTime';
 import { AiOutlineControl, AiOutlineDelete, AiOutlineDown, AiOutlineEdit, AiOutlineRight } from 'react-icons/ai';
 
 import Empty from '../../../../components/Empty';
@@ -11,7 +12,6 @@ import type { Tone } from '../../../../components/StatusBadge';
 import { StatusBadge } from '../../../../components/StatusBadge';
 import { Translation } from '../../../../components/Translation';
 import type { ApplicationDetail, ApplicationEnvStatus, ApplicationPolicyBase, EnvBinding } from '@velaux/data';
-import { beautifyTime, momentDate } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import type { PolicyRow, PolicyState } from '../../../../utils/policies';
 import { policyRows, policyState, policyStateLabel } from '../../../../utils/policies';
@@ -115,30 +115,30 @@ const PolicyList = (props: Props) => {
                 )}
               </span>
               <span>
-                {row.policy ? (
-                  <span title={momentDate(row.policy.createTime)}>{beautifyTime(row.policy.createTime)}</span>
-                ) : (
-                  <span className="row-list-muted">-</span>
-                )}
+                {row.policy ? <RelativeTime time={row.policy.createTime} /> : <span className="row-list-muted">-</span>}
               </span>
               <span className="row-list-actions">
                 {row.policy && (
                   <React.Fragment>
-                    <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => props.onShowPolicy(row.name)} />
-                    <Permission
-                      request={{
-                        resource: `project:${projectName}/application:${applicationDetail?.name}/policy:${row.name}`,
-                        action: 'delete',
-                      }}
-                      project={projectName}
-                    >
-                      <RowAction
-                        icon={<AiOutlineDelete />}
-                        label="Delete"
-                        danger
-                        onClick={() => confirmDelete(row.name)}
-                      />
-                    </Permission>
+                    {!applicationDetail?.readOnly && (
+                      <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => props.onShowPolicy(row.name)} />
+                    )}
+                    {!applicationDetail?.readOnly && (
+                      <Permission
+                        request={{
+                          resource: `project:${projectName}/application:${applicationDetail?.name}/policy:${row.name}`,
+                          action: 'delete',
+                        }}
+                        project={projectName}
+                      >
+                        <RowAction
+                          icon={<AiOutlineDelete />}
+                          label="Delete"
+                          danger
+                          onClick={() => confirmDelete(row.name)}
+                        />
+                      </Permission>
+                    )}
                   </React.Fragment>
                 )}
               </span>

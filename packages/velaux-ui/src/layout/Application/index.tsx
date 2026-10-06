@@ -1,4 +1,5 @@
 import { Loading } from '@alifd/next';
+import { allProjects, askedProject } from '../../utils/currentProject';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 import { AppTabs, EnvironmentBar } from './components/AppTabs';
@@ -13,9 +14,10 @@ interface Props {
   dispatch: Dispatch;
   location: any;
   applicationDetail?: ApplicationDetail;
+  currentProject?: { current: string; resolved: boolean };
 }
 @connect((store: any) => {
-  return { ...store.application };
+  return { ...store.application, currentProject: store.currentProject };
 })
 class ApplicationLayout extends Component<Props, any> {
   constructor(props: any) {
@@ -31,9 +33,26 @@ class ApplicationLayout extends Component<Props, any> {
     this.getNamespaceList();
   }
 
+  // The layout re-renders when the URL moves, its query included: a tab's +
+  // asks its page for the add dialog with ?add=1 on the same path.
   shouldComponentUpdate(nextProps: any) {
-    return nextProps.location.pathname !== this.props.location.pathname;
+    return (
+      nextProps.location.pathname !== this.props.location.pathname ||
+      nextProps.location.search !== this.props.location.search
+    );
   }
+
+  // followProject moves the picked project to the application's own, so a link
+  // into another project's application lands in that project.
+  followProject = () => {
+    const { currentProject, applicationDetail, dispatch } = this.props;
+    const project = applicationDetail?.project?.name;
+    // Before the picker has settled, the project is the one it is about to pick.
+    const current = currentProject?.resolved ? currentProject.current : askedProject();
+    if (project && current !== allProjects && project !== current) {
+      dispatch({ type: 'currentProject/setProject', payload: project });
+    }
+  };
 
   onGetApplicationDetails = async () => {
     const {
@@ -44,6 +63,7 @@ class ApplicationLayout extends Component<Props, any> {
       type: 'application/getApplicationDetail',
       payload: { appName: appName },
       callback: () => {
+        this.followProject();
         this.setState({ loading: false }, () => {
           this.loadApplicationComponents();
           this.loadApplicationEnvbinding();

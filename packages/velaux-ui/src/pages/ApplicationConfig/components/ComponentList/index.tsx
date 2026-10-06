@@ -141,26 +141,32 @@ const ComponentList = (props: Props) => {
                 {(com.traits || []).map((trait) => (
                   <span
                     key={trait.type}
-                    className="component-trait"
-                    title={trait.description || trait.type}
-                    onClick={() => props.changeTraitStats(true, trait, com.name)}
+                    className={`component-trait${application?.readOnly ? ' readonly' : ''}`}
+                    title={
+                      [trait.alias !== trait.type ? trait.alias : undefined, trait.description]
+                        .filter(Boolean)
+                        .join('\n') || undefined
+                    }
+                    onClick={application?.readOnly ? undefined : () => props.changeTraitStats(true, trait, com.name)}
                   >
-                    {trait.alias || trait.type}
-                    <Permission
-                      request={{
-                        resource: `project:${projectName}/application:${appName}/component:${com.name}/trait:${trait.type}`,
-                        action: 'delete',
-                      }}
-                      project={projectName}
-                    >
-                      <AiOutlineDelete
-                        className="component-trait-delete"
-                        onClick={(e: React.MouseEvent<SVGElement>) => {
-                          e.stopPropagation();
-                          props.onDeleteTrait(com.name, trait.type);
+                    {trait.type}
+                    {!application?.readOnly && (
+                      <Permission
+                        request={{
+                          resource: `project:${projectName}/application:${appName}/component:${com.name}/trait:${trait.type}`,
+                          action: 'delete',
                         }}
-                      />
-                    </Permission>
+                        project={projectName}
+                      >
+                        <AiOutlineDelete
+                          className="component-trait-delete"
+                          onClick={(e: React.MouseEvent<SVGElement>) => {
+                            e.stopPropagation();
+                            props.onDeleteTrait(com.name, trait.type);
+                          }}
+                        />
+                      </Permission>
+                    )}
                   </span>
                 ))}
                 {!application?.readOnly && (
@@ -201,7 +207,9 @@ const ComponentList = (props: Props) => {
                 )}
               </span>
               <span className="row-list-actions">
-                <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => props.editComponent(com)} />
+                {!application?.readOnly && (
+                  <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => props.editComponent(com)} />
+                )}
                 {!com.main && !application?.readOnly && (
                   <Permission
                     request={{

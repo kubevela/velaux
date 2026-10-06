@@ -15,7 +15,8 @@ import {
 import type { ExpressionContext } from '../../../../components/UISchema';
 import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
 import { detailTraitDefinition, getTraitDefinitions } from '../../../../api/definitions';
-import DrawerWithFooter from '../../../../components/Drawer';
+import { AwaitingType } from '../../../../components/AwaitingType';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
@@ -348,15 +349,11 @@ class TraitDialog extends React.Component<Props, State> {
       this.uiSchemaRef.current?.validate(callback);
     };
     const traitType: string = this.field.getValue('type');
+    // The trait's type comes first; the rest waits for it.
+    const ready = !!isEditTrait || !!traitType;
 
     return (
-      <DrawerWithFooter
-        title={this.showTraitTitle()}
-        placement="right"
-        width={800}
-        onClose={onClose}
-        extButtons={this.extButtonList()}
-      >
+      <ModalWithFooter title={this.showTraitTitle()} onClose={onClose} extButtons={this.extButtonList()}>
         <Form field={this.field}>
           <If condition={podDisruptive && traitType && podDisruptive[traitType]}>
             <Row>
@@ -402,105 +399,107 @@ class TraitDialog extends React.Component<Props, State> {
               </FormItem>
             </Col>
           </Row>
-          <Row>
-            <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Alias</Translation>}>
-                <Input
-                  name="alias"
-                  placeholder={i18n.t('Please enter').toString()}
-                  {...init('alias', {
-                    rules: [
-                      {
-                        minLength: 2,
-                        maxLength: 64,
-                        message: 'Enter a string of 2 to 64 characters.',
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
-            </Col>
+          <AwaitingType ready={ready}>
+            <Row>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={<Translation>Alias</Translation>}>
+                  <Input
+                    name="alias"
+                    placeholder={i18n.t('Please enter').toString()}
+                    {...init('alias', {
+                      rules: [
+                        {
+                          minLength: 2,
+                          maxLength: 64,
+                          message: 'Enter a string of 2 to 64 characters.',
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
 
-            <Col span={12} style={{ padding: '0 8px' }}>
-              <FormItem label={<Translation>Description</Translation>}>
-                <Input
-                  name="description"
-                  placeholder={i18n.t('Please enter').toString()}
-                  {...init('description', {
-                    rules: [
-                      {
-                        maxLength: 256,
-                        message: i18n.t('Enter a description that contains less than 256 characters.'),
-                      },
-                    ],
-                  })}
-                />
-              </FormItem>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={24} style={{ padding: '0 8px' }}>
-              <Card
-                contentHeight={'auto'}
-                style={{ marginTop: '8px' }}
-                title={i18n.t('Properties').toString()}
-                className="withActions"
-                subTitle={
-                  <Button
-                    style={{ alignItems: 'center', display: 'flex' }}
-                    onClick={() => {
-                      if (propertiesMode === 'native') {
-                        this.setState({ propertiesMode: 'code' });
-                      } else {
-                        this.setState({ propertiesMode: 'native' });
-                      }
-                    }}
-                  >
-                    {propertiesMode === 'native' && (
-                      <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
-                    )}
-                    {propertiesMode === 'code' && <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />}
-                  </Button>
-                }
-              >
-                <Loading visible={definitionLoading}>
-                  <If condition={definitionDetail}>
-                    <FormItem required={true}>
-                      <UISchema
-                        key={traitType}
-                        {...init(`properties`, {
-                          rules: [
-                            {
-                              validator: validator,
-                              message: i18n.t('Please check trait deploy properties'),
-                            },
-                          ],
-                        })}
-                        enableCodeEdit={propertiesMode === 'code'}
-                        uiSchema={definitionDetail && definitionDetail.uiSchema}
-                        definition={{
-                          type: 'trait',
-                          name: definitionDetail?.name || '',
-                          description: definitionDetail?.description || '',
-                        }}
-                        ref={this.uiSchemaRef}
-                        mode={this.props.isEditTrait ? 'edit' : 'new'}
-                        deployed={this.props.deployed}
-                        expressions={this.expressionContext()}
-                      />
-                    </FormItem>
-                  </If>
-                  <If condition={!definitionDetail}>
-                    <Message type="notice">
-                      <Translation>Please select trait type first.</Translation>
-                    </Message>
-                  </If>
-                </Loading>
-              </Card>
-            </Col>
-          </Row>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <FormItem label={<Translation>Description</Translation>}>
+                  <Input
+                    name="description"
+                    placeholder={i18n.t('Please enter').toString()}
+                    {...init('description', {
+                      rules: [
+                        {
+                          maxLength: 256,
+                          message: i18n.t('Enter a description that contains less than 256 characters.'),
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24} style={{ padding: '0 8px' }}>
+                <Card
+                  contentHeight={'auto'}
+                  style={{ marginTop: '8px' }}
+                  title={i18n.t('Properties').toString()}
+                  className="withActions"
+                  subTitle={
+                    <Button
+                      style={{ alignItems: 'center', display: 'flex' }}
+                      onClick={() => {
+                        if (propertiesMode === 'native') {
+                          this.setState({ propertiesMode: 'code' });
+                        } else {
+                          this.setState({ propertiesMode: 'native' });
+                        }
+                      }}
+                    >
+                      {propertiesMode === 'native' && (
+                        <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                      )}
+                      {propertiesMode === 'code' && <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />}
+                    </Button>
+                  }
+                >
+                  <Loading visible={definitionLoading}>
+                    <If condition={definitionDetail}>
+                      <FormItem required={true}>
+                        <UISchema
+                          key={traitType}
+                          {...init(`properties`, {
+                            rules: [
+                              {
+                                validator: validator,
+                                message: i18n.t('Please check trait deploy properties'),
+                              },
+                            ],
+                          })}
+                          enableCodeEdit={propertiesMode === 'code'}
+                          uiSchema={definitionDetail && definitionDetail.uiSchema}
+                          definition={{
+                            type: 'trait',
+                            name: definitionDetail?.name || '',
+                            description: definitionDetail?.description || '',
+                          }}
+                          ref={this.uiSchemaRef}
+                          mode={this.props.isEditTrait ? 'edit' : 'new'}
+                          deployed={this.props.deployed}
+                          expressions={this.expressionContext()}
+                        />
+                      </FormItem>
+                    </If>
+                    <If condition={!definitionDetail}>
+                      <Message type="notice">
+                        <Translation>Please select trait type first.</Translation>
+                      </Message>
+                    </If>
+                  </Loading>
+                </Card>
+              </Col>
+            </Row>
+          </AwaitingType>
         </Form>
-      </DrawerWithFooter>
+      </ModalWithFooter>
     );
   }
 }

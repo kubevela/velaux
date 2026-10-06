@@ -21,6 +21,8 @@ type Props = {
   projectName?: string;
   status: ApplicationStatus;
   onChanged: () => void;
+  // readOnly is an application its addon manages: its settings are shown, not changed.
+  readOnly?: boolean;
 };
 
 // IntervalDialog sets the Application's resync period, or clears it back to the
@@ -157,9 +159,11 @@ const Reconciliation = (props: Props) => {
           )}
         </dd>
         <dd className="reconciliation-actions">
-          <Permission request={{ resource, action: 'update' }} project={projectName}>
-            <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => setDialog('interval')} />
-          </Permission>
+          {!props.readOnly && (
+            <Permission request={{ resource, action: 'update' }} project={projectName}>
+              <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => setDialog('interval')} />
+            </Permission>
+          )}
         </dd>
 
         <dt>
@@ -195,17 +199,19 @@ const Reconciliation = (props: Props) => {
           )}
         </dd>
         <dd className="reconciliation-actions">
-          <Permission request={{ resource, action: 'restart' }} project={projectName}>
-            <RowAction icon={<AiOutlineReload />} label="Restart workflow" onClick={() => setDialog('restart')} />
-            {(plan.mode === 'once' || plan.mode === 'every') && (
-              <RowAction
-                icon={<AiOutlineStop />}
-                label="Cancel the restart"
-                danger
-                onClick={() => cancelWorkflowRestart({ appName, envName }).then(done('Workflow restart cancelled'))}
-              />
-            )}
-          </Permission>
+          {!props.readOnly && (
+            <Permission request={{ resource, action: 'restart' }} project={projectName}>
+              <RowAction icon={<AiOutlineReload />} label="Restart workflow" onClick={() => setDialog('restart')} />
+              {(plan.mode === 'once' || plan.mode === 'every') && (
+                <RowAction
+                  icon={<AiOutlineStop />}
+                  label="Cancel the restart"
+                  danger
+                  onClick={() => cancelWorkflowRestart({ appName, envName }).then(done('Workflow restart cancelled'))}
+                />
+              )}
+            </Permission>
+          )}
         </dd>
 
         {status.autoUpdate && (

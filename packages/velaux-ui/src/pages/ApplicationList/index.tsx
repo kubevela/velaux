@@ -1,16 +1,20 @@
 import { Message, Loading, Button } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
+import type { HealthFilter } from './components/AppStatus/health';
+import { byHealth, healthCounts } from './components/AppStatus/health';
+import { HealthChips } from './components/HealthChips';
+import { visibleLabels } from '../../utils/appMeta';
 
+import { projectChanged, scopedTo } from '../../utils/currentProject';
 import { deleteApplication } from '../../api/application';
-import { getComponentDefinitions } from '../../api/definitions';
 import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { ApplicationBase, LoginUserInfo } from '@velaux/data';
+import type { ApplicationBase, Env, LoginUserInfo } from '@velaux/data';
 
-import AppDialog from './components/AddAppDialog';
+import { NewServiceDialog } from './components/NewServiceDialog';
 import CardContend from './components/CardContent';
 import EditAppDialog from './components/EditAppDialog';
 import SelectSearch from './components/SelectSearch';
@@ -22,22 +26,30 @@ type Props = {
   envs?: [];
   history: any;
   userInfo?: LoginUserInfo;
+  currentProject?: { current: string; resolved: boolean };
 };
 
 export type ShowMode = 'table' | 'card' | string | null;
 
 type State = {
   showAddApplication: boolean;
-  componentDefinitions: [];
   isLoading: boolean;
   showEditApplication: boolean;
   editItem?: ApplicationBase;
   labelValue: string[];
   showMode: ShowMode;
+  health: HealthFilter;
 };
 
 @connect((store: any) => {
-  return { ...store.application, ...store.target, ...store.clusters, ...store.env, ...store.user };
+  return {
+    ...store.application,
+    ...store.target,
+    ...store.clusters,
+    ...store.env,
+    ...store.user,
+    currentProject: store.currentProject,
+  };
 })
 class Application extends Component<Props, State> {
   constructor(props: Props) {
@@ -48,25 +60,36 @@ class Application extends Component<Props, State> {
     }
     this.state = {
       showAddApplication: false,
-      componentDefinitions: [],
       labelValue: [],
       isLoading: false,
       showEditApplication: false,
       showMode: mode,
+      health: 'all',
     };
   }
 
   componentDidMount() {
     this.getApplications({});
     this.getEnvs();
-    this.onGetComponentDefinitions();
   }
 
+  componentDidUpdate(prev: Props) {
+    if (projectChanged(prev.currentProject, this.props.currentProject)) {
+      this.getApplications({});
+      this.getEnvs();
+    }
+  }
+
+  // getApplications lists the picked project's applications, or every project's
+  // for all of them, and not before the project is known.
   getApplications = async (params: any) => {
+    if (!this.props.currentProject?.resolved) {
+      return;
+    }
     this.setState({ isLoading: true });
     this.props.dispatch({
       type: 'application/getApplicationList',
-      payload: { ...params, withStatus: true },
+      payload: { ...params, project: this.props.currentProject.current, withStatus: true },
       callback: () => {
         this.setState({
           isLoading: false,
@@ -75,10 +98,15 @@ class Application extends Component<Props, State> {
     });
   };
 
+  // getEnvs lists the environments the Environment filter offers, the picked
+  // project's.
   getEnvs = async () => {
+    if (!this.props.currentProject?.resolved) {
+      return;
+    }
     this.props.dispatch({
       type: 'env/listEnvs',
-      payload: {},
+      payload: { project: this.props.currentProject.current },
     });
   };
 
@@ -93,16 +121,6 @@ class Application extends Component<Props, State> {
       if (re) {
         Message.success('Application deleted successfully');
         this.getApplications({});
-      }
-    });
-  };
-
-  onGetComponentDefinitions = async () => {
-    getComponentDefinitions().then((res) => {
-      if (res) {
-        this.setState({
-          componentDefinitions: res && res.definitions,
-        });
       }
     });
   };
@@ -149,14 +167,14 @@ class Application extends Component<Props, State> {
   };
 
   render() {
-    const { applicationList, targets, dispatch, envs, userInfo } = this.props;
-    const { showAddApplication, componentDefinitions, isLoading, showEditApplication, editItem, labelValue, showMode } =
-      this.state;
+    const { dispatch, envs, userInfo } = this.props;
+    const applicationList = scopedTo(this.props.applicationList, this.props.currentProject, (a) => a.project?.name);
+    const { showAddApplication, isLoading, showEditApplication, editItem, labelValue, showMode } = this.state;
     let appLabels: string[] = [];
     applicationList?.map((app) => {
       app.labels &&
         Object.keys(app.labels).map((key: string) => {
-          if (key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev')) {
+          if (visibleLabels(app.labels).includes(key)) {
             if (app.labels) {
               appLabels.push(key + '=' + app.labels[key]);
             }
@@ -183,12 +201,11 @@ class Application extends Component<Props, State> {
         />
 
         <SelectSearch
-          projects={userInfo?.projects}
           appLabels={appLabels}
           dispatch={dispatch}
           setLabelValue={this.setLabelValue}
           labelValue={labelValue}
-          envs={envs}
+          envs={scopedTo(envs, this.props.currentProject, (env: Env) => env.project?.name)}
           showMode={showMode}
           setMode={(mode: ShowMode) => {
             this.setState({ showMode: mode });
@@ -200,9 +217,14 @@ class Application extends Component<Props, State> {
             this.getApplications(params);
           }}
         />
+        <HealthChips
+          counts={healthCounts(applicationList || [])}
+          value={this.state.health}
+          onChange={(health: HealthFilter) => this.setState({ health })}
+        />
         <Loading visible={isLoading} fullScreen>
           <CardContend
-            applications={applicationList}
+            applications={byHealth(applicationList || [], this.state.health)}
             editAppPlan={(item: ApplicationBase) => {
               this.editAppPlan(item);
             }}
@@ -215,20 +237,13 @@ class Application extends Component<Props, State> {
           />
         </Loading>
         <If condition={showAddApplication}>
-          <AppDialog
-            visible={showAddApplication}
-            targets={targets}
-            userInfo={userInfo}
+          <NewServiceDialog
             projects={userInfo?.projects}
-            componentDefinitions={componentDefinitions}
-            setVisible={(visible) => {
-              this.setState({ showAddApplication: visible });
-            }}
-            onOK={(name: string) => {
+            project={this.props.currentProject?.current || undefined}
+            onClose={this.closeAddApplication}
+            onCreated={(name: string) => {
               this.props.history.push(`/applications/${name}/config`);
             }}
-            onClose={this.closeAddApplication}
-            dispatch={dispatch}
           />
         </If>
 
