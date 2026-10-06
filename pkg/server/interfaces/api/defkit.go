@@ -49,21 +49,21 @@ func (d *defkit) GetWebServiceRoute() *restful.WebService {
 
 	ws.Route(ws.GET("/").To(d.list).
 		Doc("list the installed DefKit modules").
-		Filter(d.RbacService.CheckPerm("definition", "list")).
+		Filter(d.RbacService.CheckPerm("defkit", "list")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "OK", apis.ListDefKitModulesResponse{}).
 		Writes(apis.ListDefKitModulesResponse{}))
 
 	ws.Route(ws.GET("/repositories").To(d.repositories).
 		Doc("the module sources the defkit addon offers when adding one").
-		Filter(d.RbacService.CheckPerm("definition", "list")).
+		Filter(d.RbacService.CheckPerm("defkit", "list")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "OK", apis.ListDefKitRepositoriesResponse{}).
 		Writes(apis.ListDefKitRepositoriesResponse{}))
 
 	ws.Route(ws.POST("/").To(d.create).
 		Doc("install a DefKit module; its render waits for review").
-		Filter(d.RbacService.CheckPerm("definition", "create")).
+		Filter(d.RbacService.CheckPerm("defkit", "create")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(apis.CreateDefKitModuleRequest{}).
 		Returns(200, "OK", apis.DefKitModule{}).
@@ -72,7 +72,7 @@ func (d *defkit) GetWebServiceRoute() *restful.WebService {
 
 	ws.Route(ws.GET("/{name}").To(d.detail).
 		Doc("detail a DefKit module and the definitions it installed").
-		Filter(d.RbacService.CheckPerm("definition", "detail")).
+		Filter(d.RbacService.CheckPerm("defkit", "detail")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(name).
 		Returns(200, "OK", apis.DefKitModuleDetail{}).
@@ -81,7 +81,7 @@ func (d *defkit) GetWebServiceRoute() *restful.WebService {
 
 	ws.Route(ws.PUT("/{name}").To(d.update).
 		Doc("change a DefKit module's source or settings; the new render waits for review unless it updates itself").
-		Filter(d.RbacService.CheckPerm("definition", "update")).
+		Filter(d.RbacService.CheckPerm("defkit", "update")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(name).
 		Reads(apis.UpdateDefKitModuleRequest{}).
@@ -91,7 +91,7 @@ func (d *defkit) GetWebServiceRoute() *restful.WebService {
 
 	ws.Route(ws.DELETE("/{name}").To(d.remove).
 		Doc("uninstall a DefKit module and the definitions it installed").
-		Filter(d.RbacService.CheckPerm("definition", "delete")).
+		Filter(d.RbacService.CheckPerm("defkit", "delete")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(name).
 		Returns(200, "OK", apis.EmptyResponse{}).
@@ -100,7 +100,7 @@ func (d *defkit) GetWebServiceRoute() *restful.WebService {
 
 	ws.Route(ws.GET("/{name}/preview").To(d.preview).
 		Doc("the module's pending render against the cluster").
-		Filter(d.RbacService.CheckPerm("definition", "detail")).
+		Filter(d.RbacService.CheckPerm("defkit", "detail")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(name).
 		Returns(200, "OK", apis.DefKitPreview{}).
@@ -109,7 +109,7 @@ func (d *defkit) GetWebServiceRoute() *restful.WebService {
 
 	ws.Route(ws.POST("/{name}/apply").To(d.apply).
 		Doc("apply the module's pending render: take over the conflicts named, delete the removed definitions named").
-		Filter(d.RbacService.CheckPerm("definition", "update")).
+		Filter(d.RbacService.CheckPerm("defkit", "update")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(name).
 		Reads(apis.ApplyDefKitPreviewRequest{}).

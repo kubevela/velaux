@@ -47,9 +47,9 @@ func (v *velaQL) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/").To(v.queryView).
 		Doc("use velaQL to query resource status").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		// The project's application list permission; with no project, only a
-		// platform permission over every project's applications, an admin's.
-		Filter(v.RbacService.CheckPerm("project/application", "list")).
+		// The project's query permission; with no project, only a platform
+		// permission over every project's queries, an admin's.
+		Filter(v.RbacService.CheckPerm("project/query", "detail")).
 		Param(ws.QueryParameter("velaql", "velaql query statement").DataType("string")).
 		Param(ws.QueryParameter("project", "the project to query in, as its user; empty for every project, admins only").DataType("string")).
 		Returns(200, "OK", apis.VelaQLViewResponse{}).

@@ -173,7 +173,7 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/reports'],
     icon: <AiOutlineBarChart />,
     label: 'Reports',
-    permission: { resource: 'project:?/application:*', action: 'list' },
+    permission: { resource: 'project:?/report:*', action: 'list' },
   },
   // Items not built yet show what is coming.
   {
@@ -229,7 +229,7 @@ const defaultWorkspaceMenus: Menu[] = [
     label: 'DefKit',
     name: 'defkit-list',
     // A module installs definitions, so it is listed to whoever may list them.
-    permission: { resource: 'definition:*', action: 'list' },
+    permission: { resource: 'defkit:*', action: 'list' },
     relatedRoute: ['/defkit'],
   },
   {
@@ -240,7 +240,7 @@ const defaultWorkspaceMenus: Menu[] = [
     icon: <BsFillFileCodeFill></BsFillFileCodeFill>,
     label: 'Definitions',
     name: 'definition-list',
-    permission: { resource: 'definition:*', action: 'list' },
+    permission: { resource: 'project:?/definition:*', action: 'list' },
     relatedRoute: ['/definitions'],
   },
   {
@@ -253,7 +253,7 @@ const defaultWorkspaceMenus: Menu[] = [
     name: 'package-list',
     // Packages are what definitions are written against, so whoever may
     // list definitions may list them.
-    permission: { resource: 'definition:*', action: 'list' },
+    permission: { resource: 'package:*', action: 'list' },
     relatedRoute: ['/packages'],
   },
   {

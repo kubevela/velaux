@@ -275,7 +275,7 @@ const Review = (props: { name: string; preview?: DefKitPreview; onApplied: () =>
         <span>
           {changes} <Translation>changes</Translation> · {preview.items.length} <Translation>definitions</Translation>
         </span>
-        <Permission request={{ resource: 'definition:*', action: 'update' }} project={''}>
+        <Permission request={{ resource: 'defkit:*', action: 'update' }} project={''}>
           <Button type="primary" loading={applying} onClick={apply}>
             <Translation>Apply</Translation>
           </Button>
@@ -386,12 +386,12 @@ const DefKitModuleDetail = (props: {
         <h1>{detail.name}</h1>
         <StatusBadge tone={phaseTones[detail.phase]} label={phaseLabels[detail.phase]} title={detail.message} />
         <span className="defkit-head-actions">
-          <Permission request={{ resource: 'definition:*', action: 'update' }} project={''}>
+          <Permission request={{ resource: 'defkit:*', action: 'update' }} project={''}>
             <Button onClick={() => setUpdating(true)}>
               <Translation>Update</Translation>
             </Button>
           </Permission>
-          <Permission request={{ resource: 'definition:*', action: 'delete' }} project={''}>
+          <Permission request={{ resource: 'defkit:*', action: 'delete' }} project={''}>
             <Button warning onClick={uninstall}>
               <Translation>Uninstall</Translation>
             </Button>

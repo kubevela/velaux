@@ -60,7 +60,7 @@ const DefKitModules = (props: { dispatch: (action: any) => void }) => {
         title="DefKit"
         subTitle="Definition modules written in Go with DefKit, rendered and reviewed before they install"
         extButtons={[
-          <Permission key="add" request={{ resource: 'definition:*', action: 'create' }} project={''}>
+          <Permission key="add" request={{ resource: 'defkit:*', action: 'create' }} project={''}>
             <Button type="primary" disabled={!addonEnabled} onClick={() => setAdding(true)}>
               <Translation>Add module</Translation>
             </Button>
