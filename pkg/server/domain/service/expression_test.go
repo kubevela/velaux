@@ -75,10 +75,11 @@ func TestExpressionCheck(t *testing.T) {
 
 func TestExpressionEnv(t *testing.T) {
 	app := &model.Application{Name: "demo", Annotations: map[string]string{"app.oam.dev/cel-expressions": "true"}}
-	env, err := (&expressionServiceImpl{enabled: true}).Env(context.Background(), app, "trait", "")
+	env, err := (&expressionServiceImpl{enabled: true}).Env(context.Background(), app, "trait", "", "")
 	require.NoError(t, err)
 	assert.True(t, env.OptedIn)
-	require.Len(t, env.Variables, 2)
+	require.Len(t, env.Variables, 3)
+	assert.Equal(t, "component", env.Variables[2].Name, "a component or trait reads the other components")
 	ctxRoot := env.Variables[0]
 	assert.Equal(t, "context", ctxRoot.Name)
 	fields := map[string]*apisv1.ExpressionVariable{}
@@ -94,12 +95,12 @@ func TestExpressionEnv(t *testing.T) {
 	require.Contains(t, fields, "clusterVersion")
 	assert.NotEmpty(t, fields["clusterVersion"].Children)
 
-	off, err := (&expressionServiceImpl{}).Env(context.Background(), app, "component", "")
+	off, err := (&expressionServiceImpl{}).Env(context.Background(), app, "component", "", "")
 	require.NoError(t, err)
 	assert.False(t, off.Enabled)
 	assert.Empty(t, off.Variables)
 
-	_, err = (&expressionServiceImpl{enabled: true}).Env(context.Background(), app, "nowhere", "")
+	_, err = (&expressionServiceImpl{enabled: true}).Env(context.Background(), app, "nowhere", "", "")
 	assert.Error(t, err)
 }
 
@@ -122,9 +123,10 @@ output: host: "db"
 		Sources:     []v1beta1.ApplicationSource{{Name: "db", Type: "db-lookup"}},
 	}
 
-	env, err := svc.Env(context.Background(), app, "component", "")
+	env, err := svc.Env(context.Background(), app, "component", "", "")
 	require.NoError(t, err)
-	require.Len(t, env.Variables, 2)
+	require.Len(t, env.Variables, 3)
+	assert.Equal(t, "component", env.Variables[2].Name, "a component or trait reads the other components")
 	sources := env.Variables[1]
 	require.Len(t, sources.Children, 1, "a source counts before the application is deployed")
 	db := sources.Children[0]
@@ -157,7 +159,7 @@ output: value: parameter.key
 		Sources:     []v1beta1.ApplicationSource{{Name: "first", Type: "lookup"}, {Name: "second", Type: "lookup"}, {Name: "third", Type: "lookup"}},
 	}
 	readable := func(source string) []string {
-		env, err := svc.Env(context.Background(), app, "source", source)
+		env, err := svc.Env(context.Background(), app, "source", source, "")
 		require.NoError(t, err)
 		require.Len(t, env.Variables, 2)
 		var names []string
@@ -170,7 +172,7 @@ output: value: parameter.key
 	assert.Empty(t, readable("first"))
 	assert.Equal(t, []string{"first", "second", "third"}, readable("new"), "a new source is declared last")
 
-	env, err := svc.Env(context.Background(), app, "source", "second")
+	env, err := svc.Env(context.Background(), app, "source", "second", "")
 	require.NoError(t, err)
 	assert.Equal(t, "context", env.Variables[0].Name, "a source reads the context a component does")
 

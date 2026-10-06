@@ -85,7 +85,7 @@ func draftApplication(optIn bool) *model.Application {
 
 func (e *expression) env(req *restful.Request, res *restful.Response) {
 	optIn, _ := strconv.ParseBool(req.QueryParameter("optIn"))
-	env, err := e.ExpressionService.Env(req.Request.Context(), draftApplication(optIn), req.QueryParameter("surface"), "")
+	env, err := e.ExpressionService.Env(req.Request.Context(), draftApplication(optIn), req.QueryParameter("surface"), "", "")
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return

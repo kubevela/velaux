@@ -21,3 +21,6 @@ var ErrExpressionSurface = NewBcode(400, 19001, "expressions cannot be written o
 
 // ErrExpressionsDisabled is returned when this server does not offer expressions.
 var ErrExpressionsDisabled = NewBcode(400, 19002, "expressions are not enabled on this server; start it with --enable-cel-expressions")
+
+// ErrExpressionInvalid is returned for properties holding an expression with an error.
+var ErrExpressionInvalid = NewBcode(400, 19003, "a property expression has an error")

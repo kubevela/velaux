@@ -27,6 +27,8 @@ type Props = {
 };
 
 type State = {
+  // propertiesValid is whether the properties form can be saved as it stands.
+  propertiesValid?: boolean;
   templateDetail?: ConfigTemplateDetail;
   templateLoading: boolean;
   createLoading: boolean;
@@ -236,7 +238,17 @@ class CreateConfigDialog extends React.Component<Props, State> {
           }}
           project={project}
         >
-          <Button type="primary" onClick={this.onCreate} loading={createLoading}>
+          <Button
+            type="primary"
+            onClick={this.onCreate}
+            disabled={this.state.propertiesValid === false}
+            title={
+              this.state.propertiesValid === false
+                ? i18n.t('Fix the highlighted properties first').toString()
+                : undefined
+            }
+            loading={createLoading}
+          >
             <Translation>Create</Translation>
           </Button>
         </Permission>
@@ -250,7 +262,17 @@ class CreateConfigDialog extends React.Component<Props, State> {
           }}
           project={project}
         >
-          <Button type="primary" onClick={this.onUpdate} loading={createLoading}>
+          <Button
+            type="primary"
+            onClick={this.onUpdate}
+            disabled={this.state.propertiesValid === false}
+            title={
+              this.state.propertiesValid === false
+                ? i18n.t('Fix the highlighted properties first').toString()
+                : undefined
+            }
+            loading={createLoading}
+          >
             <Translation>Update</Translation>
           </Button>
         </Permission>
@@ -404,6 +426,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
                             })}
                             enableCodeEdit={propertiesMode === 'code'}
                             uiSchema={templateDetail && templateDetail.uiSchema}
+                            onValidityChange={(valid: boolean) => this.setState({ propertiesValid: valid })}
                             ref={this.uiSchemaRef}
                             mode={edit ? 'edit' : 'new'}
                           />

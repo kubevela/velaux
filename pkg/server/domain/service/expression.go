@@ -18,6 +18,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"sort"
@@ -29,6 +30,7 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/format"
 	"cuelang.org/go/cue/parser"
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/cel-go/cel"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -59,9 +61,13 @@ const (
 // ExpressionService helps forms edit the $( ) CEL expressions an application's
 // properties may hold.
 type ExpressionService interface {
-	Env(ctx context.Context, app *model.Application, surface, source string) (*apisv1.ExpressionEnvResponse, error)
+	Env(ctx context.Context, app *model.Application, surface, source, component string) (*apisv1.ExpressionEnvResponse, error)
 	Check(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest) (*apisv1.ExpressionCheckResponse, error)
 	SetOptIn(ctx context.Context, app *model.Application, on bool) error
+	// CheckProperties refuses properties holding an expression the check finds
+	// an error in, each against the type its parameter declares in the
+	// definition of typeName, a type as an Application writes it.
+	CheckProperties(ctx context.Context, app *model.Application, surface, defType, typeName, properties, source, component string) error
 }
 
 type expressionServiceImpl struct {
@@ -69,6 +75,7 @@ type expressionServiceImpl struct {
 	KubeClient        client.Client       `inject:"kubeClient"`
 	Store             datastore.DataStore `inject:"datastore"`
 	EnvBindingService EnvBindingService   `inject:""`
+	DefinitionService DefinitionService   `inject:""`
 }
 
 // NewExpressionService offers expression editing when enabled, which should
@@ -96,9 +103,11 @@ func optedIn(app *model.Application) bool {
 }
 
 // Env lists what an expression on the surface can read: the surface's context
-// fields and the application's source bindings. On the source surface, source
-// names the one being edited, which reads only those declared before it.
-func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application, surface, source string) (*apisv1.ExpressionEnvResponse, error) {
+// fields, the application's source bindings and, on a component or trait, its
+// other components. On the source surface, source names the one being edited,
+// which reads only those declared before it; component names the component being
+// edited, or the one a trait is on, which reads every component but itself.
+func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application, surface, source, component string) (*apisv1.ExpressionEnvResponse, error) {
 	contextSchema, ok := contextFor(surface)
 	if !ok {
 		return nil, bcode.ErrExpressionSurface
@@ -131,6 +140,9 @@ func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application,
 		sourceRoot.Children = append(sourceRoot.Children, binding)
 	}
 	resp.Variables = append(resp.Variables, sourceRoot)
+	if components := e.componentRoot(ctx, app, surface, component); components != nil {
+		resp.Variables = append(resp.Variables, components)
+	}
 	return resp, nil
 }
 
@@ -339,6 +351,10 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 		}
 		exprStart := start + len("$(")
 		pos = exprStart + len(frag.Expr)
+		if issues := e.componentIssues(ctx, app, req, frag.Expr, exprStart); len(issues) > 0 {
+			resp.Issues = append(resp.Issues, issues...)
+			continue
+		}
 		out, err := celexpr.OutputType(env, frag.Expr)
 		if err != nil {
 			resp.Issues = append(resp.Issues, issuesAt(err.Error(), exprStart, frag.Expr)...)
@@ -426,4 +442,100 @@ func (e *expressionServiceImpl) SetOptIn(ctx context.Context, app *model.Applica
 		delete(app.Annotations, oam.AnnotationCelExpressions)
 	}
 	return e.Store.Put(ctx, app)
+}
+
+// CheckProperties refuses properties holding an expression the check finds an
+// error in, so one saved through the API is checked as the form checks it. A
+// type with no schema, or an application that reads $( literally, is left to
+// the controller.
+func (e *expressionServiceImpl) CheckProperties(ctx context.Context, app *model.Application, surface, defType, typeName, properties, source, component string) error {
+	if !e.enabled || !optedIn(app) || !strings.Contains(properties, "$(") {
+		return nil
+	}
+	if _, ok := contextFor(surface); !ok {
+		return nil
+	}
+	var values map[string]interface{}
+	if err := json.Unmarshal([]byte(properties), &values); err != nil {
+		return nil
+	}
+	name, version, _ := strings.Cut(typeName, "@")
+	detail, err := e.DefinitionService.DetailDefinitionAt(ctx, name, defType, version)
+	if err != nil || detail.APISchema == nil {
+		return nil
+	}
+	check := func(path, value string, schema *openapi3.Schema) error {
+		resp, err := e.Check(ctx, app, apisv1.ExpressionCheckRequest{
+			Surface: surface, Value: value, Kind: expressionKind(schema), Source: source, Component: component,
+		})
+		if err != nil {
+			return err
+		}
+		for _, issue := range resp.Issues {
+			if !issue.Warning {
+				return bcode.ErrExpressionInvalid.SetMessage(fmt.Sprintf("%s: %s", path, issue.Message))
+			}
+		}
+		return nil
+	}
+	return walkExpressions("", values, detail.APISchema, check)
+}
+
+// expressionKind is the type a parameter expects, as the check names it, or
+// none for any.
+func expressionKind(schema *openapi3.Schema) string {
+	if schema == nil || schema.Type == nil {
+		return ""
+	}
+	for _, kind := range []string{"integer", "number", "boolean", "string"} {
+		if schema.Type.Is(kind) {
+			return kind
+		}
+	}
+	return ""
+}
+
+// walkExpressions calls check on every string holding an expression, with its
+// dotted path and the schema of the parameter it fills.
+func walkExpressions(path string, value interface{}, schema *openapi3.Schema, check func(path, value string, schema *openapi3.Schema) error) error {
+	switch v := value.(type) {
+	case string:
+		if strings.Contains(v, "$(") {
+			return check(path, v, schema)
+		}
+	case map[string]interface{}:
+		keys := make([]string, 0, len(v))
+		for k := range v {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			var sub *openapi3.Schema
+			if schema != nil {
+				if ref, ok := schema.Properties[k]; ok && ref != nil {
+					sub = ref.Value
+				} else if schema.AdditionalProperties.Schema != nil {
+					sub = schema.AdditionalProperties.Schema.Value
+				}
+			}
+			next := k
+			if path != "" {
+				next = path + "." + k
+			}
+			if err := walkExpressions(next, v[k], sub, check); err != nil {
+				return err
+			}
+		}
+	case []interface{}:
+		var item *openapi3.Schema
+		if schema != nil && schema.Items != nil {
+			item = schema.Items.Value
+		}
+		for i, element := range v {
+			if err := walkExpressions(fmt.Sprintf("%s[%d]", path, i), element, item, check); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

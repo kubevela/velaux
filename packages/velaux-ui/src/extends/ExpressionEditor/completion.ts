@@ -24,6 +24,9 @@ export type Suggestion = {
   documentation?: string;
   insertText: string;
   snippet?: boolean;
+  // replaceBefore is how many characters before the typed part the suggestion
+  // also replaces: the dot, for a name inserted by index.
+  replaceBefore?: number;
 };
 
 // globals are the functions an expression may call at its top level.
@@ -95,6 +98,36 @@ const methods: Record<string, Suggestion[]> = {
   })),
 };
 
+// placements are the calls that read a component at a named placement, straight
+// after its name: cluster("c"), namespace("ns"), or cluster("c").namespace("ns").
+const placements: Record<string, Suggestion> = {
+  cluster: {
+    label: 'cluster',
+    kind: 'method',
+    detail: 'cluster("name")',
+    documentation: 'Reads the component in that cluster instead of beside the reader',
+    insertText: 'cluster("${1}")',
+    snippet: true,
+  },
+  namespace: {
+    label: 'namespace',
+    kind: 'method',
+    detail: 'namespace("name")',
+    documentation: "Reads the component in that namespace, in the reader's cluster unless cluster() precedes it",
+    insertText: 'namespace("${1}")',
+    snippet: true,
+  },
+};
+
+// placementsAfter is what placement calls may follow a component read that has
+// made the given calls: cluster before namespace, each once.
+function placementsAfter(calls: string[]): Suggestion[] {
+  if (calls.includes('namespace')) {
+    return [];
+  }
+  return calls.includes('cluster') ? [placements.namespace] : [placements.cluster, placements.namespace];
+}
+
 // openExpression reports whether the cursor sits inside a $( ) not yet
 // closed, and where that expression starts.
 export function openExpression(text: string): number | undefined {
@@ -144,8 +177,44 @@ function find(vars: ExpressionVariable[] | undefined, path: string[]): Expressio
   return found;
 }
 
+const identifier = /^[A-Za-z_]\w*$/;
+
+// fieldSuggestion offers a field by name, or by index where the name is not an
+// identifier: a component named my-db is read as component["my-db"], since CEL
+// reads component.my-db as subtraction.
 function fieldSuggestion(v: ExpressionVariable): Suggestion {
-  return { label: v.name, kind: 'field', detail: v.type, documentation: v.description, insertText: v.name };
+  const s: Suggestion = {
+    label: v.name,
+    kind: 'field',
+    detail: v.type,
+    documentation: v.description,
+    insertText: v.name,
+  };
+  if (!identifier.test(v.name)) {
+    s.insertText = `["${v.name}"]`;
+    s.replaceBefore = 1;
+  }
+  return s;
+}
+
+// chainTokens reads a chain of names into its names and the placement calls in
+// it: a.b, a["b"] and a.b.cluster("c") each read a then b.
+const chainToken = /\.(cluster|namespace)\([^)]*\)|\["([^"]*)"\]|\.?([A-Za-z_]\w*)/g;
+
+function chainTokens(chain: string): { names: string[]; calls: string[]; endsWithIndex: boolean } {
+  const names: string[] = [];
+  const calls: string[] = [];
+  let endsWithIndex = false;
+  for (const m of chain.matchAll(chainToken)) {
+    if (m[1]) {
+      calls.push(m[1]);
+      endsWithIndex = false;
+    } else {
+      names.push(m[2] !== undefined ? m[2] : m[3]);
+      endsWithIndex = m[2] !== undefined;
+    }
+  }
+  return { names, calls, endsWithIndex };
 }
 
 // suggest lists what may follow the text before the cursor, and how many
@@ -153,6 +222,11 @@ function fieldSuggestion(v: ExpressionVariable): Suggestion {
 export function suggest(before: string, env?: ExpressionEnv): { items: Suggestion[]; replace: number } {
   const start = openExpression(before);
   if (start === undefined) {
+    // Outside an expression, a typed $ is the only cue to start one, and the
+    // snippet takes its place; $$ is an escaped literal and starts nothing.
+    if (!before.endsWith('$') || before.endsWith('$$')) {
+      return { items: [], replace: 0 };
+    }
     return {
       items: [
         {
@@ -164,15 +238,23 @@ export function suggest(before: string, env?: ExpressionEnv): { items: Suggestio
           snippet: true,
         },
       ],
-      replace: 0,
+      replace: 1,
     };
   }
   const expr = before.substring(start);
-  const m = /([A-Za-z_][\w]*(?:\.[A-Za-z_][\w]*)*)(\.?)([A-Za-z_]\w*)?$/.exec(expr);
+  const m = /([A-Za-z_]\w*(?:\.[A-Za-z_]\w*|\["[^"]*"\]|\.(?:cluster|namespace)\([^)]*\))*)(\.?)([A-Za-z_]\w*)?$/.exec(
+    expr
+  );
   let path: string[] = [];
   let partial = '';
+  let calls: string[] = [];
   if (m) {
-    const parts = m[1].split('.');
+    const tokens = chainTokens(m[1]);
+    calls = tokens.calls;
+    if (m[2] !== '.' && !m[3] && tokens.endsWithIndex) {
+      return { items: [], replace: 0 };
+    }
+    const parts = tokens.names;
     if (m[2] === '.') {
       path = parts;
       partial = m[3] || '';
@@ -190,6 +272,9 @@ export function suggest(before: string, env?: ExpressionEnv): { items: Suggestio
     return { items: [], replace: partial.length };
   }
   const fields = (parent.children || []).map(fieldSuggestion);
+  if (path.length === 2 && path[0] === 'component') {
+    return { items: [...fields, ...placementsAfter(calls)], replace: partial.length };
+  }
   const kind = parent.type.startsWith('list') ? 'list' : parent.type;
   return { items: [...fields, ...(methods[kind] || [])], replace: partial.length };
 }
@@ -268,7 +353,36 @@ export function hoverAt(text: string, offset: number, env?: ExpressionEnv): Hove
   }
   const path = [text.substring(start, end)];
   let i = start;
-  while (text[i - 1] === '.') {
+  for (;;) {
+    if (text[i - 1] === ']') {
+      const index = /\["([^"]*)"\]$/.exec(text.substring(0, i));
+      if (!index) {
+        break;
+      }
+      path.unshift(index[1]);
+      i = index.index;
+      let j = i;
+      while (j > 0 && identChar.test(text[j - 1])) {
+        j--;
+      }
+      if (j < i) {
+        path.unshift(text.substring(j, i));
+        i = j;
+      }
+      continue;
+    }
+    if (text[i - 1] !== '.') {
+      break;
+    }
+    const call = /\.(cluster|namespace)\([^)]*\)$/.exec(text.substring(0, i - 1));
+    if (call) {
+      i = call.index + 1;
+      continue;
+    }
+    if (text[i - 2] === ']') {
+      i -= 1;
+      continue;
+    }
     let j = i - 1;
     while (j > 0 && identChar.test(text[j - 1])) {
       j--;
@@ -281,4 +395,36 @@ export function hoverAt(text: string, offset: number, env?: ExpressionEnv): Hove
   }
   const variable = find(env?.variables, path);
   return variable ? { path, variable, start, end } : undefined;
+}
+
+// ExpressionFix is a replacement the check offers for an issue: the text from
+// start to end becomes text.
+export type ExpressionFix = {
+  start: number;
+  end: number;
+  text: string;
+  message: string;
+};
+
+// fixesFor finds the fixes for the markers Monaco asks about, by where each
+// starts (Monaco's columns count from 1) and what it says.
+export function fixesFor(
+  markers: Array<{ startColumn: number; message: string }>,
+  fixes: ExpressionFix[]
+): ExpressionFix[] {
+  return markers.flatMap((m) => fixes.filter((f) => f.start + 1 === m.startColumn && f.message === m.message));
+}
+
+// ExpressionIssue is a problem the server found in an expression.
+export type ExpressionIssue = { message: string; start: number; end: number; warning?: boolean; fix?: string };
+
+// hasExpression is whether a property value holds a $( ) expression to check.
+export function hasExpression(value: unknown): boolean {
+  return typeof value === 'string' && value.includes('$(');
+}
+
+// blockingIssue is the problem that keeps a value from being saved: the first
+// error. Warnings are shown but do not block.
+export function blockingIssue(issues?: ExpressionIssue[]): ExpressionIssue | undefined {
+  return (issues || []).find((i) => !i.warning);
 }

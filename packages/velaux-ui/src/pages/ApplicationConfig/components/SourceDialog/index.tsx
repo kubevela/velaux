@@ -53,6 +53,8 @@ type Props = {
 };
 
 type State = {
+  // propertiesValid is whether the properties form can be saved as it stands.
+  propertiesValid?: boolean;
   definitions: DefinitionBase[];
   definition?: DefinitionDetail;
   loading: boolean;
@@ -232,7 +234,17 @@ class SourceDialog extends React.Component<Props, State> {
             }}
             project={project}
           >
-            <Button type="primary" onClick={this.onSubmit} loading={saving}>
+            <Button
+              type="primary"
+              onClick={this.onSubmit}
+              disabled={this.state.propertiesValid === false}
+              title={
+                this.state.propertiesValid === false
+                  ? i18n.t('Fix the highlighted properties first').toString()
+                  : undefined
+              }
+              loading={saving}
+            >
               {source ? i18n.t('Update').toString() : i18n.t('Create').toString()}
             </Button>
           </Permission>
@@ -337,6 +349,7 @@ class SourceDialog extends React.Component<Props, State> {
                         name: definition?.name || '',
                         description: definition?.description || '',
                       }}
+                      onValidityChange={(valid: boolean) => this.setState({ propertiesValid: valid })}
                       ref={this.uiSchemaRef}
                       mode={source ? 'edit' : 'new'}
                       expressions={this.expressionContext()}
