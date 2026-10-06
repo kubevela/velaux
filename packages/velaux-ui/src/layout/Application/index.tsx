@@ -1,15 +1,12 @@
-import { Loading, Grid } from '@alifd/next';
+import { Loading } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
-import EnvTabs from './components/EnvTabs';
+import { AppTabs, EnvironmentBar } from './components/AppTabs';
 import Header from './components/Header';
-import Menus from './components/Menus';
 
 import './index.less';
 import type { ApplicationDetail } from '@velaux/data';
 import { Dispatch } from 'redux';
-
-const { Row } = Grid;
 
 interface Props {
   match: any;
@@ -135,13 +132,9 @@ class ApplicationLayout extends Component<Props, any> {
     return (
       <div className="app-layout">
         <Header dispatch={dispatch} appName={appName} envName={envName} currentPath={url} />
-        <EnvTabs dispatch={dispatch} appName={appName} activeKey={envName ? envName : 'basisConfig'} />
-        <Row className="padding16 main">
-          <div className="menu">
-            <Menus currentPath={url} appName={appName} envName={envName} />
-          </div>
-          <div className="content">{children}</div>
-        </Row>
+        <AppTabs appName={appName} currentPath={url} />
+        {envName && <EnvironmentBar appName={appName} envName={envName} currentPath={url} />}
+        <div className="app-content">{children}</div>
       </div>
     );
   }

@@ -1,6 +1,8 @@
 import { Table, Button, Pagination, Dialog, Message } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Fragment, Component } from 'react';
+import { RowAction } from '../../components/RowAction';
+import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 
 import { getProjectList, deleteProject } from '../../api/project';
 import { getUserList } from '../../api/users';
@@ -8,7 +10,7 @@ import { If } from '../../components/If';
 import { ListTitle as Title } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { NameAlias , Project , User } from '@velaux/data';
+import type { NameAlias, Project, User } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 
@@ -202,28 +204,23 @@ class Projects extends Component<Props, State> {
           return (
             <Fragment>
               <Permission request={{ resource: `project:${record.name}`, action: 'update' }} project={`${record.name}`}>
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineEdit />}
+                  label="Edit"
                   onClick={() => {
                     this.onEdit(record);
                   }}
-                >
-                  <Translation>Edit</Translation>
-                </Button>
+                />
               </Permission>
               <Permission request={{ resource: `project:${record.name}`, action: 'delete' }} project={`${record.name}`}>
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineDelete />}
+                  label="Delete"
+                  danger
                   onClick={() => {
                     this.onDelete(record);
                   }}
-                >
-                  <Translation>Delete</Translation>
-                </Button>
+                />
               </Permission>
             </Fragment>
           );

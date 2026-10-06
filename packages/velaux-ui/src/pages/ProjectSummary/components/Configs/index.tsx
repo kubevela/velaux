@@ -1,5 +1,7 @@
 import { Table, Button, Dialog, Message, Tag, Balloon } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
+import { RowAction } from '../../../../components/RowAction';
+import { AiOutlineDelete, AiOutlineSend } from 'react-icons/ai';
 
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
@@ -168,16 +170,14 @@ class Configs extends Component<Props, State> {
                   }}
                   project={projectName}
                 >
-                  <Button
-                    text
-                    size={'medium'}
-                    component={'a'}
+                  <RowAction
+                    icon={<AiOutlineDelete />}
+                    label="Delete"
+                    danger
                     onClick={() => {
                       this.onDelete(record);
                     }}
-                  >
-                    <Translation>Delete</Translation>
-                  </Button>
+                  />
                 </Permission>
               </If>
               <If condition={record.legacy}>
@@ -188,16 +188,13 @@ class Configs extends Component<Props, State> {
                   }}
                   project={projectName}
                 >
-                  <Button
-                    text
-                    size={'medium'}
-                    component={'a'}
+                  <RowAction
+                    icon={<AiOutlineSend />}
+                    label="Distribute"
                     onClick={() => {
                       this.onDistribute(record);
                     }}
-                  >
-                    <Translation>Distribute</Translation>
-                  </Button>
+                  />
                 </Permission>
               </If>
             </Fragment>

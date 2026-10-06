@@ -1,10 +1,18 @@
 import { connect } from 'dva';
 import React from 'react';
+import { RowAction } from '../../../../components/RowAction';
 import './index.less';
 import { Link } from 'dva/router';
 import { Menu, Dropdown, Dialog, Button, Table, Tag, Icon } from '@alifd/next';
 import moment from 'moment';
-import { AiFillDelete, AiFillSetting, AiOutlineAppstore, AiOutlineMore } from 'react-icons/ai';
+import {
+  AiFillDelete,
+  AiFillSetting,
+  AiOutlineAppstore,
+  AiOutlineDelete,
+  AiOutlineEdit,
+  AiOutlineMore,
+} from 'react-icons/ai';
 
 import type { ShowMode } from '../..';
 import Empty from '../../../../components/Empty';
@@ -88,17 +96,13 @@ class CardContent extends React.Component<Props, State> {
     if (checkPermission(request, project, userInfo)) {
       if (button) {
         return (
-          <Button
-            text
-            size={'medium'}
-            component={'a'}
+          <RowAction
+            icon={<AiOutlineEdit />}
+            label="Edit"
             onClick={() => {
               this.onEditAppPlan(item);
             }}
-          >
-            <AiFillSetting />
-            <Translation>Edit</Translation>
-          </Button>
+          />
         );
       }
       return (
@@ -134,11 +138,7 @@ class CardContent extends React.Component<Props, State> {
     };
     if (checkPermission(request, project, userInfo)) {
       if (button) {
-        return (
-          <Button text size={'medium'} className="danger-btn" component={'a'} onClick={onClick}>
-            <AiFillDelete /> <Translation>Remove</Translation>
-          </Button>
-        );
+        return <RowAction icon={<AiOutlineDelete />} label="Remove" danger onClick={onClick} />;
       }
       return (
         <Menu.Item onClick={onClick}>
@@ -278,7 +278,6 @@ class CardContent extends React.Component<Props, State> {
           return (
             <div>
               {this.isEditPermission(record, true)}
-              <span className="line" />
               {this.isDeletePermission(record, true)}
             </div>
           );

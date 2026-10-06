@@ -169,6 +169,53 @@ export interface ApplicationStatus {
   appliedResources: Resource[];
   dependencies?: ComponentDependency[];
   appliedApplicationPolicies?: AppliedApplicationPolicy[];
+  sources?: ApplicationSourceStatus[];
+}
+
+// ApplicationSourceStatus is how one spec.sources binding resolved.
+export interface ApplicationSourceStatus {
+  name: string;
+  // type is the source definition, with its pinned revision where one was asked for.
+  type?: string;
+  // phase is Resolved, Stale, Failed or Unused: the worst of its resolutions.
+  phase?: string;
+  resolutions?: SourceResolution[];
+  // autoUpdate is the outcome after the feature gate, the binding and any
+  // publishVersion pin; message says which won when it is false.
+  autoUpdate?: boolean;
+  message?: string;
+  consumedBy?: SourceConsumer[];
+}
+
+// SourceResolution is one cache entry behind a source, typically one per cluster.
+export interface SourceResolution {
+  storageKey?: string;
+  clusters?: string[];
+  phase?: string;
+  // expiresAt is an RFC3339 timestamp.
+  expiresAt?: string;
+  message?: string;
+}
+
+// SourceConsumer is a reader of a source, and what it took.
+export interface SourceConsumer {
+  // definitionKind is component, trait, workflowstep or policy.
+  definitionKind: string;
+  // name is the reader; a trait is "<component>/<trait>".
+  name: string;
+  type?: string;
+  cluster?: string;
+  namespace?: string;
+  // values are absent when the binding's statusPolicy withholds them.
+  values?: SourceValue[];
+}
+
+// SourceValue is one value read: the source attribute and the property it fed.
+export interface SourceValue {
+  sourceAttr: string;
+  property?: string;
+  // value is redacted where the attribute is sensitive or masked.
+  value?: unknown;
 }
 
 // One component another depends on, as the Application's status reports it:

@@ -1,9 +1,11 @@
-import { Table, Button, Message, Tag, Balloon } from '@alifd/next';
+import { Table, Message, Tag, Balloon } from '@alifd/next';
 import i18n from 'i18next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
+import { AiOutlineCheckCircle, AiOutlinePieChart, AiOutlineStop } from 'react-icons/ai';
 import React, { Component, Fragment } from 'react';
+import { RowAction } from '../../components/RowAction';
 
 import { getDefinitionsList, updateDefinitionStatus } from '../../api/definitions';
 import Permission from '../../components/Permission';
@@ -112,14 +114,6 @@ class Definitions extends Component<Props, State> {
 
   getDefinitionType = () => {
     return getMatchParamObj(this.props.match, 'definitionType');
-  };
-
-  showStatus = (record: DefinitionBase) => {
-    if (record.status === 'enable') {
-      return <Translation>Disable</Translation>;
-    } else {
-      return <Translation>Enable</Translation>;
-    }
   };
 
   onChangeStatus = (record: DefinitionBase) => {
@@ -251,29 +245,21 @@ class Definitions extends Component<Props, State> {
                 }}
                 project={''}
               >
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
-                  onClick={() => {
-                    this.onChangeStatus(record);
-                  }}
-                >
-                  {this.showStatus(record)}
-                </Button>
+                <RowAction
+                  icon={record.status === 'enable' ? <AiOutlineStop /> : <AiOutlineCheckCircle />}
+                  label={record.status === 'enable' ? 'Disable' : 'Enable'}
+                  danger={record.status === 'enable'}
+                  onClick={() => this.onChangeStatus(record)}
+                />
               </Permission>
               {(definitionType === 'component' || definitionType === 'trait') &&
                 (record.restrictions?.quota || []).length > 0 && (
                   <Permission request={{ resource: `definition:${record.name}`, action: 'detail' }} project={''}>
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
-                      style={{ marginLeft: '12px' }}
+                    <RowAction
+                      icon={<AiOutlinePieChart />}
+                      label="Usage"
                       onClick={() => this.setState({ usageOf: record })}
-                    >
-                      <Translation>Usage</Translation>
-                    </Button>
+                    />
                   </Permission>
                 )}
             </Fragment>
