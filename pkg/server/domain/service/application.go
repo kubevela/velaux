@@ -32,6 +32,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
@@ -70,7 +71,7 @@ const (
 type ApplicationService interface {
 	ListApplications(ctx context.Context, listOptions apisv1.ListApplicationOptions) ([]*apisv1.ApplicationBase, error)
 	GetApplication(ctx context.Context, appName string) (*model.Application, error)
-	GetApplicationStatus(ctx context.Context, app *model.Application, envName string) (*common.AppStatus, error)
+	GetApplicationStatus(ctx context.Context, app *model.Application, envName string) (*apisv1.ApplicationStatus, error)
 	GetApplicationStatusFromAllEnvs(ctx context.Context, app *model.Application) ([]*apisv1.ApplicationStatusResponse, error)
 	DetailApplication(ctx context.Context, app *model.Application) (*apisv1.DetailApplicationResponse, error)
 	PublishApplicationTemplate(ctx context.Context, app *model.Application) (*apisv1.ApplicationTemplateBase, error)
@@ -291,8 +292,7 @@ func (c *applicationServiceImpl) DetailApplication(ctx context.Context, app *mod
 }
 
 // GetApplicationStatus get application status from controller cluster
-func (c *applicationServiceImpl) GetApplicationStatus(ctx context.Context, appmodel *model.Application, envName string) (*common.AppStatus, error) {
-	var app v1beta1.Application
+func (c *applicationServiceImpl) GetApplicationStatus(ctx context.Context, appmodel *model.Application, envName string) (*apisv1.ApplicationStatus, error) {
 	env, err := c.EnvService.GetEnv(ctx, envName)
 	if err != nil {
 		return nil, err
@@ -301,20 +301,113 @@ func (c *applicationServiceImpl) GetApplicationStatus(ctx context.Context, appmo
 	if err != nil {
 		return nil, err
 	}
-	err = c.KubeClient.Get(ctx, types.NamespacedName{Namespace: env.Namespace, Name: envBinding.AppDeployName}, &app)
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil, nil
-		}
+	status, err := c.applicationStatus(ctx, env.Namespace, envBinding.AppDeployName)
+	if apierrors.IsNotFound(err) {
+		return nil, nil
+	}
+	return status, err
+}
+
+// applicationStatus reads an Application's status from the cluster.
+func (c *applicationServiceImpl) applicationStatus(ctx context.Context, namespace, name string) (*apisv1.ApplicationStatus, error) {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(v1beta1.ApplicationKindVersionKind)
+	if err := c.KubeClient.Get(ctx, types.NamespacedName{Namespace: namespace, Name: name}, obj); err != nil {
 		return nil, err
 	}
-	if app.Generation > app.Status.ObservedGeneration {
-		app.Status.Phase = common.ApplicationStarting
+	return applicationStatusFrom(obj)
+}
+
+// applicationStatusFrom decodes an Application's status: KubeVela's fields into
+// its types, and its component dependencies, which those types predate, beside
+// them. Only the status goes through the typed conversion.
+func applicationStatusFrom(obj *unstructured.Unstructured) (*apisv1.ApplicationStatus, error) {
+	status := &apisv1.ApplicationStatus{}
+	raw, _ := obj.Object["status"].(map[string]interface{})
+	if raw != nil {
+		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(raw, &status.AppStatus); err != nil {
+			return nil, err
+		}
 	}
-	if !app.DeletionTimestamp.IsZero() {
-		app.Status.Phase = common.ApplicationDeleting
+	status.Dependencies = dependenciesOf(obj, raw)
+	if obj.GetGeneration() > status.ObservedGeneration {
+		status.Phase = common.ApplicationStarting
 	}
-	return &app.Status, nil
+	if obj.GetDeletionTimestamp() != nil {
+		status.Phase = common.ApplicationDeleting
+	}
+	return status, nil
+}
+
+// dependenciesOf is what the Application's components depend on: its
+// status.dependencies, or, where KubeVela leaves that out (it predates the field,
+// or the Application has none), the dependsOn and inputs of the deployed spec. An
+// optional field that does not decode is left out rather than failing the status,
+// and with it every environment listed alongside.
+func dependenciesOf(obj *unstructured.Unstructured, status map[string]interface{}) []apisv1.ComponentDependency {
+	if reported, ok := status["dependencies"]; ok {
+		var deps struct {
+			Dependencies []apisv1.ComponentDependency `json:"dependencies"`
+		}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(map[string]interface{}{"dependencies": reported}, &deps)
+		if err == nil {
+			return deps.Dependencies
+		}
+		klog.Warningf("ignoring status.dependencies of application %s/%s: %v", obj.GetNamespace(), obj.GetName(), err)
+	}
+	spec, _ := obj.Object["spec"].(map[string]interface{})
+	if spec == nil {
+		return nil
+	}
+	var deployed struct {
+		Components []struct {
+			Name      string   `json:"name"`
+			DependsOn []string `json:"dependsOn"`
+			Inputs    []struct {
+				From string `json:"from"`
+			} `json:"inputs"`
+			Outputs []struct {
+				Name string `json:"name"`
+			} `json:"outputs"`
+		} `json:"components"`
+	}
+	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(spec, &deployed); err != nil {
+		klog.Warningf("ignoring the components of application %s/%s: %v", obj.GetNamespace(), obj.GetName(), err)
+		return nil
+	}
+	outputOwner := map[string]string{}
+	for _, c := range deployed.Components {
+		for _, o := range c.Outputs {
+			outputOwner[o.Name] = c.Name
+		}
+	}
+	seen := map[apisv1.ComponentDependency]bool{}
+	var out []apisv1.ComponentDependency
+	add := func(d apisv1.ComponentDependency) {
+		if d.DependsOn != "" && d.DependsOn != d.Component && !seen[d] {
+			seen[d] = true
+			out = append(out, d)
+		}
+	}
+	for _, c := range deployed.Components {
+		for _, d := range c.DependsOn {
+			add(apisv1.ComponentDependency{Component: c.Name, DependsOn: d, Source: "dependsOn"})
+		}
+		for _, in := range c.Inputs {
+			add(apisv1.ComponentDependency{Component: c.Name, DependsOn: outputOwner[in.From], Source: "inputs"})
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		a, b := out[i], out[j]
+		if a.Component != b.Component {
+			return a.Component < b.Component
+		}
+		if a.DependsOn != b.DependsOn {
+			return a.DependsOn < b.DependsOn
+		}
+		return a.Source < b.Source
+	})
+	return out
 }
 
 // GetApplicationStatusFromAllEnvs get applications status from all envs
@@ -325,25 +418,18 @@ func (c *applicationServiceImpl) GetApplicationStatusFromAllEnvs(ctx context.Con
 	}
 	var res []*apisv1.ApplicationStatusResponse
 	for _, eb := range envBindings {
-		var application v1beta1.Application
 		env, err := c.EnvService.GetEnv(ctx, eb.Name)
 		if err != nil {
 			return nil, err
 		}
-		err = c.KubeClient.Get(ctx, types.NamespacedName{Namespace: env.Namespace, Name: eb.AppDeployName}, &application)
+		status, err := c.applicationStatus(ctx, env.Namespace, eb.AppDeployName)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
 				continue
 			}
 			return nil, err
 		}
-		if application.Generation > application.Status.ObservedGeneration {
-			application.Status.Phase = common.ApplicationStarting
-		}
-		if !application.DeletionTimestamp.IsZero() {
-			application.Status.Phase = common.ApplicationDeleting
-		}
-		res = append(res, &apisv1.ApplicationStatusResponse{EnvName: env.Name, Status: &application.Status})
+		res = append(res, &apisv1.ApplicationStatusResponse{EnvName: env.Name, Status: status})
 	}
 
 	return res, nil

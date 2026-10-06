@@ -1,5 +1,9 @@
 import * as React from 'react';
+import { AiOutlineArrowLeft, AiOutlineArrowRight, AiOutlineInfoCircle } from 'react-icons/ai';
 
+import { summaryEntries } from '../../utils/status';
+import type { DetailEntry } from '../../utils/status';
+import type { TooltipSection } from '../StatusTooltip';
 
 import cRole from '../../assets/resources/c-role.svg';
 import cm from '../../assets/resources/cm.svg';
@@ -77,19 +81,48 @@ export function describeTarget(node: GraphNode) {
   return [`Cluster: ${node.resource.name}`];
 }
 
-export function describeComponents(node: GraphNode) {
-  const lines = [
-    `Name: ${node.resource.name}`,
-    `Alias: ${node.resource.component?.alias}`,
-    `Type: ${node.resource.component?.componentType}`,
-    `DependsOn: ${node.resource.component?.dependsOn || []}`,
-    `Namespace: ${node.resource?.namespace}`,
-    `Cluster: ${node.resource.service?.cluster || 'local'}`,
-  ];
-  if (node.resource.service?.message) {
-    lines.push(`Message: ${node.resource.service?.message}`);
+// componentSections lists what a component depends on and what depends on it,
+// each with an arrow for its direction and, when KubeVela inferred it from a
+// component read, an icon; both icons' tooltips say why.
+export function componentSections(node: GraphNode): TooltipSection[] {
+  const items = node.dependencies || [];
+  if (items.length === 0) {
+    return [];
   }
-  return lines;
+  const content = (
+    <ul className="dependency-list">
+      {items.map((item) => (
+        <li key={`${item.direction}:${item.name}@${item.where || ''}`}>
+          {item.direction === 'outbound' ? (
+            <span className="dependency-direction" title={`Outbound: ${node.resource.name} depends on ${item.name}`}>
+              <AiOutlineArrowRight />
+            </span>
+          ) : (
+            <span className="dependency-direction" title={`Inbound: ${item.name} depends on ${node.resource.name}`}>
+              <AiOutlineArrowLeft />
+            </span>
+          )}
+          {item.name}
+          {item.type && <span className="dependency-type">{item.type}</span>}
+          {item.where && <span className="dependency-where">in {item.where}</span>}
+          {item.inferred && (
+            <span className="inferred-dependency" title={item.inferred}>
+              <AiOutlineInfoCircle />
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+  return [{ title: 'Dependencies', count: items.length, content }];
+}
+
+export function componentSummary(node: GraphNode): DetailEntry[] {
+  return summaryEntries([
+    ['Alias', node.resource.component?.alias],
+    ['Namespace', node.resource?.namespace],
+    ['Cluster', node.resource.service?.cluster || 'local'],
+  ]);
 }
 
 export function treeNodeKey(node: TreeNode & { uid?: string }) {
@@ -178,13 +211,7 @@ const resourceIcons = new Map<string, string>([
   ['Volume', vol],
 ]);
 
-export const ResourceIcon = ({
-  kind,
-  customStyle,
-}: {
-  kind: string;
-  customStyle?: React.CSSProperties;
-}) => {
+export const ResourceIcon = ({ kind, customStyle }: { kind: string; customStyle?: React.CSSProperties }) => {
   const svgName = resourceIcons.get(kind);
   if (svgName) {
     return <img title={kind} src={svgName} />;

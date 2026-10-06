@@ -6,6 +6,7 @@ import React from 'react';
 import { deployApplication } from '../../api/application';
 import { listApplicationResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
 import { If } from '../../components/If';
+import { StatusDetails } from '../../components/StatusDetails';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type {
@@ -16,11 +17,15 @@ import type {
   EnvBinding,
   ComponentStatus,
   ApplicationDeployResponse,
- AppliedResource , Target , LoginUserInfo } from '@velaux/data';
+  AppliedResource,
+  Target,
+  LoginUserInfo,
+} from '@velaux/data';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import { locale } from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
+import { componentStatusKey, hasStatusDetails, traitState, traitStateCircle } from '../../utils/status';
 import Header from '../ApplicationInstanceList/components/Header';
 
 import './index.less';
@@ -336,7 +341,10 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                       <Table
                         locale={locale().Table}
                         className="customTable"
-                        dataSource={componentStatus}
+                        dataSource={componentStatus?.map((item) => ({ ...item, statusKey: componentStatusKey(item) }))}
+                        primaryKey="statusKey"
+                        rowExpandable={hasStatusDetails}
+                        expandedRowRender={(record: ComponentStatus) => <StatusDetails status={record} />}
                         style={{ minWidth: '1000px' }}
                       >
                         <Table.Column
@@ -393,26 +401,28 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                           dataIndex="trait"
                           cell={(v: boolean, i: number, record: ComponentStatus) => {
                             const { traits } = record;
-                            const Tags = (traits || []).map((item) => {
-                              if (item.healthy) {
-                                return (
-                                  <Tag type="normal" size="small">
-                                    <div>
-                                      <span className="circle circle-success" />
-                                      <span>{item.type}</span>
-                                    </div>
-                                  </Tag>
-                                );
-                              } else {
-                                return (
-                                  <Tag type="normal" size="small">
-                                    <div>
-                                      <span className="circle circle-failure" />
-                                      <span>{item.type}</span>
-                                    </div>
-                                  </Tag>
-                                );
+                            const Tags = (traits || []).map((item, index) => {
+                              const state = traitState(item);
+                              const tag = (
+                                <Tag type="normal" size="small" key={`${item.type}-${index}`}>
+                                  <div>
+                                    <span className={`circle ${traitStateCircle[state]}`} />
+                                    <span>{item.type}</span>
+                                  </div>
+                                </Tag>
+                              );
+                              // A trait's message is on its tag; a pending trait without one says what it waits for.
+                              const note =
+                                item.message ||
+                                (state === 'pending' ? i18n.t('Pending: waits for the workload to be healthy') : '');
+                              if (!note) {
+                                return tag;
                               }
+                              return (
+                                <Balloon.Tooltip key={`${item.type}-${index}`} trigger={tag} align="t">
+                                  {note}
+                                </Balloon.Tooltip>
+                              );
                             });
                             return <TagGroup className="tags-content">{Tags}</TagGroup>;
                           }}
@@ -422,26 +432,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                           align="center"
                           dataIndex="message"
                           title={<Translation>Message</Translation>}
-                          cell={(v: string, i: number, record: ComponentStatus) => {
-                            const { message = '', traits } = record;
-                            const TraitMessages = (traits || []).map((item) => {
-                              if (item.message) {
-                                return (
-                                  <div>
-                                    <span>{item.type}: </span>
-                                    <span>{item.message}</span>
-                                  </div>
-                                );
-                              }
-                              return;
-                            });
-                            return (
-                              <div>
-                                <div>{message}</div>
-                                {TraitMessages}
-                              </div>
-                            );
-                          }}
+                          cell={(v: string, i: number, record: ComponentStatus) => <div>{record.message || ''}</div>}
                         />
                       </Table>
                     </div>

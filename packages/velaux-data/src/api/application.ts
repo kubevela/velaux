@@ -130,13 +130,41 @@ export interface ApplicationStatus {
   };
   services?: ComponentStatus[];
   appliedResources: Resource[];
+  dependencies?: ComponentDependency[];
+  appliedApplicationPolicies?: AppliedApplicationPolicy[];
+}
+
+// One component another depends on, as the Application's status reports it:
+// named in dependsOn, read through inputs, or read by a property expression,
+// with the cluster and namespace an expression names.
+export interface ComponentDependency {
+  component: string;
+  dependsOn: string;
+  source: 'dependsOn' | 'inputs' | 'expression';
+  cluster?: string;
+  namespace?: string;
+}
+
+// AppliedApplicationPolicy is how one application-scoped policy fared on the
+// Application's last render: named in spec.policies (explicit), or applied to
+// every Application in its namespace (global).
+export interface AppliedApplicationPolicy {
+  name: string;
+  type?: string;
+  namespace?: string;
+  source?: 'global' | 'explicit';
+  applied: boolean;
+  error?: boolean;
+  message?: string;
 }
 
 export interface ComponentStatus {
   name: string;
   namespace: string;
   healthy: boolean;
+  workloadHealthy?: boolean;
   message: string;
+  details?: Record<string, string>;
   traits?: TraitStatus[];
   cluster: string;
   workloadDefinition: {
@@ -220,8 +248,10 @@ export interface Trait {
 
 export interface TraitStatus {
   type: string;
-  healthy: string;
+  healthy: boolean;
+  pending?: boolean;
   message: string;
+  details?: Record<string, string>;
 }
 
 export interface ApplicationComponentBase {

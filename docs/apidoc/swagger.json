@@ -11643,6 +11643,59 @@
 				}
 			}
 		},
+		"v1.ApplicationStatus": {
+			"properties": {
+				"appliedResources": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.ClusterObjectReference"
+					}
+				},
+				"components": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.ObjectReference"
+					}
+				},
+				"conditions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/condition.Condition"
+					}
+				},
+				"dependencies": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.ComponentDependency"
+					}
+				},
+				"latestRevision": {
+					"$ref": "#/definitions/common.Revision"
+				},
+				"observedGeneration": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"policy": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.PolicyStatus"
+					}
+				},
+				"services": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.ApplicationComponentStatus"
+					}
+				},
+				"status": {
+					"type": "string"
+				},
+				"workflow": {
+					"$ref": "#/definitions/common.WorkflowStatus"
+				}
+			}
+		},
 		"v1.ApplicationStatusListResponse": {
 			"required": [
 				"status"
@@ -11666,7 +11719,7 @@
 					"type": "string"
 				},
 				"status": {
-					"$ref": "#/definitions/common.AppStatus"
+					"$ref": "#/definitions/v1.ApplicationStatus"
 				}
 			}
 		},
@@ -12046,6 +12099,30 @@
 				},
 				"workloadType": {
 					"$ref": "#/definitions/common.WorkloadTypeDescriptor"
+				}
+			}
+		},
+		"v1.ComponentDependency": {
+			"required": [
+				"component",
+				"dependsOn",
+				"source"
+			],
+			"properties": {
+				"cluster": {
+					"type": "string"
+				},
+				"component": {
+					"type": "string"
+				},
+				"dependsOn": {
+					"type": "string"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"source": {
+					"type": "string"
 				}
 			}
 		},
@@ -13054,6 +13131,9 @@
 					"$ref": "#/definitions/v1beta1.PolicyDefinitionSpec"
 				},
 				"status": {
+				"policyScope": {
+					"type": "string"
+				},
 					"type": "string"
 				},
 				"trait": {
