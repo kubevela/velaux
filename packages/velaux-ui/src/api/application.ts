@@ -231,9 +231,17 @@ export function updateComponentProperties(
   return put(`${url}/${query.appName}/components/${query.componentName}`, params).then((res) => res);
 }
 
-export function resumeApplicationWorkflowRecord(params: { appName: string; workflowName: string; recordName: string }) {
-  const { appName, workflowName, recordName } = params;
-  return get(`${url}/${appName}/workflows/${workflowName}/records/${recordName}/resume`, {}).then((res) => res);
+// resumeApplicationWorkflowRecord resumes a waiting run, or with step only that step.
+export function resumeApplicationWorkflowRecord(params: {
+  appName: string;
+  workflowName: string;
+  recordName: string;
+  step?: string;
+}) {
+  const { appName, workflowName, recordName, step } = params;
+  return get(`${url}/${appName}/workflows/${workflowName}/records/${recordName}/resume`, {
+    params: step ? { step } : {},
+  }).then((res) => res);
 }
 
 export function rollbackApplicationWorkflowRecord(params: {

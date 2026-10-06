@@ -47,6 +47,10 @@ type Workflow struct {
 	EnvName       string                              `json:"envName"`
 	Mode          wfTypesv1alpha1.WorkflowExecuteMode `json:"mode,omitempty" gorm:"serializer:json"`
 	Steps         []WorkflowStep                      `json:"steps,omitempty" gorm:"serializer:json"`
+	// Ref names a shared Workflow in the environment's namespace whose steps
+	// this workflow runs; it then has no steps of its own, and a mode only to
+	// override the shared one's.
+	Ref string `json:"ref,omitempty"`
 }
 
 // WorkflowStep defines how to execute a workflow step.

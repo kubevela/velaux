@@ -1,4 +1,4 @@
-import { Select, Grid, Card, Loading, Button, MenuButton } from '@alifd/next';
+import { Select, Loading, Button, MenuButton } from '@alifd/next';
 import { connect } from 'dva';
 import { routerRedux, Link } from 'dva/router';
 import React from 'react';
@@ -24,9 +24,9 @@ import { beautifyTime } from '../../utils/common';
 import { locale } from '../../utils/locale';
 
 import ApplicationWorkflowRecord from './components/WorkflowRecord';
+import { recordStatus } from '../../components/PipelineGraph/status';
+import './index.less';
 import { LoginUserInfo } from '@velaux/data';
-
-const { Row, Col } = Grid;
 
 type Props = {
   dispatch: Dispatch<any>;
@@ -151,8 +151,9 @@ class ApplicationWorkflow extends React.Component<Props, State> {
     }
 
     const recordOptions = records?.map((re) => {
+      const when = beautifyTime(re.startTime);
       return {
-        label: `${re.name}${beautifyTime(re.endTime) ? '(' + beautifyTime(re.endTime) + ')' : ''}`,
+        label: `${when ? when + ' · ' : ''}${i18n.t(recordStatus(re.status).label)} · ${re.name}`,
         value: re.name,
       };
     });
@@ -190,71 +191,54 @@ class ApplicationWorkflow extends React.Component<Props, State> {
           }}
           dispatch={this.props.dispatch}
         />
-        <Card contentHeight={'auto'}>
-          <Row>
-            <Col span={6}>
-              <Select
-                value={showRecordName}
-                locale={locale().Select}
-                autoWidth={false}
-                placeholder={i18n.t('Switch the workflow record')}
-                onChange={(selectRecord: string) => {
-                  this.setState({ showRecordName: selectRecord }, () => {
-                    dispatch(
-                      routerRedux.push(
-                        `/applications/${appName}/envbinding/${envName}/workflow/records/${selectRecord}`
-                      )
-                    );
-                  });
-                }}
-                dataSource={recordOptions}
-              />
-            </Col>
-            <Col span={12} />
-            <Col
-              span={6}
-              style={{
-                display: 'flex',
-                justifyContent: 'end',
+        <div className="wf-run-toolbar">
+          <Select
+            className="wf-run-select"
+            label={i18n.t('Run').toString()}
+            value={showRecordName}
+            locale={locale().Select}
+            autoWidth={false}
+            placeholder={i18n.t('Switch the workflow record')}
+            onChange={(selectRecord: string) => {
+              this.setState({ showRecordName: selectRecord }, () => {
+                dispatch(
+                  routerRedux.push(`/applications/${appName}/envbinding/${envName}/workflow/records/${selectRecord}`)
+                );
+              });
+            }}
+            dataSource={recordOptions}
+          />
+          <If condition={!applicationDetail?.readOnly}>
+            <Permission
+              project={applicationDetail.project?.name}
+              request={{
+                resource: `project:${applicationDetail.project?.name}/application:${applicationDetail.name}/workflow:*`,
+                action: 'update',
               }}
             >
-              <If condition={!applicationDetail?.readOnly}>
-                <Permission
-                  project={applicationDetail.project?.name}
-                  request={{
-                    resource: `project:${applicationDetail.project?.name}/application:${applicationDetail.name}/workflow:*`,
-                    action: 'update',
-                  }}
-                >
-                  {envWorkflows.length == 1 && (
-                    <Link to={`/applications/${appName}/envbinding/${envName}/workflow/${envWorkflows[0].name}/studio`}>
-                      <Button type="primary">
-                        <Translation>Launch Workflow Studio</Translation>
-                      </Button>
-                    </Link>
-                  )}
-                  {envWorkflows.length > 1 && (
-                    <MenuButton
-                      autoWidth={false}
-                      type="primary"
-                      label={<Translation>Launch Workflow Studio</Translation>}
-                    >
-                      {envWorkflows.map((w) => {
-                        return (
-                          <MenuButton.Item key={w.name}>
-                            <Link to={`/applications/${appName}/envbinding/${envName}/workflow/${w.name}/studio`}>
-                              {w.alias}
-                            </Link>
-                          </MenuButton.Item>
-                        );
-                      })}
-                    </MenuButton>
-                  )}
-                </Permission>
-              </If>
-            </Col>
-          </Row>
-        </Card>
+              {envWorkflows.length == 1 && (
+                <Link to={`/applications/${appName}/envbinding/${envName}/workflow/${envWorkflows[0].name}/studio`}>
+                  <Button>
+                    <Translation>Launch Workflow Studio</Translation>
+                  </Button>
+                </Link>
+              )}
+              {envWorkflows.length > 1 && (
+                <MenuButton autoWidth={false} label={<Translation>Launch Workflow Studio</Translation>}>
+                  {envWorkflows.map((w) => {
+                    return (
+                      <MenuButton.Item key={w.name}>
+                        <Link to={`/applications/${appName}/envbinding/${envName}/workflow/${w.name}/studio`}>
+                          {w.alias}
+                        </Link>
+                      </MenuButton.Item>
+                    );
+                  })}
+                </MenuButton>
+              )}
+            </Permission>
+          </If>
+        </div>
         {showRecord && (
           <ApplicationWorkflowRecord
             workflow={workflow}

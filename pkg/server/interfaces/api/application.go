@@ -624,6 +624,17 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Returns(400, "create failure", bcode.Bcode{}).
 		Writes(apis.DetailWorkflowResponse{}).Do(returns500))
 
+	ws.Route(ws.GET("/{appName}/workflows/{workflowName}/shared").To(c.WorkflowAPI.listSharedWorkflows).
+		Doc("list the shared workflows the workflow can reference, in its environment's namespace").
+		Filter(c.RbacService.CheckPerm("application/workflow", "detail")).
+		Filter(c.appCheckFilter).
+		Filter(c.WorkflowAPI.workflowCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application.").DataType("string").Required(true)).
+		Param(ws.PathParameter("workflowName", "identifier of the workflow.").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.ListSharedWorkflowsResponse{}).
+		Writes(apis.ListSharedWorkflowsResponse{}))
+
 	ws.Route(ws.GET("/{appName}/workflows/{workflowName}").To(c.WorkflowAPI.detailWorkflow).
 		Doc("detail application workflow").
 		Filter(c.RbacService.CheckPerm("application/workflow", "detail")).

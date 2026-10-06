@@ -298,7 +298,7 @@ interface StepStatus {
   name: string;
   alias: string;
   type: string;
-  phase: 'succeeded' | 'failed' | 'skipped' | 'stopped' | 'running' | 'pending';
+  phase: 'succeeded' | 'failed' | 'skipped' | 'stopped' | 'running' | 'pending' | 'suspending';
   message?: string;
   reason?: string;
   firstExecuteTime?: string;
@@ -314,10 +314,66 @@ export type WorkflowMode = 'StepByStep' | 'DAG';
 export interface UpdateWorkflowRequest {
   alias?: string;
   description?: string;
-  mode: WorkflowMode;
-  subMode: WorkflowMode;
+  // mode and subMode may be empty for a workflow with a ref, to follow the
+  // shared workflow's.
+  mode: WorkflowMode | '';
+  subMode: WorkflowMode | '';
   steps: WorkflowStep[];
   default?: boolean;
+  // ref names a shared Workflow to run in place of steps.
+  ref?: string;
+}
+
+// SharedWorkflowScope is where a shared Workflow is: the project's namespace,
+// vela-system, or, for a ref only, an environment namespace that is not the
+// project's.
+export type SharedWorkflowScope = 'project' | 'global' | 'environment';
+
+// SharedWorkflow is a Workflow resource that application workflows can
+// reference: the project's or a global one.
+export interface SharedWorkflow {
+  name: string;
+  namespace: string;
+  scope: SharedWorkflowScope;
+  alias?: string;
+  description?: string;
+  // hidden: a global one where the project has one of its name.
+  hidden?: boolean;
+  mode?: WorkflowMode;
+  subMode?: WorkflowMode;
+  steps: WorkflowStep[];
+  // usedBy names the project's workflows that run it; usedElsewhere counts
+  // other projects'.
+  usedBy?: SharedWorkflowUse[];
+  usedElsewhere?: number;
+}
+
+// SharedWorkflowUse is an application workflow that runs a shared one.
+export interface SharedWorkflowUse {
+  appName: string;
+  appAlias?: string;
+  workflowName: string;
+  workflowAlias?: string;
+  envName: string;
+}
+
+export interface ListSharedWorkflowsResponse {
+  workflows: SharedWorkflow[];
+  // globalUnavailable: the global ones could not be read.
+  globalUnavailable?: boolean;
+  // projectUnavailable: the environment's Applications run outside the
+  // project's namespace, where KubeVela cannot find the project's.
+  projectUnavailable?: boolean;
+  projectNamespace?: string;
+}
+
+export interface SharedWorkflowRequest {
+  name: string;
+  alias?: string;
+  description?: string;
+  mode?: WorkflowMode | '';
+  subMode?: WorkflowMode | '';
+  steps: WorkflowStep[];
 }
 
 export interface CreateWorkflowRequest {
@@ -325,8 +381,9 @@ export interface CreateWorkflowRequest {
   envName: string;
   alias?: string;
   description?: string;
-  mode: WorkflowMode;
-  subMode: WorkflowMode;
+  mode: WorkflowMode | '';
+  subMode: WorkflowMode | '';
+  ref?: string;
   steps: WorkflowStep[];
   default?: boolean;
 }
@@ -452,9 +509,16 @@ export interface Workflow {
   default: boolean;
   createTime?: string;
   enable: boolean;
-  mode: WorkflowMode;
-  subMode: WorkflowMode;
+  mode: WorkflowMode | '';
+  subMode: WorkflowMode | '';
   steps: WorkflowStep[];
+  // ref names the shared Workflow this one runs, whose steps are in steps;
+  // sharedMode and sharedSubMode are its modes, which apply where mode and
+  // subMode are empty.
+  ref?: string;
+  sharedScope?: SharedWorkflowScope;
+  sharedMode?: WorkflowMode;
+  sharedSubMode?: WorkflowMode;
 }
 
 export interface UpdateComponentProperties {

@@ -218,6 +218,12 @@ func ConvertWorkflowBase(workflow *model.Workflow) apisv1.WorkflowBase {
 		Mode:        string(workflow.Mode.Steps),
 		SubMode:     string(workflow.Mode.SubSteps),
 		Steps:       steps,
+		Ref:         workflow.Ref,
+	}
+	// A workflow referencing a shared one keeps empty modes: they follow the
+	// shared one's.
+	if base.Ref != "" {
+		return base
 	}
 	if base.Mode == "" {
 		base.Mode = string(v1alpha1.WorkflowModeStep)

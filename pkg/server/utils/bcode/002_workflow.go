@@ -36,3 +36,15 @@ var ErrWorkflowRecordNotExist = NewBcode(404, 20007, "workflow record is not exi
 
 // ErrWorkflowMode the workflow mode is neither StepByStep nor DAG
 var ErrWorkflowMode = NewBcode(400, 20008, "a workflow mode is StepByStep or DAG")
+
+// ErrSharedWorkflowNotFound the shared Workflow is not in the namespaces it is looked for in
+var ErrSharedWorkflowNotFound = NewBcode(404, 20009, "the shared workflow is not found")
+
+// ErrSharedWorkflowExists a shared Workflow of that name is already in the scope
+var ErrSharedWorkflowExists = NewBcode(400, 20010, "a shared workflow of that name already exists")
+
+// ErrSharedWorkflowInUse a shared Workflow is referenced by a workflow, so it cannot be deleted
+var ErrSharedWorkflowInUse = NewBcode(400, 20011, "the shared workflow is used by application workflows")
+
+// ErrSharedWorkflowScope the scope is neither project nor global
+var ErrSharedWorkflowScope = NewBcode(400, 20012, "a shared workflow's scope is project or global")

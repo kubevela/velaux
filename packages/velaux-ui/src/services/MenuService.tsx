@@ -111,6 +111,17 @@ const defaultWorkspaceMenus: Menu[] = [
   {
     catalog: 'Delivery',
     workspace: 'continuous-delivery',
+    type: MenuTypes.Workspace,
+    to: '/shared-workflows',
+    icon: <BsDiagram3 />,
+    label: 'Workflows',
+    name: 'shared-workflows',
+    permission: { resource: 'project:?/workflow:*', action: 'list' },
+    relatedRoute: ['/shared-workflows', /\/shared-workflows\/.*/],
+  },
+  {
+    catalog: 'Delivery',
+    workspace: 'continuous-delivery',
     to: '/envs',
     type: MenuTypes.Workspace,
     icon: <AiFillEnvironment></AiFillEnvironment>,

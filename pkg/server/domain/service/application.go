@@ -1184,23 +1184,41 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 	application.Spec.Sources = appModel.Sources
 	if workflow != nil {
 		application.Annotations[oam.AnnotationWorkflowName] = workflow.Name
-		var steps []wfTypesv1alpha1.WorkflowStep
-		for _, step := range workflow.Steps {
-			workflowStep := wfTypesv1alpha1.WorkflowStep{
-				WorkflowStepBase: convertWorkflowModel2WorkflowSpec(step.WorkflowStepBase),
-			}
-			workflowStep.Mode = step.Mode
-			for _, subStep := range step.SubSteps {
-				workflowStep.SubSteps = append(workflowStep.SubSteps, convertWorkflowModel2WorkflowSpec(subStep))
-			}
-			steps = append(steps, workflowStep)
-		}
-		application.Spec.Workflow = &v1beta1.Workflow{
-			Steps: steps,
-			Mode:  &workflow.Mode,
-		}
+		application.Spec.Workflow = applicationWorkflowSpec(workflow)
 	}
 	return application, nil
+}
+
+// applicationWorkflowSpec is the workflow an Application runs: a ref to a
+// shared Workflow, with a mode only if this one sets it (KubeVela then takes
+// the shared one's), or its own steps and mode. KubeVela refuses both.
+func applicationWorkflowSpec(workflow *model.Workflow) *v1beta1.Workflow {
+	if workflow.Ref != "" {
+		spec := &v1beta1.Workflow{Ref: workflow.Ref}
+		if workflow.Mode.Steps != "" || workflow.Mode.SubSteps != "" {
+			mode := workflow.Mode
+			spec.Mode = &mode
+		}
+		return spec
+	}
+	mode := workflow.Mode
+	return &v1beta1.Workflow{Steps: workflowStepSpecs(workflow.Steps), Mode: &mode}
+}
+
+// workflowStepSpecs is steps as a Workflow resource holds them.
+func workflowStepSpecs(steps []model.WorkflowStep) []wfTypesv1alpha1.WorkflowStep {
+	var specs []wfTypesv1alpha1.WorkflowStep
+	for _, step := range steps {
+		spec := wfTypesv1alpha1.WorkflowStep{
+			WorkflowStepBase: convertWorkflowModel2WorkflowSpec(step.WorkflowStepBase),
+		}
+		spec.Mode = step.Mode
+		for _, subStep := range step.SubSteps {
+			spec.SubSteps = append(spec.SubSteps, convertWorkflowModel2WorkflowSpec(subStep))
+		}
+		specs = append(specs, spec)
+	}
+	return specs
 }
 
 func convertWorkflowModel2WorkflowSpec(step model.WorkflowStepBase) wfTypesv1alpha1.WorkflowStepBase {
