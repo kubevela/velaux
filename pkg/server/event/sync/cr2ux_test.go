@@ -111,6 +111,33 @@ var _ = Describe("Test CR convert to ux", func() {
 		Expect(gotApp.IsSynced()).Should(BeEquivalentTo(true))
 	})
 
+	It("Test an addon's application is labelled with its addon", func() {
+		for _, name := range []string{dbNamespace, types.DefaultKubeVelaNS, "addon-label-test"} {
+			ns := corev1.Namespace{}
+			ns.Name = name
+			Expect(k8sClient.Create(context.TODO(), &ns)).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
+		}
+
+		addonApp := &v1beta1.Application{}
+		Expect(common2.ReadYamlToObject("testdata/test-app2.yaml", addonApp)).Should(BeNil())
+		addonApp.Name = "addon-fluxcd"
+		addonApp.Namespace = types.DefaultKubeVelaNS
+		addonApp.Labels = map[string]string{oam.LabelAddonName: "fluxcd"}
+		Expect(cr2ux.AddOrUpdate(context.Background(), addonApp)).Should(BeNil())
+		got, _, err := cr2ux.getApp(context.Background(), addonApp.Name, addonApp.Namespace)
+		Expect(err).Should(BeNil())
+		Expect(got.Labels[model.LabelSyncAddon]).Should(Equal("fluxcd"))
+
+		plain := &v1beta1.Application{}
+		Expect(common2.ReadYamlToObject("testdata/test-app2.yaml", plain)).Should(BeNil())
+		plain.Name = "not-an-addon"
+		plain.Namespace = "addon-label-test"
+		Expect(cr2ux.AddOrUpdate(context.Background(), plain)).Should(BeNil())
+		got, _, err = cr2ux.getApp(context.Background(), plain.Name, plain.Namespace)
+		Expect(err).Should(BeNil())
+		Expect(got.Labels).ShouldNot(HaveKey(model.LabelSyncAddon))
+	})
+
 	It("Test app updated and delete app", func() {
 		ctx := context.Background()
 		apName1 := "example"

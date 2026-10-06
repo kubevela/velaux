@@ -535,6 +535,8 @@ export interface ApplicationQuery {
   targetName?: string;
   labels?: string;
   withStatus?: boolean;
+  // addons is exclude, to leave out the applications addons install, or only.
+  addons?: 'exclude' | 'only';
 }
 
 export interface ComponentDefinitionsBase {

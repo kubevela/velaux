@@ -21,6 +21,7 @@ import {
   BsFileEarmarkCode,
   BsGear,
   BsBoxSeam,
+  BsBoxes,
 } from 'react-icons/bs';
 import { RiUserSettingsFill } from 'react-icons/ri';
 import { MdConfirmationNumber } from 'react-icons/md';
@@ -184,6 +185,18 @@ const defaultWorkspaceMenus: Menu[] = [
     icon: <BsGrid />,
     label: 'Modules',
     comingSoon: true,
+  },
+  {
+    catalog: 'Extension',
+    workspace: 'extension',
+    type: MenuTypes.Workspace,
+    to: '/defkit',
+    icon: <BsBoxes />,
+    label: 'DefKit',
+    name: 'defkit-list',
+    // A module installs definitions, so it is listed to whoever may list them.
+    permission: { resource: 'definition:*', action: 'list' },
+    relatedRoute: ['/defkit'],
   },
   {
     catalog: 'Extension',

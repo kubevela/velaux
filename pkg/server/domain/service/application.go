@@ -136,6 +136,19 @@ func NewApplicationService() ApplicationService {
 	return &applicationServiceImpl{}
 }
 
+// addonFilter reports whether an application is listed for an addons option:
+// exclude leaves out the applications addons install, only keeps them alone.
+func addonFilter(app *model.Application, addons string) bool {
+	isAddon := app.Labels[model.LabelSyncAddon] != ""
+	switch addons {
+	case "exclude":
+		return !isAddon
+	case "only":
+		return isAddon
+	}
+	return true
+}
+
 func listApp(ctx context.Context, ds datastore.DataStore, listOptions apisv1.ListApplicationOptions) ([]*model.Application, error) {
 	var app = model.Application{}
 	var err error
@@ -168,6 +181,9 @@ func listApp(ctx context.Context, ds datastore.DataStore, listOptions apisv1.Lis
 			!strings.Contains(appModel.Alias, listOptions.Query) &&
 			strings.Contains(appModel.Name, listOptions.Query) &&
 			strings.Contains(appModel.Description, listOptions.Query) {
+			continue
+		}
+		if !addonFilter(appModel, listOptions.Addons) {
 			continue
 		}
 		if listOptions.TargetName != "" {

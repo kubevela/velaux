@@ -47,9 +47,11 @@ func (c *CR2UX) ConvertApp2DatastoreApp(ctx context.Context, targetApp *v1beta1.
 		Name: model.DefaultInitName,
 	}
 	sourceOfTruth := apitypes.FromCR
-	if _, ok := targetApp.Labels[oam.LabelAddonName]; ok && strings.HasPrefix(targetApp.Name, "addon-") && targetApp.Namespace == apitypes.DefaultKubeVelaNS {
+	addon := ""
+	if name, ok := targetApp.Labels[oam.LabelAddonName]; ok && strings.HasPrefix(targetApp.Name, "addon-") && targetApp.Namespace == apitypes.DefaultKubeVelaNS {
 		project = c.generateSystemProject(ctx, targetApp.Namespace)
 		sourceOfTruth = apitypes.FromInner
+		addon = name
 	}
 
 	appMeta := &model.Application{
@@ -64,6 +66,9 @@ func (c *CR2UX) ConvertApp2DatastoreApp(ctx context.Context, targetApp *v1beta1.
 			apitypes.LabelSourceOfTruth: sourceOfTruth,
 		},
 		Sources: targetApp.Spec.Sources,
+	}
+	if addon != "" {
+		appMeta.Labels[model.LabelSyncAddon] = addon
 	}
 	// Only the expressions opt-in is carried: a deploy from VelaUX writes the
 	// model's annotations back to the CR.
