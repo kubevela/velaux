@@ -120,6 +120,8 @@ github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
 github.com/briandowns/spinner v1.23.0 h1:alDF2guRWqa/FOZZYWjlMIx2L6H0wyewPxo/CH4Pt2A=
 github.com/briandowns/spinner v1.23.0/go.mod h1:rPG4gmXeN3wQV/TsAY4w8lPdIM6RX3yqeBQJSrbXjuE=
+github.com/briankane/kubevela v0.0.0-20261005192129-61efba543c3d h1:zwhamGQmHQtP1EsnKZld92ipFaxbrwWnGq2PNRCXRs8=
+github.com/briankane/kubevela v0.0.0-20261005192129-61efba543c3d/go.mod h1:KF/ehb7391WgceUAcUXDMwI/GWYzZr3/Ig/KpEaPQgM=
 github.com/bshuster-repo/logrus-logstash-hook v1.0.0 h1:e+C0SB5R1pu//O4MQ3f9cFuPGoOVeF2fE4Og9otCc70=
 github.com/bshuster-repo/logrus-logstash-hook v1.0.0/go.mod h1:zsTqEiSzDgAa/8GZR7E1qaXrhYNDKBYy5/dWPTIflbk=
 github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=
@@ -665,8 +667,6 @@ github.com/oam-dev/cluster-gateway v1.9.2-0.20250629203450-2b04dd452b7a h1:DRcSD
 github.com/oam-dev/cluster-gateway v1.9.2-0.20250629203450-2b04dd452b7a/go.mod h1:ZIYRoiy4He22db8XiWTAh7QecIt5QWiQNacCZg1zbbY=
 github.com/oam-dev/cluster-register v1.0.4-0.20250624042630-618dfa13eb5b h1:9oAzdnBC9rEcwLDpkReoWpZPwqbIC0rqIejFCFkE3Gk=
 github.com/oam-dev/cluster-register v1.0.4-0.20250624042630-618dfa13eb5b/go.mod h1:grVoZB9AM44ssnJH8e+5mUQhp71ku32gKWULkWNGq7g=
-github.com/oam-dev/kubevela v1.11.1-0.20260929162142-f450c6ee9648 h1:BTWda+EsiREb1Fk5a7D7vyphy6Xnf/o+iwr4F4NV9IE=
-github.com/oam-dev/kubevela v1.11.1-0.20260929162142-f450c6ee9648/go.mod h1:KF/ehb7391WgceUAcUXDMwI/GWYzZr3/Ig/KpEaPQgM=
 github.com/oam-dev/stern v1.13.3-0.20250828063553-e1dd6271d131 h1:/PqJ2+yzsXNTDddYcmjIlYzZOkTyndnbLmhB2zr/awI=
 github.com/oam-dev/stern v1.13.3-0.20250828063553-e1dd6271d131/go.mod h1:vkI7wKjjAhSM0+UbHmhmYnb5BDpC/aRoSgjBVcUupME=
 github.com/oam-dev/terraform-config-inspect v0.0.0-20250902214508-15aa973b0d00 h1:cLgAKCJMTSU1D3biwGvVrHM1zgtUU1KtktsbbNchrJI=
