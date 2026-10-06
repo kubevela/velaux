@@ -869,7 +869,7 @@ type CreateComponentRequest struct {
 	Description   string                           `json:"description" optional:"true"`
 	Icon          string                           `json:"icon" optional:"true"`
 	Labels        map[string]string                `json:"labels,omitempty"`
-	ComponentType string                           `json:"componentType" validate:"checkname"`
+	ComponentType string                           `json:"componentType" validate:"checktype"`
 	Properties    string                           `json:"properties,omitempty"`
 	DependsOn     []string                         `json:"dependsOn" optional:"true"`
 	Inputs        wfTypesv1alpha1.StepInputs       `json:"inputs,omitempty" optional:"true"`
@@ -1019,6 +1019,22 @@ type ListDefinitionResponse struct {
 	Definitions []*DefinitionBase `json:"definitions"`
 }
 
+// DefinitionRevision is one revision of a definition, as an Application pins it.
+type DefinitionRevision struct {
+	// Revision is the revision's number, which counts up with every change.
+	Revision int64 `json:"revision"`
+	// Version is what follows @ in a type pinned to the revision: v2 for a
+	// numbered revision, v1.2.0 for one the definition's spec.version names.
+	Version    string    `json:"version"`
+	Hash       string    `json:"hash"`
+	CreateTime time.Time `json:"createTime"`
+}
+
+// ListDefinitionRevisionsResponse is a definition's revisions, newest first.
+type ListDefinitionRevisionsResponse struct {
+	Revisions []DefinitionRevision `json:"revisions"`
+}
+
 // DetailDefinitionResponse get definition detail
 type DetailDefinitionResponse struct {
 	DefinitionBase
@@ -1117,7 +1133,7 @@ type CreatePolicyRequest struct {
 	Alias       string `json:"alias"`
 	EnvName     string `json:"envName"`
 	Description string `json:"description"`
-	Type        string `json:"type" validate:"checkname"`
+	Type        string `json:"type" validate:"checktype"`
 	// Properties json data
 	Properties string `json:"properties"`
 
@@ -1147,7 +1163,7 @@ type CreateSourceRequest struct {
 	// Name is the binding expressions read it by, $(source.<name>), so a CEL
 	// identifier: clusterInfo, not cluster-info.
 	Name string `json:"name" validate:"checkidentifier"`
-	Type string `json:"type" validate:"checkname"`
+	Type string `json:"type" validate:"checktype"`
 	// Properties json data
 	Properties string `json:"properties"`
 	// AutoUpdate is the binding's own say; unset follows the controller's default,
@@ -1157,7 +1173,7 @@ type CreateSourceRequest struct {
 
 // UpdateSourceRequest changes the type or parameter of an application source
 type UpdateSourceRequest struct {
-	Type string `json:"type" validate:"checkname"`
+	Type string `json:"type" validate:"checktype"`
 	// Properties json data
 	Properties string `json:"properties"`
 	// AutoUpdate is the binding's own say; unset follows the controller's default,
@@ -1176,7 +1192,7 @@ type UpdatePolicyRequest struct {
 	Alias       string `json:"alias"`
 	EnvName     string `json:"envName"`
 	Description string `json:"description"`
-	Type        string `json:"type" validate:"checkname"`
+	Type        string `json:"type" validate:"checktype"`
 	// Properties json data
 	Properties string `json:"properties"`
 
@@ -1416,7 +1432,7 @@ type CreateApplicationEnvbindingRequest struct {
 
 // CreateApplicationTraitRequest create application trait request
 type CreateApplicationTraitRequest struct {
-	Type        string `json:"type" validate:"checkname"`
+	Type        string `json:"type" validate:"checktype"`
 	Alias       string `json:"alias,omitempty" validate:"checkalias" optional:"true"`
 	Description string `json:"description,omitempty" optional:"true"`
 	Properties  string `json:"properties"`
@@ -2156,6 +2172,16 @@ type ExpressionEnvResponse struct {
 	Variables []*ExpressionVariable `json:"variables"`
 }
 
+// DefinitionCUEResponse is a definition as CUE, as vela def get writes it.
+type DefinitionCUEResponse struct {
+	CUE string `json:"cue"`
+}
+
+// DefinitionDocResponse is a definition's reference documentation, in Markdown.
+type DefinitionDocResponse struct {
+	Markdown string `json:"markdown"`
+}
+
 // ExpressionVariable is a value an expression can read, and its fields.
 type ExpressionVariable struct {
 	Name        string `json:"name"`
@@ -2226,4 +2252,90 @@ type Customisation struct {
 type Term struct {
 	Singular string `json:"singular"`
 	Plural   string `json:"plural"`
+}
+
+// PackageBase is a CUE package a definition can import: a Package resource in
+// the cluster, or one built into KubeVela.
+type PackageBase struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace,omitempty"`
+	// Path is what a definition imports it as.
+	Path    string `json:"path"`
+	Builtin bool   `json:"builtin,omitempty"`
+	// UsedBy names what can import a built-in package: components (with traits
+	// and sources) or workflow steps.
+	UsedBy []string `json:"usedBy,omitempty"`
+	// Variant tells apart the built-in packages sharing a path: the one
+	// components import and the one workflow steps do, where they differ.
+	Variant    string           `json:"variant,omitempty"`
+	Provider   *PackageProvider `json:"provider,omitempty"`
+	Functions  int              `json:"functions"`
+	Files      int              `json:"files"`
+	CreateTime *time.Time       `json:"createTime,omitempty"`
+}
+
+// PackageProvider is the external server that runs a package's functions.
+// Header values are left out: they often carry credentials.
+type PackageProvider struct {
+	Protocol string   `json:"protocol"`
+	Endpoint string   `json:"endpoint"`
+	Headers  []string `json:"headers,omitempty"`
+}
+
+// PackageField is one field of a function's parameters or results, or of a
+// type, with its type as declared.
+type PackageField struct {
+	Name        string          `json:"name"`
+	Type        string          `json:"type,omitempty"`
+	Optional    bool            `json:"optional,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Fields      []*PackageField `json:"fields,omitempty"`
+}
+
+// PackageFunction is a definition a package's provider runs: #do names the
+// operation, $params what it takes and $returns what it gives back. Where one
+// of those is not a struct, its type stands in the Type field instead.
+type PackageFunction struct {
+	Name        string          `json:"name"`
+	Do          string          `json:"do"`
+	Provider    string          `json:"provider,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Params      []*PackageField `json:"params,omitempty"`
+	ParamsType  string          `json:"paramsType,omitempty"`
+	Returns     []*PackageField `json:"returns,omitempty"`
+	ReturnsType string          `json:"returnsType,omitempty"`
+	// Usage is how a definition calls it, with its required parameters.
+	Usage string `json:"usage"`
+}
+
+// PackageType is a definition in a package that is not a function.
+type PackageType struct {
+	Name        string          `json:"name"`
+	Description string          `json:"description,omitempty"`
+	Type        string          `json:"type,omitempty"`
+	Fields      []*PackageField `json:"fields,omitempty"`
+}
+
+// PackageFile is one of a package's CUE files.
+type PackageFile struct {
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
+
+// PackageDetail is a package with what it offers.
+type PackageDetail struct {
+	PackageBase
+	// PackageName is the name its files declare, which a definition writes
+	// before a function: mysql.#ListTables.
+	PackageName string             `json:"packageName,omitempty"`
+	Functions   []*PackageFunction `json:"functionList"`
+	Types       []*PackageType     `json:"types"`
+	FileList    []*PackageFile     `json:"fileList"`
+	// Issue is why the package's files could not be read, where they could not.
+	Issue string `json:"issue,omitempty"`
+}
+
+// ListPackagesResponse lists the packages.
+type ListPackagesResponse struct {
+	Packages []*PackageBase `json:"packages"`
 }

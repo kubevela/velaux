@@ -64,6 +64,10 @@ class Definitions extends Component<Props, State> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
+    // The list waits on the user and their permissions, which load after the page.
+    if (nextProps.userInfo !== this.props.userInfo) {
+      this.lisDefinitions(nextProps.userInfo);
+    }
     const nextPropsParams = nextProps.match.params || {};
     if (nextPropsParams.definitionType !== this.state.definitionType) {
       this.setState(
@@ -77,8 +81,7 @@ class Definitions extends Component<Props, State> {
     }
   }
 
-  lisDefinitions() {
-    const { userInfo } = this.props;
+  lisDefinitions(userInfo = this.props.userInfo) {
     const { definitionType } = this.state;
     if (!definitionType) {
       return;
@@ -170,7 +173,7 @@ class Definitions extends Component<Props, State> {
         cell: (v: string, i: number, record: DefinitionBase) => {
           return (
             <span className="definition-name">
-              <Link to={`/definitions/${definitionType}/${v}/ui-schema`}>{v}</Link>
+              <Link to={`/definitions/${definitionType}/${v}/doc`}>{v}</Link>
               {record.abstract && (
                 <Tag size="small" className="definition-abstract">
                   <Translation>Abstract</Translation>

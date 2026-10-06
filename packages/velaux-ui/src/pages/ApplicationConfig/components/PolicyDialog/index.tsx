@@ -11,6 +11,8 @@ import {
 
 import { createPolicy, updatePolicy } from '../../../../api/application';
 import { detailPolicyDefinition, getPolicyDefinitions } from '../../../../api/definitions';
+import { VersionSelect } from '../../../../components/VersionSelect';
+import { joinType, splitType } from '../../../../utils/definitionVersion';
 import { AwaitingType } from '../../../../components/AwaitingType';
 import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
@@ -172,9 +174,10 @@ class PolicyDialog extends React.Component<Props, State> {
     this.setUISchemaContext();
     const { policy } = this.props;
     if (policy) {
+      const pinned = splitType(policy.type);
       let selected = false;
       this.state.items.map((item) => {
-        if (item.type == policy.type && item.properties == undefined) {
+        if (item.type == pinned.name && item.properties == undefined) {
           this.onSelectPolicy(item);
           selected = true;
         }
@@ -187,19 +190,20 @@ class PolicyDialog extends React.Component<Props, State> {
           icon: <AiOutlineFileDone size={35} />,
         });
       }
-      this.field.setValues({ ...policy });
+      this.field.setValues({ ...policy, type: pinned.name, policyVersion: pinned.version });
       if (Array.isArray(policy.workflowPolicyBind) && policy.workflowPolicyBind.length > 0) {
         this.field.setValues({
           workflow: policy.workflowPolicyBind[0].name,
           steps: policy.workflowPolicyBind[0].steps,
         });
       }
-      this.loadPolicyDefinitionDetail(policy.type);
+      this.loadPolicyDefinitionDetail(pinned.name, pinned.version);
     }
   }
 
   handleTypeChange = (value: string) => {
     this.removeProperties(() => {
+      this.field.setValue('policyVersion', undefined);
       this.loadPolicyDefinitionDetail(value);
       this.field.setValue('name', value);
       this.field.setValue('alias', value);
@@ -285,6 +289,7 @@ class PolicyDialog extends React.Component<Props, State> {
         Message.warning(i18n.t('Please select a policy type first.'));
         return;
       }
+      policyType = joinType(policyType, this.field.getValue('policyVersion'));
       let env = envName;
       if (!env && workflow) {
         env = this.getEnvNameFromWorkflow(workflow);
@@ -337,7 +342,7 @@ class PolicyDialog extends React.Component<Props, State> {
         envName: env,
         description: description,
         alias: alias,
-        type: type,
+        type: joinType(type, this.field.getValue('policyVersion')),
         properties: JSON.stringify(properties),
       };
       if (workflow && steps && steps.length > 0) {
@@ -363,6 +368,7 @@ class PolicyDialog extends React.Component<Props, State> {
 
   onSelectPolicy = (item: PolicyItem) => {
     this.field.reset();
+    this.field.setValue('policyVersion', undefined);
     this.field.setValues({
       name: item.name,
       description: item.title,
@@ -446,9 +452,11 @@ class PolicyDialog extends React.Component<Props, State> {
     });
   };
 
-  loadPolicyDefinitionDetail = (policyType: string) => {
+  // loadPolicyDefinitionDetail loads a policy type's form, at the version it is
+  // pinned to or the latest.
+  loadPolicyDefinitionDetail = (policyType: string, version?: string) => {
     this.setState({ definitionDetailLoading: true });
-    detailPolicyDefinition({ name: policyType })
+    detailPolicyDefinition({ name: policyType, revision: version })
       .then((res) => {
         if (res) {
           this.setState({ policyDefinitionDetail: res });
@@ -468,6 +476,8 @@ class PolicyDialog extends React.Component<Props, State> {
     const init = this.field.init;
     const showType = (selectedPolicyItem && selectedPolicyItem?.name == 'custom') || policy != undefined;
     const span = 12;
+    // policyType is the type chosen, from its card or, for a custom one, its list.
+    const policyType: string = this.field.getValue('type') || selectedPolicyItem?.type || '';
     // The policy's type comes first, a custom one's from its own list; the rest waits for it.
     const ready =
       policy != undefined ||
@@ -521,6 +531,23 @@ class PolicyDialog extends React.Component<Props, State> {
                     </Form.Item>
                   </Col>
                 )}
+              </Row>
+            )}
+            {policyType && (
+              <Row wrap={true}>
+                <Col span={span} style={{ padding: '0 8px' }}>
+                  <Form.Item label={i18n.t('Version').toString()}>
+                    <VersionSelect
+                      definitionType="policy"
+                      name={policyType}
+                      value={this.field.getValue('policyVersion')}
+                      onChange={(version?: string) => {
+                        this.field.setValue('policyVersion', version);
+                        this.loadPolicyDefinitionDetail(policyType, version);
+                      }}
+                    />
+                  </Form.Item>
+                </Col>
               </Row>
             )}
             <AwaitingType ready={ready}>

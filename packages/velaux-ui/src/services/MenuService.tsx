@@ -20,6 +20,7 @@ import {
   BsPlugin,
   BsFileEarmarkCode,
   BsGear,
+  BsBoxSeam,
 } from 'react-icons/bs';
 import { RiUserSettingsFill } from 'react-icons/ri';
 import { MdConfirmationNumber } from 'react-icons/md';
@@ -194,6 +195,19 @@ const defaultWorkspaceMenus: Menu[] = [
     name: 'definition-list',
     permission: { resource: 'definition:*', action: 'list' },
     relatedRoute: ['/definitions'],
+  },
+  {
+    catalog: 'Extension',
+    workspace: 'extension',
+    type: MenuTypes.Workspace,
+    to: '/packages',
+    icon: <BsBoxSeam />,
+    label: 'Packages',
+    name: 'package-list',
+    // Packages are what definitions are written against, so whoever may
+    // list definitions may list them.
+    permission: { resource: 'definition:*', action: 'list' },
+    relatedRoute: ['/packages'],
   },
   {
     catalog: 'Admin',

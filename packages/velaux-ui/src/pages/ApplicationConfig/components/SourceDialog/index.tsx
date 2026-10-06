@@ -5,6 +5,8 @@ import { connect } from 'dva';
 
 import { createSource, getExpressionEnv, setExpressionOptIn, updateSource } from '../../../../api/application';
 import { detailSourceDefinition, getSourceDefinitions } from '../../../../api/definitions';
+import { VersionSelect } from '../../../../components/VersionSelect';
+import { joinType, splitType } from '../../../../utils/definitionVersion';
 import { AwaitingType } from '../../../../components/AwaitingType';
 import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
@@ -78,6 +80,7 @@ class SourceDialog extends React.Component<Props, State> {
             this.field.setValue('name', this.suggestedName);
           }
           this.field.remove('properties');
+          this.field.setValue('sourceVersion', undefined);
           this.setState({ definition: undefined }, () => this.loadDefinition(value));
         }
       },
@@ -118,13 +121,15 @@ class SourceDialog extends React.Component<Props, State> {
     this.loadExpressionEnv();
     this.loadDefinitions();
     if (source) {
+      const pinned = splitType(source.type);
       this.field.setValues({
         name: source.name,
-        type: source.type,
+        type: pinned.name,
+        sourceVersion: pinned.version,
         properties: source.properties,
         autoUpdate: autoUpdateOption(source.autoUpdate),
       });
-      this.loadDefinition(source.type);
+      this.loadDefinition(pinned.name, pinned.version);
     }
   }
 
@@ -158,12 +163,14 @@ class SourceDialog extends React.Component<Props, State> {
     onOptIn: this.setExpressionOptIn,
   });
 
-  loadDefinition = (type: string) => {
+  // loadDefinition loads a source type's form, at the version it is pinned to
+  // or the latest.
+  loadDefinition = (type: string, version?: string) => {
     if (!type) {
       return;
     }
     this.setState({ loading: true });
-    detailSourceDefinition({ name: type })
+    detailSourceDefinition({ name: type, revision: version })
       .then((res) => {
         if (res) {
           this.setState({ definition: res });
@@ -178,7 +185,8 @@ class SourceDialog extends React.Component<Props, State> {
         return;
       }
       const { appName, source } = this.props;
-      const { name, type, properties } = values;
+      const { name, properties } = values;
+      const type = joinType(values.type, this.field.getValue('sourceVersion'));
       const autoUpdate = autoUpdateValue(values.autoUpdate);
       this.setState({ saving: true });
       const request = source
@@ -241,6 +249,19 @@ class SourceDialog extends React.Component<Props, State> {
                     })}
                     locale={locale().Select}
                     dataSource={definitions.map((d) => ({ label: d.name, value: d.name }))}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12} style={{ padding: '0 8px' }}>
+                <Form.Item label={i18n.t('Version').toString()}>
+                  <VersionSelect
+                    definitionType="source"
+                    name={this.field.getValue('type')}
+                    value={this.field.getValue('sourceVersion')}
+                    onChange={(version?: string) => {
+                      this.field.setValue('sourceVersion', version);
+                      this.loadDefinition(this.field.getValue('type'), version);
+                    }}
                   />
                 </Form.Item>
               </Col>

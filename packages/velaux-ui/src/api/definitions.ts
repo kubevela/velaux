@@ -8,7 +8,7 @@ const baseURLOject = getDomain();
 const base = baseURLOject.APIBASE;
 
 export function getDefinitionsList(params: {
-  definitionType: 'component' | 'trait' | 'workflowstep' | 'policy';
+  definitionType: 'component' | 'trait' | 'workflowstep' | 'policy' | 'source';
   queryAll: boolean;
 }) {
   const url = base + definition;
@@ -46,9 +46,9 @@ export function getComponentDefinitions(namespaces?: string[]) {
   return get(_url, { params: { type: 'component', namespaces: namespaces?.join(',') } }).then((res) => res);
 }
 
-export function detailComponentDefinition(params: { name: string }) {
+export function detailComponentDefinition(params: { name: string; revision?: string }) {
   const _url = `${base + definition}/${params.name}`;
-  return get(_url, { params: { type: 'component' } }).then((res) => res);
+  return get(_url, { params: { type: 'component', revision: params.revision } }).then((res) => res);
 }
 
 export function getPolicyDefinitions(namespaces?: string[]) {
@@ -56,9 +56,9 @@ export function getPolicyDefinitions(namespaces?: string[]) {
   return get(_url, { params: { type: 'policy', namespaces: namespaces?.join(',') } }).then((res) => res);
 }
 
-export function detailPolicyDefinition(params: { name: string }) {
+export function detailPolicyDefinition(params: { name: string; revision?: string }) {
   const _url = `${base + definition}/${params.name}`;
-  return get(_url, { params: { type: 'policy' } }).then((res) => res);
+  return get(_url, { params: { type: 'policy', revision: params.revision } }).then((res) => res);
 }
 
 export function getSourceDefinitions(namespaces?: string[]) {
@@ -66,9 +66,9 @@ export function getSourceDefinitions(namespaces?: string[]) {
   return get(_url, { params: { type: 'source', namespaces: namespaces?.join(',') } }).then((res) => res);
 }
 
-export function detailSourceDefinition(params: { name: string }) {
+export function detailSourceDefinition(params: { name: string; revision?: string }) {
   const _url = `${base + definition}/${params.name}`;
-  return get(_url, { params: { type: 'source' } }).then((res) => res);
+  return get(_url, { params: { type: 'source', revision: params.revision } }).then((res) => res);
 }
 
 export function getTraitDefinitions(params: { appliedWorkload: string; namespaces?: string[] }) {
@@ -83,7 +83,26 @@ export function getDefinitionUsage(params: { name: string; type: 'component' | '
   return get(_url, { params: { type: params.type } }).then((res) => res);
 }
 
-export function detailTraitDefinition(params: { name: string }) {
+// getDefinitionCUE is a definition as CUE, as vela def get writes it.
+export function getDefinitionCUE(params: { name: string; type: string }) {
+  const _url = `${base + definition}/${params.name}/cue`;
+  return get(_url, { params: { type: params.type } }).then((res) => res);
+}
+
+// getDefinitionDoc is a definition's reference documentation in Markdown, as
+// vela show generates it, in the UI's language.
+export function getDefinitionDoc(params: { name: string; type: string; lang: string }) {
+  const _url = `${base + definition}/${params.name}/doc`;
+  return get(_url, { params: { type: params.type, lang: params.lang } }).then((res) => res);
+}
+
+export function detailTraitDefinition(params: { name: string; revision?: string }) {
   const _url = `${base + definition}/${params.name}`;
-  return get(_url, { params: { type: 'trait' } }).then((res) => res);
+  return get(_url, { params: { type: 'trait', revision: params.revision } }).then((res) => res);
+}
+
+// listDefinitionRevisions lists a definition's revisions, newest first.
+export function listDefinitionRevisions(params: { name: string; type: string }) {
+  const _url = `${base + definition}/${params.name}/revisions`;
+  return get(_url, { params: { type: params.type } }).then((res) => res);
 }

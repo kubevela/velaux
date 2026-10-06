@@ -287,7 +287,7 @@ class Header extends Component<Props, State> {
             <Dropdown
               triggerType="hover"
               align="bl br"
-              offset={[8, 0]}
+              offset={[collapsed ? 18 : 22, 0]}
               trigger={
                 <div className="sidebar-user" title={userName}>
                   <span className="sidebar-avatar">{(userName || '?').slice(0, 1).toUpperCase()}</span>
