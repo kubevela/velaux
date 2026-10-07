@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"sync"
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
@@ -72,7 +73,31 @@ func TestJSCache(t *testing.T) {
 	assert.Equal(t, jsFileCache.Len(), 2)
 }
 
+func TestJSCacheConcurrentRequests(t *testing.T) {
+	var wg sync.WaitGroup
+	for i := 0; i < 32; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			for j := 0; j < 20; j++ {
+				u, err := url.Parse(fmt.Sprintf("/chunk-%d.js", (i+j)%5))
+				assert.NoError(t, err)
+				res := httptest.NewRecorder()
+				utils.NewFilterChain(loadJSQuiet, JSCache).ProcessFilter(&http.Request{Method: "GET", URL: u}, res)
+				assert.Equal(t, http.StatusOK, res.Code)
+				assert.Equal(t, jsContent, res.Body.String())
+			}
+		}(i)
+	}
+	wg.Wait()
+}
+
 var jsContent = "console.log(\"hello\")"
+
+func loadJSQuiet(req *http.Request, res http.ResponseWriter) {
+	res.WriteHeader(http.StatusOK)
+	_, _ = res.Write([]byte(jsContent))
+}
 
 func loadJS(req *http.Request, res http.ResponseWriter) {
 	fmt.Printf("miss cache,path:%s \n", req.URL.String())

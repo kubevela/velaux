@@ -1,87 +1,37 @@
-.layout-top-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 48px;
-  background-color: var(--primary-color);
-  cursor: pointer;
-  -webkit-app-region: drag;
-  .windows-option-view {
-    position: absolute;
-    right: 5px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    -webkit-app-region: no-drag;
-    .option-icon {
-      width: 18px;
-      height: 18px;
-      margin-right: 12px;
-      overflow: hidden;
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: contain;
-      cursor: pointer;
-      &:hover {
-        opacity: 0.8;
-      }
-    }
-    .min {
-      width: 16px;
-      height: 16px;
-      // background-image: url('../assets/min.png');
-    }
-    .max {
-      // background-image: url('../assets/max.png');
-    }
-    .close {
-      width: 12px;
-      height: 12px;
-      // background-image: url('../assets/close.png');
-    }
-  }
-  .s-logo {
-    width: 50px;
-    margin-left: 100px;
-    -webkit-app-region: no-drag;
-  }
-  .word {
-    display: flex;
-    align-items: center;
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    -webkit-app-region: no-drag;
-  }
-}
 .layout-shell {
   display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
 }
+
+// The search sits centred above the page.
+.layout-topbar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  padding: 0 16px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+// The page fits the window, sidebar and search bar always in view; a page
+// narrower than its content scrolls within the content area instead.
 .layout {
-  min-width: var(--min-layout-width);
-}
-.layout-navigation {
-  width: 240px;
-  min-width: 60px;
-  min-height: calc(100vh - 48px);
-  padding-top: 22px;
-  background-color: #252525;
+  display: flex;
+  height: 100vh;
 }
 
 .layout-content {
   flex: 1;
-  width: calc(100% - 240px);
-  height: calc(100vh - 48px);
+  min-height: 0;
+  > * {
+    min-width: calc(var(--min-layout-width) - 500px);
+  }
   padding: 15px;
   overflow: auto;
   background-color: #f7f7f7;
-}
-
-@media (max-width: 980px) {
-  .layout-navigation {
-    width: 180px;
-  }
 }
 
 .layout-content {
@@ -105,4 +55,21 @@
   background-color: #404040;
   border-radius: 0;
   opacity: 0.9;
+}
+
+// Modals head in the sidebar's colours, set on the page root by the branding;
+// the dark default matches the unbranded sidebar.
+.next-dialog .next-dialog-header {
+  padding: 14px 20px;
+  color: var(--sb-text-strong, #f1f5f9);
+  background: var(--sb-bg, #111827);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}
+.next-dialog .next-dialog-close,
+.next-dialog .next-dialog-close .next-dialog-close-icon {
+  color: var(--sb-text, #a3adbd);
+}
+.next-dialog .next-dialog-body {
+  padding-top: 20px;
 }

@@ -102,3 +102,9 @@ var ErrApplicationDryRunFailed = NewBcode(400, 10027, "The application dry run f
 
 // ErrApplicationRevisionConflict -
 var ErrApplicationRevisionConflict = NewBcode(400, 10028, "The current revision of the application is equal to the requested revision")
+
+// ErrApplicationSourceExist means the application already has a source of that name
+var ErrApplicationSourceExist = NewBcode(400, 10029, "application source is exist")
+
+// ErrApplicationSourceNotExist means the application has no source of that name
+var ErrApplicationSourceNotExist = NewBcode(404, 10030, "application source is not exist")

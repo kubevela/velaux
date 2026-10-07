@@ -1,11 +1,14 @@
-import { Table, Card, Loading, Balloon, Button, Message, Dialog, Tag, Tab } from '@alifd/next';
+import { Table, Loading, Balloon, Button, Message, Dialog, Tag, Tab } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React from 'react';
 
 import { deployApplication } from '../../api/application';
+import { notifyDeployed } from '../../utils/deploy';
 import { listApplicationResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
 import { If } from '../../components/If';
+import { StatusBadge } from '../../components/StatusBadge';
+import { StatusDetails } from '../../components/StatusDetails';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type {
@@ -16,15 +19,20 @@ import type {
   EnvBinding,
   ComponentStatus,
   ApplicationDeployResponse,
- AppliedResource , Target , LoginUserInfo } from '@velaux/data';
+  AppliedResource,
+  Target,
+  LoginUserInfo,
+} from '@velaux/data';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import { locale } from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
+import { componentStatusKey, hasStatusDetails, traitState, traitStateCircle } from '../../utils/status';
 import Header from '../ApplicationInstanceList/components/Header';
 
 import './index.less';
 import ApplicationGraph from './components/ApplicationGraph';
+import SourceStatusList from './components/SourceStatusList';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 type Props = {
@@ -226,7 +234,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
-            Message.success(i18n.t('Application deployed successfully'));
+            notifyDeployed(re);
             this.setState({ deployLoading: false });
             this.loadApplicationStatus();
             if (re.record && re.record.name && dispatch) {
@@ -326,17 +334,18 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
                 <If condition={componentStatus}>
-                  <Card
-                    locale={locale().Card}
-                    style={{ marginTop: '8px', marginBottom: '16px' }}
-                    contentHeight="auto"
-                    title={<Translation>Component Status</Translation>}
-                  >
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Component Status</Translation>
+                    </div>
                     <div style={{ overflow: 'auto' }}>
                       <Table
                         locale={locale().Table}
                         className="customTable"
-                        dataSource={componentStatus}
+                        dataSource={componentStatus?.map((item) => ({ ...item, statusKey: componentStatusKey(item) }))}
+                        primaryKey="statusKey"
+                        rowExpandable={hasStatusDetails}
+                        expandedRowRender={(record: ComponentStatus) => <StatusDetails status={record} />}
                         style={{ minWidth: '1000px' }}
                       >
                         <Table.Column
@@ -369,23 +378,14 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                         <Table.Column
                           align="left"
                           dataIndex="healthy"
-                          width="100px"
-                          cell={(v: boolean) => {
-                            if (v) {
-                              return (
-                                <div>
-                                  <span className="circle circle-success" />
-                                  <span>Healthy</span>
-                                </div>
-                              );
-                            }
-                            return (
-                              <div>
-                                <span className="circle circle-warning" />
-                                <span>UnHealthy</span>
-                              </div>
-                            );
-                          }}
+                          width="130px"
+                          cell={(v: boolean) =>
+                            v ? (
+                              <StatusBadge tone="healthy" label="Healthy" />
+                            ) : (
+                              <StatusBadge tone="unhealthy" label="Unhealthy" />
+                            )
+                          }
                           title={<Translation>Healthy</Translation>}
                         />
                         <Table.Column
@@ -393,61 +393,54 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                           dataIndex="trait"
                           cell={(v: boolean, i: number, record: ComponentStatus) => {
                             const { traits } = record;
-                            const Tags = (traits || []).map((item) => {
-                              if (item.healthy) {
-                                return (
-                                  <Tag type="normal" size="small">
-                                    <div>
-                                      <span className="circle circle-success" />
-                                      <span>{item.type}</span>
-                                    </div>
-                                  </Tag>
-                                );
-                              } else {
-                                return (
-                                  <Tag type="normal" size="small">
-                                    <div>
-                                      <span className="circle circle-failure" />
-                                      <span>{item.type}</span>
-                                    </div>
-                                  </Tag>
-                                );
+                            const Tags = (traits || []).map((item, index) => {
+                              const state = traitState(item);
+                              const tag = (
+                                <Tag type="normal" size="small" key={`${item.type}-${index}`}>
+                                  <div>
+                                    <span className={`circle ${traitStateCircle[state]}`} />
+                                    <span>{item.type}</span>
+                                  </div>
+                                </Tag>
+                              );
+                              // A trait's message is on its tag; a pending trait without one says what it waits for.
+                              const note =
+                                item.message ||
+                                (state === 'pending' ? i18n.t('Pending: waits for the workload to be healthy') : '');
+                              if (!note) {
+                                return tag;
                               }
+                              return (
+                                <Balloon.Tooltip key={`${item.type}-${index}`} trigger={tag} align="t">
+                                  {note}
+                                </Balloon.Tooltip>
+                              );
                             });
                             return <TagGroup className="tags-content">{Tags}</TagGroup>;
                           }}
                           title={<Translation>Traits</Translation>}
                         />
                         <Table.Column
-                          align="center"
                           dataIndex="message"
                           title={<Translation>Message</Translation>}
-                          cell={(v: string, i: number, record: ComponentStatus) => {
-                            const { message = '', traits } = record;
-                            const TraitMessages = (traits || []).map((item) => {
-                              if (item.message) {
-                                return (
-                                  <div>
-                                    <span>{item.type}: </span>
-                                    <span>{item.message}</span>
-                                  </div>
-                                );
-                              }
-                              return;
-                            });
-                            return (
-                              <div>
-                                <div>{message}</div>
-                                {TraitMessages}
-                              </div>
-                            );
-                          }}
+                          cell={(v: string, i: number, record: ComponentStatus) => <div>{record.message || ''}</div>}
                         />
                       </Table>
                     </div>
-                  </Card>
+                  </section>
                 </If>
-                <Card locale={locale().Card} contentHeight="200px" title={<Translation>Applied Resources</Translation>}>
+                <If condition={applicationStatus?.sources?.length}>
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Sources</Translation>
+                    </div>
+                    <SourceStatusList sources={applicationStatus?.sources || []} />
+                  </section>
+                </If>
+                <section className="status-section">
+                  <div className="status-section-title">
+                    <Translation>Applied Resources</Translation>
+                  </div>
                   <div style={{ overflow: 'auto' }}>
                     <Table style={{ minWidth: '1000px' }} locale={locale().Table} dataSource={resources}>
                       <Table.Column
@@ -489,16 +482,8 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                           if (row.latest) {
                             return (
                               <span>
-                                <span
-                                  style={{
-                                    background: 'var(--success-color)',
-                                    padding: '4px',
-                                    fontSize: '12px',
-                                    color: '#fff',
-                                    marginRight: '4px',
-                                  }}
-                                >
-                                  NEW
+                                <span className="status-latest">
+                                  <Translation>Latest</Translation>
                                 </span>
                                 <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
                               </span>
@@ -509,15 +494,13 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                       />
                     </Table>
                   </div>
-                </Card>
+                </section>
 
                 <If condition={applicationStatus?.conditions}>
-                  <Card
-                    locale={locale().Card}
-                    style={{ marginTop: '8px' }}
-                    contentHeight="auto"
-                    title={<Translation>Conditions</Translation>}
-                  >
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Conditions</Translation>
+                    </div>
                     <div style={{ overflow: 'auto' }}>
                       <Table
                         style={{ minWidth: '1000px' }}
@@ -553,7 +536,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                         />
                       </Table>
                     </div>
-                  </Card>
+                  </section>
                 </If>
               </If>
               <If condition={!applicationStatus}>{notDeploy}</If>
