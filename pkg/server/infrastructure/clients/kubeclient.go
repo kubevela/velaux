@@ -50,6 +50,7 @@ func setKubeConfig(conf *rest.Config) (err error) {
 	}
 	kubeConfig = conf
 	kubeConfig.Wrap(auth.NewImpersonatingRoundTripper)
+	kubeConfig.Wrap(collectWarnings)
 	return nil
 }
 

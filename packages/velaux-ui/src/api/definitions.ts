@@ -21,11 +21,7 @@ export function detailDefinition(params: { name: string; type: string }) {
   return get(url, { params: { type: params.type } }).then((res) => res);
 }
 
-export function updateDefinitionStatus(params: {
-  name: string;
-  hiddenInUI: boolean;
-  type: string;
-}) {
+export function updateDefinitionStatus(params: { name: string; hiddenInUI: boolean; type: string }) {
   const url = base + `${definition}/${params.name}/status`;
   const paramsData = {
     hiddenInUI: params.hiddenInUI,
@@ -34,11 +30,7 @@ export function updateDefinitionStatus(params: {
   return put(url, paramsData).then((res) => res);
 }
 
-export function updateUISchema(params: {
-  name: string;
-  definitionType: string;
-  uiSchema: UIParam[] | undefined;
-}) {
+export function updateUISchema(params: { name: string; definitionType: string; uiSchema: UIParam[] | undefined }) {
   const url = base + `${definition}/${params.name}/uischema`;
   const paramsData = {
     type: params.definitionType,
@@ -47,9 +39,11 @@ export function updateUISchema(params: {
   return put(url, paramsData).then((res) => res);
 }
 
-export function getComponentDefinitions() {
+// namespaces, when given, have each definition report in unusableIn those its
+// restrictions keep from using it.
+export function getComponentDefinitions(namespaces?: string[]) {
   const _url = base + definition;
-  return get(_url, { params: { type: 'component' } }).then((res) => res);
+  return get(_url, { params: { type: 'component', namespaces: namespaces?.join(',') } }).then((res) => res);
 }
 
 export function detailComponentDefinition(params: { name: string }) {
@@ -57,9 +51,9 @@ export function detailComponentDefinition(params: { name: string }) {
   return get(_url, { params: { type: 'component' } }).then((res) => res);
 }
 
-export function getPolicyDefinitions() {
+export function getPolicyDefinitions(namespaces?: string[]) {
   const _url = base + definition;
-  return get(_url, { params: { type: 'policy' } }).then((res) => res);
+  return get(_url, { params: { type: 'policy', namespaces: namespaces?.join(',') } }).then((res) => res);
 }
 
 export function detailPolicyDefinition(params: { name: string }) {
@@ -67,11 +61,16 @@ export function detailPolicyDefinition(params: { name: string }) {
   return get(_url, { params: { type: 'policy' } }).then((res) => res);
 }
 
-export function getTraitDefinitions(params: { appliedWorkload: string }) {
+export function getTraitDefinitions(params: { appliedWorkload: string; namespaces?: string[] }) {
   const _url = base + definition;
-  return get(_url, { params: { type: 'trait', appliedWorkload: params.appliedWorkload } }).then(
-    (res) => res,
-  );
+  return get(_url, {
+    params: { type: 'trait', appliedWorkload: params.appliedWorkload, namespaces: params.namespaces?.join(',') },
+  }).then((res) => res);
+}
+
+export function getDefinitionUsage(params: { name: string; type: 'component' | 'trait' }) {
+  const _url = `${base + definition}/${params.name}/usage`;
+  return get(_url, { params: { type: params.type } }).then((res) => res);
 }
 
 export function detailTraitDefinition(params: { name: string }) {

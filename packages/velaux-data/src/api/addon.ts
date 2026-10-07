@@ -1,6 +1,6 @@
 import type { ApplicationStatus, UIParam } from './application';
 import type { NameAlias } from './env';
-import { KeyValue } from "../types";
+import { KeyValue } from '../types';
 
 export interface Addon {
   name: string;
@@ -21,7 +21,7 @@ export interface Addon {
     vela?: string;
     kubernetes?: string;
   };
-  uxPlugins?: KeyValue<string>
+  uxPlugins?: KeyValue<string>;
 }
 
 export interface AddonStatus {
@@ -32,6 +32,14 @@ export interface AddonStatus {
   clusters?: Record<string, AddonClusterInfo>;
   installedVersion: string;
   allClusters?: NameAlias[];
+  managedBy?: AddonManager;
+}
+
+// AddonManager is the Application whose addon component installed an addon; the
+// addon is enabled, upgraded and disabled there.
+export interface AddonManager {
+  name: string;
+  namespace: string;
 }
 
 export interface AddonClusterInfo {
@@ -74,6 +82,7 @@ export interface AddonRegistry {
 export interface AddonBaseStatus {
   name: string;
   phase: 'disabled' | 'enabled' | 'enabling' | 'suspend' | 'disabling';
+  managedBy?: AddonManager;
 }
 
 export interface EnableAddonRequest {
