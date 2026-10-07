@@ -1,3 +1,50 @@
+// The graph sits in a card on a light dot grid, its zoom pinned to the corner
+// while the graph scrolls beneath.
+.graph-frame {
+  position: relative;
+  background-color: #f8fafc;
+  background-image: radial-gradient(#dbe3ec 1px, transparent 1px);
+  background-size: 16px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.graph-zoom {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  .row-action {
+    width: 28px;
+    height: 28px;
+    border-color: transparent;
+  }
+  .row-action + .row-action {
+    margin-left: 0;
+  }
+}
+
+.graph-zoom-level {
+  min-width: 48px;
+  padding: 0 4px;
+  color: #475569;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  background: none;
+  border: none;
+  cursor: pointer;
+  &:hover {
+    color: #0f172a;
+  }
+}
+
 .graph-container {
   display: flex;
   align-items: center;
@@ -7,13 +54,6 @@
   min-height: calc(100vh - 443px);
   padding: 32px;
   overflow: auto;
-  background: rgba(171, 205, 239, 0.2);
-  //position: relative;
-  .operation {
-    position: absolute;
-    top: 32px;
-    z-index: 100;
-  }
 }
 .graph-container.top-center {
   justify-content: center;

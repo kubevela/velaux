@@ -4,9 +4,8 @@ import { Loading, Button, Table, Dialog, Message, Balloon } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React, { Component } from 'react';
-import { AiFillCaretRight, AiFillDelete, AiFillSetting } from 'react-icons/ai';
-import { BiCopyAlt } from 'react-icons/bi';
-import { HiViewList } from 'react-icons/hi';
+import { RowAction } from '../../components/RowAction';
+import { AiOutlineCopy, AiOutlineDelete, AiOutlineEdit, AiOutlineHistory, AiOutlinePlayCircle } from 'react-icons/ai';
 import type { Dispatch } from 'redux';
 
 import { deletePipeline, listPipelines } from '../../api/pipeline';
@@ -17,10 +16,19 @@ import Permission from '../../components/Permission';
 import RunPipeline from '../../components/RunPipeline';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import type { AddonBaseStatus , NameAlias , PipelineBase, PipelineListItem, PipelineRun, RunStateInfo , LoginUserInfo } from '@velaux/data';
+import type {
+  AddonBaseStatus,
+  NameAlias,
+  PipelineBase,
+  PipelineListItem,
+  PipelineRun,
+  RunStateInfo,
+  LoginUserInfo,
+} from '@velaux/data';
 import { beautifyTime, momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
-import RunStatusIcon from '../PipelineRunPage/components/RunStatusIcon';
+import type { Tone } from '../../components/StatusBadge';
+import { StatusBadge } from '../../components/StatusBadge';
 
 import CreatePipeline from './components/CreatePipeline';
 import ClonePipeline from './components/PipelineClone';
@@ -223,7 +231,7 @@ class PipelineListPage extends Component<Props, State> {
                       </Link>
                       <span>{beautifyTime(run.status?.startTime)}</span>
                     </div>
-                    <RunStatusIcon status={run.status?.status} />
+                    <StatusBadge tone={runTone(run.status?.status)} label={runLabel(run.status?.status)} />
                   </div>
                 );
               }
@@ -245,17 +253,13 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'run',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlinePlayCircle />}
+                      label="Run"
                       onClick={() => {
                         this.onRunPipeline(pipeline);
                       }}
-                    >
-                      <AiFillCaretRight /> <Translation>Run</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -264,18 +268,13 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'list',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineHistory />}
+                      label="View Runs"
                       onClick={() => {
                         this.onShowPipelineRuns(pipeline);
                       }}
-                    >
-                      <HiViewList />
-                      <Translation>View Runs</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -284,17 +283,13 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'create',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineCopy />}
+                      label="Clone"
                       onClick={() => {
                         this.onClonePipeline(pipeline);
                       }}
-                    >
-                      <BiCopyAlt /> <Translation>Clone</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -303,17 +298,13 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'update',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineEdit />}
+                      label="Edit"
                       onClick={() => {
                         this.onEditPipeline(pipeline);
                       }}
-                    >
-                      <AiFillSetting /> <Translation>Edit</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -322,18 +313,14 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'delete',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      className={'danger-btn'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineDelete />}
+                      label="Remove"
+                      danger
                       onClick={() => {
                         this.onDeletePipeline(pipeline);
                       }}
-                    >
-                      <AiFillDelete />
-                      <Translation>Remove</Translation>
-                    </Button>
+                    />
                   </Permission>
                 </div>
               );
@@ -452,3 +439,26 @@ class PipelineListPage extends Component<Props, State> {
 }
 
 export default PipelineListPage;
+
+// runTone colours a pipeline run by its phase.
+function runTone(phase?: string): Tone {
+  switch (phase) {
+    case 'succeeded':
+      return 'healthy';
+    case 'failed':
+    case 'terminated':
+      return 'failed';
+    case 'suspending':
+      return 'suspended';
+    case 'executing':
+    case 'initializing':
+      return 'progressing';
+    default:
+      return 'neutral';
+  }
+}
+
+// runLabel writes a run's phase as a word: "succeeded" to "Succeeded".
+function runLabel(phase?: string): string {
+  return phase ? phase.charAt(0).toUpperCase() + phase.slice(1) : 'Unknown';
+}

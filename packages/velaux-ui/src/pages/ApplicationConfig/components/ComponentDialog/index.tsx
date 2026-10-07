@@ -9,7 +9,11 @@ import {
   createApplicationComponent,
   updateComponentProperties,
   getApplicationComponent,
+  getExpressionEnv,
+  setExpressionOptIn,
 } from '../../../../api/application';
+import type { ExpressionContext } from '../../../../components/UISchema';
+import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
 import { detailComponentDefinition } from '../../../../api/definitions';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { Translation } from '../../../../components/Translation';
@@ -27,6 +31,12 @@ import { locale } from '../../../../utils/locale';
 import { transComponentDefinitions } from '../../../../utils/utils';
 
 import './index.less';
+import '../ComponentList/index.less';
+import { AiOutlineLink } from 'react-icons/ai';
+import type { ComponentDependency } from '@velaux/data';
+import type { DependencyItem } from '../../../../utils/dependencies';
+
+import { dependsOnOptions } from '../ComponentList/model';
 
 import Permission from '../../../../components/Permission';
 import { If } from '../../../../components/If';
@@ -43,9 +53,18 @@ type Props = {
   onComponentOK: () => void;
   onComponentClose: () => void;
   dispatch?: any;
+  // deployed says the application has been deployed, which is when its
+  // immutable parameters lock.
+  deployed?: boolean;
+  // dependencies are the component's, both ways, as the deployed Application
+  // reports them.
+  dependencies?: DependencyItem[];
+  // dependencyEdges are every component's dependencies the Application reports.
+  dependencyEdges?: ComponentDependency[];
 };
 
 type State = {
+  expressionEnv?: ExpressionEnv;
   definitionDetail?: DefinitionDetail;
   isCreateComponentLoading: boolean;
   isUpdateComponentLoading: boolean;
@@ -70,7 +89,48 @@ class ComponentDialog extends React.Component<Props, State> {
     this.uiSchemaRef = React.createRef();
   }
 
+  loadExpressionEnv = async () => {
+    const { appName } = this.props;
+    if (!appName) {
+      return;
+    }
+    try {
+      const env: ExpressionEnv = await getExpressionEnv(appName, 'component');
+      this.setState({ expressionEnv: env });
+    } catch (e) {
+      this.setState({ expressionEnv: undefined });
+    }
+  };
+
+  setExpressionOptIn = async (on: boolean): Promise<boolean> => {
+    const { appName } = this.props;
+    if (!appName) {
+      return false;
+    }
+    try {
+      await setExpressionOptIn(appName, on);
+    } catch (e) {
+      return false;
+    }
+    await this.loadExpressionEnv();
+    return true;
+  };
+
+  expressionContext = (): ExpressionContext | undefined => {
+    const { appName } = this.props;
+    if (!appName) {
+      return undefined;
+    }
+    return {
+      appName,
+      surface: 'component',
+      env: this.state.expressionEnv,
+      onOptIn: this.setExpressionOptIn,
+    };
+  };
+
   componentDidMount() {
+    this.loadExpressionEnv();
     const { isEditComponent, dispatch, appName, project } = this.props;
     if (isEditComponent) {
       this.onGetEditComponentInfo(() => {
@@ -288,27 +348,12 @@ class ComponentDialog extends React.Component<Props, State> {
   };
 
   getDependsOptions = () => {
-    const { components, componentName } = this.props;
-    const filterComponents = (components || []).filter((component) => {
-      if (
-        componentName &&
-        (component.name === componentName || (component.dependsOn && component.dependsOn.includes(componentName)))
-      ) {
-        return false;
-      } else {
-        return true;
-      }
-    });
-    const componentOptions = filterComponents?.map((component) => {
-      return {
-        label: component.alias ? `${component.alias}(${component.name})` : component.name,
-        value: component.name,
-      };
-    });
-    return componentOptions || [];
+    const { components, componentName, dependencies = [], dependencyEdges = [] } = this.props;
+    return dependsOnOptions(components || [], componentName, dependencies, dependencyEdges);
   };
 
   render() {
+    const inferredDeps = (this.props.dependencies || []).filter((d) => d.direction === 'outbound' && d.inferred);
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
@@ -444,7 +489,31 @@ class ComponentDialog extends React.Component<Props, State> {
                       locale={locale().Select}
                       mode="multiple"
                       dataSource={this.getDependsOptions()}
+                      itemRender={(item: any) =>
+                        item.inferred ? (
+                          <span className="depends-option" title={item.inferred}>
+                            {item.label}
+                            <span className="depends-option-inferred">
+                              <AiOutlineLink /> <Translation>inferred</Translation>
+                            </span>
+                          </span>
+                        ) : (
+                          item.label
+                        )
+                      }
                     />
+                    {inferredDeps.length > 0 && (
+                      <div className="depends-inferred">
+                        <Translation>Inferred from expressions</Translation>:
+                        {inferredDeps.map((d) => (
+                          <span key={d.name + (d.where || '')} className="component-dep inferred" title={d.inferred}>
+                            <AiOutlineLink />
+                            {d.name}
+                            {d.where && <span className="component-dep-where">{d.where}</span>}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </FormItem>
                 </Col>
               </Row>
@@ -496,6 +565,8 @@ class ComponentDialog extends React.Component<Props, State> {
                   }}
                   ref={this.uiSchemaRef}
                   mode={isEditComponent ? 'edit' : 'new'}
+                  deployed={this.props.deployed}
+                  expressions={this.expressionContext()}
                 />
               </If>
             </Row>

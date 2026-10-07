@@ -69,9 +69,13 @@ export function deleteWorkflow(params: { appName: string; name: string }) {
   return rdelete(url, {});
 }
 
-export function getWorkflowDefinitions(scope?: 'Application' | 'WorkflowRun') {
+// namespaces, when given, have each definition report in unusableIn those its
+// restrictions keep from using it.
+export function getWorkflowDefinitions(scope?: 'Application' | 'WorkflowRun', namespaces?: string[]) {
   const url = base + `${definition}`;
-  return get(url, { params: { type: 'workflowstep', scope: scope } }).then((res) => res);
+  return get(url, { params: { type: 'workflowstep', scope: scope, namespaces: namespaces?.join(',') } }).then(
+    (res) => res
+  );
 }
 
 export function detailWorkflowDefinition(params: { name: string }) {

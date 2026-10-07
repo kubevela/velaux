@@ -1,0 +1,90 @@
+// The columns: chevron, name, health, traits, depends on, actions.
+.component-list {
+  --row-columns: 24px minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(180px, 1.6fr) minmax(100px, 0.8fr) 90px;
+}
+
+.component-row-health,
+.component-row-traits,
+.component-row-deps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.component-env {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  padding: 1px 8px;
+  color: #334155;
+  font-size: 12px;
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.component-trait {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 10px;
+  color: #334155;
+  font-size: 12px;
+  line-height: 18px;
+  background: #f1f5f9;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  &:hover {
+    border-color: var(--primary-color, #1b58f4);
+  }
+  &.add {
+    padding: 2px 8px;
+    color: #64748b;
+  }
+}
+
+.component-trait-delete {
+  display: none;
+  color: #dc2626;
+  .component-trait:hover & {
+    display: inline;
+  }
+}
+
+.component-status-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.component-status-env {
+  min-width: 80px;
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.component-dep {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 1px 8px;
+  color: #334155;
+  font-size: 12px;
+  line-height: 18px;
+  background: #f1f5f9;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  // Inferred from an expression rather than written: greyed, with a link icon.
+  &.inferred {
+    color: #94a3b8;
+    background: transparent;
+    border: 1px dashed #cbd5e1;
+    cursor: help;
+  }
+}
+
+.component-dep-where {
+  color: #94a3b8;
+  font-size: 11px;
+}

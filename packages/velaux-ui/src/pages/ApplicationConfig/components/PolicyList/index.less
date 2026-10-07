@@ -1,19 +1,20 @@
-.policy-list-content {
-  padding-top: 11px;
-}
-.curlCode {
-  code {
-    display: block;
-    padding: 8px;
-    color: #fff;
-    background: #000;
-  }
+// The columns: chevron, name, scope, environment, state, created, actions.
+.policy-list {
+  --row-columns: 24px minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(120px, 0.8fr) minmax(100px, 0.7fr)
+    minmax(100px, 0.7fr) 90px;
 }
 
-.policy-list-nav {
+.policy-list-scope {
   display: flex;
-  justify-content: space-between;
-  .policy-list-title {
-    font-size: 16px;
-  }
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.policy-list-global {
+  padding: 1px 8px;
+  color: #b45309;
+  font-size: 12px;
+  background: #fffbeb;
+  border-radius: 4px;
 }

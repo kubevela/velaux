@@ -11,12 +11,13 @@ import { getProjectList, getProjectRoles } from '../../api/project';
 import { updateSystemInfo } from '../../api/system_config';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import type { Project, ProjectRoleBase , DexConfig, SystemInfo , LoginUserInfo } from '@velaux/data';
+import type { Project, ProjectRoleBase, DexConfig, SystemInfo, LoginUserInfo } from '@velaux/data';
 import { locale } from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
 import { CustomSelect } from '../../components/CustomSelect';
 import { If } from '../../components/If';
 import Item from '../../components/Item';
+import CustomisationCard from './components/Customisation';
 import { Dispatch } from 'redux';
 
 const { Col, Row } = Grid;
@@ -440,6 +441,7 @@ class PlatformSetting extends React.Component<Props, State> {
             </Button>
           </div>
         </Form>
+        <CustomisationCard />
       </div>
     );
   }

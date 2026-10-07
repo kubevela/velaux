@@ -1,16 +1,22 @@
 import type { Rule } from '@alifd/field';
-import { Grid, Field, Form, Select, Message, Button } from '@alifd/next';
+import { Grid, Field, Form, Select, Message, Button, Input } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React from 'react';
-import { createApplication } from '../../../../api/application';
-import { detailComponentDefinition } from '../../../../api/definitions';
+import { createApplication, getDraftExpressionEnv } from '../../../../api/application';
+import { detailComponentDefinition, getComponentDefinitions } from '../../../../api/definitions';
 import { getEnvs } from '../../../../api/env';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
-import type { DefinitionDetail , Env , Target , LoginUserInfo, UserProject } from '@velaux/data';
+import type { ExpressionContext } from '../../../../components/UISchema';
+import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
+import { checkName } from '../../../../utils/common';
+import type { DefinitionDetail, DefinitionBase, Env, Target, LoginUserInfo, UserProject } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
+import { deployNamespaces, isUsable } from '../../../../utils/restrictions';
+import type { DeployTarget } from '../../../../utils/restrictions';
+import { transComponentDefinitions } from '../../../../utils/utils';
 import EnvDialog from '../../../EnvPage/components/EnvDialog';
 import GeneralConfig from '../GeneralConfig';
 
@@ -36,13 +42,15 @@ type State = {
   project?: string;
   visibleEnvDialog: boolean;
   createLoading: boolean;
+  // Component types as the selected environments' namespaces may use them.
+  componentDefinitions?: DefinitionBase[];
+  // expressionEnv and optIn are the new application's $( ) expressions: what
+  // they can read, and whether it will read them.
+  expressionEnv?: ExpressionEnv;
+  optIn: boolean;
 };
 
 type Callback = (envName: string) => void;
-type SelectGroupType = Array<{
-  label: string;
-  children: Array<{ label: string; value: string }>;
-}>;
 
 @connect(() => {
   return {};
@@ -59,6 +67,9 @@ class AppDialog extends React.Component<Props, State> {
       envs: [],
       visibleEnvDialog: false,
       createLoading: false,
+      // The fx toggles show from the start; the application is opted in on
+      // create only if a value uses an expression.
+      optIn: true,
     };
     this.field = new Field(this, {
       autoUnmount: false,
@@ -68,6 +79,9 @@ class AppDialog extends React.Component<Props, State> {
             this.loadEnvs();
             this.field.setValue('envBindings', []);
           });
+        }
+        if (name === 'envBindings') {
+          this.loadComponentDefinitions();
         }
       },
     });
@@ -107,34 +121,54 @@ class AppDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { description, alias, name, icon = '', componentType, properties, envBindings, project } = values;
-      const envbinding = envBindings?.map((env: string) => {
-        return { name: env };
-      });
-      const params = {
+      const { alias, description, icon = '', componentType, properties, name, componentName } = values;
+      const serialized = JSON.stringify(properties);
+      this.create(values, {
         alias,
-        icon,
-        name,
+        componentType,
         description,
-        project: project || 'default',
-        envBinding: envbinding,
-        component: {
-          alias,
-          componentType,
-          description,
-          icon,
-          name,
-          properties: JSON.stringify(properties),
-        },
-      };
-      this.setState({ createLoading: true });
-      createApplication(params).then((res) => {
-        if (res && res.name) {
-          Message.success(<Translation>Application created successfully</Translation>);
-          this.props.onOK(name);
-        }
-        this.setState({ createLoading: false });
+        icon,
+        name: componentName || name,
+        properties: serialized,
       });
+    });
+  };
+
+  // onSkip creates the application without a main component and opens it, so
+  // its components can be added from the application's own page.
+  onSkip = () => {
+    this.field.validate(['name', 'alias', 'description', 'project', 'envBindings'], (error: any, values: any) => {
+      if (error) {
+        return;
+      }
+      this.create(values);
+    });
+  };
+
+  create = (values: any, component?: Record<string, any>) => {
+    const { description, alias, name, icon = '', envBindings, project } = values;
+    const envbinding = envBindings?.map((env: string) => {
+      return { name: env };
+    });
+    // Reading expressions is opted into only where a value uses one.
+    const usesExpressions = this.state.optIn && !!component && component.properties?.includes('$(');
+    const params = {
+      alias,
+      icon,
+      name,
+      description,
+      project: project || 'default',
+      envBinding: envbinding,
+      annotations: usesExpressions ? { 'app.oam.dev/cel-expressions': 'true' } : undefined,
+      component,
+    };
+    this.setState({ createLoading: true });
+    createApplication(params).then((res) => {
+      if (res && res.name) {
+        Message.success(<Translation>Application created successfully</Translation>);
+        this.props.onOK(name);
+      }
+      this.setState({ createLoading: false });
     });
   };
 
@@ -158,47 +192,45 @@ class AppDialog extends React.Component<Props, State> {
     }
   };
 
-  transComponentDefinitions() {
-    const { componentDefinitions } = this.props;
-    const defaultCoreDataSource = ['k8s-objects', 'task', 'webservice', 'worker'];
-    const cloud: SelectGroupType = [
-      {
-        label: 'Cloud',
-        children: [],
-      },
-    ];
-    const core: SelectGroupType = [
-      {
-        label: 'Core',
-        children: [],
-      },
-    ];
-    const custom: SelectGroupType = [
-      {
-        label: 'Custom',
-        children: [],
-      },
-    ];
-    (componentDefinitions || []).map((item: { name: string; workloadType: string }) => {
-      if (item.workloadType === 'configurations.terraform.core.oam.dev') {
-        cloud[0].children.push({
-          label: item.name,
-          value: item.name,
-        });
-      } else if (defaultCoreDataSource.includes(item.name)) {
-        core[0].children.push({
-          label: item.name,
-          value: item.name,
-        });
-      } else {
-        custom[0].children.push({
-          label: item.name,
-          value: item.name,
-        });
+  // selectedTargets are the environments chosen to bind, where the application's
+  // component types' restrictions are checked.
+  selectedTargets(): DeployTarget[] {
+    const selected: string[] = this.field.getValue('envBindings') || [];
+    return (this.state.envs || [])
+      .filter((env) => selected.includes(env.name))
+      .map((env) => ({ name: env.name, alias: env.alias, appDeployNamespace: env.namespace }));
+  }
+
+  // definitionsRequest numbers the component definition requests, so only the
+  // latest may set the list: an earlier one asked about other environments.
+  definitionsRequest = 0;
+
+  loadComponentDefinitions = () => {
+    const namespaces = deployNamespaces(this.selectedTargets());
+    const request = ++this.definitionsRequest;
+    if (namespaces.length === 0) {
+      this.setState({ componentDefinitions: undefined });
+      return;
+    }
+    getComponentDefinitions(namespaces).then((res) => {
+      if (res && request === this.definitionsRequest) {
+        this.setState({ componentDefinitions: res.definitions });
+        // A type chosen before the environments, such as the default, may be
+        // one they cannot use; move to the first they can rather than submit a
+        // refusal.
+        const chosen = this.field.getValue<string>('componentType');
+        const usable = (res.definitions || []).filter(isUsable).map((d: DefinitionBase) => d.name);
+        if (!chosen || !usable.includes(chosen)) {
+          if (usable.length > 0) {
+            this.handleChange(usable[0]);
+          } else {
+            this.field.setValue('componentType', undefined);
+            this.setState({ definitionDetail: undefined });
+          }
+        }
       }
     });
-    return [...core, ...custom, ...cloud];
-  }
+  };
 
   onDetailComponentDefinition = (value: string) => {
     detailComponentDefinition({ name: value }).then((re) => {
@@ -207,6 +239,30 @@ class AppDialog extends React.Component<Props, State> {
       }
     });
   };
+
+  loadExpressionEnv = async (optIn: boolean) => {
+    try {
+      const env: ExpressionEnv = await getDraftExpressionEnv('component', optIn);
+      this.setState({ expressionEnv: env });
+    } catch (e) {
+      this.setState({ expressionEnv: undefined });
+    }
+  };
+
+  // expressionContext lets the main component's properties take $( )
+  // expressions before the application exists; the switch is kept here and
+  // set on the application as it is created.
+  expressionContext = (): ExpressionContext => ({
+    appName: this.field.getValue<string>('name') || '',
+    surface: 'component',
+    env: this.state.expressionEnv,
+    draft: true,
+    onOptIn: async (on: boolean) => {
+      this.setState({ optIn: on });
+      await this.loadExpressionEnv(on);
+      return true;
+    },
+  });
 
   changeStatus = (value: string) => {
     const values: { componentType: string; envBindings: string[]; project: string } = this.field.getValues();
@@ -236,6 +292,11 @@ class AppDialog extends React.Component<Props, State> {
               payload: values.project,
             });
           }
+          // The main component is named after the application until renamed.
+          if (!this.field.getValue('componentName')) {
+            this.field.setValue('componentName', this.field.getValue('name'));
+          }
+          this.loadExpressionEnv(this.state.optIn);
           this.setState({
             dialogStats: value,
           });
@@ -256,6 +317,9 @@ class AppDialog extends React.Component<Props, State> {
         <div>
           <Button type="secondary" onClick={onClose} className="margin-right-10">
             <Translation>Cancel</Translation>
+          </Button>
+          <Button type="secondary" onClick={this.onSkip} loading={createLoading} className="margin-right-10">
+            <Translation>Skip</Translation>
           </Button>
           <Button
             type="primary"
@@ -278,6 +342,9 @@ class AppDialog extends React.Component<Props, State> {
             className="margin-right-10"
           >
             <Translation>Previous</Translation>
+          </Button>
+          <Button type="secondary" onClick={this.onSkip} loading={createLoading} className="margin-right-10">
+            <Translation>Skip</Translation>
           </Button>
           <Button loading={createLoading} type="primary" onClick={this.onSubmit}>
             <Translation>Create</Translation>
@@ -313,6 +380,7 @@ class AppDialog extends React.Component<Props, State> {
     const envBindings: string[] = this.field.getValue('envBindings');
     (envBindings || []).push(envBinding);
     this.field.setValues({ envBindings });
+    this.loadComponentDefinitions();
   };
 
   removeProperties = () => {
@@ -395,7 +463,9 @@ class AppDialog extends React.Component<Props, State> {
                             },
                           ],
                         })}
-                        dataSource={this.transComponentDefinitions()}
+                        dataSource={transComponentDefinitions(
+                          this.state.componentDefinitions || this.props.componentDefinitions
+                        )}
                         onChange={this.handleChange}
                       />
                     </FormItem>
@@ -436,6 +506,23 @@ class AppDialog extends React.Component<Props, State> {
             )}
 
             {secondStep && (
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <FormItem
+                    label={<Translation className="font-size-14 font-weight-bold">Main Component Name</Translation>}
+                    required={true}
+                  >
+                    <Input
+                      {...init('componentName', {
+                        rules: [{ required: true, pattern: checkName, message: 'Please input a valid component name' }],
+                      })}
+                      locale={locale().Input}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+            )}
+            {secondStep && (
               <FormItem required={true}>
                 <UISchema
                   {...init(`properties`, {
@@ -449,6 +536,7 @@ class AppDialog extends React.Component<Props, State> {
                   uiSchema={definitionDetail && definitionDetail.uiSchema}
                   ref={this.uiSchemaRef}
                   mode="new"
+                  expressions={this.expressionContext()}
                 />
               </FormItem>
             )}

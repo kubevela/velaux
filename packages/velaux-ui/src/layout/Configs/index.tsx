@@ -1,4 +1,3 @@
-import { Grid } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 
@@ -87,7 +86,6 @@ class ConfigsLayout extends Component<Props, State> {
   };
 
   render() {
-    const { Row, Col } = Grid;
     const { configTemplates } = this.props;
     const { activeName } = this.state;
     return (
@@ -100,12 +98,8 @@ class ConfigsLayout extends Component<Props, State> {
           <Empty style={{ marginTop: '40px' }} />
         </If>
         <If condition={activeName}>
-          <Row>
-            <Col span="5">
-              <Menu activeName={activeName} menuData={configTemplates} />
-            </Col>
-            <Col span="19">{this.props.children}</Col>
-          </Row>
+          <Menu activeName={activeName} menuData={configTemplates} />
+          {this.props.children}
         </If>
       </div>
     );
