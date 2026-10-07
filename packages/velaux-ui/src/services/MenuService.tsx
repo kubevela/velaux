@@ -1,4 +1,4 @@
-import { Project , ApplicationBase, EnvBinding , Menu, MenuTypes, Workspace , LoginUserInfo } from '@velaux/data';
+import { Project, ApplicationBase, EnvBinding, Menu, MenuTypes, Workspace, LoginUserInfo } from '@velaux/data';
 import * as React from 'react';
 import _ from 'lodash';
 import { FaLayerGroup } from 'react-icons/fa';
@@ -9,7 +9,20 @@ import {
   AiFillSetting,
   AiOutlineCluster,
 } from 'react-icons/ai';
-import { BsFileEarmarkPerson, BsFillFileCodeFill, BsHddNetworkFill, BsPlugin } from 'react-icons/bs';
+import {
+  BsCollection,
+  BsGrid,
+  BsDiagram3,
+  BsFileEarmarkPerson,
+  BsFillFileCodeFill,
+  BsHddNetworkFill,
+  BsLayers,
+  BsPlugin,
+  BsFileEarmarkCode,
+  BsGear,
+  BsBoxSeam,
+  BsBoxes,
+} from 'react-icons/bs';
 import { RiUserSettingsFill } from 'react-icons/ri';
 import { MdConfirmationNumber } from 'react-icons/md';
 import { locationService } from './LocationService';
@@ -39,7 +52,53 @@ const defaultWorkspaces: Workspace[] = [
 ];
 
 const defaultWorkspaceMenus: Menu[] = [
+  // Provisioning is not built yet: its items show what is coming.
   {
+    catalog: 'Provisioning',
+    workspace: 'continuous-delivery',
+    type: MenuTypes.Workspace,
+    name: 'provisioning-fleets',
+    to: '',
+    relatedRoute: [],
+    icon: <BsCollection />,
+    label: 'Fleets',
+    comingSoon: true,
+  },
+  {
+    catalog: 'Provisioning',
+    workspace: 'continuous-delivery',
+    type: MenuTypes.Workspace,
+    name: 'provisioning-clusters',
+    to: '',
+    relatedRoute: [],
+    icon: <AiOutlineCluster />,
+    label: 'Clusters',
+    comingSoon: true,
+  },
+  {
+    catalog: 'Provisioning',
+    workspace: 'continuous-delivery',
+    type: MenuTypes.Workspace,
+    name: 'provisioning-cluster-blueprints',
+    to: '',
+    relatedRoute: [],
+    icon: <BsDiagram3 />,
+    label: 'Cluster Blueprints',
+    comingSoon: true,
+  },
+  {
+    catalog: 'Provisioning',
+    workspace: 'continuous-delivery',
+    type: MenuTypes.Workspace,
+    name: 'provisioning-cluster-planes',
+    to: '',
+    relatedRoute: [],
+    icon: <BsLayers />,
+    label: 'Cluster Planes',
+    comingSoon: true,
+  },
+  {
+    catalog: 'Delivery',
     workspace: 'continuous-delivery',
     type: MenuTypes.Workspace,
     icon: <FaLayerGroup />,
@@ -50,16 +109,18 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/applications'],
   },
   {
+    catalog: 'Delivery',
     workspace: 'continuous-delivery',
     type: MenuTypes.Workspace,
-    name: 'pipeline-list',
-    to: '/pipelines',
-    relatedRoute: [/projects\/.*\/pipelines\/.*/, '/pipelines'],
-    icon: <BsHddNetworkFill></BsHddNetworkFill>,
-    label: 'Pipelines',
-    permission: { resource: 'project:?/pipeline:*', action: 'list' },
+    to: '/shared-workflows',
+    icon: <BsDiagram3 />,
+    label: 'Workflows',
+    name: 'shared-workflows',
+    permission: { resource: 'project:?/workflow:*', action: 'list' },
+    relatedRoute: ['/shared-workflows', /\/shared-workflows\/.*/],
   },
   {
+    catalog: 'Delivery',
     workspace: 'continuous-delivery',
     to: '/envs',
     type: MenuTypes.Workspace,
@@ -70,6 +131,7 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/envs'],
   },
   {
+    catalog: 'Delivery',
     workspace: 'continuous-delivery',
     type: MenuTypes.Workspace,
     to: '/targets',
@@ -80,15 +142,41 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/targets'],
   },
   {
+    catalog: 'Operations',
     workspace: 'continuous-delivery',
     type: MenuTypes.Workspace,
-    icon: <AiFillProject></AiFillProject>,
-    name: 'projects',
-    label: 'Projects',
-    to: '/projects',
-    relatedRoute: ['/projects'],
+    name: 'pipeline-list',
+    to: '/pipelines',
+    relatedRoute: [/projects\/.*\/pipelines\/.*/, '/pipelines'],
+    icon: <BsHddNetworkFill></BsHddNetworkFill>,
+    label: 'Pipelines',
+    permission: { resource: 'project:?/pipeline:*', action: 'list' },
+  },
+  // Items not built yet show what is coming.
+  {
+    catalog: 'Operations',
+    workspace: 'continuous-delivery',
+    type: MenuTypes.Workspace,
+    name: 'operations-coming',
+    to: '',
+    relatedRoute: [],
+    icon: <BsGear />,
+    label: 'Operations',
+    comingSoon: true,
   },
   {
+    catalog: 'Operations',
+    workspace: 'continuous-delivery',
+    type: MenuTypes.Workspace,
+    name: 'operation-templates',
+    to: '',
+    relatedRoute: [],
+    icon: <BsFileEarmarkCode />,
+    label: 'Operation Templates',
+    comingSoon: true,
+  },
+  {
+    catalog: 'Extension',
     workspace: 'extension',
     type: MenuTypes.Workspace,
     to: '/addons',
@@ -99,6 +187,30 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/addons', /\/manage\/plugins.*/],
   },
   {
+    catalog: 'Extension',
+    workspace: 'extension',
+    type: MenuTypes.Workspace,
+    name: 'modules-coming',
+    to: '',
+    relatedRoute: [],
+    icon: <BsGrid />,
+    label: 'Modules',
+    comingSoon: true,
+  },
+  {
+    catalog: 'Extension',
+    workspace: 'extension',
+    type: MenuTypes.Workspace,
+    to: '/defkit',
+    icon: <BsBoxes />,
+    label: 'DefKit',
+    name: 'defkit-list',
+    // A module installs definitions, so it is listed to whoever may list them.
+    permission: { resource: 'definition:*', action: 'list' },
+    relatedRoute: ['/defkit'],
+  },
+  {
+    catalog: 'Extension',
     workspace: 'extension',
     type: MenuTypes.Workspace,
     to: '/definitions',
@@ -109,6 +221,20 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/definitions'],
   },
   {
+    catalog: 'Extension',
+    workspace: 'extension',
+    type: MenuTypes.Workspace,
+    to: '/packages',
+    icon: <BsBoxSeam />,
+    label: 'Packages',
+    name: 'package-list',
+    // Packages are what definitions are written against, so whoever may
+    // list definitions may list them.
+    permission: { resource: 'definition:*', action: 'list' },
+    relatedRoute: ['/packages'],
+  },
+  {
+    catalog: 'Admin',
     type: MenuTypes.Workspace,
     workspace: 'admin',
     to: '/clusters',
@@ -119,6 +245,7 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/clusters'],
   },
   {
+    catalog: 'Admin',
     workspace: 'admin',
     type: MenuTypes.Workspace,
     to: '/configs',
@@ -129,6 +256,7 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/configs'],
   },
   {
+    catalog: 'Admin',
     workspace: 'admin',
     type: MenuTypes.Workspace,
     to: '/platform/projects',
@@ -139,6 +267,7 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/platform/projects$'],
   },
   {
+    catalog: 'Admin',
     workspace: 'admin',
     type: MenuTypes.Workspace,
     to: '/users',
@@ -149,6 +278,7 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['/users'],
   },
   {
+    catalog: 'Admin',
     workspace: 'admin',
     type: MenuTypes.Workspace,
     to: '/roles',
@@ -159,6 +289,7 @@ const defaultWorkspaceMenus: Menu[] = [
     relatedRoute: ['^/roles$'],
   },
   {
+    catalog: 'Admin',
     workspace: 'admin',
     type: MenuTypes.Workspace,
     to: '/settings',
@@ -185,6 +316,8 @@ export interface MenuService {
   loadCurrentWorkspace(): Workspace | undefined;
 
   loadMenus(workspace: Workspace, user: LoginUserInfo): LeftMenu[];
+
+  loadSidebarMenus(user: LoginUserInfo): LeftMenu[];
 
   loadProjectMenus(p: Project): Menu[];
 
@@ -244,7 +377,7 @@ export class MenuWrapper implements MenuService {
     this.pluginLoaded = false;
     this.menus = _.cloneDeep(defaultWorkspaceMenus);
     this.workspaces = _.cloneDeep(defaultWorkspaces);
-  }
+  };
   getWorkspace(name: string): Workspace | undefined {
     return this.workspaces.find((w) => w.name == name);
   }
@@ -283,6 +416,27 @@ export class MenuWrapper implements MenuService {
         }
       });
     return menus;
+  }
+
+  // loadSidebarMenus is every workspace's menus as one list of sections, so the
+  // sidebar needs no workspace switch. The admin workspace's screens open from
+  // the user's menu instead.
+  loadSidebarMenus(user: LoginUserInfo): LeftMenu[] {
+    const sections: LeftMenu[] = [];
+    this.loadWorkspaces(user)
+      .filter((ws) => ws.name !== 'admin')
+      .forEach((ws) => {
+        this.loadMenus(ws, user).forEach((section) => {
+          const catalog = section.catalog || ws.label || ws.name;
+          const existing = sections.find((s) => s.catalog === catalog);
+          if (existing) {
+            existing.menus.push(...section.menus);
+          } else {
+            sections.push({ catalog, menus: [...section.menus] });
+          }
+        });
+      });
+    return sections;
   }
 
   matchMenu(menu: Menu): boolean {

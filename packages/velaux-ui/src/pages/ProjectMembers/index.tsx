@@ -1,5 +1,7 @@
 import { Table, Button, Pagination, Message, Dialog } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
+import { RowAction } from '../../components/RowAction';
+import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 
 import { getProjectRoles, getProjectUsers, deleteProjectUser } from '../../api/project';
 import { If } from '../../components/If';
@@ -238,16 +240,13 @@ class ProjectMembers extends Component<Props, State> {
                 }}
                 project={projectName}
               >
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineEdit />}
+                  label="Edit"
                   onClick={() => {
                     this.onEdit(record);
                   }}
-                >
-                  <Translation>Edit</Translation>
-                </Button>
+                />
               </Permission>
               <Permission
                 request={{
@@ -256,16 +255,14 @@ class ProjectMembers extends Component<Props, State> {
                 }}
                 project={projectName}
               >
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineDelete />}
+                  label="Delete"
+                  danger
                   onClick={() => {
                     this.onDelete(record);
                   }}
-                >
-                  <Translation>Delete</Translation>
-                </Button>
+                />
               </Permission>
             </Fragment>
           );

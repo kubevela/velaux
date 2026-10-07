@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 
+	corev1 "k8s.io/api/core/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -243,11 +244,18 @@ func (p *envServiceImpl) GetAppCountInEnv(ctx context.Context, env *model.Env) (
 
 // CreateEnv create an env for request
 func (p *envServiceImpl) CreateEnv(ctx context.Context, req apisv1.CreateEnvRequest) (*apisv1.Env, error) {
+	namespace := req.Namespace
+	if namespace == "" {
+		var err error
+		if namespace, err = p.defaultEnvNamespace(ctx, req.Project, req.Name); err != nil {
+			return nil, err
+		}
+	}
 	newEnv := &model.Env{
 		Name:        req.Name,
 		Alias:       req.Alias,
 		Description: req.Description,
-		Namespace:   req.Namespace,
+		Namespace:   namespace,
 		Project:     req.Project,
 		Targets:     req.Targets,
 	}
@@ -365,4 +373,37 @@ func managePrivilegesForEnvironment(ctx context.Context, cli client.Client, env 
 // NewTestEnvService create the env service instance for testing
 func NewTestEnvService(ds datastore.DataStore, c client.Client) EnvService {
 	return &envServiceImpl{Store: ds, KubeClient: c, ProjectService: NewTestProjectService(ds, c)}
+}
+
+// defaultEnvNamespace is where an environment's Applications run when none is
+// given: the project's namespace, so they can use the project's shared
+// workflows, unless an environment already holds it, as a namespace belongs
+// to one environment; else, or with no known project, the environment's own name.
+func (p *envServiceImpl) defaultEnvNamespace(ctx context.Context, projectName, envName string) (string, error) {
+	if projectName == "" {
+		return envName, nil
+	}
+	namespace, err := projectNamespace(ctx, p.Store, projectName)
+	if errors.Is(err, bcode.ErrProjectIsNotExist) {
+		return envName, nil
+	}
+	if err != nil {
+		return "", err
+	}
+	envs, err := p.Store.List(ctx, &model.Env{Namespace: namespace}, nil)
+	if err != nil {
+		return "", err
+	}
+	if len(envs) > 0 {
+		return envName, nil
+	}
+	ns := &corev1.Namespace{}
+	err = p.KubeClient.Get(utils.WithProject(ctx, ""), client.ObjectKey{Name: namespace}, ns)
+	if err != nil && !apierror.IsNotFound(err) {
+		return "", err
+	}
+	if bound := ns.Labels[oam.LabelNamespaceOfEnvName]; bound != "" && bound != envName {
+		return envName, nil
+	}
+	return namespace, nil
 }

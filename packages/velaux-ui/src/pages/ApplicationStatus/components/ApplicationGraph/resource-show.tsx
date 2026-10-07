@@ -46,12 +46,7 @@ export const ShowResource = (props: ResourceProps) => {
   const containerId = uuid();
   return (
     <React.Fragment>
-      <DrawerWithFooter
-        title={nodeKey(props.resource, '/')}
-        placement="right"
-        width={600}
-        onClose={props.onClose}
-      >
+      <DrawerWithFooter title={nodeKey(props.resource, '/')} placement="right" width={600} onClose={props.onClose}>
         <If condition={resource}>
           <div id={containerId} style={{ height: 'calc(100vh - 100px)' }}>
             <DefinitionCode

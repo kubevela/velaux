@@ -27,3 +27,6 @@ var ErrDefinitionTypeNotSupport = NewBcode(400, 70003, "definition type not supp
 
 // ErrInvalidDefinitionUISchema invalid custom definition ui schema
 var ErrInvalidDefinitionUISchema = NewBcode(400, 70004, "invalid custom defnition ui schema")
+
+// ErrDefinitionDocUnavailable no documentation could be generated for the definition
+var ErrDefinitionDocUnavailable = NewBcode(400, 70005, "no documentation could be generated for this definition")

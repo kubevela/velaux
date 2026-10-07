@@ -164,6 +164,9 @@ func (s *restServer) buildIoCContainer() error {
 	if err := s.beanContainer.ProvideWithName("kubeClient", authClient); err != nil {
 		return fmt.Errorf("fail to provides the kubeClient bean to the container: %w", err)
 	}
+	if err := s.beanContainer.ProvideWithName("serverKubeClient", kubeClient); err != nil {
+		return fmt.Errorf("fail to provides the serverKubeClient bean to the container: %w", err)
+	}
 	if err := s.beanContainer.ProvideWithName("kubeConfig", kubeConfig); err != nil {
 		return fmt.Errorf("fail to provides the kubeConfig bean to the container: %w", err)
 	}

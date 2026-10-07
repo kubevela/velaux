@@ -29,33 +29,27 @@ export const StepSelect = (props: Props) => {
       }
     });
   });
-  if (workflow?.mode === 'DAG' && (workflow.subMode === 'DAG' || (workflow.subMode === 'StepByStep' && !inGroup))) {
+  // A step in a group waits on the group's other steps; a top-level step on
+  // the other top-level steps and, in DAG mode, the steps inside their groups.
+  if (inGroup && groupStep) {
+    groupStep.subSteps
+      ?.filter((s) => s.name !== stepName)
+      .map((step: WorkflowStepBase) => {
+        stepOptions.push({ label: showAlias(step.name, step.alias), value: step.name });
+      });
+  } else {
     steps
       ?.filter((s) => s.name !== stepName)
       .map((step: WorkflowStep) => {
-        stepOptions.push({
-          label: showAlias(step.name, step.alias),
-          value: step.name,
-        });
-        step.subSteps
-          ?.filter((s) => s.name !== stepName)
-          .map((b: WorkflowStepBase) => {
+        stepOptions.push({ label: showAlias(step.name, step.alias), value: step.name });
+        if (workflow?.mode === 'DAG') {
+          step.subSteps?.map((b: WorkflowStepBase) => {
             stepOptions.push({
               label: `${showAlias(step.name, step.alias)}/${showAlias(b.name, b.alias)}`,
               value: b.name,
             });
           });
-      });
-  }
-
-  if (workflow?.mode === 'StepByStep' && workflow.subMode === 'DAG' && inGroup && groupStep) {
-    groupStep.subSteps
-      ?.filter((s) => s.name !== stepName)
-      .map((step: WorkflowStep) => {
-        stepOptions.push({
-          label: showAlias(step.name, step.alias),
-          value: step.name,
-        });
+        }
       });
   }
 

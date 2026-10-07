@@ -1,183 +1,208 @@
-.workflow-graph {
-  --color-workflow-step-bg: #fff;
-  --color-workflow-step-connector-bg: #85d4ff;
-  --color-border-default: #85d4ff;
-  --color-workflow-step-header-shadow: #fff;
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+// Steps are cards laid out by what they wait on, joined left to right; a card's
+// left edge and badge are its status, in the badge's tone.
+.run-canvas {
   transform-origin: left top;
   cursor: grab;
+}
+
+.run-graph {
+  position: relative;
+
+  .workflow-step {
+    position: absolute;
+  }
+
   .step {
     position: relative;
-    display: inline-flex;
-    background-color: #fff;
-    border: var(--color-border-default) 1px solid;
-    border-radius: 6px;
-    box-shadow: 0px 8px 16px 0px #60617029;
-    &.active {
-      --color-border-default: var(--primary-color);
-      --color-workflow-step-connector-bg: var(--primary-color);
+    z-index: 1;
+    box-sizing: border-box;
+    padding: 12px 14px 12px 13px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid var(--tone);
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    cursor: pointer;
+    transition: border-color 0.2s linear, box-shadow 0.2s linear;
+    &:hover {
+      border-color: #cbd5e1;
+      border-left-color: var(--tone);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
     }
+    &.selected {
+      border-color: var(--primary-color);
+      border-left-color: var(--tone);
+      box-shadow: 0 0 0 1px var(--primary-color);
+    }
+    // A group is a container, not a step: tinted, dashed, and tagged.
     &.group {
-      border-top-left-radius: 0px;
-    }
-    .step-title {
-      position: absolute;
-      top: -21px;
-      left: -1px;
-      padding: 4px var(--padding-common) 0 var(--padding-common);
-      font-weight: 500;
-      font-size: var(--font-size-small);
-      background-color: var(--color-workflow-step-bg);
-      border-top-left-radius: 6px;
-      border-top-right-radius: 6px;
-      box-shadow: inset 0 1px 0 var(--color-border-default), inset 1px 0 0 var(--color-border-default),
-        inset -1px 0 0 var(--color-border-default), 0 -1px 2px var(--color-workflow-step-header-shadow);
-      transition: background-color ease-out 0.12s, box-shadow ease-out 0.12s;
-      &:after {
-        position: absolute;
-        top: 5px;
-        right: -19px;
-        width: 20px;
-        height: 16px;
-        margin-left: 16px;
-        border-bottom-left-radius: 6px;
-        box-shadow: inset 1px 0 0 var(--color-border-default), inset 0 -1px 0 var(--color-border-default),
-          -1px 3px var(--color-workflow-step-bg);
-        transition: box-shadow ease-out 0.12s;
-        content: '';
+      background: #f8fafc;
+      border: 1px dashed #94a3b8;
+      border-left: 3px solid var(--tone);
+      box-shadow: none;
+      cursor: default;
+      &:hover {
+        border-color: #94a3b8;
+        border-left-color: var(--tone);
+        box-shadow: none;
       }
     }
-    .groups {
-      position: relative;
-      padding: var(--padding-common);
-      transition: background-color ease-out 0.12s, border-color ease-out 0.12s, box-shadow ease-out 0.12s;
-      .mode {
-        text-align: center;
-      }
-    }
-    .workflow-step-port {
-      position: absolute;
-      top: 30px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      &:before {
-        position: absolute;
-        top: 1px;
-        left: 1px;
-        width: 14px;
-        height: 14px;
-        background-color: var(--color-workflow-step-bg);
-        border-radius: 50%;
-        transition: background-color ease-out 0.12s;
-        content: '';
-      }
-      &::after {
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        width: 8px;
-        height: 8px;
-        background-color: var(--color-workflow-step-connector-bg);
-        border-radius: 50%;
-        transition: background-color ease-out 0.12s;
-        content: '';
-      }
-    }
-    .workflow-step-port-output {
-      right: -8px;
-      background-image: linear-gradient(
-        90deg,
-        var(--color-workflow-step-bg) 0%,
-        var(--color-workflow-step-bg) 50%,
-        var(--color-border-default) 50%,
-        var(--color-border-default) 100%
-      );
-    }
-    .workflow-step-port-input {
-      left: -8px;
-      background-image: linear-gradient(
-        270deg,
-        var(--color-workflow-step-bg) 0%,
-        var(--color-workflow-step-bg) 50%,
-        var(--color-border-default) 50%,
-        var(--color-border-default) 100%
-      );
+    &.pending .step-name {
+      color: #64748b;
     }
   }
+
+  .step-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .step-group-tag {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    padding: 1px 6px;
+    color: #475569;
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: #e2e8f0;
+    border-radius: 4px;
+  }
+  .step-group-toggle {
+    display: inline-flex;
+    padding: 2px;
+    font-size: 15px;
+    color: #64748b;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    &:hover {
+      color: var(--primary-color);
+      background: #e2e8f0;
+    }
+  }
+  .step-group-body {
+    margin: 8px -6px -6px -5px;
+  }
+
+  .step-name {
+    overflow: hidden;
+    color: #0f172a;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .step-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    .step-type {
+      overflow: hidden;
+      color: #64748b;
+      font-size: 12px;
+      font-family: var(--font-family-code, monospace);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .step-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f1f5f9;
+    cursor: default;
+  }
+  .step-subs .step-actions {
+    margin: 2px 6px 6px;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .step-caption {
+    margin-top: 6px;
+    overflow: hidden;
+    color: #475569;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    &.error {
+      color: var(--failed-color, #dc2626);
+    }
+  }
+
+  .step-subs {
+    margin: 8px -6px 0 -5px;
+    padding-top: 6px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .step-sub {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 5px 6px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    &:hover {
+      background: #f8fafc;
+    }
+    &.selected {
+      background: #f8fafc;
+      border-color: var(--primary-color);
+    }
+    .step-sub-dot {
+      flex: none;
+      width: 8px;
+      height: 8px;
+      background: var(--tone);
+      border-radius: 50%;
+    }
+    .step-sub-name {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .step-sub-time {
+      color: #64748b;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
   .workflow-connectors {
     position: absolute;
     top: 0;
     left: 0;
     z-index: 0;
+    overflow: visible;
     transform-origin: left top;
   }
+  // A connector into a step the run has not reached is dashed.
   .workflow-connector {
-    transition: stroke ease-out 0.12s, stroke-width ease-out 0.12s, opacity ease-out 0.12s;
-    stroke: var(--color-workflow-step-connector-bg);
+    stroke: #cbd5e1;
     stroke-width: 2px;
-    &:hover {
-      stroke: var(--color-workflow-step-connector-bg-hover);
+    stroke-dasharray: 4 4;
+    &.reached {
+      stroke: #94a3b8;
+      stroke-dasharray: none;
     }
   }
-
-  .step-status {
-    display: flex;
-    flex: auto;
-    align-items: center;
-    width: 100%;
-    padding: var(--spacing-4);
-    white-space: nowrap;
-    border-radius: 6px;
-    &:hover {
-      background: #f6f4ed;
-    }
-    .step-icon {
-      display: inline-block;
-      width: 18px;
-      height: 16px;
-      overflow: visible;
-      vertical-align: text-bottom;
-      fill: currentColor;
-    }
-    .step-name {
-      flex: 1;
-      margin-left: 8px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .color-fg-success {
-      color: var(--success-color);
-    }
-    .color-fg-danger {
-      color: var(--failed-color);
-    }
-    .icon-rotate {
-      animation: rotate-keyframes 1s linear infinite;
-    }
-    .pending-icon {
-      color: var(--running-color);
-    }
-    .stopped-icon {
-      color: var(--failed-color);
-    }
-    @keyframes rotate-keyframes {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-        animation-duration: 1s;
-        animation-play-state: running;
-        animation-timing-function: linear;
-        animation-delay: 0s;
-        animation-iteration-count: infinite;
-        animation-direction: normal;
-        animation-fill-mode: none;
-      }
-    }
+  .workflow-connector-head {
+    fill: #94a3b8;
   }
 }

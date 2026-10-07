@@ -24,6 +24,7 @@ import (
 
 	"github.com/kubevela/pkg/util/stringtools"
 
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
@@ -89,7 +90,7 @@ func FromCRPolicy(appPrimaryKey string, policyCR v1beta1.AppPolicy, creator stri
 }
 
 // FromCRWorkflow converts Application CR Workflow section into velaux data store workflow
-func FromCRWorkflow(ctx context.Context, cli client.Client, appPrimaryKey string, app *v1beta1.Application, envName string) (model.Workflow, []workflowv1alpha1.WorkflowStep, error) {
+func FromCRWorkflow(ctx context.Context, cli client.Client, appPrimaryKey string, app *v1beta1.Application, envName string) (model.Workflow, []wfTypesv1alpha1.WorkflowStep, error) {
 	var defaultWorkflow = true
 	name := app.Annotations[oam.AnnotationWorkflowName]
 	if name == "" {
@@ -106,10 +107,14 @@ func FromCRWorkflow(ctx context.Context, cli client.Client, appPrimaryKey string
 	if app.Spec.Workflow == nil {
 		return dataWf, nil, nil
 	}
-	var steps []workflowv1alpha1.WorkflowStep
+	var steps []wfTypesv1alpha1.WorkflowStep
 	if app.Spec.Workflow.Ref != "" {
 		dataWf.Name = app.Spec.Workflow.Ref
-		wf := &workflowv1alpha1.Workflow{}
+		dataWf.Ref = app.Spec.Workflow.Ref
+		if app.Spec.Workflow.Mode != nil {
+			dataWf.Mode = *app.Spec.Workflow.Mode
+		}
+		wf := &wfTypesv1alpha1.Workflow{}
 		if err := cli.Get(ctx, types.NamespacedName{Namespace: app.GetNamespace(), Name: app.Spec.Workflow.Ref}, wf); err != nil {
 			return dataWf, nil, err
 		}
@@ -117,29 +122,42 @@ func FromCRWorkflow(ctx context.Context, cli client.Client, appPrimaryKey string
 	} else {
 		steps = app.Spec.Workflow.Steps
 	}
+	modelSteps, err := FromCRWorkflowSteps(steps)
+	if err != nil {
+		return dataWf, nil, err
+	}
+	dataWf.Steps = modelSteps
+	return dataWf, steps, nil
+}
+
+// FromCRWorkflowSteps converts a Workflow's steps, sub-steps with them, into
+// the model's.
+func FromCRWorkflowSteps(steps []wfTypesv1alpha1.WorkflowStep) ([]model.WorkflowStep, error) {
+	var out []model.WorkflowStep
 	for _, s := range steps {
 		base, err := FromCRWorkflowStepBase(s.WorkflowStepBase)
 		if err != nil {
-			return dataWf, nil, err
+			return nil, err
 		}
 		ws := model.WorkflowStep{
 			WorkflowStepBase: *base,
+			Mode:             s.Mode,
 			SubSteps:         make([]model.WorkflowStepBase, 0),
 		}
 		for _, sub := range s.SubSteps {
 			subBase, err := FromCRWorkflowStepBase(sub)
 			if err != nil {
-				return dataWf, nil, err
+				return nil, err
 			}
 			ws.SubSteps = append(ws.SubSteps, *subBase)
 		}
-		dataWf.Steps = append(dataWf.Steps, ws)
+		out = append(out, ws)
 	}
-	return dataWf, steps, nil
+	return out, nil
 }
 
 // FromCRWorkflowStepBase convert cr to model
-func FromCRWorkflowStepBase(step workflowv1alpha1.WorkflowStepBase) (*model.WorkflowStepBase, error) {
+func FromCRWorkflowStepBase(step wfTypesv1alpha1.WorkflowStepBase) (*model.WorkflowStepBase, error) {
 	base := &model.WorkflowStepBase{
 		Name:      step.Name,
 		Type:      step.Type,
@@ -149,6 +167,10 @@ func FromCRWorkflowStepBase(step workflowv1alpha1.WorkflowStepBase) (*model.Work
 		Meta:      step.Meta,
 		If:        step.If,
 		Timeout:   step.Timeout,
+	}
+	// A step's alias is kept in its meta, where VelaUX writes it too.
+	if step.Meta != nil {
+		base.Alias = step.Meta.Alias
 	}
 	if step.Properties != nil {
 		properties, err := model.NewJSONStruct(step.Properties)

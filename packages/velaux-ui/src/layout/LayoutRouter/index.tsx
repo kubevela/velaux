@@ -2,17 +2,27 @@ import { Redirect, Route, Switch } from 'dva/router';
 import React from 'react';
 
 import Addons from '../../pages/Addons/index';
+import DefinitionDoc from '../../pages/DefinitionDoc';
+import DefinitionFile from '../../pages/DefinitionFile';
+import DefKitModuleDetail from '../../pages/DefKitModuleDetail';
+import DefKitModules from '../../pages/DefKitModules';
+import PackageDetail from '../../pages/PackageDetail';
+import Packages from '../../pages/Packages';
 import ApplicationConfig from '../../pages/ApplicationConfig';
 import ApplicationEnvRoute from '../../pages/ApplicationEnvRoute';
 import ApplicationInstanceList from '../../pages/ApplicationInstanceList';
 import Application from '../../pages/ApplicationList';
 import ApplicationLog from '../../pages/ApplicationLog';
+import ApplicationYaml from '../../pages/ApplicationYaml';
+import ApplicationEnvironments from '../../pages/ApplicationEnvironments';
 import ApplicationRevisionList from '../../pages/ApplicationRevisionList';
 import ApplicationStatus from '../../pages/ApplicationStatus';
 import ApplicationWorkflowList from '../../pages/ApplicationWorkflowList';
 import ApplicationWorkflowStatus from '../../pages/ApplicationWorkflowStatus/index';
 import ApplicationWorkflowStudio from '../../pages/ApplicationWorkflowStudio';
 import Clusters from '../../pages/Cluster/index';
+import SharedWorkflows from '../../pages/SharedWorkflows';
+import SharedWorkflowStudio from '../../pages/SharedWorkflowStudio';
 import Configs from '../../pages/Configs';
 import Definitions from '../../pages/Definitions';
 import EnvPage from '../../pages/EnvPage';
@@ -31,7 +41,6 @@ import TargetList from '../../pages/TargetList';
 import UiSchema from '../../pages/UiSchema';
 import Users from '../../pages/Users';
 import ApplicationLayout from '../Application';
-import ConfigsLayout from '../Configs';
 import DefinitionDetails from '../DefinitionDetails';
 import DefinitionsLayout from '../Definitions';
 import ProjectLayout from '../Project';
@@ -77,6 +86,28 @@ export default function Router() {
           return (
             <ApplicationLayout {...props}>
               <ApplicationConfig {...props} />
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/applications/:appName/config/:section"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationConfig {...props} />
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/applications/:appName/environments"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationEnvironments {...props} />
             </ApplicationLayout>
           );
         }}
@@ -138,7 +169,7 @@ export default function Router() {
       />
       <Route
         exact
-        path="/applications/:appName/envbinding/:envName/status"
+        path="/applications/:appName/envbinding/:envName/status/:view?"
         render={(props: any) => {
           return (
             <ApplicationLayout {...props}>
@@ -193,6 +224,17 @@ export default function Router() {
       />
       <Route
         exact
+        path="/applications/:appName/envbinding/:envName/yaml"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationYaml {...props} />
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
         path="/envs"
         render={(props: any) => {
           return <EnvPage {...props} />;
@@ -237,6 +279,11 @@ export default function Router() {
           return <Addons {...props} />;
         }}
       />
+      <Route exact path="/packages" component={Packages} />
+      <Route exact path="/defkit" component={DefKitModules} />
+      <Route exact path="/defkit/:name" component={DefKitModuleDetail} />
+      <Route exact path="/packages/builtin" component={PackageDetail} />
+      <Route exact path="/packages/:namespace/:name" component={PackageDetail} />
       <Route
         path="/addons"
         render={(props: any) => {
@@ -332,27 +379,30 @@ export default function Router() {
       />
       <Route
         exact
+        path="/shared-workflows"
+        render={(props: any) => {
+          return <SharedWorkflows {...props} />;
+        }}
+      />
+      <Route
+        exact
+        path={['/shared-workflows/new', '/shared-workflows/:scope/:name']}
+        render={(props: any) => {
+          return <SharedWorkflowStudio {...props} />;
+        }}
+      />
+      <Route
+        exact
         path="/configs"
         render={(props: any) => {
-          return <ConfigsLayout {...props} />;
+          return <Configs {...props} />;
         }}
       />
       <Route
         exact
-        path="/configs/:templateName"
+        path={['/configs/:templateName', '/configs/:templateName/config']}
         render={(props: any) => {
-          return <Redirect to={`/configs/${props.match.params.templateName}/config`} />;
-        }}
-      />
-      <Route
-        exact
-        path="/configs/:templateName/config"
-        render={(props: any) => {
-          return (
-            <ConfigsLayout {...props}>
-              <Configs {...props} />
-            </ConfigsLayout>
-          );
+          return <Redirect to={`/configs?template=${props.match.params.templateName}`} />;
         }}
       />
       <Route
@@ -377,6 +427,30 @@ export default function Router() {
             <DefinitionsLayout {...props}>
               <Definitions {...props} />
             </DefinitionsLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/definitions/:definitionType/:definitionName/file"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'file' } };
+          return (
+            <DefinitionDetails {...mergeProps}>
+              <DefinitionFile {...props} />
+            </DefinitionDetails>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/definitions/:definitionType/:definitionName/doc"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'doc' } };
+          return (
+            <DefinitionDetails {...mergeProps}>
+              <DefinitionDoc {...props} />
+            </DefinitionDetails>
           );
         }}
       />
