@@ -17,6 +17,12 @@ export function updateWorkflow(pathParams: { appName: string; workflowName: stri
   return put(url, params).then((res) => res);
 }
 
+// listSharedWorkflows lists the shared Workflows the workflow can reference.
+export function listSharedWorkflows(params: { appName: string; workflowName: string }) {
+  const url = base + `${application}/${params.appName}/workflows/${params.workflowName}/shared`;
+  return get(url, {}).then((res) => res);
+}
+
 export function createWorkflow(pathParams: { appName: string }, params: UpdateWorkflowRequest) {
   const url = base + `${application}/${pathParams.appName}/workflows`;
   return post(url, params).then((res) => res);
@@ -69,9 +75,13 @@ export function deleteWorkflow(params: { appName: string; name: string }) {
   return rdelete(url, {});
 }
 
-export function getWorkflowDefinitions(scope?: 'Application' | 'WorkflowRun') {
+// namespaces, when given, have each definition report in unusableIn those its
+// restrictions keep from using it.
+export function getWorkflowDefinitions(scope?: 'Application' | 'WorkflowRun', namespaces?: string[]) {
   const url = base + `${definition}`;
-  return get(url, { params: { type: 'workflowstep', scope: scope } }).then((res) => res);
+  return get(url, { params: { type: 'workflowstep', scope: scope, namespaces: namespaces?.join(',') } }).then(
+    (res) => res
+  );
 }
 
 export function detailWorkflowDefinition(params: { name: string }) {

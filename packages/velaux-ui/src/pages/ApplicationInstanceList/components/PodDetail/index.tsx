@@ -12,7 +12,15 @@ import { listApplicationPodsDetails } from '../../../../api/observation';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { AddonBaseStatus , ApplicationDetail, EnvBinding , PodBase, Container, Event , LoginUserInfo } from '@velaux/data';
+import type {
+  AddonBaseStatus,
+  ApplicationDetail,
+  EnvBinding,
+  PodBase,
+  Container,
+  Event,
+  LoginUserInfo,
+} from '@velaux/data';
 import { checkEnabledAddon } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { quantityToScalar } from '../../../../utils/utils';

@@ -86,6 +86,7 @@
     "react-icons": "^4.4.0",
     "react-markdown": "7.1.0",
     "react-refresh": "^0.10.0",
+    "recharts": "^2.15.4",
     "redux": "4.1.2",
     "remark-gfm": "3.0.1",
     "systemjs": "0.20.19",

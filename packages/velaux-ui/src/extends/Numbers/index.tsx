@@ -64,7 +64,9 @@ class Numbers extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const inputList: ListParams[] = [];
-    if (props.value) {
+    // A field whose shape depends on another field can be left holding
+    // the other shape's value, such as a string; only a list seeds the items.
+    if (Array.isArray(props.value)) {
       props.value.map((v: number, index: number) => {
         const key = Date.now().toString() + index;
         inputList.push({
@@ -83,7 +85,12 @@ class Numbers extends React.Component<Props, State> {
     });
   }
 
-  componentDidMount = async () => {};
+  componentDidMount = async () => {
+    const { value, onChange } = this.props;
+    if (value !== undefined && value !== null && !Array.isArray(value)) {
+      onChange([]);
+    }
+  };
 
   changeValues = () => {
     const values = this.field.getValues();
