@@ -5,7 +5,7 @@ import type { Dispatch } from 'redux';
 import { createTrigger, updateTrigger } from '../../../../api/application';
 import { detailComponentDefinition } from '../../../../api/definitions';
 import { getPayloadType } from '../../../../api/payload';
-import DrawerWithFooter from '../../../../components/Drawer';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
@@ -23,6 +23,8 @@ import { locale } from '../../../../utils/locale';
 type Props = {
   visible: boolean;
   appName?: string;
+  // project is the application's, whose own definitions it may use.
+  project: string;
   workflows?: Workflow[];
   onOK: (params: Trigger) => void;
   onClose: () => void;
@@ -78,7 +80,7 @@ class TriggerDialog extends React.Component<Props, State> {
 
   onDetailComponentDefinition = (value: string) => {
     this.setState({ loading: true });
-    detailComponentDefinition({ name: value })
+    detailComponentDefinition({ project: this.props.project, name: value })
       .then((res) => {
         if (res) {
           const findImageObj = (res.uiSchema || []).find((item: UIParam) => item.jsonKey === 'image');
@@ -244,10 +246,8 @@ class TriggerDialog extends React.Component<Props, State> {
     });
 
     return (
-      <DrawerWithFooter
+      <ModalWithFooter
         title={editMode ? i18n.t('Edit Trigger') : i18n.t('Add Trigger')}
-        placement="right"
-        width={800}
         onClose={onClose}
         extButtons={this.extButtonList()}
       >
@@ -418,7 +418,7 @@ class TriggerDialog extends React.Component<Props, State> {
             </Translation>
           </Message>
         </Form>
-      </DrawerWithFooter>
+      </ModalWithFooter>
     );
   }
 }

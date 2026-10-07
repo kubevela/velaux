@@ -18,6 +18,7 @@ package api
 
 import (
 	"regexp"
+	"strings"
 	"unicode"
 
 	"github.com/go-playground/validator/v10"
@@ -31,6 +32,11 @@ var validate = validator.New()
 var (
 	nameRegexp  = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`)
 	emailRegexp = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	// versionRegexp is a definition version as a pinned type writes it after @:
+	// v2 for a numbered revision, v1.1.0 for a named one.
+	versionRegexp = regexp.MustCompile(`^v[0-9]+(\.[0-9]+)*$`)
+	// identifierRegexp is a CEL identifier, as a source name is read in $(source.<name>).
+	identifierRegexp = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 )
 
 const (
@@ -40,6 +46,12 @@ const (
 
 func init() {
 	if err := validate.RegisterValidation("checkname", ValidateName); err != nil {
+		panic(err)
+	}
+	if err := validate.RegisterValidation("checktype", ValidateType); err != nil {
+		panic(err)
+	}
+	if err := validate.RegisterValidation("checkidentifier", ValidateIdentifier); err != nil {
 		panic(err)
 	}
 	if err := validate.RegisterValidation("checkalias", ValidateAlias); err != nil {
@@ -77,6 +89,23 @@ func ValidateName(fl validator.FieldLevel) bool {
 		return false
 	}
 	return nameRegexp.MatchString(value)
+}
+
+// ValidateType checks a definition type as an Application writes it: a
+// definition's name, optionally pinned to one of its versions as name@version.
+func ValidateType(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+	name, version, pinned := strings.Cut(value, "@")
+	if len(value) > datastore.PrimaryKeyMaxLength || len(name) < 2 || !nameRegexp.MatchString(name) {
+		return false
+	}
+	return !pinned || versionRegexp.MatchString(version)
+}
+
+// ValidateIdentifier checks a name that expressions read as a CEL identifier.
+func ValidateIdentifier(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+	return len(value) <= datastore.PrimaryKeyMaxLength && identifierRegexp.MatchString(value)
 }
 
 // ValidateAlias custom check alias field

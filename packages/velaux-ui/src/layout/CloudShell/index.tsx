@@ -76,13 +76,7 @@ class CloudShell extends Component<Props, State> {
   }
   renderCloudShellView() {
     const { BASE_DOMAIN } = process.env;
-    return (
-      <iframe
-        width={'100%'}
-        height={'100%'}
-        src={`${BASE_DOMAIN || ''}/view/cloudshell?token=${getToken()}`}
-      />
-    );
+    return <iframe width={'100%'} height={'100%'} src={`${BASE_DOMAIN || ''}/view/cloudshell?token=${getToken()}`} />;
   }
 
   onClose = () => {

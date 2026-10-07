@@ -1,0 +1,39 @@
+// A row's action: a small bordered icon button, spaced from the one before.
+.row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: #475569;
+  font-size: 15px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  &:not([disabled]):hover {
+    color: var(--primary-color, #1b58f4);
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--primary-color, #1b58f4);
+    outline-offset: 1px;
+  }
+  &[disabled] {
+    color: #cbd5e1;
+    background: #fff;
+    border-color: #f1f5f9;
+    cursor: not-allowed;
+  }
+  & + & {
+    margin-left: 6px;
+  }
+  &.danger:not([disabled]):hover {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+}

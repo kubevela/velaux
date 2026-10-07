@@ -6,11 +6,13 @@ import type {
   WorkflowRecord,
   WorkflowRecordBase,
   WorkflowStepStatus,
- WorkflowStepBase, WorkflowStepInputs, WorkflowStepOutputs } from '@velaux/data';
+  WorkflowStepBase,
+  WorkflowStepInputs,
+  WorkflowStepOutputs,
+} from '@velaux/data';
 
-import { Card, Button, Tab, Loading, Grid, Message } from '@alifd/next';
+import { Button, Tab, Loading, Message, Table } from '@alifd/next';
 import Ansi from 'ansi-to-react';
-import classNames from 'classnames';
 import { connect } from 'dva';
 
 import './index.less';
@@ -31,13 +33,16 @@ import {
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import PipelineGraph from '../../../../components/PipelineGraph';
+import { groupMode, runMode } from '../../../../components/PipelineGraph/dependencies';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import { convertAny, momentDate, timeDiff } from '../../../../utils/common';
-import RunStatusIcon from '../../../PipelineRunPage/components/RunStatusIcon';
+import { locale } from '../../../../utils/locale';
+import { StatusBadge } from '../../../../components/StatusBadge';
+import { generatedStepProperties } from './status';
+import { recordStatus, stepStatus as stepBadge } from '../../../../components/PipelineGraph/status';
 import { HiOutlineRefresh } from 'react-icons/hi';
-
-const { Row, Col } = Grid;
+import { AiOutlineClose } from 'react-icons/ai';
 
 type Props = {
   applicationDetail: ApplicationDetail;
@@ -64,7 +69,7 @@ type State = {
   logSource?: string;
   logLoading?: boolean;
 
-  resumeLoading?: boolean;
+  approvingStep?: string;
   terminateLoading?: boolean;
   rollbackLoading?: boolean;
 };
@@ -179,7 +184,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
     const { applicationDetail, workflow, recordName } = this.props;
     const { stepStatus } = this.state;
     if (stepStatus) {
-      this.setState({ inputLoading: true });
+      this.setState({ logLoading: true });
       getWorkflowRecordLogs({
         appName: applicationDetail.name,
         workflowName: workflow.name,
@@ -219,24 +224,60 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
     }
   };
 
-  onResumeApplicationWorkflowRecord = () => {
+  onApproveStep = (step: WorkflowStepStatus) => {
     const { applicationDetail, workflow, recordName } = this.props;
-    const params = {
+    this.setState({ approvingStep: step.id });
+    resumeApplicationWorkflowRecord({
       appName: applicationDetail.name,
       workflowName: workflow.name,
       recordName,
-    };
-    this.setState({ resumeLoading: true });
-    resumeApplicationWorkflowRecord(params)
+      step: step.name,
+    })
       .then((re) => {
         if (re) {
-          Message.success('Workflow resumed successfully');
+          Message.success(i18n.t('Step approved'));
           this.loadWorkflowRecord();
         }
       })
       .finally(() => {
-        this.setState({ resumeLoading: false });
+        this.setState({ approvingStep: undefined });
       });
+  };
+
+  // renderStepActions are a waiting step's choices: roll the run back, end it,
+  // or approve the step so the run continues.
+  renderStepActions = (step: WorkflowStepStatus) => {
+    const { rollbackLoading, terminateLoading, approvingStep } = this.state;
+    return (
+      <>
+        <Button
+          size="small"
+          loading={rollbackLoading}
+          title={i18n.t('Rollback to last ready revision').toString()}
+          onClick={this.onRollbackApplicationWorkflowRecord}
+        >
+          <Translation>Rollback</Translation>
+        </Button>
+        <Button
+          size="small"
+          warning
+          loading={terminateLoading}
+          title={i18n.t('Terminate this workflow').toString()}
+          onClick={this.onTerminateApplicationWorkflowRecord}
+        >
+          <Translation>Terminate</Translation>
+        </Button>
+        <Button
+          size="small"
+          type="primary"
+          loading={approvingStep === step.id}
+          title={i18n.t('Approve this step and continue the workflow').toString()}
+          onClick={() => this.onApproveStep(step)}
+        >
+          <Translation>Approve</Translation>
+        </Button>
+      </>
+    );
   };
 
   onRollbackApplicationWorkflowRecord = () => {
@@ -300,13 +341,9 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
       inputLoading,
       outputs,
       outputLoading,
-      rollbackLoading,
-      resumeLoading,
-      terminateLoading,
     } = this.state;
 
     let stepSpec: WorkflowStepBase | undefined;
-
     workflow?.steps?.map((step) => {
       if (stepStatus && step.name == stepStatus.name) {
         stepSpec = step;
@@ -317,306 +354,254 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
         }
       });
     });
-
     let properties = stepSpec && stepSpec.properties;
-
     if (typeof properties === 'string') {
-      const newProperties: Record<string, any> = JSON.parse(properties);
-      properties = newProperties;
+      properties = JSON.parse(properties) as Record<string, any>;
     }
+    const generated = generatedStepProperties(workflow, stepStatus);
+    const status = recordStatus(showRecord?.status);
+    const failed = showRecord?.status === 'failed' || showRecord?.status === 'terminated';
 
     return (
-      <div>
-        <Row className="description" wrap={true}>
-          <Col xl={16} xs={24}>
-            <div className="name_metadata">
-              <div>
-                <div className="name">{showRecord?.name}</div>
-                <div className="metadata">
-                  <div className="start_at">
-                    <span className="label_key">Started at:</span>
-                    <time className="label_value">{momentDate(showRecord?.startTime)}</time>
-                  </div>
-                  <div className="duration_time">
-                    <span className="label_key">Duration:</span>
-                    <time className="label_value">{timeDiff(showRecord?.startTime, showRecord?.endTime)}</time>
-                  </div>
-                  <div className="mode">
-                    <span className="label_key">Mode:</span>
-                    <time className="label_value">{showRecord?.mode || 'StepByStep-DAG'}</time>
-                  </div>
-                  <div className="mode">
-                    <span className="label_key">Revision:</span>
-                    <time className="label_value">
-                      <Link to={`/applications/${applicationDetail.name}/revisions`}>
-                        {showRecord?.applicationRevision}
-                      </Link>
-                    </time>
-                  </div>
-                </div>
-              </div>
-              <div className="flexright">
-                <Button
-                  type="secondary"
-                  loading={statusLoading}
-                  onClick={() => {
-                    this.loadWorkflowRecord();
-                  }}
-                >
-                  <HiOutlineRefresh />
-                </Button>
-              </div>
-            </div>
-          </Col>
-          <Col xl={8} xs={24}>
-            <div
-              className={classNames(
-                'status',
-                { warning: showRecord?.status == 'failed' || showRecord?.status === 'terminated' },
-                { success: showRecord?.status == 'succeeded' }
-              )}
+      <div className="wf-run">
+        <div className="wf-run-summary">
+          <div className="wf-run-head">
+            <StatusBadge tone={status.tone} label={status.label} />
+            <span className="wf-run-name">{showRecord?.name}</span>
+            <Button
+              className="wf-run-refresh"
+              text
+              loading={statusLoading}
+              title={i18n.t('Refresh').toString()}
+              onClick={() => this.loadWorkflowRecord()}
             >
-              <RunStatusIcon status={showRecord?.status} />
-              <If condition={showRecord?.message}>
-                <div className="message">
-                  <div className="summary">{showRecord?.status == 'failed' ? 'Error Summary' : 'Summary'}</div>
-                  <p className="text">{showRecord?.message}</p>
-                </div>
-              </If>
-              <If condition={showRecord?.status === 'suspending'}>
-                <div className={classNames('suspend-actions')}>
-                  <div className="desc">
-                    <Translation>This workflow needs your approving</Translation>
-                  </div>
-                  <Button.Group>
-                    <Button
-                      type="secondary"
-                      size="small"
-                      loading={rollbackLoading}
-                      className="margin-top-5 margin-left-8"
-                      onClick={this.onRollbackApplicationWorkflowRecord}
-                      title="Rollback to last ready revision"
-                    >
-                      <Translation>Rollback</Translation>
-                    </Button>
-
-                    <Button
-                      type="secondary"
-                      size="small"
-                      loading={terminateLoading}
-                      className="margin-top-5 margin-left-8"
-                      title="Terminate this workflow"
-                      onClick={this.onTerminateApplicationWorkflowRecord}
-                    >
-                      <Translation>Terminate</Translation>
-                    </Button>
-
-                    <Button
-                      type="primary"
-                      size="small"
-                      loading={resumeLoading}
-                      className="margin-top-5 margin-left-8"
-                      title="Approve and continue this workflow"
-                      onClick={this.onResumeApplicationWorkflowRecord}
-                    >
-                      <Translation>Continue</Translation>
-                    </Button>
-                  </Button.Group>
-                </div>
-              </If>
+              <HiOutlineRefresh />
+            </Button>
+          </div>
+          <dl className="wf-run-meta">
+            <div>
+              <dt>
+                <Translation>Started</Translation>
+              </dt>
+              <dd>{momentDate(showRecord?.startTime) || '-'}</dd>
             </div>
-          </Col>
-        </Row>
-        <div
-          className="run-studio"
-          style={{
-            paddingLeft: '2rem',
-            height: 'calc(100vh - 400px)',
-          }}
-          onClick={() => {
-            this.setState({ showDetail: false });
-          }}
-        >
-          <div className={classNames('studio')}>
+            <div>
+              <dt>
+                <Translation>Duration</Translation>
+              </dt>
+              <dd>{timeDiff(showRecord?.startTime, showRecord?.endTime) || '-'}</dd>
+            </div>
+            <div>
+              <dt>
+                <Translation>Mode</Translation>
+              </dt>
+              <dd>{showRecord?.mode || 'StepByStep-DAG'}</dd>
+            </div>
+            <div>
+              <dt>
+                <Translation>Revision</Translation>
+              </dt>
+              <dd>
+                <Link to={`/applications/${applicationDetail.name}/revisions`}>
+                  {showRecord?.applicationRevision || '-'}
+                </Link>
+              </dd>
+            </div>
+          </dl>
+          <If condition={showRecord?.message}>
+            <Message type={failed ? 'error' : 'notice'} className="wf-run-message">
+              {showRecord?.message}
+            </Message>
+          </If>
+        </div>
+
+        <div className="wf-run-body">
+          <div className="wf-run-canvas" onClick={() => this.setState({ showDetail: false })}>
+            <div className="wf-run-hint">
+              <Translation>Select a step to see its details</Translation>
+            </div>
             {showRecord && (
               <PipelineGraph
                 name={`${showRecord?.name}`}
+                spec={workflow?.steps}
+                mode={runMode(showRecord?.mode, workflow?.mode)}
+                subMode={groupMode(undefined, showRecord?.mode, workflow?.subMode)}
                 zoom={zoom}
+                selected={showDetail ? stepStatus?.id : undefined}
+                actions={this.renderStepActions}
                 onNodeClick={this.onStepClick}
                 steps={showRecord?.steps}
               />
             )}
           </div>
           <If condition={showDetail && stepStatus}>
-            <Card
-              title={stepStatus?.alias || stepStatus?.name || stepStatus?.id}
-              className={classNames('detail')}
-              contentHeight="auto"
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-            >
-              <Tab animation={true} size="medium" onChange={this.onTabChange}>
+            <div className="wf-step-panel" onClick={(event) => event.stopPropagation()}>
+              <div className="wf-step-head">
+                <span className="wf-step-name">{stepStatus?.alias || stepStatus?.name || stepStatus?.id}</span>
+                {stepStatus && <StatusBadge tone={stepBadge(stepStatus).tone} label={stepBadge(stepStatus).label} />}
+                <Button
+                  className="wf-step-close"
+                  text
+                  title={i18n.t('Close').toString()}
+                  onClick={() => this.setState({ showDetail: false })}
+                >
+                  <AiOutlineClose />
+                </Button>
+              </div>
+              {stepStatus?.phase === 'suspending' && (
+                <div className="wf-step-actions">{this.renderStepActions(stepStatus)}</div>
+              )}
+              <Tab shape="pure" size="small" activeKey={String(this.state.activeKey)} onChange={this.onTabChange}>
                 <Tab.Item title={<Translation>Detail</Translation>} key={'detail'}>
-                  <div className="detail-page">
-                    <div className="step-info padding16">
-                      {stepStatus && (
-                        <tbody>
-                          <tr>
-                            <th>Step:</th>
-                            <td>{stepStatus.name || stepStatus?.id}</td>
-                          </tr>
-                          <tr>
-                            <th>Type:</th>
-                            <td>{stepStatus.type}</td>
-                          </tr>
-                          <If condition={stepSpec?.if}>
-                            <tr>
-                              <th>Condition:</th>
-                              <td>{stepSpec?.if}</td>
-                            </tr>
-                          </If>
-                          <tr>
-                            <th>First Execute Time:</th>
-                            <td>{stepStatus.firstExecuteTime}</td>
-                          </tr>
-                          <tr>
-                            <th>Last Execute Time:</th>
-                            <td>{stepStatus.lastExecuteTime}</td>
-                          </tr>
-                          <tr>
-                            <th>Duration:</th>
-                            <td>{timeDiff(stepStatus.firstExecuteTime, stepStatus.lastExecuteTime)}</td>
-                          </tr>
-                          <If condition={stepSpec?.timeout}>
-                            <tr>
-                              <th>Timeout:</th>
-                              <td>{stepSpec?.timeout}</td>
-                            </tr>
-                          </If>
-                          <tr>
-                            <th>Phase:</th>
-                            <td className={'step-status-text-' + stepStatus.phase}>{stepStatus.phase}</td>
-                          </tr>
-                          <If condition={stepStatus.message || stepStatus.reason}>
-                            <tr>
-                              <th>Message(Reason):</th>
-                              <td>
-                                {`${stepStatus.message || ''}`}
-                                {stepStatus.reason && `(${stepStatus.reason})`}
-                              </td>
-                            </tr>
-                          </If>
-                        </tbody>
+                  {stepStatus && (
+                    <dl className="wf-kv">
+                      <dt>
+                        <Translation>Step</Translation>
+                      </dt>
+                      <dd>{stepStatus.name || stepStatus.id}</dd>
+                      <dt>
+                        <Translation>Type</Translation>
+                      </dt>
+                      <dd>{stepStatus.type}</dd>
+                      {!!stepSpec?.if && (
+                        <>
+                          <dt>
+                            <Translation>Condition</Translation>
+                          </dt>
+                          <dd>
+                            <code>{stepSpec?.if}</code>
+                          </dd>
+                        </>
                       )}
-                    </div>
-                    {logSource && (
-                      <div className="step-log">
-                        <div className="header">
-                          <div>Step Logs</div>
-                          <Button
-                            loading={logLoading}
-                            onClick={() => {
-                              this.onGetStepLog();
-                            }}
-                            style={{ color: '#fff' }}
-                            size="small"
-                          >
-                            <HiOutlineRefresh />
-                          </Button>
-                        </div>
-                        <div className="log-content">
-                          {logs?.map((line, i: number) => {
-                            return (
-                              <div key={`log-${i}`} className="logLine">
-                                <span className="content">
-                                  <Ansi linkify={true}>{line}</Ansi>
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
+                      <dt>
+                        <Translation>First run</Translation>
+                      </dt>
+                      <dd>{momentDate(stepStatus.firstExecuteTime) || '-'}</dd>
+                      <dt>
+                        <Translation>Last run</Translation>
+                      </dt>
+                      <dd>{momentDate(stepStatus.lastExecuteTime) || '-'}</dd>
+                      <dt>
+                        <Translation>Duration</Translation>
+                      </dt>
+                      <dd>{timeDiff(stepStatus.firstExecuteTime, stepStatus.lastExecuteTime) || '-'}</dd>
+                      {!!stepSpec?.timeout && (
+                        <>
+                          <dt>
+                            <Translation>Timeout</Translation>
+                          </dt>
+                          <dd>{stepSpec?.timeout}</dd>
+                        </>
+                      )}
+                      {!!(stepStatus.message || stepStatus.reason) && (
+                        <>
+                          <dt>
+                            <Translation>Message</Translation>
+                          </dt>
+                          <dd>
+                            {stepStatus.message || ''}
+                            {stepStatus.reason && <span className="wf-kv-reason">{stepStatus.reason}</span>}
+                          </dd>
+                        </>
+                      )}
+                    </dl>
+                  )}
+                  {logSource && (
+                    <div className="wf-step-log">
+                      <div className="wf-step-log-head">
+                        <Translation>Step Logs</Translation>
+                        <Button text loading={logLoading} onClick={() => this.onGetStepLog()}>
+                          <HiOutlineRefresh />
+                        </Button>
                       </div>
-                    )}
-                  </div>
+                      <div className="wf-step-log-body">
+                        {logs?.map((line, i: number) => (
+                          <div key={`log-${i}`}>
+                            <Ansi linkify={true}>{line}</Ansi>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </Tab.Item>
                 <Tab.Item title={i18n.t('Properties').toString()} key={'properties'}>
-                  <div className="step-info padding16">
-                    <tbody>
-                      {properties &&
-                        Object.keys(properties).map((key: string) => {
-                          return (
-                            <tr>
-                              <th>{key}:</th>
-                              <td>{properties && convertAny(properties[key])}</td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </div>
+                  {generated ? (
+                    <>
+                      <Message type="notice" className="wf-step-generated">
+                        <Translation>
+                          KubeVela generated this step. The workflow declares none, so each component is applied by a
+                          step named after it.
+                        </Translation>
+                      </Message>
+                      <dl className="wf-kv">
+                        <dt>component</dt>
+                        <dd>
+                          <Link to={`/applications/${applicationDetail.name}/config/components`}>
+                            {generated.component}
+                          </Link>
+                        </dd>
+                      </dl>
+                    </>
+                  ) : properties && Object.keys(properties).length > 0 ? (
+                    <dl className="wf-kv">
+                      {Object.keys(properties).map((key: string) => (
+                        <React.Fragment key={key}>
+                          <dt>{key}</dt>
+                          <dd>
+                            <code>{properties && convertAny(properties[key])}</code>
+                          </dd>
+                        </React.Fragment>
+                      ))}
+                    </dl>
+                  ) : (
+                    <Empty hideIcon message={'There are no properties.'} />
+                  )}
                 </Tab.Item>
-                <Tab.Item title={i18n.t('Outputs')} key={'outputs'}>
-                  <If condition={!outputLoading && (!outputs || !outputs.values || outputs.values.length == 0)}>
-                    <Empty hideIcon message={'There are no outputs.'} />
-                  </If>
-                  <Loading visible={outputLoading} style={{ width: '100%' }}>
-                    <div className="step-info padding16">
-                      {outputs?.values?.map((value) => {
-                        return (
-                          <tbody>
-                            <tr>
-                              <th>Name: </th>
-                              <td>{value.name}</td>
-                            </tr>
-                            <tr>
-                              <th>Value: </th>
-                              <td>{value.value}</td>
-                            </tr>
-                            <tr>
-                              <th>Value From</th>
-                              <td>{value.valueFrom || '-'}</td>
-                            </tr>
-                          </tbody>
-                        );
-                      })}
-                    </div>
+                <Tab.Item title={i18n.t('Outputs').toString()} key={'outputs'}>
+                  <Loading visible={!!outputLoading} style={{ width: '100%' }}>
+                    {outputs?.values && outputs.values.length > 0 ? (
+                      <Table dataSource={outputs.values} size="small" hasBorder={false} locale={locale().Table}>
+                        <Table.Column title={i18n.t('Name').toString()} dataIndex="name" />
+                        <Table.Column
+                          title={i18n.t('Value').toString()}
+                          dataIndex="value"
+                          cell={(v: string) => <code>{v}</code>}
+                        />
+                        <Table.Column
+                          title={i18n.t('Value From').toString()}
+                          dataIndex="valueFrom"
+                          cell={(v: string) => v || '-'}
+                        />
+                      </Table>
+                    ) : (
+                      !outputLoading && <Empty hideIcon message={'There are no outputs.'} />
+                    )}
                   </Loading>
                 </Tab.Item>
-                <Tab.Item title={i18n.t('Inputs')} key={'inputs'}>
-                  <If condition={!inputLoading && (!inputs || !inputs?.values || inputs.values.length == 0)}>
-                    <Empty hideIcon message={'There are no inputs.'} />
-                  </If>
-                  <Loading visible={inputLoading} style={{ width: '100%' }}>
-                    <div className="step-info padding16">
-                      <tbody>
-                        {inputs?.values?.map((value) => {
-                          return (
-                            <tbody>
-                              <tr>
-                                <th>From Step: </th>
-                                <td>{value.fromStep}</td>
-                              </tr>
-                              <tr>
-                                <th>From: </th>
-                                <td>{value.from}</td>
-                              </tr>
-                              <tr>
-                                <th>Value: </th>
-                                <td>{value.value}</td>
-                              </tr>
-                              <tr>
-                                <th>ParameterKey</th>
-                                <td>{value.parameterKey || '-'}</td>
-                              </tr>
-                            </tbody>
-                          );
-                        })}
-                      </tbody>
-                    </div>
+                <Tab.Item title={i18n.t('Inputs').toString()} key={'inputs'}>
+                  <Loading visible={!!inputLoading} style={{ width: '100%' }}>
+                    {inputs?.values && inputs.values.length > 0 ? (
+                      <Table dataSource={inputs.values} size="small" hasBorder={false} locale={locale().Table}>
+                        <Table.Column title={i18n.t('From Step').toString()} dataIndex="fromStep" />
+                        <Table.Column title={i18n.t('From').toString()} dataIndex="from" />
+                        <Table.Column
+                          title={i18n.t('Value').toString()}
+                          dataIndex="value"
+                          cell={(v: string) => <code>{v}</code>}
+                        />
+                        <Table.Column
+                          title={i18n.t('Parameter Key').toString()}
+                          dataIndex="parameterKey"
+                          cell={(v: string) => v || '-'}
+                        />
+                      </Table>
+                    ) : (
+                      !inputLoading && <Empty hideIcon message={'There are no inputs.'} />
+                    )}
                   </Loading>
                 </Tab.Item>
               </Tab>
-            </Card>
+            </div>
           </If>
         </div>
       </div>

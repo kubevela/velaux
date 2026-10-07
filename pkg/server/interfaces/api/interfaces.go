@@ -68,9 +68,14 @@ func InitAPIBean() []interface{} {
 	RegisterAPI(NewProject())
 	RegisterAPI(NewEnv())
 	RegisterAPI(NewPipeline())
+	RegisterAPI(NewSharedWorkflow())
 
 	// Extension
 	RegisterAPI(NewDefinition())
+	RegisterAPI(NewExpression())
+	RegisterAPI(NewPackage())
+	RegisterAPI(NewDefKit())
+	RegisterAPI(NewCustomisation())
 	RegisterAPI(NewAddon())
 	RegisterAPI(NewEnabledAddon())
 	RegisterAPI(NewAddonRegistry())

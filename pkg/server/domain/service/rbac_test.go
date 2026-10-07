@@ -101,7 +101,7 @@ var _ = Describe("Test rbac service", func() {
 		Expect(err).Should(BeNil())
 		policies, err := rbacService.ListPermissions(context.TODO(), "")
 		Expect(err).Should(BeNil())
-		Expect(len(policies)).Should(BeEquivalentTo(int64(10)))
+		Expect(len(policies)).Should(BeEquivalentTo(int64(22)))
 	})
 
 	It("Test checkPerm by admin user", func() {
@@ -187,7 +187,7 @@ var _ = Describe("Test rbac service", func() {
 
 		policies, err := rbacService.ListPermissions(context.TODO(), "init-test")
 		Expect(err).Should(BeNil())
-		Expect(len(policies)).Should(BeEquivalentTo(int64(6)))
+		Expect(len(policies)).Should(BeEquivalentTo(int64(15)))
 	})
 
 	It("Test UpdatePermission", func() {

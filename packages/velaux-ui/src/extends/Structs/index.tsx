@@ -3,6 +3,7 @@ import { Form, Field, Button } from '@alifd/next';
 import React from 'react';
 
 import UISchema from '../../components/UISchema';
+import type { Scope, ExpressionContext } from '../../components/UISchema';
 import type { UIParam, GroupOption } from '@velaux/data';
 import ArrayItemGroup from '../ArrayItemGroup';
 
@@ -20,6 +21,16 @@ type Props = {
   value?: any;
   label: string;
   mode: 'new' | 'edit';
+  // parentScope is the form holding the list, which an item's condition
+  // reaches with `../`.
+  parentScope?: Scope;
+  expressions?: ExpressionContext;
+  // format `table` lays each item out as one row.
+  format?: string;
+  // rowKey names the field that identifies an item: unique, and its title.
+  rowKey?: string;
+  // itemLabel names the field that titles an item.
+  itemLabel?: string;
 };
 
 type State = {
@@ -34,6 +45,11 @@ type StructItemProps = {
   labelTitle: string | React.ReactElement;
   delete: (id: string) => void;
   mode: 'new' | 'edit';
+  parentScope?: Scope;
+  expressions?: ExpressionContext;
+  table?: boolean;
+  // duplicate reports the item's row key when another item has it too.
+  duplicate?: () => string | undefined;
 };
 
 class StructItem extends React.Component<StructItemProps> {
@@ -46,6 +62,11 @@ class StructItem extends React.Component<StructItemProps> {
     this.uiRef = React.createRef();
   }
   validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
+    const dup = this.props.duplicate && this.props.duplicate();
+    if (dup) {
+      callback(`${dup} is used by another item`);
+      return;
+    }
     this.uiRef.current?.validate(callback);
   };
   getParamCount = (params: UIParam[] | undefined) => {
@@ -81,7 +102,7 @@ class StructItem extends React.Component<StructItemProps> {
         }, {});
       uiSchemas = option.map((key: string) => paramMap[key]);
     }
-    const paramCount = this.getParamCount(uiSchemas);
+    const paramCount = this.props.table ? 0 : this.getParamCount(uiSchemas);
     const itemCount = uiSchemas?.filter((p) => !p.disable).length || 1;
     return (
       <div className="struct-item-container">
@@ -106,6 +127,8 @@ class StructItem extends React.Component<StructItemProps> {
                 uiSchema={uiSchemas}
                 inline
                 ref={this.uiRef}
+                parentScope={this.props.parentScope}
+                expressions={this.props.expressions}
                 mode={this.props.mode}
               />
             </ArrayItemGroup>
@@ -126,6 +149,8 @@ class StructItem extends React.Component<StructItemProps> {
               maxColSpan={24 / itemCount}
               inline
               ref={this.uiRef}
+              parentScope={this.props.parentScope}
+              expressions={this.props.expressions}
               mode={this.props.mode}
             />
           </div>
@@ -226,6 +251,22 @@ class Structs extends React.Component<Props, State> {
     });
   };
 
+  // duplicateKey is the row key of the item when another item has the same
+  // one.
+  duplicateKey = (key: string): string | undefined => {
+    const { rowKey } = this.props;
+    if (!rowKey) {
+      return undefined;
+    }
+    const values: any = this.field.getValues();
+    const own = values[`struct${key}`]?.[rowKey];
+    if (own === undefined || own === '') {
+      return undefined;
+    }
+    const clash = Object.keys(values).some((k) => k !== `struct${key}` && values[k]?.[rowKey] === own);
+    return clash ? String(own) : undefined;
+  };
+
   removeStructPlanItem = (key: string) => {
     const { structList } = this.state;
     structList.forEach((item, i) => {
@@ -240,17 +281,41 @@ class Structs extends React.Component<Props, State> {
     });
   };
 
+  // duplicateKeys are the row keys more than one item has.
+  duplicateKeys = (): string[] => {
+    const { rowKey } = this.props;
+    if (!rowKey) {
+      return [];
+    }
+    const values: any = this.field.getValues();
+    const seen = new Set<string>();
+    const dups = new Set<string>();
+    Object.keys(values).forEach((k) => {
+      const v = values[k]?.[rowKey];
+      if (v === undefined || v === '') {
+        return;
+      }
+      if (seen.has(String(v))) {
+        dups.add(String(v));
+      }
+      seen.add(String(v));
+    });
+    return Array.from(dups);
+  };
+
   render() {
     const { structList } = this.state;
     const { param, parameterGroupOption = [], label } = this.props;
     const { init } = this.field;
+    const dups = this.duplicateKeys();
     return (
       <div className="struct-plan-container">
         <div className="struct-plan-group">
           <Form field={this.field}>
             {structList.map((struct: any) => {
               const fieldObj: any = this.field.getValues();
-              const name = fieldObj[`struct${struct.key}`]?.name || '';
+              const titleKey = this.props.itemLabel || this.props.rowKey || 'name';
+              const name = fieldObj[`struct${struct.key}`]?.[titleKey] || '';
               let labelTitle: string | React.ReactElement = label;
               if (name) {
                 labelTitle = (
@@ -269,10 +334,17 @@ class Structs extends React.Component<Props, State> {
                   param={param}
                   labelTitle={labelTitle}
                   mode={this.props.mode}
+                  parentScope={this.props.parentScope}
+                  expressions={this.props.expressions}
+                  table={this.props.format === 'table'}
+                  duplicate={() => this.duplicateKey(struct.key)}
                 />
               );
             })}
           </Form>
+          <If condition={dups.length > 0}>
+            <div className="struct-plan-error">{`${dups.join(', ')} is used by more than one item`}</div>
+          </If>
         </div>
         <div className="struct-plan-option">
           <If condition={parameterGroupOption.length === 0}>

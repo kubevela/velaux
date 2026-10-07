@@ -1,26 +1,59 @@
-.app-select-wrapper {
-  background: #fff;
-  .item {
-    min-width: 100%;
-    margin: 16px 0;
-  }
-  .btn-wrapper {
-    float: right;
-    margin: 20px;
-  }
-}
-
-.margin-right-20 {
-  margin-right: 20px;
-}
-
-.show-mode {
+// The list's filters on one row: search first and widest, then the selects,
+// then refresh and the view at the right.
+.app-filter-bar {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
-  float: right;
-  height: 70px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
 }
-.flexboth {
+
+.app-filter-bar-search {
+  flex: 2 1 260px;
+  .app-filter-bar-search-icon {
+    margin: 0 4px 0 8px;
+    color: #94a3b8;
+    cursor: pointer;
+  }
+}
+
+.app-filter-bar-select {
+  flex: 1 1 160px;
+  min-width: 0;
+  &.labels {
+    flex: 1.5 1 200px;
+  }
+}
+
+.app-filter-bar-actions {
   display: flex;
-  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+// Card or table, as a segmented control.
+.app-filter-bar-mode {
+  display: inline-flex;
+  padding: 3px;
+  background: #e8edf3;
+  border-radius: 6px;
+  button {
+    padding: 3px 12px;
+    color: #475569;
+    font-size: 13px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    &.active {
+      color: #0f172a;
+      font-weight: 500;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }
+  }
 }

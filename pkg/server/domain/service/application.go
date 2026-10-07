@@ -19,19 +19,23 @@ package service
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"sort"
 	"strings"
 	"time"
 
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
+	"github.com/kubevela/pkg/controller/reconciler"
 	"github.com/kubevela/pkg/util/slices"
-	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
@@ -52,6 +56,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
 	"github.com/kubevela/velaux/pkg/server/event/sync/convert"
+	"github.com/kubevela/velaux/pkg/server/infrastructure/clients"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	assembler "github.com/kubevela/velaux/pkg/server/interfaces/api/assembler/v1"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -68,9 +73,18 @@ const (
 
 // ApplicationService application service
 type ApplicationService interface {
+	// GetApplicationResourceTree is the resource tree an env deploys, with kstatus
+	// health for the kinds KubeVela does not check itself.
+	GetApplicationResourceTree(ctx context.Context, app *model.Application, envName string, opts ResourceTreeOptions) (*apisv1.VelaQLViewResponse, error)
+	// GetApplicationDataFlows is what moves between the sources and components an env deploys.
+	GetApplicationDataFlows(ctx context.Context, app *model.Application, envName string) (*apisv1.ApplicationDataFlowsResponse, error)
 	ListApplications(ctx context.Context, listOptions apisv1.ListApplicationOptions) ([]*apisv1.ApplicationBase, error)
 	GetApplication(ctx context.Context, appName string) (*model.Application, error)
-	GetApplicationStatus(ctx context.Context, app *model.Application, envName string) (*common.AppStatus, error)
+	GetApplicationStatus(ctx context.Context, app *model.Application, envName string) (*apisv1.ApplicationStatus, error)
+	SetApplicationPaused(ctx context.Context, app *model.Application, envName string, paused bool) error
+	SetReconcileInterval(ctx context.Context, app *model.Application, envName string, interval string) error
+	RestartWorkflow(ctx context.Context, app *model.Application, envName string, schedule string) error
+	CancelWorkflowRestart(ctx context.Context, app *model.Application, envName string) error
 	GetApplicationStatusFromAllEnvs(ctx context.Context, app *model.Application) ([]*apisv1.ApplicationStatusResponse, error)
 	DetailApplication(ctx context.Context, app *model.Application) (*apisv1.DetailApplicationResponse, error)
 	PublishApplicationTemplate(ctx context.Context, app *model.Application) (*apisv1.ApplicationTemplateBase, error)
@@ -86,6 +100,10 @@ type ApplicationService interface {
 	UpdateComponent(ctx context.Context, app *model.Application, component *model.ApplicationComponent, req apisv1.UpdateApplicationComponentRequest) (*apisv1.ComponentBase, error)
 	ListPolicies(ctx context.Context, app *model.Application) ([]*apisv1.PolicyBase, error)
 	CreatePolicy(ctx context.Context, app *model.Application, policy apisv1.CreatePolicyRequest) (*apisv1.PolicyBase, error)
+	ListSources(ctx context.Context, app *model.Application) []*apisv1.SourceBase
+	CreateSource(ctx context.Context, app *model.Application, req apisv1.CreateSourceRequest) (*apisv1.SourceBase, error)
+	UpdateSource(ctx context.Context, app *model.Application, name string, req apisv1.UpdateSourceRequest) (*apisv1.SourceBase, error)
+	DeleteSource(ctx context.Context, app *model.Application, name string) error
 	DetailPolicy(ctx context.Context, app *model.Application, policyName string) (*apisv1.DetailPolicyResponse, error)
 	DeletePolicy(ctx context.Context, app *model.Application, policyName string, force bool) error
 	UpdatePolicy(ctx context.Context, app *model.Application, policyName string, policy apisv1.UpdatePolicyRequest) (*apisv1.DetailPolicyResponse, error)
@@ -118,11 +136,25 @@ type applicationServiceImpl struct {
 	DefinitionService DefinitionService   `inject:""`
 	ProjectService    ProjectService      `inject:""`
 	UserService       UserService         `inject:""`
+	VelaQLService     VelaQLService       `inject:""`
 }
 
 // NewApplicationService new application service
 func NewApplicationService() ApplicationService {
 	return &applicationServiceImpl{}
+}
+
+// addonFilter reports whether an application is listed for an addons option:
+// exclude leaves out the applications addons install, only keeps them alone.
+func addonFilter(app *model.Application, addons string) bool {
+	isAddon := app.Labels[model.LabelSyncAddon] != ""
+	switch addons {
+	case "exclude":
+		return !isAddon
+	case "only":
+		return isAddon
+	}
+	return true
 }
 
 func listApp(ctx context.Context, ds datastore.DataStore, listOptions apisv1.ListApplicationOptions) ([]*model.Application, error) {
@@ -157,6 +189,9 @@ func listApp(ctx context.Context, ds datastore.DataStore, listOptions apisv1.Lis
 			!strings.Contains(appModel.Alias, listOptions.Query) &&
 			strings.Contains(appModel.Name, listOptions.Query) &&
 			strings.Contains(appModel.Description, listOptions.Query) {
+			continue
+		}
+		if !addonFilter(appModel, listOptions.Addons) {
 			continue
 		}
 		if listOptions.TargetName != "" {
@@ -223,9 +258,18 @@ func (c *applicationServiceImpl) ListApplications(ctx context.Context, listOptio
 	if err != nil {
 		return nil, err
 	}
+	var statuses map[string][]*apisv1.ApplicationStatusResponse
+	if listOptions.WithStatus {
+		if statuses, err = c.statusesOfApps(ctx, apps); err != nil {
+			klog.Warningf("summarising the status of the applications: %s", err.Error())
+		}
+	}
 	var list []*apisv1.ApplicationBase
 	for _, app := range apps {
 		appBase := assembler.ConvertAppModelToBase(app, projects)
+		if statuses != nil {
+			appBase.Status = SummariseAppStatus(statuses[app.PrimaryKey()])
+		}
 		list = append(list, appBase)
 	}
 	sort.Slice(list, func(i, j int) bool {
@@ -291,8 +335,7 @@ func (c *applicationServiceImpl) DetailApplication(ctx context.Context, app *mod
 }
 
 // GetApplicationStatus get application status from controller cluster
-func (c *applicationServiceImpl) GetApplicationStatus(ctx context.Context, appmodel *model.Application, envName string) (*common.AppStatus, error) {
-	var app v1beta1.Application
+func (c *applicationServiceImpl) GetApplicationStatus(ctx context.Context, appmodel *model.Application, envName string) (*apisv1.ApplicationStatus, error) {
 	env, err := c.EnvService.GetEnv(ctx, envName)
 	if err != nil {
 		return nil, err
@@ -301,20 +344,126 @@ func (c *applicationServiceImpl) GetApplicationStatus(ctx context.Context, appmo
 	if err != nil {
 		return nil, err
 	}
-	err = c.KubeClient.Get(ctx, types.NamespacedName{Namespace: env.Namespace, Name: envBinding.AppDeployName}, &app)
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil, nil
-		}
+	status, err := c.applicationStatus(ctx, env.Namespace, envBinding.AppDeployName)
+	if apierrors.IsNotFound(err) {
+		return nil, nil
+	}
+	return status, err
+}
+
+// applicationStatus reads an Application's status from the cluster.
+func (c *applicationServiceImpl) applicationStatus(ctx context.Context, namespace, name string) (*apisv1.ApplicationStatus, error) {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(v1beta1.ApplicationKindVersionKind)
+	if err := c.KubeClient.Get(ctx, types.NamespacedName{Namespace: namespace, Name: name}, obj); err != nil {
 		return nil, err
 	}
-	if app.Generation > app.Status.ObservedGeneration {
-		app.Status.Phase = common.ApplicationStarting
+	return applicationStatusFrom(obj)
+}
+
+// applicationStatusFrom decodes an Application's status: KubeVela's fields into
+// its types, and its component dependencies, which those types predate, beside
+// them. Only the status goes through the typed conversion.
+func applicationStatusFrom(obj *unstructured.Unstructured) (*apisv1.ApplicationStatus, error) {
+	status := &apisv1.ApplicationStatus{}
+	raw, _ := obj.Object["status"].(map[string]interface{})
+	if raw != nil {
+		// dependencies is left to dependenciesOf, which skips a malformed value
+		// instead of failing the status.
+		fields := make(map[string]interface{}, len(raw))
+		for k, v := range raw {
+			if k != "dependencies" {
+				fields[k] = v
+			}
+		}
+		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(fields, &status.AppStatus); err != nil {
+			return nil, err
+		}
 	}
-	if !app.DeletionTimestamp.IsZero() {
-		app.Status.Phase = common.ApplicationDeleting
+	status.Dependencies = dependenciesOf(obj, raw)
+	status.Paused = reconciler.IsPaused(obj)
+	annotations := obj.GetAnnotations()
+	status.ReconcileInterval = annotations[oam.AnnotationReconcileInterval]
+	status.RestartWorkflow = annotations[oam.AnnotationWorkflowRestart]
+	status.AutoUpdate = annotations[oam.AnnotationAutoUpdate] == True
+	if obj.GetGeneration() > status.ObservedGeneration {
+		status.Phase = common.ApplicationStarting
 	}
-	return &app.Status, nil
+	if obj.GetDeletionTimestamp() != nil {
+		status.Phase = common.ApplicationDeleting
+	}
+	return status, nil
+}
+
+// dependenciesOf is what the Application's components depend on: its
+// status.dependencies, or, where KubeVela leaves that out (it predates the field,
+// or the Application has none), the dependsOn and inputs of the deployed spec. An
+// optional field that does not decode is left out rather than failing the status,
+// and with it every environment listed alongside.
+func dependenciesOf(obj *unstructured.Unstructured, status map[string]interface{}) []apisv1.ComponentDependency {
+	if reported, ok := status["dependencies"]; ok {
+		var deps struct {
+			Dependencies []apisv1.ComponentDependency `json:"dependencies"`
+		}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(map[string]interface{}{"dependencies": reported}, &deps)
+		if err == nil {
+			return deps.Dependencies
+		}
+		klog.Warningf("ignoring status.dependencies of application %s/%s: %v", obj.GetNamespace(), obj.GetName(), err)
+	}
+	spec, _ := obj.Object["spec"].(map[string]interface{})
+	if spec == nil {
+		return nil
+	}
+	var deployed struct {
+		Components []struct {
+			Name      string   `json:"name"`
+			DependsOn []string `json:"dependsOn"`
+			Inputs    []struct {
+				From string `json:"from"`
+			} `json:"inputs"`
+			Outputs []struct {
+				Name string `json:"name"`
+			} `json:"outputs"`
+		} `json:"components"`
+	}
+	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(spec, &deployed); err != nil {
+		klog.Warningf("ignoring the components of application %s/%s: %v", obj.GetNamespace(), obj.GetName(), err)
+		return nil
+	}
+	outputOwner := map[string]string{}
+	for _, c := range deployed.Components {
+		for _, o := range c.Outputs {
+			outputOwner[o.Name] = c.Name
+		}
+	}
+	seen := map[apisv1.ComponentDependency]bool{}
+	var out []apisv1.ComponentDependency
+	add := func(d apisv1.ComponentDependency) {
+		if d.DependsOn != "" && d.DependsOn != d.Component && !seen[d] {
+			seen[d] = true
+			out = append(out, d)
+		}
+	}
+	for _, c := range deployed.Components {
+		for _, d := range c.DependsOn {
+			add(apisv1.ComponentDependency{Component: c.Name, DependsOn: d, Source: "dependsOn"})
+		}
+		for _, in := range c.Inputs {
+			add(apisv1.ComponentDependency{Component: c.Name, DependsOn: outputOwner[in.From], Source: "inputs"})
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		a, b := out[i], out[j]
+		if a.Component != b.Component {
+			return a.Component < b.Component
+		}
+		if a.DependsOn != b.DependsOn {
+			return a.DependsOn < b.DependsOn
+		}
+		return a.Source < b.Source
+	})
+	return out
 }
 
 // GetApplicationStatusFromAllEnvs get applications status from all envs
@@ -325,25 +474,18 @@ func (c *applicationServiceImpl) GetApplicationStatusFromAllEnvs(ctx context.Con
 	}
 	var res []*apisv1.ApplicationStatusResponse
 	for _, eb := range envBindings {
-		var application v1beta1.Application
 		env, err := c.EnvService.GetEnv(ctx, eb.Name)
 		if err != nil {
 			return nil, err
 		}
-		err = c.KubeClient.Get(ctx, types.NamespacedName{Namespace: env.Namespace, Name: eb.AppDeployName}, &application)
+		status, err := c.applicationStatus(ctx, env.Namespace, eb.AppDeployName)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
 				continue
 			}
 			return nil, err
 		}
-		if application.Generation > application.Status.ObservedGeneration {
-			application.Status.Phase = common.ApplicationStarting
-		}
-		if !application.DeletionTimestamp.IsZero() {
-			application.Status.Phase = common.ApplicationDeleting
-		}
-		res = append(res, &apisv1.ApplicationStatusResponse{EnvName: env.Name, Status: &application.Status})
+		res = append(res, &apisv1.ApplicationStatusResponse{EnvName: env.Name, Status: status})
 	}
 
 	return res, nil
@@ -398,12 +540,16 @@ func (c *applicationServiceImpl) PublishApplicationTemplate(_ context.Context, _
 
 // CreateApplication create application
 func (c *applicationServiceImpl) CreateApplication(ctx context.Context, req apisv1.CreateApplicationRequest) (*apisv1.ApplicationBase, error) {
+	if req.WorkflowMode != "" && req.WorkflowMode != "StepByStep" && req.WorkflowMode != "DAG" {
+		return nil, bcode.ErrWorkflowMode
+	}
 	application := model.Application{
 		Name:        req.Name,
 		Alias:       req.Alias,
 		Description: req.Description,
 		Icon:        req.Icon,
 		Labels:      req.Labels,
+		Annotations: req.Annotations,
 	}
 	// check appUtil name.
 	exist, err := c.Store.IsExist(ctx, &application)
@@ -432,6 +578,9 @@ func (c *applicationServiceImpl) CreateApplication(ctx context.Context, req apis
 	if len(req.EnvBinding) > 0 {
 		err := c.saveApplicationEnvBinding(ctx, application, req.EnvBinding)
 		if err != nil {
+			return nil, err
+		}
+		if err := c.setEnvWorkflowMode(ctx, &application, req.EnvBinding, req.WorkflowMode); err != nil {
 			return nil, err
 		}
 		// For the custom payload, no need assign the component name
@@ -576,6 +725,25 @@ func (c *applicationServiceImpl) ListApplicationTriggers(ctx context.Context, ap
 	return resp, nil
 }
 
+// setEnvWorkflowMode sets the mode of the workflows created for an
+// application's env bindings; none is set for an empty mode.
+func (c *applicationServiceImpl) setEnvWorkflowMode(ctx context.Context, app *model.Application, envs []*apisv1.EnvBinding, mode string) error {
+	if mode == "" {
+		return nil
+	}
+	for _, env := range envs {
+		wf := &model.Workflow{Name: repository.ConvertWorkflowName(env.Name), AppPrimaryKey: app.PrimaryKey()}
+		if err := c.Store.Get(ctx, wf); err != nil {
+			return err
+		}
+		wf.Mode.Steps = wfTypesv1alpha1.WorkflowMode(mode)
+		if err := c.Store.Put(ctx, wf); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (c *applicationServiceImpl) saveApplicationEnvBinding(ctx context.Context, app model.Application, envBindings []*apisv1.EnvBinding) error {
 	err := c.EnvBindingService.BatchCreateEnvBinding(ctx, &app, envBindings)
 	if err != nil {
@@ -694,7 +862,7 @@ func (c *applicationServiceImpl) DetailComponent(ctx context.Context, app *model
 	}
 	var cd v1beta1.ComponentDefinition
 	loadCtx := utils.WithProject(ctx, "")
-	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: component.Type, Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
+	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: definitionName(component.Type), Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
 		klog.Warningf("component definition %s get failure. %s", pkgUtils.Sanitize(component.Type), err.Error())
 	}
 
@@ -823,7 +991,8 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 		}
 	}
 	// step4: apply to controller cluster
-	err = c.Apply.Apply(ctx, oamApp)
+	applyCtx, warnings := clients.WithWarnings(ctx)
+	err = c.Apply.Apply(applyCtx, oamApp)
 	if err != nil {
 		appRevision.Status = model.RevisionStatusFail
 		appRevision.Reason = err.Error()
@@ -832,7 +1001,7 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 		}
 
 		klog.Errorf("deploy appUtil %s failure %s", app.PrimaryKey(), err.Error())
-		return nil, bcode.ErrDeployApplyFail
+		return nil, deployApplyError(err)
 	}
 
 	// step5: create workflow record
@@ -858,12 +1027,25 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 
 	res := &apisv1.ApplicationDeployResponse{
 		ApplicationRevisionBase: c.convertRevisionModelToBase(ctx, appRevision),
+		Warnings:                warnings.List(),
 	}
 	if record != nil {
 		res.WorkflowRecord = assembler.ConvertFromRecordModel(record).WorkflowRecordBase
 	}
 
 	return res, nil
+}
+
+// deployApplyError is the error a deploy reports when the Application cannot be
+// applied. When the API server refuses it, as an admission webhook does over a
+// restricted type or an exceeded quota, its reason is the user's to see.
+// KubeVela's Application webhook refuses with a Bad Request.
+func deployApplyError(err error) error {
+	var status apierrors.APIStatus
+	if (apierrors.IsBadRequest(err) || apierrors.IsForbidden(err) || apierrors.IsInvalid(err)) && errors.As(err, &status) {
+		return bcode.ErrDeployApplyFail.SetMessage(status.Status().Message)
+	}
+	return bcode.ErrDeployApplyFail
 }
 
 func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appModel *model.Application, reqWorkflowName, envName, version string) (*v1beta1.Application, error) {
@@ -1001,29 +1183,48 @@ func (c *applicationServiceImpl) renderOAMApplication(ctx context.Context, appMo
 		}
 		application.Spec.Policies = append(application.Spec.Policies, appPolicy)
 	}
+	application.Spec.Sources = appModel.Sources
 	if workflow != nil {
 		application.Annotations[oam.AnnotationWorkflowName] = workflow.Name
-		var steps []workflowv1alpha1.WorkflowStep
-		for _, step := range workflow.Steps {
-			workflowStep := workflowv1alpha1.WorkflowStep{
-				WorkflowStepBase: convertWorkflowModel2WorkflowSpec(step.WorkflowStepBase),
-			}
-			workflowStep.Mode = step.Mode
-			for _, subStep := range step.SubSteps {
-				workflowStep.SubSteps = append(workflowStep.SubSteps, convertWorkflowModel2WorkflowSpec(subStep))
-			}
-			steps = append(steps, workflowStep)
-		}
-		application.Spec.Workflow = &v1beta1.Workflow{
-			Steps: steps,
-			Mode:  &workflow.Mode,
-		}
+		application.Spec.Workflow = applicationWorkflowSpec(workflow)
 	}
 	return application, nil
 }
 
-func convertWorkflowModel2WorkflowSpec(step model.WorkflowStepBase) workflowv1alpha1.WorkflowStepBase {
-	var workflowStep = workflowv1alpha1.WorkflowStepBase{
+// applicationWorkflowSpec is the workflow an Application runs: a ref to a
+// shared Workflow, with a mode only if this one sets it (KubeVela then takes
+// the shared one's), or its own steps and mode. KubeVela refuses both.
+func applicationWorkflowSpec(workflow *model.Workflow) *v1beta1.Workflow {
+	if workflow.Ref != "" {
+		spec := &v1beta1.Workflow{Ref: workflow.Ref}
+		if workflow.Mode.Steps != "" || workflow.Mode.SubSteps != "" {
+			mode := workflow.Mode
+			spec.Mode = &mode
+		}
+		return spec
+	}
+	mode := workflow.Mode
+	return &v1beta1.Workflow{Steps: workflowStepSpecs(workflow.Steps), Mode: &mode}
+}
+
+// workflowStepSpecs is steps as a Workflow resource holds them.
+func workflowStepSpecs(steps []model.WorkflowStep) []wfTypesv1alpha1.WorkflowStep {
+	var specs []wfTypesv1alpha1.WorkflowStep
+	for _, step := range steps {
+		spec := wfTypesv1alpha1.WorkflowStep{
+			WorkflowStepBase: convertWorkflowModel2WorkflowSpec(step.WorkflowStepBase),
+		}
+		spec.Mode = step.Mode
+		for _, subStep := range step.SubSteps {
+			spec.SubSteps = append(spec.SubSteps, convertWorkflowModel2WorkflowSpec(subStep))
+		}
+		specs = append(specs, spec)
+	}
+	return specs
+}
+
+func convertWorkflowModel2WorkflowSpec(step model.WorkflowStepBase) wfTypesv1alpha1.WorkflowStepBase {
+	var workflowStep = wfTypesv1alpha1.WorkflowStepBase{
 		Name:      step.Name,
 		Type:      step.Type,
 		Inputs:    step.Inputs,
@@ -1031,7 +1232,7 @@ func convertWorkflowModel2WorkflowSpec(step model.WorkflowStepBase) workflowv1al
 		If:        step.If,
 		Timeout:   step.Timeout,
 		DependsOn: step.DependsOn,
-		Meta: &workflowv1alpha1.WorkflowStepMeta{
+		Meta: &wfTypesv1alpha1.WorkflowStepMeta{
 			Alias: step.Alias,
 		},
 	}
@@ -1168,7 +1369,7 @@ func (c *applicationServiceImpl) UpdateComponent(ctx context.Context, _ *model.A
 func (c *applicationServiceImpl) createComponent(ctx context.Context, app *model.Application, com apisv1.CreateComponentRequest, main bool) (*apisv1.ComponentBase, error) {
 	var cd v1beta1.ComponentDefinition
 	loadCtx := utils.WithProject(ctx, "")
-	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: com.ComponentType, Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
+	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: definitionName(com.ComponentType), Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
 		klog.Warningf("component definition %s get failure. %s", pkgUtils.Sanitize(com.ComponentType), err.Error())
 		return nil, bcode.ErrComponentTypeNotSupport
 	}
@@ -1518,6 +1719,34 @@ func (c *applicationServiceImpl) Statistics(ctx context.Context, app *model.Appl
 	}, nil
 }
 
+// specDiffers compares two Applications as ignoreSomeParams normalises them,
+// their specs and the annotations that change the render, as JSON, so neither
+// key order nor the spacing of stored properties counts.
+func specDiffers(deployed, current *v1beta1.Application) (bool, error) {
+	normal := func(app *v1beta1.Application) (interface{}, error) {
+		app = app.DeepCopy()
+		ignoreSomeParams(app)
+		raw, err := json.Marshal(struct {
+			Annotations map[string]string       `json:"annotations,omitempty"`
+			Spec        v1beta1.ApplicationSpec `json:"spec"`
+		}{app.Annotations, app.Spec})
+		if err != nil {
+			return nil, err
+		}
+		var out interface{}
+		return out, json.Unmarshal(raw, &out)
+	}
+	a, err := normal(deployed)
+	if err != nil {
+		return false, err
+	}
+	b, err := normal(current)
+	if err != nil {
+		return false, err
+	}
+	return !reflect.DeepEqual(a, b), nil
+}
+
 // CompareApp compare application
 func (c *applicationServiceImpl) CompareApp(ctx context.Context, appModel *model.Application, compareReq apisv1.AppCompareReq) (*apisv1.AppCompareResponse, error) {
 	var base, compareTarget *v1beta1.Application
@@ -1602,20 +1831,24 @@ func (c *applicationServiceImpl) CompareApp(ctx context.Context, appModel *model
 		return compareResponse, nil
 	}
 
-	args := commonutil.Args{
-		Schema: commonutil.Scheme,
-	}
-	_ = args.SetConfig(c.KubeConfig)
-	args.SetClient(c.KubeClient)
-	diffResult, buff, err := compare(ctx, args, compareTarget, base)
+	// The Applications' specs are compared, not their rendered resources: a
+	// render outside the controller has no placement, so a source keyed on where
+	// a component lands would read the wrong namespace.
+	differs, err := specDiffers(base, compareTarget)
+	return compareOutcome(compareResponse, differs, err), nil
+}
+
+// compareOutcome is a comparison's answer: whether the two differ, or, where the
+// comparison failed, why. Either way both Applications stay in it.
+func compareOutcome(resp *apisv1.AppCompareResponse, differs bool, err error) *apisv1.AppCompareResponse {
 	if err != nil {
-		klog.Errorf("fail to compare the appUtil %s", err.Error())
-		compareResponse.IsDiff = false
-		return compareResponse, nil
+		klog.Errorf("fail to compare the application: %s", err.Error())
+		resp.IsDiff = false
+		resp.Error = err.Error()
+		return resp
 	}
-	compareResponse.IsDiff = diffResult.DiffType != ""
-	compareResponse.DiffReport = buff.String()
-	return compareResponse, nil
+	resp.IsDiff = differs
+	return resp
 }
 
 // ResetAppToLatestRevision reset appUtil's component to last revision
@@ -1877,11 +2110,30 @@ func dryRunApplication(ctx context.Context, c commonutil.Args, app *v1beta1.Appl
 
 // ignoreSomeParams ignore some parameters before comparing the appUtil changes.
 // ignore the workflow spec
+// renderAnnotations are the Application annotations that change how KubeVela
+// renders it, which a comparison keeps.
+var renderAnnotations = []string{
+	oam.AnnotationCelExpressions,
+	oam.AnnotationAutoUpdate,
+	oam.AnnotationFilterAnnotationKeys,
+	oam.AnnotationFilterLabelKeys,
+}
+
+// ignoreSomeParams reduces an Application to what decides its render: its name,
+// namespace, spec and renderAnnotations, with components and policies sorted.
 func ignoreSomeParams(o *v1beta1.Application) {
 	var defaultApplication = v1beta1.Application{}
 	defaultApplication.Spec = o.Spec
 	defaultApplication.Name = o.Name
 	defaultApplication.Namespace = o.Namespace
+	for _, key := range renderAnnotations {
+		if v, ok := o.Annotations[key]; ok {
+			if defaultApplication.Annotations == nil {
+				defaultApplication.Annotations = map[string]string{}
+			}
+			defaultApplication.Annotations[key] = v
+		}
+	}
 
 	sort.Slice(defaultApplication.Spec.Policies, func(i, j int) bool {
 		return defaultApplication.Spec.Policies[i].Name < defaultApplication.Spec.Policies[j].Name
@@ -1890,31 +2142,6 @@ func ignoreSomeParams(o *v1beta1.Application) {
 		return defaultApplication.Spec.Components[i].Name < defaultApplication.Spec.Components[j].Name
 	})
 	*o = defaultApplication
-}
-
-func compare(ctx context.Context, c commonutil.Args, targetApp *v1beta1.Application, baseApp *v1beta1.Application) (*dryrun.DiffEntry, bytes.Buffer, error) {
-	var buff = bytes.Buffer{}
-	_, err := c.GetClient()
-	if err != nil {
-		return nil, buff, err
-	}
-	config, err := c.GetConfig()
-	if err != nil {
-		return nil, buff, err
-	}
-	var objs []*unstructured.Unstructured
-	client, err := c.GetClient()
-	if err != nil {
-		return nil, buff, err
-	}
-	liveDiffOption := dryrun.NewLiveDiffOption(client, config, objs)
-	diffResult, err := liveDiffOption.DiffApps(ctx, baseApp, targetApp)
-	if err != nil {
-		return nil, buff, err
-	}
-	reportDiffOpt := dryrun.NewReportDiffOption(10, &buff)
-	reportDiffOpt.PrintDiffReport(diffResult)
-	return diffResult, buff, nil
 }
 
 // NewTestApplicationService create the application service instance for testing
@@ -2063,4 +2290,11 @@ func (c *applicationServiceImpl) findAllBindingPolicyWorkflowStep(ctx context.Co
 		}
 	}
 	return res, nil
+}
+
+// definitionName is the definition a type names, without the version it may
+// be pinned to: webapp@v1.1.0 is a webapp.
+func definitionName(typeName string) string {
+	name, _, _ := strings.Cut(typeName, "@")
+	return name
 }

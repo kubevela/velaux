@@ -11,7 +11,10 @@ import {
 
 import { createPolicy, updatePolicy } from '../../../../api/application';
 import { detailPolicyDefinition, getPolicyDefinitions } from '../../../../api/definitions';
-import DrawerWithFooter from '../../../../components/Drawer';
+import { VersionSelect } from '../../../../components/VersionSelect';
+import { joinType, splitType } from '../../../../utils/definitionVersion';
+import { AwaitingType } from '../../../../components/AwaitingType';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
@@ -23,7 +26,9 @@ import type {
   EnvBinding,
   UpdatePolicyRequest,
   Workflow,
- DefinitionBase } from '@velaux/data';
+  DefinitionBase,
+} from '@velaux/data';
+import { deployNamespaces, isUsable } from '../../../../utils/restrictions';
 
 import './index.less';
 import classNames from 'classnames';
@@ -60,6 +65,8 @@ type PolicyItem = {
 };
 
 type State = {
+  // propertiesValid is whether the properties form can be saved as it stands.
+  propertiesValid?: boolean;
   items: PolicyItem[];
   selectedPolicyItem?: PolicyItem;
   policyDefinitionDetail?: DefinitionDetail;
@@ -169,9 +176,10 @@ class PolicyDialog extends React.Component<Props, State> {
     this.setUISchemaContext();
     const { policy } = this.props;
     if (policy) {
+      const pinned = splitType(policy.type);
       let selected = false;
       this.state.items.map((item) => {
-        if (item.type == policy.type && item.properties == undefined) {
+        if (item.type == pinned.name && item.properties == undefined) {
           this.onSelectPolicy(item);
           selected = true;
         }
@@ -184,19 +192,20 @@ class PolicyDialog extends React.Component<Props, State> {
           icon: <AiOutlineFileDone size={35} />,
         });
       }
-      this.field.setValues({ ...policy });
+      this.field.setValues({ ...policy, type: pinned.name, policyVersion: pinned.version });
       if (Array.isArray(policy.workflowPolicyBind) && policy.workflowPolicyBind.length > 0) {
         this.field.setValues({
           workflow: policy.workflowPolicyBind[0].name,
           steps: policy.workflowPolicyBind[0].steps,
         });
       }
-      this.loadPolicyDefinitionDetail(policy.type);
+      this.loadPolicyDefinitionDetail(pinned.name, pinned.version);
     }
   }
 
   handleTypeChange = (value: string) => {
     this.removeProperties(() => {
+      this.field.setValue('policyVersion', undefined);
       this.loadPolicyDefinitionDetail(value);
       this.field.setValue('name', value);
       this.field.setValue('alias', value);
@@ -236,7 +245,12 @@ class PolicyDialog extends React.Component<Props, State> {
         >
           <If condition={!policy}>
             <Button
-              disabled={!selectedPolicyItem}
+              disabled={!selectedPolicyItem || this.state.propertiesValid === false}
+              title={
+                this.state.propertiesValid === false
+                  ? i18n.t('Fix the highlighted properties first').toString()
+                  : undefined
+              }
               type="primary"
               onClick={this.onSubmitCreate}
               loading={createPolicyLoading}
@@ -246,7 +260,12 @@ class PolicyDialog extends React.Component<Props, State> {
           </If>
           <If condition={policy}>
             <Button
-              disabled={!selectedPolicyItem}
+              disabled={!selectedPolicyItem || this.state.propertiesValid === false}
+              title={
+                this.state.propertiesValid === false
+                  ? i18n.t('Fix the highlighted properties first').toString()
+                  : undefined
+              }
               type="primary"
               onClick={this.onSubmitUpdate}
               loading={createPolicyLoading}
@@ -282,6 +301,7 @@ class PolicyDialog extends React.Component<Props, State> {
         Message.warning(i18n.t('Please select a policy type first.'));
         return;
       }
+      policyType = joinType(policyType, this.field.getValue('policyVersion'));
       let env = envName;
       if (!env && workflow) {
         env = this.getEnvNameFromWorkflow(workflow);
@@ -334,7 +354,7 @@ class PolicyDialog extends React.Component<Props, State> {
         envName: env,
         description: description,
         alias: alias,
-        type: type,
+        type: joinType(type, this.field.getValue('policyVersion')),
         properties: JSON.stringify(properties),
       };
       if (workflow && steps && steps.length > 0) {
@@ -360,6 +380,7 @@ class PolicyDialog extends React.Component<Props, State> {
 
   onSelectPolicy = (item: PolicyItem) => {
     this.field.reset();
+    this.field.setValue('policyVersion', undefined);
     this.field.setValues({
       name: item.name,
       description: item.title,
@@ -418,12 +439,9 @@ class PolicyDialog extends React.Component<Props, State> {
   buildPolicyTypeOptions = () => {
     const { definitions } = this.state;
     const options: { label: string; value: string }[] = [];
-    definitions?.map((definition) => {
+    definitions?.filter(isUsable).map((definition) => {
       if (definition.name != 'override' && definition.name != 'topology') {
-        options.push({
-          label: definition.name,
-          value: definition.name,
-        });
+        options.push({ label: definition.name, value: definition.name });
       }
     });
     return options;
@@ -441,14 +459,16 @@ class PolicyDialog extends React.Component<Props, State> {
   };
 
   loadPolicyDefinitions = () => {
-    getPolicyDefinitions().then((res) => {
+    getPolicyDefinitions(this.props.project, deployNamespaces(this.props.envbinding)).then((res) => {
       this.setState({ definitions: res.definitions });
     });
   };
 
-  loadPolicyDefinitionDetail = (policyType: string) => {
+  // loadPolicyDefinitionDetail loads a policy type's form, at the version it is
+  // pinned to or the latest.
+  loadPolicyDefinitionDetail = (policyType: string, version?: string) => {
     this.setState({ definitionDetailLoading: true });
-    detailPolicyDefinition({ name: policyType })
+    detailPolicyDefinition({ project: this.props.project, name: policyType, revision: version })
       .then((res) => {
         if (res) {
           this.setState({ policyDefinitionDetail: res });
@@ -467,12 +487,16 @@ class PolicyDialog extends React.Component<Props, State> {
     };
     const init = this.field.init;
     const showType = (selectedPolicyItem && selectedPolicyItem?.name == 'custom') || policy != undefined;
-    const span = showType ? 8 : 12;
+    const span = 12;
+    // policyType is the type chosen, from its card or, for a custom one, its list.
+    const policyType: string = this.field.getValue('type') || selectedPolicyItem?.type || '';
+    // The policy's type comes first, a custom one's from its own list; the rest waits for it.
+    const ready =
+      policy != undefined ||
+      (!!selectedPolicyItem && (selectedPolicyItem.name != 'custom' || !!this.field.getValue('type')));
     return (
-      <DrawerWithFooter
+      <ModalWithFooter
         title={policy ? i18n.t('Update Policy') : i18n.t('New Policy')}
-        placement="right"
-        width={800}
         onClose={onClose}
         extButtons={this.extButtonList()}
       >
@@ -497,7 +521,7 @@ class PolicyDialog extends React.Component<Props, State> {
                 })}
               </Row>
             )}
-            {selectedPolicyItem && (
+            {showType && (
               <Row wrap={true}>
                 {showType && (
                   <Col span={span} style={{ padding: '0 8px' }}>
@@ -519,6 +543,28 @@ class PolicyDialog extends React.Component<Props, State> {
                     </Form.Item>
                   </Col>
                 )}
+              </Row>
+            )}
+            {policyType && (
+              <Row wrap={true}>
+                <Col span={span} style={{ padding: '0 8px' }}>
+                  <Form.Item label={i18n.t('Version').toString()}>
+                    <VersionSelect
+                      definitionType="policy"
+                      project={this.props.project}
+                      name={policyType}
+                      value={this.field.getValue('policyVersion')}
+                      onChange={(version?: string) => {
+                        this.field.setValue('policyVersion', version);
+                        this.loadPolicyDefinitionDetail(policyType, version);
+                      }}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+            <AwaitingType ready={ready}>
+              <Row wrap={true}>
                 <Col span={span} style={{ padding: '0 8px' }}>
                   <Form.Item label={i18n.t('Name').toString()} required={true}>
                     <Input
@@ -569,81 +615,83 @@ class PolicyDialog extends React.Component<Props, State> {
                   </Form.Item>
                 </Col>
               </Row>
-            )}
+            </AwaitingType>
             <If condition={selectedPolicyItem?.properties}>
               <Message style={{ marginTop: '8px' }} type="success">
                 <Translation>This policy already have the default properties</Translation>
               </Message>
             </If>
           </Card>
-          <Card contentHeight="auto" style={{ marginTop: '8px' }} title={i18n.t('Select an environment').toString()}>
-            {!selectedPolicyItem ||
-              (selectedPolicyItem.type != 'override' && (
+          <AwaitingType ready={ready}>
+            <Card contentHeight="auto" style={{ marginTop: '8px' }} title={i18n.t('Select an environment').toString()}>
+              {!selectedPolicyItem ||
+                (selectedPolicyItem.type != 'override' && (
+                  <div>
+                    <Form.Item
+                      help={i18n
+                        .t('If select an environment, this policy is only enabled in the selected environment.')
+                        .toString()}
+                    >
+                      <Select
+                        {...init('envName', {
+                          rules: [],
+                        })}
+                        hasClear
+                        locale={locale().Select}
+                        dataSource={this.buildEnvironmentOptions()}
+                      />
+                    </Form.Item>
+                  </div>
+                ))}
+              {selectedPolicyItem && selectedPolicyItem.type == 'override' && (
                 <div>
-                  <Form.Item
-                    help={i18n
-                      .t('If select an environment, this policy is only enabled in the selected environment.')
-                      .toString()}
-                  >
-                    <Select
-                      {...init('envName', {
-                        rules: [],
-                      })}
-                      hasClear
-                      locale={locale().Select}
-                      dataSource={this.buildEnvironmentOptions()}
-                    />
-                  </Form.Item>
+                  <Row>
+                    <Col span={12} style={{ padding: '0 8px' }}>
+                      <Form.Item
+                        help={i18n.t('Select the workflow to which the policy should be applied.').toString()}
+                        required
+                        label={i18n.t('Workflow').toString()}
+                      >
+                        <Select
+                          {...init('workflow', {
+                            rules: [
+                              {
+                                required: true,
+                              },
+                            ],
+                          })}
+                          hasClear
+                          locale={locale().Select}
+                          dataSource={this.buildWorkflowOptions()}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12} style={{ padding: '0 8px' }}>
+                      <Form.Item
+                        help={i18n.t('Select the steps to which the policy should be applied.').toString()}
+                        label={i18n.t('Steps').toString()}
+                        required={true}
+                      >
+                        <Select
+                          {...init('steps', {
+                            rules: [
+                              {
+                                required: true,
+                              },
+                            ],
+                          })}
+                          hasClear
+                          locale={locale().Select}
+                          mode="multiple"
+                          dataSource={this.buildWorkflowStepsOptions()}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
                 </div>
-              ))}
-            {selectedPolicyItem && selectedPolicyItem.type == 'override' && (
-              <div>
-                <Row>
-                  <Col span={12} style={{ padding: '0 8px' }}>
-                    <Form.Item
-                      help={i18n.t('Select the workflow to which the policy should be applied.').toString()}
-                      required
-                      label={i18n.t('Workflow').toString()}
-                    >
-                      <Select
-                        {...init('workflow', {
-                          rules: [
-                            {
-                              required: true,
-                            },
-                          ],
-                        })}
-                        hasClear
-                        locale={locale().Select}
-                        dataSource={this.buildWorkflowOptions()}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12} style={{ padding: '0 8px' }}>
-                    <Form.Item
-                      help={i18n.t('Select the steps to which the policy should be applied.').toString()}
-                      label={i18n.t('Steps').toString()}
-                      required={true}
-                    >
-                      <Select
-                        {...init('steps', {
-                          rules: [
-                            {
-                              required: true,
-                            },
-                          ],
-                        })}
-                        hasClear
-                        locale={locale().Select}
-                        mode="multiple"
-                        dataSource={this.buildWorkflowStepsOptions()}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </div>
-            )}
-          </Card>
+              )}
+            </Card>
+          </AwaitingType>
           {selectedPolicyItem && !selectedPolicyItem?.properties && (
             <Loading visible={definitionDetailLoading} style={{ width: '100%' }}>
               <Card
@@ -687,6 +735,7 @@ class PolicyDialog extends React.Component<Props, State> {
                       name: policyDefinitionDetail?.name || '',
                       description: policyDefinitionDetail?.description || '',
                     }}
+                    onValidityChange={(valid: boolean) => this.setState({ propertiesValid: valid })}
                     ref={this.uiSchemaRef}
                     mode={'new'}
                   />
@@ -700,7 +749,7 @@ class PolicyDialog extends React.Component<Props, State> {
             </Loading>
           )}
         </Form>
-      </DrawerWithFooter>
+      </ModalWithFooter>
     );
   }
 }

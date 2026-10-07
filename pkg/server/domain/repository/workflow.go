@@ -25,7 +25,7 @@ import (
 
 	"github.com/kubevela/velaux/pkg/server/utils"
 
-	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -507,7 +507,7 @@ func createOverrideConfigForTerraformComponent(env *model.Env, target *model.Tar
 
 // GenEnvWorkflowStepsAndPolicies will generate workflow steps and policies for an env and application
 func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Client, ds datastore.DataStore, env *model.Env, app *model.Application) ([]model.WorkflowStep, []datastore.Entity) {
-	var workflowSteps []workflowv1alpha1.WorkflowStep
+	var workflowSteps []wfTypesv1alpha1.WorkflowStep
 	var policies []datastore.Entity
 	components, err := ds.List(ctx, &model.ApplicationComponent{AppPrimaryKey: app.PrimaryKey()}, nil)
 	if err != nil {
@@ -539,8 +539,8 @@ func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Clien
 		// gen workflow step and policies for all targets
 		for i := range targets {
 			target := targets[i].(*model.Target)
-			step := workflowv1alpha1.WorkflowStep{
-				WorkflowStepBase: workflowv1alpha1.WorkflowStepBase{
+			step := wfTypesv1alpha1.WorkflowStep{
+				WorkflowStepBase: wfTypesv1alpha1.WorkflowStepBase{
 					Name: target.Name + "-cloud-resource",
 					Type: DeployCloudResource,
 					Properties: util.Object2RawExtension(map[string]string{
@@ -569,8 +569,8 @@ func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Clien
 			if target.Cluster == nil {
 				continue
 			}
-			step := workflowv1alpha1.WorkflowStep{
-				WorkflowStepBase: workflowv1alpha1.WorkflowStepBase{
+			step := wfTypesv1alpha1.WorkflowStep{
+				WorkflowStepBase: wfTypesv1alpha1.WorkflowStepBase{
 					Name: target.Name,
 					Type: step.DeployWorkflowStep,
 					Properties: util.Object2RawExtension(map[string]interface{}{
@@ -608,9 +608,7 @@ func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Clien
 			klog.Errorf("workflow %s step %s properties is invalid %s", pkgUtils.Sanitize(app.Name), pkgUtils.Sanitize(step.Name), err.Error())
 			continue
 		}
-		targetName := strings.Replace(step.Name, "-cloud-resource", "", 1)
-		base.Alias = fmt.Sprintf("Deploy To %s", targetName)
-		base.Description = fmt.Sprintf("deploy app to delivery target %s", targetName)
+		base.Alias, base.Description = deployStepLabels(step.Name)
 		ws := model.WorkflowStep{
 			WorkflowStepBase: *base,
 			SubSteps:         make([]model.WorkflowStepBase, 0),
@@ -622,6 +620,13 @@ func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Clien
 }
 
 // UpdateWorkflowSteps will update workflow with new steps
+// deployStepLabels are the alias and description of a generated step deploying
+// to a target; a cloud-resource step is labelled after the target it serves.
+func deployStepLabels(stepName string) (alias, description string) {
+	targetName := strings.Replace(stepName, "-cloud-resource", "", 1)
+	return fmt.Sprintf("Deploy to %s", targetName), fmt.Sprintf("deploy app to delivery target %s", targetName)
+}
+
 func UpdateWorkflowSteps(ctx context.Context, ds datastore.DataStore, workflow *model.Workflow, steps []model.WorkflowStep) error {
 	workflow.Steps = steps
 	return ds.Put(ctx, workflow)
