@@ -1,7 +1,4 @@
 {
-	"schemes": [
-		"http"
-	],
 	"swagger": "2.0",
 	"info": {
 		"description": "Kubevela api doc",
@@ -17,7 +14,6 @@
 		},
 		"version": "v1beta1"
 	},
-	"host": "localhost:8000",
 	"paths": {
 		"/api/v1/addon_registries": {
 			"get": {
@@ -8595,12 +8591,6 @@
 						"in": "query"
 					},
 					{
-						"type": "string",
-						"description": "The publish version for deploying application.if no specified, {application name}-v{the number of times it was published} (e.g.: demo-app-v13) will be used. the workflow record will use this value as the record identifier, so please ensure that this value is not duplicated if you specify it, otherwise the request will report an error",
-						"name": "publishVersion",
-						"in": "query"
-					},
-					{
 						"name": "body",
 						"in": "body",
 						"required": true,
@@ -8627,7 +8617,7 @@
 				"tags": [
 					"oam_application"
 				],
-				"summary": "delete oam application in the specified namespace",
+				"summary": "create or update oam application in the specified namespace",
 				"operationId": "deleteOAMApplication",
 				"parameters": [
 					{
@@ -8758,6 +8748,9 @@
 				},
 				"runtimeCluster": {
 					"type": "boolean"
+				},
+				"runtime_cluster": {
+					"type": "boolean"
 				}
 			}
 		},
@@ -8767,6 +8760,9 @@
 					"type": "string"
 				},
 				"token": {
+					"type": "string"
+				},
+				"tokenSecretRef": {
 					"type": "string"
 				},
 				"url": {
@@ -8780,6 +8776,9 @@
 					"type": "string"
 				},
 				"token": {
+					"type": "string"
+				},
+				"tokenSecretRef": {
 					"type": "string"
 				},
 				"url": {
@@ -8798,6 +8797,9 @@
 				"token": {
 					"type": "string"
 				},
+				"tokenSecretRef": {
+					"type": "string"
+				},
 				"url": {
 					"type": "string"
 				}
@@ -8809,6 +8811,12 @@
 					"type": "boolean"
 				},
 				"password": {
+					"type": "string"
+				},
+				"token": {
+					"type": "string"
+				},
+				"tokenSecretRef": {
 					"type": "string"
 				},
 				"url": {
@@ -9108,6 +9116,15 @@
 		},
 		"common.AppStatus": {
 			"properties": {
+				"applicationPoliciesConfigMap": {
+					"type": "string"
+				},
+				"appliedApplicationPolicies": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.AppliedApplicationPolicy"
+					}
+				},
 				"appliedResources": {
 					"type": "array",
 					"items": {
@@ -9145,11 +9162,20 @@
 						"$ref": "#/definitions/common.ApplicationComponentStatus"
 					}
 				},
+				"sources": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.ApplicationSourceStatus"
+					}
+				},
 				"status": {
 					"type": "string"
 				},
 				"workflow": {
 					"$ref": "#/definitions/common.WorkflowStatus"
+				},
+				"workflowRestartScheduledAt": {
+					"type": "string"
 				}
 			}
 		},
@@ -9212,6 +9238,12 @@
 				"cluster": {
 					"type": "string"
 				},
+				"details": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
 				"env": {
 					"type": "string"
 				},
@@ -9241,6 +9273,43 @@
 				},
 				"workloadDefinition": {
 					"$ref": "#/definitions/common.WorkloadGVK"
+				},
+				"workloadHealthy": {
+					"type": "boolean"
+				}
+			}
+		},
+		"common.ApplicationSourceStatus": {
+			"required": [
+				"name"
+			],
+			"properties": {
+				"autoUpdate": {
+					"type": "boolean"
+				},
+				"consumedBy": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.SourceConsumer"
+					}
+				},
+				"message": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"phase": {
+					"type": "string"
+				},
+				"resolutions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.SourceResolution"
+					}
+				},
+				"type": {
+					"type": "string"
 				}
 			}
 		},
@@ -9263,11 +9332,74 @@
 				"healthy"
 			],
 			"properties": {
+				"details": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
 				"healthy": {
 					"type": "boolean"
 				},
 				"message": {
 					"type": "string"
+				},
+				"pending": {
+					"type": "boolean"
+				},
+				"type": {
+					"type": "string"
+				}
+			}
+		},
+		"common.AppliedApplicationPolicy": {
+			"required": [
+				"name",
+				"namespace",
+				"applied"
+			],
+			"properties": {
+				"annotationsCount": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"applied": {
+					"type": "boolean"
+				},
+				"definitionRevisionName": {
+					"type": "string"
+				},
+				"error": {
+					"type": "boolean"
+				},
+				"hasContext": {
+					"type": "boolean"
+				},
+				"labelsCount": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"message": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"revision": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"revisionHash": {
+					"type": "string"
+				},
+				"source": {
+					"type": "string"
+				},
+				"specModified": {
+					"type": "boolean"
 				},
 				"type": {
 					"type": "string"
@@ -9356,8 +9488,30 @@
 				}
 			}
 		},
+		"common.DefinitionRestrictions": {
+			"properties": {
+				"namespaceSelector": {
+					"$ref": "#/definitions/v1.LabelSelector"
+				},
+				"namespaces": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"quota": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.NamespaceQuota"
+					}
+				}
+			}
+		},
 		"common.HTTPOption": {
 			"properties": {
+				"bearerToken": {
+					"type": "string"
+				},
 				"caFile": {
 					"type": "string"
 				},
@@ -9373,8 +9527,32 @@
 				"password": {
 					"type": "string"
 				},
+				"plainHTTP": {
+					"type": "boolean"
+				},
 				"username": {
 					"type": "string"
+				}
+			}
+		},
+		"common.NamespaceQuota": {
+			"properties": {
+				"limit": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"namespaceSelector": {
+					"$ref": "#/definitions/v1.LabelSelector"
+				},
+				"namespaces": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"warn": {
+					"type": "integer",
+					"format": "int32"
 				}
 			}
 		},
@@ -9423,9 +9601,79 @@
 				}
 			}
 		},
+		"common.SourceConsumer": {
+			"required": [
+				"definitionKind",
+				"name"
+			],
+			"properties": {
+				"cluster": {
+					"type": "string"
+				},
+				"definitionKind": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"values": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.SourceValue"
+					}
+				}
+			}
+		},
+		"common.SourceResolution": {
+			"properties": {
+				"clusters": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"expiresAt": {
+					"type": "string"
+				},
+				"message": {
+					"type": "string"
+				},
+				"phase": {
+					"type": "string"
+				},
+				"storageKey": {
+					"type": "string"
+				}
+			}
+		},
+		"common.SourceValue": {
+			"required": [
+				"sourceAttr"
+			],
+			"properties": {
+				"property": {
+					"type": "string"
+				},
+				"sourceAttr": {
+					"type": "string"
+				},
+				"value": {
+					"type": "string"
+				}
+			}
+		},
 		"common.Status": {
 			"properties": {
 				"customStatus": {
+					"type": "string"
+				},
+				"details": {
 					"type": "string"
 				},
 				"healthPolicy": {
@@ -10152,12 +10400,12 @@
 		},
 		"model.WorkflowStep": {
 			"required": [
+				"type",
 				"description",
 				"orderIndex",
-				"type",
+				"name",
 				"alias",
-				"dependsOn",
-				"name"
+				"dependsOn"
 			],
 			"properties": {
 				"alias": {
@@ -11208,13 +11456,13 @@
 		},
 		"v1.ApplicationDeployResponse": {
 			"required": [
-				"workflowName",
 				"createTime",
+				"version",
+				"workflowName",
+				"status",
 				"note",
 				"envName",
 				"triggerType",
-				"version",
-				"status",
 				"record"
 			],
 			"properties": {
@@ -11395,6 +11643,59 @@
 				}
 			}
 		},
+		"v1.ApplicationStatus": {
+			"properties": {
+				"appliedResources": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.ClusterObjectReference"
+					}
+				},
+				"components": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.ObjectReference"
+					}
+				},
+				"conditions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/condition.Condition"
+					}
+				},
+				"dependencies": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.ComponentDependency"
+					}
+				},
+				"latestRevision": {
+					"$ref": "#/definitions/common.Revision"
+				},
+				"observedGeneration": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"policy": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.PolicyStatus"
+					}
+				},
+				"services": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.ApplicationComponentStatus"
+					}
+				},
+				"status": {
+					"type": "string"
+				},
+				"workflow": {
+					"$ref": "#/definitions/common.WorkflowStatus"
+				}
+			}
+		},
 		"v1.ApplicationStatusListResponse": {
 			"required": [
 				"status"
@@ -11418,7 +11719,7 @@
 					"type": "string"
 				},
 				"status": {
-					"$ref": "#/definitions/common.AppStatus"
+					"$ref": "#/definitions/v1.ApplicationStatus"
 				}
 			}
 		},
@@ -11801,6 +12102,30 @@
 				}
 			}
 		},
+		"v1.ComponentDependency": {
+			"required": [
+				"component",
+				"dependsOn",
+				"source"
+			],
+			"properties": {
+				"cluster": {
+					"type": "string"
+				},
+				"component": {
+					"type": "string"
+				},
+				"dependsOn": {
+					"type": "string"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"source": {
+					"type": "string"
+				}
+			}
+		},
 		"v1.ComponentListResponse": {
 			"required": [
 				"components"
@@ -12018,13 +12343,13 @@
 		},
 		"v1.ConfigTemplateDetail": {
 			"required": [
+				"name",
+				"namespace",
 				"description",
 				"scope",
 				"sensitive",
 				"createTime",
 				"alias",
-				"name",
-				"namespace",
 				"schema",
 				"uiSchema"
 			],
@@ -12806,6 +13131,9 @@
 					"$ref": "#/definitions/v1beta1.PolicyDefinitionSpec"
 				},
 				"status": {
+				"policyScope": {
+					"type": "string"
+				},
 					"type": "string"
 				},
 				"trait": {
@@ -12861,11 +13189,11 @@
 		},
 		"v1.DetailAddonResponse": {
 			"required": [
-				"name",
+				"icon",
 				"invisible",
+				"name",
 				"version",
 				"description",
-				"icon",
 				"schema",
 				"uiSchema",
 				"definitions",
@@ -12957,13 +13285,13 @@
 		},
 		"v1.DetailApplicationResponse": {
 			"required": [
+				"icon",
+				"name",
 				"updateTime",
-				"project",
 				"description",
 				"createTime",
-				"name",
 				"alias",
-				"icon",
+				"project",
 				"policies",
 				"envBindings",
 				"resourceInfo"
@@ -13026,20 +13354,20 @@
 		},
 		"v1.DetailClusterResponse": {
 			"required": [
-				"createTime",
-				"description",
-				"status",
-				"apiServerURL",
-				"kubeConfig",
 				"alias",
-				"icon",
-				"provider",
-				"updateTime",
-				"name",
-				"labels",
+				"status",
+				"kubeConfig",
+				"kubeConfigSecret",
 				"reason",
 				"dashboardURL",
-				"kubeConfigSecret",
+				"createTime",
+				"updateTime",
+				"description",
+				"icon",
+				"labels",
+				"name",
+				"provider",
+				"apiServerURL",
 				"resourceInfo"
 			],
 			"properties": {
@@ -13097,14 +13425,14 @@
 		},
 		"v1.DetailComponentResponse": {
 			"required": [
-				"createTime",
 				"updateTime",
 				"appPrimaryKey",
+				"alias",
+				"main",
+				"createTime",
 				"creator",
 				"name",
 				"type",
-				"alias",
-				"main",
 				"definition"
 			],
 			"properties": {
@@ -13192,13 +13520,13 @@
 		},
 		"v1.DetailDefinitionResponse": {
 			"required": [
-				"alias",
-				"icon",
-				"labels",
-				"category",
-				"description",
-				"status",
 				"ownerAddon",
+				"category",
+				"alias",
+				"description",
+				"icon",
+				"status",
+				"labels",
 				"name",
 				"schema",
 				"uiSchema"
@@ -13260,14 +13588,14 @@
 		"v1.DetailPolicyResponse": {
 			"required": [
 				"name",
-				"type",
-				"updateTime",
-				"alias",
 				"description",
+				"createTime",
+				"envName",
+				"alias",
+				"type",
 				"creator",
 				"properties",
-				"createTime",
-				"envName"
+				"updateTime"
 			],
 			"properties": {
 				"alias": {
@@ -13309,18 +13637,18 @@
 		},
 		"v1.DetailRevisionResponse": {
 			"required": [
-				"updateTime",
 				"appPrimaryKey",
-				"revisionCRName",
+				"reason",
+				"deployUser",
 				"envName",
-				"createTime",
 				"version",
 				"status",
-				"reason",
-				"note",
-				"triggerType",
 				"workflowName",
-				"deployUser"
+				"createTime",
+				"updateTime",
+				"note",
+				"revisionCRName",
+				"triggerType"
 			],
 			"properties": {
 				"appPrimaryKey": {
@@ -13377,10 +13705,10 @@
 		},
 		"v1.DetailTargetResponse": {
 			"required": [
-				"project",
 				"name",
+				"createTime",
 				"updateTime",
-				"createTime"
+				"project"
 			],
 			"properties": {
 				"alias": {
@@ -13420,11 +13748,11 @@
 		},
 		"v1.DetailUserResponse": {
 			"required": [
+				"disabled",
+				"createTime",
 				"lastLoginTime",
 				"name",
 				"email",
-				"disabled",
-				"createTime",
 				"projects",
 				"roles"
 			],
@@ -13465,14 +13793,14 @@
 		},
 		"v1.DetailWorkflowRecordResponse": {
 			"required": [
-				"message",
-				"name",
 				"applicationRevision",
-				"namespace",
 				"workflowAlias",
-				"status",
-				"mode",
+				"name",
+				"namespace",
 				"workflowName",
+				"mode",
+				"message",
+				"status",
 				"deployTime",
 				"deployUser",
 				"note",
@@ -13534,16 +13862,16 @@
 		},
 		"v1.DetailWorkflowResponse": {
 			"required": [
+				"name",
 				"enable",
 				"envName",
-				"createTime",
-				"subMode",
-				"name",
-				"description",
 				"updateTime",
-				"mode",
 				"alias",
-				"default"
+				"description",
+				"default",
+				"createTime",
+				"mode",
+				"subMode"
 			],
 			"properties": {
 				"alias": {
@@ -13778,12 +14106,12 @@
 		},
 		"v1.GetPipelineResponse": {
 			"required": [
+				"project",
 				"description",
 				"createTime",
-				"spec",
 				"name",
 				"alias",
-				"project",
+				"spec",
 				"info"
 			],
 			"properties": {
@@ -13826,10 +14154,10 @@
 		},
 		"v1.GetPipelineRunLogResponse": {
 			"required": [
-				"phase",
 				"id",
 				"name",
 				"type",
+				"phase",
 				"source",
 				"log"
 			],
@@ -14062,6 +14390,49 @@
 				},
 				"url": {
 					"type": "string"
+				}
+			}
+		},
+		"v1.LabelSelector": {
+			"description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.",
+			"properties": {
+				"matchExpressions": {
+					"description": "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.LabelSelectorRequirement"
+					}
+				},
+				"matchLabels": {
+					"description": "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				}
+			}
+		},
+		"v1.LabelSelectorRequirement": {
+			"description": "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+			"required": [
+				"key",
+				"operator"
+			],
+			"properties": {
+				"key": {
+					"description": "key is the label key that the selector applies to.",
+					"type": "string"
+				},
+				"operator": {
+					"description": "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
+					"type": "string"
+				},
+				"values": {
+					"description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				}
 			}
 		},
@@ -14546,11 +14917,11 @@
 		},
 		"v1.LoginUserInfoResponse": {
 			"required": [
+				"createTime",
 				"lastLoginTime",
 				"name",
 				"email",
 				"disabled",
-				"createTime",
 				"projects",
 				"platformPermissions",
 				"projectPermissions"
@@ -14602,16 +14973,16 @@
 		"v1.ManagedPluginDTO": {
 			"required": [
 				"subType",
-				"info",
-				"includes",
-				"backendService",
-				"backend",
-				"type",
 				"category",
-				"backendType",
-				"id",
+				"type",
 				"name",
+				"includes",
 				"proxy",
+				"id",
+				"backend",
+				"backendType",
+				"info",
+				"backendService",
 				"class",
 				"defaultNavURL",
 				"module",
@@ -14860,11 +15231,11 @@
 		},
 		"v1.PipelineBase": {
 			"required": [
-				"name",
-				"alias",
 				"project",
 				"description",
 				"createTime",
+				"name",
+				"alias",
 				"spec"
 			],
 			"properties": {
@@ -14905,11 +15276,11 @@
 		},
 		"v1.PipelineListItem": {
 			"required": [
+				"description",
 				"createTime",
 				"name",
 				"alias",
 				"project",
-				"description",
 				"info"
 			],
 			"properties": {
@@ -14963,11 +15334,11 @@
 		},
 		"v1.PipelineMetaResponse": {
 			"required": [
+				"name",
 				"alias",
 				"project",
 				"description",
-				"createTime",
-				"name"
+				"createTime"
 			],
 			"properties": {
 				"alias": {
@@ -14990,13 +15361,13 @@
 		},
 		"v1.PipelineRun": {
 			"required": [
-				"contextValues",
-				"spec",
 				"project",
 				"pipelineRunName",
-				"pipelineName",
 				"record",
 				"contextName",
+				"contextValues",
+				"spec",
+				"pipelineName",
 				"status"
 			],
 			"properties": {
@@ -15032,9 +15403,9 @@
 		},
 		"v1.PipelineRunBase": {
 			"required": [
+				"pipelineName",
 				"project",
 				"pipelineRunName",
-				"pipelineName",
 				"record",
 				"contextName",
 				"contextValues",
@@ -15587,10 +15958,10 @@
 		},
 		"v1.StepInputBase": {
 			"required": [
-				"id",
-				"name",
 				"type",
 				"phase",
+				"id",
+				"name",
 				"values"
 			],
 			"properties": {
@@ -16267,14 +16638,14 @@
 		},
 		"v1.WorkflowRecord": {
 			"required": [
-				"message",
-				"name",
-				"workflowAlias",
-				"applicationRevision",
 				"status",
 				"mode",
-				"namespace",
-				"workflowName"
+				"workflowName",
+				"applicationRevision",
+				"workflowAlias",
+				"message",
+				"name",
+				"namespace"
 			],
 			"properties": {
 				"applicationRevision": {
@@ -16774,6 +17145,42 @@
 				}
 			}
 		},
+		"v1beta1.ApplicationSource": {
+			"required": [
+				"name",
+				"type"
+			],
+			"properties": {
+				"autoUpdate": {
+					"type": "boolean"
+				},
+				"name": {
+					"type": "string"
+				},
+				"properties": {
+					"type": "string"
+				},
+				"statusPolicy": {
+					"$ref": "#/definitions/v1beta1.ApplicationSourceStatusPolicy"
+				},
+				"type": {
+					"type": "string"
+				}
+			}
+		},
+		"v1beta1.ApplicationSourceStatusPolicy": {
+			"properties": {
+				"exposeConsumedValues": {
+					"type": "boolean"
+				},
+				"maskPaths": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			}
+		},
 		"v1beta1.ApplicationSpec": {
 			"required": [
 				"components"
@@ -16791,6 +17198,12 @@
 						"$ref": "#/definitions/v1beta1.AppPolicy"
 					}
 				},
+				"sources": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1beta1.ApplicationSource"
+					}
+				},
 				"workflow": {
 					"$ref": "#/definitions/v1beta1.Workflow"
 				}
@@ -16801,17 +17214,26 @@
 				"workload"
 			],
 			"properties": {
+				"abstract": {
+					"type": "boolean"
+				},
 				"childResourceKinds": {
 					"type": "array",
 					"items": {
 						"$ref": "#/definitions/common.ChildResourceKind"
 					}
 				},
+				"extends": {
+					"type": "string"
+				},
 				"extension": {
 					"type": "string"
 				},
 				"podSpecPath": {
 					"type": "string"
+				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
 				},
 				"revisionLabel": {
 					"type": "string"
@@ -16821,6 +17243,9 @@
 				},
 				"status": {
 					"$ref": "#/definitions/common.Status"
+				},
+				"version": {
+					"type": "string"
 				},
 				"workload": {
 					"$ref": "#/definitions/common.WorkloadTypeDescriptor"
@@ -16832,16 +17257,35 @@
 				"definitionRef": {
 					"$ref": "#/definitions/common.DefinitionReference"
 				},
+				"global": {
+					"type": "boolean"
+				},
 				"manageHealthCheck": {
 					"type": "boolean"
 				},
+				"priority": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
+				},
 				"schematic": {
 					"$ref": "#/definitions/common.Schematic"
+				},
+				"scope": {
+					"type": "string"
+				},
+				"version": {
+					"type": "string"
 				}
 			}
 		},
 		"v1beta1.TraitDefinitionSpec": {
 			"properties": {
+				"abstract": {
+					"type": "boolean"
+				},
 				"appliesToWorkloads": {
 					"type": "array",
 					"items": {
@@ -16860,6 +17304,9 @@
 				"definitionRef": {
 					"$ref": "#/definitions/common.DefinitionReference"
 				},
+				"extends": {
+					"type": "string"
+				},
 				"extension": {
 					"type": "string"
 				},
@@ -16868,6 +17315,9 @@
 				},
 				"podDisruptive": {
 					"type": "boolean"
+				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
 				},
 				"revisionEnabled": {
 					"type": "boolean"
@@ -16880,6 +17330,9 @@
 				},
 				"status": {
 					"$ref": "#/definitions/common.Status"
+				},
+				"version": {
+					"type": "string"
 				},
 				"workloadRefPath": {
 					"type": "string"
@@ -16907,8 +17360,14 @@
 				"definitionRef": {
 					"$ref": "#/definitions/common.DefinitionReference"
 				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
+				},
 				"schematic": {
 					"$ref": "#/definitions/common.Schematic"
+				},
+				"version": {
+					"type": "string"
 				}
 			}
 		}

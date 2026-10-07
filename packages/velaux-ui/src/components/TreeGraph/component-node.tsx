@@ -6,11 +6,13 @@ import React, { useState } from 'react';
 import { Translation } from '../Translation';
 
 import type { GraphNode, GraphEdge, TraitGraphNode, Line } from './interface';
-import { describeComponents, getGraphSize, ResourceIcon } from './utils';
+import { componentSections, componentSummary, getGraphSize, ResourceIcon } from './utils';
 
 import './component-node.less';
 import type { TraitStatus } from '@velaux/data';
 import { If } from '../If';
+import { detailEntries, traitState, traitStateCircle } from '../../utils/status';
+import { StatusTooltip, statusTooltipPopupClass } from '../StatusTooltip';
 
 export interface ComponentNodeProps {
   node: GraphNode;
@@ -101,24 +103,23 @@ function renderTraitTree(traits: TraitStatus[]) {
           >
             <div className={classNames('trait')}>
               <div>
-                <span
-                  className={classNames('circle', {
-                    'circle-success': trait.healthy,
-                    'circle-failure': !trait.healthy,
-                  })}
-                />
+                <span className={classNames('circle', traitStateCircle[traitState(trait)])} />
                 {label}
               </div>
             </div>
           </div>
         );
 
-        if (trait.message) {
+        if (trait.message || detailEntries(trait.details).length > 0) {
           return (
-            <Balloon trigger={traitNode}>
-              <div>
-                <p className="line">{`Message: ${trait.message}`}</p>
-              </div>
+            <Balloon trigger={traitNode} closable={false} popupClassName={statusTooltipPopupClass}>
+              <StatusTooltip
+                title={trait.type}
+                healthy={trait.healthy}
+                pending={trait.pending}
+                message={trait.message}
+                details={trait.details}
+              />
             </Balloon>
           );
         }
@@ -156,12 +157,15 @@ export const ComponentNode = (props: ComponentNodeProps) => {
   const [showTrait, setShowTrait] = useState(props.showTrait);
   const WithBalloon = (graphNode: React.ReactNode) => {
     return (
-      <Balloon trigger={graphNode}>
-        <div>
-          {describeComponents(node).map((line: any) => {
-            return <p className="line">{line}</p>;
-          })}
-        </div>
+      <Balloon trigger={graphNode} closable={false} popupClassName={statusTooltipPopupClass}>
+        <StatusTooltip
+          title={node.resource.component?.componentType || node.resource.name}
+          healthy={node.resource.service?.healthy}
+          summary={componentSummary(node)}
+          message={node.resource.service?.message}
+          sections={componentSections(node)}
+          details={node.resource.service?.details}
+        />
       </Balloon>
     );
   };
@@ -202,14 +206,9 @@ export const ComponentNode = (props: ComponentNodeProps) => {
 
       <If condition={traits.length > 0}>
         <div className={classNames('label-traits')}>
-          {traits && traits.length > 0 && traits[0] && (                                                                                                                                                                                                                                                                                                                                                                                        
+          {traits && traits.length > 0 && traits[0] && (
             <Tag animation={true}>
-              <span
-                className={classNames('circle', {
-                  'circle-success': traits[0].healthy,
-                  'circle-failure': !traits[0].healthy,
-                })}
-              />
+              <span className={classNames('circle', traitStateCircle[traitState(traits[0])])} />
               {traits[0].type}
             </Tag>
           )}

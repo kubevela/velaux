@@ -1,4 +1,5 @@
-import { Table, Button, Message } from '@alifd/next';
+import { Table, Button, Message, Tag, Balloon } from '@alifd/next';
+import i18n from 'i18next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
@@ -7,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { getDefinitionsList, updateDefinitionStatus } from '../../api/definitions';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { DefinitionBase , LoginUserInfo } from '@velaux/data';
+import type { DefinitionBase, LoginUserInfo } from '@velaux/data';
 
 // import { momentDate } from '../../utils/common';
 
@@ -15,6 +16,7 @@ import { locale } from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
 
 import SelectSearch from './components/SelectSearch';
+import { PolicyScopeTag } from '../../components/PolicyScopeTag';
 
 import './index.less';
 import { checkPermission } from '../../utils/permission';
@@ -166,8 +168,31 @@ class Definitions extends Component<Props, State> {
         key: 'name',
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
-        cell: (v: string) => {
-          return <Link to={`/definitions/${definitionType}/${v}/ui-schema`}>{v}</Link>;
+        cell: (v: string, i: number, record: DefinitionBase) => {
+          const link = <Link to={`/definitions/${definitionType}/${v}/ui-schema`}>{v}</Link>;
+          if (!record.policyScope) {
+            return link;
+          }
+          return (
+            <span className="definition-name">
+              {link}
+              <PolicyScopeTag scope={record.policyScope} />
+              {record.policy?.global && (
+                // A global policy applies to every Application in its namespace, in priority order.
+                <Balloon.Tooltip
+                  align="t"
+                  trigger={
+                    <Tag size="small" className="definition-tag-help">
+                      <Translation>Global</Translation>
+                    </Tag>
+                  }
+                >
+                  {i18n.t('Applied to every Application in its namespace')} ({i18n.t('priority')}{' '}
+                  {record.policy.priority || 0})
+                </Balloon.Tooltip>
+              )}
+            </span>
+          );
         },
       },
       {

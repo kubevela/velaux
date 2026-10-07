@@ -26,6 +26,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	registryv1 "github.com/google/go-containerregistry/pkg/v1"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	"helm.sh/helm/v3/pkg/repo"
 	corev1 "k8s.io/api/core/v1"
@@ -476,8 +477,30 @@ type AppDryRunResponse struct {
 
 // ApplicationStatusResponse application env status response body
 type ApplicationStatusResponse struct {
-	EnvName string            `json:"envName"`
-	Status  *common.AppStatus `json:"status"`
+	EnvName string             `json:"envName"`
+	Status  *ApplicationStatus `json:"status"`
+}
+
+// ApplicationStatus is an Application's status as KubeVela reports it. Fields
+// the KubeVela types VelaUX builds against do not carry yet sit beside them.
+type ApplicationStatus struct {
+	common.AppStatus `json:",inline"`
+	// Dependencies is what each component depends on: the components named in
+	// its dependsOn, those whose outputs its inputs read, and those its property
+	// expressions read.
+	Dependencies []ComponentDependency `json:"dependencies,omitempty"`
+}
+
+// ComponentDependency is one component another depends on, as the
+// Application's status.dependencies reports it. Source is where it is declared:
+// dependsOn, inputs or expression. Cluster and Namespace are set when an
+// expression reads the component at a placement it names.
+type ComponentDependency struct {
+	Component string `json:"component"`
+	DependsOn string `json:"dependsOn"`
+	Source    string `json:"source"`
+	Cluster   string `json:"cluster,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // ApplicationStatusListResponse the all env status of an application
@@ -742,8 +765,8 @@ type ComponentBase struct {
 	Creator       string                        `json:"creator,omitempty"`
 	CreateTime    time.Time                     `json:"createTime"`
 	UpdateTime    time.Time                     `json:"updateTime"`
-	Inputs        workflowv1alpha1.StepInputs   `json:"inputs,omitempty"`
-	Outputs       workflowv1alpha1.StepOutputs  `json:"outputs,omitempty"`
+	Inputs        wfTypesv1alpha1.StepInputs    `json:"inputs,omitempty"`
+	Outputs       wfTypesv1alpha1.StepOutputs   `json:"outputs,omitempty"`
 	Traits        []*ApplicationTrait           `json:"traits"`
 	WorkloadType  common.WorkloadTypeDescriptor `json:"workloadType,omitempty"`
 }
@@ -763,8 +786,8 @@ type CreateComponentRequest struct {
 	ComponentType string                           `json:"componentType" validate:"checkname"`
 	Properties    string                           `json:"properties,omitempty"`
 	DependsOn     []string                         `json:"dependsOn" optional:"true"`
-	Inputs        workflowv1alpha1.StepInputs      `json:"inputs,omitempty" optional:"true"`
-	Outputs       workflowv1alpha1.StepOutputs     `json:"outputs,omitempty" optional:"true"`
+	Inputs        wfTypesv1alpha1.StepInputs       `json:"inputs,omitempty" optional:"true"`
+	Outputs       wfTypesv1alpha1.StepOutputs      `json:"outputs,omitempty" optional:"true"`
 	Traits        []*CreateApplicationTraitRequest `json:"traits,omitempty" optional:"true"`
 }
 
@@ -948,6 +971,10 @@ type DefinitionBase struct {
 	Component    *v1beta1.ComponentDefinitionSpec    `json:"component,omitempty"`
 	Policy       *v1beta1.PolicyDefinitionSpec       `json:"policy,omitempty"`
 	WorkflowStep *v1beta1.WorkflowStepDefinitionSpec `json:"workflowStep,omitempty"`
+	// PolicyScope is how KubeVela applies a policy: Builtin, consumed by
+	// KubeVela itself; Workload, rendered with the Application's components; or
+	// Application, applied to the Application as a whole before it renders.
+	PolicyScope string `json:"policyScope,omitempty"`
 }
 
 // CreatePolicyRequest create app policy
@@ -1055,17 +1082,17 @@ type WorkflowStep struct {
 // WorkflowStepBase is the step base of workflow
 type WorkflowStepBase struct {
 	// Name is the unique name of the workflow step.
-	Name        string                             `json:"name" validate:"checkname"`
-	Alias       string                             `json:"alias" validate:"checkalias" optional:"true"`
-	Type        string                             `json:"type" validate:"checkname"`
-	Description string                             `json:"description" optional:"true"`
-	DependsOn   []string                           `json:"dependsOn" optional:"true"`
-	Properties  Properties                         `json:"properties,omitempty"`
-	Meta        *workflowv1alpha1.WorkflowStepMeta `json:"meta,omitempty" optional:"true"`
-	If          string                             `json:"if,omitempty" optional:"true"`
-	Timeout     string                             `json:"timeout,omitempty" optional:"true"`
-	Inputs      workflowv1alpha1.StepInputs        `json:"inputs,omitempty" optional:"true"`
-	Outputs     workflowv1alpha1.StepOutputs       `json:"outputs,omitempty" optional:"true"`
+	Name        string                            `json:"name" validate:"checkname"`
+	Alias       string                            `json:"alias" validate:"checkalias" optional:"true"`
+	Type        string                            `json:"type" validate:"checkname"`
+	Description string                            `json:"description" optional:"true"`
+	DependsOn   []string                          `json:"dependsOn" optional:"true"`
+	Properties  Properties                        `json:"properties,omitempty"`
+	Meta        *wfTypesv1alpha1.WorkflowStepMeta `json:"meta,omitempty" optional:"true"`
+	If          string                            `json:"if,omitempty" optional:"true"`
+	Timeout     string                            `json:"timeout,omitempty" optional:"true"`
+	Inputs      wfTypesv1alpha1.StepInputs        `json:"inputs,omitempty" optional:"true"`
+	Outputs     wfTypesv1alpha1.StepOutputs       `json:"outputs,omitempty" optional:"true"`
 }
 
 // Properties unmarshal object or string
@@ -1784,8 +1811,8 @@ type PipelineRunBase struct {
 type RunPipelineRequest struct {
 	// Mode is the mode of the pipeline run. Available values are: "StepByStep", "DAG" for both `step` and `subStep`
 	// default: "StepByStep" for `step`, "DAG" for `subStep`
-	Mode        workflowv1alpha1.WorkflowExecuteMode `json:"mode" optional:"true"`
-	ContextName string                               `json:"contextName"`
+	Mode        wfTypesv1alpha1.WorkflowExecuteMode `json:"mode" optional:"true"`
+	ContextName string                              `json:"contextName"`
 }
 
 // ListPipelineRunResponse is the response body of listing pipeline run

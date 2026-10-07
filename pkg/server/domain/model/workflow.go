@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 )
 
@@ -41,35 +42,35 @@ type Workflow struct {
 	Alias       string `json:"alias"`
 	Description string `json:"description"`
 	// Workflow used by the default
-	Default       *bool                                `json:"default"`
-	AppPrimaryKey string                               `json:"appPrimaryKey" gorm:"primaryKey"`
-	EnvName       string                               `json:"envName"`
-	Mode          workflowv1alpha1.WorkflowExecuteMode `json:"mode,omitempty" gorm:"serializer:json"`
-	Steps         []WorkflowStep                       `json:"steps,omitempty" gorm:"serializer:json"`
+	Default       *bool                               `json:"default"`
+	AppPrimaryKey string                              `json:"appPrimaryKey" gorm:"primaryKey"`
+	EnvName       string                              `json:"envName"`
+	Mode          wfTypesv1alpha1.WorkflowExecuteMode `json:"mode,omitempty" gorm:"serializer:json"`
+	Steps         []WorkflowStep                      `json:"steps,omitempty" gorm:"serializer:json"`
 }
 
 // WorkflowStep defines how to execute a workflow step.
 type WorkflowStep struct {
 	WorkflowStepBase `json:",inline" bson:",inline"`
-	Mode             workflowv1alpha1.WorkflowMode `json:"mode,omitempty"`
-	SubSteps         []WorkflowStepBase            `json:"subSteps,omitempty"`
+	Mode             wfTypesv1alpha1.WorkflowMode `json:"mode,omitempty"`
+	SubSteps         []WorkflowStepBase           `json:"subSteps,omitempty"`
 }
 
 // WorkflowStepBase is the step base of workflow
 type WorkflowStepBase struct {
 	// Name is the unique name of the workflow step.
-	Name        string                             `json:"name"`
-	Alias       string                             `json:"alias"`
-	Type        string                             `json:"type"`
-	Description string                             `json:"description"`
-	OrderIndex  int                                `json:"orderIndex"`
-	Inputs      workflowv1alpha1.StepInputs        `json:"inputs,omitempty"`
-	Outputs     workflowv1alpha1.StepOutputs       `json:"outputs,omitempty"`
-	DependsOn   []string                           `json:"dependsOn"`
-	Properties  *JSONStruct                        `json:"properties,omitempty"`
-	Meta        *workflowv1alpha1.WorkflowStepMeta `json:"meta,omitempty"`
-	If          string                             `json:"if,omitempty"`
-	Timeout     string                             `json:"timeout,omitempty"`
+	Name        string                            `json:"name"`
+	Alias       string                            `json:"alias"`
+	Type        string                            `json:"type"`
+	Description string                            `json:"description"`
+	OrderIndex  int                               `json:"orderIndex"`
+	Inputs      wfTypesv1alpha1.StepInputs        `json:"inputs,omitempty"`
+	Outputs     wfTypesv1alpha1.StepOutputs       `json:"outputs,omitempty"`
+	DependsOn   []string                          `json:"dependsOn"`
+	Properties  *JSONStruct                       `json:"properties,omitempty"`
+	Meta        *wfTypesv1alpha1.WorkflowStepMeta `json:"meta,omitempty"`
+	If          string                            `json:"if,omitempty"`
+	Timeout     string                            `json:"timeout,omitempty"`
 }
 
 // TableName return custom table name

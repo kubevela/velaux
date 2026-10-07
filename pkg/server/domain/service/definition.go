@@ -25,6 +25,7 @@ import (
 
 	"github.com/kubevela/pkg/util/stringtools"
 
+	"github.com/oam-dev/kubevela/pkg/appfile"
 	"github.com/oam-dev/kubevela/pkg/utils/addon"
 	"github.com/oam-dev/kubevela/pkg/utils/filters"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
@@ -46,6 +47,13 @@ import (
 
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
+)
+
+// The scopes policyScope names.
+const (
+	policyScopeBuiltin     = "Builtin"
+	policyScopeApplication = "Application"
+	policyScopeWorkload    = "Workload"
 )
 
 // DefinitionService definition service, Implement the management of ComponentDefinition、TraitDefinition and WorkflowStepDefinition.
@@ -161,6 +169,11 @@ func (d *definitionServiceImpl) listDefinitions(ctx context.Context, list *unstr
 			klog.Errorf("convert definition to base failure %s", err.Error())
 			continue
 		}
+		// A global policy applies itself, and KubeVela fails an Application that
+		// names one, so it is listed only for those asking for every definition.
+		if definition.Policy != nil && definition.Policy.Global && !ops.QueryAll {
+			continue
+		}
 		defs = append(defs, definition)
 	}
 	return defs, nil
@@ -239,6 +252,7 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 			return nil, errors.Wrap(err, "invalid trait definition")
 		}
 		definition.Policy = &policyDef.Spec
+		definition.PolicyScope = policyScope(def.GetName(), policyDef.Spec.Scope)
 	}
 	return definition, nil
 }
@@ -488,7 +502,7 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	subType := ""
 	if property.Value.Items != nil {
 		if property.Value.Items.Value != nil {
-			subType = (*property.Value.Items.Value.Type)[0]
+			subType = schemaType(property.Value.Items.Value)
 		}
 		parameter.SubParameters = renderDefaultUISchema(property.Value.Items.Value)
 	}
@@ -511,7 +525,7 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	parameter.JSONKey = key
 	parameter.Description = property.Value.Description
 	parameter.Label = label
-	parameter.UIType = schema.GetDefaultUIType((*property.Value.Type)[0], len(parameter.Validate.Options) != 0, subType, len(property.Value.Properties) > 0)
+	parameter.UIType = schema.GetDefaultUIType(schemaType(property.Value), len(parameter.Validate.Options) != 0, subType, len(property.Value.Properties) > 0)
 	parameter.Validate.Max = property.Value.Max
 	parameter.Validate.MaxLength = property.Value.MaxLength
 	parameter.Validate.Min = property.Value.Min
@@ -520,6 +534,15 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	parameter.Validate.Required = slices.Contains(required, property.Value.Title)
 	parameter.Sort = 100
 	return &parameter
+}
+
+// schemaType is a schema's first type, or empty for one that sets none, as CUE
+// emits for an open value such as `{...}` or `[string]: _`.
+func schemaType(s *openapi3.Schema) string {
+	if s.Type == nil || len(*s.Type) == 0 {
+		return ""
+	}
+	return (*s.Type)[0]
 }
 
 // RenderLabel render option label
@@ -531,5 +554,17 @@ func RenderLabel(source interface{}) string {
 		return stringtools.Capitalize(v)
 	default:
 		return stringtools.Capitalize(fmt.Sprintf("%v", v))
+	}
+}
+
+// policyScope classifies a policy as KubeVela does, for its policy's type.
+func policyScope(policyType string, scope v1beta1.PolicyScope) string {
+	switch {
+	case appfile.IsBuiltinPolicyType(policyType):
+		return policyScopeBuiltin
+	case scope == v1beta1.ApplicationScope:
+		return policyScopeApplication
+	default:
+		return policyScopeWorkload
 	}
 }
