@@ -1,5 +1,7 @@
 import { Table, Button, Dialog, Message, Tag, Balloon } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
+import { RowAction } from '../../../../components/RowAction';
+import { AiOutlineDelete, AiOutlineSend } from 'react-icons/ai';
 
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
@@ -100,12 +102,18 @@ class Configs extends Component<Props, State> {
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
         cell: (v: string, i: number, config: Config) => {
-          const title = `${v}(${config.alias || '-'})`;
+          const title = v;
           if (config.sensitive || config.shared) {
             return <span>{title}</span>;
           }
           return <a onClick={() => this.onClick(config)}>{title}</a>;
         },
+      },
+      {
+        key: 'alias',
+        title: <Translation>Alias</Translation>,
+        dataIndex: 'alias',
+        cell: (v: string) => v || '',
       },
       {
         key: 'template',
@@ -162,36 +170,33 @@ class Configs extends Component<Props, State> {
                   }}
                   project={projectName}
                 >
-                  <Button
-                    text
-                    size={'medium'}
-                    component={'a'}
+                  <RowAction
+                    icon={<AiOutlineDelete />}
+                    label="Delete"
+                    danger
                     onClick={() => {
                       this.onDelete(record);
                     }}
-                  >
-                    <Translation>Delete</Translation>
-                  </Button>
+                  />
                 </Permission>
               </If>
-              <Permission
-                request={{
-                  resource: `project:${projectName}/config:${record.name}`,
-                  action: 'distribute',
-                }}
-                project={projectName}
-              >
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
-                  onClick={() => {
-                    this.onDistribute(record);
+              <If condition={record.legacy}>
+                <Permission
+                  request={{
+                    resource: `project:${projectName}/config:${record.name}`,
+                    action: 'distribute',
                   }}
+                  project={projectName}
                 >
-                  <Translation>Distribute</Translation>
-                </Button>
-              </Permission>
+                  <RowAction
+                    icon={<AiOutlineSend />}
+                    label="Distribute"
+                    onClick={() => {
+                      this.onDistribute(record);
+                    }}
+                  />
+                </Permission>
+              </If>
             </Fragment>
           );
         },

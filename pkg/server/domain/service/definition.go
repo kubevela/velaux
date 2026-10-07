@@ -25,6 +25,8 @@ import (
 
 	"github.com/kubevela/pkg/util/stringtools"
 
+	"github.com/oam-dev/kubevela/pkg/appfile"
+	"github.com/oam-dev/kubevela/pkg/definition/nsrestrict"
 	"github.com/oam-dev/kubevela/pkg/utils/addon"
 	"github.com/oam-dev/kubevela/pkg/utils/filters"
 	"github.com/oam-dev/kubevela/pkg/utils/schema"
@@ -41,11 +43,19 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kubevela/pkg/util/slices"
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
+)
+
+// The scopes policyScope names.
+const (
+	policyScopeBuiltin     = "Builtin"
+	policyScopeApplication = "Application"
+	policyScopeWorkload    = "Workload"
 )
 
 // DefinitionService definition service, Implement the management of ComponentDefinition、TraitDefinition and WorkflowStepDefinition.
@@ -54,6 +64,8 @@ type DefinitionService interface {
 	ListDefinitions(ctx context.Context, ops DefinitionQueryOption) ([]*apisv1.DefinitionBase, error)
 	// DetailDefinition get definition detail
 	DetailDefinition(ctx context.Context, name, defType string) (*apisv1.DetailDefinitionResponse, error)
+	// DefinitionUsage reports each namespace's use of a component or trait definition against its quota
+	DefinitionUsage(ctx context.Context, name, defType string) (*apisv1.DefinitionUsageResponse, error)
 	// AddDefinitionUISchema add or update custom definition ui schema
 	AddDefinitionUISchema(ctx context.Context, name, defType string, schema []*schema.UIParameter) ([]*schema.UIParameter, error)
 	// UpdateDefinitionStatus update the status of definition
@@ -65,6 +77,8 @@ const DefinitionHidden = "true"
 
 type definitionServiceImpl struct {
 	KubeClient client.Client `inject:"kubeClient"`
+	// ServerKubeClient reads with VelaUX's own identity, not the user's.
+	ServerKubeClient client.Client `inject:"serverKubeClient"`
 }
 
 // DefinitionQueryOption define a set of query options
@@ -74,11 +88,13 @@ type DefinitionQueryOption struct {
 	OwnerAddon       string `json:"sourceAddon"`
 	QueryAll         bool   `json:"queryAll"`
 	Scope            string `json:"scope"`
+	// Namespaces are the namespaces to report each definition's usability in.
+	Namespaces []string `json:"namespaces"`
 }
 
 // String return cache key string
 func (d DefinitionQueryOption) String() string {
-	return fmt.Sprintf("type:%s/appliedWorkloads:%s/ownerAddon:%s/queryAll:%v", d.Type, d.AppliedWorkloads, d.OwnerAddon, d.QueryAll)
+	return fmt.Sprintf("type:%s/appliedWorkloads:%s/ownerAddon:%s/queryAll:%v/namespaces:%s", d.Type, d.AppliedWorkloads, d.OwnerAddon, d.QueryAll, strings.Join(d.Namespaces, ","))
 }
 
 const (
@@ -87,6 +103,7 @@ const (
 	kindTraitDefinition        = "TraitDefinition"
 	kindWorkflowStepDefinition = "WorkflowStepDefinition"
 	kindPolicyDefinition       = "PolicyDefinition"
+	kindSourceDefinition       = "SourceDefinition"
 
 	// LabelDefinitionScope is the label key for definition scope, with this key, we know if the definition is for Application or WorkflowRun
 	LabelDefinitionScope = "custom.definition.oam.dev/scope"
@@ -161,9 +178,61 @@ func (d *definitionServiceImpl) listDefinitions(ctx context.Context, list *unstr
 			klog.Errorf("convert definition to base failure %s", err.Error())
 			continue
 		}
+		// A global policy applies itself, and KubeVela fails an Application that
+		// names one, so it is listed only for those asking for every definition.
+		if definition.Policy != nil && definition.Policy.Global && !ops.QueryAll {
+			continue
+		}
+		// KubeVela refuses an Application that names an abstract definition, so it
+		// is listed only for those asking for every definition, as a hidden one is.
+		if definition.Abstract && !ops.QueryAll {
+			continue
+		}
 		defs = append(defs, definition)
 	}
+	if len(ops.Namespaces) > 0 {
+		markUnusableIn(ctx, d.ServerKubeClient, defs, ops.Namespaces)
+	}
 	return defs, nil
+}
+
+// matchesNamespaceName reports whether one of the restrictions' names or globs
+// admits ns, which settles it without the Namespace's labels.
+func matchesNamespaceName(r *common.DefinitionRestrictions, ns string) bool {
+	return len(r.Namespaces) > 0 && nsrestrict.Allows(&common.DefinitionRestrictions{Namespaces: r.Namespaces}, ns, nil)
+}
+
+// markUnusableIn records, on each definition, which of the namespaces its
+// restrictions keep from using it, matched as the Application webhook matches
+// them. A Namespace's labels are read only when a selector needs them, once
+// each, with VelaUX's own identity: the webhook reads them with its own, so
+// what the user may read must not change the answer. A namespace that cannot
+// be read satisfies no selector, as in the webhook.
+func markUnusableIn(ctx context.Context, reader client.Reader, defs []*apisv1.DefinitionBase, namespaces []string) {
+	labels := map[string]map[string]string{}
+	labelsOf := func(name string) map[string]string {
+		if l, read := labels[name]; read {
+			return l
+		}
+		var ns v1.Namespace
+		if err := reader.Get(ctx, client.ObjectKey{Name: name}, &ns); err != nil {
+			klog.V(4).Infof("cannot read namespace %s to match definition restrictions: %v", name, err)
+		}
+		labels[name] = ns.Labels
+		return ns.Labels
+	}
+	for _, def := range defs {
+		r := def.Restrictions
+		for _, ns := range namespaces {
+			var nsLabels map[string]string
+			if r != nil && r.NamespaceSelector != nil && !matchesNamespaceName(r, ns) {
+				nsLabels = labelsOf(ns)
+			}
+			if !nsrestrict.Allows(r, ns, nsLabels) {
+				def.UnusableIn = append(def.UnusableIn, ns)
+			}
+		}
+	}
 }
 
 func getKindAndVersion(defType string) (apiVersion, kind string, err error) {
@@ -179,6 +248,9 @@ func getKindAndVersion(defType string) (apiVersion, kind string, err error) {
 
 	case "policy":
 		return definitionAPIVersion, kindPolicyDefinition, nil
+
+	case "source":
+		return definitionAPIVersion, kindSourceDefinition, nil
 
 	default:
 		return "", "", bcode.ErrDefinitionTypeNotSupport
@@ -202,7 +274,11 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 			}
 			return "enable"
 		}(),
+		Restrictions: nsrestrict.OfUnstructured(def),
 	}
+	// Read from the object, not the typed spec: older KubeVela types predate them.
+	definition.Abstract, _, _ = unstructured.NestedBool(def.Object, "spec", "abstract")
+	definition.Extends, _, _ = unstructured.NestedString(def.Object, "spec", "extends")
 	// Set OwnerAddon field
 	for _, ownerRef := range def.GetOwnerReferences() {
 		if strings.HasPrefix(ownerRef.Name, addon.AddonAppPrefix) {
@@ -239,6 +315,14 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 			return nil, errors.Wrap(err, "invalid trait definition")
 		}
 		definition.Policy = &policyDef.Spec
+		definition.PolicyScope = policyScope(def.GetName(), policyDef.Spec.Scope)
+	}
+	if kind == kindSourceDefinition {
+		sourceDef := &v1beta1.SourceDefinition{}
+		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(def.Object, sourceDef); err != nil {
+			return nil, errors.Wrap(err, "invalid source definition")
+		}
+		definition.Source = &sourceDef.Spec
 	}
 	return definition, nil
 }
@@ -280,13 +364,37 @@ func (d *definitionServiceImpl) DetailDefinition(ctx context.Context, name, defT
 			return nil, err
 		}
 		definition.APISchema = schema
-		// render default ui schema
-		defaultUISchema := renderDefaultUISchema(schema)
+		defaultUISchema := generatedUISchema(cm)
+		if defaultUISchema == nil {
+			defaultUISchema = renderDefaultUISchema(schema)
+		}
 		// patch from custom ui schema
 		definition.UISchema = renderCustomUISchema(ctx, d.KubeClient, name, defType, defaultUISchema)
 	}
+	if data, ok := cm.Data[types.SourceOutputSchema]; ok {
+		output := &openapi3.Schema{}
+		if err := output.UnmarshalJSON([]byte(data)); err != nil {
+			return nil, err
+		}
+		definition.OutputSchema = output
+	}
 
 	return definition, nil
+}
+
+// generatedUISchema is the form the controller generated from the
+// definition's parameter, or nil where the controller predates it.
+func generatedUISchema(cm v1.ConfigMap) []*schema.UIParameter {
+	data, ok := cm.Data[types.DefaultUISchema]
+	if !ok {
+		return nil
+	}
+	var ui []*schema.UIParameter
+	if err := json.Unmarshal([]byte(data), &ui); err != nil {
+		klog.Warningf("ignoring the generated ui schema in %s/%s: %s", cm.Namespace, cm.Name, err.Error())
+		return nil
+	}
+	return ui
 }
 
 func renderCustomUISchema(ctx context.Context, cli client.Client, name, defType string, defaultSchema []*schema.UIParameter) []*schema.UIParameter {
@@ -488,7 +596,7 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	subType := ""
 	if property.Value.Items != nil {
 		if property.Value.Items.Value != nil {
-			subType = (*property.Value.Items.Value.Type)[0]
+			subType = schemaType(property.Value.Items.Value)
 		}
 		parameter.SubParameters = renderDefaultUISchema(property.Value.Items.Value)
 	}
@@ -511,15 +619,35 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	parameter.JSONKey = key
 	parameter.Description = property.Value.Description
 	parameter.Label = label
-	parameter.UIType = schema.GetDefaultUIType((*property.Value.Type)[0], len(parameter.Validate.Options) != 0, subType, len(property.Value.Properties) > 0)
+	parameter.UIType = schema.GetDefaultUIType(schemaType(property.Value), len(parameter.Validate.Options) != 0, subType, len(property.Value.Properties) > 0)
 	parameter.Validate.Max = property.Value.Max
 	parameter.Validate.MaxLength = property.Value.MaxLength
 	parameter.Validate.Min = property.Value.Min
 	parameter.Validate.MinLength = property.Value.MinLength
 	parameter.Validate.Pattern = property.Value.Pattern
 	parameter.Validate.Required = slices.Contains(required, property.Value.Title)
+	parameter.Validate.Immutable = isImmutable(property.Value)
 	parameter.Sort = 100
 	return &parameter
+}
+
+// schemaType is a schema's first type, or empty for one that sets none, as CUE
+// emits for an open value such as `{...}` or `[string]: _`.
+func schemaType(s *openapi3.Schema) string {
+	if s.Type == nil || len(*s.Type) == 0 {
+		return ""
+	}
+	return (*s.Type)[0]
+}
+
+// extensionImmutable marks a parameter KubeVela's Application webhook refuses to
+// change once deployed: a +immutable field in the definition, as KubeVela writes
+// it into the parameter schema (its schema.ExtensionImmutable).
+const extensionImmutable = "x-immutable"
+
+func isImmutable(s *openapi3.Schema) bool {
+	immutable, _ := s.Extensions[extensionImmutable].(bool)
+	return immutable
 }
 
 // RenderLabel render option label
@@ -531,5 +659,17 @@ func RenderLabel(source interface{}) string {
 		return stringtools.Capitalize(v)
 	default:
 		return stringtools.Capitalize(fmt.Sprintf("%v", v))
+	}
+}
+
+// policyScope classifies a policy as KubeVela does, for its policy's type.
+func policyScope(policyType string, scope v1beta1.PolicyScope) string {
+	switch {
+	case appfile.IsBuiltinPolicyType(policyType):
+		return policyScopeBuiltin
+	case scope == v1beta1.ApplicationScope:
+		return policyScopeApplication
+	default:
+		return policyScopeWorkload
 	}
 }
