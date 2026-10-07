@@ -12,8 +12,11 @@ import {
   deletePolicy,
   getPolicyDetail,
   getApplicationStatistics,
+  getSources,
+  deleteSource,
 } from '../../api/application';
-import { getComponentDefinitions } from '../../api/definitions';
+import { getComponentDefinitions, getPolicyDefinitions } from '../../api/definitions';
+import { deployNamespaces } from '../../utils/restrictions';
 import { If } from '../../components/If';
 import Item from '../../components/Item';
 import NumItem from '../../components/NumItem';
@@ -34,6 +37,9 @@ import type {
   ApplicationBase,
   ApplicationComponentBase,
   ApplicationPolicyBase,
+  ApplicationEnvStatus,
+  DefinitionBase,
+  ApplicationSource,
 } from '@velaux/data';
 import { beautifyTime, momentDate, showAlias } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
@@ -45,6 +51,8 @@ import ComponentDialog from './components/ComponentDialog';
 import Components from './components/Components';
 import PolicyDialog from './components/PolicyDialog';
 import PolicyList from './components/PolicyList';
+import SourceDialog from './components/SourceDialog';
+import SourceList from './components/SourceList';
 import TraitDialog from './components/TraitDialog';
 import TriggerDialog from './components/TriggerDialog';
 import TriggerList from './components/TriggerList';
@@ -52,6 +60,7 @@ import TriggerList from './components/TriggerList';
 const { Row, Col } = Grid;
 
 type Props = {
+  applicationAllStatus?: ApplicationEnvStatus[];
   match: {
     params: {
       appName: string;
@@ -70,6 +79,7 @@ type Props = {
 };
 
 type State = {
+  policyScopes?: Record<string, string>;
   appName: string;
   componentName: string;
   visibleTrait: boolean;
@@ -90,6 +100,9 @@ type State = {
   showPolicyName?: string;
   policyDetail?: ApplicationPolicyDetail;
   statistics?: ApplicationStatistics;
+  sources: ApplicationSource[];
+  visibleSource: boolean;
+  editSource?: ApplicationSource;
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -113,14 +126,41 @@ class ApplicationConfig extends Component<Props, State> {
       isEditComponent: false,
       componentDefinitions: [],
       visiblePolicy: false,
+      sources: [],
+      visibleSource: false,
     };
   }
 
   componentDidMount() {
     this.onGetApplicationTrigger();
     this.onGetComponentDefinitions();
+    this.onGetPolicyScopes();
     this.loadAppStatistics();
+    this.loadSources();
   }
+
+  componentDidUpdate(prevProps: Props) {
+    if (deployNamespaces(prevProps.envbinding).join(',') !== deployNamespaces(this.props.envbinding).join(',')) {
+      this.onGetComponentDefinitions();
+    }
+  }
+
+  loadSources = () => {
+    getSources(this.state.appName).then((res: { sources?: ApplicationSource[] }) => {
+      if (res) {
+        this.setState({ sources: res.sources || [] });
+      }
+    });
+  };
+
+  onDeleteSource = (name: string) => {
+    deleteSource(this.state.appName, name).then((res: any) => {
+      if (res) {
+        Message.success('Application source deleted successfully');
+        this.loadSources();
+      }
+    });
+  };
 
   onGetApplicationTrigger() {
     const { appName } = this.state;
@@ -246,7 +286,15 @@ class ApplicationConfig extends Component<Props, State> {
 
   editAppPlan = () => {
     const { applicationDetail } = this.props;
-    const { alias = '', description = '', name = '', createTime = '', icon = '', labels, annotations } = applicationDetail || {};
+    const {
+      alias = '',
+      description = '',
+      name = '',
+      createTime = '',
+      icon = '',
+      labels,
+      annotations,
+    } = applicationDetail || {};
     this.setState({
       editItem: {
         name,
@@ -358,9 +406,35 @@ class ApplicationConfig extends Component<Props, State> {
     );
   };
 
+  // onGetPolicyScopes finds how KubeVela applies each policy type, which the
+  // policy list marks.
+  onGetPolicyScopes = () => {
+    getPolicyDefinitions().then((res: { definitions?: DefinitionBase[] }) => {
+      const scopes: Record<string, string> = {};
+      (res?.definitions || []).forEach((def) => {
+        if (def.policyScope) {
+          scopes[def.name] = def.policyScope;
+        }
+      });
+      this.setState({ policyScopes: scopes });
+    });
+  };
+
+  // definitionsRequest numbers the component definition requests, so only the
+  // latest may set the list: an earlier one asked about other namespaces.
+  definitionsRequest = 0;
+
   onGetComponentDefinitions = async () => {
-    getComponentDefinitions().then((res) => {
-      if (res) {
+    const namespaces = deployNamespaces(this.props.envbinding);
+    const request = ++this.definitionsRequest;
+    // Until the environments load there is no namespace to check restrictions
+    // against, and an unfiltered list offers types the webhook then refuses.
+    if (namespaces.length === 0) {
+      this.setState({ componentDefinitions: [] });
+      return;
+    }
+    getComponentDefinitions(namespaces).then((res) => {
+      if (res && request === this.definitionsRequest) {
         this.setState({
           componentDefinitions: res && res.definitions,
         });
@@ -471,6 +545,9 @@ class ApplicationConfig extends Component<Props, State> {
       visiblePolicy,
       policyDetail,
       statistics,
+      sources,
+      visibleSource,
+      editSource,
     } = this.state;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     if (!applicationDetail) {
@@ -673,6 +750,8 @@ class ApplicationConfig extends Component<Props, State> {
             </Row>
             <PolicyList
               policies={policies}
+              statuses={this.props.applicationAllStatus}
+              policyScopes={this.state.policyScopes}
               envbinding={envbinding}
               applicationDetail={applicationDetail}
               onDeletePolicy={(name: string) => {
@@ -681,6 +760,42 @@ class ApplicationConfig extends Component<Props, State> {
               onShowPolicy={(name: string) => {
                 this.onEditPolicy(name);
               }}
+            />
+          </Col>
+          <Col xl={8} xxs={24} className="app-spec-item">
+            <Row>
+              <Col span={24} className="padding16">
+                <Title
+                  title={
+                    <span className="font-size-16 font-weight-bold">
+                      <Translation>Sources</Translation>
+                    </span>
+                  }
+                  actions={[
+                    <Permission
+                      request={{
+                        resource: `project:${projectName}/application:${applicationDetail?.name}/source:*`,
+                        action: 'create',
+                      }}
+                      project={projectName}
+                    >
+                      <a
+                        key={'add'}
+                        className="font-size-14 font-weight-400"
+                        onClick={() => this.setState({ visibleSource: true, editSource: undefined })}
+                      >
+                        <Translation>New Source</Translation>
+                      </a>
+                    </Permission>,
+                  ]}
+                />
+              </Col>
+            </Row>
+            <SourceList
+              sources={sources}
+              applicationDetail={applicationDetail}
+              onDeleteSource={this.onDeleteSource}
+              onShowSource={(source: ApplicationSource) => this.setState({ visibleSource: true, editSource: source })}
             />
           </Col>
           <Col xl={8} xxs={24} className="app-spec-item">
@@ -727,6 +842,7 @@ class ApplicationConfig extends Component<Props, State> {
         <If condition={visibleTrait}>
           <TraitDialog
             project={applicationDetail?.project?.name || ''}
+            deployed={statistics ? (statistics.revisionCount || 0) > 0 : undefined}
             visible={visibleTrait}
             isEditComponent={isEditComponent}
             appName={appName}
@@ -734,6 +850,7 @@ class ApplicationConfig extends Component<Props, State> {
             isEditTrait={isEditTrait}
             traitItem={traitItem}
             temporaryTraitList={temporaryTraitList}
+            envbinding={envbinding || []}
             onClose={this.onClose}
             onOK={this.onOk}
             createTemporaryTrait={(trait: Trait) => {
@@ -766,6 +883,7 @@ class ApplicationConfig extends Component<Props, State> {
         <If condition={visibleComponent}>
           <ComponentDialog
             project={applicationDetail?.project?.name || ''}
+            deployed={statistics ? (statistics.revisionCount || 0) > 0 : undefined}
             appName={appName}
             componentName={componentName}
             components={components || []}
@@ -774,6 +892,19 @@ class ApplicationConfig extends Component<Props, State> {
             componentDefinitions={componentDefinitions}
             onComponentClose={this.onComponentClose}
             onComponentOK={this.onComponentOK}
+          />
+        </If>
+        <If condition={visibleSource}>
+          <SourceDialog
+            project={applicationDetail?.project?.name || ''}
+            appName={appName}
+            source={editSource}
+            envbinding={envbinding}
+            onClose={() => this.setState({ visibleSource: false, editSource: undefined })}
+            onOK={() => {
+              this.loadSources();
+              this.setState({ visibleSource: false, editSource: undefined });
+            }}
           />
         </If>
         <If condition={visiblePolicy}>

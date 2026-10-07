@@ -1,22 +1,25 @@
 import { connect } from 'dva';
 import { Link } from 'dva/router';
+import { Balloon } from '@alifd/next';
 import React, { useEffect, useState } from 'react';
 import { locationService } from '../../services/LocationService';
 import { Translation } from '../../components/Translation';
-import type { SystemInfo , LoginUserInfo } from '@velaux/data';
+import i18n from '../../i18n';
+import type { SystemInfo, LoginUserInfo } from '@velaux/data';
 import { LeftMenu, menuService } from '../../services/MenuService';
 
 import './index.less';
 import { checkPermission } from '../../types';
 import { getConfigs } from '../../api/config';
-import { Config , MenuTypes, PluginMeta } from '@velaux/data';
+import { Config, MenuTypes, PluginMeta } from '@velaux/data';
 import { MdOutlineMonitorHeart } from 'react-icons/md';
-import { If } from '../../components/If';
 
 interface Props {
   userInfo?: LoginUserInfo;
   systemInfo?: SystemInfo;
   pluginList: PluginMeta[];
+  // collapsed is whether the sidebar shows icons only, so names show on hover.
+  collapsed?: boolean;
 }
 
 const LeftMenuModule = (props: Props) => {
@@ -34,11 +37,10 @@ const LeftMenuModule = (props: Props) => {
   }, [props.userInfo]);
 
   useEffect(() => {
-    menuService.resetPluginMenus()
+    menuService.resetPluginMenus();
     menuService.loadPluginMenus().then(() => {
-      const workspace = menuService.loadCurrentWorkspace();
-      const menus = workspace && props.userInfo ? menuService.loadMenus(workspace, props.userInfo) : [];
-      if (grafanaConfigs && workspace?.name === 'extension') {
+      const menus = props.userInfo ? menuService.loadSidebarMenus(props.userInfo) : [];
+      if (grafanaConfigs && grafanaConfigs.length > 0) {
         const grafanaLeftMenu: LeftMenu = { catalog: 'Grafana', menus: [] };
         grafanaConfigs.map((g) => {
           if (g.properties && g.properties['endpoint']) {
@@ -54,7 +56,9 @@ const LeftMenuModule = (props: Props) => {
             });
           }
         });
-        menus.push(grafanaLeftMenu);
+        if (grafanaLeftMenu.menus.length > 0) {
+          menus.push(grafanaLeftMenu);
+        }
       }
       setMenus(menus);
     });
@@ -82,26 +86,71 @@ const LeftMenuModule = (props: Props) => {
             </span>
           </div>
         );
-        const childrenArr = (
+        // hint names a collapsed item, and says when one is not available yet.
+        const hint = (props.collapsed || childrenItem.comingSoon) && (
+          <div className="menu-item-hint">
+            {props.collapsed && (
+              <div className="menu-item-hint-name">
+                <Translation>{childrenItem.label}</Translation>
+              </div>
+            )}
+            {childrenItem.comingSoon && (
+              <div className="menu-item-hint-soon">
+                <Translation>Coming Soon</Translation>
+              </div>
+            )}
+          </div>
+        );
+        const withHint = (trigger: JSX.Element) =>
+          hint ? (
+            <Balloon.Tooltip align="r" trigger={trigger}>
+              {hint}
+            </Balloon.Tooltip>
+          ) : (
+            trigger
+          );
+        if (childrenItem.comingSoon) {
+          ele.push(
+            <li className="nav-item" key={childrenItem.name}>
+              {withHint(
+                <span className="menu-item menu-item-coming-soon" aria-disabled="true">
+                  {item}
+                </span>
+              )}
+            </li>
+          );
+          return;
+        }
+        // The tooltip names a collapsed item, so the browser's title is only
+        // given when it is not shown.
+        const title = hint ? undefined : i18n.t(childrenItem.label).toString();
+        ele.push(
           <li className="nav-item" key={childrenItem.name}>
-            <If condition={childrenItem.href}>
-              <a
-                rel="noopener noreferrer"
-                target="_blank"
-                className={childrenItem.active ? 'menu-item-active' : 'menu-item'}
-                href={childrenItem.href}
-              >
-                {item}
-              </a>
-            </If>
-            <If condition={childrenItem.to && !childrenItem.href}>
-              <Link to={childrenItem.to} className={childrenItem.active ? 'menu-item-active' : 'menu-item'}>
-                {item}
-              </Link>
-            </If>
+            {childrenItem.href &&
+              withHint(
+                <a
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className={childrenItem.active ? 'menu-item-active' : 'menu-item'}
+                  href={childrenItem.href}
+                  title={title}
+                >
+                  {item}
+                </a>
+              )}
+            {childrenItem.to &&
+              !childrenItem.href &&
+              withHint(
+                <Link
+                  to={childrenItem.to}
+                  className={childrenItem.active ? 'menu-item-active' : 'menu-item'}
+                  title={title}
+                >
+                  {item}
+                </Link>
+              )}
           </li>
         );
-        ele.push(childrenArr);
       });
     }
     if (ele.length > 0) {

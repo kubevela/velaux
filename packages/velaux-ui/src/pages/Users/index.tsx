@@ -6,8 +6,9 @@ import { getUserList, deleteUser, changeUserDisable, changeUserEnable } from '..
 import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
+import { StatusBadge } from '../../components/StatusBadge';
 import { Translation } from '../../components/Translation';
-import type { NameAlias , RolesBase , User } from '@velaux/data';
+import type { NameAlias, RolesBase, User } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 
@@ -282,6 +283,14 @@ class Users extends Component<Props, State> {
         },
       },
       {
+        key: 'status',
+        title: <Translation>Status</Translation>,
+        dataIndex: 'disabled',
+        cell: (disabled: boolean) => (
+          <StatusBadge tone={disabled ? 'neutral' : 'healthy'} label={disabled ? 'Disabled' : 'Active'} />
+        ),
+      },
+      {
         key: 'email',
         title: <Translation>Email</Translation>,
         dataIndex: 'email',
@@ -409,7 +418,6 @@ class Users extends Component<Props, State> {
                   <Button type="primary" onClick={this.handleClickCreate}>
                     <Translation>New User</Translation>
                   </Button>
-                  ,
                 </Permission>,
               ]}
             />

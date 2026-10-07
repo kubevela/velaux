@@ -104,10 +104,6 @@ template: {
 var (
 	helmTemplateName = "helm-repository"
 	helmTemplate     = `
-import (
-	"vela/config"
-)
-
 metadata: {
 	name:        "helm-repository"
 	alias:       "Helm Repository"

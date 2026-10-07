@@ -23,7 +23,9 @@ import type {
   EnvBinding,
   UpdatePolicyRequest,
   Workflow,
- DefinitionBase } from '@velaux/data';
+  DefinitionBase,
+} from '@velaux/data';
+import { deployNamespaces, isUsable } from '../../../../utils/restrictions';
 
 import './index.less';
 import classNames from 'classnames';
@@ -418,12 +420,9 @@ class PolicyDialog extends React.Component<Props, State> {
   buildPolicyTypeOptions = () => {
     const { definitions } = this.state;
     const options: { label: string; value: string }[] = [];
-    definitions?.map((definition) => {
+    definitions?.filter(isUsable).map((definition) => {
       if (definition.name != 'override' && definition.name != 'topology') {
-        options.push({
-          label: definition.name,
-          value: definition.name,
-        });
+        options.push({ label: definition.name, value: definition.name });
       }
     });
     return options;
@@ -441,7 +440,7 @@ class PolicyDialog extends React.Component<Props, State> {
   };
 
   loadPolicyDefinitions = () => {
-    getPolicyDefinitions().then((res) => {
+    getPolicyDefinitions(deployNamespaces(this.props.envbinding)).then((res) => {
       this.setState({ definitions: res.definitions });
     });
   };
