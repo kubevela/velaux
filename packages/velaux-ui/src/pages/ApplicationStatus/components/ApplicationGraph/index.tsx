@@ -1,7 +1,11 @@
-import { Button } from '@alifd/next';
 import React from 'react';
 
+import { RowAction } from '../../../../components/RowAction';
+import i18n from '../../../../i18n';
+
 import { TreeGraph } from '../../../../components/TreeGraph';
+import { dependencyItems } from '../../../../utils/dependencies';
+import type { DependencyItem } from '../../../../utils/dependencies';
 import type { TreeNode } from '../../../../components/TreeGraph/interface';
 import type {
   ApplicationDetail,
@@ -9,7 +13,9 @@ import type {
   EnvBinding,
   ApplicationComponent,
   ComponentStatus,
- AppliedResource, ResourceTreeNode } from '@velaux/data';
+  AppliedResource,
+  ResourceTreeNode,
+} from '@velaux/data';
 
 import { ShowResource } from './resource-show';
 
@@ -72,7 +78,11 @@ class ApplicationGraph extends React.Component<Props, State> {
     return tree;
   }
 
-  convertComponentNode(service: ComponentStatus, component?: ApplicationComponent): TreeNode {
+  convertComponentNode(
+    service: ComponentStatus,
+    component?: ApplicationComponent,
+    dependencies?: DependencyItem[]
+  ): TreeNode {
     const node: TreeNode = {
       nodeType: 'component',
       resource: {
@@ -83,6 +93,7 @@ class ApplicationGraph extends React.Component<Props, State> {
         cluster: service.cluster,
         service: service,
       },
+      dependencies: dependencies,
     };
     return node;
   }
@@ -143,8 +154,10 @@ class ApplicationGraph extends React.Component<Props, State> {
       const { applicationStatus, components } = this.props;
       const services = (applicationStatus && applicationStatus.services) || [];
       const componentMap = new Map<string, ApplicationComponent>();
+      const types: Record<string, string> = {};
       components?.map((com) => {
         componentMap.set(com.name, com);
+        types[com.name] = com.componentType;
       });
       services.map((s) => {
         const cluster = s.cluster || 'local';
@@ -156,10 +169,11 @@ class ApplicationGraph extends React.Component<Props, State> {
         const clusterNode = clusterTree.get(name);
         if (clusterNode) {
           const component = componentMap.get(s.name);
+          const dependencies = dependencyItems(s.name, applicationStatus?.dependencies, types);
           if (!clusterNode.leafNodes) {
-            clusterNode.leafNodes = [this.convertComponentNode(s, component)];
+            clusterNode.leafNodes = [this.convertComponentNode(s, component, dependencies)];
           } else {
-            clusterNode.leafNodes = clusterNode.leafNodes.concat(this.convertComponentNode(s, component));
+            clusterNode.leafNodes = clusterNode.leafNodes.concat(this.convertComponentNode(s, component, dependencies));
           }
         }
       });
@@ -196,47 +210,49 @@ class ApplicationGraph extends React.Component<Props, State> {
     const { showResource, resource, zoom } = this.state;
     const data = this.buildTree();
     return (
-      <div className={classNames('graph-container')}>
-        <div className="operation">
-          <Button.Group>
-            <Button
-              onClick={() => {
-                this.setState({ zoom: zoom - 0.1 });
-              }}
-              type="secondary"
-              disabled={zoom <= 0.5}
-            >
-              <AiOutlineMinus />
-            </Button>
-            <Button
-              onClick={() => {
-                this.setState({ zoom: zoom + 0.1 });
-              }}
-              disabled={zoom >= 2}
-              type="secondary"
-            >
-              <IoMdAdd />
-            </Button>
-          </Button.Group>
+      <div className="graph-frame">
+        <div className="graph-zoom">
+          <RowAction
+            icon={<AiOutlineMinus />}
+            label="Zoom out"
+            disabled={zoom <= 0.5}
+            onClick={() => this.setState({ zoom: Math.round((zoom - 0.1) * 10) / 10 })}
+          />
+          <button
+            type="button"
+            className="graph-zoom-level"
+            title={i18n.t('Reset zoom').toString()}
+            onClick={() => this.setState({ zoom: 1 })}
+          >
+            {Math.round(zoom * 100)}%
+          </button>
+          <RowAction
+            icon={<IoMdAdd />}
+            label="Zoom in"
+            disabled={zoom >= 2}
+            onClick={() => this.setState({ zoom: Math.round((zoom + 0.1) * 10) / 10 })}
+          />
         </div>
-        <TreeGraph
-          onResourceDetailClick={this.onResourceDetailClick}
-          appName={application?.name || ''}
-          envName={env?.name || ''}
-          node={data}
-          zoom={zoom}
-          nodesep={graphType === 'resource-graph' ? 50 : 80}
-        />
-        <If condition={showResource && resource}>
-          {resource && (
-            <ShowResource
-              onClose={() => {
-                this.setState({ showResource: false, resource: undefined });
-              }}
-              resource={resource}
-            />
-          )}
-        </If>
+        <div className={classNames('graph-container')}>
+          <TreeGraph
+            onResourceDetailClick={this.onResourceDetailClick}
+            appName={application?.name || ''}
+            envName={env?.name || ''}
+            node={data}
+            zoom={zoom}
+            nodesep={graphType === 'resource-graph' ? 50 : 80}
+          />
+          <If condition={showResource && resource}>
+            {resource && (
+              <ShowResource
+                onClose={() => {
+                  this.setState({ showResource: false, resource: undefined });
+                }}
+                resource={resource}
+              />
+            )}
+          </If>
+        </div>
       </div>
     );
   }

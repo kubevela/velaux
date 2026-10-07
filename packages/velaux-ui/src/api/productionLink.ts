@@ -1,4 +1,5 @@
 export const application = `/api/v1/applications`;
+export const expressions = `/api/v1/expressions`;
 export const definition = `/api/v1/definitions`;
 export const addons = `/api/v1/addons`;
 export const enabledAddon = `/api/v1/enabled_addon`;
@@ -25,3 +26,4 @@ export const configTemplates = `/api/v1/config_templates`;
 export const cloudShell = `/api/v1/cloudshell`;
 export const plugin = `/api/v1/plugins`;
 export const managePlugin = `/api/v1/manage/plugins`;
+export const packages = `/api/v1/packages`;

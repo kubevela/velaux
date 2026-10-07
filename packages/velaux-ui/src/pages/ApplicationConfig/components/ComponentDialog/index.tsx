@@ -9,9 +9,16 @@ import {
   createApplicationComponent,
   updateComponentProperties,
   getApplicationComponent,
+  getExpressionEnv,
+  setExpressionOptIn,
 } from '../../../../api/application';
+import type { ExpressionContext } from '../../../../components/UISchema';
+import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
 import { detailComponentDefinition } from '../../../../api/definitions';
-import DrawerWithFooter from '../../../../components/Drawer';
+import { VersionSelect } from '../../../../components/VersionSelect';
+import { joinType, splitType } from '../../../../utils/definitionVersion';
+import { AwaitingType } from '../../../../components/AwaitingType';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
@@ -27,6 +34,12 @@ import { locale } from '../../../../utils/locale';
 import { transComponentDefinitions } from '../../../../utils/utils';
 
 import './index.less';
+import '../ComponentList/index.less';
+import { AiOutlineLink } from 'react-icons/ai';
+import type { ComponentDependency } from '@velaux/data';
+import type { DependencyItem } from '../../../../utils/dependencies';
+
+import { dependsOnOptions } from '../ComponentList/model';
 
 import Permission from '../../../../components/Permission';
 import { If } from '../../../../components/If';
@@ -43,9 +56,18 @@ type Props = {
   onComponentOK: () => void;
   onComponentClose: () => void;
   dispatch?: any;
+  // deployed says the application has been deployed, which is when its
+  // immutable parameters lock.
+  deployed?: boolean;
+  // dependencies are the component's, both ways, as the deployed Application
+  // reports them.
+  dependencies?: DependencyItem[];
+  // dependencyEdges are every component's dependencies the Application reports.
+  dependencyEdges?: ComponentDependency[];
 };
 
 type State = {
+  expressionEnv?: ExpressionEnv;
   definitionDetail?: DefinitionDetail;
   isCreateComponentLoading: boolean;
   isUpdateComponentLoading: boolean;
@@ -70,28 +92,75 @@ class ComponentDialog extends React.Component<Props, State> {
     this.uiSchemaRef = React.createRef();
   }
 
+  loadExpressionEnv = async () => {
+    const { appName } = this.props;
+    if (!appName) {
+      return;
+    }
+    try {
+      const env: ExpressionEnv = await getExpressionEnv(appName, 'component');
+      this.setState({ expressionEnv: env });
+    } catch (e) {
+      this.setState({ expressionEnv: undefined });
+    }
+  };
+
+  setExpressionOptIn = async (on: boolean): Promise<boolean> => {
+    const { appName } = this.props;
+    if (!appName) {
+      return false;
+    }
+    try {
+      await setExpressionOptIn(appName, on);
+    } catch (e) {
+      return false;
+    }
+    await this.loadExpressionEnv();
+    return true;
+  };
+
+  expressionContext = (): ExpressionContext | undefined => {
+    const { appName } = this.props;
+    if (!appName) {
+      return undefined;
+    }
+    return {
+      appName,
+      surface: 'component',
+      env: this.state.expressionEnv,
+      onOptIn: this.setExpressionOptIn,
+    };
+  };
+
   componentDidMount() {
+    this.loadExpressionEnv();
     const { isEditComponent, dispatch, appName, project } = this.props;
     if (isEditComponent) {
       this.onGetEditComponentInfo(() => {
         if (this.state.editComponent) {
           const { name, alias, type, description, properties, dependsOn } = this.state.editComponent;
+          const pinned = splitType(type);
           this.field.setValues({
             name,
             alias,
-            componentType: type,
+            componentType: pinned.name,
+            componentVersion: pinned.version,
             description,
             properties,
             dependsOn,
           });
-          if (type) {
-            this.onDetailsComponentDefinition(type);
+          if (pinned.name) {
+            this.onDetailsComponentDefinition(pinned.name, pinned.version);
           }
         }
       });
     } else {
       const getInitComponentType: string = this.field.getValue('componentType') || '';
-      this.onDetailsComponentDefinition(getInitComponentType);
+      if (getInitComponentType) {
+        this.onDetailsComponentDefinition(getInitComponentType);
+      } else {
+        this.setState({ loading: false });
+      }
     }
     dispatch({
       type: 'uischema/setAppName',
@@ -131,7 +200,8 @@ class ComponentDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', temporaryTraitList = [] } = this.props;
-      const { name, alias = '', description = '', componentType = '', properties, dependsOn = [] } = values;
+      const { name, alias = '', description = '', properties, dependsOn = [] } = values;
+      const componentType = joinType(values.componentType || '', this.field.getValue('componentVersion'));
       const params: ApplicationComponentConfig = {
         name,
         alias,
@@ -164,14 +234,13 @@ class ComponentDialog extends React.Component<Props, State> {
     });
   };
 
-  onDetailsComponentDefinition = (value: string, callback?: () => void) => {
-    detailComponentDefinition({ name: value })
+  // onDetailsComponentDefinition loads a component type's form, at the version
+  // it is pinned to or the latest.
+  onDetailsComponentDefinition = (value: string, version?: string) => {
+    detailComponentDefinition({ name: value, revision: version })
       .then((re) => {
         if (re) {
           this.setState({ definitionDetail: re, loading: false });
-          if (callback) {
-            callback();
-          }
         }
       })
       .catch();
@@ -259,7 +328,8 @@ class ComponentDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', componentName = '' } = this.props;
-      const { name, alias = '', description = '', componentType = '', properties, dependsOn = [] } = values;
+      const { name, alias = '', description = '', properties, dependsOn = [] } = values;
+      const componentType = joinType(values.componentType || '', this.field.getValue('componentVersion'));
       const params: ApplicationComponentConfig = {
         name,
         alias,
@@ -288,108 +358,28 @@ class ComponentDialog extends React.Component<Props, State> {
   };
 
   getDependsOptions = () => {
-    const { components, componentName } = this.props;
-    const filterComponents = (components || []).filter((component) => {
-      if (
-        componentName &&
-        (component.name === componentName || (component.dependsOn && component.dependsOn.includes(componentName)))
-      ) {
-        return false;
-      } else {
-        return true;
-      }
-    });
-    const componentOptions = filterComponents?.map((component) => {
-      return {
-        label: component.alias ? `${component.alias}(${component.name})` : component.name,
-        value: component.name,
-      };
-    });
-    return componentOptions || [];
+    const { components, componentName, dependencies = [], dependencyEdges = [] } = this.props;
+    return dependsOnOptions(components || [], componentName, dependencies, dependencyEdges);
   };
 
   render() {
+    const inferredDeps = (this.props.dependencies || []).filter((d) => d.direction === 'outbound' && d.inferred);
     const init = this.field.init;
     const FormItem = Form.Item;
     const { Row, Col } = Grid;
     const { isEditComponent, componentDefinitions, onComponentClose } = this.props;
     const { definitionDetail, loading, propertiesMode } = this.state;
+    // A new component's type comes first; the rest waits for it.
+    const ready = !!isEditComponent || !!this.field.getValue('componentType');
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
 
     return (
-      <DrawerWithFooter
-        title={this.showComponentTitle()}
-        placement="right"
-        width={800}
-        onClose={onComponentClose}
-        extButtons={this.extButtonList()}
-      >
+      <ModalWithFooter title={this.showComponentTitle()} onClose={onComponentClose} extButtons={this.extButtonList()}>
         <Form field={this.field} className="basic-config-wrapper">
           <Loading visible={loading} style={{ width: '100%' }}>
             <Card contentHeight={'auto'} title="Basic Configuration">
-              <Row>
-                <Col span={12} style={{ paddingRight: '8px' }}>
-                  <FormItem
-                    label={<Translation className="font-size-14 font-weight-bold color333">Name</Translation>}
-                    labelTextAlign="left"
-                    required={true}
-                  >
-                    <Input
-                      name="name"
-                      maxLength={32}
-                      disabled={isEditComponent ? true : false}
-                      addonTextBefore={this.getInitName()}
-                      {...init('name', {
-                        rules: [
-                          {
-                            required: true,
-                            pattern: checkName,
-                            message: 'Please enter a valid application name',
-                          },
-                        ],
-                      })}
-                    />
-                  </FormItem>
-                </Col>
-
-                <Col span={12} style={{ paddingLeft: '8px' }}>
-                  <FormItem label={<Translation>Alias</Translation>}>
-                    <Input
-                      name="alias"
-                      placeholder={i18n.t('Please enter').toString()}
-                      {...init('alias', {
-                        rules: [
-                          {
-                            minLength: 2,
-                            maxLength: 64,
-                            message: 'Enter a string of 2 to 64 characters.',
-                          },
-                        ],
-                      })}
-                    />
-                  </FormItem>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <FormItem label={<Translation>Description</Translation>}>
-                    <Input
-                      name="description"
-                      placeholder={i18n.t('Please enter').toString()}
-                      {...init('description', {
-                        rules: [
-                          {
-                            maxLength: 256,
-                            message: 'Enter a description that contains less than 256 characters.',
-                          },
-                        ],
-                      })}
-                    />
-                  </FormItem>
-                </Col>
-              </Row>
               <Row>
                 <Col span={12} style={{ paddingRight: '8px' }}>
                   <FormItem
@@ -410,7 +400,6 @@ class ComponentDialog extends React.Component<Props, State> {
                       disabled={isEditComponent ? true : false}
                       className="select"
                       {...init(`componentType`, {
-                        initValue: isEditComponent ? '' : 'webservice',
                         rules: [
                           {
                             required: true,
@@ -422,86 +411,196 @@ class ComponentDialog extends React.Component<Props, State> {
                       onChange={(item: string) => {
                         this.removeProperties();
                         this.field.setValue('componentType', item);
+                        this.field.setValue('componentVersion', undefined);
                         this.onDetailsComponentDefinition(item);
                       }}
                     />
                   </FormItem>
                 </Col>
-
-                <Col span={12} style={{ paddingRight: '8px' }}>
+                <Col span={12} style={{ paddingLeft: '8px' }}>
                   <FormItem
-                    label={<Translation className="font-size-14 font-weight-bold color333">Depends On</Translation>}
+                    label={<Translation className="font-size-14 font-weight-bold color333">Version</Translation>}
                   >
-                    <Select
-                      {...init(`dependsOn`, {
-                        rules: [
-                          {
-                            required: false,
-                            message: i18n.t('Please select'),
-                          },
-                        ],
-                      })}
-                      locale={locale().Select}
-                      mode="multiple"
-                      dataSource={this.getDependsOptions()}
+                    <VersionSelect
+                      definitionType="component"
+                      name={this.field.getValue('componentType')}
+                      value={this.field.getValue('componentVersion')}
+                      onChange={(version?: string) => {
+                        this.field.setValue('componentVersion', version);
+                        this.onDetailsComponentDefinition(this.field.getValue('componentType'), version);
+                      }}
                     />
                   </FormItem>
                 </Col>
               </Row>
+              <AwaitingType ready={ready}>
+                <Row>
+                  <Col span={12} style={{ paddingRight: '8px' }}>
+                    <FormItem
+                      label={<Translation className="font-size-14 font-weight-bold color333">Name</Translation>}
+                      labelTextAlign="left"
+                      required={true}
+                    >
+                      <Input
+                        name="name"
+                        maxLength={32}
+                        disabled={isEditComponent ? true : false}
+                        addonTextBefore={this.getInitName()}
+                        {...init('name', {
+                          rules: [
+                            {
+                              required: true,
+                              pattern: checkName,
+                              message: 'Please enter a valid application name',
+                            },
+                          ],
+                        })}
+                      />
+                    </FormItem>
+                  </Col>
+
+                  <Col span={12} style={{ paddingLeft: '8px' }}>
+                    <FormItem label={<Translation>Alias</Translation>}>
+                      <Input
+                        name="alias"
+                        placeholder={i18n.t('Please enter').toString()}
+                        {...init('alias', {
+                          rules: [
+                            {
+                              minLength: 2,
+                              maxLength: 64,
+                              message: 'Enter a string of 2 to 64 characters.',
+                            },
+                          ],
+                        })}
+                      />
+                    </FormItem>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <FormItem label={<Translation>Description</Translation>}>
+                      <Input
+                        name="description"
+                        placeholder={i18n.t('Please enter').toString()}
+                        {...init('description', {
+                          rules: [
+                            {
+                              maxLength: 256,
+                              message: 'Enter a description that contains less than 256 characters.',
+                            },
+                          ],
+                        })}
+                      />
+                    </FormItem>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={12} style={{ paddingRight: '8px' }}>
+                    <FormItem
+                      label={<Translation className="font-size-14 font-weight-bold color333">Depends On</Translation>}
+                    >
+                      <Select
+                        {...init(`dependsOn`, {
+                          rules: [
+                            {
+                              required: false,
+                              message: i18n.t('Please select'),
+                            },
+                          ],
+                        })}
+                        locale={locale().Select}
+                        mode="multiple"
+                        dataSource={this.getDependsOptions()}
+                        itemRender={(item: any) =>
+                          item.inferred ? (
+                            <span className="depends-option" title={item.inferred}>
+                              {item.label}
+                              <span className="depends-option-inferred">
+                                <AiOutlineLink /> <Translation>inferred</Translation>
+                              </span>
+                            </span>
+                          ) : (
+                            item.label
+                          )
+                        }
+                      />
+                      {inferredDeps.length > 0 && (
+                        <div className="depends-inferred">
+                          <Translation>Inferred from expressions</Translation>:
+                          {inferredDeps.map((d) => (
+                            <span key={d.name + (d.where || '')} className="component-dep inferred" title={d.inferred}>
+                              <AiOutlineLink />
+                              {d.name}
+                              {d.where && <span className="component-dep-where">{d.where}</span>}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </FormItem>
+                  </Col>
+                </Row>
+              </AwaitingType>
             </Card>
           </Loading>
-          <Card
-            contentHeight={'auto'}
-            className="withActions"
-            title="Deployment Properties"
-            subTitle={
-              definitionDetail && definitionDetail.uiSchema
-                ? [
-                    <Button
-                      style={{ alignItems: 'center', display: 'flex' }}
-                      onClick={() => {
-                        if (propertiesMode === 'native') {
-                          this.setState({ propertiesMode: 'code' });
-                        } else {
-                          this.setState({ propertiesMode: 'native' });
-                        }
-                      }}
-                    >
-                      {propertiesMode === 'native' && (
-                        <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
-                      )}
-                      {propertiesMode === 'code' && <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />}
-                    </Button>,
-                  ]
-                : []
-            }
-          >
-            <Row>
-              <If condition={definitionDetail}>
-                <UISchema
-                  {...init(`properties`, {
-                    rules: [
-                      {
-                        validator: validator,
-                        message: i18n.t('Please check the component properties'),
-                      },
-                    ],
-                  })}
-                  enableCodeEdit={propertiesMode === 'code'}
-                  uiSchema={definitionDetail && definitionDetail.uiSchema}
-                  definition={{
-                    name: definitionDetail?.name || '',
-                    type: 'component',
-                    description: definitionDetail?.description || '',
-                  }}
-                  ref={this.uiSchemaRef}
-                  mode={isEditComponent ? 'edit' : 'new'}
-                />
-              </If>
-            </Row>
-          </Card>
+          <AwaitingType ready={ready}>
+            <Card
+              contentHeight={'auto'}
+              className="withActions"
+              title="Deployment Properties"
+              subTitle={
+                definitionDetail && definitionDetail.uiSchema
+                  ? [
+                      <Button
+                        style={{ alignItems: 'center', display: 'flex' }}
+                        onClick={() => {
+                          if (propertiesMode === 'native') {
+                            this.setState({ propertiesMode: 'code' });
+                          } else {
+                            this.setState({ propertiesMode: 'native' });
+                          }
+                        }}
+                      >
+                        {propertiesMode === 'native' && (
+                          <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                        )}
+                        {propertiesMode === 'code' && (
+                          <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />
+                        )}
+                      </Button>,
+                    ]
+                  : []
+              }
+            >
+              <Row>
+                <If condition={definitionDetail}>
+                  <UISchema
+                    {...init(`properties`, {
+                      rules: [
+                        {
+                          validator: validator,
+                          message: i18n.t('Please check the component properties'),
+                        },
+                      ],
+                    })}
+                    enableCodeEdit={propertiesMode === 'code'}
+                    uiSchema={definitionDetail && definitionDetail.uiSchema}
+                    definition={{
+                      name: definitionDetail?.name || '',
+                      type: 'component',
+                      description: definitionDetail?.description || '',
+                    }}
+                    ref={this.uiSchemaRef}
+                    mode={isEditComponent ? 'edit' : 'new'}
+                    deployed={this.props.deployed}
+                    expressions={this.expressionContext()}
+                  />
+                </If>
+              </Row>
+            </Card>
+          </AwaitingType>
         </Form>
-      </DrawerWithFooter>
+      </ModalWithFooter>
     );
   }
 }
