@@ -26,6 +26,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	registryv1 "github.com/google/go-containerregistry/pkg/v1"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	"helm.sh/helm/v3/pkg/repo"
 	corev1 "k8s.io/api/core/v1"
@@ -165,6 +166,15 @@ type ListEnabledAddonResponse struct {
 type AddonBaseStatus struct {
 	Name  string     `json:"name"`
 	Phase AddonPhase `json:"phase"`
+	// ManagedBy is the Application whose addon component installed the addon;
+	// the addon is enabled, upgraded and disabled there, not here.
+	ManagedBy *AddonManager `json:"managedBy,omitempty"`
+}
+
+// AddonManager names the Application that manages an addon
+type AddonManager struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 // DetailAddonResponse defines the format for showing the addon details
@@ -238,6 +248,9 @@ type ConfigTemplate struct {
 	Scope       string    `json:"scope"`
 	Sensitive   bool      `json:"sensitive"`
 	CreateTime  time.Time `json:"createTime"`
+	// Legacy marks a template kept as a config-template ConfigMap rather than a
+	// ConfigTemplate.
+	Legacy bool `json:"legacy,omitempty"`
 }
 
 // ConfigTemplateDetail define the format for detail the config template
@@ -245,6 +258,9 @@ type ConfigTemplateDetail struct {
 	ConfigTemplate
 	APISchema *openapi3.Schema `json:"schema"`
 	UISchema  schema.UISchema  `json:"uiSchema"`
+	// OutputSchema is a source definition's `schema`: the value an
+	// Application reads with $(source.<name>).
+	OutputSchema *openapi3.Schema `json:"outputSchema,omitempty"`
 }
 
 // Config define the metadata of a config
@@ -261,6 +277,13 @@ type Config struct {
 	Shared      bool                          `json:"shared"`
 	Secret      *corev1.Secret                `json:"-"`
 	Targets     []*config.ClusterTargetStatus `json:"targets"`
+	// Legacy marks a config kept as a Secret VelaUX writes rather than a Config
+	// the controller renders.
+	Legacy bool `json:"legacy,omitempty"`
+	// Phase and Message are a Config's status: Available once rendered, or the
+	// reason it could not be.
+	Phase   string `json:"phase,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 // ListConfigResponse is the response body for listing the configs
@@ -398,6 +421,8 @@ type ListApplicationOptions struct {
 	TargetName string            `json:"targetName"`
 	Query      string            `json:"query"`
 	Labels     map[string]string `json:"labels"`
+	// WithStatus fills each application's status summary from its envs.
+	WithStatus bool `json:"withStatus"`
 }
 
 // ListApplicationResponse list applications by query params
@@ -420,6 +445,40 @@ type ApplicationBase struct {
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
 	ReadOnly    bool              `json:"readOnly,omitempty"`
+	// Status summarises the application across its envs, when listed with status.
+	Status *ApplicationStatusSummary `json:"status,omitempty"`
+}
+
+// The health of an application, worst first.
+const (
+	AppHealthFailed      = "failed"
+	AppHealthUnhealthy   = "unhealthy"
+	AppHealthSuspended   = "suspended"
+	AppHealthProgressing = "progressing"
+	AppHealthHealthy     = "healthy"
+	AppHealthUndeployed  = "undeployed"
+)
+
+// ApplicationStatusSummary is an application's health at a glance: the worst
+// of its envs, and its components counted across them.
+type ApplicationStatusSummary struct {
+	Health string `json:"health"`
+	// Workflow is the workflow phase of the env setting the health.
+	Workflow string `json:"workflow,omitempty"`
+	// Components counts each component once per place it runs.
+	Components        int                 `json:"components"`
+	HealthyComponents int                 `json:"healthyComponents"`
+	Envs              []*EnvStatusSummary `json:"envs,omitempty"`
+}
+
+// EnvStatusSummary is an application's health in one env.
+type EnvStatusSummary struct {
+	Env               string `json:"env"`
+	Health            string `json:"health"`
+	Phase             string `json:"phase"`
+	Workflow          string `json:"workflow,omitempty"`
+	Components        int    `json:"components"`
+	HealthyComponents int    `json:"healthyComponents"`
 }
 
 // AppCompareResponse application compare result
@@ -476,8 +535,52 @@ type AppDryRunResponse struct {
 
 // ApplicationStatusResponse application env status response body
 type ApplicationStatusResponse struct {
-	EnvName string            `json:"envName"`
-	Status  *common.AppStatus `json:"status"`
+	EnvName string             `json:"envName"`
+	Status  *ApplicationStatus `json:"status"`
+}
+
+// ApplicationStatus is an Application's status as KubeVela reports it. Fields
+// the KubeVela types VelaUX builds against do not carry yet sit beside them.
+type ApplicationStatus struct {
+	common.AppStatus `json:",inline"`
+	// Dependencies is what each component depends on: the components named in
+	// its dependsOn, those whose outputs its inputs read, and those its property
+	// expressions read.
+	Dependencies []ComponentDependency `json:"dependencies,omitempty"`
+	// Paused is whether the controller skips the Application: it carries the
+	// controller.core.oam.dev/pause label.
+	Paused bool `json:"paused,omitempty"`
+	// ReconcileInterval is the Application's own resync period, where it sets one.
+	ReconcileInterval string `json:"reconcileInterval,omitempty"`
+	// RestartWorkflow is a pending or recurring workflow restart: "true", a time
+	// or an interval. status.workflowRestartScheduledAt is when it next runs.
+	RestartWorkflow string `json:"restartWorkflow,omitempty"`
+	// AutoUpdate is whether the Application follows definition changes. KubeVela
+	// refuses it beside the publishVersion every VelaUX deploy sets.
+	AutoUpdate bool `json:"autoUpdate,omitempty"`
+}
+
+// ReconcileIntervalRequest sets an Application's resync period; empty clears it.
+type ReconcileIntervalRequest struct {
+	Interval string `json:"interval"`
+}
+
+// RestartWorkflowRequest restarts an Application's workflow: now when empty, at
+// an RFC3339 time, or after every completion when an interval.
+type RestartWorkflowRequest struct {
+	Schedule string `json:"schedule"`
+}
+
+// ComponentDependency is one component another depends on, as the
+// Application's status.dependencies reports it. Source is where it is declared:
+// dependsOn, inputs or expression. Cluster and Namespace are set when an
+// expression reads the component at a placement it names.
+type ComponentDependency struct {
+	Component string `json:"component"`
+	DependsOn string `json:"dependsOn"`
+	Source    string `json:"source"`
+	Cluster   string `json:"cluster,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // ApplicationStatusListResponse the all env status of an application
@@ -495,14 +598,20 @@ type ApplicationStatisticsResponse struct {
 
 // CreateApplicationRequest create application request body
 type CreateApplicationRequest struct {
-	Name        string                  `json:"name" validate:"checkname"`
-	Alias       string                  `json:"alias" validate:"checkalias" optional:"true"`
-	Project     string                  `json:"project" validate:"checkname"`
-	Description string                  `json:"description" optional:"true"`
-	Icon        string                  `json:"icon"`
-	Labels      map[string]string       `json:"labels,omitempty"`
+	Name        string            `json:"name" validate:"checkname"`
+	Alias       string            `json:"alias" validate:"checkalias" optional:"true"`
+	Project     string            `json:"project" validate:"checkname"`
+	Description string            `json:"description" optional:"true"`
+	Icon        string            `json:"icon"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	// Annotations are set on the application as created, such as
+	// app.oam.dev/cel-expressions to have it read $( ) expressions.
+	Annotations map[string]string       `json:"annotations,omitempty"`
 	EnvBinding  []*EnvBinding           `json:"envBinding,omitempty"`
 	Component   *CreateComponentRequest `json:"component"`
+	// WorkflowMode is StepByStep or DAG for the workflows created for EnvBinding;
+	// KubeVela's default when empty.
+	WorkflowMode string `json:"workflowMode,omitempty"`
 }
 
 // UpdateApplicationRequest update application base config
@@ -742,8 +851,8 @@ type ComponentBase struct {
 	Creator       string                        `json:"creator,omitempty"`
 	CreateTime    time.Time                     `json:"createTime"`
 	UpdateTime    time.Time                     `json:"updateTime"`
-	Inputs        workflowv1alpha1.StepInputs   `json:"inputs,omitempty"`
-	Outputs       workflowv1alpha1.StepOutputs  `json:"outputs,omitempty"`
+	Inputs        wfTypesv1alpha1.StepInputs    `json:"inputs,omitempty"`
+	Outputs       wfTypesv1alpha1.StepOutputs   `json:"outputs,omitempty"`
 	Traits        []*ApplicationTrait           `json:"traits"`
 	WorkloadType  common.WorkloadTypeDescriptor `json:"workloadType,omitempty"`
 }
@@ -760,11 +869,11 @@ type CreateComponentRequest struct {
 	Description   string                           `json:"description" optional:"true"`
 	Icon          string                           `json:"icon" optional:"true"`
 	Labels        map[string]string                `json:"labels,omitempty"`
-	ComponentType string                           `json:"componentType" validate:"checkname"`
+	ComponentType string                           `json:"componentType" validate:"checktype"`
 	Properties    string                           `json:"properties,omitempty"`
 	DependsOn     []string                         `json:"dependsOn" optional:"true"`
-	Inputs        workflowv1alpha1.StepInputs      `json:"inputs,omitempty" optional:"true"`
-	Outputs       workflowv1alpha1.StepOutputs     `json:"outputs,omitempty" optional:"true"`
+	Inputs        wfTypesv1alpha1.StepInputs       `json:"inputs,omitempty" optional:"true"`
+	Outputs       wfTypesv1alpha1.StepOutputs      `json:"outputs,omitempty" optional:"true"`
 	Traits        []*CreateApplicationTraitRequest `json:"traits,omitempty" optional:"true"`
 }
 
@@ -910,11 +1019,30 @@ type ListDefinitionResponse struct {
 	Definitions []*DefinitionBase `json:"definitions"`
 }
 
+// DefinitionRevision is one revision of a definition, as an Application pins it.
+type DefinitionRevision struct {
+	// Revision is the revision's number, which counts up with every change.
+	Revision int64 `json:"revision"`
+	// Version is what follows @ in a type pinned to the revision: v2 for a
+	// numbered revision, v1.2.0 for one the definition's spec.version names.
+	Version    string    `json:"version"`
+	Hash       string    `json:"hash"`
+	CreateTime time.Time `json:"createTime"`
+}
+
+// ListDefinitionRevisionsResponse is a definition's revisions, newest first.
+type ListDefinitionRevisionsResponse struct {
+	Revisions []DefinitionRevision `json:"revisions"`
+}
+
 // DetailDefinitionResponse get definition detail
 type DetailDefinitionResponse struct {
 	DefinitionBase
 	APISchema *openapi3.Schema `json:"schema"`
 	UISchema  schema.UISchema  `json:"uiSchema"`
+	// OutputSchema is a source definition's `schema`: the value an
+	// Application reads with $(source.<name>).
+	OutputSchema *openapi3.Schema `json:"outputSchema,omitempty"`
 }
 
 // UpdateUISchemaRequest the request body struct about updated ui schema
@@ -948,6 +1076,54 @@ type DefinitionBase struct {
 	Component    *v1beta1.ComponentDefinitionSpec    `json:"component,omitempty"`
 	Policy       *v1beta1.PolicyDefinitionSpec       `json:"policy,omitempty"`
 	WorkflowStep *v1beta1.WorkflowStepDefinitionSpec `json:"workflowStep,omitempty"`
+	Source       *v1beta1.SourceDefinitionSpec       `json:"source,omitempty"`
+	// PolicyScope is how KubeVela applies a policy: Builtin, consumed by
+	// KubeVela itself; Workload, rendered with the Application's components; or
+	// Application, applied to the Application as a whole before it renders.
+	PolicyScope string `json:"policyScope,omitempty"`
+	// Restrictions are the namespaces that may use the definition and its quota,
+	// as the Application webhook enforces them: spec.restrictions combined with
+	// the restrict-namespaces annotation. Absent means unrestricted.
+	Restrictions *common.DefinitionRestrictions `json:"restrictions,omitempty"`
+	// UnusableIn are the namespaces asked about whose Applications the
+	// restrictions keep from using the definition.
+	UnusableIn []string `json:"unusableIn,omitempty"`
+	// Abstract marks a definition that may only be extended, never used by an
+	// Application directly.
+	Abstract bool `json:"abstract,omitempty"`
+	// Extends names the definition this one is built on.
+	Extends string `json:"extends,omitempty"`
+}
+
+// DefinitionUsageResponse is how much each namespace uses a definition, against
+// the quota that governs it.
+type DefinitionUsageResponse struct {
+	Usage []NamespaceUsage `json:"usage"`
+}
+
+// Usage states: how a namespace's use of a definition compares with its quota.
+const (
+	// UsageStateOK is use below the level the quota flags.
+	UsageStateOK = "ok"
+	// UsageStateWarn is use at or above the quota's warn level.
+	UsageStateWarn = "warn"
+	// UsageStateOver is use beyond the quota's limit; the next Application to add
+	// to it is refused.
+	UsageStateOver = "over"
+	// UsageStateExempt is a namespace annotated to skip every quota.
+	UsageStateExempt = "exempt"
+	// UsageStateUnlimited is a namespace no quota entry governs.
+	UsageStateUnlimited = "unlimited"
+)
+
+// NamespaceUsage is one namespace's use of a definition, counted as the
+// Application webhook counts it, with the quota entry that governs it.
+type NamespaceUsage struct {
+	Namespace string `json:"namespace"`
+	Used      int    `json:"used"`
+	Warn      *int32 `json:"warn,omitempty"`
+	Limit     *int32 `json:"limit,omitempty"`
+	State     string `json:"state"`
 }
 
 // CreatePolicyRequest create app policy
@@ -957,12 +1133,52 @@ type CreatePolicyRequest struct {
 	Alias       string `json:"alias"`
 	EnvName     string `json:"envName"`
 	Description string `json:"description"`
-	Type        string `json:"type" validate:"checkname"`
+	Type        string `json:"type" validate:"checktype"`
 	// Properties json data
 	Properties string `json:"properties"`
 
 	// Bind this policy to workflow
 	WorkflowPolicyBindings []WorkflowPolicyBinding `json:"workflowPolicyBind"`
+}
+
+// SourceBase is a source of an application: an external value its
+// properties read with $(source.<name>).
+type SourceBase struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+	// Properties is the source's parameter, as a JSON object.
+	Properties *model.JSONStruct `json:"properties,omitempty"`
+	// AutoUpdate is whether a change to the source's value re-dispatches what
+	// reads it; unset follows the controller's default.
+	AutoUpdate *bool `json:"autoUpdate,omitempty"`
+}
+
+// ListApplicationSourceResponse lists the sources of an application
+type ListApplicationSourceResponse struct {
+	Sources []*SourceBase `json:"sources"`
+}
+
+// CreateSourceRequest adds a source to an application
+type CreateSourceRequest struct {
+	// Name is the binding expressions read it by, $(source.<name>), so a CEL
+	// identifier: clusterInfo, not cluster-info.
+	Name string `json:"name" validate:"checkidentifier"`
+	Type string `json:"type" validate:"checktype"`
+	// Properties json data
+	Properties string `json:"properties"`
+	// AutoUpdate is the binding's own say; unset follows the controller's default,
+	// which a deploy's publishVersion pin holds. True stays live under the pin.
+	AutoUpdate *bool `json:"autoUpdate,omitempty"`
+}
+
+// UpdateSourceRequest changes the type or parameter of an application source
+type UpdateSourceRequest struct {
+	Type string `json:"type" validate:"checktype"`
+	// Properties json data
+	Properties string `json:"properties"`
+	// AutoUpdate is the binding's own say; unset follows the controller's default,
+	// which a deploy's publishVersion pin holds. True stays live under the pin.
+	AutoUpdate *bool `json:"autoUpdate,omitempty"`
 }
 
 // WorkflowPolicyBinding define the relation binding relationShip between policy and workflowStep
@@ -976,7 +1192,7 @@ type UpdatePolicyRequest struct {
 	Alias       string `json:"alias"`
 	EnvName     string `json:"envName"`
 	Description string `json:"description"`
-	Type        string `json:"type" validate:"checkname"`
+	Type        string `json:"type" validate:"checktype"`
 	// Properties json data
 	Properties string `json:"properties"`
 
@@ -1055,17 +1271,17 @@ type WorkflowStep struct {
 // WorkflowStepBase is the step base of workflow
 type WorkflowStepBase struct {
 	// Name is the unique name of the workflow step.
-	Name        string                             `json:"name" validate:"checkname"`
-	Alias       string                             `json:"alias" validate:"checkalias" optional:"true"`
-	Type        string                             `json:"type" validate:"checkname"`
-	Description string                             `json:"description" optional:"true"`
-	DependsOn   []string                           `json:"dependsOn" optional:"true"`
-	Properties  Properties                         `json:"properties,omitempty"`
-	Meta        *workflowv1alpha1.WorkflowStepMeta `json:"meta,omitempty" optional:"true"`
-	If          string                             `json:"if,omitempty" optional:"true"`
-	Timeout     string                             `json:"timeout,omitempty" optional:"true"`
-	Inputs      workflowv1alpha1.StepInputs        `json:"inputs,omitempty" optional:"true"`
-	Outputs     workflowv1alpha1.StepOutputs       `json:"outputs,omitempty" optional:"true"`
+	Name        string                            `json:"name" validate:"checkname"`
+	Alias       string                            `json:"alias" validate:"checkalias" optional:"true"`
+	Type        string                            `json:"type" validate:"checkname"`
+	Description string                            `json:"description" optional:"true"`
+	DependsOn   []string                          `json:"dependsOn" optional:"true"`
+	Properties  Properties                        `json:"properties,omitempty"`
+	Meta        *wfTypesv1alpha1.WorkflowStepMeta `json:"meta,omitempty" optional:"true"`
+	If          string                            `json:"if,omitempty" optional:"true"`
+	Timeout     string                            `json:"timeout,omitempty" optional:"true"`
+	Inputs      wfTypesv1alpha1.StepInputs        `json:"inputs,omitempty" optional:"true"`
+	Outputs     wfTypesv1alpha1.StepOutputs       `json:"outputs,omitempty" optional:"true"`
 }
 
 // Properties unmarshal object or string
@@ -1179,6 +1395,9 @@ type ApplicationDeployRequest struct {
 type ApplicationDeployResponse struct {
 	ApplicationRevisionBase `json:",inline"`
 	WorkflowRecord          WorkflowRecordBase `json:"record"`
+	// Warnings are what the API server returned with the admitted Application,
+	// such as an admission webhook's notice that a namespace nears its quota.
+	Warnings []string `json:"warnings,omitempty"`
 }
 
 // ApplicationRollbackResponse the response body that rollback with the revision
@@ -1213,7 +1432,7 @@ type CreateApplicationEnvbindingRequest struct {
 
 // CreateApplicationTraitRequest create application trait request
 type CreateApplicationTraitRequest struct {
-	Type        string `json:"type" validate:"checkname"`
+	Type        string `json:"type" validate:"checktype"`
 	Alias       string `json:"alias,omitempty" validate:"checkalias" optional:"true"`
 	Description string `json:"description,omitempty" optional:"true"`
 	Properties  string `json:"properties"`
@@ -1784,8 +2003,8 @@ type PipelineRunBase struct {
 type RunPipelineRequest struct {
 	// Mode is the mode of the pipeline run. Available values are: "StepByStep", "DAG" for both `step` and `subStep`
 	// default: "StepByStep" for `step`, "DAG" for `subStep`
-	Mode        workflowv1alpha1.WorkflowExecuteMode `json:"mode" optional:"true"`
-	ContextName string                               `json:"contextName"`
+	Mode        wfTypesv1alpha1.WorkflowExecuteMode `json:"mode" optional:"true"`
+	ContextName string                              `json:"contextName"`
 }
 
 // ListPipelineRunResponse is the response body of listing pipeline run
@@ -1938,4 +2157,190 @@ type InstallPluginRequest struct {
 	URL     string                 `json:"url"`
 	Disable bool                   `json:"disable,omitempty"`
 	Options *velacommon.HTTPOption `json:"options,omitempty"`
+}
+
+// ExpressionEnvResponse is what a form needs to edit $( ) expressions for one
+// surface of an application.
+type ExpressionEnvResponse struct {
+	// Enabled says this server offers expression editing at all.
+	Enabled bool `json:"enabled"`
+	// OptedIn says the application reads expressions: it carries the
+	// app.oam.dev/cel-expressions annotation.
+	OptedIn bool   `json:"optedIn"`
+	Surface string `json:"surface"`
+	// Variables are the roots an expression may read, with their fields.
+	Variables []*ExpressionVariable `json:"variables"`
+}
+
+// DefinitionCUEResponse is a definition as CUE, as vela def get writes it.
+type DefinitionCUEResponse struct {
+	CUE string `json:"cue"`
+}
+
+// DefinitionDocResponse is a definition's reference documentation, in Markdown.
+type DefinitionDocResponse struct {
+	Markdown string `json:"markdown"`
+}
+
+// ExpressionVariable is a value an expression can read, and its fields.
+type ExpressionVariable struct {
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	Description string `json:"description,omitempty"`
+	// Schema is the value's type as its CUE schema declares it.
+	Schema   string                `json:"schema,omitempty"`
+	Children []*ExpressionVariable `json:"children,omitempty"`
+}
+
+// ExpressionOptInRequest turns an application's reading of $( ) expressions
+// on or off.
+type ExpressionOptInRequest struct {
+	Enabled bool `json:"enabled"`
+}
+
+// ExpressionCheckRequest asks whether a property value's expressions compile
+// and what its value's type is.
+type ExpressionCheckRequest struct {
+	Surface string `json:"surface" validate:"required"`
+	// Value is the property value as written, $( ) and all.
+	Value string `json:"value"`
+	// Kind is the type the parameter expects: string, integer, number,
+	// boolean, or empty for any.
+	Kind string `json:"kind,omitempty"`
+	// Source names the source the value is written in, on the source surface:
+	// it reads only the sources declared before it.
+	Source string `json:"source,omitempty"`
+	// Component names the component the value is written in, or the one its
+	// trait is on: it cannot read its own output.
+	Component string `json:"component,omitempty"`
+}
+
+// ExpressionCheckResponse reports on a property value's expressions.
+type ExpressionCheckResponse struct {
+	// Type is the value's type once its expressions are evaluated.
+	Type   string             `json:"type,omitempty"`
+	Issues []*ExpressionIssue `json:"issues,omitempty"`
+}
+
+// ExpressionIssue is a problem in a property value, at a position in it.
+type ExpressionIssue struct {
+	Message string `json:"message"`
+	// Start and End are character offsets into the value.
+	Start int `json:"start"`
+	End   int `json:"end"`
+	// Warning is set for an issue that does not stop the value being used.
+	Warning bool `json:"warning,omitempty"`
+	// Fix, where there is one, replaces the text from Start to End.
+	Fix string `json:"fix,omitempty"`
+}
+
+// Customisation is how this VelaUX is branded, kept in the
+// velaux-configuration ConfigMap.
+type Customisation struct {
+	// PageTitle is the browser tab's title.
+	PageTitle string `json:"pageTitle,omitempty"`
+	// LogoURL replaces the KubeVela wordmark; an http(s), data or same-origin URL.
+	LogoURL string `json:"logoURL,omitempty"`
+	// IconURL replaces the sail mark shown when the sidebar is minimised.
+	IconURL string `json:"iconURL,omitempty"`
+	// SidebarColor is the sidebar's background, a hex colour; its text is
+	// light or dark to suit.
+	SidebarColor string `json:"sidebarColor,omitempty"`
+	// AccentColor marks the current page and highlights, a hex colour.
+	AccentColor string `json:"accentColor,omitempty"`
+	// Terminology renames the UI's words, keyed by the word as the UI writes it
+	// in the singular: Application, Environment, Cluster.
+	Terminology map[string]Term `json:"terminology,omitempty"`
+}
+
+// Term is the singular and plural a renamed word takes.
+type Term struct {
+	Singular string `json:"singular"`
+	Plural   string `json:"plural"`
+}
+
+// PackageBase is a CUE package a definition can import: a Package resource in
+// the cluster, or one built into KubeVela.
+type PackageBase struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace,omitempty"`
+	// Path is what a definition imports it as.
+	Path    string `json:"path"`
+	Builtin bool   `json:"builtin,omitempty"`
+	// UsedBy names what can import a built-in package: components (with traits
+	// and sources) or workflow steps.
+	UsedBy []string `json:"usedBy,omitempty"`
+	// Variant tells apart the built-in packages sharing a path: the one
+	// components import and the one workflow steps do, where they differ.
+	Variant    string           `json:"variant,omitempty"`
+	Provider   *PackageProvider `json:"provider,omitempty"`
+	Functions  int              `json:"functions"`
+	Files      int              `json:"files"`
+	CreateTime *time.Time       `json:"createTime,omitempty"`
+}
+
+// PackageProvider is the external server that runs a package's functions.
+// Header values are left out: they often carry credentials.
+type PackageProvider struct {
+	Protocol string   `json:"protocol"`
+	Endpoint string   `json:"endpoint"`
+	Headers  []string `json:"headers,omitempty"`
+}
+
+// PackageField is one field of a function's parameters or results, or of a
+// type, with its type as declared.
+type PackageField struct {
+	Name        string          `json:"name"`
+	Type        string          `json:"type,omitempty"`
+	Optional    bool            `json:"optional,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Fields      []*PackageField `json:"fields,omitempty"`
+}
+
+// PackageFunction is a definition a package's provider runs: #do names the
+// operation, $params what it takes and $returns what it gives back. Where one
+// of those is not a struct, its type stands in the Type field instead.
+type PackageFunction struct {
+	Name        string          `json:"name"`
+	Do          string          `json:"do"`
+	Provider    string          `json:"provider,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Params      []*PackageField `json:"params,omitempty"`
+	ParamsType  string          `json:"paramsType,omitempty"`
+	Returns     []*PackageField `json:"returns,omitempty"`
+	ReturnsType string          `json:"returnsType,omitempty"`
+	// Usage is how a definition calls it, with its required parameters.
+	Usage string `json:"usage"`
+}
+
+// PackageType is a definition in a package that is not a function.
+type PackageType struct {
+	Name        string          `json:"name"`
+	Description string          `json:"description,omitempty"`
+	Type        string          `json:"type,omitempty"`
+	Fields      []*PackageField `json:"fields,omitempty"`
+}
+
+// PackageFile is one of a package's CUE files.
+type PackageFile struct {
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
+
+// PackageDetail is a package with what it offers.
+type PackageDetail struct {
+	PackageBase
+	// PackageName is the name its files declare, which a definition writes
+	// before a function: mysql.#ListTables.
+	PackageName string             `json:"packageName,omitempty"`
+	Functions   []*PackageFunction `json:"functionList"`
+	Types       []*PackageType     `json:"types"`
+	FileList    []*PackageFile     `json:"fileList"`
+	// Issue is why the package's files could not be read, where they could not.
+	Issue string `json:"issue,omitempty"`
+}
+
+// ListPackagesResponse lists the packages.
+type ListPackagesResponse struct {
+	Packages []*PackageBase `json:"packages"`
 }

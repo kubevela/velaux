@@ -39,6 +39,7 @@ type application struct {
 	RbacService        service.RBACService        `inject:""`
 	ApplicationService service.ApplicationService `inject:""`
 	EnvBindingService  service.EnvBindingService  `inject:""`
+	ExpressionService  service.ExpressionService  `inject:""`
 }
 
 // NewApplication new application manage
@@ -62,6 +63,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("project", "search base on project name").DataType("string")).
 		Param(ws.QueryParameter("env", "search base on env name").DataType("string")).
 		Param(ws.QueryParameter("targetName", "Name of the application delivery target").DataType("string")).
+		Param(ws.QueryParameter("withStatus", "Fill each application's status summary").DataType("boolean")).
 		// This api will filter the app by user's permissions
 		// Filter(c.RbacService.CheckPerm("application", "list")).
 		Returns(200, "OK", apis.ListApplicationResponse{}).
@@ -287,6 +289,50 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Writes(apis.EmptyResponse{}))
 
+	ws.Route(ws.GET("/{appName}/sources").To(c.listApplicationSources).
+		Doc("list the sources of an application").
+		Filter(c.RbacService.CheckPerm("source", "list")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.ListApplicationSourceResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.ListApplicationSourceResponse{}))
+
+	ws.Route(ws.POST("/{appName}/sources").To(c.createApplicationSource).
+		Doc("add a source to an application").
+		Filter(c.RbacService.CheckPerm("source", "create")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(apis.CreateSourceRequest{}).
+		Returns(200, "OK", apis.SourceBase{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.SourceBase{}))
+
+	ws.Route(ws.PUT("/{appName}/sources/{sourceName}").To(c.updateApplicationSource).
+		Doc("update a source of an application").
+		Filter(c.RbacService.CheckPerm("source", "update")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Param(ws.PathParameter("sourceName", "identifier of the application source").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(apis.UpdateSourceRequest{}).
+		Returns(200, "OK", apis.SourceBase{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.SourceBase{}))
+
+	ws.Route(ws.DELETE("/{appName}/sources/{sourceName}").To(c.deleteApplicationSource).
+		Doc("delete a source of an application").
+		Filter(c.RbacService.CheckPerm("source", "delete")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Param(ws.PathParameter("sourceName", "identifier of the application source").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.EmptyResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
+
 	ws.Route(ws.PUT("/{appName}/policies/{policyName}").To(c.updateApplicationPolicy).
 		Doc("update policy for application").
 		Filter(c.RbacService.CheckPerm("policy", "update")).
@@ -447,6 +493,68 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Doc("recycle application env").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(c.RbacService.CheckPerm("envBinding", "recycle")).
+		Filter(c.appCheckFilter).
+		Filter(c.envCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string").Required(true)).
+		Param(ws.PathParameter("envName", "identifier of the application envbinding").DataType("string").Required(true)).
+		Returns(200, "OK", apis.EmptyResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
+
+	ws.Route(ws.POST("/{appName}/envs/{envName}/pause").To(c.pauseApplicationEnv).
+		Doc("pause the controller's reconciliation of the application in an env").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(c.RbacService.CheckPerm("envBinding", "pause")).
+		Filter(c.appCheckFilter).
+		Filter(c.envCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string").Required(true)).
+		Param(ws.PathParameter("envName", "identifier of the application envbinding").DataType("string").Required(true)).
+		Returns(200, "OK", apis.EmptyResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
+
+	ws.Route(ws.POST("/{appName}/envs/{envName}/resume").To(c.resumeApplicationEnv).
+		Doc("resume the controller's reconciliation of the application in an env").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(c.RbacService.CheckPerm("envBinding", "resume")).
+		Filter(c.appCheckFilter).
+		Filter(c.envCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string").Required(true)).
+		Param(ws.PathParameter("envName", "identifier of the application envbinding").DataType("string").Required(true)).
+		Returns(200, "OK", apis.EmptyResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
+
+	ws.Route(ws.PUT("/{appName}/envs/{envName}/reconcile-interval").To(c.setReconcileInterval).
+		Doc("set how often the controller resyncs the application in an env").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(c.RbacService.CheckPerm("envBinding", "update")).
+		Filter(c.appCheckFilter).
+		Filter(c.envCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string").Required(true)).
+		Param(ws.PathParameter("envName", "identifier of the application envbinding").DataType("string").Required(true)).
+		Reads(apis.ReconcileIntervalRequest{}).
+		Returns(200, "OK", apis.EmptyResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
+
+	ws.Route(ws.POST("/{appName}/envs/{envName}/restart-workflow").To(c.restartWorkflow).
+		Doc("restart the application's workflow in an env, now, at a time or recurring").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(c.RbacService.CheckPerm("envBinding", "restart")).
+		Filter(c.appCheckFilter).
+		Filter(c.envCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string").Required(true)).
+		Param(ws.PathParameter("envName", "identifier of the application envbinding").DataType("string").Required(true)).
+		Reads(apis.RestartWorkflowRequest{}).
+		Returns(200, "OK", apis.EmptyResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
+
+	ws.Route(ws.DELETE("/{appName}/envs/{envName}/restart-workflow").To(c.cancelWorkflowRestart).
+		Doc("cancel a scheduled or recurring workflow restart in an env").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(c.RbacService.CheckPerm("envBinding", "restart")).
 		Filter(c.appCheckFilter).
 		Filter(c.envCheckFilter).
 		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string").Required(true)).
@@ -675,6 +783,41 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Writes(apis.AppDryRunResponse{}))
 
+	ws.Route(ws.GET("/{appName}/expressions/env").To(c.expressionEnv).
+		Doc("what a $( ) expression in the application can read on a surface").
+		Filter(c.RbacService.CheckPerm("application", "detail")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Param(ws.QueryParameter("surface", "component, trait, workflowstep or source").DataType("string").Required(true)).
+		Param(ws.QueryParameter("source", "on the source surface, the source being edited; it reads only those declared before it").DataType("string")).
+		Param(ws.QueryParameter("component", "on a component or trait, the component being edited or the one the trait is on; it reads every component but itself").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.ExpressionEnvResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.ExpressionEnvResponse{}))
+
+	ws.Route(ws.POST("/{appName}/expressions/check").To(c.checkExpression).
+		Doc("check the $( ) expressions of a property value").
+		Filter(c.RbacService.CheckPerm("application", "detail")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(apis.ExpressionCheckRequest{}).
+		Returns(200, "OK", apis.ExpressionCheckResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.ExpressionCheckResponse{}))
+
+	ws.Route(ws.PUT("/{appName}/expressions").To(c.setExpressionOptIn).
+		Doc("turn the application's reading of $( ) expressions on or off, from its next deploy").
+		Reads(apis.ExpressionOptInRequest{}).
+		Filter(c.RbacService.CheckPerm("application", "update")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.EmptyResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
+
 	ws.Filter(authCheckFilter)
 	return ws
 }
@@ -729,6 +872,7 @@ func (c *application) listApplications(req *restful.Request, res *restful.Respon
 		TargetName: req.QueryParameter("targetName"),
 		Query:      req.QueryParameter("query"),
 		Labels:     labels,
+		WithStatus: req.QueryParameter("withStatus") == "true",
 	})
 	if err != nil {
 		bcode.ReturnError(req, res, err)
@@ -891,12 +1035,72 @@ func (c *application) createComponent(req *restful.Request, res *restful.Respons
 		bcode.ReturnError(req, res, err)
 		return
 	}
+	if !c.checkExpressions(req, res, app, "component", "component", createReq.ComponentType, createReq.Properties, "", createReq.Name) {
+		return
+	}
+	for _, trait := range createReq.Traits {
+		if !c.checkExpressions(req, res, app, "trait", "trait", trait.Type, trait.Properties, "", createReq.Name) {
+			return
+		}
+	}
 	base, err := c.ApplicationService.CreateComponent(req.Request.Context(), app, createReq)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	if err := res.WriteEntity(base); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) expressionEnv(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	env, err := c.ExpressionService.Env(req.Request.Context(), app, req.QueryParameter("surface"), req.QueryParameter("source"), req.QueryParameter("component"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(env); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) checkExpression(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	var body apis.ExpressionCheckRequest
+	if err := req.ReadEntity(&body); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := validate.Struct(&body); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	checked, err := c.ExpressionService.Check(req.Request.Context(), app, body)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(checked); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) setExpressionOptIn(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	var body apis.ExpressionOptInRequest
+	if err := req.ReadEntity(&body); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := c.ExpressionService.SetOptIn(req.Request.Context(), app, body.Enabled); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(apis.EmptyResponse{}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
@@ -926,6 +1130,9 @@ func (c *application) updateComponent(req *restful.Request, res *restful.Respons
 	}
 	if err := validate.Struct(&updateReq); err != nil {
 		bcode.ReturnError(req, res, err)
+		return
+	}
+	if updateReq.Properties != nil && !c.checkExpressions(req, res, app, "component", "component", component.Type, *updateReq.Properties, "", component.Name) {
 		return
 	}
 	base, err := c.ApplicationService.UpdateComponent(req.Request.Context(), app, component, updateReq)
@@ -963,6 +1170,9 @@ func (c *application) createApplicationPolicy(req *restful.Request, res *restful
 	}
 	if err := validate.Struct(&createReq); err != nil {
 		bcode.ReturnError(req, res, err)
+		return
+	}
+	if !c.checkExpressions(req, res, app, "policy", "policy", createReq.Type, createReq.Properties, "", "") {
 		return
 	}
 	base, err := c.ApplicationService.CreatePolicy(req.Request.Context(), app, createReq)
@@ -1029,12 +1239,86 @@ func (c *application) updateApplicationPolicy(req *restful.Request, res *restful
 		bcode.ReturnError(req, res, err)
 		return
 	}
+	if !c.checkExpressions(req, res, app, "policy", "policy", updateReq.Type, updateReq.Properties, "", "") {
+		return
+	}
 	response, err := c.ApplicationService.UpdatePolicy(req.Request.Context(), app, req.PathParameter("policyName"), updateReq)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	if err := res.WriteEntity(response); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) listApplicationSources(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	sources := c.ApplicationService.ListSources(req.Request.Context(), app)
+	if err := res.WriteEntity(apis.ListApplicationSourceResponse{Sources: sources}); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) createApplicationSource(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	var createReq apis.CreateSourceRequest
+	if err := req.ReadEntity(&createReq); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := validate.Struct(&createReq); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if !c.checkExpressions(req, res, app, "source", "source", createReq.Type, createReq.Properties, createReq.Name, "") {
+		return
+	}
+	source, err := c.ApplicationService.CreateSource(req.Request.Context(), app, createReq)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(source); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) updateApplicationSource(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	var updateReq apis.UpdateSourceRequest
+	if err := req.ReadEntity(&updateReq); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := validate.Struct(&updateReq); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if !c.checkExpressions(req, res, app, "source", "source", updateReq.Type, updateReq.Properties, req.PathParameter("sourceName"), "") {
+		return
+	}
+	source, err := c.ApplicationService.UpdateSource(req.Request.Context(), app, req.PathParameter("sourceName"), updateReq)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(source); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) deleteApplicationSource(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	if err := c.ApplicationService.DeleteSource(req.Request.Context(), app, req.PathParameter("sourceName")); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(apis.EmptyResponse{}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
@@ -1074,6 +1358,9 @@ func (c *application) addApplicationTrait(req *restful.Request, res *restful.Res
 		bcode.ReturnError(req, res, err)
 		return
 	}
+	if !c.checkExpressions(req, res, app, "trait", "trait", createReq.Type, createReq.Properties, "", req.PathParameter("compName")) {
+		return
+	}
 	trait, err := c.ApplicationService.CreateApplicationTrait(req.Request.Context(), app,
 		&model.ApplicationComponent{Name: req.PathParameter("compName")}, createReq)
 	if err != nil {
@@ -1095,6 +1382,9 @@ func (c *application) updateApplicationTrait(req *restful.Request, res *restful.
 	}
 	if err := validate.Struct(&updateReq); err != nil {
 		bcode.ReturnError(req, res, err)
+		return
+	}
+	if !c.checkExpressions(req, res, app, "trait", "trait", req.PathParameter("traitType"), updateReq.Properties, "", req.PathParameter("compName")) {
 		return
 	}
 	trait, err := c.ApplicationService.UpdateApplicationTrait(req.Request.Context(), app,
@@ -1313,6 +1603,60 @@ func (c *application) recycleApplicationEnv(req *restful.Request, res *restful.R
 	}
 }
 
+func (c *application) pauseApplicationEnv(req *restful.Request, res *restful.Response) {
+	c.setApplicationEnvPaused(req, res, true)
+}
+
+func (c *application) resumeApplicationEnv(req *restful.Request, res *restful.Response) {
+	c.setApplicationEnvPaused(req, res, false)
+}
+
+func (c *application) setApplicationEnvPaused(req *restful.Request, res *restful.Response, paused bool) {
+	c.applyEnvSetting(req, res, func(ctx context.Context, app *model.Application, envName string) error {
+		return c.ApplicationService.SetApplicationPaused(ctx, app, envName, paused)
+	})
+}
+
+func (c *application) setReconcileInterval(req *restful.Request, res *restful.Response) {
+	var body apis.ReconcileIntervalRequest
+	if err := req.ReadEntity(&body); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	c.applyEnvSetting(req, res, func(ctx context.Context, app *model.Application, envName string) error {
+		return c.ApplicationService.SetReconcileInterval(ctx, app, envName, body.Interval)
+	})
+}
+
+func (c *application) restartWorkflow(req *restful.Request, res *restful.Response) {
+	var body apis.RestartWorkflowRequest
+	if err := req.ReadEntity(&body); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	c.applyEnvSetting(req, res, func(ctx context.Context, app *model.Application, envName string) error {
+		return c.ApplicationService.RestartWorkflow(ctx, app, envName, body.Schedule)
+	})
+}
+
+func (c *application) cancelWorkflowRestart(req *restful.Request, res *restful.Response) {
+	c.applyEnvSetting(req, res, c.ApplicationService.CancelWorkflowRestart)
+}
+
+// applyEnvSetting runs a change to the Application deployed to the request's env.
+func (c *application) applyEnvSetting(req *restful.Request, res *restful.Response, apply func(ctx context.Context, app *model.Application, envName string) error) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	env := req.Request.Context().Value(&apis.CtxKeyApplicationEnvBinding).(*model.EnvBinding)
+	if err := apply(req.Request.Context(), app, env.Name); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(apis.EmptyResponse{}); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
 func (c *application) listApplicationRecords(req *restful.Request, res *restful.Response) {
 	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
 	records, err := c.ApplicationService.ListRecords(req.Request.Context(), app.Name)
@@ -1398,4 +1742,15 @@ func (c *application) rollbackApplicationWithRevision(req *restful.Request, res 
 		bcode.ReturnError(req, res, err)
 		return
 	}
+}
+
+// checkExpressions refuses properties holding an expression with an error, so a
+// save through the API is checked as the form checks it; it reports whether
+// the request may go on.
+func (c *application) checkExpressions(req *restful.Request, res *restful.Response, app *model.Application, surface, defType, typeName, properties, source, component string) bool {
+	if err := c.ExpressionService.CheckProperties(req.Request.Context(), app, surface, defType, typeName, properties, source, component); err != nil {
+		bcode.ReturnError(req, res, err)
+		return false
+	}
+	return true
 }

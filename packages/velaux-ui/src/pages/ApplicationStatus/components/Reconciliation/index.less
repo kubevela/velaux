@@ -1,0 +1,69 @@
+// The settings as label, value and actions, in a card like the tables.
+.reconciliation {
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.reconciliation-grid {
+  display: grid;
+  grid-template-columns: minmax(160px, max-content) 1fr auto;
+  align-items: center;
+  margin: 0;
+  font-size: 13px;
+  dt,
+  dd {
+    min-height: 40px;
+    margin: 0;
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+  }
+  > :nth-child(-n + 3) {
+    border-top: none;
+  }
+  dt {
+    padding-right: 24px;
+    color: #64748b;
+    font-weight: 500;
+  }
+  dd {
+    color: #0f172a;
+  }
+}
+
+.reconciliation-actions {
+  justify-content: flex-end;
+}
+
+.reconciliation-warning {
+  color: #b45309;
+}
+
+.reconciliation-dialog-hint {
+  margin: 0 0 12px;
+  color: #475569;
+}
+
+.reconciliation-dialog-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.reconciliation-restart-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+
+.reconciliation-datetime {
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}

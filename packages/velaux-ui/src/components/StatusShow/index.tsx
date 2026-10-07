@@ -4,9 +4,11 @@ import React from 'react';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import { Translation } from '../../components/Translation';
-import type { ApplicationStatus, Condition , Resource } from '@velaux/data';
+import type { ApplicationStatus, ComponentStatus, Condition, Resource } from '@velaux/data';
 import { locale } from '../../utils/locale';
+import { componentStatusKey, hasStatusDetails } from '../../utils/status';
 import { If } from '../If';
+import { StatusDetails } from '../StatusDetails';
 
 type Props = {
   loading: boolean;
@@ -108,7 +110,17 @@ class StatusShow extends React.Component<Props> {
               contentHeight="auto"
               title={<Translation>Component Status</Translation>}
             >
-              <Table locale={locale().Table} className="customTable" dataSource={applicationStatus?.services}>
+              <Table
+                locale={locale().Table}
+                className="customTable"
+                dataSource={applicationStatus?.services?.map((item) => ({
+                  ...item,
+                  statusKey: componentStatusKey(item),
+                }))}
+                primaryKey="statusKey"
+                rowExpandable={hasStatusDetails}
+                expandedRowRender={(record: ComponentStatus) => <StatusDetails status={record} />}
+              >
                 <Table.Column align="left" dataIndex="name" width="200px" title={<Translation>Name</Translation>} />
                 <Table.Column
                   align="left"

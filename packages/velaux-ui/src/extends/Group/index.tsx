@@ -25,6 +25,8 @@ type Props = {
   alwaysShow?: boolean;
   disableAddon?: boolean;
   onChange?: (values: any) => void;
+  // emptyValue is set when the group is switched on, if it holds nothing yet.
+  emptyValue?: any;
 };
 
 type State = {
@@ -67,6 +69,18 @@ class Group extends React.Component<Props, State> {
     }
   };
 
+  // setEmptyValue gives a group switched on a value, so a condition on the
+  // group being set holds before any of its fields is filled.
+  setEmptyValue() {
+    const { jsonKey = '', onChange, emptyValue } = this.props;
+    const field: Field | undefined = this.props.field;
+    if (emptyValue === undefined || !field || !onChange || field.getValue(jsonKey) !== undefined) {
+      return;
+    }
+    field.setValue(jsonKey, emptyValue);
+    onChange(field.getValues());
+  }
+
   removeJsonKeyValue() {
     const { jsonKey = '', onChange } = this.props;
     const field: Field | undefined = this.props.field;
@@ -100,6 +114,7 @@ class Group extends React.Component<Props, State> {
                       onChange={(event: boolean) => {
                         if (event === true) {
                           this.setState({ enable: event, closed: false, checked: true });
+                          this.setEmptyValue();
                         } else if (event === false) {
                           Dialog.confirm({
                             type: 'confirm',

@@ -1,9 +1,11 @@
 import { Table, Button, Tag, Balloon, Dialog, Message } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
+import { RowAction } from '../../../../components/RowAction';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
-import type { ConfigDistribution , WorkflowStepStatus } from '@velaux/data';
+import type { ConfigDistribution, WorkflowStepStatus } from '@velaux/data';
 import { momentDate } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import './index.less';
@@ -173,16 +175,14 @@ class ConfigDistributionPage extends Component<Props, State> {
                 }}
                 project={''}
               >
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineDelete />}
+                  label="Delete"
+                  danger
                   onClick={() => {
                     this.onDelete(record);
                   }}
-                >
-                  <Translation>Delete</Translation>
-                </Button>
+                />
               </Permission>
             </Fragment>
           );
