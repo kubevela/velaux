@@ -15,3 +15,69 @@
     border-left: 1px solid #c0c6cc !important;
   }
 }
+
+.ui-schema-locked-label {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.ui-schema-lock {
+  color: #8c8c8c;
+  cursor: help;
+}
+
+// Descriptions sit in the extra slot, so a validation message shows beside
+// them; they keep the look of help text.
+.ui-schema-description {
+  color: #999;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.ui-schema-expressible {
+  position: relative;
+}
+
+// The ƒx toggle sits at the top right of a field that may take an expression.
+.ui-schema-fx {
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  z-index: 2;
+  padding: 0 6px;
+  font-style: italic;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 18px;
+  color: #8c8c8c;
+  border: 1px solid #dcdee3;
+  border-radius: 3px;
+  cursor: pointer;
+  &:hover {
+    color: #1b58f4;
+    border-color: #1b58f4;
+  }
+  &.active {
+    color: #fff;
+    background: #1b58f4;
+    border-color: #1b58f4;
+  }
+}
+
+.ui-schema-expressions-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 4px 8px;
+  font-size: 12px;
+  color: #666;
+  .ui-schema-expressions-note {
+    flex-basis: 100%;
+    text-align: right;
+    color: #d23c26;
+  }
+}

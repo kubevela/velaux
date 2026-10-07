@@ -41,3 +41,8 @@ var (
 	// ErrChangeSecretType the secret type of the config can not be changed
 	ErrChangeSecretType = NewBcode(400, 16008, "the secret type of the config can not be changed")
 )
+
+// ErrSensitiveConfigTemplate means a ConfigTemplate marked sensitive, whose
+// Configs VelaUX cannot write yet: their properties belong in a Secret
+// referenced by propertiesFrom, not inline in the Config.
+var ErrSensitiveConfigTemplate = NewBcode(400, 16009, "configs of a sensitive ConfigTemplate cannot be written from VelaUX yet")
