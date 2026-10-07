@@ -26,6 +26,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	wfTypes "github.com/kubevela/workflow/pkg/types"
 	. "github.com/onsi/ginkgo/v2"
@@ -148,6 +149,89 @@ var _ = Describe("Test application service function", Ordered, func() {
 		Expect(err).Should(BeNil())
 		err = k8sClient.Delete(context.TODO(), &cd)
 		Expect(err).Should(BeNil())
+	})
+
+	It("Test a new application with no component sets its workflow mode", func() {
+		ctx := context.TODO()
+		_, err := appService.CreateApplication(ctx, v1.CreateApplicationRequest{
+			Name: "bare-app", Project: testProject,
+			Labels:       map[string]string{"controller.core.oam.dev/pause": "true"},
+			Annotations:  map[string]string{"app.oam.dev/reconcile-interval": "10m"},
+			EnvBinding:   []*v1.EnvBinding{{Name: "app-dev"}},
+			WorkflowMode: "DAG",
+		})
+		Expect(err).Should(BeNil())
+
+		app := &model.Application{Name: "bare-app"}
+		Expect(appService.Store.Get(ctx, app)).Should(BeNil())
+		Expect(app.Labels).Should(HaveKeyWithValue("controller.core.oam.dev/pause", "true"))
+		Expect(app.Annotations).Should(HaveKeyWithValue("app.oam.dev/reconcile-interval", "10m"))
+
+		wf := &model.Workflow{Name: repository.ConvertWorkflowName("app-dev"), AppPrimaryKey: app.PrimaryKey()}
+		Expect(appService.Store.Get(ctx, wf)).Should(BeNil())
+		Expect(string(wf.Mode.Steps)).Should(Equal("DAG"), "the mode chosen at creation")
+
+		_, err = appService.CreateApplication(ctx, v1.CreateApplicationRequest{
+			Name: "bad-mode-app", Project: testProject, EnvBinding: []*v1.EnvBinding{{Name: "app-dev"}}, WorkflowMode: "Sideways",
+		})
+		Expect(err).ShouldNot(BeNil())
+
+		// The suite's later specs count the project's applications.
+		Expect(appService.DeleteApplication(ctx, app)).Should(BeNil())
+	})
+
+	It("Test annotations given at creation reach the application", func() {
+		ctx := context.TODO()
+		_, err := appService.CreateApplication(ctx, v1.CreateApplicationRequest{
+			Name: "annotated-app", Project: testProject,
+			Annotations: map[string]string{"app.oam.dev/cel-expressions": "true"},
+			EnvBinding:  []*v1.EnvBinding{{Name: "app-dev"}},
+			Component:   &v1.CreateComponentRequest{Name: "web", ComponentType: "webservice", Properties: `{"image":"nginx"}`},
+		})
+		Expect(err).Should(BeNil())
+		appModel, err := appService.GetApplication(ctx, "annotated-app")
+		Expect(err).Should(BeNil())
+		Expect(appModel.Annotations).Should(HaveKeyWithValue("app.oam.dev/cel-expressions", "true"))
+		Expect(appService.DeleteApplication(ctx, appModel)).Should(BeNil())
+	})
+
+	It("Test application sources", func() {
+		ctx := context.TODO()
+		appModel, err := appService.GetApplication(ctx, testApp)
+		Expect(err).Should(BeNil())
+
+		source, err := appService.CreateSource(ctx, appModel, v1.CreateSourceRequest{Name: "db", Type: "db-lookup", Properties: `{"secret":"db-creds"}`})
+		Expect(err).Should(BeNil())
+		Expect(source.Properties.Properties()).Should(Equal(map[string]interface{}{"secret": "db-creds"}))
+		_, err = appService.CreateSource(ctx, appModel, v1.CreateSourceRequest{Name: "db", Type: "db-lookup"})
+		Expect(err).Should(Equal(bcode.ErrApplicationSourceExist))
+		_, err = appService.CreateSource(ctx, appModel, v1.CreateSourceRequest{Name: "bad", Type: "db-lookup", Properties: `[1]`})
+		Expect(err).Should(Equal(bcode.ErrInvalidProperties))
+
+		By("a source is stored with the application")
+		appModel, err = appService.GetApplication(ctx, testApp)
+		Expect(err).Should(BeNil())
+		Expect(appService.ListSources(ctx, appModel)).Should(HaveLen(1))
+
+		live := true
+		updated, err := appService.UpdateSource(ctx, appModel, "db", v1.UpdateSourceRequest{Type: "db-lookup", Properties: `{"secret":"other"}`, AutoUpdate: &live})
+		Expect(err).Should(BeNil())
+		Expect(*updated.AutoUpdate).Should(BeTrue())
+		_, err = appService.UpdateSource(ctx, appModel, "missing", v1.UpdateSourceRequest{Type: "db-lookup"})
+		Expect(err).Should(Equal(bcode.ErrApplicationSourceNotExist))
+
+		By("the rendered Application carries the sources")
+		oamApp, err := appService.renderOAMApplication(ctx, appModel, "", "app-dev", "")
+		Expect(err).Should(BeNil())
+		Expect(oamApp.Spec.Sources).Should(HaveLen(1))
+		Expect(string(oamApp.Spec.Sources[0].Properties.Raw)).Should(MatchJSON(`{"secret":"other"}`))
+		Expect(*oamApp.Spec.Sources[0].AutoUpdate).Should(BeTrue(), "the binding's autoUpdate reaches the Application")
+
+		Expect(appService.DeleteSource(ctx, appModel, "db")).Should(BeNil())
+		Expect(appService.DeleteSource(ctx, appModel, "db")).Should(Equal(bcode.ErrApplicationSourceNotExist))
+		appModel, err = appService.GetApplication(ctx, testApp)
+		Expect(err).Should(BeNil())
+		Expect(appModel.Sources).Should(BeEmpty())
 	})
 
 	It("Test ListApplications function", func() {
@@ -1030,9 +1114,9 @@ func createTestSuspendApp(ctx context.Context, appName, envName, revisionVersion
 				Scopes:     map[string]string{},
 			}},
 			Workflow: &v1beta1.Workflow{
-				Steps: []workflowv1alpha1.WorkflowStep{
+				Steps: []wfTypesv1alpha1.WorkflowStep{
 					{
-						WorkflowStepBase: workflowv1alpha1.WorkflowStepBase{
+						WorkflowStepBase: wfTypesv1alpha1.WorkflowStepBase{
 							Type: wfTypes.WorkflowStepTypeSuspend,
 							Name: "first",
 						},

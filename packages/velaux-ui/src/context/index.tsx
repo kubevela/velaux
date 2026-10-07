@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { WorkflowMode , WorkflowStep } from '@velaux/data';
+import type { WorkflowMode, WorkflowStep } from '@velaux/data';
 
 export interface UISchemaContextState {
   appName?: string;
@@ -35,3 +35,7 @@ type workflowEditContext = {
 };
 
 export const WorkflowEditContext = React.createContext<workflowEditContext>({});
+
+// ProjectContext is the project of the application a view shows, whose own
+// definitions come before the global ones of their name.
+export const ProjectContext = React.createContext<string>('');

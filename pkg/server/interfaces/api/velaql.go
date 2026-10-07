@@ -47,9 +47,11 @@ func (v *velaQL) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/").To(v.queryView).
 		Doc("use velaQL to query resource status").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		// TODO: VelaQL is an open data query API that is currently not compatible with RBAC.
-		// Filter(v.RbacService.CheckPerm("application", "detail")).
+		// The project's application list permission; with no project, only a
+		// platform permission over every project's applications, an admin's.
+		Filter(v.RbacService.CheckPerm("project/application", "list")).
 		Param(ws.QueryParameter("velaql", "velaql query statement").DataType("string")).
+		Param(ws.QueryParameter("project", "the project to query in, as its user; empty for every project, admins only").DataType("string")).
 		Returns(200, "OK", apis.VelaQLViewResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Writes(apis.VelaQLViewResponse{}))
@@ -61,7 +63,7 @@ func (v *velaQL) GetWebServiceRoute() *restful.WebService {
 func (v *velaQL) queryView(req *restful.Request, res *restful.Response) {
 	velaQL := req.QueryParameter("velaql")
 
-	qlResp, err := v.VelaQLService.QueryView(req.Request.Context(), velaQL)
+	qlResp, err := v.VelaQLService.QueryView(req.Request.Context(), velaQL, req.QueryParameter("project"))
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return

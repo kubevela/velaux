@@ -29,4 +29,6 @@ export interface Menu {
   icon?: string | React.ReactNode;
   permission?: ResourceAction;
   active?: boolean;
+  // comingSoon shows the item greyed out, leading nowhere.
+  comingSoon?: boolean;
 }

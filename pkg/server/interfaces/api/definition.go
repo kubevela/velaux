@@ -17,7 +17,10 @@ limitations under the License.
 package api
 
 import (
+	"context"
+
 	"strconv"
+	"strings"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	restful "github.com/emicklei/go-restful/v3"
@@ -27,6 +30,11 @@ import (
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
+)
+
+// whereProject asks for a project's own definitions.
+const (
+	whereProject = "project"
 )
 
 type definition struct {
@@ -42,43 +50,92 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Doc("api for definition manage")
 
 	tags := []string{"definition"}
+	project := ws.QueryParameter("project", "the project whose own definitions, in its namespace, are offered with the global ones").DataType("string")
+	where := ws.QueryParameter("where", "project or global; empty finds the project's, else the global one. A change needs it to reach the project's").DataType("string")
 
 	ws.Route(ws.GET("/").To(d.listDefinitions).
 		Doc("list all definitions").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		// TODO: provide project scope api for query definition list
-		// Filter(d.RbacService.CheckPerm("definition", "list")).
-		Param(ws.QueryParameter("type", "query the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy"})).
+		Filter(d.inProject("list", nil)).
+		Param(project).
+		Param(ws.QueryParameter("type", "query the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy", "source"})).
 		Param(ws.QueryParameter("queryAll", "query all definitions include hidden in UI").DataType("boolean").DefaultValue("false")).
 		Param(ws.QueryParameter("appliedWorkload", "if specified, query the trait definition applied to the workload").DataType("string")).
 		Param(ws.QueryParameter("ownerAddon", "query by which addon created the definition").DataType("string")).
 		Param(ws.QueryParameter("scope", "query by the specified scope like WorkflowRun or Application").DataType("string")).
+		Param(ws.QueryParameter("namespaces", "comma-separated namespaces to report each definition's usability in, as unusableIn").DataType("string")).
 		Returns(200, "OK", apis.ListDefinitionResponse{}).
 		Writes(apis.ListDefinitionResponse{}).Do(returns500))
 
 	ws.Route(ws.GET("/{definitionName}").To(d.detailDefinition).
 		Doc("Detail a definition").
-		// Filter(d.RbacService.CheckPerm("definition", "detail")).
+		Filter(d.inProject("detail", nil)).
 		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(project).Param(where).
 		Param(ws.QueryParameter("type", "query the definition type").DataType("string")).
+		Param(ws.QueryParameter("revision", "the version to detail, as the revisions list names it; the latest when empty").DataType("string")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "create successfully", apis.DetailDefinitionResponse{}).
 		Writes(apis.DetailDefinitionResponse{}).Do(returns500))
 
+	ws.Route(ws.GET("/{definitionName}/revisions").To(d.listDefinitionRevisions).
+		Doc("A definition's revisions, newest first, each with the version an Application pins it by").
+		Filter(d.inProject("detail", d.RbacService.CheckPerm("definition", "detail"))).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(project).Param(where).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true)).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.ListDefinitionRevisionsResponse{}).
+		Writes(apis.ListDefinitionRevisionsResponse{}).Do(returns500))
+
+	ws.Route(ws.GET("/{definitionName}/usage").To(d.definitionUsage).
+		Doc("Report each namespace's use of a component or trait definition against its quota").
+		Filter(d.inProject("detail", d.RbacService.CheckPerm("definition", "detail"))).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(project).Param(where).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait"})).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.DefinitionUsageResponse{}).
+		Writes(apis.DefinitionUsageResponse{}).Do(returns500))
+
+	ws.Route(ws.GET("/{definitionName}/cue").To(d.definitionCUE).
+		Doc("A definition as CUE, as vela def get writes it").
+		Filter(d.inProject("detail", d.RbacService.CheckPerm("definition", "detail"))).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(project).Param(where).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy", "source"})).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.DefinitionCUEResponse{}).
+		Writes(apis.DefinitionCUEResponse{}).Do(returns500))
+
+	ws.Route(ws.GET("/{definitionName}/doc").To(d.definitionDoc).
+		Doc("A definition's reference documentation in Markdown, as vela show generates it").
+		Filter(d.inProject("detail", d.RbacService.CheckPerm("definition", "detail"))).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(project).Param(where).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy"})).
+		Param(ws.QueryParameter("lang", "en (the default) or zh").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.DefinitionDocResponse{}).
+		Writes(apis.DefinitionDocResponse{}).Do(returns500))
+
 	ws.Route(ws.PUT("/{definitionName}/uischema").To(d.updateUISchema).
 		Doc("Update the UI schema for a definition").
-		Filter(d.RbacService.CheckPerm("definition", "update")).
+		Filter(d.writeIn("update")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string").Required(true)).
+		Param(project).Param(where).
 		Reads(apis.UpdateUISchemaRequest{}).
 		Returns(200, "update successfully", schema.UISchema{}).
 		Writes(apis.DetailDefinitionResponse{}).Do(returns500))
 
 	ws.Route(ws.PUT("/{definitionName}/status").To(d.updateDefinitionStatus).
 		Doc("Update the status for a definition").
-		Filter(d.RbacService.CheckPerm("definition", "update")).
+		Filter(d.writeIn("update")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string").Required(true)).
+		Param(project).Param(where).
 		Reads(apis.UpdateDefinitionStatusRequest{}).
 		Returns(200, "update successfully", schema.UISchema{}).
 		Writes(apis.DetailDefinitionResponse{}).Do(returns500))
@@ -98,11 +155,13 @@ func (d *definition) listDefinitions(req *restful.Request, res *restful.Response
 		queryAll = false
 	}
 	definitions, err := d.DefinitionService.ListDefinitions(req.Request.Context(), service.DefinitionQueryOption{
+		Project:          req.QueryParameter("project"),
 		Type:             req.QueryParameter("type"),
 		AppliedWorkloads: req.QueryParameter("appliedWorkload"),
 		OwnerAddon:       req.QueryParameter("ownerAddon"),
 		Scope:            req.QueryParameter("scope"),
 		QueryAll:         queryAll,
+		Namespaces:       splitNamespaces(req.QueryParameter("namespaces")),
 	})
 	if err != nil {
 		bcode.ReturnError(req, res, err)
@@ -114,13 +173,37 @@ func (d *definition) listDefinitions(req *restful.Request, res *restful.Response
 	}
 }
 
+func (d *definition) definitionUsage(req *restful.Request, res *restful.Response) {
+	usage, err := d.DefinitionService.DefinitionUsage(scoped(req), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(usage); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
 func (d *definition) detailDefinition(req *restful.Request, res *restful.Response) {
-	definition, err := d.DefinitionService.DetailDefinition(req.Request.Context(), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	definition, err := d.DefinitionService.DetailDefinitionAt(scoped(req), req.PathParameter("definitionName"), req.QueryParameter("type"), req.QueryParameter("revision"))
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	if err := res.WriteEntity(definition); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (d *definition) listDefinitionRevisions(req *restful.Request, res *restful.Response) {
+	revisions, err := d.DefinitionService.ListDefinitionRevisions(scoped(req), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(apis.ListDefinitionRevisionsResponse{Revisions: revisions}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
@@ -141,7 +224,7 @@ func (d *definition) updateUISchema(req *restful.Request, res *restful.Response)
 		bcode.ReturnError(req, res, bcode.ErrInvalidDefinitionUISchema.SetMessage(err.Error()))
 		return
 	}
-	schema, err := d.DefinitionService.AddDefinitionUISchema(req.Request.Context(), req.PathParameter("definitionName"), updateReq.DefinitionType, updateReq.UISchema)
+	schema, err := d.DefinitionService.AddDefinitionUISchema(scopedWrite(req), req.PathParameter("definitionName"), updateReq.DefinitionType, updateReq.UISchema)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
@@ -163,7 +246,7 @@ func (d *definition) updateDefinitionStatus(req *restful.Request, res *restful.R
 		bcode.ReturnError(req, res, err)
 		return
 	}
-	schema, err := d.DefinitionService.UpdateDefinitionStatus(req.Request.Context(), req.PathParameter("definitionName"), updateReq)
+	schema, err := d.DefinitionService.UpdateDefinitionStatus(scopedWrite(req), req.PathParameter("definitionName"), updateReq)
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
@@ -172,4 +255,90 @@ func (d *definition) updateDefinitionStatus(req *restful.Request, res *restful.R
 		bcode.ReturnError(req, res, err)
 		return
 	}
+}
+
+// splitNamespaces reads a comma-separated namespaces query parameter.
+func splitNamespaces(param string) []string {
+	var namespaces []string
+	for _, ns := range strings.Split(param, ",") {
+		if ns = strings.TrimSpace(ns); ns != "" {
+			namespaces = append(namespaces, ns)
+		}
+	}
+	return namespaces
+}
+
+func (d *definition) definitionDoc(req *restful.Request, res *restful.Response) {
+	doc, err := d.DefinitionService.DefinitionDoc(scoped(req), req.PathParameter("definitionName"), req.QueryParameter("type"), req.QueryParameter("lang"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(doc); err != nil {
+		bcode.ReturnError(req, res, err)
+	}
+}
+
+func (d *definition) definitionCUE(req *restful.Request, res *restful.Response) {
+	cue, err := d.DefinitionService.DefinitionCUE(scoped(req), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(cue); err != nil {
+		bcode.ReturnError(req, res, err)
+	}
+}
+
+// inProject checks the project's definition permission for a request naming a
+// project, and otherwise, where given, the platform's; a request with neither
+// reads the global definitions, which every signed-in user may.
+func (d *definition) inProject(action string, otherwise restful.FilterFunction) restful.FilterFunction {
+	project := d.RbacService.CheckPerm("project/definition", action)
+	return func(req *restful.Request, res *restful.Response, chain *restful.FilterChain) {
+		switch {
+		case req.QueryParameter("project") != "":
+			project(req, res, chain)
+		case otherwise != nil:
+			otherwise(req, res, chain)
+		default:
+			chain.ProcessFilter(req, res)
+		}
+	}
+}
+
+// writeIn checks the project's definition permission for a change to a
+// project's own definition, which must say so with where=project, and the
+// platform's for any other, a global one.
+func (d *definition) writeIn(action string) restful.FilterFunction {
+	project := d.RbacService.CheckPerm("project/definition", action)
+	platform := d.RbacService.CheckPerm("definition", action)
+	return func(req *restful.Request, res *restful.Response, chain *restful.FilterChain) {
+		if req.QueryParameter("where") == whereProject {
+			project(req, res, chain)
+			return
+		}
+		platform(req, res, chain)
+	}
+}
+
+// scoped is the request's context, looking where the request asks.
+func scoped(req *restful.Request) context.Context {
+	return service.WithDefinitionScope(req.Request.Context(), service.DefinitionScope{
+		Project: req.QueryParameter("project"),
+		Scope:   req.QueryParameter("where"),
+	})
+}
+
+// scopedWrite is the request's context for a change: the project's own
+// definition with where=project, else the global one.
+func scopedWrite(req *restful.Request) context.Context {
+	where := "global"
+	if req.QueryParameter("where") == whereProject {
+		where = "project"
+	}
+	return service.WithDefinitionScope(req.Request.Context(), service.DefinitionScope{
+		Project: req.QueryParameter("project"),
+		Scope:   where,
+	})
 }

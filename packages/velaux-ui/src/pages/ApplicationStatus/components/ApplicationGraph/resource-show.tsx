@@ -11,12 +11,15 @@ import type { ResourceTreeNode, ResourceObject } from '@velaux/data';
 
 type ResourceProps = {
   resource: ResourceTreeNode;
+  // project is the application's, which the resource is read as.
+  project: string;
   onClose: () => void;
 };
 
-function loadResource(resource: ResourceTreeNode, setResource: any) {
+function loadResource(resource: ResourceTreeNode, project: string, setResource: any) {
   if (resource.name && resource.kind && resource.apiVersion) {
     detailResource({
+      project,
       name: resource.name,
       namespace: resource.namespace,
       kind: resource.kind,
@@ -41,17 +44,12 @@ export const ShowResource = (props: ResourceProps) => {
   const [resource, setResource] = React.useState<ResourceObject>();
 
   React.useEffect(() => {
-    loadResource(props.resource, setResource);
-  }, [props.resource]);
+    loadResource(props.resource, props.project, setResource);
+  }, [props.resource, props.project]);
   const containerId = uuid();
   return (
     <React.Fragment>
-      <DrawerWithFooter
-        title={nodeKey(props.resource, '/')}
-        placement="right"
-        width={600}
-        onClose={props.onClose}
-      >
+      <DrawerWithFooter title={nodeKey(props.resource, '/')} placement="right" width={600} onClose={props.onClose}>
         <If condition={resource}>
           <div id={containerId} style={{ height: 'calc(100vh - 100px)' }}>
             <DefinitionCode

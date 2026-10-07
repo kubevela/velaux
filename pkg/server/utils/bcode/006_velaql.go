@@ -24,3 +24,9 @@ var ErrViewQuery = NewBcode(400, 60002, "view query failed")
 
 // ErrParseQuery2Json failed to parse query result to response
 var ErrParseQuery2Json = NewBcode(400, 60003, "fail to parse query result to json format")
+
+// ErrViewNotFound the view is neither the project's nor a global one
+var ErrViewNotFound = NewBcode(404, 60004, "the view is not found")
+
+// ErrViewForbidden the project may not read what the view asked for
+var ErrViewForbidden = NewBcode(403, 60005, "the view reads something the project has no access to")

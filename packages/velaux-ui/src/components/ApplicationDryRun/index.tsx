@@ -27,12 +27,7 @@ export const ApplicationDryRun = (props: ApplicationDryRunProps) => {
       title={props.title}
     >
       <div id={id}>
-        <DefinitionCode
-          containerId={id}
-          language="yaml"
-          readOnly={true}
-          value={props.dryRun.yaml}
-        />
+        <DefinitionCode containerId={id} language="yaml" readOnly={true} value={props.dryRun.yaml} />
       </div>
     </Dialog>
   );

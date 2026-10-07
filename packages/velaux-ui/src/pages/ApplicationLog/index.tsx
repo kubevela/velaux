@@ -1,6 +1,7 @@
-import { Message, Grid, Select } from '@alifd/next';
+import { Message, Select } from '@alifd/next';
 import { connect } from 'dva';
 import querystring from 'query-string';
+import { EnvironmentSlot, environmentSlots } from '../../components/EnvironmentSlot';
 import React, { Fragment } from 'react';
 
 import { listApplicationPods, listApplicationPodsDetails } from '../../api/observation';
@@ -11,7 +12,9 @@ import type {
   ApplicationDetail,
   ApplicationStatus,
   EnvBinding,
- PodBase, Container } from '@velaux/data';
+  PodBase,
+  Container,
+} from '@velaux/data';
 
 import LogContainer from './components/LogContainer';
 
@@ -86,11 +89,12 @@ class ApplicationLog extends React.Component<Props, State> {
   };
 
   loadPodInstance = async () => {
-    const { envbinding } = this.props;
+    const { envbinding, applicationDetail } = this.props;
     const { appName, envName, activeComponentName } = this.state;
     const envs = envbinding.filter((item) => item.name === envName);
     if (envs.length > 0 && envs[0]) {
       const param = {
+        project: applicationDetail?.project?.name || '',
         appName: envs[0].appDeployName || appName,
         appNs: envs[0].appDeployNamespace,
         componentName: activeComponentName,
@@ -128,6 +132,7 @@ class ApplicationLog extends React.Component<Props, State> {
     const { pod } = this.state;
     if (pod) {
       listApplicationPodsDetails({
+        project: this.props.applicationDetail?.project?.name || '',
         name: pod?.metadata.name || '',
         namespace: pod?.metadata.namespace || '',
         cluster: pod?.cluster || '',
@@ -215,7 +220,6 @@ class ApplicationLog extends React.Component<Props, State> {
   };
 
   render() {
-    const { Row, Col } = Grid;
     const { pod, activePodName, activeContainerName, activeComponentName, isActiveContainerNameDisabled } = this.state;
     const podLabel = (
       <span>
@@ -230,38 +234,36 @@ class ApplicationLog extends React.Component<Props, State> {
 
     return (
       <Fragment>
-        <Row>
-          <Col span="4">
-            <Select
-              placeholder={i18n.t('Select Component').toString()}
-              label={i18n.t('Component').toString()}
-              dataSource={this.getComponentNameList()}
-              value={activeComponentName}
-              onChange={this.handleComponentNameChange}
-            />
-          </Col>
-          <Col span="4" className="margin-left-10">
-            <Select
-              placeholder={i18n.t('Select Pod').toString()}
-              label={podLabel}
-              dataSource={this.getPodNameList()}
-              value={activePodName}
-              onChange={this.handlePodNameChange}
-            />
-          </Col>
-          <Col span="4" className="margin-left-10">
-            <Select
-              placeholder={i18n.t('Select Container').toString()}
-              label={containerLabel}
-              dataSource={this.getContainerNameList()}
-              value={activeContainerName}
-              onChange={this.handleContainerNameChange}
-              disabled={isActiveContainerNameDisabled}
-            />
-          </Col>
-        </Row>
+        <EnvironmentSlot id={environmentSlots.filters}>
+          <Select
+            placeholder={i18n.t('Select Component').toString()}
+            label={i18n.t('Component').toString()}
+            dataSource={this.getComponentNameList()}
+            value={activeComponentName}
+            onChange={this.handleComponentNameChange}
+          />
+          <Select
+            placeholder={i18n.t('Select Pod').toString()}
+            label={podLabel}
+            dataSource={this.getPodNameList()}
+            value={activePodName}
+            onChange={this.handlePodNameChange}
+          />
+          <Select
+            placeholder={i18n.t('Select Container').toString()}
+            label={containerLabel}
+            dataSource={this.getContainerNameList()}
+            value={activeContainerName}
+            onChange={this.handleContainerNameChange}
+            disabled={isActiveContainerNameDisabled}
+          />
+        </EnvironmentSlot>
 
-        <LogContainer pod={pod} activeContainerName={activeContainerName} />
+        <LogContainer
+          pod={pod}
+          activeContainerName={activeContainerName}
+          project={this.props.applicationDetail?.project?.name || ''}
+        />
       </Fragment>
     );
   }

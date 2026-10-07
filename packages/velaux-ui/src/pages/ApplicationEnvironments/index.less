@@ -1,0 +1,19 @@
+.environment-list {
+  --row-columns: 20px minmax(180px, 1.4fr) minmax(150px, 1fr) 110px 120px 1.4fr 48px;
+}
+
+.environment-list-health,
+.environment-list-targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+// The environment's name opens it, as the row's action does.
+.environment-list-link {
+  color: var(--primary-color, #1b58f4);
+  &:hover {
+    text-decoration: underline;
+  }
+}
