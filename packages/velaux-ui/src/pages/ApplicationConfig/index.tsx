@@ -1,5 +1,7 @@
-import { Grid, Button, Card, Message, Dialog, Balloon, Tag, Loading } from '@alifd/next';
+import { Grid, Button, Message, Dialog, Loading } from '@alifd/next';
 import React, { Component } from 'react';
+import { RelativeTime } from '../../components/RelativeTime';
+import { isDefaultDescription, syncInfo, visibleLabels } from '../../utils/appMeta';
 import './index.less';
 import { connect } from 'dva';
 
@@ -12,13 +14,17 @@ import {
   deletePolicy,
   getPolicyDetail,
   getApplicationStatistics,
+  getSources,
+  deleteSource,
 } from '../../api/application';
-import { getComponentDefinitions } from '../../api/definitions';
+import { getComponentDefinitions, getPolicyDefinitions } from '../../api/definitions';
+import { wantsAdd } from '../../layout/Application/components/AppTabs/add';
+import { deployNamespaces } from '../../utils/restrictions';
 import { If } from '../../components/If';
-import Item from '../../components/Item';
-import NumItem from '../../components/NumItem';
 import Permission from '../../components/Permission';
 import { Title } from '../../components/Title';
+import type { EnvironmentStatus } from '../ApplicationList/components/AppStatus/health';
+import { EnvironmentList } from '../ApplicationEnvironments';
 import { Translation } from '../../components/Translation';
 import { routerRedux, Link } from 'dva/router';
 import i18n from '../../i18n';
@@ -34,17 +40,22 @@ import type {
   ApplicationBase,
   ApplicationComponentBase,
   ApplicationPolicyBase,
+  ApplicationEnvStatus,
+  DefinitionBase,
+  ApplicationSource,
 } from '@velaux/data';
-import { beautifyTime, momentDate, showAlias } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import { locale } from '../../utils/locale';
 import EditAppDialog from '../ApplicationList/components/EditAppDialog';
 
 import ComponentDialog from './components/ComponentDialog';
-import Components from './components/Components';
+import ComponentList from './components/ComponentList';
+import { dependencyItems } from '../../utils/dependencies';
 import PolicyDialog from './components/PolicyDialog';
 import PolicyList from './components/PolicyList';
+import SourceDialog from './components/SourceDialog';
+import SourceList from './components/SourceList';
 import TraitDialog from './components/TraitDialog';
 import TriggerDialog from './components/TriggerDialog';
 import TriggerList from './components/TriggerList';
@@ -52,14 +63,18 @@ import TriggerList from './components/TriggerList';
 const { Row, Col } = Grid;
 
 type Props = {
+  applicationAllStatus?: ApplicationEnvStatus[];
   match: {
     params: {
       appName: string;
+      section?: string;
     };
   };
   history: {
     push: (path: string, state: {}) => {};
+    replace?: (path: string) => void;
   };
+  location?: { pathname: string; search?: string };
   dispatch: ({}) => {};
   applicationDetail?: ApplicationDetail;
   components?: ApplicationComponentBase[];
@@ -70,6 +85,7 @@ type Props = {
 };
 
 type State = {
+  policyScopes?: Record<string, string>;
   appName: string;
   componentName: string;
   visibleTrait: boolean;
@@ -90,6 +106,9 @@ type State = {
   showPolicyName?: string;
   policyDetail?: ApplicationPolicyDetail;
   statistics?: ApplicationStatistics;
+  sources: ApplicationSource[];
+  visibleSource: boolean;
+  editSource?: ApplicationSource;
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -113,14 +132,78 @@ class ApplicationConfig extends Component<Props, State> {
       isEditComponent: false,
       componentDefinitions: [],
       visiblePolicy: false,
+      sources: [],
+      visibleSource: false,
     };
   }
 
   componentDidMount() {
+    this.openAddIfAsked();
     this.onGetApplicationTrigger();
     this.onGetComponentDefinitions();
+    this.onGetPolicyScopes();
     this.loadAppStatistics();
+    this.loadSources();
   }
+
+  componentDidUpdate(prevProps: Props) {
+    if (
+      prevProps.location?.search !== this.props.location?.search ||
+      prevProps.match.params.section !== this.props.match.params.section ||
+      prevProps.applicationDetail !== this.props.applicationDetail
+    ) {
+      this.openAddIfAsked();
+    }
+    if (deployNamespaces(prevProps.envbinding).join(',') !== deployNamespaces(this.props.envbinding).join(',')) {
+      this.onGetComponentDefinitions();
+    }
+  }
+
+  // openAddIfAsked opens the section's add dialog when the URL asks for it
+  // (the tab's +), once: the ask is dropped from the URL as it opens. A
+  // read-only application opens nothing.
+  openAddIfAsked = () => {
+    const { applicationDetail, location, history, match } = this.props;
+    if (!wantsAdd(location?.search) || !applicationDetail) {
+      return;
+    }
+    if (!applicationDetail.readOnly) {
+      switch (match.params.section) {
+        case 'sources':
+          this.setState({ visibleSource: true, editSource: undefined });
+          break;
+        case 'components':
+          this.onAddComponent();
+          break;
+        case 'policies':
+          this.onAddPolicy();
+          break;
+        case 'triggers':
+          this.onAddTrigger();
+          break;
+      }
+    }
+    if (history.replace) {
+      history.replace(location?.pathname || '');
+    }
+  };
+
+  loadSources = () => {
+    getSources(this.state.appName).then((res: { sources?: ApplicationSource[] }) => {
+      if (res) {
+        this.setState({ sources: res.sources || [] });
+      }
+    });
+  };
+
+  onDeleteSource = (name: string) => {
+    deleteSource(this.state.appName, name).then((res: any) => {
+      if (res) {
+        Message.success('Application source deleted successfully');
+        this.loadSources();
+      }
+    });
+  };
 
   onGetApplicationTrigger() {
     const { appName } = this.state;
@@ -246,7 +329,15 @@ class ApplicationConfig extends Component<Props, State> {
 
   editAppPlan = () => {
     const { applicationDetail } = this.props;
-    const { alias = '', description = '', name = '', createTime = '', icon = '', labels, annotations } = applicationDetail || {};
+    const {
+      alias = '',
+      description = '',
+      name = '',
+      createTime = '',
+      icon = '',
+      labels,
+      annotations,
+    } = applicationDetail || {};
     this.setState({
       editItem: {
         name,
@@ -358,9 +449,35 @@ class ApplicationConfig extends Component<Props, State> {
     );
   };
 
+  // onGetPolicyScopes finds how KubeVela applies each policy type, which the
+  // policy list marks.
+  onGetPolicyScopes = () => {
+    getPolicyDefinitions().then((res: { definitions?: DefinitionBase[] }) => {
+      const scopes: Record<string, string> = {};
+      (res?.definitions || []).forEach((def) => {
+        if (def.policyScope) {
+          scopes[def.name] = def.policyScope;
+        }
+      });
+      this.setState({ policyScopes: scopes });
+    });
+  };
+
+  // definitionsRequest numbers the component definition requests, so only the
+  // latest may set the list: an earlier one asked about other namespaces.
+  definitionsRequest = 0;
+
   onGetComponentDefinitions = async () => {
-    getComponentDefinitions().then((res) => {
-      if (res) {
+    const namespaces = deployNamespaces(this.props.envbinding);
+    const request = ++this.definitionsRequest;
+    // Until the environments load there is no namespace to check restrictions
+    // against, and an unfiltered list offers types the webhook then refuses.
+    if (namespaces.length === 0) {
+      this.setState({ componentDefinitions: [] });
+      return;
+    }
+    getComponentDefinitions(namespaces).then((res) => {
+      if (res && request === this.definitionsRequest) {
         this.setState({
           componentDefinitions: res && res.definitions,
         });
@@ -471,262 +588,310 @@ class ApplicationConfig extends Component<Props, State> {
       visiblePolicy,
       policyDetail,
       statistics,
+      sources,
+      visibleSource,
+      editSource,
     } = this.state;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
+    const dependencyEdges = (this.props.applicationAllStatus || []).flatMap((s) => s.status?.dependencies || []);
+    // section is the tab shown; without one the page is the overview.
+    const section = this.props.match.params.section;
     if (!applicationDetail) {
       return <Loading visible />;
     }
+    const description = isDefaultDescription(applicationDetail?.description) ? '' : applicationDetail?.description;
+    const sync = syncInfo(applicationDetail?.labels);
+    const labelKeys = visibleLabels(applicationDetail?.labels);
     return (
       <div>
-        <Row className="flex-row" wrap={true}>
-          <Col xl={16} l={24} s={24} style={{ padding: '0 8px' }}>
-            <Card locale={locale().Card} contentHeight="auto" subTitle={applicationDetail?.description}>
-              <Row wrap={true}>
-                <Col xxs={12}>
-                  <div className="app-name">{showAlias(applicationDetail?.name, applicationDetail?.alias)}</div>
-                </Col>
-                <Col xxs={12} className="flexright" style={{ marginBottom: '16px' }}>
-                  <div>
+        {!section && (
+          <div className="app-overview">
+            <div className="app-overview-about">
+              <div className="app-overview-head">
+                <span className="app-overview-title">
+                  <Translation>About</Translation>
+                </span>
+                <div className="app-overview-actions">
+                  {!applicationDetail?.readOnly && (
                     <Permission
-                      request={{
-                        resource: `project:${projectName}/application/:${appName}`,
-                        action: 'delete',
-                      }}
+                      request={{ resource: `project:${projectName}/application/:${appName}`, action: 'update' }}
                       project={projectName}
                     >
-                      <Button
-                        className="danger-btn"
-                        style={{ marginRight: '16px' }}
-                        onClick={this.onDeleteApplication}
-                        type="secondary"
-                      >
-                        <Translation>Remove</Translation>
-                      </Button>
-                    </Permission>
-                    <Permission
-                      request={{
-                        resource: `project:${projectName}/application/:${appName}`,
-                        action: 'update',
-                      }}
-                      project={projectName}
-                    >
-                      <Button onClick={this.editAppPlan} type="secondary">
+                      <Button onClick={this.editAppPlan}>
                         <Translation>Edit</Translation>
                       </Button>
                     </Permission>
+                  )}
+                  {!applicationDetail?.readOnly && (
+                    <Permission
+                      request={{ resource: `project:${projectName}/application/:${appName}`, action: 'delete' }}
+                      project={projectName}
+                    >
+                      <Button className="danger-btn" onClick={this.onDeleteApplication}>
+                        <Translation>Remove</Translation>
+                      </Button>
+                    </Permission>
+                  )}
+                </div>
+              </div>
+              <p className={`app-overview-description ${description ? '' : 'empty'}`}>
+                {description || <Translation>No description</Translation>}
+              </p>
+              <div className="app-overview-facts">
+                <div>
+                  <span>
+                    <Translation>Project</Translation>
+                  </span>
+                  <Link to={`/projects/${applicationDetail?.project?.name}`}>
+                    {applicationDetail?.project?.alias || applicationDetail?.project?.name}
+                  </Link>
+                </div>
+                <div>
+                  <span>
+                    <Translation>Created</Translation>
+                  </span>
+                  <RelativeTime time={applicationDetail.createTime} />
+                </div>
+                <div>
+                  <span>
+                    <Translation>Updated</Translation>
+                  </span>
+                  <RelativeTime time={applicationDetail.updateTime} />
+                </div>
+                {sync.fromCluster && sync.namespace && (
+                  <div>
+                    <span>
+                      <Translation>Synced from</Translation>
+                    </span>
+                    <span>{sync.namespace}</span>
                   </div>
-                </Col>
-
-                <Col l={8} xs={24}>
-                  <Item
-                    label={<Translation>Project</Translation>}
-                    value={
-                      <Link to={`/projects/${applicationDetail?.project?.name}`}>
-                        {applicationDetail?.project?.alias
-                          ? applicationDetail?.project?.alias
-                          : applicationDetail?.project?.name}
-                      </Link>
-                    }
-                  />
-                </Col>
-
-                <Col l={8} xs={24}>
-                  <Item
-                    label={<Translation>Create Time</Translation>}
-                    value={
-                      <Balloon trigger={<span>{beautifyTime(applicationDetail.createTime)}</span>}>
-                        {momentDate(applicationDetail.createTime) || '-'}
-                      </Balloon>
-                    }
-                  />
-                </Col>
-
-                <Col l={8} xs={24}>
-                  <Item
-                    label={<Translation>Update Time</Translation>}
-                    value={
-                      <Balloon trigger={<span>{beautifyTime(applicationDetail.updateTime)}</span>}>
-                        {momentDate(applicationDetail.updateTime) || '-'}
-                      </Balloon>
-                    }
-                  />
-                </Col>
-
-                <Col xxs={24}>
-                  {applicationDetail?.labels &&
-                    Object.keys(applicationDetail?.labels).map((key) => {
-                      if (applicationDetail?.labels) {
-                        return (
-                          <Tag
-                            key={key}
-                            style={{ margin: '4px' }}
-                            color="blue"
-                          >{`${key}=${applicationDetail?.labels[key]}`}</Tag>
-                        );
-                      }
-                      return;
-                    })}
-                </Col>
-              </Row>
-            </Card>
-          </Col>
-          <Col xl={8} l={24} s={24} style={{ padding: '0 8px' }}>
-            <Card locale={locale().Card} contentHeight="auto" style={{ height: '100%' }}>
-              <Row>
-                <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.envCount} title={i18n.t('Environment Count').toString()} />
-                </Col>
-                <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem number={statistics?.targetCount} title={i18n.t('Target Count').toString()} />
-                </Col>
-                <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem
-                    number={statistics?.revisionCount}
-                    to={`/applications/${applicationDetail.name}/revisions`}
-                    title={i18n.t('Revision Count').toString()}
-                  />
-                </Col>
-                <Col span={6} style={{ padding: '22px 0' }}>
-                  <NumItem
-                    number={statistics?.workflowCount}
-                    to={`/applications/${applicationDetail.name}/workflows`}
-                    title={i18n.t('Workflow Count').toString()}
-                  />
-                </Col>
-              </Row>
-            </Card>
-          </Col>
-        </Row>
-
-        <Row wrap={true} className="app-spec">
-          <Col xl={8} xxs={24} className="app-spec-item">
-            <Row>
-              <Col span={24} className="padding16">
-                <Title
-                  title={
-                    <span className="font-size-16 font-weight-bold">
-                      <Translation>Components</Translation>
+                )}
+                {sync.fromCluster && sync.revision && (
+                  <div>
+                    <span>
+                      <Translation>Synced revision</Translation>
                     </span>
-                  }
-                  actions={
-                    !applicationDetail?.readOnly
-                      ? [
-                          <Permission
-                            request={{
-                              resource: `project:${projectName}/application:${applicationDetail?.name}/component:*`,
-                              action: 'create',
-                            }}
-                            project={projectName}
-                          >
-                            <a key={'add'} onClick={this.onAddComponent} className="font-size-14 font-weight-400">
-                              <Translation>New Component</Translation>
-                            </a>
-                          </Permission>,
-                        ]
-                      : []
-                  }
-                />
-              </Col>
-            </Row>
+                    <span title={sync.generation ? `generation ${sync.generation}` : undefined}>{sync.revision}</span>
+                  </div>
+                )}
+              </div>
+              {labelKeys.length > 0 && (
+                <div className="app-overview-labels">
+                  {labelKeys.map((key) => (
+                    <span key={key} className="resource-chip">{`${key}=${applicationDetail.labels?.[key]}`}</span>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <Components
-              application={applicationDetail}
-              components={components || []}
-              editComponent={(component: ApplicationComponentBase) => {
-                this.editComponent(component);
-              }}
-              onDeleteComponent={(component: string) => {
-                this.onDeleteComponent(component);
-              }}
-              onDeleteTrait={this.onDeleteTrait}
-              onAddTrait={(name: string) => {
-                this.onAddTrait(name, true);
-              }}
-              onAddComponent={this.onAddComponent}
-              changeTraitStats={this.changeTraitStats}
-            />
-          </Col>
-          <Col xl={8} xxs={24} className="app-spec-item">
-            <Row>
-              <Col span={24} className="padding16">
-                <Title
-                  title={
-                    <span className="font-size-16 font-weight-bold">
-                      <Translation>Policies</Translation>
-                    </span>
-                  }
-                  actions={[
-                    <Permission
-                      request={{
-                        resource: `project:${projectName}/application:${applicationDetail?.name}/policy:*`,
-                        action: 'create',
-                      }}
-                      project={projectName}
-                    >
-                      <a key={'add'} className="font-size-14 font-weight-400" onClick={this.onAddPolicy}>
-                        <Translation>New Policy</Translation>
-                      </a>
-                    </Permission>,
-                  ]}
-                />
-              </Col>
-            </Row>
-            <PolicyList
-              policies={policies}
-              envbinding={envbinding}
-              applicationDetail={applicationDetail}
-              onDeletePolicy={(name: string) => {
-                this.onDeletePolicy(name);
-              }}
-              onShowPolicy={(name: string) => {
-                this.onEditPolicy(name);
-              }}
-            />
-          </Col>
-          <Col xl={8} xxs={24} className="app-spec-item">
-            <Row>
-              <Col span={24} className="padding16">
-                <Title
-                  actions={[
-                    <Permission
-                      request={{
-                        resource: `project:${projectName}/application:${applicationDetail?.name}/trigger:*`,
-                        action: 'create',
-                      }}
-                      project={projectName}
-                    >
-                      <a key={'add'} className="font-size-14 font-weight-400" onClick={this.onAddTrigger}>
-                        <Translation>New Trigger</Translation>
-                      </a>
-                    </Permission>,
-                  ]}
-                  title={
-                    <span className="font-size-16 font-weight-bold">
-                      <Translation>Triggers</Translation>
-                    </span>
-                  }
-                />
-              </Col>
-            </Row>
-            <TriggerList
+            <div className="app-overview-stats">
+              {[
+                { n: statistics?.envCount, label: 'Environments', to: 'environments' },
+                { n: statistics?.targetCount, label: 'Targets', to: 'environments' },
+                { n: components?.length, label: 'Components', to: 'config/components' },
+                { n: statistics?.workflowCount, label: 'Workflows', to: 'workflows' },
+                { n: statistics?.revisionCount, label: 'Revisions', to: 'revisions' },
+              ].map((stat) => (
+                <Link key={stat.label} className="app-overview-stat" to={`/applications/${appName}/${stat.to}`}>
+                  <span className="app-overview-stat-n">{stat.n ?? '-'}</span>
+                  <Translation>{stat.label}</Translation>
+                </Link>
+              ))}
+            </div>
+
+            <div className="app-overview-section">
+              <Translation>Environments</Translation>
+            </div>
+            <EnvironmentList
               appName={appName}
-              triggers={triggers}
-              components={components || []}
-              onDeleteTrigger={(token: string) => {
-                this.onDeleteTrigger(token);
-              }}
-              createTriggerInfo={createTriggerInfo}
-              applicationDetail={applicationDetail}
-              onEditTrigger={(t: Trigger) => {
-                this.setState({ visibleTrigger: true, trigger: t });
-              }}
+              envbinding={envbinding || []}
+              applicationAllStatus={(this.props.applicationAllStatus || []) as EnvironmentStatus[]}
+              dispatch={this.props.dispatch}
             />
-          </Col>
+          </div>
+        )}
+        <Row wrap={true} className="app-spec">
+          {section === 'sources' && (
+            <Col span={24} className="app-spec-item">
+              <Row>
+                <Col span={24} className="padding16">
+                  <Title
+                    title={
+                      <span className="app-section-hint">
+                        <Translation>What the application reads when it deploys, as $(source.name).</Translation>
+                      </span>
+                    }
+                    actions={
+                      applicationDetail?.readOnly
+                        ? []
+                        : [
+                            <Permission
+                              request={{
+                                resource: `project:${projectName}/application:${applicationDetail?.name}/source:*`,
+                                action: 'create',
+                              }}
+                              project={projectName}
+                            >
+                              <Button
+                                key={'add'}
+                                type="primary"
+                                onClick={() => this.setState({ visibleSource: true, editSource: undefined })}
+                              >
+                                <Translation>New Source</Translation>
+                              </Button>
+                            </Permission>,
+                          ]
+                    }
+                  />
+                </Col>
+              </Row>
+              <SourceList
+                sources={sources}
+                applicationDetail={applicationDetail}
+                onDeleteSource={this.onDeleteSource}
+                onShowSource={(source: ApplicationSource) => this.setState({ visibleSource: true, editSource: source })}
+              />
+            </Col>
+          )}
+          {section === 'components' && (
+            <Col span={24} className="app-spec-item">
+              <Row>
+                <Col span={24} className="padding16">
+                  <Title
+                    title={
+                      <span className="app-section-hint">
+                        <Translation>What the application runs, and the traits that shape each one.</Translation>
+                      </span>
+                    }
+                    actions={
+                      !applicationDetail?.readOnly
+                        ? [
+                            <Permission
+                              request={{
+                                resource: `project:${projectName}/application:${applicationDetail?.name}/component:*`,
+                                action: 'create',
+                              }}
+                              project={projectName}
+                            >
+                              <Button key={'add'} type="primary" onClick={this.onAddComponent}>
+                                <Translation>New Component</Translation>
+                              </Button>
+                            </Permission>,
+                          ]
+                        : []
+                    }
+                  />
+                </Col>
+              </Row>
+
+              <ComponentList
+                application={applicationDetail}
+                components={components || []}
+                statuses={(this.props.applicationAllStatus || []) as any}
+                editComponent={(component: ApplicationComponentBase) => this.editComponent(component)}
+                onDeleteComponent={(component: string) => this.onDeleteComponent(component)}
+                onDeleteTrait={this.onDeleteTrait}
+                onAddTrait={(name: string) => this.onAddTrait(name, true)}
+                changeTraitStats={this.changeTraitStats}
+              />
+            </Col>
+          )}
+          {section === 'policies' && (
+            <Col span={24} className="app-spec-item">
+              <Row>
+                <Col span={24} className="padding16">
+                  <Title
+                    title={
+                      <span className="app-section-hint">
+                        <Translation>Where the application deploys, and what it overrides there.</Translation>
+                      </span>
+                    }
+                    actions={
+                      applicationDetail?.readOnly
+                        ? []
+                        : [
+                            <Permission
+                              request={{
+                                resource: `project:${projectName}/application:${applicationDetail?.name}/policy:*`,
+                                action: 'create',
+                              }}
+                              project={projectName}
+                            >
+                              <Button key={'add'} type="primary" onClick={this.onAddPolicy}>
+                                <Translation>New Policy</Translation>
+                              </Button>
+                            </Permission>,
+                          ]
+                    }
+                  />
+                </Col>
+              </Row>
+              <PolicyList
+                policies={policies}
+                statuses={this.props.applicationAllStatus}
+                policyScopes={this.state.policyScopes}
+                envbinding={envbinding}
+                applicationDetail={applicationDetail}
+                onDeletePolicy={(name: string) => {
+                  this.onDeletePolicy(name);
+                }}
+                onShowPolicy={(name: string) => {
+                  this.onEditPolicy(name);
+                }}
+              />
+            </Col>
+          )}
+          {section === 'triggers' && (
+            <Col span={24} className="app-spec-item">
+              <Row>
+                <Col span={24} className="padding16">
+                  <Title
+                    actions={
+                      applicationDetail?.readOnly
+                        ? []
+                        : [
+                            <Permission
+                              request={{
+                                resource: `project:${projectName}/application:${applicationDetail?.name}/trigger:*`,
+                                action: 'create',
+                              }}
+                              project={projectName}
+                            >
+                              <Button key={'add'} type="primary" onClick={this.onAddTrigger}>
+                                <Translation>New Trigger</Translation>
+                              </Button>
+                            </Permission>,
+                          ]
+                    }
+                    title={
+                      <span className="app-section-hint">
+                        <Translation>Webhooks that start a workflow from outside.</Translation>
+                      </span>
+                    }
+                  />
+                </Col>
+              </Row>
+              <TriggerList
+                appName={appName}
+                triggers={triggers}
+                components={components || []}
+                onDeleteTrigger={(token: string) => {
+                  this.onDeleteTrigger(token);
+                }}
+                createTriggerInfo={createTriggerInfo}
+                applicationDetail={applicationDetail}
+                onEditTrigger={(t: Trigger) => {
+                  this.setState({ visibleTrigger: true, trigger: t });
+                }}
+              />
+            </Col>
+          )}
         </Row>
 
         <If condition={visibleTrait}>
           <TraitDialog
             project={applicationDetail?.project?.name || ''}
+            deployed={statistics ? (statistics.revisionCount || 0) > 0 : undefined}
             visible={visibleTrait}
             isEditComponent={isEditComponent}
             appName={appName}
@@ -734,6 +899,7 @@ class ApplicationConfig extends Component<Props, State> {
             isEditTrait={isEditTrait}
             traitItem={traitItem}
             temporaryTraitList={temporaryTraitList}
+            envbinding={envbinding || []}
             onClose={this.onClose}
             onOK={this.onOk}
             createTemporaryTrait={(trait: Trait) => {
@@ -766,14 +932,30 @@ class ApplicationConfig extends Component<Props, State> {
         <If condition={visibleComponent}>
           <ComponentDialog
             project={applicationDetail?.project?.name || ''}
+            deployed={statistics ? (statistics.revisionCount || 0) > 0 : undefined}
             appName={appName}
             componentName={componentName}
             components={components || []}
+            dependencies={dependencyItems(componentName, dependencyEdges)}
+            dependencyEdges={dependencyEdges}
             isEditComponent={isEditComponent}
             temporaryTraitList={temporaryTraitList}
             componentDefinitions={componentDefinitions}
             onComponentClose={this.onComponentClose}
             onComponentOK={this.onComponentOK}
+          />
+        </If>
+        <If condition={visibleSource}>
+          <SourceDialog
+            project={applicationDetail?.project?.name || ''}
+            appName={appName}
+            source={editSource}
+            envbinding={envbinding}
+            onClose={() => this.setState({ visibleSource: false, editSource: undefined })}
+            onOK={() => {
+              this.loadSources();
+              this.setState({ visibleSource: false, editSource: undefined });
+            }}
           />
         </If>
         <If condition={visiblePolicy}>

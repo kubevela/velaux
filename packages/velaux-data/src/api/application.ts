@@ -37,6 +37,29 @@ export interface ApplicationBase {
   icon?: string;
   labels?: Record<string, string>;
   annotations?: Record<string, string>;
+  status?: ApplicationStatusSummary;
+}
+
+// AppHealth is an application's health, as the list summarises it.
+export type AppHealth = 'failed' | 'unhealthy' | 'suspended' | 'progressing' | 'healthy' | 'undeployed';
+
+// ApplicationStatusSummary is an application's health at a glance: the worst
+// of its envs, and its components counted across them.
+export interface ApplicationStatusSummary {
+  health: AppHealth;
+  workflow?: string;
+  components: number;
+  healthyComponents: number;
+  envs?: EnvStatusSummary[];
+}
+
+export interface EnvStatusSummary {
+  env: string;
+  health: AppHealth;
+  phase: string;
+  workflow?: string;
+  components: number;
+  healthyComponents: number;
 }
 
 export interface DefinitionDetail {
@@ -45,6 +68,8 @@ export interface DefinitionDetail {
   uiSchema: UIParam[];
   labels: Record<string, string>;
   status: string;
+  // outputSchema is a source definition's schema: the value $(source.<name>) reads.
+  outputSchema?: any;
 }
 
 export interface UIParam {
@@ -55,6 +80,14 @@ export interface UIParam {
   uiType: string;
   style?: {
     colSpan: number;
+    format?: 'table';
+    rowKey?: string;
+    itemLabel?: string;
+    placeholder?: string;
+    advanced?: boolean;
+    section?: string;
+    optionsFrom?: string;
+    expression?: 'never';
   };
   disable?: boolean;
   conditions?: ParamCondition[];
@@ -87,6 +120,7 @@ export interface UIParamValidate {
   defaultValue?: any;
   options?: Array<{ label: string; value: string }>;
   immutable?: boolean;
+  message?: string;
 }
 
 export interface ApplicationDeployRequest {
@@ -99,6 +133,9 @@ export interface ApplicationDeployRequest {
 
 export interface ApplicationDeployResponse extends ApplicationRevision {
   record?: WorkflowRecordBase;
+  // What the API server returned with the admitted Application, such as a
+  // notice that a namespace nears a definition's quota.
+  warnings?: string[];
 }
 
 export interface ApplicationRollbackResponse {
@@ -130,13 +167,98 @@ export interface ApplicationStatus {
   };
   services?: ComponentStatus[];
   appliedResources: Resource[];
+  dependencies?: ComponentDependency[];
+  appliedApplicationPolicies?: AppliedApplicationPolicy[];
+  sources?: ApplicationSourceStatus[];
+  // paused is whether the controller is skipping the Application.
+  paused?: boolean;
+  // reconcileInterval is the Application's own resync period, where it sets one.
+  reconcileInterval?: string;
+  // restartWorkflow is a pending or recurring restart: "true", a time or an interval.
+  restartWorkflow?: string;
+  // workflowRestartScheduledAt is when KubeVela next restarts the workflow.
+  workflowRestartScheduledAt?: string;
+  // autoUpdate is whether the Application follows definition changes.
+  autoUpdate?: boolean;
+}
+
+// ApplicationSourceStatus is how one spec.sources binding resolved.
+export interface ApplicationSourceStatus {
+  name: string;
+  // type is the source definition, with its pinned revision where one was asked for.
+  type?: string;
+  // phase is Resolved, Stale, Failed or Unused: the worst of its resolutions.
+  phase?: string;
+  resolutions?: SourceResolution[];
+  // autoUpdate is the outcome after the feature gate, the binding and any
+  // publishVersion pin; message says which won when it is false.
+  autoUpdate?: boolean;
+  message?: string;
+  consumedBy?: SourceConsumer[];
+}
+
+// SourceResolution is one cache entry behind a source, typically one per cluster.
+export interface SourceResolution {
+  storageKey?: string;
+  clusters?: string[];
+  phase?: string;
+  // expiresAt is an RFC3339 timestamp.
+  expiresAt?: string;
+  message?: string;
+}
+
+// SourceConsumer is a reader of a source, and what it took.
+export interface SourceConsumer {
+  // definitionKind is component, trait, workflowstep or policy.
+  definitionKind: string;
+  // name is the reader; a trait is "<component>/<trait>".
+  name: string;
+  type?: string;
+  cluster?: string;
+  namespace?: string;
+  // values are absent when the binding's statusPolicy withholds them.
+  values?: SourceValue[];
+}
+
+// SourceValue is one value read: the source attribute and the property it fed.
+export interface SourceValue {
+  sourceAttr: string;
+  property?: string;
+  // value is redacted where the attribute is sensitive or masked.
+  value?: unknown;
+}
+
+// One component another depends on, as the Application's status reports it:
+// named in dependsOn, read through inputs, or read by a property expression,
+// with the cluster and namespace an expression names.
+export interface ComponentDependency {
+  component: string;
+  dependsOn: string;
+  source: 'dependsOn' | 'inputs' | 'expression';
+  cluster?: string;
+  namespace?: string;
+}
+
+// AppliedApplicationPolicy is how one application-scoped policy fared on the
+// Application's last render: named in spec.policies (explicit), or applied to
+// every Application in its namespace (global).
+export interface AppliedApplicationPolicy {
+  name: string;
+  type?: string;
+  namespace?: string;
+  source?: 'global' | 'explicit';
+  applied: boolean;
+  error?: boolean;
+  message?: string;
 }
 
 export interface ComponentStatus {
   name: string;
   namespace: string;
   healthy: boolean;
+  workloadHealthy?: boolean;
   message: string;
+  details?: Record<string, string>;
   traits?: TraitStatus[];
   cluster: string;
   workloadDefinition: {
@@ -220,8 +342,10 @@ export interface Trait {
 
 export interface TraitStatus {
   type: string;
-  healthy: string;
+  healthy: boolean;
+  pending?: boolean;
   message: string;
+  details?: Record<string, string>;
 }
 
 export interface ApplicationComponentBase {
@@ -410,11 +534,15 @@ export interface ApplicationQuery {
   env?: string;
   targetName?: string;
   labels?: string;
+  withStatus?: boolean;
+  // addons is exclude, to leave out the applications addons install, or only.
+  addons?: 'exclude' | 'only';
 }
 
 export interface ComponentDefinitionsBase {
   name: string;
   workloadType?: string;
+  unusableIn?: string[];
 }
 
 export interface ApplicationPolicyBase {
@@ -427,6 +555,17 @@ export interface ApplicationPolicyBase {
   type: string;
   updateTime: string;
   envName?: string;
+}
+
+// ApplicationSource is an external value the application's properties read
+// with $(source.<name>).
+export interface ApplicationSource {
+  name: string;
+  type: string;
+  properties?: Record<string, any>;
+  // autoUpdate is whether a change to the source's value re-dispatches what
+  // reads it; unset follows the controller's default.
+  autoUpdate?: boolean;
 }
 
 export interface ApplicationPolicyDetail extends ApplicationPolicyBase {
@@ -475,4 +614,31 @@ export interface CreatePolicyRequest extends UpdatePolicyRequest {
 export interface WorkflowPolicyBinding {
   name: string;
   steps: string[];
+}
+
+// DataFlowEnd is one end of a data flow: a source binding or a component, at a
+// placement where one is known.
+export interface DataFlowEnd {
+  kind: 'source' | 'component';
+  name: string;
+  cluster?: string;
+  namespace?: string;
+}
+
+// DataFlowItem is one value moving along a flow: what was read, and the
+// reader's property that received it; value where KubeVela records it.
+export interface DataFlowItem {
+  read: string;
+  property?: string;
+  trait?: string;
+  value?: any;
+}
+
+// DataFlow is what moves from a producer to a reader: via source, expression,
+// inputs, or dependsOn (order only, no items).
+export interface DataFlow {
+  from: DataFlowEnd;
+  to: DataFlowEnd;
+  via: 'source' | 'expression' | 'inputs' | 'dependsOn';
+  items: DataFlowItem[];
 }

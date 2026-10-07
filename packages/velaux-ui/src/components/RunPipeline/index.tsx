@@ -18,7 +18,7 @@ import Permission from '../Permission';
 import { Translation } from '../Translation';
 
 import NewContext from './new-context';
-import { KeyValue } from "@velaux/data";
+import { KeyValue } from '@velaux/data';
 
 export interface PipelineProps {
   pipeline: PipelineListItem;

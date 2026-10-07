@@ -182,7 +182,7 @@ func (u *addonServiceImpl) GetAddon(ctx context.Context, name string, registry s
 		return nil, bcode.ErrAddonNotExist
 	}
 
-	addon.UISchema = renderAddonCustomUISchema(ctx, u.KubeClient, name, renderDefaultUISchema(addon.APISchema))
+	addon.UISchema = renderAddonCustomUISchema(ctx, u.KubeClient, name, addonDefaultUISchema(addon))
 
 	a, err := AddonImpl2AddonRes(addon, u.KubeConfig)
 	if err != nil {
@@ -216,10 +216,15 @@ func (u *addonServiceImpl) StatusAddon(ctx context.Context, name string) (*apis.
 		}, nil
 	}
 
+	var app v1beta1.Application
+	if err := u.KubeClient.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: addonutil.Addon2AppName(name)}, &app); err != nil && !errors2.IsNotFound(err) {
+		return nil, bcode.ErrGetAddonApplication
+	}
 	res := apis.AddonStatusResponse{
 		AddonBaseStatus: apis.AddonBaseStatus{
-			Name:  name,
-			Phase: apis.AddonPhase(status.AddonPhase),
+			Name:      name,
+			Phase:     apis.AddonPhase(status.AddonPhase),
+			ManagedBy: addonManager(&app),
 		},
 		InstalledVersion: status.InstalledVersion,
 		AppStatus:        *status.AppStatus,
@@ -288,7 +293,7 @@ func (u *addonServiceImpl) ListAddons(ctx context.Context, registry, query strin
 
 	for _, addon := range addons {
 		// render default ui schema
-		addon.UISchema = renderDefaultUISchema(addon.APISchema)
+		addon.UISchema = addonDefaultUISchema(addon)
 	}
 
 	var addonResources []*apis.DetailAddonResponse
@@ -345,6 +350,7 @@ func (u addonServiceImpl) UpdateAddonRegistry(ctx context.Context, name string, 
 	if err != nil {
 		return nil, bcode.ErrAddonRegistryNotExist
 	}
+	keepRegistryCredentials(r, &req)
 	switch {
 	case req.Git != nil:
 		r.Git = req.Git
@@ -364,6 +370,30 @@ func (u addonServiceImpl) UpdateAddonRegistry(ctx context.Context, name string, 
 	}
 
 	return convertAddonRegistry(r), nil
+}
+
+// keepRegistryCredentials carries a registry's stored credentials into an
+// update of the same kind that leaves them empty. The UI never receives them,
+// so an edit it saves sends none, and replacing the source would drop them and
+// orphan the token's Secret. A credential given in the update replaces the old.
+func keepRegistryCredentials(stored pkgaddon.Registry, req *apis.UpdateAddonRegistryRequest) {
+	keep := func(update *string, current string) {
+		if *update == "" {
+			*update = current
+		}
+	}
+	switch {
+	case req.Git != nil && stored.Git != nil:
+		keep(&req.Git.Token, stored.Git.Token)
+	case req.Gitee != nil && stored.Gitee != nil:
+		keep(&req.Gitee.Token, stored.Gitee.Token)
+	case req.Gitlab != nil && stored.Gitlab != nil:
+		keep(&req.Gitlab.Token, stored.Gitlab.Token)
+	case req.Helm != nil && stored.Helm != nil:
+		keep(&req.Helm.Username, stored.Helm.Username)
+		keep(&req.Helm.Password, stored.Helm.Password)
+		keep(&req.Helm.Token, stored.Helm.Token)
+	}
 }
 
 func (u *addonServiceImpl) ListAddonRegistries(ctx context.Context) ([]*apis.AddonRegistry, error) {
@@ -388,6 +418,9 @@ func (u *addonServiceImpl) ListAddonRegistries(ctx context.Context) ([]*apis.Add
 }
 
 func (u *addonServiceImpl) EnableAddon(ctx context.Context, name string, args apis.EnableAddonRequest) error {
+	if err := u.checkAddonUnmanaged(ctx, name); err != nil {
+		return err
+	}
 	var err error
 	registries, err := u.RegistryDS.ListRegistries(ctx)
 	if err != nil {
@@ -434,6 +467,9 @@ func (u *addonServiceImpl) EnableAddon(ctx context.Context, name string, args ap
 }
 
 func (u *addonServiceImpl) DisableAddon(ctx context.Context, name string, force bool) error {
+	if err := u.checkAddonUnmanaged(ctx, name); err != nil {
+		return err
+	}
 	err := pkgaddon.DisableAddon(ctx, u.KubeClient, name, u.KubeConfig, force)
 	if err != nil {
 		klog.Errorf("delete application fail: %s", err.Error())
@@ -454,8 +490,9 @@ func (u *addonServiceImpl) ListEnabledAddon(ctx context.Context) ([]*apis.AddonB
 				continue
 			}
 			response = append(response, &apis.AddonBaseStatus{
-				Name:  addonName,
-				Phase: convertAppStateToAddonPhase(application.Status.Phase),
+				Name:      addonName,
+				Phase:     convertAppStateToAddonPhase(application.Status.Phase),
+				ManagedBy: addonManager(&application),
 			})
 		}
 	}
@@ -471,6 +508,9 @@ func (u *addonServiceImpl) UpdateAddon(ctx context.Context, name string, args ap
 	}, &app)
 	if err != nil {
 		return err
+	}
+	if manager := addonManager(&app); manager != nil {
+		return errAddonManaged(name, manager)
 	}
 
 	registries, err := u.RegistryDS.ListRegistries(ctx)
@@ -561,4 +601,46 @@ func renderAddonCustomUISchema(ctx context.Context, cli client.Client, addonName
 		return defaultSchema
 	}
 	return patchSchema(defaultSchema, schema)
+}
+
+// addonDefaultUISchema is the form generated from the addon's parameter, or
+// one derived from its OpenAPI schema where none was generated.
+func addonDefaultUISchema(addon *pkgaddon.UIData) []*schema.UIParameter {
+	if addon.DefaultUISchema != nil {
+		return addon.DefaultUISchema
+	}
+	return renderDefaultUISchema(addon.APISchema)
+}
+
+// addonManager is the Application whose addon component installed an addon's
+// Application, which KubeVela labels with its parent's name and namespace.
+func addonManager(app *v1beta1.Application) *apis.AddonManager {
+	name, namespace := app.Labels[oam.LabelAppName], app.Labels[oam.LabelAppNamespace]
+	if name == "" || (name == app.Name && namespace == app.Namespace) {
+		return nil
+	}
+	return &apis.AddonManager{Name: name, Namespace: namespace}
+}
+
+// checkAddonUnmanaged refuses a change to an addon an Application manages: the
+// Application would put its own version back, or leave its component pointing
+// at an addon that is gone.
+func (u *addonServiceImpl) checkAddonUnmanaged(ctx context.Context, name string) error {
+	var app v1beta1.Application
+	err := u.KubeClient.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: addonutil.Addon2AppName(name)}, &app)
+	if errors2.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if manager := addonManager(&app); manager != nil {
+		return errAddonManaged(name, manager)
+	}
+	return nil
+}
+
+func errAddonManaged(name string, manager *apis.AddonManager) error {
+	return bcode.ErrAddonManagedByApplication.SetMessage(fmt.Sprintf(
+		"addon %s is managed by application %s/%s; change it there", name, manager.Namespace, manager.Name))
 }

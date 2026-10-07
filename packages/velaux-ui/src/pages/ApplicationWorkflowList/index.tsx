@@ -1,8 +1,9 @@
-import { Button, Dialog, Message, Table } from '@alifd/next';
+import { Dialog, Message, Table } from '@alifd/next';
 import { connect } from 'dva';
-import { Link } from 'dva/router';
+import { Link, routerRedux } from 'dva/router';
 import React from 'react';
-import { AiFillDelete } from 'react-icons/ai';
+import { RowAction } from '../../components/RowAction';
+import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 import type { Dispatch } from 'redux';
 
 import { deleteWorkflow } from '../../api/workflows';
@@ -77,11 +78,19 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
     const projectName = applicationDetail?.project?.name;
     return (
       <div>
+        <div className="app-tab-toolbar">
+          <span className="app-tab-hint">
+            <Translation>The workflow each environment deploys with. Open one to edit its steps.</Translation>
+          </span>
+        </div>
         <Table dataSource={workflows}>
           <Table.Column
             dataIndex="name"
             title={i18n.t('Name').toString()}
             cell={(v: string, i: number, w: Workflow) => {
+              if (applicationDetail?.readOnly) {
+                return v;
+              }
               return (
                 <Link to={`/applications/${applicationDetail?.name}/envbinding/${w.envName}/workflow/${v}/studio`}>
                   {v}
@@ -124,28 +133,47 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
             cell={(v: string, i: number, w: Workflow) => {
               return (
                 <div>
-                  <If condition={v != 'workflow-' + w.envName}>
-                    <Permission
-                      project={projectName}
-                      resource={{
-                        resource: `project:${projectName}/application:${applicationDetail?.name}/workflow:${v}`,
-                        action: 'delete',
-                      }}
-                    >
-                      <Button
-                        text
-                        size={'medium'}
-                        className={'danger-btn'}
-                        component={'a'}
-                        onClick={() => {
-                          this.onDeleteWorkflow(v);
+                  {!applicationDetail?.readOnly && (
+                    <React.Fragment>
+                      <Permission
+                        project={projectName}
+                        request={{
+                          resource: `project:${projectName}/application:${applicationDetail?.name}/workflow:${v}`,
+                          action: 'update',
                         }}
                       >
-                        <AiFillDelete />
-                        <Translation>Remove</Translation>
-                      </Button>
-                    </Permission>
-                  </If>
+                        <RowAction
+                          icon={<AiOutlineEdit />}
+                          label="Edit"
+                          onClick={() => {
+                            this.props.dispatch(
+                              routerRedux.push(
+                                `/applications/${applicationDetail?.name}/envbinding/${w.envName}/workflow/${v}/studio`
+                              )
+                            );
+                          }}
+                        />
+                      </Permission>
+                      <If condition={v != 'workflow-' + w.envName}>
+                        <Permission
+                          project={projectName}
+                          request={{
+                            resource: `project:${projectName}/application:${applicationDetail?.name}/workflow:${v}`,
+                            action: 'delete',
+                          }}
+                        >
+                          <RowAction
+                            icon={<AiOutlineDelete />}
+                            label="Remove"
+                            danger
+                            onClick={() => {
+                              this.onDeleteWorkflow(v);
+                            }}
+                          />
+                        </Permission>
+                      </If>
+                    </React.Fragment>
+                  )}
                 </div>
               );
             }}

@@ -1,13 +1,16 @@
 import { Table, Button, Pagination, Message, Dialog } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
+import { RowAction } from '../../components/RowAction';
+import { AiOutlineCheckCircle, AiOutlineDelete, AiOutlineEdit, AiOutlineKey, AiOutlineStop } from 'react-icons/ai';
 
 import { getRoleList } from '../../api/roles';
 import { getUserList, deleteUser, changeUserDisable, changeUserEnable } from '../../api/users';
 import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
+import { StatusBadge } from '../../components/StatusBadge';
 import { Translation } from '../../components/Translation';
-import type { NameAlias , RolesBase , User } from '@velaux/data';
+import type { NameAlias, RolesBase, User } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 
@@ -244,14 +247,6 @@ class Users extends Component<Props, State> {
     );
   };
 
-  isDisabledShow = (record: User) => {
-    if (record.disabled) {
-      return <Translation>Enable</Translation>;
-    } else {
-      return <Translation>Disable</Translation>;
-    }
-  };
-
   render() {
     const { Column } = Table;
     const columns = [
@@ -280,6 +275,14 @@ class Users extends Component<Props, State> {
             <span className="roles-permPolicies margin-right-5">{item.alias || item.name}</span>
           ));
         },
+      },
+      {
+        key: 'status',
+        title: <Translation>Status</Translation>,
+        dataIndex: 'disabled',
+        cell: (disabled: boolean) => (
+          <StatusBadge tone={disabled ? 'neutral' : 'healthy'} label={disabled ? 'Disabled' : 'Active'} />
+        ),
       },
       {
         key: 'email',
@@ -319,31 +322,23 @@ class Users extends Component<Props, State> {
           return (
             <Fragment>
               <Permission request={{ resource: `user:${record.name}`, action: 'update' }} project={''}>
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineKey />}
+                  label="Reset Password"
                   onClick={() => {
                     this.onResetPassword(record);
                   }}
-                >
-                  <Translation>Reset Password</Translation>
-                </Button>
+                />
               </Permission>
-              <span className="line" />
               <Permission request={{ resource: `user:${record.name}`, action: 'update' }} project={''}>
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineEdit />}
+                  label="Edit"
                   onClick={() => {
                     this.onEdit(record);
                   }}
-                >
-                  <Translation>Edit</Translation>
-                </Button>
+                />
               </Permission>
-              <span className="line" />
               <Permission
                 request={{
                   resource: `user:${record.name}`,
@@ -351,29 +346,22 @@ class Users extends Component<Props, State> {
                 }}
                 project={''}
               >
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
-                  onClick={() => {
-                    this.onChangeStatus(record);
-                  }}
-                >
-                  {this.isDisabledShow(record)}
-                </Button>
+                <RowAction
+                  icon={record.disabled ? <AiOutlineCheckCircle /> : <AiOutlineStop />}
+                  label={record.disabled ? 'Enable' : 'Disable'}
+                  danger={!record.disabled}
+                  onClick={() => this.onChangeStatus(record)}
+                />
               </Permission>
-              <span className="line" />
               <Permission request={{ resource: `user:${record.name}`, action: 'delete' }} project={''}>
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineDelete />}
+                  label="Delete"
+                  danger
                   onClick={() => {
                     this.onDelete(record);
                   }}
-                >
-                  <Translation>Delete</Translation>
-                </Button>
+                />
               </Permission>
             </Fragment>
           );
@@ -409,7 +397,6 @@ class Users extends Component<Props, State> {
                   <Button type="primary" onClick={this.handleClickCreate}>
                     <Translation>New User</Translation>
                   </Button>
-                  ,
                 </Permission>,
               ]}
             />
