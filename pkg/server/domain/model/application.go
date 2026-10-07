@@ -20,9 +20,11 @@ import (
 	"fmt"
 	"time"
 
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 )
 
@@ -40,6 +42,10 @@ type Application struct {
 	Icon        string            `json:"icon"`
 	Labels      map[string]string `json:"labels,omitempty" gorm:"serializer:json"`
 	Annotations map[string]string `json:"annotations,omitempty" gorm:"serializer:json"`
+	// Sources are read by the application's properties with $(source.<name>).
+	// They are kept as the CR spells them, so the fields VelaUX does not edit
+	// survive a sync.
+	Sources []v1beta1.ApplicationSource `json:"sources,omitempty" gorm:"serializer:json"`
 }
 
 // TableName return custom table name
@@ -127,11 +133,11 @@ type ApplicationComponent struct {
 	Type          string            `json:"type"`
 	Main          bool              `json:"main"`
 	// ExternalRevision specified the component revisionName
-	ExternalRevision string                       `json:"externalRevision,omitempty"`
-	Properties       *JSONStruct                  `json:"properties,omitempty" gorm:"serializer:json"`
-	DependsOn        []string                     `json:"dependsOn,omitempty" gorm:"serializer:json"`
-	Inputs           workflowv1alpha1.StepInputs  `json:"inputs,omitempty" gorm:"serializer:json"`
-	Outputs          workflowv1alpha1.StepOutputs `json:"outputs,omitempty" gorm:"serializer:json"`
+	ExternalRevision string                      `json:"externalRevision,omitempty"`
+	Properties       *JSONStruct                 `json:"properties,omitempty" gorm:"serializer:json"`
+	DependsOn        []string                    `json:"dependsOn,omitempty" gorm:"serializer:json"`
+	Inputs           wfTypesv1alpha1.StepInputs  `json:"inputs,omitempty" gorm:"serializer:json"`
+	Outputs          wfTypesv1alpha1.StepOutputs `json:"outputs,omitempty" gorm:"serializer:json"`
 	// Traits define the trait of one component, the type must be array to keep the order.
 	Traits []ApplicationTrait `json:"traits,omitempty" gorm:"serializer:json"`
 	// scopes in ApplicationComponent defines the component-level scopes

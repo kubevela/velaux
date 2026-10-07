@@ -1,20 +1,24 @@
-import { Button, Dialog, Dropdown, Grid, Menu, Message, Select } from '@alifd/next';
-import { Link, routerRedux } from 'dva/router';
+import { Button, Dialog, Dropdown, Menu, Message, Select } from '@alifd/next';
+import { routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { AiOutlineCopy } from 'react-icons/ai';
+import { AiOutlineCopy, AiOutlinePauseCircle, AiOutlinePlayCircle } from 'react-icons/ai';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import { listApplicationServiceEndpoints } from '../../../../api/observation';
 
 import {
   compareApplication,
   deleteApplicationEnvbinding,
+  pauseApplicationEnvbinding,
   recycleApplicationEnvbinding,
+  resumeApplicationEnvbinding,
 } from '../../../../api/application';
 import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 import { If } from '../../../../components/If';
+import { EnvironmentSlot, environmentSlots } from '../../../../components/EnvironmentSlot';
 import Permission from '../../../../components/Permission';
+import './index.less';
 import { Translation } from '../../../../components';
 import type {
   ApplicationCompareResponse,
@@ -46,7 +50,8 @@ type Props = {
   envName: string;
   appName: string;
   envbinding?: EnvBinding;
-  disableStatusShow?: boolean;
+  // extra leads the actions, as a note on the view such as when it last loaded.
+  extra?: React.ReactNode;
   refresh: () => void;
   dispatch: ({}) => void;
   userInfo?: LoginUserInfo;
@@ -54,6 +59,7 @@ type Props = {
 
 type State = {
   recycleLoading: boolean;
+  pauseLoading: boolean;
   deleteLoading: boolean;
   refreshLoading: boolean;
   showStatus: boolean;
@@ -71,6 +77,7 @@ class Header extends Component<Props, State> {
     super(props);
     this.state = {
       recycleLoading: false,
+      pauseLoading: false,
       deleteLoading: false,
       refreshLoading: false,
       showStatus: false,
@@ -242,6 +249,41 @@ class Header extends Component<Props, State> {
     });
   };
 
+  // setPaused pauses or resumes the controller's reconciliation of this env's
+  // Application. Pausing asks first, since nothing rolls out until a resume.
+  setPaused = (paused: boolean) => {
+    const { applicationDetail, envName, refresh, dispatch } = this.props;
+    if (!applicationDetail) {
+      return;
+    }
+    const apply = () => {
+      this.setState({ pauseLoading: true });
+      const call = paused ? pauseApplicationEnvbinding : resumeApplicationEnvbinding;
+      call({ appName: applicationDetail.name, envName: envName })
+        .then((re) => {
+          if (re) {
+            Message.success(i18n.t(paused ? 'Reconciliation paused' : 'Reconciliation resumed'));
+            refresh();
+            dispatch({ type: 'application/getApplicationAllStatus', payload: { appName: applicationDetail.name } });
+          }
+        })
+        .finally(() => this.setState({ pauseLoading: false }));
+    };
+    if (!paused) {
+      apply();
+      return;
+    }
+    Dialog.confirm({
+      content: i18n
+        .t(
+          'Pause reconciliation here? The controller stops applying changes, correcting drift and running the workflow in this environment until you resume.'
+        )
+        .toString(),
+      onOk: apply,
+      locale: locale().Dialog,
+    });
+  };
+
   deleteEnv = async () => {
     Dialog.confirm({
       content: i18n.t('Are you sure you want to delete the current environment binding?').toString(),
@@ -280,10 +322,10 @@ class Header extends Component<Props, State> {
   };
 
   render() {
-    const { Row, Col } = Grid;
     const { appName, envName, components, applicationDetail } = this.props;
-    const { recycleLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff, endpoints } = this.state;
-    const { targets, applicationStatus, disableStatusShow } = this.props;
+    const { recycleLoading, pauseLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff, endpoints } =
+      this.state;
+    const { targets, applicationStatus } = this.props;
     const targetOptions = (targets || []).map((item: Target) => ({
       label: item.alias || item.name,
       value: item.name,
@@ -292,169 +334,161 @@ class Header extends Component<Props, State> {
       label: item.alias || item.name,
       value: item.name,
     }));
-    const getAppStatusShowType = (status: string | undefined) => {
-      if (!status) {
-        return 'notice';
-      }
-      switch (status) {
-        case 'running':
-          return 'success';
-        case 'workflowFinished':
-          return 'success';
-        case 'unhealthy':
-          return 'error';
-      }
-      return 'warning';
-    };
     const projectName = applicationDetail && applicationDetail.project?.name;
-    const span = 10 + (targetOptions.length > 0 ? 0 : 4) + (componentOptions.length > 0 ? 0 : 4);
     return (
       <div>
-        <Row wrap={true} className="border-radius-8">
+        <EnvironmentSlot id={environmentSlots.filters}>
           {targetOptions.length > 0 && (
-            <Col xl={4} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
-              <Select
-                locale={locale().Select}
-                mode="single"
-                onChange={this.handleTargetChange}
-                dataSource={targetOptions}
-                label={i18n.t('Target').toString()}
-                placeholder={i18n.t('Target Selector').toString()}
-                hasClear
-              />
-            </Col>
+            <Select
+              locale={locale().Select}
+              mode="single"
+              onChange={this.handleTargetChange}
+              dataSource={targetOptions}
+              label={i18n.t('Target').toString()}
+              placeholder={i18n.t('All').toString()}
+              hasClear
+            />
           )}
           {componentOptions.length > 0 && (
-            <Col xl={4} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
-              <Select
-                locale={locale().Select}
-                mode="single"
-                onChange={this.handleComponentChange}
-                dataSource={componentOptions}
-                label={i18n.t('Component').toString()}
-                placeholder={i18n.t('Component Selector').toString()}
-                hasClear
-              />
-            </Col>
+            <Select
+              locale={locale().Select}
+              mode="single"
+              onChange={this.handleComponentChange}
+              dataSource={componentOptions}
+              label={i18n.t('Component').toString()}
+              placeholder={i18n.t('All').toString()}
+              hasClear
+            />
           )}
-          <Col xl={6} m={12} xs={24} style={{ marginBottom: '16px', padding: '0 8px' }}>
-            <If condition={applicationStatus}>
-              <Message type={getAppStatusShowType(applicationStatus?.status)} size="medium" style={{ padding: '8px' }}>
-                <Translation>{`Application is ${applicationStatus?.status || 'Init'}`}</Translation>
-                <If condition={!disableStatusShow}>
-                  <span style={{ marginLeft: '16px' }}>
-                    <Link to={`/applications/${appName}/envbinding/${envName}/status`}>
-                      <Translation>Check the details</Translation>
-                    </Link>
-                  </span>
-                </If>
-              </Message>
-            </If>
-          </Col>
-          <Col xl={span} m={12} xs={24} className="flexright" style={{ marginBottom: '16px', padding: '0 8px' }}>
-            <If condition={compare && compare.isDiff}>
-              <Button type="secondary" onClick={this.showApplicationDiff}>
-                <span className="circle circle-failure" />
-                Diff
-              </Button>
-            </If>
-            <Button type="secondary" style={{ marginLeft: '16px' }} loading={refreshLoading} onClick={this.refresh}>
-              <HiOutlineRefresh />
+        </EnvironmentSlot>
+        <EnvironmentSlot id={environmentSlots.actions}>
+          {this.props.extra}
+          <If condition={compare && compare.isDiff}>
+            <Button type="secondary" onClick={this.showApplicationDiff}>
+              <span className="circle circle-failure" />
+              Diff
             </Button>
+          </If>
+          <Button
+            type="secondary"
+            className="environment-toolbar-icon-btn"
+            loading={refreshLoading}
+            title={i18n.t('Refresh').toString()}
+            onClick={this.refresh}
+          >
+            <HiOutlineRefresh />
+          </Button>
 
-            <If condition={endpoints && endpoints.length > 0}>
-              <Dropdown
-                trigger={
-                  <Button style={{ marginLeft: '16px' }} type="secondary">
-                    <Translation>Service Endpoint</Translation>
-                  </Button>
-                }
-              >
-                <Menu>
-                  {endpoints?.map((item) => {
-                    const linkURL = getLink(item);
-                    if (item && !item.endpoint.inner) {
-                      return (
-                        <Menu.Item key={linkURL}>
-                          <If condition={item.endpoint.portName}>
-                            <span className="margin-right-5">{item.endpoint.portName}:</span>
-                          </If>
-                          <a style={{ color: '#1b58f4' }} target="_blank" href={linkURL} rel="noopener noreferrer">
-                            {linkURL}
-                          </a>
-                        </Menu.Item>
-                      );
-                    }
-                    return;
-                  })}
-                  {endpoints?.map((item) => {
-                    const linkURL = getLink(item);
-                    if (item && item.endpoint.inner) {
-                      return (
-                        <Menu.Item key={linkURL}>
-                          <If condition={item.endpoint.portName}>
-                            <span className="margin-right-5">{item.endpoint.portName}:</span>
-                          </If>
-                          <span>
-                            {linkURL}(Inner)
-                            <CopyToClipboard
-                              onCopy={() => {
-                                Message.success('Copied successfully');
-                              }}
-                              text={linkURL}
-                            >
-                              <AiOutlineCopy size={14} />
-                            </CopyToClipboard>
-                          </span>
-                        </Menu.Item>
-                      );
-                    }
-                    return;
-                  })}
-                </Menu>
-              </Dropdown>
-            </If>
+          <If condition={endpoints && endpoints.length > 0}>
+            <Dropdown
+              trigger={
+                <Button type="secondary">
+                  <Translation>Service Endpoint</Translation>
+                </Button>
+              }
+            >
+              <Menu>
+                {endpoints?.map((item) => {
+                  const linkURL = getLink(item);
+                  if (item && !item.endpoint.inner) {
+                    return (
+                      <Menu.Item key={linkURL}>
+                        <If condition={item.endpoint.portName}>
+                          <span className="margin-right-5">{item.endpoint.portName}:</span>
+                        </If>
+                        <a style={{ color: '#1b58f4' }} target="_blank" href={linkURL} rel="noopener noreferrer">
+                          {linkURL}
+                        </a>
+                      </Menu.Item>
+                    );
+                  }
+                  return;
+                })}
+                {endpoints?.map((item) => {
+                  const linkURL = getLink(item);
+                  if (item && item.endpoint.inner) {
+                    return (
+                      <Menu.Item key={linkURL}>
+                        <If condition={item.endpoint.portName}>
+                          <span className="margin-right-5">{item.endpoint.portName}:</span>
+                        </If>
+                        <span>
+                          {linkURL}(Inner)
+                          <CopyToClipboard
+                            onCopy={() => {
+                              Message.success('Copied successfully');
+                            }}
+                            text={linkURL}
+                          >
+                            <AiOutlineCopy size={14} />
+                          </CopyToClipboard>
+                        </span>
+                      </Menu.Item>
+                    );
+                  }
+                  return;
+                })}
+              </Menu>
+            </Dropdown>
+          </If>
 
-            <If condition={!applicationStatus || !applicationStatus.status}>
-              <Permission
-                request={{
-                  resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
-                  action: 'delete',
-                }}
-                project={projectName}
+          <If condition={!applicationStatus || !applicationStatus.status}>
+            <Permission
+              request={{
+                resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
+                action: 'delete',
+              }}
+              project={projectName}
+            >
+              <Button
+                loading={deleteLoading}
+                disabled={applicationDetail?.readOnly}
+                className="danger-btn"
+                onClick={this.deleteEnv}
               >
-                <Button
-                  style={{ marginLeft: '16px' }}
-                  loading={deleteLoading}
-                  disabled={applicationDetail?.readOnly}
-                  className="danger-btn"
-                  onClick={this.deleteEnv}
-                >
-                  <Translation>Delete</Translation>
-                </Button>
-              </Permission>
-            </If>
-            <If condition={applicationStatus && applicationStatus.status && applicationStatus.status != 'deleting'}>
-              <Permission
-                request={{
-                  resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
-                  action: 'recycle',
-                }}
-                project={projectName}
+                <Translation>Delete</Translation>
+              </Button>
+            </Permission>
+          </If>
+          <If condition={applicationStatus && applicationStatus.status && applicationStatus.status != 'deleting'}>
+            <Permission
+              request={{
+                resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
+                action: applicationStatus?.paused ? 'resume' : 'pause',
+              }}
+              project={projectName}
+            >
+              <Button
+                type="secondary"
+                className="environment-toolbar-icon-btn"
+                loading={pauseLoading}
+                disabled={applicationDetail?.readOnly}
+                onClick={() => this.setPaused(!applicationStatus?.paused)}
               >
-                <Button
-                  loading={recycleLoading}
-                  onClick={this.recycleEnv}
-                  disabled={applicationDetail?.readOnly}
-                  className="danger-btn"
-                  style={{ marginLeft: '16px' }}
-                >
-                  <Translation>Recycle</Translation>
-                </Button>
-              </Permission>
-            </If>
-          </Col>
-        </Row>
+                {applicationStatus?.paused ? <AiOutlinePlayCircle /> : <AiOutlinePauseCircle />}
+                <Translation>{applicationStatus?.paused ? 'Resume' : 'Pause'}</Translation>
+              </Button>
+            </Permission>
+          </If>
+          <If condition={applicationStatus && applicationStatus.status && applicationStatus.status != 'deleting'}>
+            <Permission
+              request={{
+                resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
+                action: 'recycle',
+              }}
+              project={projectName}
+            >
+              <Button
+                loading={recycleLoading}
+                onClick={this.recycleEnv}
+                disabled={applicationDetail?.readOnly}
+                className="danger-btn"
+              >
+                <Translation>Recycle</Translation>
+              </Button>
+            </Permission>
+          </If>
+        </EnvironmentSlot>
         <If condition={visibleApplicationDiff}>
           {compare && (
             <ApplicationDiff

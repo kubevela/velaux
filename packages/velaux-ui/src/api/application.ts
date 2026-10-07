@@ -12,7 +12,7 @@ import type {
 } from '@velaux/data';
 import { getDomain } from '../utils/common';
 
-import { application } from './productionLink';
+import { application, expressions } from './productionLink';
 import { post, get, rdelete, put } from './request';
 
 interface TraitQuery {
@@ -97,6 +97,29 @@ export function deletePolicy(params: { appName: string; policyName: string; forc
   return rdelete(gURL, {}, true).then((res) => res);
 }
 
+export function getSources(appName: string) {
+  return get(`${url}/${appName}/sources`, {}).then((res) => res);
+}
+
+export function createSource(
+  appName: string,
+  params: { name: string; type: string; properties: string; autoUpdate?: boolean }
+) {
+  return post(`${url}/${appName}/sources`, params).then((res) => res);
+}
+
+export function updateSource(
+  appName: string,
+  sourceName: string,
+  params: { type: string; properties: string; autoUpdate?: boolean }
+) {
+  return put(`${url}/${appName}/sources/${sourceName}`, params).then((res) => res);
+}
+
+export function deleteSource(appName: string, sourceName: string) {
+  return rdelete(`${url}/${appName}/sources/${sourceName}`, {}, true).then((res) => res);
+}
+
 export function createApplicationTemplate(params: any) {
   return post(`${url}/${params.name}/template`, params).then((res) => res);
 }
@@ -119,6 +142,26 @@ export function deleteApplicationEnvbinding(params: { appName: string; envName: 
 
 export function recycleApplicationEnvbinding(params: { appName: string; envName: string }) {
   return post(`${url}/${params.appName}/envs/${params.envName}/recycle`, {}).then((res) => res);
+}
+
+export function pauseApplicationEnvbinding(params: { appName: string; envName: string }) {
+  return post(`${url}/${params.appName}/envs/${params.envName}/pause`, {}).then((res) => res);
+}
+
+export function setReconcileInterval(params: { appName: string; envName: string; interval: string }) {
+  return put(`${url}/${params.appName}/envs/${params.envName}/reconcile-interval`, { interval: params.interval });
+}
+
+export function restartApplicationWorkflow(params: { appName: string; envName: string; schedule: string }) {
+  return post(`${url}/${params.appName}/envs/${params.envName}/restart-workflow`, { schedule: params.schedule });
+}
+
+export function cancelWorkflowRestart(params: { appName: string; envName: string }) {
+  return rdelete(`${url}/${params.appName}/envs/${params.envName}/restart-workflow`, {});
+}
+
+export function resumeApplicationEnvbinding(params: { appName: string; envName: string }) {
+  return post(`${url}/${params.appName}/envs/${params.envName}/resume`, {}).then((res) => res);
 }
 
 export function getApplicationComponent(appName: string, componentName: string) {
@@ -242,4 +285,42 @@ export function compareApplication(appName: string, params: ApplicationCompareRe
 
 export function dryRunApplication(appName: string, params: ApplicationDryRunRequest) {
   return post(`${url}/${appName}/dry-run`, params, true).then((res) => res);
+}
+
+// getExpressionEnv lists what a $( ) expression in the application can read on
+// a surface: component, trait, workflowstep or source. On the source surface,
+// source names the one being edited, which reads only those declared before it.
+// On a component or trait, component names the component being edited or the
+// one the trait is on, which reads every component but itself.
+export function getExpressionEnv(appName: string, surface: string, source?: string, component?: string) {
+  return get(`${url}/${appName}/expressions/env`, { params: { surface, source, component }, customError: true }).then(
+    (res) => res
+  );
+}
+
+// getDraftExpressionEnv lists what a $( ) expression can read in an application
+// being created, which has no sources yet.
+export function getDraftExpressionEnv(surface: string, optIn: boolean) {
+  return get(`${baseURLOject.APIBASE}${expressions}/env`, { params: { surface, optIn }, customError: true }).then(
+    (res) => res
+  );
+}
+
+// checkDraftExpression checks a property value in an application being created.
+export function checkDraftExpression(params: { surface: string; value: string; kind?: string }) {
+  return post(`${baseURLOject.APIBASE}${expressions}/check`, params, true).then((res) => res);
+}
+
+// checkExpression checks the $( ) expressions of a property value.
+export function checkExpression(
+  appName: string,
+  params: { surface: string; value: string; kind?: string; source?: string; component?: string }
+) {
+  return post(`${url}/${appName}/expressions/check`, params, true).then((res) => res);
+}
+
+// setExpressionOptIn turns the application's reading of $( ) expressions on
+// or off, from its next deploy.
+export function setExpressionOptIn(appName: string, enabled: boolean) {
+  return put(`${url}/${appName}/expressions`, { enabled }).then((res) => res);
 }

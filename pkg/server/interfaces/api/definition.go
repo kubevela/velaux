@@ -18,6 +18,7 @@ package api
 
 import (
 	"strconv"
+	"strings"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	restful "github.com/emicklei/go-restful/v3"
@@ -48,11 +49,12 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		// TODO: provide project scope api for query definition list
 		// Filter(d.RbacService.CheckPerm("definition", "list")).
-		Param(ws.QueryParameter("type", "query the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy"})).
+		Param(ws.QueryParameter("type", "query the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy", "source"})).
 		Param(ws.QueryParameter("queryAll", "query all definitions include hidden in UI").DataType("boolean").DefaultValue("false")).
 		Param(ws.QueryParameter("appliedWorkload", "if specified, query the trait definition applied to the workload").DataType("string")).
 		Param(ws.QueryParameter("ownerAddon", "query by which addon created the definition").DataType("string")).
 		Param(ws.QueryParameter("scope", "query by the specified scope like WorkflowRun or Application").DataType("string")).
+		Param(ws.QueryParameter("namespaces", "comma-separated namespaces to report each definition's usability in, as unusableIn").DataType("string")).
 		Returns(200, "OK", apis.ListDefinitionResponse{}).
 		Writes(apis.ListDefinitionResponse{}).Do(returns500))
 
@@ -61,9 +63,47 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		// Filter(d.RbacService.CheckPerm("definition", "detail")).
 		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
 		Param(ws.QueryParameter("type", "query the definition type").DataType("string")).
+		Param(ws.QueryParameter("revision", "the version to detail, as the revisions list names it; the latest when empty").DataType("string")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "create successfully", apis.DetailDefinitionResponse{}).
 		Writes(apis.DetailDefinitionResponse{}).Do(returns500))
+
+	ws.Route(ws.GET("/{definitionName}/revisions").To(d.listDefinitionRevisions).
+		Doc("A definition's revisions, newest first, each with the version an Application pins it by").
+		Filter(d.RbacService.CheckPerm("definition", "detail")).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true)).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.ListDefinitionRevisionsResponse{}).
+		Writes(apis.ListDefinitionRevisionsResponse{}).Do(returns500))
+
+	ws.Route(ws.GET("/{definitionName}/usage").To(d.definitionUsage).
+		Doc("Report each namespace's use of a component or trait definition against its quota").
+		Filter(d.RbacService.CheckPerm("definition", "detail")).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait"})).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.DefinitionUsageResponse{}).
+		Writes(apis.DefinitionUsageResponse{}).Do(returns500))
+
+	ws.Route(ws.GET("/{definitionName}/cue").To(d.definitionCUE).
+		Doc("A definition as CUE, as vela def get writes it").
+		Filter(d.RbacService.CheckPerm("definition", "detail")).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy", "source"})).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.DefinitionCUEResponse{}).
+		Writes(apis.DefinitionCUEResponse{}).Do(returns500))
+
+	ws.Route(ws.GET("/{definitionName}/doc").To(d.definitionDoc).
+		Doc("A definition's reference documentation in Markdown, as vela show generates it").
+		Filter(d.RbacService.CheckPerm("definition", "detail")).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy"})).
+		Param(ws.QueryParameter("lang", "en (the default) or zh").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.DefinitionDocResponse{}).
+		Writes(apis.DefinitionDocResponse{}).Do(returns500))
 
 	ws.Route(ws.PUT("/{definitionName}/uischema").To(d.updateUISchema).
 		Doc("Update the UI schema for a definition").
@@ -103,6 +143,7 @@ func (d *definition) listDefinitions(req *restful.Request, res *restful.Response
 		OwnerAddon:       req.QueryParameter("ownerAddon"),
 		Scope:            req.QueryParameter("scope"),
 		QueryAll:         queryAll,
+		Namespaces:       splitNamespaces(req.QueryParameter("namespaces")),
 	})
 	if err != nil {
 		bcode.ReturnError(req, res, err)
@@ -114,13 +155,37 @@ func (d *definition) listDefinitions(req *restful.Request, res *restful.Response
 	}
 }
 
+func (d *definition) definitionUsage(req *restful.Request, res *restful.Response) {
+	usage, err := d.DefinitionService.DefinitionUsage(req.Request.Context(), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(usage); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
 func (d *definition) detailDefinition(req *restful.Request, res *restful.Response) {
-	definition, err := d.DefinitionService.DetailDefinition(req.Request.Context(), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	definition, err := d.DefinitionService.DetailDefinitionAt(req.Request.Context(), req.PathParameter("definitionName"), req.QueryParameter("type"), req.QueryParameter("revision"))
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	if err := res.WriteEntity(definition); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (d *definition) listDefinitionRevisions(req *restful.Request, res *restful.Response) {
+	revisions, err := d.DefinitionService.ListDefinitionRevisions(req.Request.Context(), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(apis.ListDefinitionRevisionsResponse{Revisions: revisions}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
@@ -171,5 +236,38 @@ func (d *definition) updateDefinitionStatus(req *restful.Request, res *restful.R
 	if err := res.WriteEntity(schema); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
+	}
+}
+
+// splitNamespaces reads a comma-separated namespaces query parameter.
+func splitNamespaces(param string) []string {
+	var namespaces []string
+	for _, ns := range strings.Split(param, ",") {
+		if ns = strings.TrimSpace(ns); ns != "" {
+			namespaces = append(namespaces, ns)
+		}
+	}
+	return namespaces
+}
+
+func (d *definition) definitionDoc(req *restful.Request, res *restful.Response) {
+	doc, err := d.DefinitionService.DefinitionDoc(req.Request.Context(), req.PathParameter("definitionName"), req.QueryParameter("type"), req.QueryParameter("lang"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(doc); err != nil {
+		bcode.ReturnError(req, res, err)
+	}
+}
+
+func (d *definition) definitionCUE(req *restful.Request, res *restful.Response) {
+	cue, err := d.DefinitionService.DefinitionCUE(req.Request.Context(), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(cue); err != nil {
+		bcode.ReturnError(req, res, err)
 	}
 }

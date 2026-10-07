@@ -1,30 +1,86 @@
-.label-traits {
-  z-index: 1000;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  white-space: nowrap;
-  .trait-num {
-    display: block;
-    padding: 2px 4px;
-    border: rgb(27, 88, 244) solid 1px;
-    border-radius: 4px;
-    &.active {
-      color: #fff;
-      background-color: rgb(27, 88, 244);
-    }
+// A component node: its name and health, then its traits as chips below.
+.graph-node-component {
+  align-items: flex-start;
+  // Each node's transform gives it a stacking context of its own, so the node
+  // rises above its siblings while its trait list hangs over them.
+  &.traits-open {
+    z-index: 10;
+  }
+  .component-node-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    min-width: 0;
+    padding: 2px 0 6px;
   }
 }
 
-.trait-graph {
+.component-node-traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+
+.trait-chip,
+.trait-more {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  color: #334155;
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  .circle {
+    margin-right: 6px;
+  }
+}
+
+.trait-more {
+  color: var(--primary-color, #1b58f4);
+  font-weight: 500;
+  cursor: pointer;
+  &.active,
+  &:hover {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+  }
+}
+
+// The traits past the chips, as the same chips, under the node when opened.
+.trait-panel {
   position: absolute;
-  top: -16px;
-  left: 260px;
-  .trait {
-    height: 24px;
-    line-height: 24px;
-  }
-  .trait-node {
-    padding-left: 1em;
-  }
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  max-width: 300px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+// The name, with its health at the right.
+.component-node-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.component-node-name {
+  overflow: hidden;
+  color: #0f172a;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
