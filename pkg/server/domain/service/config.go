@@ -27,7 +27,9 @@ import (
 
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/config"
+	paramschema "github.com/oam-dev/kubevela/pkg/schema"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
+	"github.com/oam-dev/kubevela/pkg/utils/schema"
 
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
@@ -120,7 +122,7 @@ func (u *configServiceImpl) GetTemplate(ctx context.Context, tem config.Namespac
 		}
 		return nil, err
 	}
-	defaultUISchema := renderDefaultUISchema(template.Schema)
+	defaultUISchema := configTemplateUISchema(ctx, template)
 	t := &apis.ConfigTemplateDetail{
 		ConfigTemplate: apis.ConfigTemplate{
 			Alias:       template.Alias,
@@ -372,4 +374,15 @@ func (u *configServiceImpl) DeleteConfig(ctx context.Context, project, name stri
 		ns = pro.GetNamespace()
 	}
 	return u.Factory.DeleteConfig(ctx, ns, name)
+}
+
+// configTemplateUISchema generates the form from the template's parameter,
+// or derives it from the OpenAPI schema where the parameter cannot be read.
+func configTemplateUISchema(ctx context.Context, template *config.Template) []*schema.UIParameter {
+	ps, err := paramschema.GenerateParameterSchemasAt(ctx, string(template.Template), "template")
+	if err == nil {
+		return ps.UI
+	}
+	klog.Warningf("deriving the form of config template %s from its OpenAPI schema: %s", template.Name, err.Error())
+	return renderDefaultUISchema(template.Schema)
 }

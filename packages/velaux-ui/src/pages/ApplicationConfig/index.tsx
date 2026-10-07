@@ -13,7 +13,8 @@ import {
   getPolicyDetail,
   getApplicationStatistics,
 } from '../../api/application';
-import { getComponentDefinitions } from '../../api/definitions';
+import { getComponentDefinitions, getPolicyDefinitions } from '../../api/definitions';
+import { deployNamespaces } from '../../utils/restrictions';
 import { If } from '../../components/If';
 import Item from '../../components/Item';
 import NumItem from '../../components/NumItem';
@@ -34,6 +35,8 @@ import type {
   ApplicationBase,
   ApplicationComponentBase,
   ApplicationPolicyBase,
+  ApplicationEnvStatus,
+  DefinitionBase,
 } from '@velaux/data';
 import { beautifyTime, momentDate, showAlias } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
@@ -52,6 +55,7 @@ import TriggerList from './components/TriggerList';
 const { Row, Col } = Grid;
 
 type Props = {
+  applicationAllStatus?: ApplicationEnvStatus[];
   match: {
     params: {
       appName: string;
@@ -70,6 +74,7 @@ type Props = {
 };
 
 type State = {
+  policyScopes?: Record<string, string>;
   appName: string;
   componentName: string;
   visibleTrait: boolean;
@@ -119,7 +124,14 @@ class ApplicationConfig extends Component<Props, State> {
   componentDidMount() {
     this.onGetApplicationTrigger();
     this.onGetComponentDefinitions();
+    this.onGetPolicyScopes();
     this.loadAppStatistics();
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (deployNamespaces(prevProps.envbinding).join(',') !== deployNamespaces(this.props.envbinding).join(',')) {
+      this.onGetComponentDefinitions();
+    }
   }
 
   onGetApplicationTrigger() {
@@ -246,7 +258,15 @@ class ApplicationConfig extends Component<Props, State> {
 
   editAppPlan = () => {
     const { applicationDetail } = this.props;
-    const { alias = '', description = '', name = '', createTime = '', icon = '', labels, annotations } = applicationDetail || {};
+    const {
+      alias = '',
+      description = '',
+      name = '',
+      createTime = '',
+      icon = '',
+      labels,
+      annotations,
+    } = applicationDetail || {};
     this.setState({
       editItem: {
         name,
@@ -358,9 +378,35 @@ class ApplicationConfig extends Component<Props, State> {
     );
   };
 
+  // onGetPolicyScopes finds how KubeVela applies each policy type, which the
+  // policy list marks.
+  onGetPolicyScopes = () => {
+    getPolicyDefinitions().then((res: { definitions?: DefinitionBase[] }) => {
+      const scopes: Record<string, string> = {};
+      (res?.definitions || []).forEach((def) => {
+        if (def.policyScope) {
+          scopes[def.name] = def.policyScope;
+        }
+      });
+      this.setState({ policyScopes: scopes });
+    });
+  };
+
+  // definitionsRequest numbers the component definition requests, so only the
+  // latest may set the list: an earlier one asked about other namespaces.
+  definitionsRequest = 0;
+
   onGetComponentDefinitions = async () => {
-    getComponentDefinitions().then((res) => {
-      if (res) {
+    const namespaces = deployNamespaces(this.props.envbinding);
+    const request = ++this.definitionsRequest;
+    // Until the environments load there is no namespace to check restrictions
+    // against, and an unfiltered list offers types the webhook then refuses.
+    if (namespaces.length === 0) {
+      this.setState({ componentDefinitions: [] });
+      return;
+    }
+    getComponentDefinitions(namespaces).then((res) => {
+      if (res && request === this.definitionsRequest) {
         this.setState({
           componentDefinitions: res && res.definitions,
         });
@@ -673,6 +719,8 @@ class ApplicationConfig extends Component<Props, State> {
             </Row>
             <PolicyList
               policies={policies}
+              statuses={this.props.applicationAllStatus}
+              policyScopes={this.state.policyScopes}
               envbinding={envbinding}
               applicationDetail={applicationDetail}
               onDeletePolicy={(name: string) => {
@@ -727,6 +775,7 @@ class ApplicationConfig extends Component<Props, State> {
         <If condition={visibleTrait}>
           <TraitDialog
             project={applicationDetail?.project?.name || ''}
+            deployed={statistics ? (statistics.revisionCount || 0) > 0 : undefined}
             visible={visibleTrait}
             isEditComponent={isEditComponent}
             appName={appName}
@@ -734,6 +783,7 @@ class ApplicationConfig extends Component<Props, State> {
             isEditTrait={isEditTrait}
             traitItem={traitItem}
             temporaryTraitList={temporaryTraitList}
+            envbinding={envbinding || []}
             onClose={this.onClose}
             onOK={this.onOk}
             createTemporaryTrait={(trait: Trait) => {
@@ -766,6 +816,7 @@ class ApplicationConfig extends Component<Props, State> {
         <If condition={visibleComponent}>
           <ComponentDialog
             project={applicationDetail?.project?.name || ''}
+            deployed={statistics ? (statistics.revisionCount || 0) > 0 : undefined}
             appName={appName}
             componentName={componentName}
             components={components || []}
