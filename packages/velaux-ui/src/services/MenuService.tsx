@@ -166,7 +166,17 @@ const defaultWorkspaceMenus: Menu[] = [
     label: 'Settings',
     name: 'settings',
     permission: { resource: 'systemSetting', action: 'update' },
-    relatedRoute: ['/settings'],
+    relatedRoute: ['^/settings$'],
+  },
+  {
+    workspace: 'admin',
+    type: MenuTypes.Workspace,
+    to: '/settings/group-mappings',
+    icon: <AiFillSetting></AiFillSetting>,
+    label: 'Group Mappings',
+    name: 'group-mappings',
+    permission: { resource: 'role:*', action: 'update' },
+    relatedRoute: ['^/settings/group-mappings$'],
   },
 ];
 
