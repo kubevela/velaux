@@ -377,7 +377,7 @@ func (w *workflowServiceImpl) ListWorkflowRecords(ctx context.Context, workflow 
 		WorkflowName:  workflow.Name,
 	}
 	records, err := w.Store.List(ctx, &record, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{
-		{Key: "createTime", Order: datastore.SortOrderAscending},
+		{Key: keyCreateTime, Order: datastore.SortOrderAscending},
 	}})
 	if err != nil {
 		return nil, err
@@ -428,7 +428,7 @@ func (w *workflowServiceImpl) ListWorkflowRecordsFromEnv(ctx context.Context, ap
 
 	filterOptions := datastore.FilterOptions{In: []datastore.InQueryOption{{Key: "workflowName", Values: wfNames}}}
 	records, err := w.Store.List(ctx, &record, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{
-		{Key: "createTime", Order: datastore.SortOrderDescending}},
+		{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 		FilterOptions: filterOptions,
 	})
 	if err != nil {
@@ -847,7 +847,7 @@ func (w *workflowServiceImpl) RollbackRecord(ctx context.Context, appModel *mode
 		revisions, err := w.Store.List(ctx, &revision, &datastore.ListOptions{
 			Page:     1,
 			PageSize: 1,
-			SortBy:   []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+			SortBy:   []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 		})
 		if err != nil {
 			return nil, err

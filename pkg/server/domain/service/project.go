@@ -103,7 +103,7 @@ func (p *projectServiceImpl) DetailProject(ctx context.Context, projectName stri
 
 func listProjects(ctx context.Context, ds datastore.DataStore, page, pageSize int) (*apisv1.ListProjectResponse, error) {
 	var project = model.Project{}
-	entities, err := ds.List(ctx, &project, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}}})
+	entities, err := ds.List(ctx, &project, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}}})
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (p *projectServiceImpl) ListUserProjects(ctx context.Context, userName stri
 		return []*apisv1.ProjectBase{}, nil
 	}
 	projectEntities, err := p.Store.List(ctx, &model.Project{}, &datastore.ListOptions{FilterOptions: datastore.FilterOptions{In: []datastore.InQueryOption{{
-		Key:    "name",
+		Key:    keyName,
 		Values: projectNames,
 	}}}})
 	if err != nil {
@@ -329,7 +329,7 @@ func (p *projectServiceImpl) ListProjectUser(ctx context.Context, projectName st
 	var projectUser = model.ProjectUser{
 		ProjectName: projectName,
 	}
-	entities, err := p.Store.List(ctx, &projectUser, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}}})
+	entities, err := p.Store.List(ctx, &projectUser, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}}})
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +342,7 @@ func (p *projectServiceImpl) ListProjectUser(ctx context.Context, projectName st
 		users, _ := p.Store.List(ctx, &model.User{}, &datastore.ListOptions{
 			FilterOptions: datastore.FilterOptions{
 				In: []datastore.InQueryOption{
-					{Key: "name", Values: usernames},
+					{Key: keyName, Values: usernames},
 				},
 			},
 		})

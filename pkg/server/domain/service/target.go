@@ -62,7 +62,7 @@ func (dt *targetServiceImpl) Init(ctx context.Context) error {
 	targets, err := dt.Store.List(ctx, &model.Target{}, &datastore.ListOptions{FilterOptions: datastore.FilterOptions{
 		IsNotExist: []datastore.IsNotExistQueryOption{
 			{
-				Key: "project",
+				Key: keyProject,
 			},
 		},
 	}})
@@ -85,7 +85,7 @@ func (dt *targetServiceImpl) ListTargets(ctx context.Context, page, pageSize int
 	targets, err := repository.ListTarget(ctx, dt.Store, projectName, &datastore.ListOptions{
 		Page:     page,
 		PageSize: pageSize,
-		SortBy:   []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+		SortBy:   []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 	})
 	if err != nil {
 		return nil, err

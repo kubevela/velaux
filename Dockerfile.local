@@ -1,6 +1,6 @@
 ARG BASE_IMAG
 # Build the manager binary
-FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.23.8-alpine as server-builder
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.27.1-alpine as server-builder
 ARG GOPROXY
 ENV GOPROXY=${GOPROXY:-https://goproxy.cn}
 WORKDIR /workspace

@@ -218,7 +218,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 			WorkflowName:  workflow.Name,
 		}
 		records, err := c.w.Store.List(ctx, &record, &datastore.ListOptions{Page: 1, PageSize: 1, SortBy: []datastore.SortOption{
-			{Key: "createTime", Order: datastore.SortOrderDescending},
+			{Key: keyCreateTime, Order: datastore.SortOrderDescending},
 		}})
 		if err != nil {
 			return nil, err
@@ -233,7 +233,7 @@ func (c *customHandlerImpl) handle(ctx context.Context, webhookTrigger *model.Ap
 			WorkflowName:  workflow.Name,
 		}
 		records, err := c.w.Store.List(ctx, &record, &datastore.ListOptions{Page: 1, PageSize: 1, SortBy: []datastore.SortOption{
-			{Key: "createTime", Order: datastore.SortOrderDescending},
+			{Key: keyCreateTime, Order: datastore.SortOrderDescending},
 		}})
 		if err != nil {
 			return nil, err

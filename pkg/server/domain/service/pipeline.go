@@ -206,7 +206,7 @@ func (p pipelineServiceImpl) ListPipelines(ctx context.Context, req apis.ListPip
 		FilterOptions: datastore.FilterOptions{
 			In: []datastore.InQueryOption{
 				{
-					Key:    "project",
+					Key:    keyProject,
 					Values: queryProjects,
 				},
 			},
@@ -707,7 +707,7 @@ func getResourceLogs(ctx context.Context, config *rest.Config, cli client.Client
 	for _, key := range order {
 		val, ok := logMap.Load(key)
 		if ok {
-			logBuilder.WriteString(fmt.Sprintf("%s", val))
+			fmt.Fprintf(&logBuilder, "%s", val)
 		}
 	}
 	return logBuilder.String(), nil

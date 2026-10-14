@@ -183,5 +183,5 @@ func NewReverseProxy(target *url.URL) *httputil.ReverseProxy {
 		req.URL.Host = target.Host
 		req.URL.Path = strings.Replace(req.URL.Path, "/view/cloudshell", "", 1)
 	}
-	return &httputil.ReverseProxy{Director: director}
+	return &httputil.ReverseProxy{Director: director} //nolint:staticcheck // Rewrite changes which headers reach the upstream.
 }

@@ -211,7 +211,7 @@ func (d *definitionServiceImpl) capabilityOf(ctx context.Context, name, defType 
 		if exampleURL, err = get(def); err == nil {
 			capability, err = docgen.GetCapabilityByPolicyDefinitionObject(*def)
 		}
-	case "source":
+	case definitionTypeSource:
 		def := &v1beta1.SourceDefinition{}
 		if exampleURL, err = get(def); err == nil {
 			capability, err = docgen.GetCapabilityBySourceDefinitionObject(*def)

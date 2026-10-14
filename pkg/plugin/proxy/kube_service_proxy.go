@@ -121,7 +121,7 @@ func (k *kubeServiceProxy) Handler(req *http.Request, res http.ResponseWriter) {
 			}
 		}
 	}
-	rp := &httputil.ReverseProxy{Director: director, ErrorLog: log.Default()}
+	rp := &httputil.ReverseProxy{Director: director, ErrorLog: log.Default()} //nolint:staticcheck // Rewrite changes which headers reach the upstream.
 	rp.ServeHTTP(res, req)
 }
 

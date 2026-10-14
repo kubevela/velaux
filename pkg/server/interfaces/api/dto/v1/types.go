@@ -1081,6 +1081,7 @@ type DefinitionBase struct {
 	Labels      map[string]string `json:"labels"`
 	Category    string            `json:"category"`
 	// WorkloadType the component workload type
+	//
 	// Deprecated: it same as component.workload.type
 	WorkloadType string `json:"workloadType,omitempty"`
 	// OwnerAddon indicates which addon created this definition

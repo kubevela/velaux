@@ -177,9 +177,9 @@ func (s steps) getPolicies(existPolicies, policies []datastore.Entity) (c, u, d 
 func (s steps) String() string {
 	strBuffer := strings.Builder{}
 	for _, step := range s {
-		strBuffer.WriteString(fmt.Sprintf("step: %s/%s state: %v \n", step.name, step.stepType, step.state))
+		fmt.Fprintf(&strBuffer, "step: %s/%s state: %v \n", step.name, step.stepType, step.state)
 		for _, p := range step.policies {
-			strBuffer.WriteString(fmt.Sprintf("\t policy: %s/%s state: %v targets: %v\n", p.name, p.policyType, p.state, p.targets))
+			fmt.Fprintf(&strBuffer, "\t policy: %s/%s state: %v targets: %v\n", p.name, p.policyType, p.state, p.targets)
 		}
 	}
 	return strBuffer.String()

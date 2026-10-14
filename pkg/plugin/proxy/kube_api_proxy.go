@@ -116,7 +116,7 @@ func (k *kubeAPIProxy) Handler(req *http.Request, res http.ResponseWriter) {
 		}
 		req.URL = &base
 	}
-	rp := &httputil.ReverseProxy{Director: director, Transport: k.httpClient.Transport, ErrorLog: log.Default()}
+	rp := &httputil.ReverseProxy{Director: director, Transport: k.httpClient.Transport, ErrorLog: log.Default()} //nolint:staticcheck // Rewrite changes which headers reach the upstream.
 	req = req.WithContext(
 		request.WithUser(req.Context(), &user.DefaultInfo{
 			Name:   userName,
