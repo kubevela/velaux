@@ -24,6 +24,7 @@ import (
 
 	"github.com/kubevela/pkg/util/stringtools"
 
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
@@ -89,7 +90,7 @@ func FromCRPolicy(appPrimaryKey string, policyCR v1beta1.AppPolicy, creator stri
 }
 
 // FromCRWorkflow converts Application CR Workflow section into velaux data store workflow
-func FromCRWorkflow(ctx context.Context, cli client.Client, appPrimaryKey string, app *v1beta1.Application, envName string) (model.Workflow, []workflowv1alpha1.WorkflowStep, error) {
+func FromCRWorkflow(ctx context.Context, cli client.Client, appPrimaryKey string, app *v1beta1.Application, envName string) (model.Workflow, []wfTypesv1alpha1.WorkflowStep, error) {
 	var defaultWorkflow = true
 	name := app.Annotations[oam.AnnotationWorkflowName]
 	if name == "" {
@@ -106,10 +107,10 @@ func FromCRWorkflow(ctx context.Context, cli client.Client, appPrimaryKey string
 	if app.Spec.Workflow == nil {
 		return dataWf, nil, nil
 	}
-	var steps []workflowv1alpha1.WorkflowStep
+	var steps []wfTypesv1alpha1.WorkflowStep
 	if app.Spec.Workflow.Ref != "" {
 		dataWf.Name = app.Spec.Workflow.Ref
-		wf := &workflowv1alpha1.Workflow{}
+		wf := &wfTypesv1alpha1.Workflow{}
 		if err := cli.Get(ctx, types.NamespacedName{Namespace: app.GetNamespace(), Name: app.Spec.Workflow.Ref}, wf); err != nil {
 			return dataWf, nil, err
 		}
@@ -139,7 +140,7 @@ func FromCRWorkflow(ctx context.Context, cli client.Client, appPrimaryKey string
 }
 
 // FromCRWorkflowStepBase convert cr to model
-func FromCRWorkflowStepBase(step workflowv1alpha1.WorkflowStepBase) (*model.WorkflowStepBase, error) {
+func FromCRWorkflowStepBase(step wfTypesv1alpha1.WorkflowStepBase) (*model.WorkflowStepBase, error) {
 	base := &model.WorkflowStepBase{
 		Name:      step.Name,
 		Type:      step.Type,

@@ -17,7 +17,7 @@ limitations under the License.
 package v1
 
 import (
-	"github.com/kubevela/workflow/api/v1alpha1"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -53,7 +53,7 @@ func CreateWorkflowStepModel(apiSteps []apisv1.WorkflowStep) ([]model.WorkflowSt
 		}
 		stepModel := model.WorkflowStep{
 			WorkflowStepBase: *base,
-			Mode:             v1alpha1.WorkflowMode(step.Mode),
+			Mode:             wfTypesv1alpha1.WorkflowMode(step.Mode),
 			SubSteps:         make([]model.WorkflowStepBase, 0),
 		}
 		for _, sub := range step.SubSteps {

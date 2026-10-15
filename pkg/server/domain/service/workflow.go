@@ -38,6 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	wfContext "github.com/kubevela/workflow/pkg/context"
 	wfTypes "github.com/kubevela/workflow/pkg/types"
@@ -190,8 +191,8 @@ func (w *workflowServiceImpl) CreateOrUpdateWorkflow(ctx context.Context, app *m
 		workflow.Alias = req.Alias
 		workflow.Description = req.Description
 		workflow.Default = req.Default
-		workflow.Mode.Steps = workflowv1alpha1.WorkflowMode(req.Mode)
-		workflow.Mode.SubSteps = workflowv1alpha1.WorkflowMode(req.SubMode)
+		workflow.Mode.Steps = wfTypesv1alpha1.WorkflowMode(req.Mode)
+		workflow.Mode.SubSteps = wfTypesv1alpha1.WorkflowMode(req.SubMode)
 		if err := w.Store.Put(ctx, workflow); err != nil {
 			return nil, err
 		}
@@ -205,9 +206,9 @@ func (w *workflowServiceImpl) CreateOrUpdateWorkflow(ctx context.Context, app *m
 			Default:       req.Default,
 			EnvName:       req.EnvName,
 			AppPrimaryKey: app.PrimaryKey(),
-			Mode: workflowv1alpha1.WorkflowExecuteMode{
-				Steps:    workflowv1alpha1.WorkflowMode(req.Mode),
-				SubSteps: workflowv1alpha1.WorkflowMode(req.SubMode),
+			Mode: wfTypesv1alpha1.WorkflowExecuteMode{
+				Steps:    wfTypesv1alpha1.WorkflowMode(req.Mode),
+				SubSteps: wfTypesv1alpha1.WorkflowMode(req.SubMode),
 			},
 		}
 		klog.Infof("create workflow %s for app %s", pkgUtils.Sanitize(req.Name), pkgUtils.Sanitize(app.PrimaryKey()))
@@ -231,8 +232,8 @@ func (w *workflowServiceImpl) UpdateWorkflow(ctx context.Context, workflow *mode
 	if req.SubMode == "" {
 		req.Mode = string(workflowv1alpha1.WorkflowModeDAG)
 	}
-	workflow.Mode.Steps = workflowv1alpha1.WorkflowMode(req.Mode)
-	workflow.Mode.SubSteps = workflowv1alpha1.WorkflowMode(req.SubMode)
+	workflow.Mode.Steps = wfTypesv1alpha1.WorkflowMode(req.Mode)
+	workflow.Mode.SubSteps = wfTypesv1alpha1.WorkflowMode(req.SubMode)
 	// It is allowed to set multiple workflows as default, and only one takes effect.
 	if req.Default != nil {
 		workflow.Default = req.Default
@@ -922,7 +923,7 @@ func (w *workflowServiceImpl) GetWorkflowRecordLog(ctx context.Context, record *
 }
 
 func (w *workflowServiceImpl) GetWorkflowRecordOutput(_ context.Context, workflow *model.Workflow, record *model.WorkflowRecord, stepName string) (apisv1.GetPipelineRunOutputResponse, error) {
-	outputsSpec := make(map[string]workflowv1alpha1.StepOutputs)
+	outputsSpec := make(map[string]wfTypesv1alpha1.StepOutputs)
 	stepOutputs := make([]apisv1.StepOutputBase, 0)
 
 	for _, step := range workflow.Steps {
@@ -970,7 +971,7 @@ func (w *workflowServiceImpl) GetWorkflowRecordOutput(_ context.Context, workflo
 func (w *workflowServiceImpl) GetWorkflowRecordInput(_ context.Context, workflow *model.Workflow, record *model.WorkflowRecord, stepName string) (apisv1.GetPipelineRunInputResponse, error) {
 	// valueFromStep know which step the value came from
 	valueFromStep := make(map[string]string)
-	inputsSpec := make(map[string]workflowv1alpha1.StepInputs)
+	inputsSpec := make(map[string]wfTypesv1alpha1.StepInputs)
 	stepInputs := make([]apisv1.StepInputBase, 0)
 
 	for _, step := range workflow.Steps {

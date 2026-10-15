@@ -19,7 +19,7 @@ package model
 import (
 	"fmt"
 
-	"github.com/kubevela/workflow/api/v1alpha1"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 )
 
 func init() {
@@ -31,8 +31,8 @@ func init() {
 
 // WorkflowSpec defines workflow steps and other attributes
 type WorkflowSpec struct {
-	Mode  *v1alpha1.WorkflowExecuteMode `json:"mode,omitempty"`
-	Steps []WorkflowStep                `json:"steps,omitempty"`
+	Mode  *wfTypesv1alpha1.WorkflowExecuteMode `json:"mode,omitempty"`
+	Steps []WorkflowStep                       `json:"steps,omitempty"`
 }
 
 // Pipeline is the model of pipeline

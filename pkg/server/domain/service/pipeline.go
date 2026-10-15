@@ -33,6 +33,7 @@ import (
 	"github.com/kubevela/pkg/util/slices"
 
 	"github.com/fatih/color"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	"github.com/kubevela/pkg/util/k8s"
 	"github.com/kubevela/workflow/api/v1alpha1"
 	wfTypes "github.com/kubevela/workflow/pkg/types"
@@ -332,7 +333,7 @@ func (p pipelineServiceImpl) DeletePipeline(ctx context.Context, pl apis.Pipelin
 }
 
 func (p pipelineRunServiceImpl) GetPipelineRunOutput(ctx context.Context, pipelineRun apis.PipelineRun, stepName string) (apis.GetPipelineRunOutputResponse, error) {
-	outputsSpec := make(map[string]v1alpha1.StepOutputs)
+	outputsSpec := make(map[string]wfTypesv1alpha1.StepOutputs)
 	stepOutputs := make([]apis.StepOutputBase, 0)
 	if pipelineRun.Spec.WorkflowSpec != nil {
 		for _, step := range pipelineRun.Spec.WorkflowSpec.Steps {
@@ -384,7 +385,7 @@ func (p pipelineRunServiceImpl) GetPipelineRunOutput(ctx context.Context, pipeli
 func (p pipelineRunServiceImpl) GetPipelineRunInput(ctx context.Context, pipelineRun apis.PipelineRun, stepName string) (apis.GetPipelineRunInputResponse, error) {
 	// valueFromStep know which step the value came from
 	valueFromStep := make(map[string]string)
-	inputsSpec := make(map[string]v1alpha1.StepInputs)
+	inputsSpec := make(map[string]wfTypesv1alpha1.StepInputs)
 	stepInputs := make([]apis.StepInputBase, 0)
 	if pipelineRun.Spec.WorkflowSpec != nil {
 		for _, step := range pipelineRun.Spec.WorkflowSpec.Steps {
@@ -540,7 +541,7 @@ func getStepBase(run apis.PipelineRun, step string) apis.StepBase {
 	return apis.StepBase{}
 }
 
-func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.StepOutputs, v cue.Value) apis.StepOutputBase {
+func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]wfTypesv1alpha1.StepOutputs, v cue.Value) apis.StepOutputBase {
 	o := apis.StepOutputBase{
 		StepBase: apis.StepBase{
 			Name:  step.Name,
@@ -570,7 +571,7 @@ func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.St
 	return o
 }
 
-func getStepInputs(step v1alpha1.StepStatus, inputsSpec map[string]v1alpha1.StepInputs, v cue.Value, valueFromStep map[string]string) apis.StepInputBase {
+func getStepInputs(step v1alpha1.StepStatus, inputsSpec map[string]wfTypesv1alpha1.StepInputs, v cue.Value, valueFromStep map[string]string) apis.StepInputBase {
 	o := apis.StepInputBase{
 		StepBase: apis.StepBase{
 			Name:  step.Name,
@@ -712,9 +713,9 @@ func getResourceLogs(ctx context.Context, config *rest.Config, cli client.Client
 	return logBuilder.String(), nil
 }
 
-func pipelineStep2WorkflowStep(step model.WorkflowStep) v1alpha1.WorkflowStep {
-	res := v1alpha1.WorkflowStep{
-		WorkflowStepBase: v1alpha1.WorkflowStepBase{
+func pipelineStep2WorkflowStep(step model.WorkflowStep) wfTypesv1alpha1.WorkflowStep {
+	res := wfTypesv1alpha1.WorkflowStep{
+		WorkflowStepBase: wfTypesv1alpha1.WorkflowStepBase{
 			Name:       step.Name,
 			Type:       step.Type,
 			Meta:       step.Meta,
@@ -726,10 +727,10 @@ func pipelineStep2WorkflowStep(step model.WorkflowStep) v1alpha1.WorkflowStep {
 			Properties: step.Properties.RawExtension(),
 		},
 		Mode:     step.Mode,
-		SubSteps: make([]v1alpha1.WorkflowStepBase, 0),
+		SubSteps: make([]wfTypesv1alpha1.WorkflowStepBase, 0),
 	}
 	for _, subStep := range step.SubSteps {
-		res.SubSteps = append(res.SubSteps, v1alpha1.WorkflowStepBase{
+		res.SubSteps = append(res.SubSteps, wfTypesv1alpha1.WorkflowStepBase{
 			Name:       subStep.Name,
 			Type:       subStep.Type,
 			Meta:       subStep.Meta,
@@ -744,9 +745,9 @@ func pipelineStep2WorkflowStep(step model.WorkflowStep) v1alpha1.WorkflowStep {
 	return res
 }
 
-func pipelineSpec2WorkflowSpec(spec model.WorkflowSpec) *v1alpha1.WorkflowSpec {
-	res := &v1alpha1.WorkflowSpec{
-		Steps: make([]v1alpha1.WorkflowStep, 0),
+func pipelineSpec2WorkflowSpec(spec model.WorkflowSpec) *wfTypesv1alpha1.WorkflowSpec {
+	res := &wfTypesv1alpha1.WorkflowSpec{
+		Steps: make([]wfTypesv1alpha1.WorkflowStep, 0),
 	}
 	for _, step := range spec.Steps {
 		res.Steps = append(res.Steps, pipelineStep2WorkflowStep(step))
@@ -1281,7 +1282,7 @@ func checkPipelineSpec(_ model.WorkflowSpec) error {
 	return nil
 }
 
-func checkRunMode(mode *v1alpha1.WorkflowExecuteMode) error {
+func checkRunMode(mode *wfTypesv1alpha1.WorkflowExecuteMode) error {
 	if mode.Steps == "" {
 		mode.Steps = v1alpha1.WorkflowModeStep
 	}

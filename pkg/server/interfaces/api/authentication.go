@@ -20,6 +20,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -109,9 +110,15 @@ func authCheckFilter(req *restful.Request, res *restful.Response, chain *restful
 		chain.ProcessFilter(req, res)
 	}
 }
+
+// viewTokenCookie keeps the access token a view page was opened with, so the
+// page's own requests (Cloud Shell's terminal asks for /token and opens a
+// websocket) are authenticated without it in their query.
+const viewTokenCookie = "velaux_view_token"
+
 func authTokenCheck(req *http.Request, res http.ResponseWriter) bool {
-	// support getting the token from the cookie
 	var tokenValue string
+	fromQuery := false
 	tokenHeader := req.Header.Get("Authorization")
 	if tokenHeader != "" {
 		splitted := strings.Split(tokenHeader, " ")
@@ -121,14 +128,16 @@ func authTokenCheck(req *http.Request, res http.ResponseWriter) bool {
 		}
 		tokenValue = splitted[1]
 	}
+	if tokenValue == "" && strings.HasPrefix(req.URL.Path, viewPrefix) {
+		tokenValue = req.URL.Query().Get("token")
+		fromQuery = tokenValue != ""
+		if cookie, err := req.Cookie(viewTokenCookie); err == nil && tokenValue == "" {
+			tokenValue = cookie.Value
+		}
+	}
 	if tokenValue == "" {
-		if strings.HasPrefix(req.URL.Path, "/view") {
-			tokenValue = req.URL.Query().Get("token")
-		}
-		if tokenValue == "" {
-			bcode.ReturnHTTPError(req, res, bcode.ErrNotAuthorized)
-			return false
-		}
+		bcode.ReturnHTTPError(req, res, bcode.ErrNotAuthorized)
+		return false
 	}
 	token, err := service.ParseToken(tokenValue)
 	if err != nil {
@@ -138,6 +147,17 @@ func authTokenCheck(req *http.Request, res http.ResponseWriter) bool {
 	if token.GrantType != service.GrantTypeAccess {
 		bcode.ReturnHTTPError(req, res, bcode.ErrNotAccessToken)
 		return false
+	}
+	if fromQuery {
+		http.SetCookie(res, &http.Cookie{
+			Name:     viewTokenCookie,
+			Value:    tokenValue,
+			Path:     viewPrefix,
+			Expires:  time.Unix(token.ExpiresAt, 0),
+			HttpOnly: true,
+			Secure:   req.TLS != nil || req.Header.Get("X-Forwarded-Proto") == "https",
+			SameSite: http.SameSiteStrictMode,
+		})
 	}
 	newReq := req.WithContext(context.WithValue(req.Context(), &apis.CtxKeyUser, token.Username))
 	newReq = newReq.WithContext(context.WithValue(newReq.Context(), &apis.CtxKeyToken, tokenValue))
