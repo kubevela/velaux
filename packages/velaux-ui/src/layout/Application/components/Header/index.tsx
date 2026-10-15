@@ -1,10 +1,13 @@
-import { Grid, Button, Message, Dialog } from '@alifd/next';
-import classNames from 'classnames';
+import { Button, Message, Dialog } from '@alifd/next';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
 import { Breadcrumb } from '../../../../components/Breadcrumb';
+import { StatusBadge } from '../../../../components/StatusBadge';
+import type { EnvironmentStatus } from '../../../../pages/ApplicationList/components/AppStatus/health';
+import { healthLabels, summariseStatuses } from '../../../../pages/ApplicationList/components/AppStatus/health';
+import './index.less';
 
 import { deployApplication } from '../../../../api/application';
 import { notifyDeployed } from '../../../../utils/deploy';
@@ -25,8 +28,6 @@ import { handleError } from '../../../../utils/errors';
 import { locale } from '../../../../utils/locale';
 import DeployConfig from '../DeployConfig';
 import { Dispatch } from 'redux';
-
-const { Row, Col } = Grid;
 
 interface Props {
   currentPath: string;
@@ -133,65 +134,61 @@ class ApplicationHeader extends Component<Props, State> {
   componentWillUnmount() {}
 
   render() {
-    const { applicationDetail, applicationAllStatus, currentPath, workflows, envbinding, appName, envName, dispatch } =
-      this.props;
+    const { applicationDetail, applicationAllStatus, workflows, envbinding, appName, envName, dispatch } = this.props;
     const { showDeployConfig, loading } = this.state;
-    const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
-    let item = <Translation>{`app-${activeKey}`}</Translation>;
+    const summary = summariseStatuses((applicationAllStatus || []) as EnvironmentStatus[]);
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     const sourceOfTrust = applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
-    const envPage = currentPath.startsWith(`/applications/${appName}/envbinding/`);
-    if (envPage) {
-      item = <Translation>{`Environment`}</Translation>;
-    }
     return (
       <div>
-        <Row>
-          <Col span={6} className={classNames('padding16')}>
-            <Breadcrumb
-              items={[
-                {
-                  to: '/projects/' + projectName + '/applications',
-                  title: projectName,
-                },
-                {
-                  to: `/applications/${applicationDetail?.name || ''}`,
-                  title: (applicationDetail && (applicationDetail.alias || applicationDetail.name)) || '',
-                },
-                {
-                  title: item,
-                },
-              ]}
-            />
-          </Col>
-          <Col span={18} className="flexright" style={{ padding: '0 16px' }}>
-            <If condition={applicationDetail?.readOnly}>
-              <Message
-                type="notice"
-                title={i18n.t('This application is managed by the addon, and it is readonly').toString()}
-              />
-            </If>
-            <If condition={sourceOfTrust === 'from-k8s-resource'}>
-              <Message type="warning" title={i18n.t('The application is synchronizing from the cluster.').toString()} />
-            </If>
-            <Permission
-              request={{
-                resource: `project:${projectName}/application:${applicationDetail && applicationDetail.name}`,
-                action: 'deploy',
-              }}
-              project={projectName}
-            >
-              <Button
-                style={{ marginLeft: '16px' }}
-                type="primary"
-                disabled={applicationDetail?.readOnly}
-                onClick={() => this.onDeployConfig()}
+        <div className="app-head">
+          <Breadcrumb
+            items={[
+              {
+                to: '/projects/' + projectName + '/applications',
+                title: applicationDetail?.project?.alias || projectName,
+              },
+              {
+                to: `/applications/${applicationDetail?.name || ''}`,
+                title: (applicationDetail && (applicationDetail.alias || applicationDetail.name)) || '',
+              },
+            ]}
+          />
+          <div className="app-head-main">
+            <h1 className="app-head-name">{applicationDetail?.alias || applicationDetail?.name}</h1>
+            <StatusBadge tone={summary.health} label={healthLabels[summary.health]} />
+            {summary.components > 0 && (
+              <span className="app-head-meta">
+                {summary.healthyComponents}/{summary.components} <Translation>components healthy</Translation>
+              </span>
+            )}
+            <div className="app-head-actions">
+              <If condition={applicationDetail?.readOnly}>
+                <Message
+                  type="notice"
+                  title={i18n.t('This application is managed by the addon, and it is readonly').toString()}
+                />
+              </If>
+              <If condition={sourceOfTrust === 'from-k8s-resource'}>
+                <Message
+                  type="warning"
+                  title={i18n.t('The application is synchronizing from the cluster.').toString()}
+                />
+              </If>
+              <Permission
+                request={{
+                  resource: `project:${projectName}/application:${applicationDetail && applicationDetail.name}`,
+                  action: 'deploy',
+                }}
+                project={projectName}
               >
-                <Translation>Deploy</Translation>
-              </Button>
-            </Permission>
-          </Col>
-        </Row>
+                <Button type="primary" disabled={applicationDetail?.readOnly} onClick={() => this.onDeployConfig()}>
+                  <Translation>Deploy</Translation>
+                </Button>
+              </Permission>
+            </div>
+          </div>
+        </div>
         <If condition={showDeployConfig}>
           {applicationDetail && envbinding && workflows && (
             <DeployConfig

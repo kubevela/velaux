@@ -1,8 +1,9 @@
-import { Balloon, Button, Dialog, Table, Message } from '@alifd/next';
+import { Balloon, Dialog, Table, Message } from '@alifd/next';
 import classNames from 'classnames';
 import { Link } from 'dva/router';
 import React, { useState, useEffect } from 'react';
-import { AiFillDelete } from 'react-icons/ai';
+import { RowAction } from '../../../../components/RowAction';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 import { deletePipelineRun, loadPipelineRuns } from '../../../../api/pipeline';
 import { If } from '../../../../components/If';
@@ -152,18 +153,14 @@ const ViewRuns = (props: ViewRunsProps) => {
                       action: 'delete',
                     }}
                   >
-                    <Button
-                      text
-                      size={'small'}
-                      className={'danger-btn'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineDelete />}
+                      label="Remove"
+                      danger
                       onClick={() => {
                         deleteRun(name);
                       }}
-                    >
-                      <AiFillDelete />
-                      <Translation>Remove</Translation>
-                    </Button>
+                    />
                   </Permission>
                 </If>
               </div>

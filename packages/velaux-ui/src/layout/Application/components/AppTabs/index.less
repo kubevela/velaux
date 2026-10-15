@@ -1,0 +1,98 @@
+.app-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.app-tabs .app-tab {
+  flex: none;
+  margin-bottom: -1px;
+  padding: 10px 16px;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  &:hover {
+    color: #0f172a;
+  }
+  &.active {
+    color: var(--primary-color, #1b58f4);
+    border-bottom-color: var(--primary-color, #1b58f4);
+  }
+}
+
+// The bar over one env's live view.
+.environment-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.environment-bar .environment-bar-back {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: #64748b;
+  font-size: 13px;
+  &:hover {
+    color: #0f172a;
+  }
+}
+
+.environment-bar-name {
+  padding-left: 12px;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 15px;
+  border-left: 1px solid #e2e8f0;
+}
+
+.environment-bar-views {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  padding: 3px;
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.environment-bar-views .environment-view {
+  padding: 4px 12px;
+  color: #475569;
+  font-size: 13px;
+  border-radius: 4px;
+  &.active {
+    color: #0f172a;
+    font-weight: 500;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  }
+}
+
+// A tab's filters and its one line on what it holds, above its list.
+.app-tab-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  .next-select {
+    width: 240px;
+  }
+}
+
+.app-tab-hint {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 32px;
+}

@@ -1,6 +1,8 @@
 import { Table, Button, Dialog, Message, Tag, Balloon } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component, Fragment } from 'react';
+import { RowAction } from '../../components/RowAction';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 import { getConfigs, deleteConfig } from '../../api/config';
 import { If } from '../../components/If';
@@ -208,16 +210,14 @@ class Configs extends Component<Props, State> {
           return (
             <Fragment>
               <Permission request={{ resource: `config:${record.name}`, action: 'delete' }} project={''}>
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineDelete />}
+                  label="Delete"
+                  danger
                   onClick={() => {
                     this.onDelete(record);
                   }}
-                >
-                  <Translation>Delete</Translation>
-                </Button>
+                />
               </Permission>
             </Fragment>
           );

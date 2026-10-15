@@ -1,8 +1,9 @@
-import { Grid, Select } from '@alifd/next';
+import { Select } from '@alifd/next';
 import React from 'react';
 import i18n from '../../../../i18n';
 
 import type { EnvBinding } from '@velaux/data';
+import { Translation } from '../../../../components/Translation';
 import { locale } from '../../../../utils/locale';
 
 interface Label {
@@ -45,9 +46,6 @@ class Header extends React.Component<Props, State> {
 
   transEnvBind = () => {};
   render() {
-    const { Row, Col } = Grid;
-    const envPlaceholder = i18n.t('Select Environment').toString();
-    const statusPlaceholder = i18n.t('Select Status').toString();
     const { envValue, statusValue } = this.state;
     const { statusList, envBinding } = this.props;
     const envBinds = (envBinding || []).map((item: { name: string; alias?: string }) => ({
@@ -55,33 +53,31 @@ class Header extends React.Component<Props, State> {
       value: item.name,
     }));
     return (
-      <Row className="border-radius-8">
-        <Col span="6" style={{ padding: '0 8px' }}>
-          <Select
-            locale={locale().Select}
-            mode="single"
-            onChange={this.handleChangeEnv}
-            dataSource={envBinds}
-            placeholder={envPlaceholder}
-            className="item"
-            hasClear
-            value={envValue}
-          />
-        </Col>
-
-        <Col span="6" style={{ padding: '0 8px' }}>
-          <Select
-            locale={locale().Select}
-            mode="single"
-            onChange={this.handleChangeStatus}
-            dataSource={statusList}
-            placeholder={statusPlaceholder}
-            className="item"
-            hasClear
-            value={statusValue}
-          />
-        </Col>
-      </Row>
+      <div className="app-tab-toolbar">
+        <Select
+          locale={locale().Select}
+          mode="single"
+          onChange={this.handleChangeEnv}
+          dataSource={envBinds}
+          label={i18n.t('Environment').toString()}
+          placeholder={i18n.t('All').toString()}
+          hasClear
+          value={envValue}
+        />
+        <Select
+          locale={locale().Select}
+          mode="single"
+          onChange={this.handleChangeStatus}
+          dataSource={statusList}
+          label={i18n.t('Status').toString()}
+          placeholder={i18n.t('All').toString()}
+          hasClear
+          value={statusValue}
+        />
+        <span className="app-tab-hint">
+          <Translation>Each deploy, and the configuration it deployed.</Translation>
+        </span>
+      </div>
     );
   }
 }

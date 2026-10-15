@@ -1,0 +1,44 @@
+.source-status-list {
+  --row-columns: 20px minmax(180px, 1.5fr) 1fr 1fr 1fr 1.5fr;
+}
+
+.source-status-due {
+  color: #b45309;
+}
+
+// A value with a reason behind it, shown on hover.
+.source-status-hint {
+  border-bottom: 1px dotted #94a3b8;
+  cursor: help;
+}
+
+.source-status-entries {
+  margin-top: 16px;
+}
+
+// The detail tables: plain rows, no card, so they sit inside the expanded row.
+.source-status-table {
+  width: 100%;
+  font-size: 13px;
+  border-collapse: collapse;
+  th {
+    padding: 4px 12px 4px 0;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 12px;
+    text-align: left;
+  }
+  td {
+    padding: 6px 12px 6px 0;
+    color: #0f172a;
+    vertical-align: top;
+    border-top: 1px solid #e2e8f0;
+  }
+}
+
+.source-status-value {
+  max-width: 320px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

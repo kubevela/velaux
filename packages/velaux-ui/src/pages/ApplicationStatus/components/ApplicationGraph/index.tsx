@@ -1,5 +1,7 @@
-import { Button } from '@alifd/next';
 import React from 'react';
+
+import { RowAction } from '../../../../components/RowAction';
+import i18n from '../../../../i18n';
 
 import { TreeGraph } from '../../../../components/TreeGraph';
 import { dependencyItems } from '../../../../utils/dependencies';
@@ -208,47 +210,49 @@ class ApplicationGraph extends React.Component<Props, State> {
     const { showResource, resource, zoom } = this.state;
     const data = this.buildTree();
     return (
-      <div className={classNames('graph-container')}>
-        <div className="operation">
-          <Button.Group>
-            <Button
-              onClick={() => {
-                this.setState({ zoom: zoom - 0.1 });
-              }}
-              type="secondary"
-              disabled={zoom <= 0.5}
-            >
-              <AiOutlineMinus />
-            </Button>
-            <Button
-              onClick={() => {
-                this.setState({ zoom: zoom + 0.1 });
-              }}
-              disabled={zoom >= 2}
-              type="secondary"
-            >
-              <IoMdAdd />
-            </Button>
-          </Button.Group>
+      <div className="graph-frame">
+        <div className="graph-zoom">
+          <RowAction
+            icon={<AiOutlineMinus />}
+            label="Zoom out"
+            disabled={zoom <= 0.5}
+            onClick={() => this.setState({ zoom: Math.round((zoom - 0.1) * 10) / 10 })}
+          />
+          <button
+            type="button"
+            className="graph-zoom-level"
+            title={i18n.t('Reset zoom').toString()}
+            onClick={() => this.setState({ zoom: 1 })}
+          >
+            {Math.round(zoom * 100)}%
+          </button>
+          <RowAction
+            icon={<IoMdAdd />}
+            label="Zoom in"
+            disabled={zoom >= 2}
+            onClick={() => this.setState({ zoom: Math.round((zoom + 0.1) * 10) / 10 })}
+          />
         </div>
-        <TreeGraph
-          onResourceDetailClick={this.onResourceDetailClick}
-          appName={application?.name || ''}
-          envName={env?.name || ''}
-          node={data}
-          zoom={zoom}
-          nodesep={graphType === 'resource-graph' ? 50 : 80}
-        />
-        <If condition={showResource && resource}>
-          {resource && (
-            <ShowResource
-              onClose={() => {
-                this.setState({ showResource: false, resource: undefined });
-              }}
-              resource={resource}
-            />
-          )}
-        </If>
+        <div className={classNames('graph-container')}>
+          <TreeGraph
+            onResourceDetailClick={this.onResourceDetailClick}
+            appName={application?.name || ''}
+            envName={env?.name || ''}
+            node={data}
+            zoom={zoom}
+            nodesep={graphType === 'resource-graph' ? 50 : 80}
+          />
+          <If condition={showResource && resource}>
+            {resource && (
+              <ShowResource
+                onClose={() => {
+                  this.setState({ showResource: false, resource: undefined });
+                }}
+                resource={resource}
+              />
+            )}
+          </If>
+        </div>
       </div>
     );
   }
