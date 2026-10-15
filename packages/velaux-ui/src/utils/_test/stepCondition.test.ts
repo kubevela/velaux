@@ -71,12 +71,8 @@ describe('conditionScope', () => {
     }
   });
 
-  it("lists every step's outputs", () => {
-    expect(conditionScope(steps, 'canary').steps?.map((s) => s.name)).to.deep.equal([
-      'names',
-      'rollout',
-      'deploy',
-      'canary',
-    ]);
+  it("lists the workflow's steps, a group's under it", () => {
+    expect(conditionScope(steps, 'canary').steps?.map((s) => s.name)).to.deep.equal(['names', 'rollout', 'canary']);
+    expect(conditionScope(steps, 'canary').steps?.[1].subSteps?.map((s) => s.name)).to.deep.equal(['deploy']);
   });
 });

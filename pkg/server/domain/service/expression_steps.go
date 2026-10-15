@@ -28,8 +28,12 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/google/cel-go/cel"
+	wfv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	celengine "github.com/kubevela/pkg/cel"
 	"github.com/kubevela/pkg/cel/template"
+	wfexpressions "github.com/kubevela/workflow/pkg/expressions"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/oam-dev/kubevela/pkg/definition/celexpr"
 	"github.com/oam-dev/kubevela/pkg/definition/propexpr"
@@ -41,13 +45,21 @@ import (
 )
 
 // stepIssues reports the steps and each reads in an expression that admission
-// would refuse: either root off a workflow step, each outside a loop body, and,
-// when the request lists the workflow's steps, a read of a step or output the
-// workflow does not declare. The messages are the workflow's own.
+// would refuse: either root off a workflow step and, on one, what the workflow's
+// own validation refuses, when the request says which step it is in and lists
+// the workflow's steps. Without them, each outside a loop body and a read of a
+// step or output the list does not declare are refused.
 func stepIssues(req apisv1.ExpressionCheckRequest, expr string, start int) []*apisv1.ExpressionIssue {
 	refs, err := celexpr.PropertyReferences(expr)
 	if err != nil {
 		return nil
+	}
+	if req.Surface == sources.SurfaceWorkflowStep && req.Step != "" && req.Steps != nil {
+		var out []*apisv1.ExpressionIssue
+		for _, msg := range workflowIssues(req.ExpressionStep, "$("+expr+")") {
+			out = append(out, &apisv1.ExpressionIssue{Message: msg, Start: start, End: start + len(expr)})
+		}
+		return out
 	}
 	permitted := sources.RootsFor(req.Surface)
 	var out []*apisv1.ExpressionIssue
@@ -138,7 +150,7 @@ func stepReadIssue(step apisv1.ExpressionStep, r template.Reference) string {
 	if name == step.Step {
 		return fmt.Sprintf("step %s cannot read its own outputs", name)
 	}
-	for _, s := range step.Steps {
+	for _, s := range flatSteps(step.Steps) {
 		if s.Name != name {
 			continue
 		}
@@ -151,12 +163,84 @@ func stepReadIssue(step apisv1.ExpressionStep, r template.Reference) string {
 }
 
 func declaresStep(steps []apisv1.ExpressionStepOutputs, name string) bool {
-	for _, s := range steps {
+	for _, s := range flatSteps(steps) {
 		if s.Name == name {
 			return true
 		}
 	}
 	return false
+}
+
+// flatSteps is every step, a group's steps after it.
+func flatSteps(steps []apisv1.ExpressionStepOutputs) []apisv1.ExpressionStepOutputs {
+	var out []apisv1.ExpressionStepOutputs
+	for _, s := range steps {
+		out = append(out, s)
+		out = append(out, flatSteps(s.SubSteps)...)
+	}
+	return out
+}
+
+// workflowIssues is what the workflow's own validation refuses in a value of the
+// step the scope names, its if or its properties: the reads admission refuses
+// through the same call.
+func workflowIssues(scope apisv1.ExpressionStep, value string) []string {
+	var steps []wfv1alpha1.WorkflowStep
+	var at *field.Path
+	base := field.NewPath("steps")
+	place := func(b *wfv1alpha1.WorkflowStepBase, p *field.Path) {
+		if scope.Condition {
+			b.If = value
+			at = p.Child("if")
+			return
+		}
+		raw, _ := json.Marshal(map[string]string{"value": value})
+		b.Properties = &runtime.RawExtension{Raw: raw}
+		at = p.Child("properties")
+	}
+	stepBase := func(s apisv1.ExpressionStepOutputs) wfv1alpha1.WorkflowStepBase {
+		b := wfv1alpha1.WorkflowStepBase{Name: s.Name, Type: "step", DependsOn: s.DependsOn}
+		for _, o := range s.Outputs {
+			b.Outputs = append(b.Outputs, wfv1alpha1.OutputItem{Name: o, ValueFrom: o})
+		}
+		return b
+	}
+	for i, s := range scope.Steps {
+		step := wfv1alpha1.WorkflowStep{WorkflowStepBase: stepBase(s), Mode: wfv1alpha1.WorkflowMode(s.Mode)}
+		// A loop body runs once per item: a step with forEach, or a group's step
+		// in a group with one, as the step's list or its loopBody says.
+		looping := s.ForEach
+		if s.Name == scope.Step {
+			place(&step.WorkflowStepBase, base.Index(i))
+			looping = looping || (scope.LoopBody && len(s.SubSteps) == 0)
+		}
+		for j, sub := range s.SubSteps {
+			b := stepBase(sub)
+			if sub.Name == scope.Step {
+				place(&b, base.Index(i).Child("subSteps").Index(j))
+				looping = looping || scope.LoopBody
+			}
+			step.SubSteps = append(step.SubSteps, b)
+		}
+		if looping {
+			step.ForEach = &wfv1alpha1.ForEach{}
+		}
+		steps = append(steps, step)
+	}
+	if at == nil {
+		return nil
+	}
+	var mode *wfv1alpha1.WorkflowExecuteMode
+	if scope.Mode != "" || scope.SubMode != "" {
+		mode = &wfv1alpha1.WorkflowExecuteMode{Steps: wfv1alpha1.WorkflowMode(scope.Mode), SubSteps: wfv1alpha1.WorkflowMode(scope.SubMode)}
+	}
+	var out []string
+	for _, e := range wfexpressions.Validate(base, steps, mode, celexpr.Roots...) {
+		if e.Field == at.String() {
+			out = append(out, e.Detail)
+		}
+	}
+	return out
 }
 
 // readKind is the kind admission gives a value that is exactly one component or
@@ -213,7 +297,7 @@ func kindLabel(kind cue.Kind) (string, bool) {
 func stepRoots(step apisv1.ExpressionStep, sourceSchemas map[string]string) []*apisv1.ExpressionVariable {
 	steps := &apisv1.ExpressionVariable{Name: propexpr.StepsIdent, Type: kindObject,
 		Description: "The workflow's other steps, by name: an output one declares or, once it has finished, its status; the step then waits for it"}
-	for _, s := range step.Steps {
+	for _, s := range flatSteps(step.Steps) {
 		if s.Name == step.Step {
 			continue
 		}

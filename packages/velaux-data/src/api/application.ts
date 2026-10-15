@@ -734,15 +734,26 @@ export interface ExpressionStep {
   // forEachItems is the loop's forEach items as written: a list, or a string
   // holding one $( ) expression.
   forEachItems?: unknown;
-  // steps is the workflow's steps and the outputs each declares.
+  // steps is the workflow's steps and the outputs each declares, a group's steps
+  // under it. With step, the step's reads are judged as the workflow judges them.
   steps?: ExpressionStepOutputs[];
+  // mode and subMode are how the workflow's steps, and its groups', run.
+  mode?: string;
+  subMode?: string;
   // condition is whether the value is the step's if: one that is a whole $( )
   // expression must be a bool, and any other is CUE, which the check does not read.
   condition?: boolean;
 }
 
-// ExpressionStepOutputs is a workflow step and the outputs it declares.
+// ExpressionStepOutputs is a workflow step and the outputs it declares, with
+// what decides which steps it can wait for.
 export interface ExpressionStepOutputs {
   name: string;
   outputs?: string[];
+  dependsOn?: string[];
+  // forEach is whether the step, or the group, runs once per item.
+  forEach?: boolean;
+  subSteps?: ExpressionStepOutputs[];
+  // mode is how a group's steps run, when it sets one.
+  mode?: string;
 }

@@ -219,7 +219,9 @@ func TestExpressionCheckConditions(t *testing.T) {
 	assert.Equal(t, []string{"each is only set inside a forEach body"}, errs,
 		"a top-level step's own if is decided once, before its loop, so it has no each")
 
-	sub := apisv1.ExpressionStep{Step: "deploy", Steps: workflowSteps, LoopBody: true,
+	inGroup := []apisv1.ExpressionStepOutputs{{Name: "names", Outputs: []string{"list"}}, {Name: "notify"},
+		{Name: "rollout", ForEach: true, SubSteps: []apisv1.ExpressionStepOutputs{{Name: "deploy", Outputs: []string{"done"}}}}}
+	sub := apisv1.ExpressionStep{Step: "deploy", Steps: inGroup, LoopBody: true,
 		ForEachItems: json.RawMessage(`[{"name":"eu","enabled":true}]`)}
 	typ, errs = condition("$(each.item.enabled)", sub)
 	assert.Equal(t, "bool", typ, "a looping group's sub-step decides its if per pass, so it reads each")
@@ -228,7 +230,7 @@ func TestExpressionCheckConditions(t *testing.T) {
 	_, errs = condition("$(each.item.name)", sub)
 	assert.Equal(t, []string{"type mismatch: expression $(each.item.name) is string but if expects bool"}, errs)
 
-	_, errs = condition(`$(steps.names.succeeded && steps.notify.phase == "succeeded")`, top)
+	_, errs = condition(`$(steps.names.succeeded && steps.names.phase == "succeeded")`, top)
 	assert.Empty(t, errs, "a condition reads other steps' status")
 
 	_, errs = condition("$(steps.names.bogus)", top)
@@ -241,4 +243,29 @@ func TestExpressionCheckConditions(t *testing.T) {
 		assert.Empty(t, got.Issues, "%q is CUE, which the check does not read", cue)
 		assert.Empty(t, got.Type, "%q", cue)
 	}
+}
+
+// With the workflow's steps, a step's reads are judged by the workflow's own
+// validation: in order, a step cannot wait for a later one, and in parallel it
+// can; a group's step reads its group's outputs per pass.
+func TestExpressionCheckStepOrder(t *testing.T) {
+	svc, app := stepsService(t)
+	steps := []apisv1.ExpressionStepOutputs{{Name: "first"}, {Name: "second", Outputs: []string{"out"}}}
+	check := func(scope apisv1.ExpressionStep) []string {
+		t.Helper()
+		got, err := svc.Check(context.Background(), app, apisv1.ExpressionCheckRequest{Surface: "workflowstep",
+			Value: "$(steps.second.outputs.out)", ExpressionStep: scope})
+		require.NoError(t, err)
+		var errs []string
+		for _, i := range got.Issues {
+			if !i.Warning {
+				errs = append(errs, i.Message)
+			}
+		}
+		return errs
+	}
+	assert.Equal(t, []string{"second runs after first, and a workflow run in order cannot wait for it"},
+		check(apisv1.ExpressionStep{Step: "first", Steps: steps}))
+	assert.Empty(t, check(apisv1.ExpressionStep{Step: "first", Steps: steps, Mode: "DAG"}), "in parallel, the read is a dependsOn")
+	assert.Equal(t, []string{"step second cannot read its own outputs"}, check(apisv1.ExpressionStep{Step: "second", Steps: steps}))
 }

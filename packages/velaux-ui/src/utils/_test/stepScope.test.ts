@@ -9,24 +9,37 @@ const steps = [
   {
     name: 'rollout',
     type: 'step-group',
+    mode: 'StepByStep',
     forEach: { items: [{ region: 'eu' }] },
     subSteps: [{ name: 'deploy', type: 'deploy', outputs: [{ name: 'done', valueFrom: 'ok' }] }],
   },
-  { name: 'canary', type: 'deploy', forEach: { items: '$(steps.names.outputs.list)' } },
+  { name: 'canary', type: 'deploy', dependsOn: ['names'], forEach: { items: '$(steps.names.outputs.list)' } },
   { name: 'fromVar', type: 'deploy', forEach: { from: 'regions' } },
   { name: 'plain', type: 'suspend' },
 ];
 
 describe('stepScope', () => {
-  it("lists every step's declared outputs, sub-steps included", () => {
+  it("lists the workflow's steps as it runs them: outputs, dependsOn, loops and groups", () => {
     expect(stepScope(steps, 'plain').steps).to.deep.equal([
       { name: 'names', outputs: ['list'] },
-      { name: 'rollout', outputs: [] },
-      { name: 'deploy', outputs: ['done'] },
-      { name: 'canary', outputs: [] },
-      { name: 'fromVar', outputs: [] },
+      {
+        name: 'rollout',
+        outputs: [],
+        forEach: true,
+        mode: 'StepByStep',
+        subSteps: [{ name: 'deploy', outputs: ['done'] }],
+      },
+      { name: 'canary', outputs: [], dependsOn: ['names'], forEach: true },
+      { name: 'fromVar', outputs: [], forEach: true },
       { name: 'plain', outputs: [] },
     ]);
+  });
+
+  it("carries how the workflow's steps run", () => {
+    const scope = stepScope(steps, 'plain', { mode: 'DAG', subMode: 'StepByStep' });
+    expect(scope.mode).to.equal('DAG');
+    expect(scope.subMode).to.equal('StepByStep');
+    expect(stepScope(steps, 'plain').mode).to.equal(undefined);
   });
 
   it('makes a looping step a loop body over its items as written', () => {
@@ -57,7 +70,7 @@ describe('scopeParams', () => {
     expect(params.step).to.equal('deploy');
     expect(params.loopBody).to.equal(true);
     expect(JSON.parse(params.forEachItems as string)).to.deep.equal([{ region: 'eu' }]);
-    expect(JSON.parse(params.steps as string)).to.have.length(6);
+    expect(JSON.parse(params.steps as string)).to.have.length(5);
   });
 
   it('sends nothing without a scope', () => {

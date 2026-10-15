@@ -1,21 +1,26 @@
 // Where a workflow step's $( ) values sit, as the expression check and its
 // completion need it: the step, whether it runs once per item, the loop's items,
-// and every step's declared outputs.
+// and the workflow's steps with what decides which each can wait for.
 
-import type { ExpressionStep } from '@velaux/data';
+import type { ExpressionStep, ExpressionStepOutputs } from '@velaux/data';
 
 type ScopeStep = {
   name: string;
   outputs?: Array<{ name: string }>;
+  dependsOn?: string[];
   forEach?: { items?: unknown };
+  mode?: string;
   subSteps?: ScopeStep[];
 };
+
+// Modes are how the workflow's steps, and its groups' steps, run.
+export type Modes = { mode?: string; subMode?: string };
 
 // stepScope is where the step called stepName sits in steps. A step with
 // forEach, or a sub-step of a group with one, is a loop body, and reads each
 // over that loop's items; a group's own forEach makes only its sub-steps one.
-export function stepScope(steps: ScopeStep[], stepName?: string): ExpressionStep {
-  const scope: ExpressionStep = { step: stepName, steps: declaredOutputs(steps) };
+export function stepScope(steps: ScopeStep[], stepName?: string, modes?: Modes): ExpressionStep {
+  const scope: ExpressionStep = { step: stepName, steps: declaredSteps(steps), ...modesOf(modes) };
   steps.forEach((s) => {
     const own = s.name === stepName && !(s.subSteps && s.subSteps.length);
     const sub = (s.subSteps || []).some((sub) => sub.name === stepName);
@@ -33,8 +38,8 @@ export function stepScope(steps: ScopeStep[], stepName?: string): ExpressionStep
 // step's own if is decided once, before any pass of its loop, so it reads no
 // each; a looping group's sub-step decides its if per pass, and reads each over
 // the group's items.
-export function conditionScope(steps: ScopeStep[], stepName?: string): ExpressionStep {
-  const scope: ExpressionStep = { step: stepName, steps: declaredOutputs(steps), condition: true };
+export function conditionScope(steps: ScopeStep[], stepName?: string, modes?: Modes): ExpressionStep {
+  const scope: ExpressionStep = { step: stepName, steps: declaredSteps(steps), condition: true, ...modesOf(modes) };
   steps.forEach((s) => {
     if (s.forEach && (s.subSteps || []).some((sub) => sub.name === stepName)) {
       scope.loopBody = true;
@@ -46,13 +51,38 @@ export function conditionScope(steps: ScopeStep[], stepName?: string): Expressio
   return scope;
 }
 
-// declaredOutputs is every step and sub-step with the outputs it declares.
-function declaredOutputs(steps: ScopeStep[]): Array<{ name: string; outputs: string[] }> {
-  const out: Array<{ name: string; outputs: string[] }> = [];
-  steps.forEach((s) => {
-    out.push({ name: s.name, outputs: (s.outputs || []).map((o) => o.name).filter((n) => !!n) });
-    (s.subSteps || []).forEach((sub) => out.push(...declaredOutputs([sub])));
+// declaredSteps is the workflow's steps with the outputs each declares, its
+// dependsOn, whether it loops, and a group's steps and how they run.
+export function declaredSteps(steps: ScopeStep[]): ExpressionStepOutputs[] {
+  return steps.map((s) => {
+    const out: ExpressionStepOutputs = {
+      name: s.name,
+      outputs: (s.outputs || []).map((o) => o.name).filter((n) => !!n),
+    };
+    if (s.dependsOn && s.dependsOn.length) {
+      out.dependsOn = s.dependsOn;
+    }
+    if (s.forEach) {
+      out.forEach = true;
+    }
+    if (s.subSteps && s.subSteps.length) {
+      out.subSteps = declaredSteps(s.subSteps);
+      if (s.mode) {
+        out.mode = s.mode;
+      }
+    }
+    return out;
   });
+}
+
+function modesOf(modes?: Modes): Partial<ExpressionStep> {
+  const out: Partial<ExpressionStep> = {};
+  if (modes?.mode) {
+    out.mode = modes.mode;
+  }
+  if (modes?.subMode) {
+    out.subMode = modes.subMode;
+  }
   return out;
 }
 
