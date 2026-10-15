@@ -59,11 +59,7 @@ func stepIssues(req apisv1.ExpressionCheckRequest, expr string, start int) []*ap
 			continue
 		}
 		if !slices.Contains(permitted, r.Root) {
-			quoted := make([]string, len(permitted))
-			for i, p := range permitted {
-				quoted[i] = strconv.Quote(p)
-			}
-			issue(fmt.Sprintf("%q cannot be read here; this surface permits %s", r.Root, strings.Join(quoted, ", ")))
+			issue(rootRefusal(r.Root, req.Surface))
 			continue
 		}
 		switch r.Root {
@@ -341,3 +337,13 @@ var conditionBool = func() celengine.Target {
 		return b, true, true
 	})
 }()
+
+// rootRefusal is admission's refusal of a root the surface does not offer.
+func rootRefusal(root, surface string) string {
+	permitted := sources.RootsFor(surface)
+	quoted := make([]string, len(permitted))
+	for i, p := range permitted {
+		quoted[i] = strconv.Quote(p)
+	}
+	return fmt.Sprintf("%q cannot be read here; this surface permits %s", root, strings.Join(quoted, ", "))
+}

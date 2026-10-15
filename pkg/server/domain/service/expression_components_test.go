@@ -188,7 +188,7 @@ func TestExpressionEnvReadsOutputSchemas(t *testing.T) {
 	assert.NotNil(t, child(db, "output", "data", "port"), "a live field the template does not declare is offered")
 }
 
-// The check refuses a component read where the controller would.
+// The check refuses a component read where admission would, in its words.
 func TestExpressionCheckComponentReads(t *testing.T) {
 	svc := shopExpressionService(t)
 	app := &model.Application{Name: "shop", Annotations: map[string]string{oam.AnnotationCelExpressions: "true"}}
@@ -202,12 +202,16 @@ func TestExpressionCheckComponentReads(t *testing.T) {
 		return msgs
 	}
 	assert.Empty(t, check("component", "api", "$(component.db.output.data.host)"))
-	assert.Empty(t, check("trait", "api", `$(component.db.cluster("east").output.data.host)`))
-	assert.Equal(t, []string{"a component cannot read its own output"}, check("component", "db", "$(component.db.output.data.host)"))
-	assert.Equal(t, []string{"no component named cache"}, check("component", "api", "$(component.cache.output)"))
-	assert.Equal(t, []string{"only component and trait properties can read component.<name>"},
+	assert.Empty(t, check("trait", "api", `$(component.db.namespace("other").output.data.host)`))
+	assert.Equal(t, []string{`component "api" reads component.db.cluster("east").output.data.host, but no cluster "east" is registered`},
+		check("trait", "api", `$(component.db.cluster("east").output.data.host)`))
+	assert.Equal(t, []string{`component "db" reads its own output (component.db.output.data.host); a component's output only exists once it has been applied`},
+		check("component", "db", "$(component.db.output.data.host)"))
+	assert.Equal(t, []string{`component "api" reads component.cache.output, but the application has no component "cache"`},
+		check("component", "api", "$(component.cache.output)"))
+	assert.Equal(t, []string{`"component" cannot be read here; this surface permits "context", "source", "steps", "each"`},
 		check("workflowstep", "", "$(component.db.output.data.host)"))
-	assert.Equal(t, []string{`write component["my-db"]: a component whose name has a hyphen is read by index`},
+	assert.Equal(t, []string{`a component whose name has a hyphen is read by index: write component["my-db"].output.data.host`},
 		check("component", "api", "$(component.my-db.output.data.host)"))
 
 	value := "x-$(component.my-db.output.data.host)"
@@ -217,6 +221,7 @@ func TestExpressionCheckComponentReads(t *testing.T) {
 	issue := got.Issues[0]
 	assert.Equal(t, "component.my-db", value[issue.Start:issue.End], "the issue covers the read to replace")
 	assert.Equal(t, `component["my-db"]`, issue.Fix, "and carries its replacement")
-	assert.Equal(t, []string{"no component named my-db"}, check("component", "api", `$(component["my-db"].output)`),
+	assert.Equal(t, []string{`component "api" reads component["my-db"].output, but the application has no component "my-db"`},
+		check("component", "api", `$(component["my-db"].output)`),
 		"the index form reads the name it gives")
 }

@@ -173,7 +173,7 @@ func TestExpressionCheckStepReads(t *testing.T) {
 	assert.Empty(t, errs, "without the workflow's steps, a step read is not judged")
 
 	_, errs = check("workflowstep", "$(component.db.output)", "", literal)
-	assert.Equal(t, []string{"only component and trait properties can read component.<name>"}, errs)
+	assert.Equal(t, []string{`"component" cannot be read here; this surface permits "context", "source", "steps", "each"`}, errs)
 }
 
 // A step's if that is one $( ) expression is checked as admission checks it: a

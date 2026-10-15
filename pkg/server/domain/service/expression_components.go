@@ -33,14 +33,18 @@ import (
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
+	"github.com/oam-dev/kubevela/pkg/appfile"
 	"github.com/oam-dev/kubevela/pkg/appkeeper"
 	"github.com/oam-dev/kubevela/pkg/definition/celexpr"
 	"github.com/oam-dev/kubevela/pkg/definition/propexpr"
+	velamulticluster "github.com/oam-dev/kubevela/pkg/multicluster"
 	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/schema"
+	"github.com/oam-dev/kubevela/pkg/sources"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -473,17 +477,22 @@ func layered(declared, live *apisv1.ExpressionVariable) *apisv1.ExpressionVariab
 
 // hyphenatedComponentRead is a component read with a dot whose name has a
 // hyphen, which CEL parses as subtraction: component.my-db is component.my - db.
-var hyphenatedComponentRead = regexp.MustCompile(`\bcomponent\.([A-Za-z_][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)+)`)
+// It is the pattern KubeVela's celexpr.Explain names the index form for.
+var hyphenatedComponentRead = regexp.MustCompile(`\bcomponent\.([A-Za-z0-9_][A-Za-z0-9_-]*-[A-Za-z0-9_-]*[A-Za-z0-9])`)
 
-// componentIssues reports the component reads in an expression the controller
-// would refuse: a hyphenated name read with a dot, a read on a surface that
-// cannot read components, of the component itself, or of a component the
-// application does not have.
+// componentIssues reports the component reads in an expression that admission
+// refuses, in its words: a hyphenated name read with a dot, a read on a surface
+// that cannot read components, one KubeVela's ValidateComponentReads refuses (of
+// the component itself, of one the application does not have, a misplaced
+// placement), and one at a cluster that is not registered.
 func (e *expressionServiceImpl) componentIssues(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest, expr string, start int) []*apisv1.ExpressionIssue {
 	if m := hyphenatedComponentRead.FindStringSubmatchIndex(expr); m != nil {
 		name := expr[m[2]:m[3]]
+		fixed := hyphenatedComponentRead.ReplaceAllStringFunc(expr, func(read string) string {
+			return fmt.Sprintf("component[%q]", strings.TrimPrefix(read, "component."))
+		})
 		return []*apisv1.ExpressionIssue{{
-			Message: fmt.Sprintf("write component[%q]: a component whose name has a hyphen is read by index", name),
+			Message: "a component whose name has a hyphen is read by index: write " + fixed,
 			Start:   start + m[0], End: start + m[1],
 			Fix: fmt.Sprintf("component[%q]", name),
 		}}
@@ -492,36 +501,63 @@ func (e *expressionServiceImpl) componentIssues(ctx context.Context, app *model.
 	if err != nil {
 		return nil
 	}
-	var names map[string]bool
+	reads := false
+	for _, r := range refs {
+		reads = reads || (propexpr.IsComponent(r) && len(r.Path) > 0)
+	}
+	if !reads {
+		return nil
+	}
 	var out []*apisv1.ExpressionIssue
 	issue := func(msg string) {
 		out = append(out, &apisv1.ExpressionIssue{Message: msg, Start: start, End: start + len(expr)})
 	}
-	for _, r := range refs {
-		if !propexpr.IsComponent(r) || len(r.Path) == 0 {
+	if !readsComponents(req.Surface) {
+		issue(rootRefusal(propexpr.ComponentIdent, req.Surface))
+		return out
+	}
+	reader := e.readerComponent(req, expr)
+	spec := v1beta1.ApplicationSpec{Components: []common.ApplicationComponent{reader}}
+	names, declared, _ := e.componentNames(ctx, app)
+	for _, name := range names {
+		if name != reader.Name {
+			spec.Components = append(spec.Components, common.ApplicationComponent{Name: name, Type: declared[name].typ})
+		}
+	}
+	if err := appfile.ValidateComponentReads(spec); err != nil {
+		issue(err.Error())
+		return out
+	}
+	compReads, err := sources.ComponentReads(reader)
+	if err != nil {
+		return out
+	}
+	for _, r := range compReads {
+		target, err := r.Target()
+		if err != nil || target.Cluster == "" || target.Cluster == velamulticluster.ClusterLocalName || e.KubeClient == nil {
 			continue
 		}
-		name := r.Path[0]
-		switch {
-		case !readsComponents(req.Surface):
-			issue("only component and trait properties can read component.<name>")
-			return out
-		case name == req.Component:
-			issue("a component cannot read its own output")
-		default:
-			if names == nil {
-				names = map[string]bool{}
-				list, _, _ := e.componentNames(ctx, app)
-				for _, n := range list {
-					names[n] = true
-				}
-			}
-			if !names[name] {
-				issue(fmt.Sprintf("no component named %s", name))
-			}
+		if _, err := velamulticluster.GetVirtualCluster(velamulticluster.ContextInLocalCluster(ctx), e.KubeClient, target.Cluster); err != nil && velamulticluster.IsClusterNotExists(err) {
+			issue(fmt.Sprintf("component %q reads %s, but no cluster %q is registered", reader.Name, r, target.Cluster))
 		}
 	}
 	return out
+}
+
+// readerComponent is the component the expression is written in, holding it in
+// its own properties or, on the trait surface, a trait's, as KubeVela reads a
+// component's reads.
+func (e *expressionServiceImpl) readerComponent(req apisv1.ExpressionCheckRequest, expr string) common.ApplicationComponent {
+	name := req.Component
+	if name == "" {
+		name = "this component"
+	}
+	raw, _ := json.Marshal(map[string]string{"value": "$(" + expr + ")"})
+	props := &runtime.RawExtension{Raw: raw}
+	if req.Surface == traitKind {
+		return common.ApplicationComponent{Name: name, Traits: []common.ApplicationTrait{{Properties: props}}}
+	}
+	return common.ApplicationComponent{Name: name, Properties: props}
 }
 
 // componentReadKind is the kind the producer declares for a component read, as

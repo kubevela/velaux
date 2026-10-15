@@ -141,7 +141,7 @@ func TestExpressionCheckTypesComponentReads(t *testing.T) {
 	assert.Equal(t, "string", typ)
 	assert.Equal(t, []string{"this value is string, but the parameter expects int"}, errs, "a string field cannot fill an int parameter")
 
-	typ, errs = check(`$(component.db.cluster("east").output.data.host)`, "integer")
+	typ, errs = check(`$(component.db.namespace("other").output.data.host)`, "integer")
 	assert.Equal(t, "string", typ, "a placement does not change what is read")
 	assert.Len(t, errs, 1)
 
