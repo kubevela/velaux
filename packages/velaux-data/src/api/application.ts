@@ -55,6 +55,14 @@ export interface UIParam {
   uiType: string;
   style?: {
     colSpan: number;
+    format?: 'table';
+    rowKey?: string;
+    itemLabel?: string;
+    placeholder?: string;
+    advanced?: boolean;
+    section?: string;
+    optionsFrom?: string;
+    expression?: 'never';
   };
   disable?: boolean;
   conditions?: ParamCondition[];
@@ -87,6 +95,7 @@ export interface UIParamValidate {
   defaultValue?: any;
   options?: Array<{ label: string; value: string }>;
   immutable?: boolean;
+  message?: string;
 }
 
 export interface ApplicationDeployRequest {
@@ -99,6 +108,9 @@ export interface ApplicationDeployRequest {
 
 export interface ApplicationDeployResponse extends ApplicationRevision {
   record?: WorkflowRecordBase;
+  // What the API server returned with the admitted Application, such as a
+  // notice that a namespace nears a definition's quota.
+  warnings?: string[];
 }
 
 export interface ApplicationRollbackResponse {
@@ -445,6 +457,7 @@ export interface ApplicationQuery {
 export interface ComponentDefinitionsBase {
   name: string;
   workloadType?: string;
+  unusableIn?: string[];
 }
 
 export interface ApplicationPolicyBase {

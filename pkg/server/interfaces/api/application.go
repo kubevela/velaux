@@ -39,6 +39,7 @@ type application struct {
 	RbacService        service.RBACService        `inject:""`
 	ApplicationService service.ApplicationService `inject:""`
 	EnvBindingService  service.EnvBindingService  `inject:""`
+	ExpressionService  service.ExpressionService  `inject:""`
 }
 
 // NewApplication new application manage
@@ -675,6 +676,39 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Writes(apis.AppDryRunResponse{}))
 
+	ws.Route(ws.GET("/{appName}/expressions/env").To(c.expressionEnv).
+		Doc("what a $( ) expression in the application can read on a surface").
+		Filter(c.RbacService.CheckPerm("application", "detail")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Param(ws.QueryParameter("surface", "component, trait or workflowstep").DataType("string").Required(true)).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.ExpressionEnvResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.ExpressionEnvResponse{}))
+
+	ws.Route(ws.POST("/{appName}/expressions/check").To(c.checkExpression).
+		Doc("check the $( ) expressions of a property value").
+		Filter(c.RbacService.CheckPerm("application", "detail")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(apis.ExpressionCheckRequest{}).
+		Returns(200, "OK", apis.ExpressionCheckResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.ExpressionCheckResponse{}))
+
+	ws.Route(ws.PUT("/{appName}/expressions").To(c.setExpressionOptIn).
+		Doc("turn the application's reading of $( ) expressions on or off, from its next deploy").
+		Reads(apis.ExpressionOptInRequest{}).
+		Filter(c.RbacService.CheckPerm("application", "update")).
+		Filter(c.appCheckFilter).
+		Param(ws.PathParameter("appName", "identifier of the application").DataType("string")).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.EmptyResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
+
 	ws.Filter(authCheckFilter)
 	return ws
 }
@@ -897,6 +931,58 @@ func (c *application) createComponent(req *restful.Request, res *restful.Respons
 		return
 	}
 	if err := res.WriteEntity(base); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) expressionEnv(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	env, err := c.ExpressionService.Env(req.Request.Context(), app, req.QueryParameter("surface"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(env); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) checkExpression(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	var body apis.ExpressionCheckRequest
+	if err := req.ReadEntity(&body); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := validate.Struct(&body); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	checked, err := c.ExpressionService.Check(req.Request.Context(), app, body)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(checked); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *application) setExpressionOptIn(req *restful.Request, res *restful.Response) {
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	var body apis.ExpressionOptInRequest
+	if err := req.ReadEntity(&body); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := c.ExpressionService.SetOptIn(req.Request.Context(), app, body.Enabled); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(apis.EmptyResponse{}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}

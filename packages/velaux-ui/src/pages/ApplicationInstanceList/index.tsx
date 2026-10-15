@@ -5,6 +5,7 @@ import querystring from 'query-string';
 import React from 'react';
 
 import { deployApplication } from '../../api/application';
+import { notifyDeployed } from '../../utils/deploy';
 import { listApplicationPods, listCloudResources } from '../../api/observation';
 import { If } from '../../components/If';
 import StatusShow from '../../components/StatusShow';
@@ -16,7 +17,12 @@ import type {
   ApplicationDetail,
   ApplicationStatus,
   EnvBinding,
- PodBase, CloudResource, Configuration , Target , LoginUserInfo } from '@velaux/data';
+  PodBase,
+  CloudResource,
+  Configuration,
+  Target,
+  LoginUserInfo,
+} from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
@@ -375,7 +381,7 @@ class ApplicationInstanceList extends React.Component<Props, State> {
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
-            Message.success(i18n.t('Application deployed successfully'));
+            notifyDeployed(re);
             this.setState({ deployLoading: false });
             this.loadApplicationStatus();
             if (re.record && re.record.name && dispatch) {

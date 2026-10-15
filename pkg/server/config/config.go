@@ -61,6 +61,11 @@ type Config struct {
 
 	// ExitOnLostLeader will exit the process if this server lost the leader election, set this to true for debugging
 	ExitOnLostLeader bool
+
+	// EnableCelExpressions offers $( ) expression editing in forms. It must
+	// match the controller's EnableCelExpressions feature gate, which this
+	// server cannot see.
+	EnableCelExpressions bool
 }
 
 // PluginConfig the plugin directory config
@@ -132,5 +137,6 @@ func (s *Config) AddFlags(fs *pflag.FlagSet, c *Config) {
 	fs.StringVar(&s.DexServerURL, "dex-server", c.DexServerURL, "the URL of the dex server.")
 	fs.StringArrayVar(&s.PluginConfig.CustomPluginPath, "plugin-path", c.PluginConfig.CustomPluginPath, "the path of the plugin directory")
 	fs.BoolVar(&s.ExitOnLostLeader, "exit-on-lost-leader", c.ExitOnLostLeader, "exit the process if this server lost the leader election")
+	fs.BoolVar(&s.EnableCelExpressions, "enable-cel-expressions", c.EnableCelExpressions, "offer $( ) expression editing in forms; set it to match the controller's EnableCelExpressions feature gate")
 	profiling.AddFlags(fs)
 }
