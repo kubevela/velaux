@@ -57,7 +57,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Doc("list all definitions").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		// TODO: provide project scope api for query definition list
-		Filter(d.inProject("list", nil)).
+		Filter(d.inProject("list", d.RbacService.CheckPerm("definition", "list"))).
 		Param(project).
 		Param(ws.QueryParameter("type", "query the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait", "workflowstep", "policy", "source"})).
 		Param(ws.QueryParameter("queryAll", "query all definitions include hidden in UI").DataType("boolean").DefaultValue("false")).
@@ -70,7 +70,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 
 	ws.Route(ws.GET("/{definitionName}").To(d.detailDefinition).
 		Doc("Detail a definition").
-		Filter(d.inProject("detail", nil)).
+		Filter(d.inProject("detail", d.RbacService.CheckPerm("definition", "detail"))).
 		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
 		Param(project).Param(where).
 		Param(ws.QueryParameter("type", "query the definition type").DataType("string")).
@@ -291,19 +291,15 @@ func (d *definition) definitionCUE(req *restful.Request, res *restful.Response) 
 }
 
 // inProject checks the project's definition permission for a request naming a
-// project, and otherwise, where given, the platform's; a request with neither
-// reads the global definitions, which every signed-in user may.
-func (d *definition) inProject(action string, otherwise restful.FilterFunction) restful.FilterFunction {
+// project, and otherwise the platform's, given as platform.
+func (d *definition) inProject(action string, platform restful.FilterFunction) restful.FilterFunction {
 	project := d.RbacService.CheckPerm("project/definition", action)
 	return func(req *restful.Request, res *restful.Response, chain *restful.FilterChain) {
-		switch {
-		case req.QueryParameter("project") != "":
+		if req.QueryParameter("project") != "" {
 			project(req, res, chain)
-		case otherwise != nil:
-			otherwise(req, res, chain)
-		default:
-			chain.ProcessFilter(req, res)
+			return
 		}
+		platform(req, res, chain)
 	}
 }
 

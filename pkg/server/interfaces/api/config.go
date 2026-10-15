@@ -68,7 +68,7 @@ func (s *config) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("/{configName}").To(s.getConfig).
 		Doc("detail a config").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Filter(s.RbacService.CheckPerm("config", "get")).
+		Filter(s.RbacService.CheckPerm("config", "detail")).
 		Param(ws.PathParameter("configName", "identifier of the config").DataType("string")).
 		Returns(200, "OK", []*apis.Config{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
@@ -127,7 +127,7 @@ func (s *configTemplate) GetWebServiceRoute() *restful.WebService {
 	ws.Route(ws.GET("{templateName}").To(s.getConfigTemplate).
 		Doc("Detail a template").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Filter(s.RbacService.CheckPerm("config", "get")).
+		Filter(s.RbacService.CheckPerm("config", "detail")).
 		Param(ws.PathParameter("templateName", "identifier of the config template").DataType("string")).
 		Param(ws.QueryParameter("namespace", "the name of the namespace").DataType("string")).
 		Returns(200, "OK", apis.ConfigTemplateDetail{}).

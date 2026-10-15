@@ -25,10 +25,10 @@ import (
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
-// pkg is the API for the CUE packages a definition can import. Like the
-// definitions API it asks for a signed-in user and no permission: it reads
-// what definitions are written against, and changes nothing.
+// pkg is the API for the CUE packages a definition can import. It only reads,
+// under the platform's package permission.
 type pkg struct {
+	RbacService    service.RBACService    `inject:""`
 	PackageService service.PackageService `inject:""`
 }
 
@@ -47,12 +47,14 @@ func (p *pkg) GetWebServiceRoute() *restful.WebService {
 	tags := []string{"package"}
 
 	ws.Route(ws.GET("/").To(p.list).
+		Filter(p.RbacService.CheckPerm("package", "list")).
 		Doc("list the Package resources in the cluster and the packages built into KubeVela").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "OK", apis.ListPackagesResponse{}).
 		Writes(apis.ListPackagesResponse{}))
 
 	ws.Route(ws.GET("/builtin").To(p.builtin).
+		Filter(p.RbacService.CheckPerm("package", "detail")).
 		Doc("detail a package built into KubeVela, by its path and what imports it").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("path", "the path it is imported as, e.g. vela/kube").DataType("string").Required(true)).
@@ -62,6 +64,7 @@ func (p *pkg) GetWebServiceRoute() *restful.WebService {
 		Writes(apis.PackageDetail{}))
 
 	ws.Route(ws.GET("/{namespace}/{name}").To(p.detail).
+		Filter(p.RbacService.CheckPerm("package", "detail")).
 		Doc("detail a Package resource").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.PathParameter("namespace", "the Package's namespace").DataType("string")).
@@ -70,6 +73,7 @@ func (p *pkg) GetWebServiceRoute() *restful.WebService {
 		Returns(404, "Not Found", bcode.Bcode{}).
 		Writes(apis.PackageDetail{}))
 
+	ws.Filter(authCheckFilter)
 	return ws
 }
 

@@ -10,6 +10,7 @@ import { getEnvs } from '../../api/env';
 import { getProjectList } from '../../api/project';
 import { getTarget } from '../../api/target';
 import { definitionPlaceQuery } from '../../utils/definitionPlace';
+import { checkPermission } from '../../utils/permission';
 import i18n from '../../i18n';
 import { locationService } from '../../services/LocationService';
 import { menuService } from '../../services/MenuService';
@@ -180,18 +181,23 @@ class QuickSearch extends React.Component<Props, State> {
       )
     );
     const project = this.project();
-    definitionTypes.forEach((type) =>
-      getDefinitionsList({ project, definitionType: type, queryAll: false }).then((res: any) =>
-        this.add(
-          (res?.definitions || []).map((d: any) => ({
-            group: 'Definitions',
-            label: d.name,
-            detail: d.scope === 'project' ? `${type} · ${i18n.t('Project').toString()}` : type,
-            to: `/definitions/${type}/${d.name}/ui-schema${definitionPlaceQuery({ project, where: d.scope })}`,
-          }))
+    const definitions = project
+      ? { resource: `project:${project}/definition:*`, action: 'list' }
+      : { resource: 'definition:*', action: 'list' };
+    if (checkPermission(definitions, project, this.props.userInfo)) {
+      definitionTypes.forEach((type) =>
+        getDefinitionsList({ project, definitionType: type, queryAll: false }).then((res: any) =>
+          this.add(
+            (res?.definitions || []).map((d: any) => ({
+              group: 'Definitions',
+              label: d.name,
+              detail: d.scope === 'project' ? `${type} · ${i18n.t('Project').toString()}` : type,
+              to: `/definitions/${type}/${d.name}/ui-schema${definitionPlaceQuery({ project, where: d.scope })}`,
+            }))
+          )
         )
-      )
-    );
+      );
+    }
     listTemplates().then((res: any) =>
       this.add(
         (res?.templates || []).map((t: any) => ({
