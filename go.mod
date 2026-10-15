@@ -104,7 +104,7 @@ require (
 	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/kubevela/workflow v0.7.3-0.20260827155917-6b7aedc67359
-	github.com/oam-dev/kubevela v1.11.1-0.20260929162142-f450c6ee9648
+	github.com/oam-dev/kubevela v1.11.1-0.20261008122124-83861f1c2a1b
 	github.com/onsi/ginkgo/v2 v2.23.3
 	gorm.io/driver/postgres v1.5.2
 )
@@ -324,7 +324,7 @@ require (
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/google/cel-go v0.20.1 // indirect
+	github.com/google/cel-go v0.20.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
