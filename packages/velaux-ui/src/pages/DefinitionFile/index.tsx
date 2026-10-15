@@ -9,23 +9,26 @@ import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import '../DefinitionDoc/index.less';
 import './index.less';
+import { definitionPlaceFrom } from '../../utils/definitionPlace';
 
 type Props = {
   match: { params: { definitionType: string; definitionName: string } };
+  location: { search: string };
 };
 
 // DefinitionFile is a definition as the CUE file it is authored as, the way
 // vela def get prints it.
 const DefinitionFile = (props: Props) => {
   const { definitionType, definitionName } = props.match.params;
+  const { project, where } = definitionPlaceFrom(props.location.search);
   const [cue, setCue] = useState<string>();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     setLoading(true);
-    getDefinitionCUE({ name: definitionName, type: definitionType })
+    getDefinitionCUE({ project, where, name: definitionName, type: definitionType })
       .then((res: any) => setCue(res?.cue))
       .finally(() => setLoading(false));
-  }, [definitionName, definitionType]);
+  }, [definitionName, definitionType, project, where]);
   return (
     <Loading visible={loading} fullScreen={false} className="definition-doc-loading">
       <div className="definition-doc definition-file">

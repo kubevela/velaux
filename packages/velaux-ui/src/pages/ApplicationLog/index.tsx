@@ -89,11 +89,12 @@ class ApplicationLog extends React.Component<Props, State> {
   };
 
   loadPodInstance = async () => {
-    const { envbinding } = this.props;
+    const { envbinding, applicationDetail } = this.props;
     const { appName, envName, activeComponentName } = this.state;
     const envs = envbinding.filter((item) => item.name === envName);
     if (envs.length > 0 && envs[0]) {
       const param = {
+        project: applicationDetail?.project?.name || '',
         appName: envs[0].appDeployName || appName,
         appNs: envs[0].appDeployNamespace,
         componentName: activeComponentName,
@@ -131,6 +132,7 @@ class ApplicationLog extends React.Component<Props, State> {
     const { pod } = this.state;
     if (pod) {
       listApplicationPodsDetails({
+        project: this.props.applicationDetail?.project?.name || '',
         name: pod?.metadata.name || '',
         namespace: pod?.metadata.namespace || '',
         cluster: pod?.cluster || '',
@@ -257,7 +259,11 @@ class ApplicationLog extends React.Component<Props, State> {
           />
         </EnvironmentSlot>
 
-        <LogContainer pod={pod} activeContainerName={activeContainerName} />
+        <LogContainer
+          pod={pod}
+          activeContainerName={activeContainerName}
+          project={this.props.applicationDetail?.project?.name || ''}
+        />
       </Fragment>
     );
   }

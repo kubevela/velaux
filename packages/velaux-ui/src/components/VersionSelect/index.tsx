@@ -13,6 +13,9 @@ import './index.less';
 type Props = {
   // definitionType is component, trait, policy or source.
   definitionType: string;
+  // project is the application's, whose own definitions come before the
+  // global ones of their name.
+  project: string;
   // name is the definition chosen; there is no version to pick without one.
   name?: string;
   // value is the version pinned, or none to follow the latest.
@@ -28,7 +31,7 @@ const latest = '';
 // is optional but recommended: a type that follows the latest changes when
 // the definition does.
 export const VersionSelect = (props: Props) => {
-  const { definitionType, name, value, onChange, disabled } = props;
+  const { definitionType, project, name, value, onChange, disabled } = props;
   const [revisions, setRevisions] = useState<DefinitionRevision[]>([]);
 
   useEffect(() => {
@@ -36,10 +39,10 @@ export const VersionSelect = (props: Props) => {
       setRevisions([]);
       return;
     }
-    listDefinitionRevisions({ name, type: definitionType }).then((res: any) => {
+    listDefinitionRevisions({ project, name, type: definitionType }).then((res: any) => {
       setRevisions(res?.revisions || []);
     });
-  }, [name, definitionType]);
+  }, [project, name, definitionType]);
 
   const newest = revisions[0];
   const dates: Record<string, string> = {};

@@ -23,6 +23,8 @@ import { locale } from '../../../../utils/locale';
 type Props = {
   visible: boolean;
   appName?: string;
+  // project is the application's, whose own definitions it may use.
+  project: string;
   workflows?: Workflow[];
   onOK: (params: Trigger) => void;
   onClose: () => void;
@@ -78,7 +80,7 @@ class TriggerDialog extends React.Component<Props, State> {
 
   onDetailComponentDefinition = (value: string) => {
     this.setState({ loading: true });
-    detailComponentDefinition({ name: value })
+    detailComponentDefinition({ project: this.props.project, name: value })
       .then((res) => {
         if (res) {
           const findImageObj = (res.uiSchema || []).find((item: UIParam) => item.jsonKey === 'image');

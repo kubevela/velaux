@@ -14,6 +14,8 @@ import { FaEllipsisV } from 'react-icons/fa';
 
 type Props = {
   pod?: PodBase;
+  // project is the application's, which the logs are read as.
+  project: string;
   activeContainerName?: string;
 };
 
@@ -96,10 +98,11 @@ class ContainerLog extends Component<Props, State> {
   };
 
   loadContainerLog = () => {
-    const { pod, activeContainerName = '' } = this.props;
+    const { pod, activeContainerName = '', project } = this.props;
     const { previous } = this.state;
     if (pod && activeContainerName) {
       listContainerLog({
+        project,
         cluster: pod.cluster,
         namespace: pod.metadata.namespace,
         pod: pod.metadata.name,

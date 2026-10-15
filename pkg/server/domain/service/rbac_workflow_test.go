@@ -53,8 +53,8 @@ func TestAddProjectPermissionResources(t *testing.T) {
 		require.NoError(t, store.Get(ctx, perm))
 		return perm.Resources
 	}
-	assert.Equal(t, []string{"project:shop", "project:shop/workflow:*"}, get("project-view", "shop"))
-	assert.Equal(t, []string{"project:shop/application:*/*", "project:shop/workflow:*"}, get("app-management", "shop"), "not added twice")
+	assert.Equal(t, []string{"project:shop", "project:shop/workflow:*", "project:shop/definition:*"}, get("project-view", "shop"))
+	assert.Equal(t, []string{"project:shop/application:*/*", "project:shop/workflow:*", "project:shop/definition:*"}, get("app-management", "shop"), "not added twice")
 	assert.Equal(t, []string{"project:shop/config:*"}, get("custom", "shop"), "a permission of its own is left alone")
 	assert.Equal(t, []string{"*"}, get("admin", ""))
 }

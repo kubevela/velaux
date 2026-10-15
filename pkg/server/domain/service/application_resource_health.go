@@ -136,7 +136,7 @@ func (c *applicationServiceImpl) GetApplicationResourceTree(ctx context.Context,
 	if opts.Component != "" {
 		params = append([]string{fmt.Sprintf("name=%s", opts.Component)}, params...)
 	}
-	resp, err := c.VelaQLService.QueryView(ctx, fmt.Sprintf("application-resource-tree-view{%s}.status", strings.Join(params, ", ")))
+	resp, err := c.VelaQLService.QueryView(ctx, fmt.Sprintf("application-resource-tree-view{%s}.status", strings.Join(params, ", ")), app.Project)
 	if err != nil {
 		return nil, err
 	}

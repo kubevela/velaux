@@ -198,6 +198,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     const env = this.getEnvbindingByName();
     if (applicationDetail && applicationDetail.name && env) {
       const param = {
+        project: applicationDetail?.project?.name || '',
         appName: env.appDeployName || appName,
         appNs: env.appDeployNamespace,
         componentName: componentName,

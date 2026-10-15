@@ -135,7 +135,11 @@ class SharedWorkflowStudio extends React.Component<Props, State> {
   // loadDefinitions offers the step types allowed where the workflow lives; a
   // global one runs in any namespace, so it is offered every type.
   loadDefinitions = (namespace?: string) => {
-    getWorkflowDefinitions('Application', namespace ? [namespace] : undefined).then((res: any) => {
+    getWorkflowDefinitions(
+      this.scope() === 'project' ? this.project() : '',
+      'Application',
+      namespace ? [namespace] : undefined
+    ).then((res: any) => {
       if (res) {
         this.setState({ definitions: res.definitions });
       }
