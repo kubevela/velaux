@@ -416,10 +416,7 @@ func (e *expressionServiceImpl) targetFaults(ctx context.Context, app *model.App
 	}
 	compiled := propexpr.CompileSchemas(sourceSchemas)
 	opts := celengine.TypeOptions{
-		Optional: func(r celengine.Read) bool {
-			may, err := compiled.CanBeAbsent(r.Reference)
-			return err == nil && may
-		},
+		Optional: func(r celengine.Read) bool { return mayBeAbsent(req, compiled, r.Reference) },
 		DeclaredKind: func(r celengine.Read) (cue.Kind, bool) {
 			return e.refKind(ctx, app, req, compiled, r.Reference)
 		},
@@ -475,4 +472,18 @@ func rootRefusal(root, surface string) string {
 		quoted[i] = strconv.Quote(p)
 	}
 	return fmt.Sprintf("%q cannot be read here; this surface permits %s", root, strings.Join(quoted, ", "))
+}
+
+// mayBeAbsent is admission's has() judge for one read: an each.item field some
+// of the loop's items leave out, an index past some items' lists, or a key of an
+// open map, from the items as written or the schema of the source they are read
+// from; anything else from its source's or the context's schema.
+func mayBeAbsent(req apisv1.ExpressionCheckRequest, compiled propexpr.Schemas, ref template.Reference) bool {
+	if ref.Root == propexpr.EachIdent {
+		return schema.EachMayBeAbsent(schema.LoopItemMayBeAbsent(req.ForEachItems, func(r template.Reference) bool {
+			return mayBeAbsent(req, compiled, r)
+		}), ref)
+	}
+	may, err := compiled.CanBeAbsent(ref)
+	return err == nil && may
 }

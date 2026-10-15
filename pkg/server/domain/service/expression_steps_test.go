@@ -269,3 +269,33 @@ func TestExpressionCheckStepOrder(t *testing.T) {
 	assert.Empty(t, check(apisv1.ExpressionStep{Step: "first", Steps: steps, Mode: "DAG"}), "in parallel, the read is a dependsOn")
 	assert.Equal(t, []string{"step second cannot read its own outputs"}, check(apisv1.ExpressionStep{Step: "second", Steps: steps}))
 }
+
+// An each.item read may be absent, as admission judges it, where some of the
+// loop's items leave the field out or have a shorter list; has() guards it.
+func TestExpressionCheckEachMayBeAbsent(t *testing.T) {
+	svc, app := stepsService(t)
+	check := func(value, items string, cond bool) []string {
+		t.Helper()
+		scope := apisv1.ExpressionStep{LoopBody: true, ForEachItems: json.RawMessage(items), Condition: cond}
+		got, err := svc.Check(context.Background(), app, apisv1.ExpressionCheckRequest{Surface: "workflowstep", Value: value,
+			Kind: "string", Required: !cond, ExpressionStep: scope})
+		require.NoError(t, err)
+		var errs []string
+		for _, i := range got.Issues {
+			if !i.Warning {
+				errs = append(errs, i.Message)
+			}
+		}
+		return errs
+	}
+	some := `[{"wave":1,"name":"a","ports":[80]},{"name":"b","ports":[]}]`
+	all := `[{"wave":1,"name":"a","ports":[80]},{"wave":2,"name":"b","ports":[81]}]`
+	assert.Equal(t, []string{"each.item.wave may be absent and decides the step; guard it with has(each.item.wave) ? each.item.wave : <fallback>"},
+		check("$(each.item.wave > 0)", some, true))
+	assert.Empty(t, check("$(has(each.item.wave) && each.item.wave > 0)", some, true))
+	assert.Empty(t, check("$(each.item.wave > 0)", all, true))
+	assert.Len(t, check("$(each.item.ports[0] > 0)", some, true), 1, "an index past one item's list")
+	assert.Empty(t, check("$(each.item.ports[0] > 0)", all, true))
+	assert.Len(t, check("$(string(each.item.wave))", some, false), 1, "into a required parameter")
+	assert.Empty(t, check("$(each.item.name)", some, false), "a field every item has")
+}
