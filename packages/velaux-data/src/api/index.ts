@@ -15,3 +15,4 @@ export * from './system';
 export * from './target';
 export * from './user';
 export * from './package';
+export * from './defkit';

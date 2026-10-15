@@ -12,14 +12,19 @@ import CardContend from './components/card-conten/index';
 import AddonDetailDialog from './components/detail/index';
 import RegistryManageDialog from './components/registry-manage/index';
 import SelectSearch from './components/search/index';
-import Plugin from "./components/plugin";
+import Plugin from './components/plugin';
+import i18n from '../../i18n';
+import { AddonApplications } from './components/AddonApplications';
+
+import './index.less';
 
 type Props = {
   history: any;
-  plugin: boolean
+  plugin: boolean;
   dispatch: ({}) => {};
   loading: any;
   match?: any;
+  location?: { search?: string };
 
   // addon props
   addonsList: Addon[];
@@ -130,7 +135,7 @@ class Addons extends React.Component<Props, State> {
       loading,
       addonListMessage,
       enabledAddons,
-      plugin
+      plugin,
     } = this.props;
 
     const addonLoading = loading.models.addons;
@@ -144,10 +149,17 @@ class Addons extends React.Component<Props, State> {
           subTitle="Manages extended platform capabilities for KubeVela and VelaUX."
         />
 
-        <Tab defaultActiveKey={plugin ? 'plugins' : 'addons'}
-             onChange={key => {
-               history.push('/' + (key == 'plugins' ? "manage/" : "") + key)
-             }}>
+        <Tab
+          className="addons-tabs"
+          defaultActiveKey={
+            plugin ? 'plugins' : this.props.location?.search?.includes('tab=applications') ? 'applications' : 'addons'
+          }
+          onChange={(key) => {
+            history.push(
+              key == 'plugins' ? '/manage/plugins' : key == 'applications' ? '/addons?tab=applications' : '/addons'
+            );
+          }}
+        >
           <Tab.Item title="Addons" key={'addons'}>
             <SelectSearch
               dispatch={dispatch}
@@ -204,16 +216,15 @@ class Addons extends React.Component<Props, State> {
               />
             </If>
           </Tab.Item>
+          <Tab.Item title={i18n.t('Installed').toString()} key={'applications'}>
+            <AddonApplications />
+          </Tab.Item>
           <Tab.Item title="VelaUX Plugins" key={'plugins'}>
             <Loading visible={pluginLoading} style={{ width: '100%' }}>
-              <Plugin
-                dispatch={dispatch}
-                history={history}
-              ></Plugin>
+              <Plugin dispatch={dispatch} history={history}></Plugin>
             </Loading>
           </Tab.Item>
         </Tab>
-
       </div>
     );
   }

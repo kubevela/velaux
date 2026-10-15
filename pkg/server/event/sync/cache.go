@@ -54,6 +54,11 @@ func (c *CR2UX) initCache(ctx context.Context) error {
 		if !ok {
 			continue
 		}
+		// An addon's record stored before it carried its addon's name is left
+		// out, so the next sync writes the name onto it.
+		if app.Labels[types.LabelSourceOfTruth] == types.FromInner && app.Labels[model.LabelSyncAddon] == "" {
+			continue
+		}
 		namespace := app.Labels[model.LabelSyncNamespace]
 		var key = formatAppComposedName(app.Name, namespace)
 		if strings.HasSuffix(app.Name, namespace) {
