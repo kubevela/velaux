@@ -26,10 +26,8 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
-	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/format"
-	"cuelang.org/go/cue/parser"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/cel-go/cel"
 	"github.com/kubevela/pkg/cel/template"
@@ -41,6 +39,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/definition/celexpr"
 	"github.com/oam-dev/kubevela/pkg/definition/propexpr"
 	"github.com/oam-dev/kubevela/pkg/oam"
+	"github.com/oam-dev/kubevela/pkg/schema"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
@@ -56,6 +55,7 @@ const (
 	kindBool   = "bool"
 	kindList   = "list"
 	kindObject = "object"
+	kindMap    = "map"
 	kindDyn    = "dyn"
 )
 
@@ -234,18 +234,19 @@ func usage(v cue.Value) string {
 // sourceSchemas maps each source binding an expression on the surface can read
 // to the CUE of its definition's schema: the sources the application declares,
 // then any only its deployed Applications carry. A source reads only the
-// sources declared before the one named, all of them when it is new.
+// sources declared before the one named, all of them when it is new. The
+// definition is found as KubeVela's admission finds it, revision pins included.
 func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Application, surface, source string) map[string]string {
 	out := map[string]string{}
 	if e.KubeClient == nil {
 		return out
 	}
-	add := func(src v1beta1.ApplicationSource, namespace string) {
+	add := func(src v1beta1.ApplicationSource, namespace string, annotations map[string]string) {
 		if _, done := out[src.Name]; done {
 			return
 		}
-		text, err := e.sourceSchema(ctx, src.Type, namespace)
-		if err != nil {
+		text, err := schema.SourceSchemaText(ctx, e.KubeClient, namespace, src.Type, annotations)
+		if err != nil || text == "" {
 			klog.V(4).Infof("no schema for source %s of %s: %v", src.Name, app.Name, err)
 			return
 		}
@@ -255,7 +256,7 @@ func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Ap
 		if surface == surfaceSource && src.Name == source {
 			break
 		}
-		add(src, types.DefaultKubeVelaNS)
+		add(src, types.DefaultKubeVelaNS, app.Annotations)
 	}
 	if surface == surfaceSource || e.EnvBindingService == nil {
 		return out
@@ -270,55 +271,19 @@ func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Ap
 			continue
 		}
 		for _, src := range cr.Spec.Sources {
-			add(src, cr.Namespace)
+			add(src, cr.Namespace, cr.Annotations)
 		}
 	}
 	return out
-}
-
-func (e *expressionServiceImpl) sourceSchema(ctx context.Context, typ, namespace string) (string, error) {
-	def := &v1beta1.SourceDefinition{}
-	var err error
-	for _, ns := range []string{namespace, types.DefaultKubeVelaNS} {
-		if err = e.KubeClient.Get(ctx, client.ObjectKey{Namespace: ns, Name: typ}, def); err == nil {
-			break
-		}
-	}
-	if err != nil {
-		return "", err
-	}
-	if def.Spec.Schematic == nil || def.Spec.Schematic.CUE == nil {
-		return "", fmt.Errorf("source definition %s has no CUE template", typ)
-	}
-	return topLevelBlock(def.Spec.Schematic.CUE.Template, "schema")
-}
-
-// topLevelBlock returns the CUE of the template's top-level field of the given
-// name, as the admission webhook reads a source's schema.
-func topLevelBlock(template, name string) (string, error) {
-	f, err := parser.ParseFile("-", template, parser.ParseComments)
-	if err != nil {
-		return "", err
-	}
-	for _, decl := range f.Decls {
-		field, ok := decl.(*ast.Field)
-		if !ok {
-			continue
-		}
-		if label, _, err := ast.LabelName(field.Label); err != nil || label != name {
-			continue
-		}
-		b, err := format.Node(field.Value)
-		return string(b), err
-	}
-	return "", fmt.Errorf("no top-level %s block", name)
 }
 
 // celIssue matches the position cel-go reports an issue at.
 var celIssue = regexp.MustCompile(`<input>:(\d+):(\d+): ([^\n]*)`)
 
 // Check compiles each $( ) expression in a value against the surface's typed
-// environment, and compares the value's resulting type with the parameter's.
+// environment, and compares the value's resulting type with the parameter's. A
+// value that is exactly one component read takes the type its producer
+// declares, as KubeVela's admission types it.
 func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest) (*apisv1.ExpressionCheckResponse, error) {
 	contextSchema, ok := contextFor(req.Surface)
 	if !ok {
@@ -366,10 +331,13 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 	if len(resp.Issues) > 0 {
 		return resp, nil
 	}
-	if !parsed.Whole() {
-		resp.Type = kindString
-	} else {
+	if sole, ok := parsed.SoleExpr(); ok {
 		resp.Type = celKind(whole)
+		if kind, ok := e.componentReadKind(ctx, app, sole); ok {
+			resp.Type = kind
+		}
+	} else {
+		resp.Type = kindString
 	}
 	if issue := targetIssue(resp.Type, req.Kind, len(req.Value)); issue != nil {
 		resp.Issues = append(resp.Issues, issue)
@@ -407,23 +375,23 @@ func celKind(t *cel.Type) string {
 	case cel.ListType(cel.DynType).Kind():
 		return kindList
 	case cel.MapType(cel.StringType, cel.DynType).Kind():
-		return "map"
+		return kindMap
 	case cel.DynType.Kind():
 		return kindDyn
 	}
 	return t.String()
 }
 
-// targetIssue reports a value type the parameter cannot take. A dyn value
-// passes with a warning: the webhook refuses it against a concrete parameter
-// until it is converted, as int(...) does.
+// targetIssue reports a value type the parameter cannot take. A dyn value is
+// not checked, here or by the webhook, which admits it against any parameter: it
+// passes with a warning, since a value of the wrong type fails at render.
 func targetIssue(got, want string, end int) *apisv1.ExpressionIssue {
 	expected := map[string]string{"string": kindString, "integer": kindInt, "number": kindNumber, "boolean": kindBool}[want]
 	switch {
 	case expected == "", got == expected, got == kindInt && expected == kindNumber:
 		return nil
 	case got == "dyn":
-		return &apisv1.ExpressionIssue{Message: fmt.Sprintf("the type of this value is not known; convert it, for example %s(...)", map[string]string{"int": "int", "number": "double", "bool": "bool", "string": "string"}[expected]), Start: 0, End: end, Warning: true}
+		return &apisv1.ExpressionIssue{Message: fmt.Sprintf("the type of this value is not known, so it is not checked here and a wrong one fails at render; convert it to check it, for example %s(...)", map[string]string{"int": "int", "number": "double", "bool": "bool", "string": "string"}[expected]), Start: 0, End: end, Warning: true}
 	}
 	return &apisv1.ExpressionIssue{Message: fmt.Sprintf("this value is %s, but the parameter expects %s", got, expected), Start: 0, End: end}
 }

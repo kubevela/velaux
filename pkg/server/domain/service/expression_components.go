@@ -25,15 +25,19 @@ import (
 	"sort"
 	"strings"
 
+	"cuelang.org/go/cue"
 	"github.com/getkin/kin-openapi/openapi3"
 
+	"github.com/kubevela/pkg/cel/template"
 	"github.com/kubevela/pkg/multicluster"
+	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/appkeeper"
 	"github.com/oam-dev/kubevela/pkg/definition/celexpr"
 	"github.com/oam-dev/kubevela/pkg/definition/propexpr"
 	"github.com/oam-dev/kubevela/pkg/oam"
+	"github.com/oam-dev/kubevela/pkg/schema"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -131,10 +135,14 @@ func withStatus(obj *apisv1.ExpressionVariable) *apisv1.ExpressionVariable {
 	return obj
 }
 
-// declaredComponent is a component's definition type and its traits' types.
+// declaredComponent is a component's definition type and its traits' types,
+// with where its definitions are looked up: vela-system for a component only the
+// datastore declares, the deployed Application's namespace for one read from it.
 type declaredComponent struct {
-	typ    string
-	traits []string
+	typ         string
+	traits      []string
+	namespace   string
+	annotations map[string]string
 }
 
 // componentNames is the components the application declares, from the
@@ -142,10 +150,10 @@ type declaredComponent struct {
 // declares; crs are those Applications.
 func (e *expressionServiceImpl) componentNames(ctx context.Context, app *model.Application) ([]string, map[string]declaredComponent, []*v1beta1.Application) {
 	declared := map[string]declaredComponent{}
-	add := func(name, typ string, traits []string) {
+	add := func(name, typ string, traits []string, namespace string, annotations map[string]string) {
 		d := declared[name]
 		if d.typ == "" {
-			d.typ = typ
+			d.typ, d.namespace, d.annotations = typ, namespace, annotations
 		}
 		for _, t := range traits {
 			if !slices.Contains(d.traits, t) {
@@ -163,7 +171,7 @@ func (e *expressionServiceImpl) componentNames(ctx context.Context, app *model.A
 				for _, t := range comp.Traits {
 					traits = append(traits, t.Type)
 				}
-				add(comp.Name, comp.Type, traits)
+				add(comp.Name, comp.Type, traits, types.DefaultKubeVelaNS, app.Annotations)
 			}
 		}
 	}
@@ -174,7 +182,7 @@ func (e *expressionServiceImpl) componentNames(ctx context.Context, app *model.A
 			for _, t := range c.Traits {
 				traits = append(traits, t.Type)
 			}
-			add(c.Name, c.Type, traits)
+			add(c.Name, c.Type, traits, cr.Namespace, cr.Annotations)
 		}
 	}
 	names := make([]string, 0, len(declared))
@@ -514,4 +522,58 @@ func (e *expressionServiceImpl) componentIssues(ctx context.Context, app *model.
 		}
 	}
 	return out
+}
+
+// wholeComponentRead is the component read an expression consists of when it
+// does nothing but read one, such as component.db.output.data.host.
+func wholeComponentRead(expr string) (template.Reference, bool) {
+	refs, err := celexpr.PropertyReferences(expr)
+	if err != nil || len(refs) != 1 {
+		return template.Reference{}, false
+	}
+	ref := refs[0]
+	if !propexpr.IsComponent(ref) || ref.Defaulted || strings.TrimSpace(expr) != ref.String() {
+		return template.Reference{}, false
+	}
+	return ref, true
+}
+
+// componentReadKind is the type the producer declares for an expression that is
+// exactly one component read, as KubeVela's admission types it, or false when it
+// declares none and the read fits any parameter.
+func (e *expressionServiceImpl) componentReadKind(ctx context.Context, app *model.Application, expr string) (string, bool) {
+	ref, ok := wholeComponentRead(expr)
+	if !ok || e.KubeClient == nil {
+		return "", false
+	}
+	name := ref.Path[0]
+	_, declared, _ := e.componentNames(ctx, app)
+	decl, ok := declared[name]
+	if !ok || decl.typ == "" {
+		return "", false
+	}
+	comp := common.ApplicationComponent{Name: name, Type: decl.typ}
+	for _, t := range decl.traits {
+		comp.Traits = append(comp.Traits, common.ApplicationTrait{Type: t})
+	}
+	produced := schema.ProducedFor(ctx, e.KubeClient, decl.namespace, []common.ApplicationComponent{comp}, decl.annotations)
+	kind, ok := schema.ComponentReadKind(produced, ref)
+	if !ok {
+		return "", false
+	}
+	switch kind {
+	case cue.StringKind:
+		return kindString, true
+	case cue.IntKind:
+		return kindInt, true
+	case cue.NumberKind, cue.FloatKind:
+		return kindNumber, true
+	case cue.BoolKind:
+		return kindBool, true
+	case cue.ListKind:
+		return kindList, true
+	case cue.StructKind:
+		return kindMap, true
+	}
+	return "", false
 }
