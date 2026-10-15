@@ -3,13 +3,12 @@ import { connect } from 'dva';
 import React, { Component, Fragment } from 'react';
 
 import { getApplicationList, deleteApplication } from '../../api/application';
-import { getComponentDefinitions } from '../../api/definitions';
 import { getEnvs } from '../../api/env';
 import { getProjectTargetList } from '../../api/project';
 import { If } from '../../components/If';
 import type { ApplicationBase, ApplicationQuery, LoginUserInfo } from '@velaux/data';
 import type { ShowMode } from '../ApplicationList';
-import AppDialog from '../ApplicationList/components/AddAppDialog';
+import { NewServiceDialog } from '../ApplicationList/components/NewServiceDialog';
 import CardContend from '../ApplicationList/components/CardContent';
 import EditAppDialog from '../ApplicationList/components/EditAppDialog';
 
@@ -33,7 +32,6 @@ type State = {
   editApplicationItem: ApplicationBase;
   targets?: [];
   envs?: [];
-  componentDefinitions: [];
   isEditApplication: boolean;
   isAddApplication: boolean;
   labelValue: string[];
@@ -61,7 +59,6 @@ class ProjectApplications extends Component<Props, State> {
         createTime: '',
       },
       envs: [],
-      componentDefinitions: [],
       labelValue: [],
       isEditApplication: false,
       isAddApplication: false,
@@ -73,7 +70,6 @@ class ProjectApplications extends Component<Props, State> {
     this.listApplication();
     this.listProjectTargets();
     this.listEnvs();
-    this.onGetComponentDefinitions();
   }
 
   listApplication = async (queryData?: ApplicationQuery) => {
@@ -114,16 +110,6 @@ class ProjectApplications extends Component<Props, State> {
     getEnvs({ project: params.projectName }).then((res) => {
       if (res) {
         this.setState({ envs: res.envs || [] });
-      }
-    });
-  };
-
-  onGetComponentDefinitions = async () => {
-    getComponentDefinitions().then((res) => {
-      if (res) {
-        this.setState({
-          componentDefinitions: res && res.definitions,
-        });
       }
     });
   };
@@ -185,7 +171,7 @@ class ProjectApplications extends Component<Props, State> {
   };
 
   render() {
-    const { dispatch, userInfo } = this.props;
+    const { userInfo } = this.props;
     const {
       isLoading,
       applicationList,
@@ -194,7 +180,6 @@ class ProjectApplications extends Component<Props, State> {
       editApplicationItem,
       targets,
       envs,
-      componentDefinitions,
       labelValue,
     } = this.state;
     const { params = { projectName: '' } } = this.props.match;
@@ -252,23 +237,13 @@ class ProjectApplications extends Component<Props, State> {
           </Loading>
 
           <If condition={isAddApplication}>
-            <AppDialog
-              visible={isAddApplication}
-              targets={targets}
+            <NewServiceDialog
               projects={userInfo?.projects}
-              userInfo={userInfo}
-              isDisableProject={true}
-              projectName={projectName}
-              componentDefinitions={componentDefinitions}
-              setVisible={(visible) => {
-                this.setState({ isAddApplication: visible });
-              }}
-              onOK={() => {
-                this.setState({ isAddApplication: false });
-                this.listApplication();
-              }}
+              project={projectName}
               onClose={this.closeAddApplication}
-              dispatch={dispatch}
+              onCreated={(name: string) => {
+                this.props.history.push(`/applications/${name}/config`);
+              }}
             />
           </If>
 

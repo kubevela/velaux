@@ -1,5 +1,6 @@
 import { Grid, Checkbox, Dropdown, Menu, Loading, Button, Icon } from '@alifd/next';
 import Ansi from 'ansi-to-react';
+import { EnvironmentSlot, environmentSlots } from '../../../../components/EnvironmentSlot';
 import React, { Component, Fragment } from 'react';
 
 import { listContainerLog } from '../../../../api/observation';
@@ -156,27 +157,29 @@ class ContainerLog extends Component<Props, State> {
     const { logs, info, showTimestamps, autoRefresh, refreshInterval, previous, loading } = this.state;
     return (
       <Fragment>
-        <div className="application-logs-actions">
-          <Button className="download" type="normal" size="small" onClick={this.downloadLog}>
-            <Icon type="download" />
-          </Button>
-          <Checkbox checked={showTimestamps} onChange={(v) => this.setState({ showTimestamps: v })}>
-            <Translation className="font-bold font-size-14">Show timestamps</Translation>
-          </Checkbox>
-          <Checkbox checked={autoRefresh} onChange={this.setAutoRefresh}>
-            <Translation className="font-bold font-size-14">Auto-refresh</Translation>(every
-            {refreshInterval / 1000} s.)
-          </Checkbox>
-          <Dropdown trigger={<FaEllipsisV />}>
-            <Menu>
-              <Menu.Item>
-                <Checkbox checked={previous} onChange={(v) => this.setState({ previous: v })}>
-                  <Translation className="font-bold font-size-14">Show previous logs</Translation>
-                </Checkbox>
-              </Menu.Item>
-            </Menu>
-          </Dropdown>
-        </div>
+        <EnvironmentSlot id={environmentSlots.actions}>
+          <div className="application-logs-actions">
+            <Button className="download" type="normal" size="small" onClick={this.downloadLog}>
+              <Icon type="download" />
+            </Button>
+            <Checkbox checked={showTimestamps} onChange={(v) => this.setState({ showTimestamps: v })}>
+              <Translation className="font-bold font-size-14">Show timestamps</Translation>
+            </Checkbox>
+            <Checkbox checked={autoRefresh} onChange={this.setAutoRefresh}>
+              <Translation className="font-bold font-size-14">Auto-refresh</Translation>(every
+              {refreshInterval / 1000} s.)
+            </Checkbox>
+            <Dropdown trigger={<FaEllipsisV />}>
+              <Menu>
+                <Menu.Item>
+                  <Checkbox checked={previous} onChange={(v) => this.setState({ previous: v })}>
+                    <Translation className="font-bold font-size-14">Show previous logs</Translation>
+                  </Checkbox>
+                </Menu.Item>
+              </Menu>
+            </Dropdown>
+          </div>
+        </EnvironmentSlot>
 
         <Loading visible={loading} inline={false}>
           <div className="application-logs-wrapper margin-top-15">

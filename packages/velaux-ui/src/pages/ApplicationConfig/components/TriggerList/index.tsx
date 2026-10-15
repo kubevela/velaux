@@ -1,5 +1,6 @@
 import { Dialog, Grid, Message, Tab } from '@alifd/next';
 import React, { Component } from 'react';
+import { RelativeTime } from '../../../../components/RelativeTime';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { getApplicationComponent } from '../../../../api/application';
@@ -11,7 +12,7 @@ import '../../../../components/RowList';
 import { RowAction } from '../../../../components/RowAction';
 import { Translation } from '../../../../components/Translation';
 import type { ApplicationComponentBase, ApplicationComponent, Trigger, ApplicationDetail } from '@velaux/data';
-import { beautifyTime, momentDate, showAlias } from '../../../../utils/common';
+import { showAlias } from '../../../../utils/common';
 import './index.less';
 import { locale } from '../../../../utils/locale';
 import {
@@ -209,32 +210,42 @@ class TriggerList extends Component<Props, State> {
                     <span>{item.payloadType || <span className="row-list-muted">-</span>}</span>
                     <span>
                       {item.createTime ? (
-                        <span title={momentDate(item.createTime)}>{beautifyTime(item.createTime)}</span>
+                        <RelativeTime time={item.createTime} />
                       ) : (
                         <span className="row-list-muted">-</span>
                       )}
                     </span>
                     <span className="row-list-actions">
-                      <RowAction
-                        icon={<AiOutlinePlayCircle />}
-                        label="Trigger"
-                        onClick={() => this.showWebhook(item)}
-                      />
-                      <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => this.props.onEditTrigger(item)} />
-                      <Permission
-                        request={{
-                          resource: `project:${projectName}/application:${applicationDetail?.name}/trigger:${item.name}`,
-                          action: 'delete',
-                        }}
-                        project={projectName}
-                      >
+                      {!applicationDetail?.readOnly && (
                         <RowAction
-                          icon={<AiOutlineDelete />}
-                          label="Delete"
-                          danger
-                          onClick={() => this.handleTriggerDelete(item.token || '')}
+                          icon={<AiOutlinePlayCircle />}
+                          label="Trigger"
+                          onClick={() => this.showWebhook(item)}
                         />
-                      </Permission>
+                      )}
+                      {!applicationDetail?.readOnly && (
+                        <RowAction
+                          icon={<AiOutlineEdit />}
+                          label="Edit"
+                          onClick={() => this.props.onEditTrigger(item)}
+                        />
+                      )}
+                      {!applicationDetail?.readOnly && (
+                        <Permission
+                          request={{
+                            resource: `project:${projectName}/application:${applicationDetail?.name}/trigger:${item.name}`,
+                            action: 'delete',
+                          }}
+                          project={projectName}
+                        >
+                          <RowAction
+                            icon={<AiOutlineDelete />}
+                            label="Delete"
+                            danger
+                            onClick={() => this.handleTriggerDelete(item.token || '')}
+                          />
+                        </Permission>
+                      )}
                     </span>
                   </div>
                   {expanded && (

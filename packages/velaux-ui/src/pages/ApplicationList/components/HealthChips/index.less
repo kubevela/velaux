@@ -1,0 +1,41 @@
+// A row of health filters under the search bar; the tone classes come from
+// StatusBadge, which sets --tone for the dot.
+.health-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+
+.health-chip {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  color: #334155;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  cursor: pointer;
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--tone);
+    border-radius: 50%;
+  }
+  &:hover {
+    border-color: #cbd5e1;
+  }
+  &.active {
+    color: var(--primary-color, #1b58f4);
+    background: #eef2ff;
+    border-color: var(--primary-color, #1b58f4);
+  }
+}
+
+.health-chip-count {
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}

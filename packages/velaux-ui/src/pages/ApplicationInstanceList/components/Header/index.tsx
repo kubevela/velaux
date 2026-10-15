@@ -1,5 +1,5 @@
 import { Button, Dialog, Dropdown, Menu, Message, Select } from '@alifd/next';
-import { Link, routerRedux } from 'dva/router';
+import { routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
@@ -16,8 +16,7 @@ import {
 } from '../../../../api/application';
 import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 import { If } from '../../../../components/If';
-import type { Tone } from '../../../../components/StatusBadge';
-import { StatusBadge } from '../../../../components/StatusBadge';
+import { EnvironmentSlot, environmentSlots } from '../../../../components/EnvironmentSlot';
 import Permission from '../../../../components/Permission';
 import './index.less';
 import { Translation } from '../../../../components';
@@ -51,7 +50,8 @@ type Props = {
   envName: string;
   appName: string;
   envbinding?: EnvBinding;
-  disableStatusShow?: boolean;
+  // extra leads the actions, as a note on the view such as when it last loaded.
+  extra?: React.ReactNode;
   refresh: () => void;
   dispatch: ({}) => void;
   userInfo?: LoginUserInfo;
@@ -325,7 +325,7 @@ class Header extends Component<Props, State> {
     const { appName, envName, components, applicationDetail } = this.props;
     const { recycleLoading, pauseLoading, deleteLoading, refreshLoading, compare, visibleApplicationDiff, endpoints } =
       this.state;
-    const { targets, applicationStatus, disableStatusShow } = this.props;
+    const { targets, applicationStatus } = this.props;
     const targetOptions = (targets || []).map((item: Target) => ({
       label: item.alias || item.name,
       value: item.name,
@@ -334,31 +334,12 @@ class Header extends Component<Props, State> {
       label: item.alias || item.name,
       value: item.name,
     }));
-    const phaseTone = (status: string | undefined): Tone => {
-      switch (status) {
-        case undefined:
-        case '':
-          return 'undeployed';
-        case 'running':
-        case 'workflowFinished':
-          return 'healthy';
-        case 'unhealthy':
-          return 'unhealthy';
-        case 'workflowSuspending':
-          return 'suspended';
-        case 'workflowFailed':
-        case 'workflowTerminated':
-          return 'failed';
-      }
-      return 'progressing';
-    };
     const projectName = applicationDetail && applicationDetail.project?.name;
     return (
       <div>
-        <div className="environment-toolbar">
+        <EnvironmentSlot id={environmentSlots.filters}>
           {targetOptions.length > 0 && (
             <Select
-              className="environment-toolbar-select"
               locale={locale().Select}
               mode="single"
               onChange={this.handleTargetChange}
@@ -370,7 +351,6 @@ class Header extends Component<Props, State> {
           )}
           {componentOptions.length > 0 && (
             <Select
-              className="environment-toolbar-select"
               locale={locale().Select}
               mode="single"
               onChange={this.handleComponentChange}
@@ -380,142 +360,135 @@ class Header extends Component<Props, State> {
               hasClear
             />
           )}
-          <If condition={applicationStatus}>
-            <span className="environment-toolbar-phase">
-              <StatusBadge
-                tone={phaseTone(applicationStatus?.status)}
-                label={applicationStatus?.status || 'Init'}
-                title={i18n.t('Application phase').toString()}
-              />
-              <If condition={!disableStatusShow}>
-                <Link to={`/applications/${appName}/envbinding/${envName}/status`}>
-                  <Translation>Check the details</Translation>
-                </Link>
-              </If>
-            </span>
-          </If>
-          <div className="environment-toolbar-actions">
-            <If condition={compare && compare.isDiff}>
-              <Button type="secondary" onClick={this.showApplicationDiff}>
-                <span className="circle circle-failure" />
-                Diff
-              </Button>
-            </If>
-            <Button type="secondary" loading={refreshLoading} onClick={this.refresh}>
-              <HiOutlineRefresh />
+        </EnvironmentSlot>
+        <EnvironmentSlot id={environmentSlots.actions}>
+          {this.props.extra}
+          <If condition={compare && compare.isDiff}>
+            <Button type="secondary" onClick={this.showApplicationDiff}>
+              <span className="circle circle-failure" />
+              Diff
             </Button>
+          </If>
+          <Button
+            type="secondary"
+            className="environment-toolbar-icon-btn"
+            loading={refreshLoading}
+            title={i18n.t('Refresh').toString()}
+            onClick={this.refresh}
+          >
+            <HiOutlineRefresh />
+          </Button>
 
-            <If condition={endpoints && endpoints.length > 0}>
-              <Dropdown
-                trigger={
-                  <Button type="secondary">
-                    <Translation>Service Endpoint</Translation>
-                  </Button>
-                }
-              >
-                <Menu>
-                  {endpoints?.map((item) => {
-                    const linkURL = getLink(item);
-                    if (item && !item.endpoint.inner) {
-                      return (
-                        <Menu.Item key={linkURL}>
-                          <If condition={item.endpoint.portName}>
-                            <span className="margin-right-5">{item.endpoint.portName}:</span>
-                          </If>
-                          <a style={{ color: '#1b58f4' }} target="_blank" href={linkURL} rel="noopener noreferrer">
-                            {linkURL}
-                          </a>
-                        </Menu.Item>
-                      );
-                    }
-                    return;
-                  })}
-                  {endpoints?.map((item) => {
-                    const linkURL = getLink(item);
-                    if (item && item.endpoint.inner) {
-                      return (
-                        <Menu.Item key={linkURL}>
-                          <If condition={item.endpoint.portName}>
-                            <span className="margin-right-5">{item.endpoint.portName}:</span>
-                          </If>
-                          <span>
-                            {linkURL}(Inner)
-                            <CopyToClipboard
-                              onCopy={() => {
-                                Message.success('Copied successfully');
-                              }}
-                              text={linkURL}
-                            >
-                              <AiOutlineCopy size={14} />
-                            </CopyToClipboard>
-                          </span>
-                        </Menu.Item>
-                      );
-                    }
-                    return;
-                  })}
-                </Menu>
-              </Dropdown>
-            </If>
+          <If condition={endpoints && endpoints.length > 0}>
+            <Dropdown
+              trigger={
+                <Button type="secondary">
+                  <Translation>Service Endpoint</Translation>
+                </Button>
+              }
+            >
+              <Menu>
+                {endpoints?.map((item) => {
+                  const linkURL = getLink(item);
+                  if (item && !item.endpoint.inner) {
+                    return (
+                      <Menu.Item key={linkURL}>
+                        <If condition={item.endpoint.portName}>
+                          <span className="margin-right-5">{item.endpoint.portName}:</span>
+                        </If>
+                        <a style={{ color: '#1b58f4' }} target="_blank" href={linkURL} rel="noopener noreferrer">
+                          {linkURL}
+                        </a>
+                      </Menu.Item>
+                    );
+                  }
+                  return;
+                })}
+                {endpoints?.map((item) => {
+                  const linkURL = getLink(item);
+                  if (item && item.endpoint.inner) {
+                    return (
+                      <Menu.Item key={linkURL}>
+                        <If condition={item.endpoint.portName}>
+                          <span className="margin-right-5">{item.endpoint.portName}:</span>
+                        </If>
+                        <span>
+                          {linkURL}(Inner)
+                          <CopyToClipboard
+                            onCopy={() => {
+                              Message.success('Copied successfully');
+                            }}
+                            text={linkURL}
+                          >
+                            <AiOutlineCopy size={14} />
+                          </CopyToClipboard>
+                        </span>
+                      </Menu.Item>
+                    );
+                  }
+                  return;
+                })}
+              </Menu>
+            </Dropdown>
+          </If>
 
-            <If condition={!applicationStatus || !applicationStatus.status}>
-              <Permission
-                request={{
-                  resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
-                  action: 'delete',
-                }}
-                project={projectName}
+          <If condition={!applicationStatus || !applicationStatus.status}>
+            <Permission
+              request={{
+                resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
+                action: 'delete',
+              }}
+              project={projectName}
+            >
+              <Button
+                loading={deleteLoading}
+                disabled={applicationDetail?.readOnly}
+                className="danger-btn"
+                onClick={this.deleteEnv}
               >
-                <Button
-                  loading={deleteLoading}
-                  disabled={applicationDetail?.readOnly}
-                  className="danger-btn"
-                  onClick={this.deleteEnv}
-                >
-                  <Translation>Delete</Translation>
-                </Button>
-              </Permission>
-            </If>
-            <If condition={applicationStatus && applicationStatus.status && applicationStatus.status != 'deleting'}>
-              <Permission
-                request={{
-                  resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
-                  action: applicationStatus?.paused ? 'resume' : 'pause',
-                }}
-                project={projectName}
+                <Translation>Delete</Translation>
+              </Button>
+            </Permission>
+          </If>
+          <If condition={applicationStatus && applicationStatus.status && applicationStatus.status != 'deleting'}>
+            <Permission
+              request={{
+                resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
+                action: applicationStatus?.paused ? 'resume' : 'pause',
+              }}
+              project={projectName}
+            >
+              <Button
+                type="secondary"
+                className="environment-toolbar-icon-btn"
+                loading={pauseLoading}
+                disabled={applicationDetail?.readOnly}
+                onClick={() => this.setPaused(!applicationStatus?.paused)}
               >
-                <Button
-                  type="secondary"
-                  className="environment-toolbar-icon-btn"
-                  loading={pauseLoading}
-                  disabled={applicationDetail?.readOnly}
-                  onClick={() => this.setPaused(!applicationStatus?.paused)}
-                >
-                  {applicationStatus?.paused ? <AiOutlinePlayCircle /> : <AiOutlinePauseCircle />}
-                  <Translation>{applicationStatus?.paused ? 'Resume' : 'Pause'}</Translation>
-                </Button>
-              </Permission>
-            </If>
-            <If condition={applicationStatus && applicationStatus.status && applicationStatus.status != 'deleting'}>
-              <Permission
-                request={{
-                  resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
-                  action: 'recycle',
-                }}
-                project={projectName}
+                {applicationStatus?.paused ? <AiOutlinePlayCircle /> : <AiOutlinePauseCircle />}
+                <Translation>{applicationStatus?.paused ? 'Resume' : 'Pause'}</Translation>
+              </Button>
+            </Permission>
+          </If>
+          <If condition={applicationStatus && applicationStatus.status && applicationStatus.status != 'deleting'}>
+            <Permission
+              request={{
+                resource: `project:${projectName}/application:${applicationDetail?.name}/envBinding:${envName}`,
+                action: 'recycle',
+              }}
+              project={projectName}
+            >
+              <Button
+                loading={recycleLoading}
+                onClick={this.recycleEnv}
+                disabled={applicationDetail?.readOnly}
+                className="danger-btn"
               >
-                <Button
-                  loading={recycleLoading}
-                  onClick={this.recycleEnv}
-                  disabled={applicationDetail?.readOnly}
-                  className="danger-btn"
-                >
-                  <Translation>Recycle</Translation>
-                </Button>
-              </Permission>
-            </If>
-          </div>
-        </div>
+                <Translation>Recycle</Translation>
+              </Button>
+            </Permission>
+          </If>
+        </EnvironmentSlot>
         <If condition={visibleApplicationDiff}>
           {compare && (
             <ApplicationDiff

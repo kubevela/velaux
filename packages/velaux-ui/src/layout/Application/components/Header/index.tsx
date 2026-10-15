@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
+import { syncInfo } from '../../../../utils/appMeta';
 import { Breadcrumb } from '../../../../components/Breadcrumb';
 import { StatusBadge } from '../../../../components/StatusBadge';
 import type { EnvironmentStatus } from '../../../../pages/ApplicationList/components/AppStatus/health';
@@ -163,7 +164,6 @@ class ApplicationHeader extends Component<Props, State> {
     const summary = summariseStatuses((applicationAllStatus || []) as EnvironmentStatus[]);
     const paused = pausedEnvs((applicationAllStatus || []) as EnvironmentStatus[]);
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
-    const sourceOfTrust = applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
     return (
       <div>
         <div className="app-head">
@@ -189,24 +189,30 @@ class ApplicationHeader extends Component<Props, State> {
                 title={`${i18n.t('Reconciliation paused in')} ${paused.join(', ')}`}
               />
             )}
+            {applicationDetail?.readOnly && (
+              <StatusBadge
+                tone="neutral"
+                label="Read-only"
+                title={i18n.t('Managed by its addon: change it from the Addons page.').toString()}
+              />
+            )}
+            {syncInfo(applicationDetail?.labels).fromCluster && (
+              <StatusBadge
+                tone="neutral"
+                label="Synced from cluster"
+                title={i18n
+                  .t(
+                    'Managed as an Application in the cluster: VelaUX picks up its changes. Deploying from here makes VelaUX its source of truth.'
+                  )
+                  .toString()}
+              />
+            )}
             {summary.components > 0 && (
               <span className="app-head-meta">
                 {summary.healthyComponents}/{summary.components} <Translation>components healthy</Translation>
               </span>
             )}
             <div className="app-head-actions">
-              <If condition={applicationDetail?.readOnly}>
-                <Message
-                  type="notice"
-                  title={i18n.t('This application is managed by the addon, and it is readonly').toString()}
-                />
-              </If>
-              <If condition={sourceOfTrust === 'from-k8s-resource'}>
-                <Message
-                  type="warning"
-                  title={i18n.t('The application is synchronizing from the cluster.').toString()}
-                />
-              </If>
               <Permission
                 request={{
                   resource: `project:${projectName}/application:${applicationDetail && applicationDetail.name}`,

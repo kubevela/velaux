@@ -5,7 +5,8 @@ import React from 'react';
 import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
 import { createConfig, detailConfig, detailTemplate, listTemplates, updateConfig } from '../../../../api/config';
-import DrawerWithFooter from '../../../../components/Drawer';
+import { AwaitingType } from '../../../../components/AwaitingType';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
@@ -62,20 +63,19 @@ class CreateConfigDialog extends React.Component<Props, State> {
         this.onDetailTemplate(template);
       }
     }
-    this.loadProjectTemplates();
+    this.loadTemplates();
   }
 
-  loadProjectTemplates = () => {
-    const { project } = this.props;
-    if (project) {
-      listTemplates(project).then((res) => {
-        if (res && Array.isArray(res.templates)) {
-          this.setState({ templates: res.templates });
-        } else {
-          this.setState({ templates: [] });
-        }
-      });
+  // loadTemplates lists the templates a new config is chosen from, the
+  // tenant's or the global ones, when the dialog was not opened on one.
+  loadTemplates = () => {
+    const { project, template } = this.props;
+    if (template) {
+      return;
     }
+    listTemplates(project).then((res) => {
+      this.setState({ templates: res && Array.isArray(res.templates) ? res.templates : [] });
+    });
   };
 
   onDetailConfig = (callback?: () => void) => {
@@ -220,6 +220,8 @@ class CreateConfigDialog extends React.Component<Props, State> {
     const { createLoading, templateDetail, templateLoading, propertiesMode, templates } = this.state;
 
     const edit = configName != '' && configName != undefined;
+    // A new config's template comes first; the rest waits for it.
+    const ready = edit || !!template || !!this.field.getValue('template');
     const buttons = [
       <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
         <Translation>Cancel</Translation>
@@ -259,71 +261,19 @@ class CreateConfigDialog extends React.Component<Props, State> {
     };
     const templateOptions = templates?.map((tem) => {
       return {
-        label: tem.namespace + '/' + (tem.alias || tem.name),
+        label: tem.namespace === 'vela-system' ? tem.alias || tem.name : `${tem.namespace}/${tem.alias || tem.name}`,
         value: tem.namespace + '/' + tem.name,
       };
     });
     return (
       <React.Fragment>
-        <DrawerWithFooter
+        <ModalWithFooter
           title={edit ? i18n.t('Edit a config') : i18n.t('New a config')}
-          placement="right"
-          width={800}
           onClose={this.onClose}
           extButtons={buttons}
         >
           <Form {...formItemLayout} field={this.field}>
-            <Row>
-              <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Name</Translation>} labelTextAlign="left" required={true} disabled={edit}>
-                  <Input
-                    name="name"
-                    placeholder={i18n.t('Please enter').toString()}
-                    maxLength={32}
-                    {...init('name', {
-                      rules: [
-                        {
-                          required: true,
-                          pattern: checkName,
-                          message: <Translation>Please enter a valid name</Translation>,
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </Col>
-              <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Alias</Translation>}>
-                  <Input
-                    name="alias"
-                    placeholder={i18n.t('Please enter').toString()}
-                    {...init('alias', {
-                      rules: [
-                        {
-                          minLength: 2,
-                          maxLength: 64,
-                          message: 'Enter a string of 2 to 64 characters.',
-                        },
-                      ],
-                    })}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Description</Translation>}>
-                  <Input
-                    locale={locale().Input}
-                    name="description"
-                    placeholder={i18n.t('Please enter').toString()}
-                    {...init('description')}
-                  />
-                </FormItem>
-              </Col>
-            </Row>
-
-            {project && !template && (
+            {!template && (
               <Row>
                 <Col span={24} style={{ padding: '0 8px' }}>
                   <FormItem required label={<Translation>Template</Translation>}>
@@ -357,64 +307,121 @@ class CreateConfigDialog extends React.Component<Props, State> {
                 </Col>
               </Row>
             )}
-            <Row>
-              <Col span={24} style={{ padding: '0 8px' }}>
-                <Loading visible={templateLoading} style={{ width: '100%' }}>
-                  <Card
-                    contentHeight={'auto'}
-                    style={{ marginTop: '8px' }}
-                    title={i18n.t('Properties').toString()}
-                    className="withActions"
-                    subTitle={
-                      <Button
-                        style={{ alignItems: 'center', display: 'flex' }}
-                        onClick={() => {
-                          if (propertiesMode === 'native') {
-                            this.setState({ propertiesMode: 'code' });
-                          } else {
-                            this.setState({ propertiesMode: 'native' });
-                          }
-                        }}
-                      >
-                        {propertiesMode === 'native' && (
-                          <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
-                        )}
-                        {propertiesMode === 'code' && (
-                          <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />
-                        )}
-                      </Button>
-                    }
+            <AwaitingType ready={ready}>
+              <Row>
+                <Col span={12} style={{ padding: '0 8px' }}>
+                  <FormItem
+                    label={<Translation>Name</Translation>}
+                    labelTextAlign="left"
+                    required={true}
+                    disabled={edit}
                   >
-                    <FormItem required={true}>
-                      <If condition={templateDetail && templateDetail.uiSchema}>
-                        <UISchema
-                          {...init(`properties`, {
-                            rules: [
-                              {
-                                validator: validator,
-                                message: i18n.t('Please check the config properties'),
-                              },
-                            ],
-                          })}
-                          enableCodeEdit={propertiesMode === 'code'}
-                          uiSchema={templateDetail && templateDetail.uiSchema}
-                          ref={this.uiSchemaRef}
-                          mode={edit ? 'edit' : 'new'}
-                        />
-                      </If>
-                    </FormItem>
-                  </Card>
-                </Loading>
+                    <Input
+                      name="name"
+                      placeholder={i18n.t('Please enter').toString()}
+                      maxLength={32}
+                      {...init('name', {
+                        rules: [
+                          {
+                            required: true,
+                            pattern: checkName,
+                            message: <Translation>Please enter a valid name</Translation>,
+                          },
+                        ],
+                      })}
+                    />
+                  </FormItem>
+                </Col>
+                <Col span={12} style={{ padding: '0 8px' }}>
+                  <FormItem label={<Translation>Alias</Translation>}>
+                    <Input
+                      name="alias"
+                      placeholder={i18n.t('Please enter').toString()}
+                      {...init('alias', {
+                        rules: [
+                          {
+                            minLength: 2,
+                            maxLength: 64,
+                            message: 'Enter a string of 2 to 64 characters.',
+                          },
+                        ],
+                      })}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <FormItem label={<Translation>Description</Translation>}>
+                    <Input
+                      locale={locale().Input}
+                      name="description"
+                      placeholder={i18n.t('Please enter').toString()}
+                      {...init('description')}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
 
-                <If condition={!templateDetail}>
-                  <Message type="notice">
-                    <Translation>Can not load the template detail</Translation>
-                  </Message>
-                </If>
-              </Col>
-            </Row>
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <Loading visible={templateLoading} style={{ width: '100%' }}>
+                    <Card
+                      contentHeight={'auto'}
+                      style={{ marginTop: '8px' }}
+                      title={i18n.t('Properties').toString()}
+                      className="withActions"
+                      subTitle={
+                        <Button
+                          style={{ alignItems: 'center', display: 'flex' }}
+                          onClick={() => {
+                            if (propertiesMode === 'native') {
+                              this.setState({ propertiesMode: 'code' });
+                            } else {
+                              this.setState({ propertiesMode: 'native' });
+                            }
+                          }}
+                        >
+                          {propertiesMode === 'native' && (
+                            <BiCodeBlock size={14} title={i18n.t('Switch to the coding mode')} />
+                          )}
+                          {propertiesMode === 'code' && (
+                            <BiLaptop size={14} title={i18n.t('Switch to the native mode')} />
+                          )}
+                        </Button>
+                      }
+                    >
+                      <FormItem required={true}>
+                        <If condition={templateDetail && templateDetail.uiSchema}>
+                          <UISchema
+                            {...init(`properties`, {
+                              rules: [
+                                {
+                                  validator: validator,
+                                  message: i18n.t('Please check the config properties'),
+                                },
+                              ],
+                            })}
+                            enableCodeEdit={propertiesMode === 'code'}
+                            uiSchema={templateDetail && templateDetail.uiSchema}
+                            ref={this.uiSchemaRef}
+                            mode={edit ? 'edit' : 'new'}
+                          />
+                        </If>
+                      </FormItem>
+                    </Card>
+                  </Loading>
+
+                  <If condition={ready && !templateDetail && !templateLoading}>
+                    <Message type="notice">
+                      <Translation>Can not load the template detail</Translation>
+                    </Message>
+                  </If>
+                </Col>
+              </Row>
+            </AwaitingType>
           </Form>
-        </DrawerWithFooter>
+        </ModalWithFooter>
       </React.Fragment>
     );
   }

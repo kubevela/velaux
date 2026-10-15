@@ -1,12 +1,12 @@
 import { connect } from 'dva';
 import React, { Component } from 'react';
+import { RelativeTime } from '../../../../components/RelativeTime';
 
 import './index.less';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import type { ApplicationDetail, EnvBinding } from '@velaux/data';
-import { beautifyTime } from '../../../../utils/common';
 import AddAndEditEnvBind from '../AddAndEditEnvBind';
 
 import { Link } from 'dva/router';
@@ -97,7 +97,9 @@ class TabsContent extends Component<Props, State> {
                 >
                   {item.description}
                   <p>Name: {item.name}</p>
-                  <p>Bind Time: {beautifyTime(item.createTime)}</p>
+                  <p>
+                    Bind Time: <RelativeTime time={item.createTime} />
+                  </p>
                 </Balloon>
               );
             })}

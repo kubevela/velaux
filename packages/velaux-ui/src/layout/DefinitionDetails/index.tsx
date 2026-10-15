@@ -6,7 +6,7 @@ import React, { Component, Fragment } from 'react';
 
 import { Translation } from '../../components/Translation';
 import { Breadcrumb } from '../../components/Breadcrumb';
-import type { DefinitionMenuType , LoginUserInfo } from '@velaux/data';
+import type { DefinitionMenuType, LoginUserInfo } from '@velaux/data';
 
 import './index.less';
 import classNames from 'classnames';

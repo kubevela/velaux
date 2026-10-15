@@ -7,6 +7,7 @@ import ApplicationEnvRoute from '../../pages/ApplicationEnvRoute';
 import ApplicationInstanceList from '../../pages/ApplicationInstanceList';
 import Application from '../../pages/ApplicationList';
 import ApplicationLog from '../../pages/ApplicationLog';
+import ApplicationYaml from '../../pages/ApplicationYaml';
 import ApplicationEnvironments from '../../pages/ApplicationEnvironments';
 import ApplicationRevisionList from '../../pages/ApplicationRevisionList';
 import ApplicationStatus from '../../pages/ApplicationStatus';
@@ -32,7 +33,6 @@ import TargetList from '../../pages/TargetList';
 import UiSchema from '../../pages/UiSchema';
 import Users from '../../pages/Users';
 import ApplicationLayout from '../Application';
-import ConfigsLayout from '../Configs';
 import DefinitionDetails from '../DefinitionDetails';
 import DefinitionsLayout from '../Definitions';
 import ProjectLayout from '../Project';
@@ -161,7 +161,7 @@ export default function Router() {
       />
       <Route
         exact
-        path="/applications/:appName/envbinding/:envName/status"
+        path="/applications/:appName/envbinding/:envName/status/:view?"
         render={(props: any) => {
           return (
             <ApplicationLayout {...props}>
@@ -210,6 +210,17 @@ export default function Router() {
           return (
             <ApplicationLayout {...props}>
               <ApplicationLog {...props} />
+            </ApplicationLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/applications/:appName/envbinding/:envName/yaml"
+        render={(props: any) => {
+          return (
+            <ApplicationLayout {...props}>
+              <ApplicationYaml {...props} />
             </ApplicationLayout>
           );
         }}
@@ -357,25 +368,14 @@ export default function Router() {
         exact
         path="/configs"
         render={(props: any) => {
-          return <ConfigsLayout {...props} />;
+          return <Configs {...props} />;
         }}
       />
       <Route
         exact
-        path="/configs/:templateName"
+        path={['/configs/:templateName', '/configs/:templateName/config']}
         render={(props: any) => {
-          return <Redirect to={`/configs/${props.match.params.templateName}/config`} />;
-        }}
-      />
-      <Route
-        exact
-        path="/configs/:templateName/config"
-        render={(props: any) => {
-          return (
-            <ConfigsLayout {...props}>
-              <Configs {...props} />
-            </ConfigsLayout>
-          );
+          return <Redirect to={`/configs?template=${props.match.params.templateName}`} />;
         }}
       />
       <Route

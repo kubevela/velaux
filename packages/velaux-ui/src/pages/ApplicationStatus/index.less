@@ -78,3 +78,26 @@
   background: #dcfce7;
   border-radius: 10px;
 }
+
+// The status reloads by itself; this says when it last did.
+.status-refreshed {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.status-refreshed-dot {
+  width: 7px;
+  height: 7px;
+  background: #16a34a;
+  border-radius: 50%;
+  animation: status-refreshed-pulse 2s ease-in-out infinite;
+}
+
+@keyframes status-refreshed-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}

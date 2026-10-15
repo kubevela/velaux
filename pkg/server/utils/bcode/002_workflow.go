@@ -33,3 +33,6 @@ var ErrWorkflowNoEnv = NewBcode(400, 20006, "workflow must set env name")
 
 // ErrWorkflowRecordNotExist workflow record is not exist
 var ErrWorkflowRecordNotExist = NewBcode(404, 20007, "workflow record is not exist")
+
+// ErrWorkflowMode the workflow mode is neither StepByStep nor DAG
+var ErrWorkflowMode = NewBcode(400, 20008, "a workflow mode is StepByStep or DAG")

@@ -16,15 +16,9 @@ import { If } from '../If';
 
 import { ComponentNode } from './component-node';
 import type { GraphNode, TreeNode, GraphEdge, Line } from './interface';
-import {
-  describeNode,
-  describeCluster,
-  treeNodeKey,
-  getGraphSize,
-  getNodeSize,
-  ResourceIcon,
-  describeTarget,
-} from './utils';
+import { StatusTooltip, statusTooltipPopupClass } from '../StatusTooltip';
+import { clusterTooltip, resourceTooltip, targetTooltip } from './tooltip';
+import { treeNodeKey, getGraphSize, getNodeSize, ResourceIcon } from './utils';
 
 import { Link } from 'dva/router';
 import { Dropdown, Menu, Tag, Balloon } from '@alifd/next';
@@ -80,12 +74,8 @@ function renderResourceNode(props: TreeGraphProps, id: string, node: GraphNode) 
     </div>
   );
   return (
-    <Balloon trigger={graphNode}>
-      <div>
-        {describeNode(node).map((line) => {
-          return <p className="line">{line}</p>;
-        })}
-      </div>
+    <Balloon trigger={graphNode} closable={false} popupClassName={statusTooltipPopupClass}>
+      <StatusTooltip {...resourceTooltip(node.resource)} />
     </Balloon>
   );
 }
@@ -119,12 +109,8 @@ function renderAppNode(props: TreeGraphProps, id: string, node: GraphNode) {
     </div>
   );
   return (
-    <Balloon trigger={graphNode}>
-      <div>
-        {describeNode(node).map((line) => {
-          return <p className="line">{line}</p>;
-        })}
-      </div>
+    <Balloon trigger={graphNode} closable={false} popupClassName={statusTooltipPopupClass}>
+      <StatusTooltip {...resourceTooltip(node.resource)} />
     </Balloon>
   );
 }
@@ -175,12 +161,8 @@ function renderPodNode(props: TreeGraphProps, id: string, node: GraphNode) {
     </div>
   );
   return (
-    <Balloon trigger={graphNode}>
-      <div>
-        {describeNode(node).map((line) => {
-          return <p className="line">{line}</p>;
-        })}
-      </div>
+    <Balloon trigger={graphNode} closable={false} popupClassName={statusTooltipPopupClass}>
+      <StatusTooltip {...resourceTooltip(node.resource)} />
     </Balloon>
   );
 }
@@ -207,12 +189,8 @@ function renderClusterNode(props: TreeGraphProps, id: string, node: GraphNode) {
     </div>
   );
   return (
-    <Balloon trigger={graphNode}>
-      <div>
-        {describeCluster(node).map((line) => {
-          return <p className="line">{line}</p>;
-        })}
-      </div>
+    <Balloon trigger={graphNode} closable={false} popupClassName={statusTooltipPopupClass}>
+      <StatusTooltip {...clusterTooltip(node.resource.name)} />
     </Balloon>
   );
 }
@@ -239,12 +217,8 @@ function renderTargetNode(props: TreeGraphProps, id: string, node: GraphNode) {
     </div>
   );
   return (
-    <Balloon trigger={graphNode}>
-      <div>
-        {describeTarget(node).map((line) => {
-          return <p className="line">{line}</p>;
-        })}
-      </div>
+    <Balloon trigger={graphNode} closable={false} popupClassName={statusTooltipPopupClass}>
+      <StatusTooltip {...targetTooltip(node.resource.name)} />
     </Balloon>
   );
 }
@@ -327,7 +301,7 @@ export const TreeGraph = (props: TreeGraphProps) => {
           case 'pod':
             return <React.Fragment key={key}>{renderPodNode(props, key, node)}</React.Fragment>;
           case 'component':
-            return <ComponentNode key={key} node={node} showTrait={true} />;
+            return <ComponentNode key={key} node={node} showTrait={false} />;
           default:
             return <React.Fragment key={key}>{renderResourceNode(props, key, node)}</React.Fragment>;
         }
