@@ -237,48 +237,78 @@ func usage(v cue.Value) string {
 	return strings.TrimSpace(doc)
 }
 
-// sourceSchemas maps each source binding an expression on the surface can read
-// to the CUE of its definition's schema: the sources the application declares,
-// then any only its deployed Applications carry. A source reads only the
-// sources declared before the one named, all of them when it is new. The
-// definition is found as KubeVela's admission finds it, revision pins included.
-func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Application, surface, source string) map[string]string {
-	out := map[string]string{}
-	if e.KubeClient == nil {
+// sourceBinding is a source an expression may name: as the application declares
+// it, or as only a deployed Application carries it, with where its definition is
+// looked up. index is its place in the application's sources, or -1.
+type sourceBinding struct {
+	src         v1beta1.ApplicationSource
+	namespace   string
+	annotations map[string]string
+	index       int
+}
+
+// sourceBindings are the sources an expression on the surface may name, by
+// name: the sources the application declares, looked up in vela-system, then
+// any only its deployed Applications carry, looked up in theirs. A source being
+// written reads only the application's own.
+func (e *expressionServiceImpl) sourceBindings(ctx context.Context, app *model.Application, surface string) map[string]sourceBinding {
+	out := map[string]sourceBinding{}
+	for i, src := range app.Sources {
+		if _, done := out[src.Name]; !done {
+			out[src.Name] = sourceBinding{src: src, namespace: types.DefaultKubeVelaNS, annotations: app.Annotations, index: i}
+		}
+	}
+	if surface == surfaceSource || e.KubeClient == nil || e.EnvBindingService == nil {
 		return out
 	}
-	add := func(src v1beta1.ApplicationSource, namespace string, annotations map[string]string) {
-		if _, done := out[src.Name]; done {
-			return
-		}
-		text, err := schema.SourceSchemaText(ctx, e.KubeClient, namespace, src.Type, annotations)
-		if err != nil || text == "" {
-			klog.V(4).Infof("no schema for source %s of %s: %v", src.Name, app.Name, err)
-			return
-		}
-		out[src.Name] = text
-	}
-	for _, src := range app.Sources {
-		if surface == surfaceSource && src.Name == source {
-			break
-		}
-		add(src, types.DefaultKubeVelaNS, app.Annotations)
-	}
-	if surface == surfaceSource || e.EnvBindingService == nil {
-		return out
-	}
-	bindings, err := e.EnvBindingService.GetEnvBindings(ctx, app)
+	envs, err := e.EnvBindingService.GetEnvBindings(ctx, app)
 	if err != nil {
 		return out
 	}
-	for _, env := range bindings {
+	for _, env := range envs {
 		cr := &v1beta1.Application{}
 		if err := e.KubeClient.Get(ctx, client.ObjectKey{Namespace: env.AppDeployNamespace, Name: env.AppDeployName}, cr); err != nil {
 			continue
 		}
 		for _, src := range cr.Spec.Sources {
-			add(src, cr.Namespace, cr.Annotations)
+			if _, done := out[src.Name]; !done {
+				out[src.Name] = sourceBinding{src: src, namespace: cr.Namespace, annotations: cr.Annotations, index: -1}
+			}
 		}
+	}
+	return out
+}
+
+// writtenSourceIndex is where the source being written sits among the application's
+// sources: its place, or the end for a new one.
+func writtenSourceIndex(app *model.Application, source string) int {
+	for i, src := range app.Sources {
+		if src.Name == source {
+			return i
+		}
+	}
+	return len(app.Sources)
+}
+
+// sourceSchemas maps each source binding an expression on the surface can read
+// to the CUE of its definition's schema. A source reads only the sources
+// declared before the one named, all of them when it is new. The definition is
+// found as KubeVela's admission finds it, revision pins included.
+func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Application, surface, source string) map[string]string {
+	out := map[string]string{}
+	if e.KubeClient == nil {
+		return out
+	}
+	for name, b := range e.sourceBindings(ctx, app, surface) {
+		if surface == surfaceSource && b.index >= writtenSourceIndex(app, source) {
+			continue
+		}
+		text, err := schema.SourceSchemaText(ctx, e.KubeClient, b.namespace, b.src.Type, b.annotations)
+		if err != nil || text == "" {
+			klog.V(4).Infof("no schema for source %s of %s: %v", name, app.Name, err)
+			continue
+		}
+		out[name] = text
 	}
 	return out
 }
@@ -330,6 +360,10 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 		exprStart := start + len("$(")
 		pos = exprStart + len(frag.Expr)
 		if issues := e.componentIssues(ctx, app, req, frag.Expr, exprStart); len(issues) > 0 {
+			resp.Issues = append(resp.Issues, issues...)
+			continue
+		}
+		if issues := e.sourceIssues(ctx, app, req, frag.Expr, exprStart); len(issues) > 0 {
 			resp.Issues = append(resp.Issues, issues...)
 			continue
 		}
