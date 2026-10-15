@@ -1,95 +1,314 @@
-.layout-top-bar {
-  width: 100%;
-  padding: 0 16px;
-  box-shadow: 5px 0 8px #888;
-  cursor: auto !important;
-  .logo {
-    width: 200px;
-  }
-  .cycle-mode {
-    color: #fff;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-  }
-  .nav-wrapper {
-    position: relative;
-    width: 100%;
-    height: 48px;
-    .logo {
-      display: flex;
-      align-items: center;
-      margin-left: 9px;
-      border-radius: 3px;
-      img {
-        height: 30px;
-      }
-    }
-  }
-  .right {
-    display: flex;
-    float: right;
-    height: 48px;
-    margin-left: auto;
-    overflow: hidden;
-    .vela-item {
-      display: flex;
-      align-items: center;
-      justify-items: center;
-      height: 48px;
-      padding: 0 8px;
-      color: #fff;
-      cursor: pointer;
-      transition: all 0.3s;
-      a {
-        color: #fff;
-        cursor: pointer;
-      }
-    }
-    .user-item {
-      padding: 0 8px;
-      span {
-        margin-left: 8px;
-      }
-    }
-  }
-  .workspace-items {
-    display: flex;
-    flex-wrap: nowrap;
-    height: 100%;
-    .item {
-      line-height: var(--layout-header-height);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #fff;
-      padding: 0 var(--spacing-4);
-      img {
-        width: 30px;
-      }
-      &:hover,
-      &.active {
-        background: var(--hover-color);
-      }
-      svg {
-        margin-right: var(--spacing-2);
-      }
-    }
-  }
-}
-.margin-left-10 {
-  margin-left: 10px;
-}
-.margin-top-10 {
-  margin-top: 10px;
-}
-.user-actions {
+// The sidebar holds the brand, every section's menu, and at its foot Cloud
+// Shell, the admin dashboard, settings and the user.
+
+.layout-sidebar {
+  // The palette, overridden inline from the customisation's sidebar and
+  // accent colours.
+  --sb-text: #a3adbd;
+  --sb-text-strong: #f1f5f9;
+  --sb-muted: #64748b;
+  --sb-hover: rgba(255, 255, 255, 0.06);
+  --sb-active: rgba(59, 130, 246, 0.16);
+  --sb-active-text: #f1f5f9;
+  --sb-accent: #3b82f6;
+  --sb-border: rgba(255, 255, 255, 0.06);
+  position: relative;
   display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 240px;
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--sb-bg, linear-gradient(180deg, #111827 0%, #0f172a 100%));
+  border-right: 1px solid var(--sb-border);
+  transition: width 0.2s ease;
+  &.collapsed {
+    width: 64px;
+  }
+}
+
+.sidebar-brand {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  height: 56px;
+  padding: 0 12px 0 20px;
+  .collapsed & {
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+    height: auto;
+    padding: 14px 0 10px;
+  }
+}
+
+// The wordmark takes the width the sidebar gives it; minimised, the sail mark
+// stands in, drawn white for the dark rail.
+.sidebar-logo {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  img {
+    width: 100%;
+    max-height: 30px;
+    object-fit: contain;
+    object-position: left center;
+  }
+  .collapsed & {
+    flex: none;
+    img {
+      width: 28px;
+      height: 28px;
+      max-height: none;
+      object-position: center;
+    }
+  }
+  .sidebar-logo-invert {
+    filter: brightness(0) invert(1);
+  }
+  // A custom logo is drawn for a light page; on a dark sidebar it sits on a
+  // light plate.
+  .sidebar-logo-plate {
+    padding: 6px 10px;
+    background: #fff;
+    border-radius: 6px;
+  }
+}
+
+.sidebar-collapse {
+  display: flex;
+  padding: 6px;
+  color: var(--sb-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  &:hover {
+    color: var(--sb-text-strong);
+    background: var(--sb-hover);
+  }
+}
+
+.sidebar-menu {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+    width: 0;
+  }
+  .collapsed & {
+    // A section's heading keeps its space, so the sections stay apart.
+    .main-nav {
+      visibility: hidden;
+    }
+    .menu-item-text {
+      display: none;
+    }
+    .menu-item,
+    .menu-item-active {
+      margin: 2px 10px;
+      padding: 10px 0;
+      > div {
+        justify-content: center;
+      }
+    }
+    .sub-wrapper {
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.sidebar-footer {
+  padding: 10px 0 12px;
+  border-top: 1px solid var(--sb-border);
+}
+
+.sidebar-footer-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 2px 12px;
+  padding: 8px 14px;
+  color: var(--sb-text) !important;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--sb-muted);
+  }
+  &:hover {
+    color: var(--sb-text-strong) !important;
+    background: var(--sb-hover);
+    svg {
+      color: var(--sb-text-strong);
+    }
+  }
+  &.active {
+    color: var(--sb-active-text) !important;
+    background: var(--sb-active);
+    svg {
+      color: var(--sb-accent);
+    }
+  }
+  .collapsed & {
+    justify-content: center;
+    margin: 2px 10px;
+    padding: 9px 0;
+  }
+}
+
+.sidebar-language {
+  // The language switch is its own dropdown; its trigger is the icon.
+  > :first-child {
+    display: flex;
+  }
+}
+
+.sidebar-user {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 8px 12px 0;
+  padding: 8px 10px;
+  color: var(--sb-text-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  &:hover {
+    background: var(--sb-hover);
+  }
+  .collapsed & {
+    justify-content: center;
+    margin: 8px 10px 0;
+    padding: 8px 0;
+  }
+}
+
+.sidebar-avatar {
+  display: flex;
+  flex: none;
   align-items: center;
   justify-content: center;
-  margin-top: 32px;
-  .next-btn-helper {
-    font-size: 12px;
+  width: 28px;
+  height: 28px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--sb-accent);
+  border-radius: 50%;
+}
+
+.sidebar-user-name {
+  overflow: hidden;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// The user's menu, opened by hovering their name at the foot of the sidebar.
+// It renders outside the sidebar, so it takes no sidebar colours.
+.user-flyout {
+  width: 240px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  .sidebar-avatar {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.user-flyout-head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.user-flyout-name {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.user-flyout-sub {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.user-flyout-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  color: #334155 !important;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  svg {
+    flex: none;
+    color: #64748b;
+  }
+  &:hover,
+  &.active {
+    color: #0f172a !important;
+    background: #f1f5f9;
+  }
+}
+
+.user-flyout-section {
+  padding: 6px 10px 4px;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.user-flyout-divider {
+  height: 1px;
+  margin: 6px 4px;
+  background: #e2e8f0;
+}
+
+.user-flyout-logout {
+  color: #b91c1c !important;
+  svg {
+    color: #b91c1c;
+  }
+  &:hover {
+    color: #991b1b !important;
+    background: #fef2f2;
+  }
+}
+
+// A branded console still credits KubeVela, small in the bottom-right corner.
+.powered-by {
+  position: fixed;
+  right: 16px;
+  bottom: 12px;
+  z-index: 10;
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  padding: 3px 8px;
+  color: #64748b !important;
+  font-size: 11px;
+  line-height: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  img {
+    width: 14px;
+    height: 14px;
+  }
+  &:hover {
+    color: #0f172a !important;
   }
 }

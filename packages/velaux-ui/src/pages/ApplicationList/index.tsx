@@ -8,7 +8,7 @@ import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { ApplicationBase , LoginUserInfo } from '@velaux/data';
+import type { ApplicationBase, LoginUserInfo } from '@velaux/data';
 
 import AppDialog from './components/AddAppDialog';
 import CardContend from './components/CardContent';
@@ -66,7 +66,7 @@ class Application extends Component<Props, State> {
     this.setState({ isLoading: true });
     this.props.dispatch({
       type: 'application/getApplicationList',
-      payload: params,
+      payload: { ...params, withStatus: true },
       callback: () => {
         this.setState({
           isLoading: false,

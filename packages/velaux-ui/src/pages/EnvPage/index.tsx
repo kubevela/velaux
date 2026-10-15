@@ -6,7 +6,7 @@ import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { Env , LoginUserInfo } from '@velaux/data';
+import type { Env, LoginUserInfo } from '@velaux/data';
 import { locale } from '../../utils/locale';
 
 import EnvDialog from './components/EnvDialog';
@@ -126,7 +126,6 @@ class EnvList extends React.Component<Props, State> {
               >
                 <Translation>New Environment</Translation>
               </Button>
-              ,
             </Permission>,
           ]}
         />

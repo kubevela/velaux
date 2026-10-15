@@ -421,6 +421,8 @@ type ListApplicationOptions struct {
 	TargetName string            `json:"targetName"`
 	Query      string            `json:"query"`
 	Labels     map[string]string `json:"labels"`
+	// WithStatus fills each application's status summary from its envs.
+	WithStatus bool `json:"withStatus"`
 }
 
 // ListApplicationResponse list applications by query params
@@ -443,6 +445,40 @@ type ApplicationBase struct {
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
 	ReadOnly    bool              `json:"readOnly,omitempty"`
+	// Status summarises the application across its envs, when listed with status.
+	Status *ApplicationStatusSummary `json:"status,omitempty"`
+}
+
+// The health of an application, worst first.
+const (
+	AppHealthFailed      = "failed"
+	AppHealthUnhealthy   = "unhealthy"
+	AppHealthSuspended   = "suspended"
+	AppHealthProgressing = "progressing"
+	AppHealthHealthy     = "healthy"
+	AppHealthUndeployed  = "undeployed"
+)
+
+// ApplicationStatusSummary is an application's health at a glance: the worst
+// of its envs, and its components counted across them.
+type ApplicationStatusSummary struct {
+	Health string `json:"health"`
+	// Workflow is the workflow phase of the env setting the health.
+	Workflow string `json:"workflow,omitempty"`
+	// Components counts each component once per place it runs.
+	Components        int                 `json:"components"`
+	HealthyComponents int                 `json:"healthyComponents"`
+	Envs              []*EnvStatusSummary `json:"envs,omitempty"`
+}
+
+// EnvStatusSummary is an application's health in one env.
+type EnvStatusSummary struct {
+	Env               string `json:"env"`
+	Health            string `json:"health"`
+	Phase             string `json:"phase"`
+	Workflow          string `json:"workflow,omitempty"`
+	Components        int    `json:"components"`
+	HealthyComponents int    `json:"healthyComponents"`
 }
 
 // AppCompareResponse application compare result
@@ -2140,4 +2176,29 @@ type ExpressionIssue struct {
 	End   int `json:"end"`
 	// Warning is set for an issue that does not stop the value being used.
 	Warning bool `json:"warning,omitempty"`
+}
+
+// Customisation is how this VelaUX is branded, kept in the
+// velaux-configuration ConfigMap.
+type Customisation struct {
+	// PageTitle is the browser tab's title.
+	PageTitle string `json:"pageTitle,omitempty"`
+	// LogoURL replaces the KubeVela wordmark; an http(s), data or same-origin URL.
+	LogoURL string `json:"logoURL,omitempty"`
+	// IconURL replaces the sail mark shown when the sidebar is minimised.
+	IconURL string `json:"iconURL,omitempty"`
+	// SidebarColor is the sidebar's background, a hex colour; its text is
+	// light or dark to suit.
+	SidebarColor string `json:"sidebarColor,omitempty"`
+	// AccentColor marks the current page and highlights, a hex colour.
+	AccentColor string `json:"accentColor,omitempty"`
+	// Terminology renames the UI's words, keyed by the word as the UI writes it
+	// in the singular: Application, Environment, Cluster.
+	Terminology map[string]Term `json:"terminology,omitempty"`
+}
+
+// Term is the singular and plural a renamed word takes.
+type Term struct {
+	Singular string `json:"singular"`
+	Plural   string `json:"plural"`
 }

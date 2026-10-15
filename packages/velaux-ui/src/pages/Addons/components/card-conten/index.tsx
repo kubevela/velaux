@@ -1,15 +1,15 @@
 import type { MouseEvent } from 'react';
-import React from 'react';
+import React, { Fragment } from 'react';
 import './index.less';
 
-import { Grid, Card, Tag, Balloon } from '@alifd/next';
+import { Balloon } from '@alifd/next';
 
 import Empty from '../../../../components/Empty';
+import { Chip, ResourceCard, ResourceGrid } from '../../../../components/ResourceCard';
+import type { Tone } from '../../../../components/StatusBadge';
 import { If } from '../../../../components/If';
-import { Translation } from '../../../../components/Translation';
 import type { Addon, AddonBaseStatus } from '@velaux/data';
 import { intersectionArray } from '../../../../utils/common';
-import { locale } from '../../../../utils/locale';
 
 type State = {
   extendDotVisible: boolean;
@@ -42,21 +42,8 @@ class CardContent extends React.Component<Props, State> {
   };
 
   render() {
-    const { Row, Col } = Grid;
     const { addonLists, clickAddon, enabledAddons, selectTags } = this.props;
 
-    const getTagColor = (tag: string) => {
-      switch (tag) {
-        case 'alpha':
-          return 'red';
-        case 'beta':
-          return 'red';
-        case 'GA':
-          return 'green';
-        default:
-          return '';
-      }
-    };
     const nameUpper = (name: string) => {
       return name
         .split('-')
@@ -87,88 +74,87 @@ class CardContent extends React.Component<Props, State> {
     return (
       <div>
         <If condition={addonLists}>
-          <Row wrap={true}>
+          <ResourceGrid>
             {orderAddonList.map((item: Addon) => {
               const { name, icon, version, description, tags, registryName } = item;
-              const status = enabledAddons?.filter((addonStatus: AddonBaseStatus) => {
-                return addonStatus.name == name;
-              });
+              const phase = enabledAddons?.find((addonStatus: AddonBaseStatus) => addonStatus.name == name)?.phase;
               return (
-                <Col xl={4} l={6} m={8} s={12} xxs={24} className={`card-content-wraper`} key={name}>
-                  <Card locale={locale().Card} contentHeight="auto">
-                    <a onClick={() => clickAddon(name)}>
-                      <div className="cluster-card-top flexcenter">
-                        <If condition={icon && icon != 'none'}>
-                          <img src={icon} />
-                        </If>
-                        <If condition={!icon || icon === 'none'}>
-                          <div
-                            style={{
-                              display: 'inline-block',
-                              verticalAlign: 'middle',
-                              padding: `2px 4px`,
-                              width: '60px',
-                              height: '60px',
-                              borderRadius: '50%',
-                              backgroundColor: '#fff',
-                              textAlign: 'center',
-                              lineHeight: '60px',
-                            }}
-                          >
-                            <span style={{ color: '#1b58f4', fontSize: `2em` }}>{nameUpper(name)}</span>
-                          </div>
-                        </If>
-                      </div>
-                    </a>
-                    <div className="content-wraper background-F9F8FF">
-                      <Row className="content-title">
-                        <Col span="16" className="font-size-16">
-                          <a onClick={() => clickAddon(name)}>{name}</a>
-                        </Col>
-                        <If condition={registryName && registryName == 'experimental'}>
-                          <Col span="8" className="flexright">
-                            <Balloon trigger={<Tag color="yellow">Experimental</Tag>}>{notice}</Balloon>
-                          </Col>
-                        </If>
-                      </Row>
-                      <Row className="content-main">
-                        <h4 className="color595959 font-size-14" title={description}>
-                          {description}
-                        </h4>
-                      </Row>
-                      <Row className="content-main-btn">
-                        {tags?.map((tag: string) => {
-                          return (
-                            <Tag title={tag} style={{ marginRight: '8px' }} color={getTagColor(tag)} key={tag}>
-                              {tag}
-                            </Tag>
-                          );
-                        })}
-                      </Row>
-
-                      <Row className="content-foot colorA6A6A6">
-                        <Col span="16">
-                          <span>{version || '0.0.0'}</span>
-                        </Col>
-                        <Col span="8" className="text-align-right padding-right-10">
-                          <If condition={status && status.length > 0 && status[0].phase == 'enabled'}>
-                            <span className="circle circle-success" />
-                            <Translation>Enabled</Translation>
-                          </If>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Card>
-                </Col>
+                <ResourceCard
+                  key={name}
+                  tone={addonTone(phase)}
+                  badge={addonLabel(phase)}
+                  icon={<AddonIcon icon={icon} initials={nameUpper(name)} />}
+                  title={name}
+                  onOpen={() => clickAddon(name)}
+                  aside={
+                    registryName == 'experimental' ? (
+                      <Balloon trigger={<span className="resource-chip warning">Experimental</span>}>{notice}</Balloon>
+                    ) : undefined
+                  }
+                  description={description}
+                  chips={
+                    tags && tags.length > 0 ? (
+                      <Fragment>
+                        {tags.map((tag: string) => (
+                          <Chip key={tag} tone={tag === 'GA' ? 'accent' : undefined}>
+                            {tag}
+                          </Chip>
+                        ))}
+                      </Fragment>
+                    ) : undefined
+                  }
+                  footLeft={(version || '0.0.0').replace(/^v?/, 'v')}
+                  footRight={registryName}
+                />
               );
             })}
-          </Row>
+          </ResourceGrid>
         </If>
         <If condition={!addonLists || addonLists.length == 0}>
           <Empty style={{ minHeight: '400px' }} />
         </If>
       </div>
     );
+  }
+}
+
+// AddonIcon is the addon's icon, or its initials where it has none or the
+// icon fails to load.
+const AddonIcon = (props: { icon?: string; initials: string }) => {
+  const [failed, setFailed] = React.useState(false);
+  if (!props.icon || props.icon === 'none' || failed) {
+    return <Fragment>{props.initials}</Fragment>;
+  }
+  return <img src={props.icon} onError={() => setFailed(true)} />;
+};
+
+// addonTone colours an addon by its phase; one never enabled is neutral.
+function addonTone(phase?: string): Tone {
+  switch (phase) {
+    case 'enabled':
+      return 'healthy';
+    case 'enabling':
+    case 'disabling':
+      return 'progressing';
+    case 'suspend':
+      return 'suspended';
+    default:
+      return 'neutral';
+  }
+}
+
+function addonLabel(phase?: string): string {
+  switch (phase) {
+    case 'enabled':
+      return 'Enabled';
+    case 'enabling':
+      return 'Enabling';
+    case 'disabling':
+      return 'Disabling';
+    case 'suspend':
+      return 'Suspended';
+    default:
+      return 'Not enabled';
   }
 }
 

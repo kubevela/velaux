@@ -52,3 +52,168 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(432px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+// An application card, its left edge in the colour of its health.
+.app-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 20px 22px 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid var(--tone);
+  border-radius: 8px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  &:hover {
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  }
+}
+
+.app-card-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.app-card-icon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #475569;
+  font-size: 20px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+}
+
+.app-card-title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  a {
+    overflow: hidden;
+    color: #0f172a;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 22px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    &:hover {
+      color: var(--primary-color, #1b58f4);
+    }
+  }
+}
+
+.app-card-sub {
+  display: flex;
+  gap: 6px;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 12px;
+  white-space: nowrap;
+  span + span::before {
+    margin-right: 6px;
+    content: '·';
+  }
+}
+
+.app-card-more {
+  flex: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  &:hover {
+    color: #0f172a;
+  }
+}
+
+.app-card-status {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.app-card-description {
+  display: -webkit-box;
+  min-height: 40px;
+  overflow: hidden;
+  color: #475569;
+  font-size: 13px;
+  line-height: 20px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.app-card-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.app-card-label {
+  padding: 0 6px;
+  color: #1d4ed8;
+  font-size: 11px;
+  line-height: 18px;
+  background: #eff6ff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.app-card-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 12px;
+  color: #94a3b8;
+  font-size: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.app-card-readonly {
+  color: #b45309;
+}
+
+// The table view; the table itself takes the page's card style.
+.app-table {
+  margin-top: 20px;
+  overflow: auto;
+  .app-table-nowrap {
+    white-space: nowrap;
+  }
+}
+
+.app-table-name {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  a {
+    font-weight: 600;
+  }
+}
+
+.app-table-alias {
+  padding: 1px 8px;
+  color: #475569;
+  font-size: 12px;
+  white-space: nowrap;
+  background: #f1f5f9;
+  border-radius: 999px;
+}

@@ -37,6 +37,29 @@ export interface ApplicationBase {
   icon?: string;
   labels?: Record<string, string>;
   annotations?: Record<string, string>;
+  status?: ApplicationStatusSummary;
+}
+
+// AppHealth is an application's health, as the list summarises it.
+export type AppHealth = 'failed' | 'unhealthy' | 'suspended' | 'progressing' | 'healthy' | 'undeployed';
+
+// ApplicationStatusSummary is an application's health at a glance: the worst
+// of its envs, and its components counted across them.
+export interface ApplicationStatusSummary {
+  health: AppHealth;
+  workflow?: string;
+  components: number;
+  healthyComponents: number;
+  envs?: EnvStatusSummary[];
+}
+
+export interface EnvStatusSummary {
+  env: string;
+  health: AppHealth;
+  phase: string;
+  workflow?: string;
+  components: number;
+  healthyComponents: number;
 }
 
 export interface DefinitionDetail {
@@ -454,6 +477,7 @@ export interface ApplicationQuery {
   env?: string;
   targetName?: string;
   labels?: string;
+  withStatus?: boolean;
 }
 
 export interface ComponentDefinitionsBase {
