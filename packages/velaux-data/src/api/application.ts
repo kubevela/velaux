@@ -615,3 +615,30 @@ export interface WorkflowPolicyBinding {
   name: string;
   steps: string[];
 }
+
+// DataFlowEnd is one end of a data flow: a source binding or a component, at a
+// placement where one is known.
+export interface DataFlowEnd {
+  kind: 'source' | 'component';
+  name: string;
+  cluster?: string;
+  namespace?: string;
+}
+
+// DataFlowItem is one value moving along a flow: what was read, and the
+// reader's property that received it; value where KubeVela records it.
+export interface DataFlowItem {
+  read: string;
+  property?: string;
+  trait?: string;
+  value?: any;
+}
+
+// DataFlow is what moves from a producer to a reader: via source, expression,
+// inputs, or dependsOn (order only, no items).
+export interface DataFlow {
+  from: DataFlowEnd;
+  to: DataFlowEnd;
+  via: 'source' | 'expression' | 'inputs' | 'dependsOn';
+  items: DataFlowItem[];
+}

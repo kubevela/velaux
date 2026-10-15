@@ -138,7 +138,9 @@ class StatusShow extends React.Component<Props> {
                     return (
                       <div>
                         <span className="circle circle-warning" />
-                        <span>UnHealthy</span>
+                        <span>
+                          <Translation>Unhealthy</Translation>
+                        </span>
                       </div>
                     );
                   }}

@@ -54,6 +54,10 @@
   min-height: calc(100vh - 443px);
   padding: 32px;
   overflow: auto;
+  // The graph keeps the size it is laid out at, for the container to scroll.
+  > .graph-tree {
+    flex: none;
+  }
 }
 .graph-container.top-center {
   justify-content: center;

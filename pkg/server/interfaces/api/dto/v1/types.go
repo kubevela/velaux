@@ -2347,3 +2347,40 @@ type PackageDetail struct {
 type ListPackagesResponse struct {
 	Packages []*PackageBase `json:"packages"`
 }
+
+// DataFlowEnd is one end of a data flow: a source binding or a component, at
+// a placement where one is known.
+type DataFlowEnd struct {
+	// Kind is source or component.
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Cluster   string `json:"cluster,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
+}
+
+// DataFlowItem is one value moving along a flow: what was read from the
+// producer, and which of the reader's properties received it.
+type DataFlowItem struct {
+	Read     string `json:"read"`
+	Property string `json:"property,omitempty"`
+	// Trait names the reader's trait that read it, where a trait did.
+	Trait string `json:"trait,omitempty"`
+	// Value is what was read, where KubeVela records it (sources), redacted as
+	// it redacts it.
+	Value interface{} `json:"value,omitempty"`
+}
+
+// DataFlow is what moves from one producer to one reader, and how: source,
+// expression ($(component...)), inputs (outputs to inputs) or dependsOn (order
+// only, no data).
+type DataFlow struct {
+	From  DataFlowEnd    `json:"from"`
+	To    DataFlowEnd    `json:"to"`
+	Via   string         `json:"via"`
+	Items []DataFlowItem `json:"items"`
+}
+
+// ApplicationDataFlowsResponse is what moves between an env's sources and components.
+type ApplicationDataFlowsResponse struct {
+	Flows []*DataFlow `json:"flows"`
+}

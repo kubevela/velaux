@@ -32,11 +32,7 @@ export class ResourceName {
   }
 }
 
-export function checkPermission(
-  request?: ResourceAction,
-  project?: string,
-  userInfo?: LoginUserInfo,
-) {
+export function checkPermission(request?: ResourceAction, project?: string, userInfo?: LoginUserInfo) {
   if (!request) {
     return true;
   }
@@ -97,9 +93,7 @@ export function match(request: ResourceAction, permission: PermissionBase) {
     return false;
   }
   for (let i = 0; i < permission.resources?.length; i++) {
-    if (
-      resourceMatch(new ResourceName(request.resource), new ResourceName(permission.resources[i]))
-    ) {
+    if (resourceMatch(new ResourceName(request.resource), new ResourceName(permission.resources[i]))) {
       return true;
     }
   }
@@ -119,11 +113,7 @@ export function resourceMatch(requestResource: ResourceName, permissionResource:
     if (current.type != targetCurrent.type) {
       return false;
     }
-    if (
-      current.value != targetCurrent.value &&
-      current.value != '*' &&
-      targetCurrent.value != '?'
-    ) {
+    if (current.value != targetCurrent.value && current.value != '*' && targetCurrent.value != '?') {
       return false;
     }
     current = current.next;

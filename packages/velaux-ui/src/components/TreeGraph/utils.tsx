@@ -36,7 +36,7 @@ import user from '../../assets/resources/user.svg';
 import vol from '../../assets/resources/vol.svg';
 
 import { componentNodeHeight, componentNodeWidth, layoutTraits, maxTraitRows, traitArea } from './traits';
-import type { GraphNode, TreeNode, Node } from './interface';
+import type { GraphNode, TreeNode } from './interface';
 
 // componentSections lists what a component depends on and what depends on it,
 // each with an arrow for its direction and, when KubeVela inferred it from a
@@ -49,9 +49,16 @@ export function componentSections(node: GraphNode): TooltipSection[] {
   const content = (
     <ul className="dependency-list">
       {items.map((item) => (
-        <li key={`${item.direction}:${item.name}@${item.where || ''}`}>
+        <li key={`${item.kind || 'component'}:${item.direction}:${item.name}@${item.where || ''}`}>
           {item.direction === 'outbound' ? (
-            <span className="dependency-direction" title={`Outbound: ${node.resource.name} depends on ${item.name}`}>
+            <span
+              className="dependency-direction"
+              title={
+                item.kind === 'source'
+                  ? `Outbound: ${node.resource.name} reads the source ${item.name}`
+                  : `Outbound: ${node.resource.name} depends on ${item.name}`
+              }
+            >
               <AiOutlineArrowRight />
             </span>
           ) : (
@@ -60,6 +67,7 @@ export function componentSections(node: GraphNode): TooltipSection[] {
             </span>
           )}
           {item.name}
+          {item.kind === 'source' && <span className="dependency-type dependency-source">source</span>}
           {item.type && <span className="dependency-type">{item.type}</span>}
           {item.where && <span className="dependency-where">in {item.where}</span>}
           {item.inferred && (
@@ -99,19 +107,12 @@ export function nodeKey(node: TreeNode) {
   ].join('/');
 }
 
-export function getGraphSize(nodes: Node[]): { width: number; height: number } {
-  let width = 0;
-  let height = 0;
-  nodes.forEach((node) => {
-    width = Math.max(node.x || 0 + node.width, width);
-    height = Math.max(node.y || 0 + node.height, height);
-  });
-  return { width, height };
-}
-
 export function getNodeSize(node: TreeNode): { width: number; height: number } {
-  let width = 220;
-  let height = 40;
+  // A resource has room for its health beside its name; one a component
+  // applied has a line naming that component, and one more for the trait that
+  // applied it, where one did.
+  let width = node.nodeType == 'resource' ? 280 : 220;
+  let height = node.origin ? (node.origin.trait ? 92 : 74) : node.nodeType == 'resource' ? 48 : 40;
   if (node.nodeType == 'cluster') {
     width = 140;
     height = 40;
@@ -124,9 +125,17 @@ export function getNodeSize(node: TreeNode): { width: number; height: number } {
     width = 180;
     height = 40;
   }
+  if (node.nodeType == 'source') {
+    width = 280;
+    height = 64;
+  }
+  if (node.nodeType == 'flow') {
+    width = 44;
+    height = 18;
+  }
   if (node.nodeType == 'pod') {
-    width = 220;
-    height = 60;
+    width = 240;
+    height = 66;
   }
   if (node.nodeType == 'component') {
     const types = (node.resource.service?.traits || []).map((t) => t.type);

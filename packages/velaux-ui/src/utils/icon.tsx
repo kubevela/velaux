@@ -14,12 +14,12 @@ const nameUpper = (name: string) => {
 };
 
 export const renderIcon = (name: string, icon?: string, size?: string) => {
-  console.log(icon)
-  if (icon!==""  && icon!=="null" && icon!==undefined) {
-    if (!icon.startsWith("/")){
-      icon = "/"+icon
+  console.log(icon);
+  if (icon !== '' && icon !== 'null' && icon !== undefined) {
+    if (!icon.startsWith('/')) {
+      icon = '/' + icon;
     }
-    return <img style={{width: size??"60px", height: size??"60px" }} src={icon} />;
+    return <img style={{ width: size ?? '60px', height: size ?? '60px' }} src={icon} />;
   } else {
     return (
       <div
@@ -39,4 +39,4 @@ export const renderIcon = (name: string, icon?: string, size?: string) => {
       </div>
     );
   }
-}
+};

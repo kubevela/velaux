@@ -107,6 +107,7 @@ require (
 	github.com/oam-dev/kubevela v1.11.1-0.20261008122124-83861f1c2a1b
 	github.com/onsi/ginkgo/v2 v2.23.3
 	gorm.io/driver/postgres v1.5.2
+	sigs.k8s.io/cli-utils v0.37.2
 )
 
 require (

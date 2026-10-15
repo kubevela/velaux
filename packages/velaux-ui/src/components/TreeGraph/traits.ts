@@ -51,5 +51,5 @@ export function layoutTraits(types: string[], width: number, maxRows: number): {
 
 // componentNodeHeight is a component node's height with its rows of chips.
 export function componentNodeHeight(rows: number): number {
-  return 44 + rows * (chipHeight + 4);
+  return 60 + rows * (chipHeight + 4);
 }

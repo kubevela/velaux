@@ -15,7 +15,7 @@ const HelmValueShow: React.FC<Props> = (props: Props) => {
   return (
     <Dialog
       style={{ width: '60vw' }}
-      closeMode={["close", "mask"]}
+      closeMode={['close', 'mask']}
       className={'helmValueDialog'}
       overflowScroll={true}
       visible={true}

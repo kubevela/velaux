@@ -27,12 +27,25 @@
 
 // The view switch reads as the segmented control in the environment bar above it.
 .application-status-wrapper > .next-tabs-capsule {
+  // The capsule is the tabs alone; the bar's extra (when the status was
+  // last updated) follows it in the row rather than over its last tab.
   > .next-tabs-bar {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     margin-bottom: 16px;
-    padding: 3px;
-    background: #e8edf3;
-    border-radius: 6px;
+    background: transparent;
+    > .next-tabs-nav-container {
+      order: 1;
+      padding: 3px;
+      background: #e8edf3;
+      border-radius: 6px;
+    }
+    > .next-tabs-nav-extra {
+      order: 2;
+      position: static;
+      margin-left: 12px;
+      transform: none;
+    }
   }
   > .next-tabs-bar .next-tabs-tab {
     margin-right: 4px;
