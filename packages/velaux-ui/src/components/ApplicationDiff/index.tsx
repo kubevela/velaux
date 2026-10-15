@@ -46,7 +46,12 @@ export const ApplicationDiff = (props: ApplicationDiffProps) => {
         </div>
       }
     >
-      <If condition={!compare.isDiff}>
+      <If condition={!!compare.error}>
+        <Message type="warning" style={{ marginBottom: '8px' }} title={<Translation>Could not compare</Translation>}>
+          {compare.error}
+        </Message>
+      </If>
+      <If condition={!compare.isDiff && !compare.error}>
         <Message type="success" style={{ marginBottom: '8px' }}>
           <Translation>There is no change</Translation>
         </Message>

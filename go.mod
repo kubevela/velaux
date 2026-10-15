@@ -45,7 +45,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.18.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
-	github.com/kubevela/pkg v1.11.1-0.20260826024906-a4214d8d3c39
+	github.com/kubevela/pkg v1.11.1-0.20260929200056-31c873631f45
 	github.com/kubevela/prism v1.7.1-0.20250630043108-b668c767c88b
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd

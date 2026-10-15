@@ -486,7 +486,10 @@ type EnvStatusSummary struct {
 
 // AppCompareResponse application compare result
 type AppCompareResponse struct {
-	IsDiff        bool   `json:"isDiff"`
+	IsDiff bool `json:"isDiff"`
+	// Error says why the two could not be compared; IsDiff is then false
+	// because nothing is known, not because nothing differs.
+	Error         string `json:"error,omitempty"`
 	DiffReport    string `json:"diffReport"`
 	BaseAppYAML   string `json:"baseAppYAML"`
 	TargetAppYAML string `json:"targetAppYAML"`
@@ -2448,4 +2451,79 @@ type DataFlow struct {
 // ApplicationDataFlowsResponse is what moves between an env's sources and components.
 type ApplicationDataFlowsResponse struct {
 	Flows []*DataFlow `json:"flows"`
+}
+
+// ReportMeta is a report in the catalogue: a labelled ConfigMap, global in
+// vela-system or local in the project's namespace.
+type ReportMeta struct {
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	// Scope is local or global; a global report is hidden where a local one
+	// has its name.
+	Scope  string `json:"scope"`
+	Hidden bool   `json:"hidden,omitempty"`
+	// Error says why the report cannot be run, where its CUE is not a report.
+	Error string `json:"error,omitempty"`
+	// Parameters is the form for the report's parameter block, if it has one.
+	Parameters schema.UISchema `json:"parameters,omitempty"`
+}
+
+// ListReportsResponse is the catalogue of reports for a project.
+type ListReportsResponse struct {
+	Reports []ReportMeta `json:"reports"`
+	// GlobalUnavailable says the global reports could not be read.
+	GlobalUnavailable bool `json:"globalUnavailable,omitempty"`
+}
+
+// ReportColumn is a column of a report's table.
+type ReportColumn struct {
+	Key    string `json:"key"`
+	Title  string `json:"title"`
+	Format string `json:"format,omitempty"`
+}
+
+// ReportRow is a row of a report's table, with a link per column that has one.
+type ReportRow struct {
+	Values map[string]interface{} `json:"values"`
+	Links  map[string]string      `json:"links,omitempty"`
+}
+
+// ReportPoint is a point on a report's chart: a value per series.
+type ReportPoint struct {
+	Label  string             `json:"label"`
+	Values map[string]float64 `json:"values"`
+}
+
+// ReportChart summarises a report's rows: bar, line or pie.
+type ReportChart struct {
+	Type   string        `json:"type"`
+	Title  string        `json:"title,omitempty"`
+	Series []string      `json:"series"`
+	Points []ReportPoint `json:"points"`
+}
+
+// ReportStat is a headline number of a report, shown above its chart.
+type ReportStat struct {
+	Label  string      `json:"label"`
+	Value  interface{} `json:"value"`
+	Format string      `json:"format,omitempty"`
+	// Tone colours the number: healthy, unhealthy, progressing or neutral.
+	Tone string `json:"tone,omitempty"`
+}
+
+// RunReportRequest is a report's parameters.
+type RunReportRequest struct {
+	Parameters map[string]interface{} `json:"parameters,omitempty"`
+}
+
+// ReportResult is a report run over one project.
+type ReportResult struct {
+	Report      ReportMeta     `json:"report"`
+	Project     string         `json:"project"`
+	GeneratedAt time.Time      `json:"generatedAt"`
+	Columns     []ReportColumn `json:"columns"`
+	Stats       []ReportStat   `json:"stats,omitempty"`
+	Rows        []ReportRow    `json:"rows"`
+	Chart       *ReportChart   `json:"chart,omitempty"`
 }
