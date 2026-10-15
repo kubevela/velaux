@@ -100,12 +100,18 @@ class Configs extends Component<Props, State> {
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
         cell: (v: string, i: number, config: Config) => {
-          const title = `${v}(${config.alias || '-'})`;
+          const title = v;
           if (config.sensitive || config.shared) {
             return <span>{title}</span>;
           }
           return <a onClick={() => this.onClick(config)}>{title}</a>;
         },
+      },
+      {
+        key: 'alias',
+        title: <Translation>Alias</Translation>,
+        dataIndex: 'alias',
+        cell: (v: string) => v || '',
       },
       {
         key: 'template',
@@ -174,24 +180,26 @@ class Configs extends Component<Props, State> {
                   </Button>
                 </Permission>
               </If>
-              <Permission
-                request={{
-                  resource: `project:${projectName}/config:${record.name}`,
-                  action: 'distribute',
-                }}
-                project={projectName}
-              >
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
-                  onClick={() => {
-                    this.onDistribute(record);
+              <If condition={record.legacy}>
+                <Permission
+                  request={{
+                    resource: `project:${projectName}/config:${record.name}`,
+                    action: 'distribute',
                   }}
+                  project={projectName}
                 >
-                  <Translation>Distribute</Translation>
-                </Button>
-              </Permission>
+                  <Button
+                    text
+                    size={'medium'}
+                    component={'a'}
+                    onClick={() => {
+                      this.onDistribute(record);
+                    }}
+                  >
+                    <Translation>Distribute</Translation>
+                  </Button>
+                </Permission>
+              </If>
             </Fragment>
           );
         },

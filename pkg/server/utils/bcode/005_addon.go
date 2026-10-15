@@ -76,6 +76,10 @@ var (
 
 	// ErrRegistryNotExist means the specified registry not exist
 	ErrRegistryNotExist = NewBcode(400, 50022, "The specified not exist")
+
+	// ErrAddonManagedByApplication means an Application installed the addon with
+	// its addon component, so the addon is changed there
+	ErrAddonManagedByApplication = NewBcode(400, 50023, "addon is managed by an application")
 )
 
 // isGithubRateLimit check if error is github rate limit

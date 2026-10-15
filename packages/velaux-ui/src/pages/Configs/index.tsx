@@ -1,4 +1,4 @@
-import { Table, Button, Dialog, Message } from '@alifd/next';
+import { Table, Button, Dialog, Message, Tag, Balloon } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component, Fragment } from 'react';
 
@@ -6,7 +6,7 @@ import { getConfigs, deleteConfig } from '../../api/config';
 import { If } from '../../components/If';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { ConfigTemplate, Config , LoginUserInfo } from '@velaux/data';
+import type { ConfigTemplate, Config, LoginUserInfo } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
@@ -135,14 +135,48 @@ class Configs extends Component<Props, State> {
     const columns = [
       {
         key: 'name',
-        title: <Translation>Name(Alias)</Translation>,
+        title: <Translation>Name</Translation>,
         dataIndex: 'name',
         cell: (v: string, i: number, config: Config) => {
-          const title = `${v}(${config.alias || '-'})`;
+          const title = v;
+          const legacy = config.legacy && (
+            <Tag size="small" style={{ marginLeft: '8px' }}>
+              <Translation>Legacy</Translation>
+            </Tag>
+          );
           if (config.sensitive) {
-            return <span>{title}</span>;
+            return (
+              <span>
+                {title}
+                {legacy}
+              </span>
+            );
           }
-          return <a onClick={() => this.onClick(config.name)}>{title}</a>;
+          return (
+            <span>
+              <a onClick={() => this.onClick(config.name)}>{title}</a>
+              {legacy}
+            </span>
+          );
+        },
+      },
+      {
+        key: 'alias',
+        title: <Translation>Alias</Translation>,
+        dataIndex: 'alias',
+        cell: (v: string) => v || '',
+      },
+      {
+        key: 'phase',
+        title: <Translation>Status</Translation>,
+        dataIndex: 'phase',
+        cell: (v: string, i: number, config: Config) => {
+          if (config.legacy) {
+            return <span>-</span>;
+          }
+          const color = v === 'Available' ? 'green' : v === 'Error' ? 'red' : 'orange';
+          const tag = <Tag color={color}>{v || 'Pending'}</Tag>;
+          return config.message ? <Balloon.Tooltip trigger={tag}>{config.message}</Balloon.Tooltip> : tag;
         },
       },
       {
