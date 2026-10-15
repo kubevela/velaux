@@ -56,7 +56,7 @@ func InitServiceBean(c config.Config) []interface{} {
 		clusterService, rbacService, projectService, envService, targetService, workflowService, oamApplicationService, definitionService, addonService, envBindingService, systemInfoService, helmService, userService,
 		authenticationService, configService, applicationService, webhookService, pipelineService, pipelineRunService,
 		contextService, NewImageService(), NewCloudShellService(), pluginService, velaQLService, expressionService, NewCustomisationService(),
-		NewPackageService(), NewDefKitService(),
+		NewPackageService(), NewDefKitService(), NewSharedWorkflowService(),
 	}
 }
 

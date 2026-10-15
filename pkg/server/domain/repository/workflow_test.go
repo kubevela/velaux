@@ -38,6 +38,15 @@ import (
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 )
 
+func TestDeployStepLabels(t *testing.T) {
+	alias, description := deployStepLabels("shop-prod")
+	assert.Equal(t, "Deploy to shop-prod", alias)
+	assert.Equal(t, "deploy app to delivery target shop-prod", description)
+
+	alias, _ = deployStepLabels("shop-prod-cloud-resource")
+	assert.Equal(t, "Deploy to shop-prod", alias)
+}
+
 func TestCompareWorkflowSteps(t *testing.T) {
 	existSteps := []model.WorkflowStep{
 		{

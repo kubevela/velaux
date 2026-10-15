@@ -115,6 +115,20 @@ func (w *Workflow) detailWorkflow(req *restful.Request, res *restful.Response) {
 	}
 }
 
+// listSharedWorkflows lists the shared Workflows the workflow can reference.
+func (w *Workflow) listSharedWorkflows(req *restful.Request, res *restful.Response) {
+	workflow := req.Request.Context().Value(&apis.CtxKeyWorkflow).(*model.Workflow)
+	shared, err := w.WorkflowService.ListSharedWorkflows(req.Request.Context(), workflow.EnvName)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(shared); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
 func (w *Workflow) updateWorkflow(req *restful.Request, res *restful.Response) {
 	workflow := req.Request.Context().Value(&apis.CtxKeyWorkflow).(*model.Workflow)
 	// Verify the validity of parameters

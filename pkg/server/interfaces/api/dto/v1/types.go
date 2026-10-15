@@ -1248,10 +1248,13 @@ type CreateWorkflowRequest struct {
 	Alias       string         `json:"alias" validate:"checkalias" optional:"true"`
 	Description string         `json:"description" optional:"true"`
 	Steps       []WorkflowStep `json:"steps,omitempty"`
-	Mode        string         `json:"mode" validate:"oneof=DAG StepByStep"`
-	SubMode     string         `json:"subMode" validate:"oneof=DAG StepByStep"`
-	Default     *bool          `json:"default"`
-	EnvName     string         `json:"envName" validate:"checkname"`
+	// Ref names a shared Workflow to run in place of steps; its modes may then
+	// be empty, to follow the shared one's.
+	Ref     string `json:"ref,omitempty" optional:"true"`
+	Mode    string `json:"mode" validate:"omitempty,oneof=DAG StepByStep"`
+	SubMode string `json:"subMode" validate:"omitempty,oneof=DAG StepByStep"`
+	Default *bool  `json:"default"`
+	EnvName string `json:"envName" validate:"checkname"`
 }
 
 // UpdateWorkflowRequest update or create application workflow
@@ -1259,9 +1262,12 @@ type UpdateWorkflowRequest struct {
 	Alias       string         `json:"alias"  validate:"checkalias" optional:"true"`
 	Description string         `json:"description" optional:"true"`
 	Steps       []WorkflowStep `json:"steps,omitempty"`
-	Mode        string         `json:"mode" validate:"oneof=DAG StepByStep"`
-	SubMode     string         `json:"subMode" validate:"oneof=DAG StepByStep"`
-	Default     *bool          `json:"default"`
+	// Ref names a shared Workflow to run in place of steps; its modes may then
+	// be empty, to follow the shared one's.
+	Ref     string `json:"ref,omitempty" optional:"true"`
+	Mode    string `json:"mode" validate:"omitempty,oneof=DAG StepByStep"`
+	SubMode string `json:"subMode" validate:"omitempty,oneof=DAG StepByStep"`
+	Default *bool  `json:"default"`
 }
 
 // WorkflowStep workflow step config
@@ -1332,6 +1338,65 @@ type WorkflowBase struct {
 	Mode        string         `json:"mode"`
 	SubMode     string         `json:"subMode"`
 	Steps       []WorkflowStep `json:"steps,omitempty"`
+	// Ref names the shared Workflow this one runs, its steps shown in Steps;
+	// SharedMode and SharedSubMode are that Workflow's own modes, which apply
+	// where Mode and SubMode are empty.
+	Ref           string `json:"ref,omitempty"`
+	SharedScope   string `json:"sharedScope,omitempty"`
+	SharedMode    string `json:"sharedMode,omitempty"`
+	SharedSubMode string `json:"sharedSubMode,omitempty"`
+}
+
+// SharedWorkflow is a Workflow resource a workflow can reference: the
+// project's, in its namespace, or global, in the system namespace. A global
+// one is hidden where the project has one of its name, as KubeVela runs that.
+type SharedWorkflow struct {
+	Name        string         `json:"name"`
+	Namespace   string         `json:"namespace"`
+	Scope       string         `json:"scope"`
+	Alias       string         `json:"alias,omitempty"`
+	Description string         `json:"description,omitempty"`
+	Hidden      bool           `json:"hidden,omitempty"`
+	Mode        string         `json:"mode,omitempty"`
+	SubMode     string         `json:"subMode,omitempty"`
+	Steps       []WorkflowStep `json:"steps"`
+	// UsedBy lists the project's workflows that run this one; UsedElsewhere
+	// counts other projects' workflows, which are not named.
+	UsedBy        []SharedWorkflowUse `json:"usedBy,omitempty"`
+	UsedElsewhere int                 `json:"usedElsewhere,omitempty"`
+}
+
+// SharedWorkflowUse is an application workflow that references a shared one.
+type SharedWorkflowUse struct {
+	AppName       string `json:"appName"`
+	AppAlias      string `json:"appAlias,omitempty"`
+	WorkflowName  string `json:"workflowName"`
+	WorkflowAlias string `json:"workflowAlias,omitempty"`
+	EnvName       string `json:"envName"`
+}
+
+// ListSharedWorkflowsResponse lists the shared Workflows a workflow can reference.
+type ListSharedWorkflowsResponse struct {
+	Workflows []SharedWorkflow `json:"workflows"`
+	// GlobalUnavailable says the global shared workflows could not be read, so
+	// only the project's are listed.
+	GlobalUnavailable bool `json:"globalUnavailable,omitempty"`
+	// ProjectUnavailable says the environment's Applications run outside the
+	// project's namespace, so KubeVela cannot find the project's workflows.
+	ProjectUnavailable bool `json:"projectUnavailable,omitempty"`
+	// ProjectNamespace is the namespace holding the project's.
+	ProjectNamespace string `json:"projectNamespace,omitempty"`
+}
+
+// SharedWorkflowRequest creates or updates a shared Workflow. Name is only read
+// on create.
+type SharedWorkflowRequest struct {
+	Name        string         `json:"name" validate:"checkname"`
+	Alias       string         `json:"alias" validate:"checkalias" optional:"true"`
+	Description string         `json:"description" optional:"true"`
+	Mode        string         `json:"mode" validate:"omitempty,oneof=DAG StepByStep"`
+	SubMode     string         `json:"subMode" validate:"omitempty,oneof=DAG StepByStep"`
+	Steps       []WorkflowStep `json:"steps"`
 }
 
 // ListWorkflowRecordsResponse list workflow execution record
