@@ -11,6 +11,7 @@ import i18n from '../../i18n';
 import { locale } from '../../utils/locale';
 import { Translation } from '../Translation';
 import { forEachProblem, forEachWarning, itemColumns } from './loop-edit';
+import { stepScope } from './step-scope';
 
 type Source = 'list' | 'from' | 'expression';
 
@@ -265,6 +266,7 @@ export const LoopItems = (props: Props) => {
             <ExpressionEditor
               appName={appName}
               surface="workflowstep"
+              step={{ step: stepName, steps: stepScope(steps || [], stepName).steps }}
               value={typeof value.items === 'string' ? value.items : ''}
               onChange={(v: string) => onChange(withSettings({ items: v }))}
             />

@@ -4,6 +4,8 @@ import React from 'react';
 import { AiFillCheckCircle, AiFillCloseCircle, AiFillWarning } from 'react-icons/ai';
 import { v4 as uuid } from 'uuid';
 
+import type { ExpressionStep } from '@velaux/data';
+
 import { checkDraftExpression, checkExpression } from '../../api/application';
 import type { ExpressionEnv, ExpressionFix } from './completion';
 import { blockingIssue } from './completion';
@@ -46,7 +48,7 @@ function register() {
         [/"([^"\\]|\\.)*"|'([^'\\]|\\.)*'/, 'string'],
         [/\d+(\.\d+)?/, 'number'],
         [/\b(true|false|null|in)\b/, 'keyword'],
-        [/\b(context|source|component)\b/, 'type'],
+        [/\b(context|source|component|steps|each)\b/, 'type'],
       ],
     },
   });
@@ -143,6 +145,8 @@ type Props = {
   source?: string;
   // component names the component being edited, or the one a trait is on.
   component?: string;
+  // step is where a workflow step's value sits: the steps it reads, its loop.
+  step?: ExpressionStep;
   // draft is an application being created, checked without it.
   draft?: boolean;
   // kind is the type the parameter expects: string, integer, number or boolean.
@@ -303,12 +307,12 @@ class ExpressionEditor extends React.Component<Props, State> {
       return;
     }
     this.checked = value;
-    const { appName, surface, source, component, kind, draft } = this.props;
+    const { appName, surface, source, component, kind, draft, step } = this.props;
     let res: any;
     try {
       res = draft
         ? await checkDraftExpression({ surface, value, kind })
-        : await checkExpression(appName, { surface, value, kind, source, component });
+        : await checkExpression(appName, { surface, value, kind, source, component, ...step });
     } catch (e) {
       return;
     }

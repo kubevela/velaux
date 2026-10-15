@@ -14,6 +14,7 @@ import { WorkflowEditContext } from '../../context';
 import { forEachProblem } from './loop-edit';
 import { LoopItems } from './loop-items';
 import StepForm from './step-form';
+import { stepScope } from './step-scope';
 import { StepTypeIcon } from './step-icon';
 
 import './index.less';
@@ -353,7 +354,14 @@ class AddStep extends React.Component<Props, State> {
             />
           </Form.Item>
         )}
-        <StepForm ref={this.form} inline step={draft.step} onUpdate={() => {}} onClose={this.props.onClose} />
+        <StepForm
+          ref={this.form}
+          inline
+          step={draft.step}
+          scope={stepScope(draft.steps, draft.step.name)}
+          onUpdate={() => {}}
+          onClose={this.props.onClose}
+        />
       </WorkflowEditContext.Provider>
     );
   };

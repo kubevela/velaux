@@ -40,6 +40,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/definition/propexpr"
 	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/schema"
+	"github.com/oam-dev/kubevela/pkg/sources"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
@@ -62,7 +63,7 @@ const (
 // ExpressionService helps forms edit the $( ) CEL expressions an application's
 // properties may hold.
 type ExpressionService interface {
-	Env(ctx context.Context, app *model.Application, surface, source, component string) (*apisv1.ExpressionEnvResponse, error)
+	Env(ctx context.Context, app *model.Application, surface, source, component string, step apisv1.ExpressionStep) (*apisv1.ExpressionEnvResponse, error)
 	Check(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest) (*apisv1.ExpressionCheckResponse, error)
 	SetOptIn(ctx context.Context, app *model.Application, on bool) error
 	// CheckProperties refuses properties holding an expression the check finds
@@ -107,8 +108,10 @@ func optedIn(app *model.Application) bool {
 // fields, the application's source bindings and, on a component or trait, its
 // other components. On the source surface, source names the one being edited,
 // which reads only those declared before it; component names the component being
-// edited, or the one a trait is on, which reads every component but itself.
-func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application, surface, source, component string) (*apisv1.ExpressionEnvResponse, error) {
+// edited, or the one a trait is on, which reads every component but itself. A
+// workflow step also reads the other steps' outputs and, in a loop body, each,
+// from where step says it sits.
+func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application, surface, source, component string, step apisv1.ExpressionStep) (*apisv1.ExpressionEnvResponse, error) {
 	contextSchema, ok := contextFor(surface)
 	if !ok {
 		return nil, bcode.ErrExpressionSurface
@@ -143,6 +146,9 @@ func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application,
 	resp.Variables = append(resp.Variables, sourceRoot)
 	if components := e.componentRoot(ctx, app, surface, component); components != nil {
 		resp.Variables = append(resp.Variables, components)
+	}
+	if surface == sources.SurfaceWorkflowStep {
+		resp.Variables = append(resp.Variables, stepRoots(step, schemas)...)
 	}
 	return resp, nil
 }
@@ -282,8 +288,8 @@ var celIssue = regexp.MustCompile(`<input>:(\d+):(\d+): ([^\n]*)`)
 
 // Check compiles each $( ) expression in a value against the surface's typed
 // environment, and compares the value's resulting type with the parameter's. A
-// value that is exactly one component read takes the type its producer
-// declares, as KubeVela's admission types it.
+// value that is exactly one component or each read takes the type KubeVela's
+// admission gives it: the producer's declared type, or the loop item's.
 func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest) (*apisv1.ExpressionCheckResponse, error) {
 	contextSchema, ok := contextFor(req.Surface)
 	if !ok {
@@ -299,7 +305,8 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 		resp.Type = kindString
 		return resp, nil
 	}
-	env, err := celexpr.EnvForContext(e.sourceSchemas(ctx, app, req.Surface, req.Source), contextSchema)
+	schemas := e.sourceSchemas(ctx, app, req.Surface, req.Source)
+	env, err := celexpr.EnvForContext(schemas, contextSchema)
 	if err != nil {
 		return nil, err
 	}
@@ -321,6 +328,10 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 			resp.Issues = append(resp.Issues, issues...)
 			continue
 		}
+		if issues := stepIssues(req, frag.Expr, exprStart); len(issues) > 0 {
+			resp.Issues = append(resp.Issues, issues...)
+			continue
+		}
 		out, err := celexpr.OutputType(env, frag.Expr)
 		if err != nil {
 			resp.Issues = append(resp.Issues, issuesAt(err.Error(), exprStart, frag.Expr)...)
@@ -331,9 +342,9 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 	if len(resp.Issues) > 0 {
 		return resp, nil
 	}
-	if sole, ok := parsed.SoleExpr(); ok {
+	if _, ok := parsed.SoleExpr(); ok {
 		resp.Type = celKind(whole)
-		if kind, ok := e.componentReadKind(ctx, app, sole); ok {
+		if kind, ok := e.readKind(ctx, app, req, schemas); ok {
 			resp.Type = kind
 		}
 	} else {

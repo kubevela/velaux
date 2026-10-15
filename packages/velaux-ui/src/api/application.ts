@@ -9,7 +9,9 @@ import type {
   UpdatePolicyRequest,
   UpdateTriggerRequest,
   CreateTriggerRequest,
+  ExpressionStep,
 } from '@velaux/data';
+import { scopeParams } from '../components/WorkflowStudio/step-scope';
 import { getDomain } from '../utils/common';
 
 import { application, expressions } from './productionLink';
@@ -303,11 +305,19 @@ export function dryRunApplication(appName: string, params: ApplicationDryRunRequ
 // a surface: component, trait, workflowstep or source. On the source surface,
 // source names the one being edited, which reads only those declared before it.
 // On a component or trait, component names the component being edited or the
-// one the trait is on, which reads every component but itself.
-export function getExpressionEnv(appName: string, surface: string, source?: string, component?: string) {
-  return get(`${url}/${appName}/expressions/env`, { params: { surface, source, component }, customError: true }).then(
-    (res) => res
-  );
+// one the trait is on, which reads every component but itself. On a workflow
+// step, step says where it sits: the steps it may read and the loop it runs in.
+export function getExpressionEnv(
+  appName: string,
+  surface: string,
+  source?: string,
+  component?: string,
+  step?: ExpressionStep
+) {
+  return get(`${url}/${appName}/expressions/env`, {
+    params: { surface, source, component, ...scopeParams(step) },
+    customError: true,
+  }).then((res) => res);
 }
 
 // getDraftExpressionEnv lists what a $( ) expression can read in an application
@@ -326,7 +336,7 @@ export function checkDraftExpression(params: { surface: string; value: string; k
 // checkExpression checks the $( ) expressions of a property value.
 export function checkExpression(
   appName: string,
-  params: { surface: string; value: string; kind?: string; source?: string; component?: string }
+  params: { surface: string; value: string; kind?: string; source?: string; component?: string } & ExpressionStep
 ) {
   return post(`${url}/${appName}/expressions/check`, params, true).then((res) => res);
 }

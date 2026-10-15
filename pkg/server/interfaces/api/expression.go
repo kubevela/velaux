@@ -17,6 +17,7 @@ limitations under the License.
 package api
 
 import (
+	"encoding/json"
 	"strconv"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -85,7 +86,7 @@ func draftApplication(optIn bool) *model.Application {
 
 func (e *expression) env(req *restful.Request, res *restful.Response) {
 	optIn, _ := strconv.ParseBool(req.QueryParameter("optIn"))
-	env, err := e.ExpressionService.Env(req.Request.Context(), draftApplication(optIn), req.QueryParameter("surface"), "", "")
+	env, err := e.ExpressionService.Env(req.Request.Context(), draftApplication(optIn), req.QueryParameter("surface"), "", "", apis.ExpressionStep{})
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
@@ -115,4 +116,24 @@ func (e *expression) check(req *restful.Request, res *restful.Response) {
 		bcode.ReturnError(req, res, err)
 		return
 	}
+}
+
+// expressionStep is where a workflow step's value sits, from the query: each
+// part is optional, and one that does not parse is left out.
+func expressionStep(req *restful.Request) apis.ExpressionStep {
+	step := apis.ExpressionStep{Step: req.QueryParameter("step")}
+	step.LoopBody, _ = strconv.ParseBool(req.QueryParameter("loopBody"))
+	if items := req.QueryParameter("forEachItems"); items != "" && json.Valid([]byte(items)) {
+		step.ForEachItems = json.RawMessage(items)
+	}
+	if steps := req.QueryParameter("steps"); steps != "" {
+		var parsed []apis.ExpressionStepOutputs
+		if err := json.Unmarshal([]byte(steps), &parsed); err == nil {
+			if parsed == nil {
+				parsed = []apis.ExpressionStepOutputs{}
+			}
+			step.Steps = parsed
+		}
+	}
+	return step
 }

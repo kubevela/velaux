@@ -128,7 +128,7 @@ func TestExpressionEnvReadsComponents(t *testing.T) {
 	svc := shopExpressionService(t)
 	app := &model.Application{Name: "shop", Annotations: map[string]string{oam.AnnotationCelExpressions: "true"}}
 
-	env, err := svc.Env(context.Background(), app, "component", "", "api")
+	env, err := svc.Env(context.Background(), app, "component", "", "api", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	components := root(env, "component")
 	require.NotNil(t, components)
@@ -152,7 +152,7 @@ func TestExpressionEnvReadsComponents(t *testing.T) {
 		assert.Empty(t, status.Children)
 	}
 
-	trait, err := svc.Env(context.Background(), app, "trait", "", "db")
+	trait, err := svc.Env(context.Background(), app, "trait", "", "db", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	var traitReads []string
 	for _, c := range root(trait, "component").Children {
@@ -160,7 +160,7 @@ func TestExpressionEnvReadsComponents(t *testing.T) {
 	}
 	assert.Equal(t, []string{"api"}, traitReads, "a trait reads the other components, not its own")
 
-	src, err := svc.Env(context.Background(), app, "source", "first", "")
+	src, err := svc.Env(context.Background(), app, "source", "first", "", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	assert.Nil(t, root(src, "component"), "a source cannot read a component")
 }
@@ -171,7 +171,7 @@ func TestExpressionEnvReadsOutputSchemas(t *testing.T) {
 	svc := shopExpressionService(t)
 	app := &model.Application{Name: "shop", Annotations: map[string]string{oam.AnnotationCelExpressions: "true"}}
 
-	env, err := svc.Env(context.Background(), app, "component", "", "db")
+	env, err := svc.Env(context.Background(), app, "component", "", "db", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	api := child(root(env, "component"), "api")
 	require.NotNil(t, api)
@@ -180,7 +180,7 @@ func TestExpressionEnvReadsOutputSchemas(t *testing.T) {
 	assert.Equal(t, "list(object)", child(api, "outputs", "service", "spec", "ports").Type, "and each trait's outputs")
 	assert.Equal(t, "dyn", child(api, "outputs", "service", "status").Type)
 
-	env, err = svc.Env(context.Background(), app, "component", "", "api")
+	env, err = svc.Env(context.Background(), app, "component", "", "api", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	db := child(root(env, "component"), "db")
 	assert.Equal(t, "string", child(db, "output", "kind").Type, "a declared field is offered before the object has it")

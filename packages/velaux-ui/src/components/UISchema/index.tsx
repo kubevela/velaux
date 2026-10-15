@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import { Translation } from '../Translation';
-import type { ParamCondition, UIParam, UIParamValidate, Definition } from '@velaux/data';
+import type { ExpressionStep, ParamCondition, UIParam, UIParamValidate, Definition } from '@velaux/data';
 
 import type { Rule } from '@alifd/field';
 import { Balloon, Form, Input, Select, Field, Switch, Grid, Divider, Collapse } from '@alifd/next';
@@ -59,6 +59,8 @@ export type ExpressionContext = {
   // component names the component being edited, or the one a trait is on: it
   // cannot read its own output.
   component?: string;
+  // step is where a workflow step's value sits: the steps it reads, its loop.
+  step?: ExpressionStep;
   // draft is an application being created, which the expression endpoints of
   // an existing one cannot answer for.
   draft?: boolean;
@@ -311,7 +313,14 @@ class UISchema extends Component<Props, State> {
     const kind = expressionKind(param);
     const check = ex.draft
       ? checkDraftExpression({ surface: ex.surface, value, kind })
-      : checkExpression(ex.appName, { surface: ex.surface, value, kind, source: ex.source, component: ex.component });
+      : checkExpression(ex.appName, {
+          surface: ex.surface,
+          value,
+          kind,
+          source: ex.source,
+          component: ex.component,
+          ...ex.step,
+        });
     return check.then((res: any) => blockingIssue(res?.issues)?.message).catch(() => undefined);
   };
 
@@ -1528,6 +1537,7 @@ class UISchema extends Component<Props, State> {
             surface={this.props.expressions?.surface || ''}
             source={this.props.expressions?.source}
             component={this.props.expressions?.component}
+            step={this.props.expressions?.step}
             draft={this.props.expressions?.draft}
             reserve={fxWidth}
             autoFocus={!!this.focusOnSwitch[param.jsonKey]}

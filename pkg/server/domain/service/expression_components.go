@@ -524,56 +524,23 @@ func (e *expressionServiceImpl) componentIssues(ctx context.Context, app *model.
 	return out
 }
 
-// wholeComponentRead is the component read an expression consists of when it
-// does nothing but read one, such as component.db.output.data.host.
-func wholeComponentRead(expr string) (template.Reference, bool) {
-	refs, err := celexpr.PropertyReferences(expr)
-	if err != nil || len(refs) != 1 {
-		return template.Reference{}, false
-	}
-	ref := refs[0]
-	if !propexpr.IsComponent(ref) || ref.Defaulted || strings.TrimSpace(expr) != ref.String() {
-		return template.Reference{}, false
-	}
-	return ref, true
-}
-
-// componentReadKind is the type the producer declares for an expression that is
-// exactly one component read, as KubeVela's admission types it, or false when it
-// declares none and the read fits any parameter.
-func (e *expressionServiceImpl) componentReadKind(ctx context.Context, app *model.Application, expr string) (string, bool) {
-	ref, ok := wholeComponentRead(expr)
-	if !ok || e.KubeClient == nil {
-		return "", false
+// componentReadKind is the kind the producer declares for a component read, as
+// KubeVela's admission types it, or false when it declares none and the read
+// fits any parameter.
+func (e *expressionServiceImpl) componentReadKind(ctx context.Context, app *model.Application, ref template.Reference) (cue.Kind, bool) {
+	if e.KubeClient == nil || len(ref.Path) == 0 {
+		return cue.BottomKind, false
 	}
 	name := ref.Path[0]
 	_, declared, _ := e.componentNames(ctx, app)
 	decl, ok := declared[name]
 	if !ok || decl.typ == "" {
-		return "", false
+		return cue.BottomKind, false
 	}
 	comp := common.ApplicationComponent{Name: name, Type: decl.typ}
 	for _, t := range decl.traits {
 		comp.Traits = append(comp.Traits, common.ApplicationTrait{Type: t})
 	}
 	produced := schema.ProducedFor(ctx, e.KubeClient, decl.namespace, []common.ApplicationComponent{comp}, decl.annotations)
-	kind, ok := schema.ComponentReadKind(produced, ref)
-	if !ok {
-		return "", false
-	}
-	switch kind {
-	case cue.StringKind:
-		return kindString, true
-	case cue.IntKind:
-		return kindInt, true
-	case cue.NumberKind, cue.FloatKind:
-		return kindNumber, true
-	case cue.BoolKind:
-		return kindBool, true
-	case cue.ListKind:
-		return kindList, true
-	case cue.StructKind:
-		return kindMap, true
-	}
-	return "", false
+	return schema.ComponentReadKind(produced, ref)
 }

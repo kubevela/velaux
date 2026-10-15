@@ -2310,6 +2310,30 @@ type ExpressionCheckRequest struct {
 	// Component names the component the value is written in, or the one its
 	// trait is on: it cannot read its own output.
 	Component string `json:"component,omitempty"`
+	ExpressionStep
+}
+
+// ExpressionStep is where a workflow step's value sits, for the steps and each
+// roots: every field is optional, and a request without them reads neither.
+type ExpressionStep struct {
+	// Step names the step the value is written in, which cannot read its own
+	// outputs.
+	Step string `json:"step,omitempty"`
+	// LoopBody is whether the step runs once per item: a step with forEach, or a
+	// sub-step of a group with one. Only a loop body reads each.
+	LoopBody bool `json:"loopBody,omitempty"`
+	// ForEachItems is the loop's forEach items as written: a list, or a string
+	// holding one $( ) expression. each.item is typed from it.
+	ForEachItems json.RawMessage `json:"forEachItems,omitempty"`
+	// Steps is the workflow's steps and the outputs each declares, sub-steps
+	// included. When given, a read of a step or output not among them is refused.
+	Steps []ExpressionStepOutputs `json:"steps,omitempty"`
+}
+
+// ExpressionStepOutputs is a workflow step and the outputs it declares.
+type ExpressionStepOutputs struct {
+	Name    string   `json:"name"`
+	Outputs []string `json:"outputs,omitempty"`
 }
 
 // ExpressionCheckResponse reports on a property value's expressions.

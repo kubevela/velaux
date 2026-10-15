@@ -721,3 +721,25 @@ export interface DataFlow {
   via: 'source' | 'expression' | 'inputs' | 'dependsOn';
   items: DataFlowItem[];
 }
+
+// ExpressionStep is where a workflow step's $( ) value sits, for the steps and
+// each roots. Every field is optional; a request without them reads neither.
+export interface ExpressionStep {
+  // step names the step the value is written in, which cannot read its own
+  // outputs.
+  step?: string;
+  // loopBody is whether the step runs once per item: a step with forEach, or a
+  // sub-step of a group with one. Only a loop body reads each.
+  loopBody?: boolean;
+  // forEachItems is the loop's forEach items as written: a list, or a string
+  // holding one $( ) expression.
+  forEachItems?: unknown;
+  // steps is the workflow's steps and the outputs each declares.
+  steps?: ExpressionStepOutputs[];
+}
+
+// ExpressionStepOutputs is a workflow step and the outputs it declares.
+export interface ExpressionStepOutputs {
+  name: string;
+  outputs?: string[];
+}

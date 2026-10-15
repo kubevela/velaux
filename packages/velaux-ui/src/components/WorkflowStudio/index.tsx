@@ -16,6 +16,7 @@ import StepForm from './step-form';
 import AddStep from './add-step';
 import { setLoop } from './loop-edit';
 import { LoopEditor } from './loop-editor';
+import { stepScope } from './step-scope';
 
 import './index.less';
 
@@ -248,6 +249,7 @@ class WorkflowStudio extends React.Component<Props, State> {
               isSubStep={!!showGroup}
               onUpdate={this.onUpdateStep}
               step={showStep}
+              scope={stepScope(steps, showStep.name)}
             />
           </WorkflowEditContext.Provider>
         )}
