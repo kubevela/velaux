@@ -291,6 +291,9 @@ func writtenSourceIndex(app *model.Application, source string) int {
 	return len(app.Sources)
 }
 
+// anySchema is the schema of a source binding whose definition declares none.
+const anySchema = "_"
+
 // sourceSchemas maps each source binding an expression on the surface can read
 // to the CUE of its definition's schema. A source reads only the sources
 // declared before the one named, all of them when it is new. The definition is
@@ -304,10 +307,16 @@ func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Ap
 		if surface == surfaceSource && b.index >= writtenSourceIndex(app, source) {
 			continue
 		}
+		if b.src.Type == "" {
+			continue
+		}
+		// A binding is declared whatever its definition says, as admission
+		// declares it: one with no schema, or one that cannot be loaded (which
+		// the source rules report), is of any type, so its reads fit anything.
 		text, err := schema.SourceSchemaText(ctx, e.KubeClient, b.namespace, b.src.Type, b.annotations)
 		if err != nil || text == "" {
 			klog.V(4).Infof("no schema for source %s of %s: %v", name, app.Name, err)
-			continue
+			text = anySchema
 		}
 		out[name] = text
 	}

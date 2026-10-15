@@ -43,10 +43,11 @@ func TestExpressionCheckSourceRules(t *testing.T) {
 	cli := fake.NewClientBuilder().WithScheme(common2.Scheme).WithObjects(
 		def("settings", "parameter: {}\nschema: {name: string, labels: [string]: string, maybe?: bool, any: _}\noutput: {}\n"),
 		def("narrow", "consumableFrom: [\"workflowstep\"]\nparameter: {}\nschema: {name: string}\noutput: {}\n"),
+		def("plain", "parameter: {}\noutput: {}\n"),
 	).Build()
 	svc := &expressionServiceImpl{enabled: true, KubeClient: cli}
 	app := &model.Application{Name: "shop", Annotations: map[string]string{oam.AnnotationCelExpressions: "true"},
-		Sources: []v1beta1.ApplicationSource{{Name: "cfg", Type: "settings"}, {Name: "only", Type: "narrow"}, {Name: "gone", Type: "nowhere"}}}
+		Sources: []v1beta1.ApplicationSource{{Name: "cfg", Type: "settings"}, {Name: "only", Type: "narrow"}, {Name: "gone", Type: "nowhere"}, {Name: "raw", Type: "plain"}}}
 	check := func(surface, source, value string) []string {
 		t.Helper()
 		got, err := svc.Check(context.Background(), app, apisv1.ExpressionCheckRequest{Surface: surface, Source: source, Value: value})
@@ -70,6 +71,7 @@ func TestExpressionCheckSourceRules(t *testing.T) {
 	assert.Equal(t, []string{`SourceDefinition "narrow" declares consumableFrom [workflowstep] and cannot be consumed from a component`},
 		check("component", "", "$(source.only.name)"))
 	assert.Empty(t, check("workflowstep", "", "$(source.only.name)"))
+	assert.Empty(t, check("component", "", "$(source.raw.anything)"), "a binding whose definition declares no schema is of any type")
 	assert.Equal(t, []string{`source at index 0 can only depend on prior sources, but "only" is at index 1`},
 		check("source", "cfg", "$(source.only.name)"), "a source reads only those declared before it")
 }
