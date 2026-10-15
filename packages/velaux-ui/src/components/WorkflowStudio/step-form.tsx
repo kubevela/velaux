@@ -20,6 +20,7 @@ import { Translation } from '../Translation';
 import UISchema from '../UISchema';
 import type { ExpressionContext } from '../UISchema';
 
+import { ConditionInput } from './condition-input';
 import { InputItems } from './input-item';
 import { OutputItems } from './output-item';
 import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
@@ -35,6 +36,9 @@ type Props = {
   // scope is where the step sits in its workflow, for the steps and each its
   // property expressions read.
   scope?: ExpressionStep;
+  // conditionScope is where its if sits, which reads each only in a looping
+  // group's sub-step.
+  conditionScope?: ExpressionStep;
 };
 
 type State = {
@@ -42,6 +46,7 @@ type State = {
   definitionLoading: boolean;
   propertiesMode: 'native' | 'code';
   expressionEnv?: ExpressionEnv;
+  conditionEnv?: ExpressionEnv;
 };
 
 class StepForm extends Component<Props, State> {
@@ -84,16 +89,13 @@ class StepForm extends Component<Props, State> {
       return;
     }
     try {
-      const env: ExpressionEnv = await getExpressionEnv(
-        appName,
-        'workflowstep',
-        undefined,
-        undefined,
-        this.props.scope
-      );
-      this.setState({ expressionEnv: env });
+      const [env, conditionEnv]: ExpressionEnv[] = await Promise.all([
+        getExpressionEnv(appName, 'workflowstep', undefined, undefined, this.props.scope),
+        getExpressionEnv(appName, 'workflowstep', undefined, undefined, this.props.conditionScope),
+      ]);
+      this.setState({ expressionEnv: env, conditionEnv });
     } catch (e) {
-      this.setState({ expressionEnv: undefined });
+      this.setState({ expressionEnv: undefined, conditionEnv: undefined });
     }
   };
 
@@ -276,8 +278,10 @@ class StepForm extends Component<Props, State> {
                   />
                 }
               >
-                <Input
-                  name="if"
+                <ConditionInput
+                  appName={this.appName()}
+                  scope={this.props.conditionScope}
+                  env={this.state.conditionEnv}
                   {...init('if', {
                     rules: [],
                   })}

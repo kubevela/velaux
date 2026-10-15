@@ -2328,6 +2328,9 @@ type ExpressionStep struct {
 	// Steps is the workflow's steps and the outputs each declares, sub-steps
 	// included. When given, a read of a step or output not among them is refused.
 	Steps []ExpressionStepOutputs `json:"steps,omitempty"`
+	// Condition is whether the value is the step's if. One that is a whole $( )
+	// expression must be a bool; any other is CUE, which the check does not read.
+	Condition bool `json:"condition,omitempty"`
 }
 
 // ExpressionStepOutputs is a workflow step and the outputs it declares.

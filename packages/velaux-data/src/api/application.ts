@@ -736,6 +736,9 @@ export interface ExpressionStep {
   forEachItems?: unknown;
   // steps is the workflow's steps and the outputs each declares.
   steps?: ExpressionStepOutputs[];
+  // condition is whether the value is the step's if: one that is a whole $( )
+  // expression must be a bool, and any other is CUE, which the check does not read.
+  condition?: boolean;
 }
 
 // ExpressionStepOutputs is a workflow step and the outputs it declares.

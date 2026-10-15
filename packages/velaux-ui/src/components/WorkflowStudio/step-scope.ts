@@ -29,6 +29,23 @@ export function stepScope(steps: ScopeStep[], stepName?: string): ExpressionStep
   return scope;
 }
 
+// conditionScope is where the if of the step called stepName sits. A top-level
+// step's own if is decided once, before any pass of its loop, so it reads no
+// each; a looping group's sub-step decides its if per pass, and reads each over
+// the group's items.
+export function conditionScope(steps: ScopeStep[], stepName?: string): ExpressionStep {
+  const scope: ExpressionStep = { step: stepName, steps: declaredOutputs(steps), condition: true };
+  steps.forEach((s) => {
+    if (s.forEach && (s.subSteps || []).some((sub) => sub.name === stepName)) {
+      scope.loopBody = true;
+      if (s.forEach.items !== undefined) {
+        scope.forEachItems = s.forEach.items;
+      }
+    }
+  });
+  return scope;
+}
+
 // declaredOutputs is every step and sub-step with the outputs it declares.
 function declaredOutputs(steps: ScopeStep[]): Array<{ name: string; outputs: string[] }> {
   const out: Array<{ name: string; outputs: string[] }> = [];

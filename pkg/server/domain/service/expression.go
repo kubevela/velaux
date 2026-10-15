@@ -31,6 +31,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/cel-go/cel"
 	"github.com/kubevela/pkg/cel/template"
+	wfexpressions "github.com/kubevela/workflow/pkg/expressions"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -289,13 +290,18 @@ var celIssue = regexp.MustCompile(`<input>:(\d+):(\d+): ([^\n]*)`)
 // Check compiles each $( ) expression in a value against the surface's typed
 // environment, and compares the value's resulting type with the parameter's. A
 // value that is exactly one component or each read takes the type KubeVela's
-// admission gives it: the producer's declared type, or the loop item's.
+// admission gives it: the producer's declared type, or the loop item's. A step's
+// if that is one $( ) expression is checked as admission checks it, as a bool;
+// any other if is CUE and is not read.
 func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest) (*apisv1.ExpressionCheckResponse, error) {
 	contextSchema, ok := contextFor(req.Surface)
 	if !ok {
 		return nil, bcode.ErrExpressionSurface
 	}
 	resp := &apisv1.ExpressionCheckResponse{}
+	if req.Condition && !wfexpressions.IsCondition(req.Value) {
+		return resp, nil
+	}
 	parsed, err := template.Parse(req.Value)
 	if err != nil {
 		resp.Issues = append(resp.Issues, &apisv1.ExpressionIssue{Message: err.Error(), Start: 0, End: len(req.Value)})
@@ -349,6 +355,13 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 		}
 	} else {
 		resp.Type = kindString
+	}
+	if req.Condition {
+		if issues := e.conditionIssues(ctx, app, req, env, schemas); len(issues) > 0 {
+			resp.Issues = append(resp.Issues, issues...)
+			return resp, nil
+		}
+		req.Kind = "boolean"
 	}
 	if issue := targetIssue(resp.Type, req.Kind, len(req.Value)); issue != nil {
 		resp.Issues = append(resp.Issues, issue)

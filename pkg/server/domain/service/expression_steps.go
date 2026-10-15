@@ -19,6 +19,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -26,6 +27,8 @@ import (
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
+	"github.com/google/cel-go/cel"
+	celengine "github.com/kubevela/pkg/cel"
 	"github.com/kubevela/pkg/cel/template"
 
 	"github.com/oam-dev/kubevela/pkg/definition/celexpr"
@@ -77,20 +80,65 @@ func stepIssues(req apisv1.ExpressionCheckRequest, expr string, start int) []*ap
 	return out
 }
 
-// stepReadIssue is what is wrong with a steps.<name>.outputs.<output> read, or
-// "" when nothing is or the request does not list the workflow's steps.
-func stepReadIssue(step apisv1.ExpressionStep, r template.Reference) string {
-	if len(r.Path) < 3 || r.Path[1] != "outputs" {
-		name := "<step>"
-		if len(r.Path) > 0 {
-			name = r.Path[0]
+// stepStatusFields are what steps.<name> offers beside outputs: the step's
+// status once it has finished, as the workflow answers it, with their types.
+var stepStatusFields = []struct{ name, kind, description string }{
+	{"phase", kindString, "The step's phase once it has finished, such as succeeded or failed"},
+	{"message", kindString, "The step's message"},
+	{"reason", kindString, "Why the step ended in its phase"},
+	{"succeeded", kindBool, "Whether the step succeeded"},
+	{"failed", kindBool, "Whether the step failed"},
+	{"skipped", kindBool, "Whether the step was skipped"},
+	{"timeout", kindBool, "Whether the step timed out"},
+	{"failedAfterRetries", kindBool, "Whether the step failed after its retries"},
+	{"terminate", kindBool, "Whether the step terminated the workflow"},
+}
+
+func isStepStatusField(name string) bool {
+	for _, f := range stepStatusFields {
+		if f.name == name {
+			return true
 		}
-		return fmt.Sprintf("read steps.%s.outputs.<name>", name)
+	}
+	return false
+}
+
+// stepReadHint is the refusal of a steps.<name> read that is neither an output
+// nor a status field, in the workflow's words.
+func stepReadHint(name string) string {
+	fields := make([]string, len(stepStatusFields))
+	for i, f := range stepStatusFields {
+		fields[i] = f.name
+	}
+	return fmt.Sprintf("read steps.%s.outputs.<name>, or steps.%s.<%s>", name, name, strings.Join(fields, "|"))
+}
+
+// stepReadIssue is what is wrong with a steps.<name>.outputs.<output> or
+// steps.<name>.<status field> read, or "" when nothing is or the request does
+// not list the workflow's steps.
+func stepReadIssue(step apisv1.ExpressionStep, r template.Reference) string {
+	name := "<step>"
+	if len(r.Path) > 0 {
+		name = r.Path[0]
+	}
+	if len(r.Path) >= 2 && isStepStatusField(r.Path[1]) {
+		switch {
+		case step.Steps == nil:
+			return ""
+		case name == step.Step:
+			return fmt.Sprintf("step %s cannot read its own outputs", name)
+		case !declaresStep(step.Steps, name):
+			return fmt.Sprintf("no step %q", name)
+		}
+		return ""
+	}
+	if len(r.Path) < 3 || r.Path[1] != "outputs" {
+		return stepReadHint(name)
 	}
 	if step.Steps == nil {
 		return ""
 	}
-	name, output := r.Path[0], r.Path[2]
+	output := r.Path[2]
 	if name == step.Step {
 		return fmt.Sprintf("step %s cannot read its own outputs", name)
 	}
@@ -106,29 +154,42 @@ func stepReadIssue(step apisv1.ExpressionStep, r template.Reference) string {
 	return fmt.Sprintf("no step %q", name)
 }
 
+func declaresStep(steps []apisv1.ExpressionStepOutputs, name string) bool {
+	for _, s := range steps {
+		if s.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 // readKind is the kind admission gives a value that is exactly one component or
 // each read: a component's from what it applies, the loop's from its items, an
 // item read from a source typed by that source's schema.
 func (e *expressionServiceImpl) readKind(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest,
 	sourceSchemas map[string]string) (string, bool) {
 	ref, ok := schema.BareRead(req.Value)
-	if !ok {
+	if !ok || (ref.Root != propexpr.ComponentIdent && ref.Root != propexpr.EachIdent) {
 		return "", false
 	}
-	var kind cue.Kind
-	switch ref.Root {
-	case propexpr.ComponentIdent:
-		kind, ok = e.componentReadKind(ctx, app, ref)
-	case propexpr.EachIdent:
-		compiled := propexpr.CompileSchemas(sourceSchemas)
-		kind, ok = schema.EachReadKind(schema.LoopItemKind(req.ForEachItems, compiled.Kind), ref)
-	default:
-		return "", false
-	}
+	kind, ok := e.refKind(ctx, app, req, propexpr.CompileSchemas(sourceSchemas), ref)
 	if !ok {
 		return "", false
 	}
 	return kindLabel(kind)
+}
+
+// refKind is the kind admission knows for one read: a component's from what it
+// applies, the loop's from its items, and a source's or context's from its schema.
+func (e *expressionServiceImpl) refKind(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest,
+	compiled propexpr.Schemas, ref template.Reference) (cue.Kind, bool) {
+	switch ref.Root {
+	case propexpr.ComponentIdent:
+		return e.componentReadKind(ctx, app, ref)
+	case propexpr.EachIdent:
+		return schema.EachReadKind(schema.LoopItemKind(req.ForEachItems, compiled.Kind), ref)
+	}
+	return compiled.Kind(ref)
 }
 
 // kindLabel is a CUE kind as the editor names it.
@@ -151,21 +212,28 @@ func kindLabel(kind cue.Kind) (string, bool) {
 }
 
 // stepRoots are the roots only a workflow step reads: steps, every other step
-// the request lists with the outputs it declares, and, in a loop body, each.
+// the request lists with the outputs it declares and its status fields, and, in
+// a loop body, each.
 func stepRoots(step apisv1.ExpressionStep, sourceSchemas map[string]string) []*apisv1.ExpressionVariable {
 	steps := &apisv1.ExpressionVariable{Name: propexpr.StepsIdent, Type: kindObject,
-		Description: "The workflow's other steps, by name: read an output one declares, which the step then waits for"}
+		Description: "The workflow's other steps, by name: an output one declares or, once it has finished, its status; the step then waits for it"}
 	for _, s := range step.Steps {
-		if s.Name == step.Step || len(s.Outputs) == 0 {
+		if s.Name == step.Step {
 			continue
 		}
-		outputs := &apisv1.ExpressionVariable{Name: "outputs", Type: kindObject, Description: "The outputs the step declares"}
-		for _, o := range s.Outputs {
-			outputs.Children = append(outputs.Children, &apisv1.ExpressionVariable{Name: o, Type: kindDyn,
-				Description: "Declared without a type: cast what you read, such as int(...) or string(...)"})
+		var children []*apisv1.ExpressionVariable
+		if len(s.Outputs) > 0 {
+			outputs := &apisv1.ExpressionVariable{Name: "outputs", Type: kindObject, Description: "The outputs the step declares"}
+			for _, o := range s.Outputs {
+				outputs.Children = append(outputs.Children, &apisv1.ExpressionVariable{Name: o, Type: kindDyn,
+					Description: "Declared without a type: cast what you read, such as int(...) or string(...)"})
+			}
+			children = append(children, outputs)
 		}
-		steps.Children = append(steps.Children, &apisv1.ExpressionVariable{Name: s.Name, Type: kindObject,
-			Children: []*apisv1.ExpressionVariable{outputs}})
+		for _, f := range stepStatusFields {
+			children = append(children, &apisv1.ExpressionVariable{Name: f.name, Type: f.kind, Description: f.description})
+		}
+		steps.Children = append(steps.Children, &apisv1.ExpressionVariable{Name: s.Name, Type: kindObject, Children: children})
 	}
 	out := []*apisv1.ExpressionVariable{steps}
 	if !step.LoopBody {
@@ -220,3 +288,56 @@ func loopItemVariable(items json.RawMessage, sourceSchemas map[string]string) *a
 	}
 	return untyped
 }
+
+// conditionIssues types a step's $( ) if as admission does: a required bool,
+// whose reads that may be absent must be guarded with has(), in admission's
+// words.
+func (e *expressionServiceImpl) conditionIssues(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest,
+	env *cel.Env, sourceSchemas map[string]string) []*apisv1.ExpressionIssue {
+	value := strings.TrimSpace(req.Value)
+	raw, err := json.Marshal(value)
+	if err != nil {
+		return nil
+	}
+	plan, err := celexpr.Vela.PlanJSON(raw)
+	if err != nil {
+		return nil
+	}
+	compiled := propexpr.CompileSchemas(sourceSchemas)
+	opts := celengine.TypeOptions{
+		Optional: func(r celengine.Read) bool {
+			may, err := compiled.CanBeAbsent(r.Reference)
+			return err == nil && may
+		},
+		DeclaredKind: func(r celengine.Read) (cue.Kind, bool) {
+			return e.refKind(ctx, app, req, compiled, r.Reference)
+		},
+	}
+	var out []*apisv1.ExpressionIssue
+	for _, f := range plan.CheckTypes(env, conditionBool, opts) {
+		var mismatch *celengine.TypeMismatch
+		var absent *celengine.MayBeAbsent
+		msg := f.Err.Error()
+		switch {
+		case errors.As(f.Err, &mismatch):
+			msg = fmt.Sprintf("type mismatch: expression %v is %s but if expects bool", value, mismatch.Got)
+		case errors.As(f.Err, &absent):
+			read := absent.Read.String()
+			msg = fmt.Sprintf("%s may be absent and decides the step; guard it with has(%s) ? %s : <fallback>", read, read, read)
+		}
+		out = append(out, &apisv1.ExpressionIssue{Message: msg, Start: 0, End: len(req.Value)})
+	}
+	return out
+}
+
+// conditionBool is a step's $( ) if as the engine's target: a required bool,
+// since a condition that may be absent decides nothing.
+var conditionBool = func() celengine.Target {
+	b := cuecontext.New().CompileString("bool")
+	return celengine.TargetFunc(func(property string) (cue.Value, bool, bool) {
+		if property != "" {
+			return cue.Value{}, false, false
+		}
+		return b, true, true
+	})
+}()

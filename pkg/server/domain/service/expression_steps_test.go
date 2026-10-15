@@ -68,8 +68,12 @@ func TestExpressionEnvStepRoots(t *testing.T) {
 	for _, c := range steps.Children {
 		names = append(names, c.Name)
 	}
-	assert.Equal(t, []string{"names"}, names, "the step itself and a step declaring no output are left out")
+	assert.Equal(t, []string{"names", "notify"}, names, "the step itself is left out")
 	assert.Equal(t, "dyn", child(steps, "names", "outputs", "list").Type, "an output declares no type")
+	assert.Nil(t, child(steps, "notify", "outputs"), "a step declaring no output offers none")
+	assert.Equal(t, "string", child(steps, "notify", "phase").Type, "every step offers its status once finished")
+	assert.Equal(t, "bool", child(steps, "notify", "succeeded").Type)
+	assert.Equal(t, "bool", child(steps, "names", "failedAfterRetries").Type)
 
 	each := root(env, "each")
 	require.NotNil(t, each)
@@ -151,14 +155,90 @@ func TestExpressionCheckStepReads(t *testing.T) {
 	assert.Equal(t, []string{`no step "gone"`}, errs)
 
 	_, errs = check("workflowstep", "$(steps.names)", "", literal)
-	assert.Equal(t, []string{"read steps.names.outputs.<name>"}, errs)
+	assert.Equal(t, []string{"read steps.names.outputs.<name>, or steps.names.<phase|message|reason|succeeded|failed|skipped|timeout|failedAfterRetries|terminate>"}, errs)
+
+	_, errs = check("workflowstep", "$(steps.names.phase)", "", literal)
+	assert.Empty(t, errs, "a step's status is read in properties too")
+
+	_, errs = check("workflowstep", "$(steps.gone.succeeded)", "", literal)
+	assert.Equal(t, []string{`no step "gone"`}, errs)
 
 	_, errs = check("workflowstep", "$(steps.deploy.outputs.done)", "", literal)
 	assert.Equal(t, []string{"step deploy cannot read its own outputs"}, errs)
+
+	_, errs = check("workflowstep", "$(steps.deploy.failed)", "", literal)
+	assert.Equal(t, []string{"step deploy cannot read its own outputs"}, errs, "nor its own status, as the workflow refuses")
 
 	_, errs = check("workflowstep", "$(steps.gone.outputs.list)", "", apisv1.ExpressionStep{})
 	assert.Empty(t, errs, "without the workflow's steps, a step read is not judged")
 
 	_, errs = check("workflowstep", "$(component.db.output)", "", literal)
 	assert.Equal(t, []string{"only component and trait properties can read component.<name>"}, errs)
+}
+
+// A step's if that is one $( ) expression is checked as admission checks it: a
+// required bool, in admission's words. Any other if is CUE, and is not read.
+func TestExpressionCheckConditions(t *testing.T) {
+	cli := fake.NewClientBuilder().WithScheme(common2.Scheme).
+		WithObjects(sourceDefinition("flags", velaNS, "name: string, on: bool, maybe?: bool")).Build()
+	svc := &expressionServiceImpl{enabled: true, KubeClient: cli}
+	app := &model.Application{Name: "shop", Annotations: map[string]string{oam.AnnotationCelExpressions: "true"},
+		Sources: []v1beta1.ApplicationSource{{Name: "f", Type: "flags"}}}
+	condition := func(value string, step apisv1.ExpressionStep) (string, []string) {
+		t.Helper()
+		step.Condition = true
+		got, err := svc.Check(context.Background(), app, apisv1.ExpressionCheckRequest{Surface: "workflowstep", Value: value, ExpressionStep: step})
+		require.NoError(t, err)
+		var errs []string
+		for _, i := range got.Issues {
+			if !i.Warning {
+				errs = append(errs, i.Message)
+			}
+		}
+		return got.Type, errs
+	}
+	top := apisv1.ExpressionStep{Step: "deploy", Steps: workflowSteps}
+
+	_, errs := condition("$(source.f.name)", top)
+	assert.Equal(t, []string{"type mismatch: expression $(source.f.name) is string but if expects bool"}, errs)
+
+	typ, errs := condition(`$(source.f.name == "eu")`, top)
+	assert.Equal(t, "bool", typ, "a comparison is a bool")
+	assert.Empty(t, errs)
+
+	_, errs = condition("$(source.f.on)", top)
+	assert.Empty(t, errs)
+
+	_, errs = condition("$(source.f.maybe)", top)
+	assert.Equal(t, []string{"source.f.maybe may be absent and decides the step; guard it with has(source.f.maybe) ? source.f.maybe : <fallback>"}, errs)
+
+	_, errs = condition("$(has(source.f.maybe) ? source.f.maybe : false)", top)
+	assert.Empty(t, errs, "a guarded read may be absent")
+
+	_, errs = condition("$(each.index == 0)", top)
+	assert.Equal(t, []string{"each is only set inside a forEach body"}, errs,
+		"a top-level step's own if is decided once, before its loop, so it has no each")
+
+	sub := apisv1.ExpressionStep{Step: "deploy", Steps: workflowSteps, LoopBody: true,
+		ForEachItems: json.RawMessage(`[{"name":"eu","enabled":true}]`)}
+	typ, errs = condition("$(each.item.enabled)", sub)
+	assert.Equal(t, "bool", typ, "a looping group's sub-step decides its if per pass, so it reads each")
+	assert.Empty(t, errs)
+
+	_, errs = condition("$(each.item.name)", sub)
+	assert.Equal(t, []string{"type mismatch: expression $(each.item.name) is string but if expects bool"}, errs)
+
+	_, errs = condition(`$(steps.names.succeeded && steps.notify.phase == "succeeded")`, top)
+	assert.Empty(t, errs, "a condition reads other steps' status")
+
+	_, errs = condition("$(steps.names.bogus)", top)
+	assert.Equal(t, []string{"read steps.names.outputs.<name>, or steps.names.<phase|message|reason|succeeded|failed|skipped|timeout|failedAfterRetries|terminate>"}, errs)
+
+	for _, cue := range []string{"always", "", "status.names.succeeded", `context.name == "$(x)"`, "$(a) && $(b)"} {
+		got, err := svc.Check(context.Background(), app, apisv1.ExpressionCheckRequest{Surface: "workflowstep", Value: cue,
+			ExpressionStep: apisv1.ExpressionStep{Condition: true}})
+		require.NoError(t, err)
+		assert.Empty(t, got.Issues, "%q is CUE, which the check does not read", cue)
+		assert.Empty(t, got.Type, "%q", cue)
+	}
 }
