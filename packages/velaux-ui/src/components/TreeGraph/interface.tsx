@@ -1,9 +1,13 @@
-import type { TraitStatus , ResourceTreeNode } from '@velaux/data';
+import type { TraitStatus, ResourceTreeNode } from '@velaux/data';
+
+import type { DependencyItem } from '../../utils/dependencies';
 
 export interface TreeNode {
   resource: ResourceTreeNode;
   nodeType: 'app' | 'cluster' | 'component' | 'trait' | 'policy' | 'resource' | 'pod' | 'target';
   leafNodes?: TreeNode[];
+  // For a component node: what it depends on and what depends on it.
+  dependencies?: DependencyItem[];
 }
 
 export interface Node {
