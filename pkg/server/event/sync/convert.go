@@ -63,6 +63,12 @@ func (c *CR2UX) ConvertApp2DatastoreApp(ctx context.Context, targetApp *v1beta1.
 			model.LabelSyncRevision:     getRevision(*targetApp),
 			apitypes.LabelSourceOfTruth: sourceOfTruth,
 		},
+		Sources: targetApp.Spec.Sources,
+	}
+	// Only the expressions opt-in is carried: a deploy from VelaUX writes the
+	// model's annotations back to the CR.
+	if targetApp.Annotations[oam.AnnotationCelExpressions] == "true" {
+		appMeta.Annotations = map[string]string{oam.AnnotationCelExpressions: "true"}
 	}
 	appMeta.CreateTime = targetApp.CreationTimestamp.Time
 	appMeta.UpdateTime = time.Now()

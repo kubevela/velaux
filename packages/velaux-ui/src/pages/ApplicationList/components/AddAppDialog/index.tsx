@@ -1,14 +1,17 @@
 import type { Rule } from '@alifd/field';
-import { Grid, Field, Form, Select, Message, Button } from '@alifd/next';
+import { Grid, Field, Form, Select, Message, Button, Input } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import React from 'react';
-import { createApplication } from '../../../../api/application';
+import { createApplication, getDraftExpressionEnv } from '../../../../api/application';
 import { detailComponentDefinition, getComponentDefinitions } from '../../../../api/definitions';
 import { getEnvs } from '../../../../api/env';
 import DrawerWithFooter from '../../../../components/Drawer';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
+import type { ExpressionContext } from '../../../../components/UISchema';
+import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
+import { checkName } from '../../../../utils/common';
 import type { DefinitionDetail, DefinitionBase, Env, Target, LoginUserInfo, UserProject } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 import { deployNamespaces, isUsable } from '../../../../utils/restrictions';
@@ -41,6 +44,10 @@ type State = {
   createLoading: boolean;
   // Component types as the selected environments' namespaces may use them.
   componentDefinitions?: DefinitionBase[];
+  // expressionEnv and optIn are the new application's $( ) expressions: what
+  // they can read, and whether it will read them.
+  expressionEnv?: ExpressionEnv;
+  optIn: boolean;
 };
 
 type Callback = (envName: string) => void;
@@ -60,6 +67,9 @@ class AppDialog extends React.Component<Props, State> {
       envs: [],
       visibleEnvDialog: false,
       createLoading: false,
+      // The fx toggles show from the start; the application is opted in on
+      // create only if a value uses an expression.
+      optIn: true,
     };
     this.field = new Field(this, {
       autoUnmount: false,
@@ -111,34 +121,54 @@ class AppDialog extends React.Component<Props, State> {
       if (error) {
         return;
       }
-      const { description, alias, name, icon = '', componentType, properties, envBindings, project } = values;
-      const envbinding = envBindings?.map((env: string) => {
-        return { name: env };
-      });
-      const params = {
+      const { alias, description, icon = '', componentType, properties, name, componentName } = values;
+      const serialized = JSON.stringify(properties);
+      this.create(values, {
         alias,
-        icon,
-        name,
+        componentType,
         description,
-        project: project || 'default',
-        envBinding: envbinding,
-        component: {
-          alias,
-          componentType,
-          description,
-          icon,
-          name,
-          properties: JSON.stringify(properties),
-        },
-      };
-      this.setState({ createLoading: true });
-      createApplication(params).then((res) => {
-        if (res && res.name) {
-          Message.success(<Translation>Application created successfully</Translation>);
-          this.props.onOK(name);
-        }
-        this.setState({ createLoading: false });
+        icon,
+        name: componentName || name,
+        properties: serialized,
       });
+    });
+  };
+
+  // onSkip creates the application without a main component and opens it, so
+  // its components can be added from the application's own page.
+  onSkip = () => {
+    this.field.validate(['name', 'alias', 'description', 'project', 'envBindings'], (error: any, values: any) => {
+      if (error) {
+        return;
+      }
+      this.create(values);
+    });
+  };
+
+  create = (values: any, component?: Record<string, any>) => {
+    const { description, alias, name, icon = '', envBindings, project } = values;
+    const envbinding = envBindings?.map((env: string) => {
+      return { name: env };
+    });
+    // Reading expressions is opted into only where a value uses one.
+    const usesExpressions = this.state.optIn && !!component && component.properties?.includes('$(');
+    const params = {
+      alias,
+      icon,
+      name,
+      description,
+      project: project || 'default',
+      envBinding: envbinding,
+      annotations: usesExpressions ? { 'app.oam.dev/cel-expressions': 'true' } : undefined,
+      component,
+    };
+    this.setState({ createLoading: true });
+    createApplication(params).then((res) => {
+      if (res && res.name) {
+        Message.success(<Translation>Application created successfully</Translation>);
+        this.props.onOK(name);
+      }
+      this.setState({ createLoading: false });
     });
   };
 
@@ -210,6 +240,30 @@ class AppDialog extends React.Component<Props, State> {
     });
   };
 
+  loadExpressionEnv = async (optIn: boolean) => {
+    try {
+      const env: ExpressionEnv = await getDraftExpressionEnv('component', optIn);
+      this.setState({ expressionEnv: env });
+    } catch (e) {
+      this.setState({ expressionEnv: undefined });
+    }
+  };
+
+  // expressionContext lets the main component's properties take $( )
+  // expressions before the application exists; the switch is kept here and
+  // set on the application as it is created.
+  expressionContext = (): ExpressionContext => ({
+    appName: this.field.getValue<string>('name') || '',
+    surface: 'component',
+    env: this.state.expressionEnv,
+    draft: true,
+    onOptIn: async (on: boolean) => {
+      this.setState({ optIn: on });
+      await this.loadExpressionEnv(on);
+      return true;
+    },
+  });
+
   changeStatus = (value: string) => {
     const values: { componentType: string; envBindings: string[]; project: string } = this.field.getValues();
     const { envBindings } = values;
@@ -238,6 +292,11 @@ class AppDialog extends React.Component<Props, State> {
               payload: values.project,
             });
           }
+          // The main component is named after the application until renamed.
+          if (!this.field.getValue('componentName')) {
+            this.field.setValue('componentName', this.field.getValue('name'));
+          }
+          this.loadExpressionEnv(this.state.optIn);
           this.setState({
             dialogStats: value,
           });
@@ -258,6 +317,9 @@ class AppDialog extends React.Component<Props, State> {
         <div>
           <Button type="secondary" onClick={onClose} className="margin-right-10">
             <Translation>Cancel</Translation>
+          </Button>
+          <Button type="secondary" onClick={this.onSkip} loading={createLoading} className="margin-right-10">
+            <Translation>Skip</Translation>
           </Button>
           <Button
             type="primary"
@@ -280,6 +342,9 @@ class AppDialog extends React.Component<Props, State> {
             className="margin-right-10"
           >
             <Translation>Previous</Translation>
+          </Button>
+          <Button type="secondary" onClick={this.onSkip} loading={createLoading} className="margin-right-10">
+            <Translation>Skip</Translation>
           </Button>
           <Button loading={createLoading} type="primary" onClick={this.onSubmit}>
             <Translation>Create</Translation>
@@ -441,6 +506,23 @@ class AppDialog extends React.Component<Props, State> {
             )}
 
             {secondStep && (
+              <Row>
+                <Col span={24} style={{ padding: '0 8px' }}>
+                  <FormItem
+                    label={<Translation className="font-size-14 font-weight-bold">Main Component Name</Translation>}
+                    required={true}
+                  >
+                    <Input
+                      {...init('componentName', {
+                        rules: [{ required: true, pattern: checkName, message: 'Please input a valid component name' }],
+                      })}
+                      locale={locale().Input}
+                    />
+                  </FormItem>
+                </Col>
+              </Row>
+            )}
+            {secondStep && (
               <FormItem required={true}>
                 <UISchema
                   {...init(`properties`, {
@@ -454,6 +536,7 @@ class AppDialog extends React.Component<Props, State> {
                   uiSchema={definitionDetail && definitionDetail.uiSchema}
                   ref={this.uiSchemaRef}
                   mode="new"
+                  expressions={this.expressionContext()}
                 />
               </FormItem>
             )}

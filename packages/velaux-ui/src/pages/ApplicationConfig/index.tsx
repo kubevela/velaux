@@ -12,6 +12,8 @@ import {
   deletePolicy,
   getPolicyDetail,
   getApplicationStatistics,
+  getSources,
+  deleteSource,
 } from '../../api/application';
 import { getComponentDefinitions, getPolicyDefinitions } from '../../api/definitions';
 import { deployNamespaces } from '../../utils/restrictions';
@@ -37,6 +39,7 @@ import type {
   ApplicationPolicyBase,
   ApplicationEnvStatus,
   DefinitionBase,
+  ApplicationSource,
 } from '@velaux/data';
 import { beautifyTime, momentDate, showAlias } from '../../utils/common';
 import type { APIError } from '../../utils/errors';
@@ -48,6 +51,8 @@ import ComponentDialog from './components/ComponentDialog';
 import Components from './components/Components';
 import PolicyDialog from './components/PolicyDialog';
 import PolicyList from './components/PolicyList';
+import SourceDialog from './components/SourceDialog';
+import SourceList from './components/SourceList';
 import TraitDialog from './components/TraitDialog';
 import TriggerDialog from './components/TriggerDialog';
 import TriggerList from './components/TriggerList';
@@ -95,6 +100,9 @@ type State = {
   showPolicyName?: string;
   policyDetail?: ApplicationPolicyDetail;
   statistics?: ApplicationStatistics;
+  sources: ApplicationSource[];
+  visibleSource: boolean;
+  editSource?: ApplicationSource;
 };
 @connect((store: any) => {
   return { ...store.application };
@@ -118,6 +126,8 @@ class ApplicationConfig extends Component<Props, State> {
       isEditComponent: false,
       componentDefinitions: [],
       visiblePolicy: false,
+      sources: [],
+      visibleSource: false,
     };
   }
 
@@ -126,6 +136,7 @@ class ApplicationConfig extends Component<Props, State> {
     this.onGetComponentDefinitions();
     this.onGetPolicyScopes();
     this.loadAppStatistics();
+    this.loadSources();
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -133,6 +144,23 @@ class ApplicationConfig extends Component<Props, State> {
       this.onGetComponentDefinitions();
     }
   }
+
+  loadSources = () => {
+    getSources(this.state.appName).then((res: { sources?: ApplicationSource[] }) => {
+      if (res) {
+        this.setState({ sources: res.sources || [] });
+      }
+    });
+  };
+
+  onDeleteSource = (name: string) => {
+    deleteSource(this.state.appName, name).then((res: any) => {
+      if (res) {
+        Message.success('Application source deleted successfully');
+        this.loadSources();
+      }
+    });
+  };
 
   onGetApplicationTrigger() {
     const { appName } = this.state;
@@ -517,6 +545,9 @@ class ApplicationConfig extends Component<Props, State> {
       visiblePolicy,
       policyDetail,
       statistics,
+      sources,
+      visibleSource,
+      editSource,
     } = this.state;
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     if (!applicationDetail) {
@@ -735,6 +766,42 @@ class ApplicationConfig extends Component<Props, State> {
             <Row>
               <Col span={24} className="padding16">
                 <Title
+                  title={
+                    <span className="font-size-16 font-weight-bold">
+                      <Translation>Sources</Translation>
+                    </span>
+                  }
+                  actions={[
+                    <Permission
+                      request={{
+                        resource: `project:${projectName}/application:${applicationDetail?.name}/source:*`,
+                        action: 'create',
+                      }}
+                      project={projectName}
+                    >
+                      <a
+                        key={'add'}
+                        className="font-size-14 font-weight-400"
+                        onClick={() => this.setState({ visibleSource: true, editSource: undefined })}
+                      >
+                        <Translation>New Source</Translation>
+                      </a>
+                    </Permission>,
+                  ]}
+                />
+              </Col>
+            </Row>
+            <SourceList
+              sources={sources}
+              applicationDetail={applicationDetail}
+              onDeleteSource={this.onDeleteSource}
+              onShowSource={(source: ApplicationSource) => this.setState({ visibleSource: true, editSource: source })}
+            />
+          </Col>
+          <Col xl={8} xxs={24} className="app-spec-item">
+            <Row>
+              <Col span={24} className="padding16">
+                <Title
                   actions={[
                     <Permission
                       request={{
@@ -825,6 +892,19 @@ class ApplicationConfig extends Component<Props, State> {
             componentDefinitions={componentDefinitions}
             onComponentClose={this.onComponentClose}
             onComponentOK={this.onComponentOK}
+          />
+        </If>
+        <If condition={visibleSource}>
+          <SourceDialog
+            project={applicationDetail?.project?.name || ''}
+            appName={appName}
+            source={editSource}
+            envbinding={envbinding}
+            onClose={() => this.setState({ visibleSource: false, editSource: undefined })}
+            onOK={() => {
+              this.loadSources();
+              this.setState({ visibleSource: false, editSource: undefined });
+            }}
           />
         </If>
         <If condition={visiblePolicy}>

@@ -46,11 +46,17 @@ import { If } from '../If';
 const { Col, Row } = Grid;
 
 // ExpressionContext says where a form's values are written, so its fields can
-// take $( ) expressions: the application, and the surface (component, trait or
-// workflowstep) that decides what an expression can read.
+// take $( ) expressions: the application, and the surface (component, trait,
+// workflowstep or source) that decides what an expression can read.
 export type ExpressionContext = {
   appName: string;
   surface: string;
+  // source names the source being edited, on the source surface: it reads only
+  // the sources declared before it.
+  source?: string;
+  // draft is an application being created, which the expression endpoints of
+  // an existing one cannot answer for.
+  draft?: boolean;
   env?: ExpressionEnv;
   // onOptIn turns the application's reading of expressions on or off,
   // resolving true once it has.
@@ -1377,6 +1383,8 @@ class UISchema extends Component<Props, State> {
           <ExpressionEditor
             appName={this.props.expressions?.appName || ''}
             surface={this.props.expressions?.surface || ''}
+            source={this.props.expressions?.source}
+            draft={this.props.expressions?.draft}
             env={this.props.expressions?.env}
             kind={expressionKind(param)}
             disabled={disableEdit}

@@ -71,6 +71,7 @@ func InitAPIBean() []interface{} {
 
 	// Extension
 	RegisterAPI(NewDefinition())
+	RegisterAPI(NewExpression())
 	RegisterAPI(NewAddon())
 	RegisterAPI(NewEnabledAddon())
 	RegisterAPI(NewAddonRegistry())
