@@ -26,3 +26,4 @@ export const configTemplates = `/api/v1/config_templates`;
 export const cloudShell = `/api/v1/cloudshell`;
 export const plugin = `/api/v1/plugins`;
 export const managePlugin = `/api/v1/manage/plugins`;
+export const packages = `/api/v1/packages`;

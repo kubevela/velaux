@@ -2,6 +2,7 @@ import { Grid } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
+import { AiOutlineCode, AiOutlineLayout, AiOutlineRead } from 'react-icons/ai';
 import React, { Component, Fragment } from 'react';
 
 import { Translation } from '../../components/Translation';
@@ -35,7 +36,20 @@ class DefinitionDetailsLayout extends Component<Props> {
     const { definitionType, definitionName } = params;
     const list = [
       {
+        id: 'doc',
+        icon: <AiOutlineRead />,
+        name: <Translation>Documentation</Translation>,
+        to: `/definitions/${definitionType}/${definitionName}/doc`,
+      },
+      {
+        id: 'file',
+        icon: <AiOutlineCode />,
+        name: <Translation>CUE Source</Translation>,
+        to: `/definitions/${definitionType}/${definitionName}/file`,
+      },
+      {
         id: 'uiSchema',
+        icon: <AiOutlineLayout />,
         name: <Translation>UI Schema</Translation>,
         to: `/definitions/${definitionType}/${definitionName}/ui-schema`,
       },
@@ -44,7 +58,8 @@ class DefinitionDetailsLayout extends Component<Props> {
     const nav = list.map((item) => {
       const active = this.props.activeId === item.id ? 'active' : '';
       return (
-        <Link key={item.id} className={active} to={item.to}>
+        <Link key={item.id} className={classNames('definition-tab', active)} to={item.to} role="tab">
+          {item.icon}
           {item.name}
         </Link>
       );
@@ -82,8 +97,8 @@ class DefinitionDetailsLayout extends Component<Props> {
             />
           </Col>
         </Row>
-        <nav className="definitions-detail-wrapper">
-          <ul>{menu}</ul>
+        <nav className="definition-tabs" role="tablist">
+          {menu}
         </nav>
         {this.props.children}
       </Fragment>

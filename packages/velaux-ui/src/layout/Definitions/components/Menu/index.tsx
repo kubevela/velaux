@@ -1,52 +1,30 @@
-import { Icon, Grid } from '@alifd/next';
 import { Link } from 'dva/router';
-import React, { Component } from 'react';
+import React from 'react';
 
 import type { DefinitionMenuType } from '@velaux/data';
+import { Translation } from '../../../../components/Translation';
 import './index.less';
 
 type Props = {
   activeType: string;
   definitionTypes: DefinitionMenuType[];
 };
-type State = {};
 
-class Menu extends Component<Props, State> {
-  getMenuItem = () => {
-    const { Row, Col } = Grid;
-    const { activeType, definitionTypes } = this.props;
-    const result = (definitionTypes || []).map((item) => {
-      const isActive = activeType === item.type ? 'active-menu-item' : '';
-      return (
-        <li key={item.type}>
-          <Link to={`/definitions/${item.type}/config`}>
-            <Row className={`menu-item-wrapper ${isActive}`}>
-              <Col span="22">
-                <div className="menu-item-description">
-                  <span className="padding-left-15"> {item.name}</span>
-                </div>
-              </Col>
-              <Col span="2">
-                <div className="menu-item-icon">
-                  <Icon type="arrow-right" />
-                </div>
-              </Col>
-            </Row>
-          </Link>
-        </li>
-      );
-    });
-    return result;
-  };
-
-  render() {
-    const menuItem = this.getMenuItem();
-    return (
-      <div className="definitions-menu-content">
-        <ul>{menuItem}</ul>
-      </div>
-    );
-  }
-}
+// Menu is the definitions page's tabs, one per definition type.
+const Menu = (props: Props) => (
+  <div className="definitions-tabs" role="tablist">
+    {(props.definitionTypes || []).map((item) => (
+      <Link
+        key={item.type}
+        role="tab"
+        aria-selected={props.activeType === item.type}
+        className={`definitions-tab ${props.activeType === item.type ? 'active' : ''}`}
+        to={`/definitions/${item.type}/config`}
+      >
+        <Translation>{item.name}</Translation>
+      </Link>
+    ))}
+  </div>
+);
 
 export default Menu;

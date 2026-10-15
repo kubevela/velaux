@@ -2,6 +2,10 @@ import { Redirect, Route, Switch } from 'dva/router';
 import React from 'react';
 
 import Addons from '../../pages/Addons/index';
+import DefinitionDoc from '../../pages/DefinitionDoc';
+import DefinitionFile from '../../pages/DefinitionFile';
+import PackageDetail from '../../pages/PackageDetail';
+import Packages from '../../pages/Packages';
 import ApplicationConfig from '../../pages/ApplicationConfig';
 import ApplicationEnvRoute from '../../pages/ApplicationEnvRoute';
 import ApplicationInstanceList from '../../pages/ApplicationInstanceList';
@@ -271,6 +275,9 @@ export default function Router() {
           return <Addons {...props} />;
         }}
       />
+      <Route exact path="/packages" component={Packages} />
+      <Route exact path="/packages/builtin" component={PackageDetail} />
+      <Route exact path="/packages/:namespace/:name" component={PackageDetail} />
       <Route
         path="/addons"
         render={(props: any) => {
@@ -400,6 +407,30 @@ export default function Router() {
             <DefinitionsLayout {...props}>
               <Definitions {...props} />
             </DefinitionsLayout>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/definitions/:definitionType/:definitionName/file"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'file' } };
+          return (
+            <DefinitionDetails {...mergeProps}>
+              <DefinitionFile {...props} />
+            </DefinitionDetails>
+          );
+        }}
+      />
+      <Route
+        exact
+        path="/definitions/:definitionType/:definitionName/doc"
+        render={(props: any) => {
+          const mergeProps = { ...props, ...{ activeId: 'doc' } };
+          return (
+            <DefinitionDetails {...mergeProps}>
+              <DefinitionDoc {...props} />
+            </DefinitionDetails>
           );
         }}
       />
