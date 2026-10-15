@@ -32,6 +32,7 @@ import (
 	"cuelang.org/go/cue/parser"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/cel-go/cel"
+	"github.com/kubevela/pkg/cel/template"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -324,7 +325,7 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 		return nil, bcode.ErrExpressionSurface
 	}
 	resp := &apisv1.ExpressionCheckResponse{}
-	parsed, err := propexpr.Parse(req.Value)
+	parsed, err := template.Parse(req.Value)
 	if err != nil {
 		resp.Issues = append(resp.Issues, &apisv1.ExpressionIssue{Message: err.Error(), Start: 0, End: len(req.Value)})
 		return resp, nil

@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/kubevela/pkg/cel/template"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/pkg/definition/celexpr"
@@ -125,11 +126,11 @@ func componentReads(flows flowSet, to apisv1.DataFlowEnd, trait string, props *r
 	if json.Unmarshal(props.Raw, &tree) != nil {
 		return
 	}
-	_ = propexpr.Walk(tree, "", func(path, raw string) error {
-		if !propexpr.MayContainExpr(raw) {
+	_ = template.Walk(tree, "", func(path, raw string) error {
+		if !template.MayContainExpr(raw) {
 			return nil
 		}
-		parsed, err := propexpr.Parse(raw)
+		parsed, err := template.Parse(raw)
 		if err != nil {
 			return nil //nolint:nilerr // the controller reports a malformed expression; a graph shows what it can
 		}
@@ -142,13 +143,13 @@ func componentReads(flows flowSet, to apisv1.DataFlowEnd, trait string, props *r
 				continue
 			}
 			for _, r := range refs {
-				if !r.IsComponent() || len(r.Path) == 0 {
+				if !propexpr.IsComponent(r) || len(r.Path) == 0 {
 					continue
 				}
-				calls, rest := r.Placement()
+				calls, rest := propexpr.Placement(r)
 				from := apisv1.DataFlowEnd{Kind: componentKind, Name: rest[0]}
 				for _, call := range calls {
-					fn, arg := propexpr.SplitPlacementCall(call)
+					fn, arg := template.SplitCall(call)
 					switch fn {
 					case "cluster":
 						from.Cluster = arg

@@ -490,7 +490,7 @@ func (e *expressionServiceImpl) componentIssues(ctx context.Context, app *model.
 		out = append(out, &apisv1.ExpressionIssue{Message: msg, Start: start, End: start + len(expr)})
 	}
 	for _, r := range refs {
-		if !r.IsComponent() || len(r.Path) == 0 {
+		if !propexpr.IsComponent(r) || len(r.Path) == 0 {
 			continue
 		}
 		name := r.Path[0]
