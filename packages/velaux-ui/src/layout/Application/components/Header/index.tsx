@@ -6,7 +6,11 @@ import React, { Component } from 'react';
 import { Breadcrumb } from '../../../../components/Breadcrumb';
 import { StatusBadge } from '../../../../components/StatusBadge';
 import type { EnvironmentStatus } from '../../../../pages/ApplicationList/components/AppStatus/health';
-import { healthLabels, summariseStatuses } from '../../../../pages/ApplicationList/components/AppStatus/health';
+import {
+  healthLabels,
+  pausedEnvs,
+  summariseStatuses,
+} from '../../../../pages/ApplicationList/components/AppStatus/health';
 import './index.less';
 
 import { deployApplication } from '../../../../api/application';
@@ -86,7 +90,27 @@ class ApplicationHeader extends Component<Props, State> {
     }
   };
 
+  // onDeploy deploys a workflow, asking first when its env is paused, since the
+  // deploy is written but does not roll out until a resume.
   onDeploy = (workflowName?: string, force?: boolean) => {
+    const { workflows, applicationAllStatus } = this.props;
+    const envName = workflows?.find((w) => w.name === workflowName)?.envName;
+    if (!force && envName && pausedEnvs((applicationAllStatus || []) as EnvironmentStatus[]).includes(envName)) {
+      Dialog.confirm({
+        content: i18n
+          .t(
+            'Reconciliation is paused in this environment: the deploy is written but does not roll out until you resume.'
+          )
+          .toString(),
+        onOk: () => this.deploy(workflowName, force),
+        locale: locale().Dialog,
+      });
+      return;
+    }
+    this.deploy(workflowName, force);
+  };
+
+  deploy = (workflowName?: string, force?: boolean) => {
     const { applicationDetail, dispatch } = this.props;
     if (applicationDetail) {
       deployApplication(
@@ -137,6 +161,7 @@ class ApplicationHeader extends Component<Props, State> {
     const { applicationDetail, applicationAllStatus, workflows, envbinding, appName, envName, dispatch } = this.props;
     const { showDeployConfig, loading } = this.state;
     const summary = summariseStatuses((applicationAllStatus || []) as EnvironmentStatus[]);
+    const paused = pausedEnvs((applicationAllStatus || []) as EnvironmentStatus[]);
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     const sourceOfTrust = applicationDetail?.labels && applicationDetail?.labels['app.oam.dev/source-of-truth'];
     return (
@@ -157,6 +182,13 @@ class ApplicationHeader extends Component<Props, State> {
           <div className="app-head-main">
             <h1 className="app-head-name">{applicationDetail?.alias || applicationDetail?.name}</h1>
             <StatusBadge tone={summary.health} label={healthLabels[summary.health]} />
+            {paused.length > 0 && (
+              <StatusBadge
+                tone="suspended"
+                label="Paused"
+                title={`${i18n.t('Reconciliation paused in')} ${paused.join(', ')}`}
+              />
+            )}
             {summary.components > 0 && (
               <span className="app-head-meta">
                 {summary.healthyComponents}/{summary.components} <Translation>components healthy</Translation>

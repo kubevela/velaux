@@ -170,6 +170,16 @@ export interface ApplicationStatus {
   dependencies?: ComponentDependency[];
   appliedApplicationPolicies?: AppliedApplicationPolicy[];
   sources?: ApplicationSourceStatus[];
+  // paused is whether the controller is skipping the Application.
+  paused?: boolean;
+  // reconcileInterval is the Application's own resync period, where it sets one.
+  reconcileInterval?: string;
+  // restartWorkflow is a pending or recurring restart: "true", a time or an interval.
+  restartWorkflow?: string;
+  // workflowRestartScheduledAt is when KubeVela next restarts the workflow.
+  workflowRestartScheduledAt?: string;
+  // autoUpdate is whether the Application follows definition changes.
+  autoUpdate?: boolean;
 }
 
 // ApplicationSourceStatus is how one spec.sources binding resolved.
