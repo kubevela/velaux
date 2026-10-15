@@ -319,6 +319,7 @@ class UISchema extends Component<Props, State> {
           kind,
           source: ex.source,
           component: ex.component,
+          required: !!param.validate?.required,
           ...ex.step,
         });
     return check.then((res: any) => blockingIssue(res?.issues)?.message).catch(() => undefined);
@@ -1543,6 +1544,7 @@ class UISchema extends Component<Props, State> {
             autoFocus={!!this.focusOnSwitch[param.jsonKey]}
             env={this.props.expressions?.env}
             kind={expressionKind(param)}
+            required={!!param.validate?.required}
             disabled={disableEdit}
             onStatus={(error: boolean) => {
               this.exprErrors[param.jsonKey] = error;

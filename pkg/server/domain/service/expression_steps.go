@@ -291,6 +291,37 @@ func loopItemVariable(items json.RawMessage, sourceSchemas map[string]string) *a
 func (e *expressionServiceImpl) conditionIssues(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest,
 	env *cel.Env, sourceSchemas map[string]string) []*apisv1.ExpressionIssue {
 	value := strings.TrimSpace(req.Value)
+	return e.targetFaults(ctx, app, req, env, sourceSchemas, value, conditionBool,
+		func(got string) string {
+			return fmt.Sprintf("type mismatch: expression %v is %s but if expects bool", value, got)
+		},
+		func(read string) string {
+			return fmt.Sprintf("%s may be absent and decides the step; %s", read, guardHint(read))
+		})
+}
+
+// absentIssues refuses, as admission does, a read that may be absent feeding a
+// required parameter unless has() guards it. The type it feeds is judged by
+// targetIssue.
+func (e *expressionServiceImpl) absentIssues(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest,
+	env *cel.Env, sourceSchemas map[string]string) []*apisv1.ExpressionIssue {
+	return e.targetFaults(ctx, app, req, env, sourceSchemas, req.Value, requiredAny, nil,
+		func(read string) string {
+			return fmt.Sprintf("%s may be absent and feeds a required parameter; %s", read, guardHint(read))
+		})
+}
+
+// guardHint is admission's advice for a read that may be absent.
+func guardHint(read string) string {
+	return fmt.Sprintf("guard it with has(%s) ? %s : <fallback>", read, read)
+}
+
+// targetFaults types a whole value against target as admission's type pass
+// does, with the kinds admission knows for reads and the has() rule for one that
+// may be absent, worded by mismatch and absent. A nil mismatch reports none.
+func (e *expressionServiceImpl) targetFaults(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest,
+	env *cel.Env, sourceSchemas map[string]string, value string, target celengine.Target,
+	mismatch func(got string) string, absent func(read string) string) []*apisv1.ExpressionIssue {
 	raw, err := json.Marshal(value)
 	if err != nil {
 		return nil
@@ -310,21 +341,35 @@ func (e *expressionServiceImpl) conditionIssues(ctx context.Context, app *model.
 		},
 	}
 	var out []*apisv1.ExpressionIssue
-	for _, f := range plan.CheckTypes(env, conditionBool, opts) {
-		var mismatch *celengine.TypeMismatch
-		var absent *celengine.MayBeAbsent
+	for _, f := range plan.CheckTypes(env, target, opts) {
+		var m *celengine.TypeMismatch
+		var a *celengine.MayBeAbsent
 		msg := f.Err.Error()
 		switch {
-		case errors.As(f.Err, &mismatch):
-			msg = fmt.Sprintf("type mismatch: expression %v is %s but if expects bool", value, mismatch.Got)
-		case errors.As(f.Err, &absent):
-			read := absent.Read.String()
-			msg = fmt.Sprintf("%s may be absent and decides the step; guard it with has(%s) ? %s : <fallback>", read, read, read)
+		case errors.As(f.Err, &m):
+			if mismatch == nil {
+				continue
+			}
+			msg = mismatch(m.Got)
+		case errors.As(f.Err, &a):
+			msg = absent(a.Read.String())
 		}
 		out = append(out, &apisv1.ExpressionIssue{Message: msg, Start: 0, End: len(req.Value)})
 	}
 	return out
 }
+
+// requiredAny is a required parameter of any type, the target the has() rule
+// is judged against.
+var requiredAny = func() celengine.Target {
+	top := cuecontext.New().CompileString("_")
+	return celengine.TargetFunc(func(property string) (cue.Value, bool, bool) {
+		if property != "" {
+			return cue.Value{}, false, false
+		}
+		return top, true, true
+	})
+}()
 
 // conditionBool is a step's $( ) if as the engine's target: a required bool,
 // since a condition that may be absent decides nothing.

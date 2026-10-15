@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -395,6 +396,11 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 			return resp, nil
 		}
 		req.Kind = "boolean"
+	} else if req.Required {
+		if issues := e.absentIssues(ctx, app, req, env, schemas); len(issues) > 0 {
+			resp.Issues = append(resp.Issues, issues...)
+			return resp, nil
+		}
 	}
 	if issue := targetIssue(resp.Type, req.Kind, len(req.Value)); issue != nil {
 		resp.Issues = append(resp.Issues, issue)
@@ -492,9 +498,9 @@ func (e *expressionServiceImpl) CheckProperties(ctx context.Context, app *model.
 	if err != nil || detail.APISchema == nil {
 		return nil
 	}
-	check := func(path, value string, schema *openapi3.Schema) error {
+	check := func(path, value string, schema *openapi3.Schema, required bool) error {
 		resp, err := e.Check(ctx, app, apisv1.ExpressionCheckRequest{
-			Surface: surface, Value: value, Kind: expressionKind(schema), Source: source, Component: component,
+			Surface: surface, Value: value, Kind: expressionKind(schema), Source: source, Component: component, Required: required,
 		})
 		if err != nil {
 			return err
@@ -506,7 +512,7 @@ func (e *expressionServiceImpl) CheckProperties(ctx context.Context, app *model.
 		}
 		return nil
 	}
-	return walkExpressions("", values, detail.APISchema, check)
+	return walkExpressions("", values, detail.APISchema, false, check)
 }
 
 // expressionKind is the type a parameter expects, as the check names it, or
@@ -524,12 +530,14 @@ func expressionKind(schema *openapi3.Schema) string {
 }
 
 // walkExpressions calls check on every string holding an expression, with its
-// dotted path and the schema of the parameter it fills.
-func walkExpressions(path string, value interface{}, schema *openapi3.Schema, check func(path, value string, schema *openapi3.Schema) error) error {
+// dotted path, the schema of the parameter it fills and whether that parameter
+// must be set.
+func walkExpressions(path string, value interface{}, schema *openapi3.Schema, required bool,
+	check func(path, value string, schema *openapi3.Schema, required bool) error) error {
 	switch v := value.(type) {
 	case string:
 		if strings.Contains(v, "$(") {
-			return check(path, v, schema)
+			return check(path, v, schema, required)
 		}
 	case map[string]interface{}:
 		keys := make([]string, 0, len(v))
@@ -550,7 +558,8 @@ func walkExpressions(path string, value interface{}, schema *openapi3.Schema, ch
 			if path != "" {
 				next = path + "." + k
 			}
-			if err := walkExpressions(next, v[k], sub, check); err != nil {
+			needed := schema != nil && slices.Contains(schema.Required, k)
+			if err := walkExpressions(next, v[k], sub, needed, check); err != nil {
 				return err
 			}
 		}
@@ -560,7 +569,7 @@ func walkExpressions(path string, value interface{}, schema *openapi3.Schema, ch
 			item = schema.Items.Value
 		}
 		for i, element := range v {
-			if err := walkExpressions(fmt.Sprintf("%s[%d]", path, i), element, item, check); err != nil {
+			if err := walkExpressions(fmt.Sprintf("%s[%d]", path, i), element, item, false, check); err != nil {
 				return err
 			}
 		}

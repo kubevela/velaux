@@ -151,6 +151,9 @@ type Props = {
   draft?: boolean;
   // kind is the type the parameter expects: string, integer, number or boolean.
   kind?: string;
+  // required is whether the parameter must be set, so a read that may be
+  // absent needs a has() guard.
+  required?: boolean;
   env?: ExpressionEnv;
   // reserve is room at the right of the input kept for the parent's own
   // control, such as the form's ƒx toggle; the status mark sits left of it.
@@ -307,12 +310,12 @@ class ExpressionEditor extends React.Component<Props, State> {
       return;
     }
     this.checked = value;
-    const { appName, surface, source, component, kind, draft, step } = this.props;
+    const { appName, surface, source, component, kind, draft, step, required } = this.props;
     let res: any;
     try {
       res = draft
         ? await checkDraftExpression({ surface, value, kind })
-        : await checkExpression(appName, { surface, value, kind, source, component, ...step });
+        : await checkExpression(appName, { surface, value, kind, source, component, required, ...step });
     } catch (e) {
       return;
     }

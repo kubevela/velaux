@@ -348,7 +348,7 @@ func componentOf(app, component, kind, typ string, properties *model.JSONStruct)
 		return c
 	}
 	c.Properties = *properties
-	_ = walkExpressions("", map[string]interface{}(*properties), nil, func(path, value string, _ *openapi3.Schema) error {
+	_ = walkExpressions("", map[string]interface{}(*properties), nil, false, func(path, value string, _ *openapi3.Schema, _ bool) error {
 		c.Expressions = append(c.Expressions, report.Expression{Property: path, Expression: value})
 		return nil
 	})

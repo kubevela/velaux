@@ -2310,6 +2310,9 @@ type ExpressionCheckRequest struct {
 	// Component names the component the value is written in, or the one its
 	// trait is on: it cannot read its own output.
 	Component string `json:"component,omitempty"`
+	// Required is whether the parameter must be set: a read that may be absent
+	// feeding it is refused unless has() guards it.
+	Required bool `json:"required,omitempty"`
 	ExpressionStep
 }
 

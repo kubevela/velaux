@@ -336,7 +336,14 @@ export function checkDraftExpression(params: { surface: string; value: string; k
 // checkExpression checks the $( ) expressions of a property value.
 export function checkExpression(
   appName: string,
-  params: { surface: string; value: string; kind?: string; source?: string; component?: string } & ExpressionStep
+  params: {
+    surface: string;
+    value: string;
+    kind?: string;
+    source?: string;
+    component?: string;
+    required?: boolean;
+  } & ExpressionStep
 ) {
   return post(`${url}/${appName}/expressions/check`, params, true).then((res) => res);
 }
