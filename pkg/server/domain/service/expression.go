@@ -57,7 +57,6 @@ const (
 	kindBool   = "bool"
 	kindList   = "list"
 	kindObject = "object"
-	kindMap    = "map"
 	kindDyn    = "dyn"
 )
 
@@ -399,7 +398,9 @@ func celKind(t *cel.Type) string {
 	case cel.ListType(cel.DynType).Kind():
 		return kindList
 	case cel.MapType(cel.StringType, cel.DynType).Kind():
-		return kindMap
+		// A map is named as admission names it, which reads a struct and a
+		// map alike as an object.
+		return kindObject
 	case cel.DynType.Kind():
 		return kindDyn
 	}

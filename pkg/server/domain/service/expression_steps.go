@@ -206,7 +206,7 @@ func kindLabel(kind cue.Kind) (string, bool) {
 	case cue.ListKind:
 		return kindList, true
 	case cue.StructKind:
-		return kindMap, true
+		return kindObject, true
 	}
 	return "", false
 }
