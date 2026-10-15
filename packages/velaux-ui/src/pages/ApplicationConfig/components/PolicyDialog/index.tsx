@@ -65,6 +65,8 @@ type PolicyItem = {
 };
 
 type State = {
+  // propertiesValid is whether the properties form can be saved as it stands.
+  propertiesValid?: boolean;
   items: PolicyItem[];
   selectedPolicyItem?: PolicyItem;
   policyDefinitionDetail?: DefinitionDetail;
@@ -243,7 +245,12 @@ class PolicyDialog extends React.Component<Props, State> {
         >
           <If condition={!policy}>
             <Button
-              disabled={!selectedPolicyItem}
+              disabled={!selectedPolicyItem || this.state.propertiesValid === false}
+              title={
+                this.state.propertiesValid === false
+                  ? i18n.t('Fix the highlighted properties first').toString()
+                  : undefined
+              }
               type="primary"
               onClick={this.onSubmitCreate}
               loading={createPolicyLoading}
@@ -253,7 +260,12 @@ class PolicyDialog extends React.Component<Props, State> {
           </If>
           <If condition={policy}>
             <Button
-              disabled={!selectedPolicyItem}
+              disabled={!selectedPolicyItem || this.state.propertiesValid === false}
+              title={
+                this.state.propertiesValid === false
+                  ? i18n.t('Fix the highlighted properties first').toString()
+                  : undefined
+              }
               type="primary"
               onClick={this.onSubmitUpdate}
               loading={createPolicyLoading}
@@ -722,6 +734,7 @@ class PolicyDialog extends React.Component<Props, State> {
                       name: policyDefinitionDetail?.name || '',
                       description: policyDefinitionDetail?.description || '',
                     }}
+                    onValidityChange={(valid: boolean) => this.setState({ propertiesValid: valid })}
                     ref={this.uiSchemaRef}
                     mode={'new'}
                   />

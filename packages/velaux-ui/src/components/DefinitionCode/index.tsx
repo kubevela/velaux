@@ -53,6 +53,9 @@ class DefinitionCode extends React.Component<Props> {
       model,
       theme: theme,
     });
+    // Monaco keeps one theme for the page, which expression editors set light;
+    // a code editor takes its own back when focused.
+    this.editor.onDidFocusEditorText(() => monaco.editor.setTheme(theme));
     const textModel: monaco.editor.ITextModel | null = this.editor.getModel();
     if (textModel) {
       if (onChange) {
@@ -70,11 +73,7 @@ class DefinitionCode extends React.Component<Props> {
 
   componentWillReceiveProps(nextProps: Props) {
     const { language, value, runtime } = nextProps;
-    if (
-      language !== this.props.language ||
-      runtime !== this.props.runtime ||
-      value !== this.props.value
-    ) {
+    if (language !== this.props.language || runtime !== this.props.runtime || value !== this.props.value) {
       if (this.editor) {
         this.editor.getModel()?.setValue(value || '');
       }

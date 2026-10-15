@@ -290,8 +290,10 @@ export function dryRunApplication(appName: string, params: ApplicationDryRunRequ
 // getExpressionEnv lists what a $( ) expression in the application can read on
 // a surface: component, trait, workflowstep or source. On the source surface,
 // source names the one being edited, which reads only those declared before it.
-export function getExpressionEnv(appName: string, surface: string, source?: string) {
-  return get(`${url}/${appName}/expressions/env`, { params: { surface, source }, customError: true }).then(
+// On a component or trait, component names the component being edited or the
+// one the trait is on, which reads every component but itself.
+export function getExpressionEnv(appName: string, surface: string, source?: string, component?: string) {
+  return get(`${url}/${appName}/expressions/env`, { params: { surface, source, component }, customError: true }).then(
     (res) => res
   );
 }
@@ -312,7 +314,7 @@ export function checkDraftExpression(params: { surface: string; value: string; k
 // checkExpression checks the $( ) expressions of a property value.
 export function checkExpression(
   appName: string,
-  params: { surface: string; value: string; kind?: string; source?: string }
+  params: { surface: string; value: string; kind?: string; source?: string; component?: string }
 ) {
   return post(`${url}/${appName}/expressions/check`, params, true).then((res) => res);
 }
