@@ -13,16 +13,14 @@
 }
 
 .list-warper {
-  height: calc(100% - 80px);
-  min-height: 300px;
-  padding: 0 8px;
   .box {
-    height: 100%;
-    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     .box-item {
-      margin-bottom: 4px;
       .next-card {
-        min-height: 80px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
       }
     }
   }
@@ -44,4 +42,116 @@
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
+}
+
+// One section of the application, as a tab: a line on what it holds, its
+// create button, and its list.
+.app-spec-item {
+  padding: 0;
+  h3 {
+    margin: 0;
+  }
+  .app-section-hint {
+    color: #64748b;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 32px;
+  }
+  .next-row:first-child > .next-col {
+    padding: 0 0 12px;
+  }
+}
+
+// The overview: what the application is, how much of it there is, and its
+// health in each env.
+.app-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.app-overview-about {
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.app-overview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-overview-title,
+.app-overview-section {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.app-overview-section {
+  margin-bottom: -8px;
+}
+
+.app-overview-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.app-overview-description {
+  margin: 8px 0 16px;
+  color: #334155;
+  font-size: 14px;
+  &.empty {
+    color: #94a3b8;
+  }
+}
+
+.app-overview-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 40px;
+  font-size: 13px;
+  > div {
+    display: flex;
+    gap: 8px;
+  }
+  > div > span:first-child {
+    color: #64748b;
+  }
+}
+
+.app-overview-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.app-overview-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.app-overview .app-overview-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 18px;
+  color: #64748b;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  &:hover {
+    border-color: var(--primary-color, #1b58f4);
+  }
+}
+
+.app-overview-stat-n {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 22px;
 }

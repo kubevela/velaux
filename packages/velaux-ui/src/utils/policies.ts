@@ -11,13 +11,6 @@ export function policyState(policy: AppliedApplicationPolicy): PolicyState {
   return policy.applied ? 'applied' : 'skipped';
 }
 
-// policyStateCircle is the status dot for a policy state.
-export const policyStateCircle: Record<PolicyState, string> = {
-  applied: 'circle-success',
-  skipped: 'circle-skipped',
-  error: 'circle-failure',
-};
-
 // policyStateLabel words a policy state.
 export const policyStateLabel: Record<PolicyState, string> = {
   applied: 'Applied',

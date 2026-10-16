@@ -1,12 +1,13 @@
-import { Table, Message, Dialog, Button } from '@alifd/next';
+import { Table, Message, Dialog } from '@alifd/next';
 import React, { Component } from 'react';
-import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
+import { RowAction } from '../../../../components/RowAction';
+import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 
 import { deleteTarget } from '../../../../api/target';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import './index.less';
-import type { Project , Target } from '@velaux/data';
+import type { Project, Target } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 
 import { Link } from 'dva/router';
@@ -90,26 +91,19 @@ class TableList extends Component<Props> {
           return (
             <div>
               <Permission request={{ resource: `target:${record.name}`, action: 'update' }} project={''}>
-                <Button
-                  text={true}
-                  component={'a'}
-                  size={'medium'}
-                  className="margin-left-10"
+                <RowAction
+                  icon={<AiOutlineEdit />}
+                  label="Edit"
                   onClick={() => {
                     this.onEdit(record);
                   }}
-                >
-                  <AiFillSetting />
-                  <Translation>Edit</Translation>
-                </Button>
-                <span className="line" />
+                />
               </Permission>
               <Permission request={{ resource: `target:${record.name}`, action: 'delete' }} project={''}>
-                <Button
-                  text={true}
-                  component={'a'}
-                  size={'medium'}
-                  className="danger-btn"
+                <RowAction
+                  icon={<AiOutlineDelete />}
+                  label="Remove"
+                  danger
                   onClick={() => {
                     Dialog.confirm({
                       type: 'confirm',
@@ -120,10 +114,7 @@ class TableList extends Component<Props> {
                       locale: locale().Dialog,
                     });
                   }}
-                >
-                  <AiFillDelete />
-                  <Translation>Remove</Translation>
-                </Button>
+                />
               </Permission>
             </div>
           );

@@ -1,5 +1,7 @@
 import { Button, Dialog, Form, Input, Select, Field, Table, Message, Pagination } from '@alifd/next';
 import React from 'react';
+import { RowAction } from '../../../../components/RowAction';
+import { AiOutlineLink } from 'react-icons/ai';
 
 import { getCloudClustersList } from '../../../../api/cluster';
 import { If } from '../../../../components/If';
@@ -243,15 +245,13 @@ class CloudServiceDialog extends React.Component<Props, State> {
         cell: (v: string, i: number, record: Record) => {
           return (
             <Permission request={{ resource: 'cluster:*', action: 'create' }} project={''}>
-              <Button
-                text
-                component={'a'}
+              <RowAction
+                icon={<AiOutlineLink />}
+                label="Connect"
                 onClick={() => {
                   this.connectCloudCluster(record);
                 }}
-              >
-                <Translation>Connect</Translation>
-              </Button>
+              />
             </Permission>
           );
         },

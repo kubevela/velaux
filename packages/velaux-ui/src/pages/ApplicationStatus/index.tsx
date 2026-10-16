@@ -1,4 +1,4 @@
-import { Table, Card, Loading, Balloon, Button, Message, Dialog, Tag, Tab } from '@alifd/next';
+import { Table, Loading, Balloon, Button, Message, Dialog, Tag, Tab } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React from 'react';
@@ -7,6 +7,7 @@ import { deployApplication } from '../../api/application';
 import { notifyDeployed } from '../../utils/deploy';
 import { listApplicationResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
 import { If } from '../../components/If';
+import { StatusBadge } from '../../components/StatusBadge';
 import { StatusDetails } from '../../components/StatusDetails';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
@@ -31,6 +32,7 @@ import Header from '../ApplicationInstanceList/components/Header';
 
 import './index.less';
 import ApplicationGraph from './components/ApplicationGraph';
+import SourceStatusList from './components/SourceStatusList';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 type Props = {
@@ -332,12 +334,10 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
                 <If condition={componentStatus}>
-                  <Card
-                    locale={locale().Card}
-                    style={{ marginTop: '8px', marginBottom: '16px' }}
-                    contentHeight="auto"
-                    title={<Translation>Component Status</Translation>}
-                  >
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Component Status</Translation>
+                    </div>
                     <div style={{ overflow: 'auto' }}>
                       <Table
                         locale={locale().Table}
@@ -378,23 +378,14 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                         <Table.Column
                           align="left"
                           dataIndex="healthy"
-                          width="100px"
-                          cell={(v: boolean) => {
-                            if (v) {
-                              return (
-                                <div>
-                                  <span className="circle circle-success" />
-                                  <span>Healthy</span>
-                                </div>
-                              );
-                            }
-                            return (
-                              <div>
-                                <span className="circle circle-warning" />
-                                <span>UnHealthy</span>
-                              </div>
-                            );
-                          }}
+                          width="130px"
+                          cell={(v: boolean) =>
+                            v ? (
+                              <StatusBadge tone="healthy" label="Healthy" />
+                            ) : (
+                              <StatusBadge tone="unhealthy" label="Unhealthy" />
+                            )
+                          }
                           title={<Translation>Healthy</Translation>}
                         />
                         <Table.Column
@@ -430,16 +421,26 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                           title={<Translation>Traits</Translation>}
                         />
                         <Table.Column
-                          align="center"
                           dataIndex="message"
                           title={<Translation>Message</Translation>}
                           cell={(v: string, i: number, record: ComponentStatus) => <div>{record.message || ''}</div>}
                         />
                       </Table>
                     </div>
-                  </Card>
+                  </section>
                 </If>
-                <Card locale={locale().Card} contentHeight="200px" title={<Translation>Applied Resources</Translation>}>
+                <If condition={applicationStatus?.sources?.length}>
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Sources</Translation>
+                    </div>
+                    <SourceStatusList sources={applicationStatus?.sources || []} />
+                  </section>
+                </If>
+                <section className="status-section">
+                  <div className="status-section-title">
+                    <Translation>Applied Resources</Translation>
+                  </div>
                   <div style={{ overflow: 'auto' }}>
                     <Table style={{ minWidth: '1000px' }} locale={locale().Table} dataSource={resources}>
                       <Table.Column
@@ -481,16 +482,8 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                           if (row.latest) {
                             return (
                               <span>
-                                <span
-                                  style={{
-                                    background: 'var(--success-color)',
-                                    padding: '4px',
-                                    fontSize: '12px',
-                                    color: '#fff',
-                                    marginRight: '4px',
-                                  }}
-                                >
-                                  NEW
+                                <span className="status-latest">
+                                  <Translation>Latest</Translation>
                                 </span>
                                 <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
                               </span>
@@ -501,15 +494,13 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                       />
                     </Table>
                   </div>
-                </Card>
+                </section>
 
                 <If condition={applicationStatus?.conditions}>
-                  <Card
-                    locale={locale().Card}
-                    style={{ marginTop: '8px' }}
-                    contentHeight="auto"
-                    title={<Translation>Conditions</Translation>}
-                  >
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Conditions</Translation>
+                    </div>
                     <div style={{ overflow: 'auto' }}>
                       <Table
                         style={{ minWidth: '1000px' }}
@@ -545,7 +536,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                         />
                       </Table>
                     </div>
-                  </Card>
+                  </section>
                 </If>
               </If>
               <If condition={!applicationStatus}>{notDeploy}</If>

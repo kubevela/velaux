@@ -1,8 +1,9 @@
-import { Balloon, Button, Dialog, Dropdown, Menu, Message, Table } from '@alifd/next';
+import { Balloon, Dialog, Dropdown, Menu, Message, Table } from '@alifd/next';
 
 import Empty from '../Empty';
 
 import { Link, routerRedux } from 'dva/router';
+import { AiOutlineDiff, AiOutlineFileSearch, AiOutlineRollback } from 'react-icons/ai';
 import React, { Component } from 'react';
 
 import './index.less';
@@ -13,6 +14,7 @@ import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 import { If } from '../../../../components/If';
 import Item from '../../../../components/Item';
 import Permission from '../../../../components/Permission';
+import { RowAction } from '../../../../components/RowAction';
 import { Translation } from '../../../../components/Translation';
 import type {
   ApplicationCompareRequest,
@@ -20,7 +22,8 @@ import type {
   ApplicationDetail,
   ApplicationRevision,
   ApplicationRollbackResponse,
- NameAlias } from '@velaux/data';
+  NameAlias,
+} from '@velaux/data';
 import { momentDate, showAlias } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { statusList } from '../../constants';
@@ -201,25 +204,13 @@ class TableList extends Component<Props, State> {
                   action: 'detail',
                 }}
               >
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
-                  onClick={() => {
-                    this.props.onShowAppModel(record);
-                  }}
-                >
-                  <Translation>Detail</Translation>
-                </Button>
+                <RowAction
+                  icon={<AiOutlineFileSearch />}
+                  label="Detail"
+                  onClick={() => this.props.onShowAppModel(record)}
+                />
               </Permission>
-              <span className="line" />
-              <Dropdown
-                trigger={
-                  <Button text size={'medium'} component={'a'}>
-                    <Translation>Diff</Translation>
-                  </Button>
-                }
-              >
+              <Dropdown trigger={<RowAction icon={<AiOutlineDiff />} label="Diff" />}>
                 <Menu>
                   <Menu.Item
                     onClick={() => {
@@ -237,7 +228,6 @@ class TableList extends Component<Props, State> {
                   </Menu.Item>
                 </Menu>
               </Dropdown>
-              <span className="line" />
 
               <If condition={record.status === 'complete' || record.status == 'terminated'}>
                 <Permission
@@ -247,16 +237,7 @@ class TableList extends Component<Props, State> {
                     action: 'rollback',
                   }}
                 >
-                  <Button
-                    text
-                    size={'medium'}
-                    component={'a'}
-                    onClick={() => {
-                      this.onRollback(record);
-                    }}
-                  >
-                    <Translation>Rollback</Translation>
-                  </Button>
+                  <RowAction icon={<AiOutlineRollback />} label="Rollback" onClick={() => this.onRollback(record)} />
                 </Permission>
               </If>
             </div>
