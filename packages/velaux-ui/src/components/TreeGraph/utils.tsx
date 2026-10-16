@@ -35,51 +35,8 @@ import svc from '../../assets/resources/svc.svg';
 import user from '../../assets/resources/user.svg';
 import vol from '../../assets/resources/vol.svg';
 
+import { componentNodeHeight, componentNodeWidth, layoutTraits, maxTraitRows, traitArea } from './traits';
 import type { GraphNode, TreeNode, Node } from './interface';
-
-export function describeNode(node: GraphNode) {
-  const lines = [
-    `Kind: ${node.resource.kind}`,
-    `Namespace: ${node.resource.namespace || '(global)'}`,
-    `Name: ${node.resource.name}`,
-  ];
-  if (node.resource.healthStatus?.statusCode) {
-    let statue = `Status: ${node.resource.healthStatus?.statusCode}`;
-    if (node.resource.kind === 'Pod') {
-      statue = statue + `(${node.resource.additionalInfo?.Status})`;
-    }
-    lines.push(statue);
-  }
-  if (node.resource.healthStatus?.message) {
-    lines.push(`Message: ${node.resource.healthStatus?.message}`);
-  }
-  if (node.resource.healthStatus?.reason) {
-    lines.push(`Reason: ${node.resource.healthStatus?.reason}`);
-  }
-  if (node.resource.kind === 'Service' && node.resource.additionalInfo?.EIP) {
-    lines.push(`EIP: ${node.resource.additionalInfo?.EIP}`);
-  }
-  if (node.resource.kind === 'Pod') {
-    lines.push(`Age: ${node.resource.additionalInfo?.Age}`);
-    lines.push(`Ready: ${node.resource.additionalInfo?.Ready}`);
-    lines.push(`Restarts: ${node.resource.additionalInfo?.Restarts}`);
-  }
-  return lines;
-}
-
-export function describeCluster(node: GraphNode) {
-  const lines = [`Cluster: ${node.resource.name}`];
-  return lines;
-}
-
-export function describeTarget(node: GraphNode) {
-  const info = node.resource.name.split('/');
-  if (info.length > 1) {
-    const lines = [`Cluster: ${info[0]}`, `Namespace: ${info[1]}`];
-    return lines;
-  }
-  return [`Cluster: ${node.resource.name}`];
-}
 
 // componentSections lists what a component depends on and what depends on it,
 // each with an arrow for its direction and, when KubeVela inferred it from a
@@ -172,8 +129,9 @@ export function getNodeSize(node: TreeNode): { width: number; height: number } {
     height = 60;
   }
   if (node.nodeType == 'component') {
-    width = 320;
-    height = 40;
+    const types = (node.resource.service?.traits || []).map((t) => t.type);
+    width = componentNodeWidth;
+    height = componentNodeHeight(layoutTraits(types, traitArea, maxTraitRows).rows.length);
   }
   return { width, height };
 }

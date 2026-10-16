@@ -5,7 +5,7 @@ import type { Dispatch } from 'redux';
 import { createTrigger, updateTrigger } from '../../../../api/application';
 import { detailComponentDefinition } from '../../../../api/definitions';
 import { getPayloadType } from '../../../../api/payload';
-import DrawerWithFooter from '../../../../components/Drawer';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
@@ -244,10 +244,8 @@ class TriggerDialog extends React.Component<Props, State> {
     });
 
     return (
-      <DrawerWithFooter
+      <ModalWithFooter
         title={editMode ? i18n.t('Edit Trigger') : i18n.t('Add Trigger')}
-        placement="right"
-        width={800}
         onClose={onClose}
         extButtons={this.extButtonList()}
       >
@@ -418,7 +416,7 @@ class TriggerDialog extends React.Component<Props, State> {
             </Translation>
           </Message>
         </Form>
-      </DrawerWithFooter>
+      </ModalWithFooter>
     );
   }
 }

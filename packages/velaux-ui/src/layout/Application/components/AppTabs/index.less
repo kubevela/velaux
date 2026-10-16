@@ -1,6 +1,7 @@
 .app-tabs {
   display: flex;
   gap: 4px;
+  align-items: flex-end;
   margin-bottom: 20px;
   overflow-x: auto;
   border-bottom: 1px solid #e2e8f0;
@@ -25,17 +26,72 @@
   }
 }
 
+// The tabs that configure the application: a shaded block with its label
+// above its tabs, which share the row's baseline with the rest.
+.app-tabs .app-tab-group {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  margin: 0 8px;
+  padding: 0 4px;
+  background: #eef2f7;
+  border: 1px solid #e2e8f0;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.app-tabs .app-tab-group-label {
+  padding: 5px 12px 0;
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.app-tabs .app-tab-group-tabs {
+  display: flex;
+  align-items: flex-end;
+}
+
+.app-tabs .app-tab-with-add {
+  display: inline-flex;
+  align-items: center;
+  .app-tab {
+    padding-right: 2px;
+  }
+}
+
+.app-tabs .app-tab-add {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 10px 1px 2px;
+  padding: 2px;
+  color: #94a3b8;
+  font-size: 12px;
+  border-radius: 4px;
+  &:hover {
+    color: var(--primary-color, #1b58f4);
+    background: #e2e8f0;
+  }
+}
+
 // The bar over one env's live view.
 .environment-bar {
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.environment-bar-head {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
-  margin-bottom: 16px;
   padding: 10px 16px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
 }
 
 .environment-bar .environment-bar-back {
@@ -57,26 +113,47 @@
   border-left: 1px solid #e2e8f0;
 }
 
-.environment-bar-views {
+.environment-bar-filters {
   display: flex;
-  gap: 4px;
+  gap: 8px;
+  align-items: center;
   margin-left: auto;
-  padding: 3px;
-  background: #f1f5f9;
-  border-radius: 6px;
+  .next-select {
+    width: 220px;
+  }
 }
 
-.environment-bar-views .environment-view {
-  padding: 4px 12px;
+.environment-bar-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  padding: 0 16px;
+  border-top: 1px solid #eef2f7;
+}
+
+.environment-bar-tabs .environment-view {
+  margin-bottom: -1px;
+  padding: 10px 12px;
   color: #475569;
+  font-weight: 500;
   font-size: 13px;
-  border-radius: 4px;
-  &.active {
+  border-bottom: 2px solid transparent;
+  &:hover {
     color: #0f172a;
-    font-weight: 500;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
   }
+  &.active {
+    color: var(--primary-color, #1b58f4);
+    border-bottom-color: var(--primary-color, #1b58f4);
+  }
+}
+
+.environment-bar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+  padding: 6px 0;
 }
 
 // A tab's filters and its one line on what it holds, above its list.

@@ -90,11 +90,9 @@ class EditPlatFormUserDialog extends Component<Props, State> {
           onOk={this.onInitAdmin}
           locale={locale().Dialog}
           footerActions={['ok']}
-          okProps={
-            {
-              loading: isLoading,
-            }
-          }
+          okProps={{
+            loading: isLoading,
+          }}
         >
           <Form loading={isLoading} {...formItemLayout} field={this.field}>
             <Row>
@@ -109,7 +107,9 @@ class EditPlatFormUserDialog extends Component<Props, State> {
                         {
                           required: true,
                           pattern: checkName,
-                          message: <Translation>You must input a valid name with alphanumeric character only</Translation>,
+                          message: (
+                            <Translation>You must input a valid name with alphanumeric character only</Translation>
+                          ),
                         },
                       ],
                     })}
@@ -139,7 +139,8 @@ class EditPlatFormUserDialog extends Component<Props, State> {
                           pattern: checkUserPassword,
                           message: (
                             <Translation>
-                                Password must be alphanumeric, contain at least one letter and one number, and be 8-16 characters long
+                              Password must be alphanumeric, contain at least one letter and one number, and be 8-16
+                              characters long
                             </Translation>
                           ),
                         },

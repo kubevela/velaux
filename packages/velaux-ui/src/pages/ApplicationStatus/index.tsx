@@ -1,4 +1,4 @@
-import { Table, Loading, Balloon, Button, Message, Dialog, Tag, Tab } from '@alifd/next';
+import { Table, Loading, Balloon, Button, Message, Dialog, Tag } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React from 'react';
@@ -28,6 +28,7 @@ import { handleError } from '../../utils/errors';
 import { locale } from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
 import { componentStatusKey, hasStatusDetails, traitState, traitStateCircle } from '../../utils/status';
+import { statusMode } from '../../layout/Application/components/AppTabs/add';
 import Header from '../ApplicationInstanceList/components/Header';
 
 import './index.less';
@@ -42,6 +43,7 @@ type Props = {
     params: {
       envName: string;
       appName: string;
+      view?: string;
     };
   };
   location: { pathname: string };
@@ -52,7 +54,34 @@ type Props = {
   userInfo?: LoginUserInfo;
 };
 
+// refreshInterval is how often the status reloads while the page is visible.
+const refreshInterval = 15000;
+
+// RefreshedAt says the status reloads by itself, and how long ago it last did.
+const RefreshedAt = (props: { at?: number }) => {
+  const [, tick] = React.useState(0);
+  React.useEffect(() => {
+    const timer = setInterval(() => tick((n) => n + 1), 5000);
+    return () => clearInterval(timer);
+  }, []);
+  if (!props.at) {
+    return null;
+  }
+  const seconds = Math.max(0, Math.round((Date.now() - props.at) / 1000));
+  return (
+    <span
+      className="status-refreshed"
+      title={i18n.t('The status reloads every 15 seconds while this page is open').toString()}
+    >
+      <span className="status-refreshed-dot" />
+      <Translation>Updated</Translation> {seconds < 5 ? i18n.t('just now') : `${seconds}s ${i18n.t('ago')}`}
+    </span>
+  );
+};
+
 type State = {
+  // refreshedAt is when the status last loaded.
+  refreshedAt?: number;
   loading: boolean;
   target?: Target;
   componentName?: string;
@@ -76,13 +105,30 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       resourceLoading: false,
       endpointLoading: false,
       envName: '',
-      mode: 'resource-graph',
+      mode: statusMode(props.match.params.view),
       resources: [],
     };
   }
 
   componentDidMount() {
     this.loadApplicationStatus();
+    this.refreshTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        this.loadApplicationStatus(true);
+      }
+    }, refreshInterval);
+  }
+
+  componentWillUnmount() {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+    }
+  }
+
+  componentDidUpdate(prev: Props) {
+    if (prev.match.params.view !== this.props.match.params.view) {
+      this.onChangeMode(statusMode(this.props.match.params.view));
+    }
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -98,7 +144,9 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     }
   }
 
-  loadApplicationStatus = async () => {
+  // loadApplicationStatus loads the env's status and resources; a silent load,
+  // the periodic refresh, keeps the page as it is while it runs.
+  loadApplicationStatus = async (silent = false) => {
     const {
       params: { appName, envName },
     } = this.props.match;
@@ -107,13 +155,17 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         type: 'application/getApplicationStatus',
         payload: { appName: appName, envName: envName },
         callback: (res: any) => {
+          this.setState({ refreshedAt: Date.now() });
           if (res.status) {
-            this.loadApplicationAppliedResources();
+            this.loadApplicationAppliedResources(silent);
           }
         },
       });
     }
   };
+
+  // refreshTimer reloads the status while the page is visible.
+  refreshTimer?: ReturnType<typeof setInterval>;
 
   getTargets = () => {
     const { envbinding, match } = this.props;
@@ -132,10 +184,10 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     return envbinding.find((env) => env.name === envName);
   };
 
-  loadApplicationAppliedResources = async () => {
+  loadApplicationAppliedResources = async (silent = false) => {
     const { mode } = this.state;
     if (mode === 'resource-graph') {
-      await this.loadResourceTree();
+      await this.loadResourceTree(silent);
       return;
     }
     const { applicationDetail } = this.props;
@@ -156,7 +208,9 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         param.cluster = target.cluster?.clusterName || '';
         param.clusterNs = target.cluster?.namespace || '';
       }
-      this.setState({ resourceLoading: true });
+      if (!silent) {
+        this.setState({ resourceLoading: true });
+      }
       listApplicationServiceAppliedResources(param)
         .then((re) => {
           if (re && re.resources) {
@@ -171,7 +225,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     }
   };
 
-  loadResourceTree = async () => {
+  loadResourceTree = async (silent = false) => {
     const { applicationDetail } = this.props;
     const env = this.getEnvbindingByName();
     const { target, componentName, resourceLoading } = this.state;
@@ -190,7 +244,9 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         param.cluster = target.cluster?.clusterName || '';
         param.clusterNs = target.cluster?.namespace || '';
       }
-      this.setState({ resourceLoading: true });
+      if (!silent) {
+        this.setState({ resourceLoading: true });
+      }
       listApplicationResourceTree(param)
         .then((re) => {
           if (re && re.resources) {
@@ -317,21 +373,21 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             targets={this.getTargets()}
             envName={envName}
             appName={appName}
-            disableStatusShow={true}
             applicationDetail={applicationDetail}
             applicationStatus={applicationStatus}
             components={components}
             updateQuery={(params: { target?: string; component?: string }) => {
               this.updateQuery(params);
             }}
+            extra={<RefreshedAt at={this.state.refreshedAt} />}
             refresh={() => {
               this.loadApplicationStatus();
             }}
             dispatch={this.props.dispatch}
           />
         </Loading>
-        <Tab onChange={this.onChangeMode} defaultActiveKey={mode} shape="capsule">
-          <Tab.Item title={i18n.t('Overview').toString()} key="overview">
+        {mode === 'overview' && (
+          <>
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
                 {applicationStatus && (
@@ -345,6 +401,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                       projectName={applicationDetail?.project?.name}
                       status={applicationStatus}
                       onChanged={this.loadApplicationStatus}
+                      readOnly={applicationDetail?.readOnly}
                     />
                   </section>
                 )}
@@ -556,8 +613,10 @@ class ApplicationStatusPage extends React.Component<Props, State> {
               </If>
               <If condition={!applicationStatus}>{notDeploy}</If>
             </Loading>
-          </Tab.Item>
-          <Tab.Item title={i18n.t('Resource Graph').toString()} key="resource-graph">
+          </>
+        )}
+        {mode === 'resource-graph' && (
+          <>
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
                 <ApplicationGraph
@@ -570,8 +629,10 @@ class ApplicationStatusPage extends React.Component<Props, State> {
               </If>
             </Loading>
             <If condition={!applicationStatus}>{notDeploy}</If>
-          </Tab.Item>
-          <Tab.Item title={i18n.t('Application Graph').toString()} key="application-graph">
+          </>
+        )}
+        {mode === 'application-graph' && (
+          <>
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
                 <ApplicationGraph
@@ -585,8 +646,8 @@ class ApplicationStatusPage extends React.Component<Props, State> {
               </If>
             </Loading>
             <If condition={!applicationStatus}>{notDeploy}</If>
-          </Tab.Item>
-        </Tab>
+          </>
+        )}
       </div>
     );
   }

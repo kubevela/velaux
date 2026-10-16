@@ -1,4 +1,5 @@
 import React from 'react';
+import { RelativeTime } from '../../components/RelativeTime';
 import { Input, Form, Loading, Grid, Tag } from '@alifd/next';
 import './index.less';
 
@@ -12,7 +13,7 @@ import { getImageInfo } from '../../api/repository';
 import dockerLogo from '../../assets/docker.svg';
 import { If } from '../../components/If';
 import type { ImageInfo } from '@velaux/data';
-import { beautifyTime, beautifyBinarySize } from '../../utils/common';
+import { beautifyBinarySize } from '../../utils/common';
 import ImageSecretSelect from '../ImageSecretSelect';
 const { Col, Row } = Grid;
 
@@ -74,8 +75,7 @@ class ImageInput extends React.Component<Props, State> {
   };
 
   render() {
-    const { value, id, required, label, key, onSecretChange, secretValue, disabled, secretID } =
-      this.props;
+    const { value, id, required, label, key, onSecretChange, secretValue, disabled, secretID } = this.props;
     const { loading, imageInfo } = this.state;
     if (!this.state.imageName && value) {
       this.setState({ imageName: value }, () => {
@@ -99,9 +99,7 @@ class ImageInput extends React.Component<Props, State> {
               help={
                 <span>
                   To deploy from a private registry, you need to{' '}
-                  <Link to="/configs/config-image-registry/config">
-                    create a config configuration
-                  </Link>
+                  <Link to="/configs/config-image-registry/config">create a config configuration</Link>
                 </span>
               }
             >
@@ -118,12 +116,7 @@ class ImageInput extends React.Component<Props, State> {
           </Col>
           <Col span={8}>
             <Form.Item label={'Secret'}>
-              <ImageSecretSelect
-                id={secretID}
-                disabled={secretDisabled}
-                onChange={onSecretChange}
-                value={secrets}
-              />
+              <ImageSecretSelect id={secretID} disabled={secretDisabled} onChange={onSecretChange} value={secrets} />
             </Form.Item>
           </Col>
         </Row>
@@ -141,11 +134,9 @@ class ImageInput extends React.Component<Props, State> {
                       </div>
                       <div className="desc">
                         <span title={imageInfo?.info?.created}>
-                          {beautifyTime(imageInfo?.info?.created)}
+                          <RelativeTime time={imageInfo?.info?.created} />
                         </span>
-                        <span style={{ marginLeft: '8px' }}>
-                          {beautifyBinarySize(imageInfo?.size || 0)}
-                        </span>
+                        <span style={{ marginLeft: '8px' }}>{beautifyBinarySize(imageInfo?.size || 0)}</span>
                         <If condition={imageInfo?.info?.architecture}>
                           <span style={{ marginLeft: '8px' }}>{imageInfo?.info?.architecture}</span>
                         </If>

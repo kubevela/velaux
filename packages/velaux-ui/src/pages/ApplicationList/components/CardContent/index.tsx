@@ -1,5 +1,6 @@
 import { connect } from 'dva';
 import React from 'react';
+import { isDefaultDescription, visibleLabels } from '../../../../utils/appMeta';
 import { RowAction } from '../../../../components/RowAction';
 import './index.less';
 import { Link } from 'dva/router';
@@ -218,7 +219,7 @@ class CardContent extends React.Component<Props, State> {
         title: <Translation>Description</Translation>,
         dataIndex: 'description',
         cell: (v: string) => {
-          return <span>{v}</span>;
+          return <span>{isDefaultDescription(v) ? '' : v}</span>;
         },
       },
 
@@ -235,7 +236,7 @@ class CardContent extends React.Component<Props, State> {
               <div className={more ? '' : 'table-content-label'}>
                 {label &&
                   Object.keys(label)?.map((key) => {
-                    if (label && key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev') < 0) {
+                    if (label && visibleLabels(label).includes(key)) {
                       displayLabels++;
                       return (
                         <div>
@@ -340,9 +341,8 @@ class CardContent extends React.Component<Props, State> {
       <div className="app-grid">
         {applications?.map((item: ApplicationBase) => {
           const { name, alias, icon, description, updateTime, readOnly, labels, project, status } = item;
-          const showLabels = Object.keys(labels || {}).filter(
-            (key) => key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev') < 0
-          );
+          const showLabels = visibleLabels(labels);
+          const shownDescription = isDefaultDescription(description) ? '' : description;
           return (
             <div className={`app-card tone-${healthOf(status)}`} key={name}>
               <div className="app-card-head">
@@ -373,8 +373,8 @@ class CardContent extends React.Component<Props, State> {
 
               <ComponentHealth status={status} />
 
-              <div className="app-card-description" title={description}>
-                {description}
+              <div className="app-card-description" title={shownDescription}>
+                {shownDescription}
               </div>
 
               <EnvHealth status={status} />
@@ -393,7 +393,8 @@ class CardContent extends React.Component<Props, State> {
 
               <div className="app-card-foot">
                 <span title={momentDate(updateTime)}>
-                  <Translation>Updated</Translation> {updateTime && moment(updateTime).fromNow()}
+                  <Translation>Updated</Translation>{' '}
+                  {updateTime && <span title={momentDate(updateTime)}>{moment(updateTime).fromNow()}</span>}
                 </span>
                 <If condition={readOnly}>
                   <span className="app-card-readonly">

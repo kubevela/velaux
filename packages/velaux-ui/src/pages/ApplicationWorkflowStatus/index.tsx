@@ -18,7 +18,8 @@ import type {
   Workflow,
   WorkflowRecord,
   WorkflowStepStatus,
- WorkflowStepBase } from '@velaux/data';
+  WorkflowStepBase,
+} from '@velaux/data';
 import { beautifyTime } from '../../utils/common';
 import { locale } from '../../utils/locale';
 
@@ -182,7 +183,6 @@ class ApplicationWorkflow extends React.Component<Props, State> {
           envbinding={this.getEnvbindingByName()}
           envName={envName}
           appName={appName}
-          disableStatusShow={true}
           applicationDetail={applicationDetail}
           applicationStatus={applicationStatus}
           refresh={() => {

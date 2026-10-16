@@ -26,6 +26,8 @@ export interface StatusTooltipProps {
   healthy?: boolean;
   // pending is a trait waiting for its workload, shown in place of its health.
   pending?: boolean;
+  // progressing is a resource still rolling out, shown in place of its health.
+  progressing?: boolean;
   summary?: DetailEntry[];
   message?: string;
   sections?: TooltipSection[];
@@ -46,7 +48,7 @@ function CollapsibleSection(props: TooltipSection) {
   );
 }
 
-// StatusTooltip summarises a component or trait on the graph, with its
+// StatusTooltip summarises a node on the graph, with its
 // sections, then its status details, folded away until asked for.
 export const StatusTooltip = (props: StatusTooltipProps) => {
   const details = detailEntries(props.details);
@@ -59,10 +61,10 @@ export const StatusTooltip = (props: StatusTooltipProps) => {
     <div className="status-tooltip">
       <div className="status-tooltip-header">
         <span className="status-tooltip-title">{props.title}</span>
-        {props.pending ? (
+        {props.pending || props.progressing ? (
           <span className="status-tooltip-health pending">
             <span className="circle circle-pending" />
-            <Translation>Pending</Translation>
+            <Translation>{props.pending ? 'Pending' : 'Progressing'}</Translation>
           </span>
         ) : (
           props.healthy !== undefined && (

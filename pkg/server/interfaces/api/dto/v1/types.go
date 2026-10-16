@@ -609,6 +609,9 @@ type CreateApplicationRequest struct {
 	Annotations map[string]string       `json:"annotations,omitempty"`
 	EnvBinding  []*EnvBinding           `json:"envBinding,omitempty"`
 	Component   *CreateComponentRequest `json:"component"`
+	// WorkflowMode is StepByStep or DAG for the workflows created for EnvBinding;
+	// KubeVela's default when empty.
+	WorkflowMode string `json:"workflowMode,omitempty"`
 }
 
 // UpdateApplicationRequest update application base config

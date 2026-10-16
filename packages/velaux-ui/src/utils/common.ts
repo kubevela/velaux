@@ -111,13 +111,13 @@ export function beautifyTime(time?: string) {
   let mistiming = Math.round(now.getTime() / 1000) - timestamp;
   const postfix = mistiming > 0 ? 'ago' : 'later';
   mistiming = Math.abs(mistiming);
-  const arrr = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'];
+  const arrr = ['year', 'month', 'week', 'day', 'hour', 'minute', 'second'];
   const arrn = [31536000, 2592000, 604800, 86400, 3600, 60, 1];
 
   for (let i = 0; i < 7; i++) {
     const inm = Math.floor(mistiming / arrn[i]);
     if (inm != 0) {
-      return inm + ' ' + arrr[i] + ' ' + postfix;
+      return `${inm} ${arrr[i]}${inm === 1 ? '' : 's'} ${postfix}`;
     }
   }
   return '';

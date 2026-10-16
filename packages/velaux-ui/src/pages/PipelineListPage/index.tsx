@@ -1,9 +1,11 @@
 import { ListTitle as Title } from '../../components/ListTitle';
 
+import { projectChanged } from '../../utils/currentProject';
 import { Loading, Button, Table, Dialog, Message, Balloon } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React, { Component } from 'react';
+import { RelativeTime } from '../../components/RelativeTime';
 import { RowAction } from '../../components/RowAction';
 import { AiOutlineCopy, AiOutlineDelete, AiOutlineEdit, AiOutlineHistory, AiOutlinePlayCircle } from 'react-icons/ai';
 import type { Dispatch } from 'redux';
@@ -25,7 +27,7 @@ import type {
   RunStateInfo,
   LoginUserInfo,
 } from '@velaux/data';
-import { beautifyTime, momentDate } from '../../utils/common';
+import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import type { Tone } from '../../components/StatusBadge';
 import { StatusBadge } from '../../components/StatusBadge';
@@ -39,6 +41,7 @@ type Props = {
   userInfo?: LoginUserInfo;
   dispatch: Dispatch<any>;
   enabledAddons?: AddonBaseStatus[];
+  currentProject?: { current: string; resolved: boolean };
 };
 
 export type ShowMode = 'table' | 'card' | string | null;
@@ -56,7 +59,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.user, ...store.addons };
+  return { ...store.user, ...store.addons, currentProject: store.currentProject };
 })
 class PipelineListPage extends Component<Props, State> {
   constructor(props: Props) {
@@ -71,9 +74,19 @@ class PipelineListPage extends Component<Props, State> {
     this.getPipelines({});
   }
 
-  getPipelines = async (params: { projectName?: string; query?: string }) => {
+  componentDidUpdate(prev: Props) {
+    if (projectChanged(prev.currentProject, this.props.currentProject)) {
+      this.getPipelines({});
+    }
+  }
+
+  // getPipelines lists the picked project's pipelines, or every project's for all of them.
+  getPipelines = async (params: { query?: string }) => {
+    if (!this.props.currentProject?.resolved) {
+      return;
+    }
     this.setState({ isLoading: true });
-    listPipelines(params)
+    listPipelines({ query: params.query, projectName: this.props.currentProject.current })
       .then((res) => {
         this.setState({
           pipelines: res && Array.isArray(res.pipelines) ? res.pipelines : [],
@@ -229,7 +242,7 @@ class PipelineListPage extends Component<Props, State> {
                       >
                         {run.pipelineRunName}
                       </Link>
-                      <span>{beautifyTime(run.status?.startTime)}</span>
+                      <RelativeTime time={run.status?.startTime} />
                     </div>
                     <StatusBadge tone={runTone(run.status?.status)} label={runLabel(run.status?.status)} />
                   </div>
@@ -332,7 +345,6 @@ class PipelineListPage extends Component<Props, State> {
   };
 
   render() {
-    const { userInfo } = this.props;
     const { showMode, isLoading, showRunPipeline, pipeline, showRuns, showNewPipeline, showClonePipeline } = this.state;
     const { enabledAddons } = this.props;
     const addonEnabled = enabledAddons?.filter((addon) => addon.name == 'vela-workflow').length;
@@ -358,7 +370,7 @@ class PipelineListPage extends Component<Props, State> {
         />
 
         <SelectSearch
-          projects={userInfo?.projects}
+          disableProject
           showMode={showMode}
           setMode={(mode: ShowMode) => {
             this.setState({ showMode: mode });
@@ -411,6 +423,7 @@ class PipelineListPage extends Component<Props, State> {
         </If>
         <If condition={showNewPipeline}>
           <CreatePipeline
+            project={this.props.currentProject?.current || undefined}
             onClose={() => {
               this.setState({ showNewPipeline: false, pipeline: undefined });
             }}

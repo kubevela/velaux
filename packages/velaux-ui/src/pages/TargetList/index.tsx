@@ -1,4 +1,5 @@
 import { Pagination, Button } from '@alifd/next';
+import { projectChanged, scopedTo } from '../../utils/currentProject';
 import { connect } from 'dva';
 import React from 'react';
 
@@ -15,8 +16,9 @@ import TargetDialog from './components/TargetDialog';
 import './index.less';
 
 type Props = {
-  targets?: [];
+  targets?: Target[];
   total?: number;
+  currentProject?: { current: string; resolved: boolean };
   clusterList?: Cluster[];
   dispatch: ({}) => void;
   userInfo?: LoginUserInfo;
@@ -34,7 +36,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.target, ...store.clusters, ...store.user };
+  return { ...store.target, ...store.clusters, ...store.user, currentProject: store.currentProject };
 })
 class TargetList extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -55,7 +57,17 @@ class TargetList extends React.Component<Props, State> {
     this.getClusterList();
   }
 
+  componentDidUpdate(prev: Props) {
+    if (projectChanged(prev.currentProject, this.props.currentProject)) {
+      this.getTargetList();
+    }
+  }
+
+  // getTargetList lists the picked project's, or every project's for all of them.
   getTargetList = async () => {
+    if (!this.props.currentProject?.resolved) {
+      return;
+    }
     const { page, pageSize, query } = this.state;
     this.props.dispatch({
       type: 'target/listTargets',
@@ -63,6 +75,7 @@ class TargetList extends React.Component<Props, State> {
         query,
         page,
         pageSize,
+        project: this.props.currentProject.current,
       },
     });
   };
@@ -139,7 +152,7 @@ class TargetList extends React.Component<Props, State> {
         />
 
         <TableList
-          list={targets}
+          list={scopedTo<Target>(targets, this.props.currentProject, (t: Target) => t.project?.name)}
           updateTargetList={this.updateTargetList}
           changeISEdit={(is: boolean, record: Target) => {
             this.changeISEdit(is, record);

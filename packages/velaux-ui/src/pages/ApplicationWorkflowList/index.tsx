@@ -88,6 +88,9 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
             dataIndex="name"
             title={i18n.t('Name').toString()}
             cell={(v: string, i: number, w: Workflow) => {
+              if (applicationDetail?.readOnly) {
+                return v;
+              }
               return (
                 <Link to={`/applications/${applicationDetail?.name}/envbinding/${w.envName}/workflow/${v}/studio`}>
                   {v}
@@ -130,43 +133,47 @@ class ApplicationWorkflowList extends React.Component<Props, State> {
             cell={(v: string, i: number, w: Workflow) => {
               return (
                 <div>
-                  <Permission
-                    project={projectName}
-                    request={{
-                      resource: `project:${projectName}/application:${applicationDetail?.name}/workflow:${v}`,
-                      action: 'update',
-                    }}
-                  >
-                    <RowAction
-                      icon={<AiOutlineEdit />}
-                      label="Edit"
-                      onClick={() => {
-                        this.props.dispatch(
-                          routerRedux.push(
-                            `/applications/${applicationDetail?.name}/envbinding/${w.envName}/workflow/${v}/studio`
-                          )
-                        );
-                      }}
-                    />
-                  </Permission>
-                  <If condition={v != 'workflow-' + w.envName}>
-                    <Permission
-                      project={projectName}
-                      request={{
-                        resource: `project:${projectName}/application:${applicationDetail?.name}/workflow:${v}`,
-                        action: 'delete',
-                      }}
-                    >
-                      <RowAction
-                        icon={<AiOutlineDelete />}
-                        label="Remove"
-                        danger
-                        onClick={() => {
-                          this.onDeleteWorkflow(v);
+                  {!applicationDetail?.readOnly && (
+                    <React.Fragment>
+                      <Permission
+                        project={projectName}
+                        request={{
+                          resource: `project:${projectName}/application:${applicationDetail?.name}/workflow:${v}`,
+                          action: 'update',
                         }}
-                      />
-                    </Permission>
-                  </If>
+                      >
+                        <RowAction
+                          icon={<AiOutlineEdit />}
+                          label="Edit"
+                          onClick={() => {
+                            this.props.dispatch(
+                              routerRedux.push(
+                                `/applications/${applicationDetail?.name}/envbinding/${w.envName}/workflow/${v}/studio`
+                              )
+                            );
+                          }}
+                        />
+                      </Permission>
+                      <If condition={v != 'workflow-' + w.envName}>
+                        <Permission
+                          project={projectName}
+                          request={{
+                            resource: `project:${projectName}/application:${applicationDetail?.name}/workflow:${v}`,
+                            action: 'delete',
+                          }}
+                        >
+                          <RowAction
+                            icon={<AiOutlineDelete />}
+                            label="Remove"
+                            danger
+                            onClick={() => {
+                              this.onDeleteWorkflow(v);
+                            }}
+                          />
+                        </Permission>
+                      </If>
+                    </React.Fragment>
+                  )}
                 </div>
               );
             }}

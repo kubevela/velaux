@@ -13,7 +13,7 @@ import { locale } from '../../../../utils/locale';
 import { Link } from 'dva/router';
 
 type Props = {
-  list?: [];
+  list?: Target[];
   updateTargetList: () => void;
   changeISEdit: (param: boolean, record: Target) => void;
 };
