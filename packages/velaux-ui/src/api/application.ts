@@ -12,7 +12,7 @@ import type {
 } from '@velaux/data';
 import { getDomain } from '../utils/common';
 
-import { application } from './productionLink';
+import { application, expressions } from './productionLink';
 import { post, get, rdelete, put } from './request';
 
 interface TraitQuery {
@@ -95,6 +95,29 @@ export function deletePolicy(params: { appName: string; policyName: string; forc
     return rdelete(gURL, { params: { force: true } }, true).then((res) => res);
   }
   return rdelete(gURL, {}, true).then((res) => res);
+}
+
+export function getSources(appName: string) {
+  return get(`${url}/${appName}/sources`, {}).then((res) => res);
+}
+
+export function createSource(
+  appName: string,
+  params: { name: string; type: string; properties: string; autoUpdate?: boolean }
+) {
+  return post(`${url}/${appName}/sources`, params).then((res) => res);
+}
+
+export function updateSource(
+  appName: string,
+  sourceName: string,
+  params: { type: string; properties: string; autoUpdate?: boolean }
+) {
+  return put(`${url}/${appName}/sources/${sourceName}`, params).then((res) => res);
+}
+
+export function deleteSource(appName: string, sourceName: string) {
+  return rdelete(`${url}/${appName}/sources/${sourceName}`, {}, true).then((res) => res);
 }
 
 export function createApplicationTemplate(params: any) {
@@ -245,13 +268,32 @@ export function dryRunApplication(appName: string, params: ApplicationDryRunRequ
 }
 
 // getExpressionEnv lists what a $( ) expression in the application can read on
-// a surface: component, trait or workflowstep.
-export function getExpressionEnv(appName: string, surface: string) {
-  return get(`${url}/${appName}/expressions/env`, { params: { surface }, customError: true }).then((res) => res);
+// a surface: component, trait, workflowstep or source. On the source surface,
+// source names the one being edited, which reads only those declared before it.
+export function getExpressionEnv(appName: string, surface: string, source?: string) {
+  return get(`${url}/${appName}/expressions/env`, { params: { surface, source }, customError: true }).then(
+    (res) => res
+  );
+}
+
+// getDraftExpressionEnv lists what a $( ) expression can read in an application
+// being created, which has no sources yet.
+export function getDraftExpressionEnv(surface: string, optIn: boolean) {
+  return get(`${baseURLOject.APIBASE}${expressions}/env`, { params: { surface, optIn }, customError: true }).then(
+    (res) => res
+  );
+}
+
+// checkDraftExpression checks a property value in an application being created.
+export function checkDraftExpression(params: { surface: string; value: string; kind?: string }) {
+  return post(`${baseURLOject.APIBASE}${expressions}/check`, params, true).then((res) => res);
 }
 
 // checkExpression checks the $( ) expressions of a property value.
-export function checkExpression(appName: string, params: { surface: string; value: string; kind?: string }) {
+export function checkExpression(
+  appName: string,
+  params: { surface: string; value: string; kind?: string; source?: string }
+) {
   return post(`${url}/${appName}/expressions/check`, params, true).then((res) => res);
 }
 

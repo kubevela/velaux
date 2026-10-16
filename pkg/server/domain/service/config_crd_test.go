@@ -149,3 +149,27 @@ func TestConfigsOfATemplateCRDAreConfigCRs(t *testing.T) {
 	require.NoError(t, svc.DeleteConfig(ctx, NoProject, "cluster-info"))
 	assert.Error(t, cli.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: "cluster-info"}, &configv1alpha1.Config{}))
 }
+
+func TestSourceCacheConfigsAreNotListed(t *testing.T) {
+	ctx := context.Background()
+	cached := &configv1alpha1.Config{
+		ObjectMeta: metav1.ObjectMeta{Name: "cluster-info-5bdee5ba", Namespace: types.DefaultKubeVelaNS,
+			Labels: map[string]string{types.LabelSourceDefinitionName: "cluster-info"}},
+		Spec: configv1alpha1.ConfigSpec{TemplateRef: &configv1alpha1.ConfigTemplateReference{Name: "source-cluster-info-1234"}},
+	}
+	svc, _ := configCRDService(t, cached)
+	_, err := svc.CreateConfig(ctx, NoProject, apis.CreateConfigRequest{
+		Name:       "cluster-info",
+		Template:   apis.NamespacedName{Name: "cluster-info"},
+		Properties: `{"clusterName":"prod-eu-1","environment":"dev"}`,
+	})
+	require.NoError(t, err)
+
+	configs, err := svc.ListConfigs(ctx, NoProject, "", false)
+	require.NoError(t, err)
+	var names []string
+	for _, c := range configs {
+		names = append(names, c.Name)
+	}
+	assert.Equal(t, []string{"cluster-info"}, names, "a source's cached value is not a config anyone wrote")
+}

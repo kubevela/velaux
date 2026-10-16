@@ -4,7 +4,7 @@ import React from 'react';
 import { AiFillCheckCircle, AiFillCloseCircle, AiFillWarning } from 'react-icons/ai';
 import { v4 as uuid } from 'uuid';
 
-import { checkExpression } from '../../api/application';
+import { checkDraftExpression, checkExpression } from '../../api/application';
 import type { ExpressionEnv } from './completion';
 import { expressionSpans, hoverAt, suggest } from './completion';
 import './index.less';
@@ -102,6 +102,10 @@ type Props = {
   disabled?: boolean;
   appName: string;
   surface: string;
+  // source names the source being edited, on the source surface.
+  source?: string;
+  // draft is an application being created, checked without it.
+  draft?: boolean;
   // kind is the type the parameter expects: string, integer, number or boolean.
   kind?: string;
   env?: ExpressionEnv;
@@ -243,10 +247,12 @@ class ExpressionEditor extends React.Component<Props, State> {
       return;
     }
     this.checked = value;
-    const { appName, surface, kind } = this.props;
+    const { appName, surface, source, kind, draft } = this.props;
     let res: any;
     try {
-      res = await checkExpression(appName, { surface, value, kind });
+      res = draft
+        ? await checkDraftExpression({ surface, value, kind })
+        : await checkExpression(appName, { surface, value, kind, source });
     } catch (e) {
       return;
     }

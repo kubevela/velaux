@@ -59,7 +59,7 @@ const (
 // ExpressionService helps forms edit the $( ) CEL expressions an application's
 // properties may hold.
 type ExpressionService interface {
-	Env(ctx context.Context, app *model.Application, surface string) (*apisv1.ExpressionEnvResponse, error)
+	Env(ctx context.Context, app *model.Application, surface, source string) (*apisv1.ExpressionEnvResponse, error)
 	Check(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest) (*apisv1.ExpressionCheckResponse, error)
 	SetOptIn(ctx context.Context, app *model.Application, on bool) error
 }
@@ -77,21 +77,36 @@ func NewExpressionService(enabled bool) ExpressionService {
 	return &expressionServiceImpl{enabled: enabled}
 }
 
+// surfaceSource is a value in one of the application's sources: a chained
+// source, resolved during a component's render, so it reads the context a
+// component does and the sources declared before it.
+const surfaceSource = "source"
+
+// contextFor is the context an expression on the surface reads, and whether
+// the surface is one expressions may be written on.
+func contextFor(surface string) (propexpr.ContextSchema, bool) {
+	if surface == surfaceSource {
+		return propexpr.ContextFor("component"), true
+	}
+	return propexpr.ContextFor(surface), propexpr.SurfaceDeclared(surface)
+}
+
 func optedIn(app *model.Application) bool {
 	return app.Annotations[oam.AnnotationCelExpressions] == True
 }
 
 // Env lists what an expression on the surface can read: the surface's context
-// fields and the application's source bindings.
-func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application, surface string) (*apisv1.ExpressionEnvResponse, error) {
-	if !propexpr.SurfaceDeclared(surface) {
+// fields and the application's source bindings. On the source surface, source
+// names the one being edited, which reads only those declared before it.
+func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application, surface, source string) (*apisv1.ExpressionEnvResponse, error) {
+	contextSchema, ok := contextFor(surface)
+	if !ok {
 		return nil, bcode.ErrExpressionSurface
 	}
 	resp := &apisv1.ExpressionEnvResponse{Enabled: e.enabled, OptedIn: optedIn(app), Surface: surface}
 	if !e.enabled {
 		return resp, nil
 	}
-	contextSchema := propexpr.ContextFor(surface)
 	contextRoot := &apisv1.ExpressionVariable{Name: propexpr.ContextIdent, Type: kindObject, Description: "The application, component and cluster this value is rendered for"}
 	for _, name := range contextSchema.ReadableFields() {
 		if v, ok := contextSchema.FieldValue(name); ok {
@@ -101,7 +116,7 @@ func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application,
 	resp.Variables = append(resp.Variables, contextRoot)
 
 	sourceRoot := &apisv1.ExpressionVariable{Name: propexpr.SourceIdent, Type: kindObject, Description: "The sources this application declares, by binding name"}
-	schemas := e.sourceSchemas(ctx, app)
+	schemas := e.sourceSchemas(ctx, app, surface, source)
 	names := make([]string, 0, len(schemas))
 	for name := range schemas {
 		names = append(names, name)
@@ -203,12 +218,33 @@ func usage(v cue.Value) string {
 	return strings.TrimSpace(doc)
 }
 
-// sourceSchemas reads the source bindings of the application as deployed, and
-// the CUE of each binding's SourceDefinition schema. VelaUX does not model
-// spec.sources itself, so an application not yet deployed has none.
-func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Application) map[string]string {
+// sourceSchemas maps each source binding an expression on the surface can read
+// to the CUE of its definition's schema: the sources the application declares,
+// then any only its deployed Applications carry. A source reads only the
+// sources declared before the one named, all of them when it is new.
+func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Application, surface, source string) map[string]string {
 	out := map[string]string{}
-	if e.EnvBindingService == nil || e.KubeClient == nil {
+	if e.KubeClient == nil {
+		return out
+	}
+	add := func(src v1beta1.ApplicationSource, namespace string) {
+		if _, done := out[src.Name]; done {
+			return
+		}
+		text, err := e.sourceSchema(ctx, src.Type, namespace)
+		if err != nil {
+			klog.V(4).Infof("no schema for source %s of %s: %v", src.Name, app.Name, err)
+			return
+		}
+		out[src.Name] = text
+	}
+	for _, src := range app.Sources {
+		if surface == surfaceSource && src.Name == source {
+			break
+		}
+		add(src, types.DefaultKubeVelaNS)
+	}
+	if surface == surfaceSource || e.EnvBindingService == nil {
 		return out
 	}
 	bindings, err := e.EnvBindingService.GetEnvBindings(ctx, app)
@@ -221,15 +257,7 @@ func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Ap
 			continue
 		}
 		for _, src := range cr.Spec.Sources {
-			if _, done := out[src.Name]; done {
-				continue
-			}
-			text, err := e.sourceSchema(ctx, src.Type, cr.Namespace)
-			if err != nil {
-				klog.V(4).Infof("no schema for source %s of %s: %v", src.Name, app.Name, err)
-				continue
-			}
-			out[src.Name] = text
+			add(src, cr.Namespace)
 		}
 	}
 	return out
@@ -279,7 +307,8 @@ var celIssue = regexp.MustCompile(`<input>:(\d+):(\d+): ([^\n]*)`)
 // Check compiles each $( ) expression in a value against the surface's typed
 // environment, and compares the value's resulting type with the parameter's.
 func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest) (*apisv1.ExpressionCheckResponse, error) {
-	if !propexpr.SurfaceDeclared(req.Surface) {
+	contextSchema, ok := contextFor(req.Surface)
+	if !ok {
 		return nil, bcode.ErrExpressionSurface
 	}
 	resp := &apisv1.ExpressionCheckResponse{}
@@ -292,7 +321,7 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 		resp.Type = kindString
 		return resp, nil
 	}
-	env, err := celexpr.EnvForContext(e.sourceSchemas(ctx, app), propexpr.ContextFor(req.Surface))
+	env, err := celexpr.EnvForContext(e.sourceSchemas(ctx, app, req.Surface, req.Source), contextSchema)
 	if err != nil {
 		return nil, err
 	}

@@ -227,6 +227,9 @@ var ResourceMaps = map[string]resourceMetadata{
 					"policy": {
 						pathName: "policyName",
 					},
+					"source": {
+						pathName: "sourceName",
+					},
 					"revision": {
 						pathName: "revision",
 					},
