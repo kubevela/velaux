@@ -2310,6 +2310,50 @@ type ExpressionCheckRequest struct {
 	// Component names the component the value is written in, or the one its
 	// trait is on: it cannot read its own output.
 	Component string `json:"component,omitempty"`
+	// Required is whether the parameter must be set: a read that may be absent
+	// feeding it is refused unless has() guards it.
+	Required bool `json:"required,omitempty"`
+	ExpressionStep
+}
+
+// ExpressionStep is where a workflow step's value sits, for the steps and each
+// roots: every field is optional, and a request without them reads neither.
+type ExpressionStep struct {
+	// Step names the step the value is written in, which cannot read its own
+	// outputs.
+	Step string `json:"step,omitempty"`
+	// LoopBody is whether the step runs once per item: a step with forEach, or a
+	// sub-step of a group with one. Only a loop body reads each.
+	LoopBody bool `json:"loopBody,omitempty"`
+	// ForEachItems is the loop's forEach items as written: a list, or a string
+	// holding one $( ) expression. each.item is typed from it.
+	ForEachItems json.RawMessage `json:"forEachItems,omitempty"`
+	// Steps is the workflow's steps and the outputs each declares, a group's
+	// steps under it. When given, a step's reads are judged as the workflow
+	// judges them: a read of a step or output not among them, of the step itself,
+	// or of one it cannot wait for is refused.
+	Steps []ExpressionStepOutputs `json:"steps,omitempty"`
+	// Mode and SubMode are how the workflow's steps, and its groups' steps, run:
+	// StepByStep or DAG. Left out, steps run in order and a group's in parallel.
+	Mode    string `json:"mode,omitempty"`
+	SubMode string `json:"subMode,omitempty"`
+	// Condition is whether the value is the step's if. One that is a whole $( )
+	// expression must be a bool; any other is CUE, which the check does not read.
+	Condition bool `json:"condition,omitempty"`
+}
+
+// ExpressionStepOutputs is a workflow step and the outputs it declares, with
+// what decides which steps it can wait for: its dependsOn, whether it loops, and
+// for a group, its steps and how they run.
+type ExpressionStepOutputs struct {
+	Name      string   `json:"name"`
+	Outputs   []string `json:"outputs,omitempty"`
+	DependsOn []string `json:"dependsOn,omitempty"`
+	// ForEach is whether the step, or the group, runs once per item.
+	ForEach  bool                    `json:"forEach,omitempty"`
+	SubSteps []ExpressionStepOutputs `json:"subSteps,omitempty"`
+	// Mode is how a group's steps run, StepByStep or DAG, when it sets one.
+	Mode string `json:"mode,omitempty"`
 }
 
 // ExpressionCheckResponse reports on a property value's expressions.

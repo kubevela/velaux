@@ -128,7 +128,7 @@ func TestExpressionEnvReadsComponents(t *testing.T) {
 	svc := shopExpressionService(t)
 	app := &model.Application{Name: "shop", Annotations: map[string]string{oam.AnnotationCelExpressions: "true"}}
 
-	env, err := svc.Env(context.Background(), app, "component", "", "api")
+	env, err := svc.Env(context.Background(), app, "component", "", "api", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	components := root(env, "component")
 	require.NotNil(t, components)
@@ -152,7 +152,7 @@ func TestExpressionEnvReadsComponents(t *testing.T) {
 		assert.Empty(t, status.Children)
 	}
 
-	trait, err := svc.Env(context.Background(), app, "trait", "", "db")
+	trait, err := svc.Env(context.Background(), app, "trait", "", "db", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	var traitReads []string
 	for _, c := range root(trait, "component").Children {
@@ -160,7 +160,7 @@ func TestExpressionEnvReadsComponents(t *testing.T) {
 	}
 	assert.Equal(t, []string{"api"}, traitReads, "a trait reads the other components, not its own")
 
-	src, err := svc.Env(context.Background(), app, "source", "first", "")
+	src, err := svc.Env(context.Background(), app, "source", "first", "", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	assert.Nil(t, root(src, "component"), "a source cannot read a component")
 }
@@ -171,7 +171,7 @@ func TestExpressionEnvReadsOutputSchemas(t *testing.T) {
 	svc := shopExpressionService(t)
 	app := &model.Application{Name: "shop", Annotations: map[string]string{oam.AnnotationCelExpressions: "true"}}
 
-	env, err := svc.Env(context.Background(), app, "component", "", "db")
+	env, err := svc.Env(context.Background(), app, "component", "", "db", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	api := child(root(env, "component"), "api")
 	require.NotNil(t, api)
@@ -180,7 +180,7 @@ func TestExpressionEnvReadsOutputSchemas(t *testing.T) {
 	assert.Equal(t, "list(object)", child(api, "outputs", "service", "spec", "ports").Type, "and each trait's outputs")
 	assert.Equal(t, "dyn", child(api, "outputs", "service", "status").Type)
 
-	env, err = svc.Env(context.Background(), app, "component", "", "api")
+	env, err = svc.Env(context.Background(), app, "component", "", "api", apisv1.ExpressionStep{})
 	require.NoError(t, err)
 	db := child(root(env, "component"), "db")
 	assert.Equal(t, "string", child(db, "output", "kind").Type, "a declared field is offered before the object has it")
@@ -188,7 +188,7 @@ func TestExpressionEnvReadsOutputSchemas(t *testing.T) {
 	assert.NotNil(t, child(db, "output", "data", "port"), "a live field the template does not declare is offered")
 }
 
-// The check refuses a component read where the controller would.
+// The check refuses a component read where admission would, in its words.
 func TestExpressionCheckComponentReads(t *testing.T) {
 	svc := shopExpressionService(t)
 	app := &model.Application{Name: "shop", Annotations: map[string]string{oam.AnnotationCelExpressions: "true"}}
@@ -202,12 +202,16 @@ func TestExpressionCheckComponentReads(t *testing.T) {
 		return msgs
 	}
 	assert.Empty(t, check("component", "api", "$(component.db.output.data.host)"))
-	assert.Empty(t, check("trait", "api", `$(component.db.cluster("east").output.data.host)`))
-	assert.Equal(t, []string{"a component cannot read its own output"}, check("component", "db", "$(component.db.output.data.host)"))
-	assert.Equal(t, []string{"no component named cache"}, check("component", "api", "$(component.cache.output)"))
-	assert.Equal(t, []string{"only component and trait properties can read component.<name>"},
+	assert.Empty(t, check("trait", "api", `$(component.db.namespace("other").output.data.host)`))
+	assert.Equal(t, []string{`component "api" reads component.db.cluster("east").output.data.host, but no cluster "east" is registered`},
+		check("trait", "api", `$(component.db.cluster("east").output.data.host)`))
+	assert.Equal(t, []string{`component "db" reads its own output (component.db.output.data.host); a component's output only exists once it has been applied`},
+		check("component", "db", "$(component.db.output.data.host)"))
+	assert.Equal(t, []string{`component "api" reads component.cache.output, but the application has no component "cache"`},
+		check("component", "api", "$(component.cache.output)"))
+	assert.Equal(t, []string{`"component" cannot be read here; this surface permits "context", "source", "steps", "each"`},
 		check("workflowstep", "", "$(component.db.output.data.host)"))
-	assert.Equal(t, []string{`write component["my-db"]: a component whose name has a hyphen is read by index`},
+	assert.Equal(t, []string{`a component whose name has a hyphen is read by index: write component["my-db"].output.data.host`},
 		check("component", "api", "$(component.my-db.output.data.host)"))
 
 	value := "x-$(component.my-db.output.data.host)"
@@ -217,6 +221,7 @@ func TestExpressionCheckComponentReads(t *testing.T) {
 	issue := got.Issues[0]
 	assert.Equal(t, "component.my-db", value[issue.Start:issue.End], "the issue covers the read to replace")
 	assert.Equal(t, `component["my-db"]`, issue.Fix, "and carries its replacement")
-	assert.Equal(t, []string{"no component named my-db"}, check("component", "api", `$(component["my-db"].output)`),
+	assert.Equal(t, []string{`component "api" reads component["my-db"].output, but the application has no component "my-db"`},
+		check("component", "api", `$(component["my-db"].output)`),
 		"the index form reads the name it gives")
 }

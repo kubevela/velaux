@@ -21,17 +21,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 
 	"cuelang.org/go/cue"
-	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/format"
-	"cuelang.org/go/cue/parser"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/cel-go/cel"
+	"github.com/kubevela/pkg/cel/template"
+	wfexpressions "github.com/kubevela/workflow/pkg/expressions"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -40,6 +41,8 @@ import (
 	"github.com/oam-dev/kubevela/pkg/definition/celexpr"
 	"github.com/oam-dev/kubevela/pkg/definition/propexpr"
 	"github.com/oam-dev/kubevela/pkg/oam"
+	"github.com/oam-dev/kubevela/pkg/schema"
+	"github.com/oam-dev/kubevela/pkg/sources"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
@@ -61,7 +64,7 @@ const (
 // ExpressionService helps forms edit the $( ) CEL expressions an application's
 // properties may hold.
 type ExpressionService interface {
-	Env(ctx context.Context, app *model.Application, surface, source, component string) (*apisv1.ExpressionEnvResponse, error)
+	Env(ctx context.Context, app *model.Application, surface, source, component string, step apisv1.ExpressionStep) (*apisv1.ExpressionEnvResponse, error)
 	Check(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest) (*apisv1.ExpressionCheckResponse, error)
 	SetOptIn(ctx context.Context, app *model.Application, on bool) error
 	// CheckProperties refuses properties holding an expression the check finds
@@ -106,8 +109,10 @@ func optedIn(app *model.Application) bool {
 // fields, the application's source bindings and, on a component or trait, its
 // other components. On the source surface, source names the one being edited,
 // which reads only those declared before it; component names the component being
-// edited, or the one a trait is on, which reads every component but itself.
-func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application, surface, source, component string) (*apisv1.ExpressionEnvResponse, error) {
+// edited, or the one a trait is on, which reads every component but itself. A
+// workflow step also reads the other steps' outputs and, in a loop body, each,
+// from where step says it sits.
+func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application, surface, source, component string, step apisv1.ExpressionStep) (*apisv1.ExpressionEnvResponse, error) {
 	contextSchema, ok := contextFor(surface)
 	if !ok {
 		return nil, bcode.ErrExpressionSurface
@@ -142,6 +147,9 @@ func (e *expressionServiceImpl) Env(ctx context.Context, app *model.Application,
 	resp.Variables = append(resp.Variables, sourceRoot)
 	if components := e.componentRoot(ctx, app, surface, component); components != nil {
 		resp.Variables = append(resp.Variables, components)
+	}
+	if surface == sources.SurfaceWorkflowStep {
+		resp.Variables = append(resp.Variables, stepRoots(step, schemas)...)
 	}
 	return resp, nil
 }
@@ -230,101 +238,110 @@ func usage(v cue.Value) string {
 	return strings.TrimSpace(doc)
 }
 
-// sourceSchemas maps each source binding an expression on the surface can read
-// to the CUE of its definition's schema: the sources the application declares,
-// then any only its deployed Applications carry. A source reads only the
-// sources declared before the one named, all of them when it is new.
-func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Application, surface, source string) map[string]string {
-	out := map[string]string{}
-	if e.KubeClient == nil {
+// sourceBinding is a source an expression may name: as the application declares
+// it, or as only a deployed Application carries it, with where its definition is
+// looked up. index is its place in the application's sources, or -1.
+type sourceBinding struct {
+	src         v1beta1.ApplicationSource
+	namespace   string
+	annotations map[string]string
+	index       int
+}
+
+// sourceBindings are the sources an expression on the surface may name, by
+// name: the sources the application declares, looked up in vela-system, then
+// any only its deployed Applications carry, looked up in theirs. A source being
+// written reads only the application's own.
+func (e *expressionServiceImpl) sourceBindings(ctx context.Context, app *model.Application, surface string) map[string]sourceBinding {
+	out := map[string]sourceBinding{}
+	for i, src := range app.Sources {
+		if _, done := out[src.Name]; !done {
+			out[src.Name] = sourceBinding{src: src, namespace: types.DefaultKubeVelaNS, annotations: app.Annotations, index: i}
+		}
+	}
+	if surface == surfaceSource || e.KubeClient == nil || e.EnvBindingService == nil {
 		return out
 	}
-	add := func(src v1beta1.ApplicationSource, namespace string) {
-		if _, done := out[src.Name]; done {
-			return
-		}
-		text, err := e.sourceSchema(ctx, src.Type, namespace)
-		if err != nil {
-			klog.V(4).Infof("no schema for source %s of %s: %v", src.Name, app.Name, err)
-			return
-		}
-		out[src.Name] = text
-	}
-	for _, src := range app.Sources {
-		if surface == surfaceSource && src.Name == source {
-			break
-		}
-		add(src, types.DefaultKubeVelaNS)
-	}
-	if surface == surfaceSource || e.EnvBindingService == nil {
-		return out
-	}
-	bindings, err := e.EnvBindingService.GetEnvBindings(ctx, app)
+	envs, err := e.EnvBindingService.GetEnvBindings(ctx, app)
 	if err != nil {
 		return out
 	}
-	for _, env := range bindings {
+	for _, env := range envs {
 		cr := &v1beta1.Application{}
 		if err := e.KubeClient.Get(ctx, client.ObjectKey{Namespace: env.AppDeployNamespace, Name: env.AppDeployName}, cr); err != nil {
 			continue
 		}
 		for _, src := range cr.Spec.Sources {
-			add(src, cr.Namespace)
+			if _, done := out[src.Name]; !done {
+				out[src.Name] = sourceBinding{src: src, namespace: cr.Namespace, annotations: cr.Annotations, index: -1}
+			}
 		}
 	}
 	return out
 }
 
-func (e *expressionServiceImpl) sourceSchema(ctx context.Context, typ, namespace string) (string, error) {
-	def := &v1beta1.SourceDefinition{}
-	var err error
-	for _, ns := range []string{namespace, types.DefaultKubeVelaNS} {
-		if err = e.KubeClient.Get(ctx, client.ObjectKey{Namespace: ns, Name: typ}, def); err == nil {
-			break
+// writtenSourceIndex is where the source being written sits among the application's
+// sources: its place, or the end for a new one.
+func writtenSourceIndex(app *model.Application, source string) int {
+	for i, src := range app.Sources {
+		if src.Name == source {
+			return i
 		}
 	}
-	if err != nil {
-		return "", err
-	}
-	if def.Spec.Schematic == nil || def.Spec.Schematic.CUE == nil {
-		return "", fmt.Errorf("source definition %s has no CUE template", typ)
-	}
-	return topLevelBlock(def.Spec.Schematic.CUE.Template, "schema")
+	return len(app.Sources)
 }
 
-// topLevelBlock returns the CUE of the template's top-level field of the given
-// name, as the admission webhook reads a source's schema.
-func topLevelBlock(template, name string) (string, error) {
-	f, err := parser.ParseFile("-", template, parser.ParseComments)
-	if err != nil {
-		return "", err
+// anySchema is the schema of a source binding whose definition declares none.
+const anySchema = "_"
+
+// sourceSchemas maps each source binding an expression on the surface can read
+// to the CUE of its definition's schema. A source reads only the sources
+// declared before the one named, all of them when it is new. The definition is
+// found as KubeVela's admission finds it, revision pins included.
+func (e *expressionServiceImpl) sourceSchemas(ctx context.Context, app *model.Application, surface, source string) map[string]string {
+	out := map[string]string{}
+	if e.KubeClient == nil {
+		return out
 	}
-	for _, decl := range f.Decls {
-		field, ok := decl.(*ast.Field)
-		if !ok {
+	for name, b := range e.sourceBindings(ctx, app, surface) {
+		if surface == surfaceSource && b.index >= writtenSourceIndex(app, source) {
 			continue
 		}
-		if label, _, err := ast.LabelName(field.Label); err != nil || label != name {
+		if b.src.Type == "" {
 			continue
 		}
-		b, err := format.Node(field.Value)
-		return string(b), err
+		// A binding is declared whatever its definition says, as admission
+		// declares it: one with no schema, or one that cannot be loaded (which
+		// the source rules report), is of any type, so its reads fit anything.
+		text, err := schema.SourceSchemaText(ctx, e.KubeClient, b.namespace, b.src.Type, b.annotations)
+		if err != nil || text == "" {
+			klog.V(4).Infof("no schema for source %s of %s: %v", name, app.Name, err)
+			text = anySchema
+		}
+		out[name] = text
 	}
-	return "", fmt.Errorf("no top-level %s block", name)
+	return out
 }
 
 // celIssue matches the position cel-go reports an issue at.
 var celIssue = regexp.MustCompile(`<input>:(\d+):(\d+): ([^\n]*)`)
 
 // Check compiles each $( ) expression in a value against the surface's typed
-// environment, and compares the value's resulting type with the parameter's.
+// environment, and compares the value's resulting type with the parameter's. A
+// value that is exactly one component or each read takes the type KubeVela's
+// admission gives it: the producer's declared type, or the loop item's. A step's
+// if that is one $( ) expression is checked as admission checks it, as a bool;
+// any other if is CUE and is not read.
 func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Application, req apisv1.ExpressionCheckRequest) (*apisv1.ExpressionCheckResponse, error) {
 	contextSchema, ok := contextFor(req.Surface)
 	if !ok {
 		return nil, bcode.ErrExpressionSurface
 	}
 	resp := &apisv1.ExpressionCheckResponse{}
-	parsed, err := propexpr.Parse(req.Value)
+	if req.Condition && !wfexpressions.IsCondition(req.Value) {
+		return resp, nil
+	}
+	parsed, err := template.Parse(req.Value)
 	if err != nil {
 		resp.Issues = append(resp.Issues, &apisv1.ExpressionIssue{Message: err.Error(), Start: 0, End: len(req.Value)})
 		return resp, nil
@@ -333,7 +350,8 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 		resp.Type = kindString
 		return resp, nil
 	}
-	env, err := celexpr.EnvForContext(e.sourceSchemas(ctx, app, req.Surface, req.Source), contextSchema)
+	schemas := e.sourceSchemas(ctx, app, req.Surface, req.Source)
+	env, err := celexpr.EnvForContext(schemas, contextSchema)
 	if err != nil {
 		return nil, err
 	}
@@ -355,6 +373,14 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 			resp.Issues = append(resp.Issues, issues...)
 			continue
 		}
+		if issues := e.sourceIssues(ctx, app, req, frag.Expr, exprStart); len(issues) > 0 {
+			resp.Issues = append(resp.Issues, issues...)
+			continue
+		}
+		if issues := stepIssues(req, frag.Expr, exprStart); len(issues) > 0 {
+			resp.Issues = append(resp.Issues, issues...)
+			continue
+		}
 		out, err := celexpr.OutputType(env, frag.Expr)
 		if err != nil {
 			resp.Issues = append(resp.Issues, issuesAt(err.Error(), exprStart, frag.Expr)...)
@@ -365,10 +391,25 @@ func (e *expressionServiceImpl) Check(ctx context.Context, app *model.Applicatio
 	if len(resp.Issues) > 0 {
 		return resp, nil
 	}
-	if !parsed.Whole() {
-		resp.Type = kindString
-	} else {
+	if _, ok := parsed.SoleExpr(); ok {
 		resp.Type = celKind(whole)
+		if kind, ok := e.readKind(ctx, app, req, schemas); ok {
+			resp.Type = kind
+		}
+	} else {
+		resp.Type = kindString
+	}
+	if req.Condition {
+		if issues := e.conditionIssues(ctx, app, req, env, schemas); len(issues) > 0 {
+			resp.Issues = append(resp.Issues, issues...)
+			return resp, nil
+		}
+		req.Kind = "boolean"
+	} else if req.Required {
+		if issues := e.absentIssues(ctx, app, req, env, schemas); len(issues) > 0 {
+			resp.Issues = append(resp.Issues, issues...)
+			return resp, nil
+		}
 	}
 	if issue := targetIssue(resp.Type, req.Kind, len(req.Value)); issue != nil {
 		resp.Issues = append(resp.Issues, issue)
@@ -406,23 +447,25 @@ func celKind(t *cel.Type) string {
 	case cel.ListType(cel.DynType).Kind():
 		return kindList
 	case cel.MapType(cel.StringType, cel.DynType).Kind():
-		return "map"
+		// A map is named as admission names it, which reads a struct and a
+		// map alike as an object.
+		return kindObject
 	case cel.DynType.Kind():
 		return kindDyn
 	}
 	return t.String()
 }
 
-// targetIssue reports a value type the parameter cannot take. A dyn value
-// passes with a warning: the webhook refuses it against a concrete parameter
-// until it is converted, as int(...) does.
+// targetIssue reports a value type the parameter cannot take. A dyn value is
+// not checked, here or by the webhook, which admits it against any parameter: it
+// passes with a warning, since a value of the wrong type fails at render.
 func targetIssue(got, want string, end int) *apisv1.ExpressionIssue {
 	expected := map[string]string{"string": kindString, "integer": kindInt, "number": kindNumber, "boolean": kindBool}[want]
 	switch {
 	case expected == "", got == expected, got == kindInt && expected == kindNumber:
 		return nil
 	case got == "dyn":
-		return &apisv1.ExpressionIssue{Message: fmt.Sprintf("the type of this value is not known; convert it, for example %s(...)", map[string]string{"int": "int", "number": "double", "bool": "bool", "string": "string"}[expected]), Start: 0, End: end, Warning: true}
+		return &apisv1.ExpressionIssue{Message: fmt.Sprintf("the type of this value is not known, so it is not checked here and a wrong one fails at render; convert it to check it, for example %s(...)", map[string]string{"int": "int", "number": "double", "bool": "bool", "string": "string"}[expected]), Start: 0, End: end, Warning: true}
 	}
 	return &apisv1.ExpressionIssue{Message: fmt.Sprintf("this value is %s, but the parameter expects %s", got, expected), Start: 0, End: end}
 }
@@ -464,9 +507,9 @@ func (e *expressionServiceImpl) CheckProperties(ctx context.Context, app *model.
 	if err != nil || detail.APISchema == nil {
 		return nil
 	}
-	check := func(path, value string, schema *openapi3.Schema) error {
+	check := func(path, value string, schema *openapi3.Schema, required bool) error {
 		resp, err := e.Check(ctx, app, apisv1.ExpressionCheckRequest{
-			Surface: surface, Value: value, Kind: expressionKind(schema), Source: source, Component: component,
+			Surface: surface, Value: value, Kind: expressionKind(schema), Source: source, Component: component, Required: required,
 		})
 		if err != nil {
 			return err
@@ -478,7 +521,7 @@ func (e *expressionServiceImpl) CheckProperties(ctx context.Context, app *model.
 		}
 		return nil
 	}
-	return walkExpressions("", values, detail.APISchema, check)
+	return walkExpressions("", values, detail.APISchema, false, check)
 }
 
 // expressionKind is the type a parameter expects, as the check names it, or
@@ -496,12 +539,14 @@ func expressionKind(schema *openapi3.Schema) string {
 }
 
 // walkExpressions calls check on every string holding an expression, with its
-// dotted path and the schema of the parameter it fills.
-func walkExpressions(path string, value interface{}, schema *openapi3.Schema, check func(path, value string, schema *openapi3.Schema) error) error {
+// dotted path, the schema of the parameter it fills and whether that parameter
+// must be set.
+func walkExpressions(path string, value interface{}, schema *openapi3.Schema, required bool,
+	check func(path, value string, schema *openapi3.Schema, required bool) error) error {
 	switch v := value.(type) {
 	case string:
 		if strings.Contains(v, "$(") {
-			return check(path, v, schema)
+			return check(path, v, schema, required)
 		}
 	case map[string]interface{}:
 		keys := make([]string, 0, len(v))
@@ -522,7 +567,8 @@ func walkExpressions(path string, value interface{}, schema *openapi3.Schema, ch
 			if path != "" {
 				next = path + "." + k
 			}
-			if err := walkExpressions(next, v[k], sub, check); err != nil {
+			needed := schema != nil && slices.Contains(schema.Required, k)
+			if err := walkExpressions(next, v[k], sub, needed, check); err != nil {
 				return err
 			}
 		}
@@ -532,7 +578,7 @@ func walkExpressions(path string, value interface{}, schema *openapi3.Schema, ch
 			item = schema.Items.Value
 		}
 		for i, element := range v {
-			if err := walkExpressions(fmt.Sprintf("%s[%d]", path, i), element, item, check); err != nil {
+			if err := walkExpressions(fmt.Sprintf("%s[%d]", path, i), element, item, false, check); err != nil {
 				return err
 			}
 		}

@@ -830,6 +830,10 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("surface", "component, trait, workflowstep or source").DataType("string").Required(true)).
 		Param(ws.QueryParameter("source", "on the source surface, the source being edited; it reads only those declared before it").DataType("string")).
 		Param(ws.QueryParameter("component", "on a component or trait, the component being edited or the one the trait is on; it reads every component but itself").DataType("string")).
+		Param(ws.QueryParameter("step", "on a workflow step, the step being edited; it reads every other step's outputs").DataType("string")).
+		Param(ws.QueryParameter("loopBody", "on a workflow step, whether it runs once per item and so reads each").DataType("boolean")).
+		Param(ws.QueryParameter("forEachItems", "on a loop body, its forEach items as written, in JSON").DataType("string")).
+		Param(ws.QueryParameter("steps", "on a workflow step, the workflow's steps and their declared outputs, in JSON").DataType("string")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "OK", apis.ExpressionEnvResponse{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
@@ -1096,7 +1100,7 @@ func (c *application) createComponent(req *restful.Request, res *restful.Respons
 
 func (c *application) expressionEnv(req *restful.Request, res *restful.Response) {
 	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
-	env, err := c.ExpressionService.Env(req.Request.Context(), app, req.QueryParameter("surface"), req.QueryParameter("source"), req.QueryParameter("component"))
+	env, err := c.ExpressionService.Env(req.Request.Context(), app, req.QueryParameter("surface"), req.QueryParameter("source"), req.QueryParameter("component"), expressionStep(req))
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return

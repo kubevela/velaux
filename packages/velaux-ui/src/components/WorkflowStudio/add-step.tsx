@@ -14,6 +14,7 @@ import { WorkflowEditContext } from '../../context';
 import { forEachProblem } from './loop-edit';
 import { LoopItems } from './loop-items';
 import StepForm from './step-form';
+import { conditionScope, stepScope } from './step-scope';
 import { StepTypeIcon } from './step-icon';
 
 import './index.less';
@@ -126,6 +127,8 @@ type Props = {
   loop?: boolean;
   // subMode is how a new group's steps run until it is changed here.
   subMode?: WorkflowMode;
+  // mode is how the workflow's steps run.
+  mode?: WorkflowMode;
 };
 type State = {
   selectType?: DefinitionBase;
@@ -353,7 +356,18 @@ class AddStep extends React.Component<Props, State> {
             />
           </Form.Item>
         )}
-        <StepForm ref={this.form} inline step={draft.step} onUpdate={() => {}} onClose={this.props.onClose} />
+        <StepForm
+          ref={this.form}
+          inline
+          step={draft.step}
+          scope={stepScope(draft.steps, draft.step.name, { mode: this.props.mode, subMode: this.props.subMode })}
+          conditionScope={conditionScope(draft.steps, draft.step.name, {
+            mode: this.props.mode,
+            subMode: this.props.subMode,
+          })}
+          onUpdate={() => {}}
+          onClose={this.props.onClose}
+        />
       </WorkflowEditContext.Provider>
     );
   };

@@ -4,19 +4,23 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
+import { getExpressionEnv, setExpressionOptIn } from '../../api/application';
 import { detailWorkflowDefinition } from '../../api/workflows';
 import { UISchemaContext, WorkflowContext } from '../../context';
 import Group from '../../extends/Group';
 import './index.less';
 import { StepSelect } from '../../extends/StepSelect';
 import i18n from '../../i18n';
-import type { DefinitionDetail, WorkflowStepBase } from '@velaux/data';
+import type { DefinitionDetail, ExpressionStep, WorkflowStepBase } from '@velaux/data';
+import type { ExpressionEnv } from '../../extends/ExpressionEditor';
 import { replaceUrl } from '../../utils/common';
 import DrawerWithFooter from '../Drawer';
 import { If } from '../If';
 import { Translation } from '../Translation';
 import UISchema from '../UISchema';
+import type { ExpressionContext } from '../UISchema';
 
+import { ConditionInput } from './condition-input';
 import { InputItems } from './input-item';
 import { OutputItems } from './output-item';
 import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
@@ -29,12 +33,20 @@ type Props = {
   // inline draws the form alone, for a host that has its own frame and
   // buttons, and leaves out the alias and description it asks for itself.
   inline?: boolean;
+  // scope is where the step sits in its workflow, for the steps and each its
+  // property expressions read.
+  scope?: ExpressionStep;
+  // conditionScope is where its if sits, which reads each only in a looping
+  // group's sub-step.
+  conditionScope?: ExpressionStep;
 };
 
 type State = {
   definitionDetail?: DefinitionDetail;
   definitionLoading: boolean;
   propertiesMode: 'native' | 'code';
+  expressionEnv?: ExpressionEnv;
+  conditionEnv?: ExpressionEnv;
 };
 
 class StepForm extends Component<Props, State> {
@@ -64,6 +76,55 @@ class StepForm extends Component<Props, State> {
       this.field.setValues({ properties: JSON.parse(properties) });
     }
     this.onDetailDefinition(type);
+    this.loadExpressionEnv();
+  };
+
+  // appName is the application whose workflow this is; a pipeline has none,
+  // and its steps take no expressions.
+  appName = (): string | undefined => this.context?.appName;
+
+  loadExpressionEnv = async () => {
+    const appName = this.appName();
+    if (!appName) {
+      return;
+    }
+    try {
+      const [env, conditionEnv]: ExpressionEnv[] = await Promise.all([
+        getExpressionEnv(appName, 'workflowstep', undefined, undefined, this.props.scope),
+        getExpressionEnv(appName, 'workflowstep', undefined, undefined, this.props.conditionScope),
+      ]);
+      this.setState({ expressionEnv: env, conditionEnv });
+    } catch (e) {
+      this.setState({ expressionEnv: undefined, conditionEnv: undefined });
+    }
+  };
+
+  setExpressionOptIn = async (on: boolean): Promise<boolean> => {
+    const appName = this.appName();
+    if (!appName) {
+      return false;
+    }
+    try {
+      await setExpressionOptIn(appName, on);
+    } catch (e) {
+      return false;
+    }
+    await this.loadExpressionEnv();
+    return true;
+  };
+
+  expressionContext = (): ExpressionContext | undefined => {
+    const appName = this.appName();
+    if (!appName) {
+      return undefined;
+    }
+    return {
+      appName,
+      surface: 'workflowstep',
+      step: this.props.scope,
+      env: this.state.expressionEnv,
+      onOptIn: this.setExpressionOptIn,
+    };
   };
 
   setValues = (values: any | null) => {
@@ -182,6 +243,7 @@ class StepForm extends Component<Props, State> {
                         }}
                         ref={this.uiSchemaRef}
                         mode={'edit'}
+                        expressions={this.expressionContext()}
                       />
                     </UISchemaContext.Provider>
                   </FormItem>
@@ -216,8 +278,10 @@ class StepForm extends Component<Props, State> {
                   />
                 }
               >
-                <Input
-                  name="if"
+                <ConditionInput
+                  appName={this.appName()}
+                  scope={this.props.conditionScope}
+                  env={this.state.conditionEnv}
                   {...init('if', {
                     rules: [],
                   })}

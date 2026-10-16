@@ -16,6 +16,7 @@ import StepForm from './step-form';
 import AddStep from './add-step';
 import { setLoop } from './loop-edit';
 import { LoopEditor } from './loop-editor';
+import { conditionScope, stepScope } from './step-scope';
 
 import './index.less';
 
@@ -226,6 +227,7 @@ class WorkflowStudio extends React.Component<Props, State> {
             draft={this.place}
             onAdd={this.addStep}
             subMode={this.props.subMode}
+            mode={this.props.mode}
             definitions={definitions?.filter(
               (d) => adding.kind === 'loop' || (adding.kind === 'group') === (d.name === 'step-group')
             )}
@@ -248,6 +250,8 @@ class WorkflowStudio extends React.Component<Props, State> {
               isSubStep={!!showGroup}
               onUpdate={this.onUpdateStep}
               step={showStep}
+              scope={stepScope(steps, showStep.name, { mode, subMode })}
+              conditionScope={conditionScope(steps, showStep.name, { mode, subMode })}
             />
           </WorkflowEditContext.Provider>
         )}
