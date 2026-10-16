@@ -17,9 +17,21 @@
     margin-bottom: 8px;
   }
 
+  .status-tooltip-heading {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
   .status-tooltip-title {
     font-weight: 600;
     font-size: 14px;
+  }
+
+  .status-tooltip-on {
+    padding-left: 12px;
+    color: #64748b;
+    font-size: 12px;
   }
 
   .status-tooltip-health {
@@ -110,5 +122,31 @@
     letter-spacing: 0;
     background: #f0f0f0;
     border-radius: 8px;
+  }
+}
+
+// The circled k inside a health badge VelaUX read with kstatus, in the
+// badge's own colour.
+.status-tooltip-source-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 2px;
+  color: inherit;
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 1;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.8;
+  cursor: help;
+}
+
+.status-tooltip-source-popup {
+  font-size: 12px;
+  a {
+    color: var(--primary-color);
   }
 }

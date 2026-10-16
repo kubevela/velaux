@@ -22,11 +22,7 @@ export function listApplicationPods(params: {
   });
 }
 
-export function listApplicationPodsDetails(params: {
-  namespace: string;
-  name: string;
-  cluster: string;
-}) {
+export function listApplicationPodsDetails(params: { namespace: string; name: string; cluster: string }) {
   const urlParams = `pod-view{namespace=${params.namespace},name=${params.name},cluster=${params.cluster}}.status`;
   return get('/api/v1/query', {
     params: {
@@ -163,6 +159,19 @@ export function listApplicationResourceTree(params: {
       velaql: urlParams,
     },
   });
+}
+
+// listEnvResourceTree is the resource tree an application's env deploys, its
+// health read by kstatus for the kinds KubeVela does not check itself.
+export function listEnvResourceTree(params: {
+  appName: string;
+  envName: string;
+  componentName?: string;
+  cluster?: string;
+  clusterNs?: string;
+}) {
+  const { appName, envName, ...query } = params;
+  return get(`/api/v1/applications/${appName}/envs/${envName}/resource-tree`, { params: query });
 }
 
 export function detailResource(params: {

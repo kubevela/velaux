@@ -9,7 +9,7 @@ import type { Dispatch } from 'redux';
 import { WorkflowMode } from '@velaux/data';
 
 import { WorkflowEditContext } from '../../context';
-import type { DefinitionBase , WorkflowStep, WorkflowStepBase } from '@velaux/data';
+import type { DefinitionBase, WorkflowStep, WorkflowStepBase } from '@velaux/data';
 
 import { Edge } from './edge';
 import { Step } from './step';

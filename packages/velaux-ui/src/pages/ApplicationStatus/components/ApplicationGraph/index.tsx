@@ -7,9 +7,16 @@ import { TreeGraph } from '../../../../components/TreeGraph';
 import { dependencyItems } from '../../../../utils/dependencies';
 import type { DependencyItem } from '../../../../utils/dependencies';
 import type { TreeNode } from '../../../../components/TreeGraph/interface';
+
+import { resourceOrigin } from './origins';
+import { treeNodeKey } from '../../../../components/TreeGraph/utils';
+import { placementKey, sourceLinks, sourceReads } from './sources';
+import { flowNodes } from './flows';
+import { getApplicationDataFlows } from '../../../../api/application';
 import type {
   ApplicationDetail,
   ApplicationStatus,
+  DataFlow,
   EnvBinding,
   ApplicationComponent,
   ComponentStatus,
@@ -39,6 +46,8 @@ type State = {
   showResource: boolean;
   resource?: ResourceTreeNode;
   zoom: number;
+  // flows are what moves between sources and components; undefined until read.
+  flows?: DataFlow[];
 };
 
 class ApplicationGraph extends React.Component<Props, State> {
@@ -50,7 +59,32 @@ class ApplicationGraph extends React.Component<Props, State> {
     };
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.loadFlows();
+  }
+
+  componentDidUpdate(prev: Props) {
+    if (
+      prev.env?.name !== this.props.env?.name ||
+      prev.application?.name !== this.props.application?.name ||
+      prev.graphType !== this.props.graphType
+    ) {
+      this.loadFlows();
+    }
+  }
+
+  // loadFlows reads the data flows the service graph draws between dependencies.
+  loadFlows() {
+    const { application, env, graphType } = this.props;
+    if (graphType !== 'application-graph' || !application?.name || !env?.name) {
+      return;
+    }
+    getApplicationDataFlows({ name: application.name, envName: env.name }).then((res: any) => {
+      if (res && Array.isArray(res.flows)) {
+        this.setState({ flows: res.flows });
+      }
+    });
+  }
 
   convertNodeType(node: ResourceTreeNode) {
     switch (node.kind) {
@@ -133,6 +167,7 @@ class ApplicationGraph extends React.Component<Props, State> {
 
   buildClusterNode(resources: AppliedResource[], graphType?: string): TreeNode[] {
     const clusterTree: Map<string, TreeNode> = new Map<string, TreeNode>();
+    this.placements = new Map<string, string>();
     if (graphType === 'resource-graph') {
       resources.map((res) => {
         const cluster = res.cluster || 'local';
@@ -142,11 +177,9 @@ class ApplicationGraph extends React.Component<Props, State> {
         const node = clusterTree.get(cluster);
         if (node) {
           if (res.resourceTree) {
-            if (!node.leafNodes) {
-              node.leafNodes = this.convertNode([res.resourceTree]);
-            } else {
-              node.leafNodes = node.leafNodes.concat(this.convertNode([res.resourceTree]));
-            }
+            const applied = this.convertNode([res.resourceTree]);
+            applied[0].origin = resourceOrigin(res, this.props.components, this.props.applicationStatus?.services);
+            node.leafNodes = (node.leafNodes || []).concat(applied);
           }
         }
       });
@@ -169,12 +202,12 @@ class ApplicationGraph extends React.Component<Props, State> {
         const clusterNode = clusterTree.get(name);
         if (clusterNode) {
           const component = componentMap.get(s.name);
-          const dependencies = dependencyItems(s.name, applicationStatus?.dependencies, types);
-          if (!clusterNode.leafNodes) {
-            clusterNode.leafNodes = [this.convertComponentNode(s, component, dependencies)];
-          } else {
-            clusterNode.leafNodes = clusterNode.leafNodes.concat(this.convertComponentNode(s, component, dependencies));
-          }
+          const dependencies = dependencyItems(s.name, applicationStatus?.dependencies, types).concat(
+            sourceReads(s.name, s.cluster, s.namespace, applicationStatus?.sources)
+          );
+          const componentNode = this.convertComponentNode(s, component, dependencies);
+          this.placements.set(placementKey(s.cluster, s.namespace, s.name), treeNodeKey(componentNode));
+          clusterNode.leafNodes = (clusterNode.leafNodes || []).concat(componentNode);
         }
       });
       //this.generateTree(clusterTree, components || []);
@@ -184,6 +217,28 @@ class ApplicationGraph extends React.Component<Props, State> {
       tree.push(value);
     });
     return tree;
+  }
+
+  // placements are the component nodes buildClusterNode put on the graph, by
+  // placementKey, for the source nodes to link to.
+  placements = new Map<string, string>();
+
+  // buildSourceNodes are the Application's spec.sources bindings, each linked
+  // to the component placements that read it.
+  buildSourceNodes(): TreeNode[] {
+    const { applicationStatus } = this.props;
+    const withFlows = !!this.state.flows;
+    return (applicationStatus?.sources || []).map((source) => {
+      const { links, elsewhere } = sourceLinks(source, this.placements);
+      return {
+        nodeType: 'source',
+        resource: { name: source.name, kind: 'Source' },
+        source,
+        // Once the flows are read they join a source to its readers instead.
+        links: withFlows ? [] : links,
+        readersElsewhere: elsewhere,
+      };
+    });
   }
 
   buildTree(): TreeNode {
@@ -198,6 +253,12 @@ class ApplicationGraph extends React.Component<Props, State> {
       },
       leafNodes: this.buildClusterNode(resources, graphType),
     };
+    if (graphType === 'application-graph') {
+      const sourceNodes = this.buildSourceNodes();
+      root.leafNodes = sourceNodes.concat(root.leafNodes || []);
+      const sourceKeys = new Map(sourceNodes.map((n) => [n.resource.name, treeNodeKey(n)]));
+      root.detached = flowNodes(this.state.flows || [], this.placements, sourceKeys);
+    }
     return root;
   }
 

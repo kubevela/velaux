@@ -164,7 +164,7 @@ export interface Service {
         port: number;
         protocol: string;
         targetPort: number;
-      },
+      }
     ];
   };
   status?: {
@@ -234,6 +234,9 @@ export interface ResourceHealthStatus {
   statusCode: string;
   reason: string;
   message: string;
+  // source is kstatus where VelaUX read the health with it, for a kind
+  // KubeVela does not check itself.
+  source?: 'kstatus';
 }
 
 export interface ResourceObject {

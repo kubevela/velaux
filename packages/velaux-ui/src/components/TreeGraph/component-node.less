@@ -1,18 +1,22 @@
-// A component node: its name and health, then its traits as chips below.
-.graph-node-component {
+// A component node: its name and health, then its traits as chips below. A
+// source node shares its layout, without the traits.
+.graph-node-component,
+.graph-node-source {
   align-items: flex-start;
   // Each node's transform gives it a stacking context of its own, so the node
   // rises above its siblings while its trait list hangs over them.
   &.traits-open {
     z-index: 10;
   }
+  // Room inside the border, so the health and trait pills clear its edges.
+  padding-right: 12px;
   .component-node-body {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     width: 100%;
     min-width: 0;
-    padding: 2px 0 6px;
+    padding: 8px 0 10px;
   }
 }
 
@@ -83,4 +87,24 @@
   font-weight: 500;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+// A node's definition, under its name, and the revision its type resolves to.
+.definition-line {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 16px;
+  .definition-name {
+    overflow: hidden;
+    color: #334155;
+    font-weight: 500;
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .definition-version {
+    color: #94a3b8;
+    font-size: 11px;
+  }
 }
