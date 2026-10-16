@@ -691,12 +691,15 @@
   "Cannot be changed once deployed": "部署后不可更改",
   "Abstract": "抽象",
   "extends": "继承自",
+  "Managed by application": "由应用管理",
+  "This addon was installed by the application's addon component. Enable, upgrade and disable it there.": "此插件由该应用的 addon 组件安装，请在该应用中启用、升级或禁用。",
   "Scope": "作用范围",
   "Deployment": "部署",
   "Running": "运行中",
   "YAML": "YAML",
   "Custom": "自定义",
   "Expressions": "表达式",
+  "Template": "模板",
   "Group": "分组",
   "steps": "个步骤"
 }

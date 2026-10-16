@@ -13,8 +13,10 @@ import {
   Grid,
   Dropdown,
   Menu,
+  Balloon,
 } from '@alifd/next';
 import React from 'react';
+import { AiOutlineInfoCircle } from 'react-icons/ai';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -27,7 +29,16 @@ import StatusShow from '../../../../components/StatusShow';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
 import i18n from '../../../../i18n';
-import type { Addon, AddonStatus, EnableAddonRequest , ApplicationStatus, UIParam , NameAlias , Endpoint } from '@velaux/data';
+import type {
+  Addon,
+  AddonManager,
+  AddonStatus,
+  EnableAddonRequest,
+  ApplicationStatus,
+  UIParam,
+  NameAlias,
+  Endpoint,
+} from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 
 import 'github-markdown-css/github-markdown-light.css';
@@ -55,6 +66,7 @@ type State = {
   upgradeLoading: boolean;
   args?: any;
   addonsStatus?: ApplicationStatus;
+  managedBy?: AddonManager;
   showStatusVisible: boolean;
   mode?: 'new' | 'edit';
   version?: string;
@@ -160,6 +172,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
           statusLoading: false,
           clusters: clusters || ['local'],
           addonsStatus: res.appStatus,
+          managedBy: res.managedBy,
           enabledClusters: enabledClusters,
         });
       })
@@ -312,6 +325,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
       upgradeLoading,
       enableLoading,
       addonsStatus,
+      managedBy,
       showStatusVisible,
       version,
       clusters,
@@ -339,6 +353,27 @@ class AddonDetailDialog extends React.Component<Props, State> {
 
     const workflowStatus = addonsStatus?.status;
 
+    // An addon an Application installed is changed through that Application,
+    // which would otherwise put its own version back.
+    if (managedBy) {
+      buttons.push(
+        <Balloon.Tooltip
+          key="managed"
+          align="t"
+          trigger={
+            <span className="addon-managed">
+              <AiOutlineInfoCircle size={14} />
+              {i18n.t('Managed by application')} {managedBy.namespace}/{managedBy.name}
+            </span>
+          }
+        >
+          {i18n.t(
+            "This addon was installed by the application's addon component. Enable, upgrade and disable it there."
+          )}
+        </Balloon.Tooltip>
+      );
+    }
+
     if (status === 'enabled' || status === 'enabling' || status === 'disabling') {
       buttons.push(
         <Permission
@@ -353,9 +388,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
             type="secondary"
             onClick={this.onDisable}
             title={status}
-            className="danger-btn"
+            className={managedBy ? undefined : 'danger-btn'}
             loading={status === 'disabling'}
-            disabled={status === 'disabling'}
+            disabled={status === 'disabling' || !!managedBy}
           >
             <Translation>Disable</Translation>
           </Button>
@@ -366,7 +401,13 @@ class AddonDetailDialog extends React.Component<Props, State> {
     if (status == 'enabled' || status == 'suspend' || workflowStatus == 'workflowFailed') {
       buttons.push(
         <Permission key={'upgrade'} request={{ resource: `addon:${addonName}`, action: 'update' }} project={''}>
-          <Button loading={upgradeLoading} type="primary" onClick={this.onUpgrade} style={{ marginLeft: '16px' }}>
+          <Button
+            loading={upgradeLoading}
+            type="primary"
+            onClick={this.onUpgrade}
+            style={{ marginLeft: '16px' }}
+            disabled={!!managedBy}
+          >
             <Translation>Upgrade</Translation>
           </Button>
         </Permission>
@@ -381,6 +422,7 @@ class AddonDetailDialog extends React.Component<Props, State> {
             type="primary"
             onClick={this.onEnable}
             style={{ marginLeft: '16px' }}
+            disabled={!!managedBy}
           >
             <Translation>Enable</Translation>
           </Button>

@@ -11233,6 +11233,9 @@
 				"phase"
 			],
 			"properties": {
+				"managedBy": {
+					"$ref": "#/definitions/v1.AddonManager"
+				},
 				"name": {
 					"type": "string"
 				},
@@ -11264,6 +11267,20 @@
 					"$ref": "#/definitions/addon.Meta"
 				},
 				"registryName": {
+					"type": "string"
+				}
+			}
+		},
+		"v1.AddonManager": {
+			"required": [
+				"name",
+				"namespace"
+			],
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"namespace": {
 					"type": "string"
 				}
 			}
@@ -11323,6 +11340,9 @@
 				},
 				"installedVersion": {
 					"type": "string"
+				},
+				"managedBy": {
+					"$ref": "#/definitions/v1.AddonManager"
 				},
 				"name": {
 					"type": "string"

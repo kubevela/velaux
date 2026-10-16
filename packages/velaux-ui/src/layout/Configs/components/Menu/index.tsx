@@ -1,7 +1,9 @@
-import { Icon, Grid } from '@alifd/next';
+import { Icon, Grid, Tag } from '@alifd/next';
 import { Link } from 'dva/router';
 import _ from 'lodash';
 import React, { Component } from 'react';
+
+import { Translation } from '../../../../components/Translation';
 
 import aliyunImg from '../../../../assets/aliyun.svg';
 import awsImg from '../../../../assets/aws.svg';
@@ -114,7 +116,14 @@ class Menu extends Component<Props, State> {
                 </div>
               </Col>
               <Col span="17">
-                <div className="menu-item-description">{item.alias || item.name}</div>
+                <div className="menu-item-description">
+                  {item.alias || item.name}
+                  {item.legacy && (
+                    <Tag size="small" className="menu-item-legacy">
+                      <Translation>Legacy</Translation>
+                    </Tag>
+                  )}
+                </div>
               </Col>
               <Col span="2">
                 <div className="menu-item-icon">

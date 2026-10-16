@@ -8,6 +8,8 @@ export interface ConfigTemplate {
   scope: string;
   sensitive: boolean;
   createTime: string;
+  // legacy marks a template kept as a config-template ConfigMap, not a ConfigTemplate.
+  legacy?: boolean;
 }
 
 export interface ConfigTemplateDetail extends ConfigTemplate {
@@ -46,6 +48,11 @@ export interface Config {
   properties?: Record<string, any>;
   shared: boolean;
   targets?: TargetClusterStatus[];
+  // legacy marks a config kept as a Secret VelaUX writes, not a Config.
+  legacy?: boolean;
+  // phase and message are a Config's status.
+  phase?: string;
+  message?: string;
 }
 
 export interface ConfigDistribution {
