@@ -423,6 +423,9 @@ type ListApplicationOptions struct {
 	Labels     map[string]string `json:"labels"`
 	// WithStatus fills each application's status summary from its envs.
 	WithStatus bool `json:"withStatus"`
+	// Addons is exclude, to leave out the applications addons install, or only,
+	// for those alone; every application otherwise.
+	Addons string `json:"addons,omitempty"`
 }
 
 // ListApplicationResponse list applications by query params

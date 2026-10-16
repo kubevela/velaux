@@ -4,6 +4,8 @@ import React from 'react';
 import Addons from '../../pages/Addons/index';
 import DefinitionDoc from '../../pages/DefinitionDoc';
 import DefinitionFile from '../../pages/DefinitionFile';
+import DefKitModuleDetail from '../../pages/DefKitModuleDetail';
+import DefKitModules from '../../pages/DefKitModules';
 import PackageDetail from '../../pages/PackageDetail';
 import Packages from '../../pages/Packages';
 import ApplicationConfig from '../../pages/ApplicationConfig';
@@ -276,6 +278,8 @@ export default function Router() {
         }}
       />
       <Route exact path="/packages" component={Packages} />
+      <Route exact path="/defkit" component={DefKitModules} />
+      <Route exact path="/defkit/:name" component={DefKitModuleDetail} />
       <Route exact path="/packages/builtin" component={PackageDetail} />
       <Route exact path="/packages/:namespace/:name" component={PackageDetail} />
       <Route

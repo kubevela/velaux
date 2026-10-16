@@ -73,6 +73,7 @@ func InitAPIBean() []interface{} {
 	RegisterAPI(NewDefinition())
 	RegisterAPI(NewExpression())
 	RegisterAPI(NewPackage())
+	RegisterAPI(NewDefKit())
 	RegisterAPI(NewCustomisation())
 	RegisterAPI(NewAddon())
 	RegisterAPI(NewEnabledAddon())
