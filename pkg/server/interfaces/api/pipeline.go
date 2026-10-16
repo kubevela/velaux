@@ -22,7 +22,6 @@ import (
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
-	"github.com/kubevela/workflow/api/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/klog/v2"
 
@@ -167,10 +166,10 @@ func initPipelineRoutes(ws *restful.WebService, n *project) {
 	// get pipeline run status
 	ws.Route(ws.GET("/{projectName}/pipelines/{pipelineName}/runs/{runName}/status").To(n.getPipelineRunStatus).
 		Doc("get pipeline run status").
-		Returns(200, "OK", v1alpha1.WorkflowRunStatus{}).
+		Returns(200, "OK", apis.PipelineRunStatus{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Filter(n.RBACService.CheckPerm("project/pipeline/pipelineRun", "detail")).
-		Writes(v1alpha1.WorkflowRunStatus{}).Do(meta, projParam, pipelineParam, runParam))
+		Writes(apis.PipelineRunStatus{}).Do(meta, projParam, pipelineParam, runParam))
 
 	// get pipeline run log
 	ws.Route(ws.GET("/{projectName}/pipelines/{pipelineName}/runs/{runName}/log").To(n.getPipelineRunLog).
@@ -420,7 +419,7 @@ func (n *project) getPipelineRun(req *restful.Request, res *restful.Response) {
 
 func (n *project) getPipelineRunStatus(req *restful.Request, res *restful.Response) {
 	pipelineRun := req.Request.Context().Value(&apis.CtxKeyPipelineRun).(*apis.PipelineRun)
-	if err := res.WriteEntity(pipelineRun.Status); err != nil {
+	if err := res.WriteEntity(apis.PipelineRunStatus{WorkflowRunStatus: pipelineRun.Status, Loops: pipelineRun.Loops}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}

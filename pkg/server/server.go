@@ -510,7 +510,7 @@ func (s *restServer) proxyDexService(res http.ResponseWriter, req *http.Request)
 		req.URL.Scheme = u.Scheme
 		req.URL.Host = u.Host
 	}
-	dexProxy := &httputil.ReverseProxy{Director: director}
+	dexProxy := &httputil.ReverseProxy{Director: director} //nolint:staticcheck // Rewrite changes which headers reach the upstream.
 	dexProxy.ServeHTTP(res, req)
 }
 

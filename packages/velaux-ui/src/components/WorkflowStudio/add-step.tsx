@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React from 'react';
 
 import i18n from '../../i18n';
-import type { DefinitionBase, WorkflowMode, WorkflowStep, WorkflowStepBase } from '@velaux/data';
+import type { DefinitionBase, ForEach, WorkflowMode, WorkflowStep, WorkflowStepBase } from '@velaux/data';
 import { checkName, showAlias } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import { isUsable } from '../../utils/restrictions';
@@ -11,6 +11,8 @@ import Item from '../Item';
 import { Translation } from '../Translation';
 
 import { WorkflowEditContext } from '../../context';
+import { forEachProblem } from './loop-edit';
+import { LoopItems } from './loop-items';
 import StepForm from './step-form';
 import { StepTypeIcon } from './step-icon';
 
@@ -120,6 +122,8 @@ type Props = {
   draft: (step: WorkflowStepBase) => { steps: WorkflowStep[]; step: WorkflowStepBase };
   onAdd: (step: WorkflowStepBase) => void;
   addSub?: boolean;
+  // loop adds a loop: the step, or group, then what it repeats over.
+  loop?: boolean;
   // subMode is how a new group's steps run until it is changed here.
   subMode?: WorkflowMode;
 };
@@ -128,19 +132,20 @@ type State = {
   stage: number;
   details?: { name: string; alias?: string; description?: string };
   groupMode?: WorkflowMode;
+  forEach: ForEach;
 };
 
-type Stage = 'type' | 'details' | 'properties';
+type Stage = 'type' | 'details' | 'items' | 'properties';
 
 // AddStep adds a step in stages: its type (unless only one is on offer), its
-// name and description, then its properties. Nothing is added until Add, and
+// name and description, for a loop what it repeats over, then its properties. Nothing is added until Add, and
 // only once every stage is valid; cancelling at any stage adds nothing.
 class AddStep extends React.Component<Props, State> {
   field = new Field(this);
   form = React.createRef<StepForm>();
   constructor(props: Props) {
     super(props);
-    this.state = { stage: 0 };
+    this.state = { stage: 0, forEach: { items: [] } };
   }
 
   // usable are the types on offer: inside a group, no group.
@@ -153,7 +158,10 @@ class AddStep extends React.Component<Props, State> {
     return this.state.selectType || (usable.length === 1 ? usable[0] : undefined);
   };
 
-  stages = (): Stage[] => (this.usable().length === 1 ? ['details', 'properties'] : ['type', 'details', 'properties']);
+  stages = (): Stage[] => {
+    const stages: Stage[] = this.usable().length === 1 ? ['details', 'properties'] : ['type', 'details', 'properties'];
+    return this.props.loop ? [...stages.slice(0, -1), 'items', 'properties'] : stages;
+  };
 
   // draftStep is the step as the stages so far describe it.
   draftStep = (): WorkflowStepBase => {
@@ -165,6 +173,7 @@ class AddStep extends React.Component<Props, State> {
       alias: details?.alias,
       description: details?.description,
       ...(type?.name === 'step-group' ? { mode: groupMode || this.props.subMode || 'DAG' } : {}),
+      ...(this.props.loop ? { forEach: this.state.forEach } : {}),
     } as WorkflowStepBase;
   };
 
@@ -172,6 +181,12 @@ class AddStep extends React.Component<Props, State> {
     const stage = this.stages()[this.state.stage];
     if (stage === 'type') {
       if (this.chosen()) {
+        this.setState({ stage: this.state.stage + 1 });
+      }
+      return;
+    }
+    if (stage === 'items') {
+      if (!forEachProblem(this.state.forEach)) {
         this.setState({ stage: this.state.stage + 1 });
       }
       return;
@@ -202,8 +217,8 @@ class AddStep extends React.Component<Props, State> {
     }
     form.collect((step) => {
       if (step) {
-        const { mode } = this.draftStep() as WorkflowStepBase & { mode?: WorkflowMode };
-        this.props.onAdd(mode ? ({ ...step, mode } as WorkflowStepBase) : step);
+        const { mode, forEach } = this.draftStep() as WorkflowStepBase & { mode?: WorkflowMode; forEach?: ForEach };
+        this.props.onAdd({ ...step, ...(mode ? { mode } : {}), ...(forEach ? { forEach } : {}) } as WorkflowStepBase);
       }
     });
   };
@@ -311,6 +326,15 @@ class AddStep extends React.Component<Props, State> {
     );
   };
 
+  renderItems = () => {
+    const draft = this.props.draft(this.draftStep());
+    return (
+      <WorkflowEditContext.Provider value={{ stepName: draft.step.name, steps: draft.steps }}>
+        <LoopItems value={this.state.forEach} onChange={(forEach) => this.setState({ forEach })} />
+      </WorkflowEditContext.Provider>
+    );
+  };
+
   renderProperties = () => {
     const draft = this.props.draft(this.draftStep());
     const group = draft.step.type === 'step-group';
@@ -339,7 +363,12 @@ class AddStep extends React.Component<Props, State> {
     const stages = this.stages();
     const stage = stages[this.state.stage];
     const group = this.chosen()?.name === 'step-group';
-    const titles: Record<Stage, string> = { type: 'Type', details: 'Details', properties: 'Properties' };
+    const titles: Record<Stage, string> = {
+      type: 'Type',
+      details: 'Details',
+      items: 'Items',
+      properties: 'Properties',
+    };
     const last = this.state.stage === stages.length - 1;
     return (
       <Dialog
@@ -348,7 +377,7 @@ class AddStep extends React.Component<Props, State> {
         overflowScroll={true}
         onClose={onClose}
         width={800}
-        title={i18n.t(group ? 'Add Group' : 'Add Step').toString()}
+        title={i18n.t(this.props.loop ? 'Add Loop' : group ? 'Add Group' : 'Add Step').toString()}
         visible
         v2
         footer={
@@ -366,7 +395,13 @@ class AddStep extends React.Component<Props, State> {
                 <Translation>Add</Translation>
               </Button>
             ) : (
-              <Button type="primary" disabled={stage === 'type' && !this.chosen()} onClick={this.next}>
+              <Button
+                type="primary"
+                disabled={
+                  (stage === 'type' && !this.chosen()) || (stage === 'items' && !!forEachProblem(this.state.forEach))
+                }
+                onClick={this.next}
+              >
                 <Translation>Next</Translation>
               </Button>
             )}
@@ -381,6 +416,7 @@ class AddStep extends React.Component<Props, State> {
         <div className="add-step-body">
           {stage === 'type' && this.renderType()}
           {stage === 'details' && this.renderDetails()}
+          {stage === 'items' && this.renderItems()}
           {stage === 'properties' && this.renderProperties()}
         </div>
       </Dialog>

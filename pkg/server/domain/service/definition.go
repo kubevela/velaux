@@ -120,6 +120,9 @@ const (
 	kindPolicyDefinition       = "PolicyDefinition"
 	kindSourceDefinition       = "SourceDefinition"
 
+	// definitionTypeSource is the type name VelaUX's API gives a SourceDefinition.
+	definitionTypeSource = "source"
+
 	// LabelDefinitionScope is the label key for definition scope, with this key, we know if the definition is for Application or WorkflowRun
 	LabelDefinitionScope = "custom.definition.oam.dev/scope"
 )
@@ -288,7 +291,7 @@ func getKindAndVersion(defType string) (apiVersion, kind string, err error) {
 	case "policy":
 		return definitionAPIVersion, kindPolicyDefinition, nil
 
-	case "source":
+	case definitionTypeSource:
 		return definitionAPIVersion, kindSourceDefinition, nil
 
 	default:
@@ -331,7 +334,7 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(def.Object, compDef); err != nil {
 			return nil, errors.Wrap(err, "invalid component definition")
 		}
-		definition.WorkloadType = compDef.Spec.Workload.Type
+		definition.WorkloadType = compDef.Spec.Workload.Type //nolint:staticcheck // still returned for clients that read it
 		definition.Component = &compDef.Spec
 	}
 	if kind == kindTraitDefinition {
@@ -749,11 +752,11 @@ func policyScope(policyType string, scope v1beta1.PolicyScope) string {
 // revisionTypes are the definition types a DefinitionRevision records, by the
 // type name VelaUX's API uses.
 var revisionTypes = map[string]common.DefinitionType{
-	"component":    common.ComponentType,
-	"trait":        common.TraitType,
-	"policy":       common.PolicyType,
-	"workflowstep": common.WorkflowStepType,
-	"source":       common.SourceType,
+	"component":          common.ComponentType,
+	"trait":              common.TraitType,
+	"policy":             common.PolicyType,
+	"workflowstep":       common.WorkflowStepType,
+	definitionTypeSource: common.SourceType,
 }
 
 // revisionOf is the name of the definition a revision snapshots.

@@ -224,7 +224,7 @@ var _ = Describe("Test the rest api about the config", func() {
 
 	It("Test creating a config to a project", func() {
 
-		delete(fmt.Sprintf("/projects/" + projectName))
+		delete("/projects/" + projectName)
 
 		createProject := v1.CreateProjectRequest{
 			Name:  projectName,

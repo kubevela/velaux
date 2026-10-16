@@ -71,6 +71,90 @@
     background: #e2e8f0;
     border-radius: 4px;
   }
+  // A loop is a group that repeats: violet, and stacked when closed.
+  .step.group.loop {
+    background: #faf7ff;
+    border-color: #c4b5fd;
+    &:hover {
+      border-color: #c4b5fd;
+    }
+    &:not(.open) {
+      box-shadow: 4px 4px 0 -1px #fff, 4px 4px 0 0 #ddd6fe, 8px 8px 0 -1px #fff, 8px 8px 0 0 #ede9fe;
+    }
+  }
+  .step-group-tag.loop-tag {
+    color: #5b21b6;
+    background: #ede9fe;
+  }
+  .loop-segments {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+  }
+  .loop-segment {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+  .loop-segment-bar {
+    height: 6px;
+    background: var(--tone);
+    border-radius: 3px;
+  }
+  .loop-segment.tone-neutral .loop-segment-bar {
+    background: #e2e8f0;
+  }
+  .loop-segment-label {
+    overflow: hidden;
+    color: #475569;
+    font-size: 11px;
+    font-family: var(--font-family-code, monospace);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .loop-lanes {
+    display: flex;
+    flex-direction: column;
+    margin: 10px -6px -6px -5px;
+  }
+  .loop-lane {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 10px;
+    background: #fff;
+    border: 1px solid #ede9fe;
+    border-radius: 8px;
+  }
+  .loop-lane-label {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    width: 76px;
+    cursor: default;
+  }
+  .loop-lane-name {
+    overflow: hidden;
+    color: #0f172a;
+    font-weight: 600;
+    font-size: 13px;
+    font-family: var(--font-family-code, monospace);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .loop-lane-index {
+    color: #64748b;
+    font-size: 11px;
+  }
+  .loop-then {
+    margin-left: 40px;
+    padding: 2px 0 2px 8px;
+    color: #64748b;
+    font-size: 11px;
+    border-left: 2px solid #c4b5fd;
+  }
   .step-group-toggle {
     display: inline-flex;
     padding: 2px;

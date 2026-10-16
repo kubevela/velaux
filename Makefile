@@ -5,17 +5,17 @@ all: docker-build
 
 .PHONY: golangci
 golangci:
-ifeq ($(shell $(GLOBAL_GOLANGCILINT) version --format short), $(GOLANGCILINT_VERSION))
+ifeq ($(shell $(GLOBAL_GOLANGCILINT) version --short), $(GOLANGCILINT_VERSION))
 	@$(OK) golangci-lint is already installed
 GOLANGCILINT=$(GLOBAL_GOLANGCILINT)
-else ifeq ($(shell $(GOBIN_GOLANGCILINT) version --format short), $(GOLANGCILINT_VERSION))
+else ifeq ($(shell $(GOBIN_GOLANGCILINT) version --short), $(GOLANGCILINT_VERSION))
 	@$(OK) golangci-lint is already installed
 GOLANGCILINT=$(GOBIN_GOLANGCILINT)
 else
 	@{ \
 	set -e ;\
 	echo 'installing golangci-lint-$(GOLANGCILINT_VERSION)' ;\
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v$(GOLANGCILINT_VERSION) ;\
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v$(GOLANGCILINT_VERSION) ;\
 	echo 'Successfully installed' ;\
 	}
 GOLANGCILINT=$(GOBIN)/golangci-lint
@@ -27,7 +27,7 @@ ifeq (, $(shell which staticcheck))
 	@{ \
 	set -e ;\
 	echo 'installing honnef.co/go/tools/cmd/staticcheck ' ;\
-	go install honnef.co/go/tools/cmd/staticcheck@v0.5.1 ;\
+	go install honnef.co/go/tools/cmd/staticcheck@v0.8.2 ;\
 	}
 STATICCHECK=$(GOBIN)/staticcheck
 else

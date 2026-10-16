@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
 	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 )
@@ -40,4 +41,19 @@ func TestFromCRWorkflowStepsAlias(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Standard checks", steps[0].Alias)
 	assert.Equal(t, "Health check", steps[0].SubSteps[0].Alias)
+}
+
+func TestFromCRWorkflowStepsForEach(t *testing.T) {
+	forEach := &wfTypesv1alpha1.ForEach{
+		Items: &apiextensionsv1.JSON{Raw: []byte(`[{"name":"east"},{"name":"west"}]`)},
+		Key:   []string{"name"},
+		Mode:  "StepByStep",
+	}
+	steps, err := FromCRWorkflowSteps([]wfTypesv1alpha1.WorkflowStep{
+		{WorkflowStepBase: wfTypesv1alpha1.WorkflowStepBase{Name: "deploy", Type: "deploy"}, ForEach: forEach},
+		{WorkflowStepBase: wfTypesv1alpha1.WorkflowStepBase{Name: "rollout", Type: "step-group"}, ForEach: &wfTypesv1alpha1.ForEach{From: "regions"}},
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, forEach, steps[0].ForEach)
+	assert.Equal(t, "regions", steps[1].ForEach.From)
 }

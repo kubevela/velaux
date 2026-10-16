@@ -15,7 +15,7 @@ on:
 
 env:
   # Common versions
-  GO_VERSION: '1.23.8'
+  GO_VERSION: '1.27.1'
 
 permissions:
   contents: read
@@ -87,8 +87,8 @@ jobs:
 
       - name: Install envtest binaries
         run: |
-          go install sigs.k8s.io/controller-runtime/tools/setup-envtest@v0.0.0-20250308055145-5fe7bb3edc86 # release-0.19
-          echo "KUBEBUILDER_ASSETS=$("$(go env GOPATH)/bin/setup-envtest" use 1.26.1 -p path)" >> "$GITHUB_ENV"
+          go install sigs.k8s.io/controller-runtime/tools/setup-envtest@v0.25.2
+          echo "KUBEBUILDER_ASSETS=$("$(go env GOPATH)/bin/setup-envtest" use 1.37.0 -p path)" >> "$GITHUB_ENV"
 
       - name: Run api server unit test
         run: make unit-test-server-ci

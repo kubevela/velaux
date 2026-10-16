@@ -23,6 +23,7 @@ import (
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apiserver/pkg/endpoints/request"
@@ -155,6 +156,10 @@ func (g *guard) DeleteAllOf(context.Context, client.Object, ...client.DeleteAllO
 	return ErrReadOnly
 }
 
+func (g *guard) Apply(context.Context, runtime.ApplyConfiguration, ...client.ApplyOption) error {
+	return ErrReadOnly
+}
+
 func (g *guard) Status() client.SubResourceWriter {
 	return refused{}
 }
@@ -179,5 +184,9 @@ func (refused) Update(context.Context, client.Object, ...client.SubResourceUpdat
 }
 
 func (refused) Patch(context.Context, client.Object, client.Patch, ...client.SubResourcePatchOption) error {
+	return ErrReadOnly
+}
+
+func (refused) Apply(context.Context, runtime.ApplyConfiguration, ...client.SubResourceApplyOption) error {
 	return ErrReadOnly
 }

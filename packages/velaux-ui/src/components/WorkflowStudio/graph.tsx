@@ -22,12 +22,14 @@ import type { StepEdge } from '../PipelineGraph/dependencies';
 import { canMove, forwardWaits, stepEdges } from '../PipelineGraph/dependencies';
 import { StepEdges, stepWidth, useStepLayout } from '../PipelineGraph/layout';
 import { Translation } from '../Translation';
+import { describeItems } from '../PipelineGraph/loop';
 import { addPreview, canDependOn } from './edit';
+import { loopModeLabel } from './loop-items';
 import '../PipelineGraph/index.less';
 
-// AddAt is what to add and where: a step or a group, into a group or the top
-// level, after a step (in the middle, or as a branch from it) or last.
-export type AddAt = { kind: 'step' | 'group'; group?: string; after?: string; branch?: boolean };
+// AddAt is what to add and where: a step, a group or a loop, into a group or
+// the top level, after a step (in the middle, or as a branch from it) or last.
+export type AddAt = { kind: 'step' | 'group' | 'loop'; group?: string; after?: string; branch?: boolean };
 
 type StudioGraphProps = {
   steps: WorkflowStep[];
@@ -39,6 +41,9 @@ type StudioGraphProps = {
   onAdd: (at: AddAt) => void;
   onEdit: (step: WorkflowStepBase, group?: string) => void;
   onDelete: (name: string, group?: string) => void;
+  // onLoop opens a top-level step's loop: to make it repeat, or to change or
+  // stop its repeating.
+  onLoop: (step: WorkflowStep) => void;
   onGroupMode: (group: string, mode: WorkflowMode) => void;
   onMove: (name: string, group: string | undefined, delta: -1 | 1) => void;
   // onLink makes step `to` wait on step `from`; onUnlink stops it.
@@ -61,9 +66,11 @@ const modeOptions = () => [
 const label = (step: { alias?: string; name: string }) => step.alias || step.name;
 
 // StepTools are a card's moves (where steps run in order, each offered only
-// where it keeps the step after what it waits on) and Delete, shown on hover.
+// where it keeps the step after what it waits on), Repeat (for a top-level step
+// that is not yet a loop) and Delete, shown on hover.
 const StepTools = (props: {
   onDelete: () => void;
+  onRepeat?: () => void;
   onMove?: (delta: -1 | 1) => void;
   earlier?: boolean;
   later?: boolean;
@@ -86,6 +93,7 @@ const StepTools = (props: {
     <span className="studio-step-tools">
       {props.onMove && tool('Move earlier', <BsArrowLeftShort />, () => props.onMove!(-1), !props.earlier)}
       {props.onMove && tool('Move later', <BsArrowRightShort />, () => props.onMove!(1), !props.later)}
+      {props.onRepeat && tool('Repeat this once per item', <BsArrowRepeat />, props.onRepeat)}
       {tool('Delete', <BsTrash3 />, props.onDelete)}
     </span>
   );
@@ -160,7 +168,7 @@ const AddMenu = (props: {
 // PreviewTree draws a small tree: root, then each node as a chip, a node's
 // children nested under it; added marks the chip that would be new, and a
 // group is drawn as a box holding a couple of small steps.
-type PreviewNode = { label: string; added?: boolean; group?: boolean; children?: PreviewNode[] };
+type PreviewNode = { label: string; added?: boolean; group?: boolean; loop?: boolean; children?: PreviewNode[] };
 const PreviewTree = (props: { root: string; nodes: PreviewNode[]; caption: string }) => {
   const shown = (nodes: PreviewNode[]) => {
     const limit = 4;
@@ -169,7 +177,18 @@ const PreviewTree = (props: { root: string; nodes: PreviewNode[]; caption: strin
       <ul className="pv-tree">
         {nodes.slice(0, limit).map((n) => (
           <li key={n.label}>
-            {n.group ? (
+            {n.loop ? (
+              <span className={classNames('pv-chip', 'pv-group', 'pv-loop', { added: n.added })}>
+                <span className="pv-group-tag">
+                  <BsArrowRepeat />
+                  <Translation>Loop</Translation>
+                </span>
+                <Translation>{n.label}</Translation>
+                <span className="pv-subs">
+                  <span className="pv-sub" />
+                </span>
+              </span>
+            ) : n.group ? (
               <span className={classNames('pv-chip', 'pv-group', { added: n.added })}>
                 <span className="pv-group-tag">
                   <BsCollection />
@@ -208,6 +227,50 @@ const PreviewTree = (props: { root: string; nodes: PreviewNode[]; caption: strin
   );
 };
 
+// LoopStrip heads a loop's card: tagged as a loop, what it repeats over and how
+// the items run. Clicking it opens the loop.
+const LoopStrip = (props: { step: WorkflowStep; readOnly?: boolean; onOpen: () => void }) => {
+  const forEach = props.step.forEach!;
+  const items = describeItems(forEach);
+  const source =
+    items.source === 'from' ? 'from' : items.source === 'expression' ? 'from the expression' : 'for each of';
+  return (
+    <button
+      type="button"
+      className="studio-loop-strip"
+      title={i18n.t(props.readOnly ? 'What this loop repeats over' : 'Change what this repeats over').toString()}
+      disabled={props.readOnly}
+      onClick={(event) => {
+        event.stopPropagation();
+        props.onOpen();
+      }}
+    >
+      <span className="step-group-tag loop-tag">
+        <BsArrowRepeat />
+        <Translation>Loop</Translation>
+      </span>
+      <span className="studio-loop-items">
+        <Translation>{source}</Translation>
+        {items.chips.map((c) => (
+          <code key={c} className="studio-loop-chip" title={c}>
+            {c}
+          </code>
+        ))}
+        {items.more > 0 && <span className="studio-loop-more">+{items.more}</span>}
+      </span>
+      {forEach.key && forEach.key.length > 0 && (
+        <span className="studio-loop-items">
+          <Translation>named by</Translation>
+          <code className="studio-loop-chip">{forEach.key.join(' - ')}</code>
+        </span>
+      )}
+      <span className="studio-loop-mode">
+        <Translation>{loopModeLabel(forEach.mode)}</Translation>
+      </span>
+    </button>
+  );
+};
+
 // StudioGraph draws a workflow's steps for editing, laid out by what they wait
 // on as a run is. Each card adds after it inline or as a branch; clicking a
 // card edits it, and hovering a card shows its moves and Delete. A group holds
@@ -221,6 +284,7 @@ export const StudioGraph = (props: StudioGraphProps) => {
     onAdd,
     onEdit,
     onDelete,
+    onLoop,
     onGroupMode,
     onMove,
     onLink,
@@ -243,29 +307,30 @@ export const StudioGraph = (props: StudioGraphProps) => {
     readOnly ? null : (
       <StepTools
         onDelete={() => onDelete(step.name, group)}
+        onRepeat={!group && !step.forEach ? () => onLoop(step) : undefined}
         onMove={mode === 'StepByStep' ? (delta) => onMove(step.name, group, delta) : undefined}
         earlier={canMove(steps, index, -1)}
         later={canMove(steps, index, 1)}
       />
     );
-  // addItems are what can be added: no group inside a group, and no loop yet.
+  // addItems are what can be added: no group or loop inside a group, since
+  // only a top-level step can repeat.
   const addItems: AddItem[] = [
     { key: 'step', label: 'Step', icon: <BsSquare /> },
     { key: 'group', label: 'Group', icon: <BsCollection />, disabled: !!group },
-    { key: 'loop', label: 'Loop', icon: <BsArrowRepeat />, disabled: true, note: 'Soon' },
+    { key: 'loop', label: 'Loop', icon: <BsArrowRepeat />, disabled: !!group },
   ];
+  const kindOf = (key: string): AddAt['kind'] => (key === 'group' ? 'group' : key === 'loop' ? 'loop' : 'step');
   const labelOf = (name: string) => label(steps.find((x) => x.name === name) || { name });
   // previewAfter draws what adding the hovered item after step would do,
   // inline or as a branch.
   const previewAfter = (step: WorkflowStep, key: string, branch: boolean) => {
-    if (key === 'loop') {
-      return <div className="pv-caption">{i18n.t('Loops are coming soon').toString()}</div>;
-    }
     const { moved, stay } = addPreview(steps, step.name, branch ? 'branch' : 'step', mode);
     const added: PreviewNode = {
-      label: key === 'group' ? 'New group' : 'New step',
+      label: key === 'group' ? 'New group' : key === 'loop' ? 'New loop' : 'New step',
       added: true,
       group: key === 'group',
+      loop: key === 'loop',
       children: moved.map((n) => ({ label: labelOf(n) })),
     };
     const kept = stay.map((n) => ({ label: labelOf(n) }));
@@ -311,9 +376,7 @@ export const StudioGraph = (props: StudioGraphProps) => {
         <AddMenu
           preview={(key) => previewAfter(step, key, branch)}
           items={addItems}
-          onPick={(key) =>
-            key !== 'loop' && onAdd({ kind: key === 'group' ? 'group' : 'step', group, after: step.name, branch })
-          }
+          onPick={(key) => onAdd({ kind: kindOf(key), group, after: step.name, branch })}
         >
           {button}
         </AddMenu>
@@ -424,6 +487,7 @@ export const StudioGraph = (props: StudioGraphProps) => {
         )}
         {steps.map((step, index) => {
           const isGroup = step.type === 'step-group';
+          const looped = !!step.forEach;
           const ownMode: WorkflowMode = (step.mode as WorkflowMode) || subMode;
           return (
             <div
@@ -436,7 +500,7 @@ export const StudioGraph = (props: StudioGraphProps) => {
               style={layout.place(step.name)}
             >
               <div
-                className={classNames('step', 'studio-step', { group: isGroup, open: isGroup })}
+                className={classNames('step', 'studio-step', { group: isGroup, open: isGroup, looped })}
                 style={isGroup ? undefined : { width: stepWidth }}
                 onClick={(event) => {
                   event.stopPropagation();
@@ -445,6 +509,7 @@ export const StudioGraph = (props: StudioGraphProps) => {
                   }
                 }}
               >
+                {looped && step.forEach && <LoopStrip step={step} readOnly={readOnly} onOpen={() => onLoop(step)} />}
                 {isGroup && (
                   <div className="step-group-head">
                     <span className="step-group-tag">
@@ -507,6 +572,7 @@ export const StudioGraph = (props: StudioGraphProps) => {
                       onAdd={onAdd}
                       onEdit={onEdit}
                       onDelete={onDelete}
+                      onLoop={onLoop}
                       onGroupMode={onGroupMode}
                       onMove={onMove}
                       onLink={onLink}
@@ -532,7 +598,7 @@ export const StudioGraph = (props: StudioGraphProps) => {
       {!readOnly && (
         <AddMenu
           items={addItems.filter((item) => item.key !== 'branch')}
-          onPick={(key) => key !== 'loop' && onAdd({ kind: key === 'group' ? 'group' : 'step', group })}
+          onPick={(key) => onAdd({ kind: kindOf(key), group })}
         >
           <button
             type="button"

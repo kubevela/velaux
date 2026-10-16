@@ -41,6 +41,7 @@ import (
 	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	wfContext "github.com/kubevela/workflow/pkg/context"
+	"github.com/kubevela/workflow/pkg/tasks/builtin"
 	wfTypes "github.com/kubevela/workflow/pkg/types"
 	wfUtils "github.com/kubevela/workflow/pkg/utils"
 
@@ -49,6 +50,7 @@ import (
 	pkgUtils "github.com/oam-dev/kubevela/pkg/utils"
 	"github.com/oam-dev/kubevela/pkg/utils/apply"
 	"github.com/oam-dev/kubevela/pkg/workflow/operation"
+	wfStep "github.com/oam-dev/kubevela/pkg/workflow/step"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
@@ -377,7 +379,7 @@ func (w *workflowServiceImpl) ListWorkflowRecords(ctx context.Context, workflow 
 		WorkflowName:  workflow.Name,
 	}
 	records, err := w.Store.List(ctx, &record, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{
-		{Key: "createTime", Order: datastore.SortOrderAscending},
+		{Key: keyCreateTime, Order: datastore.SortOrderAscending},
 	}})
 	if err != nil {
 		return nil, err
@@ -428,7 +430,7 @@ func (w *workflowServiceImpl) ListWorkflowRecordsFromEnv(ctx context.Context, ap
 
 	filterOptions := datastore.FilterOptions{In: []datastore.InQueryOption{{Key: "workflowName", Values: wfNames}}}
 	records, err := w.Store.List(ctx, &record, &datastore.ListOptions{Page: page, PageSize: pageSize, SortBy: []datastore.SortOption{
-		{Key: "createTime", Order: datastore.SortOrderDescending}},
+		{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 		FilterOptions: filterOptions,
 	})
 	if err != nil {
@@ -581,9 +583,17 @@ func (w *workflowServiceImpl) syncRecordFromApplicationStatus(ctx context.Contex
 			stepAlias[sub.Name] = sub.Alias
 		}
 	}
+	loops := w.loopSteps(ctx, app)
+	loopStatus := make(map[string]model.WorkflowStepStatus)
 	for _, step := range status.Steps {
 		stepStatus[step.Name] = convert.FromCRWorkflowStepStatus(step.StepStatus, stepAlias[step.Name])
 		wStatus := model.WorkflowStepStatus{StepStatus: stepStatus[step.Name]}
+		if spec, ok := loops[step.Name]; ok {
+			wStatus.Loop, wStatus.SubStepsStatus = loopPasses(spec, step, record.ContextValue)
+			loopStatus[step.Name] = wStatus
+			workflowStepStatus = append(workflowStepStatus, wStatus)
+			continue
+		}
 		for _, sub := range step.SubStepsStatus {
 			stepStatus[sub.Name] = convert.FromCRWorkflowStepStatus(sub, stepAlias[sub.Name])
 			wStatus.SubStepsStatus = append(wStatus.SubStepsStatus, stepStatus[sub.Name])
@@ -591,6 +601,10 @@ func (w *workflowServiceImpl) syncRecordFromApplicationStatus(ctx context.Contex
 		workflowStepStatus = append(workflowStepStatus, wStatus)
 	}
 	for i, step := range record.Steps {
+		if l, ok := loopStatus[step.Name]; ok {
+			record.Steps[i] = l
+			continue
+		}
 		if s, ok := stepStatus[step.Name]; ok {
 			record.Steps[i].StepStatus = s
 		} else {
@@ -629,6 +643,67 @@ func (w *workflowServiceImpl) syncRecordFromApplicationStatus(ctx context.Contex
 		klog.InfoS("successfully sync workflow status", "oam app name", app.Name, "workflow name", record.WorkflowName, "record name", record.Name, "status", record.Status, "sync source", app.Name)
 	}
 	return nil
+}
+
+// loopSteps are the Application's forEach steps by name, from the spec the
+// controller runs: its own steps, or those of the Workflow it references.
+func (w *workflowServiceImpl) loopSteps(ctx context.Context, app *v1beta1.Application) map[string]wfTypesv1alpha1.WorkflowStep {
+	if app.Spec.Workflow == nil {
+		return nil
+	}
+	steps := app.Spec.Workflow.Steps
+	if ref := app.Spec.Workflow.Ref; ref != "" {
+		wf, err := wfStep.GetRefWorkflow(ctx, w.KubeClient, app.Namespace, ref)
+		if err != nil {
+			klog.Errorf("failed to read the workflow %s of the application %s: %s", ref, app.Name, err.Error())
+			return nil
+		}
+		steps = wf.Steps
+	}
+	loops := make(map[string]wfTypesv1alpha1.WorkflowStep)
+	for _, s := range steps {
+		if s.ForEach != nil {
+			loops[s.Name] = s
+		}
+	}
+	return loops
+}
+
+// loopPasses is a forEach step's loop status and its passes: each sub-step the
+// engine ran, with the item it ran for and the alias of the body step it repeats.
+// The items, and a keyed loop's labels, are the ones the engine stored in the
+// workflow context.
+func loopPasses(spec wfTypesv1alpha1.WorkflowStep, status workflowv1alpha1.WorkflowStepStatus, contextValue map[string]string) (*model.LoopStatus, []model.StepStatus) {
+	loop := &model.LoopStatus{Mode: loopMode(spec.ForEach)}
+	if pinned := contextValue[builtin.PinnedItemsKey(status.ID)]; pinned != "" {
+		if err := json.Unmarshal([]byte(pinned), &loop.Items); err != nil {
+			klog.Errorf("failed to decode the items of the forEach step %s: %s", spec.Name, err.Error())
+		}
+	}
+	loop.Labels = builtin.ItemLabels(func(paths ...string) string {
+		return contextValue[strings.Join(paths, ".")]
+	}, status.ID)
+	passes := make([]model.StepStatus, 0, len(status.SubStepsStatus))
+	for _, sub := range status.SubStepsStatus {
+		template, _ := builtin.IterationTemplate(spec, loop.Labels, sub.Name)
+		alias := template.Name
+		if template.Meta != nil && template.Meta.Alias != "" {
+			alias = template.Meta.Alias
+		}
+		pass := convert.FromCRWorkflowStepStatus(sub, alias)
+		if index, ok := builtin.IterationIndex(spec, loop.Labels, sub.Name); ok {
+			pass.Iteration = &index
+		}
+		passes = append(passes, pass)
+	}
+	return loop, passes
+}
+
+func loopMode(forEach *wfTypesv1alpha1.ForEach) wfTypesv1alpha1.WorkflowMode {
+	if forEach.Mode == "" {
+		return workflowv1alpha1.WorkflowModeStep
+	}
+	return forEach.Mode
 }
 
 func resetStepStatus(status model.StepStatus) model.StepStatus {
@@ -695,7 +770,14 @@ func (w *workflowServiceImpl) CreateWorkflowRecord(ctx context.Context, appModel
 	steps := make([]model.WorkflowStepStatus, len(workflow.Steps))
 	for i, step := range workflow.Steps {
 		subStatus := make([]model.StepStatus, 0)
+		var loop *model.LoopStatus
+		if step.ForEach != nil {
+			loop = &model.LoopStatus{Mode: loopMode(step.ForEach)}
+		}
 		for _, sub := range step.SubSteps {
+			if loop != nil {
+				break
+			}
 			subStatus = append(subStatus, model.StepStatus{
 				Name:  sub.Name,
 				Alias: sub.Alias,
@@ -709,6 +791,7 @@ func (w *workflowServiceImpl) CreateWorkflowRecord(ctx context.Context, appModel
 				Type:  step.Type,
 			},
 			SubStepsStatus: subStatus,
+			Loop:           loop,
 		}
 	}
 
@@ -847,7 +930,7 @@ func (w *workflowServiceImpl) RollbackRecord(ctx context.Context, appModel *mode
 		revisions, err := w.Store.List(ctx, &revision, &datastore.ListOptions{
 			Page:     1,
 			PageSize: 1,
-			SortBy:   []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+			SortBy:   []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 		})
 		if err != nil {
 			return nil, err

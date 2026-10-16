@@ -75,7 +75,7 @@ func dataFlows(app *v1beta1.Application) []*apisv1.DataFlow {
 			if reader == "" {
 				continue
 			}
-			from := apisv1.DataFlowEnd{Kind: "source", Name: s.Name}
+			from := apisv1.DataFlowEnd{Kind: sourceKind, Name: s.Name}
 			to := apisv1.DataFlowEnd{Kind: componentKind, Name: reader, Cluster: consumer.Cluster, Namespace: consumer.Namespace}
 			flow := flows.get(from, to, flowViaSource)
 			for _, v := range consumer.Values {

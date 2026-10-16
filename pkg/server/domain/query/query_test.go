@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/endpoints/request"
+	corev1ac "k8s.io/client-go/applyconfigurations/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
@@ -158,6 +159,10 @@ func TestGuard(t *testing.T) {
 		assert.ErrorIs(t, g.Delete(ctx, pod), ErrReadOnly)
 		assert.ErrorIs(t, g.Create(ctx, pod), ErrReadOnly)
 		assert.ErrorIs(t, g.Update(ctx, pod), ErrReadOnly)
+		assert.ErrorIs(t, g.Patch(ctx, pod, client.Merge), ErrReadOnly)
+		assert.ErrorIs(t, g.Apply(ctx, corev1ac.Pod("web", "shop")), ErrReadOnly)
+		assert.ErrorIs(t, g.Status().Apply(ctx, corev1ac.Pod("web", "shop")), ErrReadOnly)
+		assert.ErrorIs(t, g.SubResource("scale").Apply(ctx, corev1ac.Pod("web", "shop")), ErrReadOnly)
 	})
 }
 

@@ -130,7 +130,7 @@ func (p *envServiceImpl) ListEnvs(ctx context.Context, page, pageSize int, listO
 	filter := datastore.FilterOptions{
 		In: []datastore.InQueryOption{
 			{
-				Key:    "project",
+				Key:    keyProject,
 				Values: projectNames,
 			},
 		},
@@ -138,7 +138,7 @@ func (p *envServiceImpl) ListEnvs(ctx context.Context, page, pageSize int, listO
 	entities, err := repository.ListEnvs(ctx, p.Store, &datastore.ListOptions{
 		Page:          page,
 		PageSize:      pageSize,
-		SortBy:        []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+		SortBy:        []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 		FilterOptions: filter,
 	})
 	if err != nil {
@@ -205,7 +205,7 @@ func (p *envServiceImpl) UpdateEnv(ctx context.Context, name string, req apisv1.
 		targets, err = repository.ListTarget(ctx, p.Store, "", &datastore.ListOptions{
 			FilterOptions: datastore.FilterOptions{
 				In: []datastore.InQueryOption{{
-					Key:    "name",
+					Key:    keyName,
 					Values: req.Targets,
 				}},
 			},

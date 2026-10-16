@@ -204,11 +204,11 @@ func paramPlaceholder(f *apisv1.PackageField) string {
 	switch {
 	case len(f.Fields) > 0:
 		return "{}"
-	case f.Type == "string":
+	case f.Type == kindString:
 		return `""`
-	case f.Type == "int" || f.Type == "number" || f.Type == "float":
+	case f.Type == kindInt || f.Type == kindNumber || f.Type == "float":
 		return "0"
-	case f.Type == "bool":
+	case f.Type == kindBool:
 		return "false"
 	case strings.HasPrefix(f.Type, "["):
 		return "[]"

@@ -9,7 +9,7 @@ RUN apk add --no-cache git make clang build-base python3
 RUN yarn install && yarn build
 
 # Build the manager binary
-FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.23.8-alpine as server-builder
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.27.1-alpine as server-builder
 ARG GOPROXY
 ENV GOPROXY=${GOPROXY:-https://goproxy.cn}
 WORKDIR /workspace

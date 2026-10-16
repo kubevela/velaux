@@ -417,9 +417,9 @@ func celKind(t *cel.Type) string {
 // passes with a warning: the webhook refuses it against a concrete parameter
 // until it is converted, as int(...) does.
 func targetIssue(got, want string, end int) *apisv1.ExpressionIssue {
-	expected := map[string]string{"string": "string", "integer": "int", "number": "number", "boolean": "bool"}[want]
+	expected := map[string]string{"string": kindString, "integer": kindInt, "number": kindNumber, "boolean": kindBool}[want]
 	switch {
-	case expected == "", got == expected, got == "int" && expected == "number":
+	case expected == "", got == expected, got == kindInt && expected == kindNumber:
 		return nil
 	case got == "dyn":
 		return &apisv1.ExpressionIssue{Message: fmt.Sprintf("the type of this value is not known; convert it, for example %s(...)", map[string]string{"int": "int", "number": "double", "bool": "bool", "string": "string"}[expected]), Start: 0, End: end, Warning: true}

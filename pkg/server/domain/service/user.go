@@ -220,7 +220,7 @@ func (u *userServiceImpl) GenerateUserProjects(ctx context.Context, user *model.
 		Username: user.Name,
 	}
 	projectUsers, err := u.Store.List(ctx, pUser, &datastore.ListOptions{
-		SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+		SortBy: []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 	})
 	if err != nil {
 		return nil, nil, err
@@ -360,7 +360,7 @@ func (u *userServiceImpl) ListUsers(ctx context.Context, page, pageSize int, lis
 	user := &model.User{}
 	var queries []datastore.FuzzyQueryOption
 	if listOptions.Name != "" {
-		queries = append(queries, datastore.FuzzyQueryOption{Key: "name", Query: listOptions.Name})
+		queries = append(queries, datastore.FuzzyQueryOption{Key: keyName, Query: listOptions.Name})
 	}
 	if listOptions.Email != "" {
 		queries = append(queries, datastore.FuzzyQueryOption{Key: "email", Query: listOptions.Email})
@@ -374,7 +374,7 @@ func (u *userServiceImpl) ListUsers(ctx context.Context, page, pageSize int, lis
 	users, err := u.Store.List(ctx, user, &datastore.ListOptions{
 		Page:          page,
 		PageSize:      pageSize,
-		SortBy:        []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+		SortBy:        []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 		FilterOptions: fo,
 	})
 	if err != nil {

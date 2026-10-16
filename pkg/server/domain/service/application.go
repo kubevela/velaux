@@ -171,7 +171,7 @@ func listApp(ctx context.Context, ds datastore.DataStore, listOptions apisv1.Lis
 	var filterOptions datastore.FilterOptions
 	if len(listOptions.Projects) > 0 {
 		filterOptions.In = append(filterOptions.In, datastore.InQueryOption{
-			Key:    "project",
+			Key:    keyProject,
 			Values: listOptions.Projects,
 		})
 	}
@@ -697,7 +697,7 @@ func (c *applicationServiceImpl) ListApplicationTriggers(ctx context.Context, ap
 		AppPrimaryKey: app.Name,
 	}
 	triggers, err := c.Store.List(ctx, trigger, &datastore.ListOptions{
-		SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}}},
+		SortBy: []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}}},
 	)
 	if err != nil {
 		klog.Errorf("failed to list application triggers, %s", err.Error())
@@ -794,7 +794,7 @@ func (c *applicationServiceImpl) ListRecords(ctx context.Context, appName string
 		Finished:      model.UnFinished,
 	}
 	records, err := c.Store.List(ctx, &record, &datastore.ListOptions{SortBy: []datastore.SortOption{
-		{Key: "createTime", Order: datastore.SortOrderDescending},
+		{Key: keyCreateTime, Order: datastore.SortOrderDescending},
 	}})
 	if err != nil {
 		return nil, err
@@ -804,7 +804,7 @@ func (c *applicationServiceImpl) ListRecords(ctx context.Context, appName string
 		records, err = c.Store.List(ctx, &record, &datastore.ListOptions{
 			Page:     1,
 			PageSize: 1,
-			SortBy:   []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+			SortBy:   []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 		})
 		if err != nil {
 			return nil, err
@@ -828,7 +828,7 @@ func (c *applicationServiceImpl) ListComponents(ctx context.Context, app *model.
 	var component = model.ApplicationComponent{
 		AppPrimaryKey: app.PrimaryKey(),
 	}
-	components, err := c.Store.List(ctx, &component, &datastore.ListOptions{SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}}})
+	components, err := c.Store.List(ctx, &component, &datastore.ListOptions{SortBy: []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}}})
 	if err != nil {
 		return nil, err
 	}
@@ -937,7 +937,7 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 			EnvName:       workflow.EnvName,
 		}
 		list, err := c.Store.List(ctx, &lastVersion, &datastore.ListOptions{
-			PageSize: 1, Page: 1, SortBy: []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}}})
+			PageSize: 1, Page: 1, SortBy: []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}}})
 		if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
 			klog.Errorf("query appUtil latest revision failure %s", err.Error())
 			return nil, bcode.ErrDeployConflict
@@ -1215,6 +1215,7 @@ func workflowStepSpecs(steps []model.WorkflowStep) []wfTypesv1alpha1.WorkflowSte
 			WorkflowStepBase: convertWorkflowModel2WorkflowSpec(step.WorkflowStepBase),
 		}
 		spec.Mode = step.Mode
+		spec.ForEach = step.ForEach
 		for _, subStep := range step.SubSteps {
 			spec.SubSteps = append(spec.SubSteps, convertWorkflowModel2WorkflowSpec(subStep))
 		}
@@ -1646,7 +1647,7 @@ func (c *applicationServiceImpl) ListRevisions(ctx context.Context, appName, env
 	revisions, err := c.Store.List(ctx, &revision, &datastore.ListOptions{
 		Page:     page,
 		PageSize: pageSize,
-		SortBy:   []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+		SortBy:   []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 	})
 	if err != nil {
 		return nil, err

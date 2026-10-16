@@ -316,6 +316,7 @@ const (
 const (
 	componentKind = "component"
 	traitKind     = "trait"
+	sourceKind    = "source"
 )
 
 // outputsSource is a definition whose template may declare outputs.
@@ -441,7 +442,7 @@ func layered(declared, live *apisv1.ExpressionVariable) *apisv1.ExpressionVariab
 		return declared
 	}
 	out := &apisv1.ExpressionVariable{Name: live.Name, Type: live.Type, Description: live.Description, Schema: live.Schema}
-	if live.Type == "dyn" || (live.Type == "list" && strings.HasPrefix(declared.Type, "list(")) {
+	if live.Type == kindDyn || (live.Type == kindList && strings.HasPrefix(declared.Type, "list(")) {
 		out.Type = declared.Type
 	}
 	byName := map[string]*apisv1.ExpressionVariable{}

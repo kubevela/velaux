@@ -1081,6 +1081,7 @@ type DefinitionBase struct {
 	Labels      map[string]string `json:"labels"`
 	Category    string            `json:"category"`
 	// WorkloadType the component workload type
+	//
 	// Deprecated: it same as component.workload.type
 	WorkloadType string `json:"workloadType,omitempty"`
 	// OwnerAddon indicates which addon created this definition
@@ -1285,6 +1286,8 @@ type WorkflowStep struct {
 	WorkflowStepBase `json:",inline"`
 	Mode             string             `json:"mode,omitempty" validate:"checkMode"`
 	SubSteps         []WorkflowStepBase `json:"subSteps,omitempty"`
+	// ForEach repeats the step, or a group's steps, once per item.
+	ForEach *wfTypesv1alpha1.ForEach `json:"forEach,omitempty" optional:"true"`
 }
 
 // WorkflowStepBase is the step base of workflow
@@ -2065,6 +2068,22 @@ type PipelineRunMeta struct {
 type PipelineRun struct {
 	PipelineRunBase `json:",inline"`
 	Status          workflowv1alpha1.WorkflowRunStatus `json:"status"`
+	// Loops are the run's forEach steps by name: the items each resolved, and the
+	// item each of its passes ran for.
+	Loops map[string]PipelineRunLoop `json:"loops,omitempty"`
+}
+
+// PipelineRunStatus is a pipeline run's status, with its loops.
+type PipelineRunStatus struct {
+	workflowv1alpha1.WorkflowRunStatus `json:",inline"`
+	Loops                              map[string]PipelineRunLoop `json:"loops,omitempty"`
+}
+
+// PipelineRunLoop is one forEach step of a pipeline run.
+type PipelineRunLoop struct {
+	model.LoopStatus `json:",inline"`
+	// Iterations is the index of the item each pass ran for, by pass name.
+	Iterations map[string]int `json:"iterations,omitempty"`
 }
 
 // PipelineRunBase is the base info of pipeline run
