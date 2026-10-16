@@ -1,0 +1,114 @@
+.status-tooltip-popup.next-balloon {
+  min-width: 260px;
+  max-width: 400px;
+  padding: 12px 14px;
+}
+
+.status-tooltip {
+  color: #262626;
+  font-size: 12px;
+  line-height: 18px;
+
+  .status-tooltip-header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .status-tooltip-title {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .status-tooltip-health {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 0 8px;
+    color: #1e7e34;
+    font-size: 11px;
+    line-height: 20px;
+    white-space: nowrap;
+    background: #eaf6ec;
+    border-radius: 10px;
+    .circle {
+      margin: 0;
+    }
+    &.unhealthy {
+      color: #ad6800;
+      background: #fff7e6;
+    }
+    &.pending {
+      color: #0958d9;
+      background: #e6f4ff;
+    }
+  }
+
+  .status-details-list {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 2px 16px;
+    margin: 0;
+    dt {
+      color: #8c8c8c;
+    }
+    dd {
+      margin: 0;
+      word-break: break-all;
+    }
+  }
+
+  .status-tooltip-message {
+    margin-top: 8px;
+    padding: 6px 8px;
+    background: #f7f8fa;
+    border-radius: 4px;
+  }
+
+  .status-tooltip-section {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .status-tooltip-section-content {
+    margin-top: 6px;
+  }
+
+  .status-tooltip-toggle {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 0;
+    color: #595959;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+
+  .status-tooltip-chevron {
+    transition: transform 0.15s ease;
+    &.open {
+      transform: rotate(90deg);
+    }
+  }
+
+  .status-tooltip-count {
+    padding: 0 6px;
+    color: #595959;
+    font-size: 10px;
+    line-height: 16px;
+    letter-spacing: 0;
+    background: #f0f0f0;
+    border-radius: 8px;
+  }
+}

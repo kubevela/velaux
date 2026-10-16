@@ -477,8 +477,30 @@ type AppDryRunResponse struct {
 
 // ApplicationStatusResponse application env status response body
 type ApplicationStatusResponse struct {
-	EnvName string            `json:"envName"`
-	Status  *common.AppStatus `json:"status"`
+	EnvName string             `json:"envName"`
+	Status  *ApplicationStatus `json:"status"`
+}
+
+// ApplicationStatus is an Application's status as KubeVela reports it. Fields
+// the KubeVela types VelaUX builds against do not carry yet sit beside them.
+type ApplicationStatus struct {
+	common.AppStatus `json:",inline"`
+	// Dependencies is what each component depends on: the components named in
+	// its dependsOn, those whose outputs its inputs read, and those its property
+	// expressions read.
+	Dependencies []ComponentDependency `json:"dependencies,omitempty"`
+}
+
+// ComponentDependency is one component another depends on, as the
+// Application's status.dependencies reports it. Source is where it is declared:
+// dependsOn, inputs or expression. Cluster and Namespace are set when an
+// expression reads the component at a placement it names.
+type ComponentDependency struct {
+	Component string `json:"component"`
+	DependsOn string `json:"dependsOn"`
+	Source    string `json:"source"`
+	Cluster   string `json:"cluster,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // ApplicationStatusListResponse the all env status of an application
@@ -949,6 +971,10 @@ type DefinitionBase struct {
 	Component    *v1beta1.ComponentDefinitionSpec    `json:"component,omitempty"`
 	Policy       *v1beta1.PolicyDefinitionSpec       `json:"policy,omitempty"`
 	WorkflowStep *v1beta1.WorkflowStepDefinitionSpec `json:"workflowStep,omitempty"`
+	// PolicyScope is how KubeVela applies a policy: Builtin, consumed by
+	// KubeVela itself; Workload, rendered with the Application's components; or
+	// Application, applied to the Application as a whole before it renders.
+	PolicyScope string `json:"policyScope,omitempty"`
 }
 
 // CreatePolicyRequest create app policy
