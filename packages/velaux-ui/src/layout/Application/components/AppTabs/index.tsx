@@ -5,9 +5,14 @@ import { AiOutlineArrowLeft } from 'react-icons/ai';
 
 import type { EnvBinding } from '@velaux/data';
 import { StatusBadge } from '../../../../components/StatusBadge';
+import i18n from '../../../../i18n';
 import { Translation } from '../../../../components/Translation';
 import type { EnvironmentStatus } from '../../../../pages/ApplicationList/components/AppStatus/health';
-import { healthLabels, summariseStatuses } from '../../../../pages/ApplicationList/components/AppStatus/health';
+import {
+  healthLabels,
+  pausedEnvs,
+  summariseStatuses,
+} from '../../../../pages/ApplicationList/components/AppStatus/health';
 import './index.less';
 
 type Tab = { key: string; label: string; to: string; active: (path: string) => boolean };
@@ -93,6 +98,9 @@ const EnvironmentBarView = (props: {
       </Link>
       <span className="environment-bar-name">{binding?.alias || envName}</span>
       <StatusBadge tone={health} label={healthLabels[health]} />
+      {pausedEnvs(props.applicationAllStatus || []).includes(envName) && (
+        <StatusBadge tone="suspended" label="Paused" title={i18n.t('Reconciliation paused').toString()} />
+      )}
       <div className="environment-bar-views">
         {views.map((v) => (
           <Link

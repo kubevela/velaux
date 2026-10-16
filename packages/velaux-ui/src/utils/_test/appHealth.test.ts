@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import {
   componentRatio,
   healthOf,
+  pausedEnvs,
   summariseStatuses,
   workflowLabel,
 } from '../../pages/ApplicationList/components/AppStatus/health';
@@ -48,5 +49,17 @@ describe('summarising per-environment statuses', () => {
 
   it('calls a running environment with an unhealthy component unhealthy', () => {
     expect(summariseStatuses([{ envName: 'dev', status: running([true, false]) }] as any).health).to.equal('unhealthy');
+  });
+});
+
+describe('pausedEnvs', () => {
+  it('lists the envs whose reconciliation is paused', () => {
+    expect(
+      pausedEnvs([
+        { envName: 'dev', status: { status: 'running' } },
+        { envName: 'prod', status: { status: 'running', paused: true } },
+        { envName: 'staging' },
+      ])
+    ).to.deep.equal(['prod']);
   });
 });
