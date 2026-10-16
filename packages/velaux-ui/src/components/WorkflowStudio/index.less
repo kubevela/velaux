@@ -1,59 +1,483 @@
-.line-action {
-  position: absolute;
-  top: 27px;
-  left: -60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  padding: 2px;
-  background: var(--color-border-default);
-  border-radius: 50%;
-  cursor: pointer;
-  opacity: 1;
-  &:hover {
-    background: var(--primary-color);
+// The editor's canvas starts at the top: a graph grows downward from there.
+.run-studio.studio-editor .studio {
+  align-items: flex-start;
+  padding-top: 24px;
+}
+
+// The studio draws its steps as the run view does (PipelineGraph/index.less),
+// with a design-time edge in place of a status and controls to edit.
+.studio-graph {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  > .run-graph {
+    margin-left: 24px;
   }
-  .line-icon {
-    color: #fff;
+  // The right of each card is kept for its +.
+  .step.studio-step {
+    padding-right: 58px;
+    --tone: var(--primary-color);
+    &.group {
+      --tone: #94a3b8;
+    }
+  }
+  .studio-step-head {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  // A card's moves and Delete show while it is hovered.
+  .studio-step-tools {
+    display: inline-flex;
+    flex: none;
+    gap: 2px;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.15s linear;
+  }
+  .studio-step:hover > .studio-step-head > .studio-step-tools,
+  .studio-step.group:hover > .step-group-head > .studio-step-tools {
+    opacity: 1;
+  }
+  .studio-tool {
+    display: inline-flex;
+    padding: 2px;
+    color: #64748b;
+    font-size: 15px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    &:hover:not(:disabled) {
+      color: var(--primary-color);
+      background: #e2e8f0;
+    }
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+  }
+  // A card's Inline and Branch sit inside it, stacked on the middle of its
+  // right side, with a + to their left joining them. One grey shape frames all
+  // three: a capsule round the two, swelling left round the +.
+  .studio-add-pair {
+    --frame: #f1f5f9;
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    z-index: 2;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    padding: 3px;
+    background: var(--frame);
+    border-radius: 14px;
+    transform: translateY(-50%);
+    transition: background 0.15s linear;
+  }
+  .studio-add-half {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 0;
+    // A ring marks each as a button inside the shared frame.
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color 0.15s linear, background 0.15s linear, border-color 0.15s linear;
     svg {
       display: block;
-      fill: currentColor;
+      flex: none;
     }
+    &:hover:not(:disabled),
+    &.open {
+      color: #fff;
+      background: #16a34a;
+      border-color: #16a34a;
+    }
+    &:disabled {
+      color: #cbd5e1;
+      background: transparent;
+      border-style: dashed;
+      cursor: default;
+    }
+  }
+  .studio-add-join {
+    position: absolute;
+    top: 50%;
+    left: -12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    color: #94a3b8;
+    font-size: 15px;
+    background: var(--frame);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    transition: color 0.15s linear, background 0.15s linear;
+  }
+  // Hovering a card lights just its two buttons; one inside a group lights its
+  // own, not the group's.
+  .workflow-step:hover:not(:has(.workflow-step:hover)) > .studio-add-pair {
+    .studio-add-half:not(:disabled):not(:hover):not(.open) {
+      color: #16a34a;
+      border-color: #86efac;
+    }
+  }
+  // A step's port, on the middle of its right border: drag it onto a step that
+  // should wait on this one. Shown while the card is hovered.
+  .studio-port {
+    position: absolute;
+    top: 50%;
+    right: -7px;
+    z-index: 3;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border: 2px solid #94a3b8;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    cursor: crosshair;
+    opacity: 0;
+    transition: opacity 0.15s linear;
+    &:hover {
+      background: #16a34a;
+      border-color: #16a34a;
+    }
+  }
+  .workflow-step:hover:not(:has(.workflow-step:hover)) > .studio-port,
+  .run-graph.dragging > .workflow-step > .studio-port {
+    opacity: 1;
+  }
+  // While a line is drawn: where it may land, and where it may not.
+  .workflow-step.drop-ok > .studio-step {
+    outline: 2px dashed #16a34a;
+    outline-offset: 3px;
+  }
+  .workflow-step.drop-no > .studio-step {
+    opacity: 0.4;
+  }
+  .studio-drag-line path {
+    fill: none;
+    stroke: #16a34a;
+    stroke-width: 2px;
+    stroke-dasharray: 5 4;
+  }
+  // Lines are picked along a band wider than they are drawn.
+  .workflow-connectors {
+    pointer-events: none;
+  }
+  .workflow-connector-hit {
+    stroke: transparent;
+    stroke-width: 12px;
+    cursor: pointer;
+    pointer-events: stroke;
+  }
+  .workflow-connector.picked {
+    stroke: var(--primary-color);
+    stroke-width: 3px;
+  }
+  .studio-unlink {
+    position: absolute;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    color: #fff;
+    font-size: 10px;
+    background: #dc2626;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+    cursor: pointer;
+  }
+
+  .studio-warning {
+    margin-top: 6px;
+    color: var(--failed-color, #dc2626);
+    font-size: 12px;
+    line-height: 16px;
+  }
+  // A wait that never ends is drawn bold, in red, above the cards.
+  .workflow-connectors.front {
+    z-index: 3;
+    pointer-events: none;
+    .workflow-connector-head {
+      fill: var(--failed-color, #dc2626);
+    }
+  }
+  .workflow-connector.forward {
+    stroke: var(--failed-color, #dc2626);
+    stroke-width: 3px;
+    stroke-dasharray: none;
+  }
+  .studio-group-mode .next-select {
+    width: 120px;
+  }
+  .studio-add-step {
+    svg {
+      color: #16a34a;
+    }
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    margin: 4px 0 8px 44px;
+    padding: 6px 12px;
+    color: #475569;
+    font-size: 13px;
+    background: #fff;
+    border: 1px dashed #94a3b8;
+    border-radius: 6px;
+    cursor: pointer;
+    &:hover {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+  }
+  .step-group-body .studio-add-step {
+    margin-left: 24px;
   }
 }
 
-.workflow-graph {
-  .step-start,
-  .step-end {
+// The add menu grows out of its +, from the left, centred on it.
+@keyframes studio-add-menu-in {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.studio-add-menu {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  overflow: visible;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  filter: drop-shadow(0 4px 10px rgba(15, 23, 42, 0.12));
+  transform-origin: left center;
+  animation: studio-add-menu-in 0.14s ease-out;
+  // A pointer on the left edge, level with the +, joins the menu to it.
+  &::before {
+    position: absolute;
+    top: 50%;
+    left: -8px;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border-bottom: 1px solid #cbd5e1;
+    border-left: 1px solid #cbd5e1;
+    border-bottom-left-radius: 2px;
+    transform: translateY(-50%) rotate(45deg);
+    content: '';
+  }
+  .next-menu {
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+  }
+  .next-menu-item-inner {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 100px;
-    height: 75px;
-    margin-right: 100px;
-    i {
-      color: var(--color-border-default);
+  }
+  .studio-add-icon {
+    display: inline-flex;
+    width: 16px;
+    margin-right: 8px;
+    color: #16a34a;
+  }
+  .next-disabled .studio-add-icon {
+    color: inherit;
+  }
+}
+// The preview beside the add menu: the step, and what would follow it.
+.studio-add-preview {
+  display: grid;
+  width: 220px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-left: 1px solid #e2e8f0;
+  border-radius: 0 8px 8px 0;
+  .pv-layer {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    &.shown {
+      visibility: visible;
+    }
+  }
+  .pv-chip {
+    display: inline-block;
+    max-width: 170px;
+    overflow: hidden;
+    padding: 1px 8px;
+    color: #334155;
+    font-size: 12px;
+    line-height: 18px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    &.root {
+      font-weight: 600;
+    }
+    &.added {
+      color: #15803d;
+      background: #f0fdf4;
+      border: 1px dashed #16a34a;
+    }
+  }
+  // A group in the preview: a larger box with its tag and two small steps.
+  .pv-group {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 130px;
+    padding: 4px 8px 6px;
+    line-height: 16px;
+    .pv-group-tag {
+      display: inline-flex;
+      gap: 3px;
+      align-items: center;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 9px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .pv-subs {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-top: 2px;
+    }
+    .pv-sub {
+      width: 80%;
+      height: 9px;
+      background: #fff;
+      border: 1px solid #86efac;
+      border-left: 2px solid #16a34a;
+      border-radius: 2px;
+    }
+  }
+  .pv-more {
+    color: #64748b;
+    font-size: 11px;
+  }
+  .pv-tree {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    li {
+      position: relative;
+      margin-top: 4px;
+      padding-left: 18px;
+      // The tree's lines: down the left, and across into each chip.
       &::before {
-        font-size: var(--font-size-x-large);
+        position: absolute;
+        top: -4px;
+        bottom: 0;
+        left: 7px;
+        border-left: 1px solid #94a3b8;
+        content: '';
+      }
+      &:last-child::before {
+        bottom: auto;
+        height: 14px;
+      }
+      &::after {
+        position: absolute;
+        top: 10px;
+        left: 7px;
+        width: 9px;
+        border-top: 1px solid #94a3b8;
+        content: '';
       }
     }
   }
-  .step-delete {
-    .next-icon {
-      &:hover {
-        color: var(--primary-color);
-      }
-    }
+  .pv-caption {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 11px;
   }
-  .sub-step-add {
-    text-align: center;
-    border: 1px dashed var(--grey-300);
-    &:hover {
-      background: #f6f4ed;
-    }
+}
+
+.studio-add-note {
+  margin-left: 8px;
+  padding: 0 5px;
+  color: #64748b;
+  font-size: 10px;
+  line-height: 16px;
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+// The studio toolbar's Settings button: the label, then how the workflow runs.
+.next-btn.studio-settings-button {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+  > svg {
+    flex: none;
   }
+  .studio-settings-summary {
+    margin-left: 4px;
+    padding-left: 8px;
+    color: #64748b;
+    border-left: 1px solid #e2e8f0;
+  }
+  .studio-settings-sep {
+    margin: 0 4px;
+  }
+}
+
+// Above a workflow that runs a shared one's steps: whose they are, and the way
+// to take a copy.
+.studio-shared-banner {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  color: #1e3a8a;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  code {
+    font-weight: 600;
+  }
+}
+
+// The Add wizard: its stages along the top, then the stage, then its buttons.
+.add-step-stages {
+  margin-bottom: 20px;
+}
+.add-step-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .def-items {

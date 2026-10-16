@@ -152,7 +152,7 @@ export function lanesNeeded(nodes: RouteNode[], edges: RouteEdge[]): number {
 }
 
 // routeEdges routes every edge between nodes in increasing columns; an edge
-// whose target is not right of its source runs straight between their sides.
+// whose target is not right of its source loops round below the graph.
 export function routeEdges(
   nodes: RouteNode[],
   edges: RouteEdge[],
@@ -160,6 +160,7 @@ export function routeEdges(
 ): Record<string, Point[]> {
   const byKey = new Map(nodes.map((n) => [n.key, n]));
   const routes: Record<string, Point[]> = {};
+  const backward: Array<{ key: string; a: Box; b: Box; from: string; to: string }> = [];
   const forward = edges.filter((e) => {
     const a = byKey.get(e.from);
     const b = byKey.get(e.to);
@@ -169,11 +170,40 @@ export function routeEdges(
     if (b.column > a.column) {
       return true;
     }
-    routes[e.key] = [
-      { x: a.box.left + a.box.width, y: centreY(a.box) },
-      { x: b.box.left, y: centreY(b.box) },
-    ];
+    backward.push({ key: e.key, a: a.box, b: b.box, from: e.from, to: e.to });
     return false;
+  });
+
+  // A backward edge leaves its source's right side near the bottom, drops in
+  // the gap beside it to a lane of its own below every box, runs back, and
+  // rises in the gap before its target into the target's left side, each at a
+  // spacing of its own so no two share a run.
+  const bottom = Math.max(...nodes.map((n) => n.box.top + n.box.height));
+  // Loops sit twice the usual spacing apart: they are drawn bold.
+  const apart = o.spacing * 2;
+  const outs = new Map<string, number>();
+  const ins = new Map<string, number>();
+  // Loops are laid nearest source first: a farther one runs deeper and wider
+  // round it, so loops nest rather than cross.
+  backward.sort((x, y) => x.a.left - y.a.left || x.b.left - y.b.left);
+  backward.forEach((e, i) => {
+    const out = outs.get(e.from) || 0;
+    const into = ins.get(e.to) || 0;
+    outs.set(e.from, out + 1);
+    ins.set(e.to, into + 1);
+    const fromY = e.a.top + e.a.height - apart * (out + 1);
+    const toY = e.b.top + e.b.height - apart * (into + 1);
+    const outX = e.a.left + e.a.width + o.leadOut + apart * i;
+    const inX = e.b.left - o.leadIn - apart * i;
+    const lane = bottom + o.stub + apart * i;
+    routes[e.key] = [
+      { x: e.a.left + e.a.width, y: fromY },
+      { x: outX, y: fromY },
+      { x: outX, y: lane },
+      { x: inX, y: lane },
+      { x: inX, y: toY },
+      { x: e.b.left, y: toY },
+    ];
   });
 
   // Each edge's passes, one per column it skips: as given, else level with its

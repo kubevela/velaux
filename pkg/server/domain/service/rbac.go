@@ -69,6 +69,7 @@ var defaultProjectPermissionTemplate = []*model.PermissionTemplate{
 			"project:{projectName}/environment:*",
 			"project:{projectName}/application:*/*",
 			"project:{projectName}/pipeline:*/*",
+			"project:{projectName}/workflow:*",
 		},
 		Actions: []string{"detail", "list"},
 		Effect:  "Allow",
@@ -77,7 +78,7 @@ var defaultProjectPermissionTemplate = []*model.PermissionTemplate{
 	{
 		Name:      "app-management",
 		Alias:     "App Management",
-		Resources: []string{"project:{projectName}/application:*/*"},
+		Resources: []string{"project:{projectName}/application:*/*", "project:{projectName}/workflow:*"},
 		Actions:   []string{"*"},
 		Effect:    "Allow",
 		Scope:     "project",
@@ -302,6 +303,9 @@ var ResourceMaps = map[string]resourceMetadata{
 	"definition": {
 		pathName: "definitionName",
 	},
+	"sharedWorkflow": {
+		pathName: "workflowName",
+	},
 	"configType": {
 		pathName: "configType",
 		subResources: map[string]resourceMetadata{
@@ -513,10 +517,67 @@ func (p *rbacServiceImpl) Init(ctx context.Context) error {
 		}
 	}
 
+	if err := p.addProjectPermissionResources(ctx); err != nil {
+		return fmt.Errorf("failed to add the new resources to the projects' permissions %w", err)
+	}
+
 	if err := managePrivilegesForAdminUser(ctx, p.KubeClient, AdminRole, false); err != nil {
 		return fmt.Errorf("failed to init the RBAC in cluster for the admin role %w", err)
 	}
 	return nil
+}
+
+// addedProjectPermissionResources are resources added to the default project
+// permissions after projects were created with them. Templates are copied into
+// a project when it is created, so these are added to existing ones on start.
+var addedProjectPermissionResources = map[string][]string{
+	"project-view":   {"project:{projectName}/workflow:*"},
+	"app-management": {"project:{projectName}/workflow:*"},
+}
+
+// addProjectPermissionResources adds addedProjectPermissionResources to each
+// project's permission of that name that lacks them. It only adds: a project's
+// permissions are otherwise its admins'.
+func (p *rbacServiceImpl) addProjectPermissionResources(ctx context.Context) error {
+	all, err := p.Store.List(ctx, &model.Permission{}, nil)
+	if err != nil {
+		return err
+	}
+	for _, entity := range all {
+		perm := entity.(*model.Permission)
+		added, ok := addedProjectPermissionResources[perm.Name]
+		if !ok || perm.Project == "" {
+			continue
+		}
+		if resources, changed := withProjectResources(perm.Resources, added, perm.Project); changed {
+			perm.Resources = resources
+			if err := p.Store.Put(ctx, perm); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// withProjectResources is resources with each of added, for the project named
+// projectName, that it lacks.
+func withProjectResources(resources, added []string, projectName string) ([]string, bool) {
+	changed := false
+	for _, resource := range added {
+		var rra RequestResourceAction
+		rra.SetResourceWithName(resource, func(name string) string {
+			if name == ResourceMaps["project"].pathName {
+				return projectName
+			}
+			return ""
+		})
+		formatted := rra.GetResource().String()
+		if !slices.Contains(resources, formatted) {
+			resources = append(resources, formatted)
+			changed = true
+		}
+	}
+	return resources, changed
 }
 
 // GetUserPermissions get user permission policies, if projectName is empty, will only get the platform permission policies
