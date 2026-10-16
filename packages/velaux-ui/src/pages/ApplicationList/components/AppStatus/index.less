@@ -1,0 +1,76 @@
+@import '../../../../components/StatusBadge/index.less';
+
+.app-workflow {
+  color: #64748b;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.app-components {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+  font-size: 13px;
+}
+
+.app-components-text {
+  display: flex;
+  gap: 8px;
+  white-space: nowrap;
+  justify-content: space-between;
+  color: #475569;
+}
+
+.app-components-count {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.app-components-bar {
+  height: 6px;
+  overflow: hidden;
+  background: #e2e8f0;
+  border-radius: 2px;
+  div {
+    height: 100%;
+    border-radius: 2px;
+  }
+  .full {
+    background: @tone-healthy;
+  }
+  .partial {
+    background: @tone-unhealthy;
+  }
+}
+
+.app-components-none {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.app-envs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.app-env {
+  display: inline-flex;
+  white-space: nowrap;
+  gap: 5px;
+  align-items: center;
+  padding: 1px 8px;
+  color: #334155;
+  font-size: 12px;
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.app-components.compact {
+  gap: 4px;
+  font-size: 12px;
+  .app-components-bar {
+    height: 4px;
+  }
+}

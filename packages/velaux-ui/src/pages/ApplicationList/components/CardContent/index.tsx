@@ -2,16 +2,18 @@ import { connect } from 'dva';
 import React from 'react';
 import './index.less';
 import { Link } from 'dva/router';
-import { Grid, Card, Menu, Dropdown, Dialog, Button, Table, Tag, Icon } from '@alifd/next';
-import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
+import { Menu, Dropdown, Dialog, Button, Table, Tag, Icon } from '@alifd/next';
+import moment from 'moment';
+import { AiFillDelete, AiFillSetting, AiOutlineAppstore, AiOutlineMore } from 'react-icons/ai';
 
 import type { ShowMode } from '../..';
-import appSvg from '../../../../assets/application.svg';
 import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
-import type { ApplicationBase , Project , LoginUserInfo } from '@velaux/data';
+import type { ApplicationBase, ApplicationStatusSummary, Project, LoginUserInfo } from '@velaux/data';
+import { ComponentHealth, EnvHealth, HealthBadge, WorkflowBadge } from '../AppStatus';
+import { healthOf, workflowLabel } from '../AppStatus/health';
 import { momentDate } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
@@ -154,12 +156,46 @@ class CardContent extends React.Component<Props, State> {
     return [
       {
         key: 'name',
-        title: <Translation>Name(Alias)</Translation>,
+        title: <Translation>Name</Translation>,
         dataIndex: 'name',
-        cell: (v: string, i: number, app: ApplicationBase) => {
-          const showName = app.name + '(' + (app.alias || '-') + ')';
-          return <Link to={`/applications/${v}/config`}>{showName}</Link>;
-        },
+        cell: (v: string, i: number, app: ApplicationBase) => (
+          <span className="app-table-name">
+            <Link className="app-table-nowrap" to={`/applications/${v}/config`}>
+              {v}
+            </Link>
+            {app.alias && app.alias !== v && (
+              <span className="app-table-alias">
+                <Translation>alias</Translation>: {app.alias}
+              </span>
+            )}
+          </span>
+        ),
+      },
+      {
+        key: 'health',
+        title: <Translation>Health</Translation>,
+        dataIndex: 'status',
+        cell: (v: ApplicationStatusSummary) => <HealthBadge status={v} />,
+      },
+      {
+        key: 'workflow',
+        title: <Translation>Workflow</Translation>,
+        dataIndex: 'status',
+        cell: (v: ApplicationStatusSummary) => (
+          <span className="app-table-nowrap">{workflowLabel(v?.workflow) || '-'}</span>
+        ),
+      },
+      {
+        key: 'components',
+        title: <Translation>Components</Translation>,
+        dataIndex: 'status',
+        cell: (v: ApplicationStatusSummary) => <ComponentHealth status={v} compact />,
+      },
+      {
+        key: 'envs',
+        title: <Translation>Environments</Translation>,
+        dataIndex: 'status',
+        cell: (v: ApplicationStatusSummary) => <EnvHealth status={v} />,
       },
       {
         key: 'project',
@@ -167,7 +203,11 @@ class CardContent extends React.Component<Props, State> {
         dataIndex: 'project',
         cell: (v: Project) => {
           if (v && v.name) {
-            return <Link to={`/projects/${v.name}/summary`}>{v && v.name}</Link>;
+            return (
+              <Link className="app-table-nowrap" to={`/projects/${v.name}/summary`}>
+                {v.alias || v.name}
+              </Link>
+            );
           } else {
             return null;
           }
@@ -193,23 +233,24 @@ class CardContent extends React.Component<Props, State> {
           return (
             <div>
               <div className={more ? '' : 'table-content-label'}>
-                {label && Object.keys(label)?.map((key) => {
-                  if (label && key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev') < 0) {
-                    displayLabels++;
-                    return (
-                      <div>
-                        <Tag
-                          onClick={(e) => this.onClickLabelFilter(key + '=' + `${label[key]}`)}
-                          key={`${key}=${label[key]}`}
-                          style={{ margin: '2px' }}
-                          color="blue"
-                          size="small"
-                        >{`${key}=${label[key]}`}</Tag>
-                      </div>
-                    );
-                  }
-                  return;
-                })}
+                {label &&
+                  Object.keys(label)?.map((key) => {
+                    if (label && key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev') < 0) {
+                      displayLabels++;
+                      return (
+                        <div>
+                          <Tag
+                            onClick={(e) => this.onClickLabelFilter(key + '=' + `${label[key]}`)}
+                            key={`${key}=${label[key]}`}
+                            style={{ margin: '2px' }}
+                            color="blue"
+                            size="small"
+                          >{`${key}=${label[key]}`}</Tag>
+                        </div>
+                      );
+                    }
+                    return;
+                  })}
               </div>
               {displayLabels > 1 && (
                 <div>
@@ -247,7 +288,6 @@ class CardContent extends React.Component<Props, State> {
   };
 
   render() {
-    const { Row, Col } = Grid;
     const { applications, setVisible, showMode } = this.props;
     const projectName = this.props.projectName || '?';
     if (!applications || applications.length === 0) {
@@ -280,7 +320,7 @@ class CardContent extends React.Component<Props, State> {
     const columns = this.getColumns();
     if (showMode == 'table') {
       return (
-        <div style={{ overflow: 'auto' }}>
+        <div className="app-table">
           <Table
             locale={locale().Table}
             className="customTable"
@@ -298,101 +338,74 @@ class CardContent extends React.Component<Props, State> {
     }
 
     return (
-      <Row wrap={true}>
+      <div className="app-grid">
         {applications?.map((item: ApplicationBase) => {
-          const { name, alias, icon, description, createTime, readOnly, labels } = item;
-          const showName = alias || name;
+          const { name, alias, icon, description, updateTime, readOnly, labels, project, status } = item;
+          const showLabels = Object.keys(labels || {}).filter(
+            (key) => key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev') < 0
+          );
           return (
-            <Col xl={6} m={8} s={12} xxs={24} className={`card-content-wrapper`} key={`${item.name}`}>
-              <Card locale={locale().Card} contentHeight="auto">
-                <Link to={`/applications/${name}/config`}>
-                  <div className="appplan-card-top flexcenter">
-                    <If condition={icon && icon != 'none'}>
-                      <img src={icon} />
-                    </If>
-                    <If condition={!icon || icon === 'none'}>
-                      <img src={appSvg} />
-                    </If>
-                  </div>
+            <div className={`app-card tone-${healthOf(status)}`} key={name}>
+              <div className="app-card-head">
+                <Link to={`/applications/${name}/config`} className="app-card-icon">
+                  {icon && icon !== 'none' ? <img src={icon} /> : <AiOutlineAppstore />}
                 </Link>
-                <div className="content-wrapper background-F9F8FF">
-                  <Row className="content-title">
-                    <Col span="20" className="font-size-16 color1A1A1A">
-                      <Link to={`/applications/${name}/config`}>{showName}</Link>
-                    </Col>
-                    <Col span={4} className="dot-wrapper">
-                      <Dropdown
-                        trigger={
-                          <svg
-                            className={'action'}
-                            viewBox="0 0 1024 1024"
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            p-id="3448"
-                          >
-                            <path
-                              d="M365.066 197.39c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
-                              fill="#a6a6a6"
-                              p-id="3449"
-                            />
-                            <path
-                              d="M365.066 512c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
-                              fill="#a6a6a6"
-                              p-id="3450"
-                            />
-                            <path
-                              d="M365.066 826.61c0 0 0 0 0 0 0 58.569 47.479 106.048 106.048 106.048 58.569 0 106.048-47.479 106.048-106.048 0 0 0 0 0 0 0-58.569-47.479-106.048-106.048-106.048-58.569 0-106.048 47.479-106.048 106.048 0 0 0 0 0 0z"
-                              fill="#a6a6a6"
-                              p-id="3451"
-                            />
-                          </svg>
-                        }
-                      >
-                        <Menu>
-                          {this.isEditPermission(item)}
-                          {this.isDeletePermission(item)}
-                        </Menu>
-                      </Dropdown>
-                    </Col>
-                  </Row>
-                  <Row className="content-main">
-                    <h4 className="color595959 font-size-14" title={description}>
-                      {description}
-                    </h4>
-                  </Row>
-                  <Row className="content-labels">
-                    {labels &&
-                      Object.keys(labels).map((key) => {
-                        if (labels && key.indexOf('ux.oam.dev') < 0 && key.indexOf('app.oam.dev')) {
-                          return (
-                            <Tag
-                              onClick={(e) => this.onClickLabelFilter(key + '=' + `${labels[key]}`)}
-                              key={key}
-                              style={{ margin: '4px' }}
-                              color="blue"
-                            >{`${key}=${labels[key]}`}</Tag>
-                          );
-                        }
-                        return null;
-                      })}
-                  </Row>
-                  <Row className="content-foot colorA6A6A6">
-                    <Col span="16">
-                      <span>{createTime && momentDate(createTime)}</span>
-                    </Col>
-                    <Col span={8} className="flexright">
-                      <If condition={readOnly}>
-                        <span className="circle circle-warning" />
-                        <Translation>ReadOnly</Translation>
-                      </If>
-                    </Col>
-                  </Row>
+                <div className="app-card-title">
+                  <Link to={`/applications/${name}/config`} title={name}>
+                    {alias || name}
+                  </Link>
+                  <span className="app-card-sub">
+                    {alias && alias !== name ? <span>{name}</span> : null}
+                    {project?.name && <span>{project.alias || project.name}</span>}
+                  </span>
                 </div>
-              </Card>
-            </Col>
+                <Dropdown trigger={<AiOutlineMore className="app-card-more" />} align="tr br">
+                  <Menu>
+                    {this.isEditPermission(item)}
+                    {this.isDeletePermission(item)}
+                  </Menu>
+                </Dropdown>
+              </div>
+
+              <div className="app-card-status">
+                <HealthBadge status={status} />
+                <WorkflowBadge status={status} />
+              </div>
+
+              <ComponentHealth status={status} />
+
+              <div className="app-card-description" title={description}>
+                {description}
+              </div>
+
+              <EnvHealth status={status} />
+
+              {showLabels.length > 0 && (
+                <div className="app-card-labels">
+                  {showLabels.map((key) => (
+                    <span
+                      key={key}
+                      className="app-card-label"
+                      onClick={() => this.onClickLabelFilter(key + '=' + `${labels?.[key]}`)}
+                    >{`${key}=${labels?.[key]}`}</span>
+                  ))}
+                </div>
+              )}
+
+              <div className="app-card-foot">
+                <span title={momentDate(updateTime)}>
+                  <Translation>Updated</Translation> {updateTime && moment(updateTime).fromNow()}
+                </span>
+                <If condition={readOnly}>
+                  <span className="app-card-readonly">
+                    <Translation>ReadOnly</Translation>
+                  </span>
+                </If>
+              </div>
+            </div>
           );
         })}
-      </Row>
+      </div>
     );
   }
 }

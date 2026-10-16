@@ -6,7 +6,7 @@ import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
-import type { Cluster , Target , LoginUserInfo } from '@velaux/data';
+import type { Cluster, Target, LoginUserInfo } from '@velaux/data';
 import { locale } from '../../utils/locale';
 
 import TableList from './components/List';
@@ -134,7 +134,6 @@ class TargetList extends React.Component<Props, State> {
               >
                 <Translation>New Target</Translation>
               </Button>
-              ,
             </Permission>,
           ]}
         />

@@ -652,3 +652,55 @@ a {
   }
   color: var(--grey-500);
 }
+
+// Tables in the page content read as cards: rounded, a shaded header and
+// rows divided only horizontally, with words wrapped whole.
+.layout-content .next-table {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  table {
+    border: none;
+  }
+  th,
+  td {
+    border-right: none !important;
+    border-left: none !important;
+  }
+  th {
+    color: #64748b;
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    background: #f8fafc;
+    border-color: #e2e8f0;
+  }
+  td {
+    border-color: #f1f5f9;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  .next-table-row:hover td {
+    background: #f8fafc;
+  }
+  .next-table-cell-wrapper {
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+}
+
+// Filter bars above a list: one white strip, rounded like the tables.
+.app-select-wrapper,
+.user-select-wrapper,
+.definitions-select-wrapper,
+.cluster-input-wrapper,
+.project-select-wrapper,
+.addon-search {
+  margin-bottom: 16px;
+  padding: 0 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}

@@ -1,4 +1,3 @@
-import { Icon, Grid, Tag } from '@alifd/next';
 import { Link } from 'dva/router';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -100,49 +99,27 @@ class Menu extends Component<Props, State> {
     });
   };
 
-  getMenuItem = () => {
-    const { Row, Col } = Grid;
-    const { activeName } = this.props;
-    const transMenuData = this.transMenuData();
-    const result = (transMenuData || []).map((item) => {
-      const isActive = activeName === item.name ? 'active-menu-item' : '';
-      return (
-        <li key={item.name}>
-          <Link to={`/configs/${item.name}/config`}>
-            <Row className={`menu-item-wrapper ${isActive}`}>
-              <Col span="5">
-                <div className="menu-item-img-wrapper">
-                  <img src={item.img} className="menu-item-img" />
-                </div>
-              </Col>
-              <Col span="17">
-                <div className="menu-item-description">
-                  {item.alias || item.name}
-                  {item.legacy && (
-                    <Tag size="small" className="menu-item-legacy">
-                      <Translation>Legacy</Translation>
-                    </Tag>
-                  )}
-                </div>
-              </Col>
-              <Col span="2">
-                <div className="menu-item-icon">
-                  <Icon type={item.iconType} />
-                </div>
-              </Col>
-            </Row>
-          </Link>
-        </li>
-      );
-    });
-    return result;
-  };
-
   render() {
-    const menuItem = this.getMenuItem();
+    const { activeName } = this.props;
     return (
-      <div className="menu-content">
-        <ul>{menuItem}</ul>
+      <div className="configs-tabs" role="tablist">
+        {this.transMenuData().map((item) => (
+          <Link
+            key={item.name}
+            role="tab"
+            aria-selected={activeName === item.name}
+            className={`configs-tab ${activeName === item.name ? 'active' : ''}`}
+            to={`/configs/${item.name}/config`}
+          >
+            <img src={item.img} />
+            {item.alias || item.name}
+            {item.legacy && (
+              <span className="configs-tab-legacy">
+                <Translation>Legacy</Translation>
+              </span>
+            )}
+          </Link>
+        ))}
       </div>
     );
   }
