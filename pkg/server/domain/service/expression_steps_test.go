@@ -80,6 +80,7 @@ func TestExpressionEnvStepRoots(t *testing.T) {
 	assert.Equal(t, "string", child(each, "item", "name").Type, "a literal item's fields are typed as written")
 	assert.Equal(t, "int", child(each, "item", "port").Type)
 	assert.Equal(t, "int", child(each, "index").Type)
+	assert.Equal(t, "string", child(each, "key").Type, "each.key is the item's key, or its index as text")
 
 	env, err = svc.Env(context.Background(), app, "workflowstep", "", "", loopStep(`"$(source.cfg.regions)"`))
 	require.NoError(t, err)
@@ -125,6 +126,12 @@ func TestExpressionCheckStepReads(t *testing.T) {
 	typ, errs = check("workflowstep", "$(each.index)", "integer", literal)
 	assert.Equal(t, "int", typ, "each.index is an int")
 	assert.Empty(t, errs)
+
+	typ, errs = check("workflowstep", "$(each.key)", "string", literal)
+	assert.Equal(t, "string", typ, "each.key is a string")
+	assert.Empty(t, errs)
+	_, errs = check("workflowstep", "$(each.key)", "integer", literal)
+	assert.NotEmpty(t, errs, "a key is text, not a number")
 
 	typ, errs = check("workflowstep", "$(each.item.zone)", "string", loopStep(`"$(source.cfg.regions)"`))
 	assert.Equal(t, "int", typ, "items read from a source are typed by its schema")

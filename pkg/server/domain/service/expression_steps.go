@@ -324,7 +324,8 @@ func stepRoots(step apisv1.ExpressionStep, sourceSchemas map[string]string) []*a
 	return append(out, &apisv1.ExpressionVariable{Name: propexpr.EachIdent, Type: kindObject,
 		Description: "The loop's current pass",
 		Children: []*apisv1.ExpressionVariable{item,
-			{Name: "index", Type: kindInt, Description: "The item's position in the list, from 0"}}})
+			{Name: "index", Type: kindInt, Description: "The item's position in the list, from 0"},
+			{Name: "key", Type: kindString, Description: "The item's key, from forEach.key, or its index as text"}}})
 }
 
 // loopItemVariable is each.item with the fields its items declare: a literal
