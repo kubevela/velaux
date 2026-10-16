@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/golang/groupcache/lru"
 	"k8s.io/klog/v2"
@@ -27,7 +28,42 @@ import (
 	"github.com/kubevela/velaux/pkg/server/utils"
 )
 
-var jsFileCache = lru.New(100)
+var jsFileCache = newSyncCache(100)
+
+// syncCache is an LRU cache safe for concurrent use: lru.Cache is not, and
+// the server reads and fills it from every request for a JS file.
+type syncCache struct {
+	mu    sync.Mutex
+	cache *lru.Cache
+}
+
+func newSyncCache(size int) *syncCache {
+	return &syncCache{cache: lru.New(size)}
+}
+
+func (c *syncCache) Get(key lru.Key) (interface{}, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.cache.Get(key)
+}
+
+func (c *syncCache) Add(key lru.Key, value interface{}) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.cache.Add(key, value)
+}
+
+func (c *syncCache) Remove(key lru.Key) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.cache.Remove(key)
+}
+
+func (c *syncCache) Len() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.cache.Len()
+}
 
 // HeaderHitCache the header key
 var HeaderHitCache = "Hit-Cache"

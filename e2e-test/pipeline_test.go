@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	"github.com/kubevela/workflow/api/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -46,7 +47,7 @@ func init() {
 			WorkflowStepBase: model.WorkflowStepBase{
 				Name: "request",
 				Type: "request",
-				Outputs: v1alpha1.StepOutputs{
+				Outputs: wfTypesv1alpha1.StepOutputs{
 					{
 						ValueFrom: "import \"strconv\"\n\"Current star count: \" + strconv.FormatInt(response[\"stargazers_count\"], 10)\n",
 						Name:      "stars",
@@ -156,7 +157,7 @@ var _ = Describe("Test the rest api about the pipeline", Ordered, func() {
 				{
 					Name: "request1",
 					Type: "request",
-					Outputs: v1alpha1.StepOutputs{
+					Outputs: wfTypesv1alpha1.StepOutputs{
 						{
 							ValueFrom: "import \"strconv\"\n\"Current star count: \" + strconv.FormatInt(response[\"stargazers_count\"], 10)\n",
 							Name:      "stars",
@@ -167,7 +168,7 @@ var _ = Describe("Test the rest api about the pipeline", Ordered, func() {
 				{
 					Name: "request2",
 					Type: "request",
-					Outputs: v1alpha1.StepOutputs{
+					Outputs: wfTypesv1alpha1.StepOutputs{
 						{
 							ValueFrom: "import \"strconv\"\n\"Current star count: \" + strconv.FormatInt(response[\"stargazers_count\"], 10)\n",
 							Name:      "stars-copy",
@@ -185,7 +186,7 @@ var _ = Describe("Test the rest api about the pipeline", Ordered, func() {
 			WorkflowStepBase: model.WorkflowStepBase{
 				Name: "log",
 				Type: "log",
-				Inputs: v1alpha1.StepInputs{
+				Inputs: wfTypesv1alpha1.StepInputs{
 					{
 						ParameterKey: "data",
 						From:         "stars",
@@ -207,7 +208,7 @@ var _ = Describe("Test the rest api about the pipeline", Ordered, func() {
 
 	It("run pipeline", func() {
 		var req = apisv1.RunPipelineRequest{
-			Mode: v1alpha1.WorkflowExecuteMode{
+			Mode: wfTypesv1alpha1.WorkflowExecuteMode{
 				Steps:    "StepByStep",
 				SubSteps: "DAG",
 			},

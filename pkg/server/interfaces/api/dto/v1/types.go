@@ -26,6 +26,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	registryv1 "github.com/google/go-containerregistry/pkg/v1"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	workflowv1alpha1 "github.com/kubevela/workflow/api/v1alpha1"
 	"helm.sh/helm/v3/pkg/repo"
 	corev1 "k8s.io/api/core/v1"
@@ -742,8 +743,8 @@ type ComponentBase struct {
 	Creator       string                        `json:"creator,omitempty"`
 	CreateTime    time.Time                     `json:"createTime"`
 	UpdateTime    time.Time                     `json:"updateTime"`
-	Inputs        workflowv1alpha1.StepInputs   `json:"inputs,omitempty"`
-	Outputs       workflowv1alpha1.StepOutputs  `json:"outputs,omitempty"`
+	Inputs        wfTypesv1alpha1.StepInputs    `json:"inputs,omitempty"`
+	Outputs       wfTypesv1alpha1.StepOutputs   `json:"outputs,omitempty"`
 	Traits        []*ApplicationTrait           `json:"traits"`
 	WorkloadType  common.WorkloadTypeDescriptor `json:"workloadType,omitempty"`
 }
@@ -763,8 +764,8 @@ type CreateComponentRequest struct {
 	ComponentType string                           `json:"componentType" validate:"checkname"`
 	Properties    string                           `json:"properties,omitempty"`
 	DependsOn     []string                         `json:"dependsOn" optional:"true"`
-	Inputs        workflowv1alpha1.StepInputs      `json:"inputs,omitempty" optional:"true"`
-	Outputs       workflowv1alpha1.StepOutputs     `json:"outputs,omitempty" optional:"true"`
+	Inputs        wfTypesv1alpha1.StepInputs       `json:"inputs,omitempty" optional:"true"`
+	Outputs       wfTypesv1alpha1.StepOutputs      `json:"outputs,omitempty" optional:"true"`
 	Traits        []*CreateApplicationTraitRequest `json:"traits,omitempty" optional:"true"`
 }
 
@@ -1055,17 +1056,17 @@ type WorkflowStep struct {
 // WorkflowStepBase is the step base of workflow
 type WorkflowStepBase struct {
 	// Name is the unique name of the workflow step.
-	Name        string                             `json:"name" validate:"checkname"`
-	Alias       string                             `json:"alias" validate:"checkalias" optional:"true"`
-	Type        string                             `json:"type" validate:"checkname"`
-	Description string                             `json:"description" optional:"true"`
-	DependsOn   []string                           `json:"dependsOn" optional:"true"`
-	Properties  Properties                         `json:"properties,omitempty"`
-	Meta        *workflowv1alpha1.WorkflowStepMeta `json:"meta,omitempty" optional:"true"`
-	If          string                             `json:"if,omitempty" optional:"true"`
-	Timeout     string                             `json:"timeout,omitempty" optional:"true"`
-	Inputs      workflowv1alpha1.StepInputs        `json:"inputs,omitempty" optional:"true"`
-	Outputs     workflowv1alpha1.StepOutputs       `json:"outputs,omitempty" optional:"true"`
+	Name        string                            `json:"name" validate:"checkname"`
+	Alias       string                            `json:"alias" validate:"checkalias" optional:"true"`
+	Type        string                            `json:"type" validate:"checkname"`
+	Description string                            `json:"description" optional:"true"`
+	DependsOn   []string                          `json:"dependsOn" optional:"true"`
+	Properties  Properties                        `json:"properties,omitempty"`
+	Meta        *wfTypesv1alpha1.WorkflowStepMeta `json:"meta,omitempty" optional:"true"`
+	If          string                            `json:"if,omitempty" optional:"true"`
+	Timeout     string                            `json:"timeout,omitempty" optional:"true"`
+	Inputs      wfTypesv1alpha1.StepInputs        `json:"inputs,omitempty" optional:"true"`
+	Outputs     wfTypesv1alpha1.StepOutputs       `json:"outputs,omitempty" optional:"true"`
 }
 
 // Properties unmarshal object or string
@@ -1784,8 +1785,8 @@ type PipelineRunBase struct {
 type RunPipelineRequest struct {
 	// Mode is the mode of the pipeline run. Available values are: "StepByStep", "DAG" for both `step` and `subStep`
 	// default: "StepByStep" for `step`, "DAG" for `subStep`
-	Mode        workflowv1alpha1.WorkflowExecuteMode `json:"mode" optional:"true"`
-	ContextName string                               `json:"contextName"`
+	Mode        wfTypesv1alpha1.WorkflowExecuteMode `json:"mode" optional:"true"`
+	ContextName string                              `json:"contextName"`
 }
 
 // ListPipelineRunResponse is the response body of listing pipeline run

@@ -345,6 +345,7 @@ func (u addonServiceImpl) UpdateAddonRegistry(ctx context.Context, name string, 
 	if err != nil {
 		return nil, bcode.ErrAddonRegistryNotExist
 	}
+	keepRegistryCredentials(r, &req)
 	switch {
 	case req.Git != nil:
 		r.Git = req.Git
@@ -364,6 +365,30 @@ func (u addonServiceImpl) UpdateAddonRegistry(ctx context.Context, name string, 
 	}
 
 	return convertAddonRegistry(r), nil
+}
+
+// keepRegistryCredentials carries a registry's stored credentials into an
+// update of the same kind that leaves them empty. The UI never receives them,
+// so an edit it saves sends none, and replacing the source would drop them and
+// orphan the token's Secret. A credential given in the update replaces the old.
+func keepRegistryCredentials(stored pkgaddon.Registry, req *apis.UpdateAddonRegistryRequest) {
+	keep := func(update *string, current string) {
+		if *update == "" {
+			*update = current
+		}
+	}
+	switch {
+	case req.Git != nil && stored.Git != nil:
+		keep(&req.Git.Token, stored.Git.Token)
+	case req.Gitee != nil && stored.Gitee != nil:
+		keep(&req.Gitee.Token, stored.Gitee.Token)
+	case req.Gitlab != nil && stored.Gitlab != nil:
+		keep(&req.Gitlab.Token, stored.Gitlab.Token)
+	case req.Helm != nil && stored.Helm != nil:
+		keep(&req.Helm.Username, stored.Helm.Username)
+		keep(&req.Helm.Password, stored.Helm.Password)
+		keep(&req.Helm.Token, stored.Helm.Token)
+	}
 }
 
 func (u *addonServiceImpl) ListAddonRegistries(ctx context.Context) ([]*apis.AddonRegistry, error) {
