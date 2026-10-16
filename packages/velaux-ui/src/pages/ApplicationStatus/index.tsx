@@ -4,6 +4,7 @@ import { Link, routerRedux } from 'dva/router';
 import React from 'react';
 
 import { deployApplication } from '../../api/application';
+import { notifyDeployed } from '../../utils/deploy';
 import { listApplicationResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
 import { If } from '../../components/If';
 import { StatusDetails } from '../../components/StatusDetails';
@@ -231,7 +232,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
-            Message.success(i18n.t('Application deployed successfully'));
+            notifyDeployed(re);
             this.setState({ deployLoading: false });
             this.loadApplicationStatus();
             if (re.record && re.record.name && dispatch) {

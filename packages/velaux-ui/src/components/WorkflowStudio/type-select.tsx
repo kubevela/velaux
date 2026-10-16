@@ -3,9 +3,10 @@ import _ from 'lodash';
 import React from 'react';
 
 import i18n from '../../i18n';
-import type { DefinitionBase , WorkflowStepBase } from '@velaux/data';
+import type { DefinitionBase, WorkflowStepBase } from '@velaux/data';
 import { checkName, showAlias } from '../../utils/common';
 import { locale } from '../../utils/locale';
+import { isUsable } from '../../utils/restrictions';
 import Item from '../Item';
 import { Translation } from '../Translation';
 
@@ -147,7 +148,9 @@ class TypeSelect extends React.Component<Props, State> {
   render() {
     const { definitions, onClose, checkStepName, addSub } = this.props;
     const { selectType } = this.state;
-    const categories = buildDefinitionCategory(definitions?.filter((def) => !addSub || def.name != 'step-group') || []);
+    const categories = buildDefinitionCategory(
+      definitions?.filter((def) => (!addSub || def.name != 'step-group') && isUsable(def)) || []
+    );
     const { init } = this.field;
     const checkStepNameRule = (rule: Rule, value: any, callback: (error?: string) => void) => {
       if (checkStepName(value)) {

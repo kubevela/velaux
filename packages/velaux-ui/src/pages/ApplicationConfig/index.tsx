@@ -14,6 +14,7 @@ import {
   getApplicationStatistics,
 } from '../../api/application';
 import { getComponentDefinitions, getPolicyDefinitions } from '../../api/definitions';
+import { deployNamespaces } from '../../utils/restrictions';
 import { If } from '../../components/If';
 import Item from '../../components/Item';
 import NumItem from '../../components/NumItem';
@@ -125,6 +126,12 @@ class ApplicationConfig extends Component<Props, State> {
     this.onGetComponentDefinitions();
     this.onGetPolicyScopes();
     this.loadAppStatistics();
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (deployNamespaces(prevProps.envbinding).join(',') !== deployNamespaces(this.props.envbinding).join(',')) {
+      this.onGetComponentDefinitions();
+    }
   }
 
   onGetApplicationTrigger() {
@@ -385,9 +392,21 @@ class ApplicationConfig extends Component<Props, State> {
     });
   };
 
+  // definitionsRequest numbers the component definition requests, so only the
+  // latest may set the list: an earlier one asked about other namespaces.
+  definitionsRequest = 0;
+
   onGetComponentDefinitions = async () => {
-    getComponentDefinitions().then((res) => {
-      if (res) {
+    const namespaces = deployNamespaces(this.props.envbinding);
+    const request = ++this.definitionsRequest;
+    // Until the environments load there is no namespace to check restrictions
+    // against, and an unfiltered list offers types the webhook then refuses.
+    if (namespaces.length === 0) {
+      this.setState({ componentDefinitions: [] });
+      return;
+    }
+    getComponentDefinitions(namespaces).then((res) => {
+      if (res && request === this.definitionsRequest) {
         this.setState({
           componentDefinitions: res && res.definitions,
         });
@@ -756,6 +775,7 @@ class ApplicationConfig extends Component<Props, State> {
         <If condition={visibleTrait}>
           <TraitDialog
             project={applicationDetail?.project?.name || ''}
+            deployed={statistics ? (statistics.revisionCount || 0) > 0 : undefined}
             visible={visibleTrait}
             isEditComponent={isEditComponent}
             appName={appName}
@@ -763,6 +783,7 @@ class ApplicationConfig extends Component<Props, State> {
             isEditTrait={isEditTrait}
             traitItem={traitItem}
             temporaryTraitList={temporaryTraitList}
+            envbinding={envbinding || []}
             onClose={this.onClose}
             onOK={this.onOk}
             createTemporaryTrait={(trait: Trait) => {
@@ -795,6 +816,7 @@ class ApplicationConfig extends Component<Props, State> {
         <If condition={visibleComponent}>
           <ComponentDialog
             project={applicationDetail?.project?.name || ''}
+            deployed={statistics ? (statistics.revisionCount || 0) > 0 : undefined}
             appName={appName}
             componentName={componentName}
             components={components || []}

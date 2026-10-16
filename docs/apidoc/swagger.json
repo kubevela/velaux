@@ -4225,6 +4225,12 @@
 						"description": "query by the specified scope like WorkflowRun or Application",
 						"name": "scope",
 						"in": "query"
+					},
+					{
+						"type": "string",
+						"description": "comma-separated namespaces to report each definition's usability in, as unusableIn",
+						"name": "namespaces",
+						"in": "query"
 					}
 				],
 				"responses": {
@@ -4371,6 +4377,54 @@
 							"items": {
 								"$ref": "#/definitions/*schema.UIParameter"
 							}
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
+		"/api/v1/definitions/{definitionName}/usage": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"definition"
+				],
+				"summary": "Report each namespace's use of a component or trait definition against its quota",
+				"operationId": "definitionUsage",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the definition",
+						"name": "definitionName",
+						"in": "path",
+						"required": true
+					},
+					{
+						"enum": [
+							"component",
+							"trait"
+						],
+						"type": "string",
+						"description": "the definition type",
+						"name": "type",
+						"in": "query",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.DefinitionUsageResponse"
 						}
 					},
 					"500": {
@@ -11500,6 +11554,12 @@
 				"version": {
 					"type": "string"
 				},
+				"warnings": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
 				"workflowName": {
 					"type": "string"
 				}
@@ -13130,6 +13190,9 @@
 				"policy": {
 					"$ref": "#/definitions/v1beta1.PolicyDefinitionSpec"
 				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
+				},
 				"status": {
 				"policyScope": {
 					"type": "string"
@@ -13139,11 +13202,36 @@
 				"trait": {
 					"$ref": "#/definitions/v1beta1.TraitDefinitionSpec"
 				},
+				"unusableIn": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
 				"workflowStep": {
 					"$ref": "#/definitions/v1beta1.WorkflowStepDefinitionSpec"
 				},
 				"workloadType": {
 					"type": "string"
+				},
+				"abstract": {
+					"type": "boolean"
+				},
+				"extends": {
+					"type": "string"
+				}
+			}
+		},
+		"v1.DefinitionUsageResponse": {
+			"required": [
+				"usage"
+			],
+			"properties": {
+				"usage": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.NamespaceUsage"
+					}
 				}
 			}
 		},
@@ -13562,6 +13650,9 @@
 				"policy": {
 					"$ref": "#/definitions/v1beta1.PolicyDefinitionSpec"
 				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
+				},
 				"schema": {
 					"type": "string"
 				},
@@ -13575,6 +13666,12 @@
 					"type": "array",
 					"items": {
 						"$ref": "#/definitions/schema.UIParameter"
+					}
+				},
+				"unusableIn": {
+					"type": "array",
+					"items": {
+						"type": "string"
 					}
 				},
 				"workflowStep": {
@@ -15120,6 +15217,33 @@
 				},
 				"name": {
 					"type": "string"
+				}
+			}
+		},
+		"v1.NamespaceUsage": {
+			"required": [
+				"namespace",
+				"used",
+				"state"
+			],
+			"properties": {
+				"limit": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"state": {
+					"type": "string"
+				},
+				"used": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"warn": {
+					"type": "integer",
+					"format": "int32"
 				}
 			}
 		},

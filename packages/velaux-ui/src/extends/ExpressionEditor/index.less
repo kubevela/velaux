@@ -1,0 +1,44 @@
+.expression-editor {
+  position: relative;
+  width: 100%;
+  .expression-editor-input {
+    height: 32px;
+    padding: 5px 0 0;
+    overflow: hidden;
+    border: 1px solid #c0c6cc;
+    border-radius: 3px;
+    background: #fff;
+    &.disabled {
+      background: #f7f8fa;
+    }
+  }
+  .expression-editor-mark {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: default;
+    &.ok {
+      color: #1e8e3e;
+    }
+    &.error {
+      color: #d23c26;
+    }
+    &.warning {
+      color: #e8a33d;
+    }
+  }
+}
+
+// Behind each $( ) expression: Monaco draws decorations in its own layer, so
+// this rule cannot sit inside .expression-editor.
+.vela-cel-frame {
+  background-color: rgba(27, 88, 244, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(27, 88, 244, 0.2);
+  border-radius: 3px;
+}

@@ -11,7 +11,8 @@ import { WorkflowPrompt } from '../../components/WorkflowPrompt';
 import WorkflowStudio from '../../components/WorkflowStudio';
 import { WorkflowContext } from '../../context';
 import type { WorkflowData } from '../../context/index';
-import type { ApplicationDetail, EnvBinding, Workflow, WorkflowMode , DefinitionBase , WorkflowStep } from '@velaux/data';
+import { deployNamespaces } from '../../utils/restrictions';
+import type { ApplicationDetail, EnvBinding, Workflow, WorkflowMode, DefinitionBase, WorkflowStep } from '@velaux/data';
 import { showAlias } from '../../utils/common';
 import { locale } from '../../utils/locale';
 
@@ -80,6 +81,7 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Readonly<Props>): void {
     if (prevProps.match !== this.props.match || prevProps.envbinding !== this.props.envbinding) {
       this.loadWorkflow();
+      this.loadWorkflowDefinitions();
     }
     const search = locationService.getSearchObject();
     const setCanary = search && search['setCanary'] == true ? true : false;
@@ -107,14 +109,33 @@ class ApplicationWorkflowStudio extends React.Component<Props, State> {
     }
   };
 
+  // definitionsRequest numbers the step definition requests, so only the latest
+  // may set the list: an earlier one asked about other namespaces.
+  definitionsRequest = 0;
+
   loadWorkflowDefinitions = () => {
-    getWorkflowDefinitions('Application').then((res: any) => {
-      if (res) {
+    const namespaces = deployNamespaces(this.deployTargets());
+    const request = ++this.definitionsRequest;
+    // Until the environment loads there is no namespace to check restrictions
+    // against, and an unfiltered list offers steps the webhook then refuses.
+    if (namespaces.length === 0) {
+      this.setState({ definitions: [] });
+      return;
+    }
+    getWorkflowDefinitions('Application', namespaces).then((res: any) => {
+      if (res && request === this.definitionsRequest) {
         this.setState({
           definitions: res && res.definitions,
         });
       }
     });
+  };
+
+  // deployTargets is the environment this workflow deploys to, where its step
+  // types' restrictions are checked; the studio lists only the usable ones.
+  deployTargets = (): EnvBinding[] => {
+    const env = this.getEnvbindingByName();
+    return env ? [env] : [];
   };
 
   getEnvbindingByName = () => {

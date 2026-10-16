@@ -18,6 +18,7 @@ package api
 
 import (
 	"strconv"
+	"strings"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	restful "github.com/emicklei/go-restful/v3"
@@ -53,6 +54,7 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("appliedWorkload", "if specified, query the trait definition applied to the workload").DataType("string")).
 		Param(ws.QueryParameter("ownerAddon", "query by which addon created the definition").DataType("string")).
 		Param(ws.QueryParameter("scope", "query by the specified scope like WorkflowRun or Application").DataType("string")).
+		Param(ws.QueryParameter("namespaces", "comma-separated namespaces to report each definition's usability in, as unusableIn").DataType("string")).
 		Returns(200, "OK", apis.ListDefinitionResponse{}).
 		Writes(apis.ListDefinitionResponse{}).Do(returns500))
 
@@ -64,6 +66,15 @@ func (d *definition) GetWebServiceRoute() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(200, "create successfully", apis.DetailDefinitionResponse{}).
 		Writes(apis.DetailDefinitionResponse{}).Do(returns500))
+
+	ws.Route(ws.GET("/{definitionName}/usage").To(d.definitionUsage).
+		Doc("Report each namespace's use of a component or trait definition against its quota").
+		Filter(d.RbacService.CheckPerm("definition", "detail")).
+		Param(ws.PathParameter("definitionName", "identifier of the definition").DataType("string")).
+		Param(ws.QueryParameter("type", "the definition type").DataType("string").Required(true).PossibleValues([]string{"component", "trait"})).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", apis.DefinitionUsageResponse{}).
+		Writes(apis.DefinitionUsageResponse{}).Do(returns500))
 
 	ws.Route(ws.PUT("/{definitionName}/uischema").To(d.updateUISchema).
 		Doc("Update the UI schema for a definition").
@@ -103,12 +114,25 @@ func (d *definition) listDefinitions(req *restful.Request, res *restful.Response
 		OwnerAddon:       req.QueryParameter("ownerAddon"),
 		Scope:            req.QueryParameter("scope"),
 		QueryAll:         queryAll,
+		Namespaces:       splitNamespaces(req.QueryParameter("namespaces")),
 	})
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
 	if err := res.WriteEntity(apis.ListDefinitionResponse{Definitions: definitions}); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (d *definition) definitionUsage(req *restful.Request, res *restful.Response) {
+	usage, err := d.DefinitionService.DefinitionUsage(req.Request.Context(), req.PathParameter("definitionName"), req.QueryParameter("type"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(usage); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
@@ -172,4 +196,15 @@ func (d *definition) updateDefinitionStatus(req *restful.Request, res *restful.R
 		bcode.ReturnError(req, res, err)
 		return
 	}
+}
+
+// splitNamespaces reads a comma-separated namespaces query parameter.
+func splitNamespaces(param string) []string {
+	var namespaces []string
+	for _, ns := range strings.Split(param, ",") {
+		if ns = strings.TrimSpace(ns); ns != "" {
+			namespaces = append(namespaces, ns)
+		}
+	}
+	return namespaces
 }
