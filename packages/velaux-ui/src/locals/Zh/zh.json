@@ -886,6 +886,7 @@
   "CUE Source": "CUE 源码",
   "Pinning a version is recommended, so changes to the definition reach this only when you choose.": "建议固定版本，这样定义的变更只在你选择时才会生效。",
   "Versions": "版本",
+  "Fix the highlighted properties first": "请先修正标出的属性",
   "Group": "分组",
   "step": "个步骤",
   "steps": "个步骤"

@@ -246,10 +246,10 @@ func markUnusableIn(ctx context.Context, reader client.Reader, defs []*apisv1.De
 
 func getKindAndVersion(defType string) (apiVersion, kind string, err error) {
 	switch defType {
-	case "component":
+	case componentKind:
 		return definitionAPIVersion, kindComponentDefinition, nil
 
-	case "trait":
+	case traitKind:
 		return definitionAPIVersion, kindTraitDefinition, nil
 
 	case "workflowstep":

@@ -2210,6 +2210,9 @@ type ExpressionCheckRequest struct {
 	// Source names the source the value is written in, on the source surface:
 	// it reads only the sources declared before it.
 	Source string `json:"source,omitempty"`
+	// Component names the component the value is written in, or the one its
+	// trait is on: it cannot read its own output.
+	Component string `json:"component,omitempty"`
 }
 
 // ExpressionCheckResponse reports on a property value's expressions.
@@ -2227,6 +2230,8 @@ type ExpressionIssue struct {
 	End   int `json:"end"`
 	// Warning is set for an issue that does not stop the value being used.
 	Warning bool `json:"warning,omitempty"`
+	// Fix, where there is one, replaces the text from Start to End.
+	Fix string `json:"fix,omitempty"`
 }
 
 // Customisation is how this VelaUX is branded, kept in the

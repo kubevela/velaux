@@ -179,12 +179,12 @@ func (d *definitionServiceImpl) capabilityOf(ctx context.Context, name, defType 
 		err        error
 	)
 	switch defType {
-	case "component":
+	case componentKind:
 		def := &v1beta1.ComponentDefinition{}
 		if exampleURL, err = get(def); err == nil {
 			capability, err = docgen.GetCapabilityByComponentDefinitionObject(*def, def.Spec.Workload.Type)
 		}
-	case "trait":
+	case traitKind:
 		def := &v1beta1.TraitDefinition{}
 		if exampleURL, err = get(def); err == nil {
 			capability, err = docgen.GetCapabilityByTraitDefinitionObject(*def)

@@ -34,6 +34,8 @@ import Numbers from '../../extends/Numbers';
 import Structs from '../../extends/Structs';
 import StructMap from '../../extends/StructMap';
 import ExpressionEditor from '../../extends/ExpressionEditor';
+import { blockingIssue, hasExpression } from '../../extends/ExpressionEditor/completion';
+import { checkDraftExpression, checkExpression } from '../../api/application';
 import type { ExpressionEnv } from '../../extends/ExpressionEditor';
 import OptionsFromSelect, { isOptionsSource } from '../../extends/OptionsFromSelect';
 import { checkImageName, replaceUrl } from '../../utils/common';
@@ -54,6 +56,9 @@ export type ExpressionContext = {
   // source names the source being edited, on the source surface: it reads only
   // the sources declared before it.
   source?: string;
+  // component names the component being edited, or the one a trait is on: it
+  // cannot read its own output.
+  component?: string;
   // draft is an application being created, which the expression endpoints of
   // an existing one cannot answer for.
   draft?: boolean;
@@ -65,6 +70,9 @@ export type ExpressionContext = {
 
 // expressibleTypes are the widgets whose value an expression may replace.
 const expressibleTypes = ['Input', 'Number', 'Switch', 'Select', 'Suggest'];
+
+// fxWidth is the room the ƒx toggle takes at the right of an expression field.
+const fxWidth = 30;
 
 // Scope is an enclosing form, which a condition reaches with `../`.
 export type Scope = {
@@ -80,6 +88,9 @@ type Props = {
   uiSchema?: UIParam[];
   maxColSpan?: number;
   onChange?: (params: any) => void;
+  // onValidityChange hears whether the form can be saved as it stands: no
+  // expression the server finds an error in, no required field left empty.
+  onValidityChange?: (valid: boolean) => void;
   registerForm?: (form: Field) => void;
   disableRenderRow?: boolean;
   mode: 'new' | 'edit';
@@ -215,6 +226,8 @@ class UISchema extends Component<Props, State> {
         if (onChange) {
           onChange(values);
         }
+        this.reportValidity();
+        this.refreshExpressionErrors();
       },
     });
     this.registerForm = {};
@@ -230,6 +243,46 @@ class UISchema extends Component<Props, State> {
 
   componentDidMount = () => {
     this.setValues();
+    this.reportValidity();
+    this.refreshExpressionErrors();
+  };
+
+  // A new schema, a new type or version, is judged afresh.
+  componentDidUpdate(prev: Props) {
+    if (prev.uiSchema !== this.props.uiSchema) {
+      this.exprErrors = {};
+      this.childInvalid = {};
+      this.lastValid = undefined;
+      this.reportValidity();
+      this.refreshExpressionErrors();
+    }
+  }
+
+  // exprErrors and childInvalid are the params whose expression has an error,
+  // and the nested sections that are not valid.
+  exprErrors: Record<string, boolean> = {};
+  childInvalid: Record<string, boolean> = {};
+  lastValid?: boolean;
+
+  // reportValidity tells the parent whether the form can be saved, when that
+  // changes. A required field shown only under conditions is left to the
+  // form's own check on save.
+  reportValidity = () => {
+    const values: Record<string, any> = this.form.getValues() || {};
+    const missing = (this.props.uiSchema || []).some(
+      (p) =>
+        p.validate?.required &&
+        !p.disable &&
+        !(p.conditions && p.conditions.length > 0) &&
+        !p.subParameters?.length &&
+        (values[p.jsonKey] === undefined || values[p.jsonKey] === null || values[p.jsonKey] === '')
+    );
+    const valid =
+      !missing && !Object.values(this.exprErrors).some(Boolean) && !Object.values(this.childInvalid).some(Boolean);
+    if (valid !== this.lastValid) {
+      this.lastValid = valid;
+      this.props.onValidityChange?.(valid);
+    }
   };
 
   onRegisterForm = (key: string, form: Field) => {
@@ -248,6 +301,66 @@ class UISchema extends Component<Props, State> {
     }
   };
 
+  // checkOne is the error the server finds in a param's expression, if any,
+  // such as one evaluating to a string where an integer is expected.
+  checkOne = (param: UIParam, value: any): Promise<string | undefined> => {
+    const ex = this.props.expressions;
+    if (!ex || !hasExpression(value)) {
+      return Promise.resolve(undefined);
+    }
+    const kind = expressionKind(param);
+    const check = ex.draft
+      ? checkDraftExpression({ surface: ex.surface, value, kind })
+      : checkExpression(ex.appName, { surface: ex.surface, value, kind, source: ex.source, component: ex.component });
+    return check.then((res: any) => blockingIssue(res?.issues)?.message).catch(() => undefined);
+  };
+
+  checkExpressionRule = (param: UIParam, value: any, callback: (error?: string) => void) => {
+    this.checkOne(param, value).then((error) => callback(error));
+  };
+
+  // checkExpressions checks every param holding an expression, shown or not: a
+  // param folded under Advanced is not in the form, but its value is saved.
+  checkExpressions = async (): Promise<Record<string, string>> => {
+    const values: Record<string, any> = { ...(this.props.value || {}), ...(this.form.getValues() || {}) };
+    const params = (this.props.uiSchema || []).filter((p) => hasExpression(values[p.jsonKey]));
+    const errors = await Promise.all(params.map((p) => this.checkOne(p, values[p.jsonKey])));
+    const out: Record<string, string> = {};
+    params.forEach((p, i) => {
+      if (errors[i]) {
+        out[p.jsonKey] = errors[i] as string;
+      }
+    });
+    return out;
+  };
+
+  checkTimer?: ReturnType<typeof setTimeout>;
+
+  // refreshExpressionErrors re-checks the expressions shortly after the form
+  // settles, for the validity the dialog's buttons follow.
+  refreshExpressionErrors = () => {
+    if (this.checkTimer) {
+      clearTimeout(this.checkTimer);
+    }
+    this.checkTimer = setTimeout(() => {
+      this.checkExpressions().then((errors) => {
+        this.exprErrors = {};
+        Object.keys(errors).forEach((key) => (this.exprErrors[key] = true));
+        // An error folded under Advanced is shown, since the buttons wait on it.
+        if (Object.keys(errors).length > 0 && !this.state.advanced) {
+          this.setState({ advanced: true });
+        }
+        this.reportValidity();
+      });
+    }, 400);
+  };
+
+  componentWillUnmount() {
+    if (this.checkTimer) {
+      clearTimeout(this.checkTimer);
+    }
+  }
+
   validate = (callback: (error?: string) => void) => {
     this.form.validate((errors) => {
       const { codeError } = this.state;
@@ -260,7 +373,18 @@ class UISchema extends Component<Props, State> {
         callback('ui schema validate failure');
         return;
       }
-      callback();
+      this.checkExpressions().then((errors) => {
+        const keys = Object.keys(errors);
+        if (keys.length === 0) {
+          callback();
+          return;
+        }
+        // Show the params folded under Advanced, where an error may hide.
+        if (!this.state.advanced) {
+          this.setState({ advanced: true });
+        }
+        callback(errors[keys[0]]);
+      });
     });
   };
 
@@ -291,6 +415,8 @@ class UISchema extends Component<Props, State> {
     const held = typeof v === 'string' && v.indexOf('$(') > -1 && param.style?.expression !== 'never';
     if (held) {
       this.openedAsExpression[param.jsonKey] = true;
+      const typing = document.activeElement?.closest(`[data-param="${CSS.escape(param.jsonKey)}"]`);
+      this.focusOnSwitch[param.jsonKey] = !!typing;
     }
     return held;
   };
@@ -304,7 +430,11 @@ class UISchema extends Component<Props, State> {
     if (!on && typeof v === 'string' && v.indexOf('$(') > -1) {
       this.form.setValue(param.jsonKey, undefined);
     }
+    if (!on) {
+      delete this.exprErrors[param.jsonKey];
+    }
     this.setState({ expressionKeys: { ...this.state.expressionKeys, [param.jsonKey]: on } }, () => {
+      this.reportValidity();
       if (this.props.onChange) {
         this.props.onChange(this.form.getValues());
       }
@@ -312,8 +442,13 @@ class UISchema extends Component<Props, State> {
   };
 
   toggleExpression = (param: UIParam, active: boolean) => {
+    this.focusOnSwitch[param.jsonKey] = !active;
     this.setExpressionMode(param, !active);
   };
+
+  // focusOnSwitch records the params whose expression editor takes focus as it
+  // mounts: one switched on with ƒx, or one typed into until it held a $(.
+  focusOnSwitch: Record<string, boolean> = {};
 
   // expressionsToggle is the switch that lets the application read $( )
   // expressions, shown once, at the top of the outermost form.
@@ -1130,6 +1265,10 @@ class UISchema extends Component<Props, State> {
                     registerForm={(form: Field) => {
                       this.onRegisterForm(param.jsonKey, form);
                     }}
+                    onValidityChange={(valid: boolean) => {
+                      this.childInvalid[param.jsonKey] = !valid;
+                      this.reportValidity();
+                    }}
                     uiSchema={param.subParameters}
                     parentScope={this.scope()}
                     expressions={this.props.expressions}
@@ -1205,6 +1344,10 @@ class UISchema extends Component<Props, State> {
                   uiSchema={param.subParameters}
                   registerForm={(form: Field) => {
                     this.onRegisterForm(param.jsonKey, form);
+                  }}
+                  onValidityChange={(valid: boolean) => {
+                    this.childInvalid[param.jsonKey] = !valid;
+                    this.reportValidity();
                   }}
                   inline={inline}
                   maxColSpan={24 / itemCount}
@@ -1384,13 +1527,26 @@ class UISchema extends Component<Props, State> {
             appName={this.props.expressions?.appName || ''}
             surface={this.props.expressions?.surface || ''}
             source={this.props.expressions?.source}
+            component={this.props.expressions?.component}
             draft={this.props.expressions?.draft}
+            reserve={fxWidth}
+            autoFocus={!!this.focusOnSwitch[param.jsonKey]}
             env={this.props.expressions?.env}
             kind={expressionKind(param)}
             disabled={disableEdit}
+            onStatus={(error: boolean) => {
+              this.exprErrors[param.jsonKey] = error;
+              this.reportValidity();
+            }}
             {...init(param.jsonKey, {
               initValue: initValue,
-              rules: required ? [{ required: true, message: 'This field is required.' }] : [],
+              rules: [
+                ...(required ? [{ required: true, message: 'This field is required.' }] : []),
+                {
+                  validator: (rule: any, value: any, callback: (error?: string) => void) =>
+                    this.checkExpressionRule(param, value, callback),
+                },
+              ],
             })}
           />
         </Form.Item>
@@ -1401,6 +1557,7 @@ class UISchema extends Component<Props, State> {
           span={colSpan}
           style={{ padding: '0 4px' }}
           className={expressible ? 'ui-schema-expressible' : undefined}
+          data-param={param.jsonKey}
         >
           {expressible && (
             <span
