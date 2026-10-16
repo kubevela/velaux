@@ -17,6 +17,8 @@ const { Row, Col } = Grid;
 
 type Props = {
   pod: PodBase;
+  // project is the application's, which the logs are read as.
+  project: string;
   containerName: string;
   clusterName: string;
   onClose: () => void;
@@ -79,9 +81,10 @@ class ContainerLog extends Component<Props, State> {
   };
 
   loadContainerLog = () => {
-    const { pod, containerName, clusterName } = this.props;
+    const { pod, containerName, clusterName, project } = this.props;
     const { previous } = this.state;
     listContainerLog({
+      project,
       cluster: clusterName,
       namespace: pod.metadata.namespace,
       pod: pod.metadata.name,

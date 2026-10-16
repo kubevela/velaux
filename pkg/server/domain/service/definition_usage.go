@@ -47,11 +47,20 @@ func (d *definitionServiceImpl) DefinitionUsage(ctx context.Context, name, defTy
 	def := &unstructured.Unstructured{}
 	def.SetAPIVersion(version)
 	def.SetKind(kind)
-	if err := d.KubeClient.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: name}, def); err != nil {
+	place, err := d.placeOf(ctx, kind, name)
+	if err != nil {
+		return nil, err
+	}
+	if err := place.cli.Get(ctx, client.ObjectKey{Namespace: place.namespace, Name: name}, def); err != nil {
 		return nil, err
 	}
 	var apps v1beta1.ApplicationList
-	if err := d.KubeClient.List(ctx, &apps); err != nil {
+	opts := []client.ListOption{}
+	if place.namespace != types.DefaultKubeVelaNS {
+		// KubeVela finds a project's definition for Applications in its namespace alone.
+		opts = append(opts, client.InNamespace(place.namespace))
+	}
+	if err := d.KubeClient.List(ctx, &apps, opts...); err != nil {
 		return nil, err
 	}
 	namespaces := map[string]corev1.Namespace{}

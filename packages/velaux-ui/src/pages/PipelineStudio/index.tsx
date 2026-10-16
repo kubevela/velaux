@@ -90,7 +90,7 @@ class PipelineStudio extends React.Component<Props, State> {
   };
 
   loadWorkflowDefinitions = () => {
-    getWorkflowDefinitions('WorkflowRun').then((res: any) => {
+    getWorkflowDefinitions(this.props.match.params.projectName, 'WorkflowRun').then((res: any) => {
       if (res) {
         this.setState({
           definitions: res && res.definitions,

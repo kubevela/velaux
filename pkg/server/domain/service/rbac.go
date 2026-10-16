@@ -70,6 +70,7 @@ var defaultProjectPermissionTemplate = []*model.PermissionTemplate{
 			"project:{projectName}/application:*/*",
 			"project:{projectName}/pipeline:*/*",
 			"project:{projectName}/workflow:*",
+			"project:{projectName}/definition:*",
 		},
 		Actions: []string{"detail", "list"},
 		Effect:  "Allow",
@@ -78,7 +79,7 @@ var defaultProjectPermissionTemplate = []*model.PermissionTemplate{
 	{
 		Name:      "app-management",
 		Alias:     "App Management",
-		Resources: []string{"project:{projectName}/application:*/*", "project:{projectName}/workflow:*"},
+		Resources: []string{"project:{projectName}/application:*/*", "project:{projectName}/workflow:*", "project:{projectName}/definition:*"},
 		Actions:   []string{"*"},
 		Effect:    "Allow",
 		Scope:     "project",
@@ -250,6 +251,9 @@ var ResourceMaps = map[string]resourceMetadata{
 			},
 			"workflow": {
 				pathName: "workflowName",
+			},
+			"definition": {
+				pathName: "definitionName",
 			},
 			"role": {
 				pathName: "roleName",
@@ -531,8 +535,8 @@ func (p *rbacServiceImpl) Init(ctx context.Context) error {
 // permissions after projects were created with them. Templates are copied into
 // a project when it is created, so these are added to existing ones on start.
 var addedProjectPermissionResources = map[string][]string{
-	"project-view":   {"project:{projectName}/workflow:*"},
-	"app-management": {"project:{projectName}/workflow:*"},
+	"project-view":   {"project:{projectName}/workflow:*", "project:{projectName}/definition:*"},
+	"app-management": {"project:{projectName}/workflow:*", "project:{projectName}/definition:*"},
 }
 
 // addProjectPermissionResources adds addedProjectPermissionResources to each

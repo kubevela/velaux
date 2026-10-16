@@ -185,6 +185,9 @@ class AddonDetailDialog extends React.Component<Props, State> {
     // TODO: the app name and namespace should get from the api server.
     const appName = 'addon-' + this.props.addonName;
     listApplicationServiceEndpoints({
+      // An addon's Application is in vela-system, no project's: a query across
+      // every project, which only admins may run.
+      project: '',
       appName: appName,
       appNs: 'vela-system',
     }).then((re) => {

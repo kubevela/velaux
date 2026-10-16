@@ -25,6 +25,9 @@ import { UsageDialog } from './components/UsageDialog';
 
 import './index.less';
 import { checkPermission } from '../../utils/permission';
+import { projectChanged } from '../../utils/currentProject';
+import type { DefinitionPlace } from '../../utils/definitionPlace';
+import { definitionPlaceQuery, definitionResource } from '../../utils/definitionPlace';
 
 type Props = {
   match: {
@@ -33,6 +36,7 @@ type Props = {
     };
   };
   userInfo?: LoginUserInfo;
+  currentProject?: { current: string; resolved: boolean };
 };
 
 type State = {
@@ -46,7 +50,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.definitions, ...store.user };
+  return { ...store.definitions, ...store.user, currentProject: store.currentProject };
 })
 class Definitions extends Component<Props, State> {
   constructor(props: Props) {
@@ -65,8 +69,11 @@ class Definitions extends Component<Props, State> {
 
   componentWillReceiveProps(nextProps: Props) {
     // The list waits on the user and their permissions, which load after the page.
-    if (nextProps.userInfo !== this.props.userInfo) {
-      this.lisDefinitions(nextProps.userInfo);
+    if (
+      nextProps.userInfo !== this.props.userInfo ||
+      projectChanged(this.props.currentProject, nextProps.currentProject)
+    ) {
+      this.lisDefinitions(nextProps.userInfo, nextProps.currentProject);
     }
     const nextPropsParams = nextProps.match.params || {};
     if (nextPropsParams.definitionType !== this.state.definitionType) {
@@ -81,15 +88,28 @@ class Definitions extends Component<Props, State> {
     }
   }
 
-  lisDefinitions(userInfo = this.props.userInfo) {
+  // project is the one picked in the top bar: its own definitions are listed
+  // with the global ones. Every project at once lists the global ones alone.
+  project = (currentProject = this.props.currentProject) => (currentProject?.resolved ? currentProject.current : '');
+
+  // place is where a listed definition is.
+  place = (record: DefinitionBase): DefinitionPlace => ({
+    project: this.project(),
+    where: record.scope === 'project' ? 'project' : 'global',
+  });
+
+  lisDefinitions(userInfo = this.props.userInfo, currentProject = this.props.currentProject) {
     const { definitionType } = this.state;
     if (!definitionType) {
       return;
     }
-    if (!checkPermission({ resource: 'definition:*', action: 'list' }, '', userInfo)) {
+    const project = this.project(currentProject);
+    const resource = project ? `project:${project}/definition:*` : 'definition:*';
+    if (!checkPermission({ resource, action: 'list' }, project, userInfo)) {
       return;
     }
     const params = {
+      project,
       definitionType,
       queryAll: true,
     };
@@ -123,7 +143,7 @@ class Definitions extends Component<Props, State> {
     const { definitionType } = this.state;
     const { status, name } = record;
     if (status === 'enable') {
-      updateDefinitionStatus({ name, hiddenInUI: true, type: definitionType })
+      updateDefinitionStatus({ ...this.place(record), name, hiddenInUI: true, type: definitionType })
         .then((res) => {
           if (res) {
             Message.success(<Translation>Update definition status success</Translation>);
@@ -132,7 +152,7 @@ class Definitions extends Component<Props, State> {
         })
         .catch();
     } else {
-      updateDefinitionStatus({ name, hiddenInUI: false, type: definitionType })
+      updateDefinitionStatus({ ...this.place(record), name, hiddenInUI: false, type: definitionType })
         .then((res) => {
           if (res) {
             Message.success(<Translation>Update definition status success</Translation>);
@@ -173,7 +193,7 @@ class Definitions extends Component<Props, State> {
         cell: (v: string, i: number, record: DefinitionBase) => {
           return (
             <span className="definition-name">
-              <Link to={`/definitions/${definitionType}/${v}/doc`}>{v}</Link>
+              <Link to={`/definitions/${definitionType}/${v}/doc${definitionPlaceQuery(this.place(record))}`}>{v}</Link>
               {record.abstract && (
                 <Tag size="small" className="definition-abstract">
                   <Translation>Abstract</Translation>
@@ -202,6 +222,24 @@ class Definitions extends Component<Props, State> {
             </span>
           );
         },
+      },
+      {
+        key: 'where',
+        title: <Translation>Where</Translation>,
+        dataIndex: 'scope',
+        cell: (v: string, i: number, record: DefinitionBase) => (
+          <span>
+            <StatusBadge
+              tone={v === 'project' ? 'progressing' : 'neutral'}
+              label={v === 'project' ? 'Project' : 'Global'}
+            />
+            {record.overridden && (
+              <span className="definition-overridden">
+                <Translation>{"overridden by the project's"}</Translation>
+              </span>
+            )}
+          </span>
+        ),
       },
       {
         key: 'status',
@@ -243,10 +281,10 @@ class Definitions extends Component<Props, State> {
             <Fragment>
               <Permission
                 request={{
-                  resource: `definition:${record.name}`,
+                  resource: definitionResource(this.place(record), record.name),
                   action: 'update',
                 }}
-                project={''}
+                project={this.place(record).where === 'project' ? this.project() : ''}
               >
                 <RowAction
                   icon={record.status === 'enable' ? <AiOutlineStop /> : <AiOutlineCheckCircle />}
@@ -257,7 +295,10 @@ class Definitions extends Component<Props, State> {
               </Permission>
               {(definitionType === 'component' || definitionType === 'trait') &&
                 (record.restrictions?.quota || []).length > 0 && (
-                  <Permission request={{ resource: `definition:${record.name}`, action: 'detail' }} project={''}>
+                  <Permission
+                    request={{ resource: definitionResource(this.place(record), record.name), action: 'detail' }}
+                    project={this.place(record).where === 'project' ? this.project() : ''}
+                  >
                     <RowAction
                       icon={<AiOutlinePieChart />}
                       label="Usage"
@@ -297,6 +338,7 @@ class Definitions extends Component<Props, State> {
           <UsageDialog
             definition={usageOf}
             definitionType={definitionType}
+            place={this.place(usageOf)}
             onClose={() => this.setState({ usageOf: undefined })}
           />
         )}

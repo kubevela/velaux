@@ -452,15 +452,17 @@ class ApplicationConfig extends Component<Props, State> {
   // onGetPolicyScopes finds how KubeVela applies each policy type, which the
   // policy list marks.
   onGetPolicyScopes = () => {
-    getPolicyDefinitions().then((res: { definitions?: DefinitionBase[] }) => {
-      const scopes: Record<string, string> = {};
-      (res?.definitions || []).forEach((def) => {
-        if (def.policyScope) {
-          scopes[def.name] = def.policyScope;
-        }
-      });
-      this.setState({ policyScopes: scopes });
-    });
+    getPolicyDefinitions(this.props.applicationDetail?.project?.name || '').then(
+      (res: { definitions?: DefinitionBase[] }) => {
+        const scopes: Record<string, string> = {};
+        (res?.definitions || []).forEach((def) => {
+          if (def.policyScope) {
+            scopes[def.name] = def.policyScope;
+          }
+        });
+        this.setState({ policyScopes: scopes });
+      }
+    );
   };
 
   // definitionsRequest numbers the component definition requests, so only the
@@ -476,7 +478,7 @@ class ApplicationConfig extends Component<Props, State> {
       this.setState({ componentDefinitions: [] });
       return;
     }
-    getComponentDefinitions(namespaces).then((res) => {
+    getComponentDefinitions(this.props.applicationDetail?.project?.name || '', namespaces).then((res) => {
       if (res && request === this.definitionsRequest) {
         this.setState({
           componentDefinitions: res && res.definitions,
@@ -915,6 +917,7 @@ class ApplicationConfig extends Component<Props, State> {
           <TriggerDialog
             visible={visibleTrigger}
             appName={appName}
+            project={applicationDetail?.project?.name || ''}
             trigger={trigger}
             workflows={workflows}
             components={components || []}
