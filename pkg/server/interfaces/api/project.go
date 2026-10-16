@@ -21,6 +21,8 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"k8s.io/klog/v2"
 
+	pkgUtils "github.com/oam-dev/kubevela/pkg/utils"
+
 	pkgconfig "github.com/oam-dev/kubevela/pkg/config"
 
 	"github.com/kubevela/velaux/pkg/server/domain/service"
@@ -38,6 +40,7 @@ type project struct {
 	PipelineRunService service.PipelineRunService `inject:""`
 	ContextService     service.ContextService     `inject:""`
 	RBACService        service.RBACService        `inject:""`
+	ReportService      service.ReportService      `inject:""`
 }
 
 // NewProject new project
@@ -221,6 +224,25 @@ func (n *project) GetWebServiceRoute() *restful.WebService {
 		Returns(200, "OK", apis.ConfigTemplateDetail{}).
 		Returns(400, "Bad Request", bcode.Bcode{}).
 		Writes(apis.ConfigTemplateDetail{}))
+
+	ws.Route(ws.GET("/{projectName}/reports").To(n.listReports).
+		Doc("the reports a project can run: its own, then the global ones").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(n.RbacService.CheckPerm("project/application", "list")).
+		Param(ws.PathParameter("projectName", "identifier of the project").DataType("string").Required(true)).
+		Returns(200, "OK", apis.ListReportsResponse{}).
+		Writes(apis.ListReportsResponse{}))
+
+	ws.Route(ws.POST("/{projectName}/reports/{reportID}").To(n.runReport).
+		Doc("run a report over the project's applications and namespaces").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(n.RbacService.CheckPerm("project/application", "list")).
+		Param(ws.PathParameter("projectName", "identifier of the project").DataType("string").Required(true)).
+		Param(ws.PathParameter("reportID", "the report").DataType("string").Required(true)).
+		Reads(apis.RunReportRequest{}).
+		Returns(200, "OK", apis.ReportResult{}).
+		Returns(404, "Not Found", bcode.Bcode{}).
+		Writes(apis.ReportResult{}))
 
 	ws.Route(ws.GET("/{projectName}/configs").To(n.getConfigs).
 		Doc("get configs which are in a project").
@@ -860,5 +882,44 @@ func (n *project) deleteDistribution(req *restful.Request, res *restful.Response
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return
+	}
+}
+
+func (n *project) listReports(req *restful.Request, res *restful.Response) {
+	list, err := n.ReportService.ListReports(req.Request.Context(), req.PathParameter("projectName"))
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if err := res.WriteEntity(list); err != nil {
+		bcode.ReturnError(req, res, err)
+	}
+}
+
+// runReport runs a report over the project in the path, the one whose
+// permission the route checked, and logs who ran it.
+func (n *project) runReport(req *restful.Request, res *restful.Response) {
+	projectName := req.PathParameter("projectName")
+	if _, err := n.ProjectService.GetProject(req.Request.Context(), projectName); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	reportID := req.PathParameter("reportID")
+	var run apis.RunReportRequest
+	if req.Request.ContentLength > 0 {
+		if err := req.ReadEntity(&run); err != nil {
+			bcode.ReturnError(req, res, err)
+			return
+		}
+	}
+	result, err := n.ReportService.RunReport(req.Request.Context(), projectName, reportID, run.Parameters)
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	user, _ := req.Request.Context().Value(&apis.CtxKeyUser).(string)
+	klog.InfoS("report run", "user", pkgUtils.Sanitize(user), "project", pkgUtils.Sanitize(projectName), "report", pkgUtils.Sanitize(reportID), "scope", result.Report.Scope, "parameters", len(run.Parameters), "rows", len(result.Rows))
+	if err := res.WriteEntity(result); err != nil {
+		bcode.ReturnError(req, res, err)
 	}
 }
