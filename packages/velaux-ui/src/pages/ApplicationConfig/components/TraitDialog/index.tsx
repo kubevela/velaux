@@ -15,6 +15,8 @@ import {
 import type { ExpressionContext } from '../../../../components/UISchema';
 import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
 import { detailTraitDefinition, getTraitDefinitions } from '../../../../api/definitions';
+import { VersionSelect } from '../../../../components/VersionSelect';
+import { joinType, splitType } from '../../../../utils/definitionVersion';
 import { AwaitingType } from '../../../../components/AwaitingType';
 import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
@@ -119,14 +121,16 @@ class TraitDialog extends React.Component<Props, State> {
       const { isEditTrait, traitItem, appName, project, dispatch } = this.props;
       if (isEditTrait && traitItem) {
         const { alias, type, description, properties } = traitItem;
+        const pinned = splitType(type);
         this.field.setValues({
           alias,
-          type,
+          type: pinned.name,
+          traitVersion: pinned.version,
           description,
           properties,
         });
-        if (type) {
-          this.onDetailsTraitDefinition(type);
+        if (pinned.name) {
+          this.onDetailsTraitDefinition(pinned.name, pinned.version);
         }
       }
       dispatch({
@@ -189,8 +193,14 @@ class TraitDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', componentName = '', temporaryTraitList = [] } = this.props;
-      const { alias = '', type = '', description = '', properties } = values;
-      const query = { appName, componentName, traitType: type };
+      const { alias = '', description = '', properties } = values;
+      const type = joinType(values.type || '', this.field.getValue('traitVersion'));
+      // A trait is found by the type it was saved with, which a new version changes.
+      const query = {
+        appName,
+        componentName,
+        traitType: this.props.isEditTrait ? this.props.traitItem?.type || type : type,
+      };
       const params: Trait = {
         alias,
         type,
@@ -226,7 +236,7 @@ class TraitDialog extends React.Component<Props, State> {
           });
         }
       } else {
-        const findSameType = temporaryTraitList.find((item) => item.type === type);
+        const findSameType = temporaryTraitList.find((item) => splitType(item.type).name === splitType(type).name);
         if (!isEditTrait && !findSameType) {
           params.properties = JSON.parse(params.properties);
           this.props.createTemporaryTrait(params);
@@ -245,16 +255,15 @@ class TraitDialog extends React.Component<Props, State> {
     return (traitDefinitions || []).filter(isUsable).map((item) => ({ label: item.name, value: item.name }));
   }
 
-  onDetailsTraitDefinition = (value: string, callback?: () => void) => {
+  // onDetailsTraitDefinition loads a trait type's form, at the version it is
+  // pinned to or the latest.
+  onDetailsTraitDefinition = (value: string, version?: string) => {
     this.setState({ definitionLoading: true });
-    detailTraitDefinition({ name: value })
+    detailTraitDefinition({ name: value, revision: version })
       .then((re) => {
         if (re) {
           this.setState({ definitionDetail: re, definitionLoading: false });
           this.setDefaultProperties(re);
-          if (callback) {
-            callback();
-          }
         }
       })
       .catch(() => this.setState({ definitionLoading: false }));
@@ -275,7 +284,7 @@ class TraitDialog extends React.Component<Props, State> {
 
   handleTypeChange = (value: string) => {
     this.removeProperties();
-    this.field.setValues({ type: value });
+    this.field.setValues({ type: value, traitVersion: undefined });
     this.onDetailsTraitDefinition(value);
     this.setAlias(value);
   };
@@ -368,7 +377,7 @@ class TraitDialog extends React.Component<Props, State> {
             </Row>
           </If>
           <Row>
-            <Col span={24} style={{ padding: '0 8px' }}>
+            <Col span={12} style={{ padding: '0 8px' }}>
               <FormItem
                 label={<Translation>Type</Translation>}
                 required
@@ -395,6 +404,19 @@ class TraitDialog extends React.Component<Props, State> {
                   })}
                   dataSource={this.transTraitDefinitions()}
                   onChange={this.handleTypeChange}
+                />
+              </FormItem>
+            </Col>
+            <Col span={12} style={{ padding: '0 8px' }}>
+              <FormItem label={<Translation>Version</Translation>}>
+                <VersionSelect
+                  definitionType="trait"
+                  name={this.field.getValue('type')}
+                  value={this.field.getValue('traitVersion')}
+                  onChange={(version?: string) => {
+                    this.field.setValue('traitVersion', version);
+                    this.onDetailsTraitDefinition(this.field.getValue('type'), version);
+                  }}
                 />
               </FormItem>
             </Col>

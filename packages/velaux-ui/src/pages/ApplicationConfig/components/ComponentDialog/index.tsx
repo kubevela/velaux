@@ -15,6 +15,8 @@ import {
 import type { ExpressionContext } from '../../../../components/UISchema';
 import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
 import { detailComponentDefinition } from '../../../../api/definitions';
+import { VersionSelect } from '../../../../components/VersionSelect';
+import { joinType, splitType } from '../../../../utils/definitionVersion';
 import { AwaitingType } from '../../../../components/AwaitingType';
 import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { Translation } from '../../../../components/Translation';
@@ -137,16 +139,18 @@ class ComponentDialog extends React.Component<Props, State> {
       this.onGetEditComponentInfo(() => {
         if (this.state.editComponent) {
           const { name, alias, type, description, properties, dependsOn } = this.state.editComponent;
+          const pinned = splitType(type);
           this.field.setValues({
             name,
             alias,
-            componentType: type,
+            componentType: pinned.name,
+            componentVersion: pinned.version,
             description,
             properties,
             dependsOn,
           });
-          if (type) {
-            this.onDetailsComponentDefinition(type);
+          if (pinned.name) {
+            this.onDetailsComponentDefinition(pinned.name, pinned.version);
           }
         }
       });
@@ -196,7 +200,8 @@ class ComponentDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', temporaryTraitList = [] } = this.props;
-      const { name, alias = '', description = '', componentType = '', properties, dependsOn = [] } = values;
+      const { name, alias = '', description = '', properties, dependsOn = [] } = values;
+      const componentType = joinType(values.componentType || '', this.field.getValue('componentVersion'));
       const params: ApplicationComponentConfig = {
         name,
         alias,
@@ -229,14 +234,13 @@ class ComponentDialog extends React.Component<Props, State> {
     });
   };
 
-  onDetailsComponentDefinition = (value: string, callback?: () => void) => {
-    detailComponentDefinition({ name: value })
+  // onDetailsComponentDefinition loads a component type's form, at the version
+  // it is pinned to or the latest.
+  onDetailsComponentDefinition = (value: string, version?: string) => {
+    detailComponentDefinition({ name: value, revision: version })
       .then((re) => {
         if (re) {
           this.setState({ definitionDetail: re, loading: false });
-          if (callback) {
-            callback();
-          }
         }
       })
       .catch();
@@ -324,7 +328,8 @@ class ComponentDialog extends React.Component<Props, State> {
         return;
       }
       const { appName = '', componentName = '' } = this.props;
-      const { name, alias = '', description = '', componentType = '', properties, dependsOn = [] } = values;
+      const { name, alias = '', description = '', properties, dependsOn = [] } = values;
+      const componentType = joinType(values.componentType || '', this.field.getValue('componentVersion'));
       const params: ApplicationComponentConfig = {
         name,
         alias,
@@ -406,7 +411,23 @@ class ComponentDialog extends React.Component<Props, State> {
                       onChange={(item: string) => {
                         this.removeProperties();
                         this.field.setValue('componentType', item);
+                        this.field.setValue('componentVersion', undefined);
                         this.onDetailsComponentDefinition(item);
+                      }}
+                    />
+                  </FormItem>
+                </Col>
+                <Col span={12} style={{ paddingLeft: '8px' }}>
+                  <FormItem
+                    label={<Translation className="font-size-14 font-weight-bold color333">Version</Translation>}
+                  >
+                    <VersionSelect
+                      definitionType="component"
+                      name={this.field.getValue('componentType')}
+                      value={this.field.getValue('componentVersion')}
+                      onChange={(version?: string) => {
+                        this.field.setValue('componentVersion', version);
+                        this.onDetailsComponentDefinition(this.field.getValue('componentType'), version);
                       }}
                     />
                   </FormItem>

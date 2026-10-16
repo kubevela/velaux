@@ -1,4 +1,5 @@
 import { Dialog } from '@alifd/next';
+import { TypeLabel } from '../../../../components/TypeLabel';
 import React, { useState } from 'react';
 import { AiOutlineDelete, AiOutlineDown, AiOutlineEdit, AiOutlineImport, AiOutlineRight } from 'react-icons/ai';
 
@@ -64,7 +65,7 @@ const SourceList = ({ sources, applicationDetail, onDeleteSource, onShowSource }
                 <AiOutlineImport className="row-list-icon" />
                 <span>
                   <span className="row-list-title">{item.name}</span>
-                  <span className="row-list-type">{item.type}</span>
+                  <TypeLabel className="row-list-type" type={item.type} />
                 </span>
               </span>
               <span>

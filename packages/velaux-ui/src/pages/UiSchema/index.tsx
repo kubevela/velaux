@@ -175,12 +175,12 @@ class UiSchema extends Component<Props, State> {
         <div className="uiSchema-wrapper">
           <Loading visible={isLoading} inline={false}>
             <If condition={!uiSchema || uiSchema.length === 0}>
-              <Card locale={locale().Card}>
+              <Card locale={locale().Card} contentHeight="auto">
                 <Empty message={<Translation>There is no ui schema definition</Translation>} iconWidth={'30px'} />
               </Card>
             </If>
             <If condition={!uiSchema || uiSchema.length !== 0}>
-              <section className="margin-top-20" style={{ maxWidth: '1520px', margin: '16px auto' }}>
+              <section className="margin-top-20" style={{ margin: '16px 0' }}>
                 <Message type="notice" style={{ margin: '0 8px 8px 16px' }}>
                   <Translation>
                     Custom the UI schema will preview in right, please refer to the document to get more info

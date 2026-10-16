@@ -62,8 +62,17 @@ const (
 type DefinitionService interface {
 	// ListDefinitions list definition base info
 	ListDefinitions(ctx context.Context, ops DefinitionQueryOption) ([]*apisv1.DefinitionBase, error)
+	// DefinitionCUE is a definition as CUE, as vela def get writes it.
+	DefinitionCUE(ctx context.Context, name, defType string) (*apisv1.DefinitionCUEResponse, error)
+	// DefinitionDoc is a definition's reference documentation in Markdown.
+	DefinitionDoc(ctx context.Context, name, defType, lang string) (*apisv1.DefinitionDocResponse, error)
 	// DetailDefinition get definition detail
 	DetailDefinition(ctx context.Context, name, defType string) (*apisv1.DetailDefinitionResponse, error)
+	// DetailDefinitionAt is a definition's detail at one of its versions, as
+	// ListDefinitionRevisions names them; no version is the latest.
+	DetailDefinitionAt(ctx context.Context, name, defType, version string) (*apisv1.DetailDefinitionResponse, error)
+	// ListDefinitionRevisions lists a definition's revisions, newest first.
+	ListDefinitionRevisions(ctx context.Context, name, defType string) ([]apisv1.DefinitionRevision, error)
 	// DefinitionUsage reports each namespace's use of a component or trait definition against its quota
 	DefinitionUsage(ctx context.Context, name, defType string) (*apisv1.DefinitionUsageResponse, error)
 	// AddDefinitionUISchema add or update custom definition ui schema
@@ -329,12 +338,19 @@ func convertDefinitionBase(def unstructured.Unstructured, kind string) (*apisv1.
 
 // DetailDefinition get definition detail
 func (d *definitionServiceImpl) DetailDefinition(ctx context.Context, name, defType string) (*apisv1.DetailDefinitionResponse, error) {
+	return d.DetailDefinitionAt(ctx, name, defType, "")
+}
+
+// DetailDefinitionAt is a definition's detail with the parameters of one of its
+// versions: the controller writes each revision's schema beside the latest's,
+// as <type>-schema-<name>-<version>.
+func (d *definitionServiceImpl) DetailDefinitionAt(ctx context.Context, name, defType, version string) (*apisv1.DetailDefinitionResponse, error) {
 	def := &unstructured.Unstructured{}
-	version, kind, err := getKindAndVersion(defType)
+	apiVersion, kind, err := getKindAndVersion(defType)
 	if err != nil {
 		return nil, err
 	}
-	def.SetAPIVersion(version)
+	def.SetAPIVersion(apiVersion)
 	def.SetKind(kind)
 	if err := d.KubeClient.Get(ctx, k8stypes.NamespacedName{Namespace: types.DefaultKubeVelaNS, Name: name}, def); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -346,12 +362,18 @@ func (d *definitionServiceImpl) DetailDefinition(ctx context.Context, name, defT
 	if err != nil {
 		return nil, err
 	}
+	schemaName := fmt.Sprintf("%s-schema-%s", defType, name)
+	if version != "" {
+		schemaName = fmt.Sprintf("%s-%s", schemaName, version)
+	}
 	var cm v1.ConfigMap
-	if err := d.KubeClient.Get(ctx, k8stypes.NamespacedName{
-		Namespace: types.DefaultKubeVelaNS,
-		Name:      fmt.Sprintf("%s-schema-%s", defType, name),
-	}, &cm); err != nil && !apierrors.IsNotFound(err) {
-		return nil, err
+	if err := d.KubeClient.Get(ctx, k8stypes.NamespacedName{Namespace: types.DefaultKubeVelaNS, Name: schemaName}, &cm); err != nil {
+		if !apierrors.IsNotFound(err) {
+			return nil, err
+		}
+		if version != "" {
+			return nil, bcode.ErrDefinitionNotFound
+		}
 	}
 
 	definition := &apisv1.DetailDefinitionResponse{
@@ -672,4 +694,59 @@ func policyScope(policyType string, scope v1beta1.PolicyScope) string {
 	default:
 		return policyScopeWorkload
 	}
+}
+
+// revisionTypes are the definition types a DefinitionRevision records, by the
+// type name VelaUX's API uses.
+var revisionTypes = map[string]common.DefinitionType{
+	"component":    common.ComponentType,
+	"trait":        common.TraitType,
+	"policy":       common.PolicyType,
+	"workflowstep": common.WorkflowStepType,
+	"source":       common.SourceType,
+}
+
+// revisionOf is the name of the definition a revision snapshots.
+func revisionOf(rev v1beta1.DefinitionRevision) string {
+	switch rev.Spec.DefinitionType {
+	case common.ComponentType:
+		return rev.Spec.ComponentDefinition.Name
+	case common.TraitType:
+		return rev.Spec.TraitDefinition.Name
+	case common.PolicyType:
+		return rev.Spec.PolicyDefinition.Name
+	case common.WorkflowStepType:
+		return rev.Spec.WorkflowStepDefinition.Name
+	case common.SourceType:
+		return rev.Spec.SourceDefinition.Name
+	}
+	return ""
+}
+
+// ListDefinitionRevisions lists a definition's revisions, newest first. A
+// revision is named <definition>-<version>, so its version is what an
+// Application writes after @ to pin it.
+func (d *definitionServiceImpl) ListDefinitionRevisions(ctx context.Context, name, defType string) ([]apisv1.DefinitionRevision, error) {
+	definitionType, ok := revisionTypes[defType]
+	if !ok {
+		return nil, bcode.ErrDefinitionTypeNotSupport
+	}
+	var list v1beta1.DefinitionRevisionList
+	if err := d.KubeClient.List(ctx, &list, client.InNamespace(types.DefaultKubeVelaNS)); err != nil {
+		return nil, err
+	}
+	revisions := []apisv1.DefinitionRevision{}
+	for _, rev := range list.Items {
+		if rev.Spec.DefinitionType != definitionType || revisionOf(rev) != name {
+			continue
+		}
+		revisions = append(revisions, apisv1.DefinitionRevision{
+			Revision:   rev.Spec.Revision,
+			Version:    strings.TrimPrefix(rev.Name, name+"-"),
+			Hash:       rev.Spec.RevisionHash,
+			CreateTime: rev.CreationTimestamp.Time,
+		})
+	}
+	sort.Slice(revisions, func(i, j int) bool { return revisions[i].Revision > revisions[j].Revision })
+	return revisions, nil
 }

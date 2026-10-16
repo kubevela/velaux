@@ -1,4 +1,5 @@
 import { Dialog } from '@alifd/next';
+import { TypeLabel } from '../../../../components/TypeLabel';
 import React, { useState } from 'react';
 import { RelativeTime } from '../../../../components/RelativeTime';
 import { AiOutlineControl, AiOutlineDelete, AiOutlineDown, AiOutlineEdit, AiOutlineRight } from 'react-icons/ai';
@@ -95,7 +96,7 @@ const PolicyList = (props: Props) => {
                 <AiOutlineControl className="row-list-icon" />
                 <span>
                   <span className="row-list-title">{row.policy?.alias || row.name}</span>
-                  <span className="row-list-type">{row.type}</span>
+                  <TypeLabel className="row-list-type" type={row.type} />
                 </span>
               </span>
               <span className="policy-list-scope">

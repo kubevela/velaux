@@ -838,7 +838,7 @@ func (c *applicationServiceImpl) DetailComponent(ctx context.Context, app *model
 	}
 	var cd v1beta1.ComponentDefinition
 	loadCtx := utils.WithProject(ctx, "")
-	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: component.Type, Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
+	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: definitionName(component.Type), Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
 		klog.Warningf("component definition %s get failure. %s", pkgUtils.Sanitize(component.Type), err.Error())
 	}
 
@@ -1327,7 +1327,7 @@ func (c *applicationServiceImpl) UpdateComponent(ctx context.Context, _ *model.A
 func (c *applicationServiceImpl) createComponent(ctx context.Context, app *model.Application, com apisv1.CreateComponentRequest, main bool) (*apisv1.ComponentBase, error) {
 	var cd v1beta1.ComponentDefinition
 	loadCtx := utils.WithProject(ctx, "")
-	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: com.ComponentType, Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
+	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: definitionName(com.ComponentType), Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
 		klog.Warningf("component definition %s get failure. %s", pkgUtils.Sanitize(com.ComponentType), err.Error())
 		return nil, bcode.ErrComponentTypeNotSupport
 	}
@@ -2222,4 +2222,11 @@ func (c *applicationServiceImpl) findAllBindingPolicyWorkflowStep(ctx context.Co
 		}
 	}
 	return res, nil
+}
+
+// definitionName is the definition a type names, without the version it may
+// be pinned to: webapp@v1.1.0 is a webapp.
+func definitionName(typeName string) string {
+	name, _, _ := strings.Cut(typeName, "@")
+	return name
 }

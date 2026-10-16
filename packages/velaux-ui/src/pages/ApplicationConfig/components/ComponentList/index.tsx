@@ -1,4 +1,5 @@
 import { Dialog } from '@alifd/next';
+import { TypeLabel } from '../../../../components/TypeLabel';
 import React, { useState } from 'react';
 import { AiOutlineDelete, AiOutlineDown, AiOutlineEdit, AiOutlineLink, AiOutlineRight } from 'react-icons/ai';
 import { IoMdAdd } from 'react-icons/io';
@@ -116,7 +117,7 @@ const ComponentList = (props: Props) => {
                 <img src={typeIcon(com)} />
                 <span>
                   <span className="row-list-title">{com.alias || com.name}</span>
-                  <span className="row-list-type">{com.componentType}</span>
+                  <TypeLabel className="row-list-type" type={com.componentType} />
                 </span>
               </span>
               <span className="component-row-health">
@@ -149,7 +150,7 @@ const ComponentList = (props: Props) => {
                     }
                     onClick={application?.readOnly ? undefined : () => props.changeTraitStats(true, trait, com.name)}
                   >
-                    {trait.type}
+                    <TypeLabel type={trait.type} />
                     {!application?.readOnly && (
                       <Permission
                         request={{
