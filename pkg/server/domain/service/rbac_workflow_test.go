@@ -31,32 +31,76 @@ import (
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/kubeapi"
 )
 
-func TestAddProjectPermissionResources(t *testing.T) {
+func TestMigrateFeaturePermissions(t *testing.T) {
 	ctx := context.Background()
 	cli := fake.NewClientBuilder().WithScheme(common2.Scheme).Build()
 	store, err := kubeapi.New(ctx, datastore.Config{Database: "kubevela"}, cli)
 	require.NoError(t, err)
 	for _, e := range []datastore.Entity{
+		&model.Project{Name: "shop"},
 		&model.Permission{Name: "project-view", Project: "shop", Resources: []string{"project:shop"}, Actions: []string{"detail", "list"}},
-		&model.Permission{Name: "app-management", Project: "shop", Resources: []string{"project:shop/application:*/*", "project:shop/workflow:*"}, Actions: []string{"*"}},
-		&model.Permission{Name: "custom", Project: "shop", Resources: []string{"project:shop/config:*"}, Actions: []string{"*"}},
+		&model.Permission{Name: "app-management", Project: "shop", Resources: []string{"project:shop/application:*/*", "project:shop/workflow:*", "project:shop/definition:*"}, Actions: []string{"*"}},
+		&model.Permission{Name: "custom", Project: "shop", Resources: []string{"project:shop/workflow:*"}, Actions: []string{"*"}},
 		&model.Permission{Name: "admin", Resources: []string{"*"}, Actions: []string{"*"}},
+		&model.Role{Name: "app-developer", Project: "shop", Permissions: []string{"project-view", "app-management"}},
+		&model.Role{Name: "auditor", Project: "shop", Permissions: []string{"custom"}},
 	} {
 		require.NoError(t, store.Add(ctx, e))
 	}
 	p := &rbacServiceImpl{Store: store}
-	require.NoError(t, p.addProjectPermissionResources(ctx))
-	require.NoError(t, p.addProjectPermissionResources(ctx), "a second start changes nothing")
+	require.NoError(t, p.migratePermissions(ctx))
 
-	get := func(name, project string) []string {
+	get := func(name, project string) *model.Permission {
 		perm := &model.Permission{Name: name, Project: project}
 		require.NoError(t, store.Get(ctx, perm))
-		return perm.Resources
+		return perm
 	}
-	assert.Equal(t, []string{"project:shop", "project:shop/workflow:*", "project:shop/definition:*"}, get("project-view", "shop"))
-	assert.Equal(t, []string{"project:shop/application:*/*", "project:shop/workflow:*", "project:shop/definition:*"}, get("app-management", "shop"), "not added twice")
-	assert.Equal(t, []string{"project:shop/config:*"}, get("custom", "shop"), "a permission of its own is left alone")
-	assert.Equal(t, []string{"*"}, get("admin", ""))
+	t.Run("project view narrows to the project, its members and roles", func(t *testing.T) {
+		assert.ElementsMatch(t, []string{"project:shop", "project:shop/role:*", "project:shop/projectUser:*", "project:shop/permission:*"}, get("project-view", "shop").Resources)
+	})
+	t.Run("each feature has a view", func(t *testing.T) {
+		assert.ElementsMatch(t, []string{"project:shop/application:*/*:*", "project:shop/query:*"}, get("app-view", "shop").Resources, "as project creation formats it")
+		assert.Equal(t, []string{"detail", "list"}, get("app-view", "shop").Actions)
+		assert.Equal(t, []string{"project:shop/report:*"}, get("report-view", "shop").Resources)
+		for _, view := range featureViews {
+			get(view, "shop")
+		}
+	})
+	t.Run("a role holding project view keeps what it read, through the views", func(t *testing.T) {
+		role := &model.Role{Name: "app-developer", Project: "shop"}
+		require.NoError(t, store.Get(ctx, role))
+		for _, view := range featureViews {
+			assert.Contains(t, role.Permissions, view)
+		}
+		auditor := &model.Role{Name: "auditor", Project: "shop"}
+		require.NoError(t, store.Get(ctx, auditor))
+		assert.Equal(t, []string{"custom"}, auditor.Permissions, "a role without project view is left alone")
+	})
+	t.Run("app management keeps applications alone", func(t *testing.T) {
+		assert.Equal(t, []string{"project:shop/application:*/*"}, get("app-management", "shop").Resources)
+	})
+	t.Run("workflow and definition management are created in the project", func(t *testing.T) {
+		assert.Equal(t, []string{"project:shop/workflow:*"}, get("workflow-management", "shop").Resources)
+		assert.Equal(t, []string{"project:shop/definition:*"}, get("definition-management", "shop").Resources)
+	})
+	t.Run("a permission of the admins' own is left alone", func(t *testing.T) {
+		assert.Equal(t, []string{"project:shop/workflow:*"}, get("custom", "shop").Resources)
+	})
+	t.Run("the platform gains the templates it lacks", func(t *testing.T) {
+		assert.Equal(t, []string{"package:*"}, get("package-view", "").Resources)
+		assert.Equal(t, []string{"defkit:*"}, get("defkit-management", "").Resources)
+		assert.Equal(t, []string{"sharedWorkflow:*"}, get("global-workflow-management", "").Resources)
+		assert.Equal(t, []string{"defkit:*"}, get("defkit-view", "").Resources)
+		assert.Equal(t, []string{"detail", "list"}, get("cluster-view", "").Actions)
+		assert.Equal(t, []string{"*"}, get("admin", "").Resources)
+	})
+	t.Run("it runs once: an admin's change afterwards stands", func(t *testing.T) {
+		perm := get("app-management", "shop")
+		perm.Resources = append(perm.Resources, "project:shop/workflow:*")
+		require.NoError(t, store.Put(ctx, perm))
+		require.NoError(t, p.migratePermissions(ctx))
+		assert.Contains(t, get("app-management", "shop").Resources, "project:shop/workflow:*")
+	})
 }
 
 func TestProjectWorkflowPermission(t *testing.T) {
