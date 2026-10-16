@@ -1,4 +1,4 @@
-import type { Condition, InputItem, OutputItem, WorkflowMode, WorkflowStepStatus } from './application';
+import type { Condition, InputItem, LoopStatus, OutputItem, WorkflowMode, WorkflowStepStatus } from './application';
 import type { NameAlias } from './env';
 import { KeyValue } from "../types";
 
@@ -114,6 +114,19 @@ export interface WorkflowStepBase {
 export interface WorkflowStep extends WorkflowStepBase {
   mode?: WorkflowMode;
   subSteps?: WorkflowStepBase[];
+  // forEach repeats the step, or a group's steps, once per item.
+  forEach?: ForEach;
+}
+
+// ForEach is the list a step repeats over: items given in place (a list, or a
+// $( ) expression that resolves to one), or read from a workflow variable.
+export interface ForEach {
+  items?: any;
+  from?: string;
+  // key names each item by these paths into it, joined with -, so its passes
+  // are <loop>-<key>; none numbers them.
+  key?: string[];
+  mode?: WorkflowMode;
 }
 
 interface PipelineRunMode {
@@ -143,6 +156,14 @@ export interface PipelineRunStatus {
   steps?: WorkflowStepStatus[];
   startTime?: string;
   endTime?: string;
+  // loops are the run's loop steps by name.
+  loops?: Record<string, PipelineRunLoop>;
+}
+
+// PipelineRunLoop is a loop of a pipeline run: its items, and the item each of
+// its passes ran for, by pass name.
+export interface PipelineRunLoop extends LoopStatus {
+  iterations?: Record<string, number>;
 }
 
 export interface WorkflowStepOutputs {

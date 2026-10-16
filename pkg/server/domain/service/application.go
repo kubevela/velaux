@@ -1215,6 +1215,7 @@ func workflowStepSpecs(steps []model.WorkflowStep) []wfTypesv1alpha1.WorkflowSte
 			WorkflowStepBase: convertWorkflowModel2WorkflowSpec(step.WorkflowStepBase),
 		}
 		spec.Mode = step.Mode
+		spec.ForEach = step.ForEach
 		for _, subStep := range step.SubSteps {
 			spec.SubSteps = append(spec.SubSteps, convertWorkflowModel2WorkflowSpec(subStep))
 		}

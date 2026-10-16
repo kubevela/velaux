@@ -728,6 +728,7 @@ func pipelineStep2WorkflowStep(step model.WorkflowStep) wfTypesv1alpha1.Workflow
 		},
 		Mode:     step.Mode,
 		SubSteps: make([]wfTypesv1alpha1.WorkflowStepBase, 0),
+		ForEach:  step.ForEach,
 	}
 	for _, subStep := range step.SubSteps {
 		res.SubSteps = append(res.SubSteps, wfTypesv1alpha1.WorkflowStepBase{
@@ -837,7 +838,7 @@ func (p pipelineServiceImpl) getPipelineInfo(ctx context.Context, wf *model.Pipe
 		if err != nil {
 			return nil, err
 		}
-		pi.LastRun, err = workflowRun2PipelineRun(*run, project, p.ContextService)
+		pi.LastRun, err = workflowRun2PipelineRun(*run, project, p.ContextService, runContext(ctx, p.KubeClient, run))
 		if err != nil {
 			return nil, err
 		}
@@ -943,7 +944,7 @@ func (p pipelineRunServiceImpl) GetPipelineRun(ctx context.Context, meta apis.Pi
 		run.Spec.WorkflowSpec = pipelineSpec2WorkflowSpec(pipeline.Spec)
 
 	}
-	return workflowRun2PipelineRun(run, project, p.ContextService)
+	return workflowRun2PipelineRun(run, project, p.ContextService, runContext(ctx, p.KubeClient, &run))
 }
 
 // ListPipelineRuns will list all pipeline runs
@@ -1138,7 +1139,49 @@ func pipeline2PipelineBase(wf *model.Pipeline, project model.Project) *apis.Pipe
 	}
 }
 
-func workflowRun2PipelineRun(run v1alpha1.WorkflowRun, project *model.Project, ctxService ContextService) (*apis.PipelineRun, error) {
+// runContext is what a run's workflow context holds, or nothing before the run
+// has one.
+func runContext(ctx context.Context, cli client.Client, run *v1alpha1.WorkflowRun) map[string]string {
+	cb := run.Status.ContextBackend
+	if cb == nil || cb.Name == "" {
+		return nil
+	}
+	var cm corev1.ConfigMap
+	if err := cli.Get(ctx, types.NamespacedName{Namespace: cb.Namespace, Name: cb.Name}, &cm); err != nil {
+		klog.Errorf("failed to read the context of the pipeline run %s: %s", run.Name, err.Error())
+		return nil
+	}
+	return cm.Data
+}
+
+// runLoops are a run's forEach steps by name, each with its items and the item
+// each of its passes ran for.
+func runLoops(run v1alpha1.WorkflowRun, contextValue map[string]string) map[string]apis.PipelineRunLoop {
+	if run.Spec.WorkflowSpec == nil {
+		return nil
+	}
+	status := make(map[string]v1alpha1.WorkflowStepStatus, len(run.Status.Steps))
+	for _, s := range run.Status.Steps {
+		status[s.Name] = s
+	}
+	loops := make(map[string]apis.PipelineRunLoop)
+	for _, spec := range run.Spec.WorkflowSpec.Steps {
+		if spec.ForEach == nil {
+			continue
+		}
+		loop, passes := loopPasses(spec, status[spec.Name], contextValue)
+		iterations := make(map[string]int, len(passes))
+		for _, pass := range passes {
+			if pass.Iteration != nil {
+				iterations[pass.Name] = *pass.Iteration
+			}
+		}
+		loops[spec.Name] = apis.PipelineRunLoop{LoopStatus: *loop, Iterations: iterations}
+	}
+	return loops
+}
+
+func workflowRun2PipelineRun(run v1alpha1.WorkflowRun, project *model.Project, ctxService ContextService, contextValue map[string]string) (*apis.PipelineRun, error) {
 	mergeSteps(&run)
 	pipelineName := run.Labels[labelPipeline]
 	pipelineRun := &apis.PipelineRun{
@@ -1154,6 +1197,7 @@ func workflowRun2PipelineRun(run v1alpha1.WorkflowRun, project *model.Project, c
 			Spec: run.Spec,
 		},
 		Status: run.Status,
+		Loops:  runLoops(run, contextValue),
 	}
 	if labels := run.GetLabels(); labels != nil {
 		ctxName := labels[labelContext]
@@ -1181,9 +1225,14 @@ func mergeSteps(run *v1alpha1.WorkflowRun) {
 		stepStatus[step.Name] = &run.Status.Steps[i]
 	}
 	for _, step := range run.Spec.WorkflowSpec.Steps {
+		// A loop's sub-steps are its passes, which only the run knows.
+		loop := step.ForEach != nil
 		if stepStatusCache, exist := stepStatus[step.Name]; !exist {
 			var subSteps []v1alpha1.StepStatus
 			for _, subStep := range step.SubSteps {
+				if loop {
+					break
+				}
 				subSteps = append(subSteps, v1alpha1.StepStatus{
 					Name:  subStep.Name,
 					Type:  subStep.Type,
@@ -1198,7 +1247,7 @@ func mergeSteps(run *v1alpha1.WorkflowRun) {
 				},
 				SubStepsStatus: subSteps,
 			})
-		} else if len(step.SubSteps) > len(stepStatusCache.SubStepsStatus) {
+		} else if !loop && len(step.SubSteps) > len(stepStatusCache.SubStepsStatus) {
 			var subStepStatus = make(map[string]v1alpha1.StepStatus, len(stepStatusCache.SubStepsStatus))
 			for i, step := range stepStatusCache.SubStepsStatus {
 				subStepStatus[step.Name] = stepStatusCache.SubStepsStatus[i]

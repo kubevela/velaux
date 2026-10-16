@@ -55,6 +55,7 @@ func CreateWorkflowStepModel(apiSteps []apisv1.WorkflowStep) ([]model.WorkflowSt
 			WorkflowStepBase: *base,
 			Mode:             wfTypesv1alpha1.WorkflowMode(step.Mode),
 			SubSteps:         make([]model.WorkflowStepBase, 0),
+			ForEach:          step.ForEach,
 		}
 		for _, sub := range step.SubSteps {
 			base, err := CreateWorkflowStepBaseModel(sub)

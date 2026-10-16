@@ -58,6 +58,8 @@ type WorkflowStep struct {
 	WorkflowStepBase `json:",inline" bson:",inline"`
 	Mode             wfTypesv1alpha1.WorkflowMode `json:"mode,omitempty"`
 	SubSteps         []WorkflowStepBase           `json:"subSteps,omitempty"`
+	// ForEach repeats the step, or a group's steps, once per item.
+	ForEach *wfTypesv1alpha1.ForEach `json:"forEach,omitempty"`
 }
 
 // WorkflowStepBase is the step base of workflow
@@ -135,6 +137,17 @@ type WorkflowRecord struct {
 type WorkflowStepStatus struct {
 	StepStatus     `json:",inline" bson:",inline"`
 	SubStepsStatus []StepStatus `json:"subSteps,omitempty"`
+	// Loop is set on a forEach step; its sub-steps are then its passes.
+	Loop *LoopStatus `json:"loop,omitempty"`
+}
+
+// LoopStatus is a forEach step's mode and the items it resolved, once it starts.
+type LoopStatus struct {
+	Mode  wfTypesv1alpha1.WorkflowMode `json:"mode"`
+	Items []interface{}                `json:"items,omitempty"`
+	// Labels name the items of a keyed loop, as its passes are named; none for a
+	// loop named by index.
+	Labels []string `json:"labels,omitempty"`
 }
 
 // StepStatus is the workflow step status database model
@@ -148,6 +161,8 @@ type StepStatus struct {
 	Reason           string                             `json:"reason,omitempty"`
 	FirstExecuteTime time.Time                          `json:"firstExecuteTime,omitempty"`
 	LastExecuteTime  time.Time                          `json:"lastExecuteTime,omitempty"`
+	// Iteration is the index of the item a forEach pass ran for.
+	Iteration *int `json:"iteration,omitempty"`
 }
 
 // TableName return custom table name

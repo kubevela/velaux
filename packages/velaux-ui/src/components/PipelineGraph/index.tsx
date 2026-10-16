@@ -4,13 +4,21 @@ import Draggable from 'react-draggable';
 import type { WorkflowStepStatus } from '@velaux/data';
 
 import './index.less';
+import { LoopStep } from './components/loop-step';
 import { Step } from './components/step';
 import type { SpecStep } from './dependencies';
 import { groupMode, groupOpensItself, stepEdges } from './dependencies';
 import { StepEdges, stepWidth, useStepLayout } from './layout';
+import { laneSpec, loopLanes } from './loop';
 import { stepReached } from './status';
 
-type GroupSpec = SpecStep & { mode?: string; subSteps?: SpecStep[] };
+type GroupSpec = SpecStep & {
+  type?: string;
+  alias?: string;
+  mode?: string;
+  subSteps?: Array<SpecStep & { type: string; alias?: string }>;
+  forEach?: { items?: unknown; from?: string };
+};
 
 type StepGraphProps = {
   name?: string;
@@ -34,7 +42,8 @@ type PipelineGraphProps = StepGraphProps & { zoom: number };
 
 // StepGraph draws steps left to right by what they wait on: a step sits right
 // of every step it depends on, and steps that do not wait on each other share a
-// column. An open step group draws its sub-steps the same way, inside it.
+// column. An open step group draws its sub-steps the same way, inside it, and an
+// open loop draws each item's passes the same way, a lane per item.
 const StepGraph = (props: StepGraphProps) => {
   const { steps = [], spec, mode, subMode = 'DAG', name, selected, actions, onNodeClick, onResize } = props;
   // opened holds the groups someone opened or closed; the rest follow
@@ -63,8 +72,10 @@ const StepGraph = (props: StepGraphProps) => {
       />
       {steps.map((step) => {
         const group = step.type == 'step-group';
-        const open = group && (opened[step.name] ?? groupOpensItself(step));
+        const looped = !!step.loop;
+        const open = (group || looped) && (opened[step.name] ?? groupOpensItself(step));
         const groupSpec = specOf.get(step.name);
+        const bodyMode = groupMode(groupSpec?.mode, undefined, subMode);
         return (
           <div
             key={name + step.name}
@@ -72,29 +83,51 @@ const StepGraph = (props: StepGraphProps) => {
             data-step-key={step.name}
             style={layout.place(step.name)}
           >
-            <Step
-              step={step}
-              width={stepWidth}
-              group={group}
-              open={open}
-              onToggle={() => setOpened({ ...opened, [step.name]: !open })}
-              selected={selected}
-              actions={actions}
-              onNodeClick={onNodeClick}
-            >
-              {open && (
-                <StepGraph
-                  name={`${name}/${step.name}`}
-                  steps={step.subSteps}
-                  spec={groupSpec?.subSteps}
-                  mode={groupMode(groupSpec?.mode, undefined, subMode)}
-                  selected={selected}
-                  actions={actions}
-                  onNodeClick={onNodeClick}
-                  onResize={nestedResized}
-                />
-              )}
-            </Step>
+            {looped ? (
+              <LoopStep
+                step={step}
+                lanes={loopLanes(step, groupSpec && { ...groupSpec, type: groupSpec.type || step.type })}
+                width={stepWidth}
+                open={open}
+                onToggle={() => setOpened({ ...opened, [step.name]: !open })}
+                lane={(lane) => (
+                  <StepGraph
+                    name={`${name}/${step.name}/${lane.index}`}
+                    steps={lane.passes}
+                    spec={group ? laneSpec(step.name, lane.key, groupSpec?.subSteps || []) : undefined}
+                    mode={group ? bodyMode : 'StepByStep'}
+                    selected={selected}
+                    actions={actions}
+                    onNodeClick={onNodeClick}
+                    onResize={nestedResized}
+                  />
+                )}
+              />
+            ) : (
+              <Step
+                step={step}
+                width={stepWidth}
+                group={group}
+                open={open}
+                onToggle={() => setOpened({ ...opened, [step.name]: !open })}
+                selected={selected}
+                actions={actions}
+                onNodeClick={onNodeClick}
+              >
+                {open && (
+                  <StepGraph
+                    name={`${name}/${step.name}`}
+                    steps={step.subSteps}
+                    spec={groupSpec?.subSteps}
+                    mode={bodyMode}
+                    selected={selected}
+                    actions={actions}
+                    onNodeClick={onNodeClick}
+                    onResize={nestedResized}
+                  />
+                )}
+              </Step>
+            )}
           </div>
         );
       })}

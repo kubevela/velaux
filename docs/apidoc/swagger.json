@@ -6785,7 +6785,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1alpha1.WorkflowRunStatus"
+							"$ref": "#/definitions/v1.PipelineRunStatus"
 						}
 					},
 					"400": {
@@ -10334,6 +10334,28 @@
 		"model.JSONStruct": {
 			"type": "object"
 		},
+		"model.LoopStatus": {
+			"required": [
+				"mode"
+			],
+			"properties": {
+				"items": {
+					"type": "array",
+					"items": {
+						"type": "object"
+					}
+				},
+				"labels": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"mode": {
+					"type": "string"
+				}
+			}
+		},
 		"model.ProjectRef": {
 			"required": [
 				"name",
@@ -10404,6 +10426,9 @@
 				"id": {
 					"type": "string"
 				},
+				"iteration": {
+					"type": "integer"
+				},
 				"lastExecuteTime": {
 					"type": "string",
 					"format": "date-time"
@@ -10473,6 +10498,9 @@
 				},
 				"description": {
 					"type": "string"
+				},
+				"forEach": {
+					"$ref": "#/definitions/v1alpha1.ForEach"
 				},
 				"if": {
 					"type": "string"
@@ -10597,6 +10625,9 @@
 				"lastExecuteTime": {
 					"type": "string",
 					"format": "date-time"
+				},
+				"loop": {
+					"$ref": "#/definitions/model.LoopStatus"
 				},
 				"message": {
 					"type": "string"
@@ -15524,6 +15555,12 @@
 						"$ref": "#/definitions/model.Value"
 					}
 				},
+				"loops": {
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "#/definitions/v1.PipelineRunLoop"
+					}
+				},
 				"pipelineName": {
 					"type": "string"
 				},
@@ -15624,6 +15661,34 @@
 				}
 			}
 		},
+		"v1.PipelineRunLoop": {
+			"required": [
+				"mode"
+			],
+			"properties": {
+				"items": {
+					"type": "array",
+					"items": {
+						"type": "object"
+					}
+				},
+				"iterations": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "integer"
+					}
+				},
+				"labels": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"mode": {
+					"type": "string"
+				}
+			}
+		},
 		"v1.PipelineRunMeta": {
 			"required": [
 				"pipelineName",
@@ -15639,6 +15704,65 @@
 				},
 				"project": {
 					"$ref": "#/definitions/v1.NameAlias"
+				}
+			}
+		},
+		"v1.PipelineRunStatus": {
+			"required": [
+				"mode",
+				"status",
+				"suspend",
+				"terminated",
+				"finished"
+			],
+			"properties": {
+				"conditions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/condition.Condition"
+					}
+				},
+				"contextBackend": {
+					"$ref": "#/definitions/v1.ObjectReference"
+				},
+				"endTime": {
+					"type": "string"
+				},
+				"finished": {
+					"type": "boolean"
+				},
+				"message": {
+					"type": "string"
+				},
+				"mode": {
+					"$ref": "#/definitions/v1alpha1.WorkflowExecuteMode"
+				},
+				"startTime": {
+					"type": "string"
+				},
+				"status": {
+					"type": "string"
+				},
+				"steps": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1alpha1.WorkflowStepStatus"
+					}
+				},
+				"suspend": {
+					"type": "boolean"
+				},
+				"suspendState": {
+					"type": "string"
+				},
+				"terminated": {
+					"type": "boolean"
+				},
+				"loops": {
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "#/definitions/v1.PipelineRunLoop"
+					}
 				}
 			}
 		},
@@ -16896,6 +17020,9 @@
 				"description": {
 					"type": "string"
 				},
+				"forEach": {
+					"$ref": "#/definitions/v1alpha1.ForEach"
+				},
 				"if": {
 					"type": "string"
 				},
@@ -16983,6 +17110,25 @@
 					"type": "string"
 				},
 				"type": {
+					"type": "string"
+				}
+			}
+		},
+		"v1alpha1.ForEach": {
+			"properties": {
+				"from": {
+					"type": "string"
+				},
+				"items": {
+					"type": "object"
+				},
+				"key": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"mode": {
 					"type": "string"
 				}
 			}

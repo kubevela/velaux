@@ -143,6 +143,7 @@ func FromCRWorkflowSteps(steps []wfTypesv1alpha1.WorkflowStep) ([]model.Workflow
 			WorkflowStepBase: *base,
 			Mode:             s.Mode,
 			SubSteps:         make([]model.WorkflowStepBase, 0),
+			ForEach:          s.ForEach,
 		}
 		for _, sub := range s.SubSteps {
 			subBase, err := FromCRWorkflowStepBase(sub)

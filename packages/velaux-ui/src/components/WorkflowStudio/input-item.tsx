@@ -5,6 +5,7 @@ import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 import { WorkflowEditContext } from '../../context';
 import type { InputItem, OutputItem } from '@velaux/data';
 import { locale } from '../../utils/locale';
+import { loopInputs } from './loop-edit';
 const { Row, Col } = Grid;
 
 export const InputItemForm = (props: { value?: InputItem; onChange: (i: InputItem) => void }) => {
@@ -24,7 +25,8 @@ export const InputItemForm = (props: { value?: InputItem; onChange: (i: InputIte
   };
 
   const { steps, stepName } = useContext(WorkflowEditContext);
-  const fromItemOptions: Array<{ value: string }> = [];
+  // A step a loop repeats reads the current item first.
+  const fromItemOptions: Array<{ value: string }> = loopInputs(steps || [], stepName).map((value) => ({ value }));
 
   const convertOutputs = (outputs?: OutputItem[]) => {
     if (!outputs) {

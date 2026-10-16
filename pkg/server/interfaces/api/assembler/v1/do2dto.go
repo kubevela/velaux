@@ -171,6 +171,7 @@ func ConvertFromWorkflowStepModel(step model.WorkflowStep) apisv1.WorkflowStep {
 		WorkflowStepBase: ConvertFromWorkflowStepBaseModel(step.WorkflowStepBase),
 		Mode:             string(step.Mode),
 		SubSteps:         make([]apisv1.WorkflowStepBase, 0),
+		ForEach:          step.ForEach,
 	}
 	if step.Properties != nil {
 		apiStep.Properties = step.Properties.Properties()

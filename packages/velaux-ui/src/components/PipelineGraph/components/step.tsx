@@ -108,7 +108,7 @@ export const Step = (props: StepProps) => {
   return (
     <div
       className={classNames('step', `tone-${status.tone}`, {
-        selected: selected === step.id,
+        selected: !!step.id && selected === step.id,
         pending: !step.phase,
       })}
       style={{ width: width + 'px' }}

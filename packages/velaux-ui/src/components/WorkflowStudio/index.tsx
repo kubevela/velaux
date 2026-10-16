@@ -6,7 +6,7 @@ import Draggable from 'react-draggable';
 import type { Dispatch } from 'redux';
 
 import { WorkflowEditContext } from '../../context';
-import type { DefinitionBase, WorkflowMode, WorkflowStep, WorkflowStepBase } from '@velaux/data';
+import type { DefinitionBase, ForEach, WorkflowMode, WorkflowStep, WorkflowStepBase } from '@velaux/data';
 
 import { groupMode, orderByDependencies } from '../PipelineGraph/dependencies';
 import { addDependency, insertAfter, removeDependency, studioUpdate } from './edit';
@@ -14,6 +14,8 @@ import type { AddAt } from './graph';
 import { StudioGraph } from './graph';
 import StepForm from './step-form';
 import AddStep from './add-step';
+import { setLoop } from './loop-edit';
+import { LoopEditor } from './loop-editor';
 
 import './index.less';
 
@@ -35,6 +37,8 @@ type State = {
   // showStep is the step whose form is open; showGroup the group it is in.
   showStep?: WorkflowStepBase;
   showGroup?: string;
+  // loopStep is the step whose loop is open.
+  loopStep?: WorkflowStep;
 };
 
 // withoutDependency drops a removed step from its siblings' dependsOn, so none
@@ -137,6 +141,14 @@ class WorkflowStudio extends React.Component<Props, State> {
     this.setState({ steps }, this.onChange);
   };
 
+  onSaveLoop = (forEach: ForEach | undefined) => {
+    const { loopStep } = this.state;
+    if (!loopStep) {
+      return;
+    }
+    this.setState({ steps: setLoop(this.state.steps, loopStep.name, forEach), loopStep: undefined }, this.onChange);
+  };
+
   onGroupMode = (group: string, mode: WorkflowMode) => {
     const steps = this.state.steps.map((s) =>
       s.name === group
@@ -178,7 +190,7 @@ class WorkflowStudio extends React.Component<Props, State> {
   };
 
   render() {
-    const { steps, adding, showStep, showGroup } = this.state;
+    const { steps, adding, showStep, showGroup, loopStep } = this.state;
     const { definitions, mode = 'StepByStep', subMode = 'DAG' } = this.props;
     return (
       <div className={classNames('run-studio', 'studio-editor')}>
@@ -192,6 +204,7 @@ class WorkflowStudio extends React.Component<Props, State> {
                 onAdd={(at) => this.setState({ adding: at })}
                 onEdit={(step, group) => this.setState({ showStep: step, showGroup: group })}
                 onDelete={this.onDeleteStep}
+                onLoop={(step) => this.setState({ loopStep: step })}
                 onGroupMode={this.onGroupMode}
                 onMove={this.onMove}
                 onLink={this.onLink}
@@ -209,10 +222,21 @@ class WorkflowStudio extends React.Component<Props, State> {
               this.setState({ adding: undefined });
             }}
             addSub={!!adding.group}
+            loop={adding.kind === 'loop'}
             draft={this.place}
             onAdd={this.addStep}
             subMode={this.props.subMode}
-            definitions={definitions?.filter((d) => (adding.kind === 'group') === (d.name === 'step-group'))}
+            definitions={definitions?.filter(
+              (d) => adding.kind === 'loop' || (adding.kind === 'group') === (d.name === 'step-group')
+            )}
+          />
+        )}
+        {loopStep && (
+          <LoopEditor
+            step={loopStep}
+            steps={steps}
+            onSave={this.onSaveLoop}
+            onClose={() => this.setState({ loopStep: undefined })}
           />
         )}
         {showStep && (

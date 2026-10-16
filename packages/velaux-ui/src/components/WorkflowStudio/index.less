@@ -20,6 +20,65 @@
     &.group {
       --tone: #94a3b8;
     }
+    // A loop is drawn as a stack of cards, one behind the other, in violet.
+    &.looped {
+      --tone: #7c3aed;
+      box-shadow: 4px 4px 0 -1px #fff, 4px 4px 0 0 #c4b5fd, 8px 8px 0 -1px #fff, 8px 8px 0 0 #ddd6fe;
+    }
+    &.group.looped {
+      background: #faf7ff;
+      border-color: #a78bfa;
+    }
+  }
+  .studio-loop-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    width: 100%;
+    margin: 0 0 8px;
+    padding: 0;
+    color: #475569;
+    font-size: 12px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    &:disabled {
+      cursor: default;
+    }
+    &:hover:not(:disabled) .studio-loop-items {
+      color: var(--primary-color);
+    }
+  }
+  .studio-loop-items {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+  .studio-loop-chip {
+    max-width: 120px;
+    overflow: hidden;
+    padding: 0 5px;
+    color: #334155;
+    font-size: 11px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background: #fff;
+    border: 1px solid #ddd6fe;
+    border-radius: 4px;
+  }
+  .studio-loop-more {
+    color: #64748b;
+  }
+  .studio-loop-mode {
+    padding: 0 8px;
+    color: #5b21b6;
+    font-size: 11px;
+    line-height: 18px;
+    background: #ede9fe;
+    border-radius: 9px;
   }
   .studio-step-head {
     display: flex;
@@ -467,6 +526,99 @@
   border-radius: 6px;
   code {
     font-weight: 600;
+  }
+}
+
+// A loop in the preview: the group box, in violet.
+.studio-add-menu .pv-loop .pv-group-tag {
+  color: #7c3aed;
+}
+
+// What a loop repeats over: a source, its items, and how they run.
+.loop-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  .loop-items-label {
+    margin-top: 6px;
+    color: #0f172a;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .loop-items-help {
+    color: #64748b;
+    font-size: 12px;
+  }
+  .loop-items-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    > * {
+      max-width: 100%;
+    }
+  }
+  .loop-items-table {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+  .loop-items-row {
+    display: grid;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 10px;
+    border-top: 1px solid #f1f5f9;
+    &.head {
+      color: #64748b;
+      font-weight: 600;
+      font-size: 12px;
+      background: #f8fafc;
+      border-top: none;
+      border-radius: 8px 8px 0 0;
+    }
+  }
+  .loop-items-index {
+    color: #64748b;
+    font-size: 12px;
+  }
+  .loop-items-remove {
+    display: inline-flex;
+    justify-content: center;
+    padding: 4px;
+    color: #64748b;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    &:hover {
+      color: var(--failed-color, #dc2626);
+      background: #f1f5f9;
+    }
+  }
+  .loop-items-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 8px 10px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .loop-items-key {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .loop-items-yaml,
+  .loop-items-key-select,
+  .loop-items-from {
+    width: 480px;
+  }
+  .loop-items-yaml textarea {
+    font-family: var(--font-family-code, monospace);
+  }
+  .loop-items-error {
+    color: var(--failed-color, #dc2626);
+    font-size: 12px;
   }
 }
 
