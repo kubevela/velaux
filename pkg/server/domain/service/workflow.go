@@ -187,6 +187,9 @@ func (w *workflowServiceImpl) CreateOrUpdateWorkflow(ctx context.Context, app *m
 		return nil, err
 	}
 	if req.Ref != "" {
+		if err := w.reachableRef(ctx, req.EnvName, req.Ref); err != nil {
+			return nil, err
+		}
 		modelSteps = nil
 	}
 	req.Mode, req.SubMode = workflowModes(req.Mode, req.SubMode, req.Ref)
@@ -229,6 +232,11 @@ func (w *workflowServiceImpl) UpdateWorkflow(ctx context.Context, workflow *mode
 	modeSteps, err := assembler.CreateWorkflowStepModel(req.Steps)
 	if err != nil {
 		return nil, err
+	}
+	if req.Ref != "" {
+		if err := w.reachableRef(ctx, workflow.EnvName, req.Ref); err != nil {
+			return nil, err
+		}
 	}
 	workflow.Description = req.Description
 	workflow.Alias = req.Alias
@@ -303,6 +311,32 @@ func (w *workflowServiceImpl) sharedWorkflow(ctx context.Context, envName, ref s
 		return nil, "", err
 	}
 	return findSharedWorkflow(ctx, w.KubeClient, w.ServerKubeClient, env.Namespace, projectNs, ref)
+}
+
+// reachableRef refuses a ref to a shared Workflow that a workflow of the
+// environment named envName could not run, saying why, so that what is saved is
+// what deploys.
+func (w *workflowServiceImpl) reachableRef(ctx context.Context, envName, ref string) error {
+	_, _, err := w.sharedWorkflow(ctx, envName, ref)
+	if !errors.Is(err, bcode.ErrSharedWorkflowNotFound) {
+		return err
+	}
+	env, err := repository.GetEnv(ctx, w.Store, envName)
+	if err != nil {
+		return err
+	}
+	projectNs, err := projectNamespace(ctx, w.Store, env.Project)
+	if err != nil {
+		return err
+	}
+	shared := &wfTypesv1alpha1.Workflow{}
+	if w.KubeClient.Get(ctx, types.NamespacedName{Namespace: projectNs, Name: ref}, shared) == nil {
+		return bcode.ErrSharedWorkflowUnreachable.SetMessage(fmt.Sprintf(
+			"shared workflow %s is not reachable from environment %s: a project's shared workflows serve only environments in the project's namespace (%s); reference a global shared workflow instead, or use an environment in namespace %s",
+			ref, envName, projectNs, projectNs))
+	}
+	return bcode.ErrSharedWorkflowUnreachable.SetMessage(fmt.Sprintf(
+		"shared workflow %s is not found in environment %s's namespace (%s) or the system namespace", ref, envName, env.Namespace))
 }
 
 // ListSharedWorkflows lists the shared Workflows a workflow of the environment

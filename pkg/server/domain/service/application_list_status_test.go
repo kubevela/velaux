@@ -95,6 +95,7 @@ func listStatusFixture(t *testing.T, unlistable ...string) (*applicationServiceI
 	svc := &applicationServiceImpl{
 		Store:             store,
 		KubeClient:        cli,
+		ServerKubeClient:  cli,
 		EnvService:        envService,
 		EnvBindingService: &envBindingServiceImpl{Store: store, EnvService: envService},
 	}

@@ -127,6 +127,7 @@ type ApplicationService interface {
 type applicationServiceImpl struct {
 	Store             datastore.DataStore `inject:"datastore"`
 	KubeClient        client.Client       `inject:"kubeClient"`
+	ServerKubeClient  client.Client       `inject:"serverKubeClient"`
 	KubeConfig        *rest.Config        `inject:"kubeConfig"`
 	Apply             apply.Applicator    `inject:"apply"`
 	WorkflowService   WorkflowService     `inject:""`
@@ -861,9 +862,10 @@ func (c *applicationServiceImpl) DetailComponent(ctx context.Context, app *model
 		return nil, err
 	}
 	var cd v1beta1.ComponentDefinition
-	loadCtx := utils.WithProject(ctx, "")
-	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: definitionName(component.Type), Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
+	if def, err := c.componentDefinition(ctx, app, component.Type); err != nil {
 		klog.Warningf("component definition %s get failure. %s", pkgUtils.Sanitize(component.Type), err.Error())
+	} else {
+		cd = *def
 	}
 
 	return &apisv1.DetailComponentResponse{
@@ -1368,9 +1370,8 @@ func (c *applicationServiceImpl) UpdateComponent(ctx context.Context, _ *model.A
 }
 
 func (c *applicationServiceImpl) createComponent(ctx context.Context, app *model.Application, com apisv1.CreateComponentRequest, main bool) (*apisv1.ComponentBase, error) {
-	var cd v1beta1.ComponentDefinition
-	loadCtx := utils.WithProject(ctx, "")
-	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: definitionName(com.ComponentType), Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
+	cd, err := c.componentDefinition(ctx, app, com.ComponentType)
+	if err != nil {
 		klog.Warningf("component definition %s get failure. %s", pkgUtils.Sanitize(com.ComponentType), err.Error())
 		return nil, bcode.ErrComponentTypeNotSupport
 	}
@@ -1435,6 +1436,32 @@ func (c *applicationServiceImpl) createComponent(ctx context.Context, app *model
 	}
 
 	return assembler.ConvertComponentModelToBase(&componentModel), nil
+}
+
+// componentDefinition is the ComponentDefinition a component type names in
+// app's project, found where the type picker lists it and KubeVela resolves it:
+// the project's namespace, read as VelaUX, then the system namespace, read as
+// the user.
+func (c *applicationServiceImpl) componentDefinition(ctx context.Context, app *model.Application, typeName string) (*v1beta1.ComponentDefinition, error) {
+	name := definitionName(typeName)
+	cd := &v1beta1.ComponentDefinition{}
+	if app.Project != "" {
+		namespace, err := projectNamespace(ctx, c.Store, app.Project)
+		if err != nil {
+			return nil, err
+		}
+		err = c.ServerKubeClient.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, cd)
+		if err == nil {
+			return cd, nil
+		}
+		if !apierrors.IsNotFound(err) {
+			return nil, err
+		}
+	}
+	if err := c.KubeClient.Get(utils.WithProject(ctx, ""), types.NamespacedName{Name: name, Namespace: velatypes.DefaultKubeVelaNS}, cd); err != nil {
+		return nil, err
+	}
+	return cd, nil
 }
 
 func (c *applicationServiceImpl) CreateComponent(ctx context.Context, app *model.Application, com apisv1.CreateComponentRequest) (*apisv1.ComponentBase, error) {
@@ -2177,10 +2204,11 @@ func NewTestApplicationService(ds datastore.DataStore, c client.Client, cfg *res
 	}
 	workflowService.EnvBindingService = envbinding
 	return &applicationServiceImpl{
-		Store:      ds,
-		KubeClient: c,
-		KubeConfig: cfg,
-		Apply:      apply.NewAPIApplicator(c),
+		Store:            ds,
+		KubeClient:       c,
+		ServerKubeClient: c,
+		KubeConfig:       cfg,
+		Apply:            apply.NewAPIApplicator(c),
 		WorkflowService: &workflowServiceImpl{
 			Store:             ds,
 			KubeClient:        c,
