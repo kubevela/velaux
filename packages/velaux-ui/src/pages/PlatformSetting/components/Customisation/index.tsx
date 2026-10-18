@@ -24,6 +24,11 @@ type State = {
   terms: Record<string, Term>;
   newTerm: string;
   saving: boolean;
+  // loadError is why the current customisation could not be read; until it
+  // is, saving would replace what the card never saw, so it is disabled.
+  loadError: string;
+  // terminologyError is why the stored terminology was ignored.
+  terminologyError: string;
 };
 
 const hex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
@@ -42,11 +47,18 @@ class CustomisationCard extends React.Component<{}, State> {
       terms: {},
       newTerm: '',
       saving: false,
+      loadError: '',
+      terminologyError: '',
     };
   }
 
   componentDidMount() {
-    getCustomisation().then((c) => this.load(c || {}));
+    getCustomisation()
+      .then((c) => this.load(c || {}))
+      .catch((err) => {
+        const reason = (err && (err.Message || (typeof err === 'string' ? err : ''))) || '';
+        this.setState({ loadError: reason || i18n.t('The customisation could not be read').toString() });
+      });
   }
 
   load = (c: Customisation) => {
@@ -57,6 +69,8 @@ class CustomisationCard extends React.Component<{}, State> {
       sidebarColor: c.sidebarColor || '',
       accentColor: c.accentColor || '',
       terms: c.terminology || {},
+      loadError: '',
+      terminologyError: c.terminologyError || '',
     });
   };
 
@@ -124,7 +138,7 @@ class CustomisationCard extends React.Component<{}, State> {
   };
 
   render() {
-    const { pageTitle, logoURL, iconURL, terms, newTerm, saving } = this.state;
+    const { pageTitle, logoURL, iconURL, terms, newTerm, saving, loadError, terminologyError } = this.state;
     const names = [...offeredTerms, ...Object.keys(terms).filter((t) => !offeredTerms.includes(t))];
     return (
       <Card
@@ -134,6 +148,11 @@ class CustomisationCard extends React.Component<{}, State> {
         title={<Translation>Customisation</Translation>}
         subTitle={<span>velaux-configuration</span>}
       >
+        {loadError && (
+          <Message type="error" className="customisation-message">
+            {i18n.t('The current customisation could not be read, so saving is disabled').toString()}: {loadError}
+          </Message>
+        )}
         <div className="customisation-grid">
           <div className="customisation-field">
             <label>
@@ -176,6 +195,12 @@ class CustomisationCard extends React.Component<{}, State> {
           {this.colour('accentColor', 'Accent colour', '#3b82f6')}
         </div>
 
+        {terminologyError && (
+          <Message type="warning" className="customisation-message">
+            {terminologyError.charAt(0).toUpperCase() + terminologyError.slice(1)}.{' '}
+            {i18n.t('It is ignored until you save; saving replaces it with the terms below.').toString()}
+          </Message>
+        )}
         <table className="customisation-terms">
           <thead>
             <tr>
@@ -228,10 +253,10 @@ class CustomisationCard extends React.Component<{}, State> {
         </table>
 
         <div className="customisation-actions">
-          <Button onClick={() => this.save({})} disabled={saving}>
+          <Button onClick={() => this.save({})} disabled={saving || !!loadError}>
             <Translation>Reset to defaults</Translation>
           </Button>
-          <Button type="primary" onClick={this.onSave} loading={saving}>
+          <Button type="primary" onClick={this.onSave} loading={saving} disabled={!!loadError}>
             <Translation>Save</Translation>
           </Button>
         </div>

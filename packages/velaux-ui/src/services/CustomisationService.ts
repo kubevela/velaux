@@ -14,6 +14,9 @@ export interface Customisation {
   sidebarColor?: string;
   accentColor?: string;
   terminology?: Terminology;
+  // terminologyError says why the stored terminology was ignored; the server
+  // sets it and never stores it.
+  terminologyError?: string;
 }
 
 type Listener = (c: Customisation) => void;

@@ -326,17 +326,18 @@ func (u *userServiceImpl) UpdateUser(ctx context.Context, user *model.User, req 
 	if err != nil {
 		return nil, err
 	}
+	if req.Password != "" && sysInfo.LoginType == model.LoginTypeDex {
+		return nil, bcode.ErrUserCannotModified.SetMessage("passwords are managed by Dex in dex login mode")
+	}
 	if req.Alias != "" {
 		user.Alias = req.Alias
 	}
-	if sysInfo.LoginType != model.LoginTypeDex {
-		if req.Password != "" {
-			hash, err := GeneratePasswordHash(req.Password)
-			if err != nil {
-				return nil, err
-			}
-			user.Password = hash
+	if req.Password != "" {
+		hash, err := GeneratePasswordHash(req.Password)
+		if err != nil {
+			return nil, err
 		}
+		user.Password = hash
 	}
 	if req.Email != "" {
 		if user.Email != "" {

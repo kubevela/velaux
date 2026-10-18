@@ -3,6 +3,7 @@ import React, { Component, Fragment } from 'react';
 import { RowAction } from '../../components/RowAction';
 import { AiOutlineCheckCircle, AiOutlineDelete, AiOutlineEdit, AiOutlineKey, AiOutlineStop } from 'react-icons/ai';
 
+import { getLoginType } from '../../api/authentication';
 import { getRoleList } from '../../api/roles';
 import { getUserList, deleteUser, changeUserDisable, changeUserEnable } from '../../api/users';
 import { If } from '../../components/If';
@@ -37,6 +38,8 @@ type State = {
   rolesList: RolesBase[];
   isResetPassword: boolean;
   isResetPasswordDialog: boolean;
+  // dex is whether users sign in through Dex, which owns their passwords.
+  dex: boolean;
 };
 
 class Users extends Component<Props, State> {
@@ -44,6 +47,7 @@ class Users extends Component<Props, State> {
     super(props);
     this.state = {
       isUserDialogVisible: false,
+      dex: false,
       name: '',
       email: '',
       alias: '',
@@ -67,6 +71,12 @@ class Users extends Component<Props, State> {
   componentDidMount() {
     this.listUser();
     this.listRoles();
+    // Unknown, the action stays offered; in Dex mode the server refuses it.
+    getLoginType()
+      .then((res: { loginType?: string }) => {
+        this.setState({ dex: res?.loginType === 'dex' });
+      })
+      .catch(() => {});
   }
 
   listUser = async () => {
@@ -321,15 +331,17 @@ class Users extends Component<Props, State> {
         cell: (v: string, i: number, record: User) => {
           return (
             <Fragment>
-              <Permission request={{ resource: `user:${record.name}`, action: 'update' }} project={''}>
-                <RowAction
-                  icon={<AiOutlineKey />}
-                  label="Reset Password"
-                  onClick={() => {
-                    this.onResetPassword(record);
-                  }}
-                />
-              </Permission>
+              <If condition={!this.state.dex}>
+                <Permission request={{ resource: `user:${record.name}`, action: 'update' }} project={''}>
+                  <RowAction
+                    icon={<AiOutlineKey />}
+                    label="Reset Password"
+                    onClick={() => {
+                      this.onResetPassword(record);
+                    }}
+                  />
+                </Permission>
+              </If>
               <Permission request={{ resource: `user:${record.name}`, action: 'update' }} project={''}>
                 <RowAction
                   icon={<AiOutlineEdit />}
