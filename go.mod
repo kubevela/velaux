@@ -28,12 +28,12 @@ require (
 	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
-	github.com/kubevela/pkg v1.11.1-0.20261015125649-a754071f0895
+	github.com/kubevela/pkg v1.11.1-0.20261019120055-ed78b6ef9194
 	github.com/kubevela/prism v1.7.1-0.20261008155615-dba749127f62
-	github.com/kubevela/workflow v0.7.3-0.20261015140747-53204a3594a8
+	github.com/kubevela/workflow v0.7.3-0.20261020111406-bd4f7f28dbc6
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 	github.com/oam-dev/cluster-gateway v1.9.2-0.20261007161929-f1e00d9a9b07
-	github.com/oam-dev/kubevela v1.11.1-0.20261016075157-28372bbf8817
+	github.com/oam-dev/kubevela v1.11.1-0.20261020122214-0bd2ebed108f
 	github.com/oam-dev/terraform-controller v0.8.1-0.20261007155713-6804e7b2e5b4
 	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.43.0

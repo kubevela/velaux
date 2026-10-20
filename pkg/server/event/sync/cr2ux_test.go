@@ -27,11 +27,15 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
+	"github.com/oam-dev/kubevela/pkg/features"
 	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 	common2 "github.com/oam-dev/kubevela/pkg/utils/common"
@@ -109,6 +113,39 @@ var _ = Describe("Test CR convert to ux", func() {
 		Expect(gotApp.Labels[types.LabelSourceOfTruth]).Should(BeEquivalentTo(types.FromCR))
 		Expect(err).Should(BeNil())
 		Expect(gotApp.IsSynced()).Should(BeEquivalentTo(true))
+	})
+
+	It("Test an application reading expressions syncs with one in its deploy step", func() {
+		ns := corev1.Namespace{}
+		ns.Name = "expr-sync-test"
+		Expect(k8sClient.Create(context.TODO(), &ns)).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
+		app := func(name string, annotations map[string]string) *v1beta1.Application {
+			return &v1beta1.Application{
+				ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: ns.Name, Annotations: annotations},
+				Spec: v1beta1.ApplicationSpec{
+					Components: []common.ApplicationComponent{{Name: "web", Type: "webservice", Properties: &runtime.RawExtension{Raw: []byte(`{"image":"nginx"}`)}}},
+					Workflow: &v1beta1.Workflow{Steps: []wfTypesv1alpha1.WorkflowStep{{WorkflowStepBase: wfTypesv1alpha1.WorkflowStepBase{
+						Name: "deploy", Type: "deploy", Properties: &runtime.RawExtension{Raw: []byte(`{"policies":[],"parallelism":"$(context.appName)"}`)},
+					}}}},
+				},
+			}
+		}
+
+		// VelaUX holds the gates as the controller publishes them.
+		was := utilfeature.DefaultMutableFeatureGate.Enabled(features.EnableCelExpressions)
+		Expect(utilfeature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=true", features.EnableCelExpressions))).Should(Succeed())
+		defer func() {
+			Expect(utilfeature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=%t", features.EnableCelExpressions, was))).Should(Succeed())
+		}()
+
+		By("opted in, the expression is left for the workflow to resolve")
+		_, err := cr2ux.ConvertApp2DatastoreApp(context.Background(), app("expr-on", map[string]string{oam.AnnotationCelExpressions: "true"}))
+		Expect(err).Should(BeNil())
+
+		By("not opted in, the step is invalid, as KubeVela finds it")
+		_, err = cr2ux.ConvertApp2DatastoreApp(context.Background(), app("expr-off", nil))
+		Expect(err).ShouldNot(BeNil())
+		Expect(err.Error()).Should(ContainSubstring("invalid WorkflowStep deploy"))
 	})
 
 	It("Test an addon's application is labelled with its addon", func() {
