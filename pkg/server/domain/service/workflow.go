@@ -944,10 +944,17 @@ func (w *workflowServiceImpl) ResumeWorkflow(ctx context.Context, appModel *mode
 	return operation.ResumeWorkflow(ctx, w.KubeClient, oamApp, stepName)
 }
 
+// TerminateWorkflow ends the environment's run whatever it is doing, waiting
+// or executing, as vela workflow terminate does; a run that has finished has
+// nothing to end.
 func (w *workflowServiceImpl) TerminateWorkflow(ctx context.Context, appModel *model.Application, workflow *model.Workflow) error {
-	oamApp, err := w.checkRecordRunning(ctx, appModel, workflow.EnvName)
+	oamApp, err := w.deployedApplication(ctx, appModel, workflow.EnvName)
 	if err != nil {
 		return err
+	}
+	status := oamApp.Status.Workflow
+	if status == nil || status.Terminated || status.Finished {
+		return bcode.ErrWorkflowNotTerminable
 	}
 	return operation.TerminateWorkflow(ctx, w.KubeClient, oamApp)
 }
@@ -1043,7 +1050,23 @@ func (w *workflowServiceImpl) RollbackRecord(ctx context.Context, appModel *mode
 	return &assembler.ConvertFromRecordModel(newRecord).WorkflowRecordBase, nil
 }
 
+// checkRecordRunning is the environment's deployed Application, refusing one
+// whose workflow is executing: it can be resumed or rolled back only once it
+// waits or has stopped.
 func (w *workflowServiceImpl) checkRecordRunning(ctx context.Context, appModel *model.Application, envName string) (*v1beta1.Application, error) {
+	oamApp, err := w.deployedApplication(ctx, appModel, envName)
+	if err != nil {
+		return nil, err
+	}
+	if oamApp.Status.Workflow != nil && !oamApp.Status.Workflow.Suspend && !oamApp.Status.Workflow.Terminated && !oamApp.Status.Workflow.Finished {
+		return nil, fmt.Errorf("workflow is still running, can not operate a running workflow")
+	}
+	return oamApp, nil
+}
+
+// deployedApplication is the Application the environment named envName runs
+// app as.
+func (w *workflowServiceImpl) deployedApplication(ctx context.Context, appModel *model.Application, envName string) (*v1beta1.Application, error) {
 	oamApp := &v1beta1.Application{}
 	env, err := w.EnvService.GetEnv(ctx, envName)
 	if err != nil {
@@ -1060,10 +1083,6 @@ func (w *workflowServiceImpl) checkRecordRunning(ctx context.Context, appModel *
 	if err := w.KubeClient.Get(ctx, types.NamespacedName{Name: name, Namespace: env.Namespace}, oamApp); err != nil {
 		return nil, err
 	}
-	if oamApp.Status.Workflow != nil && !oamApp.Status.Workflow.Suspend && !oamApp.Status.Workflow.Terminated && !oamApp.Status.Workflow.Finished {
-		return nil, fmt.Errorf("workflow is still running, can not operate a running workflow")
-	}
-
 	oamApp.SetGroupVersionKind(v1beta1.ApplicationKindVersionKind)
 	return oamApp, nil
 }
