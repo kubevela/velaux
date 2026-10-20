@@ -66,7 +66,7 @@ var _ = Describe("Test workflow service functions", Ordered, func() {
 			EnvService:        envService,
 			EnvBindingService: envBindingService,
 		}
-		appService = &applicationServiceImpl{Store: ds, KubeClient: k8sClient,
+		appService = &applicationServiceImpl{Store: ds, KubeClient: k8sClient, ServerKubeClient: k8sClient,
 			Apply:             apply.NewAPIApplicator(k8sClient),
 			ProjectService:    projectService,
 			EnvService:        envService,

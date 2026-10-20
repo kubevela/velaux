@@ -127,6 +127,7 @@ type ApplicationService interface {
 type applicationServiceImpl struct {
 	Store             datastore.DataStore `inject:"datastore"`
 	KubeClient        client.Client       `inject:"kubeClient"`
+	ServerKubeClient  client.Client       `inject:"serverKubeClient"`
 	KubeConfig        *rest.Config        `inject:"kubeConfig"`
 	Apply             apply.Applicator    `inject:"apply"`
 	WorkflowService   WorkflowService     `inject:""`
@@ -861,9 +862,10 @@ func (c *applicationServiceImpl) DetailComponent(ctx context.Context, app *model
 		return nil, err
 	}
 	var cd v1beta1.ComponentDefinition
-	loadCtx := utils.WithProject(ctx, "")
-	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: definitionName(component.Type), Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
+	if def, err := c.componentDefinition(ctx, app, component.Type); err != nil {
 		klog.Warningf("component definition %s get failure. %s", pkgUtils.Sanitize(component.Type), err.Error())
+	} else {
+		cd = *def
 	}
 
 	return &apisv1.DetailComponentResponse{
@@ -1346,6 +1348,10 @@ func (c *applicationServiceImpl) UpdateComponent(ctx context.Context, _ *model.A
 		component.Description = *req.Description
 	}
 	if req.DependsOn != nil {
+		deps := componentDeps{name: component.Name, dependsOn: *req.DependsOn, inputs: component.Inputs, outputs: component.Outputs}
+		if err := c.checkDependsOn(ctx, component.AppPrimaryKey, deps, true); err != nil {
+			return nil, err
+		}
 		component.DependsOn = *req.DependsOn
 	}
 	if req.Icon != nil {
@@ -1368,9 +1374,12 @@ func (c *applicationServiceImpl) UpdateComponent(ctx context.Context, _ *model.A
 }
 
 func (c *applicationServiceImpl) createComponent(ctx context.Context, app *model.Application, com apisv1.CreateComponentRequest, main bool) (*apisv1.ComponentBase, error) {
-	var cd v1beta1.ComponentDefinition
-	loadCtx := utils.WithProject(ctx, "")
-	if err := c.KubeClient.Get(loadCtx, types.NamespacedName{Name: definitionName(com.ComponentType), Namespace: velatypes.DefaultKubeVelaNS}, &cd); err != nil {
+	deps := componentDeps{name: com.Name, dependsOn: com.DependsOn, inputs: com.Inputs, outputs: com.Outputs}
+	if err := c.checkDependsOn(ctx, app.PrimaryKey(), deps, false); err != nil {
+		return nil, err
+	}
+	cd, err := c.componentDefinition(ctx, app, com.ComponentType)
+	if err != nil {
 		klog.Warningf("component definition %s get failure. %s", pkgUtils.Sanitize(com.ComponentType), err.Error())
 		return nil, bcode.ErrComponentTypeNotSupport
 	}
@@ -1435,6 +1444,108 @@ func (c *applicationServiceImpl) createComponent(ctx context.Context, app *model
 	}
 
 	return assembler.ConvertComponentModelToBase(&componentModel), nil
+}
+
+// componentDefinition is the ComponentDefinition a component type names in
+// app's project, found where the type picker lists it and KubeVela resolves it:
+// the project's namespace, read as VelaUX, then the system namespace, read as
+// the user.
+func (c *applicationServiceImpl) componentDefinition(ctx context.Context, app *model.Application, typeName string) (*v1beta1.ComponentDefinition, error) {
+	name := definitionName(typeName)
+	cd := &v1beta1.ComponentDefinition{}
+	if app.Project != "" {
+		namespace, err := projectNamespace(ctx, c.Store, app.Project)
+		if err != nil {
+			return nil, err
+		}
+		err = c.ServerKubeClient.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, cd)
+		if err == nil {
+			return cd, nil
+		}
+		if !apierrors.IsNotFound(err) {
+			return nil, err
+		}
+	}
+	if err := c.KubeClient.Get(utils.WithProject(ctx, ""), types.NamespacedName{Name: name, Namespace: velatypes.DefaultKubeVelaNS}, cd); err != nil {
+		return nil, err
+	}
+	return cd, nil
+}
+
+// componentDeps is what a component waits on by its own declarations.
+type componentDeps struct {
+	name      string
+	dependsOn []string
+	inputs    wfTypesv1alpha1.StepInputs
+	outputs   wfTypesv1alpha1.StepOutputs
+}
+
+// checkDependsOn refuses a component's dependencies that KubeVela refuses at
+// deploy: depending on itself, or waiting on other components of the
+// application keyed appKey in a cycle, by dependsOn or by an input naming
+// another component's output. Where knownOnly, a dependsOn must also name a
+// component the application has; a component being created may name one not
+// added yet.
+func (c *applicationServiceImpl) checkDependsOn(ctx context.Context, appKey string, comp componentDeps, knownOnly bool) error {
+	for _, dep := range comp.dependsOn {
+		if dep == comp.name {
+			return bcode.ErrComponentDependsOn.SetMessage(fmt.Sprintf("component %s cannot depend on itself", comp.name))
+		}
+	}
+	entities, err := c.Store.List(ctx, &model.ApplicationComponent{AppPrimaryKey: appKey}, nil)
+	if err != nil {
+		return err
+	}
+	all := map[string]componentDeps{}
+	for _, entity := range entities {
+		stored := entity.(*model.ApplicationComponent)
+		all[stored.Name] = componentDeps{name: stored.Name, dependsOn: stored.DependsOn, inputs: stored.Inputs, outputs: stored.Outputs}
+	}
+	all[comp.name] = comp
+	if knownOnly {
+		for _, dep := range comp.dependsOn {
+			if _, ok := all[dep]; !ok {
+				return bcode.ErrComponentDependsOn.SetMessage(fmt.Sprintf("component %s depends on %s, which is not a component of this application", comp.name, dep))
+			}
+		}
+	}
+	outputOwner := map[string]string{}
+	for _, deps := range all {
+		for _, out := range deps.outputs {
+			outputOwner[out.Name] = deps.name
+		}
+	}
+	edges := map[string][]string{}
+	for _, deps := range all {
+		edges[deps.name] = append(edges[deps.name], deps.dependsOn...)
+		for _, in := range deps.inputs {
+			if owner, ok := outputOwner[in.From]; ok {
+				edges[deps.name] = append(edges[deps.name], owner)
+			}
+		}
+	}
+	if path := dependsOnPath(edges, edges[comp.name], comp.name, map[string]bool{}); path != nil {
+		return bcode.ErrComponentDependsOn.SetMessage("components wait on each other in a cycle: " + strings.Join(append([]string{comp.name}, path...), " -> "))
+	}
+	return nil
+}
+
+// dependsOnPath is a path along edges from one of from to target, target
+// last, or nil where there is none.
+func dependsOnPath(edges map[string][]string, from []string, target string, seen map[string]bool) []string {
+	for _, next := range from {
+		if next == target {
+			return []string{target}
+		}
+		if seen[next] {
+			continue
+		}
+		seen[next] = true
+		if rest := dependsOnPath(edges, edges[next], target, seen); rest != nil {
+			return append([]string{next}, rest...)
+		}
+	}
+	return nil
 }
 
 func (c *applicationServiceImpl) CreateComponent(ctx context.Context, app *model.Application, com apisv1.CreateComponentRequest) (*apisv1.ComponentBase, error) {
@@ -2177,10 +2288,11 @@ func NewTestApplicationService(ds datastore.DataStore, c client.Client, cfg *res
 	}
 	workflowService.EnvBindingService = envbinding
 	return &applicationServiceImpl{
-		Store:      ds,
-		KubeClient: c,
-		KubeConfig: cfg,
-		Apply:      apply.NewAPIApplicator(c),
+		Store:            ds,
+		KubeClient:       c,
+		ServerKubeClient: c,
+		KubeConfig:       cfg,
+		Apply:            apply.NewAPIApplicator(c),
 		WorkflowService: &workflowServiceImpl{
 			Store:             ds,
 			KubeClient:        c,

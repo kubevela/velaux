@@ -117,3 +117,7 @@ var ErrInvalidReconcileInterval = NewBcode(400, 10032, "the reconcile interval m
 
 // ErrInvalidRestartSchedule the workflow restart schedule is not a time or an interval
 var ErrInvalidRestartSchedule = NewBcode(400, 10033, "the restart schedule must be empty, an RFC3339 time or a positive interval")
+
+// ErrComponentDependsOn a component's dependsOn names itself, a component the
+// application does not have, or closes a cycle
+var ErrComponentDependsOn = NewBcode(400, 10034, "the component's dependsOn is not valid")

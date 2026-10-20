@@ -48,3 +48,13 @@ var ErrSharedWorkflowInUse = NewBcode(400, 20011, "the shared workflow is used b
 
 // ErrSharedWorkflowScope the scope is neither project nor global
 var ErrSharedWorkflowScope = NewBcode(400, 20012, "a shared workflow's scope is project or global")
+
+// ErrSharedWorkflowUnreachable a workflow references a shared Workflow its
+// environment cannot reach: KubeVela looks in the environment's namespace, then
+// the system namespace, so a project's shared Workflow serves only environments
+// in the project's namespace.
+var ErrSharedWorkflowUnreachable = NewBcode(400, 20013, "the shared workflow is not reachable from this environment")
+
+// ErrWorkflowNotTerminable the workflow has no run that has not finished, so
+// there is nothing to terminate
+var ErrWorkflowNotTerminable = NewBcode(400, 20014, "the workflow has no unfinished run to terminate")

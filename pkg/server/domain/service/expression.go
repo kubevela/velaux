@@ -71,6 +71,7 @@ type ExpressionService interface {
 	// an error in, each against the type its parameter declares in the
 	// definition of typeName, a type as an Application writes it.
 	CheckProperties(ctx context.Context, app *model.Application, surface, defType, typeName, properties, source, component string) error
+	CheckWorkflow(ctx context.Context, app *model.Application, steps []apisv1.WorkflowStep, mode, subMode string) error
 }
 
 type expressionServiceImpl struct {
@@ -91,6 +92,10 @@ func NewExpressionService(enabled bool) ExpressionService {
 // source, resolved during a component's render, so it reads the context a
 // component does and the sources declared before it.
 const surfaceSource = "source"
+
+// surfaceWorkflowStep is the surface of a workflow step's values, and the
+// definition type of its step types.
+const surfaceWorkflowStep = "workflowstep"
 
 // contextFor is the context an expression on the surface reads, and whether
 // the surface is one expressions may be written on.
@@ -492,6 +497,13 @@ func (e *expressionServiceImpl) SetOptIn(ctx context.Context, app *model.Applica
 // type with no schema, or an application that reads $( literally, is left to
 // the controller.
 func (e *expressionServiceImpl) CheckProperties(ctx context.Context, app *model.Application, surface, defType, typeName, properties, source, component string) error {
+	return e.checkProperties(ctx, app, surface, defType, typeName, properties, source, component, apisv1.ExpressionStep{}, "")
+}
+
+// checkProperties is CheckProperties for a value in the step scope names, each
+// error's path under prefix.
+func (e *expressionServiceImpl) checkProperties(ctx context.Context, app *model.Application, surface, defType, typeName, properties, source, component string,
+	step apisv1.ExpressionStep, prefix string) error {
 	if !e.enabled || !optedIn(app) || !strings.Contains(properties, "$(") {
 		return nil
 	}
@@ -509,17 +521,12 @@ func (e *expressionServiceImpl) CheckProperties(ctx context.Context, app *model.
 	}
 	check := func(path, value string, schema *openapi3.Schema, required bool) error {
 		resp, err := e.Check(ctx, app, apisv1.ExpressionCheckRequest{
-			Surface: surface, Value: value, Kind: expressionKind(schema), Source: source, Component: component, Required: required,
+			Surface: surface, Value: value, Kind: expressionKind(schema), Source: source, Component: component, Required: required, ExpressionStep: step,
 		})
 		if err != nil {
 			return err
 		}
-		for _, issue := range resp.Issues {
-			if !issue.Warning {
-				return bcode.ErrExpressionInvalid.SetMessage(fmt.Sprintf("%s: %s", path, issue.Message))
-			}
-		}
-		return nil
+		return firstIssue(prefix+path, resp)
 	}
 	return walkExpressions("", values, detail.APISchema, false, check)
 }
@@ -584,4 +591,110 @@ func walkExpressions(path string, value interface{}, schema *openapi3.Schema, re
 		}
 	}
 	return nil
+}
+
+// firstIssue is the response's first error, at path, or nil where it has only
+// warnings.
+func firstIssue(path string, resp *apisv1.ExpressionCheckResponse) error {
+	for _, issue := range resp.Issues {
+		if !issue.Warning {
+			return bcode.ErrExpressionInvalid.SetMessage(fmt.Sprintf("%s: %s", path, issue.Message))
+		}
+	}
+	return nil
+}
+
+// CheckWorkflow refuses a workflow holding an expression the check finds an
+// error in, as the studio's editors flag it: a step's properties, an if that
+// is a whole $( ) expression and loop items that are one, each judged where
+// it sits among the steps.
+func (e *expressionServiceImpl) CheckWorkflow(ctx context.Context, app *model.Application, steps []apisv1.WorkflowStep, mode, subMode string) error {
+	if !e.enabled || !optedIn(app) {
+		return nil
+	}
+	declared := declaredSteps(steps)
+	scope := func(name string, loopBody bool, items json.RawMessage) apisv1.ExpressionStep {
+		return apisv1.ExpressionStep{Step: name, LoopBody: loopBody, ForEachItems: items, Steps: declared, Mode: mode, SubMode: subMode}
+	}
+	for _, s := range steps {
+		var items json.RawMessage
+		if s.ForEach != nil && s.ForEach.Items != nil {
+			items = s.ForEach.Items.Raw
+			var expr string
+			if json.Unmarshal(items, &expr) == nil && strings.Contains(expr, "$(") {
+				resp, err := e.Check(ctx, app, apisv1.ExpressionCheckRequest{Surface: surfaceWorkflowStep, Value: expr,
+					ExpressionStep: apisv1.ExpressionStep{Steps: declared, Mode: mode, SubMode: subMode}})
+				if err != nil {
+					return err
+				}
+				if err := firstIssue("steps."+s.Name+".forEach.items", resp); err != nil {
+					return err
+				}
+			}
+		}
+		looping := s.ForEach != nil
+		// A step's own if is read before its loop starts, so it reads no item.
+		if err := e.checkStep(ctx, app, s.WorkflowStepBase, scope(s.Name, looping && len(s.SubSteps) == 0, items), scope(s.Name, false, nil)); err != nil {
+			return err
+		}
+		for _, sub := range s.SubSteps {
+			subScope := scope(sub.Name, looping, items)
+			if err := e.checkStep(ctx, app, sub, subScope, subScope); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// checkStep checks a step's if, where it is a whole $( ) expression, in
+// ifScope, and its properties in scope.
+func (e *expressionServiceImpl) checkStep(ctx context.Context, app *model.Application, step apisv1.WorkflowStepBase, scope, ifScope apisv1.ExpressionStep) error {
+	prefix := "steps." + step.Name + "."
+	if strings.Contains(step.If, "$(") {
+		condition := ifScope
+		condition.Condition = true
+		resp, err := e.Check(ctx, app, apisv1.ExpressionCheckRequest{Surface: surfaceWorkflowStep, Value: step.If, Kind: "boolean", ExpressionStep: condition})
+		if err != nil {
+			return err
+		}
+		if err := firstIssue(prefix+"if", resp); err != nil {
+			return err
+		}
+	}
+	if len(step.Properties) == 0 {
+		return nil
+	}
+	raw, err := json.Marshal(step.Properties)
+	if err != nil {
+		return err
+	}
+	return e.checkProperties(ctx, app, surfaceWorkflowStep, surfaceWorkflowStep, step.Type, string(raw), "", "", scope, prefix+"properties.")
+}
+
+// declaredSteps are the steps as the expression check reads them: each one's
+// name, outputs, dependencies and loop, a group's steps under it.
+func declaredSteps(steps []apisv1.WorkflowStep) []apisv1.ExpressionStepOutputs {
+	out := make([]apisv1.ExpressionStepOutputs, 0, len(steps))
+	base := func(b apisv1.WorkflowStepBase) apisv1.ExpressionStepOutputs {
+		d := apisv1.ExpressionStepOutputs{Name: b.Name, DependsOn: b.DependsOn}
+		for _, o := range b.Outputs {
+			if o.Name != "" {
+				d.Outputs = append(d.Outputs, o.Name)
+			}
+		}
+		return d
+	}
+	for _, s := range steps {
+		d := base(s.WorkflowStepBase)
+		d.ForEach = s.ForEach != nil
+		for _, sub := range s.SubSteps {
+			d.SubSteps = append(d.SubSteps, base(sub))
+		}
+		if len(s.SubSteps) > 0 {
+			d.Mode = s.Mode
+		}
+		out = append(out, d)
+	}
+	return out
 }

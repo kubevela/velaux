@@ -2392,6 +2392,9 @@ type Customisation struct {
 	// Terminology renames the UI's words, keyed by the word as the UI writes it
 	// in the singular: Application, Environment, Cluster.
 	Terminology map[string]Term `json:"terminology,omitempty"`
+	// TerminologyError says why the stored terminology was ignored, where it
+	// cannot be read; it is never stored.
+	TerminologyError string `json:"terminologyError,omitempty"`
 }
 
 // Term is the singular and plural a renamed word takes.

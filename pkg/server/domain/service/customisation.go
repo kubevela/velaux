@@ -19,12 +19,14 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/apis/types"
@@ -88,8 +90,12 @@ func (s *customisationServiceImpl) Get(ctx context.Context) (*apisv1.Customisati
 		AccentColor:  cm.Data[customisationAccentKey],
 	}
 	if raw := cm.Data[customisationTerminologyKey]; raw != "" {
+		// A ConfigMap edited with kubectl is not validated: terminology that
+		// cannot be read, as JSON or as terms, is ignored whole, and said so.
 		if err := json.Unmarshal([]byte(raw), &c.Terminology); err != nil {
-			return nil, err
+			klog.Warningf("customisation terminology ignored: %v", err)
+			c.Terminology = nil
+			c.TerminologyError = fmt.Sprintf("the terminology in the %s ConfigMap could not be read: %v", CustomisationConfigMapName, err)
 		}
 	}
 	return c, nil
@@ -97,6 +103,7 @@ func (s *customisationServiceImpl) Get(ctx context.Context) (*apisv1.Customisati
 
 // Update replaces the customisation.
 func (s *customisationServiceImpl) Update(ctx context.Context, c apisv1.Customisation) (*apisv1.Customisation, error) {
+	c.TerminologyError = ""
 	if err := validateCustomisation(c); err != nil {
 		return nil, err
 	}

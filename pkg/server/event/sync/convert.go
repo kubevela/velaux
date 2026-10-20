@@ -32,6 +32,7 @@ import (
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	apitypes "github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/oam"
+	"github.com/oam-dev/kubevela/pkg/sources"
 	"github.com/oam-dev/kubevela/pkg/workflow/step"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
@@ -140,7 +141,8 @@ func (c *CR2UX) ConvertApp2DatastoreApp(ctx context.Context, targetApp *v1beta1.
 	for _, plc := range targetApp.Spec.Policies {
 		innerPlc[plc.Name] = struct{}{}
 	}
-	outsidePLC, err := step.LoadExternalPoliciesForWorkflow(ctx, cli, targetApp.Namespace, steps, targetApp.Spec.Policies)
+	outsidePLC, err := step.LoadExternalPoliciesForWorkflow(ctx, cli, targetApp.Namespace, steps, targetApp.Spec.Policies,
+		sources.ExpressionsEnabledFor(targetApp.GetAnnotations()))
 	if err != nil {
 		return nil, err
 	}

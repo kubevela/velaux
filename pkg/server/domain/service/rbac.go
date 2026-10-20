@@ -77,6 +77,12 @@ const (
 	permReportView     = "report-view"
 )
 
+// The Management permissions split from App Management, by name.
+const (
+	permWorkflowManagement   = "workflow-management"
+	permDefinitionManagement = "definition-management"
+)
+
 // defaultProjectPermissionTemplate are the permissions each project is given:
 // a View (list, detail) and a Management (everything) for each feature, and
 // Project View for the project itself, its members and roles.
@@ -130,7 +136,7 @@ var defaultProjectPermissionTemplate = []*model.PermissionTemplate{
 		Scope:     permissionScopeProject,
 	},
 	{
-		Name:      "workflow-management",
+		Name:      permWorkflowManagement,
 		Alias:     "Workflow Management",
 		Resources: []string{"project:{projectName}/workflow:*"},
 		Actions:   []string{"*"},
@@ -146,7 +152,7 @@ var defaultProjectPermissionTemplate = []*model.PermissionTemplate{
 		Scope:     permissionScopeProject,
 	},
 	{
-		Name:      "definition-management",
+		Name:      permDefinitionManagement,
 		Alias:     "Definition Management",
 		Resources: []string{"project:{projectName}/definition:*"},
 		Actions:   []string{"*"},
@@ -728,6 +734,7 @@ var permissionMigrations = []struct {
 }{
 	{"2026-10-05-feature-permissions", migrateFeaturePermissions},
 	{"2026-10-05-feature-views", migrateFeatureViews},
+	{"2026-10-19-feature-management-grants", migrateFeatureManagementGrants},
 }
 
 // featureViews are the View templates migrateFeatureViews gives each project.
@@ -831,9 +838,8 @@ func missingPlatformPermissions(have map[string]bool) []datastore.Entity {
 // migrateFeaturePermissions gives each feature its own permissions. Project
 // View reads workflows, definitions, reports and queries; workflow and
 // definition writes leave App Management for templates of their own, created
-// in each project; the platform gains the templates it lacks. Roles are left
-// alone: whoever should write workflows or definitions is given the new
-// templates by a project admin.
+// in each project; the platform gains the templates it lacks. The built-in
+// roles are given the new templates by migrateFeatureManagementGrants.
 func migrateFeaturePermissions(ctx context.Context, p *rbacServiceImpl) error {
 	add := map[string][]string{
 		permProjectView: {"project:{projectName}/workflow:*", "project:{projectName}/definition:*", "project:{projectName}/report:*", "project:{projectName}/query:*"},
@@ -841,7 +847,7 @@ func migrateFeaturePermissions(ctx context.Context, p *rbacServiceImpl) error {
 	remove := map[string][]string{
 		"app-management": {"project:{projectName}/workflow:*", "project:{projectName}/definition:*"},
 	}
-	created := []string{"workflow-management", "definition-management"}
+	created := []string{permWorkflowManagement, permDefinitionManagement}
 
 	all, err := p.Store.List(ctx, &model.Permission{}, nil)
 	if err != nil {
@@ -877,6 +883,54 @@ func migrateFeaturePermissions(ctx context.Context, p *rbacServiceImpl) error {
 		return nil
 	}
 	return p.Store.BatchAdd(ctx, batch)
+}
+
+// featureManagement are the templates migrateFeatureManagementGrants gives the
+// built-in roles named in builtinManagers.
+var featureManagement = []string{permWorkflowManagement, permDefinitionManagement}
+
+// builtinManagers are the built-in project roles a project created now gives
+// featureManagement.
+var builtinManagers = []string{"project-admin", "app-developer"}
+
+// migrateFeatureManagementGrants gives each project's built-in Project Admin
+// and App Developer the Workflow and Definition Management its project has and
+// they lack, as a project created now gives them. Custom roles are the
+// admins' to grant.
+func migrateFeatureManagementGrants(ctx context.Context, p *rbacServiceImpl) error {
+	all, err := p.Store.List(ctx, &model.Permission{}, nil)
+	if err != nil {
+		return err
+	}
+	have := map[string]bool{}
+	for _, entity := range all {
+		perm := entity.(*model.Permission)
+		have[perm.Project+"/"+perm.Name] = true
+	}
+	roles, err := p.Store.List(ctx, &model.Role{}, nil)
+	if err != nil {
+		return err
+	}
+	for _, entity := range roles {
+		role := entity.(*model.Role)
+		if role.Project == "" || !slices.Contains(builtinManagers, role.Name) {
+			continue
+		}
+		changed := false
+		for _, name := range featureManagement {
+			// A role names only permissions its project has.
+			if have[role.Project+"/"+name] && !slices.Contains(role.Permissions, name) {
+				role.Permissions = append(role.Permissions, name)
+				changed = true
+			}
+		}
+		if changed {
+			if err := p.Store.Put(ctx, role); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // migratePermissions applies each permission migration not yet recorded.
@@ -1487,12 +1541,12 @@ func (p *rbacServiceImpl) SyncDefaultRoleAndUsersForProject(ctx context.Context,
 		batchData = append(batchData, &model.Role{
 			Name:        "app-developer",
 			Alias:       "App Developer",
-			Permissions: []string{permProjectView, permAppView, permEnvView, permWorkflowView, permDefinitionView, permConfigView, permPipelineView, permReportView, "app-management", "workflow-management", "definition-management", "env-management", "config-management", "pipeline-management"},
+			Permissions: []string{permProjectView, permAppView, permEnvView, permWorkflowView, permDefinitionView, permConfigView, permPipelineView, permReportView, "app-management", permWorkflowManagement, permDefinitionManagement, "env-management", "config-management", "pipeline-management"},
 			Project:     project.Name,
 		}, &model.Role{
 			Name:        "project-admin",
 			Alias:       "Project Admin",
-			Permissions: []string{permProjectView, permAppView, permEnvView, permWorkflowView, permDefinitionView, permConfigView, permPipelineView, permReportView, "app-management", "workflow-management", "definition-management", "env-management", "config-management", "pipeline-management", "role-management"},
+			Permissions: []string{permProjectView, permAppView, permEnvView, permWorkflowView, permDefinitionView, permConfigView, permPipelineView, permReportView, "app-management", permWorkflowManagement, permDefinitionManagement, "env-management", "config-management", "pipeline-management", "role-management"},
 			Project:     project.Name,
 		}, &model.Role{
 			Name:        "project-viewer",

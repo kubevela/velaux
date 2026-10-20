@@ -11,7 +11,7 @@ import type {
   WorkflowStepOutputs,
 } from '@velaux/data';
 
-import { Button, Tab, Loading, Message, Table } from '@alifd/next';
+import { Button, Dialog, Tab, Loading, Message, Table } from '@alifd/next';
 import Ansi from 'ansi-to-react';
 import { connect } from 'dva';
 
@@ -43,6 +43,9 @@ import { generatedStepProperties } from './status';
 import { recordStatus, stepStatus as stepBadge } from '../../../../components/PipelineGraph/status';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import { AiOutlineClose } from 'react-icons/ai';
+
+// finishedStatuses are a run's statuses once it has stopped for good.
+const finishedStatuses = ['terminated', 'failed', 'succeeded'];
 
 type Props = {
   applicationDetail: ApplicationDetail;
@@ -116,12 +119,7 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
       .then((res: WorkflowRecord) => {
         if (res) {
           this.setState({ showRecord: res });
-          if (
-            res.status &&
-            ['terminated', 'failed', 'succeeded'].indexOf(res.status) == -1 &&
-            !this.loop &&
-            !this.disableLoop
-          ) {
+          if (res.status && !finishedStatuses.includes(res.status) && !this.loop && !this.disableLoop) {
             this.loop = true;
             window.setTimeout(() => {
               this.loop = false;
@@ -306,6 +304,19 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
       });
   };
 
+  // confirmTerminate asks before ending a run from its header, which is offered
+  // for any run that has not finished, a stuck one included.
+  confirmTerminate = () => {
+    Dialog.confirm({
+      type: 'confirm',
+      content: i18n
+        .t('Terminate this run? The workflow stops where it is; deploy again to start a new run.')
+        .toString(),
+      onOk: this.onTerminateApplicationWorkflowRecord,
+      locale: locale().Dialog,
+    });
+  };
+
   onTerminateApplicationWorkflowRecord = () => {
     const { applicationDetail, workflow, recordName } = this.props;
     const params = {
@@ -368,6 +379,18 @@ class ApplicationWorkflowRecord extends React.Component<Props, State> {
           <div className="wf-run-head">
             <StatusBadge tone={status.tone} label={status.label} />
             <span className="wf-run-name">{showRecord?.name}</span>
+            {showRecord?.status && !finishedStatuses.includes(showRecord.status) && (
+              <Button
+                className="wf-run-terminate"
+                size="small"
+                warning
+                loading={this.state.terminateLoading}
+                title={i18n.t('Terminate this workflow').toString()}
+                onClick={this.confirmTerminate}
+              >
+                <Translation>Terminate</Translation>
+              </Button>
+            )}
             <Button
               className="wf-run-refresh"
               text
