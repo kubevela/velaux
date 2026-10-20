@@ -33,6 +33,18 @@ import (
 type Workflow struct {
 	WorkflowService    service.WorkflowService    `inject:""`
 	ApplicationService service.ApplicationService `inject:""`
+	ExpressionService  service.ExpressionService  `inject:""`
+}
+
+// checkExpressions refuses steps holding an expression with an error, so a
+// save through the API is checked as the studio checks it; it reports whether
+// the request may go on. A workflow referencing a shared one has no steps.
+func (w *Workflow) checkExpressions(req *restful.Request, res *restful.Response, app *model.Application, steps []apis.WorkflowStep, mode, subMode string) bool {
+	if err := w.ExpressionService.CheckWorkflow(req.Request.Context(), app, steps, mode, subMode); err != nil {
+		bcode.ReturnError(req, res, err)
+		return false
+	}
+	return true
 }
 
 // NewWorkflow new workflow api interface
@@ -87,6 +99,9 @@ func (w *Workflow) createOrUpdateApplicationWorkflow(req *restful.Request, res *
 		return
 	}
 	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	if createReq.Ref == "" && !w.checkExpressions(req, res, app, createReq.Steps, createReq.Mode, createReq.SubMode) {
+		return
+	}
 	// Call the domain service layer code
 	workflowDetail, err := w.WorkflowService.CreateOrUpdateWorkflow(req.Request.Context(), app, createReq)
 	if err != nil {
@@ -139,6 +154,10 @@ func (w *Workflow) updateWorkflow(req *restful.Request, res *restful.Response) {
 	}
 	if err := validate.Struct(&updateReq); err != nil {
 		bcode.ReturnError(req, res, err)
+		return
+	}
+	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
+	if updateReq.Ref == "" && !w.checkExpressions(req, res, app, updateReq.Steps, updateReq.Mode, updateReq.SubMode) {
 		return
 	}
 	detail, err := w.WorkflowService.UpdateWorkflow(req.Request.Context(), workflow, updateReq)
