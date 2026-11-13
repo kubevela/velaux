@@ -197,6 +197,12 @@ func (u *configServiceImpl) CreateConfig(ctx context.Context, project string, re
 	if req.Template.Namespace == "" {
 		req.Template.Namespace = GlobalConfigNamespace
 	}
+	// VelaUX renders the template with its own identity, so it is held to the templates it
+	// offers: the system namespace's, and the config's own namespace's. An update keeps the
+	// config's template, so this applies only here.
+	if req.Template.Namespace != GlobalConfigNamespace && req.Template.Namespace != ns {
+		return nil, bcode.ErrTemplateNamespaceNotAllowed
+	}
 	ct, err := u.templateCR(ctx, config.NamespacedName(req.Template))
 	if err != nil {
 		return nil, err
