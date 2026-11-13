@@ -32,6 +32,8 @@ const (
 // SystemInfo systemInfo model
 type SystemInfo struct {
 	BaseModel
+	// SignedKey is where the token signing key was kept before it moved to a Secret. It is
+	// emptied on start.
 	SignedKey                   string        `json:"signedKey"`
 	InstallID                   string        `json:"installID" gorm:"primaryKey"`
 	EnableCollection            bool          `json:"enableCollection"`

@@ -19,11 +19,14 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
 	velatypes "github.com/oam-dev/kubevela/apis/types"
@@ -84,3 +87,54 @@ metadata:
   namespace: vela-system
 type: Opaque
 `
+
+var _ = Describe("Token signing key", func() {
+	var systemService *systemInfoServiceImpl
+	var ds datastore.DataStore
+	database := "signing-key-test"
+
+	BeforeEach(func() {
+		var err error
+		ds, err = NewDatastore(datastore.Config{Type: "kubeapi", Database: database})
+		Expect(err).Should(BeNil())
+		systemService = &systemInfoServiceImpl{Store: ds, KubeClient: k8sClient}
+		_ = k8sClient.Delete(context.TODO(), &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: tokenSigningKeySecret, Namespace: velatypes.DefaultKubeVelaNS}})
+	})
+
+	storedKeyAppearsIn := func(key string) bool {
+		cms := &corev1.ConfigMapList{}
+		Expect(k8sClient.List(context.TODO(), cms, client.InNamespace(database))).Should(Succeed())
+		for _, cm := range cms.Items {
+			for _, v := range cm.Data {
+				if strings.Contains(v, key) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	It("keeps the key in a Secret, out of the datastore, and reuses it", func() {
+		Expect(systemService.Init(context.TODO())).Should(Succeed())
+		secret := &corev1.Secret{}
+		Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Name: tokenSigningKeySecret, Namespace: velatypes.DefaultKubeVelaNS}, secret)).Should(Succeed())
+		key := string(secret.Data[tokenSigningKeyField])
+		Expect(len(key)).Should(BeNumerically(">=", 32))
+		Expect(signedKey).Should(Equal(key))
+		Expect(storedKeyAppearsIn(key)).Should(BeFalse(), "the datastore's ConfigMaps are readable by the view role")
+
+		Expect(systemService.Init(context.TODO())).Should(Succeed())
+		Expect(signedKey).Should(Equal(key), "a restart keeps the key, and the sessions signed with it")
+	})
+
+	It("drops a key the datastore still holds, and does not reuse it", func() {
+		info, err := systemService.Get(context.TODO())
+		Expect(err).Should(BeNil())
+		info.SignedKey = "a-key-from-before-it-moved-to-a-secret"
+		Expect(ds.Put(context.TODO(), info)).Should(Succeed())
+
+		Expect(systemService.Init(context.TODO())).Should(Succeed())
+		Expect(signedKey).ShouldNot(Equal("a-key-from-before-it-moved-to-a-secret"))
+		Expect(storedKeyAppearsIn("a-key-from-before-it-moved-to-a-secret")).Should(BeFalse())
+	})
+})
