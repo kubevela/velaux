@@ -150,6 +150,12 @@ func (d *definitionServiceImpl) listDefinitions(ctx context.Context, list *unstr
 				Key:      types.LabelDefinitionDeprecated,
 				Operator: metav1.LabelSelectorOpDoesNotExist,
 			},
+			// Modules are in development, and KubeVela refuses a module's type by its
+			// definition's name (it takes module/version/name), so they are not offered.
+			{
+				Key:      types.LabelDefinitionModule,
+				Operator: metav1.LabelSelectorOpDoesNotExist,
+			},
 		},
 	}
 	if ops.Scope != "" {
