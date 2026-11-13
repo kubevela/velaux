@@ -1128,10 +1128,13 @@ func (p *rbacServiceImpl) CheckPerm(resource string, actions ...string) func(req
 			bcode.ReturnError(req, res, bcode.ErrUnauthorized)
 			return
 		}
-		user := &model.User{Name: userName}
-		if err := p.Store.Get(req.Request.Context(), user); err != nil {
-			bcode.ReturnError(req, res, bcode.ErrUnauthorized)
-			return
+		user, ok := req.Request.Context().Value(&apisv1.CtxKeyUserModel).(*model.User)
+		if !ok || user.Name != userName {
+			user = &model.User{Name: userName}
+			if err := p.Store.Get(req.Request.Context(), user); err != nil {
+				bcode.ReturnError(req, res, bcode.ErrUnauthorized)
+				return
+			}
 		}
 		path, err := checkResourcePath(resource)
 		if err != nil {
