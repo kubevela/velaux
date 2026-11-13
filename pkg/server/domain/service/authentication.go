@@ -18,6 +18,8 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -320,7 +322,61 @@ func generateDexConfig(ctx context.Context, kubeClient client.Client, update *mo
 	return nil
 }
 
+// legacyDexClientSecret is the Dex client secret every install was given before each got its own.
+const legacyDexClientSecret = "velaux-secret"
+
+// newDexClientSecret is a random Dex client secret for one install.
+func newDexClientSecret() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+// Init gives an install still holding the Dex client secret every install once shared one of its
+// own, and restarts Dex to read it. A failure is logged, not fatal: login works as before.
+func (a *authenticationServiceImpl) Init(ctx context.Context) error {
+	if err := a.replaceLegacyDexClientSecret(ctx); err != nil {
+		klog.Warningf("could not replace the shared Dex client secret: %s", err.Error())
+	}
+	return nil
+}
+
+func (a *authenticationServiceImpl) replaceLegacyDexClientSecret(ctx context.Context) error {
+	secret := &corev1.Secret{}
+	if err := a.KubeClient.Get(ctx, types.NamespacedName{Name: dexConfigName, Namespace: velatypes.DefaultKubeVelaNS}, secret); err != nil {
+		return client.IgnoreNotFound(err)
+	}
+	dexConfig := &model.DexConfig{}
+	if err := yaml.Unmarshal(secret.Data[secretDexConfigKey], dexConfig); err != nil {
+		return err
+	}
+	if len(dexConfig.StaticClients) == 0 || dexConfig.StaticClients[0].Secret != legacyDexClientSecret {
+		return nil
+	}
+	clientSecret, err := newDexClientSecret()
+	if err != nil {
+		return err
+	}
+	dexConfig.StaticClients[0].Secret = clientSecret
+	config, err := yaml.Marshal(dexConfig)
+	if err != nil {
+		return err
+	}
+	secret.Data[secretDexConfigKey] = config
+	if err := a.KubeClient.Update(ctx, secret); err != nil {
+		return err
+	}
+	klog.Info("replaced the shared Dex client secret with one of this install's own")
+	return restartDex(ctx, a.KubeClient)
+}
+
 func initDexConfig(ctx context.Context, kubeClient client.Client, velaAddress string) (*corev1.Secret, error) {
+	clientSecret, err := newDexClientSecret()
+	if err != nil {
+		return nil, err
+	}
 	dexConfig := model.DexConfig{
 		Issuer: fmt.Sprintf("%s/dex", velaAddress),
 		Web: model.DexWeb{
@@ -336,7 +392,7 @@ func initDexConfig(ctx context.Context, kubeClient client.Client, velaAddress st
 			{
 				ID:           "velaux",
 				Name:         "VelaUX",
-				Secret:       "velaux-secret",
+				Secret:       clientSecret,
 				RedirectURIs: []string{fmt.Sprintf("%s/callback", velaAddress)},
 			},
 		},
