@@ -541,6 +541,9 @@ func (c *applicationServiceImpl) PublishApplicationTemplate(_ context.Context, _
 
 // CreateApplication create application
 func (c *applicationServiceImpl) CreateApplication(ctx context.Context, req apisv1.CreateApplicationRequest) (*apisv1.ApplicationBase, error) {
+	if err := requireAuthorizedProject(ctx, req.Project); err != nil {
+		return nil, err
+	}
 	if req.WorkflowMode != "" && req.WorkflowMode != "StepByStep" && req.WorkflowMode != "DAG" {
 		return nil, bcode.ErrWorkflowMode
 	}

@@ -45,3 +45,6 @@ var ErrProjectUserExist = NewBcode(400, 30009, "the user is already exist in thi
 
 // ErrProjectOwnerInvalid means the project owner name is invalid
 var ErrProjectOwnerInvalid = NewBcode(400, 30010, "the project owner name is invalid")
+
+// ErrProjectNotAuthorized means a request writes to a project other than the one it was authorized for
+var ErrProjectNotAuthorized = NewBcode(403, 30011, "the request writes to a project other than the one it was authorized for")
