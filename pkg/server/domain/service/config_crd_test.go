@@ -112,6 +112,28 @@ func TestUpdatingAConfigKeepsItsTemplateRef(t *testing.T) {
 	assert.Equal(t, configv1alpha1.ConfigTemplateReference{Name: "cluster-info"}, *got.Spec.TemplateRef)
 }
 
+// Migration adopts a config before its template, so a Config can stand on a template
+// that is still a legacy ConfigMap; editing it resolves the template either way.
+func TestAConfigOnALegacyTemplateCanBeUpdated(t *testing.T) {
+	ctx := context.Background()
+	existing := &configv1alpha1.Config{
+		ObjectMeta: metav1.ObjectMeta{Name: "registry", Namespace: types.DefaultKubeVelaNS},
+		Spec: configv1alpha1.ConfigSpec{
+			TemplateRef: &configv1alpha1.ConfigTemplateReference{Name: "image-registry", Namespace: types.DefaultKubeVelaNS},
+			Properties:  &runtime.RawExtension{Raw: []byte(`{"registry":"a.example.com"}`)},
+		},
+	}
+	svc, cli := configCRDService(t, existing)
+	_, err := svc.UpdateConfig(ctx, NoProject, "registry", apis.UpdateConfigRequest{Properties: `{"registry":"b.example.com"}`})
+	require.NoError(t, err)
+	got := &configv1alpha1.Config{}
+	require.NoError(t, cli.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: "registry"}, got))
+	assert.JSONEq(t, `{"registry":"b.example.com"}`, string(got.Spec.Properties.Raw))
+
+	_, err = svc.UpdateConfig(ctx, NoProject, "registry", apis.UpdateConfigRequest{Properties: `{"registry":1}`})
+	require.Error(t, err, "the legacy template still validates the properties")
+}
+
 func TestConfigsOfATemplateCRDAreConfigCRs(t *testing.T) {
 	ctx := context.Background()
 	svc, cli := configCRDService(t)

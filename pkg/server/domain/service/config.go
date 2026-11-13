@@ -208,10 +208,11 @@ func (u *configServiceImpl) CreateConfig(ctx context.Context, project string, re
 		return nil, err
 	}
 	if ct != nil {
-		if err := u.validateConfigCR(ctx, ct, req.Name, ns, properties); err != nil {
+		tpl := config.NamespacedName{Name: ct.Name, Namespace: ct.Namespace}
+		if err := u.validateConfigCR(ctx, tpl, ct.Spec.Sensitive, req.Name, ns, properties); err != nil {
 			return nil, err
 		}
-		c, err := u.writeConfigCR(ctx, ct, nil, req.Name, ns, req.Alias, req.Description, properties)
+		c, err := u.writeConfigCR(ctx, tpl, nil, req.Name, ns, req.Alias, req.Description, properties)
 		if err != nil {
 			return nil, err
 		}

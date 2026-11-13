@@ -19,6 +19,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -129,19 +130,19 @@ func (u *configServiceImpl) configCRs(ctx context.Context, namespace, template s
 
 // validateConfigCR renders the properties against the template, so a value the
 // template refuses is refused here rather than in the Config's status.
-func (u *configServiceImpl) validateConfigCR(ctx context.Context, ct *configv1alpha1.ConfigTemplate, name, namespace string, properties map[string]interface{}) error {
-	if ct.Spec.Sensitive {
+func (u *configServiceImpl) validateConfigCR(ctx context.Context, tpl config.NamespacedName, sensitive bool, name, namespace string, properties map[string]interface{}) error {
+	if sensitive {
 		return bcode.ErrSensitiveConfigTemplate
 	}
-	_, err := u.Factory.ParseConfig(ctx, config.NamespacedName{Name: ct.Name, Namespace: ct.Namespace}, config.Metadata{
+	_, err := u.Factory.ParseConfig(ctx, tpl, config.Metadata{
 		NamespacedName: config.NamespacedName{Name: name, Namespace: namespace},
 		Properties:     properties,
 	})
 	return err
 }
 
-// writeConfigCR creates or updates a Config of a ConfigTemplate.
-func (u *configServiceImpl) writeConfigCR(ctx context.Context, ct *configv1alpha1.ConfigTemplate, existing *configv1alpha1.Config,
+// writeConfigCR creates or updates a Config of the template tpl.
+func (u *configServiceImpl) writeConfigCR(ctx context.Context, tpl config.NamespacedName, existing *configv1alpha1.Config,
 	name, namespace, alias, description string, properties map[string]interface{}) (*configv1alpha1.Config, error) {
 	raw, err := json.Marshal(properties)
 	if err != nil {
@@ -152,7 +153,7 @@ func (u *configServiceImpl) writeConfigCR(ctx context.Context, ct *configv1alpha
 		c = &configv1alpha1.Config{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace}}
 		// Only on create: the Config webhook refuses any change to templateRef,
 		// including spelling out a namespace it left to the default.
-		c.Spec.TemplateRef = &configv1alpha1.ConfigTemplateReference{Name: ct.Name, Namespace: ct.Namespace}
+		c.Spec.TemplateRef = &configv1alpha1.ConfigTemplateReference{Name: tpl.Name, Namespace: tpl.Namespace}
 	}
 	c.Spec.Properties = &runtime.RawExtension{Raw: raw}
 	c.Spec.Alias, c.Spec.Description = alias, description
@@ -201,17 +202,23 @@ func (u *configServiceImpl) updateConfigCR(ctx context.Context, project string, 
 	if c.Spec.TemplateRef == nil {
 		return nil, bcode.ErrTemplateNotFound
 	}
-	ct, err := u.templateCR(ctx, config.NamespacedName{Name: c.Spec.TemplateRef.Name, Namespace: c.Spec.TemplateRef.Namespace})
+	// The template may still be a legacy ConfigMap: migration adopts a config before its
+	// template. LoadTemplate reads the ConfigTemplate first and the ConfigMap after it.
+	tplNamespace := c.Spec.TemplateRef.Namespace
+	if tplNamespace == "" {
+		tplNamespace = GlobalConfigNamespace
+	}
+	tpl, err := u.Factory.LoadTemplate(ctx, c.Spec.TemplateRef.Name, tplNamespace)
 	if err != nil {
+		if errors.Is(err, config.ErrTemplateNotFound) {
+			return nil, bcode.ErrTemplateNotFound
+		}
 		return nil, err
 	}
-	if ct == nil {
-		return nil, bcode.ErrTemplateNotFound
-	}
-	if err := u.validateConfigCR(ctx, ct, c.Name, c.Namespace, properties); err != nil {
+	if err := u.validateConfigCR(ctx, tpl.NamespacedName, tpl.Sensitive, c.Name, c.Namespace, properties); err != nil {
 		return nil, err
 	}
-	updated, err := u.writeConfigCR(ctx, ct, c, c.Name, c.Namespace, req.Alias, req.Description, properties)
+	updated, err := u.writeConfigCR(ctx, tpl.NamespacedName, c, c.Name, c.Namespace, req.Alias, req.Description, properties)
 	if err != nil {
 		return nil, err
 	}
