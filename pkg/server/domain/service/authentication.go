@@ -111,20 +111,22 @@ func (a *authenticationServiceImpl) newDexHandler(ctx context.Context, req apisv
 	if req.Code == "" {
 		return nil, bcode.ErrInvalidLoginRequest
 	}
-	dexConfig, err := a.GetDexConfig(ctx)
+	// The stored config, not GetDexConfig's public view: the code exchange needs the secret.
+	dexConfig, err := getDexConfig(ctx, a.KubeClient)
 	if err != nil {
 		return nil, err
 	}
+	dexClient := dexConfig.StaticClients[0]
 	provider, err := oidc.NewProvider(ctx, dexConfig.Issuer)
 	if err != nil {
 		return nil, err
 	}
-	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: dexConfig.ClientID})
+	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: dexClient.ID})
 	oauth2Config := &oauth2.Config{
-		ClientID:     dexConfig.ClientID,
-		ClientSecret: dexConfig.ClientSecret,
+		ClientID:     dexClient.ID,
+		ClientSecret: dexClient.Secret,
 		Endpoint:     provider.Endpoint(),
-		RedirectURL:  dexConfig.RedirectURL,
+		RedirectURL:  dexClient.RedirectURIs[0],
 	}
 	oidcCtx := oidc.ClientContext(ctx, http.DefaultClient)
 	token, err := oauth2Config.Exchange(oidcCtx, req.Code)
@@ -271,10 +273,9 @@ func (a *authenticationServiceImpl) GetDexConfig(ctx context.Context) (*apisv1.D
 		return nil, err
 	}
 	return &apisv1.DexConfigResponse{
-		Issuer:       config.Issuer,
-		ClientID:     config.StaticClients[0].ID,
-		ClientSecret: config.StaticClients[0].Secret,
-		RedirectURL:  config.StaticClients[0].RedirectURIs[0],
+		Issuer:      config.Issuer,
+		ClientID:    config.StaticClients[0].ID,
+		RedirectURL: config.StaticClients[0].RedirectURIs[0],
 	}, nil
 }
 

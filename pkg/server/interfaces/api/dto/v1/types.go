@@ -1689,12 +1689,12 @@ type RefreshTokenResponse struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
-// DexConfigResponse is the response of dex config
+// DexConfigResponse is the response of dex config. The login page reads it before anyone signs
+// in, so it holds only what the browser sees in the authorize redirect, never the client secret.
 type DexConfigResponse struct {
-	ClientID     string `json:"clientID"`
-	ClientSecret string `json:"clientSecret"`
-	RedirectURL  string `json:"redirectURL"`
-	Issuer       string `json:"issuer"`
+	ClientID    string `json:"clientID"`
+	RedirectURL string `json:"redirectURL"`
+	Issuer      string `json:"issuer"`
 }
 
 // DetailUserResponse is the response of user detail
