@@ -232,7 +232,7 @@ export const replaceUrl = function (text: string) {
 export const checkUserPassword = /^(?=.*[0-9])(?=.*[a-zA-Z])(.{8,16})$/;
 
 export function isMatchBusinessCode(businessCode: number) {
-  const tokenExpiredList = [12002, 12010];
+  const tokenExpiredList = [12002, 12010, 12013];
   return tokenExpiredList.includes(businessCode);
 }
 

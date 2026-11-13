@@ -49,6 +49,9 @@ type User struct {
 	// UserRoles binding the platform level roles
 	UserRoles []string `json:"userRoles" gorm:"serializer:json"`
 	DexSub    string   `json:"dexSub,omitempty"`
+	// TokenGeneration is the generation of the user's tokens: only tokens issued at the
+	// current generation are accepted, so raising it ends every session.
+	TokenGeneration int64 `json:"tokenGeneration,omitempty" gorm:"default:0"`
 }
 
 // TableName return custom table name
@@ -131,6 +134,8 @@ func (u *ProjectUser) Index() map[string]interface{} {
 type CustomClaims struct {
 	Username  string `json:"username"`
 	GrantType string `json:"grantType"`
+	// Generation is the user's TokenGeneration when the token was issued.
+	Generation int64 `json:"generation,omitempty"`
 	jwt.StandardClaims
 }
 
