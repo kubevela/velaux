@@ -186,10 +186,7 @@ func listApp(ctx context.Context, ds datastore.DataStore, listOptions apisv1.Lis
 		if !ok {
 			continue
 		}
-		if listOptions.Query != "" &&
-			!strings.Contains(appModel.Alias, listOptions.Query) &&
-			strings.Contains(appModel.Name, listOptions.Query) &&
-			strings.Contains(appModel.Description, listOptions.Query) {
+		if !matchesQuery(appModel, listOptions.Query) {
 			continue
 		}
 		if !addonFilter(appModel, listOptions.Addons) {
@@ -541,6 +538,9 @@ func (c *applicationServiceImpl) PublishApplicationTemplate(_ context.Context, _
 
 // CreateApplication create application
 func (c *applicationServiceImpl) CreateApplication(ctx context.Context, req apisv1.CreateApplicationRequest) (*apisv1.ApplicationBase, error) {
+	if err := requireAuthorizedProject(ctx, req.Project); err != nil {
+		return nil, err
+	}
 	if req.WorkflowMode != "" && req.WorkflowMode != "StepByStep" && req.WorkflowMode != "DAG" {
 		return nil, bcode.ErrWorkflowMode
 	}
@@ -2403,6 +2403,21 @@ func (c *applicationServiceImpl) findAllBindingPolicyWorkflowStep(ctx context.Co
 		}
 	}
 	return res, nil
+}
+
+// matchesQuery reports whether an app's name, alias or description contains query, ignoring
+// case; an empty query matches every app.
+func matchesQuery(app *model.Application, query string) bool {
+	if query == "" {
+		return true
+	}
+	query = strings.ToLower(query)
+	for _, field := range []string{app.Name, app.Alias, app.Description} {
+		if strings.Contains(strings.ToLower(field), query) {
+			return true
+		}
+	}
+	return false
 }
 
 // definitionName is the definition a type names, without the version it may

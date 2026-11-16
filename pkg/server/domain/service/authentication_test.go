@@ -371,7 +371,6 @@ var _ = Describe("Test authentication service functions", Ordered, func() {
 		Expect(err).Should(BeNil())
 		Expect(config.Issuer).Should(Equal("http://velaux.com/dex"))
 		Expect(config.ClientID).Should(Equal("velaux"))
-		Expect(config.ClientSecret).Should(Equal("velaux-secret"))
 		Expect(config.RedirectURL).Should(Equal("http://velaux.com/callback"))
 	})
 

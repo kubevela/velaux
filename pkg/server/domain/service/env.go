@@ -244,6 +244,9 @@ func (p *envServiceImpl) GetAppCountInEnv(ctx context.Context, env *model.Env) (
 
 // CreateEnv create an env for request
 func (p *envServiceImpl) CreateEnv(ctx context.Context, req apisv1.CreateEnvRequest) (*apisv1.Env, error) {
+	if err := requireAuthorizedProject(ctx, req.Project); err != nil {
+		return nil, err
+	}
 	namespace := req.Namespace
 	if namespace == "" {
 		var err error

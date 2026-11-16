@@ -15,6 +15,7 @@ import {
 import logo from '../../assets/kubevela-logo-white.png';
 import logoMark from '../../assets/KubeVela-01.svg';
 import logoDark from '../../assets/kubevela-logo.png';
+import { logout } from '../../api/authentication';
 import { loadCustomisation } from '../../api/customisation';
 import type { Customisation } from '../../services/CustomisationService';
 import { customisationService } from '../../services/CustomisationService';
@@ -162,13 +163,17 @@ class Header extends Component<Props, State> {
   };
 
   onLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    this.props.dispatch(
-      routerRedux.push({
-        pathname: '/login',
-      })
-    );
+    const signOut = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      this.props.dispatch(
+        routerRedux.push({
+          pathname: '/login',
+        })
+      );
+    };
+    // Ends the session on the server too; the browser signs out whether or not that succeeds.
+    logout().finally(signOut);
   };
 
   checkEnabledAddon = (addonName: string) => {

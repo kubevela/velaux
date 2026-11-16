@@ -18,6 +18,9 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -70,6 +73,11 @@ var signedKey string
 type AuthenticationService interface {
 	Login(ctx context.Context, loginReq apisv1.LoginRequest) (*apisv1.LoginResponse, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*apisv1.RefreshTokenResponse, error)
+	// ValidateToken returns the claims of a token of the given grant type and the user it
+	// was issued to, refusing it when that user is gone or disabled or the token is revoked.
+	ValidateToken(ctx context.Context, token, grantType string) (*model.CustomClaims, *model.User, error)
+	// Logout ends every session of the user.
+	Logout(ctx context.Context, username string) error
 	GetDexConfig(ctx context.Context) (*apisv1.DexConfigResponse, error)
 	GetLoginType(ctx context.Context) (*apisv1.GetLoginTypeResponse, error)
 }
@@ -109,20 +117,22 @@ func (a *authenticationServiceImpl) newDexHandler(ctx context.Context, req apisv
 	if req.Code == "" {
 		return nil, bcode.ErrInvalidLoginRequest
 	}
-	dexConfig, err := a.GetDexConfig(ctx)
+	// The stored config, not GetDexConfig's public view: the code exchange needs the secret.
+	dexConfig, err := getDexConfig(ctx, a.KubeClient)
 	if err != nil {
 		return nil, err
 	}
+	dexClient := dexConfig.StaticClients[0]
 	provider, err := oidc.NewProvider(ctx, dexConfig.Issuer)
 	if err != nil {
 		return nil, err
 	}
-	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: dexConfig.ClientID})
+	idTokenVerifier := provider.Verifier(&oidc.Config{ClientID: dexClient.ID})
 	oauth2Config := &oauth2.Config{
-		ClientID:     dexConfig.ClientID,
-		ClientSecret: dexConfig.ClientSecret,
+		ClientID:     dexClient.ID,
+		ClientSecret: dexClient.Secret,
 		Endpoint:     provider.Endpoint(),
-		RedirectURL:  dexConfig.RedirectURL,
+		RedirectURL:  dexClient.RedirectURIs[0],
 	}
 	oidcCtx := oidc.ClientContext(ctx, http.DefaultClient)
 	token, err := oauth2Config.Exchange(oidcCtx, req.Code)
@@ -183,11 +193,11 @@ func (a *authenticationServiceImpl) Login(ctx context.Context, loginReq apisv1.L
 	if userBase.Disabled {
 		return nil, bcode.ErrUserAlreadyDisabled
 	}
-	accessToken, err := a.generateJWTToken(userBase.Name, GrantTypeAccess, time.Hour)
+	user, err := a.UserService.GetUser(ctx, userBase.Name)
 	if err != nil {
 		return nil, err
 	}
-	refreshToken, err := a.generateJWTToken(userBase.Name, GrantTypeRefresh, time.Hour*24)
+	accessToken, refreshToken, err := a.issueTokens(user)
 	if err != nil {
 		return nil, err
 	}
@@ -198,41 +208,92 @@ func (a *authenticationServiceImpl) Login(ctx context.Context, loginReq apisv1.L
 	}, nil
 }
 
-func (a *authenticationServiceImpl) generateJWTToken(username, grantType string, expireDuration time.Duration) (string, error) {
-	expire := time.Now().Add(expireDuration)
+func (a *authenticationServiceImpl) issueTokens(user *model.User) (accessToken, refreshToken string, err error) {
+	if accessToken, err = a.generateJWTToken(user, GrantTypeAccess, time.Hour); err != nil {
+		return "", "", err
+	}
+	if refreshToken, err = a.generateJWTToken(user, GrantTypeRefresh, time.Hour*24); err != nil {
+		return "", "", err
+	}
+	return accessToken, refreshToken, nil
+}
+
+func (a *authenticationServiceImpl) generateJWTToken(user *model.User, grantType string, expireDuration time.Duration) (string, error) {
+	now := time.Now()
+	id := make([]byte, 16)
+	if _, err := rand.Read(id); err != nil {
+		return "", err
+	}
 	claims := model.CustomClaims{
 		StandardClaims: jwt.StandardClaims{
-			NotBefore: time.Now().Unix(),
-			ExpiresAt: expire.Unix(),
+			Id:        hex.EncodeToString(id),
+			IssuedAt:  now.Unix(),
+			NotBefore: now.Unix(),
+			ExpiresAt: now.Add(expireDuration).Unix(),
 			Issuer:    jwtIssuer,
 		},
-		Username:  username,
-		GrantType: grantType,
+		Username:   user.Name,
+		GrantType:  grantType,
+		Generation: user.TokenGeneration,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(signedKey))
 }
 
-func (a *authenticationServiceImpl) RefreshToken(_ context.Context, refreshToken string) (*apisv1.RefreshTokenResponse, error) {
-	claim, err := ParseToken(refreshToken)
+// ValidateToken returns the claims of a token of the given grant type and the user it was issued
+// to. A token is accepted only while its user exists, is enabled and is at the generation the
+// token was issued at.
+func (a *authenticationServiceImpl) ValidateToken(ctx context.Context, token, grantType string) (*model.CustomClaims, *model.User, error) {
+	claims, err := ParseToken(token)
+	if err != nil {
+		return nil, nil, err
+	}
+	if claims.GrantType != grantType {
+		if grantType == GrantTypeRefresh {
+			return nil, nil, bcode.ErrTokenInvalid
+		}
+		return nil, nil, bcode.ErrNotAccessToken
+	}
+	user := &model.User{Name: claims.Username}
+	if err := a.Store.Get(ctx, user); err != nil {
+		if errors.Is(err, datastore.ErrRecordNotExist) {
+			return nil, nil, bcode.ErrSessionEnded
+		}
+		return nil, nil, err
+	}
+	if user.Disabled || claims.Generation != user.TokenGeneration {
+		return nil, nil, bcode.ErrSessionEnded
+	}
+	return claims, user, nil
+}
+
+// RefreshToken issues a new access token and refresh token for a valid refresh token.
+func (a *authenticationServiceImpl) RefreshToken(ctx context.Context, refreshToken string) (*apisv1.RefreshTokenResponse, error) {
+	_, user, err := a.ValidateToken(ctx, refreshToken, GrantTypeRefresh)
 	if err != nil {
 		if errors.Is(err, bcode.ErrTokenExpired) {
 			return nil, bcode.ErrRefreshTokenExpired
 		}
 		return nil, err
 	}
-	if claim.GrantType == GrantTypeRefresh {
-		accessToken, err := a.generateJWTToken(claim.Username, GrantTypeAccess, time.Hour)
-		if err != nil {
-			return nil, err
-		}
-		// TODO: generate a new refresh token
-		return &apisv1.RefreshTokenResponse{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
-		}, nil
+	accessToken, newRefreshToken, err := a.issueTokens(user)
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	return &apisv1.RefreshTokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+	}, nil
+}
+
+// Logout ends every session of the user by raising their token generation.
+func (a *authenticationServiceImpl) Logout(ctx context.Context, username string) error {
+	user := &model.User{Name: username}
+	if err := a.Store.Get(ctx, user); err != nil {
+		return err
+	}
+	user.TokenGeneration++
+	return a.Store.Put(ctx, user)
 }
 
 // ParseToken parses and verifies a token
@@ -268,10 +329,9 @@ func (a *authenticationServiceImpl) GetDexConfig(ctx context.Context) (*apisv1.D
 		return nil, err
 	}
 	return &apisv1.DexConfigResponse{
-		Issuer:       config.Issuer,
-		ClientID:     config.StaticClients[0].ID,
-		ClientSecret: config.StaticClients[0].Secret,
-		RedirectURL:  config.StaticClients[0].RedirectURIs[0],
+		Issuer:      config.Issuer,
+		ClientID:    config.StaticClients[0].ID,
+		RedirectURL: config.StaticClients[0].RedirectURIs[0],
 	}, nil
 }
 
@@ -319,7 +379,61 @@ func generateDexConfig(ctx context.Context, kubeClient client.Client, update *mo
 	return nil
 }
 
+// legacyDexClientSecret is the Dex client secret every install was given before each got its own.
+const legacyDexClientSecret = "velaux-secret"
+
+// newDexClientSecret is a random Dex client secret for one install.
+func newDexClientSecret() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+// Init gives an install still holding the Dex client secret every install once shared one of its
+// own, and restarts Dex to read it. A failure is logged, not fatal: login works as before.
+func (a *authenticationServiceImpl) Init(ctx context.Context) error {
+	if err := a.replaceLegacyDexClientSecret(ctx); err != nil {
+		klog.Warningf("could not replace the shared Dex client secret: %s", err.Error())
+	}
+	return nil
+}
+
+func (a *authenticationServiceImpl) replaceLegacyDexClientSecret(ctx context.Context) error {
+	secret := &corev1.Secret{}
+	if err := a.KubeClient.Get(ctx, types.NamespacedName{Name: dexConfigName, Namespace: velatypes.DefaultKubeVelaNS}, secret); err != nil {
+		return client.IgnoreNotFound(err)
+	}
+	dexConfig := &model.DexConfig{}
+	if err := yaml.Unmarshal(secret.Data[secretDexConfigKey], dexConfig); err != nil {
+		return err
+	}
+	if len(dexConfig.StaticClients) == 0 || dexConfig.StaticClients[0].Secret != legacyDexClientSecret {
+		return nil
+	}
+	clientSecret, err := newDexClientSecret()
+	if err != nil {
+		return err
+	}
+	dexConfig.StaticClients[0].Secret = clientSecret
+	config, err := yaml.Marshal(dexConfig)
+	if err != nil {
+		return err
+	}
+	secret.Data[secretDexConfigKey] = config
+	if err := a.KubeClient.Update(ctx, secret); err != nil {
+		return err
+	}
+	klog.Info("replaced the shared Dex client secret with one of this install's own")
+	return restartDex(ctx, a.KubeClient)
+}
+
 func initDexConfig(ctx context.Context, kubeClient client.Client, velaAddress string) (*corev1.Secret, error) {
+	clientSecret, err := newDexClientSecret()
+	if err != nil {
+		return nil, err
+	}
 	dexConfig := model.DexConfig{
 		Issuer: fmt.Sprintf("%s/dex", velaAddress),
 		Web: model.DexWeb{
@@ -335,7 +449,7 @@ func initDexConfig(ctx context.Context, kubeClient client.Client, velaAddress st
 			{
 				ID:           "velaux",
 				Name:         "VelaUX",
-				Secret:       "velaux-secret",
+				Secret:       clientSecret,
 				RedirectURIs: []string{fmt.Sprintf("%s/callback", velaAddress)},
 			},
 		},
@@ -543,15 +657,13 @@ func (l *localHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) 
 	if err := compareHashWithPassword(user.Password, l.password); err != nil {
 		return nil, err
 	}
+	if user.Disabled {
+		return nil, bcode.ErrUserAlreadyDisabled
+	}
 	if err := l.userService.UpdateUserLoginTime(ctx, user); err != nil {
 		return nil, err
 	}
-	return &apisv1.UserBase{
-		CreateTime:    user.CreateTime,
-		LastLoginTime: user.LastLoginTime,
-		Name:          user.Name,
-		Email:         user.Email,
-	}, nil
+	return convertUserBase(user), nil
 }
 
 // FakeAdminName is the fake admin name for testing

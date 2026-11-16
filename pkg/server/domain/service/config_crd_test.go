@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kubevela/velaux/pkg/server/utils/bcode"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -33,6 +35,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/config"
 	common2 "github.com/oam-dev/kubevela/pkg/utils/common"
 
+	"github.com/kubevela/velaux/pkg/server/domain/model"
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
@@ -107,6 +110,28 @@ func TestUpdatingAConfigKeepsItsTemplateRef(t *testing.T) {
 	got := &configv1alpha1.Config{}
 	require.NoError(t, cli.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: "cluster-info"}, got))
 	assert.Equal(t, configv1alpha1.ConfigTemplateReference{Name: "cluster-info"}, *got.Spec.TemplateRef)
+}
+
+// Migration adopts a config before its template, so a Config can stand on a template
+// that is still a legacy ConfigMap; editing it resolves the template either way.
+func TestAConfigOnALegacyTemplateCanBeUpdated(t *testing.T) {
+	ctx := context.Background()
+	existing := &configv1alpha1.Config{
+		ObjectMeta: metav1.ObjectMeta{Name: "registry", Namespace: types.DefaultKubeVelaNS},
+		Spec: configv1alpha1.ConfigSpec{
+			TemplateRef: &configv1alpha1.ConfigTemplateReference{Name: "image-registry", Namespace: types.DefaultKubeVelaNS},
+			Properties:  &runtime.RawExtension{Raw: []byte(`{"registry":"a.example.com"}`)},
+		},
+	}
+	svc, cli := configCRDService(t, existing)
+	_, err := svc.UpdateConfig(ctx, NoProject, "registry", apis.UpdateConfigRequest{Properties: `{"registry":"b.example.com"}`})
+	require.NoError(t, err)
+	got := &configv1alpha1.Config{}
+	require.NoError(t, cli.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: "registry"}, got))
+	assert.JSONEq(t, `{"registry":"b.example.com"}`, string(got.Spec.Properties.Raw))
+
+	_, err = svc.UpdateConfig(ctx, NoProject, "registry", apis.UpdateConfigRequest{Properties: `{"registry":1}`})
+	require.Error(t, err, "the legacy template still validates the properties")
 }
 
 func TestConfigsOfATemplateCRDAreConfigCRs(t *testing.T) {
@@ -196,4 +221,46 @@ func TestProjectTemplateUISchemaIsItsOwn(t *testing.T) {
 		labels[p.JSONKey] = p.Label
 	}
 	assert.Equal(t, "Shop's cluster", labels["clusterName"], "the UI schema beside the template, in its namespace")
+}
+
+// shopProject answers GetProject for the "shop" project, in namespace "team-shop".
+type shopProject struct{ ProjectService }
+
+func (shopProject) GetProject(_ context.Context, name string) (*model.Project, error) {
+	return &model.Project{Name: name, Namespace: "team-shop"}, nil
+}
+
+// A config is rendered with VelaUX's own identity, so it may use only the templates VelaUX
+// offers: the system namespace's, and for a project config the project namespace's.
+func TestCreateConfigRefusesATemplateFromAnotherNamespace(t *testing.T) {
+	ctx := context.Background()
+	template := func(ns string) *configv1alpha1.ConfigTemplate {
+		return &configv1alpha1.ConfigTemplate{
+			ObjectMeta: metav1.ObjectMeta{Name: "cluster-info", Namespace: ns},
+			Spec:       configv1alpha1.ConfigTemplateSpec{Template: clusterInfoTemplate, Scope: "project"},
+		}
+	}
+	svc, _ := configCRDService(t, template("team-shop"), template("team-other"))
+	svc.ProjectService = shopProject{}
+	properties := `{"clusterName":"prod-eu-1","environment":"dev"}`
+
+	_, err := svc.CreateConfig(ctx, NoProject, apis.CreateConfigRequest{
+		Name: "global", Template: apis.NamespacedName{Name: "cluster-info", Namespace: "team-other"}, Properties: properties,
+	})
+	assert.ErrorIs(t, err, bcode.ErrTemplateNamespaceNotAllowed, "a global config uses only the system namespace's templates")
+
+	_, err = svc.CreateConfig(ctx, "shop", apis.CreateConfigRequest{
+		Name: "foreign", Template: apis.NamespacedName{Name: "cluster-info", Namespace: "team-other"}, Properties: properties,
+	})
+	assert.ErrorIs(t, err, bcode.ErrTemplateNamespaceNotAllowed, "another project's template is refused")
+
+	_, err = svc.CreateConfig(ctx, "shop", apis.CreateConfigRequest{
+		Name: "own", Template: apis.NamespacedName{Name: "cluster-info", Namespace: "team-shop"}, Properties: properties,
+	})
+	assert.NoError(t, err, "the project's own template is allowed")
+
+	_, err = svc.CreateConfig(ctx, "shop", apis.CreateConfigRequest{
+		Name: "system", Template: apis.NamespacedName{Name: "cluster-info"}, Properties: properties,
+	})
+	assert.NoError(t, err, "a system template is allowed")
 }

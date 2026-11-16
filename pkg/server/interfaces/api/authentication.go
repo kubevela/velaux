@@ -25,6 +25,7 @@ import (
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 
+	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 	apis "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
@@ -41,7 +42,11 @@ func NewAuthentication() Interface {
 	return &authentication{}
 }
 
+// sessions validates every token the API accepts; it is the injected AuthenticationService.
+var sessions service.AuthenticationService
+
 func (c *authentication) GetWebServiceRoute() *restful.WebService {
+	sessions = c.AuthenticationService
 	ws := new(restful.WebService)
 	ws.Path(versionPrefix+"/auth").
 		Consumes(restful.MIME_XML, restful.MIME_JSON).
@@ -71,6 +76,16 @@ func (c *authentication) GetWebServiceRoute() *restful.WebService {
 		Returns(200, "", apis.RefreshTokenResponse{}).
 		Returns(400, "", bcode.Bcode{}).
 		Writes(apis.RefreshTokenResponse{}))
+
+	ws.Route(ws.POST("/logout").To(c.logout).
+		Doc("end every session of the login user").
+		// It reads no body, so it needs no content type.
+		Consumes("*/*").
+		Filter(authCheckFilter).
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "", apis.EmptyResponse{}).
+		Returns(400, "", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
 
 	ws.Route(ws.GET("/login_type").To(c.getLoginType).
 		Doc("get login type").
@@ -139,13 +154,13 @@ func authTokenCheck(req *http.Request, res http.ResponseWriter) bool {
 		bcode.ReturnHTTPError(req, res, bcode.ErrNotAuthorized)
 		return false
 	}
-	token, err := service.ParseToken(tokenValue)
-	if err != nil {
-		bcode.ReturnHTTPError(req, res, err)
+	if sessions == nil {
+		bcode.ReturnHTTPError(req, res, bcode.ErrNotAuthorized)
 		return false
 	}
-	if token.GrantType != service.GrantTypeAccess {
-		bcode.ReturnHTTPError(req, res, bcode.ErrNotAccessToken)
+	token, user, err := sessions.ValidateToken(req.Context(), tokenValue, service.GrantTypeAccess)
+	if err != nil {
+		bcode.ReturnHTTPError(req, res, err)
 		return false
 	}
 	if fromQuery {
@@ -160,6 +175,7 @@ func authTokenCheck(req *http.Request, res http.ResponseWriter) bool {
 		})
 	}
 	newReq := req.WithContext(context.WithValue(req.Context(), &apis.CtxKeyUser, token.Username))
+	newReq = newReq.WithContext(context.WithValue(newReq.Context(), &apis.CtxKeyUserModel, user))
 	newReq = newReq.WithContext(context.WithValue(newReq.Context(), &apis.CtxKeyToken, tokenValue))
 	*req = *newReq
 	return true
@@ -176,6 +192,10 @@ func AuthTokenCheck(req *http.Request, res http.ResponseWriter, chain *utils.Fil
 func AuthUserCheck(userService service.UserService) func(req *http.Request, res http.ResponseWriter, chain *utils.FilterChain) {
 	return func(req *http.Request, res http.ResponseWriter, chain *utils.FilterChain) {
 		// get login user info
+		if _, ok := req.Context().Value(&apis.CtxKeyUserModel).(*model.User); ok {
+			chain.ProcessFilter(req, res)
+			return
+		}
 		userName, ok := req.Context().Value(&apis.CtxKeyUser).(string)
 		if !ok {
 			bcode.ReturnHTTPError(req, res, bcode.ErrUnauthorized)
@@ -285,6 +305,23 @@ func (c *authentication) configureAdmin(req *restful.Request, res *restful.Respo
 		return
 	}
 	if err = res.WriteEntity(resp); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (c *authentication) logout(req *restful.Request, res *restful.Response) {
+	userName, ok := req.Request.Context().Value(&apis.CtxKeyUser).(string)
+	if !ok {
+		bcode.ReturnError(req, res, bcode.ErrUnauthorized)
+		return
+	}
+	if err := c.AuthenticationService.Logout(req.Request.Context(), userName); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	http.SetCookie(res.ResponseWriter, &http.Cookie{Name: viewTokenCookie, Path: viewPrefix, MaxAge: -1, HttpOnly: true})
+	if err := res.WriteEntity(apis.EmptyResponse{}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}

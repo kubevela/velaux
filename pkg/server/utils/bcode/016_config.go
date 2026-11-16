@@ -46,3 +46,7 @@ var (
 // Configs VelaUX cannot write yet: their properties belong in a Secret
 // referenced by propertiesFrom, not inline in the Config.
 var ErrSensitiveConfigTemplate = NewBcode(400, 16009, "configs of a sensitive ConfigTemplate cannot be written from VelaUX yet")
+
+// ErrTemplateNamespaceNotAllowed means a config names a template outside the namespaces VelaUX
+// offers templates from: the system namespace, and for a project config the project's.
+var ErrTemplateNamespaceNotAllowed = NewBcode(400, 16010, "a config may use only a template from the system namespace or its project's namespace")
