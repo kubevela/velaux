@@ -55,6 +55,8 @@ var (
 	// ErrInvalidBackendAuth -
 	ErrInvalidBackendAuth = errors.New("backend auth only support the basic")
 
+	// ErrInvalidDefinitions means a definition plugin names no valid definition, or another plugin names one.
+	ErrInvalidDefinitions = errors.New("the definitions field is invalid in plugin.json: a definition plugin names at least one definition by kind (component, trait, policy, workflow-step, source) and name, and only definition plugins name any")
 	// ErrInvalidBackendAuthEmptySecret -
 	ErrInvalidBackendAuthEmptySecret = errors.New("the authSecret field is required when the auth type is defined")
 )
@@ -246,6 +248,9 @@ func validatePluginJSON(data types.JSONData) error {
 			return ErrInvalidInclude
 		}
 	}
+	if err := validateDefinitions(data); err != nil {
+		return err
+	}
 	if data.Backend && data.BackendType != types.KubeAPI && data.BackendType != types.KubeService && data.BackendType != types.StaticServer {
 		return ErrInvalidBackendTypeNotSupport
 	}
@@ -265,6 +270,24 @@ func validatePluginJSON(data types.JSONData) error {
 		return ErrInvalidBackendAuth
 	}
 
+	return nil
+}
+
+func validateDefinitions(data types.JSONData) error {
+	if data.Type != types.Definition {
+		if len(data.Definitions) > 0 {
+			return ErrInvalidDefinitions
+		}
+		return nil
+	}
+	if len(data.Definitions) == 0 {
+		return ErrInvalidDefinitions
+	}
+	for _, d := range data.Definitions {
+		if !d.Kind.IsValid() || d.Name == "" {
+			return ErrInvalidDefinitions
+		}
+	}
 	return nil
 }
 

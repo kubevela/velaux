@@ -82,11 +82,13 @@ type JSONData struct {
 	ID   string `json:"id"`
 	Type Type   `json:"type"`
 	// there are four sub types in the definition plugin type, includes: component, trait, policy ,and workflow-step.
-	SubType  string      `json:"subType"`
-	Name     string      `json:"name"`
-	Info     Info        `json:"info"`
-	Includes []*Includes `json:"includes"`
-	Category string      `json:"category"`
+	SubType string `json:"subType"`
+	// Definitions lists the definitions whose properties form a definition plugin replaces.
+	Definitions []DefinitionRef `json:"definitions,omitempty"`
+	Name        string          `json:"name"`
+	Info        Info            `json:"info"`
+	Includes    []*Includes     `json:"includes"`
+	Category    string          `json:"category"`
 	// Backend If the plugin has a backend component.
 	Backend     bool              `json:"backend"`
 	Proxy       bool              `json:"proxy"`
@@ -260,6 +262,37 @@ const (
 	// Definition means the plugin provides a UI component for the component，trait, workflow-step, and policy definitions.
 	Definition Type = "definition"
 )
+
+// DefinitionRef names one definition, by kind and name.
+type DefinitionRef struct {
+	Kind DefinitionKind `json:"kind"`
+	Name string         `json:"name"`
+}
+
+// DefinitionKind is the kind of definition a definition plugin applies to.
+type DefinitionKind string
+
+const (
+	// DefinitionKindComponent is a ComponentDefinition.
+	DefinitionKindComponent DefinitionKind = "component"
+	// DefinitionKindTrait is a TraitDefinition.
+	DefinitionKindTrait DefinitionKind = "trait"
+	// DefinitionKindPolicy is a PolicyDefinition.
+	DefinitionKindPolicy DefinitionKind = "policy"
+	// DefinitionKindWorkflowStep is a WorkflowStepDefinition.
+	DefinitionKindWorkflowStep DefinitionKind = "workflow-step"
+	// DefinitionKindSource is a SourceDefinition.
+	DefinitionKindSource DefinitionKind = "source"
+)
+
+// IsValid checking the definition kind
+func (k DefinitionKind) IsValid() bool {
+	switch k {
+	case DefinitionKindComponent, DefinitionKindTrait, DefinitionKindPolicy, DefinitionKindWorkflowStep, DefinitionKindSource:
+		return true
+	}
+	return false
+}
 
 // IsValid checking the plugin type
 func (pt Type) IsValid() bool {

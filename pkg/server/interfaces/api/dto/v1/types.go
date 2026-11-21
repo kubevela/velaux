@@ -2213,12 +2213,14 @@ type PluginDTO struct {
 	ID   string           `json:"id"`
 	Type pluginTypes.Type `json:"type"`
 	// there are four sub types in the definition plugin type, includes: component, trait, policy ,and workflow-step.
-	SubType       string                  `json:"subType"`
-	Name          string                  `json:"name"`
-	Info          pluginTypes.Info        `json:"info"`
-	Includes      []*pluginTypes.Includes `json:"includes"`
-	Category      string                  `json:"category"`
-	DefaultNavURL string                  `json:"defaultNavURL"`
+	SubType string `json:"subType"`
+	// Definitions lists the definitions whose properties form a definition plugin replaces.
+	Definitions   []pluginTypes.DefinitionRef `json:"definitions,omitempty"`
+	Name          string                      `json:"name"`
+	Info          pluginTypes.Info            `json:"info"`
+	Includes      []*pluginTypes.Includes     `json:"includes"`
+	Category      string                      `json:"category"`
+	DefaultNavURL string                      `json:"defaultNavURL"`
 	// SystemJS fields
 	Module  string `json:"module"`
 	BaseURL string `json:"baseURL"`

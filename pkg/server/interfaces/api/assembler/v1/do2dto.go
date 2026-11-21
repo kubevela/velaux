@@ -317,6 +317,7 @@ func PluginToDTO(p pluginTypes.Plugin) apisv1.PluginDTO {
 		Category:      p.Category,
 		Type:          p.Type,
 		SubType:       p.SubType,
+		Definitions:   p.Definitions,
 		Info:          p.Info,
 		Includes:      p.Includes,
 		DefaultNavURL: p.DefaultNavURL,
