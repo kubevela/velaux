@@ -1,6 +1,7 @@
 import { ComponentType } from 'react';
 import { KeyValue, MenuType, ResourceAction, Workspace } from '..';
 import { Addon } from '../api'
+import type { DefinitionRef } from './definition';
 
 export enum PluginType {
   PageApp = 'page-app',
@@ -67,6 +68,8 @@ export interface PluginMeta<T extends KeyValue = {}> extends PluginLink, SourceA
 
   // Define the menus
   includes?: PluginInclude[];
+  // The definitions a definition plugin replaces the properties form of
+  definitions?: DefinitionRef[];
 
   // Filled in by the backend
   jsonSetting?: T;

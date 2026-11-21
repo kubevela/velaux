@@ -35,7 +35,7 @@ import classNames from 'classnames';
 
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
-import UISchema from '../../../../components/UISchema';
+import DefinitionPropertiesForm from '../../../../components/DefinitionPropertiesForm';
 
 import type { Rule } from '@alifd/next/lib/field';
 import { connect } from 'dva';
@@ -79,7 +79,7 @@ type State = {
 @connect()
 class PolicyDialog extends React.Component<Props, State> {
   field: Field;
-  uiSchemaRef: React.RefObject<UISchema>;
+  uiSchemaRef: React.RefObject<DefinitionPropertiesForm>;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -718,7 +718,8 @@ class PolicyDialog extends React.Component<Props, State> {
                 }
               >
                 <Form.Item required={true}>
-                  <UISchema
+                  <DefinitionPropertiesForm
+                    context={{ project: this.props.project, appName: this.props.appName }}
                     key={policyDefinitionDetail?.name}
                     {...init(`properties`, {
                       rules: [

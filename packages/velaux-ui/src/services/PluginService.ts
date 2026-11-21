@@ -7,7 +7,8 @@ import _ from 'lodash'; // eslint-disable-line lodash/import-scope
 import moment from 'moment'; // eslint-disable-line no-restricted-imports
 import react from 'react';
 import * as velauxData from '@velaux/data'; // eslint-disable-line no-restricted-imports
-import { AppPagePlugin, PluginLink, PluginMeta, PluginType } from '@velaux/data';
+import { AppPagePlugin, DefinitionPlugin, PluginLink, PluginMeta, PluginType } from '@velaux/data';
+import type { DefinitionKind } from '@velaux/data';
 import * as velauxUI from '../types'; // eslint-disable-line no-restricted-imports
 import * as ReactDom from 'react-dom';
 import * as DvaRouter from 'dva/router';
@@ -15,6 +16,8 @@ import * as Redux from 'redux';
 import builtInPlugins from './plugin/BuiltInPlugins';
 import { getPluginInfo, locateWithCache, registerPluginInCache } from './plugin/PluginCache';
 import { getBackendSrv } from './BackendService';
+import { createDefinitionPluginFinder } from '../utils/definitionPlugin';
+import type { DefinitionPluginLookup } from '../utils/definitionPlugin';
 
 /**
  * @internal
@@ -80,12 +83,26 @@ export function importAppPagePlugin(meta: PluginMeta): Promise<AppPagePlugin> {
   });
 }
 
+export function importDefinitionPlugin(meta: PluginMeta): Promise<DefinitionPlugin> {
+  return importPluginModule(meta.module, meta.info?.version).then((pluginExports) => {
+    const plugin = pluginExports.plugin ? (pluginExports.plugin as DefinitionPlugin) : new DefinitionPlugin();
+    plugin.meta = meta;
+    return plugin;
+  });
+}
+
 /**
  * @public
  * A wrapper to generate the menu configs
  */
 export interface PluginService {
   listAppPagePlugins(): Promise<PluginMeta[]>;
+
+  listDefinitionPlugins(): Promise<PluginMeta[]>;
+
+  // findDefinitionPlugin loads the plugin that replaces the properties form of
+  // the definition, if one is enabled.
+  findDefinitionPlugin(kind: DefinitionKind, name: string): Promise<DefinitionPluginLookup>;
 
   loadMeta(pluginID: string): Promise<PluginMeta | PluginLink>;
 }
@@ -106,6 +123,20 @@ export class PluginWrapper implements PluginService {
         return Promise.reject(new Error('Unknown Plugins'));
       });
   }
+
+  listDefinitionPlugins(): Promise<PluginMeta[]> {
+    return getBackendSrv()
+      .get('/api/v1/plugins')
+      .then((res: any) => {
+        const plugins = res && res.plugins ? (res.plugins as PluginMeta[]) : [];
+        return plugins.filter((p) => p.type === PluginType.Definition);
+      });
+  }
+
+  findDefinitionPlugin = createDefinitionPluginFinder(
+    () => this.listDefinitionPlugins(),
+    (meta) => importDefinitionPlugin(meta)
+  );
 
   async loadMeta(pluginID: string): Promise<PluginMeta> {
     return getPluginInfo(pluginID);

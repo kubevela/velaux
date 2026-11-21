@@ -21,7 +21,7 @@ import { AwaitingType } from '../../../../components/AwaitingType';
 import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
-import UISchema from '../../../../components/UISchema';
+import DefinitionPropertiesForm from '../../../../components/DefinitionPropertiesForm';
 import i18n from '../../../../i18n';
 import type { ApplicationComponent, DefinitionDetail, Trait, DefinitionBase, EnvBinding } from '@velaux/data';
 import { deployNamespaces, isUsable } from '../../../../utils/restrictions';
@@ -63,7 +63,7 @@ type State = {
 @connect()
 class TraitDialog extends React.Component<Props, State> {
   field: Field;
-  uiSchemaRef: React.RefObject<UISchema>;
+  uiSchemaRef: React.RefObject<DefinitionPropertiesForm>;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -499,7 +499,8 @@ class TraitDialog extends React.Component<Props, State> {
                   <Loading visible={definitionLoading}>
                     <If condition={definitionDetail}>
                       <FormItem required={true}>
-                        <UISchema
+                        <DefinitionPropertiesForm
+                          context={{ project: this.props.project, appName: this.props.appName }}
                           key={traitType}
                           {...init(`properties`, {
                             rules: [

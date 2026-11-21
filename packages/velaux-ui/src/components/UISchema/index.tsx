@@ -82,6 +82,8 @@ export type Scope = {
   parent?: Scope;
 };
 
+export type UISchemaProps = Props;
+
 type Props = {
   inline?: boolean;
   id?: string;

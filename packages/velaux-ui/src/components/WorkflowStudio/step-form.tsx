@@ -17,7 +17,7 @@ import { replaceUrl } from '../../utils/common';
 import DrawerWithFooter from '../Drawer';
 import { If } from '../If';
 import { Translation } from '../Translation';
-import UISchema from '../UISchema';
+import DefinitionPropertiesForm from '../DefinitionPropertiesForm';
 import type { ExpressionContext } from '../UISchema';
 
 import { ConditionInput } from './condition-input';
@@ -52,7 +52,7 @@ type State = {
 class StepForm extends Component<Props, State> {
   static contextType = WorkflowContext;
   field: Field;
-  uiSchemaRef: React.RefObject<UISchema>;
+  uiSchemaRef: React.RefObject<DefinitionPropertiesForm>;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -225,7 +225,8 @@ class StepForm extends Component<Props, State> {
                       </div>
                     </If>
                     <UISchemaContext.Provider value={this.context}>
-                      <UISchema
+                      <DefinitionPropertiesForm
+                        context={{ appName: this.appName() }}
                         {...init(`properties`, {
                           rules: [
                             {

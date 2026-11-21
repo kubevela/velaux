@@ -12,7 +12,7 @@ import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
-import UISchema from '../../../../components/UISchema';
+import DefinitionPropertiesForm from '../../../../components/DefinitionPropertiesForm';
 import type { ExpressionContext } from '../../../../components/UISchema';
 import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
 import i18n from '../../../../i18n';
@@ -65,7 +65,7 @@ type State = {
 @connect()
 class SourceDialog extends React.Component<Props, State> {
   field: Field;
-  uiSchemaRef: React.RefObject<UISchema>;
+  uiSchemaRef: React.RefObject<DefinitionPropertiesForm>;
   // suggestedName is the binding the dialog last filled in from the type.
   suggestedName = '';
 
@@ -337,7 +337,8 @@ class SourceDialog extends React.Component<Props, State> {
                 </If>
                 <If condition={definition && (definition.uiSchema || []).length > 0}>
                   <Form.Item required={true}>
-                    <UISchema
+                    <DefinitionPropertiesForm
+                      context={{ project: this.props.project, appName: this.props.appName }}
                       key={definition?.name}
                       {...init('properties', {
                         rules: [

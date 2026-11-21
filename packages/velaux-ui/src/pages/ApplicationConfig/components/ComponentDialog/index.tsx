@@ -20,7 +20,7 @@ import { joinType, splitType } from '../../../../utils/definitionVersion';
 import { AwaitingType } from '../../../../components/AwaitingType';
 import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { Translation } from '../../../../components/Translation';
-import UISchema from '../../../../components/UISchema';
+import DefinitionPropertiesForm from '../../../../components/DefinitionPropertiesForm';
 import i18n from '../../../../i18n';
 import type {
   DefinitionDetail,
@@ -81,7 +81,7 @@ type State = {
 @connect()
 class ComponentDialog extends React.Component<Props, State> {
   field: Field;
-  uiSchemaRef: React.RefObject<UISchema>;
+  uiSchemaRef: React.RefObject<DefinitionPropertiesForm>;
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
@@ -598,7 +598,8 @@ class ComponentDialog extends React.Component<Props, State> {
             >
               <Row>
                 <If condition={definitionDetail}>
-                  <UISchema
+                  <DefinitionPropertiesForm
+                    context={{ project: this.props.project, appName: this.props.appName }}
                     {...init(`properties`, {
                       rules: [
                         {
