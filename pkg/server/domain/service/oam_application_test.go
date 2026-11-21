@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 	"github.com/oam-dev/kubevela/pkg/utils/common"
 
@@ -80,7 +81,7 @@ var _ = Describe("Test oam application service function", func() {
 			Policies:   baseApp.Spec.Policies,
 			Workflow:   baseApp.Spec.Workflow,
 		}
-		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, req, appName, appNs)).Should(BeNil())
+		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, req, appName, appNs, "")).Should(BeNil())
 
 		app := new(v1beta1.Application)
 		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: appNs, Name: appName}, app)).Should(BeNil())
@@ -92,13 +93,37 @@ var _ = Describe("Test oam application service function", func() {
 		updateReq := apiv1.ApplicationRequest{
 			Components: baseApp.Spec.Components[1:],
 		}
-		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, updateReq, appName, appNs)).Should(BeNil())
+		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, updateReq, appName, appNs, "")).Should(BeNil())
 
 		updatedApp := new(v1beta1.Application)
 		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: appNs, Name: appName}, updatedApp)).Should(BeNil())
 		Expect(updatedApp.Spec.Components).Should(Equal(updateReq.Components))
 		Expect(updatedApp.Spec.Policies).Should(BeNil())
 		Expect(updatedApp.Spec.Workflow).Should(BeNil())
+	})
+
+	It("keeps the Application's other annotations on update", func() {
+		appName := "test-keep-annotations"
+		appNs := randomNamespaceName("test-keep-annotations")
+		req := apiv1.ApplicationRequest{Components: baseApp.Spec.Components}
+		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, req, appName, appNs, "")).Should(BeNil())
+
+		app := new(v1beta1.Application)
+		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: appNs, Name: appName}, app)).Should(BeNil())
+		app.SetAnnotations(map[string]string{"example.com/team": "payments"})
+		Expect(k8sClient.Update(ctx, app)).Should(BeNil())
+
+		By("updating without a publishVersion")
+		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, req, appName, appNs, "")).Should(BeNil())
+		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: appNs, Name: appName}, app)).Should(BeNil())
+		Expect(app.GetAnnotations()).Should(HaveKeyWithValue("example.com/team", "payments"))
+		Expect(app.GetAnnotations()).ShouldNot(HaveKey(oam.AnnotationPublishVersion))
+
+		By("updating with a publishVersion")
+		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, req, appName, appNs, "v2")).Should(BeNil())
+		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: appNs, Name: appName}, app)).Should(BeNil())
+		Expect(app.GetAnnotations()).Should(HaveKeyWithValue("example.com/team", "payments"))
+		Expect(app.GetAnnotations()).Should(HaveKeyWithValue(oam.AnnotationPublishVersion, "v2"))
 	})
 
 	It("Test GetOAMApplication function", func() {
@@ -137,13 +162,40 @@ var _ = Describe("Test oam application service function", func() {
 			Policies:   newApp.Spec.Policies,
 			Workflow:   newApp.Spec.Workflow,
 		}
-		Expect(oamAppService.DryRunOAMApplication(ctx, req, appName, appNs)).Should(BeNil())
+		Expect(oamAppService.DryRunOAMApplication(ctx, req, appName, appNs, "")).Should(BeNil())
 
 		By("test dryRun update application")
 		updateReq := apiv1.ApplicationRequest{
 			Components: newApp.Spec.Components[1:],
 		}
-		Expect(oamAppService.DryRunOAMApplication(ctx, updateReq, appName, appNs)).Should(BeNil())
+		Expect(oamAppService.DryRunOAMApplication(ctx, updateReq, appName, appNs, "")).Should(BeNil())
+
+	})
+
+	It("Test DryRunOAMApplication function with publishVersion", func() {
+		By("test dryRun create application")
+		appName := "test-new-app"
+		appNs := randomNamespaceName("test-new-app")
+		publishVersion := time.Now().Format(appName + "20060102150405")
+		var newApp v1beta1.Application
+		Expect(common.ReadYamlToObject("./testdata/dryrun-app.yaml", &newApp)).Should(BeNil())
+		newApp.SetNamespace(namespace)
+		Eventually(func() error {
+			return k8sClient.Create(ctx, &newApp)
+		}, time.Second*3, time.Microsecond*300).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
+
+		req := apiv1.ApplicationRequest{
+			Components: newApp.Spec.Components,
+			Policies:   newApp.Spec.Policies,
+			Workflow:   newApp.Spec.Workflow,
+		}
+		Expect(oamAppService.DryRunOAMApplication(ctx, req, appName, appNs, publishVersion)).Should(BeNil())
+
+		By("test dryRun update application")
+		updateReq := apiv1.ApplicationRequest{
+			Components: newApp.Spec.Components[1:],
+		}
+		Expect(oamAppService.DryRunOAMApplication(ctx, updateReq, appName, appNs, publishVersion)).Should(BeNil())
 
 	})
 })

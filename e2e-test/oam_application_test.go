@@ -127,4 +127,36 @@ var _ = Describe("Test oam application rest api", func() {
 			defer res.Body.Close()
 		}, time.Minute).Should(Succeed())
 	})
+
+	It("Test dryRun create and update oam app with publishVersion parameter", func() {
+		defer GinkgoRecover()
+		By("test dryRun create app with publishVersion")
+
+		Expect(common.ReadYamlToObject("./testdata/dryrun-app.yaml", &app)).Should(BeNil())
+		req := apiv1.ApplicationRequest{
+			Components: app.Spec.Components,
+			Policies:   app.Spec.Policies,
+			Workflow:   app.Spec.Workflow,
+		}
+		publishVersion := time.Now().Format(appName + "20060102150405")
+		res := post(fmt.Sprintf("/v1/namespaces/%s/applications/%s?dryRun=All&publishVersion=%s", namespace, appName+"-dryrun", publishVersion), req)
+		Expect(res).ShouldNot(BeNil())
+		Expect(cmp.Diff(res.StatusCode, 200)).Should(BeEmpty())
+		Expect(res.Body).ShouldNot(BeNil())
+		defer res.Body.Close()
+
+		time.Sleep(time.Second)
+		By("test dryRun update app with publishVersion")
+		updateReq := apiv1.ApplicationRequest{
+			Components: app.Spec.Components[1:],
+		}
+		publishVersion = time.Now().Format(appName + "20060102150405")
+		Eventually(func(g Gomega) {
+			res = post(fmt.Sprintf("/v1/namespaces/%s/applications/%s?dryRun=All&publishVersion=%s", namespace, appName+"-dryrun", publishVersion), updateReq)
+			g.Expect(res).ShouldNot(BeNil())
+			g.Expect(cmp.Diff(res.StatusCode, 200)).Should(BeEmpty())
+			g.Expect(res.Body).ShouldNot(BeNil())
+			defer res.Body.Close()
+		}, time.Minute).Should(Succeed())
+	})
 })

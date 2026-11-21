@@ -63,11 +63,14 @@ func (c *oamApplication) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("dryRun", "When present, indicates that modifications should not be persisted. "+
 			"An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. "+
 			"Valid values are: - All: all dry run stages will be processed").DataType("string").Required(false)).
+		Param(ws.QueryParameter("publishVersion", "Sets the application's app.oam.dev/publishVersion annotation. "+
+			"A new value starts a new workflow run; sending the same value again does not. "+
+			"When empty, the annotation is left as it is.").DataType("string").Required(false)).
 		Reads(apis.ApplicationRequest{}))
 
 	ws.Route(ws.DELETE("/namespaces/{namespace}/applications/{appname}").To(c.deleteApplication).
 		Operation("deleteOAMApplication").
-		Doc("create or update oam application in the specified namespace").
+		Doc("delete oam application in the specified namespace").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(c.RbacService.CheckPerm("application", "delete")).
 		Param(ws.PathParameter("namespace", "identifier of the namespace").DataType("string")).
@@ -104,19 +107,20 @@ func (c *oamApplication) createOrUpdateApplication(req *restful.Request, res *re
 		return
 	}
 
+	publishVersion := req.QueryParameter("publishVersion")
 	dryRun := req.QueryParameter("dryRun")
 	if len(dryRun) != 0 {
 		if dryRun != "All" {
 			bcode.ReturnError(req, res, bcode.ErrApplicationDryRunFailed.SetMessage("Invalid dryRun parameter. Must be 'All'"))
 			return
 		}
-		if err := c.OamApplicationService.DryRunOAMApplication(req.Request.Context(), createReq, appName, namespace); err != nil {
+		if err := c.OamApplicationService.DryRunOAMApplication(req.Request.Context(), createReq, appName, namespace, publishVersion); err != nil {
 			klog.Errorf("dryrun application failure %s", err.Error())
 			bcode.ReturnError(req, res, err)
 			return
 		}
 	} else {
-		if err := c.OamApplicationService.CreateOrUpdateOAMApplication(req.Request.Context(), createReq, appName, namespace); err != nil {
+		if err := c.OamApplicationService.CreateOrUpdateOAMApplication(req.Request.Context(), createReq, appName, namespace, publishVersion); err != nil {
 			klog.Errorf("create application failure %s", err.Error())
 			bcode.ReturnError(req, res, err)
 			return
