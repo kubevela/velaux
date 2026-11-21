@@ -62,6 +62,7 @@ const (
 	permissionAllow         = "Allow"
 	actionDetail            = "detail"
 	actionList              = "list"
+	actionCompare           = "compare"
 	resourceCloudShell      = "cloudshell"
 )
 
@@ -85,7 +86,8 @@ const (
 
 // defaultProjectPermissionTemplate are the permissions each project is given:
 // a View (list, detail) and a Management (everything) for each feature, and
-// Project View for the project itself, its members and roles.
+// Project View for the project itself, its members and roles. App View also
+// compares an application with what runs in the cluster, which only reads.
 var defaultProjectPermissionTemplate = []*model.PermissionTemplate{
 	{
 		Name:      permProjectView,
@@ -99,7 +101,7 @@ var defaultProjectPermissionTemplate = []*model.PermissionTemplate{
 		Name:      permAppView,
 		Alias:     "App View",
 		Resources: []string{"project:{projectName}/application:*/*", "project:{projectName}/query:*"},
-		Actions:   []string{actionDetail, actionList},
+		Actions:   []string{actionDetail, actionList, actionCompare},
 		Effect:    permissionAllow,
 		Scope:     permissionScopeProject,
 	},
@@ -735,6 +737,7 @@ var permissionMigrations = []struct {
 	{"2026-10-05-feature-permissions", migrateFeaturePermissions},
 	{"2026-10-05-feature-views", migrateFeatureViews},
 	{"2026-10-19-feature-management-grants", migrateFeatureManagementGrants},
+	{"2026-11-22-app-view-compare", migrateAppViewCompare},
 }
 
 // featureViews are the View templates migrateFeatureViews gives each project.
@@ -928,6 +931,26 @@ func migrateFeatureManagementGrants(ctx context.Context, p *rbacServiceImpl) err
 			if err := p.Store.Put(ctx, role); err != nil {
 				return err
 			}
+		}
+	}
+	return nil
+}
+
+// migrateAppViewCompare gives each project's App View the compare action a
+// project created now gives it. An App View allowing every action already has it.
+func migrateAppViewCompare(ctx context.Context, p *rbacServiceImpl) error {
+	all, err := p.Store.List(ctx, &model.Permission{}, nil)
+	if err != nil {
+		return err
+	}
+	for _, entity := range all {
+		perm := entity.(*model.Permission)
+		if perm.Project == "" || perm.Name != permAppView || slices.Contains(perm.Actions, actionCompare) || slices.Contains(perm.Actions, "*") {
+			continue
+		}
+		perm.Actions = append(perm.Actions, actionCompare)
+		if err := p.Store.Put(ctx, perm); err != nil {
+			return err
 		}
 	}
 	return nil

@@ -18,8 +18,12 @@ package service
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 
+	"github.com/emicklei/go-restful/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -29,6 +33,7 @@ import (
 	"github.com/kubevela/velaux/pkg/server/domain/model"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore"
 	"github.com/kubevela/velaux/pkg/server/infrastructure/datastore/kubeapi"
+	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 )
 
 // preSplitStore is project shop as main left it between #972 and #973: App
@@ -158,5 +163,74 @@ func TestUpgradeGivesBuiltinRolesTheirManagement(t *testing.T) {
 		}
 		assert.Equal(t, 1, count)
 		assert.Contains(t, perms, "definition-management")
+	})
+}
+
+func TestProjectViewerComparesApplications(t *testing.T) {
+	ctx := context.Background()
+	newStore := func(t *testing.T, entities ...datastore.Entity) datastore.DataStore {
+		t.Helper()
+		cli := fake.NewClientBuilder().WithScheme(common2.Scheme).Build()
+		store, err := kubeapi.New(ctx, datastore.Config{Database: "kubevela"}, cli)
+		require.NoError(t, err)
+		base := []datastore.Entity{
+			&model.User{Name: "viewer"},
+			&model.Project{Name: "shop"},
+			&model.ProjectUser{ProjectName: "shop", Username: "viewer", UserRoles: []string{"project-viewer"}},
+		}
+		for _, e := range append(base, entities...) {
+			require.NoError(t, store.Add(ctx, e))
+		}
+		return store
+	}
+	allowed := func(t *testing.T, store datastore.DataStore, action string) bool {
+		t.Helper()
+		req := &http.Request{Header: http.Header{}, URL: &url.URL{}, Form: url.Values{"project": {"shop"}}}
+		req = req.WithContext(context.WithValue(ctx, &apisv1.CtxKeyUser, "viewer"))
+		res := restful.NewResponse(httptest.NewRecorder())
+		res.SetRequestAccepts("application/json")
+		pass := false
+		chain := &restful.FilterChain{Target: func(*restful.Request, *restful.Response) { pass = true }}
+		(&rbacServiceImpl{Store: store}).CheckPerm("application", action)(restful.NewRequest(req), res, chain)
+		return pass
+	}
+	actions := func(t *testing.T, store datastore.DataStore, name string) []string {
+		t.Helper()
+		perm := &model.Permission{Name: name, Project: "shop"}
+		require.NoError(t, store.Get(ctx, perm))
+		return perm.Actions
+	}
+
+	t.Run("in a project created now", func(t *testing.T) {
+		store := newStore(t)
+		require.NoError(t, (&rbacServiceImpl{Store: store}).SyncDefaultRoleAndUsersForProject(ctx, &model.Project{Name: "shop"}))
+		assert.True(t, allowed(t, store, "compare"))
+		assert.False(t, allowed(t, store, "deploy"))
+		assert.False(t, allowed(t, store, "update"))
+	})
+
+	t.Run("upgrading: App View gains compare", func(t *testing.T) {
+		store := newStore(t,
+			&model.Permission{Name: "app-view", Project: "shop", Resources: []string{"project:shop/application:*/*:*", "project:shop/query:*"}, Actions: []string{"detail", "list"}},
+			&model.Permission{Name: "env-view", Project: "shop", Resources: []string{"project:shop/environment:*"}, Actions: []string{"detail", "list"}},
+			&model.Role{Name: "project-viewer", Project: "shop", Permissions: []string{"project-view", "app-view", "env-view"}},
+			&model.Migration{Name: "2026-10-05-feature-permissions"},
+			&model.Migration{Name: "2026-10-05-feature-views"},
+			&model.Migration{Name: "2026-10-19-feature-management-grants"},
+		)
+		assert.False(t, allowed(t, store, "compare"), "before the upgrade")
+		require.NoError(t, (&rbacServiceImpl{Store: store}).migratePermissions(ctx))
+		assert.True(t, allowed(t, store, "compare"))
+		assert.False(t, allowed(t, store, "deploy"))
+		assert.Equal(t, []string{"detail", "list", "compare"}, actions(t, store, "app-view"))
+		assert.Equal(t, []string{"detail", "list"}, actions(t, store, "env-view"))
+	})
+
+	t.Run("an App View an admin widened to everything is left alone", func(t *testing.T) {
+		store := newStore(t,
+			&model.Permission{Name: "app-view", Project: "shop", Resources: []string{"project:shop/application:*/*:*"}, Actions: []string{"*"}},
+		)
+		require.NoError(t, (&rbacServiceImpl{Store: store}).migratePermissions(ctx))
+		assert.Equal(t, []string{"*"}, actions(t, store, "app-view"))
 	})
 }
