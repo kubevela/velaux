@@ -5,17 +5,17 @@ all: docker-build
 
 .PHONY: golangci
 golangci:
-ifeq ($(shell $(GLOBAL_GOLANGCILINT) version --format short), $(GOLANGCILINT_VERSION))
+ifeq ($(shell $(GLOBAL_GOLANGCILINT) version --short), $(GOLANGCILINT_VERSION))
 	@$(OK) golangci-lint is already installed
 GOLANGCILINT=$(GLOBAL_GOLANGCILINT)
-else ifeq ($(shell $(GOBIN_GOLANGCILINT) version --format short), $(GOLANGCILINT_VERSION))
+else ifeq ($(shell $(GOBIN_GOLANGCILINT) version --short), $(GOLANGCILINT_VERSION))
 	@$(OK) golangci-lint is already installed
 GOLANGCILINT=$(GOBIN_GOLANGCILINT)
 else
 	@{ \
 	set -e ;\
 	echo 'installing golangci-lint-$(GOLANGCILINT_VERSION)' ;\
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v$(GOLANGCILINT_VERSION) ;\
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v$(GOLANGCILINT_VERSION) ;\
 	echo 'Successfully installed' ;\
 	}
 GOLANGCILINT=$(GOBIN)/golangci-lint
@@ -27,7 +27,7 @@ ifeq (, $(shell which staticcheck))
 	@{ \
 	set -e ;\
 	echo 'installing honnef.co/go/tools/cmd/staticcheck ' ;\
-	go install honnef.co/go/tools/cmd/staticcheck@d7e217c1ff411395475b2971c0824e1e7cc1af98 ;\
+	go install honnef.co/go/tools/cmd/staticcheck@v0.8.2 ;\
 	}
 STATICCHECK=$(GOBIN)/staticcheck
 else
@@ -51,12 +51,12 @@ e2e-setup-core: install-vela install-core install-addon
 
 .PHONY: install-vela
 install-vela: 
-	curl -fsSl https://kubevela.io/script/install.sh | bash -s v1.9.0-alpha.3
+	curl -fsSl https://kubevela.io/script/install.sh | bash -s v1.10.3
 install-core:
-	vela install -v v1.9.0-alpha.2 -y
+	vela install -v v1.9.2 -y
 install-addon:
 	vela addon enable fluxcd
-	vela addon enable vela-workflow --override-definitions
+	vela addon enable vela-workflow version="0.6.0" --override-definitions
 	kubectl wait --for=condition=Ready pod -l app=source-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app=helm-controller -n flux-system --timeout=600s
 	kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=vela-workflow -n vela-system --timeout=600s
@@ -78,8 +78,43 @@ e2e-server-test:
 	go test -v -coverpkg=./... -coverprofile=/tmp/e2e_apiserver_test.out ./e2e-test
 	@$(OK) tests pass
 
-unit-test-server:
+# NOTE:: use this for local testing if on Mac because of gomonkey package issues
+unit-test-server-local:
 	go test -gcflags=all=-l -coverprofile=coverage.txt $(shell go list ./pkg/... ./cmd/...)
+
+unit-test-server-ci:
+	@$(INFO) Running server unit tests
+	# Run non-service packages with go test in parallel for speed
+	go test -gcflags=all=-l -coverprofile=coverage-other.txt $$(go list ./pkg/... ./cmd/... | grep -v pkg/server/domain/service)
+	
+	# Run the service package using ginkgo with serial execution
+	$$(go env GOPATH)/bin/ginkgo -v --procs=1 --focus="serial" --coverprofile=coverage-service.txt ./pkg/server/domain/service
+	
+	# Merge coverage files
+	echo "mode: set" > coverage.txt
+	tail -n +2 coverage-other.txt >> coverage.txt || true
+	tail -n +2 coverage-service.txt >> coverage.txt || true
+	rm -f coverage-other.txt coverage-service.txt
+	@$(OK) Server unit tests completed
+# Test database management
+.PHONY: test-db-up
+test-db-up:
+	@$(INFO) Starting test databases with docker-compose
+	docker-compose -f docker-compose.test.yml up -d
+	@$(INFO) Waiting for databases to be ready...
+	@sleep 5
+	@docker-compose -f docker-compose.test.yml ps
+	@$(OK) Test databases are running
+
+.PHONY: test-db-down
+test-db-down:
+	@$(INFO) Stopping test databases
+	docker-compose -f docker-compose.test.yml down -v
+	@$(OK) Test databases stopped
+
+.PHONY: test-db-logs
+test-db-logs:
+	docker-compose -f docker-compose.test.yml logs -f
 
 setup-test-server:
 	curl -L -o kubebuilder https://go.kubebuilder.io/dl/latest/$(shell go env GOOS)/$(shell go env GOARCH)

@@ -1,5 +1,7 @@
 import { Button, Message, Grid, Dialog, Form, Input, Table, Field, Select } from '@alifd/next';
 import React from 'react';
+import { RowAction } from '../../../../components/RowAction';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 import { createAddonRegistry, deleteAddonRegistry } from '../../../../api/addons';
 import { If } from '../../../../components/If';
@@ -153,7 +155,10 @@ class RegistryManageDialog extends React.Component<Props, State> {
     const renderAction = (name: string) => {
       return (
         <Permission request={{ resource: `addonRegistry:${name}`, action: 'delete' }} project={''}>
-          <a
+          <RowAction
+            icon={<AiOutlineDelete />}
+            label="Remove"
+            danger
             onClick={() => {
               Dialog.confirm({
                 content: <Translation>Are you sure to delete?</Translation>,
@@ -163,9 +168,7 @@ class RegistryManageDialog extends React.Component<Props, State> {
                 locale: locale().Dialog,
               });
             }}
-          >
-            <Translation>Remove</Translation>
-          </a>
+          />
         </Permission>
       );
     };

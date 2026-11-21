@@ -27,10 +27,16 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela/apis/types"
+	"github.com/oam-dev/kubevela/pkg/features"
+	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 	common2 "github.com/oam-dev/kubevela/pkg/utils/common"
 
@@ -109,6 +115,66 @@ var _ = Describe("Test CR convert to ux", func() {
 		Expect(gotApp.IsSynced()).Should(BeEquivalentTo(true))
 	})
 
+	It("Test an application reading expressions syncs with one in its deploy step", func() {
+		ns := corev1.Namespace{}
+		ns.Name = "expr-sync-test"
+		Expect(k8sClient.Create(context.TODO(), &ns)).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
+		app := func(name string, annotations map[string]string) *v1beta1.Application {
+			return &v1beta1.Application{
+				ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: ns.Name, Annotations: annotations},
+				Spec: v1beta1.ApplicationSpec{
+					Components: []common.ApplicationComponent{{Name: "web", Type: "webservice", Properties: &runtime.RawExtension{Raw: []byte(`{"image":"nginx"}`)}}},
+					Workflow: &v1beta1.Workflow{Steps: []wfTypesv1alpha1.WorkflowStep{{WorkflowStepBase: wfTypesv1alpha1.WorkflowStepBase{
+						Name: "deploy", Type: "deploy", Properties: &runtime.RawExtension{Raw: []byte(`{"policies":[],"parallelism":"$(context.appName)"}`)},
+					}}}},
+				},
+			}
+		}
+
+		// VelaUX holds the gates as the controller publishes them.
+		was := utilfeature.DefaultMutableFeatureGate.Enabled(features.EnableCelExpressions)
+		Expect(utilfeature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=true", features.EnableCelExpressions))).Should(Succeed())
+		defer func() {
+			Expect(utilfeature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=%t", features.EnableCelExpressions, was))).Should(Succeed())
+		}()
+
+		By("opted in, the expression is left for the workflow to resolve")
+		_, err := cr2ux.ConvertApp2DatastoreApp(context.Background(), app("expr-on", map[string]string{oam.AnnotationCelExpressions: "true"}))
+		Expect(err).Should(BeNil())
+
+		By("not opted in, the step is invalid, as KubeVela finds it")
+		_, err = cr2ux.ConvertApp2DatastoreApp(context.Background(), app("expr-off", nil))
+		Expect(err).ShouldNot(BeNil())
+		Expect(err.Error()).Should(ContainSubstring("invalid WorkflowStep deploy"))
+	})
+
+	It("Test an addon's application is labelled with its addon", func() {
+		for _, name := range []string{dbNamespace, types.DefaultKubeVelaNS, "addon-label-test"} {
+			ns := corev1.Namespace{}
+			ns.Name = name
+			Expect(k8sClient.Create(context.TODO(), &ns)).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
+		}
+
+		addonApp := &v1beta1.Application{}
+		Expect(common2.ReadYamlToObject("testdata/test-app2.yaml", addonApp)).Should(BeNil())
+		addonApp.Name = "addon-fluxcd"
+		addonApp.Namespace = types.DefaultKubeVelaNS
+		addonApp.Labels = map[string]string{oam.LabelAddonName: "fluxcd"}
+		Expect(cr2ux.AddOrUpdate(context.Background(), addonApp)).Should(BeNil())
+		got, _, err := cr2ux.getApp(context.Background(), addonApp.Name, addonApp.Namespace)
+		Expect(err).Should(BeNil())
+		Expect(got.Labels[model.LabelSyncAddon]).Should(Equal("fluxcd"))
+
+		plain := &v1beta1.Application{}
+		Expect(common2.ReadYamlToObject("testdata/test-app2.yaml", plain)).Should(BeNil())
+		plain.Name = "not-an-addon"
+		plain.Namespace = "addon-label-test"
+		Expect(cr2ux.AddOrUpdate(context.Background(), plain)).Should(BeNil())
+		got, _, err = cr2ux.getApp(context.Background(), plain.Name, plain.Namespace)
+		Expect(err).Should(BeNil())
+		Expect(got.Labels).ShouldNot(HaveKey(model.LabelSyncAddon))
+	})
+
 	It("Test app updated and delete app", func() {
 		ctx := context.Background()
 		apName1 := "example"
@@ -128,8 +194,15 @@ var _ = Describe("Test CR convert to ux", func() {
 		Expect(common2.ReadYamlToObject("testdata/test-app1.yaml", app1)).Should(BeNil())
 		app1.Namespace = appNS1
 		envName := model.AutoGenEnvNamePrefix + app1.Namespace
+		app1.Spec.Sources = []v1beta1.ApplicationSource{{Name: "db", Type: "db-lookup", Properties: &runtime.RawExtension{Raw: []byte(`{"secret":"db-creds"}`)}}}
+		app1.Annotations = map[string]string{oam.AnnotationCelExpressions: "true", "kubectl.kubernetes.io/last-applied-configuration": "{}"}
 
 		Expect(cr2ux.AddOrUpdate(context.Background(), app1)).Should(BeNil())
+		synced := model.Application{Name: apName1}
+		Expect(ds.Get(ctx, &synced)).Should(BeNil())
+		Expect(synced.Annotations).Should(Equal(map[string]string{oam.AnnotationCelExpressions: "true"}), "the expressions opt-in is synced, other annotations are not")
+		Expect(synced.Sources).Should(HaveLen(1))
+		Expect(string(synced.Sources[0].Properties.Raw)).Should(MatchJSON(`{"secret":"db-creds"}`))
 		comp1 := model.ApplicationComponent{AppPrimaryKey: apName1, Name: "nginx"}
 		Expect(ds.Get(context.Background(), &comp1)).Should(BeNil())
 		Expect(comp1.Properties).Should(BeEquivalentTo(&model.JSONStruct{"image": "nginx"}))
@@ -152,6 +225,7 @@ var _ = Describe("Test CR convert to ux", func() {
 		app1.Namespace = appNS1
 		app1.Status.LatestRevision = &common.Revision{Name: "v2"}
 		app1.Spec = app2.Spec
+		app1.Annotations = nil
 		Expect(cr2ux.AddOrUpdate(context.Background(), app1)).Should(BeNil())
 		comp3 := model.ApplicationComponent{AppPrimaryKey: apName1, Name: "blog"}
 		Expect(ds.Get(context.Background(), &comp3)).Should(BeNil())
@@ -161,6 +235,10 @@ var _ = Describe("Test CR convert to ux", func() {
 		Expect(ds.Get(ctx, &comp2)).Should(BeEquivalentTo(datastore.ErrRecordNotExist))
 		Expect(ds.Get(ctx, &appPlc1)).Should(BeEquivalentTo(datastore.ErrRecordNotExist), fmt.Sprintf("plc name %s, creator %s", appPlc1.Name, appPlc1.Creator))
 		Expect(ds.Get(ctx, &appPlc2)).Should(BeEquivalentTo(datastore.ErrRecordNotExist), fmt.Sprintf("plc name %s, creator %s", appPlc2.Name, appPlc2.Creator))
+		resynced := model.Application{Name: apName1}
+		Expect(ds.Get(ctx, &resynced)).Should(BeNil())
+		Expect(resynced.Sources).Should(BeEmpty(), "a source removed from the CR is removed from VelaUX")
+		Expect(resynced.Annotations).ShouldNot(HaveKey(oam.AnnotationCelExpressions), "an opt-in removed from the CR is removed from VelaUX")
 		appwf2 := &model.Workflow{AppPrimaryKey: apName1, Name: appwf1.Name}
 		Expect(ds.Get(ctx, appwf2)).Should(BeNil())
 		Expect(len(appwf2.Steps)).Should(BeEquivalentTo(0))

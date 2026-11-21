@@ -6,7 +6,7 @@
 		"contact": {
 			"name": "kubevela",
 			"url": "https://kubevela.io/",
-			"email": "feedback@mail.kubevela.io"
+			"email": "cncf-kubevela-maintainers@lists.cncf.io"
 		},
 		"license": {
 			"name": "Apache License 2.0",
@@ -1412,6 +1412,62 @@
 				}
 			}
 		},
+		"/api/v1/applications/{appName}/envs/{envName}/records": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"application"
+				],
+				"summary": "query application workflow execution record of one environment",
+				"operationId": "listWorkflowRecordsFromEnv",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the application.",
+						"name": "appName",
+						"in": "path",
+						"required": true
+					},
+					{
+						"type": "string",
+						"description": "identifier of the environment.",
+						"name": "envName",
+						"in": "path",
+						"required": true
+					},
+					{
+						"type": "integer",
+						"description": "query the page number",
+						"name": "page",
+						"in": "query"
+					},
+					{
+						"type": "integer",
+						"description": "query the page size number",
+						"name": "pageSize",
+						"in": "query"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ListWorkflowRecordsResponse"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
 		"/api/v1/applications/{appName}/envs/{envName}/recycle": {
 			"post": {
 				"consumes": [
@@ -2018,6 +2074,46 @@
 				}
 			}
 		},
+		"/api/v1/applications/{appName}/status": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"application"
+				],
+				"summary": "get application status from all envs",
+				"operationId": "getApplicationStatusFromAllEnvs",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the application ",
+						"name": "appName",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ApplicationStatusListResponse"
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"schema": {
+							"$ref": "#/definitions/bcode.Bcode"
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/applications/{appName}/template": {
 			"post": {
 				"consumes": [
@@ -2272,7 +2368,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.ListWorkflowResponse"
 						}
 					},
 					"500": {
@@ -2313,9 +2409,9 @@
 				],
 				"responses": {
 					"200": {
-						"description": "OK",
+						"description": "create success",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.DetailWorkflowResponse"
 						}
 					},
 					"400": {
@@ -2355,7 +2451,7 @@
 					},
 					{
 						"type": "string",
-						"description": "identifier of the workfloc.",
+						"description": "identifier of the workflow.",
 						"name": "workflowName",
 						"in": "path",
 						"required": true
@@ -2363,9 +2459,9 @@
 				],
 				"responses": {
 					"200": {
-						"description": "OK",
+						"description": "create success",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.DetailWorkflowResponse"
 						}
 					},
 					"500": {
@@ -2415,7 +2511,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.DetailWorkflowResponse"
 						}
 					},
 					"500": {
@@ -2435,7 +2531,7 @@
 				"tags": [
 					"application"
 				],
-				"summary": "deletet workflow",
+				"summary": "delete workflow",
 				"operationId": "deleteWorkflow",
 				"parameters": [
 					{
@@ -2513,7 +2609,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.ListWorkflowRecordsResponse"
 						}
 					},
 					"500": {
@@ -2564,7 +2660,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.DetailWorkflowRecordResponse"
 						}
 					},
 					"500": {
@@ -2927,6 +3023,37 @@
 				}
 			}
 		},
+		"/api/v1/auth/admin_configured": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"authentication"
+				],
+				"summary": "check admin is configured",
+				"operationId": "adminConfigured",
+				"responses": {
+					"200": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/v1.AdminConfiguredResponse"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/bcode.Bcode"
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/auth/dex_config": {
 			"get": {
 				"consumes": [
@@ -2947,6 +3074,47 @@
 						"description": "",
 						"schema": {
 							"$ref": "#/definitions/v1.DexConfigResponse"
+						}
+					},
+					"400": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/bcode.Bcode"
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/auth/init_admin": {
+			"put": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"authentication"
+				],
+				"summary": "initialize admin",
+				"operationId": "configureAdmin",
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/v1.InitAdminRequest"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "",
+						"schema": {
+							"$ref": "#/definitions/v1.InitAdminResponse"
 						}
 					},
 					"400": {
@@ -3111,7 +3279,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.CloudShellPrepareResponse"
 						}
 					},
 					"400": {
@@ -3199,7 +3367,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.ListClusterResponse"
 						}
 					},
 					"400": {
@@ -4057,13 +4225,19 @@
 						"description": "query by the specified scope like WorkflowRun or Application",
 						"name": "scope",
 						"in": "query"
+					},
+					{
+						"type": "string",
+						"description": "comma-separated namespaces to report each definition's usability in, as unusableIn",
+						"name": "namespaces",
+						"in": "query"
 					}
 				],
 				"responses": {
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.ListDefinitionResponse"
 						}
 					},
 					"500": {
@@ -4104,9 +4278,9 @@
 				],
 				"responses": {
 					"200": {
-						"description": "OK",
+						"description": "create successfully",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.DetailDefinitionResponse"
 						}
 					},
 					"500": {
@@ -4149,9 +4323,12 @@
 				],
 				"responses": {
 					"200": {
-						"description": "OK",
+						"description": "update successfully",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/*schema.UIParameter"
+							}
 						}
 					},
 					"500": {
@@ -4194,9 +4371,60 @@
 				],
 				"responses": {
 					"200": {
+						"description": "update successfully",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/*schema.UIParameter"
+							}
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
+		"/api/v1/definitions/{definitionName}/usage": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"definition"
+				],
+				"summary": "Report each namespace's use of a component or trait definition against its quota",
+				"operationId": "definitionUsage",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the definition",
+						"name": "definitionName",
+						"in": "path",
+						"required": true
+					},
+					{
+						"enum": [
+							"component",
+							"trait"
+						],
+						"type": "string",
+						"description": "the definition type",
+						"name": "type",
+						"in": "query",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.DefinitionUsageResponse"
 						}
 					},
 					"500": {
@@ -4388,6 +4616,272 @@
 				}
 			}
 		},
+		"/api/v1/manage/plugins": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"Plugin"
+				],
+				"summary": "List the installed plugins",
+				"operationId": "listInstalledPlugins",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ListPluginResponse"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
+		"/api/v1/manage/plugins/{pluginId}": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"Plugin"
+				],
+				"summary": "Detail an installed plugin",
+				"operationId": "detailPlugin",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the plugin.",
+						"name": "pluginId",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ManagedPluginDTO"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
+		"/api/v1/manage/plugins/{pluginId}/disable": {
+			"post": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"Plugin"
+				],
+				"summary": "Disable an installed plugin",
+				"operationId": "disablePlugin",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the plugin.",
+						"name": "pluginId",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ManagedPluginDTO"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
+		"/api/v1/manage/plugins/{pluginId}/enable": {
+			"post": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"Plugin"
+				],
+				"summary": "Enable an installed plugin",
+				"operationId": "enablePlugin",
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/v1.PluginEnableRequest"
+						}
+					},
+					{
+						"type": "string",
+						"description": "identifier of the plugin.",
+						"name": "pluginId",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ManagedPluginDTO"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
+		"/api/v1/manage/plugins/{pluginId}/install": {
+			"post": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"Plugin"
+				],
+				"summary": "Install one specific plugin",
+				"operationId": "installPlugin",
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/v1.InstallPluginRequest"
+						}
+					},
+					{
+						"type": "string",
+						"description": "identifier of the plugin.",
+						"name": "pluginId",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ManagedPluginDTO"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
+		"/api/v1/manage/plugins/{pluginId}/setting": {
+			"post": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"Plugin"
+				],
+				"summary": "Set an installed plugin",
+				"operationId": "pluginSetting",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the plugin.",
+						"name": "pluginId",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ManagedPluginDTO"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
+		"/api/v1/manage/plugins/{pluginId}/uninstall": {
+			"post": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"Plugin"
+				],
+				"summary": "Uninstall one specific plugin",
+				"operationId": "uninstallPlugin",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the plugin.",
+						"name": "pluginId",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.EmptyResponse"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
 		"/api/v1/payload_types": {
 			"get": {
 				"consumes": [
@@ -4559,6 +5053,71 @@
 						"schema": {
 							"$ref": "#/definitions/bcode.Bcode"
 						}
+					}
+				}
+			}
+		},
+		"/api/v1/plugins": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"Plugin"
+				],
+				"summary": "List the enabled plugins",
+				"operationId": "listEnabledPlugins",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.ListPluginResponse"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
+					}
+				}
+			}
+		},
+		"/api/v1/plugins/{pluginId}": {
+			"get": {
+				"consumes": [
+					"application/xml",
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/xml"
+				],
+				"tags": [
+					"Plugin"
+				],
+				"summary": "Detail an installed plugin",
+				"operationId": "detailPlugin",
+				"parameters": [
+					{
+						"type": "string",
+						"description": "identifier of the plugin.",
+						"name": "pluginId",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/v1.PluginDTO"
+						}
+					},
+					"500": {
+						"description": "Bummer, something went wrong"
 					}
 				}
 			}
@@ -6226,7 +6785,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1alpha1.WorkflowRunStatus"
+							"$ref": "#/definitions/v1.PipelineRunStatus"
 						}
 					},
 					"400": {
@@ -7144,7 +7703,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/map[string]interface%20%7B%7D"
+							"$ref": "#/definitions/v1.Properties"
 						}
 					},
 					"400": {
@@ -7490,7 +8049,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.ListTargetResponse"
 						}
 					},
 					"500": {
@@ -7524,9 +8083,9 @@
 				],
 				"responses": {
 					"200": {
-						"description": "OK",
+						"description": "create success",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.DetailTargetResponse"
 						}
 					},
 					"400": {
@@ -7567,9 +8126,9 @@
 				],
 				"responses": {
 					"200": {
-						"description": "OK",
+						"description": "create success",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.DetailTargetResponse"
 						}
 					},
 					"500": {
@@ -7612,7 +8171,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/v1.SimpleResponse"
+							"$ref": "#/definitions/v1.DetailTargetResponse"
 						}
 					},
 					"500": {
@@ -7632,7 +8191,7 @@
 				"tags": [
 					"Target"
 				],
-				"summary": "deletet Target",
+				"summary": "delete Target",
 				"operationId": "deleteTarget",
 				"parameters": [
 					{
@@ -8217,6 +8776,7 @@
 		}
 	},
 	"definitions": {
+		"*schema.UIParameter": {},
 		"*v1.ApplicationTriggerBase": {},
 		"*v1.Config": {},
 		"*v1.EmptyResponse": {},
@@ -8256,6 +8816,9 @@
 				"token": {
 					"type": "string"
 				},
+				"tokenSecretRef": {
+					"type": "string"
+				},
 				"url": {
 					"type": "string"
 				}
@@ -8267,6 +8830,9 @@
 					"type": "string"
 				},
 				"token": {
+					"type": "string"
+				},
+				"tokenSecretRef": {
 					"type": "string"
 				},
 				"url": {
@@ -8285,6 +8851,9 @@
 				"token": {
 					"type": "string"
 				},
+				"tokenSecretRef": {
+					"type": "string"
+				},
 				"url": {
 					"type": "string"
 				}
@@ -8296,6 +8865,12 @@
 					"type": "boolean"
 				},
 				"password": {
+					"type": "string"
+				},
+				"token": {
+					"type": "string"
+				},
+				"tokenSecretRef": {
 					"type": "string"
 				},
 				"url": {
@@ -8315,6 +8890,12 @@
 				"invisible"
 			],
 			"properties": {
+				"annotations": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
 				"dependencies": {
 					"type": "array",
 					"items": {
@@ -8353,6 +8934,12 @@
 				},
 				"url": {
 					"type": "string"
+				},
+				"uxPlugins": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
 				},
 				"version": {
 					"type": "string"
@@ -8583,6 +9170,15 @@
 		},
 		"common.AppStatus": {
 			"properties": {
+				"applicationPoliciesConfigMap": {
+					"type": "string"
+				},
+				"appliedApplicationPolicies": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.AppliedApplicationPolicy"
+					}
+				},
 				"appliedResources": {
 					"type": "array",
 					"items": {
@@ -8620,11 +9216,20 @@
 						"$ref": "#/definitions/common.ApplicationComponentStatus"
 					}
 				},
+				"sources": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.ApplicationSourceStatus"
+					}
+				},
 				"status": {
 					"type": "string"
 				},
 				"workflow": {
 					"$ref": "#/definitions/common.WorkflowStatus"
+				},
+				"workflowRestartScheduledAt": {
+					"type": "string"
 				}
 			}
 		},
@@ -8687,6 +9292,12 @@
 				"cluster": {
 					"type": "string"
 				},
+				"details": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
 				"env": {
 					"type": "string"
 				},
@@ -8716,6 +9327,43 @@
 				},
 				"workloadDefinition": {
 					"$ref": "#/definitions/common.WorkloadGVK"
+				},
+				"workloadHealthy": {
+					"type": "boolean"
+				}
+			}
+		},
+		"common.ApplicationSourceStatus": {
+			"required": [
+				"name"
+			],
+			"properties": {
+				"autoUpdate": {
+					"type": "boolean"
+				},
+				"consumedBy": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.SourceConsumer"
+					}
+				},
+				"message": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"phase": {
+					"type": "string"
+				},
+				"resolutions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.SourceResolution"
+					}
+				},
+				"type": {
+					"type": "string"
 				}
 			}
 		},
@@ -8738,11 +9386,74 @@
 				"healthy"
 			],
 			"properties": {
+				"details": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
 				"healthy": {
 					"type": "boolean"
 				},
 				"message": {
 					"type": "string"
+				},
+				"pending": {
+					"type": "boolean"
+				},
+				"type": {
+					"type": "string"
+				}
+			}
+		},
+		"common.AppliedApplicationPolicy": {
+			"required": [
+				"name",
+				"namespace",
+				"applied"
+			],
+			"properties": {
+				"annotationsCount": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"applied": {
+					"type": "boolean"
+				},
+				"definitionRevisionName": {
+					"type": "string"
+				},
+				"error": {
+					"type": "boolean"
+				},
+				"hasContext": {
+					"type": "boolean"
+				},
+				"labelsCount": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"message": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"revision": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"revisionHash": {
+					"type": "string"
+				},
+				"source": {
+					"type": "string"
+				},
+				"specModified": {
+					"type": "boolean"
 				},
 				"type": {
 					"type": "string"
@@ -8831,60 +9542,71 @@
 				}
 			}
 		},
-		"common.Helm": {
-			"required": [
-				"release",
-				"repository"
-			],
+		"common.DefinitionRestrictions": {
 			"properties": {
-				"release": {
-					"type": "string"
+				"namespaceSelector": {
+					"$ref": "#/definitions/v1.LabelSelector"
 				},
-				"repository": {
-					"type": "string"
-				}
-			}
-		},
-		"common.Kube": {
-			"required": [
-				"template"
-			],
-			"properties": {
-				"parameters": {
-					"type": "array",
-					"items": {
-						"$ref": "#/definitions/common.KubeParameter"
-					}
-				},
-				"template": {
-					"type": "string"
-				}
-			}
-		},
-		"common.KubeParameter": {
-			"required": [
-				"name",
-				"type",
-				"fieldPaths"
-			],
-			"properties": {
-				"description": {
-					"type": "string"
-				},
-				"fieldPaths": {
+				"namespaces": {
 					"type": "array",
 					"items": {
 						"type": "string"
 					}
 				},
-				"name": {
+				"quota": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.NamespaceQuota"
+					}
+				}
+			}
+		},
+		"common.HTTPOption": {
+			"properties": {
+				"bearerToken": {
 					"type": "string"
 				},
-				"required": {
+				"caFile": {
+					"type": "string"
+				},
+				"certFile": {
+					"type": "string"
+				},
+				"insecureSkipTLS": {
 					"type": "boolean"
 				},
-				"type": {
+				"keyFile": {
 					"type": "string"
+				},
+				"password": {
+					"type": "string"
+				},
+				"plainHTTP": {
+					"type": "boolean"
+				},
+				"username": {
+					"type": "string"
+				}
+			}
+		},
+		"common.NamespaceQuota": {
+			"properties": {
+				"limit": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"namespaceSelector": {
+					"$ref": "#/definitions/v1.LabelSelector"
+				},
+				"namespaces": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"warn": {
+					"type": "integer",
+					"format": "int32"
 				}
 			}
 		},
@@ -8928,20 +9650,84 @@
 				"cue": {
 					"$ref": "#/definitions/common.CUE"
 				},
-				"helm": {
-					"$ref": "#/definitions/common.Helm"
-				},
-				"kube": {
-					"$ref": "#/definitions/common.Kube"
-				},
 				"terraform": {
 					"$ref": "#/definitions/common.Terraform"
+				}
+			}
+		},
+		"common.SourceConsumer": {
+			"required": [
+				"definitionKind",
+				"name"
+			],
+			"properties": {
+				"cluster": {
+					"type": "string"
+				},
+				"definitionKind": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"values": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.SourceValue"
+					}
+				}
+			}
+		},
+		"common.SourceResolution": {
+			"properties": {
+				"clusters": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"expiresAt": {
+					"type": "string"
+				},
+				"message": {
+					"type": "string"
+				},
+				"phase": {
+					"type": "string"
+				},
+				"storageKey": {
+					"type": "string"
+				}
+			}
+		},
+		"common.SourceValue": {
+			"required": [
+				"sourceAttr"
+			],
+			"properties": {
+				"property": {
+					"type": "string"
+				},
+				"sourceAttr": {
+					"type": "string"
+				},
+				"value": {
+					"type": "string"
 				}
 			}
 		},
 		"common.Status": {
 			"properties": {
 				"customStatus": {
+					"type": "string"
+				},
+				"details": {
 					"type": "string"
 				},
 				"healthPolicy": {
@@ -9548,6 +10334,28 @@
 		"model.JSONStruct": {
 			"type": "object"
 		},
+		"model.LoopStatus": {
+			"required": [
+				"mode"
+			],
+			"properties": {
+				"items": {
+					"type": "array",
+					"items": {
+						"type": "object"
+					}
+				},
+				"labels": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"mode": {
+					"type": "string"
+				}
+			}
+		},
 		"model.ProjectRef": {
 			"required": [
 				"name",
@@ -9618,6 +10426,9 @@
 				"id": {
 					"type": "string"
 				},
+				"iteration": {
+					"type": "integer"
+				},
 				"lastExecuteTime": {
 					"type": "string",
 					"format": "date-time"
@@ -9668,12 +10479,12 @@
 		},
 		"model.WorkflowStep": {
 			"required": [
-				"orderIndex",
-				"alias",
 				"type",
 				"description",
-				"dependsOn",
-				"name"
+				"orderIndex",
+				"name",
+				"alias",
+				"dependsOn"
 			],
 			"properties": {
 				"alias": {
@@ -9688,6 +10499,9 @@
 				"description": {
 					"type": "string"
 				},
+				"forEach": {
+					"$ref": "#/definitions/v1alpha1.ForEach"
+				},
 				"if": {
 					"type": "string"
 				},
@@ -9699,6 +10513,9 @@
 				},
 				"meta": {
 					"$ref": "#/definitions/v1alpha1.WorkflowStepMeta"
+				},
+				"mode": {
+					"type": "string"
 				},
 				"name": {
 					"type": "string"
@@ -9808,6 +10625,9 @@
 				"lastExecuteTime": {
 					"type": "string",
 					"format": "date-time"
+				},
+				"loop": {
+					"$ref": "#/definitions/model.LoopStatus"
 				},
 				"message": {
 					"type": "string"
@@ -10037,6 +10857,259 @@
 			}
 		},
 		"schema.Validate.defaultValue": {},
+		"types.BuildInfo": {
+			"properties": {
+				"branch": {
+					"type": "string"
+				},
+				"hash": {
+					"type": "string"
+				},
+				"repo": {
+					"type": "string"
+				},
+				"time": {
+					"type": "integer",
+					"format": "int64"
+				}
+			}
+		},
+		"types.Header": {
+			"required": [
+				"name",
+				"value"
+			],
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"value": {
+					"type": "string"
+				}
+			}
+		},
+		"types.Includes": {
+			"required": [
+				"name",
+				"label",
+				"to",
+				"type",
+				"icon",
+				"workspace",
+				"relatedRoute"
+			],
+			"properties": {
+				"catalog": {
+					"type": "string"
+				},
+				"icon": {
+					"type": "string"
+				},
+				"label": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"permission": {
+					"$ref": "#/definitions/types.Permission"
+				},
+				"relatedRoute": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"to": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"workspace": {
+					"$ref": "#/definitions/types.Workspace"
+				}
+			}
+		},
+		"types.Info": {
+			"required": [
+				"author",
+				"description",
+				"links",
+				"logos",
+				"build",
+				"screenshots",
+				"version",
+				"updated"
+			],
+			"properties": {
+				"author": {
+					"$ref": "#/definitions/types.InfoLink"
+				},
+				"build": {
+					"$ref": "#/definitions/types.BuildInfo"
+				},
+				"description": {
+					"type": "string"
+				},
+				"links": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/types.InfoLink"
+					}
+				},
+				"logos": {
+					"$ref": "#/definitions/types.Logos"
+				},
+				"screenshots": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/types.Screenshots"
+					}
+				},
+				"updated": {
+					"type": "string"
+				},
+				"version": {
+					"type": "string"
+				}
+			}
+		},
+		"types.InfoLink": {
+			"required": [
+				"name",
+				"url"
+			],
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"url": {
+					"type": "string"
+				}
+			}
+		},
+		"types.JSONData": {
+			"required": [
+				"id",
+				"type",
+				"subType",
+				"name",
+				"info",
+				"includes",
+				"category",
+				"backend",
+				"proxy",
+				"backendType",
+				"backendService"
+			],
+			"properties": {
+				"authSecret": {
+					"$ref": "#/definitions/types.KubernetesSecret"
+				},
+				"authType": {
+					"type": "string"
+				},
+				"backend": {
+					"type": "boolean"
+				},
+				"backendService": {
+					"$ref": "#/definitions/types.KubernetesService"
+				},
+				"backendType": {
+					"type": "string"
+				},
+				"category": {
+					"type": "string"
+				},
+				"id": {
+					"type": "string"
+				},
+				"includes": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/types.Includes"
+					}
+				},
+				"info": {
+					"$ref": "#/definitions/types.Info"
+				},
+				"kubePermissions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.PolicyRule"
+					}
+				},
+				"name": {
+					"type": "string"
+				},
+				"proxy": {
+					"type": "boolean"
+				},
+				"requirement": {
+					"$ref": "#/definitions/types.Requirement"
+				},
+				"routes": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/types.Route"
+					}
+				},
+				"subType": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				}
+			}
+		},
+		"types.KubernetesSecret": {
+			"required": [
+				"name",
+				"namespace"
+			],
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"namespace": {
+					"type": "string"
+				}
+			}
+		},
+		"types.KubernetesService": {
+			"required": [
+				"name",
+				"namespace",
+				"port"
+			],
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"port": {
+					"type": "integer",
+					"format": "int32"
+				}
+			}
+		},
+		"types.Logos": {
+			"required": [
+				"small",
+				"large"
+			],
+			"properties": {
+				"large": {
+					"type": "string"
+				},
+				"small": {
+					"type": "string"
+				}
+			}
+		},
 		"types.NamespacedName": {
 			"required": [
 				"Namespace",
@@ -10047,6 +11120,20 @@
 					"type": "string"
 				},
 				"Namespace": {
+					"type": "string"
+				}
+			}
+		},
+		"types.Permission": {
+			"required": [
+				"resource",
+				"action"
+			],
+			"properties": {
+				"action": {
+					"type": "string"
+				},
+				"resource": {
 					"type": "string"
 				}
 			}
@@ -10064,6 +11151,59 @@
 				}
 			}
 		},
+		"types.Requirement": {
+			"required": [
+				"velauxVersion"
+			],
+			"properties": {
+				"velauxVersion": {
+					"type": "string"
+				}
+			}
+		},
+		"types.Route": {
+			"required": [
+				"path",
+				"method"
+			],
+			"properties": {
+				"headers": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/types.Header"
+					}
+				},
+				"method": {
+					"type": "string"
+				},
+				"path": {
+					"type": "string"
+				},
+				"permission": {
+					"$ref": "#/definitions/types.Permission"
+				},
+				"resourceMap": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				}
+			}
+		},
+		"types.Screenshots": {
+			"required": [
+				"name",
+				"path"
+			],
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"path": {
+					"type": "string"
+				}
+			}
+		},
 		"types.SecretReference": {
 			"required": [
 				"name"
@@ -10073,6 +11213,16 @@
 					"type": "string"
 				},
 				"namespace": {
+					"type": "string"
+				}
+			}
+		},
+		"types.Workspace": {
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
 					"type": "string"
 				}
 			}
@@ -10114,6 +11264,9 @@
 				"phase"
 			],
 			"properties": {
+				"managedBy": {
+					"$ref": "#/definitions/v1.AddonManager"
+				},
 				"name": {
 					"type": "string"
 				},
@@ -10145,6 +11298,20 @@
 					"$ref": "#/definitions/addon.Meta"
 				},
 				"registryName": {
+					"type": "string"
+				}
+			}
+		},
+		"v1.AddonManager": {
+			"required": [
+				"name",
+				"namespace"
+			],
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"namespace": {
 					"type": "string"
 				}
 			}
@@ -10205,6 +11372,9 @@
 				"installedVersion": {
 					"type": "string"
 				},
+				"managedBy": {
+					"$ref": "#/definitions/v1.AddonManager"
+				},
 				"name": {
 					"type": "string"
 				},
@@ -10215,6 +11385,16 @@
 		},
 		"v1.AddonStatusResponse.clusters": {
 			"type": "object"
+		},
+		"v1.AdminConfiguredResponse": {
+			"required": [
+				"configured"
+			],
+			"properties": {
+				"configured": {
+					"type": "boolean"
+				}
+			}
 		},
 		"v1.AppCompareReq": {
 			"properties": {
@@ -10314,6 +11494,12 @@
 				"alias": {
 					"type": "string"
 				},
+				"annotations": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
 				"createTime": {
 					"type": "string",
 					"format": "date-time"
@@ -10375,13 +11561,13 @@
 		},
 		"v1.ApplicationDeployResponse": {
 			"required": [
-				"status",
 				"createTime",
 				"version",
+				"workflowName",
+				"status",
 				"note",
 				"envName",
 				"triggerType",
-				"workflowName",
 				"record"
 			],
 			"properties": {
@@ -10418,6 +11604,12 @@
 				},
 				"version": {
 					"type": "string"
+				},
+				"warnings": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				},
 				"workflowName": {
 					"type": "string"
@@ -10562,6 +11754,72 @@
 				}
 			}
 		},
+		"v1.ApplicationStatus": {
+			"properties": {
+				"appliedResources": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.ClusterObjectReference"
+					}
+				},
+				"components": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.ObjectReference"
+					}
+				},
+				"conditions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/condition.Condition"
+					}
+				},
+				"dependencies": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.ComponentDependency"
+					}
+				},
+				"latestRevision": {
+					"$ref": "#/definitions/common.Revision"
+				},
+				"observedGeneration": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"policy": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.PolicyStatus"
+					}
+				},
+				"services": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/common.ApplicationComponentStatus"
+					}
+				},
+				"status": {
+					"type": "string"
+				},
+				"workflow": {
+					"$ref": "#/definitions/common.WorkflowStatus"
+				}
+			}
+		},
+		"v1.ApplicationStatusListResponse": {
+			"required": [
+				"status"
+			],
+			"properties": {
+				"status": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.ApplicationStatusResponse"
+					}
+				}
+			}
+		},
 		"v1.ApplicationStatusResponse": {
 			"required": [
 				"envName",
@@ -10572,7 +11830,7 @@
 					"type": "string"
 				},
 				"status": {
-					"$ref": "#/definitions/common.AppStatus"
+					"$ref": "#/definitions/v1.ApplicationStatus"
 				}
 			}
 		},
@@ -10955,6 +12213,30 @@
 				}
 			}
 		},
+		"v1.ComponentDependency": {
+			"required": [
+				"component",
+				"dependsOn",
+				"source"
+			],
+			"properties": {
+				"cluster": {
+					"type": "string"
+				},
+				"component": {
+					"type": "string"
+				},
+				"dependsOn": {
+					"type": "string"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"source": {
+					"type": "string"
+				}
+			}
+		},
 		"v1.ComponentListResponse": {
 			"required": [
 				"components"
@@ -11118,6 +12400,12 @@
 				"os": {
 					"type": "string"
 				},
+				"os.features": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
 				"os.version": {
 					"type": "string"
 				},
@@ -11166,13 +12454,13 @@
 		},
 		"v1.ConfigTemplateDetail": {
 			"required": [
+				"name",
+				"namespace",
+				"description",
 				"scope",
 				"sensitive",
 				"createTime",
 				"alias",
-				"name",
-				"namespace",
-				"description",
 				"schema",
 				"uiSchema"
 			],
@@ -11919,10 +13207,14 @@
 				"icon",
 				"status",
 				"labels",
+				"category",
 				"ownerAddon"
 			],
 			"properties": {
 				"alias": {
+					"type": "string"
+				},
+				"category": {
 					"type": "string"
 				},
 				"component": {
@@ -11949,17 +13241,48 @@
 				"policy": {
 					"$ref": "#/definitions/v1beta1.PolicyDefinitionSpec"
 				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
+				},
 				"status": {
+				"policyScope": {
+					"type": "string"
+				},
 					"type": "string"
 				},
 				"trait": {
 					"$ref": "#/definitions/v1beta1.TraitDefinitionSpec"
+				},
+				"unusableIn": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				},
 				"workflowStep": {
 					"$ref": "#/definitions/v1beta1.WorkflowStepDefinitionSpec"
 				},
 				"workloadType": {
 					"type": "string"
+				},
+				"abstract": {
+					"type": "boolean"
+				},
+				"extends": {
+					"type": "string"
+				}
+			}
+		},
+		"v1.DefinitionUsageResponse": {
+			"required": [
+				"usage"
+			],
+			"properties": {
+				"usage": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.NamespaceUsage"
+					}
 				}
 			}
 		},
@@ -11975,6 +13298,9 @@
 					"additionalProperties": {
 						"type": "string"
 					}
+				},
+				"artifactType": {
+					"type": "string"
 				},
 				"data": {
 					"type": "string"
@@ -12002,17 +13328,23 @@
 		},
 		"v1.DetailAddonResponse": {
 			"required": [
+				"icon",
+				"invisible",
 				"name",
 				"version",
 				"description",
-				"icon",
-				"invisible",
 				"schema",
 				"uiSchema",
 				"definitions",
 				"availableVersions"
 			],
 			"properties": {
+				"annotations": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
 				"availableVersions": {
 					"type": "array",
 					"items": {
@@ -12079,6 +13411,12 @@
 				"url": {
 					"type": "string"
 				},
+				"uxPlugins": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
 				"version": {
 					"type": "string"
 				}
@@ -12086,13 +13424,13 @@
 		},
 		"v1.DetailApplicationResponse": {
 			"required": [
+				"icon",
+				"name",
+				"updateTime",
 				"description",
 				"createTime",
-				"updateTime",
-				"icon",
 				"alias",
 				"project",
-				"name",
 				"policies",
 				"envBindings",
 				"resourceInfo"
@@ -12100,6 +13438,12 @@
 			"properties": {
 				"alias": {
 					"type": "string"
+				},
+				"annotations": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
 				},
 				"createTime": {
 					"type": "string",
@@ -12149,20 +13493,20 @@
 		},
 		"v1.DetailClusterResponse": {
 			"required": [
-				"apiServerURL",
-				"dashboardURL",
-				"labels",
-				"name",
-				"updateTime",
 				"alias",
 				"status",
-				"createTime",
-				"icon",
-				"reason",
-				"provider",
 				"kubeConfig",
 				"kubeConfigSecret",
+				"reason",
+				"dashboardURL",
+				"createTime",
+				"updateTime",
 				"description",
+				"icon",
+				"labels",
+				"name",
+				"provider",
+				"apiServerURL",
 				"resourceInfo"
 			],
 			"properties": {
@@ -12221,13 +13565,13 @@
 		"v1.DetailComponentResponse": {
 			"required": [
 				"updateTime",
-				"name",
-				"creator",
-				"alias",
-				"type",
-				"createTime",
 				"appPrimaryKey",
+				"alias",
 				"main",
+				"createTime",
+				"creator",
+				"name",
+				"type",
 				"definition"
 			],
 			"properties": {
@@ -12315,18 +13659,22 @@
 		},
 		"v1.DetailDefinitionResponse": {
 			"required": [
-				"labels",
-				"name",
-				"alias",
-				"status",
 				"ownerAddon",
+				"category",
+				"alias",
 				"description",
 				"icon",
+				"status",
+				"labels",
+				"name",
 				"schema",
 				"uiSchema"
 			],
 			"properties": {
 				"alias": {
+					"type": "string"
+				},
+				"category": {
 					"type": "string"
 				},
 				"component": {
@@ -12353,6 +13701,9 @@
 				"policy": {
 					"$ref": "#/definitions/v1beta1.PolicyDefinitionSpec"
 				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
+				},
 				"schema": {
 					"type": "string"
 				},
@@ -12368,6 +13719,12 @@
 						"$ref": "#/definitions/schema.UIParameter"
 					}
 				},
+				"unusableIn": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
 				"workflowStep": {
 					"$ref": "#/definitions/v1beta1.WorkflowStepDefinitionSpec"
 				},
@@ -12378,15 +13735,15 @@
 		},
 		"v1.DetailPolicyResponse": {
 			"required": [
-				"properties",
-				"updateTime",
-				"envName",
 				"name",
+				"description",
+				"createTime",
+				"envName",
 				"alias",
 				"type",
-				"description",
 				"creator",
-				"createTime"
+				"properties",
+				"updateTime"
 			],
 			"properties": {
 				"alias": {
@@ -12428,18 +13785,18 @@
 		},
 		"v1.DetailRevisionResponse": {
 			"required": [
-				"status",
-				"deployUser",
 				"appPrimaryKey",
-				"version",
-				"revisionCRName",
-				"note",
-				"envName",
-				"createTime",
 				"reason",
-				"triggerType",
+				"deployUser",
+				"envName",
+				"version",
+				"status",
 				"workflowName",
-				"updateTime"
+				"createTime",
+				"updateTime",
+				"note",
+				"revisionCRName",
+				"triggerType"
 			],
 			"properties": {
 				"appPrimaryKey": {
@@ -12496,10 +13853,10 @@
 		},
 		"v1.DetailTargetResponse": {
 			"required": [
+				"name",
 				"createTime",
 				"updateTime",
-				"project",
-				"name"
+				"project"
 			],
 			"properties": {
 				"alias": {
@@ -12539,11 +13896,11 @@
 		},
 		"v1.DetailUserResponse": {
 			"required": [
+				"disabled",
+				"createTime",
 				"lastLoginTime",
 				"name",
 				"email",
-				"disabled",
-				"createTime",
 				"projects",
 				"roles"
 			],
@@ -12571,7 +13928,7 @@
 				"projects": {
 					"type": "array",
 					"items": {
-						"$ref": "#/definitions/v1.ProjectBase"
+						"$ref": "#/definitions/v1.UserProjectBase"
 					}
 				},
 				"roles": {
@@ -12584,14 +13941,14 @@
 		},
 		"v1.DetailWorkflowRecordResponse": {
 			"required": [
-				"status",
-				"message",
-				"mode",
+				"applicationRevision",
+				"workflowAlias",
 				"name",
 				"namespace",
-				"workflowAlias",
-				"applicationRevision",
 				"workflowName",
+				"mode",
+				"message",
+				"status",
 				"deployTime",
 				"deployUser",
 				"note",
@@ -12654,15 +14011,15 @@
 		"v1.DetailWorkflowResponse": {
 			"required": [
 				"name",
+				"enable",
+				"envName",
+				"updateTime",
 				"alias",
 				"description",
 				"default",
-				"subMode",
-				"enable",
-				"envName",
 				"createTime",
-				"updateTime",
-				"mode"
+				"mode",
+				"subMode"
 			],
 			"properties": {
 				"alias": {
@@ -12897,12 +14254,12 @@
 		},
 		"v1.GetPipelineResponse": {
 			"required": [
-				"name",
-				"alias",
 				"project",
-				"spec",
 				"description",
 				"createTime",
+				"name",
+				"alias",
+				"spec",
 				"info"
 			],
 			"properties": {
@@ -12988,8 +14345,14 @@
 		},
 		"v1.HandleApplicationTriggerWebhookRequest": {
 			"properties": {
+				"action": {
+					"type": "string"
+				},
 				"codeInfo": {
 					"$ref": "#/definitions/model.CodeInfo"
+				},
+				"step": {
+					"type": "string"
 				},
 				"upgrade": {
 					"type": "object",
@@ -13112,6 +14475,34 @@
 				}
 			}
 		},
+		"v1.InitAdminRequest": {
+			"required": [
+				"name",
+				"password",
+				"email"
+			],
+			"properties": {
+				"email": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"password": {
+					"type": "string"
+				}
+			}
+		},
+		"v1.InitAdminResponse": {
+			"required": [
+				"success"
+			],
+			"properties": {
+				"success": {
+					"type": "boolean"
+				}
+			}
+		},
 		"v1.InputVar": {
 			"required": [
 				"from",
@@ -13131,6 +14522,65 @@
 				},
 				"value": {
 					"type": "string"
+				}
+			}
+		},
+		"v1.InstallPluginRequest": {
+			"required": [
+				"url"
+			],
+			"properties": {
+				"disable": {
+					"type": "boolean"
+				},
+				"options": {
+					"$ref": "#/definitions/common.HTTPOption"
+				},
+				"url": {
+					"type": "string"
+				}
+			}
+		},
+		"v1.LabelSelector": {
+			"description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.",
+			"properties": {
+				"matchExpressions": {
+					"description": "matchExpressions is a list of label selector requirements. The requirements are ANDed.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.LabelSelectorRequirement"
+					}
+				},
+				"matchLabels": {
+					"description": "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.",
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				}
+			}
+		},
+		"v1.LabelSelectorRequirement": {
+			"description": "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
+			"required": [
+				"key",
+				"operator"
+			],
+			"properties": {
+				"key": {
+					"description": "key is the label key that the selector applies to.",
+					"type": "string"
+				},
+				"operator": {
+					"description": "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.",
+					"type": "string"
+				},
+				"values": {
+					"description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				}
 			}
 		},
@@ -13417,6 +14867,19 @@
 				}
 			}
 		},
+		"v1.ListPluginResponse": {
+			"required": [
+				"plugins"
+			],
+			"properties": {
+				"plugins": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.PluginDTO"
+					}
+				}
+			}
+		},
 		"v1.ListProjectResponse": {
 			"required": [
 				"projects",
@@ -13650,8 +15113,113 @@
 				"projects": {
 					"type": "array",
 					"items": {
-						"$ref": "#/definitions/v1.ProjectBase"
+						"$ref": "#/definitions/v1.UserProjectBase"
 					}
+				}
+			}
+		},
+		"v1.ManagedPluginDTO": {
+			"required": [
+				"subType",
+				"category",
+				"type",
+				"name",
+				"includes",
+				"proxy",
+				"id",
+				"backend",
+				"backendType",
+				"info",
+				"backendService",
+				"class",
+				"defaultNavURL",
+				"module",
+				"baseURL",
+				"enabled",
+				"jsonSetting",
+				"secureJsonFields"
+			],
+			"properties": {
+				"authSecret": {
+					"$ref": "#/definitions/types.KubernetesSecret"
+				},
+				"authType": {
+					"type": "string"
+				},
+				"backend": {
+					"type": "boolean"
+				},
+				"backendService": {
+					"$ref": "#/definitions/types.KubernetesService"
+				},
+				"backendType": {
+					"type": "string"
+				},
+				"baseURL": {
+					"type": "string"
+				},
+				"category": {
+					"type": "string"
+				},
+				"class": {
+					"type": "string"
+				},
+				"defaultNavURL": {
+					"type": "string"
+				},
+				"enabled": {
+					"type": "boolean"
+				},
+				"id": {
+					"type": "string"
+				},
+				"includes": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/types.Includes"
+					}
+				},
+				"info": {
+					"$ref": "#/definitions/types.Info"
+				},
+				"jsonSetting": {
+					"type": "object"
+				},
+				"kubePermissions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.PolicyRule"
+					}
+				},
+				"module": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"proxy": {
+					"type": "boolean"
+				},
+				"requirement": {
+					"$ref": "#/definitions/types.Requirement"
+				},
+				"routes": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/types.Route"
+					}
+				},
+				"secureJsonFields": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "boolean"
+					}
+				},
+				"subType": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
 				}
 			}
 		},
@@ -13683,6 +15251,9 @@
 				"schemaVersion": {
 					"type": "integer",
 					"format": "int64"
+				},
+				"subject": {
+					"$ref": "#/definitions/v1.Descriptor"
 				}
 			}
 		},
@@ -13697,6 +15268,33 @@
 				},
 				"name": {
 					"type": "string"
+				}
+			}
+		},
+		"v1.NamespaceUsage": {
+			"required": [
+				"namespace",
+				"used",
+				"state"
+			],
+			"properties": {
+				"limit": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"namespace": {
+					"type": "string"
+				},
+				"state": {
+					"type": "string"
+				},
+				"used": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"warn": {
+					"type": "integer",
+					"format": "int32"
 				}
 			}
 		},
@@ -13808,11 +15406,11 @@
 		},
 		"v1.PipelineBase": {
 			"required": [
+				"project",
 				"description",
 				"createTime",
 				"name",
 				"alias",
-				"project",
 				"spec"
 			],
 			"properties": {
@@ -13853,11 +15451,11 @@
 		},
 		"v1.PipelineListItem": {
 			"required": [
+				"description",
 				"createTime",
 				"name",
 				"alias",
 				"project",
-				"description",
 				"info"
 			],
 			"properties": {
@@ -13911,11 +15509,11 @@
 		},
 		"v1.PipelineMetaResponse": {
 			"required": [
+				"name",
+				"alias",
 				"project",
 				"description",
-				"createTime",
-				"name",
-				"alias"
+				"createTime"
 			],
 			"properties": {
 				"alias": {
@@ -13938,13 +15536,13 @@
 		},
 		"v1.PipelineRun": {
 			"required": [
-				"spec",
 				"project",
 				"pipelineRunName",
-				"pipelineName",
 				"record",
 				"contextName",
 				"contextValues",
+				"spec",
+				"pipelineName",
 				"status"
 			],
 			"properties": {
@@ -13955,6 +15553,12 @@
 					"type": "array",
 					"items": {
 						"$ref": "#/definitions/model.Value"
+					}
+				},
+				"loops": {
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "#/definitions/v1.PipelineRunLoop"
 					}
 				},
 				"pipelineName": {
@@ -13980,9 +15584,9 @@
 		},
 		"v1.PipelineRunBase": {
 			"required": [
+				"pipelineName",
 				"project",
 				"pipelineRunName",
-				"pipelineName",
 				"record",
 				"contextName",
 				"contextValues",
@@ -14057,6 +15661,34 @@
 				}
 			}
 		},
+		"v1.PipelineRunLoop": {
+			"required": [
+				"mode"
+			],
+			"properties": {
+				"items": {
+					"type": "array",
+					"items": {
+						"type": "object"
+					}
+				},
+				"iterations": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "integer"
+					}
+				},
+				"labels": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"mode": {
+					"type": "string"
+				}
+			}
+		},
 		"v1.PipelineRunMeta": {
 			"required": [
 				"pipelineName",
@@ -14072,6 +15704,65 @@
 				},
 				"project": {
 					"$ref": "#/definitions/v1.NameAlias"
+				}
+			}
+		},
+		"v1.PipelineRunStatus": {
+			"required": [
+				"mode",
+				"status",
+				"suspend",
+				"terminated",
+				"finished"
+			],
+			"properties": {
+				"conditions": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/condition.Condition"
+					}
+				},
+				"contextBackend": {
+					"$ref": "#/definitions/v1.ObjectReference"
+				},
+				"endTime": {
+					"type": "string"
+				},
+				"finished": {
+					"type": "boolean"
+				},
+				"message": {
+					"type": "string"
+				},
+				"mode": {
+					"$ref": "#/definitions/v1alpha1.WorkflowExecuteMode"
+				},
+				"startTime": {
+					"type": "string"
+				},
+				"status": {
+					"type": "string"
+				},
+				"steps": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1alpha1.WorkflowStepStatus"
+					}
+				},
+				"suspend": {
+					"type": "boolean"
+				},
+				"suspendState": {
+					"type": "string"
+				},
+				"terminated": {
+					"type": "boolean"
+				},
+				"loops": {
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "#/definitions/v1.PipelineRunLoop"
+					}
 				}
 			}
 		},
@@ -14104,6 +15795,69 @@
 				},
 				"variant": {
 					"type": "string"
+				}
+			}
+		},
+		"v1.PluginDTO": {
+			"required": [
+				"id",
+				"type",
+				"subType",
+				"name",
+				"info",
+				"includes",
+				"category",
+				"defaultNavURL",
+				"module",
+				"baseURL"
+			],
+			"properties": {
+				"baseURL": {
+					"type": "string"
+				},
+				"category": {
+					"type": "string"
+				},
+				"defaultNavURL": {
+					"type": "string"
+				},
+				"id": {
+					"type": "string"
+				},
+				"includes": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/types.Includes"
+					}
+				},
+				"info": {
+					"$ref": "#/definitions/types.Info"
+				},
+				"module": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"subType": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				}
+			}
+		},
+		"v1.PluginEnableRequest": {
+			"required": [
+				"jsonData",
+				"secureJsonData"
+			],
+			"properties": {
+				"jsonData": {
+					"type": "object"
+				},
+				"secureJsonData": {
+					"type": "object"
 				}
 			}
 		},
@@ -14148,6 +15902,49 @@
 				"updateTime": {
 					"type": "string",
 					"format": "date-time"
+				}
+			}
+		},
+		"v1.PolicyRule": {
+			"description": "PolicyRule holds information that describes a policy rule, but does not contain information about who the rule applies to or which namespace the rule applies to.",
+			"required": [
+				"verbs"
+			],
+			"properties": {
+				"apiGroups": {
+					"description": "APIGroups is the name of the APIGroup that contains the resources.  If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. \"\" represents the core API group and \"*\" represents all API groups.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"nonResourceURLs": {
+					"description": "NonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding. Rules can either apply to API resources (such as \"pods\" or \"secrets\") or non-resource URL paths (such as \"/api\"),  but not both.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"resourceNames": {
+					"description": "ResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"resources": {
+					"description": "Resources is a list of resources this rule applies to. '*' represents all resources.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"verbs": {
+					"description": "Verbs is a list of Verbs that apply to ALL the ResourceKinds contained in this rule. '*' represents all verbs.",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				}
 			}
 		},
@@ -14216,6 +16013,9 @@
 					}
 				}
 			}
+		},
+		"v1.Properties": {
+			"type": "object"
 		},
 		"v1.PutApplicationEnvBindingRequest": {},
 		"v1.RefreshTokenResponse": {
@@ -14426,10 +16226,10 @@
 		},
 		"v1.StepInputBase": {
 			"required": [
-				"id",
-				"name",
 				"type",
 				"phase",
+				"id",
+				"name",
 				"values"
 			],
 			"properties": {
@@ -14455,10 +16255,10 @@
 		},
 		"v1.StepOutputBase": {
 			"required": [
+				"id",
 				"name",
 				"type",
 				"phase",
-				"id",
 				"values"
 			],
 			"properties": {
@@ -14541,9 +16341,9 @@
 		},
 		"v1.SystemInfoResponse": {
 			"required": [
+				"platformID",
 				"enableCollection",
 				"loginType",
-				"platformID",
 				"systemVersion"
 			],
 			"properties": {
@@ -14714,6 +16514,12 @@
 			"properties": {
 				"alias": {
 					"type": "string"
+				},
+				"annotations": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
 				},
 				"description": {
 					"type": "string"
@@ -14991,6 +16797,39 @@
 				}
 			}
 		},
+		"v1.UserProjectBase": {
+			"required": [
+				"name",
+				"alias",
+				"description",
+				"joinTime",
+				"roles"
+			],
+			"properties": {
+				"alias": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"joinTime": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"name": {
+					"type": "string"
+				},
+				"owner": {
+					"$ref": "#/definitions/v1.NameAlias"
+				},
+				"roles": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1.NameAlias"
+					}
+				}
+			}
+		},
 		"v1.VelaQLViewResponse": {
 			"type": "object"
 		},
@@ -15067,14 +16906,14 @@
 		},
 		"v1.WorkflowRecord": {
 			"required": [
-				"name",
-				"workflowName",
 				"status",
-				"message",
 				"mode",
-				"namespace",
+				"workflowName",
+				"applicationRevision",
 				"workflowAlias",
-				"applicationRevision"
+				"message",
+				"name",
+				"namespace"
 			],
 			"properties": {
 				"applicationRevision": {
@@ -15181,6 +17020,9 @@
 				"description": {
 					"type": "string"
 				},
+				"forEach": {
+					"$ref": "#/definitions/v1alpha1.ForEach"
+				},
 				"if": {
 					"type": "string"
 				},
@@ -15192,6 +17034,9 @@
 				},
 				"meta": {
 					"$ref": "#/definitions/v1alpha1.WorkflowStepMeta"
+				},
+				"mode": {
+					"type": "string"
 				},
 				"name": {
 					"type": "string"
@@ -15265,6 +17110,25 @@
 					"type": "string"
 				},
 				"type": {
+					"type": "string"
+				}
+			}
+		},
+		"v1alpha1.ForEach": {
+			"properties": {
+				"from": {
+					"type": "string"
+				},
+				"items": {
+					"type": "object"
+				},
+				"key": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"mode": {
 					"type": "string"
 				}
 			}
@@ -15439,6 +17303,9 @@
 				"meta": {
 					"$ref": "#/definitions/v1alpha1.WorkflowStepMeta"
 				},
+				"mode": {
+					"type": "string"
+				},
 				"name": {
 					"type": "string"
 				},
@@ -15554,7 +17421,6 @@
 		},
 		"v1beta1.AppPolicy": {
 			"required": [
-				"name",
 				"type"
 			],
 			"properties": {
@@ -15566,6 +17432,42 @@
 				},
 				"type": {
 					"type": "string"
+				}
+			}
+		},
+		"v1beta1.ApplicationSource": {
+			"required": [
+				"name",
+				"type"
+			],
+			"properties": {
+				"autoUpdate": {
+					"type": "boolean"
+				},
+				"name": {
+					"type": "string"
+				},
+				"properties": {
+					"type": "string"
+				},
+				"statusPolicy": {
+					"$ref": "#/definitions/v1beta1.ApplicationSourceStatusPolicy"
+				},
+				"type": {
+					"type": "string"
+				}
+			}
+		},
+		"v1beta1.ApplicationSourceStatusPolicy": {
+			"properties": {
+				"exposeConsumedValues": {
+					"type": "boolean"
+				},
+				"maskPaths": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				}
 			}
 		},
@@ -15586,6 +17488,12 @@
 						"$ref": "#/definitions/v1beta1.AppPolicy"
 					}
 				},
+				"sources": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/v1beta1.ApplicationSource"
+					}
+				},
 				"workflow": {
 					"$ref": "#/definitions/v1beta1.Workflow"
 				}
@@ -15596,17 +17504,26 @@
 				"workload"
 			],
 			"properties": {
+				"abstract": {
+					"type": "boolean"
+				},
 				"childResourceKinds": {
 					"type": "array",
 					"items": {
 						"$ref": "#/definitions/common.ChildResourceKind"
 					}
 				},
+				"extends": {
+					"type": "string"
+				},
 				"extension": {
 					"type": "string"
 				},
 				"podSpecPath": {
 					"type": "string"
+				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
 				},
 				"revisionLabel": {
 					"type": "string"
@@ -15616,6 +17533,9 @@
 				},
 				"status": {
 					"$ref": "#/definitions/common.Status"
+				},
+				"version": {
+					"type": "string"
 				},
 				"workload": {
 					"$ref": "#/definitions/common.WorkloadTypeDescriptor"
@@ -15627,16 +17547,35 @@
 				"definitionRef": {
 					"$ref": "#/definitions/common.DefinitionReference"
 				},
+				"global": {
+					"type": "boolean"
+				},
 				"manageHealthCheck": {
 					"type": "boolean"
 				},
+				"priority": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
+				},
 				"schematic": {
 					"$ref": "#/definitions/common.Schematic"
+				},
+				"scope": {
+					"type": "string"
+				},
+				"version": {
+					"type": "string"
 				}
 			}
 		},
 		"v1beta1.TraitDefinitionSpec": {
 			"properties": {
+				"abstract": {
+					"type": "boolean"
+				},
 				"appliesToWorkloads": {
 					"type": "array",
 					"items": {
@@ -15655,6 +17594,9 @@
 				"definitionRef": {
 					"$ref": "#/definitions/common.DefinitionReference"
 				},
+				"extends": {
+					"type": "string"
+				},
 				"extension": {
 					"type": "string"
 				},
@@ -15663,6 +17605,9 @@
 				},
 				"podDisruptive": {
 					"type": "boolean"
+				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
 				},
 				"revisionEnabled": {
 					"type": "boolean"
@@ -15675,6 +17620,9 @@
 				},
 				"status": {
 					"$ref": "#/definitions/common.Status"
+				},
+				"version": {
+					"type": "string"
 				},
 				"workloadRefPath": {
 					"type": "string"
@@ -15702,8 +17650,14 @@
 				"definitionRef": {
 					"$ref": "#/definitions/common.DefinitionReference"
 				},
+				"restrictions": {
+					"$ref": "#/definitions/common.DefinitionRestrictions"
+				},
 				"schematic": {
 					"$ref": "#/definitions/common.Schematic"
+				},
+				"version": {
+					"type": "string"
 				}
 			}
 		}

@@ -44,3 +44,4 @@ e2e-plugins
 
 npm-artifacts
 bin
+coverage*

@@ -1,132 +1,179 @@
-import { Balloon, Card, Dialog, Grid } from '@alifd/next';
-import React, { Component } from 'react';
+import { Dialog } from '@alifd/next';
+import { TypeLabel } from '../../../../components/TypeLabel';
+import React, { useState } from 'react';
+import { RelativeTime } from '../../../../components/RelativeTime';
+import { AiOutlineControl, AiOutlineDelete, AiOutlineDown, AiOutlineEdit, AiOutlineRight } from 'react-icons/ai';
 
-import { If } from '../../../../components/If';
-import Item from '../../../../components/Item';
-import Permission from '../../../../components/Permission';
-import type { ApplicationDetail, ApplicationPolicyBase, EnvBinding } from '@velaux/data';
-import { beautifyTime, momentDate } from '../../../../utils/common';
-import './index.less';
 import Empty from '../../../../components/Empty';
+import Permission from '../../../../components/Permission';
+import { PolicyScopeTag } from '../../../../components/PolicyScopeTag';
+import { flattenProperties, PropertyList } from '../../../../components/RowList';
+import { RowAction } from '../../../../components/RowAction';
+import type { Tone } from '../../../../components/StatusBadge';
+import { StatusBadge } from '../../../../components/StatusBadge';
 import { Translation } from '../../../../components/Translation';
+import type { ApplicationDetail, ApplicationEnvStatus, ApplicationPolicyBase, EnvBinding } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
-import { AiOutlineDelete } from 'react-icons/ai';
+import type { PolicyRow, PolicyState } from '../../../../utils/policies';
+import { policyRows, policyState, policyStateLabel } from '../../../../utils/policies';
+import './index.less';
 
 type Props = {
   policies?: ApplicationPolicyBase[];
+  // statuses carry how each environment's Application applied its policies,
+  // and the global policies it received, which the application does not own.
+  statuses?: ApplicationEnvStatus[];
+  // policyScopes maps a policy type to how KubeVela applies it.
+  policyScopes?: Record<string, string>;
   envbinding?: EnvBinding[];
   applicationDetail?: ApplicationDetail;
   onDeletePolicy: (name: string) => void;
   onShowPolicy: (name: string) => void;
 };
 
-type State = {};
+const stateTone: Record<PolicyState, Tone> = {
+  applied: 'healthy',
+  skipped: 'neutral',
+  error: 'failed',
+};
 
-class PolicyList extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {};
-  }
+const rowKey = (row: PolicyRow) => `${row.global}-${row.envName}-${row.name}`;
 
-  handlePolicyDelete = (name: string) => {
+// PolicyList lists an application's policies as rows, then the global
+// policies its environments received: each one's scope, environment, and how
+// it fared where KubeVela reports it. A row expands to its properties and the
+// reason it was skipped or failed.
+const PolicyList = (props: Props) => {
+  const { policies, statuses, policyScopes, envbinding, applicationDetail } = props;
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const toggle = (key: string) => setOpen({ ...open, [key]: !open[key] });
+  const envAlias = (name?: string) => envbinding?.find((e) => e.name === name)?.alias || name;
+  const projectName = applicationDetail?.project?.name;
+  const confirmDelete = (name: string) =>
     Dialog.alert({
       content: 'Are you sure want to delete this policy?',
-      onOk: () => {
-        this.props.onDeletePolicy(name);
-      },
-      onClose: () => {},
+      onOk: () => props.onDeletePolicy(name),
       locale: locale().Dialog,
     });
-  };
 
-  render() {
-    const { Row, Col } = Grid;
-    const { policies, envbinding, applicationDetail } = this.props;
-    const envNameAlias: any = {};
-    envNameAlias[''] = '-';
-    envbinding?.map((item) => {
-      envNameAlias[item.name] = item.alias;
-    });
-    const projectName = applicationDetail && applicationDetail.project?.name;
-    return (
-      <div className="list-warper">
-        <div className="box">
-          <Row wrap={true}>
-            {(policies || []).map((item: ApplicationPolicyBase) => (
-              <Col span={24} key={item.type + item.name} className="box-item">
-                <Card free={true} style={{ padding: '16px' }} hasBorder contentHeight="auto" locale={locale().Card}>
-                  <div className="policy-list-nav">
-                    <div className="policy-list-title">
-                      <a onClick={() => this.props.onShowPolicy(item.name)}>
-                        <Balloon trigger={<span>{item.alias ? item.alias : item.name}</span>}>
-                          {item.description}
-                        </Balloon>
-                      </a>
-                    </div>
-                    <div className="trigger-list-operation">
+  const rows = policyRows(policies, statuses);
+  if (rows.length === 0) {
+    return <Empty message={<Translation>There are no policies</Translation>} />;
+  }
+  return (
+    <div className="row-list policy-list">
+      <div className="row-list-head">
+        <span />
+        <span>
+          <Translation>Name</Translation>
+        </span>
+        <span>
+          <Translation>Scope</Translation>
+        </span>
+        <span>
+          <Translation>Environment</Translation>
+        </span>
+        <span>
+          <Translation>State</Translation>
+        </span>
+        <span>
+          <Translation>Create Time</Translation>
+        </span>
+        <span />
+      </div>
+      {rows.map((row) => {
+        const key = rowKey(row);
+        const expanded = !!open[key];
+        const state = row.applied && policyState(row.applied);
+        const reason = row.applied?.message;
+        return (
+          <div key={key} className={`row-list-row ${expanded ? 'expanded' : ''}`}>
+            <div className="row-list-main">
+              <span className="row-list-chevron" onClick={() => toggle(key)}>
+                {expanded ? <AiOutlineDown /> : <AiOutlineRight />}
+              </span>
+              <span className="row-list-name" onClick={() => toggle(key)}>
+                <AiOutlineControl className="row-list-icon" />
+                <span>
+                  <span className="row-list-title">{row.policy?.alias || row.name}</span>
+                  <TypeLabel className="row-list-type" type={row.type} />
+                </span>
+              </span>
+              <span className="policy-list-scope">
+                <PolicyScopeTag scope={row.global ? 'Application' : (policyScopes || {})[row.type || '']} />
+                {row.global && (
+                  <span className="policy-list-global">
+                    <Translation>Global</Translation>
+                  </span>
+                )}
+              </span>
+              <span>{row.envName ? envAlias(row.envName) : <span className="row-list-muted">-</span>}</span>
+              <span>
+                {state ? (
+                  <StatusBadge tone={stateTone[state]} label={policyStateLabel[state]} title={reason} />
+                ) : (
+                  <span className="row-list-muted">-</span>
+                )}
+              </span>
+              <span>
+                {row.policy ? <RelativeTime time={row.policy.createTime} /> : <span className="row-list-muted">-</span>}
+              </span>
+              <span className="row-list-actions">
+                {row.policy && (
+                  <React.Fragment>
+                    {!applicationDetail?.readOnly && (
+                      <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => props.onShowPolicy(row.name)} />
+                    )}
+                    {!applicationDetail?.readOnly && (
                       <Permission
                         request={{
-                          resource: `project:${projectName}/application:${applicationDetail?.name}/policy:${item.name}`,
+                          resource: `project:${projectName}/application:${applicationDetail?.name}/policy:${row.name}`,
                           action: 'delete',
                         }}
                         project={projectName}
                       >
-                        <AiOutlineDelete
-                          size={14}
-                          className="margin-right-0 cursor-pointer danger-icon"
-                          onClick={() => {
-                            this.handlePolicyDelete(item.name);
-                          }}
+                        <RowAction
+                          icon={<AiOutlineDelete />}
+                          label="Delete"
+                          danger
+                          onClick={() => confirmDelete(row.name)}
                         />
                       </Permission>
-                    </div>
-                  </div>
-                  <div className="policy-list-content">
-                    <Row wrap={true}>
-                      <Col span={24}>
-                        <Item
-                          marginBottom="8px"
-                          labelWidth={160}
-                          label={<Translation>Type</Translation>}
-                          value={item.type}
-                        />
-                      </Col>
-                      <Col span={24}>
-                        <Item
-                          marginBottom="8px"
-                          labelWidth={160}
-                          label={<Translation>Environment</Translation>}
-                          value={envNameAlias[item.envName || '']}
-                        />
-                      </Col>
-                      <Col span={24}>
-                        <Item
-                          marginBottom="8px"
-                          labelWidth={160}
-                          label={<Translation>Create Time</Translation>}
-                          value={<span title={momentDate(item.createTime)}>{beautifyTime(item.createTime)}</span>}
-                        />
-                      </Col>
-                    </Row>
-                  </div>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-          <If condition={!policies || policies.length == 0}>
-            <Empty
-              style={{ minHeight: '400px' }}
-              message={
-                <span>
-                  <Translation>There are no policies</Translation>
-                </span>
-              }
-            />
-          </If>
-        </div>
-      </div>
-    );
-  }
-}
+                    )}
+                  </React.Fragment>
+                )}
+              </span>
+            </div>
+            {expanded && (
+              <div className="row-list-detail">
+                {row.policy?.description && <p className="row-list-description">{row.policy.description}</p>}
+                {reason && <p className="row-list-description">{reason}</p>}
+                {row.global && row.applied?.namespace && (
+                  <p className="row-list-description">
+                    <Translation>From namespace</Translation> {row.applied.namespace}
+                  </p>
+                )}
+                <div className="row-list-detail-title">
+                  <Translation>Properties</Translation>
+                </div>
+                {row.policy && flattenProperties(row.policy.properties).length > 0 ? (
+                  <PropertyList properties={row.policy.properties} />
+                ) : (
+                  <span className="row-list-muted">
+                    {row.global ? (
+                      <Translation>A global policy, managed outside this application</Translation>
+                    ) : (
+                      <Translation>No properties</Translation>
+                    )}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export default PolicyList;

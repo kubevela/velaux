@@ -16,8 +16,11 @@ import {
 import Empty from '../../components/Empty';
 import { If } from '../../components/If';
 import PipelineGraph from '../../components/PipelineGraph';
+import { groupMode, runMode } from '../../components/PipelineGraph/dependencies';
+import { withLoops } from '../../components/PipelineGraph/loop';
 import { Translation } from '../../components/Translation';
-import type { WorkflowStepStatus ,
+import type {
+  WorkflowStepStatus,
   PipelineDetail,
   PipelineRunBase,
   PipelineRunStatus,
@@ -286,7 +289,10 @@ class PipelineRunPage extends Component<Props, State> {
             {runStatus && (
               <PipelineGraph
                 name={`${runBase?.pipelineRunName}`}
-                steps={runStatus.steps}
+                spec={runBase?.spec.workflowSpec.steps}
+                mode={runMode(undefined, runBase?.spec.mode?.steps)}
+                subMode={groupMode(undefined, undefined, runBase?.spec.mode?.subSteps)}
+                steps={withLoops(runStatus.steps || [], runStatus.loops)}
                 zoom={1}
                 onNodeClick={this.onStepClick}
               />

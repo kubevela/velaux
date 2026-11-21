@@ -1,4 +1,3 @@
-import { Grid } from '@alifd/next';
 import { connect } from 'dva';
 import React, { Component } from 'react';
 
@@ -61,7 +60,6 @@ class DefinitionsLayout extends Component<Props, State> {
   };
 
   render() {
-    const { Row, Col } = Grid;
     const { definitionTypes } = this.state;
     const { activeType } = this.state;
     return (
@@ -74,12 +72,8 @@ class DefinitionsLayout extends Component<Props, State> {
           <Empty style={{ marginTop: '40px' }} />
         </If>
         <If condition={activeType}>
-          <Row>
-            <Col span="5">
-              <Menu activeType={activeType} definitionTypes={definitionTypes} />
-            </Col>
-            <Col span="19">{this.props.children}</Col>
-          </Row>
+          <Menu activeType={activeType} definitionTypes={definitionTypes} />
+          {this.props.children}
         </If>
       </div>
     );

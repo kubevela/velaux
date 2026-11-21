@@ -2,12 +2,7 @@ import * as monaco from 'monaco-editor';
 import React, { useEffect } from 'react';
 
 import defineTheme from '../DefinitionCode/theme';
-export const DiffEditor = (props: {
-  id: string;
-  base: string;
-  target: string;
-  language?: string;
-}) => {
+export const DiffEditor = (props: { id: string; base: string; target: string; language?: string }) => {
   const { language = 'yaml', base, target, id } = props;
   useEffect(() => {
     const container: any = document.getElementById(id);

@@ -10,7 +10,7 @@ jobs:
   runs-on: ubuntu-latest
   steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@6ccd57f4c5d15bdc2fef309bd9fb6cc9db2ef1c6
 
     - name: Build Vela Core image from Dockerfile
       run: |
@@ -23,7 +23,7 @@ jobs:
         output: 'trivy-results.sarif'
 
     - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v1
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'

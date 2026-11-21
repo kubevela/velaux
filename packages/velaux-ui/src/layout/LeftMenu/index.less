@@ -1,37 +1,67 @@
-.menu-item {
+// The navigation reads as a quiet column: muted items, a soft tint on hover,
+// and the current page marked by a tinted pill with an accent bar.
+@nav-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+.menu-item,
+.menu-item-active {
+  position: relative;
   display: block;
-  padding: 8px 0 8px 32px;
+  margin: 2px 12px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--sb-muted);
+    transition: color 0.15s ease;
+  }
+}
+
+.menu-item:hover {
+  color: var(--sb-text-strong) !important;
+  background-color: var(--sb-hover);
+  svg {
+    color: var(--sb-text-strong);
+  }
 }
 
 .menu-item-active {
-  display: block;
-  padding: 8px 0 8px 32px;
-  color: #fff !important;
-  background-image: linear-gradient(to right, #0830f1, #1b242f);
+  color: var(--sb-active-text) !important;
+  background-color: var(--sb-active);
+  &::before {
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: -12px;
+    width: 3px;
+    background-color: var(--sb-accent);
+    border-radius: 0 3px 3px 0;
+    content: '';
+  }
+  svg {
+    color: var(--sb-accent);
+  }
 }
 
 .menu-item-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .menu-item-text {
   flex: initial;
-  height: 16px;
-  margin-left: 6px;
+  margin-left: 12px;
+  font-weight: 500;
   font-size: 14px;
-  font-family: SFProText-Medium;
-  line-height: 16px;
-  letter-spacing: 0;
-}
-.menu-item:hover {
-  color: #fff !important;
-  background-image: linear-gradient(to right, #0830f1, #1b242f);
+  font-family: @nav-font;
+  line-height: 20px;
+  letter-spacing: 0.1px;
 }
 
 .menu-item-text-active {
-  color: #fff !important;
-  background-image: linear-gradient(to right, #0830f1, #1b242f);
+  color: var(--sb-text-strong) !important;
 }
 
 a:hover {
@@ -53,35 +83,41 @@ a:hover {
 .slide-wrapper {
   display: flex;
   flex-direction: column;
+  font-family: @nav-font;
   a:link {
-    color: rgb(211, 204, 204) !important;
+    color: var(--sb-text) !important;
   }
   ul,
   li {
     list-style: none;
     a {
-      color: rgb(211, 204, 204);
+      color: var(--sb-text);
     }
   }
   .first-nav {
-    color: #87878a;
+    color: var(--sb-muted);
   }
   .nav-container {
-    color: #87878a;
+    color: var(--sb-muted);
     .main-nav {
-      height: 24px;
-      margin-bottom: 6px;
-      font-size: 14px;
-      line-height: 24px;
+      height: auto;
+      margin: 0 0 6px;
+      padding-left: 26px !important;
+      color: var(--sb-muted);
+      font-weight: 600;
+      font-size: 11px;
+      line-height: 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
     .sub-wrapper {
       margin-bottom: 20px;
     }
   }
   .ul-wrapper {
-    font-size: 16px;
+    font-size: 14px;
     ul {
-      font-size: 16px;
+      font-size: 14px;
     }
     .remote,
     .next-icon.next-medium::before {
@@ -98,4 +134,19 @@ a:hover {
   p {
     color: #fff;
   }
+}
+
+// An item not built yet: greyed out, leading nowhere.
+.menu-item-coming-soon {
+  display: block;
+  cursor: default;
+  opacity: 0.45;
+}
+
+.menu-item-hint-name {
+  font-weight: 600;
+}
+.menu-item-hint-name + .menu-item-hint-soon {
+  margin-top: 2px;
+  opacity: 0.75;
 }

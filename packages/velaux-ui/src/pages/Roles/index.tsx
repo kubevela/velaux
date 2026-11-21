@@ -1,5 +1,7 @@
 import { Button, Dialog, Message, Pagination, Table } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
+import { RowAction } from '../../components/RowAction';
+import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 
 import { getPlatformPermissions } from '../../api/rbac';
 import { deleteRole, getRoleList } from '../../api/roles';
@@ -14,8 +16,7 @@ import './index.less';
 
 import RolesDialog from './components/RolesDialog';
 
-interface Props {
-}
+interface Props {}
 
 type State = {
   list: RolesBase[];
@@ -169,29 +170,24 @@ class Roles extends Component<Props, State> {
           return (
             <Fragment>
               <Permission request={{ resource: `role:${record.name}`, action: 'update' }} project={''}>
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineEdit />}
+                  label="Edit"
                   onClick={() => {
                     this.onEdit(record);
                   }}
-                >
-                  <Translation>Edit</Translation>
-                </Button>
+                />
               </Permission>
 
               <Permission request={{ resource: `role:${record.name}`, action: 'delete' }} project={''}>
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
+                <RowAction
+                  icon={<AiOutlineDelete />}
+                  label="Delete"
+                  danger
                   onClick={() => {
                     this.onDelete(record);
                   }}
-                >
-                  <Translation>Delete</Translation>
-                </Button>
+                />
               </Permission>
             </Fragment>
           );

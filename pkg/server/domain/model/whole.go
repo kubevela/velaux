@@ -42,6 +42,8 @@ const (
 	LabelSyncRevision = "ux.oam.dev/synced-revision"
 	// LabelSyncNamespace describes the namespace synced from
 	LabelSyncNamespace = "ux.oam.dev/from-namespace"
+	// LabelSyncAddon names the addon a synced application installs.
+	LabelSyncAddon = "ux.oam.dev/addon"
 )
 
 const (

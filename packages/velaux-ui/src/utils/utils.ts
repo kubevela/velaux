@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import { isUsable } from './restrictions';
 
-import type { ComponentDefinitionsBase,Endpoint  } from '@velaux/data';
+import type { ComponentDefinitionsBase, Endpoint } from '@velaux/data';
 
 type SelectGroupType = Array<{
   label: string;
@@ -31,9 +32,23 @@ export function quantityToScalar(quantity: string): number | bigint {
   }
   switch (suffix) {
     case 'n':
-      return Number(quantity.substr(0, quantity.length - 1)).valueOf() / 100_000_000.0;
+      return Number(quantity.substr(0, quantity.length - 1)).valueOf() / 1_000_000_000.0;
+    case 'u':
+      return Number(quantity.substr(0, quantity.length - 1)).valueOf() / 1_000_000.0;
     case 'm':
       return Number(quantity.substr(0, quantity.length - 1)).valueOf() / 1000.0;
+    case 'k':
+      return BigInt(quantity.substr(0, quantity.length - 1)) * BigInt(1000);
+    case 'M':
+      return BigInt(quantity.substr(0, quantity.length - 1)) * BigInt(1000 * 1000);
+    case 'G':
+      return BigInt(quantity.substr(0, quantity.length - 1)) * BigInt(1000 * 1000 * 1000);
+    case 'T':
+      return BigInt(quantity.substr(0, quantity.length - 1)) * BigInt(1000 * 1000 * 1000) * BigInt(1000);
+    case 'P':
+      return BigInt(quantity.substr(0, quantity.length - 1)) * BigInt(1000 * 1000 * 1000) * BigInt(1000 * 1000);
+    case 'E':
+      return BigInt(quantity.substr(0, quantity.length - 1)) * BigInt(1000 * 1000 * 1000) * BigInt(1000 * 1000 * 1000);
     case 'Ki':
       return BigInt(quantity.substr(0, quantity.length - 2)) * BigInt(1024);
     case 'Mi':
@@ -41,26 +56,18 @@ export function quantityToScalar(quantity: string): number | bigint {
     case 'Gi':
       return BigInt(quantity.substr(0, quantity.length - 2)) * BigInt(1024 * 1024 * 1024);
     case 'Ti':
-      return (
-        BigInt(quantity.substr(0, quantity.length - 2)) * BigInt(1024 * 1024 * 1024) * BigInt(1024)
-      );
+      return BigInt(quantity.substr(0, quantity.length - 2)) * BigInt(1024 * 1024 * 1024) * BigInt(1024);
     case 'Pi':
-      return (
-        BigInt(quantity.substr(0, quantity.length - 2)) *
-        BigInt(1024 * 1024 * 1024) *
-        BigInt(1024 * 1024)
-      );
+      return BigInt(quantity.substr(0, quantity.length - 2)) * BigInt(1024 * 1024 * 1024) * BigInt(1024 * 1024);
     case 'Ei':
-      return (
-        BigInt(quantity.substr(0, quantity.length - 2)) *
-        BigInt(1024 * 1024 * 1024) *
-        BigInt(1024 * 1024 * 1024)
-      );
+      return BigInt(quantity.substr(0, quantity.length - 2)) * BigInt(1024 * 1024 * 1024) * BigInt(1024 * 1024 * 1024);
     default:
       throw new Error(`Unknown suffix: ${suffix}`);
   }
 }
 
+// transComponentDefinitions groups component types for a picker, leaving out
+// those the application's namespaces may not use, and any group left empty.
 export function transComponentDefinitions(componentDefinitions: ComponentDefinitionsBase[]) {
   const defaultCoreDataSource = ['k8s-objects', 'task', 'webservice', 'worker'];
   const cloud: SelectGroupType = [
@@ -81,25 +88,16 @@ export function transComponentDefinitions(componentDefinitions: ComponentDefinit
       children: [],
     },
   ];
-  (componentDefinitions || []).map((item: { name: string; workloadType?: string }) => {
+  (componentDefinitions || []).filter(isUsable).map((item: { name: string; workloadType?: string }) => {
     if (item.workloadType === 'configurations.terraform.core.oam.dev') {
-      cloud[0].children.push({
-        label: item.name,
-        value: item.name,
-      });
+      cloud[0].children.push({ label: item.name, value: item.name });
     } else if (defaultCoreDataSource.includes(item.name)) {
-      core[0].children.push({
-        label: item.name,
-        value: item.name,
-      });
+      core[0].children.push({ label: item.name, value: item.name });
     } else {
-      custom[0].children.push({
-        label: item.name,
-        value: item.name,
-      });
+      custom[0].children.push({ label: item.name, value: item.name });
     }
   });
-  return [...core, ...custom, ...cloud];
+  return [...core, ...custom, ...cloud].filter((group) => group.children.length > 0);
 }
 
 export function getLink(endpointObj: Endpoint) {
@@ -128,6 +126,9 @@ export function getLink(endpointObj: Endpoint) {
 }
 
 export function getValue(key: string, value: any): any {
+  if (!value) {
+    return null;
+  }
   if (key.indexOf('.') > -1) {
     const currentKey: string = key.substring(0, key.indexOf('.'));
     const nextKey: string = key.substring(key.indexOf('.') + 1);
@@ -139,9 +140,7 @@ export function getValue(key: string, value: any): any {
   return value[key];
 }
 
-export function getSelectLabel(
-  data: Array<{ name: string; alias?: string }>,
-): Array<{ label: string; value: string }> {
+export function getSelectLabel(data: Array<{ name: string; alias?: string }>): Array<{ label: string; value: string }> {
   return (data || []).map((item: { name: string; alias?: string }) => {
     return { label: item.alias || item.name, value: item.name };
   });
@@ -197,8 +196,8 @@ export function getBrowserNameAndVersion() {
 }
 
 export function downloadStringFile(content: string, filename: string) {
-  const element = document.createElement("a");
-  const file = new Blob([content], {type: 'text/plain'});
+  const element = document.createElement('a');
+  const file = new Blob([content], { type: 'text/plain' });
   element.href = URL.createObjectURL(file);
   element.download = filename;
   document.body.appendChild(element);

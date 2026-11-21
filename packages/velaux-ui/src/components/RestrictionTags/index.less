@@ -1,0 +1,24 @@
+.restriction-tags {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.restriction-tag {
+  cursor: help;
+}
+
+// Balloons render in a portal on the body, outside the table's stylesheet.
+.restriction-tags-popup {
+  .restriction-tags-heading {
+    margin-bottom: 4px;
+    color: #8c8c8c;
+    font-size: 12px;
+  }
+  ul {
+    margin: 0;
+    padding-left: 16px;
+  }
+  li {
+    line-height: 20px;
+  }
+}

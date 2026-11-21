@@ -1,13 +1,18 @@
-import { Table, Button, Message } from '@alifd/next';
+import { Table, Message, Tag, Balloon } from '@alifd/next';
+import i18n from 'i18next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
 import _ from 'lodash';
+import { AiOutlineCheckCircle, AiOutlinePieChart, AiOutlineStop } from 'react-icons/ai';
 import React, { Component, Fragment } from 'react';
+import { RowAction } from '../../components/RowAction';
 
 import { getDefinitionsList, updateDefinitionStatus } from '../../api/definitions';
 import Permission from '../../components/Permission';
+import { RestrictionTags } from '../../components/RestrictionTags';
+import { StatusBadge } from '../../components/StatusBadge';
 import { Translation } from '../../components/Translation';
-import type { DefinitionBase , LoginUserInfo } from '@velaux/data';
+import type { DefinitionBase, DefinitionRestrictions, LoginUserInfo } from '@velaux/data';
 
 // import { momentDate } from '../../utils/common';
 
@@ -15,9 +20,14 @@ import { locale } from '../../utils/locale';
 import { getMatchParamObj } from '../../utils/utils';
 
 import SelectSearch from './components/SelectSearch';
+import { PolicyScopeTag } from '../../components/PolicyScopeTag';
+import { UsageDialog } from './components/UsageDialog';
 
 import './index.less';
 import { checkPermission } from '../../utils/permission';
+import { projectChanged } from '../../utils/currentProject';
+import type { DefinitionPlace } from '../../utils/definitionPlace';
+import { definitionPlaceQuery, definitionResource } from '../../utils/definitionPlace';
 
 type Props = {
   match: {
@@ -26,6 +36,7 @@ type Props = {
     };
   };
   userInfo?: LoginUserInfo;
+  currentProject?: { current: string; resolved: boolean };
 };
 
 type State = {
@@ -34,10 +45,12 @@ type State = {
   isLoading: boolean;
   searchValue: string;
   searchList: DefinitionBase[];
+  // usageOf is the definition whose quota usage is shown.
+  usageOf?: DefinitionBase;
 };
 
 @connect((store: any) => {
-  return { ...store.definitions, ...store.user };
+  return { ...store.definitions, ...store.user, currentProject: store.currentProject };
 })
 class Definitions extends Component<Props, State> {
   constructor(props: Props) {
@@ -55,6 +68,13 @@ class Definitions extends Component<Props, State> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
+    // The list waits on the user and their permissions, which load after the page.
+    if (
+      nextProps.userInfo !== this.props.userInfo ||
+      projectChanged(this.props.currentProject, nextProps.currentProject)
+    ) {
+      this.lisDefinitions(nextProps.userInfo, nextProps.currentProject);
+    }
     const nextPropsParams = nextProps.match.params || {};
     if (nextPropsParams.definitionType !== this.state.definitionType) {
       this.setState(
@@ -68,16 +88,28 @@ class Definitions extends Component<Props, State> {
     }
   }
 
-  lisDefinitions() {
-    const { userInfo } = this.props;
+  // project is the one picked in the top bar: its own definitions are listed
+  // with the global ones. Every project at once lists the global ones alone.
+  project = (currentProject = this.props.currentProject) => (currentProject?.resolved ? currentProject.current : '');
+
+  // place is where a listed definition is.
+  place = (record: DefinitionBase): DefinitionPlace => ({
+    project: this.project(),
+    where: record.scope === 'project' ? 'project' : 'global',
+  });
+
+  lisDefinitions(userInfo = this.props.userInfo, currentProject = this.props.currentProject) {
     const { definitionType } = this.state;
     if (!definitionType) {
       return;
     }
-    if (!checkPermission({ resource: 'definition:*', action: 'list' }, '', userInfo)) {
+    const project = this.project(currentProject);
+    const resource = project ? `project:${project}/definition:*` : 'definition:*';
+    if (!checkPermission({ resource, action: 'list' }, project, userInfo)) {
       return;
     }
     const params = {
+      project,
       definitionType,
       queryAll: true,
     };
@@ -107,19 +139,11 @@ class Definitions extends Component<Props, State> {
     return getMatchParamObj(this.props.match, 'definitionType');
   };
 
-  showStatus = (record: DefinitionBase) => {
-    if (record.status === 'enable') {
-      return <Translation>Disable</Translation>;
-    } else {
-      return <Translation>Enable</Translation>;
-    }
-  };
-
   onChangeStatus = (record: DefinitionBase) => {
     const { definitionType } = this.state;
     const { status, name } = record;
     if (status === 'enable') {
-      updateDefinitionStatus({ name, hiddenInUI: true, type: definitionType })
+      updateDefinitionStatus({ ...this.place(record), name, hiddenInUI: true, type: definitionType })
         .then((res) => {
           if (res) {
             Message.success(<Translation>Update definition status success</Translation>);
@@ -128,7 +152,7 @@ class Definitions extends Component<Props, State> {
         })
         .catch();
     } else {
-      updateDefinitionStatus({ name, hiddenInUI: false, type: definitionType })
+      updateDefinitionStatus({ ...this.place(record), name, hiddenInUI: false, type: definitionType })
         .then((res) => {
           if (res) {
             Message.success(<Translation>Update definition status success</Translation>);
@@ -160,15 +184,62 @@ class Definitions extends Component<Props, State> {
   };
 
   render() {
-    const { definitionType, isLoading, searchValue } = this.state;
+    const { definitionType, isLoading, searchValue, usageOf } = this.state;
     const columns = [
       {
         key: 'name',
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
-        cell: (v: string) => {
-          return <Link to={`/definitions/${definitionType}/${v}/ui-schema`}>{v}</Link>;
+        cell: (v: string, i: number, record: DefinitionBase) => {
+          return (
+            <span className="definition-name">
+              <Link to={`/definitions/${definitionType}/${v}/doc${definitionPlaceQuery(this.place(record))}`}>{v}</Link>
+              {record.abstract && (
+                <Tag size="small" className="definition-abstract">
+                  <Translation>Abstract</Translation>
+                </Tag>
+              )}
+              {record.extends && (
+                <span className="definition-extends">
+                  <Translation>extends</Translation> {record.extends}
+                </span>
+              )}
+              {record.policyScope && <PolicyScopeTag scope={record.policyScope} />}
+              {record.policy?.global && (
+                // A global policy applies to every Application in its namespace, in priority order.
+                <Balloon.Tooltip
+                  align="t"
+                  trigger={
+                    <Tag size="small" className="definition-tag-help">
+                      <Translation>Global</Translation>
+                    </Tag>
+                  }
+                >
+                  {i18n.t('Applied to every Application in its namespace')} ({i18n.t('priority')}{' '}
+                  {record.policy.priority || 0})
+                </Balloon.Tooltip>
+              )}
+            </span>
+          );
         },
+      },
+      {
+        key: 'where',
+        title: <Translation>Where</Translation>,
+        dataIndex: 'scope',
+        cell: (v: string, i: number, record: DefinitionBase) => (
+          <span>
+            <StatusBadge
+              tone={v === 'project' ? 'progressing' : 'neutral'}
+              label={v === 'project' ? 'Project' : 'Global'}
+            />
+            {record.overridden && (
+              <span className="definition-overridden">
+                <Translation>{"overridden by the project's"}</Translation>
+              </span>
+            )}
+          </span>
+        ),
       },
       {
         key: 'status',
@@ -182,9 +253,16 @@ class Definitions extends Component<Props, State> {
           const findStatus = _.find(enumStatusList, (item) => {
             return item.name === v;
           });
-          const colorClass = (findStatus && findStatus.color) || '';
-          return <span className={`${colorClass}`}>{findStatus && findStatus.status}</span>;
+          return findStatus ? (
+            <StatusBadge tone={findStatus.name === 'enable' ? 'healthy' : 'neutral'} label={findStatus.status} />
+          ) : null;
         },
+      },
+      {
+        key: 'restrictions',
+        title: <Translation>Restrictions</Translation>,
+        dataIndex: 'restrictions',
+        cell: (v?: DefinitionRestrictions) => <RestrictionTags restrictions={v} />,
       },
       // {
       //   key: 'createTime',
@@ -203,22 +281,31 @@ class Definitions extends Component<Props, State> {
             <Fragment>
               <Permission
                 request={{
-                  resource: `definition:${record.name}`,
+                  resource: definitionResource(this.place(record), record.name),
                   action: 'update',
                 }}
-                project={''}
+                project={this.place(record).where === 'project' ? this.project() : ''}
               >
-                <Button
-                  text
-                  size={'medium'}
-                  component={'a'}
-                  onClick={() => {
-                    this.onChangeStatus(record);
-                  }}
-                >
-                  {this.showStatus(record)}
-                </Button>
+                <RowAction
+                  icon={record.status === 'enable' ? <AiOutlineStop /> : <AiOutlineCheckCircle />}
+                  label={record.status === 'enable' ? 'Disable' : 'Enable'}
+                  danger={record.status === 'enable'}
+                  onClick={() => this.onChangeStatus(record)}
+                />
               </Permission>
+              {(definitionType === 'component' || definitionType === 'trait') &&
+                (record.restrictions?.quota || []).length > 0 && (
+                  <Permission
+                    request={{ resource: definitionResource(this.place(record), record.name), action: 'detail' }}
+                    project={this.place(record).where === 'project' ? this.project() : ''}
+                  >
+                    <RowAction
+                      icon={<AiOutlinePieChart />}
+                      label="Usage"
+                      onClick={() => this.setState({ usageOf: record })}
+                    />
+                  </Permission>
+                )}
             </Fragment>
           );
         },
@@ -247,6 +334,14 @@ class Definitions extends Component<Props, State> {
             <Column {...col} key={key} align={'left'} />
           ))}
         </Table>
+        {usageOf && (definitionType === 'component' || definitionType === 'trait') && (
+          <UsageDialog
+            definition={usageOf}
+            definitionType={definitionType}
+            place={this.place(usageOf)}
+            onClose={() => this.setState({ usageOf: undefined })}
+          />
+        )}
       </div>
     );
   }

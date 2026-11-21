@@ -49,7 +49,7 @@ type ApplicationSync struct {
 	WorkflowService    service.WorkflowService    `inject:""`
 	TargetService      service.TargetService      `inject:""`
 	EnvService         service.EnvService         `inject:""`
-	Queue              workqueue.RateLimitingInterface
+	Queue              workqueue.TypedRateLimitingInterface[*v1beta1.Application]
 }
 
 // Start prepares watchers and run their controllers, then waits for process termination signals
@@ -95,7 +95,7 @@ func (a *ApplicationSync) Start(ctx context.Context, errorChan chan error) {
 			if down {
 				break
 			}
-			app := item.(*v1beta1.Application)
+			app := item
 			if err := cu.AddOrUpdate(ctx, app); err != nil {
 				failTimes := a.Queue.NumRequeues(app)
 				klog.Errorf("fail to add or update application %s: %s, requeue times: %d", app.Name, err.Error(), failTimes)
@@ -122,7 +122,7 @@ func (a *ApplicationSync) Start(ctx context.Context, errorChan chan error) {
 		AddFunc: func(obj interface{}) {
 			addOrUpdateHandler(obj)
 		},
-		UpdateFunc: func(oldObj, obj interface{}) {
+		UpdateFunc: func(oldObj, obj interface{}) { //nolint:revive,unused
 			addOrUpdateHandler(obj)
 		},
 		DeleteFunc: func(obj interface{}) {

@@ -18,6 +18,8 @@ package service
 
 import (
 	"context"
+	"reflect"
+	"sort"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -162,3 +164,15 @@ var _ = Describe("Test env service functions", func() {
 		Expect(checkEqual([]string{"default"}, []string{"default"})).Should(BeTrue())
 	})
 })
+
+func checkEqual(old, new []string) bool {
+	if old == nil && new == nil {
+		return true
+	}
+	if old == nil || new == nil {
+		return false
+	}
+	sort.Strings(old)
+	sort.Strings(new)
+	return reflect.DeepEqual(old, new)
+}

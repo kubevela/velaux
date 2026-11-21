@@ -19,7 +19,7 @@ package service
 import (
 	"context"
 
-	"github.com/kubevela/workflow/api/v1alpha1"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -67,7 +67,7 @@ var _ = Describe("Test pipeline service functions", func() {
 					{
 						Name: "request",
 						Type: "request",
-						Outputs: v1alpha1.StepOutputs{
+						Outputs: wfTypesv1alpha1.StepOutputs{
 							{
 								ValueFrom: "import \"strconv\"\n\"Current star count: \" + strconv.FormatInt(response[\"stargazers_count\"], 10)\n",
 								Name:      "stars",

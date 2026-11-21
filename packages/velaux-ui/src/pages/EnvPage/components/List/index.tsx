@@ -1,15 +1,16 @@
 import { ColumnProps } from '@alifd/next/types/table';
-import { Table, Message, Dialog, Tag, Button } from '@alifd/next';
+import { Table, Message, Dialog, Tag } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Component } from 'react';
-import { AiFillDelete, AiFillSetting } from 'react-icons/ai';
+import { RowAction } from '../../../../components/RowAction';
+import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 
 import { deleteEnv } from '../../../../api/env';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import './index.less';
-import type { Env, NameAlias , Project , LoginUserInfo } from '@velaux/data';
+import type { Env, NameAlias, Project, LoginUserInfo } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
 const { Group: TagGroup } = Tag;
@@ -139,19 +140,13 @@ class TableList extends Component<Props> {
                 }}
                 project={record.project.name}
               >
-                <Button
-                  className="margin-left-10"
-                  text={true}
-                  component={'a'}
-                  size={'medium'}
+                <RowAction
+                  icon={<AiOutlineEdit />}
+                  label="Edit"
                   onClick={() => {
                     this.onEdit(record);
                   }}
-                >
-                  <AiFillSetting />
-                  <Translation>Edit</Translation>
-                </Button>
-                <span className="line" />
+                />
               </Permission>
               <Permission
                 request={{
@@ -160,11 +155,10 @@ class TableList extends Component<Props> {
                 }}
                 project={record.project.name}
               >
-                <Button
-                  text={true}
-                  component={'a'}
-                  size={'medium'}
-                  className={'danger-btn'}
+                <RowAction
+                  icon={<AiOutlineDelete />}
+                  label="Remove"
+                  danger
                   onClick={() => {
                     Dialog.confirm({
                       type: 'confirm',
@@ -175,10 +169,7 @@ class TableList extends Component<Props> {
                       locale: locale().Dialog,
                     });
                   }}
-                >
-                  <AiFillDelete />
-                  <Translation>Remove</Translation>
-                </Button>
+                />
               </Permission>
             </div>
           );

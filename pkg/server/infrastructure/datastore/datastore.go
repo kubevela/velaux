@@ -86,7 +86,7 @@ func NewEntity(in Entity) (Entity, error) {
 		return nil, ErrNilEntity
 	}
 	t := reflect.TypeOf(in)
-	if t.Kind() == reflect.Ptr {
+	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	newEntity := reflect.New(t)

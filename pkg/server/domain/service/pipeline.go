@@ -28,12 +28,14 @@ import (
 	"sync"
 	"time"
 
+	"cuelang.org/go/cue"
+
 	"github.com/kubevela/pkg/util/slices"
 
 	"github.com/fatih/color"
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	"github.com/kubevela/pkg/util/k8s"
 	"github.com/kubevela/workflow/api/v1alpha1"
-	"github.com/kubevela/workflow/pkg/cue/model/value"
 	wfTypes "github.com/kubevela/workflow/pkg/types"
 	wfUtils "github.com/kubevela/workflow/pkg/utils"
 	"github.com/modern-go/concurrent"
@@ -204,7 +206,7 @@ func (p pipelineServiceImpl) ListPipelines(ctx context.Context, req apis.ListPip
 		FilterOptions: datastore.FilterOptions{
 			In: []datastore.InQueryOption{
 				{
-					Key:    "project",
+					Key:    keyProject,
 					Values: queryProjects,
 				},
 			},
@@ -331,7 +333,7 @@ func (p pipelineServiceImpl) DeletePipeline(ctx context.Context, pl apis.Pipelin
 }
 
 func (p pipelineRunServiceImpl) GetPipelineRunOutput(ctx context.Context, pipelineRun apis.PipelineRun, stepName string) (apis.GetPipelineRunOutputResponse, error) {
-	outputsSpec := make(map[string]v1alpha1.StepOutputs)
+	outputsSpec := make(map[string]wfTypesv1alpha1.StepOutputs)
 	stepOutputs := make([]apis.StepOutputBase, 0)
 	if pipelineRun.Spec.WorkflowSpec != nil {
 		for _, step := range pipelineRun.Spec.WorkflowSpec.Steps {
@@ -349,7 +351,7 @@ func (p pipelineRunServiceImpl) GetPipelineRunOutput(ctx context.Context, pipeli
 	if ctxBackend == nil {
 		return apis.GetPipelineRunOutputResponse{}, nil
 	}
-	v, err := wfUtils.GetDataFromContext(ctx, p.KubeClient, ctxBackend.Name, pipelineRun.PipelineRunName, ctxBackend.Namespace)
+	v, err := wfUtils.GetDataFromContext(ctx, ctxBackend.Name, pipelineRun.PipelineRunName, ctxBackend.Namespace)
 	if err != nil {
 		klog.Errorf("get data from context backend failed: %v", err)
 		return apis.GetPipelineRunOutputResponse{}, bcode.ErrGetContextBackendData
@@ -383,7 +385,7 @@ func (p pipelineRunServiceImpl) GetPipelineRunOutput(ctx context.Context, pipeli
 func (p pipelineRunServiceImpl) GetPipelineRunInput(ctx context.Context, pipelineRun apis.PipelineRun, stepName string) (apis.GetPipelineRunInputResponse, error) {
 	// valueFromStep know which step the value came from
 	valueFromStep := make(map[string]string)
-	inputsSpec := make(map[string]v1alpha1.StepInputs)
+	inputsSpec := make(map[string]wfTypesv1alpha1.StepInputs)
 	stepInputs := make([]apis.StepInputBase, 0)
 	if pipelineRun.Spec.WorkflowSpec != nil {
 		for _, step := range pipelineRun.Spec.WorkflowSpec.Steps {
@@ -411,7 +413,7 @@ func (p pipelineRunServiceImpl) GetPipelineRunInput(ctx context.Context, pipelin
 	if ctxBackend == nil {
 		return apis.GetPipelineRunInputResponse{}, nil
 	}
-	v, err := wfUtils.GetDataFromContext(ctx, p.KubeClient, ctxBackend.Name, pipelineRun.PipelineRunName, ctxBackend.Namespace)
+	v, err := wfUtils.GetDataFromContext(ctx, ctxBackend.Name, pipelineRun.PipelineRunName, ctxBackend.Namespace)
 	if err != nil {
 		klog.Errorf("get data from context backend failed: %v", err)
 		return apis.GetPipelineRunInputResponse{}, bcode.ErrGetContextBackendData
@@ -476,7 +478,7 @@ func (p pipelineRunServiceImpl) GetPipelineRunLog(ctx context.Context, pipelineR
 		return apis.GetPipelineRunLogResponse{}, nil
 	}
 
-	logConfig, err := wfUtils.GetLogConfigFromStep(ctx, p.KubeClient, pipelineRun.Status.ContextBackend.Name, pipelineRun.PipelineName, project.GetNamespace(), step)
+	logConfig, err := wfUtils.GetLogConfigFromStep(ctx, pipelineRun.Status.ContextBackend.Name, pipelineRun.PipelineName, project.GetNamespace(), step)
 	if err != nil {
 		if strings.Contains(err.Error(), "no log config found") {
 			return apis.GetPipelineRunLogResponse{
@@ -539,7 +541,7 @@ func getStepBase(run apis.PipelineRun, step string) apis.StepBase {
 	return apis.StepBase{}
 }
 
-func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.StepOutputs, v *value.Value) apis.StepOutputBase {
+func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]wfTypesv1alpha1.StepOutputs, v cue.Value) apis.StepOutputBase {
 	o := apis.StepOutputBase{
 		StepBase: apis.StepBase{
 			Name:  step.Name,
@@ -550,14 +552,15 @@ func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.St
 	}
 	values := make([]apis.OutputVar, 0)
 	for _, output := range outputsSpec[step.Name] {
-		outputValue, err := v.LookupValue(output.Name)
+		outputValue := v.LookupPath(cue.ParsePath(output.Name))
+		if outputValue.Err() != nil {
+			continue
+		}
+		jsonBytes, err := outputValue.MarshalJSON()
 		if err != nil {
 			continue
 		}
-		s, err := outputValue.String()
-		if err != nil {
-			continue
-		}
+		s := string(jsonBytes)
 		values = append(values, apis.OutputVar{
 			Name:      output.Name,
 			ValueFrom: output.ValueFrom,
@@ -568,7 +571,7 @@ func getStepOutputs(step v1alpha1.StepStatus, outputsSpec map[string]v1alpha1.St
 	return o
 }
 
-func getStepInputs(step v1alpha1.StepStatus, inputsSpec map[string]v1alpha1.StepInputs, v *value.Value, valueFromStep map[string]string) apis.StepInputBase {
+func getStepInputs(step v1alpha1.StepStatus, inputsSpec map[string]wfTypesv1alpha1.StepInputs, v cue.Value, valueFromStep map[string]string) apis.StepInputBase {
 	o := apis.StepInputBase{
 		StepBase: apis.StepBase{
 			Name:  step.Name,
@@ -579,14 +582,15 @@ func getStepInputs(step v1alpha1.StepStatus, inputsSpec map[string]v1alpha1.Step
 	}
 	values := make([]apis.InputVar, 0)
 	for _, input := range inputsSpec[step.Name] {
-		outputValue, err := v.LookupValue(input.From)
+		outputValue := v.LookupPath(cue.ParsePath(input.From))
+		if outputValue.Err() != nil {
+			continue
+		}
+		jsonBytes, err := outputValue.MarshalJSON()
 		if err != nil {
 			continue
 		}
-		s, err := outputValue.String()
-		if err != nil {
-			continue
-		}
+		s := string(jsonBytes)
 		values = append(values, apis.InputVar{
 			Value:        s,
 			From:         input.From,
@@ -696,22 +700,22 @@ func getResourceLogs(ctx context.Context, config *rest.Config, cli client.Client
 
 	order := make([]string, 0)
 	sort.Strings(order)
-	logMap.Range(func(key, value any) bool {
+	logMap.Range(func(key, value any) bool { //nolint:revive,unused
 		order = append(order, key.(string))
 		return true
 	})
 	for _, key := range order {
 		val, ok := logMap.Load(key)
 		if ok {
-			logBuilder.WriteString(fmt.Sprintf("%s", val))
+			fmt.Fprintf(&logBuilder, "%s", val)
 		}
 	}
 	return logBuilder.String(), nil
 }
 
-func pipelineStep2WorkflowStep(step model.WorkflowStep) v1alpha1.WorkflowStep {
-	res := v1alpha1.WorkflowStep{
-		WorkflowStepBase: v1alpha1.WorkflowStepBase{
+func pipelineStep2WorkflowStep(step model.WorkflowStep) wfTypesv1alpha1.WorkflowStep {
+	res := wfTypesv1alpha1.WorkflowStep{
+		WorkflowStepBase: wfTypesv1alpha1.WorkflowStepBase{
 			Name:       step.Name,
 			Type:       step.Type,
 			Meta:       step.Meta,
@@ -723,10 +727,11 @@ func pipelineStep2WorkflowStep(step model.WorkflowStep) v1alpha1.WorkflowStep {
 			Properties: step.Properties.RawExtension(),
 		},
 		Mode:     step.Mode,
-		SubSteps: make([]v1alpha1.WorkflowStepBase, 0),
+		SubSteps: make([]wfTypesv1alpha1.WorkflowStepBase, 0),
+		ForEach:  step.ForEach,
 	}
 	for _, subStep := range step.SubSteps {
-		res.SubSteps = append(res.SubSteps, v1alpha1.WorkflowStepBase{
+		res.SubSteps = append(res.SubSteps, wfTypesv1alpha1.WorkflowStepBase{
 			Name:       subStep.Name,
 			Type:       subStep.Type,
 			Meta:       subStep.Meta,
@@ -741,9 +746,9 @@ func pipelineStep2WorkflowStep(step model.WorkflowStep) v1alpha1.WorkflowStep {
 	return res
 }
 
-func pipelineSpec2WorkflowSpec(spec model.WorkflowSpec) *v1alpha1.WorkflowSpec {
-	res := &v1alpha1.WorkflowSpec{
-		Steps: make([]v1alpha1.WorkflowStep, 0),
+func pipelineSpec2WorkflowSpec(spec model.WorkflowSpec) *wfTypesv1alpha1.WorkflowSpec {
+	res := &wfTypesv1alpha1.WorkflowSpec{
+		Steps: make([]wfTypesv1alpha1.WorkflowStep, 0),
 	}
 	for _, step := range spec.Steps {
 		res.Steps = append(res.Steps, pipelineStep2WorkflowStep(step))
@@ -808,7 +813,7 @@ func (p pipelineServiceImpl) getPipelineInfo(ctx context.Context, wf *model.Pipe
 	if err != nil {
 		if meta.IsNoMatchError(err) {
 			weekStat := make([]apis.RunStatInfo, 0)
-			for i := 0; i < 7; i++ {
+			for range 7 {
 				weekStat = append(weekStat, apis.RunStatInfo{})
 			}
 			return &apis.PipelineInfo{
@@ -833,7 +838,7 @@ func (p pipelineServiceImpl) getPipelineInfo(ctx context.Context, wf *model.Pipe
 		if err != nil {
 			return nil, err
 		}
-		pi.LastRun, err = workflowRun2PipelineRun(*run, project, p.ContextService)
+		pi.LastRun, err = workflowRun2PipelineRun(*run, project, p.ContextService, runContext(ctx, p.KubeClient, run))
 		if err != nil {
 			return nil, err
 		}
@@ -851,7 +856,7 @@ func getRunStat(runs []v1alpha1.WorkflowRun) apis.RunStat {
 	}
 	// returned int x means the (x+1)/7 days of the week, valid number is 0-6
 	inThisWeek := func(run v1alpha1.WorkflowRun) (int, bool) {
-		startTime := run.Status.StartTime.Time.Unix()
+		startTime := run.Status.StartTime.Unix()
 		// one week, note this is not week of natual, but week of unix timestamp
 		if today-startTime < 604800 {
 			return 6 - int((today-startTime)/86400), true
@@ -939,7 +944,7 @@ func (p pipelineRunServiceImpl) GetPipelineRun(ctx context.Context, meta apis.Pi
 		run.Spec.WorkflowSpec = pipelineSpec2WorkflowSpec(pipeline.Spec)
 
 	}
-	return workflowRun2PipelineRun(run, project, p.ContextService)
+	return workflowRun2PipelineRun(run, project, p.ContextService, runContext(ctx, p.KubeClient, &run))
 }
 
 // ListPipelineRuns will list all pipeline runs
@@ -1134,7 +1139,49 @@ func pipeline2PipelineBase(wf *model.Pipeline, project model.Project) *apis.Pipe
 	}
 }
 
-func workflowRun2PipelineRun(run v1alpha1.WorkflowRun, project *model.Project, ctxService ContextService) (*apis.PipelineRun, error) {
+// runContext is what a run's workflow context holds, or nothing before the run
+// has one.
+func runContext(ctx context.Context, cli client.Client, run *v1alpha1.WorkflowRun) map[string]string {
+	cb := run.Status.ContextBackend
+	if cb == nil || cb.Name == "" {
+		return nil
+	}
+	var cm corev1.ConfigMap
+	if err := cli.Get(ctx, types.NamespacedName{Namespace: cb.Namespace, Name: cb.Name}, &cm); err != nil {
+		klog.Errorf("failed to read the context of the pipeline run %s: %s", run.Name, err.Error())
+		return nil
+	}
+	return cm.Data
+}
+
+// runLoops are a run's forEach steps by name, each with its items and the item
+// each of its passes ran for.
+func runLoops(run v1alpha1.WorkflowRun, contextValue map[string]string) map[string]apis.PipelineRunLoop {
+	if run.Spec.WorkflowSpec == nil {
+		return nil
+	}
+	status := make(map[string]v1alpha1.WorkflowStepStatus, len(run.Status.Steps))
+	for _, s := range run.Status.Steps {
+		status[s.Name] = s
+	}
+	loops := make(map[string]apis.PipelineRunLoop)
+	for _, spec := range run.Spec.WorkflowSpec.Steps {
+		if spec.ForEach == nil {
+			continue
+		}
+		loop, passes := loopPasses(spec, status[spec.Name], contextValue)
+		iterations := make(map[string]int, len(passes))
+		for _, pass := range passes {
+			if pass.Iteration != nil {
+				iterations[pass.Name] = *pass.Iteration
+			}
+		}
+		loops[spec.Name] = apis.PipelineRunLoop{LoopStatus: *loop, Iterations: iterations}
+	}
+	return loops
+}
+
+func workflowRun2PipelineRun(run v1alpha1.WorkflowRun, project *model.Project, ctxService ContextService, contextValue map[string]string) (*apis.PipelineRun, error) {
 	mergeSteps(&run)
 	pipelineName := run.Labels[labelPipeline]
 	pipelineRun := &apis.PipelineRun{
@@ -1150,6 +1197,7 @@ func workflowRun2PipelineRun(run v1alpha1.WorkflowRun, project *model.Project, c
 			Spec: run.Spec,
 		},
 		Status: run.Status,
+		Loops:  runLoops(run, contextValue),
 	}
 	if labels := run.GetLabels(); labels != nil {
 		ctxName := labels[labelContext]
@@ -1158,8 +1206,8 @@ func workflowRun2PipelineRun(run v1alpha1.WorkflowRun, project *model.Project, c
 			if err != nil && !errors.Is(err, datastore.ErrRecordNotExist) {
 				return nil, err
 			}
-			pipelineRun.PipelineRunBase.ContextName = ctxName
-			pipelineRun.PipelineRunBase.ContextValues = ctx.Values
+			pipelineRun.ContextName = ctxName
+			pipelineRun.ContextValues = ctx.Values
 		}
 	}
 	return pipelineRun, nil
@@ -1177,9 +1225,14 @@ func mergeSteps(run *v1alpha1.WorkflowRun) {
 		stepStatus[step.Name] = &run.Status.Steps[i]
 	}
 	for _, step := range run.Spec.WorkflowSpec.Steps {
+		// A loop's sub-steps are its passes, which only the run knows.
+		loop := step.ForEach != nil
 		if stepStatusCache, exist := stepStatus[step.Name]; !exist {
 			var subSteps []v1alpha1.StepStatus
 			for _, subStep := range step.SubSteps {
+				if loop {
+					break
+				}
 				subSteps = append(subSteps, v1alpha1.StepStatus{
 					Name:  subStep.Name,
 					Type:  subStep.Type,
@@ -1194,7 +1247,7 @@ func mergeSteps(run *v1alpha1.WorkflowRun) {
 				},
 				SubStepsStatus: subSteps,
 			})
-		} else if len(step.SubSteps) > len(stepStatusCache.SubStepsStatus) {
+		} else if !loop && len(step.SubSteps) > len(stepStatusCache.SubStepsStatus) {
 			var subStepStatus = make(map[string]v1alpha1.StepStatus, len(stepStatusCache.SubStepsStatus))
 			for i, step := range stepStatusCache.SubStepsStatus {
 				subStepStatus[step.Name] = stepStatusCache.SubStepsStatus[i]
@@ -1278,7 +1331,7 @@ func checkPipelineSpec(_ model.WorkflowSpec) error {
 	return nil
 }
 
-func checkRunMode(mode *v1alpha1.WorkflowExecuteMode) error {
+func checkRunMode(mode *wfTypesv1alpha1.WorkflowExecuteMode) error {
 	if mode.Steps == "" {
 		mode.Steps = v1alpha1.WorkflowModeStep
 	}

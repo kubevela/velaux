@@ -1,24 +1,23 @@
-import { Loading, Grid } from '@alifd/next';
+import { Loading } from '@alifd/next';
+import { allProjects, askedProject } from '../../utils/currentProject';
 import { connect } from 'dva';
 import React, { Component } from 'react';
-import EnvTabs from './components/EnvTabs';
+import { AppTabs, EnvironmentBar } from './components/AppTabs';
 import Header from './components/Header';
-import Menus from './components/Menus';
 
 import './index.less';
 import type { ApplicationDetail } from '@velaux/data';
 import { Dispatch } from 'redux';
-
-const { Row } = Grid;
 
 interface Props {
   match: any;
   dispatch: Dispatch;
   location: any;
   applicationDetail?: ApplicationDetail;
+  currentProject?: { current: string; resolved: boolean };
 }
 @connect((store: any) => {
-  return { ...store.application };
+  return { ...store.application, currentProject: store.currentProject };
 })
 class ApplicationLayout extends Component<Props, any> {
   constructor(props: any) {
@@ -34,9 +33,26 @@ class ApplicationLayout extends Component<Props, any> {
     this.getNamespaceList();
   }
 
+  // The layout re-renders when the URL moves, its query included: a tab's +
+  // asks its page for the add dialog with ?add=1 on the same path.
   shouldComponentUpdate(nextProps: any) {
-    return nextProps.location.pathname !== this.props.location.pathname;
+    return (
+      nextProps.location.pathname !== this.props.location.pathname ||
+      nextProps.location.search !== this.props.location.search
+    );
   }
+
+  // followProject moves the picked project to the application's own, so a link
+  // into another project's application lands in that project.
+  followProject = () => {
+    const { currentProject, applicationDetail, dispatch } = this.props;
+    const project = applicationDetail?.project?.name;
+    // Before the picker has settled, the project is the one it is about to pick.
+    const current = currentProject?.resolved ? currentProject.current : askedProject();
+    if (project && current !== allProjects && project !== current) {
+      dispatch({ type: 'currentProject/setProject', payload: project });
+    }
+  };
 
   onGetApplicationDetails = async () => {
     const {
@@ -47,6 +63,7 @@ class ApplicationLayout extends Component<Props, any> {
       type: 'application/getApplicationDetail',
       payload: { appName: appName },
       callback: () => {
+        this.followProject();
         this.setState({ loading: false }, () => {
           this.loadApplicationComponents();
           this.loadApplicationEnvbinding();
@@ -135,13 +152,9 @@ class ApplicationLayout extends Component<Props, any> {
     return (
       <div className="app-layout">
         <Header dispatch={dispatch} appName={appName} envName={envName} currentPath={url} />
-        <EnvTabs dispatch={dispatch} appName={appName} activeKey={envName ? envName : 'basisConfig'} />
-        <Row className="padding16 main">
-          <div className="menu">
-            <Menus currentPath={url} appName={appName} envName={envName} />
-          </div>
-          <div className="content">{children}</div>
-        </Row>
+        <AppTabs appName={appName} currentPath={url} />
+        {envName && <EnvironmentBar appName={appName} envName={envName} currentPath={url} />}
+        <div className="app-content">{children}</div>
       </div>
     );
   }

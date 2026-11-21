@@ -46,7 +46,7 @@ func NewAPIServerCommand() *cobra.Command {
 		Long: `The KubeVela API server validates and configures data for the API objects. 
 The API Server services REST operations and provides the frontend to the
 cluster's shared state through which all other components interact.`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error { //nolint:revive,unused
 			if err := s.Validate(); err != nil {
 				return err
 			}
@@ -64,7 +64,7 @@ cluster's shared state through which all other components interact.`,
 	buildSwaggerCmd := &cobra.Command{
 		Use:   "build-swagger",
 		Short: "Build swagger documentation of KubeVela apiserver",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error { //nolint:revive,unused
 			name := "docs/apidoc/latest-swagger.json"
 			if len(args) > 0 {
 				name = args[0]

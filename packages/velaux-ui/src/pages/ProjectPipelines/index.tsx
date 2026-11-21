@@ -2,9 +2,9 @@ import { Loading, Button, Table, Dialog, Message, Balloon } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React, { Component } from 'react';
-import { AiFillCaretRight, AiFillDelete } from 'react-icons/ai';
-import { BiCopyAlt } from 'react-icons/bi';
-import { HiViewList } from 'react-icons/hi';
+import { RelativeTime } from '../../components/RelativeTime';
+import { RowAction } from '../../components/RowAction';
+import { AiOutlineCopy, AiOutlineDelete, AiOutlineHistory, AiOutlinePlayCircle } from 'react-icons/ai';
 import type { Dispatch } from 'redux';
 
 import { deletePipeline, listPipelines } from '../../api/pipeline';
@@ -14,8 +14,16 @@ import Permission from '../../components/Permission';
 import RunPipeline from '../../components/RunPipeline';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import type { AddonBaseStatus , NameAlias , PipelineBase, PipelineListItem, PipelineRun, RunStateInfo , LoginUserInfo } from '@velaux/data';
-import { beautifyTime, momentDate } from '../../utils/common';
+import type {
+  AddonBaseStatus,
+  NameAlias,
+  PipelineBase,
+  PipelineListItem,
+  PipelineRun,
+  RunStateInfo,
+  LoginUserInfo,
+} from '@velaux/data';
+import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import CreatePipeline from '../PipelineListPage/components/CreatePipeline';
 import ClonePipeline from '../PipelineListPage/components/PipelineClone';
@@ -223,7 +231,7 @@ class ProjectPipelines extends Component<Props, State> {
                       >
                         {run.pipelineRunName}
                       </Link>
-                      <span>{beautifyTime(run.status?.startTime)}</span>
+                      <RelativeTime time={run.status?.startTime} />
                     </div>
                     <RunStatusIcon status={run.status?.status} />
                   </div>
@@ -247,17 +255,13 @@ class ProjectPipelines extends Component<Props, State> {
                       action: 'run',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlinePlayCircle />}
+                      label="Run"
                       onClick={() => {
                         this.onRunPipeline(pipeline);
                       }}
-                    >
-                      <AiFillCaretRight /> <Translation>Run</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -266,18 +270,13 @@ class ProjectPipelines extends Component<Props, State> {
                       action: 'list',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineHistory />}
+                      label="View Runs"
                       onClick={() => {
                         this.onShowPipelineRuns(pipeline);
                       }}
-                    >
-                      <HiViewList />
-                      <Translation>View Runs</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -286,17 +285,13 @@ class ProjectPipelines extends Component<Props, State> {
                       action: 'create',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineCopy />}
+                      label="Clone"
                       onClick={() => {
                         this.onClonePipeline(pipeline);
                       }}
-                    >
-                      <BiCopyAlt /> <Translation>Clone</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -305,18 +300,14 @@ class ProjectPipelines extends Component<Props, State> {
                       action: 'delete',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      className={'danger-btn'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineDelete />}
+                      label="Remove"
+                      danger
                       onClick={() => {
                         this.onDeletePipeline(pipeline);
                       }}
-                    >
-                      <AiFillDelete />
-                      <Translation>Remove</Translation>
-                    </Button>
+                    />
                   </Permission>
                 </div>
               );

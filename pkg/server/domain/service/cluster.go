@@ -214,7 +214,7 @@ func joinClusterByKubeConfigString(ctx context.Context, k8sClient client.Client,
 		}
 		return "", errors.Wrapf(err, "failed to join cluster")
 	}
-	return clusterConfig.Cluster.Server, nil
+	return clusterConfig.Server, nil
 }
 
 func createClusterModelFromRequest(req apis.CreateClusterRequest, oldCluster *model.Cluster) (newCluster *model.Cluster) {

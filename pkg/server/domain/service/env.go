@@ -20,9 +20,8 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"reflect"
-	"sort"
 
+	corev1 "k8s.io/api/core/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -131,7 +130,7 @@ func (p *envServiceImpl) ListEnvs(ctx context.Context, page, pageSize int, listO
 	filter := datastore.FilterOptions{
 		In: []datastore.InQueryOption{
 			{
-				Key:    "project",
+				Key:    keyProject,
 				Values: projectNames,
 			},
 		},
@@ -139,7 +138,7 @@ func (p *envServiceImpl) ListEnvs(ctx context.Context, page, pageSize int, listO
 	entities, err := repository.ListEnvs(ctx, p.Store, &datastore.ListOptions{
 		Page:          page,
 		PageSize:      pageSize,
-		SortBy:        []datastore.SortOption{{Key: "createTime", Order: datastore.SortOrderDescending}},
+		SortBy:        []datastore.SortOption{{Key: keyCreateTime, Order: datastore.SortOrderDescending}},
 		FilterOptions: filter,
 	})
 	if err != nil {
@@ -169,18 +168,6 @@ func (p *envServiceImpl) ListEnvs(ctx context.Context, page, pageSize int, listO
 
 func (p *envServiceImpl) ListEnvCount(ctx context.Context, listOption apisv1.ListEnvOptions) (int64, error) {
 	return p.Store.Count(ctx, &model.Env{Project: listOption.Project}, nil)
-}
-
-func checkEqual(old, new []string) bool {
-	if old == nil && new == nil {
-		return true
-	}
-	if old == nil || new == nil {
-		return false
-	}
-	sort.Strings(old)
-	sort.Strings(new)
-	return reflect.DeepEqual(old, new)
 }
 
 // UpdateEnv update an env for request
@@ -218,7 +205,7 @@ func (p *envServiceImpl) UpdateEnv(ctx context.Context, name string, req apisv1.
 		targets, err = repository.ListTarget(ctx, p.Store, "", &datastore.ListOptions{
 			FilterOptions: datastore.FilterOptions{
 				In: []datastore.InQueryOption{{
-					Key:    "name",
+					Key:    keyName,
 					Values: req.Targets,
 				}},
 			},
@@ -257,11 +244,18 @@ func (p *envServiceImpl) GetAppCountInEnv(ctx context.Context, env *model.Env) (
 
 // CreateEnv create an env for request
 func (p *envServiceImpl) CreateEnv(ctx context.Context, req apisv1.CreateEnvRequest) (*apisv1.Env, error) {
+	namespace := req.Namespace
+	if namespace == "" {
+		var err error
+		if namespace, err = p.defaultEnvNamespace(ctx, req.Project, req.Name); err != nil {
+			return nil, err
+		}
+	}
 	newEnv := &model.Env{
 		Name:        req.Name,
 		Alias:       req.Alias,
 		Description: req.Description,
-		Namespace:   req.Namespace,
+		Namespace:   namespace,
 		Project:     req.Project,
 		Targets:     req.Targets,
 	}
@@ -365,9 +359,9 @@ func managePrivilegesForEnvironment(ctx context.Context, cli client.Client, env 
 	p := &auth.ApplicationPrivilege{Cluster: types.ClusterLocalName, Namespace: env.Namespace}
 	identity := &auth.Identity{Groups: []string{utils.KubeVelaProjectGroupPrefix + env.Project}}
 	writer := &bytes.Buffer{}
-	f, msg := auth.GrantPrivileges, "GrantPrivileges"
+	f, msg := auth.GrantPrivileges, grantMsg
 	if revoke {
-		f, msg = auth.RevokePrivileges, "RevokePrivileges"
+		f, msg = auth.RevokePrivileges, revokeMsg
 	}
 	if err := f(ctx, cli, []auth.PrivilegeDescription{p}, identity, writer); err != nil {
 		return err
@@ -379,4 +373,37 @@ func managePrivilegesForEnvironment(ctx context.Context, cli client.Client, env 
 // NewTestEnvService create the env service instance for testing
 func NewTestEnvService(ds datastore.DataStore, c client.Client) EnvService {
 	return &envServiceImpl{Store: ds, KubeClient: c, ProjectService: NewTestProjectService(ds, c)}
+}
+
+// defaultEnvNamespace is where an environment's Applications run when none is
+// given: the project's namespace, so they can use the project's shared
+// workflows, unless an environment already holds it, as a namespace belongs
+// to one environment; else, or with no known project, the environment's own name.
+func (p *envServiceImpl) defaultEnvNamespace(ctx context.Context, projectName, envName string) (string, error) {
+	if projectName == "" {
+		return envName, nil
+	}
+	namespace, err := projectNamespace(ctx, p.Store, projectName)
+	if errors.Is(err, bcode.ErrProjectIsNotExist) {
+		return envName, nil
+	}
+	if err != nil {
+		return "", err
+	}
+	envs, err := p.Store.List(ctx, &model.Env{Namespace: namespace}, nil)
+	if err != nil {
+		return "", err
+	}
+	if len(envs) > 0 {
+		return envName, nil
+	}
+	ns := &corev1.Namespace{}
+	err = p.KubeClient.Get(utils.WithProject(ctx, ""), client.ObjectKey{Name: namespace}, ns)
+	if err != nil && !apierror.IsNotFound(err) {
+		return "", err
+	}
+	if bound := ns.Labels[oam.LabelNamespaceOfEnvName]; bound != "" && bound != envName {
+		return envName, nil
+	}
+	return namespace, nil
 }

@@ -54,6 +54,8 @@ const (
 	secretDexConfigKey = "config.yaml"
 	dexAddonName       = "addon-dex"
 	jwtIssuer          = "vela-issuer"
+	grantMsg           = "GrantPrivileges"
+	revokeMsg          = "RevokePrivileges"
 
 	// GrantTypeAccess is the grant type for access token
 	GrantTypeAccess = "access"
@@ -235,7 +237,7 @@ func (a *authenticationServiceImpl) RefreshToken(_ context.Context, refreshToken
 
 // ParseToken parses and verifies a token
 func ParseToken(tokenString string) (*model.CustomClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &model.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &model.CustomClaims{}, func(token *jwt.Token) (interface{}, error) { //nolint:revive,unused
 		return []byte(signedKey), nil
 	})
 	if err != nil {
@@ -449,6 +451,14 @@ func (a *authenticationServiceImpl) GetLoginType(ctx context.Context) (*apisv1.G
 	}, nil
 }
 
+func getUserName(sub string) string {
+	username := strings.ToLower(sub)
+	if len(sub) > datastore.PrimaryKeyMaxLength {
+		return sub[:datastore.PrimaryKeyMaxLength]
+	}
+	return username
+}
+
 func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 	var claims struct {
 		Email string `json:"email"`
@@ -492,14 +502,8 @@ func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 			klog.Errorf("failed to get the system info %s", err.Error())
 		}
 		user := &model.User{
-			Email: claims.Email,
-			Name: func() string {
-				sub := strings.ToLower(claims.Sub)
-				if len(sub) > datastore.PrimaryKeyMaxLength {
-					return sub[:datastore.PrimaryKeyMaxLength]
-				}
-				return sub
-			}(),
+			Email:         claims.Email,
+			Name:          getUserName(claims.Sub),
 			DexSub:        claims.Sub,
 			Alias:         claims.Name,
 			LastLoginTime: time.Now(),
@@ -514,7 +518,7 @@ func (d *dexHandlerImpl) login(ctx context.Context) (*apisv1.UserBase, error) {
 		if systemInfo != nil {
 			for _, project := range systemInfo.DexUserDefaultProjects {
 				_, err := d.projectService.AddProjectUser(ctx, project.Name, apisv1.AddProjectUserRequest{
-					UserName:  strings.ToLower(claims.Sub),
+					UserName:  getUserName(claims.Sub),
 					UserRoles: project.Roles,
 				})
 				if err != nil {

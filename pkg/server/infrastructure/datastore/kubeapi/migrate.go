@@ -60,7 +60,6 @@ func migrate(dbns string, c client.Client) {
 		}
 		klog.Infof("migrating data for table %v", k.TableName())
 		for _, cm := range configMaps.Items {
-			cm := cm
 			checkprefix := strings.ReplaceAll(fmt.Sprintf("veladatabase-%s", k.TableName()), "_", "-")
 			if !strings.HasPrefix(cm.Name, checkprefix) {
 				continue

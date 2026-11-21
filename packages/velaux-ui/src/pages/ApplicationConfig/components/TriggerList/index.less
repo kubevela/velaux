@@ -1,7 +1,8 @@
-.trigger-list-content {
-  min-height: 109px;
-  padding: 11px 0;
+// The columns: chevron, name, workflow, payload, created, actions.
+.trigger-list {
+  --row-columns: 24px minmax(180px, 1.4fr) minmax(160px, 1.2fr) minmax(90px, 0.6fr) minmax(100px, 0.7fr) 150px;
 }
+
 .curlCode {
   code {
     display: block;
@@ -11,21 +12,11 @@
   }
 }
 
-.trigger-list-nav {
-  display: flex;
-  justify-content: space-between;
-  .trigger-list-title {
-    color: var(--primary-color);
-    font-size: 16px;
-    cursor: pointer;
-  }
-}
-
-.justify-tabs-tab.active{
+.justify-tabs-tab.active {
   background-color: #000 !important;
   color: #fff !important;
 }
 
-.next-tabs-wrapped.next-tabs-top > .next-tabs-bar .next-tabs-tab{
+.next-tabs-wrapped.next-tabs-top > .next-tabs-bar .next-tabs-tab {
   border: none !important;
 }

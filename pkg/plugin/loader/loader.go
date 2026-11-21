@@ -135,7 +135,7 @@ func (l *Loader) loadPlugins(class types.Class, pluginJSONPaths []string, existi
 }
 
 func (l *Loader) readPluginJSON(pluginJSONPath string) (types.JSONData, error) {
-	klog.V(4).Info("Loading plugin, path: %s", pluginJSONPath)
+	klog.V(4).Infof("Loading plugin, path: %s", pluginJSONPath)
 
 	if !strings.EqualFold(filepath.Ext(pluginJSONPath), ".json") {
 		return types.JSONData{}, ErrInvalidPluginJSONFilePath
@@ -183,7 +183,7 @@ func setImages(p *types.Plugin) {
 	p.Info.Logos.Small = pluginLogoURL(p.Type, p.Info.Logos.Small, p.BaseURL)
 	p.Info.Logos.Large = pluginLogoURL(p.Type, p.Info.Logos.Large, p.BaseURL)
 
-	for i := 0; i < len(p.Info.Screenshots); i++ {
+	for i := range p.Info.Screenshots {
 		p.Info.Screenshots[i].Path = evalRelativePluginURLPath(p.Info.Screenshots[i].Path, p.BaseURL, p.Type)
 	}
 }

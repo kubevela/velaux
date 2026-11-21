@@ -105,6 +105,41 @@ var _ = Describe("Test Cache", func() {
 		Expect(cr2ux.shouldSyncMetaFromCLI(ctx, app1, false)).Should(BeEquivalentTo(true))
 
 	})
+	It("Test an addon's record from before the addon label is synced again", func() {
+		dbNamespace := "cache-db-ns3-test"
+		ds, err := NewDatastore(datastore.Config{Type: "kubeapi", Database: dbNamespace})
+		Expect(err).Should(BeNil())
+		ns := corev1.Namespace{}
+		ns.Name = dbNamespace
+		Expect(k8sClient.Create(context.TODO(), &ns)).Should(SatisfyAny(BeNil(), &util.AlreadyExistMatcher{}))
+		cr2ux := newCR2UX(ds)
+		ctx := context.Background()
+
+		inner := map[string]string{
+			model.LabelSyncRevision:      "addon-old-v1",
+			model.LabelSyncNamespace:     "vela-system",
+			velatypes.LabelSourceOfTruth: velatypes.FromInner,
+		}
+		Expect(ds.Add(ctx, &model.Application{Name: "addon-old", Labels: inner})).Should(BeNil())
+		labelled := map[string]string{model.LabelSyncAddon: "new"}
+		for k, v := range inner {
+			labelled[k] = v
+		}
+		labelled[model.LabelSyncRevision] = "addon-new-v1"
+		Expect(ds.Add(ctx, &model.Application{Name: "addon-new", Labels: labelled})).Should(BeNil())
+		Expect(cr2ux.initCache(ctx)).Should(BeNil())
+
+		old := &v1beta1.Application{}
+		old.Name, old.Namespace = "addon-old", "vela-system"
+		old.Status.LatestRevision = &common.Revision{Name: "addon-old-v1"}
+		Expect(cr2ux.shouldSyncMetaFromCLI(ctx, old, false)).Should(BeTrue(), "synced again for its addon label")
+
+		current := &v1beta1.Application{}
+		current.Name, current.Namespace = "addon-new", "vela-system"
+		current.Status.LatestRevision = &common.Revision{Name: "addon-new-v1"}
+		Expect(cr2ux.shouldSyncMetaFromCLI(ctx, current, false)).Should(BeFalse(), "an up-to-date record is not")
+	})
+
 	It("Test don't cache with from inner system label", func() {
 		dbNamespace := "cache-db-ns2-test"
 

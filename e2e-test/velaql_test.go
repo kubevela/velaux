@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	types2 "github.com/oam-dev/kubevela/pkg/velaql/providers/query/types"
+	types2 "github.com/oam-dev/kubevela/pkg/utils/types"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

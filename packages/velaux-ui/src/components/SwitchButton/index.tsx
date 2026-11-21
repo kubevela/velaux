@@ -6,7 +6,6 @@ import { TbLanguage } from 'react-icons/tb';
 
 import { getLanguage } from '../../utils/common';
 
-
 const SwitchLanguage = () => {
   const { i18n } = useTranslation();
   const _isEnglish = getLanguage() === 'en';

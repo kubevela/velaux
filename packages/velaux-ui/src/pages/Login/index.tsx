@@ -4,6 +4,7 @@ import React, { Component, Fragment } from 'react';
 import { getDexConfig, getLoginType, isAdminConfigured, loginLocal } from '../../api/authentication';
 import LogoWhite from '../../assets/kubevela-logo-white.png';
 import Logo from '../../assets/kubevela-logo.png';
+import { loadCustomisation } from '../../api/customisation';
 import { If } from '../../components/If';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { Translation } from '../../components/Translation';
@@ -12,7 +13,7 @@ import './index.less';
 import type { DexConfig } from '@velaux/data';
 import { checkName, checkUserPassword } from '../../utils/common';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
-import EditPlatFormUserDialog from "../../layout/Header/components/EditPlatFormUserDialog";
+import EditPlatFormUserDialog from '../../layout/Header/components/EditPlatFormUserDialog';
 
 type Props = {
   code: string;
@@ -28,10 +29,11 @@ type Props = {
 
 type State = {
   dexConfig?: DexConfig;
-  firstTimeLogin: boolean
+  firstTimeLogin: boolean;
   loginType: string;
   loginErrorMessage: string;
   loginLoading: boolean;
+  logoURL?: string;
 };
 export default class LoginPage extends Component<Props, State> {
   field: Field;
@@ -48,8 +50,9 @@ export default class LoginPage extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this.isFirstLogin()
+    this.isFirstLogin();
     this.onGetLoginType();
+    loadCustomisation().then((c) => this.setState({ logoURL: c.logoURL }));
   }
 
   onGetLoginType = () => {
@@ -75,11 +78,11 @@ export default class LoginPage extends Component<Props, State> {
     isAdminConfigured().then((res: any) => {
       if (res && !res.configured) {
         this.setState({
-          firstTimeLogin: true
-        })
+          firstTimeLogin: true,
+        });
       }
-    })
-  }
+    });
+  };
   ontDexConfig = () => {
     getDexConfig()
       .then((res) => {
@@ -161,7 +164,11 @@ export default class LoginPage extends Component<Props, State> {
         <div className="login-topbar">
           <Row className="nav-wrapper">
             <Col span="4" className="logo">
-              <img src={LogoWhite} title={'Make shipping applications more enjoyable.'} />
+              <img
+                src={this.state.logoURL || LogoWhite}
+                className={this.state.logoURL ? 'login-logo-plate' : undefined}
+                title={'Make shipping applications more enjoyable.'}
+              />
             </Col>
             <div style={{ flex: '1 1 0%' }} />
             <div className="right">
@@ -187,7 +194,7 @@ export default class LoginPage extends Component<Props, State> {
                 <div className="login-card-wrapper">
                   <Card contentHeight={'auto'}>
                     <div className="logo-img-wrapper">
-                      <img src={Logo} />
+                      <img src={this.state.logoURL || Logo} />
                     </div>
                     <h3 className="login-title-description">
                       <Translation>Make shipping applications more enjoyable</Translation>

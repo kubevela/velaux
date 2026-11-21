@@ -20,6 +20,7 @@ import (
 	"context"
 	"net/http"
 
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/endpoints/request"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -136,6 +137,12 @@ func (c *authClient) DeleteAllOf(ctx context.Context, obj client.Object, opts ..
 	return c.Client.DeleteAllOf(ctx, obj, opts...)
 }
 
+// Apply .
+func (c *authClient) Apply(ctx context.Context, obj runtime.ApplyConfiguration, opts ...client.ApplyOption) error {
+	ctx = ContextWithUserInfo(ctx)
+	return c.Client.Apply(ctx, obj, opts...)
+}
+
 type authAppStatusClient struct {
 	client.StatusWriter
 }
@@ -150,4 +157,10 @@ func (c *authAppStatusClient) Update(ctx context.Context, obj client.Object, opt
 func (c *authAppStatusClient) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.SubResourcePatchOption) error {
 	ctx = ContextWithUserInfo(ctx)
 	return c.StatusWriter.Patch(ctx, obj, patch, opts...)
+}
+
+// Apply .
+func (c *authAppStatusClient) Apply(ctx context.Context, obj runtime.ApplyConfiguration, opts ...client.SubResourceApplyOption) error {
+	ctx = ContextWithUserInfo(ctx)
+	return c.StatusWriter.Apply(ctx, obj, opts...)
 }

@@ -83,7 +83,7 @@ Check out [CONTRIBUTING](./CONTRIBUTING.md) to see how to develop with KubeVela.
 
 ## Report Vulnerability
 
-Security is a first priority thing for us at KubeVela. If you come across a related issue, please send email to security@mail.kubevela.io .
+Security is a first priority thing for us at KubeVela. If you come across a related issue, please send email to cncf-kubevela-security@lists.cncf.io .
 
 ## Code of Conduct
 

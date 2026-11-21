@@ -1,11 +1,14 @@
-import { Table, Card, Loading, Balloon, Button, Message, Dialog, Tag, Tab } from '@alifd/next';
+import { Table, Loading, Balloon, Button, Message, Dialog, Tag } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React from 'react';
 
 import { deployApplication } from '../../api/application';
-import { listApplicationResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
+import { notifyDeployed } from '../../utils/deploy';
+import { listEnvResourceTree, listApplicationServiceAppliedResources } from '../../api/observation';
 import { If } from '../../components/If';
+import { StatusBadge } from '../../components/StatusBadge';
+import { StatusDetails } from '../../components/StatusDetails';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type {
@@ -16,15 +19,22 @@ import type {
   EnvBinding,
   ComponentStatus,
   ApplicationDeployResponse,
- AppliedResource , Target , LoginUserInfo } from '@velaux/data';
+  AppliedResource,
+  Target,
+  LoginUserInfo,
+} from '@velaux/data';
 import type { APIError } from '../../utils/errors';
 import { handleError } from '../../utils/errors';
 import { locale } from '../../utils/locale';
 import { checkPermission } from '../../utils/permission';
+import { componentStatusKey, hasStatusDetails, traitState, traitStateCircle } from '../../utils/status';
+import { statusMode } from '../../layout/Application/components/AppTabs/add';
 import Header from '../ApplicationInstanceList/components/Header';
 
 import './index.less';
 import ApplicationGraph from './components/ApplicationGraph';
+import SourceStatusList from './components/SourceStatusList';
+import Reconciliation from './components/Reconciliation';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 type Props = {
@@ -33,6 +43,7 @@ type Props = {
     params: {
       envName: string;
       appName: string;
+      view?: string;
     };
   };
   location: { pathname: string };
@@ -43,7 +54,34 @@ type Props = {
   userInfo?: LoginUserInfo;
 };
 
+// refreshInterval is how often the status reloads while the page is visible.
+const refreshInterval = 15000;
+
+// RefreshedAt says the status reloads by itself, and how long ago it last did.
+const RefreshedAt = (props: { at?: number }) => {
+  const [, tick] = React.useState(0);
+  React.useEffect(() => {
+    const timer = setInterval(() => tick((n) => n + 1), 5000);
+    return () => clearInterval(timer);
+  }, []);
+  if (!props.at) {
+    return null;
+  }
+  const seconds = Math.max(0, Math.round((Date.now() - props.at) / 1000));
+  return (
+    <span
+      className="status-refreshed"
+      title={i18n.t('The status reloads every 15 seconds while this page is open').toString()}
+    >
+      <span className="status-refreshed-dot" />
+      <Translation>Updated</Translation> {seconds < 5 ? i18n.t('just now') : `${seconds}s ${i18n.t('ago')}`}
+    </span>
+  );
+};
+
 type State = {
+  // refreshedAt is when the status last loaded.
+  refreshedAt?: number;
   loading: boolean;
   target?: Target;
   componentName?: string;
@@ -67,13 +105,30 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       resourceLoading: false,
       endpointLoading: false,
       envName: '',
-      mode: 'resource-graph',
+      mode: statusMode(props.match.params.view),
       resources: [],
     };
   }
 
   componentDidMount() {
     this.loadApplicationStatus();
+    this.refreshTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        this.loadApplicationStatus(true);
+      }
+    }, refreshInterval);
+  }
+
+  componentWillUnmount() {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+    }
+  }
+
+  componentDidUpdate(prev: Props) {
+    if (prev.match.params.view !== this.props.match.params.view) {
+      this.onChangeMode(statusMode(this.props.match.params.view));
+    }
   }
 
   componentWillReceiveProps(nextProps: any) {
@@ -89,7 +144,9 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     }
   }
 
-  loadApplicationStatus = async () => {
+  // loadApplicationStatus loads the env's status and resources; a silent load,
+  // the periodic refresh, keeps the page as it is while it runs.
+  loadApplicationStatus = async (silent = false) => {
     const {
       params: { appName, envName },
     } = this.props.match;
@@ -98,13 +155,17 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         type: 'application/getApplicationStatus',
         payload: { appName: appName, envName: envName },
         callback: (res: any) => {
+          this.setState({ refreshedAt: Date.now() });
           if (res.status) {
-            this.loadApplicationAppliedResources();
+            this.loadApplicationAppliedResources(silent);
           }
         },
       });
     }
   };
+
+  // refreshTimer reloads the status while the page is visible.
+  refreshTimer?: ReturnType<typeof setInterval>;
 
   getTargets = () => {
     const { envbinding, match } = this.props;
@@ -123,10 +184,10 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     return envbinding.find((env) => env.name === envName);
   };
 
-  loadApplicationAppliedResources = async () => {
+  loadApplicationAppliedResources = async (silent = false) => {
     const { mode } = this.state;
     if (mode === 'resource-graph') {
-      await this.loadResourceTree();
+      await this.loadResourceTree(silent);
       return;
     }
     const { applicationDetail } = this.props;
@@ -137,6 +198,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     const env = this.getEnvbindingByName();
     if (applicationDetail && applicationDetail.name && env) {
       const param = {
+        project: applicationDetail?.project?.name || '',
         appName: env.appDeployName || appName,
         appNs: env.appDeployNamespace,
         componentName: componentName,
@@ -147,7 +209,9 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         param.cluster = target.cluster?.clusterName || '';
         param.clusterNs = target.cluster?.namespace || '';
       }
-      this.setState({ resourceLoading: true });
+      if (!silent) {
+        this.setState({ resourceLoading: true });
+      }
       listApplicationServiceAppliedResources(param)
         .then((re) => {
           if (re && re.resources) {
@@ -162,7 +226,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     }
   };
 
-  loadResourceTree = async () => {
+  loadResourceTree = async (silent = false) => {
     const { applicationDetail } = this.props;
     const env = this.getEnvbindingByName();
     const { target, componentName, resourceLoading } = this.state;
@@ -171,8 +235,8 @@ class ApplicationStatusPage extends React.Component<Props, State> {
     } = this.props.match;
     if (applicationDetail && applicationDetail.name && env && !resourceLoading) {
       const param = {
-        appName: env.appDeployName || appName,
-        appNs: env.appDeployNamespace,
+        appName: appName,
+        envName: env.name,
         componentName: componentName,
         cluster: '',
         clusterNs: '',
@@ -181,8 +245,10 @@ class ApplicationStatusPage extends React.Component<Props, State> {
         param.cluster = target.cluster?.clusterName || '';
         param.clusterNs = target.cluster?.namespace || '';
       }
-      this.setState({ resourceLoading: true });
-      listApplicationResourceTree(param)
+      if (!silent) {
+        this.setState({ resourceLoading: true });
+      }
+      listEnvResourceTree(param)
         .then((re) => {
           if (re && re.resources) {
             this.setState({ resources: re.resources });
@@ -226,7 +292,7 @@ class ApplicationStatusPage extends React.Component<Props, State> {
       )
         .then((re: ApplicationDeployResponse) => {
           if (re) {
-            Message.success(i18n.t('Application deployed successfully'));
+            notifyDeployed(re);
             this.setState({ deployLoading: false });
             this.loadApplicationStatus();
             if (re.record && re.record.name && dispatch) {
@@ -308,35 +374,51 @@ class ApplicationStatusPage extends React.Component<Props, State> {
             targets={this.getTargets()}
             envName={envName}
             appName={appName}
-            disableStatusShow={true}
             applicationDetail={applicationDetail}
             applicationStatus={applicationStatus}
             components={components}
             updateQuery={(params: { target?: string; component?: string }) => {
               this.updateQuery(params);
             }}
+            extra={<RefreshedAt at={this.state.refreshedAt} />}
             refresh={() => {
               this.loadApplicationStatus();
             }}
             dispatch={this.props.dispatch}
           />
         </Loading>
-        <Tab onChange={this.onChangeMode} defaultActiveKey={mode} shape="capsule">
-          <Tab.Item title={i18n.t('Overview').toString()} key="overview">
+        {mode === 'overview' && (
+          <>
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
+                {applicationStatus && (
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Reconciliation</Translation>
+                    </div>
+                    <Reconciliation
+                      appName={appName}
+                      envName={envName}
+                      projectName={applicationDetail?.project?.name}
+                      status={applicationStatus}
+                      onChanged={this.loadApplicationStatus}
+                      readOnly={applicationDetail?.readOnly}
+                    />
+                  </section>
+                )}
                 <If condition={componentStatus}>
-                  <Card
-                    locale={locale().Card}
-                    style={{ marginTop: '8px', marginBottom: '16px' }}
-                    contentHeight="auto"
-                    title={<Translation>Component Status</Translation>}
-                  >
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Component Status</Translation>
+                    </div>
                     <div style={{ overflow: 'auto' }}>
                       <Table
                         locale={locale().Table}
                         className="customTable"
-                        dataSource={componentStatus}
+                        dataSource={componentStatus?.map((item) => ({ ...item, statusKey: componentStatusKey(item) }))}
+                        primaryKey="statusKey"
+                        rowExpandable={hasStatusDetails}
+                        expandedRowRender={(record: ComponentStatus) => <StatusDetails status={record} />}
                         style={{ minWidth: '1000px' }}
                       >
                         <Table.Column
@@ -369,23 +451,14 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                         <Table.Column
                           align="left"
                           dataIndex="healthy"
-                          width="100px"
-                          cell={(v: boolean) => {
-                            if (v) {
-                              return (
-                                <div>
-                                  <span className="circle circle-success" />
-                                  <span>Healthy</span>
-                                </div>
-                              );
-                            }
-                            return (
-                              <div>
-                                <span className="circle circle-warning" />
-                                <span>UnHealthy</span>
-                              </div>
-                            );
-                          }}
+                          width="130px"
+                          cell={(v: boolean) =>
+                            v ? (
+                              <StatusBadge tone="healthy" label="Healthy" />
+                            ) : (
+                              <StatusBadge tone="unhealthy" label="Unhealthy" />
+                            )
+                          }
                           title={<Translation>Healthy</Translation>}
                         />
                         <Table.Column
@@ -393,61 +466,54 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                           dataIndex="trait"
                           cell={(v: boolean, i: number, record: ComponentStatus) => {
                             const { traits } = record;
-                            const Tags = (traits || []).map((item) => {
-                              if (item.healthy) {
-                                return (
-                                  <Tag type="normal" size="small">
-                                    <div>
-                                      <span className="circle circle-success" />
-                                      <span>{item.type}</span>
-                                    </div>
-                                  </Tag>
-                                );
-                              } else {
-                                return (
-                                  <Tag type="normal" size="small">
-                                    <div>
-                                      <span className="circle circle-failure" />
-                                      <span>{item.type}</span>
-                                    </div>
-                                  </Tag>
-                                );
+                            const Tags = (traits || []).map((item, index) => {
+                              const state = traitState(item);
+                              const tag = (
+                                <Tag type="normal" size="small" key={`${item.type}-${index}`}>
+                                  <div>
+                                    <span className={`circle ${traitStateCircle[state]}`} />
+                                    <span>{item.type}</span>
+                                  </div>
+                                </Tag>
+                              );
+                              // A trait's message is on its tag; a pending trait without one says what it waits for.
+                              const note =
+                                item.message ||
+                                (state === 'pending' ? i18n.t('Pending: waits for the workload to be healthy') : '');
+                              if (!note) {
+                                return tag;
                               }
+                              return (
+                                <Balloon.Tooltip key={`${item.type}-${index}`} trigger={tag} align="t">
+                                  {note}
+                                </Balloon.Tooltip>
+                              );
                             });
                             return <TagGroup className="tags-content">{Tags}</TagGroup>;
                           }}
                           title={<Translation>Traits</Translation>}
                         />
                         <Table.Column
-                          align="center"
                           dataIndex="message"
                           title={<Translation>Message</Translation>}
-                          cell={(v: string, i: number, record: ComponentStatus) => {
-                            const { message = '', traits } = record;
-                            const TraitMessages = (traits || []).map((item) => {
-                              if (item.message) {
-                                return (
-                                  <div>
-                                    <span>{item.type}: </span>
-                                    <span>{item.message}</span>
-                                  </div>
-                                );
-                              }
-                              return;
-                            });
-                            return (
-                              <div>
-                                <div>{message}</div>
-                                {TraitMessages}
-                              </div>
-                            );
-                          }}
+                          cell={(v: string, i: number, record: ComponentStatus) => <div>{record.message || ''}</div>}
                         />
                       </Table>
                     </div>
-                  </Card>
+                  </section>
                 </If>
-                <Card locale={locale().Card} contentHeight="200px" title={<Translation>Applied Resources</Translation>}>
+                <If condition={applicationStatus?.sources?.length}>
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Sources</Translation>
+                    </div>
+                    <SourceStatusList sources={applicationStatus?.sources || []} />
+                  </section>
+                </If>
+                <section className="status-section">
+                  <div className="status-section-title">
+                    <Translation>Applied Resources</Translation>
+                  </div>
                   <div style={{ overflow: 'auto' }}>
                     <Table style={{ minWidth: '1000px' }} locale={locale().Table} dataSource={resources}>
                       <Table.Column
@@ -489,16 +555,8 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                           if (row.latest) {
                             return (
                               <span>
-                                <span
-                                  style={{
-                                    background: 'var(--success-color)',
-                                    padding: '4px',
-                                    fontSize: '12px',
-                                    color: '#fff',
-                                    marginRight: '4px',
-                                  }}
-                                >
-                                  NEW
+                                <span className="status-latest">
+                                  <Translation>Latest</Translation>
                                 </span>
                                 <Link to={`/applications/${applicationDetail?.name}/revisions`}>{v}</Link>
                               </span>
@@ -509,15 +567,13 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                       />
                     </Table>
                   </div>
-                </Card>
+                </section>
 
                 <If condition={applicationStatus?.conditions}>
-                  <Card
-                    locale={locale().Card}
-                    style={{ marginTop: '8px' }}
-                    contentHeight="auto"
-                    title={<Translation>Conditions</Translation>}
-                  >
+                  <section className="status-section">
+                    <div className="status-section-title">
+                      <Translation>Conditions</Translation>
+                    </div>
                     <div style={{ overflow: 'auto' }}>
                       <Table
                         style={{ minWidth: '1000px' }}
@@ -553,13 +609,15 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                         />
                       </Table>
                     </div>
-                  </Card>
+                  </section>
                 </If>
               </If>
               <If condition={!applicationStatus}>{notDeploy}</If>
             </Loading>
-          </Tab.Item>
-          <Tab.Item title={i18n.t('Resource Graph').toString()} key="resource-graph">
+          </>
+        )}
+        {mode === 'resource-graph' && (
+          <>
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
                 <ApplicationGraph
@@ -567,13 +625,16 @@ class ApplicationStatusPage extends React.Component<Props, State> {
                   application={applicationDetail}
                   env={env}
                   resources={resources}
+                  components={components}
                   graphType="resource-graph"
                 />
               </If>
             </Loading>
             <If condition={!applicationStatus}>{notDeploy}</If>
-          </Tab.Item>
-          <Tab.Item title={i18n.t('Application Graph').toString()} key="application-graph">
+          </>
+        )}
+        {mode === 'application-graph' && (
+          <>
             <Loading visible={loading && resourceLoading} style={{ width: '100%' }}>
               <If condition={applicationStatus}>
                 <ApplicationGraph
@@ -587,8 +648,8 @@ class ApplicationStatusPage extends React.Component<Props, State> {
               </If>
             </Loading>
             <If condition={!applicationStatus}>{notDeploy}</If>
-          </Tab.Item>
-        </Tab>
+          </>
+        )}
       </div>
     );
   }

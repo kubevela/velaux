@@ -1,0 +1,120 @@
+.packages-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.packages-search {
+  flex: 1 1 280px;
+  .packages-search-icon {
+    margin: 0 4px 0 8px;
+    color: #94a3b8;
+  }
+}
+
+// All, in the cluster or built in, as a segmented control.
+.packages-source,
+.package-tabs {
+  display: inline-flex;
+  padding: 3px;
+  background: #e8edf3;
+  border-radius: 6px;
+  button {
+    padding: 3px 12px;
+    color: #475569;
+    font-size: 13px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    &.active {
+      color: #0f172a;
+      font-weight: 500;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }
+  }
+}
+
+.package-list {
+  --row-columns: minmax(220px, 1.4fr) minmax(160px, 1.2fr) 120px 90px;
+  .row-list-name {
+    color: inherit;
+  }
+  .row-list-title {
+    color: var(--primary-color, #1b58f4);
+  }
+}
+
+// What runs a package's functions, as a pill: an external provider, CueX or KubeVela.
+.provider-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  font-weight: 500;
+  font-size: 12px;
+  border-radius: 11px;
+  &.external {
+    color: #1d4ed8;
+    background: #dbeafe;
+  }
+  &.cuex {
+    color: #6d28d9;
+    background: #ede9fe;
+  }
+  &.builtin {
+    color: #0f766e;
+    background: #ccfbf1;
+  }
+}
+
+.package-protocol {
+  padding: 1px 6px;
+  color: #334155;
+  font-size: 11px;
+  text-transform: uppercase;
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.package-type {
+  color: #7c3aed;
+  font-size: 12px;
+  font-family: Menlo, Monaco, monospace;
+  white-space: pre-wrap;
+}
+
+.package-fields {
+  width: 100%;
+  font-size: 13px;
+  border-collapse: collapse;
+  th {
+    padding: 4px 12px 4px 0;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 12px;
+    text-align: left;
+  }
+  td {
+    padding: 6px 12px 6px 0;
+    vertical-align: top;
+    border-top: 1px solid #e2e8f0;
+  }
+  code {
+    font-size: 12px;
+    font-family: Menlo, Monaco, monospace;
+  }
+}
+
+// A type written as a whole, above the fields it stands for.
+.package-type-whole {
+  display: block;
+  margin-bottom: 6px;
+}

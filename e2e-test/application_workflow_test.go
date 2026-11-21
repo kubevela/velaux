@@ -24,6 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	wfTypesv1alpha1 "github.com/kubevela/pkg/apis/oam/v1alpha1"
 	"github.com/kubevela/workflow/api/v1alpha1"
 
 	"github.com/kubevela/velaux/pkg/server/domain/repository"
@@ -110,14 +111,14 @@ var _ = Describe("Test application workflow rest api", func() {
 					"name": "demo",
 				},
 				DependsOn: []string{"create-config"},
-				Outputs: v1alpha1.StepOutputs{{
+				Outputs: wfTypesv1alpha1.StepOutputs{{
 					ValueFrom: "output.config.configName",
 					Name:      "configName",
 				}},
 			}, {
 				Name: "delete-config",
 				Type: "delete-config",
-				Inputs: v1alpha1.StepInputs{
+				Inputs: wfTypesv1alpha1.StepInputs{
 					{
 						From:         "configName",
 						ParameterKey: "name",
@@ -184,7 +185,7 @@ var _ = Describe("Test application workflow rest api", func() {
 		Expect(decodeResponseBody(res, &ir)).Should(Succeed())
 		Expect(len(ir.StepInputs)).Should(Equal(1))
 		Expect(len(ir.StepInputs[0].Values)).Should(Equal(1))
-		Expect(ir.StepInputs[0].Values[0].Value).Should(Equal("\"demo\"\n"))
+		Expect(ir.StepInputs[0].Values[0].Value).Should(Equal("\"demo\""))
 	})
 
 	It("Load the step outputs", func() {
@@ -193,7 +194,7 @@ var _ = Describe("Test application workflow rest api", func() {
 		Expect(decodeResponseBody(res, &or)).Should(Succeed())
 		Expect(len(or.StepOutputs)).Should(Equal(1))
 		Expect(len(or.StepOutputs[0].Values)).Should(Equal(1))
-		Expect(or.StepOutputs[0].Values[0].Value).Should(Equal("\"demo\"\n"))
+		Expect(or.StepOutputs[0].Values[0].Value).Should(Equal("\"demo\""))
 	})
 
 })

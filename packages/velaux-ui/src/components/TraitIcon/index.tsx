@@ -67,11 +67,7 @@ const getIcon = (name: string) => {
             fill="#00A2DD"
             p-id="2672"
           />
-          <path
-            d="M512 512m-128 0a128 128 0 1 0 256 0 128 128 0 1 0-256 0Z"
-            fill="#00A2DD"
-            p-id="2673"
-          />
+          <path d="M512 512m-128 0a128 128 0 1 0 256 0 128 128 0 1 0-256 0Z" fill="#00A2DD" p-id="2673" />
         </svg>
       );
   }

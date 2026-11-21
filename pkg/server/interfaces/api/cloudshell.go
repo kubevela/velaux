@@ -161,7 +161,7 @@ func (c *CloudShellView) proxy(req *restful.Request, res *restful.Response) {
 		proxy.Upgrader = &websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
-			CheckOrigin: func(req *http.Request) bool {
+			CheckOrigin: func(req *http.Request) bool { //nolint:revive,unused
 				return true
 			},
 		}
@@ -183,5 +183,5 @@ func NewReverseProxy(target *url.URL) *httputil.ReverseProxy {
 		req.URL.Host = target.Host
 		req.URL.Path = strings.Replace(req.URL.Path, "/view/cloudshell", "", 1)
 	}
-	return &httputil.ReverseProxy{Director: director}
+	return &httputil.ReverseProxy{Director: director} //nolint:staticcheck // Rewrite changes which headers reach the upstream.
 }

@@ -121,7 +121,7 @@ func (p *ManagePlugin) GetWebServiceRoute() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Filter(p.RBACService.CheckPerm("managePlugin", "enable")).
 		Param(ws.PathParameter("pluginId", "identifier of the plugin.").DataType("string")).
-		Returns(200, "OK", struct{}{}).
+		Returns(200, "OK", apis.EmptyResponse{}).
 		Writes(apis.PluginDTO{}).Do(returns500))
 
 	ws.Route(ws.POST("/{pluginId}/enable").To(p.enablePlugin).

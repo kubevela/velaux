@@ -1,5 +1,9 @@
 import * as React from 'react';
+import { AiOutlineArrowLeft, AiOutlineArrowRight, AiOutlineInfoCircle } from 'react-icons/ai';
 
+import { summaryEntries } from '../../utils/status';
+import type { DetailEntry } from '../../utils/status';
+import type { TooltipSection } from '../StatusTooltip';
 
 import cRole from '../../assets/resources/c-role.svg';
 import cm from '../../assets/resources/cm.svg';
@@ -31,65 +35,59 @@ import svc from '../../assets/resources/svc.svg';
 import user from '../../assets/resources/user.svg';
 import vol from '../../assets/resources/vol.svg';
 
-import type { GraphNode, TreeNode, Node } from './interface';
+import { componentNodeHeight, componentNodeWidth, layoutTraits, maxTraitRows, traitArea } from './traits';
+import type { GraphNode, TreeNode } from './interface';
 
-export function describeNode(node: GraphNode) {
-  const lines = [
-    `Kind: ${node.resource.kind}`,
-    `Namespace: ${node.resource.namespace || '(global)'}`,
-    `Name: ${node.resource.name}`,
-  ];
-  if (node.resource.healthStatus?.statusCode) {
-    let statue = `Status: ${node.resource.healthStatus?.statusCode}`;
-    if (node.resource.kind === 'Pod') {
-      statue = statue + `(${node.resource.additionalInfo?.Status})`;
-    }
-    lines.push(statue);
+// componentSections lists what a component depends on and what depends on it,
+// each with an arrow for its direction and, when KubeVela inferred it from a
+// component read, an icon; both icons' tooltips say why.
+export function componentSections(node: GraphNode): TooltipSection[] {
+  const items = node.dependencies || [];
+  if (items.length === 0) {
+    return [];
   }
-  if (node.resource.healthStatus?.message) {
-    lines.push(`Message: ${node.resource.healthStatus?.message}`);
-  }
-  if (node.resource.healthStatus?.reason) {
-    lines.push(`Reason: ${node.resource.healthStatus?.reason}`);
-  }
-  if (node.resource.kind === 'Service' && node.resource.additionalInfo?.EIP) {
-    lines.push(`EIP: ${node.resource.additionalInfo?.EIP}`);
-  }
-  if (node.resource.kind === 'Pod') {
-    lines.push(`Age: ${node.resource.additionalInfo?.Age}`);
-    lines.push(`Ready: ${node.resource.additionalInfo?.Ready}`);
-    lines.push(`Restarts: ${node.resource.additionalInfo?.Restarts}`);
-  }
-  return lines;
+  const content = (
+    <ul className="dependency-list">
+      {items.map((item) => (
+        <li key={`${item.kind || 'component'}:${item.direction}:${item.name}@${item.where || ''}`}>
+          {item.direction === 'outbound' ? (
+            <span
+              className="dependency-direction"
+              title={
+                item.kind === 'source'
+                  ? `Outbound: ${node.resource.name} reads the source ${item.name}`
+                  : `Outbound: ${node.resource.name} depends on ${item.name}`
+              }
+            >
+              <AiOutlineArrowRight />
+            </span>
+          ) : (
+            <span className="dependency-direction" title={`Inbound: ${item.name} depends on ${node.resource.name}`}>
+              <AiOutlineArrowLeft />
+            </span>
+          )}
+          {item.name}
+          {item.kind === 'source' && <span className="dependency-type dependency-source">source</span>}
+          {item.type && <span className="dependency-type">{item.type}</span>}
+          {item.where && <span className="dependency-where">in {item.where}</span>}
+          {item.inferred && (
+            <span className="inferred-dependency" title={item.inferred}>
+              <AiOutlineInfoCircle />
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+  return [{ title: 'Dependencies', count: items.length, content }];
 }
 
-export function describeCluster(node: GraphNode) {
-  const lines = [`Cluster: ${node.resource.name}`];
-  return lines;
-}
-
-export function describeTarget(node: GraphNode) {
-  const info = node.resource.name.split('/');
-  if (info.length > 1) {
-    const lines = [`Cluster: ${info[0]}`, `Namespace: ${info[1]}`];
-    return lines;
-  }
-  return [`Cluster: ${node.resource.name}`];
-}
-
-export function describeComponents(node: GraphNode) {
-  const lines = [
-    `Name: ${node.resource.name}`,
-    `Alias: ${node.resource.component?.alias}`,
-    `Type: ${node.resource.component?.componentType}`,
-    `DependsOn: ${node.resource.component?.dependsOn || []}`,
-    `Namespace: ${node.resource?.namespace}`,
-    `Cluster: ${node.resource.service?.cluster || 'local'}`,
-  ];
-  if (node.resource.service?.message) {
-    lines.push(`Message: ${node.resource.service?.message}`);
-  }
-  return lines;
+export function componentSummary(node: GraphNode): DetailEntry[] {
+  return summaryEntries([
+    ['Alias', node.resource.component?.alias],
+    ['Namespace', node.resource?.namespace],
+    ['Cluster', node.resource.service?.cluster || 'local'],
+  ]);
 }
 
 export function treeNodeKey(node: TreeNode & { uid?: string }) {
@@ -109,19 +107,12 @@ export function nodeKey(node: TreeNode) {
   ].join('/');
 }
 
-export function getGraphSize(nodes: Node[]): { width: number; height: number } {
-  let width = 0;
-  let height = 0;
-  nodes.forEach((node) => {
-    width = Math.max(node.x || 0 + node.width, width);
-    height = Math.max(node.y || 0 + node.height, height);
-  });
-  return { width, height };
-}
-
 export function getNodeSize(node: TreeNode): { width: number; height: number } {
-  let width = 220;
-  let height = 40;
+  // A resource has room for its health beside its name; one a component
+  // applied has a line naming that component, and one more for the trait that
+  // applied it, where one did.
+  let width = node.nodeType == 'resource' ? 280 : 220;
+  let height = node.origin ? (node.origin.trait ? 92 : 74) : node.nodeType == 'resource' ? 48 : 40;
   if (node.nodeType == 'cluster') {
     width = 140;
     height = 40;
@@ -134,13 +125,22 @@ export function getNodeSize(node: TreeNode): { width: number; height: number } {
     width = 180;
     height = 40;
   }
+  if (node.nodeType == 'source') {
+    width = 280;
+    height = 64;
+  }
+  if (node.nodeType == 'flow') {
+    width = 44;
+    height = 18;
+  }
   if (node.nodeType == 'pod') {
-    width = 220;
-    height = 60;
+    width = 240;
+    height = 66;
   }
   if (node.nodeType == 'component') {
-    width = 320;
-    height = 40;
+    const types = (node.resource.service?.traits || []).map((t) => t.type);
+    width = componentNodeWidth;
+    height = componentNodeHeight(layoutTraits(types, traitArea, maxTraitRows).rows.length);
   }
   return { width, height };
 }
@@ -178,13 +178,7 @@ const resourceIcons = new Map<string, string>([
   ['Volume', vol],
 ]);
 
-export const ResourceIcon = ({
-  kind,
-  customStyle,
-}: {
-  kind: string;
-  customStyle?: React.CSSProperties;
-}) => {
+export const ResourceIcon = ({ kind, customStyle }: { kind: string; customStyle?: React.CSSProperties }) => {
   const svgName = resourceIcons.get(kind);
   if (svgName) {
     return <img title={kind} src={svgName} />;

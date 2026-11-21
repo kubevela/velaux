@@ -13,6 +13,8 @@ type Props = {
   value?: any;
   id: string;
   appNamespace?: string;
+  // project is the application's, from the uischema store.
+  project?: string;
   disabled: boolean;
 };
 
@@ -50,7 +52,7 @@ class SecretSelect extends React.Component<Props, State> {
   };
   loadSecrets = () => {
     if (this.props.appNamespace) {
-      listCloudResourceSecrets({ appNs: this.props.appNamespace }).then((res) => {
+      listCloudResourceSecrets({ appNs: this.props.appNamespace, project: this.props.project || '' }).then((res) => {
         if (res) {
           this.setState({ secrets: res.secrets }, () => {
             const keys = this.getSecretKeys(this.props.value);

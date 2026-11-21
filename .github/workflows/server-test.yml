@@ -15,7 +15,7 @@ on:
 
 env:
   # Common versions
-  GO_VERSION: '1.19'
+  GO_VERSION: '1.27.1'
 
 permissions:
   contents: read
@@ -23,13 +23,13 @@ permissions:
 jobs:
 
   detect-noop:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       noop: ${{ steps.noop.outputs.should_skip }}
     steps:
       - name: Detect No-op Changes
         id: noop
-        uses: fkirc/skip-duplicate-actions@12aca0a884f6137d619d6a8a09fcc3406ced5281
+        uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           paths_ignore: '["**.md", "**.mdx", "**.png", "**.jpg"]'
@@ -37,24 +37,24 @@ jobs:
         continue-on-error: true
 
   server-unit-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
     steps:
       - name: Set up Go
-        uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568
+        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7
         with:
           go-version: ${{ env.GO_VERSION }}
         id: go
 
       - name: Check out code into the Go module directory
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@6ccd57f4c5d15bdc2fef309bd9fb6cc9db2ef1c6
         with:
           submodules: true
 
       - name: Cache Go Dependencies
-        uses: actions/cache@6998d139ddd3e68c71e9e398d8e40b71a2f39812
+        uses: actions/cache@v4
         with:
           path: .work/pkg
           key: ${{ runner.os }}-pkg-${{ hashFiles('**/go.sum') }}
@@ -62,9 +62,9 @@ jobs:
 
       - name: Install ginkgo
         run: |
-          sudo sed -i 's/azure\.//' /etc/apt/sources.list
-          sudo apt-get update
-          sudo apt-get install -y golang-ginkgo-dev
+          go install github.com/onsi/ginkgo/v2/ginkgo@v2.23.4
+          echo "Ginkgo version:"
+          $(go env GOPATH)/bin/ginkgo version
 
       - name : Set up MySQL
         uses: mirromutth/mysql-action@v1.1
@@ -81,21 +81,17 @@ jobs:
           postgresql password: 'Kubevela-123'
 
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@d26215f71b2ce60420a2a3776a25893d11a65f85 # 1.9.0
+        uses: supercharge/mongodb-github-action@5a87bd81f88e2a8b195f8b7b656f5cda1350815a # 1.11.0
         with:
           mongodb-version: '5.0'
 
-        # TODO need update action version to resolve node 12 deprecated.
-      - name: install Kubebuilder
-        uses: RyanSiu1995/kubebuilder-action@ff52bff1bae252239223476e5ab0d71d6ba02343
-        with:
-          version: 3.1.0
-          kubebuilderOnly: false
-          kubernetesVersion: v1.22.17
+      - name: Install envtest binaries
+        run: |
+          go install sigs.k8s.io/controller-runtime/tools/setup-envtest@v0.25.2
+          echo "KUBEBUILDER_ASSETS=$("$(go env GOPATH)/bin/setup-envtest" use 1.37.0 -p path)" >> "$GITHUB_ENV"
 
       - name: Run api server unit test
-        run: make unit-test-server
-
+        run: make unit-test-server-ci
       - name: Upload coverage report
         uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
         with:
@@ -105,30 +101,32 @@ jobs:
           name: codecov-umbrella
 
   server-e2e-tests:
-    runs-on: ubuntu-20.04
+    # Branch protection requires this check by name. A job's name cannot read
+    # env, so the version is repeated here: bump both, and the required check.
+    name: server-e2e-tests (v1.26)
+    runs-on: ubuntu-22.04
     needs: [ detect-noop ]
     if: needs.detect-noop.outputs.noop != 'true'
-    strategy:
-      matrix:
-        k8s-version: ["v1.22", "v1.26"]
+    env:
+      K8S_VERSION: v1.26
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.k8s-version }}
+      group: ${{ github.workflow }}-${{ github.ref }}-server-e2e-tests
       cancel-in-progress: true
 
     steps:
       - name: Set up Go
-        uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568
+        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7
         with:
           go-version: ${{ env.GO_VERSION }}
         id: go
 
       - name: Check out code into the Go module directory
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@6ccd57f4c5d15bdc2fef309bd9fb6cc9db2ef1c6
         with:
           submodules: true
       - name: Build docker image
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@1a162644f9a7e87d8f4b053101d1d9a712edc18c
         with:
           context: ./
           build-args: |
@@ -146,22 +144,22 @@ jobs:
       - name: Calculate K3d args
         run: |
           EGRESS_ARG=""
-          if [[ "${{ matrix.k8s-version }}" == v1.26 ]]; then
+          if [[ "$K8S_VERSION" == v1.26 ]]; then
             EGRESS_ARG="--k3s-arg --egress-selector-mode=disabled@server:0"
           fi
           echo "EGRESS_ARG=${EGRESS_ARG}" >> $GITHUB_ENV 
 
       - name: Setup K3d (Hub)
-        uses: nolar/setup-k3d-k3s@293b8e5822a20bc0d5bcdd4826f1a665e72aba96
+        uses: nolar/setup-k3d-k3s@62c9d1bd2bc843275c85d2e7dcd696edc1160eee # v1.1.0
         with:
-          version: ${{ matrix.k8s-version }}
+          channel: ${{ env.K8S_VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           k3d-args: ${{ env.EGRESS_ARG }}
 
       - name: Setup K3d (Worker)
-        uses: nolar/setup-k3d-k3s@293b8e5822a20bc0d5bcdd4826f1a665e72aba96
+        uses: nolar/setup-k3d-k3s@62c9d1bd2bc843275c85d2e7dcd696edc1160eee # v1.1.0
         with:
-          version: ${{ matrix.k8s-version }}
+          channel: ${{ env.K8S_VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           k3d-name: worker
           k3d-args: --kubeconfig-update-default=false --network=k3d-k3s-default ${{ env.EGRESS_ARG }}
@@ -193,7 +191,7 @@ jobs:
           make enable-addon
 
       - name: Upload coverage report
-        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
+        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: /tmp/e2e_apiserver_test.out

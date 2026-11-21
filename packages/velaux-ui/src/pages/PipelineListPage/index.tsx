@@ -1,12 +1,13 @@
 import { ListTitle as Title } from '../../components/ListTitle';
 
+import { projectChanged } from '../../utils/currentProject';
 import { Loading, Button, Table, Dialog, Message, Balloon } from '@alifd/next';
 import { connect } from 'dva';
 import { Link, routerRedux } from 'dva/router';
 import React, { Component } from 'react';
-import { AiFillCaretRight, AiFillDelete, AiFillSetting } from 'react-icons/ai';
-import { BiCopyAlt } from 'react-icons/bi';
-import { HiViewList } from 'react-icons/hi';
+import { RelativeTime } from '../../components/RelativeTime';
+import { RowAction } from '../../components/RowAction';
+import { AiOutlineCopy, AiOutlineDelete, AiOutlineEdit, AiOutlineHistory, AiOutlinePlayCircle } from 'react-icons/ai';
 import type { Dispatch } from 'redux';
 
 import { deletePipeline, listPipelines } from '../../api/pipeline';
@@ -17,10 +18,19 @@ import Permission from '../../components/Permission';
 import RunPipeline from '../../components/RunPipeline';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import type { AddonBaseStatus , NameAlias , PipelineBase, PipelineListItem, PipelineRun, RunStateInfo , LoginUserInfo } from '@velaux/data';
-import { beautifyTime, momentDate } from '../../utils/common';
+import type {
+  AddonBaseStatus,
+  NameAlias,
+  PipelineBase,
+  PipelineListItem,
+  PipelineRun,
+  RunStateInfo,
+  LoginUserInfo,
+} from '@velaux/data';
+import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
-import RunStatusIcon from '../PipelineRunPage/components/RunStatusIcon';
+import type { Tone } from '../../components/StatusBadge';
+import { StatusBadge } from '../../components/StatusBadge';
 
 import CreatePipeline from './components/CreatePipeline';
 import ClonePipeline from './components/PipelineClone';
@@ -31,6 +41,7 @@ type Props = {
   userInfo?: LoginUserInfo;
   dispatch: Dispatch<any>;
   enabledAddons?: AddonBaseStatus[];
+  currentProject?: { current: string; resolved: boolean };
 };
 
 export type ShowMode = 'table' | 'card' | string | null;
@@ -48,7 +59,7 @@ type State = {
 };
 
 @connect((store: any) => {
-  return { ...store.user, ...store.addons };
+  return { ...store.user, ...store.addons, currentProject: store.currentProject };
 })
 class PipelineListPage extends Component<Props, State> {
   constructor(props: Props) {
@@ -63,9 +74,19 @@ class PipelineListPage extends Component<Props, State> {
     this.getPipelines({});
   }
 
-  getPipelines = async (params: { projectName?: string; query?: string }) => {
+  componentDidUpdate(prev: Props) {
+    if (projectChanged(prev.currentProject, this.props.currentProject)) {
+      this.getPipelines({});
+    }
+  }
+
+  // getPipelines lists the picked project's pipelines, or every project's for all of them.
+  getPipelines = async (params: { query?: string }) => {
+    if (!this.props.currentProject?.resolved) {
+      return;
+    }
     this.setState({ isLoading: true });
-    listPipelines(params)
+    listPipelines({ query: params.query, projectName: this.props.currentProject.current })
       .then((res) => {
         this.setState({
           pipelines: res && Array.isArray(res.pipelines) ? res.pipelines : [],
@@ -221,9 +242,9 @@ class PipelineListPage extends Component<Props, State> {
                       >
                         {run.pipelineRunName}
                       </Link>
-                      <span>{beautifyTime(run.status?.startTime)}</span>
+                      <RelativeTime time={run.status?.startTime} />
                     </div>
-                    <RunStatusIcon status={run.status?.status} />
+                    <StatusBadge tone={runTone(run.status?.status)} label={runLabel(run.status?.status)} />
                   </div>
                 );
               }
@@ -245,17 +266,13 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'run',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlinePlayCircle />}
+                      label="Run"
                       onClick={() => {
                         this.onRunPipeline(pipeline);
                       }}
-                    >
-                      <AiFillCaretRight /> <Translation>Run</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -264,18 +281,13 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'list',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineHistory />}
+                      label="View Runs"
                       onClick={() => {
                         this.onShowPipelineRuns(pipeline);
                       }}
-                    >
-                      <HiViewList />
-                      <Translation>View Runs</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -284,17 +296,13 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'create',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineCopy />}
+                      label="Clone"
                       onClick={() => {
                         this.onClonePipeline(pipeline);
                       }}
-                    >
-                      <BiCopyAlt /> <Translation>Clone</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -303,17 +311,13 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'update',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineEdit />}
+                      label="Edit"
                       onClick={() => {
                         this.onEditPipeline(pipeline);
                       }}
-                    >
-                      <AiFillSetting /> <Translation>Edit</Translation>
-                    </Button>
-                    <span className="line" />
+                    />
                   </Permission>
                   <Permission
                     project={pipeline.project.name}
@@ -322,18 +326,14 @@ class PipelineListPage extends Component<Props, State> {
                       action: 'delete',
                     }}
                   >
-                    <Button
-                      text
-                      size={'medium'}
-                      className={'danger-btn'}
-                      component={'a'}
+                    <RowAction
+                      icon={<AiOutlineDelete />}
+                      label="Remove"
+                      danger
                       onClick={() => {
                         this.onDeletePipeline(pipeline);
                       }}
-                    >
-                      <AiFillDelete />
-                      <Translation>Remove</Translation>
-                    </Button>
+                    />
                   </Permission>
                 </div>
               );
@@ -345,7 +345,6 @@ class PipelineListPage extends Component<Props, State> {
   };
 
   render() {
-    const { userInfo } = this.props;
     const { showMode, isLoading, showRunPipeline, pipeline, showRuns, showNewPipeline, showClonePipeline } = this.state;
     const { enabledAddons } = this.props;
     const addonEnabled = enabledAddons?.filter((addon) => addon.name == 'vela-workflow').length;
@@ -371,7 +370,7 @@ class PipelineListPage extends Component<Props, State> {
         />
 
         <SelectSearch
-          projects={userInfo?.projects}
+          disableProject
           showMode={showMode}
           setMode={(mode: ShowMode) => {
             this.setState({ showMode: mode });
@@ -424,6 +423,7 @@ class PipelineListPage extends Component<Props, State> {
         </If>
         <If condition={showNewPipeline}>
           <CreatePipeline
+            project={this.props.currentProject?.current || undefined}
             onClose={() => {
               this.setState({ showNewPipeline: false, pipeline: undefined });
             }}
@@ -452,3 +452,26 @@ class PipelineListPage extends Component<Props, State> {
 }
 
 export default PipelineListPage;
+
+// runTone colours a pipeline run by its phase.
+function runTone(phase?: string): Tone {
+  switch (phase) {
+    case 'succeeded':
+      return 'healthy';
+    case 'failed':
+    case 'terminated':
+      return 'failed';
+    case 'suspending':
+      return 'suspended';
+    case 'executing':
+    case 'initializing':
+      return 'progressing';
+    default:
+      return 'neutral';
+  }
+}
+
+// runLabel writes a run's phase as a word: "succeeded" to "Succeeded".
+function runLabel(phase?: string): string {
+  return phase ? phase.charAt(0).toUpperCase() + phase.slice(1) : 'Unknown';
+}
