@@ -1,5 +1,4 @@
 import { Card, Field, Form, Grid, Input, Loading, Message, Select, Button, Table } from '@alifd/next';
-import type { Rule } from '@alifd/next/lib/field';
 import React from 'react';
 import { connect } from 'dva';
 
@@ -13,6 +12,7 @@ import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import DefinitionPropertiesForm from '../../../../components/DefinitionPropertiesForm';
+import { propertiesRule } from '../../../../utils/definitionPlugin';
 import type { ExpressionContext } from '../../../../components/UISchema';
 import type { ExpressionEnv } from '../../../../extends/ExpressionEditor';
 import i18n from '../../../../i18n';
@@ -209,15 +209,6 @@ class SourceDialog extends React.Component<Props, State> {
     const { onClose, source, appName, project } = this.props;
     const { definitions, definition, loading, saving } = this.state;
     const init = this.field.init;
-    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
-      // A source with no parameters renders no form, so there is nothing to
-      // check; the callback must still run or the submit never completes.
-      if (!this.uiSchemaRef.current) {
-        callback();
-        return;
-      }
-      this.uiSchemaRef.current.validate(callback);
-    };
     const name = this.field.getValue<string>('name') || (source && source.name) || '<name>';
     const fields = sourceFields(name, definition?.outputSchema);
     // The source's type comes first; the rest waits for it.
@@ -342,7 +333,10 @@ class SourceDialog extends React.Component<Props, State> {
                       key={definition?.name}
                       {...init('properties', {
                         rules: [
-                          { validator: validator, message: i18n.t('Please check the properties of this source') },
+                          propertiesRule(
+                            () => this.uiSchemaRef.current,
+                            i18n.t('Please check the properties of this source')
+                          ),
                         ],
                       })}
                       uiSchema={definition?.uiSchema}

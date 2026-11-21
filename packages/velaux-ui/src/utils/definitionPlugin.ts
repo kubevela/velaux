@@ -83,3 +83,37 @@ export function createDefinitionPluginFinder(
     }
   };
 }
+
+// pluginValidation runs the validator of a loaded plugin. The coding mode, and
+// any definition without a loaded plugin, are validated by the generated form.
+export function pluginValidation(
+  lookup: DefinitionPluginLookup | undefined,
+  codeMode: boolean,
+  value: any
+): { applies: false } | { applies: true; error?: string } {
+  if (codeMode || lookup?.status !== 'loaded') {
+    return { applies: false };
+  }
+  return { applies: true, error: lookup.plugin.validator ? lookup.plugin.validator(value) : undefined };
+}
+
+// PropertiesValidator is the part of the properties form a dialog validates
+// through: it reports the plugin's own message, or the generic one it is given.
+export interface PropertiesValidator {
+  validate(callback: (error?: string) => void, generic?: string): void;
+}
+
+// propertiesRule is the Field rule for a dialog's properties. It sets no rule
+// message, since Field would show that in place of the plugin's own.
+export function propertiesRule(form: () => PropertiesValidator | null | undefined, generic: string) {
+  return {
+    validator: (_rule: any, _value: any, callback: (error?: string) => void) => {
+      const current = form();
+      if (!current) {
+        callback();
+        return;
+      }
+      current.validate(callback, generic);
+    },
+  };
+}

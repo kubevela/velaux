@@ -1,4 +1,3 @@
-import type { Rule } from '@alifd/field';
 import { Grid, Field, Form, Input, Button } from '@alifd/next';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -18,6 +17,7 @@ import DrawerWithFooter from '../Drawer';
 import { If } from '../If';
 import { Translation } from '../Translation';
 import DefinitionPropertiesForm from '../DefinitionPropertiesForm';
+import { propertiesRule } from '../../utils/definitionPlugin';
 import type { ExpressionContext } from '../UISchema';
 
 import { ConditionInput } from './condition-input';
@@ -179,13 +179,6 @@ class StepForm extends Component<Props, State> {
     const { definitionDetail, propertiesMode } = this.state;
     // The properties are checked by their form; a step with none to show (a
     // group) has nothing to check.
-    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
-      if (!this.uiSchemaRef.current) {
-        callback();
-        return;
-      }
-      this.uiSchemaRef.current.validate(callback);
-    };
 
     const groupStep = this.field.getValue('type') == 'step-group';
     const { inline } = this.props;
@@ -227,12 +220,12 @@ class StepForm extends Component<Props, State> {
                     <UISchemaContext.Provider value={this.context}>
                       <DefinitionPropertiesForm
                         context={{ appName: this.appName() }}
-                        {...init(`properties`, {
+                        {...init('properties', {
                           rules: [
-                            {
-                              validator: validator,
-                              message: i18n.t('Please check the properties of the workflow step'),
-                            },
+                            propertiesRule(
+                              () => this.uiSchemaRef.current,
+                              i18n.t('Please check the properties of the workflow step')
+                            ),
                           ],
                         })}
                         enableCodeEdit={propertiesMode === 'code'}

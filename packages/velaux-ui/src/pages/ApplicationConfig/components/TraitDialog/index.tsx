@@ -1,4 +1,3 @@
-import type { Rule } from '@alifd/field';
 import { Grid, Field, Form, Select, Message, Button, Input, Icon, Card, Loading } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
@@ -22,6 +21,7 @@ import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import DefinitionPropertiesForm from '../../../../components/DefinitionPropertiesForm';
+import { propertiesRule } from '../../../../utils/definitionPlugin';
 import i18n from '../../../../i18n';
 import type { ApplicationComponent, DefinitionDetail, Trait, DefinitionBase, EnvBinding } from '@velaux/data';
 import { deployNamespaces, isUsable } from '../../../../utils/restrictions';
@@ -366,9 +366,6 @@ class TraitDialog extends React.Component<Props, State> {
     const { Row, Col } = Grid;
     const { onClose, isEditTrait } = this.props;
     const { definitionDetail, definitionLoading, podDisruptive, propertiesMode } = this.state;
-    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
-      this.uiSchemaRef.current?.validate(callback);
-    };
     const traitType: string = this.field.getValue('type');
     // The trait's type comes first; the rest waits for it.
     const ready = !!isEditTrait || !!traitType;
@@ -502,12 +499,12 @@ class TraitDialog extends React.Component<Props, State> {
                         <DefinitionPropertiesForm
                           context={{ project: this.props.project, appName: this.props.appName }}
                           key={traitType}
-                          {...init(`properties`, {
+                          {...init('properties', {
                             rules: [
-                              {
-                                validator: validator,
-                                message: i18n.t('Please check trait deploy properties'),
-                              },
+                              propertiesRule(
+                                () => this.uiSchemaRef.current,
+                                i18n.t('Please check trait deploy properties')
+                              ),
                             ],
                           })}
                           enableCodeEdit={propertiesMode === 'code'}

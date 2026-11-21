@@ -36,8 +36,8 @@ import classNames from 'classnames';
 import { checkName } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
 import DefinitionPropertiesForm from '../../../../components/DefinitionPropertiesForm';
+import { propertiesRule } from '../../../../utils/definitionPlugin';
 
-import type { Rule } from '@alifd/next/lib/field';
 import { connect } from 'dva';
 import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
@@ -482,9 +482,6 @@ class PolicyDialog extends React.Component<Props, State> {
   render() {
     const { onClose, policy } = this.props;
     const { items, selectedPolicyItem, definitionDetailLoading, policyDefinitionDetail, propertiesMode } = this.state;
-    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
-      this.uiSchemaRef.current?.validate(callback);
-    };
     const init = this.field.init;
     const showType = (selectedPolicyItem && selectedPolicyItem?.name == 'custom') || policy != undefined;
     const span = 12;
@@ -721,12 +718,12 @@ class PolicyDialog extends React.Component<Props, State> {
                   <DefinitionPropertiesForm
                     context={{ project: this.props.project, appName: this.props.appName }}
                     key={policyDefinitionDetail?.name}
-                    {...init(`properties`, {
+                    {...init('properties', {
                       rules: [
-                        {
-                          validator: validator,
-                          message: i18n.t('Please check the properties of this policy'),
-                        },
+                        propertiesRule(
+                          () => this.uiSchemaRef.current,
+                          i18n.t('Please check the properties of this policy')
+                        ),
                       ],
                     })}
                     enableCodeEdit={propertiesMode === 'code'}

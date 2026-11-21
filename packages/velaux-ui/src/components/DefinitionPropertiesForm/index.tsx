@@ -3,8 +3,8 @@ import type { DefinitionFormContext, DefinitionKind } from '@velaux/data';
 import React, { Component } from 'react';
 
 import { getPluginSrv } from '../../services/PluginService';
-import { definitionKind } from '../../utils/definitionPlugin';
-import type { DefinitionPluginLookup } from '../../utils/definitionPlugin';
+import { definitionKind, pluginValidation } from '../../utils/definitionPlugin';
+import type { DefinitionPluginLookup, PropertiesValidator } from '../../utils/definitionPlugin';
 import { ErrorBoundary } from '../ErrorBoundary';
 import i18n from 'i18next';
 import UISchema from '../UISchema';
@@ -25,7 +25,7 @@ type State = {
 // form of the definition plugin that lists it, if one is enabled, otherwise the
 // generated UISchema form. The coding mode always uses the UISchema editor, and
 // a plugin that fails to load or render falls back to it with a notice.
-class DefinitionPropertiesForm extends Component<Props, State> {
+class DefinitionPropertiesForm extends Component<Props, State> implements PropertiesValidator {
   uiSchemaRef: React.RefObject<UISchema>;
 
   constructor(props: Props) {
@@ -67,17 +67,19 @@ class DefinitionPropertiesForm extends Component<Props, State> {
       });
   };
 
-  validate = (callback: (error?: string) => void) => {
-    const { lookup } = this.state;
-    if (lookup?.status === 'loaded' && !this.props.enableCodeEdit) {
-      callback(lookup.plugin.validator ? lookup.plugin.validator(this.props.value) : undefined);
+  // validate reports the plugin's own message when a plugin form is showing,
+  // otherwise the generic message when the generated form fails.
+  validate = (callback: (error?: string) => void, generic?: string) => {
+    const check = pluginValidation(this.state.lookup, !!this.props.enableCodeEdit, this.props.value);
+    if (check.applies) {
+      callback(check.error);
       return;
     }
     if (!this.uiSchemaRef.current) {
       callback();
       return;
     }
-    this.uiSchemaRef.current.validate(callback);
+    this.uiSchemaRef.current.validate((error?: string) => callback(error ? generic || error : undefined));
   };
 
   renderGeneric(notice?: string) {

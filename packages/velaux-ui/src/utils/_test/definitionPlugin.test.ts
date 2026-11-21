@@ -1,7 +1,15 @@
 import 'mocha';
 import { assert } from 'chai';
+import { Field } from '@alifd/next';
 import type { PluginMeta } from '@velaux/data';
-import { createDefinitionPluginFinder, definitionKind, matchDefinitionPlugin } from '../definitionPlugin';
+import {
+  createDefinitionPluginFinder,
+  definitionKind,
+  matchDefinitionPlugin,
+  pluginValidation,
+  propertiesRule,
+} from '../definitionPlugin';
+import type { DefinitionPluginLookup } from '../definitionPlugin';
 
 function meta(id: string, extra: Partial<PluginMeta> = {}): PluginMeta {
   return {
@@ -102,5 +110,66 @@ describe('createDefinitionPluginFinder', () => {
     );
     assert.equal((await find('policy', 'topology')).status, 'none');
     assert.equal((await find('policy', 'topology')).status, 'loaded');
+  });
+});
+
+describe('propertiesRule', () => {
+  const validateField = (rule: any): Promise<string[] | undefined> =>
+    new Promise((resolve) => {
+      const ctx: any = { state: {}, setState() {}, forceUpdate() {} };
+      const field = new Field(ctx);
+      field.init('properties', { rules: [rule] });
+      field.validate((errors: any) => resolve(errors ? errors.properties.errors : undefined));
+    });
+
+  it("shows a plugin's own message when it blocks the save", async () => {
+    const form = { validate: (cb: (e?: string) => void) => cb('Pick at least one cluster') };
+    const errors = await validateField(propertiesRule(() => form, 'Please check the properties of this policy'));
+    assert.deepEqual(errors, ['Pick at least one cluster']);
+  });
+  it('shows the generic message when the generated form blocks the save', async () => {
+    const form = { validate: (cb: (e?: string) => void, generic?: string) => cb(generic) };
+    const errors = await validateField(propertiesRule(() => form, 'Please check the properties of this policy'));
+    assert.deepEqual(errors, ['Please check the properties of this policy']);
+  });
+  it('passes when the form passes, or is not there yet', async () => {
+    assert.isUndefined(await validateField(propertiesRule(() => ({ validate: (cb: any) => cb() }), 'generic')));
+    assert.isUndefined(await validateField(propertiesRule(() => null, 'generic')));
+  });
+});
+
+describe('pluginValidation', () => {
+  const loaded = (validator?: (v: any) => string | undefined): DefinitionPluginLookup => ({
+    status: 'loaded',
+    plugin: { meta: meta('picker'), form: () => null, validator },
+  });
+  it("runs a loaded plugin's validator", () => {
+    assert.deepEqual(
+      pluginValidation(
+        loaded(() => 'Pick at least one cluster'),
+        false,
+        {}
+      ),
+      {
+        applies: true,
+        error: 'Pick at least one cluster',
+      }
+    );
+    assert.deepEqual(pluginValidation(loaded(), false, {}), { applies: true, error: undefined });
+  });
+  it('leaves the coding mode and the generated form to UISchema', () => {
+    assert.deepEqual(
+      pluginValidation(
+        loaded(() => 'no'),
+        true,
+        {}
+      ),
+      { applies: false }
+    );
+    assert.deepEqual(pluginValidation({ status: 'none' }, false, {}), { applies: false });
+    assert.deepEqual(pluginValidation({ status: 'failed', pluginID: 'picker', error: 'x' }, false, {}), {
+      applies: false,
+    });
+    assert.deepEqual(pluginValidation(undefined, false, {}), { applies: false });
   });
 });
