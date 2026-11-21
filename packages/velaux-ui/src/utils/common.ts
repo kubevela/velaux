@@ -9,7 +9,7 @@ type Navigator = {
 export function getLanguage() {
   const navigator: Navigator = window.navigator;
   const lang = navigator.language || 'en';
-  return localStorage.getItem('lang') || lang.split('-')[0];
+  return (localStorage.getItem('lang') || lang).split('-')[0].toLowerCase();
 }
 
 export function isMock() {
