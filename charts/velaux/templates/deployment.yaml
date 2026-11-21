@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "velaux.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "velaux.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "velaux.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "velaux.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "velaux.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: velaux-server
+          image: {{ include "velaux.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- $dsType := include "velaux.datastoreType" . }}
+          {{- $dsSecret := include "velaux.datastoreSecretName" . }}
+          {{- if and (ne $dsType "kubeapi") $dsSecret }}
+          env:
+            - name: VELAUX_DATASTORE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dsSecret }}
+                  key: {{ include "velaux.datastoreSecretKey" . }}
+          {{- end }}
+          args:
+            - "server"
+            - "--datastore-type={{ $dsType }}"
+            - "--feature-gates=EnableCacheJSFile=true"
+            {{- if .Values.datastore.database }}
+            - "--datastore-database={{ .Values.datastore.database }}"
+            {{- end }}
+            {{- if ne $dsType "kubeapi" }}
+            {{- if $dsSecret }}
+            - "--datastore-url=$(VELAUX_DATASTORE_URL)"
+            {{- else if .Values.datastore.url }}
+            - "--datastore-url={{ .Values.datastore.url }}"
+            {{- end }}
+            {{- end }}
+            {{- if .Values.enableImpersonation }}
+            - "--feature-gates=EnableImpersonation=true"
+            {{- end }}
+            {{- range .Values.extraFeatureGates }}
+            - "--feature-gates={{ . }}"
+            {{- end }}
+            {{- range .Values.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /index.html
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /index.html
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

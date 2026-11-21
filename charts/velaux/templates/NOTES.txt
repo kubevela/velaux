@@ -1,0 +1,32 @@
+VelaUX has been installed as release {{ .Release.Name }} in namespace {{ .Release.Namespace }}.
+
+Datastore: {{ .Values.datastore.type }}
+
+Access the VelaUX dashboard:
+
+{{- if .Values.ingress.enabled }}
+
+  http{{ if .Values.ingress.tls.enabled }}s{{ end }}://{{ .Values.ingress.host }}{{ .Values.ingress.path }}
+
+{{- else if eq .Values.service.type "NodePort" }}
+
+  export NODE_IP=$(kubectl get nodes -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "http://$NODE_IP:{{ .Values.service.nodePort }}"
+
+{{- else if eq .Values.service.type "LoadBalancer" }}
+
+  Wait for the LoadBalancer IP:
+  kubectl get svc {{ include "velaux.fullname" . }} -n {{ .Release.Namespace }} -w
+
+{{- else }}
+
+  Port-forward to reach the dashboard locally:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "velaux.fullname" . }} 8000:{{ .Values.service.port }}
+  Then open http://127.0.0.1:8000
+
+{{- end }}
+
+The default admin credentials are printed in the server logs on first start:
+  kubectl logs -n {{ .Release.Namespace }} deploy/{{ include "velaux.fullname" . }} | grep -i "admin"
+
+NOTE: VelaUX requires the KubeVela control plane (vela-core) to be installed in the cluster.
