@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 	"github.com/oam-dev/kubevela/pkg/utils/common"
 
@@ -99,6 +100,30 @@ var _ = Describe("Test oam application service function", func() {
 		Expect(updatedApp.Spec.Components).Should(Equal(updateReq.Components))
 		Expect(updatedApp.Spec.Policies).Should(BeNil())
 		Expect(updatedApp.Spec.Workflow).Should(BeNil())
+	})
+
+	It("keeps the Application's other annotations on update", func() {
+		appName := "test-keep-annotations"
+		appNs := randomNamespaceName("test-keep-annotations")
+		req := apiv1.ApplicationRequest{Components: baseApp.Spec.Components}
+		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, req, appName, appNs, "")).Should(BeNil())
+
+		app := new(v1beta1.Application)
+		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: appNs, Name: appName}, app)).Should(BeNil())
+		app.SetAnnotations(map[string]string{"example.com/team": "payments"})
+		Expect(k8sClient.Update(ctx, app)).Should(BeNil())
+
+		By("updating without a publishVersion")
+		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, req, appName, appNs, "")).Should(BeNil())
+		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: appNs, Name: appName}, app)).Should(BeNil())
+		Expect(app.GetAnnotations()).Should(HaveKeyWithValue("example.com/team", "payments"))
+		Expect(app.GetAnnotations()).ShouldNot(HaveKey(oam.AnnotationPublishVersion))
+
+		By("updating with a publishVersion")
+		Expect(oamAppService.CreateOrUpdateOAMApplication(ctx, req, appName, appNs, "v2")).Should(BeNil())
+		Expect(k8sClient.Get(ctx, client.ObjectKey{Namespace: appNs, Name: appName}, app)).Should(BeNil())
+		Expect(app.GetAnnotations()).Should(HaveKeyWithValue("example.com/team", "payments"))
+		Expect(app.GetAnnotations()).Should(HaveKeyWithValue(oam.AnnotationPublishVersion, "v2"))
 	})
 
 	It("Test GetOAMApplication function", func() {

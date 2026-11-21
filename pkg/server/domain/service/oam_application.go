@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/utils/common"
 
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -61,16 +62,10 @@ func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Cont
 		}
 	}
 
-	annotations := map[string]string{}
-	if publishVersion != "" {
-		annotations["app.oam.dev/publishVersion"] = publishVersion
-	}
-
 	app := &v1beta1.Application{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Annotations: annotations,
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: v1beta1.ApplicationSpec{
 			Components: request.Components,
@@ -78,6 +73,7 @@ func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Cont
 			Workflow:   request.Workflow,
 		},
 	}
+	setPublishVersion(app, publishVersion)
 
 	existApp := new(v1beta1.Application)
 	err = o.KubeClient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, existApp)
@@ -89,7 +85,7 @@ func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Cont
 	}
 
 	existApp.Spec = app.Spec
-	existApp.ObjectMeta.Annotations = annotations
+	setPublishVersion(existApp, publishVersion)
 	return o.KubeClient.Update(ctx, existApp)
 }
 
@@ -128,20 +124,14 @@ func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, req
 		}
 	}
 
-	annotations := map[string]string{}
-	if publishVersion != "" {
-		annotations["app.oam.dev/publishVersion"] = publishVersion
-	}
-
 	app := &v1beta1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
 			APIVersion: "core.oam.dev/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Annotations: annotations,
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: v1beta1.ApplicationSpec{
 			Components: request.Components,
@@ -149,6 +139,7 @@ func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, req
 			Workflow:   request.Workflow,
 		},
 	}
+	setPublishVersion(app, publishVersion)
 
 	args := common.Args{
 		Schema: common.Scheme,
@@ -170,6 +161,14 @@ func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, req
 	}
 
 	existApp.Spec = app.Spec
-	existApp.ObjectMeta.Annotations = annotations
+	setPublishVersion(existApp, publishVersion)
 	return o.KubeClient.Update(ctx, existApp, client.DryRunAll)
+}
+
+// setPublishVersion sets the publish version annotation when one is given, and
+// leaves the Application's other annotations as they are.
+func setPublishVersion(app *v1beta1.Application, publishVersion string) {
+	if publishVersion != "" {
+		oam.SetPublishVersion(app, publishVersion)
+	}
 }

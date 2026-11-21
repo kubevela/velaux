@@ -63,10 +63,9 @@ func (c *oamApplication) GetWebServiceRoute() *restful.WebService {
 		Param(ws.QueryParameter("dryRun", "When present, indicates that modifications should not be persisted. "+
 			"An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. "+
 			"Valid values are: - All: all dry run stages will be processed").DataType("string").Required(false)).
-		Param(ws.QueryParameter("publishVersion", "The publish version for deploying application."+
-			"if no specified, {application name}-v{the number of times it was published} (e.g.: demo-app-v13) will be used. "+
-			"the workflow record will use this value as the record identifier, so please ensure that this value is not duplicated "+
-			"if you specify it, otherwise the request will report an error").DataType("string").Required(false)).
+		Param(ws.QueryParameter("publishVersion", "Sets the application's app.oam.dev/publishVersion annotation. "+
+			"A new value starts a new workflow run; sending the same value again does not. "+
+			"When empty, the annotation is left as it is.").DataType("string").Required(false)).
 		Reads(apis.ApplicationRequest{}))
 
 	ws.Route(ws.DELETE("/namespaces/{namespace}/applications/{appname}").To(c.deleteApplication).
