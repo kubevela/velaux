@@ -83,6 +83,89 @@ const localeData = {
       closeAriaLabel: 'Close',
     },
   },
+  ja: {
+    Timeline: {
+      expand: '展開',
+      fold: '折りたたむ',
+    },
+    Balloon: {
+      close: '閉じる',
+    },
+    Card: {
+      expand: '展開',
+      fold: '折りたたむ',
+    },
+    Dialog: {
+      close: '閉じる',
+      ok: 'OK',
+      cancel: 'キャンセル',
+    },
+    Drawer: {
+      close: '閉じる',
+    },
+    Message: {
+      closeAriaLabel: '閉じる',
+    },
+    Pagination: {
+      prev: '前へ',
+      next: '次へ',
+      goTo: '移動',
+      page: 'ページ',
+      go: '移動',
+      total: '{current} / {total} ページ',
+      labelPrev: '前のページ、現在 {current} ページ',
+      labelNext: '次のページ、現在 {current} ページ',
+      inputAriaLabel: '移動先のページを入力してください',
+      selectAriaLabel: '1ページあたりの表示件数を選択してください',
+      pageSize: '表示件数:',
+    },
+    Input: {
+      clear: 'クリア',
+    },
+    List: {
+      empty: 'データがありません',
+    },
+    Select: {
+      selectPlaceholder: '選択してください',
+      autoCompletePlaceholder: '入力してください',
+      notFoundContent: '選択肢がありません',
+      maxTagPlaceholder: '{selected}/{total} 件選択済み',
+      selectAll: 'すべて選択',
+    },
+    Table: {
+      empty: 'データがありません',
+      ok: 'OK',
+      reset: 'リセット',
+      asc: '昇順',
+      desc: '降順',
+      expanded: '展開済み',
+      folded: '折りたたみ済み',
+      filter: 'フィルター',
+      selectAll: 'すべて選択',
+    },
+    Upload: {
+      card: {
+        cancel: 'キャンセル',
+        delete: '削除',
+      },
+      upload: {
+        delete: '削除',
+      },
+    },
+    Search: {
+      buttonText: '検索',
+    },
+    Tag: {
+      delete: '削除',
+    },
+    Switch: {
+      on: 'オン',
+      off: 'オフ',
+    },
+    Tab: {
+      closeAriaLabel: '閉じる',
+    },
+  },
   zh: {
     Timeline: {
       expand: '展开',
