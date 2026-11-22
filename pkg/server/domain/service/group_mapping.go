@@ -185,12 +185,7 @@ func (g *groupMappingServiceImpl) SyncUserGroupMappings(ctx context.Context, use
 		return nil
 	}
 
-	// Collect all project/role assignments from matching groups
-	type projectRole struct {
-		project string
-		role    string
-	}
-	// Use a map to deduplicate
+	// Collect all project/role assignments from matching groups, deduplicated
 	assignmentSet := make(map[string]map[string]bool) // project -> set of roles
 	for _, group := range oidcGroups {
 		if roles, ok := mapping.Groups[group]; ok {
