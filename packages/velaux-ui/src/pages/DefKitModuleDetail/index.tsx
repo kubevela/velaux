@@ -16,6 +16,7 @@ import {
   applyDefKitPreview,
   deleteDefKitModule,
   detailDefKitModule,
+  listDefKitModules,
   previewDefKitModule,
   updateDefKitModule,
 } from '../../api/defkit';
@@ -27,7 +28,10 @@ import '../../components/RowList';
 import { StatusBadge } from '../../components/StatusBadge';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
+import { handleError } from '../../utils/errors';
 import {
+  addonMissing,
+  apiMessage,
   autoText,
   busy,
   definitionLink,
@@ -37,8 +41,11 @@ import {
   phaseLabels,
   phaseTones,
   policyLabels,
+  renderChangedCode,
+  sequence,
   sourceText,
   statusLabels,
+  stepLabel,
   stepTone,
   withOverride,
 } from '../DefKitModules/defkit';
@@ -146,7 +153,7 @@ const ModuleApplication = (props: { application: DefKitApplication }) => {
                   </span>
                 </span>
                 <span>
-                  <StatusBadge tone={stepTone(step.phase)} label={step.phase || 'pending'} />
+                  <StatusBadge tone={stepTone(step.phase)} label={stepLabel(step.phase)} />
                 </span>
                 <span className="defkit-description" title={step.message}>
                   {step.message}
@@ -191,7 +198,13 @@ const ModuleApplication = (props: { application: DefKitApplication }) => {
 };
 
 // Review is a module's pending render against the cluster, and its Apply.
-const Review = (props: { name: string; preview?: DefKitPreview; onApplied: () => void }) => {
+// Its ticks belong to one render, so it is keyed by the render it shows.
+const Review = (props: {
+  name: string;
+  preview?: DefKitPreview;
+  onApplied: () => void;
+  onRenderChanged: () => void;
+}) => {
   const { preview } = props;
   const [takeOver, setTakeOver] = useState<Record<string, boolean>>({});
   const [remove, setRemove] = useState<Record<string, boolean>>({});
@@ -203,7 +216,11 @@ const Review = (props: { name: string; preview?: DefKitPreview; onApplied: () =>
     return (
       <div className="defkit-waiting">
         <StatusBadge tone="progressing" label="Rendering" />
-        <Translation>The module is rendering in a Job. This page updates when it is ready.</Translation>
+        {preview.message ? (
+          <span className="defkit-message">{preview.message}</span>
+        ) : (
+          <Translation>The module is rendering in a Job. This page updates when it is ready.</Translation>
+        )}
       </div>
     );
   }
@@ -226,14 +243,27 @@ const Review = (props: { name: string; preview?: DefKitPreview; onApplied: () =>
     const deleting = picked(remove);
     const run = () => {
       setApplying(true);
-      applyDefKitPreview(props.name, picked(takeOver), deleting)
+      applyDefKitPreview(props.name, { render: preview.render || '', takeOver: picked(takeOver), delete: deleting })
         .then((res: any) => {
+          setApplying(false);
           if (res) {
             Message.success(i18n.t('Applying the module').toString());
             props.onApplied();
           }
         })
-        .finally(() => setApplying(false));
+        .catch((err: any) => {
+          setApplying(false);
+          if (err?.BusinessCode === renderChangedCode) {
+            Message.warning(
+              i18n.t('The module rendered again since this review. Review the new render, then apply it.').toString()
+            );
+            props.onRenderChanged();
+          } else if (err?.BusinessCode) {
+            handleError(err);
+          } else {
+            Message.error(i18n.t('The module could not be applied').toString());
+          }
+        });
     };
     if (deleting.length === 0) {
       run();
@@ -255,7 +285,7 @@ const Review = (props: { name: string; preview?: DefKitPreview; onApplied: () =>
     <div>
       {preview.errors && preview.errors.length > 0 && (
         <div className="package-issue">
-          <Translation>Some definitions could not be rendered</Translation>:
+          <Translation>The render has problems</Translation>:
           <ul>
             {preview.errors.map((e) => (
               <li key={e}>{e}</li>
@@ -325,10 +355,40 @@ const DefKitModuleDetail = (props: {
   const [preview, setPreview] = useState<DefKitPreview>();
   const [tab, setTab] = useState<Tab>(props.location.search.includes('tab=review') ? 'review' : 'definitions');
   const [updating, setUpdating] = useState(false);
+  const [detailError, setDetailError] = useState<string>();
+  const [previewError, setPreviewError] = useState<string>();
+  const [noAddon, setNoAddon] = useState(false);
+  const [seq] = useState(sequence);
+  useEffect(() => {
+    seq.start();
+    return seq.stop;
+  }, [seq]);
+  // load refreshes the module, its render and whether the addon is enabled;
+  // replies to an earlier load, or after unmount, are dropped.
   const load = useCallback(() => {
-    detailDefKitModule(name).then((res: any) => res && setDetail(res));
-    previewDefKitModule(name).then((res: any) => res && setPreview(res));
-  }, [name]);
+    const n = seq.next();
+    const failed = (set: (msg?: string) => void) => (err: any) =>
+      seq.current(n) && set(apiMessage(err) || i18n.t('The server could not be reached').toString());
+    detailDefKitModule(name, true)
+      .then((res: any) => {
+        if (seq.current(n) && res) {
+          setDetail(res);
+          setDetailError(undefined);
+        }
+      })
+      .catch(failed(setDetailError));
+    previewDefKitModule(name, true)
+      .then((res: any) => {
+        if (seq.current(n) && res) {
+          setPreview(res);
+          setPreviewError(undefined);
+        }
+      })
+      .catch(failed(setPreviewError));
+    listDefKitModules(true)
+      .then((res: any) => seq.current(n) && setNoAddon(addonMissing(res)))
+      .catch(() => undefined);
+  }, [name, seq]);
   useEffect(load, [load]);
   const polling = busy(detail?.phase) || busy(preview?.phase);
   useEffect(() => {
@@ -338,8 +398,28 @@ const DefKitModuleDetail = (props: {
     const timer = setInterval(load, 5000);
     return () => clearInterval(timer);
   }, [polling, load]);
+  const loadError = detailError || previewError;
   if (!detail) {
-    return null;
+    if (!detailError) {
+      return null;
+    }
+    return (
+      <div className="package-detail defkit-detail">
+        <Link className="package-back" to="/defkit">
+          <AiOutlineArrowLeft /> <Translation>DefKit</Translation>
+        </Link>
+        <Empty
+          message={
+            <span>
+              <Translation>This module could not be loaded</Translation>: {detailError}
+            </span>
+          }
+        />
+        <Link to="/defkit">
+          <Translation>Back to DefKit modules</Translation>
+        </Link>
+      </div>
+    );
   }
   const uninstall = () =>
     Dialog.confirm({
@@ -358,22 +438,35 @@ const DefKitModuleDetail = (props: {
         }),
       locale: { ok: i18n.t('Uninstall').toString(), cancel: i18n.t('Cancel').toString() },
     });
-  // setPolicy changes one definition's deletion policy. It is a change to the
-  // module's garbage-collect policy, so the module renders and applies again.
+  // setPolicy changes one definition's deletion policy, once confirmed. It is a
+  // change to the module's garbage-collect policy, so the module renders again.
   const setPolicy = (id: string, policy?: DefKitPolicy) =>
-    updateDefKitModule(name, detail.source, withOverride(detail.settings, id, policy)).then((res: any) => {
-      if (res) {
-        Message.success(
-          i18n
-            .t(
-              detail.settings.autoUpdate
-                ? 'Policy saved; the module renders and applies again'
-                : 'Policy saved; the module renders again for review'
-            )
-            .toString()
-        );
-        load();
-      }
+    Dialog.confirm({
+      type: 'confirm',
+      title: <Translation>Change deletion policy</Translation>,
+      content: (
+        <Translation>
+          {detail.settings.autoUpdate
+            ? 'The module renders and applies again with this policy.'
+            : 'The module renders again with this policy and waits for review before it applies.'}
+        </Translation>
+      ),
+      onOk: () =>
+        updateDefKitModule(name, detail.source, withOverride(detail.settings, id, policy)).then((res: any) => {
+          if (res) {
+            Message.success(
+              i18n
+                .t(
+                  detail.settings.autoUpdate
+                    ? 'Policy saved; the module renders and applies again'
+                    : 'Policy saved; the module renders again for review'
+                )
+                .toString()
+            );
+            load();
+          }
+        }),
+      locale: { ok: i18n.t('Change').toString(), cancel: i18n.t('Cancel').toString() },
     });
   const info = detail.info;
   return (
@@ -387,7 +480,7 @@ const DefKitModuleDetail = (props: {
         <StatusBadge tone={phaseTones[detail.phase]} label={phaseLabels[detail.phase]} title={detail.message} />
         <span className="defkit-head-actions">
           <Permission request={{ resource: 'defkit:*', action: 'update' }} project={''}>
-            <Button onClick={() => setUpdating(true)}>
+            <Button disabled={noAddon} onClick={() => setUpdating(true)}>
               <Translation>Update</Translation>
             </Button>
           </Permission>
@@ -398,6 +491,20 @@ const DefKitModuleDetail = (props: {
           </Permission>
         </span>
       </div>
+      {noAddon && (
+        <div className="package-issue">
+          <Translation>Enable the defkit addon to install DefKit modules</Translation>
+          {' · '}
+          <Link to="/addons">
+            <Translation>Addons</Translation>
+          </Link>
+        </div>
+      )}
+      {loadError && (
+        <div className="package-issue">
+          <Translation>This module could not be refreshed</Translation>: {loadError}
+        </div>
+      )}
       {info?.description && <p className="defkit-description-line">{info.description}</p>}
       <div className="package-facts">
         <div>
@@ -480,8 +587,8 @@ const DefKitModuleDetail = (props: {
               {t === 'definitions'
                 ? detail.definitions.length
                 : t === 'review' && preview?.phase === 'review'
-                ? '•'
-                : ''}
+                  ? '•'
+                  : ''}
             </span>
           </button>
         ))}
@@ -514,23 +621,28 @@ const DefKitModuleDetail = (props: {
                   <span>{i18n.t(kindLabels[d.kind] || d.kind)}</span>
                   <span className="defkit-description">{d.description}</span>
                   <span>
-                    <Select
-                      size="small"
-                      className="defkit-policy"
-                      value={detail.settings.overrides?.[itemId(d)] || 'default'}
-                      onChange={(v: string) => setPolicy(itemId(d), v === 'default' ? undefined : (v as DefKitPolicy))}
-                      dataSource={[
-                        {
-                          value: 'default',
-                          label: `${i18n.t('Module').toString()} (${i18n
-                            .t(policyLabels[detail.settings.deletionPolicy || 'retain'])
-                            .toString()
-                            .toLowerCase()})`,
-                        },
-                        { value: 'retain', label: i18n.t('Retain').toString() },
-                        { value: 'delete', label: i18n.t('Delete').toString() },
-                      ]}
-                    />
+                    <Permission request={{ resource: 'defkit:*', action: 'update' }} project={''}>
+                      <Select
+                        disabled={noAddon}
+                        size="small"
+                        className="defkit-policy"
+                        value={detail.settings.overrides?.[itemId(d)] || 'default'}
+                        onChange={(v: string) =>
+                          setPolicy(itemId(d), v === 'default' ? undefined : (v as DefKitPolicy))
+                        }
+                        dataSource={[
+                          {
+                            value: 'default',
+                            label: `${i18n.t('Module').toString()} (${i18n
+                              .t(policyLabels[detail.settings.deletionPolicy || 'retain'])
+                              .toString()
+                              .toLowerCase()})`,
+                          },
+                          { value: 'retain', label: i18n.t('Retain').toString() },
+                          { value: 'delete', label: i18n.t('Delete').toString() },
+                        ]}
+                      />
+                    </Permission>
                   </span>
                 </div>
               </div>
@@ -540,12 +652,14 @@ const DefKitModuleDetail = (props: {
       {tab === 'application' && detail.application && <ModuleApplication application={detail.application} />}
       {tab === 'review' && (
         <Review
+          key={preview?.render || ''}
           name={name}
           preview={preview}
           onApplied={() => {
             setTab('definitions');
             load();
           }}
+          onRenderChanged={load}
         />
       )}
       {updating && (

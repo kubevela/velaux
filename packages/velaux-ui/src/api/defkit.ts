@@ -1,12 +1,13 @@
-import type { DefKitSettings, DefKitSource } from '@velaux/data';
+import type { ApplyDefKitPreviewRequest, DefKitSettings, DefKitSource } from '@velaux/data';
 import { getDomain } from '../utils/common';
 import { defkit } from './productionLink';
 import { get, post, put, rdelete } from './request';
 
 const base = getDomain().APIBASE + defkit;
 
-export function listDefKitModules() {
-  return get(base, {}).then((res) => res);
+// listDefKitModules lists the modules; with customError a failure rejects with the server's error instead of a toast.
+export function listDefKitModules(customError?: boolean) {
+  return get(base, { customError }).then((res) => res);
 }
 
 // listDefKitRepositories are the module sources the defkit addon offers.
@@ -14,8 +15,8 @@ export function listDefKitRepositories() {
   return get(`${base}/repositories`, {}).then((res) => res);
 }
 
-export function detailDefKitModule(name: string) {
-  return get(`${base}/${name}`, {}).then((res) => res);
+export function detailDefKitModule(name: string, customError?: boolean) {
+  return get(`${base}/${name}`, { customError }).then((res) => res);
 }
 
 export function createDefKitModule(name: string, source: DefKitSource, settings: DefKitSettings) {
@@ -30,12 +31,12 @@ export function deleteDefKitModule(name: string) {
   return rdelete(`${base}/${name}`, {}).then((res) => res);
 }
 
-export function previewDefKitModule(name: string) {
-  return get(`${base}/${name}/preview`, {}).then((res) => res);
+export function previewDefKitModule(name: string, customError?: boolean) {
+  return get(`${base}/${name}/preview`, { customError }).then((res) => res);
 }
 
-// applyDefKitPreview applies a module's pending render: the conflicts named are
-// taken over, the rest skipped; the removed definitions named are deleted.
-export function applyDefKitPreview(name: string, takeOver: string[], remove: string[]) {
-  return post(`${base}/${name}/apply`, { takeOver, delete: remove }).then((res) => res);
+// applyDefKitPreview applies the render reviewed; it rejects with the server's
+// error so that a render changed since the review can be told apart.
+export function applyDefKitPreview(name: string, req: ApplyDefKitPreviewRequest) {
+  return post(`${base}/${name}/apply`, req, true).then((res) => res);
 }

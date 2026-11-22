@@ -108,6 +108,16 @@ export interface DefKitPreview {
   info?: DefKitModuleInfo;
   errors?: string[];
   items: DefKitPreviewItem[];
+  // render identifies the render shown, for Apply to send back unchanged.
+  render?: string;
+}
+
+// ApplyDefKitPreviewRequest applies the reviewed render: conflicts named in
+// takeOver are taken over, removed definitions named in delete are deleted.
+export interface ApplyDefKitPreviewRequest {
+  render: string;
+  takeOver: string[];
+  delete: string[];
 }
 
 // DefKitRepository is a module source the defkit addon offers when adding one.
