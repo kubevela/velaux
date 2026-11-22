@@ -18,11 +18,11 @@ package bcode
 
 var (
 	// ErrGroupMappingConfigNotFound means the velaux-rbac-cm ConfigMap was not found
-	ErrGroupMappingConfigNotFound = NewBcode(404, 19001, "group mapping config not found")
+	ErrGroupMappingConfigNotFound = NewBcode(404, 25001, "group mapping config not found")
 	// ErrGroupMappingInvalidConfig means the group mapping configuration is invalid
-	ErrGroupMappingInvalidConfig = NewBcode(400, 19002, "invalid group mapping configuration")
+	ErrGroupMappingInvalidConfig = NewBcode(400, 25002, "invalid group mapping configuration")
 	// ErrGroupMappingProjectNotExist means a project referenced in group mapping does not exist
-	ErrGroupMappingProjectNotExist = NewBcode(400, 19003, "project in group mapping does not exist")
+	ErrGroupMappingProjectNotExist = NewBcode(400, 25003, "project in group mapping does not exist")
 	// ErrGroupMappingRoleNotExist means a role referenced in group mapping does not exist
-	ErrGroupMappingRoleNotExist = NewBcode(400, 19004, "role in group mapping does not exist")
+	ErrGroupMappingRoleNotExist = NewBcode(400, 25004, "role in group mapping does not exist")
 )
