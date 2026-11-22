@@ -7,6 +7,7 @@ import { getEnvs } from '../../../../api/env';
 import { Translation } from '../../../../components/Translation';
 import KV from '../../../../extends/KV';
 import i18n from '../../../../i18n';
+import { useCapabilities } from '../../../../utils/useCapabilities';
 import { checkName } from '../../../../utils/common';
 import type { NewServiceValues } from './request';
 import { defaultEnvs, newServiceRequest } from './request';
@@ -24,6 +25,7 @@ type Props = {
 // is, and how it is kept. Its components, sources and policies are added on its
 // own page, which opens once it is created.
 export const NewServiceDialog = (props: Props) => {
+  const caps = useCapabilities();
   const field = Field.useField({
     values: {
       project: props.project || props.projects?.[0]?.name,
@@ -161,22 +163,27 @@ export const NewServiceDialog = (props: Props) => {
           >
             <Switch {...init('paused', { valueName: 'checked' })} />
           </Form.Item>
-          <Form.Item
-            label={<Translation>Resync interval</Translation>}
-            help={<Translation>How often the controller reconciles it, such as 5m; the default when empty</Translation>}
-          >
-            <Input
-              {...init('resyncInterval', {
-                rules: [
-                  {
-                    pattern: /^\s*(([0-9]+(\.[0-9]+)?(h|m|s))+)?\s*$/,
-                    message: i18n.t('A duration such as 10m or 1h').toString(),
-                  },
-                ],
-              })}
-              placeholder="5m"
-            />
-          </Form.Item>
+          {/* A controller before KubeVela 1.11 ignores a resync interval. */}
+          {caps.reconcileInterval && (
+            <Form.Item
+              label={<Translation>Resync interval</Translation>}
+              help={
+                <Translation>How often the controller reconciles it, such as 5m; the default when empty</Translation>
+              }
+            >
+              <Input
+                {...init('resyncInterval', {
+                  rules: [
+                    {
+                      pattern: /^\s*(([0-9]+(\.[0-9]+)?(h|m|s))+)?\s*$/,
+                      message: i18n.t('A duration such as 10m or 1h').toString(),
+                    },
+                  ],
+                })}
+                placeholder="5m"
+              />
+            </Form.Item>
+          )}
         </div>
         <Form.Item label={<Translation>Labels</Translation>}>
           <KV {...init('labels')} id="new-service-labels" disabled={false} />

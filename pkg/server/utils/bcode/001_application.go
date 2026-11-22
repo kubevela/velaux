@@ -121,3 +121,6 @@ var ErrInvalidRestartSchedule = NewBcode(400, 10033, "the restart schedule must 
 // ErrComponentDependsOn a component's dependsOn names itself, a component the
 // application does not have, or closes a cycle
 var ErrComponentDependsOn = NewBcode(400, 10034, "the component's dependsOn is not valid")
+
+// ErrNeedsNewerKubeVela means the cluster's KubeVela controller is too old to honour the request.
+var ErrNeedsNewerKubeVela = NewBcode(400, 10035, "this needs a newer KubeVela")

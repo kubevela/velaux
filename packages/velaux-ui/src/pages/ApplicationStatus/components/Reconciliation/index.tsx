@@ -11,6 +11,7 @@ import i18n from '../../../../i18n';
 import type { ApplicationStatus } from '@velaux/data';
 import { momentDate } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
+import { useCapabilities } from '../../../../utils/useCapabilities';
 import { restartPlan } from '../../../../utils/reconciliation';
 import { timeLeft } from '../../../../utils/sourceStatus';
 import './index.less';
@@ -119,6 +120,8 @@ const RestartDialog = (props: { onRestart: (schedule: string) => void; onClose: 
 const Reconciliation = (props: Props) => {
   const { appName, envName, projectName, status, onChanged } = props;
   const [dialog, setDialog] = useState<'interval' | 'restart' | undefined>();
+  // A controller before KubeVela 1.11 ignores both, so neither is offered.
+  const caps = useCapabilities();
   const plan = restartPlan(status.restartWorkflow, status.workflowRestartScheduledAt);
   const resource = `project:${projectName}/application:${appName}/envBinding:${envName}`;
   const done = (message: string) => (re: unknown) => {
@@ -144,75 +147,85 @@ const Reconciliation = (props: Props) => {
         </dd>
         <dd />
 
-        <dt>
-          <Translation>Resync interval</Translation>
-        </dt>
-        <dd>
-          {status.reconcileInterval ? (
-            <span>
-              <Translation>Every</Translation> {status.reconcileInterval}
-            </span>
-          ) : (
-            <span className="row-list-muted">
-              <Translation>Controller default</Translation>
-            </span>
-          )}
-        </dd>
-        <dd className="reconciliation-actions">
-          {!props.readOnly && (
-            <Permission request={{ resource, action: 'update' }} project={projectName}>
-              <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => setDialog('interval')} />
-            </Permission>
-          )}
-        </dd>
-
-        <dt>
-          <Translation>Workflow restart</Translation>
-        </dt>
-        <dd>
-          {plan.mode === 'none' && (
-            <span className="row-list-muted">
-              <Translation>None scheduled</Translation>
-            </span>
-          )}
-          {plan.mode === 'now' && <Translation>Restarting</Translation>}
-          {plan.mode !== 'none' && plan.mode !== 'now' && (
-            <span>
-              {plan.mode === 'every' && (
+        {caps.reconcileInterval && (
+          <React.Fragment>
+            <dt>
+              <Translation>Resync interval</Translation>
+            </dt>
+            <dd>
+              {status.reconcileInterval ? (
                 <span>
-                  <Translation>Every</Translation> {plan.every}
-                  {plan.next && ', '}
+                  <Translation>Every</Translation> {status.reconcileInterval}
+                </span>
+              ) : (
+                <span className="row-list-muted">
+                  <Translation>Controller default</Translation>
                 </span>
               )}
-              {plan.next && (
-                <span title={momentDate(plan.next.toISOString())}>
-                  {next ? (
+            </dd>
+            <dd className="reconciliation-actions">
+              {!props.readOnly && (
+                <Permission request={{ resource, action: 'update' }} project={projectName}>
+                  <RowAction icon={<AiOutlineEdit />} label="Edit" onClick={() => setDialog('interval')} />
+                </Permission>
+              )}
+            </dd>
+          </React.Fragment>
+        )}
+
+        {caps.workflowRestart && (
+          <React.Fragment>
+            <dt>
+              <Translation>Workflow restart</Translation>
+            </dt>
+            <dd>
+              {plan.mode === 'none' && (
+                <span className="row-list-muted">
+                  <Translation>None scheduled</Translation>
+                </span>
+              )}
+              {plan.mode === 'now' && <Translation>Restarting</Translation>}
+              {plan.mode !== 'none' && plan.mode !== 'now' && (
+                <span>
+                  {plan.mode === 'every' && (
                     <span>
-                      <Translation>next in</Translation> {next}
+                      <Translation>Every</Translation> {plan.every}
+                      {plan.next && ', '}
                     </span>
-                  ) : (
-                    <Translation>due now</Translation>
+                  )}
+                  {plan.next && (
+                    <span title={momentDate(plan.next.toISOString())}>
+                      {next ? (
+                        <span>
+                          <Translation>next in</Translation> {next}
+                        </span>
+                      ) : (
+                        <Translation>due now</Translation>
+                      )}
+                    </span>
                   )}
                 </span>
               )}
-            </span>
-          )}
-        </dd>
-        <dd className="reconciliation-actions">
-          {!props.readOnly && (
-            <Permission request={{ resource, action: 'restart' }} project={projectName}>
-              <RowAction icon={<AiOutlineReload />} label="Restart workflow" onClick={() => setDialog('restart')} />
-              {(plan.mode === 'once' || plan.mode === 'every') && (
-                <RowAction
-                  icon={<AiOutlineStop />}
-                  label="Cancel the restart"
-                  danger
-                  onClick={() => cancelWorkflowRestart({ appName, envName }).then(done('Workflow restart cancelled'))}
-                />
+            </dd>
+            <dd className="reconciliation-actions">
+              {!props.readOnly && (
+                <Permission request={{ resource, action: 'restart' }} project={projectName}>
+                  <RowAction icon={<AiOutlineReload />} label="Restart workflow" onClick={() => setDialog('restart')} />
+                  {(plan.mode === 'once' || plan.mode === 'every') && (
+                    <RowAction
+                      icon={<AiOutlineStop />}
+                      label="Cancel the restart"
+                      danger
+                      onClick={() =>
+                        cancelWorkflowRestart({ appName, envName }).then(done('Workflow restart cancelled'))
+                      }
+                    />
+                  )}
+                </Permission>
               )}
-            </Permission>
-          )}
-        </dd>
+            </dd>
+          </React.Fragment>
+        )}
 
         {status.autoUpdate && (
           <React.Fragment>
