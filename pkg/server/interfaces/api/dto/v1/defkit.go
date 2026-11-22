@@ -142,11 +142,13 @@ type DefKitPreviewItem struct {
 // DefKitPreview is a module's pending render against the cluster.
 type DefKitPreview struct {
 	// Phase is the module's: a preview is ready to apply in review.
-	Phase   string               `json:"phase"`
-	Message string               `json:"message,omitempty"`
-	Info    *DefKitModuleInfo    `json:"info,omitempty"`
-	Errors  []string             `json:"errors,omitempty"`
-	Items   []*DefKitPreviewItem `json:"items"`
+	Phase   string `json:"phase"`
+	Message string `json:"message,omitempty"`
+	// Render names the render this preview shows; applying it sends it back.
+	Render string               `json:"render,omitempty"`
+	Info   *DefKitModuleInfo    `json:"info,omitempty"`
+	Errors []string             `json:"errors,omitempty"`
+	Items  []*DefKitPreviewItem `json:"items"`
 }
 
 // CreateDefKitModuleRequest installs a module.
@@ -164,6 +166,9 @@ type UpdateDefKitModuleRequest struct {
 
 // ApplyDefKitPreviewRequest applies a module's pending render.
 type ApplyDefKitPreviewRequest struct {
+	// Render is the preview's render: the one reviewed, which is refused once
+	// a newer render has replaced it.
+	Render string `json:"render"`
 	// TakeOver are the conflicts to take over, as Kind/name; the rest are left alone.
 	TakeOver []string `json:"takeOver,omitempty"`
 	// Delete are the removed definitions to delete, as Kind/name; the rest are kept.

@@ -29,4 +29,15 @@ var (
 	ErrDefKitNotInReview = NewBcode(400, 23005, "the module has no render waiting for review")
 	// ErrDefKitInvalidSettings the deletion policy or interval is not valid
 	ErrDefKitInvalidSettings = NewBcode(400, 23006, "a deletion policy is retain or delete, and an interval a duration of at least 5m, such as 10m")
+
+	// ErrDefKitRenderChanged means the render reviewed is no longer the module's pending one.
+	ErrDefKitRenderChanged = NewBcode(409, 23007, "the module's render has changed since it was reviewed; review it again")
+	// ErrDefKitGitCredentials means a repository address carries credentials.
+	ErrDefKitGitCredentials = NewBcode(400, 23008, "a repository address cannot carry credentials; DefKit modules come from public repositories")
+	// ErrDefKitNotDefinitions means a render holds objects other than definitions.
+	ErrDefKitNotDefinitions = NewBcode(400, 23009, "the render holds objects other than definitions, so it cannot be applied")
+	// ErrDefKitInvalidSource means the module's source cannot be rendered as given.
+	ErrDefKitInvalidSource = NewBcode(400, 23010, "the module's name, path, repository, version, prefix or types are not valid")
+	// ErrDefKitModuleChanged means the module changed while it was being updated.
+	ErrDefKitModuleChanged = NewBcode(409, 23011, "the module has changed since it was read; reload it and save again")
 )
