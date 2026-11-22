@@ -6,6 +6,8 @@ import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { Customisation } from '../../../../services/CustomisationService';
 import { customisationService } from '../../../../services/CustomisationService';
+import type { Draft } from '../../../../utils/customisation';
+import { previewOf } from '../../../../utils/customisation';
 import { locale } from '../../../../utils/locale';
 import type { Term } from '../../../../utils/terminology';
 import { pluralOf } from '../../../../utils/terminology';
@@ -41,9 +43,24 @@ type State = {
 
 const hex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
+// draftOf is the part of the card's state the page previews.
+const draftOf = (s: State): Draft => ({
+  pageTitle: s.pageTitle,
+  logoURL: s.logoURL,
+  iconURL: s.iconURL,
+  sidebarColor: s.sidebarColor,
+  accentColor: s.accentColor,
+  showComingSoon: s.showComingSoon,
+});
+
 // CustomisationCard edits how this VelaUX is branded: its logo, sidebar colours
-// and terminology, kept in the velaux-configuration ConfigMap.
+// and terminology, kept in the velaux-configuration ConfigMap. The page shows
+// the edits as they are made, and goes back to what is stored if they are
+// left unsaved.
 class CustomisationCard extends React.Component<{}, State> {
+  // stored is the customisation as last read or saved.
+  stored?: Customisation;
+
   constructor(props: {}) {
     super(props);
     this.state = {
@@ -75,7 +92,23 @@ class CustomisationCard extends React.Component<{}, State> {
       });
   }
 
+  componentDidUpdate(_: {}, prev: State) {
+    const draft = draftOf(this.state);
+    const before = draftOf(prev);
+    const changed = (Object.keys(draft) as (keyof Draft)[]).some((k) => draft[k] !== before[k]);
+    if (this.stored && changed) {
+      customisationService.set(previewOf(this.stored, draft));
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.stored) {
+      customisationService.set(this.stored);
+    }
+  }
+
   load = (c: Customisation) => {
+    this.stored = c;
     this.setState({
       pageTitle: c.pageTitle || '',
       logoURL: c.logoURL || '',
