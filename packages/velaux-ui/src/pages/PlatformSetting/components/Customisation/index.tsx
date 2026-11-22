@@ -35,6 +35,8 @@ type State = {
   terminologyError: string;
   // warnings are which other stored values were ignored.
   warnings: string[];
+  // resourceVersion is the stored version the card read, sent with a save.
+  resourceVersion?: string;
 };
 
 const hex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
@@ -86,6 +88,7 @@ class CustomisationCard extends React.Component<{}, State> {
       loadError: '',
       terminologyError: c.terminologyError || '',
       warnings: c.warnings || [],
+      resourceVersion: c.resourceVersion,
     });
   };
 
@@ -96,7 +99,7 @@ class CustomisationCard extends React.Component<{}, State> {
 
   save = (c: Customisation) => {
     this.setState({ saving: true });
-    updateCustomisation(c)
+    updateCustomisation({ ...c, resourceVersion: this.state.resourceVersion })
       .then((saved) => {
         if (saved) {
           customisationService.set(saved);

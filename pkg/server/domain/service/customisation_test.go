@@ -53,8 +53,9 @@ func TestCustomisationRoundTrip(t *testing.T) {
 			"Cluster":     {Singular: "Region", Plural: "Regions"},
 		},
 	}
-	_, err = svc.Update(ctx, want)
+	saved, err := svc.Update(ctx, want)
 	require.NoError(t, err)
+	want.ResourceVersion = saved.ResourceVersion
 	got, err := svc.Get(ctx)
 	require.NoError(t, err)
 	assert.Equal(t, &want, got)
@@ -142,4 +143,32 @@ func TestCustomisationIgnoresStoredValuesItCannotUse(t *testing.T) {
 	assert.Contains(t, got.Warnings[0], "logoURL")
 	assert.Contains(t, got.Warnings[1], "pageTitle")
 	assert.Contains(t, got.Warnings[2], "sidebarColor")
+}
+
+func TestCustomisationRefusesAStaleSave(t *testing.T) {
+	ctx := context.Background()
+	cli := fake.NewClientBuilder().WithScheme(common2.Scheme).Build()
+	svc := &customisationServiceImpl{KubeClient: cli}
+
+	read, err := svc.Get(ctx)
+	require.NoError(t, err)
+	assert.Empty(t, read.ResourceVersion, "no ConfigMap has no version")
+
+	first, err := svc.Update(ctx, apisv1.Customisation{PageTitle: "First"})
+	require.NoError(t, err)
+	require.NotEmpty(t, first.ResourceVersion, "a save returns the version it wrote")
+
+	// Two cards opened on the first save; one saves, then the other.
+	_, err = svc.Update(ctx, apisv1.Customisation{PageTitle: "Second", ResourceVersion: first.ResourceVersion})
+	require.NoError(t, err)
+	_, err = svc.Update(ctx, apisv1.Customisation{PageTitle: "Third", ResourceVersion: first.ResourceVersion})
+	assert.ErrorIs(t, err, bcode.ErrCustomisationChanged)
+
+	got, err := svc.Get(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, "Second", got.PageTitle)
+
+	// A request with no version, as a script sends, saves regardless.
+	_, err = svc.Update(ctx, apisv1.Customisation{PageTitle: "Scripted"})
+	require.NoError(t, err)
 }

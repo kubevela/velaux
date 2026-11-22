@@ -91,6 +91,7 @@ func (s *customisationServiceImpl) Get(ctx context.Context) (*apisv1.Customisati
 		return nil, err
 	}
 	c := &apisv1.Customisation{
+		ResourceVersion: cm.ResourceVersion,
 		// Only the exact "true" the card writes shows what is coming.
 		ShowComingSoon: cm.Data[customisationComingSoonKey] == "true",
 	}
@@ -158,6 +159,8 @@ func (s *customisationServiceImpl) Update(ctx context.Context, c apisv1.Customis
 	cm := &corev1.ConfigMap{}
 	err := s.KubeClient.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: CustomisationConfigMapName}, cm)
 	switch {
+	case c.ResourceVersion != "" && (apierrors.IsNotFound(err) || err == nil && cm.ResourceVersion != c.ResourceVersion):
+		return nil, bcode.ErrCustomisationChanged
 	case apierrors.IsNotFound(err):
 		cm = &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{Name: CustomisationConfigMapName, Namespace: types.DefaultKubeVelaNS},
@@ -176,9 +179,13 @@ func (s *customisationServiceImpl) Update(ctx context.Context, c apisv1.Customis
 		}
 		err = s.KubeClient.Update(ctx, cm)
 	}
+	if apierrors.IsConflict(err) {
+		return nil, bcode.ErrCustomisationChanged
+	}
 	if err != nil {
 		return nil, err
 	}
+	c.ResourceVersion = cm.ResourceVersion
 	return &c, nil
 }
 

@@ -2401,6 +2401,10 @@ type Customisation struct {
 	// Warnings say which other stored values were ignored, and why; they are
 	// never stored.
 	Warnings []string `json:"warnings,omitempty"`
+	// ResourceVersion is the stored ConfigMap's version as read. A save that
+	// sends it is refused if the ConfigMap has changed since; one without it
+	// saves regardless.
+	ResourceVersion string `json:"resourceVersion,omitempty"`
 }
 
 // Term is the singular and plural a renamed word takes.

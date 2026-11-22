@@ -20,3 +20,7 @@ package bcode
 // that is no http(s) or data URL, or a term that is not a single capitalised
 // word with a singular and a plural.
 var ErrInvalidCustomisation = NewBcode(400, 21001, "the customisation is not valid")
+
+// ErrCustomisationChanged means the customisation changed after it was read,
+// so saving would overwrite a change the saver never saw.
+var ErrCustomisationChanged = NewBcode(409, 21002, "the customisation has changed since it was read; reload it and save again")
