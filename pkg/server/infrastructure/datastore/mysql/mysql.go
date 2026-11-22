@@ -48,6 +48,9 @@ func New(ctx context.Context, cfg datastore.Config) (datastore.DataStore, error)
 		if err := db.WithContext(ctx).AutoMigrate(v); err != nil {
 			return nil, err
 		}
+		if err := sql.WidenPrimaryKey(db.WithContext(ctx), v); err != nil {
+			return nil, err
+		}
 	}
 
 	m := &mysql{
