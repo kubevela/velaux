@@ -27,6 +27,7 @@ import (
 var _ = Describe("Test validate function", func() {
 	It("Test check name validate ", func() {
 		Expect(cmp.Diff(nameRegexp.MatchString("///Asd asda "), false)).Should(BeEmpty())
+		Expect(nameRegexp.MatchString(`ab\_c`)).Should(BeFalse(), "a backslash is not part of a name")
 		var app0 = apisv1.CreateApplicationRequest{
 			Name:    "a",
 			Project: "namespace",

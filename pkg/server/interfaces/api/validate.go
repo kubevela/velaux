@@ -30,7 +30,7 @@ import (
 var validate = validator.New()
 
 var (
-	nameRegexp  = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`)
+	nameRegexp  = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`)
 	emailRegexp = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	// versionRegexp is a definition version as a pinned type writes it after @:
 	// v2 for a numbered revision, v1.1.0 for a named one.
