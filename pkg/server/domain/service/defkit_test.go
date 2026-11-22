@@ -31,6 +31,7 @@ import (
 	common2 "github.com/oam-dev/kubevela/pkg/utils/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -543,6 +544,38 @@ func TestDefKitDeleteRemovesItsRenders(t *testing.T) {
 	cms := &corev1.ConfigMapList{}
 	require.NoError(t, cli.List(ctx, cms, client.InNamespace(defkitRenderNamespace)))
 	assert.Empty(t, cms.Items)
+}
+
+// A module made before its garbage-collect policy cascaded to Jobs still
+// takes its render pods with it.
+func TestDefKitDeleteTakesItsRenderPods(t *testing.T) {
+	ctx := context.Background()
+	svc, cli := reviewFixture(t)
+	var propagation []metav1.DeletionPropagation
+	var order []string
+	svc.KubeClient = interceptor.NewClient(cli.(client.WithWatch), interceptor.Funcs{
+		Delete: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteOption) error {
+			if _, ok := obj.(*v1beta1.Application); ok {
+				order = append(order, "Application")
+			}
+			return c.Delete(ctx, obj, opts...)
+		},
+		DeleteAllOf: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.DeleteAllOfOption) error {
+			if _, ok := obj.(*batchv1.Job); ok {
+				order = append(order, "Jobs")
+				o := &client.DeleteAllOfOptions{}
+				o.ApplyOptions(opts)
+				require.NotNil(t, o.PropagationPolicy)
+				propagation = append(propagation, *o.PropagationPolicy)
+				assert.Equal(t, defkitRenderNamespace, o.Namespace)
+				assert.Equal(t, "defkit.oam.dev/module=defkit-defs", o.LabelSelector.String())
+			}
+			return c.DeleteAllOf(ctx, obj, opts...)
+		},
+	})
+	require.NoError(t, svc.DeleteModule(ctx, "defs"))
+	assert.Equal(t, []metav1.DeletionPropagation{metav1.DeletePropagationBackground}, propagation)
+	assert.Equal(t, []string{"Jobs", "Application"}, order, "the Jobs go before the Application's own collection can orphan their pods")
 }
 
 // A module installed again under the same name owns only what its own

@@ -35,6 +35,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/appkeeper"
 	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/workflow/operation"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -258,6 +259,13 @@ func (s *defkitServiceImpl) UpdateModule(ctx context.Context, name string, req a
 func (s *defkitServiceImpl) DeleteModule(ctx context.Context, name string) error {
 	app, err := s.application(ctx, name)
 	if err != nil {
+		return err
+	}
+	// Its render Jobs go first, with their pods: the Application's own garbage
+	// collection cascades to them only if it was made with the Job rule, and
+	// would otherwise reach them first and orphan the pods.
+	if err := s.KubeClient.DeleteAllOf(ctx, &batchv1.Job{}, client.InNamespace(defkitRenderNamespace),
+		client.MatchingLabels{defkitModuleLabel: app.Name}, client.PropagationPolicy(metav1.DeletePropagationBackground)); err != nil {
 		return err
 	}
 	if err := s.KubeClient.Delete(ctx, app); err != nil {
