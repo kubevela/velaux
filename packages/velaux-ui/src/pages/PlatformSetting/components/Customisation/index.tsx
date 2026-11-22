@@ -1,4 +1,4 @@
-import { Button, Card, Input, Loading, Message, Switch } from '@alifd/next';
+import { Button, Card, Dialog, Input, Loading, Message, Switch } from '@alifd/next';
 import React from 'react';
 
 import { getCustomisation, updateCustomisation } from '../../../../api/customisation';
@@ -108,6 +108,20 @@ class CustomisationCard extends React.Component<{}, State> {
         }
       })
       .finally(() => this.setState({ saving: false }));
+  };
+
+  // onReset clears every value the card holds, once confirmed.
+  onReset = () => {
+    Dialog.confirm({
+      type: 'confirm',
+      content: (
+        <Translation>
+          Reset the page title, logo, icon, colours, terminology and coming soon items to the defaults?
+        </Translation>
+      ),
+      onOk: () => this.save({}),
+      locale: locale().Dialog,
+    });
   };
 
   onSave = () => {
@@ -304,7 +318,7 @@ class CustomisationCard extends React.Component<{}, State> {
           </table>
 
           <div className="customisation-actions">
-            <Button onClick={() => this.save({})} disabled={saving || !!loadError}>
+            <Button onClick={this.onReset} disabled={saving || !!loadError}>
               <Translation>Reset to defaults</Translation>
             </Button>
             <Button type="primary" onClick={this.onSave} loading={saving} disabled={!!loadError}>

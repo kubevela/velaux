@@ -1044,5 +1044,6 @@
   "This module has pre- or post-apply hooks, which are not run from here. Use vela def apply-module to run them.": "此模块包含应用前或应用后钩子，此处不会执行。请使用 vela def apply-module 执行。",
   "Show coming soon": "显示即将推出",
   "List the menu items not built yet, greyed out": "以灰色列出尚未推出的菜单项",
-  "A save replaces what is ignored with the values below.": "保存后，被忽略的值将由下方的值替换。"
+  "A save replaces what is ignored with the values below.": "保存后，被忽略的值将由下方的值替换。",
+  "Reset the page title, logo, icon, colours, terminology and coming soon items to the defaults?": "将页面标题、徽标、图标、颜色、术语和即将推出的菜单项重置为默认值？"
 }
