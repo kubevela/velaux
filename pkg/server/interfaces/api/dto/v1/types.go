@@ -2600,3 +2600,19 @@ type ReportResult struct {
 	Rows        []ReportRow    `json:"rows"`
 	Chart       *ReportChart   `json:"chart,omitempty"`
 }
+
+// GroupMappingResponse is the response body for group mapping configuration
+type GroupMappingResponse struct {
+	Groups map[string][]GroupProjectRoleBase `json:"groups"`
+}
+
+// GroupProjectRoleBase represents a single mapping of a group to a project and role
+type GroupProjectRoleBase struct {
+	Project string `json:"project"`
+	Role    string `json:"role"`
+}
+
+// UpdateGroupMappingRequest is the request body for updating group mappings
+type UpdateGroupMappingRequest struct {
+	Groups map[string][]GroupProjectRoleBase `json:"groups"`
+}
