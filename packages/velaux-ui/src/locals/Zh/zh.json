@@ -533,7 +533,7 @@
   "Environment binding deleted successfully": "成功移除环境绑定",
   "Retry": "重试",
   "Password should be 8-16 bits and contain at least one number and one letter": "密码应为8-16位, 并至少包含一个数字和一个字母",
-  "Password must be alphanumeric, contain at least one letter and one number, and be 8-16 characters long": "密码必须是字母数字，至少包含一个字母和一个数字，长度为 8-16 个字符",
+  "Password must contain at least one letter and one number, and be 8-16 characters long": "密码必须至少包含一个字母和一个数字，长度为 8-16 个字符",
   "Please input a valid email": "请输入有效的电子邮件地址",
   "Please input a email": "请输入电子邮箱地址",
   "User updated successfully": "用户更新成功",
