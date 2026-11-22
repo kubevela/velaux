@@ -37,7 +37,7 @@ const SwitchLanguage = () => {
             setLanguage('ja');
           }}
         >
-          日本語{language === 'ja' ? '(現在)' : ''}
+          日本語{language === 'ja' ? '(選択中)' : ''}
         </Menu.Item>
       </Menu>
     </Dropdown>
