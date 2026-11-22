@@ -19,6 +19,9 @@ export interface Customisation {
   // terminologyError says why the stored terminology was ignored; the server
   // sets it and never stores it.
   terminologyError?: string;
+  // warnings say which other stored values were ignored, and why; the server
+  // sets them and never stores them.
+  warnings?: string[];
 }
 
 type Listener = (c: Customisation) => void;

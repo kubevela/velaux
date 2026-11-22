@@ -119,3 +119,27 @@ func TestCustomisationUpdateKeepsKeysItDoesNotOwn(t *testing.T) {
 	assert.Equal(t, map[string]string{"previewFeatures": "modules", "pageTitle": "New"}, got.Data,
 		"the card's own keys are replaced, any other key is left alone")
 }
+
+func TestCustomisationIgnoresStoredValuesItCannotUse(t *testing.T) {
+	cm := &corev1.ConfigMap{}
+	cm.Name, cm.Namespace = CustomisationConfigMapName, types.DefaultKubeVelaNS
+	cm.Data = map[string]string{
+		"logoURL":      "javascript:alert(1)",
+		"iconURL":      "/icon.svg",
+		"sidebarColor": "red",
+		"accentColor":  "#00739d",
+		"pageTitle":    "one\ntwo",
+	}
+	svc := &customisationServiceImpl{KubeClient: fake.NewClientBuilder().WithScheme(common2.Scheme).WithObjects(cm).Build()}
+	got, err := svc.Get(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, "/icon.svg", got.IconURL)
+	assert.Equal(t, "#00739d", got.AccentColor)
+	assert.Empty(t, got.LogoURL)
+	assert.Empty(t, got.SidebarColor)
+	assert.Empty(t, got.PageTitle)
+	require.Len(t, got.Warnings, 3)
+	assert.Contains(t, got.Warnings[0], "logoURL")
+	assert.Contains(t, got.Warnings[1], "pageTitle")
+	assert.Contains(t, got.Warnings[2], "sidebarColor")
+}

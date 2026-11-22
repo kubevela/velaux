@@ -2398,6 +2398,9 @@ type Customisation struct {
 	// TerminologyError says why the stored terminology was ignored, where it
 	// cannot be read; it is never stored.
 	TerminologyError string `json:"terminologyError,omitempty"`
+	// Warnings say which other stored values were ignored, and why; they are
+	// never stored.
+	Warnings []string `json:"warnings,omitempty"`
 }
 
 // Term is the singular and plural a renamed word takes.

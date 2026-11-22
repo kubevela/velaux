@@ -1043,5 +1043,6 @@
   "Each module installs through its own workflow in vela-system, so its definitions are tracked and garbage collected like any other resource.": "每个模块通过 vela-system 中自己的工作流安装，其定义会像其他资源一样被跟踪和回收。",
   "This module has pre- or post-apply hooks, which are not run from here. Use vela def apply-module to run them.": "此模块包含应用前或应用后钩子，此处不会执行。请使用 vela def apply-module 执行。",
   "Show coming soon": "显示即将推出",
-  "List the menu items not built yet, greyed out": "以灰色列出尚未推出的菜单项"
+  "List the menu items not built yet, greyed out": "以灰色列出尚未推出的菜单项",
+  "A save replaces what is ignored with the values below.": "保存后，被忽略的值将由下方的值替换。"
 }

@@ -91,17 +91,33 @@ func (s *customisationServiceImpl) Get(ctx context.Context) (*apisv1.Customisati
 		return nil, err
 	}
 	c := &apisv1.Customisation{
-		PageTitle:    cm.Data[customisationTitleKey],
-		LogoURL:      cm.Data[customisationLogoKey],
-		IconURL:      cm.Data[customisationIconKey],
-		SidebarColor: cm.Data[customisationSidebarKey],
-		AccentColor:  cm.Data[customisationAccentKey],
 		// Only the exact "true" the card writes shows what is coming.
 		ShowComingSoon: cm.Data[customisationComingSoonKey] == "true",
 	}
+	// A ConfigMap edited with kubectl is not validated: a value the card would
+	// refuse is ignored, and said so.
+	for _, f := range []struct {
+		key   string
+		field *string
+		valid func(string) bool
+		want  string
+	}{
+		{customisationLogoKey, &c.LogoURL, validImageURL, "an http(s), data:image or same-origin URL"},
+		{customisationIconKey, &c.IconURL, validImageURL, "an http(s), data:image or same-origin URL"},
+		{customisationTitleKey, &c.PageTitle, validPageTitle, fmt.Sprintf("one line of at most %d characters", maxPageTitle)},
+		{customisationSidebarKey, &c.SidebarColor, hexColor.MatchString, "a hex colour, #rgb or #rrggbb"},
+		{customisationAccentKey, &c.AccentColor, hexColor.MatchString, "a hex colour, #rgb or #rrggbb"},
+	} {
+		value := cm.Data[f.key]
+		if value != "" && !f.valid(value) {
+			klog.Warningf("customisation %s ignored: %q", f.key, value)
+			c.Warnings = append(c.Warnings, fmt.Sprintf("the %s in the %s ConfigMap is ignored: it is not %s", f.key, CustomisationConfigMapName, f.want))
+			continue
+		}
+		*f.field = value
+	}
 	if raw := cm.Data[customisationTerminologyKey]; raw != "" {
-		// A ConfigMap edited with kubectl is not validated: terminology that
-		// cannot be read, as JSON or as terms, is ignored whole, and said so.
+		// Terminology that cannot be read, as JSON or as terms, is ignored whole.
 		if err := json.Unmarshal([]byte(raw), &c.Terminology); err != nil {
 			klog.Warningf("customisation terminology ignored: %v", err)
 			c.Terminology = nil
@@ -113,7 +129,7 @@ func (s *customisationServiceImpl) Get(ctx context.Context) (*apisv1.Customisati
 
 // Update replaces the customisation, leaving the ConfigMap's other keys alone.
 func (s *customisationServiceImpl) Update(ctx context.Context, c apisv1.Customisation) (*apisv1.Customisation, error) {
-	c.TerminologyError = ""
+	c.TerminologyError, c.Warnings = "", nil
 	if err := validateCustomisation(c); err != nil {
 		return nil, err
 	}
@@ -166,14 +182,25 @@ func (s *customisationServiceImpl) Update(ctx context.Context, c apisv1.Customis
 	return &c, nil
 }
 
+// validImageURL is whether an image URL is one the page may load: http(s),
+// a data image, or a path on this origin.
+func validImageURL(url string) bool {
+	return strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") ||
+		strings.HasPrefix(url, "data:image/") || strings.HasPrefix(url, "/")
+}
+
+// validPageTitle is whether a title fits the browser tab: one line, bounded.
+func validPageTitle(title string) bool {
+	return len(title) <= maxPageTitle && !strings.ContainsAny(title, "\r\n\t")
+}
+
 func validateCustomisation(c apisv1.Customisation) error {
 	for _, url := range []string{c.LogoURL, c.IconURL} {
-		if url != "" && !strings.HasPrefix(url, "https://") && !strings.HasPrefix(url, "http://") &&
-			!strings.HasPrefix(url, "data:image/") && !strings.HasPrefix(url, "/") {
+		if url != "" && !validImageURL(url) {
 			return bcode.ErrInvalidCustomisation
 		}
 	}
-	if len(c.PageTitle) > maxPageTitle || strings.ContainsAny(c.PageTitle, "\r\n\t") {
+	if !validPageTitle(c.PageTitle) {
 		return bcode.ErrInvalidCustomisation
 	}
 	for _, color := range []string{c.SidebarColor, c.AccentColor} {

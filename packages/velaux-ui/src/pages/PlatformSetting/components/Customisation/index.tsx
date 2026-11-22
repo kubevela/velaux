@@ -33,6 +33,8 @@ type State = {
   loadError: string;
   // terminologyError is why the stored terminology was ignored.
   terminologyError: string;
+  // warnings are which other stored values were ignored.
+  warnings: string[];
 };
 
 const hex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
@@ -55,6 +57,7 @@ class CustomisationCard extends React.Component<{}, State> {
       loading: true,
       loadError: '',
       terminologyError: '',
+      warnings: [],
     };
   }
 
@@ -82,6 +85,7 @@ class CustomisationCard extends React.Component<{}, State> {
       loading: false,
       loadError: '',
       terminologyError: c.terminologyError || '',
+      warnings: c.warnings || [],
     });
   };
 
@@ -161,6 +165,7 @@ class CustomisationCard extends React.Component<{}, State> {
       loading,
       loadError,
       terminologyError,
+      warnings,
     } = this.state;
     const names = [...offeredTerms, ...Object.keys(terms).filter((t) => !offeredTerms.includes(t))];
     return (
@@ -175,6 +180,14 @@ class CustomisationCard extends React.Component<{}, State> {
           {loadError && (
             <Message type="error" className="customisation-message">
               {i18n.t('The current customisation could not be read, so saving is disabled').toString()}: {loadError}
+            </Message>
+          )}
+          {warnings.length > 0 && (
+            <Message type="warning" className="customisation-message">
+              {warnings.map((w) => (
+                <div key={w}>{w.charAt(0).toUpperCase() + w.slice(1)}.</div>
+              ))}
+              {i18n.t('A save replaces what is ignored with the values below.').toString()}
             </Message>
           )}
           <div className="customisation-grid">
