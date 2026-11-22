@@ -49,6 +49,13 @@ const (
 	customisationComingSoonKey  = "showComingSoon"
 )
 
+// customisationKeys are the ConfigMap keys the customisation owns; an update
+// replaces these and leaves any other key alone.
+var customisationKeys = []string{
+	customisationLogoKey, customisationIconKey, customisationTitleKey, customisationSidebarKey,
+	customisationAccentKey, customisationTerminologyKey, customisationComingSoonKey,
+}
+
 // termName is a word the UI may rename: one capitalised word, as it is written
 // in the UI's own text.
 var termName = regexp.MustCompile(`^[A-Z][a-zA-Z]*$`)
@@ -104,7 +111,7 @@ func (s *customisationServiceImpl) Get(ctx context.Context) (*apisv1.Customisati
 	return c, nil
 }
 
-// Update replaces the customisation.
+// Update replaces the customisation, leaving the ConfigMap's other keys alone.
 func (s *customisationServiceImpl) Update(ctx context.Context, c apisv1.Customisation) (*apisv1.Customisation, error) {
 	c.TerminologyError = ""
 	if err := validateCustomisation(c); err != nil {
@@ -142,7 +149,15 @@ func (s *customisationServiceImpl) Update(ctx context.Context, c apisv1.Customis
 		}
 		err = s.KubeClient.Create(ctx, cm)
 	case err == nil:
-		cm.Data = data
+		if cm.Data == nil {
+			cm.Data = map[string]string{}
+		}
+		for _, key := range customisationKeys {
+			delete(cm.Data, key)
+		}
+		for key, value := range data {
+			cm.Data[key] = value
+		}
 		err = s.KubeClient.Update(ctx, cm)
 	}
 	if err != nil {

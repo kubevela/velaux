@@ -102,3 +102,20 @@ func TestCustomisationShowsComingSoonOnlyWhenTrue(t *testing.T) {
 		assert.Equal(t, want, got.ShowComingSoon, "showComingSoon: %q", value)
 	}
 }
+
+func TestCustomisationUpdateKeepsKeysItDoesNotOwn(t *testing.T) {
+	ctx := context.Background()
+	cm := &corev1.ConfigMap{}
+	cm.Name, cm.Namespace = CustomisationConfigMapName, types.DefaultKubeVelaNS
+	cm.Data = map[string]string{"previewFeatures": "modules", "logoURL": "https://example.com/old.svg", "pageTitle": "Old"}
+	cli := fake.NewClientBuilder().WithScheme(common2.Scheme).WithObjects(cm).Build()
+	svc := &customisationServiceImpl{KubeClient: cli}
+
+	_, err := svc.Update(ctx, apisv1.Customisation{PageTitle: "New"})
+	require.NoError(t, err)
+
+	got := &corev1.ConfigMap{}
+	require.NoError(t, cli.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: CustomisationConfigMapName}, got))
+	assert.Equal(t, map[string]string{"previewFeatures": "modules", "pageTitle": "New"}, got.Data,
+		"the card's own keys are replaced, any other key is left alone")
+}
