@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import En from './locals/En/en.json';
+import Ja from './locals/Ja/ja.json';
 import Zh from './locals/Zh/zh.json';
 import { getLanguage } from './utils/common';
 import { customisationService, terminologyPostProcessor } from './services/CustomisationService';
@@ -9,6 +10,9 @@ import { customisationService, terminologyPostProcessor } from './services/Custo
 const resources = {
   en: {
     translation: En,
+  },
+  ja: {
+    translation: Ja,
   },
   zh: {
     translation: Zh,

@@ -8,8 +8,7 @@ import { getLanguage } from '../../utils/common';
 
 const SwitchLanguage = () => {
   const { i18n } = useTranslation();
-  const _isEnglish = getLanguage() === 'en';
-  const [isEnglish, setIsEnglish] = useState(_isEnglish);
+  const [language, setLanguage] = useState(getLanguage());
   return (
     <Dropdown trigger={<TbLanguage size="18" />}>
       <Menu>
@@ -17,19 +16,28 @@ const SwitchLanguage = () => {
           onClick={() => {
             i18n.changeLanguage('en');
             localStorage.setItem('lang', 'en');
-            setIsEnglish(true);
+            setLanguage('en');
           }}
         >
-          English {isEnglish ? '(Now)' : ''}
+          English {language === 'en' ? '(Now)' : ''}
         </Menu.Item>
         <Menu.Item
           onClick={() => {
             i18n.changeLanguage('zh');
             localStorage.setItem('lang', 'zh');
-            setIsEnglish(false);
+            setLanguage('zh');
           }}
         >
-          中文{!isEnglish ? '(当前)' : ''}
+          中文{language === 'zh' ? '(当前)' : ''}
+        </Menu.Item>
+        <Menu.Item
+          onClick={() => {
+            i18n.changeLanguage('ja');
+            localStorage.setItem('lang', 'ja');
+            setLanguage('ja');
+          }}
+        >
+          日本語{language === 'ja' ? '(現在)' : ''}
         </Menu.Item>
       </Menu>
     </Dropdown>
