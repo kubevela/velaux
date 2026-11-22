@@ -1,7 +1,14 @@
 import { expect } from 'chai';
 
 import {
+  addonMissing,
+  apiMessage,
   autoText,
+  gitCredentials,
+  intervalError,
+  rekeyOverrides,
+  sequence,
+  stepLabel,
   definitionLink,
   durationMs,
   minIntervalMs,
@@ -91,5 +98,72 @@ describe('defkit', () => {
       },
       { value: 'github.com/org/defs', label: 'Team defs · github.com/org/defs' },
     ]);
+  });
+
+  it('rekeys overrides to a new prefix', () => {
+    expect(
+      rekeyOverrides({ 'TraitDefinition/dk-scaler': 'delete', 'ComponentDefinition/dk-web': 'retain' }, 'dk-', 'my-')
+    ).to.deep.equal({ 'TraitDefinition/my-scaler': 'delete', 'ComponentDefinition/my-web': 'retain' });
+    expect(rekeyOverrides({ 'TraitDefinition/scaler': 'delete' }, '', 'my-')).to.deep.equal({
+      'TraitDefinition/my-scaler': 'delete',
+    });
+    expect(rekeyOverrides({ 'TraitDefinition/my-scaler': 'delete' }, 'my-', '')).to.deep.equal({
+      'TraitDefinition/scaler': 'delete',
+    });
+    expect(rekeyOverrides({ 'TraitDefinition/other': 'delete' }, 'dk-', 'my-')).to.deep.equal({
+      'TraitDefinition/other': 'delete',
+    });
+    expect(rekeyOverrides(undefined, 'dk-', 'my-')).to.equal(undefined);
+  });
+
+  it('labels a workflow step phase for translation', () => {
+    expect(stepLabel('succeeded')).to.equal('Succeeded');
+    expect(stepLabel('suspending')).to.equal('Suspended');
+    expect(stepLabel(undefined)).to.equal('Pending');
+    expect(stepLabel('custom')).to.equal('custom');
+  });
+
+  it('checks the auto update interval as the dialog does', () => {
+    expect(intervalError('10m')).to.equal(undefined);
+    expect(intervalError('5m')).to.equal(undefined);
+    expect(intervalError('4m59s')).to.equal('At least 5m');
+    expect(intervalError('300s')).to.equal(undefined);
+    expect(intervalError('soon')).to.equal('A duration such as 10m or 1h');
+    expect(intervalError('')).to.equal('A duration such as 10m or 1h');
+  });
+
+  it('spots credentials in a git URL', () => {
+    expect(gitCredentials('https://user:token@github.com/org/defs')).to.equal(true);
+    expect(gitCredentials(' https://token@github.com/org/defs ')).to.equal(true);
+    expect(gitCredentials('https://github.com/org/defs')).to.equal(false);
+    expect(gitCredentials('https://github.com/org/defs@main')).to.equal(false);
+    expect(gitCredentials('git@github.com:org/defs.git')).to.equal(false);
+    expect(gitCredentials('github.com/org/defs')).to.equal(false);
+  });
+
+  it('keeps only the latest reply, and none after a stop', () => {
+    const seq = sequence();
+    const first = seq.next();
+    const second = seq.next();
+    expect(seq.current(first)).to.equal(false);
+    expect(seq.current(second)).to.equal(true);
+    seq.stop();
+    expect(seq.current(second)).to.equal(false);
+    seq.start();
+    expect(seq.current(seq.next())).to.equal(true);
+  });
+
+  it('reads the addon as missing only when a reply says so', () => {
+    expect(addonMissing({ addonEnabled: false })).to.equal(true);
+    expect(addonMissing({ addonEnabled: true })).to.equal(false);
+    expect(addonMissing({})).to.equal(false);
+    expect(addonMissing(undefined)).to.equal(false);
+  });
+
+  it('reads the message of a failed request', () => {
+    expect(apiMessage({ BusinessCode: 23008, Message: 'private repositories are not supported' })).to.equal(
+      'private repositories are not supported'
+    );
+    expect(apiMessage(undefined)).to.equal(undefined);
   });
 });

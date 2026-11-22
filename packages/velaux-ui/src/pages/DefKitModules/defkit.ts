@@ -136,6 +136,16 @@ export function durationMs(value: string): number | undefined {
   return total;
 }
 
+// intervalError is why an auto update interval is refused, as an untranslated
+// message, or undefined when it is accepted.
+export function intervalError(value: string): string | undefined {
+  const ms = durationMs(value || '');
+  if (ms === undefined) {
+    return 'A duration such as 10m or 1h';
+  }
+  return ms < minIntervalMs ? 'At least 5m' : undefined;
+}
+
 // stepTones colours a workflow step by its phase.
 export function stepTone(phase?: string): Tone {
   switch (phase) {
@@ -150,6 +160,83 @@ export function stepTone(phase?: string): Tone {
   }
   return 'neutral';
 }
+
+const stepLabels: Record<string, string> = {
+  succeeded: 'Succeeded',
+  failed: 'Failed',
+  suspending: 'Suspended',
+  running: 'Running',
+  skipped: 'Skipped',
+  pending: 'Pending',
+};
+
+// stepLabel is a workflow step's phase as a translatable label; an unknown phase is shown as it is.
+export function stepLabel(phase?: string): string {
+  return stepLabels[phase || 'pending'] || (phase as string);
+}
+
+// rekeyOverrides moves overrides, keyed Kind/name, from names under one prefix
+// to the same names under another; keys without the old prefix are kept.
+export function rekeyOverrides(
+  overrides: Record<string, DefKitPolicy> | undefined,
+  from: string,
+  to: string
+): Record<string, DefKitPolicy> | undefined {
+  if (!overrides || from === to) {
+    return overrides;
+  }
+  const out: Record<string, DefKitPolicy> = {};
+  Object.keys(overrides).forEach((key) => {
+    const slash = key.indexOf('/');
+    const kind = key.slice(0, slash);
+    const name = key.slice(slash + 1);
+    out[name.startsWith(from) ? `${kind}/${to}${name.slice(from.length)}` : key] = overrides[key];
+  });
+  return out;
+}
+
+// gitCredentials says whether a source is an http(s) URL carrying user info,
+// which the server refuses: private repositories are not supported.
+export function gitCredentials(from: string): boolean {
+  return /^https?:\/\/[^/?#]*@/i.test(from.trim());
+}
+
+// Sequence numbers requests so that only the latest reply is used, and none
+// once its component has unmounted.
+export interface Sequence {
+  next: () => number;
+  current: (n: number) => boolean;
+  start: () => void;
+  stop: () => void;
+}
+
+export function sequence(): Sequence {
+  let last = 0;
+  let live = true;
+  return {
+    next: () => ++last,
+    current: (n: number) => live && n === last,
+    start: () => {
+      live = true;
+    },
+    stop: () => {
+      live = false;
+    },
+  };
+}
+
+// addonMissing is true only when a successful list reply says the defkit addon is not enabled.
+export function addonMissing(res?: { addonEnabled?: boolean }): boolean {
+  return res?.addonEnabled === false;
+}
+
+// apiMessage is the server's message for a failed request, when it sent one.
+export function apiMessage(err?: { Message?: string }): string | undefined {
+  return err?.Message || undefined;
+}
+
+// renderChangedCode is the server's refusal to apply a render other than the one reviewed.
+export const renderChangedCode = 23007;
 
 // repositoryOptions are the built-in repositories as the Source field offers
 // them: the address to fill in, labelled with the repository's name.
