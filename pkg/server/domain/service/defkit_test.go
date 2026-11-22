@@ -284,14 +284,14 @@ func TestDefKitDeletionPolicy(t *testing.T) {
 	src := apisv1.DefKitSource{Git: "https://example.com/defs"}
 	keep, rules := storedGCPolicy(t, defkitApplication("defs", src, apisv1.DefKitSettings{}))
 	assert.False(t, keep, "the rules decide what outlives an update")
-	require.Len(t, rules, 1)
+	require.Len(t, rules, 2)
 	assert.Equal(t, "never", rules[0]["strategy"], "a module retains its definitions by default")
 
 	_, rules = storedGCPolicy(t, defkitApplication("defs", src, apisv1.DefKitSettings{
 		DeletionPolicy: "delete",
 		Overrides:      map[string]string{"TraitDefinition/keep-me": "retain", "TraitDefinition/a": "retain", "PolicyDefinition/b": "delete"},
 	}))
-	require.Len(t, rules, 3)
+	require.Len(t, rules, 4)
 	assert.Equal(t, map[string]interface{}{
 		"selector": map[string]interface{}{"resourceTypes": []interface{}{"PolicyDefinition"}, "resourceNames": []interface{}{"b"}},
 		"strategy": "onAppUpdate",
@@ -301,6 +301,16 @@ func TestDefKitDeletionPolicy(t *testing.T) {
 		"strategy": "never",
 	}, rules[1])
 	assert.Equal(t, "onAppUpdate", rules[2]["strategy"], "then the module's own")
+}
+
+func TestDefKitRenderJobsTakeTheirPods(t *testing.T) {
+	src := apisv1.DefKitSource{Git: "https://example.com/defs"}
+	_, rules := storedGCPolicy(t, defkitApplication("defs", src, apisv1.DefKitSettings{}))
+	assert.Contains(t, rules, map[string]interface{}{
+		"selector":    map[string]interface{}{"resourceTypes": []interface{}{"Job"}},
+		"strategy":    "onAppUpdate",
+		"propagation": "cascading",
+	}, "a render Job collected unfinished takes its pods with it")
 }
 
 func TestDefKitAutoUpdate(t *testing.T) {

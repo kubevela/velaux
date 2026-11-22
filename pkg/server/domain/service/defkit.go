@@ -660,7 +660,9 @@ func defkitApplication(name string, src apisv1.DefKitSource, settings apisv1.Def
 
 // gcRules are the garbage-collect rules of a module's deletion policy: one per
 // kind and strategy for the overrides, first since the first matching rule
-// wins, then the module's own for every definition kind.
+// wins, then the module's own for every definition kind. A last rule cascades
+// to a render Job's pods: deleted without a propagation policy, the API server
+// orphans a Job's pods, and KubeVela sets one only from a rule.
 func gcRules(settings apisv1.DefKitSettings) []interface{} {
 	byRule := map[[2]string][]string{}
 	for id, policy := range settings.Overrides {
@@ -698,6 +700,10 @@ func gcRules(settings apisv1.DefKitSettings) []interface{} {
 	return append(rules, map[string]interface{}{
 		"selector": map[string]interface{}{"resourceTypes": kinds},
 		"strategy": gcStrategy(settings.DeletionPolicy),
+	}, map[string]interface{}{
+		"selector":    map[string]interface{}{"resourceTypes": []string{"Job"}},
+		"strategy":    "onAppUpdate",
+		"propagation": "cascading",
 	})
 }
 
