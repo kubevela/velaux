@@ -28,3 +28,4 @@ export const plugin = `/api/v1/plugins`;
 export const managePlugin = `/api/v1/manage/plugins`;
 export const packages = `/api/v1/packages`;
 export const defkit = `/api/v1/defkit`;
+export const groupMappings = `/api/v1/group_mappings`;

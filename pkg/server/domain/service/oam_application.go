@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/oam-dev/kubevela/apis/core.oam.dev/v1beta1"
+	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/utils/common"
 
 	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
@@ -34,10 +35,10 @@ import (
 
 // OAMApplicationService oam_application service
 type OAMApplicationService interface {
-	CreateOrUpdateOAMApplication(context.Context, apisv1.ApplicationRequest, string, string) error
+	CreateOrUpdateOAMApplication(context.Context, apisv1.ApplicationRequest, string, string, string) error
 	GetOAMApplication(context.Context, string, string) (*apisv1.ApplicationResponse, error)
 	DeleteOAMApplication(context.Context, string, string) error
-	DryRunOAMApplication(context.Context, apisv1.ApplicationRequest, string, string) error
+	DryRunOAMApplication(context.Context, apisv1.ApplicationRequest, string, string, string) error
 }
 
 // NewOAMApplicationService new oam_application service
@@ -51,7 +52,7 @@ type oamApplicationServiceImpl struct {
 }
 
 // CreateOrUpdateOAMApplication create or update application
-func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Context, request apisv1.ApplicationRequest, name, namespace string) error {
+func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Context, request apisv1.ApplicationRequest, name, namespace string, publishVersion string) error {
 	ns := new(v1.Namespace)
 	err := o.KubeClient.Get(ctx, client.ObjectKey{Name: namespace}, ns)
 	if kerrors.IsNotFound(err) {
@@ -72,6 +73,7 @@ func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Cont
 			Workflow:   request.Workflow,
 		},
 	}
+	setPublishVersion(app, publishVersion)
 
 	existApp := new(v1beta1.Application)
 	err = o.KubeClient.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, existApp)
@@ -83,6 +85,7 @@ func (o oamApplicationServiceImpl) CreateOrUpdateOAMApplication(ctx context.Cont
 	}
 
 	existApp.Spec = app.Spec
+	setPublishVersion(existApp, publishVersion)
 	return o.KubeClient.Update(ctx, existApp)
 }
 
@@ -111,7 +114,7 @@ func (o oamApplicationServiceImpl) DeleteOAMApplication(ctx context.Context, nam
 }
 
 // DryRunOAMApplication dryRun create or update application
-func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, request apisv1.ApplicationRequest, name, namespace string) error {
+func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, request apisv1.ApplicationRequest, name, namespace string, publishVersion string) error {
 	ns := new(v1.Namespace)
 	err := o.KubeClient.Get(ctx, client.ObjectKey{Name: namespace}, ns)
 	if kerrors.IsNotFound(err) {
@@ -136,6 +139,7 @@ func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, req
 			Workflow:   request.Workflow,
 		},
 	}
+	setPublishVersion(app, publishVersion)
 
 	args := common.Args{
 		Schema: common.Scheme,
@@ -157,5 +161,14 @@ func (o oamApplicationServiceImpl) DryRunOAMApplication(ctx context.Context, req
 	}
 
 	existApp.Spec = app.Spec
+	setPublishVersion(existApp, publishVersion)
 	return o.KubeClient.Update(ctx, existApp, client.DryRunAll)
+}
+
+// setPublishVersion sets the publish version annotation when one is given, and
+// leaves the Application's other annotations as they are.
+func setPublishVersion(app *v1beta1.Application, publishVersion string) {
+	if publishVersion != "" {
+		oam.SetPublishVersion(app, publishVersion)
+	}
 }

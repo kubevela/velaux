@@ -229,7 +229,7 @@ export const replaceUrl = function (text: string) {
   return str;
 };
 
-export const checkUserPassword = /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]{8,16})$/;
+export const checkUserPassword = /^(?=.*[0-9])(?=.*[a-zA-Z])(.{8,16})$/;
 
 export function isMatchBusinessCode(businessCode: number) {
   const tokenExpiredList = [12002, 12010];

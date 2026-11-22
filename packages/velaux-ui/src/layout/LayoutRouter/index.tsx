@@ -27,6 +27,7 @@ import Reports from '../../pages/Reports';
 import Configs from '../../pages/Configs';
 import Definitions from '../../pages/Definitions';
 import EnvPage from '../../pages/EnvPage';
+import GroupMappings from '../../pages/GroupMappings';
 import NotFound from '../../pages/NotFound';
 import PipelineListPage from '../../pages/PipelineListPage';
 import PipelineRunPage from '../../pages/PipelineRunPage';
@@ -482,9 +483,16 @@ export default function Router() {
         }}
       />
       <Route
+        exact={true}
         path="/settings"
         render={(props: any) => {
           return <PlatformSetting {...props}></PlatformSetting>;
+        }}
+      />
+      <Route
+        path="/settings/group-mappings"
+        render={(props: any) => {
+          return <GroupMappings {...props}></GroupMappings>;
         }}
       />
       <Route
