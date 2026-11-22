@@ -43,10 +43,11 @@ func TestCustomisationRoundTrip(t *testing.T) {
 	assert.Equal(t, &apisv1.Customisation{}, empty, "no ConfigMap means the defaults")
 
 	want := apisv1.Customisation{
-		PageTitle:    "Guidewire Platform",
-		LogoURL:      "https://example.com/logo.svg",
-		SidebarColor: "#e6f1f6",
-		AccentColor:  "#00739d",
+		PageTitle:      "Guidewire Platform",
+		LogoURL:        "https://example.com/logo.svg",
+		SidebarColor:   "#e6f1f6",
+		AccentColor:    "#00739d",
+		ShowComingSoon: true,
 		Terminology: map[string]apisv1.Term{
 			"Environment": {Singular: "Stage", Plural: "Stages"},
 			"Cluster":     {Singular: "Region", Plural: "Regions"},
@@ -63,6 +64,7 @@ func TestCustomisationRoundTrip(t *testing.T) {
 	assert.Equal(t, "https://example.com/logo.svg", cm.Data["logoURL"])
 	assert.Equal(t, "#e6f1f6", cm.Data["sidebarColor"])
 	assert.Equal(t, "Guidewire Platform", cm.Data["pageTitle"])
+	assert.Equal(t, "true", cm.Data["showComingSoon"])
 	assert.JSONEq(t, `{"Environment":{"singular":"Stage","plural":"Stages"},"Cluster":{"singular":"Region","plural":"Regions"}}`, cm.Data["terminology"])
 
 	// A second update replaces the first, including dropping a term.
@@ -71,6 +73,7 @@ func TestCustomisationRoundTrip(t *testing.T) {
 	got, err = svc.Get(ctx)
 	require.NoError(t, err)
 	assert.Empty(t, got.LogoURL)
+	assert.False(t, got.ShowComingSoon, "an update without it hides what is coming again")
 	assert.Len(t, got.Terminology, 1)
 }
 
@@ -85,5 +88,17 @@ func TestCustomisationRefusesWhatItCannotUse(t *testing.T) {
 	} {
 		_, err := svc.Update(context.Background(), c)
 		assert.ErrorIs(t, err, bcode.ErrInvalidCustomisation, name)
+	}
+}
+
+func TestCustomisationShowsComingSoonOnlyWhenTrue(t *testing.T) {
+	for value, want := range map[string]bool{"true": true, "": false, "false": false, "yes": false, "TRUE": false} {
+		cm := &corev1.ConfigMap{}
+		cm.Name, cm.Namespace = CustomisationConfigMapName, types.DefaultKubeVelaNS
+		cm.Data = map[string]string{"showComingSoon": value}
+		svc := &customisationServiceImpl{KubeClient: fake.NewClientBuilder().WithScheme(common2.Scheme).WithObjects(cm).Build()}
+		got, err := svc.Get(context.Background())
+		require.NoError(t, err)
+		assert.Equal(t, want, got.ShowComingSoon, "showComingSoon: %q", value)
 	}
 }

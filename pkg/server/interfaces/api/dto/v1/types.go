@@ -2389,6 +2389,9 @@ type Customisation struct {
 	SidebarColor string `json:"sidebarColor,omitempty"`
 	// AccentColor marks the current page and highlights, a hex colour.
 	AccentColor string `json:"accentColor,omitempty"`
+	// ShowComingSoon lists the menu items not built yet, greyed out; they are
+	// hidden unless it is set.
+	ShowComingSoon bool `json:"showComingSoon,omitempty"`
 	// Terminology renames the UI's words, keyed by the word as the UI writes it
 	// in the singular: Application, Environment, Cluster.
 	Terminology map[string]Term `json:"terminology,omitempty"`

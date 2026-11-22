@@ -46,6 +46,7 @@ const (
 	customisationSidebarKey     = "sidebarColor"
 	customisationAccentKey      = "accentColor"
 	customisationTerminologyKey = "terminology"
+	customisationComingSoonKey  = "showComingSoon"
 )
 
 // termName is a word the UI may rename: one capitalised word, as it is written
@@ -88,6 +89,8 @@ func (s *customisationServiceImpl) Get(ctx context.Context) (*apisv1.Customisati
 		IconURL:      cm.Data[customisationIconKey],
 		SidebarColor: cm.Data[customisationSidebarKey],
 		AccentColor:  cm.Data[customisationAccentKey],
+		// Only the exact "true" the card writes shows what is coming.
+		ShowComingSoon: cm.Data[customisationComingSoonKey] == "true",
 	}
 	if raw := cm.Data[customisationTerminologyKey]; raw != "" {
 		// A ConfigMap edited with kubectl is not validated: terminology that
@@ -118,6 +121,9 @@ func (s *customisationServiceImpl) Update(ctx context.Context, c apisv1.Customis
 		if value != "" {
 			data[key] = value
 		}
+	}
+	if c.ShowComingSoon {
+		data[customisationComingSoonKey] = "true"
 	}
 	if len(c.Terminology) > 0 {
 		raw, err := json.Marshal(c.Terminology)

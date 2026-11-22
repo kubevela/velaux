@@ -1,4 +1,4 @@
-import { Button, Card, Input, Message } from '@alifd/next';
+import { Button, Card, Input, Message, Switch } from '@alifd/next';
 import React from 'react';
 
 import { getCustomisation, updateCustomisation } from '../../../../api/customisation';
@@ -21,6 +21,7 @@ type State = {
   iconURL: string;
   sidebarColor: string;
   accentColor: string;
+  showComingSoon: boolean;
   terms: Record<string, Term>;
   newTerm: string;
   saving: boolean;
@@ -44,6 +45,7 @@ class CustomisationCard extends React.Component<{}, State> {
       iconURL: '',
       sidebarColor: '',
       accentColor: '',
+      showComingSoon: false,
       terms: {},
       newTerm: '',
       saving: false,
@@ -68,6 +70,7 @@ class CustomisationCard extends React.Component<{}, State> {
       iconURL: c.iconURL || '',
       sidebarColor: c.sidebarColor || '',
       accentColor: c.accentColor || '',
+      showComingSoon: !!c.showComingSoon,
       terms: c.terminology || {},
       loadError: '',
       terminologyError: c.terminologyError || '',
@@ -93,7 +96,7 @@ class CustomisationCard extends React.Component<{}, State> {
   };
 
   onSave = () => {
-    const { pageTitle, logoURL, iconURL, sidebarColor, accentColor, terms } = this.state;
+    const { pageTitle, logoURL, iconURL, sidebarColor, accentColor, showComingSoon, terms } = this.state;
     // A term is renamed only once it has a singular; its plural defaults to
     // the singular's.
     const terminology: Record<string, Term> = {};
@@ -109,6 +112,7 @@ class CustomisationCard extends React.Component<{}, State> {
       iconURL: iconURL.trim() || undefined,
       sidebarColor: hex.test(sidebarColor) ? sidebarColor : undefined,
       accentColor: hex.test(accentColor) ? accentColor : undefined,
+      showComingSoon: showComingSoon || undefined,
       terminology,
     });
   };
@@ -138,7 +142,8 @@ class CustomisationCard extends React.Component<{}, State> {
   };
 
   render() {
-    const { pageTitle, logoURL, iconURL, terms, newTerm, saving, loadError, terminologyError } = this.state;
+    const { pageTitle, logoURL, iconURL, showComingSoon, terms, newTerm, saving, loadError, terminologyError } =
+      this.state;
     const names = [...offeredTerms, ...Object.keys(terms).filter((t) => !offeredTerms.includes(t))];
     return (
       <Card
@@ -193,6 +198,17 @@ class CustomisationCard extends React.Component<{}, State> {
           </div>
           {this.colour('sidebarColor', 'Sidebar colour', '#111827')}
           {this.colour('accentColor', 'Accent colour', '#3b82f6')}
+          <div className="customisation-field">
+            <label>
+              <Translation>Show coming soon</Translation>
+            </label>
+            <div className="customisation-switch">
+              <Switch checked={showComingSoon} onChange={(v: boolean) => this.setState({ showComingSoon: v })} />
+              <span>
+                <Translation>List the menu items not built yet, greyed out</Translation>
+              </span>
+            </div>
+          </div>
         </div>
 
         {terminologyError && (

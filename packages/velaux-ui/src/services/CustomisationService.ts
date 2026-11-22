@@ -13,6 +13,8 @@ export interface Customisation {
   // and its current page and highlights.
   sidebarColor?: string;
   accentColor?: string;
+  // showComingSoon lists the menu items not built yet.
+  showComingSoon?: boolean;
   terminology?: Terminology;
   // terminologyError says why the stored terminology was ignored; the server
   // sets it and never stores it.
