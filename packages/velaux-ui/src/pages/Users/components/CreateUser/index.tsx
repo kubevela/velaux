@@ -209,7 +209,7 @@ class CreateUser extends React.Component<Props, State> {
                             pattern: checkUserPassword,
                             message: (
                               <Translation>
-                                Password must be alphanumeric, contain at least one letter and one number, and be 8-16 characters long
+                                Password must contain at least one letter and one number, and be 8-16 characters long
                               </Translation>
                             ),
                           },
