@@ -15,7 +15,17 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import '../Packages/index.less';
-import { autoText, busy, kindLabels, phaseLabels, phaseTones, sourceText } from './defkit';
+import {
+  addonMissing,
+  apiMessage,
+  autoText,
+  busy,
+  kindLabels,
+  phaseLabels,
+  phaseTones,
+  sequence,
+  sourceText,
+} from './defkit';
 import { ModuleDialog } from './ModuleDialog';
 import './index.less';
 
@@ -32,28 +42,42 @@ const DefKitModules = (props: { dispatch: (action: any) => void }) => {
   const [modules, setModules] = useState<DefKitModule[]>([]);
   const [addonEnabled, setAddonEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>();
   const [adding, setAdding] = useState(false);
-  const load = useCallback(
-    () =>
-      listDefKitModules()
-        .then((res: any) => {
+  const [seq] = useState(sequence);
+  useEffect(() => {
+    seq.start();
+    return seq.stop;
+  }, [seq]);
+  // load refreshes the list; a failure keeps the rows shown, and replies to an
+  // earlier load, or after unmount, are dropped.
+  const load = useCallback(() => {
+    const n = seq.next();
+    listDefKitModules(true)
+      .then((res: any) => {
+        if (seq.current(n)) {
           setModules(res?.modules || []);
-          setAddonEnabled(!!res?.addonEnabled);
-        })
-        .finally(() => setLoading(false)),
-    []
-  );
+          setAddonEnabled(!addonMissing(res));
+          setError(undefined);
+          setLoading(false);
+        }
+      })
+      .catch((err: any) => {
+        if (seq.current(n)) {
+          setError(apiMessage(err) || i18n.t('The server could not be reached').toString());
+          setLoading(false);
+        }
+      });
+  }, [seq]);
+  useEffect(load, [load]);
+  const polling = !!error || modules.some((m) => busy(m.phase));
   useEffect(() => {
-    load();
-  }, [load]);
-  const anyBusy = modules.some((m) => busy(m.phase));
-  useEffect(() => {
-    if (!anyBusy) {
+    if (!polling) {
       return undefined;
     }
     const timer = setInterval(load, 5000);
     return () => clearInterval(timer);
-  }, [anyBusy, load]);
+  }, [polling, load]);
   return (
     <div className="packages defkit">
       <ListTitle
@@ -85,8 +109,13 @@ const DefKitModules = (props: { dispatch: (action: any) => void }) => {
           </Link>
         </div>
       )}
+      {error && (
+        <div className="package-issue">
+          <Translation>DefKit modules could not be loaded</Translation>: {error}
+        </div>
+      )}
       {!loading && modules.length === 0 ? (
-        <Empty message={<Translation>No DefKit modules</Translation>} />
+        !error && <Empty message={<Translation>No DefKit modules</Translation>} />
       ) : (
         <div className="row-list defkit-list">
           <div className="row-list-head">
@@ -128,6 +157,11 @@ const DefKitModules = (props: { dispatch: (action: any) => void }) => {
                     </Link>
                   ) : (
                     <StatusBadge tone={phaseTones[m.phase]} label={phaseLabels[m.phase]} title={m.message} />
+                  )}
+                  {m.message && (
+                    <span className="defkit-row-message" title={m.message}>
+                      {m.message}
+                    </span>
                   )}
                   {m.settings?.autoUpdate && (
                     <span className="defkit-auto">
