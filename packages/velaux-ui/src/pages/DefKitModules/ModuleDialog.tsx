@@ -1,11 +1,11 @@
 import { Button, Checkbox, Dialog, Field, Form, Input, Message, Radio, Select, Switch } from '@alifd/next';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import type { DefKitModule, DefKitRepository, DefKitSettings } from '@velaux/data';
 import { createDefKitModule, listDefKitRepositories, updateDefKitModule } from '../../api/defkit';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import { durationMs, minIntervalMs, parseSource, repositoryOptions } from './defkit';
+import { gitCredentials, intervalError, parseSource, rekeyOverrides, repositoryOptions } from './defkit';
 
 const typeOptions = [
   { value: 'component', label: 'Components' },
@@ -33,8 +33,13 @@ export const ModuleDialog = (props: { module?: DefKitModule; onClose: () => void
   });
   const [saving, setSaving] = useState(false);
   const [repos, setRepos] = useState<DefKitRepository[]>([]);
+  const mounted = useRef(true);
   useEffect(() => {
-    listDefKitRepositories().then((res: any) => setRepos(res?.repositories || []));
+    mounted.current = true;
+    listDefKitRepositories().then((res: any) => mounted.current && setRepos(res?.repositories || []));
+    return () => {
+      mounted.current = false;
+    };
   }, []);
   // pickSource fills in the version a built-in repository names, unless one is set.
   const pickSource = (value: string) => {
@@ -50,9 +55,10 @@ export const ModuleDialog = (props: { module?: DefKitModule; onClose: () => void
         return;
       }
       const source = parseSource(values.from, values.version, values.prefix, values.types || []);
+      // Overrides are keyed by definition name, so they follow a change of prefix.
       const settings: DefKitSettings = {
         deletionPolicy: values.deletionPolicy,
-        overrides: module?.settings.overrides,
+        overrides: rekeyOverrides(module?.settings.overrides, src?.prefix || '', source.prefix || ''),
         autoUpdate: values.autoUpdate,
         interval: values.autoUpdate ? values.interval.trim() : undefined,
       };
@@ -60,22 +66,23 @@ export const ModuleDialog = (props: { module?: DefKitModule; onClose: () => void
       const call = module
         ? updateDefKitModule(module.name, source, settings)
         : createDefKitModule(values.name, source, settings);
-      call
-        .then((res: any) => {
-          if (res) {
-            Message.success(
-              i18n
-                .t(
-                  values.autoUpdate
-                    ? 'Rendering the module; it applies when ready'
-                    : 'Rendering the module; review it when it is ready'
-                )
-                .toString()
-            );
-            props.onDone(module ? module.name : values.name);
-          }
-        })
-        .finally(() => setSaving(false));
+      call.then((res: any) => {
+        if (mounted.current) {
+          setSaving(false);
+        }
+        if (res) {
+          Message.success(
+            i18n
+              .t(
+                values.autoUpdate
+                  ? 'Rendering the module; it applies when ready'
+                  : 'Rendering the module; review it when it is ready'
+              )
+              .toString()
+          );
+          props.onDone(module ? module.name : values.name);
+        }
+      });
     });
   };
   const { init } = field;
@@ -118,7 +125,21 @@ export const ModuleDialog = (props: { module?: DefKitModule; onClose: () => void
           help={<Translation>Pick a built-in repository, or type any git repository URL or Go module path</Translation>}
         >
           <Select.AutoComplete
-            {...init('from', { rules: [{ required: true, message: i18n.t('Say where the module is').toString() }] })}
+            {...init('from', {
+              rules: [
+                { required: true, message: i18n.t('Say where the module is').toString() },
+                {
+                  validator: (_: any, value: string, callback: (error?: string) => void) =>
+                    gitCredentials(value || '')
+                      ? callback(
+                          i18n
+                            .t('Remove the credentials from the URL; private repositories are not supported')
+                            .toString()
+                        )
+                      : callback(),
+                },
+              ],
+            })}
             onChange={(value: string) => pickSource(value)}
             dataSource={repositoryOptions(repos)}
             hasClear
@@ -189,14 +210,8 @@ export const ModuleDialog = (props: { module?: DefKitModule; onClose: () => void
                 rules: [
                   {
                     validator: (_: any, value: string, callback: (error?: string) => void) => {
-                      const ms = durationMs(value || '');
-                      if (ms === undefined) {
-                        callback(i18n.t('A duration such as 10m or 1h').toString());
-                      } else if (ms < minIntervalMs) {
-                        callback(i18n.t('At least 5m').toString());
-                      } else {
-                        callback();
-                      }
+                      const error = intervalError(value || '');
+                      callback(error && i18n.t(error).toString());
                     },
                   },
                 ],
