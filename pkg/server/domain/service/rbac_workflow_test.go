@@ -60,7 +60,7 @@ func TestMigrateFeaturePermissions(t *testing.T) {
 	})
 	t.Run("each feature has a view", func(t *testing.T) {
 		assert.ElementsMatch(t, []string{"project:shop/application:*/*:*", "project:shop/query:*"}, get("app-view", "shop").Resources, "as project creation formats it")
-		assert.Equal(t, []string{"detail", "list"}, get("app-view", "shop").Actions)
+		assert.Equal(t, []string{"detail", "list", "compare"}, get("app-view", "shop").Actions)
 		assert.Equal(t, []string{"project:shop/report:*"}, get("report-view", "shop").Resources)
 		for _, view := range featureViews {
 			get(view, "shop")
