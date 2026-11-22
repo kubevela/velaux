@@ -28,13 +28,13 @@ require (
 	github.com/grafana/grafana v1.9.2-0.20230216173926-a0bea04a0274
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
-	github.com/kubevela/pkg v1.11.1-0.20261019120055-ed78b6ef9194
+	github.com/kubevela/pkg v1.11.1-0.20261119095142-ff99f28d06e8
 	github.com/kubevela/prism v1.7.1-0.20261008155615-dba749127f62
-	github.com/kubevela/workflow v0.7.3-0.20261020111406-bd4f7f28dbc6
+	github.com/kubevela/workflow v0.8.0-alpha.2
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
-	github.com/oam-dev/cluster-gateway v1.9.2-0.20261007161929-f1e00d9a9b07
-	github.com/oam-dev/kubevela v1.11.1-0.20261020122214-0bd2ebed108f
-	github.com/oam-dev/terraform-controller v0.8.1-0.20261007155713-6804e7b2e5b4
+	github.com/oam-dev/cluster-gateway v1.10.0-alpha.1
+	github.com/oam-dev/kubevela v1.12.0-alpha.2
+	github.com/oam-dev/terraform-controller v0.9.1
 	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.43.0
 	github.com/pkg/errors v0.9.1
@@ -237,7 +237,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/nacos-group/nacos-sdk-go/v2 v2.2.2 // indirect
-	github.com/oam-dev/cluster-register v1.0.4-0.20261007161948-d674530a63cd // indirect
+	github.com/oam-dev/cluster-register v1.1.0-alpha.1 // indirect
 	github.com/oam-dev/terraform-config-inspect v0.0.0-20261007155724-d8a4743f5ad5 // indirect
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
