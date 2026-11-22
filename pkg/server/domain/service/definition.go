@@ -689,7 +689,7 @@ func renderUIParameter(key, label string, property *openapi3.SchemaRef, required
 	parameter.Validate = &schema.Validate{}
 	parameter.Validate.DefaultValue = property.Value.Default
 	for _, enum := range property.Value.Enum {
-		parameter.Validate.Options = append(parameter.Validate.Options, schema.Option{Label: RenderLabel(enum), Value: enum})
+		parameter.Validate.Options = append(parameter.Validate.Options, schema.Option{Label: optionLabel(enum, property.Value.Default), Value: enum})
 	}
 	parameter.JSONKey = key
 	parameter.Description = property.Value.Description
@@ -735,6 +735,18 @@ func RenderLabel(source interface{}) string {
 	default:
 		return stringtools.Capitalize(fmt.Sprintf("%v", v))
 	}
+}
+
+// optionLabel is the label of an enum choice. An empty string is a real choice (the
+// storage trait's emptyDir medium, for one), so it is labelled rather than left blank.
+func optionLabel(value, defaultValue interface{}) string {
+	if value != "" {
+		return RenderLabel(value)
+	}
+	if defaultValue == "" {
+		return "Default"
+	}
+	return "(empty)"
 }
 
 // policyScope classifies a policy as KubeVela does, for its policy's type.
