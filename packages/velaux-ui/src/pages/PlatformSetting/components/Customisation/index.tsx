@@ -1,4 +1,4 @@
-import { Button, Card, Input, Message, Switch } from '@alifd/next';
+import { Button, Card, Input, Loading, Message, Switch } from '@alifd/next';
 import React from 'react';
 
 import { getCustomisation, updateCustomisation } from '../../../../api/customisation';
@@ -25,6 +25,9 @@ type State = {
   terms: Record<string, Term>;
   newTerm: string;
   saving: boolean;
+  // loading is until the stored customisation is read; the card takes no
+  // input before then, as the read would replace it.
+  loading: boolean;
   // loadError is why the current customisation could not be read; until it
   // is, saving would replace what the card never saw, so it is disabled.
   loadError: string;
@@ -49,6 +52,7 @@ class CustomisationCard extends React.Component<{}, State> {
       terms: {},
       newTerm: '',
       saving: false,
+      loading: true,
       loadError: '',
       terminologyError: '',
     };
@@ -59,7 +63,10 @@ class CustomisationCard extends React.Component<{}, State> {
       .then((c) => this.load(c || {}))
       .catch((err) => {
         const reason = (err && (err.Message || (typeof err === 'string' ? err : ''))) || '';
-        this.setState({ loadError: reason || i18n.t('The customisation could not be read').toString() });
+        this.setState({
+          loading: false,
+          loadError: reason || i18n.t('The customisation could not be read').toString(),
+        });
       });
   }
 
@@ -72,6 +79,7 @@ class CustomisationCard extends React.Component<{}, State> {
       accentColor: c.accentColor || '',
       showComingSoon: !!c.showComingSoon,
       terms: c.terminology || {},
+      loading: false,
       loadError: '',
       terminologyError: c.terminologyError || '',
     });
@@ -142,141 +150,153 @@ class CustomisationCard extends React.Component<{}, State> {
   };
 
   render() {
-    const { pageTitle, logoURL, iconURL, showComingSoon, terms, newTerm, saving, loadError, terminologyError } =
-      this.state;
+    const {
+      pageTitle,
+      logoURL,
+      iconURL,
+      showComingSoon,
+      terms,
+      newTerm,
+      saving,
+      loading,
+      loadError,
+      terminologyError,
+    } = this.state;
     const names = [...offeredTerms, ...Object.keys(terms).filter((t) => !offeredTerms.includes(t))];
     return (
-      <Card
-        className="customisation-card"
-        contentHeight="auto"
-        locale={locale().Card}
-        title={<Translation>Customisation</Translation>}
-        subTitle={<span>velaux-configuration</span>}
-      >
-        {loadError && (
-          <Message type="error" className="customisation-message">
-            {i18n.t('The current customisation could not be read, so saving is disabled').toString()}: {loadError}
-          </Message>
-        )}
-        <div className="customisation-grid">
-          <div className="customisation-field">
-            <label>
-              <Translation>Page title (browser tab)</Translation>
-            </label>
-            <Input
-              value={pageTitle}
-              maxLength={100}
-              placeholder="KubeVela-Make shipping applications more enjoyable."
-              onChange={(v: string) => this.setState({ pageTitle: v })}
-              hasClear
-            />
-          </div>
-          <div />
-          <div className="customisation-field">
-            <label>
-              <Translation>Logo URL</Translation>
-            </label>
-            <Input
-              value={logoURL}
-              placeholder="https://example.com/logo.svg"
-              onChange={(v: string) => this.setState({ logoURL: v })}
-              hasClear
-            />
-            {logoURL && <img className="customisation-preview" src={logoURL} />}
-          </div>
-          <div className="customisation-field">
-            <label>
-              <Translation>Icon URL (minimised sidebar)</Translation>
-            </label>
-            <Input
-              value={iconURL}
-              placeholder="https://example.com/icon.svg"
-              onChange={(v: string) => this.setState({ iconURL: v })}
-              hasClear
-            />
-            {iconURL && <img className="customisation-preview icon" src={iconURL} />}
-          </div>
-          {this.colour('sidebarColor', 'Sidebar colour', '#111827')}
-          {this.colour('accentColor', 'Accent colour', '#3b82f6')}
-          <div className="customisation-field">
-            <label>
-              <Translation>Show coming soon</Translation>
-            </label>
-            <div className="customisation-switch">
-              <Switch checked={showComingSoon} onChange={(v: boolean) => this.setState({ showComingSoon: v })} />
-              <span>
-                <Translation>List the menu items not built yet, greyed out</Translation>
-              </span>
+      <Loading visible={loading} style={{ display: 'block' }}>
+        <Card
+          className="customisation-card"
+          contentHeight="auto"
+          locale={locale().Card}
+          title={<Translation>Customisation</Translation>}
+          subTitle={<span>velaux-configuration</span>}
+        >
+          {loadError && (
+            <Message type="error" className="customisation-message">
+              {i18n.t('The current customisation could not be read, so saving is disabled').toString()}: {loadError}
+            </Message>
+          )}
+          <div className="customisation-grid">
+            <div className="customisation-field">
+              <label>
+                <Translation>Page title (browser tab)</Translation>
+              </label>
+              <Input
+                value={pageTitle}
+                maxLength={100}
+                placeholder="KubeVela-Make shipping applications more enjoyable."
+                onChange={(v: string) => this.setState({ pageTitle: v })}
+                hasClear
+              />
+            </div>
+            <div />
+            <div className="customisation-field">
+              <label>
+                <Translation>Logo URL</Translation>
+              </label>
+              <Input
+                value={logoURL}
+                placeholder="https://example.com/logo.svg"
+                onChange={(v: string) => this.setState({ logoURL: v })}
+                hasClear
+              />
+              {logoURL && <img className="customisation-preview" src={logoURL} />}
+            </div>
+            <div className="customisation-field">
+              <label>
+                <Translation>Icon URL (minimised sidebar)</Translation>
+              </label>
+              <Input
+                value={iconURL}
+                placeholder="https://example.com/icon.svg"
+                onChange={(v: string) => this.setState({ iconURL: v })}
+                hasClear
+              />
+              {iconURL && <img className="customisation-preview icon" src={iconURL} />}
+            </div>
+            {this.colour('sidebarColor', 'Sidebar colour', '#111827')}
+            {this.colour('accentColor', 'Accent colour', '#3b82f6')}
+            <div className="customisation-field">
+              <label>
+                <Translation>Show coming soon</Translation>
+              </label>
+              <div className="customisation-switch">
+                <Switch checked={showComingSoon} onChange={(v: boolean) => this.setState({ showComingSoon: v })} />
+                <span>
+                  <Translation>List the menu items not built yet, greyed out</Translation>
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {terminologyError && (
-          <Message type="warning" className="customisation-message">
-            {terminologyError.charAt(0).toUpperCase() + terminologyError.slice(1)}.{' '}
-            {i18n.t('It is ignored until you save; saving replaces it with the terms below.').toString()}
-          </Message>
-        )}
-        <table className="customisation-terms">
-          <thead>
-            <tr>
-              <th>{i18n.t('Term').toString()}</th>
-              <th>{i18n.t('Singular').toString()}</th>
-              <th>{i18n.t('Plural').toString()}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {names.map((name) => (
-              <tr key={name}>
-                {/* The default word itself, untranslated, so it is never shown renamed. */}
-                <td className="customisation-term-name">{name}</td>
-                <td>
-                  <Input
-                    value={terms[name]?.singular || ''}
-                    placeholder={name}
-                    onChange={(v: string) => this.setTerm(name, 'singular', v)}
-                  />
-                </td>
-                <td>
-                  <Input
-                    value={terms[name]?.plural || ''}
-                    placeholder={terms[name]?.singular ? pluralOf(terms[name].singular) : pluralOf(name)}
-                    onChange={(v: string) => this.setTerm(name, 'plural', v)}
-                  />
+          {terminologyError && (
+            <Message type="warning" className="customisation-message">
+              {terminologyError.charAt(0).toUpperCase() + terminologyError.slice(1)}.{' '}
+              {i18n.t('It is ignored until you save; saving replaces it with the terms below.').toString()}
+            </Message>
+          )}
+          <table className="customisation-terms">
+            <thead>
+              <tr>
+                <th>{i18n.t('Term').toString()}</th>
+                <th>{i18n.t('Singular').toString()}</th>
+                <th>{i18n.t('Plural').toString()}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {names.map((name) => (
+                <tr key={name}>
+                  {/* The default word itself, untranslated, so it is never shown renamed. */}
+                  <td className="customisation-term-name">{name}</td>
+                  <td>
+                    <Input
+                      value={terms[name]?.singular || ''}
+                      placeholder={name}
+                      onChange={(v: string) => this.setTerm(name, 'singular', v)}
+                    />
+                  </td>
+                  <td>
+                    <Input
+                      value={terms[name]?.plural || ''}
+                      placeholder={terms[name]?.singular ? pluralOf(terms[name].singular) : pluralOf(name)}
+                      onChange={(v: string) => this.setTerm(name, 'plural', v)}
+                    />
+                  </td>
+                </tr>
+              ))}
+              <tr>
+                <td colSpan={3}>
+                  <div className="customisation-new-term">
+                    <Input
+                      value={newTerm}
+                      placeholder={i18n.t('Another word to rename, e.g. Addon').toString()}
+                      onChange={(v: string) => this.setState({ newTerm: v })}
+                    />
+                    <Button
+                      disabled={!/^[A-Z][a-zA-Z]*$/.test(newTerm) || names.includes(newTerm)}
+                      onClick={() =>
+                        this.setState({ newTerm: '', terms: { ...terms, [newTerm]: { singular: '', plural: '' } } })
+                      }
+                    >
+                      <Translation>Add</Translation>
+                    </Button>
+                  </div>
                 </td>
               </tr>
-            ))}
-            <tr>
-              <td colSpan={3}>
-                <div className="customisation-new-term">
-                  <Input
-                    value={newTerm}
-                    placeholder={i18n.t('Another word to rename, e.g. Addon').toString()}
-                    onChange={(v: string) => this.setState({ newTerm: v })}
-                  />
-                  <Button
-                    disabled={!/^[A-Z][a-zA-Z]*$/.test(newTerm) || names.includes(newTerm)}
-                    onClick={() =>
-                      this.setState({ newTerm: '', terms: { ...terms, [newTerm]: { singular: '', plural: '' } } })
-                    }
-                  >
-                    <Translation>Add</Translation>
-                  </Button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
 
-        <div className="customisation-actions">
-          <Button onClick={() => this.save({})} disabled={saving || !!loadError}>
-            <Translation>Reset to defaults</Translation>
-          </Button>
-          <Button type="primary" onClick={this.onSave} loading={saving} disabled={!!loadError}>
-            <Translation>Save</Translation>
-          </Button>
-        </div>
-      </Card>
+          <div className="customisation-actions">
+            <Button onClick={() => this.save({})} disabled={saving || !!loadError}>
+              <Translation>Reset to defaults</Translation>
+            </Button>
+            <Button type="primary" onClick={this.onSave} loading={saving} disabled={!!loadError}>
+              <Translation>Save</Translation>
+            </Button>
+          </div>
+        </Card>
+      </Loading>
     );
   }
 }
