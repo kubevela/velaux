@@ -34,6 +34,7 @@ import (
 	"github.com/oam-dev/kubevela/pkg/oam/util"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
+	v1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
@@ -90,6 +91,22 @@ var _ = Describe("Test cluster service function", func() {
 		Expect(resp.Alias).Should(Equal("prism-alias"))
 		_, err = service.GetKubeCluster(ctx, "non-exist-cluster")
 		Expect(err).Should(Equal(bcode.ErrClusterNotFoundInDataStore))
+	})
+
+	It("never returns a cluster's stored kubeconfig, and keeps it on an edit that leaves it out", func() {
+		service := clusterServiceImpl{Store: ds, caches: cache, K8sClient: k8sClient}
+		Expect(ds.Add(ctx, &model.Cluster{Name: "kept", Alias: "kept", KubeConfig: "stored-kubeconfig"})).Should(Succeed())
+
+		resp, err := service.GetKubeCluster(ctx, "kept")
+		Expect(err).Should(Succeed())
+		Expect(resp.KubeConfig).Should(BeEmpty())
+
+		_, err = service.ModifyKubeCluster(ctx, v1.CreateClusterRequest{Name: "kept", Alias: "renamed"}, "kept")
+		Expect(err).Should(Succeed())
+		stored := &model.Cluster{Name: "kept"}
+		Expect(ds.Get(ctx, stored)).Should(Succeed())
+		Expect(stored.Alias).Should(Equal("renamed"))
+		Expect(stored.KubeConfig).Should(Equal("stored-kubeconfig"))
 	})
 
 	It("Test delete kube cluster", func() {

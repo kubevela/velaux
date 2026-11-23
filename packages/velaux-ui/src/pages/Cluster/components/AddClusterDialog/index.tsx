@@ -55,7 +55,7 @@ class AddClusterDialog extends React.Component<Props, State> {
       });
     }
   };
-  
+
   onClose = () => {
     this.props.onClose();
     this.resetField();
@@ -74,7 +74,8 @@ class AddClusterDialog extends React.Component<Props, State> {
           icon: cluster?.icon,
           description: values.description,
           dashboardURL: values.dashboardURL,
-          kubeConfig: values.kubeConfig,
+          // Left empty, the server keeps the stored kubeconfig, which it never sends back.
+          kubeConfig: values.kubeConfig || undefined,
           labels: cluster?.labels,
         }).then((re: any) => {
           if (re) {
@@ -140,7 +141,7 @@ class AddClusterDialog extends React.Component<Props, State> {
     };
     const init = this.field.init;
     const values: { kubeConfig: string } = this.field.getValues();
-    const valueInfo = cluster?.kubeConfig || values.kubeConfig || '';
+    const valueInfo = values.kubeConfig || '';
     return (
       <Dialog
         locale={locale().Dialog}
@@ -238,7 +239,18 @@ class AddClusterDialog extends React.Component<Props, State> {
             </Row>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>KubeConfig</Translation>} labelAlign="top" required>
+                <FormItem
+                  label={<Translation>KubeConfig</Translation>}
+                  labelAlign="top"
+                  required={!editMode}
+                  help={
+                    editMode ? (
+                      <Translation>
+                        The stored KubeConfig is not shown. Upload or paste one only to replace it.
+                      </Translation>
+                    ) : undefined
+                  }
+                >
                   <Upload request={this.customRequest}>
                     <Button text type="normal" className="padding-left-0">
                       <AiOutlineCloudUpload />
@@ -252,10 +264,9 @@ class AddClusterDialog extends React.Component<Props, State> {
                       language={'yaml'}
                       readOnly={false}
                       {...init('kubeConfig', {
-                        initValue: cluster?.kubeConfig,
                         rules: [
                           {
-                            required: true,
+                            required: !editMode,
                             message: <Translation>Please upload or edit kube config</Translation>,
                           },
                         ],

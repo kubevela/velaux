@@ -241,7 +241,7 @@ func (c *Cluster) modifyKubeCluster(req *restful.Request, res *restful.Response)
 		bcode.ReturnError(req, res, err)
 		return
 	}
-	if err := validate.Struct(&createReq); err != nil {
+	if err := validateModifyClusterRequest(&createReq); err != nil {
 		bcode.ReturnError(req, res, err)
 		return
 	}
@@ -446,4 +446,9 @@ func (c *Cluster) deleteCloudClusterCreation(req *restful.Request, res *restful.
 		bcode.ReturnError(req, res, err)
 		return
 	}
+}
+
+// validateModifyClusterRequest checks an edit, which may leave the kubeconfig out to keep the stored one.
+func validateModifyClusterRequest(req *apis.CreateClusterRequest) error {
+	return validate.StructExcept(req, "KubeConfig", "KubeConfigSecret")
 }
