@@ -46,7 +46,7 @@ type EnvBindingService interface {
 	CreateEnvBinding(ctx context.Context, app *model.Application, env apisv1.CreateApplicationEnvbindingRequest) (*apisv1.EnvBinding, error)
 	BatchCreateEnvBinding(ctx context.Context, app *model.Application, env apisv1.EnvBindingList) error
 	UpdateEnvBinding(ctx context.Context, app *model.Application, envName string, diff apisv1.PutApplicationEnvBindingRequest) (*apisv1.DetailEnvBindingResponse, error)
-	DeleteEnvBinding(ctx context.Context, app *model.Application, envName string) error
+	DeleteEnvBinding(ctx context.Context, app *model.Application, envName string, keepWorkflow bool) error
 	BatchDeleteEnvBinding(ctx context.Context, app *model.Application) error
 	DetailEnvBinding(ctx context.Context, app *model.Application, envBinding *model.EnvBinding) (*apisv1.DetailEnvBindingResponse, error)
 	ApplicationEnvRecycle(ctx context.Context, appModel *model.Application, envBinding *model.EnvBinding) error
@@ -111,8 +111,7 @@ func (e *envBindingServiceImpl) CreateEnvBinding(ctx context.Context, app *model
 		return nil, err
 	}
 	envBindingModel := assembler.CreateEnvBindingModel(app, envReq)
-	err = e.createEnvWorkflow(ctx, app, env, false)
-	if err != nil {
+	if err := e.reuseOrCreateEnvWorkflow(ctx, app, env); err != nil {
 		return nil, err
 	}
 	if err := e.Store.Add(ctx, &envBindingModel); err != nil {
@@ -178,7 +177,7 @@ func (e *envBindingServiceImpl) UpdateEnvBinding(ctx context.Context, app *model
 	return e.DetailEnvBinding(ctx, app, envBinding)
 }
 
-func (e *envBindingServiceImpl) DeleteEnvBinding(ctx context.Context, appModel *model.Application, envName string) error {
+func (e *envBindingServiceImpl) DeleteEnvBinding(ctx context.Context, appModel *model.Application, envName string, keepWorkflow bool) error {
 	envBinding, err := e.getBindingByEnv(ctx, appModel, envName)
 	if err != nil {
 		if errors.Is(err, datastore.ErrRecordNotExist) {
@@ -199,6 +198,10 @@ func (e *envBindingServiceImpl) DeleteEnvBinding(ctx context.Context, appModel *
 		if err := e.Store.Delete(ctx, &model.EnvBinding{AppPrimaryKey: appModel.PrimaryKey(), Name: envBinding.Name}); err != nil {
 			return err
 		}
+	}
+	// A kept workflow and its policies wait for the env to be added back.
+	if keepWorkflow {
+		return nil
 	}
 	// delete env workflow
 	if err := e.deleteEnvWorkflow(ctx, appModel, repository.ConvertWorkflowName(envBinding.Name)); err != nil {
@@ -229,7 +232,10 @@ func (e *envBindingServiceImpl) BatchDeleteEnvBinding(ctx context.Context, app *
 }
 
 func (e *envBindingServiceImpl) createEnvWorkflow(ctx context.Context, app *model.Application, env *model.Env, isDefault bool) error {
-	steps, policies := repository.GenEnvWorkflowStepsAndPolicies(ctx, e.KubeClient, e.Store, env, app)
+	steps, policies, err := repository.GenEnvWorkflowStepsAndPolicies(ctx, e.KubeClient, e.Store, env, app)
+	if err != nil {
+		return err
+	}
 	workflow := &model.Workflow{
 		Steps:         steps,
 		Name:          repository.ConvertWorkflowName(env.Name),
@@ -243,14 +249,29 @@ func (e *envBindingServiceImpl) createEnvWorkflow(ctx context.Context, app *mode
 	if err := e.Store.Add(ctx, workflow); err != nil {
 		return err
 	}
-	err := e.Store.BatchAdd(ctx, policies)
-	if err != nil {
+	if err := e.Store.BatchAdd(ctx, policies); err != nil {
 		if err := e.WorkflowService.DeleteWorkflow(ctx, app, repository.ConvertWorkflowName(env.Name)); err != nil {
 			klog.Errorf("fail to rollback the workflow after fail to create policies, %s", err.Error())
 		}
 		return fmt.Errorf("fail to create policies %w", err)
 	}
 	return nil
+}
+
+// reuseOrCreateEnvWorkflow brings back a workflow kept when the env was last removed, brought up to date with the
+// env's targets, or creates one.
+func (e *envBindingServiceImpl) reuseOrCreateEnvWorkflow(ctx context.Context, app *model.Application, env *model.Env) error {
+	_, err := repository.GetWorkflowForApp(ctx, e.Store, app, repository.ConvertWorkflowName(env.Name))
+	if errors.Is(err, bcode.ErrWorkflowNotExist) {
+		return e.createEnvWorkflow(ctx, app, env, false)
+	}
+	if err != nil {
+		return err
+	}
+	if app.FromCluster() {
+		return nil
+	}
+	return repository.UpdateEnvWorkflow(ctx, e.KubeClient, e.Store, app, env)
 }
 
 func (e *envBindingServiceImpl) deleteEnvWorkflow(ctx context.Context, app *model.Application, workflowName string) error {

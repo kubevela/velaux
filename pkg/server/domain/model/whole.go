@@ -40,6 +40,8 @@ const (
 	LabelSyncGeneration = "ux.oam.dev/synced-generation"
 	// LabelSyncRevision describes the revision name synced from
 	LabelSyncRevision = "ux.oam.dev/synced-revision"
+	// AnnotationDeployedGeneration is the Application's generation when VelaUX last deployed it
+	AnnotationDeployedGeneration = "ux.oam.dev/deployed-generation"
 	// LabelSyncNamespace describes the namespace synced from
 	LabelSyncNamespace = "ux.oam.dev/from-namespace"
 	// LabelSyncAddon names the addon a synced application installs.

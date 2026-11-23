@@ -48,3 +48,9 @@ var ErrProjectOwnerInvalid = NewBcode(400, 30010, "the project owner name is inv
 
 // ErrProjectNotAuthorized means a request writes to a project other than the one it was authorized for
 var ErrProjectNotAuthorized = NewBcode(403, 30011, "the request writes to a project other than the one it was authorized for")
+
+// ErrProjectAccessNotStale means the project named in the access still exists
+var ErrProjectAccessNotStale = NewBcode(400, 30012, "the project still exists, so its access isn't left over")
+
+// ErrStaleProjectAccessParams means the request didn't name the RoleBinding and project to remove
+var ErrStaleProjectAccessParams = NewBcode(400, 30013, "namespace, binding and project are all required")

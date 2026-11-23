@@ -72,6 +72,25 @@ func (n *project) GetWebServiceRoute() *restful.WebService {
 		Returns(200, "OK", apis.ProjectBase{}).
 		Writes(apis.ProjectBase{}))
 
+	ws.Route(ws.GET("/stale-access").To(n.listStaleProjectAccess).
+		Doc("list RoleBindings that still grant access to projects that no longer exist").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Filter(n.RbacService.CheckPerm("project", "delete")).
+		Returns(200, "OK", apis.ListStaleProjectAccessResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.ListStaleProjectAccessResponse{}))
+
+	ws.Route(ws.DELETE("/stale-access").To(n.removeStaleProjectAccess).
+		Doc("remove a deleted project's group from a RoleBinding").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("namespace", "namespace of the RoleBinding").DataType("string").Required(true)).
+		Param(ws.QueryParameter("binding", "name of the RoleBinding").DataType("string").Required(true)).
+		Param(ws.QueryParameter("project", "the deleted project").DataType("string").Required(true)).
+		Filter(n.RbacService.CheckPerm("project", "delete")).
+		Returns(200, "OK", apis.EmptyResponse{}).
+		Returns(400, "Bad Request", bcode.Bcode{}).
+		Writes(apis.EmptyResponse{}))
+
 	ws.Route(ws.GET("/{projectName}").To(n.detailProject).
 		Doc("detail a project").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
@@ -432,6 +451,41 @@ func (n *project) deleteProject(req *restful.Request, res *restful.Response) {
 		return
 	}
 	// Write back response data
+	if err := res.WriteEntity(apis.EmptyResponse{}); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (n *project) listStaleProjectAccess(req *restful.Request, res *restful.Response) {
+	items, err := n.ProjectService.ListStaleProjectAccess(req.Request.Context())
+	if err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+	if items == nil {
+		items = []apis.StaleProjectAccess{}
+	}
+	if err := res.WriteEntity(apis.ListStaleProjectAccessResponse{Items: items}); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
+}
+
+func (n *project) removeStaleProjectAccess(req *restful.Request, res *restful.Response) {
+	access := apis.StaleProjectAccess{
+		Namespace: req.QueryParameter("namespace"),
+		Binding:   req.QueryParameter("binding"),
+		Project:   req.QueryParameter("project"),
+	}
+	if access.Namespace == "" || access.Binding == "" || access.Project == "" {
+		bcode.ReturnError(req, res, bcode.ErrStaleProjectAccessParams)
+		return
+	}
+	if err := n.ProjectService.RemoveStaleProjectAccess(req.Request.Context(), access); err != nil {
+		bcode.ReturnError(req, res, err)
+		return
+	}
 	if err := res.WriteEntity(apis.EmptyResponse{}); err != nil {
 		bcode.ReturnError(req, res, err)
 		return

@@ -464,6 +464,7 @@ func (c *application) GetWebServiceRoute() *restful.WebService {
 		Filter(c.envCheckFilter).
 		Param(ws.PathParameter("appName", "identifier of the application ").DataType("string")).
 		Param(ws.PathParameter("envName", "identifier of the envBinding ").DataType("string")).
+		Param(ws.QueryParameter("keepWorkflow", "keep the env's workflow and policies, to be used again when the env is added back").DataType("boolean")).
 		Returns(200, "OK", apis.EmptyResponse{}).
 		Returns(404, "Not Found", bcode.Bcode{}).
 		Writes(apis.EmptyResponse{}))
@@ -1605,7 +1606,7 @@ func (c *application) createApplicationEnv(req *restful.Request, res *restful.Re
 
 func (c *application) deleteApplicationEnv(req *restful.Request, res *restful.Response) {
 	app := req.Request.Context().Value(&apis.CtxKeyApplication).(*model.Application)
-	err := c.EnvBindingService.DeleteEnvBinding(req.Request.Context(), app, req.PathParameter("envName"))
+	err := c.EnvBindingService.DeleteEnvBinding(req.Request.Context(), app, req.PathParameter("envName"), req.QueryParameter("keepWorkflow") == "true")
 	if err != nil {
 		bcode.ReturnError(req, res, err)
 		return

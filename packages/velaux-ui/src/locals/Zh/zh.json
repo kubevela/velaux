@@ -1104,5 +1104,21 @@
   "Manage": "管理",
   "Delete the role success": "删除角色成功",
   "Prepare your first shipment?": "准备好你的第一批货物了吗？",
-  "Shipment lost at sea. Try again?": "货物在海上丢失了。再试一次？"
+  "Shipment lost at sea. Try again?": "货物在海上丢失了。再试一次？",
+  "Access removed": "访问权限已移除",
+  "Deleted project": "已删除的项目",
+  "RoleBinding": "RoleBinding",
+  "Role": "角色",
+  "in namespace": "在命名空间",
+  "Remove the access left behind for deleted project": "移除已删除项目遗留的访问权限：",
+  "Project Access": "项目访问权限",
+  "Namespaces that still grant access to deleted projects. A new project with the same name would get that access.": "仍向已删除项目授予访问权限的命名空间。同名的新项目将获得该访问权限。",
+  "Remove the environment": "移除环境",
+  "Remove this application from the environment": "从以下环境中移除此应用",
+  "Keep them for when the environment is added back": "保留它们，以便重新添加该环境时使用",
+  "Take over this application?": "接管此应用？",
+  "This application was applied outside VelaUX. Deploying from here makes VelaUX its source of truth: VelaUX pins the deployed version, so later changes made with kubectl or GitOps are accepted but not rolled out until they are deployed from VelaUX.": "此应用是在 VelaUX 之外创建的。从这里部署后，VelaUX 将成为它的唯一来源：VelaUX 会锁定已部署的版本，之后通过 kubectl 或 GitOps 做的修改会被接受，但在从 VelaUX 部署之前不会生效。",
+  "Changed outside VelaUX": "在 VelaUX 之外被修改",
+  "The Application changed after its last deploy from VelaUX and the change is not rolled out, in": "该应用在上次从 VelaUX 部署后被修改，修改尚未生效，所在环境：",
+  "Deploy from VelaUX to roll out what VelaUX holds.": "从 VelaUX 部署以生效 VelaUX 中的配置。"
 }

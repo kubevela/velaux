@@ -334,6 +334,17 @@ const defaultWorkspaceMenus: Menu[] = [
     permission: { resource: 'role:*', action: 'update' },
     relatedRoute: ['^/settings/group-mappings$'],
   },
+  {
+    catalog: 'Admin',
+    workspace: 'admin',
+    type: MenuTypes.Workspace,
+    to: '/settings/project-access',
+    icon: <RiUserSettingsFill></RiUserSettingsFill>,
+    label: 'Project Access',
+    name: 'project-access',
+    permission: { resource: 'project:*', action: 'delete' },
+    relatedRoute: ['^/settings/project-access$'],
+  },
 ];
 
 export type LeftMenu = {

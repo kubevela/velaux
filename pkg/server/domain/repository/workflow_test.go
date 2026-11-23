@@ -563,7 +563,10 @@ var _ = Describe("Test workflow model", func() {
 })
 
 func CreateEnvWorkflow(ctx context.Context, store datastore.DataStore, kubeClient client.Client, app *model.Application, env *model.Env, isDefault bool) error {
-	steps, policies := GenEnvWorkflowStepsAndPolicies(ctx, kubeClient, store, env, app)
+	steps, policies, err := GenEnvWorkflowStepsAndPolicies(ctx, kubeClient, store, env, app)
+	if err != nil {
+		return err
+	}
 	workflow := &model.Workflow{
 		Steps:         steps,
 		Name:          ConvertWorkflowName(env.Name),
@@ -577,8 +580,7 @@ func CreateEnvWorkflow(ctx context.Context, store datastore.DataStore, kubeClien
 	if err := store.Add(ctx, workflow); err != nil {
 		return err
 	}
-	err := store.BatchAdd(ctx, policies)
-	if err != nil {
+	if err := store.BatchAdd(ctx, policies); err != nil {
 		return fmt.Errorf("fail to create policies %w", err)
 	}
 	return nil

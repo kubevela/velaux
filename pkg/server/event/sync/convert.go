@@ -23,8 +23,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubevela/pkg/util/slices"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
@@ -198,13 +196,9 @@ func (c *CR2UX) generateEnv(ctx context.Context, defaultProject string, envNames
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to list the env, %w", err)
 	}
+	// The sync never changes an env that already exists: its targets decide where the env's own apps deploy.
 	if len(existEnvs) > 0 {
 		env := existEnvs[0].(*model.Env)
-		for name, project := range envTargetNames {
-			if !slices.Contains(env.Targets, name) && project == env.Project {
-				env.Targets = append(env.Targets, name)
-			}
-		}
 		return env, env.Project, nil
 	}
 

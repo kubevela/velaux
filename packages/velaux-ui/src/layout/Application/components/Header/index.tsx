@@ -9,6 +9,7 @@ import { StatusBadge } from '../../../../components/StatusBadge';
 import type { EnvironmentStatus } from '../../../../pages/ApplicationList/components/AppStatus/health';
 import {
   healthLabels,
+  changedOutsideEnvs,
   pausedEnvs,
   summariseStatuses,
 } from '../../../../pages/ApplicationList/components/AppStatus/health';
@@ -90,9 +91,30 @@ class ApplicationHeader extends Component<Props, State> {
     }
   };
 
-  // onDeploy deploys a workflow, asking first when its env is paused, since the
-  // deploy is written but does not roll out until a resume.
+  // onDeploy deploys a workflow.
   onDeploy = (workflowName?: string, force?: boolean) => {
+    const { applicationDetail } = this.props;
+    // The first deploy from here takes over an app applied outside VelaUX, so ask first.
+    if (!force && syncInfo(applicationDetail?.labels).fromCluster) {
+      Dialog.confirm({
+        title: i18n.t('Take over this application?').toString(),
+        content: i18n
+          .t(
+            'This application was applied outside VelaUX. Deploying from here makes VelaUX its source of truth: VelaUX pins the deployed version, so later changes made with kubectl or GitOps are accepted but not rolled out until they are deployed from VelaUX.'
+          )
+          .toString(),
+        onOk: () => this.onDeployUnpaused(workflowName, force),
+        style: { width: 520 },
+        locale: locale().Dialog,
+      });
+      return;
+    }
+    this.onDeployUnpaused(workflowName, force);
+  };
+
+  // onDeployUnpaused asks first when the workflow's env is paused, since the deploy is written but does not roll out
+  // until a resume.
+  onDeployUnpaused = (workflowName?: string, force?: boolean) => {
     const { workflows, applicationAllStatus } = this.props;
     const envName = workflows?.find((w) => w.name === workflowName)?.envName;
     if (!force && envName && pausedEnvs((applicationAllStatus || []) as EnvironmentStatus[]).includes(envName)) {
@@ -162,6 +184,7 @@ class ApplicationHeader extends Component<Props, State> {
     const { showDeployConfig, loading } = this.state;
     const summary = summariseStatuses((applicationAllStatus || []) as EnvironmentStatus[]);
     const paused = pausedEnvs((applicationAllStatus || []) as EnvironmentStatus[]);
+    const changedOutside = changedOutsideEnvs((applicationAllStatus || []) as EnvironmentStatus[]);
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     return (
       <div>
@@ -197,6 +220,15 @@ class ApplicationHeader extends Component<Props, State> {
               tone="suspended"
               label="Paused"
               title={`${i18n.t('Reconciliation paused in')} ${paused.join(', ')}`}
+            />
+          )}
+          {changedOutside.length > 0 && (
+            <StatusBadge
+              tone="suspended"
+              label="Changed outside VelaUX"
+              title={`${i18n.t(
+                'The Application changed after its last deploy from VelaUX and the change is not rolled out, in'
+              )} ${changedOutside.join(', ')}. ${i18n.t('Deploy from VelaUX to roll out what VelaUX holds.')}`}
             />
           )}
           {applicationDetail?.readOnly && (

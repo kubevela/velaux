@@ -43,12 +43,18 @@ export interface EnvironmentStatus {
     workflow?: { status?: string };
     services?: Array<{ healthy?: boolean }>;
     paused?: boolean;
+    changedOutsideVelaux?: boolean;
   };
 }
 
 // pausedEnvs are the envs whose Application the controller is skipping.
 export function pausedEnvs(statuses: EnvironmentStatus[]): string[] {
   return (statuses || []).filter((s) => s.status?.paused).map((s) => s.envName);
+}
+
+// changedOutsideEnvs are the envs whose Application changed after VelaUX last deployed it.
+export function changedOutsideEnvs(statuses: EnvironmentStatus[]): string[] {
+  return (statuses || []).filter((s) => s.status?.changedOutsideVelaux).map((s) => s.envName);
 }
 
 const healthRank: Record<AppHealth, number> = {

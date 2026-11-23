@@ -25,6 +25,7 @@ import (
 	"math/rand"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -349,6 +350,18 @@ func (c *applicationServiceImpl) GetApplicationStatus(ctx context.Context, appmo
 	return status, err
 }
 
+// recordDeployedGeneration annotates the Application with the generation VelaUX just deployed, so a later change made
+// elsewhere can be told apart. Annotations don't move the generation.
+func (c *applicationServiceImpl) recordDeployedGeneration(ctx context.Context, app *v1beta1.Application) error {
+	var current v1beta1.Application
+	if err := c.KubeClient.Get(ctx, client.ObjectKeyFromObject(app), &current); err != nil {
+		return err
+	}
+	patch := client.MergeFrom(current.DeepCopy())
+	metav1.SetMetaDataAnnotation(&current.ObjectMeta, model.AnnotationDeployedGeneration, strconv.FormatInt(current.Generation, 10))
+	return c.KubeClient.Patch(ctx, &current, patch)
+}
+
 // applicationStatus reads an Application's status from the cluster.
 func (c *applicationServiceImpl) applicationStatus(ctx context.Context, namespace, name string) (*apisv1.ApplicationStatus, error) {
 	obj := &unstructured.Unstructured{}
@@ -384,6 +397,9 @@ func applicationStatusFrom(obj *unstructured.Unstructured) (*apisv1.ApplicationS
 	status.ReconcileInterval = annotations[oam.AnnotationReconcileInterval]
 	status.RestartWorkflow = annotations[oam.AnnotationWorkflowRestart]
 	status.AutoUpdate = annotations[oam.AnnotationAutoUpdate] == True
+	if deployed, ok := annotations[model.AnnotationDeployedGeneration]; ok {
+		status.ChangedOutsideVelaUX = deployed != strconv.FormatInt(obj.GetGeneration(), 10)
+	}
 	if obj.GetGeneration() > status.ObservedGeneration {
 		status.Phase = common.ApplicationStarting
 	}
@@ -1004,6 +1020,10 @@ func (c *applicationServiceImpl) Deploy(ctx context.Context, app *model.Applicat
 
 		klog.Errorf("deploy appUtil %s failure %s", app.PrimaryKey(), err.Error())
 		return nil, deployApplyError(err)
+	}
+
+	if err := c.recordDeployedGeneration(ctx, oamApp); err != nil {
+		klog.Warningf("failed to record the deployed generation of %s: %s", app.PrimaryKey(), err.Error())
 	}
 
 	// step5: create workflow record

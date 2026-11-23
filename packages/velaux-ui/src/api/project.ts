@@ -7,6 +7,7 @@ import type {
   ProjectRole,
   ProjectUserCreate,
   ProjectUserQuery,
+  StaleProjectAccess,
 } from '@velaux/data';
 import { getDomain } from '../utils/common';
 
@@ -93,4 +94,13 @@ export function deleteProjectUser(query: QueryProjectUser, params: UserRoles) {
 export function getCloudServiceProviderList(projectName: string) {
   const urlPath = project + `/${projectName}/providers`;
   return get(urlPath, {}).then((res) => res);
+}
+
+export function listStaleProjectAccess() {
+  return get(project + '/stale-access', { customError: true }).then((res) => res);
+}
+
+export function removeStaleProjectAccess(access: StaleProjectAccess) {
+  const { namespace, binding, project: name, role } = access;
+  return rdelete(project + '/stale-access', { params: { namespace, binding, project: name, role } }).then((res) => res);
 }

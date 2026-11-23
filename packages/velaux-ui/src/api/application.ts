@@ -142,8 +142,9 @@ export function getApplicationEnvbinding(params: { appName: string }) {
   return get(`${url}/${params.appName}/envs`, params).then((res) => res);
 }
 
-export function deleteApplicationEnvbinding(params: { appName: string; envName: string }) {
-  return rdelete(`${url}/${params.appName}/envs/${params.envName}`, {}).then((res) => res);
+export function deleteApplicationEnvbinding(params: { appName: string; envName: string; keepWorkflow?: boolean }) {
+  const query = params.keepWorkflow ? '?keepWorkflow=true' : '';
+  return rdelete(`${url}/${params.appName}/envs/${params.envName}${query}`, {}).then((res) => res);
 }
 
 export function recycleApplicationEnvbinding(params: { appName: string; envName: string }) {

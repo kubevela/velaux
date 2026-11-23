@@ -564,6 +564,9 @@ type ApplicationStatus struct {
 	// AutoUpdate is whether the Application follows definition changes. KubeVela
 	// refuses it beside the publishVersion every VelaUX deploy sets.
 	AutoUpdate bool `json:"autoUpdate,omitempty"`
+	// ChangedOutsideVelaUX is whether the spec changed after VelaUX last deployed it. KubeVela doesn't roll such a
+	// change out while the publishVersion of that deploy stays.
+	ChangedOutsideVelaUX bool `json:"changedOutsideVelaux,omitempty"`
 }
 
 // ReconcileIntervalRequest sets an Application's resync period; empty clears it.
@@ -2640,4 +2643,17 @@ type GroupProjectRoleBase struct {
 // UpdateGroupMappingRequest is the request body for updating group mappings
 type UpdateGroupMappingRequest struct {
 	Groups map[string][]GroupProjectRoleBase `json:"groups"`
+}
+
+// StaleProjectAccess is a project group still named in a RoleBinding after its project was deleted
+type StaleProjectAccess struct {
+	Namespace string `json:"namespace"`
+	Binding   string `json:"binding"`
+	Project   string `json:"project"`
+	Role      string `json:"role,omitempty"`
+}
+
+// ListStaleProjectAccessResponse lists the access left behind by deleted projects
+type ListStaleProjectAccessResponse struct {
+	Items []StaleProjectAccess `json:"items"`
 }

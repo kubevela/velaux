@@ -53,6 +53,7 @@ func prepareEnv(envName string) {
 	// create env
 	var createEnvReq = apisv1.CreateEnvRequest{
 		Name:    envName,
+		Project: appProject,
 		Targets: []string{targetName},
 	}
 	res = post("/envs", createEnvReq)
