@@ -5,7 +5,14 @@ import type { DefKitModule, DefKitRepository, DefKitSettings } from '@velaux/dat
 import { createDefKitModule, listDefKitRepositories, updateDefKitModule } from '../../api/defkit';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
-import { gitCredentials, intervalError, parseSource, rekeyOverrides, repositoryOptions } from './defkit';
+import {
+  gitCredentials,
+  helpUnlessError,
+  intervalError,
+  parseSource,
+  rekeyOverrides,
+  repositoryOptions,
+} from './defkit';
 
 const typeOptions = [
   { value: 'component', label: 'Components' },
@@ -122,7 +129,10 @@ export const ModuleDialog = (props: { module?: DefKitModule; onClose: () => void
         <Form.Item
           label={<Translation>Source</Translation>}
           required
-          help={<Translation>Pick a built-in repository, or type any git repository URL or Go module path</Translation>}
+          help={helpUnlessError(
+            field.getError('from'),
+            <Translation>Pick a built-in repository, or type any git repository URL or Go module path</Translation>
+          )}
         >
           <Select.AutoComplete
             {...init('from', {
@@ -203,7 +213,10 @@ export const ModuleDialog = (props: { module?: DefKitModule; onClose: () => void
           <Form.Item
             label={<Translation>Every</Translation>}
             required
-            help={<Translation>A duration after each run, at least 5m, such as 10m or 1h</Translation>}
+            help={helpUnlessError(
+              field.getError('interval'),
+              <Translation>A duration after each run, at least 5m, such as 10m or 1h</Translation>
+            )}
           >
             <Input
               {...init('interval', {

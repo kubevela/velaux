@@ -5,6 +5,7 @@ import {
   apiMessage,
   autoText,
   gitCredentials,
+  helpUnlessError,
   intervalError,
   rekeyOverrides,
   sequence,
@@ -165,5 +166,15 @@ describe('defkit', () => {
       'private repositories are not supported'
     );
     expect(apiMessage(undefined)).to.equal(undefined);
+  });
+});
+
+describe('helpUnlessError', () => {
+  it('drops the help while the field has an error, so the error shows in its place', () => {
+    expect(helpUnlessError(['Remove the credentials from the URL'], 'Pick a repository')).to.equal(undefined);
+  });
+  it('keeps the help while the field is valid', () => {
+    expect(helpUnlessError(null, 'Pick a repository')).to.equal('Pick a repository');
+    expect(helpUnlessError([], 'Pick a repository')).to.equal('Pick a repository');
   });
 });

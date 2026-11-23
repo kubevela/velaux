@@ -201,6 +201,12 @@ export function gitCredentials(from: string): boolean {
   return /^https?:\/\/[^/?#]*@/i.test(from.trim());
 }
 
+// helpUnlessError is a form field's help while it is valid. Fusion shows a field's help in place of its error, so the
+// help gives way while there is one.
+export function helpUnlessError<T>(errors: unknown[] | null | undefined, help: T): T | undefined {
+  return errors && errors.length > 0 ? undefined : help;
+}
+
 // Sequence numbers requests so that only the latest reply is used, and none
 // once its component has unmounted.
 export interface Sequence {
