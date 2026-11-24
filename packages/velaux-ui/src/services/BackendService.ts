@@ -114,7 +114,7 @@ export class BackendWrapper implements BackendSrv {
             });
           }
         } else if (data.BusinessCode === 12010 || data.BusinessCode === 12004 || data.BusinessCode === 12013) {
-          return ResetLogin.getInstance().reset;
+          return ResetLogin.getInstance(data.BusinessCode).reset;
         } else {
           return Promise.reject(error.response || error);
         }
