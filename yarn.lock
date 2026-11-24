@@ -2004,7 +2004,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.2.0, @babel/runtime@npm:^7.20.7, @babel/runtime@npm:^7.3.4, @babel/runtime@npm:^7.4.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.2.0, @babel/runtime@npm:^7.20.7, @babel/runtime@npm:^7.3.4, @babel/runtime@npm:^7.4.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.9.2":
   version: 7.21.5
   resolution: "@babel/runtime@npm:7.21.5"
   dependencies:
@@ -6499,7 +6499,7 @@ __metadata:
     dva-loading: 3.0.22
     github-markdown-css: ^5.1.0
     history: 4.10.1
-    i18next: ^19.8.2
+    i18next: ^26.3.4
     js-yaml: ^4.1.0
     lodash: 4.17.21
     mocha: 10.2.0
@@ -15902,12 +15902,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^19.8.2":
-  version: 19.9.2
-  resolution: "i18next@npm:19.9.2"
-  dependencies:
-    "@babel/runtime": ^7.12.0
-  checksum: a24207707eacb28488975f8921d843bc35b86f2a48504cb82eaf620e1aacddbda8d53a4dc600543a708ba49bc45e61072a753f250e89fad2c1932259190ef81a
+"i18next@npm:^26.3.4":
+  version: 26.3.4
+  resolution: "i18next@npm:26.3.4"
+  peerDependencies:
+    typescript: ^5 || ^6
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 08fb3cd474fe8725c5a7c8d0a31bbaaf8c9d906f0ec1306cc1e131d517334629f2e2de6e548b8d537c359f58537a9e9b835cf86a32897819bff3a2c6378310ca
   languageName: node
   linkType: hard
 
