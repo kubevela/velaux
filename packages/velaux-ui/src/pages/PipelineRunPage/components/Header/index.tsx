@@ -1,11 +1,9 @@
 import { Grid, Button, Dialog, Message, Balloon } from '@alifd/next';
-import classNames from 'classnames';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import React, { Component } from 'react';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import type { Dispatch } from 'redux';
-import { TiWarningOutline } from 'react-icons/ti';
 import { resumePipelineRun, runPipeline, stopPipelineRun, terminatePipelineRun } from '../../../../api/pipeline';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
@@ -14,7 +12,8 @@ import i18n from '../../../../i18n';
 import type { PipelineDetail, PipelineRunBase, PipelineRunStatus } from '@velaux/data';
 import { momentDate, timeDiff } from '../../../../utils/common';
 import { locale } from '../../../../utils/locale';
-import RunStatusIcon from '../RunStatusIcon';
+import { recordStatus } from '../../../../components/PipelineGraph/status';
+import { StatusBadge } from '../../../../components/StatusBadge';
 import { Breadcrumb } from '../../../../components/Breadcrumb';
 
 const { Row, Col } = Grid;
@@ -149,7 +148,11 @@ class Header extends Component<Props, State> {
     const projectName = (pipeline && pipeline.project?.name) || '';
     const runCondition = runStatus?.conditions?.filter((con) => con.type === 'WorkflowRun');
     const { reRunLoading, stopLoading, resumeLoading, terminateLoading } = this.state;
-    const message = runStatus?.message;
+    const conditionFailed = !!runCondition && runCondition.length > 0 && runCondition[0].status == 'False';
+    const status = recordStatus(runStatus?.status || (conditionFailed ? 'pending' : undefined));
+    // alert is the WorkflowRun condition's message when that condition is false, else the run's own message.
+    const alert = conditionFailed ? runCondition && runCondition[0].message : runStatus?.message;
+    const failed = conditionFailed || runStatus?.status === 'failed' || runStatus?.status === 'terminated';
 
     return (
       <div>
@@ -211,116 +214,85 @@ class Header extends Component<Props, State> {
             </If>
           </Col>
         </Row>
-        <Row className="description" wrap={true}>
-          <Col xl={16} xs={24}>
-            <div className="name_metadata">
-              <div>
-                <div className="name">{runBase?.pipelineRunName}</div>
-                <div className="metadata">
-                  <div className="start_at">
-                    <span className="label_key">Started at:</span>
-                    <time className="label_value">{momentDate(runStatus?.startTime)}</time>
-                  </div>
-                  <div className="duration_time">
-                    <span className="label_key">Duration:</span>
-                    <time className="label_value">{timeDiff(runStatus?.startTime, runStatus?.endTime)}</time>
-                  </div>
-                  <div className="mode">
-                    <span className="label_key">Mode:</span>
-                    <time className="label_value">{runStatus?.mode?.steps || 'StepByStep'}</time>
-                  </div>
-                  <div className="mode">
-                    <span className="label_key">Sub Step Mode:</span>
-                    <time className="label_value">{runStatus?.mode?.subSteps || 'DAG'}</time>
-                  </div>
-                  <Balloon
-                    trigger={
-                      <div>
-                        <span className="label_key">Context:</span>
-                        <time className="label_value">{runBase?.contextName || '-'}</time>
-                      </div>
-                    }
-                  >
-                    {runBase?.contextValues?.map((item) => {
-                      return (
-                        <div key={item.key}>
-                          <span className="label_key">{item.key}=</span>
-                          <span className="label_value">{item.value}</span>
-                        </div>
-                      );
-                    })}
-                  </Balloon>
-                </div>
+        <div className="description">
+          <div className="name_metadata">
+            <div>
+              <div className="name">
+                <span>{runBase?.pipelineRunName}</span>
+                {runStatus && <StatusBadge tone={status.tone} label={status.label} />}
               </div>
-              <div className="flexright">
-                <Button type="secondary" loading={statusLoading} onClick={this.props.loadRunStatus}>
-                  <HiOutlineRefresh />
-                </Button>
+              <div className="metadata">
+                <div className="start_at">
+                  <span className="label_key">Started at:</span>
+                  <time className="label_value">{momentDate(runStatus?.startTime)}</time>
+                </div>
+                <div className="duration_time">
+                  <span className="label_key">Duration:</span>
+                  <time className="label_value">{timeDiff(runStatus?.startTime, runStatus?.endTime)}</time>
+                </div>
+                <div className="mode">
+                  <span className="label_key">Mode:</span>
+                  <time className="label_value">{runStatus?.mode?.steps || 'StepByStep'}</time>
+                </div>
+                <div className="mode">
+                  <span className="label_key">Sub Step Mode:</span>
+                  <time className="label_value">{runStatus?.mode?.subSteps || 'DAG'}</time>
+                </div>
+                <Balloon
+                  trigger={
+                    <div>
+                      <span className="label_key">Context:</span>
+                      <time className="label_value">{runBase?.contextName || '-'}</time>
+                    </div>
+                  }
+                >
+                  {runBase?.contextValues?.map((item) => {
+                    return (
+                      <div key={item.key}>
+                        <span className="label_key">{item.key}=</span>
+                        <span className="label_value">{item.value}</span>
+                      </div>
+                    );
+                  })}
+                </Balloon>
               </div>
             </div>
-          </Col>
-          <Col xl={8} xs={24}>
-            <If condition={!runCondition || runCondition.length == 0 || runCondition[0].status == 'True'}>
-              <div
-                className={classNames(
-                  'status',
-                  { warning: runStatus?.status == 'failed' || runStatus?.status === 'terminated' },
-                  { success: runStatus?.status == 'succeeded' }
-                )}
-              >
-                <RunStatusIcon status={runStatus?.status} />
-                <If condition={message}>
-                  <div className="message">
-                    <div className="summary">{runStatus?.status == 'failed' ? 'Error Summary' : 'Summary'}</div>
-                    <p className="text">{message}</p>
-                  </div>
-                </If>
-                <If condition={runStatus?.status === 'suspending'}>
-                  <div className={classNames('suspend-actions')}>
-                    <div className="desc">This Pipeline need you approve.</div>
-                    <Button.Group>
-                      <Button
-                        type="secondary"
-                        size="small"
-                        loading={terminateLoading}
-                        className="margin-top-5 margin-left-8"
-                        title="Terminate this workflow"
-                        onClick={this.onTerminatePipelineRun}
-                      >
-                        <Translation>Terminate</Translation>
-                      </Button>
-
-                      <Button
-                        type="primary"
-                        size="small"
-                        loading={resumeLoading}
-                        className="margin-top-5 margin-left-8"
-                        title="Approve and continue this workflow"
-                        onClick={this.onResumePipelineRun}
-                      >
-                        <Translation>Resume</Translation>
-                      </Button>
-                    </Button.Group>
-                  </div>
-                </If>
+            <div className="flexright">
+              <Button type="secondary" loading={statusLoading} onClick={this.props.loadRunStatus}>
+                <HiOutlineRefresh />
+              </Button>
+            </div>
+          </div>
+          <If condition={alert}>
+            <Message type={failed ? 'error' : 'notice'} className="run-alert">
+              {alert}
+            </Message>
+          </If>
+          <If condition={!conditionFailed && runStatus?.status === 'suspending'}>
+            <Message type="notice" className="run-alert">
+              <div className="run-approval">
+                <Translation>This pipeline needs your approval.</Translation>
+                <Button
+                  size="small"
+                  loading={terminateLoading}
+                  title={i18n.t('Terminate this workflow').toString()}
+                  onClick={this.onTerminatePipelineRun}
+                >
+                  <Translation>Terminate</Translation>
+                </Button>
+                <Button
+                  type="primary"
+                  size="small"
+                  loading={resumeLoading}
+                  title={i18n.t('Approve and continue this workflow').toString()}
+                  onClick={this.onResumePipelineRun}
+                >
+                  <Translation>Resume</Translation>
+                </Button>
               </div>
-            </If>
-            <If condition={runCondition && runCondition[0].status == 'False'}>
-              <div className={classNames('status', { warning: runStatus?.status == 'failed' })}>
-                <div className="icon">
-                  <TiWarningOutline />
-                  <span>{(runStatus?.status || 'pending').toUpperCase()}</span>
-                </div>
-                <If condition={runCondition && runCondition[0].message}>
-                  <div className="message">
-                    <div className="summary">Error Summary</div>
-                    <p className="text">{runCondition && runCondition[0].message}</p>
-                  </div>
-                </If>
-              </div>
-            </If>
-          </Col>
-        </Row>
+            </Message>
+          </If>
+        </div>
       </div>
     );
   }

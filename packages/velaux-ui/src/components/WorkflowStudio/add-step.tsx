@@ -15,7 +15,7 @@ import { forEachProblem } from './loop-edit';
 import { LoopItems } from './loop-items';
 import StepForm from './step-form';
 import { conditionScope, stepScope } from './step-scope';
-import { StepTypeIcon } from './step-icon';
+import { StepTypeTile } from './step-icon';
 
 import './index.less';
 import type { Rule } from '@alifd/next/lib/field';
@@ -243,7 +243,7 @@ class AddStep extends React.Component<Props, State> {
                       this.setState({ selectType: def, stage: this.state.stage + 1 });
                     }}
                   >
-                    <StepTypeIcon type={def.name} />
+                    <StepTypeTile type={def.name} />
                   </div>
                   <div className="name">{showAlias(def.name, def.alias)}</div>
                 </div>

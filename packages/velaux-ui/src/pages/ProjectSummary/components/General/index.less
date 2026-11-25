@@ -1,21 +1,35 @@
-.general-wrapper {
-  margin-top: 40px;
-  .card-wrapper {
-    min-height: 200px;
-    .card-title-wrapper {
-      display: flex;
-      justify-content: space-between;
-      .card-title {
-        margin-top: 6px;
-        margin-left: 4px;
-        color: #000;
-        font-weight: bold;
-        font-size: 16px;
-      }
-    }
-    .card-button-wrapper {
-      margin-top: 6px;
-      margin-right: 4px;
-    }
+.project-about {
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.project-about-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.project-about-description {
+  margin: 8px 0 16px;
+  color: #334155;
+  font-size: 14px;
+  &.empty {
+    color: #94a3b8;
+  }
+}
+
+.project-about-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 40px;
+  font-size: 13px;
+  > div {
+    display: flex;
+    gap: 8px;
+  }
+  > div > span:first-child {
+    color: #64748b;
   }
 }

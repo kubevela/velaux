@@ -1586,15 +1586,6 @@ class UISchema extends Component<Props, State> {
         </Col>
       );
     });
-    const formItemLayout = {
-      labelCol: {
-        fixedSpan: 4,
-      },
-      wrapperCol: {
-        span: 14,
-      },
-    };
-
     const showAdvancedButton =
       explicitAdvanced || couldBeDisabledParamCount != couldShowParamCount || requiredParamCount === 0;
     return (
@@ -1606,11 +1597,12 @@ class UISchema extends Component<Props, State> {
           <If condition={onlyShowRequired || explicitAdvanced}>
             <Divider />
             <If condition={showAdvancedButton}>
-              <Form {...formItemLayout} style={{ width: '100%' }} fullWidth={true}>
-                <Form.Item labelAlign="left" colon={true} label={<Translation>Advanced Parameters</Translation>}>
-                  <Switch onChange={this.onChangeAdvanced} size="small" checked={advanced} />
-                </Form.Item>
-              </Form>
+              <div className="ui-schema-advanced-toggle">
+                <Switch onChange={this.onChangeAdvanced} size="small" checked={advanced} />
+                <span className="ui-schema-advanced-label">
+                  <Translation>Advanced Parameters</Translation>
+                </span>
+              </div>
             </If>
           </If>
         </If>

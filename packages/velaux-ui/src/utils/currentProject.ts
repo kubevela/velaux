@@ -68,3 +68,15 @@ export function scopedTo<T>(
   }
   return (items || []).filter((item) => inProject(picked.current, projectOf(item)));
 }
+
+// ProjectView is what a view of one project shows: nothing until the project is
+// known, a prompt to pick one when every project is picked, else the project's own.
+export type ProjectView = 'unknown' | 'pick' | 'project';
+
+// projectView is the ProjectView for the project picked in the top bar.
+export function projectView(picked?: { current: string; resolved: boolean }): ProjectView {
+  if (!picked?.resolved) {
+    return 'unknown';
+  }
+  return picked.current === allProjects ? 'pick' : 'project';
+}

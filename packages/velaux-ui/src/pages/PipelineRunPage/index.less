@@ -88,6 +88,9 @@
     padding: 16px;
   }
   .name {
+    display: flex;
+    gap: 12px;
+    align-items: center;
     margin-bottom: var(--spacing-3);
     font-weight: 600;
     font-size: var(--font-size-large);
@@ -109,47 +112,13 @@
     --typography-size: var(--font-size-small);
     --intent-color: var(--grey-900);
   }
-  .status {
+  .run-alert {
+    margin: 0 16px 16px;
+  }
+  .run-approval {
     display: flex;
+    gap: 12px;
     align-items: center;
-    height: 90px;
-    padding: 16px;
-    background-color: #f7e19e;
-    --execution-status-color: var(--primary-color);
-    &.warning {
-      background-color: var(--red-100);
-      --execution-status-color: var(--failed-color);
-    }
-    &.success {
-      background-color: var(--success-color);
-      --execution-status-color: #fff;
-    }
-    .icon {
-      display: flex;
-      padding: 0 16px;
-      color: var(--execution-status-color) !important;
-      svg:not([fill]) {
-        fill: currentColor;
-      }
-      span {
-        margin-left: 16px;
-      }
-      .status-text {
-        font-size: var(--font-size-medium);
-      }
-    }
-    .message {
-      .summary {
-        margin-bottom: var(--spacing-1);
-        color: var(--red-600);
-        font-weight: 500;
-        font-size: var(--font-size-normal);
-        line-height: 1.33;
-      }
-      .message {
-        font-size: var(--font-size-normal);
-      }
-    }
   }
 }
 

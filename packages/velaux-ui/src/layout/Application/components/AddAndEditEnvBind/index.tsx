@@ -185,12 +185,16 @@ class EnvBindPlanDialog extends Component<Props, State> {
           locale={locale().Dialog}
           style={{ width: '600px' }}
           overflowScroll={true}
-          footerActions={['ok']}
           onClose={this.props.onClose}
           footer={
-            <Button type="primary" onClick={this.onSubmit} loading={loading}>
-              {!isEdit ? <Translation>Submit</Translation> : <Translation>Save</Translation>}
-            </Button>
+            <div>
+              <Button onClick={this.props.onClose} style={{ marginRight: '8px' }}>
+                <Translation>Cancel</Translation>
+              </Button>
+              <Button type="primary" onClick={this.onSubmit} loading={loading}>
+                {!isEdit ? <Translation>Bind</Translation> : <Translation>Update</Translation>}
+              </Button>
+            </div>
           }
           title={<Translation>Bind Environment</Translation>}
         >

@@ -1,0 +1,152 @@
+// The 404 page, centred: the sea, then what happened and the way back.
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 88px 16px 112px;
+  text-align: center;
+}
+
+// The sea: the boat sinks below the water, which hides it, and bubbles rise.
+.not-found-sea {
+  position: relative;
+  width: 160px;
+  height: 128px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.not-found-boat {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 92px;
+  margin-left: -46px;
+  transform-origin: 50% 85%;
+  animation: not-found-sink 5.6s ease-in 0.4s both;
+}
+
+.not-found-sail {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: #0f172a;
+}
+
+.not-found-water {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 26px;
+}
+
+// The page's own colour, so the water hides what has sunk.
+.not-found-water-fill {
+  fill: #f7f7f7;
+}
+
+.not-found-water-line {
+  fill: none;
+  stroke: #006fff;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.not-found-bubble {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid #006fff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: not-found-bubble 1.4s ease-out both;
+  &:nth-of-type(1) {
+    margin-left: -10px;
+    animation-delay: 4.6s;
+  }
+  &:nth-of-type(2) {
+    width: 5px;
+    height: 5px;
+    margin-left: 4px;
+    animation-delay: 5s;
+  }
+  &:nth-of-type(3) {
+    width: 4px;
+    height: 4px;
+    margin-left: -3px;
+    animation-delay: 5.4s;
+  }
+}
+
+// Bob on the water, list hard with the stern up, then slip under bow first.
+@keyframes not-found-sink {
+  0% {
+    transform: translateY(0) rotate(0);
+  }
+  10% {
+    transform: translateY(-3px) rotate(-3deg);
+  }
+  20% {
+    transform: translateY(1px) rotate(3deg);
+  }
+  30% {
+    transform: translateY(-2px) rotate(-2deg);
+  }
+  42% {
+    transform: translateY(6px) rotate(18deg);
+  }
+  56% {
+    transform: translateY(16px) rotate(34deg);
+  }
+  70% {
+    transform: translateY(34px) rotate(44deg);
+  }
+  100% {
+    transform: translateY(140px) rotate(52deg);
+  }
+}
+
+@keyframes not-found-bubble {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-34px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .not-found-boat,
+  .not-found-bubble {
+    animation: none;
+  }
+}
+
+.not-found-code {
+  margin-bottom: 4px;
+  color: #006fff;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.3em;
+}
+
+.not-found-title {
+  margin-bottom: 8px;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.not-found-lead {
+  margin-bottom: 24px;
+  color: #64748b;
+  font-size: 15px;
+}

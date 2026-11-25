@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { allProjects, inProject, resolveProject, projectChanged, scopedTo } from '../currentProject';
+import { allProjects, inProject, resolveProject, projectChanged, projectView, scopedTo } from '../currentProject';
 
 describe('resolveProject', () => {
   it('keeps a project the user may open', () => {
@@ -41,5 +41,18 @@ describe('scopedTo', () => {
   it("shows only the picked project's, or everything for all of them", () => {
     expect(scopedTo(items, { current: 'shop', resolved: true }, (i) => i.project)).to.deep.equal([{ project: 'shop' }]);
     expect(scopedTo(items, { current: '', resolved: true }, (i) => i.project)).to.deep.equal(items);
+  });
+});
+
+describe('projectView', () => {
+  it('waits until the project is known', () => {
+    expect(projectView(undefined)).to.equal('unknown');
+    expect(projectView({ current: 'shop', resolved: false })).to.equal('unknown');
+  });
+  it('asks for a project when every project is picked', () => {
+    expect(projectView({ current: allProjects, resolved: true })).to.equal('pick');
+  });
+  it("shows the picked project's own", () => {
+    expect(projectView({ current: 'shop', resolved: true })).to.equal('project');
   });
 });

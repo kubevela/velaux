@@ -1,12 +1,15 @@
 import { AppPagePlugin, PluginMeta } from '@velaux/data';
 import * as React from 'react';
+import i18n from 'i18next';
 import { Translation } from '../../components';
+import { Breadcrumb } from '../../components/Breadcrumb';
+import { StatusBadge } from '../../components/StatusBadge';
 import { locationService } from '../../services';
 import { getPluginSrv, importAppPagePlugin } from '../../services/PluginService';
-import { Box, Button, Divider, Grid, Loading, Message, Tab } from '@alifd/next';
+import { Button, Loading, Message } from '@alifd/next';
+import { AiOutlineAppstore, AiOutlineSetting } from 'react-icons/ai';
 import './index.less';
 import { connect } from 'dva';
-import { renderIcon } from '../../utils/icon';
 
 interface Props {
   pluginId: string;
@@ -33,6 +36,17 @@ function RootPage({ pluginId }: Props) {
     <div>
       <AppRootPage meta={app.meta} basename={locationService.getLocation().pathname} />
     </div>
+  );
+}
+
+// PluginLogo is the plugin's logo, or a plain icon when it has none or it fails to load.
+function PluginLogo({ src }: { src?: string }) {
+  const [failed, setFailed] = React.useState(false);
+  const url = src && src !== 'null' ? (src.startsWith('/') ? src : '/' + src) : '';
+  return (
+    <span className="plugin-logo">
+      {url && !failed ? <img src={url} alt="" onError={() => setFailed(true)} /> : <AiOutlineAppstore />}
+    </span>
   );
 }
 
@@ -100,9 +114,6 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
     );
   }
 
-  // const meta = app.meta
-  const { Col, Row } = Grid;
-
   const isEnabled = meta.enabled;
   const isInstalled = !!meta.info;
 
@@ -156,107 +167,73 @@ function ConfigPage({ pluginId, dispatch, pluginList, loading }: Props) {
     });
   };
 
-  const handleGotoPlugins = () => {
-    const history = locationService.getHistory();
-    history.push('/manage/plugins');
-  };
   const AppConfigPage = app.configPages.body;
+  const description = meta.info?.description;
 
   return (
-    <Box>
+    <div className="plugin-config">
       <Loading visible={loading.models.plugins ?? false} fullScreen={true} />
-      <Box className={'container'}>
-        <Box className={'page-header'} direction={'row'} spacing={12}>
-          <span className={'page-header-logo'}>{renderIcon(meta.id, meta.info?.logos.large, '80px')}</span>
-          <Box direction={'column'}>
-            <h1 className={'page-header-title'}>
-              {
-                <>
-                  <a onClick={handleGotoPlugins}>Plugins</a> / {meta.name}
-                </>
-              }
-            </h1>
-
-            <h4 className={'font-size-14'}>{meta.info.description ?? 'No descriptions'}</h4>
-          </Box>
-          <Box style={{ marginLeft: 'auto' }} align={'flex-end'} direction={'row'} justify={'flex-end'}>
-            <Box justify={'space-between'} style={{ height: '100%' }}>
-              <Row className={'basic-info font-size-16'} justify={'end'}>
-                <Col>
-                  <div className={'info-item-title'}>Version</div>
-                  <div>{meta.info.version}</div>
-                </Col>
-                <Col>
-                  <Divider direction="ver" style={{ height: '100%' }} />
-                </Col>
-                <Col>
-                  <Box direction={'column'}>
-                    <div className={'info-item-title'}>Author</div>
-                    <div>{meta.info.author?.name ?? 'Unknown'}</div>
-                  </Box>
-                </Col>
-                <Col>
-                  <Divider direction="ver" style={{ height: '100%' }} />
-                </Col>
-                <Col className={'info-item'}>
-                  <div className={'info-item-title'}>Status</div>
-                  <div>
-                    {meta.enabled ? (
-                      <Translation className={'status-enabled'}>Enabled</Translation>
-                    ) : (
-                      <Translation className={'status-disabled'}>Disabled</Translation>
-                    )}
-                  </div>
-                </Col>
-              </Row>
-              <Box direction={'row'} justify={'flex-end'} spacing={8}>
-                {isInstalled && (
-                  <Button disabled={meta?.addon === undefined} warning={true} onClick={() => uninstallPlugin(pluginId)}>
-                    Uninstall
-                  </Button>
-                )}
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-      <Box className={'container'}>
-        <Tab>
-          <Tab.Item title={'Config'}>
-            <Box style={{ backgroundColor: '#FFF', padding: '0 10px' }}>
-              <AppConfigPage
-                plugin={app}
-                query={{}}
-                onJSONDataChange={handleJSONChange}
-                onSecureJSONDataChange={handleSecureJSONChange}
-              />
-              <Box direction={'row'} justify={'center'} spacing={10} margin={20}>
-                {!isEnabled && (
-                  <Button type={'normal'} onClick={saveSetting}>
-                    Save
-                  </Button>
-                )}
-                {!isEnabled && (
-                  <Button type={'primary'} onClick={saveAndEnable}>
-                    Save & Enable
-                  </Button>
-                )}
-                {isEnabled && (
-                  <Button type={'primary'} onClick={saveSetting}>
-                    Save
-                  </Button>
-                )}
-                {isEnabled && (
-                  <Button type={'normal'} warning={true} onClick={() => disablePlugin(pluginId)}>
-                    Disable
-                  </Button>
-                )}
-              </Box>
-            </Box>
-          </Tab.Item>
-        </Tab>
-      </Box>
-    </Box>
+      <div className="plugin-head">
+        <Breadcrumb
+          items={[{ to: '/manage/plugins', title: <Translation>VelaUX Plugins</Translation> }, { title: meta.name }]}
+        />
+        <div className="plugin-head-main">
+          <PluginLogo src={meta.info?.logos?.large} />
+          <div className="plugin-head-text">
+            <div className="plugin-head-title">
+              <h1 className="plugin-head-name">{meta.name}</h1>
+              <StatusBadge tone={isEnabled ? 'healthy' : 'neutral'} label={isEnabled ? 'Enabled' : 'Disabled'} />
+            </div>
+            <div className="plugin-head-meta">
+              {description && <span>{description}</span>}
+              {meta.info?.version && (
+                <span>
+                  <Translation>Version</Translation> {meta.info.version}
+                </span>
+              )}
+              <span>
+                <Translation>Author</Translation> {meta.info?.author?.name ?? i18n.t('Unknown')}
+              </span>
+            </div>
+          </div>
+          <div className="plugin-head-actions">
+            {isEnabled ? (
+              <Button warning={true} onClick={() => disablePlugin(pluginId)}>
+                <Translation>Disable</Translation>
+              </Button>
+            ) : (
+              <Button type="primary" onClick={saveAndEnable}>
+                <Translation>Enable</Translation>
+              </Button>
+            )}
+            {isInstalled && (
+              <Button disabled={meta?.addon === undefined} warning={true} onClick={() => uninstallPlugin(pluginId)}>
+                <Translation>Uninstall</Translation>
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+      <nav className="plugin-tabs" role="tablist">
+        <span className="plugin-tab active" role="tab">
+          <AiOutlineSetting />
+          <Translation>Config</Translation>
+        </span>
+      </nav>
+      <div className="plugin-config-card">
+        <AppConfigPage
+          plugin={app}
+          query={{}}
+          onJSONDataChange={handleJSONChange}
+          onSecureJSONDataChange={handleSecureJSONChange}
+        />
+        <div className="plugin-config-footer">
+          <Button type="primary" onClick={saveSetting}>
+            <Translation>Save</Translation>
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 

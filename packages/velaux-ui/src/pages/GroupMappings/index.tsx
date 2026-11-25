@@ -9,6 +9,7 @@ import { ListTitle as Title } from '../../components/ListTitle';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type { Project, ProjectRoleBase, GroupProjectRoleBase } from '@velaux/data';
+import './index.less';
 
 const { Row, Col } = Grid;
 const FormItem = Form.Item;
@@ -98,7 +99,7 @@ class GroupMappings extends React.Component<Props, State> {
         });
       }
       this.setState({ mappingItems: items, isLoading: false });
-      
+
       // Initialize field values
       items.forEach((item) => {
         this.field.setValue(`${item.id}-group`, item.group);
@@ -150,15 +151,15 @@ class GroupMappings extends React.Component<Props, State> {
       if (errs) {
         return;
       }
-      
+
       const { mappingItems } = this.state;
       const groupsMap: Record<string, GroupProjectRoleBase[]> = {};
-      
+
       mappingItems.forEach((item) => {
         const group = values[`${item.id}-group`];
         const project = values[`${item.id}-project`];
         const role = values[`${item.id}-role`];
-        
+
         if (group && project && role) {
           if (!groupsMap[group]) {
             groupsMap[group] = [];
@@ -166,7 +167,7 @@ class GroupMappings extends React.Component<Props, State> {
           groupsMap[group].push({ project, role });
         }
       });
-      
+
       this.setState({ isLoading: true });
       updateGroupMappings({ groups: groupsMap })
         .then((res) => {
@@ -188,76 +189,76 @@ class GroupMappings extends React.Component<Props, State> {
       <div>
         <Title
           title={i18n.t('OIDC Group Mappings').toString()}
-          subTitle={i18n.t('Configure OIDC group to project role mappings. These map OIDC group claims to project roles dynamically upon login.').toString()}
+          subTitle={i18n
+            .t(
+              'Configure OIDC group to project role mappings. These map OIDC group claims to project roles dynamically upon login.'
+            )
+            .toString()}
           extButtons={[
             <Button key="save" type="primary" onClick={this.onSubmit} loading={isLoading}>
               <Translation>Save</Translation>
-            </Button>
+            </Button>,
           ]}
         />
-        <div className="margin-top-20" style={{ padding: '0 20px' }}>
+        <div className="group-mappings">
           <Form field={this.field}>
-              {mappingItems.map((item, index) => {
-                const projectValue = getValue(`${item.id}-project`) as string;
-                return (
-                  <Row key={item.id} gutter={16} className="margin-bottom-10">
-                    <Col span={7}>
-                      <FormItem required>
-                        <Input
-                          {...init(`${item.id}-group`, {
-                            rules: [{ required: true, message: 'Group name is required' }],
-                          })}
-                          placeholder={i18n.t('OIDC Group Name').toString()}
-                        />
-                      </FormItem>
-                    </Col>
-                    <Col span={7}>
-                      <FormItem required>
-                        <Select
-                          {...init(`${item.id}-project`, {
-                            rules: [{ required: true, message: 'Project is required' }],
-                          })}
-                          placeholder={i18n.t('Select Project').toString()}
-                          dataSource={this.generateProjectOptions()}
-                          style={{ width: '100%' }}
-                          showSearch
-                        />
-                      </FormItem>
-                    </Col>
-                    <Col span={7}>
-                      <FormItem required>
-                        <Select
-                          {...init(`${item.id}-role`, {
-                            rules: [{ required: true, message: 'Role is required' }],
-                          })}
-                          placeholder={i18n.t('Select Role').toString()}
-                          dataSource={this.generateProjectRoleOptions(projectValue || item.project)}
-                          style={{ width: '100%' }}
-                          disabled={!projectValue && !item.project}
-                        />
-                      </FormItem>
-                    </Col>
-                    <Col span={3}>
-                      <Button
-                        text
-                        onClick={() => this.onRemoveItem(item.id)}
-                        className="margin-top-10"
-                      >
-                        <AiOutlineDelete size={16} />
-                      </Button>
-                    </Col>
-                  </Row>
-                );
-              })}
-              <Row>
-                <Col span={24}>
-                  <Button type="secondary" onClick={this.onAddItem}>
-                    <AiOutlinePlus /> <Translation>Add Mapping</Translation>
-                  </Button>
-                </Col>
-              </Row>
-            </Form>
-          </div>
+            {mappingItems.map((item, index) => {
+              const projectValue = getValue(`${item.id}-project`) as string;
+              return (
+                <Row key={item.id} gutter={16} className="margin-bottom-10">
+                  <Col span={7}>
+                    <FormItem required>
+                      <Input
+                        {...init(`${item.id}-group`, {
+                          rules: [{ required: true, message: 'Group name is required' }],
+                        })}
+                        placeholder={i18n.t('OIDC Group Name').toString()}
+                      />
+                    </FormItem>
+                  </Col>
+                  <Col span={7}>
+                    <FormItem required>
+                      <Select
+                        {...init(`${item.id}-project`, {
+                          rules: [{ required: true, message: 'Project is required' }],
+                        })}
+                        placeholder={i18n.t('Select Project').toString()}
+                        dataSource={this.generateProjectOptions()}
+                        style={{ width: '100%' }}
+                        showSearch
+                      />
+                    </FormItem>
+                  </Col>
+                  <Col span={7}>
+                    <FormItem required>
+                      <Select
+                        {...init(`${item.id}-role`, {
+                          rules: [{ required: true, message: 'Role is required' }],
+                        })}
+                        placeholder={i18n.t('Select Role').toString()}
+                        dataSource={this.generateProjectRoleOptions(projectValue || item.project)}
+                        style={{ width: '100%' }}
+                        disabled={!projectValue && !item.project}
+                      />
+                    </FormItem>
+                  </Col>
+                  <Col span={3}>
+                    <Button text onClick={() => this.onRemoveItem(item.id)} className="margin-top-10">
+                      <AiOutlineDelete size={16} />
+                    </Button>
+                  </Col>
+                </Row>
+              );
+            })}
+            <Row>
+              <Col span={24}>
+                <Button type="secondary" onClick={this.onAddItem}>
+                  <AiOutlinePlus /> <Translation>Add Mapping</Translation>
+                </Button>
+              </Col>
+            </Row>
+          </Form>
+        </div>
       </div>
     );
   }

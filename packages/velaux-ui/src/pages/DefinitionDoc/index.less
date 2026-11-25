@@ -11,9 +11,43 @@
   border-radius: 8px;
   .markdown-body {
     font-size: 14px;
+    // Tables match the app's: rounded, a shaded header, rows divided only horizontally.
     table {
       display: table;
       width: 100%;
+      overflow: hidden;
+      font-size: 13px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    table tr {
+      background: #fff;
+      border-top: none;
+    }
+    table tr:nth-child(2n) {
+      background: #fff;
+    }
+    table tr:hover td {
+      background: #f8fafc;
+    }
+    table th,
+    table td {
+      padding: 10px 16px;
+      text-align: left;
+      border: none;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    table th {
+      color: #64748b;
+      font-weight: 600;
+      white-space: nowrap;
+      background: #f8fafc;
+      border-bottom-color: #e2e8f0;
+    }
+    table tr:last-child td {
+      border-bottom: none;
     }
   }
 }

@@ -29,10 +29,10 @@ import type {
 } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
-import type { Tone } from '../../components/StatusBadge';
-import { StatusBadge } from '../../components/StatusBadge';
+import { AliasName } from '../../components/AliasName';
 
 import CreatePipeline from './components/CreatePipeline';
+import { RunStatusBadge } from './components/RunStatusBadge';
 import ClonePipeline from './components/PipelineClone';
 import SelectSearch from './components/SelectSearch';
 import ViewRuns from './components/ViewRuns';
@@ -145,32 +145,22 @@ class PipelineListPage extends Component<Props, State> {
         >
           <Table.Column
             key={'name'}
-            title={i18n.t('Name(Alias)').toString()}
+            title={i18n.t('Name').toString()}
             dataIndex="name"
-            cell={(name: string, i: number, pipeline: PipelineListItem) => {
-              let text = name;
-              if (pipeline.alias) {
-                text = `${name}(${pipeline.alias})`;
-              }
-              return (
-                <div className="pipeline-name">
-                  <Link to={`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/studio`}>{text}</Link>
-                  <span>{pipeline.description}</span>
-                </div>
-              );
-            }}
+            cell={(name: string, i: number, pipeline: PipelineListItem) => (
+              <AliasName
+                name={name}
+                alias={pipeline.alias}
+                to={`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/studio`}
+                detail={pipeline.description}
+              />
+            )}
           />
           <Table.Column
             key={'project'}
             title={i18n.t('Project').toString()}
             dataIndex="project"
-            cell={(project: NameAlias) => {
-              let text = project.name;
-              if (project.alias) {
-                text = `${project.name}(${project.alias})`;
-              }
-              return <Link to={`/projects/${project.name}`}>{text}</Link>;
-            }}
+            cell={(project: NameAlias) => <Link to={`/projects/${project.name}`}>{project.alias || project.name}</Link>}
           />
           <Table.Column
             key={'createTime'}
@@ -244,7 +234,7 @@ class PipelineListPage extends Component<Props, State> {
                       </Link>
                       <RelativeTime time={run.status?.startTime} />
                     </div>
-                    <StatusBadge tone={runTone(run.status?.status)} label={runLabel(run.status?.status)} />
+                    <RunStatusBadge status={run.status?.status} />
                   </div>
                 );
               }
@@ -452,26 +442,3 @@ class PipelineListPage extends Component<Props, State> {
 }
 
 export default PipelineListPage;
-
-// runTone colours a pipeline run by its phase.
-function runTone(phase?: string): Tone {
-  switch (phase) {
-    case 'succeeded':
-      return 'healthy';
-    case 'failed':
-    case 'terminated':
-      return 'failed';
-    case 'suspending':
-      return 'suspended';
-    case 'executing':
-    case 'initializing':
-      return 'progressing';
-    default:
-      return 'neutral';
-  }
-}
-
-// runLabel writes a run's phase as a word: "succeeded" to "Succeeded".
-function runLabel(phase?: string): string {
-  return phase ? phase.charAt(0).toUpperCase() + phase.slice(1) : 'Unknown';
-}

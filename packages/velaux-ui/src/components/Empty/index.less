@@ -6,12 +6,111 @@
   justify-content: center;
   width: 100%;
   padding: 32px 16px;
-  svg {
-    width: 80px;
-  }
   .message {
     padding: 8px;
     color: var(--grey-500);
     font-size: 16px;
+  }
+}
+
+// The buoy rides the swell: it rises, falls and rocks on its base while the water drifts past by one wave.
+// The water fades out at either side and with depth, so it has no hard edge.
+.empty-buoy {
+  width: 160px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 25%, #000 75%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 25%, #000 75%, transparent);
+}
+
+.empty-buoy-water {
+  animation: empty-buoy-drift 5s linear infinite;
+}
+
+.empty-buoy-water-back {
+  fill: none;
+  stroke: #bfdbfe;
+  stroke-width: 1.2;
+  animation: empty-buoy-drift-back 7s linear infinite;
+}
+
+.empty-buoy-line {
+  fill: none;
+  stroke: #006fff;
+  stroke-width: 1.4;
+}
+
+.empty-buoy-float {
+  transform-box: view-box;
+  animation: empty-buoy-bob 3.2s ease-in-out infinite;
+}
+
+.empty-buoy-body {
+  fill: #ef4444;
+}
+
+.empty-buoy-band {
+  fill: #fff;
+}
+
+.empty-buoy-base {
+  fill: #334155;
+}
+
+.empty-buoy-cage {
+  fill: none;
+  stroke: #334155;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.empty-buoy-lamp {
+  fill: #f59e0b;
+}
+
+.empty-buoy-glow {
+  fill: #fbbf24;
+  opacity: 0;
+  animation: empty-buoy-blink 3.2s ease-in-out infinite;
+}
+
+@keyframes empty-buoy-drift {
+  to {
+    transform: translateX(-20px);
+  }
+}
+
+@keyframes empty-buoy-drift-back {
+  to {
+    transform: translateX(20px);
+  }
+}
+
+@keyframes empty-buoy-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(2.5px) rotate(5deg);
+  }
+}
+
+@keyframes empty-buoy-blink {
+  0%,
+  60%,
+  100% {
+    opacity: 0;
+  }
+  70% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty-buoy-water,
+  .empty-buoy-water-back,
+  .empty-buoy-float,
+  .empty-buoy-glow {
+    animation: none;
   }
 }

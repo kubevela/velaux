@@ -2,7 +2,7 @@ import { Grid, Form, Input, Field, Button, Message } from '@alifd/next';
 import React from 'react';
 
 import { updateUser } from '../../../../api/users';
-import DrawerWithFooter from '../../../../components/Drawer';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { User } from '@velaux/data';
@@ -71,7 +71,7 @@ class ResetPassword extends React.Component<Props, State> {
   showClickButtons = () => {
     const { loading } = this.state;
     return [
-      <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
+      <Button type="secondary" onClick={this.onClose}>
         <Translation>Cancel</Translation>
       </Button>,
       <Button type="primary" onClick={this.onCreate} loading={loading}>
@@ -95,10 +95,9 @@ class ResetPassword extends React.Component<Props, State> {
 
     return (
       <React.Fragment>
-        <DrawerWithFooter
+        <ModalWithFooter
           title={this.showTitle()}
-          placement="right"
-          width={800}
+          width={720}
           onClose={this.onClose}
           extButtons={this.showClickButtons()}
         >
@@ -128,7 +127,7 @@ class ResetPassword extends React.Component<Props, State> {
               </Col>
             </Row>
           </Form>
-        </DrawerWithFooter>
+        </ModalWithFooter>
       </React.Fragment>
     );
   }

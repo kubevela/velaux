@@ -217,8 +217,12 @@ class SourceDialog extends React.Component<Props, State> {
       <ModalWithFooter
         title={source ? i18n.t('Update Source') : i18n.t('New Source')}
         onClose={onClose}
-        extButtons={
+        extButtons={[
+          <Button key="cancel" type="secondary" onClick={onClose}>
+            {i18n.t('Cancel').toString()}
+          </Button>,
           <Permission
+            key="submit"
             request={{
               resource: `project:${project}/application:${appName}/source:*`,
               action: source ? 'update' : 'create',
@@ -238,8 +242,8 @@ class SourceDialog extends React.Component<Props, State> {
             >
               {source ? i18n.t('Update').toString() : i18n.t('Create').toString()}
             </Button>
-          </Permission>
-        }
+          </Permission>,
+        ]}
       >
         <Form field={this.field}>
           <Card contentHeight="auto" title={i18n.t('Source').toString()}>

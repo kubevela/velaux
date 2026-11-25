@@ -8,6 +8,7 @@ import { AiOutlineCopy, AiOutlineDelete, AiOutlineHistory, AiOutlinePlayCircle }
 import type { Dispatch } from 'redux';
 
 import { deletePipeline, listPipelines } from '../../api/pipeline';
+import { AliasName } from '../../components/AliasName';
 import { If } from '../../components/If';
 import { ListTitle as Title } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
@@ -29,7 +30,7 @@ import CreatePipeline from '../PipelineListPage/components/CreatePipeline';
 import ClonePipeline from '../PipelineListPage/components/PipelineClone';
 import SelectSearch from '../PipelineListPage/components/SelectSearch';
 import ViewRuns from '../PipelineListPage/components/ViewRuns';
-import RunStatusIcon from '../PipelineRunPage/components/RunStatusIcon';
+import { RunStatusBadge } from '../PipelineListPage/components/RunStatusBadge';
 
 type Props = {
   match: {
@@ -134,32 +135,22 @@ class ProjectPipelines extends Component<Props, State> {
         >
           <Table.Column
             key={'name'}
-            title={i18n.t('Name(Alias)').toString()}
+            title={i18n.t('Name').toString()}
             dataIndex="name"
-            cell={(name: string, i: number, pipeline: PipelineListItem) => {
-              let text = name;
-              if (pipeline.alias) {
-                text = `${name}(${pipeline.alias})`;
-              }
-              return (
-                <div className="pipeline-name">
-                  <Link to={`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/studio`}>{text}</Link>
-                  <span>{pipeline.description}</span>
-                </div>
-              );
-            }}
+            cell={(name: string, i: number, pipeline: PipelineListItem) => (
+              <AliasName
+                name={name}
+                alias={pipeline.alias}
+                to={`/projects/${pipeline.project.name}/pipelines/${pipeline.name}/studio`}
+                detail={pipeline.description}
+              />
+            )}
           />
           <Table.Column
             key={'project'}
             title={i18n.t('Project').toString()}
             dataIndex="project"
-            cell={(project: NameAlias) => {
-              let text = project.name;
-              if (project.alias) {
-                text = `${project.name}(${project.alias})`;
-              }
-              return <Link to={`/projects/${project.name}`}>{text}</Link>;
-            }}
+            cell={(project: NameAlias) => <Link to={`/projects/${project.name}`}>{project.alias || project.name}</Link>}
           />
           <Table.Column
             key={'createTime'}
@@ -233,7 +224,7 @@ class ProjectPipelines extends Component<Props, State> {
                       </Link>
                       <RelativeTime time={run.status?.startTime} />
                     </div>
-                    <RunStatusIcon status={run.status?.status} />
+                    <RunStatusBadge status={run.status?.status} />
                   </div>
                 );
               }

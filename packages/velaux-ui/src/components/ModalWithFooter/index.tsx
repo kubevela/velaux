@@ -17,7 +17,7 @@ type Props = {
 
 // ModalWithFooter is DrawerWithFooter as a centred modal: the same props, its
 // buttons in the footer, and a body that scrolls within the window. It is 60%
-// of the window wide unless given a width.
+// of the window wide unless given a width. Given onOk, it puts Cancel before it.
 const ModalWithFooter = (props: Props) => {
   const { children, title, width, onOk, onClose, extButtons, onOkButtonText, onOkButtonLoading } = props;
   return (
@@ -31,6 +31,11 @@ const ModalWithFooter = (props: Props) => {
       footer={
         <div className="modal-with-footer-actions">
           {extButtons}
+          {onOk && (
+            <Button type="secondary" onClick={onClose}>
+              <Translation>Cancel</Translation>
+            </Button>
+          )}
           {onOk && (
             <Button loading={onOkButtonLoading} type="primary" onClick={onOk}>
               <Translation>{onOkButtonText ? onOkButtonText : 'Submit'}</Translation>

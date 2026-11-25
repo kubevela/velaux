@@ -1,114 +1,384 @@
-.full {
+// The sign-in page is laid out like the app: a brand panel in the sidebar's
+// palette beside a light content area holding the form.
+
+.login-page {
   display: flex;
-  align-items: center;
-  justify-items: center;
-  height: calc(100vh - 48px);
-  background: #f7f7f7;
-  .login-wrapper {
-    width: 400px;
-    margin: 0 auto;
-    .logo-img-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 32px;
-      img {
-        width: 280px;
-      }
-    }
-    .login-card-wrapper {
-      .label-title {
-        color: #202529;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      .login-title-description {
-        padding-bottom: 20px;
-        font-weight: 600;
-        font-size: 16px;
-        text-align: center;
-      }
-      .next-card-show-divider {
-        width: 400px;
-        box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-        .next-card-content {
-          height: auto;
-          .next-btn {
-            display: block;
-            margin: 0 auto;
-            color: #fff;
-            font-size: 16px;
-            text-align: center;
-          }
-          .next-btn:hover {
-            box-shadow: none;
-          }
-        }
-        .next-form {
-          height: 210px !important;
-        }
-        .next-card-footer {
-          display: none;
-        }
-      }
-      .logo-error-wrapper {
-        margin-bottom: 10px;
-        color: red;
-        font-size: 16px;
-        text-align: center;
-      }
-    }
-  }
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #f8fafc;
 }
 
-.login-topbar {
-  width: 100%;
-  padding: 0 16px;
-  background-color: var(--btn-pure-primary-bg-color);
-  box-shadow: 5px 0 8px #888;
-  -webkit-app-region: drag;
-  .nav-wrapper {
+.login-brand {
+  // The sidebar's dark defaults, overridden inline from the customisation.
+  --sb-text: #a3adbd;
+  --sb-text-strong: #f1f5f9;
+  --sb-hover: rgba(255, 255, 255, 0.06);
+  --sb-border: rgba(255, 255, 255, 0.06);
+  --sb-accent: #3b82f6;
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 46%;
+  min-width: 360px;
+  max-width: 640px;
+  overflow: hidden;
+  padding: 32px 40px 24px;
+  background: var(--sb-bg, linear-gradient(180deg, #111827 0%, #0f172a 100%));
+  border-right: 1px solid var(--sb-border);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  &.branded {
+    opacity: 1;
+  }
+  // A glow of the accent behind the hero, and a faint dot grid fading out
+  // towards the foot.
+  &::before,
+  &::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    pointer-events: none;
+  }
+  &::before {
+    background: radial-gradient(
+        60% 45% at 85% 30%,
+        color-mix(in srgb, var(--sb-accent) 28%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(50% 40% at 0% 100%, color-mix(in srgb, var(--sb-accent) 18%, transparent), transparent 70%);
+  }
+  &::after {
+    background-image: radial-gradient(color-mix(in srgb, var(--sb-text-strong) 14%, transparent) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+  }
+  > * {
     position: relative;
-    width: 100%;
-    height: 48px;
-    .logo {
-      display: flex;
-      align-items: center;
-      margin-left: 9px;
-      border-radius: 3px;
-      img {
-        height: 30px;
-      }
-    }
-  }
-  .right {
-    display: flex;
-    float: right;
-    height: 48px;
-    margin-left: auto;
-    overflow: hidden;
-    .vela-item {
-      display: flex;
-      align-items: center;
-      justify-items: center;
-      height: 48px;
-      padding: 0 8px;
-      color: #fff;
-      cursor: pointer;
-      transition: all 0.3s;
-      z-index: 2000;
-      a {
-        color: #fff;
-        cursor: pointer;
-      }
-    }
+    z-index: 1;
   }
 }
 
-// A custom logo is drawn for a light page; on the coloured bar it sits on a
-// light plate.
+.login-brand-logo {
+  align-self: flex-start;
+  max-width: 300px;
+  max-height: 56px;
+  object-fit: contain;
+}
+
+// A custom logo is drawn for a light page; on a dark panel it sits on a light
+// plate.
 .login-logo-plate {
-  padding: 4px 8px;
+  padding: 6px 10px;
   background: #fff;
   border-radius: 6px;
+}
+
+.login-brand-hero {
+  margin: auto 0;
+}
+
+.login-brand-tagline {
+  margin: 0;
+  color: var(--sb-text-strong);
+  font-weight: 700;
+  font-size: 44px;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+// The tagline's second line, in the accent.
+.login-brand-accent {
+  display: block;
+  color: var(--sb-accent);
+}
+
+// The drawing's parts brighten as their phase comes round; the first phase
+// has no transitions, so it starts from dim.
+.delivery-graph {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 40px;
+  overflow: visible;
+  * {
+    transition: fill 0.3s ease, stroke 0.3s ease, stroke-dashoffset 0.45s ease-in-out, opacity 0.4s ease;
+  }
+  &.resetting * {
+    transition: none !important;
+  }
+  .dg-card > rect:first-child {
+    fill: color-mix(in srgb, var(--sb-text-strong) 7%, transparent);
+    stroke: color-mix(in srgb, var(--sb-text-strong) 16%, transparent);
+    stroke-width: 1;
+  }
+  // The application is its components: each snaps in from above, its type
+  // tile in a shade of the accent, and its traits clip on after it.
+  .dg-app > rect:first-child {
+    stroke: color-mix(in srgb, var(--sb-text-strong) 16%, transparent);
+  }
+  .dg-app.on > rect:first-child {
+    stroke: color-mix(in srgb, var(--sb-accent) 65%, transparent);
+  }
+  .dg-component {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.35);
+    &.on {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .dg-block {
+    fill: color-mix(in srgb, var(--sb-text-strong) 9%, transparent);
+    stroke: color-mix(in srgb, var(--sb-text-strong) 22%, transparent);
+    stroke-width: 1;
+  }
+  .dg-type {
+    fill: var(--sb-accent);
+  }
+  .dg-component:nth-of-type(2) .dg-type {
+    fill: color-mix(in srgb, var(--sb-accent) 65%, var(--sb-text-strong) 10%);
+  }
+  .dg-component:nth-of-type(3) .dg-type {
+    fill: color-mix(in srgb, var(--sb-accent) 45%, var(--sb-text-strong) 15%);
+  }
+  .dg-trait {
+    fill: color-mix(in srgb, var(--sb-accent) 55%, transparent);
+    opacity: 0;
+    transform: translateX(-6px);
+    transform-box: fill-box;
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.35);
+  }
+  .dg-component.on .dg-trait {
+    opacity: 1;
+    transform: none;
+  }
+  .dg-line {
+    fill: color-mix(in srgb, var(--sb-text-strong) 18%, transparent);
+    &.strong {
+      fill: color-mix(in srgb, var(--sb-text-strong) 40%, transparent);
+    }
+  }
+  .dg-edge,
+  .dg-flow {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .dg-edge {
+    stroke: color-mix(in srgb, var(--sb-text-strong) 14%, transparent);
+  }
+  .dg-flow {
+    stroke: var(--sb-accent);
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    &.on {
+      stroke-dashoffset: 0;
+    }
+  }
+  .dg-step {
+    circle {
+      fill: var(--sb-bg, #111827);
+      stroke: color-mix(in srgb, var(--sb-text-strong) 28%, transparent);
+      stroke-width: 2;
+    }
+    path {
+      fill: none;
+      stroke: #fff;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0;
+    }
+    &.on {
+      circle {
+        fill: var(--sb-accent);
+        stroke: var(--sb-accent);
+      }
+      path {
+        opacity: 1;
+      }
+    }
+  }
+  .dg-dot,
+  .dg-pod {
+    fill: color-mix(in srgb, var(--sb-text-strong) 16%, transparent);
+  }
+  .dg-cluster.on {
+    > rect:first-child {
+      stroke: color-mix(in srgb, #22c55e 45%, transparent);
+    }
+    .dg-dot,
+    .dg-pod {
+      fill: #22c55e;
+    }
+  }
+}
+
+// The footer's icons line up with the logo and tagline above.
+.login-brand-footer {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-left: -10px;
+}
+
+.login-brand-item {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  height: 32px;
+  padding: 0 10px;
+  color: var(--sb-text) !important;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  &:hover {
+    color: var(--sb-text-strong) !important;
+    background: var(--sb-hover);
+  }
+}
+
+.login-main {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 24px 16px;
+  overflow: auto;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 32px 32px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 16px 40px -16px rgba(15, 23, 42, 0.16);
+  .next-form-item {
+    margin-bottom: 16px;
+  }
+  .next-form-item-label {
+    padding-bottom: 6px;
+    color: #334155;
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .next-input {
+    width: 100%;
+    border-radius: 6px;
+  }
+}
+
+.login-title {
+  margin: 0 0 4px;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.login-subtitle {
+  margin: 0 0 28px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.login-error {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 18px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  svg {
+    flex: none;
+    margin-top: 1px;
+  }
+}
+
+.login-submit.next-btn {
+  width: 100%;
+  margin-top: 8px;
+  border-radius: 6px;
+}
+
+.login-main .powered-by {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  padding: 3px 8px;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  img {
+    width: 14px;
+    height: 14px;
+  }
+  &:hover {
+    color: #0f172a;
+  }
+}
+
+// On a narrow screen the brand panel is a bar above the form.
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
+  }
+  .login-brand {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    padding: 12px 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--sb-border);
+  }
+  .login-brand-logo {
+    align-self: center;
+    max-width: 160px;
+    max-height: 30px;
+  }
+  .login-brand-hero,
+  .login-brand-item span {
+    display: none;
+  }
+  .login-brand-footer {
+    margin-left: 0;
+  }
+  .login-main {
+    align-items: flex-start;
+    padding-top: 48px;
+  }
+  .login-form {
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+// A short window has no room for the drawing above the tagline.
+@media (max-height: 760px) {
+  .delivery-graph {
+    display: none;
+  }
 }

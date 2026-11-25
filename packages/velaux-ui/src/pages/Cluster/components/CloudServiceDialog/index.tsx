@@ -185,14 +185,6 @@ class CloudServiceDialog extends React.Component<Props, State> {
     const { choseInput, cloudClusters, btnLoading, total, tableLoading } = this.state;
     const { Column } = Table;
     const FormItem = Form.Item;
-    const formItemLayout = {
-      labelCol: {
-        fixedSpan: 8,
-      },
-      wrapperCol: {
-        span: 16,
-      },
-    };
 
     const columns = [
       {
@@ -268,28 +260,33 @@ class CloudServiceDialog extends React.Component<Props, State> {
           title={<Translation>Connect Kubernetes Cluster From Cloud</Translation>}
           autoFocus={true}
           visible={visible}
+          width={choseInput ? 560 : 960}
           onOk={this.onOk}
           onCancel={this.onClose}
           onClose={this.onClose}
           footer={
             choseInput && (
-              <Button type="primary" onClick={this.onOk} loading={btnLoading}>
-                <Translation>Next Step</Translation>
-              </Button>
+              <div>
+                <Button onClick={this.onClose} style={{ marginRight: '8px' }}>
+                  <Translation>Cancel</Translation>
+                </Button>
+                <Button type="primary" onClick={this.onOk} loading={btnLoading}>
+                  <Translation>Next Step</Translation>
+                </Button>
+              </div>
             )
           }
           v2
         >
           <If condition={choseInput}>
-            <Message style={{ marginBottom: '16px' }}>
+            <Message type="notice" style={{ marginBottom: '16px' }}>
               <Translation>{notice}</Translation>
             </Message>
-            <Form {...formItemLayout} field={this.field} className="cloud-server-wrapper">
+            <Form field={this.field} labelAlign="top" fullWidth className="cloud-server-wrapper">
               <FormItem label={<Translation>Provider</Translation>} required={true}>
                 <Select
                   locale={locale().Select}
                   mode="single"
-                  size="large"
                   dataSource={providerList}
                   className="item"
                   {...init('provider', {

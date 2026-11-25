@@ -1,34 +1,6 @@
-.app-tabs {
-  display: flex;
-  gap: 4px;
-  align-items: flex-end;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.app-tabs .app-tab {
-  flex: none;
-  margin-bottom: -1px;
-  padding: 10px 16px;
-  color: #64748b;
-  font-weight: 500;
-  font-size: 14px;
-  white-space: nowrap;
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
-  &:hover {
-    color: #0f172a;
-  }
-  &.active {
-    color: var(--primary-color, #1b58f4);
-    border-bottom-color: var(--primary-color, #1b58f4);
-  }
-}
-
 // The tabs that configure the application: a shaded block with its label
 // above its tabs, which share the row's baseline with the rest.
-.app-tabs .app-tab-group {
+.page-tabs .app-tab-group {
   display: flex;
   flex: none;
   flex-direction: column;
@@ -40,7 +12,7 @@
   border-radius: 8px 8px 0 0;
 }
 
-.app-tabs .app-tab-group-label {
+.page-tabs .app-tab-group-label {
   padding: 5px 12px 0;
   text-align: center;
   color: #64748b;
@@ -51,20 +23,20 @@
   text-transform: uppercase;
 }
 
-.app-tabs .app-tab-group-tabs {
+.page-tabs .app-tab-group-tabs {
   display: flex;
   align-items: flex-end;
 }
 
-.app-tabs .app-tab-with-add {
+.page-tabs .app-tab-with-add {
   display: inline-flex;
   align-items: center;
-  .app-tab {
+  .page-tab {
     padding-right: 2px;
   }
 }
 
-.app-tabs .app-tab-add {
+.page-tabs .app-tab-add {
   display: inline-flex;
   align-items: center;
   margin: 0 10px 1px 2px;

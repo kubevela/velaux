@@ -2,11 +2,11 @@ import { Grid, Form, Input, Field, Button, Message, Select } from '@alifd/next';
 import React from 'react';
 
 import { createProject, updateProject } from '../../../../api/project';
-import DrawerWithFooter from '../../../../components/Drawer';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { Project , User } from '@velaux/data';
+import type { Project, User } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 
 type Props = {
@@ -116,7 +116,7 @@ class CreateConfig extends React.Component<Props, State> {
 
     const { isEditProject, userList = [] } = this.props;
     const buttons = [
-      <Button type="secondary" onClick={this.onCloseCreate} style={{ marginRight: '16px' }}>
+      <Button type="secondary" onClick={this.onCloseCreate}>
         <Translation>Cancel</Translation>
       </Button>,
       <Button type="primary" onClick={this.onCreate} loading={loading}>
@@ -131,17 +131,11 @@ class CreateConfig extends React.Component<Props, State> {
 
     return (
       <React.Fragment>
-        <DrawerWithFooter
-          title={this.getTitle()}
-          placement="right"
-          width={800}
-          onClose={this.onCloseCreate}
-          extButtons={buttons}
-        >
+        <ModalWithFooter title={this.getTitle()} width={760} onClose={this.onCloseCreate} extButtons={buttons}>
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Name</Translation>} labelTextAlign="left" required={true}>
+                <FormItem label={<Translation>Name</Translation>} required={true}>
                   <Input
                     name="name"
                     placeholder={i18n.t('Please enter').toString()}
@@ -209,7 +203,7 @@ class CreateConfig extends React.Component<Props, State> {
               </Col>
             </Row>
           </Form>
-        </DrawerWithFooter>
+        </ModalWithFooter>
       </React.Fragment>
     );
   }

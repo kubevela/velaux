@@ -1,19 +1,13 @@
-import { Grid } from '@alifd/next';
 import { connect } from 'dva';
-import { Link } from 'dva/router';
 import _ from 'lodash';
-import { AiOutlineCode, AiOutlineLayout, AiOutlineRead } from 'react-icons/ai';
 import React, { Component, Fragment } from 'react';
 
-import { Translation } from '../../components/Translation';
-import { Breadcrumb } from '../../components/Breadcrumb';
+import { detailDefinition } from '../../api/definitions';
+import { PageHeader } from '../../components/PageHeader';
+import { PageTab, PageTabs } from '../../components/PageTabs';
+import { StatusBadge } from '../../components/StatusBadge';
 import { definitionPlaceFrom, definitionPlaceQuery } from '../../utils/definitionPlace';
-import type { DefinitionMenuType, LoginUserInfo } from '@velaux/data';
-
-import './index.less';
-import classNames from 'classnames';
-
-const { Row, Col } = Grid;
+import type { DefinitionBase, DefinitionMenuType, LoginUserInfo } from '@velaux/data';
 
 type Props = {
   activeId: string;
@@ -29,80 +23,104 @@ type Props = {
   definitionTypes: DefinitionMenuType[];
 };
 
+// typeNames names one definition of each type.
+const typeNames: Record<string, string> = {
+  component: 'Component',
+  trait: 'Trait',
+  policy: 'Policy',
+  workflowstep: 'Workflow Step',
+  source: 'Source',
+};
+
+type State = {
+  definition?: DefinitionBase;
+};
+
 @connect((store: any) => {
   return { ...store.definitions, ...store.user };
 })
-class DefinitionDetailsLayout extends Component<Props> {
+class DefinitionDetailsLayout extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {};
+  }
+
+  componentDidMount() {
+    this.loadDefinition();
+  }
+
+  componentDidUpdate(prev: Props) {
+    const { definitionName, definitionType } = this.props.match.params;
+    if (
+      prev.match.params.definitionName !== definitionName ||
+      prev.match.params.definitionType !== definitionType ||
+      prev.location.search !== this.props.location.search
+    ) {
+      this.loadDefinition();
+    }
+  }
+
+  loadDefinition = () => {
+    const { definitionName, definitionType } = this.props.match.params;
+    this.setState({ definition: undefined });
+    detailDefinition({
+      ...definitionPlaceFrom(this.props.location.search),
+      name: definitionName,
+      type: definitionType,
+    }).then((res: any) => {
+      if (res && res.name === this.props.match.params.definitionName) {
+        this.setState({ definition: res });
+      }
+    });
+  };
+
   getNavList = () => {
     const { params = { definitionType: '', definitionName: '' } } = this.props.match;
     const { definitionType, definitionName } = params;
     const query = definitionPlaceQuery(definitionPlaceFrom(this.props.location.search));
-    const list = [
-      {
-        id: 'doc',
-        icon: <AiOutlineRead />,
-        name: <Translation>Documentation</Translation>,
-        to: `/definitions/${definitionType}/${definitionName}/doc${query}`,
-      },
-      {
-        id: 'file',
-        icon: <AiOutlineCode />,
-        name: <Translation>CUE Source</Translation>,
-        to: `/definitions/${definitionType}/${definitionName}/file${query}`,
-      },
-      {
-        id: 'uiSchema',
-        icon: <AiOutlineLayout />,
-        name: <Translation>UI Schema</Translation>,
-        to: `/definitions/${definitionType}/${definitionName}/ui-schema${query}`,
-      },
+    return [
+      { id: 'doc', name: 'Documentation', to: `/definitions/${definitionType}/${definitionName}/doc${query}` },
+      { id: 'file', name: 'CUE Source', to: `/definitions/${definitionType}/${definitionName}/file${query}` },
+      { id: 'uiSchema', name: 'UI Schema', to: `/definitions/${definitionType}/${definitionName}/ui-schema${query}` },
     ];
-
-    const nav = list.map((item) => {
-      const active = this.props.activeId === item.id ? 'active' : '';
-      return (
-        <Link key={item.id} className={classNames('definition-tab', active)} to={item.to} role="tab">
-          {item.icon}
-          {item.name}
-        </Link>
-      );
-    });
-    return nav;
-  };
-
-  matchDefinitionName = (definitionType: string) => {
-    const { definitionTypes } = this.props;
-    const matchDefinition = _.find(definitionTypes, (item) => {
-      return item.type === definitionType;
-    });
-    return (matchDefinition && matchDefinition.name) || '';
   };
 
   render() {
-    const menu = this.getNavList();
     const { params = { definitionType: '', definitionName: '' } } = this.props.match;
     const { definitionType, definitionName } = params;
-
+    const { definition } = this.state;
+    const where = definition?.scope || definitionPlaceFrom(this.props.location.search).where;
+    const typeName = typeNames[definitionType] || _.upperFirst(definitionType);
     return (
       <Fragment>
-        <Row>
-          <Col span={6} className={classNames('padding16', 'breadcrumb')}>
-            <Breadcrumb
-              items={[
-                {
-                  to: `/definitions/${definitionType}/config`,
-                  title: 'Definitions',
-                },
-                {
-                  title: definitionName,
-                },
-              ]}
+        <PageHeader
+          breadcrumb={[
+            { to: `/definitions/${definitionType}/config`, title: 'Definitions' },
+            { title: definitionName },
+          ]}
+          title={definition?.alias || definitionName}
+          description={definition?.description}
+        >
+          {definition?.alias && <span className="page-head-meta">{definitionName}</span>}
+          {typeName && <StatusBadge tone="neutral" label={typeName} />}
+          {where && (
+            <StatusBadge
+              tone={where === 'project' ? 'progressing' : 'neutral'}
+              label={where === 'project' ? 'Project' : 'Global'}
             />
-          </Col>
-        </Row>
-        <nav className="definition-tabs" role="tablist">
-          {menu}
-        </nav>
+          )}
+          {definition?.status && (
+            <StatusBadge
+              tone={definition.status === 'enable' ? 'healthy' : 'neutral'}
+              label={definition.status === 'enable' ? 'Enabled' : 'Disabled'}
+            />
+          )}
+        </PageHeader>
+        <PageTabs>
+          {this.getNavList().map((item) => (
+            <PageTab key={item.id} label={item.name} to={item.to} active={this.props.activeId === item.id} />
+          ))}
+        </PageTabs>
         {this.props.children}
       </Fragment>
     );

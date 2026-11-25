@@ -209,17 +209,15 @@ class Configs extends Component<Props, State> {
     return (
       <Fragment>
         <div className="config-wrapper">
-          <section className="card-title-wrapper">
-            <span className="card-title">
+          <div className="summary-section-head">
+            <span className="summary-section-title">
               <Translation>Configs</Translation>
             </span>
-            <div>
+            <div className="summary-section-actions">
               <Button
-                type="secondary"
                 onClick={() => {
                   this.listConfigs(projectName);
                 }}
-                className="card-button-wrapper"
               >
                 <HiOutlineRefresh />
               </Button>
@@ -231,21 +229,17 @@ class Configs extends Component<Props, State> {
                   onClick={() => {
                     this.setState({ showConfig: true });
                   }}
-                  type="secondary"
-                  className="card-button-wrapper"
                 >
                   <Translation>Add</Translation>
                 </Button>
               </Permission>
             </div>
-          </section>
-          <section className="card-content-table">
-            <Table locale={locale().Table} dataSource={configs} hasBorder={true} loading={isLoading}>
-              {columns.map((col, key) => (
-                <Column {...col} key={key} align={'left'} />
-              ))}
-            </Table>
-          </section>
+          </div>
+          <Table locale={locale().Table} dataSource={configs} loading={isLoading}>
+            {columns.map((col, key) => (
+              <Column {...col} key={key} align={'left'} />
+            ))}
+          </Table>
         </div>
         <If condition={showConfig}>
           <CreateConfig

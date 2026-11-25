@@ -5,6 +5,7 @@ import { createClusterNamespace } from '../../../../api/cluster';
 import { If } from '../../../../components/If';
 import { Translation } from '../../../../components/Translation';
 import { locale } from '../../../../utils/locale';
+import './index.less';
 
 type Props = {
   cluster?: string;
@@ -98,10 +99,10 @@ class Namespace extends React.Component<Props, State> {
 
     return (
       <div>
-        <div className="cluster-container">
+        <div className="target-namespace">
           <Select
             locale={locale().Select}
-            className="cluster-params-input"
+            className="target-namespace-select"
             mode="single"
             disabled={disabled}
             dataSource={namespaces}
@@ -110,12 +111,7 @@ class Namespace extends React.Component<Props, State> {
             value={value}
           />
           <If condition={!disableNew}>
-            <Button
-              className="cluster-option-btn"
-              type="secondary"
-              disabled={disabled}
-              onClick={this.openNamespaceInput}
-            >
+            <Button type="secondary" disabled={disabled} onClick={this.openNamespaceInput}>
               <Translation>New</Translation>
             </Button>
           </If>
@@ -131,7 +127,7 @@ class Namespace extends React.Component<Props, State> {
           onOk={this.createNamespace}
           onCancel={this.onClose}
           onClose={this.onClose}
-          footerActions={['ok']}
+          footerActions={['cancel', 'ok']}
         >
           <Form field={this.field} {...formItemLayout}>
             <Row>

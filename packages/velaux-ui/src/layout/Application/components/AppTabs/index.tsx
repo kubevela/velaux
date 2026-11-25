@@ -18,6 +18,7 @@ import {
 } from '../../../../pages/ApplicationList/components/AppStatus/health';
 import { addLink, environmentViews, tabRuns, tabsReadOnly } from './add';
 import { environmentSlots } from '../../../../components/EnvironmentSlot';
+import { PageTab, PageTabs } from '../../../../components/PageTabs';
 import './index.less';
 
 // A tab may sit in a labelled group; one that can add has a + that opens its
@@ -76,17 +77,7 @@ export function appTabs(appName: string): Tab[] {
 // group sit together under its label; those that can add have a + unless the
 // application is read-only.
 const AppTabsView = (props: { appName: string; currentPath: string; readOnly: boolean }) => {
-  const tab = (t: Tab) => (
-    <Link
-      key={t.key}
-      role="tab"
-      aria-selected={t.active(props.currentPath)}
-      className={`app-tab ${t.active(props.currentPath) ? 'active' : ''}`}
-      to={t.to}
-    >
-      <Translation>{t.label}</Translation>
-    </Link>
-  );
+  const tab = (t: Tab) => <PageTab key={t.key} label={t.label} to={t.to} active={t.active(props.currentPath)} />;
   const withAdd = (t: Tab) =>
     t.canAdd && !props.readOnly ? (
       <span key={t.key} className="app-tab-with-add">
@@ -104,7 +95,7 @@ const AppTabsView = (props: { appName: string; currentPath: string; readOnly: bo
       tab(t)
     );
   return (
-    <div className="app-tabs" role="tablist">
+    <PageTabs>
       {tabRuns(appTabs(props.appName)).map((run) =>
         run.group ? (
           <div key={run.group} className="app-tab-group" role="group" aria-label={i18n.t(run.group).toString()}>
@@ -117,7 +108,7 @@ const AppTabsView = (props: { appName: string; currentPath: string; readOnly: bo
           run.tabs.map(withAdd)
         )
       )}
-    </div>
+    </PageTabs>
   );
 };
 
