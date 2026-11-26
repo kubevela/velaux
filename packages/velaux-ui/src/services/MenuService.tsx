@@ -29,6 +29,8 @@ import { MdConfirmationNumber } from 'react-icons/md';
 import { locationService } from './LocationService';
 import { checkPermission } from '../utils/permission';
 import { getPluginSrv } from './PluginService';
+import { customisationService } from './CustomisationService';
+import { menuShown } from '../utils/menus';
 
 const defaultWorkspaces: Workspace[] = [
   {
@@ -437,7 +439,7 @@ export class MenuWrapper implements MenuService {
     this.menus
       .filter((menu) => menu.workspace == workspace.name)
       .map((menu) => {
-        if (!checkPermission(menu.permission, '?', user)) {
+        if (!checkPermission(menu.permission, '?', user) || !menuShown(menu, customisationService.get())) {
           return;
         }
         const catalog = menus.filter((m) => m.catalog == menu.catalog);

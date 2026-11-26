@@ -7,6 +7,7 @@ import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
 import type { SystemInfo, LoginUserInfo } from '@velaux/data';
 import { LeftMenu, menuService } from '../../services/MenuService';
+import { customisationService } from '../../services/CustomisationService';
 
 import './index.less';
 import { checkPermission } from '../../types';
@@ -26,6 +27,9 @@ const LeftMenuModule = (props: Props) => {
   const path = locationService.getPathName();
   const [menus, setMenus] = useState<LeftMenu[]>();
   const [grafanaConfigs, setGrafanaConfigs] = useState<Config[]>();
+  // showComingSoon redraws the menus when the customisation loads or changes.
+  const [showComingSoon, setShowComingSoon] = useState(!!customisationService.get().showComingSoon);
+  useEffect(() => customisationService.subscribe((c) => setShowComingSoon(!!c.showComingSoon)), []);
   useEffect(() => {
     if (checkPermission({ resource: 'config', action: 'list' }, '', props.userInfo)) {
       getConfigs('grafana').then((res) => {
@@ -62,7 +66,7 @@ const LeftMenuModule = (props: Props) => {
       }
       setMenus(menus);
     });
-  }, [props.userInfo, path, grafanaConfigs, props.pluginList]);
+  }, [props.userInfo, path, grafanaConfigs, props.pluginList, showComingSoon]);
 
   if (!props.userInfo) {
     return <div />;

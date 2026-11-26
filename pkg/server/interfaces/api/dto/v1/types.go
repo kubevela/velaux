@@ -2404,12 +2404,22 @@ type Customisation struct {
 	SidebarColor string `json:"sidebarColor,omitempty"`
 	// AccentColor marks the current page and highlights, a hex colour.
 	AccentColor string `json:"accentColor,omitempty"`
+	// ShowComingSoon lists the menu items not built yet, greyed out; they are
+	// hidden unless it is set.
+	ShowComingSoon bool `json:"showComingSoon,omitempty"`
 	// Terminology renames the UI's words, keyed by the word as the UI writes it
 	// in the singular: Application, Environment, Cluster.
 	Terminology map[string]Term `json:"terminology,omitempty"`
 	// TerminologyError says why the stored terminology was ignored, where it
 	// cannot be read; it is never stored.
 	TerminologyError string `json:"terminologyError,omitempty"`
+	// Warnings say which other stored values were ignored, and why; they are
+	// never stored.
+	Warnings []string `json:"warnings,omitempty"`
+	// ResourceVersion is the stored ConfigMap's version as read. A save that
+	// sends it is refused if the ConfigMap has changed since; one without it
+	// saves regardless.
+	ResourceVersion string `json:"resourceVersion,omitempty"`
 }
 
 // Term is the singular and plural a renamed word takes.

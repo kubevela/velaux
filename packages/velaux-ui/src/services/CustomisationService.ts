@@ -13,10 +13,18 @@ export interface Customisation {
   // and its current page and highlights.
   sidebarColor?: string;
   accentColor?: string;
+  // showComingSoon lists the menu items not built yet.
+  showComingSoon?: boolean;
   terminology?: Terminology;
   // terminologyError says why the stored terminology was ignored; the server
   // sets it and never stores it.
   terminologyError?: string;
+  // warnings say which other stored values were ignored, and why; the server
+  // sets them and never stores them.
+  warnings?: string[];
+  // resourceVersion is the stored version as read; a save that sends it is
+  // refused if the customisation has changed since.
+  resourceVersion?: string;
 }
 
 type Listener = (c: Customisation) => void;

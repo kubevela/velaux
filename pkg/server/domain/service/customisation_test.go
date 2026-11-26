@@ -43,17 +43,19 @@ func TestCustomisationRoundTrip(t *testing.T) {
 	assert.Equal(t, &apisv1.Customisation{}, empty, "no ConfigMap means the defaults")
 
 	want := apisv1.Customisation{
-		PageTitle:    "Guidewire Platform",
-		LogoURL:      "https://example.com/logo.svg",
-		SidebarColor: "#e6f1f6",
-		AccentColor:  "#00739d",
+		PageTitle:      "Guidewire Platform",
+		LogoURL:        "https://example.com/logo.svg",
+		SidebarColor:   "#e6f1f6",
+		AccentColor:    "#00739d",
+		ShowComingSoon: true,
 		Terminology: map[string]apisv1.Term{
 			"Environment": {Singular: "Stage", Plural: "Stages"},
 			"Cluster":     {Singular: "Region", Plural: "Regions"},
 		},
 	}
-	_, err = svc.Update(ctx, want)
+	saved, err := svc.Update(ctx, want)
 	require.NoError(t, err)
+	want.ResourceVersion = saved.ResourceVersion
 	got, err := svc.Get(ctx)
 	require.NoError(t, err)
 	assert.Equal(t, &want, got)
@@ -63,6 +65,7 @@ func TestCustomisationRoundTrip(t *testing.T) {
 	assert.Equal(t, "https://example.com/logo.svg", cm.Data["logoURL"])
 	assert.Equal(t, "#e6f1f6", cm.Data["sidebarColor"])
 	assert.Equal(t, "Guidewire Platform", cm.Data["pageTitle"])
+	assert.Equal(t, "true", cm.Data["showComingSoon"])
 	assert.JSONEq(t, `{"Environment":{"singular":"Stage","plural":"Stages"},"Cluster":{"singular":"Region","plural":"Regions"}}`, cm.Data["terminology"])
 
 	// A second update replaces the first, including dropping a term.
@@ -71,6 +74,7 @@ func TestCustomisationRoundTrip(t *testing.T) {
 	got, err = svc.Get(ctx)
 	require.NoError(t, err)
 	assert.Empty(t, got.LogoURL)
+	assert.False(t, got.ShowComingSoon, "an update without it hides what is coming again")
 	assert.Len(t, got.Terminology, 1)
 }
 
@@ -86,4 +90,85 @@ func TestCustomisationRefusesWhatItCannotUse(t *testing.T) {
 		_, err := svc.Update(context.Background(), c)
 		assert.ErrorIs(t, err, bcode.ErrInvalidCustomisation, name)
 	}
+}
+
+func TestCustomisationShowsComingSoonOnlyWhenTrue(t *testing.T) {
+	for value, want := range map[string]bool{"true": true, "": false, "false": false, "yes": false, "TRUE": false} {
+		cm := &corev1.ConfigMap{}
+		cm.Name, cm.Namespace = CustomisationConfigMapName, types.DefaultKubeVelaNS
+		cm.Data = map[string]string{"showComingSoon": value}
+		svc := &customisationServiceImpl{KubeClient: fake.NewClientBuilder().WithScheme(common2.Scheme).WithObjects(cm).Build()}
+		got, err := svc.Get(context.Background())
+		require.NoError(t, err)
+		assert.Equal(t, want, got.ShowComingSoon, "showComingSoon: %q", value)
+	}
+}
+
+func TestCustomisationUpdateKeepsKeysItDoesNotOwn(t *testing.T) {
+	ctx := context.Background()
+	cm := &corev1.ConfigMap{}
+	cm.Name, cm.Namespace = CustomisationConfigMapName, types.DefaultKubeVelaNS
+	cm.Data = map[string]string{"previewFeatures": "modules", "logoURL": "https://example.com/old.svg", "pageTitle": "Old"}
+	cli := fake.NewClientBuilder().WithScheme(common2.Scheme).WithObjects(cm).Build()
+	svc := &customisationServiceImpl{KubeClient: cli}
+
+	_, err := svc.Update(ctx, apisv1.Customisation{PageTitle: "New"})
+	require.NoError(t, err)
+
+	got := &corev1.ConfigMap{}
+	require.NoError(t, cli.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: CustomisationConfigMapName}, got))
+	assert.Equal(t, map[string]string{"previewFeatures": "modules", "pageTitle": "New"}, got.Data,
+		"the card's own keys are replaced, any other key is left alone")
+}
+
+func TestCustomisationIgnoresStoredValuesItCannotUse(t *testing.T) {
+	cm := &corev1.ConfigMap{}
+	cm.Name, cm.Namespace = CustomisationConfigMapName, types.DefaultKubeVelaNS
+	cm.Data = map[string]string{
+		"logoURL":      "javascript:alert(1)",
+		"iconURL":      "/icon.svg",
+		"sidebarColor": "red",
+		"accentColor":  "#00739d",
+		"pageTitle":    "one\ntwo",
+	}
+	svc := &customisationServiceImpl{KubeClient: fake.NewClientBuilder().WithScheme(common2.Scheme).WithObjects(cm).Build()}
+	got, err := svc.Get(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, "/icon.svg", got.IconURL)
+	assert.Equal(t, "#00739d", got.AccentColor)
+	assert.Empty(t, got.LogoURL)
+	assert.Empty(t, got.SidebarColor)
+	assert.Empty(t, got.PageTitle)
+	require.Len(t, got.Warnings, 3)
+	assert.Contains(t, got.Warnings[0], "logoURL")
+	assert.Contains(t, got.Warnings[1], "pageTitle")
+	assert.Contains(t, got.Warnings[2], "sidebarColor")
+}
+
+func TestCustomisationRefusesAStaleSave(t *testing.T) {
+	ctx := context.Background()
+	cli := fake.NewClientBuilder().WithScheme(common2.Scheme).Build()
+	svc := &customisationServiceImpl{KubeClient: cli}
+
+	read, err := svc.Get(ctx)
+	require.NoError(t, err)
+	assert.Empty(t, read.ResourceVersion, "no ConfigMap has no version")
+
+	first, err := svc.Update(ctx, apisv1.Customisation{PageTitle: "First"})
+	require.NoError(t, err)
+	require.NotEmpty(t, first.ResourceVersion, "a save returns the version it wrote")
+
+	// Two cards opened on the first save; one saves, then the other.
+	_, err = svc.Update(ctx, apisv1.Customisation{PageTitle: "Second", ResourceVersion: first.ResourceVersion})
+	require.NoError(t, err)
+	_, err = svc.Update(ctx, apisv1.Customisation{PageTitle: "Third", ResourceVersion: first.ResourceVersion})
+	assert.ErrorIs(t, err, bcode.ErrCustomisationChanged)
+
+	got, err := svc.Get(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, "Second", got.PageTitle)
+
+	// A request with no version, as a script sends, saves regardless.
+	_, err = svc.Update(ctx, apisv1.Customisation{PageTitle: "Scripted"})
+	require.NoError(t, err)
 }
