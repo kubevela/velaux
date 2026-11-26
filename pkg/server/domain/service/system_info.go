@@ -97,6 +97,7 @@ func (u systemInfoServiceImpl) GetSystemInfo(ctx context.Context) (*v1.SystemInf
 			VelaVersion: version.VelaVersion,
 			GitVersion:  version.GitRevision,
 		},
+		Capabilities: controllerCapabilities(ctx, u.KubeClient),
 		StatisticInfo: v1.StatisticInfo{
 			AppCount:                   info.StatisticInfo.AppCount,
 			ClusterCount:               info.StatisticInfo.ClusterCount,

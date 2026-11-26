@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
+	apisv1 "github.com/kubevela/velaux/pkg/server/interfaces/api/dto/v1"
 	"github.com/kubevela/velaux/pkg/server/utils/bcode"
 )
 
@@ -66,6 +67,11 @@ func (c *applicationServiceImpl) SetReconcileInterval(ctx context.Context, appmo
 	if err := validReconcileInterval(interval); err != nil {
 		return err
 	}
+	if interval != "" {
+		if err := needsReconciliation(ctx, c.KubeClient, func(c apisv1.ControllerCapabilities) bool { return c.ReconcileInterval }); err != nil {
+			return err
+		}
+	}
 	key, err := c.deployedApplication(ctx, appmodel, envName)
 	if err != nil {
 		return err
@@ -82,6 +88,9 @@ func (c *applicationServiceImpl) SetReconcileInterval(ctx context.Context, appmo
 func (c *applicationServiceImpl) RestartWorkflow(ctx context.Context, appmodel *model.Application, envName string, schedule string) error {
 	value, err := restartSchedule(schedule)
 	if err != nil {
+		return err
+	}
+	if err := needsReconciliation(ctx, c.KubeClient, func(c apisv1.ControllerCapabilities) bool { return c.WorkflowRestart }); err != nil {
 		return err
 	}
 	key, err := c.deployedApplication(ctx, appmodel, envName)

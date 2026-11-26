@@ -35,6 +35,7 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
@@ -140,7 +141,12 @@ func (d *definitionServiceImpl) ListDefinitions(ctx context.Context, ops Definit
 	}
 	defs.SetAPIVersion(version)
 	defs.SetKind(kind)
-	return d.listDefinitions(ctx, defs, kind, ops)
+	list, err := d.listDefinitions(ctx, defs, kind, ops)
+	// A KubeVela before 1.12 has no SourceDefinition CRD, so no sources.
+	if meta.IsNoMatchError(err) && kind == kindSourceDefinition {
+		return nil, nil
+	}
+	return list, err
 }
 
 func (d *definitionServiceImpl) listDefinitions(ctx context.Context, list *unstructured.UnstructuredList, kind string, ops DefinitionQueryOption) ([]*apisv1.DefinitionBase, error) {

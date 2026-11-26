@@ -1621,6 +1621,8 @@ type SystemInfoResponse struct {
 	SystemInfo
 	SystemVersion SystemVersion `json:"systemVersion"`
 	StatisticInfo StatisticInfo `json:"statisticInfo,omitempty"`
+	// Capabilities are what the cluster's KubeVela controller can do.
+	Capabilities ControllerCapabilities `json:"capabilities"`
 }
 
 // SystemInfo system info
@@ -1657,6 +1659,17 @@ type SystemInfoRequest struct {
 type SystemVersion struct {
 	VelaVersion string `json:"velaVersion"`
 	GitVersion  string `json:"gitVersion"`
+}
+
+// ControllerCapabilities are the features of the cluster's KubeVela controller
+// that VelaUX offers only where it has them.
+type ControllerCapabilities struct {
+	// VelaCoreVersion is the controller's image tag, empty when it cannot be read.
+	VelaCoreVersion string `json:"velaCoreVersion,omitempty"`
+	// ReconcileInterval is whether it honours an Application's resync interval.
+	ReconcileInterval bool `json:"reconcileInterval"`
+	// WorkflowRestart is whether it restarts an Application's workflow on request.
+	WorkflowRestart bool `json:"workflowRestart"`
 }
 
 // ChartVersionListResponse contains helm chart versions info

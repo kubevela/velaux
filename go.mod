@@ -4,6 +4,7 @@ go 1.27.1
 
 require (
 	cuelang.org/go v0.14.1
+	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/agiledragon/gomonkey/v2 v2.9.0
 	github.com/alibabacloud-go/cs-20151215/v3 v3.0.35
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.4
@@ -76,7 +77,6 @@ require (
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
-	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
 	github.com/Masterminds/squirrel v1.5.4 // indirect

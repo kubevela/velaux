@@ -5,6 +5,8 @@ export interface SystemInfo {
   };
   installTime: string;
   enableCollection: boolean;
+  // capabilities are what the cluster's KubeVela controller can do.
+  capabilities?: ControllerCapabilities;
   loginType?: boolean;
   platformID: string;
   statisticInfo: {
@@ -38,4 +40,12 @@ export interface DexConfig {
   clientSecret: string;
   issuer: string;
   redirectURL: string;
+}
+
+// ControllerCapabilities are the features of the cluster's KubeVela controller
+// that VelaUX offers only where it has them.
+export interface ControllerCapabilities {
+  velaCoreVersion?: string;
+  reconcileInterval: boolean;
+  workflowRestart: boolean;
 }
