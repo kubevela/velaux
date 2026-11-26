@@ -9,10 +9,10 @@ import SvgNotification from '../Icons/SvgNotification';
 import SvgSecret from '../Icons/SvgSecret';
 import SvgSvc from '../Icons/SvgSvc';
 import SvgTerraform from '../Icons/SvgTerraform';
-import SvgWorkflow from '../Icons/SvgWorkflow';
 
-export const StepTypeIcon = (props: { type: string }) => {
-  switch (props.type) {
+// stepTypeIcon is the icon drawn for a step type, if it has its own.
+const stepTypeIcon = (type: string): React.ReactElement | undefined => {
+  switch (type) {
     case DeployModes.Deploy:
     case DeployModes.CanaryDeploy:
       return <SvgKubernetes width="24px" height="24px" />;
@@ -60,6 +60,20 @@ export const StepTypeIcon = (props: { type: string }) => {
         />
       );
     default:
-      return <SvgWorkflow width="24px" height="24px" />;
+      return undefined;
   }
 };
+
+// StepTypeTile is a step type's icon for picking it, or the initials of its
+// name where it has no icon of its own.
+export const StepTypeTile = (props: { type: string }) =>
+  stepTypeIcon(props.type) || (
+    <span className="step-type-initials">
+      {props.type
+        .split(/[-_0-9]/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join('')}
+    </span>
+  );

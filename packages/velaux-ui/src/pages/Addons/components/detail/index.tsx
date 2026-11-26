@@ -25,6 +25,7 @@ import { listApplicationServiceEndpoints } from '../../../../api/observation';
 import DrawerWithFooter from '../../../../components/Drawer';
 import Empty from '../../../../components/Empty';
 import Permission from '../../../../components/Permission';
+import { StatusBadge } from '../../../../components/StatusBadge';
 import StatusShow from '../../../../components/StatusShow';
 import { Translation } from '../../../../components/Translation';
 import UISchema from '../../../../components/UISchema';
@@ -46,6 +47,7 @@ import './index.less';
 import { Link } from 'dva/router';
 
 import { getLink } from '../../../../utils/utils';
+import { addonLabel, addonTone } from '../card-conten';
 import { BiCodeBlock, BiLaptop } from 'react-icons/bi';
 
 const { Col, Row } = Grid;
@@ -342,8 +344,12 @@ class AddonDetailDialog extends React.Component<Props, State> {
     const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
       this.uiSchemaRef.current?.validate(callback);
     };
-    let showName = addonDetailInfo?.name ? addonDetailInfo.name : 'Addon Detail';
-    showName = `${showName}(${status})`;
+    const showName = (
+      <span className="addon-detail-title">
+        {addonDetailInfo?.name ? addonDetailInfo.name : <Translation>Addon Detail</Translation>}
+        {status && <StatusBadge tone={addonTone(status)} label={addonLabel(status)} />}
+      </span>
+    );
     addonDetailInfo?.uiSchema?.map((item) => {
       if (item.jsonKey.indexOf('SECRET_KEY') != -1) {
         item.uiType = 'Password';
@@ -531,12 +537,17 @@ class AddonDetailDialog extends React.Component<Props, State> {
                       value={version}
                     />
                   </Form.Item>
-                  {addonDetailInfo?.system && (
-                    <span className="warning-text">
-                      This version requirements: (
-                      {addonDetailInfo?.system.vela ? `KubeVela: ${addonDetailInfo?.system.vela}` : ''}
-                      {addonDetailInfo?.system.kubernetes ? ` Kubernetes: ${addonDetailInfo?.system.kubernetes}` : ''})
-                    </span>
+                  {addonDetailInfo?.system && (addonDetailInfo.system.vela || addonDetailInfo.system.kubernetes) && (
+                    <Message type="notice" shape="inline" size="medium" className="addon-requirements">
+                      <Translation>This version requires</Translation>
+                      {[
+                        addonDetailInfo.system.vela && `KubeVela ${addonDetailInfo.system.vela}`,
+                        addonDetailInfo.system.kubernetes && `Kubernetes ${addonDetailInfo.system.kubernetes}`,
+                      ]
+                        .filter(Boolean)
+                        .map((req) => ` ${req}`)
+                        .join(',')}
+                    </Message>
                   )}
                 </div>
               )}

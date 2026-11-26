@@ -1,0 +1,90 @@
+// The permission picker: a light grey panel with a small uppercase heading, as in the other dialogs.
+.role-permissions {
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  a {
+    color: #2563eb;
+    font-size: 12px;
+    cursor: pointer;
+  }
+}
+
+.role-permissions-head {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  a {
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+}
+
+.role-permissions-count {
+  flex: 1;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.role-permissions-tables {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.role-permissions-matrix {
+  flex: 1;
+  width: 100%;
+  border-collapse: collapse;
+  th {
+    width: 64px;
+    padding: 4px 0;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 12px;
+    text-align: center;
+    &:first-child {
+      width: auto;
+    }
+  }
+  td {
+    padding: 5px 0;
+    color: #0f172a;
+    font-size: 13px;
+    text-align: center;
+    border-top: 1px solid #eef2f6;
+    &:first-child {
+      text-align: left;
+    }
+  }
+}
+
+.role-permissions-others {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  .next-checkbox-wrapper {
+    margin: 0;
+  }
+  .next-checkbox-label {
+    color: #0f172a;
+    font-size: 13px;
+  }
+}
+
+.role-access {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

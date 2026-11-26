@@ -196,27 +196,23 @@ class ConfigDistributionPage extends Component<Props, State> {
     return (
       <Fragment>
         <div className="config-wrapper">
-          <section className="card-title-wrapper">
-            <span className="card-title">
+          <div className="summary-section-head">
+            <span className="summary-section-title">
               <Translation>Config Distributions</Translation>
             </span>
             <Button
-              type="secondary"
               onClick={() => {
                 this.listConfigDistributions(projectName);
               }}
-              className="card-button-wrapper"
             >
               <HiOutlineRefresh />
             </Button>
-          </section>
-          <section className="card-content-table">
-            <Table locale={locale().Table} dataSource={distributions} hasBorder={true} loading={isLoading}>
-              {columns.map((col, key) => (
-                <Column {...col} key={key} align={'left'} />
-              ))}
-            </Table>
-          </section>
+          </div>
+          <Table locale={locale().Table} dataSource={distributions} loading={isLoading}>
+            {columns.map((col, key) => (
+              <Column {...col} key={key} align={'left'} />
+            ))}
+          </Table>
         </div>
       </Fragment>
     );

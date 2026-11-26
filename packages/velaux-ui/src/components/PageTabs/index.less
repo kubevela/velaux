@@ -1,0 +1,28 @@
+.page-tabs {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.page-tabs .page-tab {
+  flex: none;
+  margin-bottom: -1px;
+  padding: 10px 16px;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  &:hover {
+    color: #0f172a;
+  }
+  &.active {
+    color: var(--primary-color, #1b58f4);
+    border-bottom-color: var(--primary-color, #1b58f4);
+  }
+}

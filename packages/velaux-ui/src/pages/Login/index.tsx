@@ -1,19 +1,23 @@
-import { Button, Card, Field, Form, Grid, Icon, Input } from '@alifd/next';
-import React, { Component, Fragment } from 'react';
+import { Button, Field, Form, Input } from '@alifd/next';
+import classNames from 'classnames';
+import React, { Component } from 'react';
+import { AiOutlineExclamationCircle, AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import { getDexConfig, getLoginType, isAdminConfigured, loginLocal } from '../../api/authentication';
+import { loadCustomisation } from '../../api/customisation';
+import logoMark from '../../assets/KubeVela-01.svg';
 import LogoWhite from '../../assets/kubevela-logo-white.png';
 import Logo from '../../assets/kubevela-logo.png';
-import { loadCustomisation } from '../../api/customisation';
-import { If } from '../../components/If';
 import SwitchLanguage from '../../components/SwitchButton/index';
 import { Translation } from '../../components/Translation';
 import i18n from '../../i18n';
+import EditPlatFormUserDialog from '../../layout/Header/components/EditPlatFormUserDialog';
+import type { Customisation } from '../../services/CustomisationService';
+import { checkName, checkUserPassword } from '../../utils/common';
+import { isLight, sidebarTheme } from '../../utils/theme';
+import { DeliveryGraph } from './DeliveryGraph';
 import './index.less';
 import type { DexConfig } from '@velaux/data';
-import { checkName, checkUserPassword } from '../../utils/common';
-import { AiOutlineQuestionCircle } from 'react-icons/ai';
-import EditPlatFormUserDialog from '../../layout/Header/components/EditPlatFormUserDialog';
 
 type Props = {
   code: string;
@@ -33,7 +37,10 @@ type State = {
   loginType: string;
   loginErrorMessage: string;
   loginLoading: boolean;
-  logoURL?: string;
+  customisation: Customisation;
+  // branded is set once the customisation is read, so the brand panel does
+  // not flash the default colours first.
+  branded: boolean;
 };
 export default class LoginPage extends Component<Props, State> {
   field: Field;
@@ -46,13 +53,28 @@ export default class LoginPage extends Component<Props, State> {
       loginType: '',
       loginErrorMessage: '',
       loginLoading: false,
+      customisation: {},
+      branded: false,
     };
   }
 
+  // The phone layout needs a device-width viewport; the rest of the app is desktop-only, so only this page sets one.
+  viewport?: HTMLMetaElement;
+
   componentDidMount() {
+    if (!document.querySelector('meta[name="viewport"]')) {
+      this.viewport = document.createElement('meta');
+      this.viewport.name = 'viewport';
+      this.viewport.content = 'width=device-width, initial-scale=1';
+      document.head.appendChild(this.viewport);
+    }
     this.isFirstLogin();
     this.onGetLoginType();
-    loadCustomisation().then((c) => this.setState({ logoURL: c.logoURL }));
+    loadCustomisation().then((customisation) => this.setState({ customisation, branded: true }));
+  }
+
+  componentWillUnmount() {
+    this.viewport?.remove();
   }
 
   onGetLoginType = () => {
@@ -101,6 +123,9 @@ export default class LoginPage extends Component<Props, State> {
   };
 
   handleSubmit = () => {
+    if (this.state.loginLoading) {
+      return;
+    }
     this.field.validate((error: any, values: any) => {
       if (error) {
         return;
@@ -149,126 +174,126 @@ export default class LoginPage extends Component<Props, State> {
   render() {
     const FormItem = Form.Item;
     const init = this.field.init;
-    const formItemLayout = {
-      labelCol: {
-        fixedSpan: 6,
-      },
-      wrapperCol: {
-        span: 20,
-      },
-    };
-    const { loginType, loginErrorMessage, loginLoading, firstTimeLogin } = this.state;
-    const { Row, Col } = Grid;
+    const { loginType, loginErrorMessage, loginLoading, firstTimeLogin, customisation, branded } = this.state;
+    // The brand panel takes the sidebar's colours and logo, as the app does.
+    const theme = sidebarTheme(customisation.sidebarColor, customisation.accentColor);
+    const light = !!customisation.sidebarColor && isLight(customisation.sidebarColor);
+    const logoSrc = customisation.logoURL || (light ? Logo : LogoWhite);
     return (
-      <Fragment>
-        <div className="login-topbar">
-          <Row className="nav-wrapper">
-            <Col span="4" className="logo">
-              <img
-                src={this.state.logoURL || LogoWhite}
-                className={this.state.logoURL ? 'login-logo-plate' : undefined}
-                title={'Make shipping applications more enjoyable.'}
-              />
-            </Col>
-            <div style={{ flex: '1 1 0%' }} />
-            <div className="right">
-              <div className="vela-item">
-                <a title="KubeVela Documents" href="https://kubevela.io" target="_blank" rel="noopener noreferrer">
-                  <AiOutlineQuestionCircle size={18} />
-                </a>
-              </div>
-              <div className="vela-item">
-                <SwitchLanguage />
-              </div>
+      <div className="login-page">
+        <div className={classNames('login-brand', { branded })} style={theme as React.CSSProperties}>
+          <img
+            src={logoSrc}
+            className={classNames('login-brand-logo', { 'login-logo-plate': customisation.logoURL && !light })}
+            title={'Platform Engineering. Simplified.'}
+          />
+          <div className="login-brand-hero">
+            <DeliveryGraph />
+            <h2 className="login-brand-tagline">
+              <Translation>Platform Engineering.</Translation>{' '}
+              <span className="login-brand-accent">
+                <Translation>Simplified.</Translation>
+              </span>
+            </h2>
+          </div>
+          <div className="login-brand-footer">
+            <a
+              className="login-brand-item"
+              title="KubeVela Documents"
+              href="https://kubevela.io"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <AiOutlineQuestionCircle size={18} />
+              <span>
+                <Translation>Documentation</Translation>
+              </span>
+            </a>
+            <div className="login-brand-item">
+              <SwitchLanguage />
             </div>
-          </Row>
+          </div>
         </div>
 
-        <div className="full">
-          <If condition={!firstTimeLogin}>
-            <div className="login-wrapper">
-              <If condition={loginType === 'dex'}>
-                <div />
-              </If>
-              <If condition={loginType === 'local'}>
-                <div className="login-card-wrapper">
-                  <Card contentHeight={'auto'}>
-                    <div className="logo-img-wrapper">
-                      <img src={this.state.logoURL || Logo} />
-                    </div>
-                    <h3 className="login-title-description">
-                      <Translation>Make shipping applications more enjoyable</Translation>
-                    </h3>
-                    <Form
-                      onSubmitCapture={(e) => {
-                        e.preventDefault();
-                      }}
-                      onSubmit={this.handleSubmit}
-                      {...formItemLayout}
-                      field={this.field}
-                    >
-                      <FormItem
-                        label={<Translation className="label-title">Username</Translation>}
-                        labelAlign="top"
-                        required
-                      >
-                        <Input
-                          name="username"
-                          placeholder={i18n.t('Please input the username').toString()}
-                          {...init('username', {
-                            rules: [
-                              {
-                                required: true,
-                                pattern: checkName,
-                                message: <Translation>Please input the username</Translation>,
-                              },
-                            ],
-                          })}
-                        />
-                      </FormItem>
-                      <FormItem
-                        label={<Translation className="label-title">Password</Translation>}
-                        labelAlign="top"
-                        required
-                      >
-                        <Input
-                          name="password"
-                          htmlType="password"
-                          placeholder={i18n.t('Please input the password').toString()}
-                          {...init('password', {
-                            rules: [
-                              {
-                                required: true,
-                                pattern: checkUserPassword,
-                                message: (
-                                  <Translation>
-                                    The password should be 8-16 bits and contain at least one number and one letter
-                                  </Translation>
-                                ),
-                              },
-                            ],
-                          })}
-                        />
-                      </FormItem>
-                      <Button loading={loginLoading} type="primary" htmlType="submit" onClick={this.handleSubmit}>
-                        <Translation>Sign in</Translation>
-                      </Button>
-                    </Form>
-                    <If condition={loginErrorMessage}>
-                      <div className="logo-error-wrapper">
-                        <Icon type="warning1" /> <Translation>{loginErrorMessage}</Translation>
-                      </div>
-                    </If>
-                  </Card>
-                </div>
-              </If>
+        <div className="login-main">
+          {!firstTimeLogin && loginType === 'local' && (
+            <div className="login-form">
+              <h1 className="login-title">
+                <Translation>Sign in</Translation>
+              </h1>
+              <p className="login-subtitle">
+                <Translation>Sign in with your account to continue</Translation>
+              </p>
+              <Form
+                onSubmitCapture={(e) => {
+                  e.preventDefault();
+                }}
+                onSubmit={this.handleSubmit}
+                field={this.field}
+                labelAlign="top"
+              >
+                <FormItem label={<Translation>Username</Translation>}>
+                  <Input
+                    name="username"
+                    size="large"
+                    autoFocus
+                    autoComplete="username"
+                    placeholder={i18n.t('Please input the username').toString()}
+                    {...init('username', {
+                      rules: [
+                        {
+                          required: true,
+                          pattern: checkName,
+                          message: <Translation>Please input the username</Translation>,
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+                <FormItem label={<Translation>Password</Translation>}>
+                  <Input
+                    name="password"
+                    size="large"
+                    htmlType="password"
+                    autoComplete="current-password"
+                    placeholder={i18n.t('Please input the password').toString()}
+                    {...init('password', {
+                      rules: [
+                        {
+                          required: true,
+                          pattern: checkUserPassword,
+                          message: (
+                            <Translation>
+                              The password should be 8-16 bits and contain at least one number and one letter
+                            </Translation>
+                          ),
+                        },
+                      ],
+                    })}
+                  />
+                </FormItem>
+                {loginErrorMessage && (
+                  <div className="login-error" role="alert">
+                    <AiOutlineExclamationCircle size={16} />
+                    <Translation>{loginErrorMessage}</Translation>
+                  </div>
+                )}
+                <Button className="login-submit" size="large" loading={loginLoading} type="primary" htmlType="submit">
+                  <Translation>Sign in</Translation>
+                </Button>
+              </Form>
             </div>
-          </If>
-          <If condition={firstTimeLogin}>
-            <EditPlatFormUserDialog onClose={this.onCloseEditAdminUser} />
-          </If>
+          )}
+          {firstTimeLogin && <EditPlatFormUserDialog onClose={this.onCloseEditAdminUser} />}
+          {customisation.logoURL && (
+            <a className="powered-by" href="https://kubevela.io" target="_blank" rel="noopener noreferrer">
+              <Translation>Powered by</Translation>
+              <img src={logoMark} alt="" />
+              KubeVela
+            </a>
+          )}
         </div>
-      </Fragment>
+      </div>
     );
   }
 }

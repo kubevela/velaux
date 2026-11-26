@@ -1,4 +1,4 @@
-import { Message, Grid, Dialog, Form, Input, Field, Select, Loading } from '@alifd/next';
+import { Button, Message, Grid, Dialog, Form, Input, Field, Select, Loading } from '@alifd/next';
 import React from 'react';
 
 import { listNamespaces } from '../../../../api/observation';
@@ -272,7 +272,16 @@ class TargetDialog extends React.Component<Props, State> {
           onOk={this.onOk}
           onCancel={this.onClose}
           onClose={this.onClose}
-          footerActions={['ok']}
+          footer={
+            <div>
+              <Button onClick={this.onClose} style={{ marginRight: '8px' }}>
+                <Translation>Cancel</Translation>
+              </Button>
+              <Button type="primary" onClick={this.onOk}>
+                {isEdit ? <Translation>Update</Translation> : <Translation>Create</Translation>}
+              </Button>
+            </div>
+          }
         >
           <Form {...formItemLayout} field={this.field}>
             {!liteMode && (

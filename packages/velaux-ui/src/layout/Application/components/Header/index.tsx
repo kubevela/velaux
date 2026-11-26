@@ -4,7 +4,7 @@ import { routerRedux } from 'dva/router';
 import i18n from 'i18next';
 import React, { Component } from 'react';
 import { syncInfo } from '../../../../utils/appMeta';
-import { Breadcrumb } from '../../../../components/Breadcrumb';
+import { PageHeader } from '../../../../components/PageHeader';
 import { StatusBadge } from '../../../../components/StatusBadge';
 import type { EnvironmentStatus } from '../../../../pages/ApplicationList/components/AppStatus/health';
 import {
@@ -12,7 +12,6 @@ import {
   pausedEnvs,
   summariseStatuses,
 } from '../../../../pages/ApplicationList/components/AppStatus/health';
-import './index.less';
 
 import { deployApplication } from '../../../../api/application';
 import { notifyDeployed } from '../../../../utils/deploy';
@@ -166,67 +165,64 @@ class ApplicationHeader extends Component<Props, State> {
     const projectName = (applicationDetail && applicationDetail.project?.name) || '';
     return (
       <div>
-        <div className="app-head">
-          <Breadcrumb
-            items={[
-              {
-                to: '/projects/' + projectName + '/applications',
-                title: applicationDetail?.project?.alias || projectName,
-              },
-              {
-                to: `/applications/${applicationDetail?.name || ''}`,
-                title: (applicationDetail && (applicationDetail.alias || applicationDetail.name)) || '',
-              },
-            ]}
-          />
-          <div className="app-head-main">
-            <h1 className="app-head-name">{applicationDetail?.alias || applicationDetail?.name}</h1>
-            <StatusBadge tone={summary.health} label={healthLabels[summary.health]} />
-            {paused.length > 0 && (
-              <StatusBadge
-                tone="suspended"
-                label="Paused"
-                title={`${i18n.t('Reconciliation paused in')} ${paused.join(', ')}`}
-              />
-            )}
-            {applicationDetail?.readOnly && (
-              <StatusBadge
-                tone="neutral"
-                label="Read-only"
-                title={i18n.t('Managed by its addon: change it from the Addons page.').toString()}
-              />
-            )}
-            {syncInfo(applicationDetail?.labels).fromCluster && (
-              <StatusBadge
-                tone="neutral"
-                label="Synced from cluster"
-                title={i18n
-                  .t(
-                    'Managed as an Application in the cluster: VelaUX picks up its changes. Deploying from here makes VelaUX its source of truth.'
-                  )
-                  .toString()}
-              />
-            )}
-            {summary.components > 0 && (
-              <span className="app-head-meta">
-                {summary.healthyComponents}/{summary.components} <Translation>components healthy</Translation>
-              </span>
-            )}
-            <div className="app-head-actions">
-              <Permission
-                request={{
-                  resource: `project:${projectName}/application:${applicationDetail && applicationDetail.name}`,
-                  action: 'deploy',
-                }}
-                project={projectName}
-              >
-                <Button type="primary" disabled={applicationDetail?.readOnly} onClick={() => this.onDeployConfig()}>
-                  <Translation>Deploy</Translation>
-                </Button>
-              </Permission>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          breadcrumb={[
+            {
+              to: '/projects/' + projectName + '/applications',
+              title: applicationDetail?.project?.alias || projectName,
+            },
+            {
+              to: `/applications/${applicationDetail?.name || ''}`,
+              title: (applicationDetail && (applicationDetail.alias || applicationDetail.name)) || '',
+            },
+          ]}
+          title={applicationDetail?.alias || applicationDetail?.name}
+          actions={
+            <Permission
+              request={{
+                resource: `project:${projectName}/application:${applicationDetail && applicationDetail.name}`,
+                action: 'deploy',
+              }}
+              project={projectName}
+            >
+              <Button type="primary" disabled={applicationDetail?.readOnly} onClick={() => this.onDeployConfig()}>
+                <Translation>Deploy</Translation>
+              </Button>
+            </Permission>
+          }
+        >
+          <StatusBadge tone={summary.health} label={healthLabels[summary.health]} />
+          {paused.length > 0 && (
+            <StatusBadge
+              tone="suspended"
+              label="Paused"
+              title={`${i18n.t('Reconciliation paused in')} ${paused.join(', ')}`}
+            />
+          )}
+          {applicationDetail?.readOnly && (
+            <StatusBadge
+              tone="neutral"
+              label="Read-only"
+              title={i18n.t('Managed by its addon: change it from the Addons page.').toString()}
+            />
+          )}
+          {syncInfo(applicationDetail?.labels).fromCluster && (
+            <StatusBadge
+              tone="neutral"
+              label="Synced from cluster"
+              title={i18n
+                .t(
+                  'Managed as an Application in the cluster: VelaUX picks up its changes. Deploying from here makes VelaUX its source of truth.'
+                )
+                .toString()}
+            />
+          )}
+          {summary.components > 0 && (
+            <span className="page-head-meta">
+              {summary.healthyComponents}/{summary.components} <Translation>components healthy</Translation>
+            </span>
+          )}
+        </PageHeader>
         <If condition={showDeployConfig}>
           {applicationDetail && envbinding && workflows && (
             <DeployConfig

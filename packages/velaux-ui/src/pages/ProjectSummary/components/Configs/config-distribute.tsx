@@ -5,7 +5,7 @@ import './index.less';
 import { applyProjectConfigDistribution } from '../../../../api/config';
 import { getProjectTargetList } from '../../../../api/project';
 import { Translation } from '../../../../components/Translation';
-import type { NamespacedName, TargetCluster, TargetClusterStatus , Target } from '@velaux/data';
+import type { NamespacedName, TargetCluster, TargetClusterStatus, Target } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 const { Col, Row } = Grid;
 

@@ -34,11 +34,15 @@ export type ShowMode = 'table' | 'card' | string | null;
 type State = {
   showAddApplication: boolean;
   isLoading: boolean;
+  // loaded is false until the first list arrives, so the empty dock does not show while it loads.
+  loaded: boolean;
   showEditApplication: boolean;
   editItem?: ApplicationBase;
   labelValue: string[];
   showMode: ShowMode;
   health: HealthFilter;
+  // searching is true when the last listing was narrowed by a query, env or labels.
+  searching: boolean;
 };
 
 @connect((store: any) => {
@@ -62,9 +66,11 @@ class Application extends Component<Props, State> {
       showAddApplication: false,
       labelValue: [],
       isLoading: false,
+      loaded: false,
       showEditApplication: false,
       showMode: mode,
       health: 'all',
+      searching: false,
     };
   }
 
@@ -86,7 +92,7 @@ class Application extends Component<Props, State> {
     if (!this.props.currentProject?.resolved) {
       return;
     }
-    this.setState({ isLoading: true });
+    this.setState({ isLoading: true, searching: !!(params?.query || params?.env || params?.labels) });
     this.props.dispatch({
       type: 'application/getApplicationList',
       // An addon's applications are listed on the Addons page instead.
@@ -94,6 +100,7 @@ class Application extends Component<Props, State> {
       callback: () => {
         this.setState({
           isLoading: false,
+          loaded: true,
         });
       },
     });
@@ -224,18 +231,21 @@ class Application extends Component<Props, State> {
           onChange={(health: HealthFilter) => this.setState({ health })}
         />
         <Loading visible={isLoading} fullScreen>
-          <CardContend
-            applications={byHealth(applicationList || [], this.state.health)}
-            editAppPlan={(item: ApplicationBase) => {
-              this.editAppPlan(item);
-            }}
-            clickLabelFilter={this.clickLabelFilter}
-            showMode={showMode}
-            deleteAppPlan={this.onDeleteApp}
-            setVisible={(visible) => {
-              this.setState({ showAddApplication: visible });
-            }}
-          />
+          {this.state.loaded && (
+            <CardContend
+              applications={byHealth(applicationList || [], this.state.health)}
+              editAppPlan={(item: ApplicationBase) => {
+                this.editAppPlan(item);
+              }}
+              clickLabelFilter={this.clickLabelFilter}
+              showMode={showMode}
+              filtered={this.state.searching || this.state.health !== 'all'}
+              deleteAppPlan={this.onDeleteApp}
+              setVisible={(visible) => {
+                this.setState({ showAddApplication: visible });
+              }}
+            />
+          )}
         </Loading>
         <If condition={showAddApplication}>
           <NewServiceDialog

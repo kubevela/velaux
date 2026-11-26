@@ -8,6 +8,7 @@ import { getRoleList } from '../../api/roles';
 import { getUserList, deleteUser, changeUserDisable, changeUserEnable } from '../../api/users';
 import { If } from '../../components/If';
 import { ListTitle } from '../../components/ListTitle';
+import { Chip } from '../../components/ResourceCard';
 import Permission from '../../components/Permission';
 import { StatusBadge } from '../../components/StatusBadge';
 import { Translation } from '../../components/Translation';
@@ -281,9 +282,13 @@ class Users extends Component<Props, State> {
         title: <Translation>Platform Roles</Translation>,
         dataIndex: 'roles',
         cell: (v: NameAlias[]) => {
-          return (v || []).map((item: NameAlias) => (
-            <span className="roles-permPolicies margin-right-5">{item.alias || item.name}</span>
-          ));
+          return (
+            <span className="role-chips">
+              {(v || []).map((item: NameAlias) => (
+                <Chip key={item.name}>{item.alias || item.name}</Chip>
+              ))}
+            </span>
+          );
         },
       },
       {

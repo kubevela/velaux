@@ -4,7 +4,9 @@ import { RowAction } from '../../components/RowAction';
 import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 
 import { getProjectRoles, getProjectUsers, deleteProjectUser } from '../../api/project';
+import { AliasName } from '../../components/AliasName';
 import { If } from '../../components/If';
+import { Chip } from '../../components/ResourceCard';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components/Translation';
 import type { ProjectMember, ProjectRoleBase } from '@velaux/data';
@@ -195,11 +197,7 @@ class ProjectMembers extends Component<Props, State> {
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
         cell: (v: string, i: number, item: ProjectMember) => {
-          return (
-            <span>
-              {v}({item.alias || '-'})
-            </span>
-          );
+          return <AliasName name={v} alias={item.alias} />;
         },
       },
       {
@@ -207,11 +205,13 @@ class ProjectMembers extends Component<Props, State> {
         title: <Translation>UserRoles</Translation>,
         dataIndex: 'userRoles',
         cell: (v: string[]) => {
-          return v.map((item: string) => (
-            <span key={item} className="roles-permPolicies margin-right-5">
-              {item}
+          return (
+            <span className="role-chips">
+              {v.map((item: string) => (
+                <Chip key={item}>{item}</Chip>
+              ))}
             </span>
-          ));
+          );
         },
       },
 

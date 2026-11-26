@@ -234,11 +234,13 @@ class EnvDialog extends React.Component<Props, State> {
           onOk={this.onOk}
           onCancel={this.onClose}
           onClose={this.onClose}
-          footerActions={['cancel', 'ok']}
           footer={
             <div>
+              <Button onClick={this.onClose} style={{ marginRight: '8px' }}>
+                <Translation>Cancel</Translation>
+              </Button>
               <Button onClick={this.onOk} type="primary" loading={submitLoading}>
-                <Translation>OK</Translation>
+                {isEdit ? <Translation>Update</Translation> : <Translation>Create</Translation>}
               </Button>
             </div>
           }
@@ -250,7 +252,7 @@ class EnvDialog extends React.Component<Props, State> {
                   <Input
                     name="name"
                     disabled={isEdit}
-                    placeholder={i18n.t('Please enter the Environment name').toString()}
+                    placeholder={i18n.t('Please enter').toString()}
                     {...init('name', {
                       rules: [
                         {
@@ -269,7 +271,7 @@ class EnvDialog extends React.Component<Props, State> {
                 <FormItem label={<Translation>Alias</Translation>}>
                   <Input
                     name="alias"
-                    placeholder={i18n.t('Please enter the Environment alias').toString()}
+                    placeholder={i18n.t('Please enter').toString()}
                     {...init('alias', {
                       rules: [
                         {
@@ -309,7 +311,7 @@ class EnvDialog extends React.Component<Props, State> {
                 <FormItem label={<Translation>Description</Translation>}>
                   <Input
                     name="description"
-                    placeholder={i18n.t('Please enter the Environment description').toString()}
+                    placeholder={i18n.t('Please enter').toString()}
                     {...init('description', {
                       rules: [
                         {
@@ -331,7 +333,7 @@ class EnvDialog extends React.Component<Props, State> {
                     name="project"
                     hasClear
                     showSearch
-                    placeholder={i18n.t('Please select a project').toString()}
+                    placeholder={i18n.t('Please select').toString()}
                     filterLocal={true}
                     dataSource={projectOptions}
                     style={{ width: '100%' }}
@@ -357,7 +359,7 @@ class EnvDialog extends React.Component<Props, State> {
                         locale={locale().Select}
                         className="select"
                         mode="multiple"
-                        placeholder={i18n.t('Please select a target').toString()}
+                        placeholder={i18n.t('Please select').toString()}
                         {...init(`targets`, {
                           rules: [
                             {

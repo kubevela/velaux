@@ -1,4 +1,4 @@
-import { Field, Grid, Radio, Input, Message, Switch, Select, Dialog, Card, Button, Form } from '@alifd/next';
+import { Field, Grid, Radio, Input, Message, Switch, Select, Dialog, Button, Form } from '@alifd/next';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import React from 'react';
@@ -18,6 +18,9 @@ import { CustomSelect } from '../../components/CustomSelect';
 import { If } from '../../components/If';
 import Item from '../../components/Item';
 import CustomisationCard from './components/Customisation';
+import { SettingsSection } from './components/SettingsSection';
+import { ListTitle } from '../../components/ListTitle';
+import './index.less';
 import { Dispatch } from 'redux';
 
 const { Col, Row } = Grid;
@@ -37,6 +40,9 @@ type State = {
   projects?: Project[];
   roles?: ProjectRoleBase[];
 };
+
+// knownVersion is a version the server reported, or undefined for a build without one.
+const knownVersion = (v?: string) => (v && v !== 'UNKNOWN' ? v : undefined);
 
 type QuickShowRet = {
   hide: () => void;
@@ -297,27 +303,28 @@ class PlatformSetting extends React.Component<Props, State> {
   render() {
     const { systemInfo } = this.props;
     const { defaultProjectItems } = this.state;
+    const version = knownVersion(systemInfo.systemVersion?.velaVersion);
+    const gitVersion = knownVersion(systemInfo.systemVersion?.gitVersion);
+    const saveButton = (
+      <Button type="primary" onClick={this.onUpdate}>
+        <Translation>Save</Translation>
+      </Button>
+    );
     return (
-      <div className="container">
-        <Card locale={locale().Card} contentHeight="auto" style={{ marginBottom: 'var(--spacing-4)' }}>
-          <div className="setting-version">
-            <Row>
-              <Col span={12}>
-                <Item label="Version" value={systemInfo.systemVersion?.velaVersion}></Item>
-              </Col>
-              <Col span={12}>
-                <Item label="GitVersion" value={systemInfo.systemVersion?.gitVersion}></Item>
-              </Col>
-            </Row>
-          </div>
-        </Card>
+      <div className="settings-page">
+        <ListTitle
+          title="Settings"
+          subTitle="Sign-in, usage data and branding for this VelaUX"
+          extButtons={[
+            version || gitVersion ? (
+              <span key="version" className="settings-version" title={gitVersion}>
+                <Translation>Version</Translation> {version || gitVersion}
+              </span>
+            ) : null,
+          ]}
+        />
         <Form field={this.field} labelCol={{ fixedSpan: 8 }} wrapperCol={{ span: 16 }}>
-          <Card
-            style={{ marginBottom: '16px' }}
-            locale={locale().Card}
-            contentHeight="200px"
-            title={<Translation>User authentication configuration</Translation>}
-          >
+          <SettingsSection title={<Translation>User authentication configuration</Translation>} actions={saveButton}>
             <Row wrap={true}>
               <Col span={24}>
                 <Form.Item required={true} label={i18n.t('User login mode').toString()}>
@@ -356,11 +363,6 @@ class PlatformSetting extends React.Component<Props, State> {
               </Col>
               <Col span={24}>
                 <Form.Item label={i18n.t('Setting the default projects for the dex login user').toString()}>
-                  <div className="flexright" style={{ marginBottom: '8px' }}>
-                    <Button onClick={this.onAddItem}>
-                      <AiOutlinePlus />
-                    </Button>
-                  </div>
                   {defaultProjectItems.map((item) => {
                     return (
                       <Row id={item.id} key={item.id}>
@@ -389,25 +391,23 @@ class PlatformSetting extends React.Component<Props, State> {
                             />
                           </Form.Item>
                         </Col>
-                        <Col span={4}>
-                          <div className="flexright">
-                            <Button onClick={() => this.onRemoveItem(item.id)}>
-                              <AiOutlineDelete />
-                            </Button>
-                          </div>
+                        <Col span={4} style={{ padding: '0 4px' }}>
+                          <Button onClick={() => this.onRemoveItem(item.id)}>
+                            <AiOutlineDelete />
+                          </Button>
                         </Col>
                       </Row>
                     );
                   })}
+                  <Button onClick={this.onAddItem}>
+                    <AiOutlinePlus /> <Translation>Add</Translation>
+                  </Button>
                 </Form.Item>
               </Col>
             </Row>
-          </Card>
+          </SettingsSection>
 
-          <Card
-            style={{ marginBottom: '16px' }}
-            locale={locale().Card}
-            contentHeight="200px"
+          <SettingsSection
             title={
               <span>
                 <Translation>User experience improvement plan</Translation>
@@ -416,10 +416,11 @@ class PlatformSetting extends React.Component<Props, State> {
                   href="https://kubevela.io/docs/reference/user-improvement-plan"
                   rel="noopener noreferrer"
                 >
-                  <MdOutlineHelpCenter size={16} style={{ marginLeft: '4px' }}></MdOutlineHelpCenter>
+                  <MdOutlineHelpCenter size={16} style={{ marginLeft: '4px', verticalAlign: 'text-bottom' }} />
                 </a>
               </span>
             }
+            actions={saveButton}
           >
             <Item
               label={i18n.t('Contribution')}
@@ -434,12 +435,7 @@ class PlatformSetting extends React.Component<Props, State> {
                 />
               }
             />
-          </Card>
-          <div className="flexright">
-            <Button type="primary" onClick={this.onUpdate}>
-              <Translation>Submit</Translation>
-            </Button>
-          </div>
+          </SettingsSection>
         </Form>
         <CustomisationCard />
       </div>

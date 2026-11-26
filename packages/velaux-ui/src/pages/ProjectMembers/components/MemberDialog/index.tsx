@@ -2,7 +2,7 @@ import { Grid, Form, Input, Field, Button, Message, Select } from '@alifd/next';
 import React from 'react';
 
 import { createProjectUsers, updateProjectUser } from '../../../../api/project';
-import DrawerWithFooter from '../../../../components/Drawer';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
 import type { ProjectMember, ProjectRoleBase } from '@velaux/data';
@@ -112,7 +112,7 @@ class MemberDialog extends React.Component<Props, State> {
     }
 
     return [
-      <Button type="secondary" onClick={this.onClose} style={{ marginRight: '16px' }}>
+      <Button type="secondary" onClick={this.onClose}>
         <Translation>Cancel</Translation>
       </Button>,
       createEle,
@@ -137,17 +137,16 @@ class MemberDialog extends React.Component<Props, State> {
     const rolesList = getSelectLabel(projectRoles);
     return (
       <React.Fragment>
-        <DrawerWithFooter
+        <ModalWithFooter
           title={this.showTitle()}
-          placement="right"
-          width={800}
+          width={720}
           onClose={this.onClose}
           extButtons={this.showClickButtons()}
         >
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={24} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Username</Translation>} labelTextAlign="left" required>
+                <FormItem label={<Translation>Username</Translation>} required>
                   <Input
                     name="userName"
                     placeholder={i18n.t('Please enter').toString()}
@@ -186,7 +185,7 @@ class MemberDialog extends React.Component<Props, State> {
               </Col>
             </Row>
           </Form>
-        </DrawerWithFooter>
+        </ModalWithFooter>
       </React.Fragment>
     );
   }

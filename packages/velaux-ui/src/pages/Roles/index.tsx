@@ -4,17 +4,19 @@ import { RowAction } from '../../components/RowAction';
 import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 
 import { getPlatformPermissions } from '../../api/rbac';
-import { deleteRole, getRoleList } from '../../api/roles';
+import { createRole, deleteRole, getRoleList, updateRole } from '../../api/roles';
+import { AliasName } from '../../components/AliasName';
 import { If } from '../../components/If';
 import { ListTitle as Title } from '../../components/ListTitle';
 import Permission from '../../components/Permission';
 import { Translation } from '../../components';
+import RoleDialog from '../../components/RoleDialog';
+import type { RoleValues } from '../../components/RoleDialog';
+import { RoleAccessChips } from '../../components/RolePermissions';
 import type { PermissionBase, RolesBase } from '@velaux/data';
 import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
 import './index.less';
-
-import RolesDialog from './components/RolesDialog';
 
 interface Props {}
 
@@ -106,6 +108,8 @@ class Roles extends Component<Props, State> {
     this.listRoles();
   };
 
+  saveRole = (values: RoleValues, isEdit: boolean) => (isEdit ? updateRole(values) : createRole(values));
+
   onCloseCreate = () => {
     this.setState({ visible: false });
   };
@@ -134,38 +138,27 @@ class Roles extends Component<Props, State> {
         key: 'name',
         title: <Translation>Name</Translation>,
         dataIndex: 'name',
-        cell: (v: string) => {
-          return <span>{v}</span>;
-        },
+        width: 220,
+        cell: (v: string, i: number, record: RolesBase) => <AliasName name={v} alias={record.alias} />,
       },
       {
-        key: 'alias',
-        title: <Translation>Alias</Translation>,
-        dataIndex: 'alias',
-        cell: (v: string) => {
-          return <span>{v}</span>;
-        },
+        key: 'permissions',
+        title: <Translation>Permissions</Translation>,
+        dataIndex: 'permissions',
+        cell: (v: RolesBase['permissions']) => <RoleAccessChips granted={v} permissions={this.state.permissions} />,
       },
       {
         key: 'createTime',
-        title: <Translation>Create Time</Translation>,
+        title: <Translation>CreateTime</Translation>,
         dataIndex: 'createTime',
-        cell: (v: string) => {
-          return <span>{momentDate(v)}</span>;
-        },
+        width: 200,
+        cell: (v: string) => <span>{momentDate(v)}</span>,
       },
-      // {
-      //   key: 'permPolicies',
-      //   title: <Translation>PermPolicies</Translation>,
-      //   dataIndex: 'permPolicies',
-      //   cell: (v: any) => {
-      //     return v.map((item: any) => (<span className='roles-permPolicies margin-right-5'>{item && item.name}</span>))
-      //   },
-      // },
       {
         key: 'operation',
         title: <Translation>Actions</Translation>,
         dataIndex: 'operation',
+        width: 120,
         cell: (v: string, i: number, record: RolesBase) => {
           return (
             <Fragment>
@@ -202,7 +195,7 @@ class Roles extends Component<Props, State> {
         <div className="roles-list-content">
           <Title
             title="Platform Roles"
-            subTitle="Assign permissions for resources such as clusters、targets、addons、projects and users"
+            subTitle="Assign permissions for resources such as clusters, targets, addons, projects and users"
             extButtons={[
               <Permission request={{ resource: 'role:*', action: 'create' }} project={''}>
                 <Button type="primary" onClick={this.handleClickCreate}>
@@ -228,13 +221,12 @@ class Roles extends Component<Props, State> {
           />
 
           <If condition={visible}>
-            <RolesDialog
-              visible={visible}
-              isEditRole={isEditRole}
-              editRoleItem={editRoleItem}
+            <RoleDialog
+              role={isEditRole ? editRoleItem : undefined}
               permissions={permissions}
-              onCreate={this.onCreate}
-              onCloseCreate={this.onCloseCreate}
+              save={this.saveRole}
+              onSaved={this.onCreate}
+              onClose={this.onCloseCreate}
             />
           </If>
         </div>

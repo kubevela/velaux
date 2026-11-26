@@ -1,13 +1,10 @@
-import { Button, Grid, Card, Message } from '@alifd/next';
+import { Button } from '@alifd/next';
 import React, { Component, Fragment } from 'react';
 
-import { If } from '../../../../components/If';
-import Item from '../../../../components/Item';
 import Permission from '../../../../components/Permission';
+import { RelativeTime } from '../../../../components/RelativeTime';
 import { Translation } from '../../../../components/Translation';
-import type { Project, ProjectDetail , User } from '@velaux/data';
-import { momentDate } from '../../../../utils/common';
-import { locale } from '../../../../utils/locale';
+import type { Project, ProjectDetail, User } from '@velaux/data';
 import GeneralDialog from '../GeneralDialog';
 import './index.less';
 
@@ -52,7 +49,6 @@ class General extends Component<Props, State> {
   };
 
   render() {
-    const { Row, Col } = Grid;
     const {
       userList,
       projectDetails = {
@@ -67,60 +63,53 @@ class General extends Component<Props, State> {
     const { isEditGeneral, editGeneral } = this.state;
     return (
       <Fragment>
-        <div className="general-wrapper">
-          <Card locale={locale().Card} contentHeight="auto" className="card-wrapper">
-            <section className="card-title-wrapper">
-              <span className="card-title">
-                <Translation>General</Translation>
+        <div className="project-about">
+          <div className="project-about-head">
+            <span className="summary-section-title">
+              <Translation>About</Translation>
+            </span>
+            <Permission request={{ resource: `project:${projectName}`, action: 'update' }} project={projectName}>
+              <Button
+                onClick={() => {
+                  this.editGeneral(projectDetails);
+                }}
+              >
+                <Translation>Edit</Translation>
+              </Button>
+            </Permission>
+          </div>
+          <p className={`project-about-description ${projectDetails.description ? '' : 'empty'}`}>
+            {projectDetails.description || <Translation>No description</Translation>}
+          </p>
+          <div className="project-about-facts">
+            <div>
+              <span>
+                <Translation>Name</Translation>
               </span>
-              <Permission request={{ resource: `project:${projectName}`, action: 'update' }} project={projectName}>
-                <Button
-                  className="card-button-wrapper"
-                  onClick={() => {
-                    this.editGeneral(projectDetails);
-                  }}
-                >
-                  <Translation>Edit</Translation>
-                </Button>
-              </Permission>
-            </section>
-            <section className="card-content-wrapper">
-              <If condition={projectDetails.description}>
-                <Row style={{ marginBottom: '16px' }}>
-                  <Message type="notice">{projectDetails.description}</Message>
-                </Row>
-              </If>
-              <Row wrap={true}>
-                <Col m={12} xs={24}>
-                  <Item
-                    label={<Translation>Name(Alias)</Translation>}
-                    value={`${projectDetails.name}(${projectDetails.alias || '-'})`}
-                  />
-                </Col>
-                <Col m={12} xs={24}>
-                  <Item
-                    label={<Translation>Owner</Translation>}
-                    value={
-                      projectDetails.owner?.alias
-                        ? `${projectDetails.owner?.alias}(${projectDetails.owner?.name})`
-                        : projectDetails.owner?.name
-                    }
-                  />
-                </Col>
-              </Row>
-              <Row wrap={true}>
-                <Col m={12} xs={24}>
-                  <Item label={<Translation>Create Time</Translation>} value={momentDate(projectDetails.createTime)} />
-                </Col>
-                <Col m={12} xs={24}>
-                  <Item label={<Translation>Update Time</Translation>} value={momentDate(projectDetails.updateTime)} />
-                </Col>
-              </Row>
-            </section>
-          </Card>
+              <span>{projectDetails.name}</span>
+            </div>
+            <div>
+              <span>
+                <Translation>Owner</Translation>
+              </span>
+              <span>{projectDetails.owner?.alias || projectDetails.owner?.name || '-'}</span>
+            </div>
+            <div>
+              <span>
+                <Translation>Created</Translation>
+              </span>
+              <RelativeTime time={projectDetails.createTime} />
+            </div>
+            <div>
+              <span>
+                <Translation>Updated</Translation>
+              </span>
+              <RelativeTime time={projectDetails.updateTime} />
+            </div>
+          </div>
         </div>
 
-        <If condition={isEditGeneral}>
+        {isEditGeneral && (
           <GeneralDialog
             isEditGeneral={isEditGeneral}
             editGeneral={editGeneral}
@@ -128,7 +117,7 @@ class General extends Component<Props, State> {
             onUpdateGeneral={this.onUpdateGeneral}
             onCloseGeneral={this.onCloseGeneral}
           />
-        </If>
+        )}
       </Fragment>
     );
   }

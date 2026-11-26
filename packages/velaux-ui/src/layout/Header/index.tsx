@@ -235,7 +235,7 @@ class Header extends Component<Props, State> {
     return (
       <div className={classNames('layout-sidebar', { collapsed })} style={theme as React.CSSProperties}>
         <div className="sidebar-brand">
-          <Link to="/" className="sidebar-logo" title={'Make shipping applications more enjoyable.'}>
+          <Link to="/" className="sidebar-logo" title={'Platform Engineering. Simplified.'}>
             <img
               src={logoSrc}
               className={classNames({

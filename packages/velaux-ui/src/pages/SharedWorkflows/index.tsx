@@ -15,7 +15,7 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { Translation } from '../../components/Translation';
 import { SettingsSummary } from '../../components/WorkflowStudio/settings';
 import i18n from '../../i18n';
-import { allProjects } from '../../utils/currentProject';
+import { projectView } from '../../utils/currentProject';
 import { locale } from '../../utils/locale';
 import type { SharedUsage, SharedWhere } from '../../utils/sharedWorkflows';
 import { filterShared, inUse } from '../../utils/sharedWorkflows';
@@ -74,7 +74,8 @@ const UsedBy = (props: { workflow: SharedWorkflow }) => {
 // SharedWorkflows lists the shared workflows the picked project's
 // applications can use: its own, in its namespace, and the global ones.
 const SharedWorkflows = (props: Props) => {
-  const project = props.currentProject?.resolved ? props.currentProject.current : undefined;
+  const view = projectView(props.currentProject);
+  const project = view === 'project' ? props.currentProject?.current : undefined;
   const [list, setList] = useState<ListSharedWorkflowsResponse>();
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
@@ -94,8 +95,23 @@ const SharedWorkflows = (props: Props) => {
   }, [project]);
   useEffect(load, [load]);
 
-  if (!project) {
+  if (view === 'unknown') {
     return null;
+  }
+  if (!project) {
+    return (
+      <div className="shared-workflows">
+        <ListTitle
+          title="Workflows"
+          subTitle="Workflows the project's applications can run in place of their own steps"
+        />
+        <Empty
+          message={
+            <Translation>Pick a project in the top bar. Each project has shared workflows of its own.</Translation>
+          }
+        />
+      </div>
+    );
   }
   const canProject = canCreate(project, 'project', props.userInfo);
   const canGlobal = canCreate(project, 'global', props.userInfo);
@@ -166,13 +182,7 @@ const SharedWorkflows = (props: Props) => {
           </Button>,
         ]}
       />
-      {project === allProjects ? (
-        <Empty
-          message={
-            <Translation>Pick a project in the top bar. Each project has shared workflows of its own.</Translation>
-          }
-        />
-      ) : !loading && workflows.length === 0 ? (
+      {!loading && workflows.length === 0 ? (
         <Empty message={<Translation>No shared workflows for this project, nor global ones</Translation>} />
       ) : (
         <>

@@ -3,7 +3,6 @@ import { Message, Field, Grid, Button, Loading, Card } from '@alifd/next';
 import * as yaml from 'js-yaml';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import { detailDefinition, updateUISchema } from '../../api/definitions';
 import DefinitionCode from '../../components/DefinitionCode';
@@ -184,64 +183,68 @@ class UiSchema extends Component<Props, State> {
               </Card>
             </If>
             <If condition={!uiSchema || uiSchema.length !== 0}>
-              <section className="margin-top-20" style={{ margin: '16px 0' }}>
-                <Message type="notice" style={{ margin: '0 8px 8px 16px' }}>
-                  <Translation>
-                    Custom the UI schema will preview in right, please refer to the document to get more info
-                  </Translation>
-                  <a
-                    style={{ marginLeft: '8px' }}
-                    target="_blank"
-                    href="https://kubevela.net/docs/reference/ui-schema"
-                    rel="noopener noreferrer"
-                  >
-                    <AiOutlineQuestionCircle size={16} />
-                  </a>
-                </Message>
-                <Row>
-                  <Col span="12" className="padding-left-10 padding-right-10">
-                    <Card
-                      locale={locale().Card}
-                      contentHeight="auto"
-                      id="yaml-code"
-                      className="yaml-code"
-                      style={{ height: yamlHeight }}
-                    >
-                      <DefinitionCode
-                        containerId="yaml-code"
-                        language={'yaml'}
-                        readOnly={false}
-                        {...init('yamlValues')}
-                        ref={this.DefinitionCodeRef}
-                        onChange={this.onChangeYaml}
-                      />
-                    </Card>
+              <section className="ui-schema-editor">
+                <Row gutter={16}>
+                  <Col span="12">
+                    <div className="ui-schema-panel">
+                      <div className="ui-schema-panel-head">
+                        <span className="ui-schema-panel-title">YAML</span>
+                        <span className="ui-schema-panel-hint">
+                          <Translation>The form it makes shows on the right.</Translation>
+                          <a
+                            target="_blank"
+                            href="https://kubevela.io/docs/reference/ui-schema"
+                            rel="noopener noreferrer"
+                          >
+                            <Translation>UI schema reference</Translation>
+                          </a>
+                        </span>
+                      </div>
+                      <Card
+                        locale={locale().Card}
+                        contentHeight="auto"
+                        id="yaml-code"
+                        className="yaml-code"
+                        style={{ height: yamlHeight }}
+                      >
+                        <DefinitionCode
+                          containerId="yaml-code"
+                          language={'yaml'}
+                          readOnly={false}
+                          {...init('yamlValues')}
+                          ref={this.DefinitionCodeRef}
+                          onChange={this.onChangeYaml}
+                        />
+                      </Card>
+                    </div>
                   </Col>
-                  <Col span="12" className="padding-left-10 padding-right-10">
+                  <Col span="12">
                     <If condition={uiSchema && uiSchema.length !== 0}>
-                      <div id="view-ui-schema">
-                        <div className="preview">
-                          <span>
+                      <div className="ui-schema-panel">
+                        <div className="ui-schema-panel-head">
+                          <span className="ui-schema-panel-title">
                             <Translation>Preview</Translation>
                           </span>
                         </div>
-                        <Card locale={locale().Card} contentHeight="auto" className="view-ui-schema">
-                          <UISchema
-                            {...init(`properties`, {
-                              rules: [
-                                {
-                                  validator: validator,
-                                  message: 'Please check UI Schema properties',
-                                },
-                              ],
-                            })}
-                            uiSchema={this.sortUISchema(uiSchema)}
-                            ref={this.uiSchemaRef}
-                            advanced={true}
-                            value={{}}
-                            mode="edit"
-                          />
-                        </Card>
+                        <div id="view-ui-schema">
+                          <Card locale={locale().Card} contentHeight="auto" className="view-ui-schema">
+                            <UISchema
+                              {...init(`properties`, {
+                                rules: [
+                                  {
+                                    validator: validator,
+                                    message: 'Please check UI Schema properties',
+                                  },
+                                ],
+                              })}
+                              uiSchema={this.sortUISchema(uiSchema)}
+                              ref={this.uiSchemaRef}
+                              advanced={true}
+                              value={{}}
+                              mode="edit"
+                            />
+                          </Card>
+                        </div>
                       </div>
                     </If>
                   </Col>

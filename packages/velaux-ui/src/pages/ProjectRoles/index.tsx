@@ -1,14 +1,24 @@
-import { Grid, Dialog, Message } from '@alifd/next';
-import React, { Component } from 'react';
+import { Button, Dialog, Message, Table } from '@alifd/next';
+import React, { Component, Fragment } from 'react';
+import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 
-import { getProjectRoles, getProjectPermissions, deleteProjectRoles } from '../../api/project';
-import { If } from '../../components/If';
+import {
+  createProjectRoles,
+  deleteProjectRoles,
+  getProjectPermissions,
+  getProjectRoles,
+  updateProjectRoles,
+} from '../../api/project';
+import { AliasName } from '../../components/AliasName';
+import Permission from '../../components/Permission';
+import RoleDialog from '../../components/RoleDialog';
+import type { RoleValues } from '../../components/RoleDialog';
+import { RoleAccessChips } from '../../components/RolePermissions';
+import { RowAction } from '../../components/RowAction';
 import { Translation } from '../../components/Translation';
-import type { ProjectRoleBase , PermissionBase } from '@velaux/data';
+import type { ProjectRoleBase, PermissionBase } from '@velaux/data';
+import { momentDate } from '../../utils/common';
 import { locale } from '../../utils/locale';
-
-import ProjectMenu from './components/Menu';
-import ProjectPermPoliciesDetail from './components/ProjectPermPoliciesDetail';
 
 import './index.less';
 
@@ -19,178 +29,136 @@ type Props = {
     };
   };
 };
+
 type State = {
-  projectName: string;
-  projectRoles: ProjectRoleBase[];
-  projectPermissions: PermissionBase[];
+  roles: ProjectRoleBase[];
+  permissions: PermissionBase[];
   isLoading: boolean;
-  isAddRole: false;
-  activeRoleName: string;
-  activeRoleItem: ProjectRoleBase;
-  isCreateProjectRoles: boolean;
+  visible: boolean;
+  editRole?: ProjectRoleBase;
 };
 
+// ProjectRoles is a project's Roles tab: its roles, what each may do, and the dialog to create or edit one.
 class ProjectRoles extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      projectName: this.getProjectName(),
-      projectRoles: [],
-      projectPermissions: [],
-      activeRoleName: '',
-      isLoading: false,
-      isAddRole: false,
-      activeRoleItem: { name: '' },
-      isCreateProjectRoles: false,
-    };
+    this.state = { roles: [], permissions: [], isLoading: false, visible: false };
   }
 
   componentDidMount() {
-    this.listProjectRoles();
-    this.listProjectPermPolicies();
+    this.listRoles();
+    getProjectPermissions({ projectName: this.projectName() }).then((res) => {
+      this.setState({ permissions: res || [] });
+    });
   }
 
-  listProjectRoles = async () => {
-    const { projectName } = this.state;
-    const params = {
-      projectName,
-    };
+  projectName = () => this.props.match.params.projectName || '';
+
+  listRoles = () => {
     this.setState({ isLoading: true });
-    getProjectRoles(params)
+    getProjectRoles({ projectName: this.projectName() })
       .then((res) => {
-        this.setState({
-          projectRoles: (res && res.roles) || [],
-        });
+        this.setState({ roles: (res && res.roles) || [] });
       })
       .finally(() => {
-        this.setState({
-          isLoading: false,
-        });
+        this.setState({ isLoading: false });
       });
   };
 
-  listProjectPermPolicies = async () => {
-    const { projectName } = this.state;
-    const param = { projectName };
-    getProjectPermissions(param).then((res) => {
-      this.setState({
-        projectPermissions: (res && res) || [],
-      });
-    });
+  saveRole = (values: RoleValues, isEdit: boolean) => {
+    const projectName = this.projectName();
+    return isEdit
+      ? updateProjectRoles({ projectName, roleName: values.name }, values)
+      : createProjectRoles({ projectName }, values);
   };
 
-  getProjectName = () => {
-    const { params = { projectName: '' } } = this.props.match;
-    return params.projectName || '';
+  onSaved = () => {
+    this.setState({ visible: false, editRole: undefined });
+    this.listRoles();
   };
 
-  getActiveRoleName = () => {
-    const { activeRoleName, projectRoles = [] } = this.state;
-    if (!activeRoleName && projectRoles.length != 0) {
-      return projectRoles[0] && projectRoles[0].name;
-    } else {
-      return activeRoleName || '';
-    }
-  };
-
-  getActiveRoleItem = () => {
-    const { activeRoleItem, projectRoles = [] } = this.state;
-    if (!activeRoleItem.name && projectRoles.length != 0) {
-      return projectRoles[0];
-    } else {
-      return activeRoleItem || [];
-    }
-  };
-
-  addRole = () => {
-    this.setState({
-      isCreateProjectRoles: true,
-    });
-  };
-
-  handleChangeRole = (roleName: string) => {
-    this.setState(
-      {
-        activeRoleName: roleName,
-      },
-      () => {
-        const activeRoleItem = this.findActiveRoleItem();
-        this.setState({
-          activeRoleItem: activeRoleItem || { name: '' },
-        });
-      }
-    );
-  };
-
-  findActiveRoleItem = () => {
-    const { projectRoles, activeRoleName } = this.state;
-    return (projectRoles || [{ name: '' }]).find((item: { name: string }) => item.name === activeRoleName);
-  };
-
-  onCreate = (activeRoleName: string) => {
-    this.setState({
-      isCreateProjectRoles: false,
-      activeRoleName,
-    });
-    this.listProjectRoles();
-  };
-
-  onDeleteProjectRole = (roleName: string) => {
-    const { projectName } = this.state;
+  onDelete = (roleName: string) => {
     Dialog.confirm({
       content: 'Are you sure you want to delete this role',
       onOk: () => {
-        if (roleName) {
-          deleteProjectRoles({ projectName, roleName }).then((res) => {
-            if (res) {
-              Message.success(<Translation>Delete the role success</Translation>);
-              this.listProjectRoles();
-            }
-          });
-        }
+        deleteProjectRoles({ projectName: this.projectName(), roleName }).then((res) => {
+          if (res) {
+            Message.success(<Translation>Delete the role success</Translation>);
+            this.listRoles();
+          }
+        });
       },
       locale: locale().Dialog,
     });
   };
 
   render() {
-    const { Row, Col } = Grid;
-    const { projectName, projectRoles, isAddRole, projectPermissions, isCreateProjectRoles } = this.state;
+    const projectName = this.projectName();
+    const { roles, permissions, isLoading, visible, editRole } = this.state;
+    const { Column } = Table;
     return (
-      <Row className="project-roles-wrapper">
-        <Col span="6">
-          <ProjectMenu
-            isCreateProjectRoles={isCreateProjectRoles}
-            isAddRole={isAddRole}
-            activeRoleName={this.getActiveRoleName()}
-            projectRoles={projectRoles}
-            addRole={this.addRole}
-            projectName={projectName}
-            handleChangeRole={(roleName: string) => {
-              this.handleChangeRole(roleName);
-            }}
-            onDeleteProjectRole={(roleName: string) => {
-              this.onDeleteProjectRole(roleName);
-            }}
+      <div className="project-roles">
+        <section className="project-roles-create">
+          <Permission request={{ resource: `project:${projectName}/role:*`, action: 'create' }} project={projectName}>
+            <Button type="primary" onClick={() => this.setState({ visible: true, editRole: undefined })}>
+              <Translation>New Role</Translation>
+            </Button>
+          </Permission>
+        </section>
+        <Table locale={locale().Table} dataSource={roles} loading={isLoading}>
+          <Column
+            title={<Translation>Name</Translation>}
+            dataIndex="name"
+            width={220}
+            cell={(v: string, i: number, record: ProjectRoleBase) => <AliasName name={v} alias={record.alias} />}
           />
-        </Col>
-
-        <Col span="18" className="project-auth-border-left">
-          <If condition={!isAddRole}>
-            <ProjectPermPoliciesDetail
-              projectRoles={projectRoles}
-              projectName={projectName}
-              isCreateProjectRoles={isCreateProjectRoles}
-              activeRoleName={this.getActiveRoleName()}
-              activeRoleItem={this.getActiveRoleItem()}
-              projectPermissions={projectPermissions}
-              onCreate={(activeRoleName: string) => {
-                this.onCreate(activeRoleName);
-              }}
-            />
-          </If>
-        </Col>
-      </Row>
+          <Column
+            title={<Translation>Permissions</Translation>}
+            dataIndex="permissions"
+            cell={(v: ProjectRoleBase['permissions']) => <RoleAccessChips granted={v} permissions={permissions} />}
+          />
+          <Column
+            title={<Translation>CreateTime</Translation>}
+            dataIndex="createTime"
+            width={200}
+            cell={(v: string) => (v ? momentDate(v) : '')}
+          />
+          <Column
+            title={<Translation>Actions</Translation>}
+            dataIndex="name"
+            width={120}
+            cell={(v: string, i: number, record: ProjectRoleBase) => (
+              <Fragment>
+                <Permission
+                  request={{ resource: `project:${projectName}/role:${v}`, action: 'update' }}
+                  project={projectName}
+                >
+                  <RowAction
+                    icon={<AiOutlineEdit />}
+                    label="Edit"
+                    onClick={() => this.setState({ visible: true, editRole: record })}
+                  />
+                </Permission>
+                <Permission
+                  request={{ resource: `project:${projectName}/role:${v}`, action: 'delete' }}
+                  project={projectName}
+                >
+                  <RowAction icon={<AiOutlineDelete />} label="Delete" danger onClick={() => this.onDelete(v)} />
+                </Permission>
+              </Fragment>
+            )}
+          />
+        </Table>
+        {visible && (
+          <RoleDialog
+            role={editRole}
+            permissions={permissions}
+            save={this.saveRole}
+            onSaved={this.onSaved}
+            onClose={() => this.setState({ visible: false, editRole: undefined })}
+          />
+        )}
+      </div>
     );
   }
 }

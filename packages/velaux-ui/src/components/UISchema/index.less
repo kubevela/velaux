@@ -81,3 +81,27 @@
     color: #d23c26;
   }
 }
+
+// The Advanced Parameters switch reads as a form label beside its switch.
+.ui-schema-advanced-toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  margin: 4px 0 8px;
+  .ui-schema-advanced-label {
+    color: #333;
+    font-weight: 600;
+    font-size: 14px;
+  }
+}
+
+// A form laid in a flex row takes the row's width, as its divider does.
+.next-row > .ui-schema-container {
+  width: 100%;
+}
+
+.ui-schema-container > .next-divider-hoz {
+  width: 100%;
+  margin: 8px 0 12px;
+}

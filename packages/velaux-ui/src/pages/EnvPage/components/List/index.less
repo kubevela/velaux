@@ -4,3 +4,18 @@
     text-align: left;
   }
 }
+
+.env-list-targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  .resource-chip {
+    white-space: nowrap;
+  }
+  .resource-chip a {
+    color: #334155;
+    &:hover {
+      color: var(--primary-color, #1b58f4);
+    }
+  }
+}

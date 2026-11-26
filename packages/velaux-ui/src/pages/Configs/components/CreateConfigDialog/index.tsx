@@ -290,7 +290,7 @@ class CreateConfigDialog extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <ModalWithFooter
-          title={edit ? i18n.t('Edit a config') : i18n.t('New a config')}
+          title={edit ? i18n.t('Edit Config') : i18n.t('New Config')}
           onClose={this.onClose}
           extButtons={buttons}
         >

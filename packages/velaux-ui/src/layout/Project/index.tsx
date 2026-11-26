@@ -1,17 +1,11 @@
-import { Grid } from '@alifd/next';
 import { connect } from 'dva';
-import { Link } from 'dva/router';
 import React, { Component, Fragment } from 'react';
 
 import { Translation } from '../../components/Translation';
-import { Breadcrumb } from '../../components/Breadcrumb';
-import './index.less';
+import { PageHeader } from '../../components/PageHeader';
+import { PageTab, PageTabs } from '../../components/PageTabs';
 import type { ProjectDetail, LoginUserInfo } from '@velaux/data';
 import { checkPermission } from '../../utils/permission';
-
-import classNames from 'classnames';
-
-const { Row, Col } = Grid;
 
 type Props = {
   activeId: string;
@@ -58,17 +52,17 @@ class ProjectLayout extends Component<Props> {
     const list = [
       {
         id: 'summary',
-        name: <Translation>Summary</Translation>,
+        name: 'Summary',
         to: `/projects/${projectName}/summary`,
       },
       {
         id: 'applications',
-        name: <Translation>Applications</Translation>,
+        name: 'Applications',
         to: `/projects/${projectName}/applications`,
       },
       {
         id: 'pipelines',
-        name: <Translation>Pipelines</Translation>,
+        name: 'Pipelines',
         to: `/projects/${projectName}/pipelines`,
       },
     ];
@@ -76,53 +70,44 @@ class ProjectLayout extends Component<Props> {
     if (checkPermission({ resource: `project:${projectName}/role:*`, action: 'list' }, projectName, userInfo)) {
       list.push({
         id: 'roles',
-        name: <Translation>Roles</Translation>,
+        name: 'Roles',
         to: `/projects/${projectName}/roles`,
       });
     }
     if (checkPermission({ resource: `project:${projectName}/projectUser:*`, action: 'list' }, projectName, userInfo)) {
       list.push({
         id: 'members',
-        name: <Translation>Members</Translation>,
+        name: 'Members',
         to: `/projects/${projectName}/members`,
       });
     }
 
-    const nav = list.map((item) => {
-      const active = this.props.activeId === item.id ? 'active' : '';
-      return (
-        <Link key={item.id} className={active} to={item.to}>
-          {item.name}
-        </Link>
-      );
-    });
-    return nav;
+    return list;
   };
 
   render() {
-    const menu = this.getNavList();
-    const { projectDetails } = this.props;
-    const projectName = projectDetails?.alias || projectDetails?.name || '';
+    const { projectDetails, activeId } = this.props;
+    const title = projectDetails?.alias || projectDetails?.name || '';
+    const owner = projectDetails?.owner?.alias || projectDetails?.owner?.name;
     return (
       <Fragment>
-        <Row>
-          <Col span={6} className={classNames('breadcrumb')}>
-            <Breadcrumb
-              items={[
-                {
-                  to: '/projects',
-                  title: 'Projects',
-                },
-                {
-                  title: projectName,
-                },
-              ]}
-            />
-          </Col>
-        </Row>
-        <nav className="project-detail-wrapper">
-          <ul>{menu}</ul>
-        </nav>
+        <PageHeader
+          breadcrumb={[{ to: '/projects', title: 'Projects' }, { title: title }]}
+          title={title}
+          description={projectDetails?.description}
+        >
+          {projectDetails?.alias && <span className="page-head-meta">{projectDetails.name}</span>}
+          {owner && (
+            <span className="page-head-meta">
+              <Translation>Owner</Translation>: {owner}
+            </span>
+          )}
+        </PageHeader>
+        <PageTabs>
+          {this.getNavList().map((item) => (
+            <PageTab key={item.id} label={item.name} to={item.to} active={activeId === item.id} />
+          ))}
+        </PageTabs>
         {this.props.children}
       </Fragment>
     );

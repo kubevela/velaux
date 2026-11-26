@@ -23,7 +23,11 @@
     // A loop is drawn as a stack of cards, one behind the other, in violet.
     &.looped {
       --tone: #7c3aed;
-      box-shadow: 4px 4px 0 -1px #fff, 4px 4px 0 0 #c4b5fd, 8px 8px 0 -1px #fff, 8px 8px 0 0 #ddd6fe;
+      box-shadow:
+        4px 4px 0 -1px #fff,
+        4px 4px 0 0 #c4b5fd,
+        8px 8px 0 -1px #fff,
+        8px 8px 0 0 #ddd6fe;
     }
     &.group.looped {
       background: #faf7ff;
@@ -153,7 +157,10 @@
     border: 1px solid #cbd5e1;
     border-radius: 50%;
     cursor: pointer;
-    transition: color 0.15s linear, background 0.15s linear, border-color 0.15s linear;
+    transition:
+      color 0.15s linear,
+      background 0.15s linear,
+      border-color 0.15s linear;
     svg {
       display: block;
       flex: none;
@@ -185,7 +192,9 @@
     background: var(--frame);
     border-radius: 50%;
     transform: translateY(-50%);
-    transition: color 0.15s linear, background 0.15s linear;
+    transition:
+      color 0.15s linear,
+      background 0.15s linear;
   }
   // Hovering a card lights just its two buttons; one inside a group lights its
   // own, not the group's.
@@ -635,33 +644,48 @@
 .def-items {
   display: flex;
   flex-wrap: wrap;
+  gap: 8px;
   .def-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: var(--spacing-3);
+    width: 120px;
+    padding: 8px 4px;
     .icon {
-      position: relative;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 72px;
-      height: 72px;
-      padding: var(--spacing-3);
-      border: 1px solid transparent;
-      border-radius: 4px;
-      box-shadow: var(--elevation-2);
+      width: 56px;
+      height: 56px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
       cursor: pointer;
+      transition:
+        border-color 0.12s,
+        background 0.12s;
       &:hover {
-        border: 1px solid var(--primary-color);
+        background: #fff;
+        border-color: var(--primary-color);
       }
     }
+    &.selected .icon {
+      background: #fff;
+      border-color: var(--primary-color);
+    }
+    .step-type-initials {
+      color: #475569;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+    }
     .name {
-      display: grid;
-      margin-top: var(--spacing-3);
+      margin-top: 8px;
+      color: #334155;
+      font-size: 12px;
+      line-height: 16px;
       text-align: center;
+      word-break: break-word;
     }
   }
 }

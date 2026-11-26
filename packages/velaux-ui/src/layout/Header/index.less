@@ -88,12 +88,27 @@
   }
 }
 
+// The navigation scrolls on its own between the logo and the footer, with a
+// thin bar and a fade at its foot showing there is more below.
 .sidebar-menu {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
   &::-webkit-scrollbar {
-    width: 0;
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  // Room under the last item, so it clears the fade.
+  .slide-wrapper {
+    padding-bottom: 16px;
   }
   .collapsed & {
     // A section's heading keeps its space, so the sections stay apart.
@@ -113,6 +128,34 @@
     }
     .sub-wrapper {
       margin-bottom: 10px;
+    }
+  }
+  // On a short window the rows and section headings sit closer together.
+  @media (max-height: 850px) {
+    .menu-item,
+    .menu-item-active {
+      margin-top: 1px;
+      margin-bottom: 1px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+    .slide-wrapper .nav-container .main-nav {
+      margin-bottom: 2px;
+    }
+    .slide-wrapper .nav-container .sub-wrapper {
+      margin-bottom: 10px;
+    }
+    .collapsed & {
+      .menu-item,
+      .menu-item-active {
+        margin-top: 1px;
+        margin-bottom: 1px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+      .slide-wrapper .nav-container .sub-wrapper {
+        margin-bottom: 6px;
+      }
     }
   }
 }

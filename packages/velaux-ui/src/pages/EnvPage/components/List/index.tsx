@@ -1,19 +1,19 @@
 import { ColumnProps } from '@alifd/next/types/table';
-import { Table, Message, Dialog, Tag } from '@alifd/next';
+import { Table, Message, Dialog } from '@alifd/next';
 import { Link } from 'dva/router';
 import React, { Component } from 'react';
 import { RowAction } from '../../../../components/RowAction';
 import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai';
 
 import { deleteEnv } from '../../../../api/env';
-import { If } from '../../../../components/If';
+import { AliasName } from '../../../../components/AliasName';
+import { Chip } from '../../../../components/ResourceCard';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import './index.less';
 import type { Env, NameAlias, Project, LoginUserInfo } from '@velaux/data';
 import { locale } from '../../../../utils/locale';
 import { checkPermission } from '../../../../utils/permission';
-const { Group: TagGroup } = Tag;
 
 type Props = {
   list?: Env[];
@@ -43,18 +43,18 @@ class TableList extends Component<Props> {
     return [
       {
         key: 'name',
-        title: <Translation>Name(Alias)</Translation>,
+        title: <Translation>Name</Translation>,
         dataIndex: 'name',
         width: '200px',
         cell: (v: string, i: number, env: Env) => {
           return (
-            <a
+            <AliasName
+              name={env.name}
+              alias={env.alias}
               onClick={() => {
                 this.showEnvAppList(v);
               }}
-            >
-              {`${env.name}(${env.alias || '-'})`}
-            </a>
+            />
           );
         },
       },
@@ -94,34 +94,17 @@ class TableList extends Component<Props> {
         dataIndex: 'targets',
         cell: (v: NameAlias[], i: number, record: Env) => {
           return (
-            <TagGroup>
+            <span className="env-list-targets">
               {v?.map((target: NameAlias) => {
-                return (
-                  <Tag color="green" key={target.name + i}>
-                    <If
-                      condition={checkPermission(
-                        { resource: `target:*`, action: 'list' },
-                        record.project.name,
-                        this.props.userInfo
-                      )}
-                    >
-                      <Link to="/targets">{target.alias ? target.alias : target.name}</Link>
-                    </If>
-                    <If
-                      condition={
-                        !checkPermission(
-                          { resource: `target:*`, action: 'list' },
-                          record.project.name,
-                          this.props.userInfo
-                        )
-                      }
-                    >
-                      {target.alias ? target.alias : target.name}
-                    </If>
-                  </Tag>
+                const label = target.alias ? target.alias : target.name;
+                const canList = checkPermission(
+                  { resource: `target:*`, action: 'list' },
+                  record.project.name,
+                  this.props.userInfo
                 );
+                return <Chip key={target.name + i}>{canList ? <Link to="/targets">{label}</Link> : label}</Chip>;
               })}
-            </TagGroup>
+            </span>
           );
         },
       },

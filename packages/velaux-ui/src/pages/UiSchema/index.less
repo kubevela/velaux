@@ -3,13 +3,44 @@
     height: calc(100vh - 357px);
     overflow-y: auto;
   }
-  .preview {
-    padding: 8px;
-    color: #fff;
-    font-size: 15px;
-    text-align: center;
-    background: #0064c8;
-    border-radius: 8px 8px 0 0;
-    opacity: 0.8;
+}
+
+.ui-schema-editor {
+  margin-bottom: 16px;
+}
+
+// A panel of the editor: a white card with a titled head, like the Settings sections.
+.ui-schema-panel {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  .next-card {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+.ui-schema-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ui-schema-panel-title {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.ui-schema-panel-hint {
+  color: #64748b;
+  font-size: 13px;
+  a {
+    margin-left: 6px;
   }
 }

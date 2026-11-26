@@ -129,7 +129,7 @@ const AddonIcon = (props: { icon?: string; initials: string }) => {
 };
 
 // addonTone colours an addon by its phase; one never enabled is neutral.
-function addonTone(phase?: string): Tone {
+export function addonTone(phase?: string): Tone {
   switch (phase) {
     case 'enabled':
       return 'healthy';
@@ -143,7 +143,8 @@ function addonTone(phase?: string): Tone {
   }
 }
 
-function addonLabel(phase?: string): string {
+// addonLabel names an addon's phase as its badge shows it.
+export function addonLabel(phase?: string): string {
   switch (phase) {
     case 'enabled':
       return 'Enabled';

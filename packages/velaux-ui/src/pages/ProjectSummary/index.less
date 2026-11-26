@@ -1,0 +1,53 @@
+// The project overview: an About card, count tiles and one section per list, as on the application overview.
+.project-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.project-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.project-summary .project-summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 18px;
+  color: #64748b;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  &:hover {
+    border-color: var(--primary-color, #1b58f4);
+  }
+}
+
+.project-summary-stat-n {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 22px;
+}
+
+// A list on the overview: its title and actions on one row, then the table.
+.summary-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.summary-section-title {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.summary-section-actions {
+  display: flex;
+  gap: 8px;
+}

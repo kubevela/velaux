@@ -699,3 +699,38 @@ a {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
 }
+
+// The loading indicator is a ship's wheel, the Kubernetes helm, turned a third at a time hand over hand.
+@helm: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="%23000"%3E%3Ccircle cx="24" cy="24" r="13" stroke-width="3.2"/%3E%3Ccircle cx="24" cy="24" r="4.5" fill="%23000" stroke="none"/%3E%3Cpath d="M24 24L24.00 4.50M24 24L39.25 11.84M24 24L43.01 28.34M24 24L32.46 41.57M24 24L15.54 41.57M24 24L4.99 28.34M24 24L8.75 11.84" stroke-width="2.6" stroke-linecap="round"/%3E%3Ccircle cx="24.00" cy="3.50" r="2.6" fill="%23000" stroke="none"/%3E%3Ccircle cx="40.03" cy="11.22" r="2.6" fill="%23000" stroke="none"/%3E%3Ccircle cx="43.99" cy="28.56" r="2.6" fill="%23000" stroke="none"/%3E%3Ccircle cx="32.89" cy="42.47" r="2.6" fill="%23000" stroke="none"/%3E%3Ccircle cx="15.11" cy="42.47" r="2.6" fill="%23000" stroke="none"/%3E%3Ccircle cx="4.01" cy="28.56" r="2.6" fill="%23000" stroke="none"/%3E%3Ccircle cx="7.97" cy="11.22" r="2.6" fill="%23000" stroke="none"/%3E%3C/svg%3E');
+.next-loading-fusion-reactor,
+.next-loading-fusion-reactor[dir='rtl'] {
+  background: @primary-color;
+  -webkit-mask: @helm center / contain no-repeat;
+  mask: @helm center / contain no-repeat;
+  animation: vela-helm 2.4s ease-in-out infinite;
+  .next-loading-dot {
+    display: none;
+  }
+}
+
+@keyframes vela-helm {
+  0% {
+    transform: rotate(0deg);
+  }
+  33.33% {
+    transform: rotate(120deg);
+  }
+  66.67% {
+    transform: rotate(240deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .next-loading-fusion-reactor,
+  .next-loading-fusion-reactor[dir='rtl'] {
+    animation: vela-helm 6s linear infinite;
+  }
+}

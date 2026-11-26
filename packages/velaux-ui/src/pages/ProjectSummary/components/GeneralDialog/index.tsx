@@ -2,10 +2,10 @@ import { Grid, Form, Input, Field, Button, Message, Select } from '@alifd/next';
 import React from 'react';
 
 import { updateProject } from '../../../../api/project';
-import DrawerWithFooter from '../../../../components/Drawer';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { Translation } from '../../../../components/Translation';
 import i18n from '../../../../i18n';
-import type { Project , User } from '@velaux/data';
+import type { Project, User } from '@velaux/data';
 import { checkName } from '../../../../utils/common';
 
 type Props = {
@@ -97,7 +97,7 @@ class GeneralDialog extends React.Component<Props, State> {
     };
 
     const buttons = [
-      <Button type="secondary" onClick={this.onCloseGeneral} style={{ marginRight: '16px' }}>
+      <Button type="secondary" onClick={this.onCloseGeneral}>
         <Translation>Cancel</Translation>
       </Button>,
       <Button type="primary" onClick={this.onUpdateGeneral} loading={loading}>
@@ -107,17 +107,11 @@ class GeneralDialog extends React.Component<Props, State> {
 
     return (
       <React.Fragment>
-        <DrawerWithFooter
-          title={this.getTitle()}
-          placement="right"
-          width={800}
-          onClose={this.onCloseGeneral}
-          extButtons={buttons}
-        >
+        <ModalWithFooter title={this.getTitle()} width={760} onClose={this.onCloseGeneral} extButtons={buttons}>
           <Form {...formItemLayout} field={this.field}>
             <Row>
               <Col span={12} style={{ padding: '0 8px' }}>
-                <FormItem label={<Translation>Name</Translation>} labelTextAlign="left" required={true}>
+                <FormItem label={<Translation>Name</Translation>} required={true}>
                   <Input
                     name="name"
                     disabled={isEditGeneral ? true : false}
@@ -189,7 +183,7 @@ class GeneralDialog extends React.Component<Props, State> {
               </Col>
             </Row>
           </Form>
-        </DrawerWithFooter>
+        </ModalWithFooter>
       </React.Fragment>
     );
   }

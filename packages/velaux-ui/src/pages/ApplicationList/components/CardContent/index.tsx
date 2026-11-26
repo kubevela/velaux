@@ -4,7 +4,7 @@ import { isDefaultDescription, visibleLabels } from '../../../../utils/appMeta';
 import { RowAction } from '../../../../components/RowAction';
 import './index.less';
 import { Link } from 'dva/router';
-import { Menu, Dropdown, Dialog, Button, Table, Tag, Icon } from '@alifd/next';
+import { Menu, Dropdown, Dialog, Table, Tag, Icon } from '@alifd/next';
 import moment from 'moment';
 import {
   AiFillDelete,
@@ -16,11 +16,11 @@ import {
 } from 'react-icons/ai';
 
 import type { ShowMode } from '../..';
-import Empty from '../../../../components/Empty';
 import { If } from '../../../../components/If';
 import Permission from '../../../../components/Permission';
 import { Translation } from '../../../../components/Translation';
 import type { ApplicationBase, ApplicationStatusSummary, Project, LoginUserInfo } from '@velaux/data';
+import { CreateButton, EmptyDock } from '../EmptyDock';
 import { ComponentHealth, EnvHealth, HealthBadge, WorkflowBadge } from '../AppStatus';
 import { healthOf, workflowLabel } from '../AppStatus/health';
 import { momentDate } from '../../../../utils/common';
@@ -43,6 +43,8 @@ type Props = {
   setVisible: (visible: boolean) => void;
   clickLabelFilter?: (label: string) => void;
   showMode: ShowMode;
+  // filtered is true when a search or filter is narrowing the list.
+  filtered?: boolean;
 };
 
 @connect((store: any) => {
@@ -292,28 +294,16 @@ class CardContent extends React.Component<Props, State> {
     const projectName = this.props.projectName || '?';
     if (!applications || applications.length === 0) {
       return (
-        <Empty
-          message={
-            <section style={{ textAlign: 'center' }}>
-              <Translation>There are no applications</Translation>
-              <main>
-                <Permission
-                  request={{ resource: `project:${projectName}/application:*`, action: 'create' }}
-                  project={projectName}
-                >
-                  <Button
-                    component="a"
-                    onClick={() => {
-                      setVisible(true);
-                    }}
-                  >
-                    <Translation>New Application</Translation>
-                  </Button>
-                </Permission>
-              </main>
-            </section>
+        <EmptyDock
+          filtered={this.props.filtered}
+          create={
+            <Permission
+              request={{ resource: `project:${projectName}/application:*`, action: 'create' }}
+              project={projectName}
+            >
+              <CreateButton onClick={() => setVisible(true)} />
+            </Permission>
           }
-          style={{ minHeight: '400px' }}
         />
       );
     }
@@ -358,6 +348,7 @@ class CardContent extends React.Component<Props, State> {
                     {project?.name && <span>{project.alias || project.name}</span>}
                   </span>
                 </div>
+                <HealthBadge status={status} />
                 <Dropdown trigger={<AiOutlineMore className="app-card-more" />} align="tr br">
                   <Menu>
                     {this.isEditPermission(item)}
@@ -366,18 +357,16 @@ class CardContent extends React.Component<Props, State> {
                 </Dropdown>
               </div>
 
+              {shownDescription && (
+                <div className="app-card-description" title={shownDescription}>
+                  {shownDescription}
+                </div>
+              )}
+
               <div className="app-card-status">
-                <HealthBadge status={status} />
+                <ComponentHealth status={status} compact />
                 <WorkflowBadge status={status} />
               </div>
-
-              <ComponentHealth status={status} />
-
-              <div className="app-card-description" title={shownDescription}>
-                {shownDescription}
-              </div>
-
-              <EnvHealth status={status} />
 
               {showLabels.length > 0 && (
                 <div className="app-card-labels">
@@ -392,15 +381,17 @@ class CardContent extends React.Component<Props, State> {
               )}
 
               <div className="app-card-foot">
-                <span title={momentDate(updateTime)}>
-                  <Translation>Updated</Translation>{' '}
-                  {updateTime && <span title={momentDate(updateTime)}>{moment(updateTime).fromNow()}</span>}
-                </span>
-                <If condition={readOnly}>
-                  <span className="app-card-readonly">
-                    <Translation>ReadOnly</Translation>
+                <EnvHealth status={status} />
+                <span className="app-card-meta">
+                  <If condition={readOnly}>
+                    <span className="app-card-readonly">
+                      <Translation>ReadOnly</Translation>
+                    </span>
+                  </If>
+                  <span title={momentDate(updateTime)}>
+                    <Translation>Updated</Translation> {updateTime && moment(updateTime).fromNow()}
                   </span>
-                </If>
+                </span>
               </div>
             </div>
           );

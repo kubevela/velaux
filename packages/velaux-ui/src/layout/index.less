@@ -75,6 +75,62 @@
   padding-top: 20px;
 }
 
+// Cards in dialogs and drawers are form sections: a small uppercase label
+// over a light divider, without a box of their own.
+.next-dialog,
+.next-drawer {
+  .next-card {
+    margin: 0 0 24px !important;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .next-card .next-card-head {
+    padding: 0;
+    background: transparent;
+  }
+  .next-card .next-card-head-main {
+    display: flex;
+    align-items: center;
+    height: auto;
+    min-height: 28px;
+    margin: 0 0 16px;
+    padding: 0 0 6px;
+    line-height: 20px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .next-card .next-card-title {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    max-width: none;
+    padding-left: 0;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    &::before {
+      display: none;
+    }
+  }
+  .next-card .next-card-subtitle {
+    margin-left: 8px;
+    color: #94a3b8;
+    font-weight: normal;
+    font-size: 12px;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+  .next-card.withActions .next-card-subtitle {
+    margin-left: auto;
+  }
+  .next-card .next-card-body {
+    padding: 0;
+  }
+}
+
 // The top bar's right end: the tenant every view is scoped to.
 .layout-topbar-end {
   position: absolute;

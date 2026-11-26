@@ -3,7 +3,7 @@ import i18n from 'i18next';
 import React from 'react';
 
 import { updateApplication } from '../../../../api/application';
-import DrawerWithFooter from '../../../../components/Drawer';
+import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { Translation } from '../../../../components/Translation';
 import KV from '../../../../extends/KV';
 import type { ApplicationBase } from '@velaux/data';
@@ -50,14 +50,14 @@ class EditAppDialog extends React.Component<Props> {
   extButtonList = () => {
     const { onClose } = this.props;
     return (
-      <div>
-        <Button type="secondary" onClick={onClose} className="margin-right-10">
+      <React.Fragment>
+        <Button type="secondary" onClick={onClose}>
           <Translation>Cancel</Translation>
         </Button>
         <Button type="primary" onClick={this.onSubmit}>
           <Translation>Update</Translation>
         </Button>
-      </div>
+      </React.Fragment>
     );
   };
 
@@ -67,10 +67,9 @@ class EditAppDialog extends React.Component<Props> {
     const { Row, Col } = Grid;
     const { editItem, onClose } = this.props;
     return (
-      <DrawerWithFooter
+      <ModalWithFooter
         title={<Translation>Edit Application</Translation>}
-        placement="right"
-        width={800}
+        width={720}
         onClose={onClose}
         extButtons={this.extButtonList()}
       >
@@ -140,7 +139,7 @@ class EditAppDialog extends React.Component<Props> {
             </Row>
           </Form>
         )}
-      </DrawerWithFooter>
+      </ModalWithFooter>
     );
   }
 }

@@ -203,6 +203,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
         title={i18n.t(!editMode ? 'New Pipeline' : 'Edit Pipeline')}
         onClose={this.props.onClose}
         onOk={this.onSubmit}
+        onOkButtonText={!editMode ? 'Create' : 'Update'}
         onOkButtonLoading={loading}
       >
         <Form field={this.field}>
@@ -232,7 +233,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
               <FormItem label={<Translation>Alias</Translation>}>
                 <Input
                   name="alias"
-                  placeholder={i18n.t('Give your pipeline a more recognizable name').toString()}
+                  placeholder={i18n.t('Please enter').toString()}
                   {...init('alias', {
                     rules: [
                       {
@@ -249,7 +250,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
               <FormItem label={<Translation>Project</Translation>} required>
                 <Select
                   name="project"
-                  placeholder={i18n.t('Please select a project').toString()}
+                  placeholder={i18n.t('Please select').toString()}
                   dataSource={projectOptions}
                   filterLocal={true}
                   hasClear={true}
@@ -314,7 +315,7 @@ class CreatePipeline extends React.Component<PipelineProps, State> {
                     name="template"
                     dataSource={templates}
                     hasClear
-                    placeholder="Select a template"
+                    placeholder={i18n.t('Please select').toString()}
                     onChange={(value) => {
                       this.field.setValue('steps', value);
                       const template = templates.find((t) => t.value == value);

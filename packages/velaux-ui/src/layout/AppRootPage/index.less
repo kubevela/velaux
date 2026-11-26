@@ -1,27 +1,110 @@
-.info-item {
-  white-space: nowrap;
-  min-width: 80px;
+// A plugin's config page: breadcrumb and title header, one tab, the plugin's form in a card.
+.plugin-head {
+  padding: 4px 0 16px;
+  .next-breadcrumb {
+    font-size: 13px;
+  }
 }
-.page-header {
+
+.plugin-head-main {
+  display: flex;
+  gap: 16px;
+  align-items: center;
   margin-top: 10px;
-  .page-header-logo {
-    min-width: 50px;
+}
+
+.plugin-logo {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  color: var(--primary-color, #1b58f4);
+  font-size: 26px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
   }
-  .page-header-title {
-    margin-top: 0;
-    font-size: 24px;
+}
+
+.plugin-head-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.plugin-head-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.plugin-head-name {
+  margin: 0;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.plugin-head-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.plugin-head-actions {
+  display: flex;
+  flex: none;
+  gap: 12px;
+  align-items: center;
+}
+
+.plugin-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.plugin-tab {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  font-weight: 500;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  &.active {
+    color: var(--primary-color, #1b58f4);
+    border-bottom-color: var(--primary-color, #1b58f4);
   }
-  .basic-info {
-    width: fit-content;
+  svg {
     font-size: 16px;
   }
-  .info-item-title {
-    color: var(--grey-500);
-  }
-  .status-enabled {
-    color: var(--success-color);
-  }
-  .status-disabled {
-    color: var(--danger-color);
-  }
+}
+
+.plugin-config-card {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.plugin-config-footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
 }
