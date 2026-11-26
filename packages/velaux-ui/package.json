@@ -67,7 +67,7 @@
     "dva-loading": "3.0.22",
     "github-markdown-css": "^5.1.0",
     "history": "4.10.1",
-    "i18next": "^19.8.2",
+    "i18next": "^26.3.4",
     "js-yaml": "^4.1.0",
     "lodash": "4.17.21",
     "moment": "^2.27.0",
