@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "declaration": false,
+    "baseUrl": "../src",
+    "typeRoots": [
+      "../node_modules/@types"
+    ],
+    "resolveJsonModule": true
+  },
+  "exclude": [
+    "dist/**/*"
+  ],
+  "extends": "@grafana/tsconfig",
+  "include": [
+    "src/**/*.ts*",
+    "images.d.ts"
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es5",
+      "esModuleInterop": true
+    },
+    "transpileOnly": true
+  },
+}

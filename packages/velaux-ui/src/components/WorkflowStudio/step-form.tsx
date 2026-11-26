@@ -1,4 +1,3 @@
-import type { Rule } from '@alifd/field';
 import { Grid, Field, Form, Input, Button } from '@alifd/next';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -17,7 +16,8 @@ import { replaceUrl } from '../../utils/common';
 import DrawerWithFooter from '../Drawer';
 import { If } from '../If';
 import { Translation } from '../Translation';
-import UISchema from '../UISchema';
+import DefinitionPropertiesForm from '../DefinitionPropertiesForm';
+import { propertiesRule } from '../../utils/definitionPlugin';
 import type { ExpressionContext } from '../UISchema';
 
 import { ConditionInput } from './condition-input';
@@ -52,7 +52,7 @@ type State = {
 class StepForm extends Component<Props, State> {
   static contextType = WorkflowContext;
   field: Field;
-  uiSchemaRef: React.RefObject<UISchema>;
+  uiSchemaRef: React.RefObject<DefinitionPropertiesForm>;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -179,13 +179,6 @@ class StepForm extends Component<Props, State> {
     const { definitionDetail, propertiesMode } = this.state;
     // The properties are checked by their form; a step with none to show (a
     // group) has nothing to check.
-    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
-      if (!this.uiSchemaRef.current) {
-        callback();
-        return;
-      }
-      this.uiSchemaRef.current.validate(callback);
-    };
 
     const groupStep = this.field.getValue('type') == 'step-group';
     const { inline } = this.props;
@@ -225,13 +218,14 @@ class StepForm extends Component<Props, State> {
                       </div>
                     </If>
                     <UISchemaContext.Provider value={this.context}>
-                      <UISchema
-                        {...init(`properties`, {
+                      <DefinitionPropertiesForm
+                        context={{ appName: this.appName() }}
+                        {...init('properties', {
                           rules: [
-                            {
-                              validator: validator,
-                              message: i18n.t('Please check the properties of the workflow step'),
-                            },
+                            propertiesRule(
+                              () => this.uiSchemaRef.current,
+                              i18n.t('Please check the properties of the workflow step')
+                            ),
                           ],
                         })}
                         enableCodeEdit={propertiesMode === 'code'}

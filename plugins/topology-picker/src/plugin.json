@@ -1,0 +1,32 @@
+{
+  "type": "definition",
+  "name": "Topology Picker",
+  "id": "topology-picker",
+  "definitions": [
+    {
+      "kind": "policy",
+      "name": "topology"
+    }
+  ],
+  "info": {
+    "keywords": [
+      "topology",
+      "cluster"
+    ],
+    "description": "Pick the clusters of a topology policy from the clusters VelaUX knows about",
+    "author": {
+      "name": "KubeVela"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "velauxDependency": ">=1.12.0",
+    "plugins": []
+  }
+}

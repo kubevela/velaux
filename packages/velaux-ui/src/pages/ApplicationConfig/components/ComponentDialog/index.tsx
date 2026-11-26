@@ -1,4 +1,3 @@
-import type { Rule } from '@alifd/field';
 import { Grid, Field, Form, Message, Button, Input, Select, Card, Loading } from '@alifd/next';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
@@ -20,7 +19,8 @@ import { joinType, splitType } from '../../../../utils/definitionVersion';
 import { AwaitingType } from '../../../../components/AwaitingType';
 import ModalWithFooter from '../../../../components/ModalWithFooter';
 import { Translation } from '../../../../components/Translation';
-import UISchema from '../../../../components/UISchema';
+import DefinitionPropertiesForm from '../../../../components/DefinitionPropertiesForm';
+import { propertiesRule } from '../../../../utils/definitionPlugin';
 import i18n from '../../../../i18n';
 import type {
   DefinitionDetail,
@@ -81,7 +81,7 @@ type State = {
 @connect()
 class ComponentDialog extends React.Component<Props, State> {
   field: Field;
-  uiSchemaRef: React.RefObject<UISchema>;
+  uiSchemaRef: React.RefObject<DefinitionPropertiesForm>;
   constructor(props: Props) {
     super(props);
     this.field = new Field(this);
@@ -394,9 +394,6 @@ class ComponentDialog extends React.Component<Props, State> {
     const { definitionDetail, loading, propertiesMode } = this.state;
     // A new component's type comes first; the rest waits for it.
     const ready = !!isEditComponent || !!this.field.getValue('componentType');
-    const validator = (rule: Rule, value: any, callback: (error?: string) => void) => {
-      this.uiSchemaRef.current?.validate(callback);
-    };
 
     return (
       <ModalWithFooter title={this.showComponentTitle()} onClose={onComponentClose} extButtons={this.extButtonList()}>
@@ -598,13 +595,11 @@ class ComponentDialog extends React.Component<Props, State> {
             >
               <Row>
                 <If condition={definitionDetail}>
-                  <UISchema
-                    {...init(`properties`, {
+                  <DefinitionPropertiesForm
+                    context={{ project: this.props.project, appName: this.props.appName }}
+                    {...init('properties', {
                       rules: [
-                        {
-                          validator: validator,
-                          message: i18n.t('Please check the component properties'),
-                        },
+                        propertiesRule(() => this.uiSchemaRef.current, i18n.t('Please check the component properties')),
                       ],
                     })}
                     enableCodeEdit={propertiesMode === 'code'}
