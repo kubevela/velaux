@@ -298,6 +298,11 @@ var _ = Describe("Test CR convert to ux", func() {
 		count, err = cr2ux.envService.ListEnvCount(context.TODO(), v1.ListEnvOptions{Project: projectName})
 		Expect(err).Should(BeNil())
 		Expect(count).Should(Equal(int64(2)))
+		By("the app's targets are not added to the env that owns the namespace, on a later sync either")
+		Expect(newCR2UX(ds).AddOrUpdate(context.Background(), app5)).Should(BeNil())
+		env := &model.Env{Name: "env-test"}
+		Expect(ds.Get(context.TODO(), env)).Should(Succeed())
+		Expect(env.Targets).Should(Equal([]string{"target-test"}))
 	})
 
 	It("Test to sync the project which existed env belongs", func() {

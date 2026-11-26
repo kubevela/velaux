@@ -86,6 +86,12 @@ func (a *Application) GetAppNamespaceForSynced() string {
 	return a.Labels[LabelSyncNamespace]
 }
 
+// FromCluster reports whether the app was first synced from an Application made outside VelaUX.
+// It stays true after VelaUX takes the app over, unlike IsSynced.
+func (a *Application) FromCluster() bool {
+	return a.GetAppNamespaceForSynced() != ""
+}
+
 // IsSynced answer if the app is synced one
 func (a *Application) IsSynced() bool {
 	if a.Labels == nil {

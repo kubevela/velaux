@@ -55,9 +55,9 @@ var _ = Describe("Test env service functions", func() {
 
 	It("Test Create/Get/Delete Env function", func() {
 		// create target
-		err := ds.Add(context.TODO(), &model.Target{Name: "env-test"})
+		err := ds.Add(context.TODO(), &model.Target{Name: "env-test", Project: "env-project"})
 		Expect(err).Should(BeNil())
-		err = ds.Add(context.TODO(), &model.Target{Name: "env-test-2"})
+		err = ds.Add(context.TODO(), &model.Target{Name: "env-test-2", Project: "env-project"})
 		Expect(err).Should(BeNil())
 
 		req := apisv1.CreateEnvRequest{

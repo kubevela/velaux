@@ -4,6 +4,7 @@ import { initReactI18next } from 'react-i18next';
 import En from './locals/En/en.json';
 import Zh from './locals/Zh/zh.json';
 import { getLanguage } from './utils/common';
+import { i18nSeparators } from './utils/i18nOptions';
 import { customisationService, terminologyPostProcessor } from './services/CustomisationService';
 
 const resources = {
@@ -24,7 +25,7 @@ i18n
     // Every string passes through the customised terminology, missing keys too.
     postProcess: ['terminology'],
     lng: currentLanguage,
-    keySeparator: false, // we do not use keys in form messages.welcome
+    ...i18nSeparators,
     interpolation: {
       escapeValue: false, // react already safes from xss
     },

@@ -30,3 +30,6 @@ var ErrTargetNamespaceAlreadyBound = NewBcode(400, 80004, "the namespace specifi
 
 // ErrTargetInvalidWithEmptyClusterOrNamespace indicates the namespace/cluster of target is empty
 var ErrTargetInvalidWithEmptyClusterOrNamespace = NewBcode(400, 80005, "the namespace or cluster of target should not be empty")
+
+// ErrTargetInUseByEnv means an env still lists the target
+var ErrTargetInUseByEnv = NewBcode(400, 80006, "the target is still used by an env, remove it from the env first")

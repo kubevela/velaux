@@ -442,9 +442,9 @@ var _ = Describe("Test authentication service functions", Ordered, func() {
 		Expect(env.Targets).Should(BeEquivalentTo([]string{model.DefaultInitName}))
 		Expect(env.Namespace).Should(BeEquivalentTo(defaultNamespace))
 
-		err = targetService.DeleteTarget(context.TODO(), model.DefaultInitName)
-		Expect(err).Should(BeNil())
 		err = envService.DeleteEnv(context.TODO(), model.DefaultInitName)
+		Expect(err).Should(BeNil())
+		err = targetService.DeleteTarget(context.TODO(), model.DefaultInitName)
 		Expect(err).Should(BeNil())
 	})
 })

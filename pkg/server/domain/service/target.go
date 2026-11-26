@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -121,11 +122,19 @@ func (dt *targetServiceImpl) DeleteTarget(ctx context.Context, targetName string
 	if err != nil {
 		return err
 	}
-	if err = repository.DeleteTargetNamespace(ctx, dt.K8sClient, ddt.Cluster.ClusterName, ddt.Cluster.Namespace); err != nil {
+	envs, err := dt.Store.List(ctx, &model.Env{}, nil)
+	if err != nil {
 		return err
 	}
-	if err = managePrivilegesForTarget(ctx, dt.K8sClient, ddt, true); err != nil {
-		return err
+	for _, e := range envs {
+		if slices.Contains(e.(*model.Env).Targets, targetName) {
+			return bcode.ErrTargetInUseByEnv
+		}
+	}
+	if ddt.Cluster != nil {
+		if err := dt.releaseTargetNamespace(ctx, ddt); err != nil {
+			return err
+		}
 	}
 	if err = dt.Store.Delete(ctx, target); err != nil {
 		if errors.Is(err, datastore.ErrRecordNotExist) {
@@ -134,6 +143,33 @@ func (dt *targetServiceImpl) DeleteTarget(ctx context.Context, targetName string
 		return err
 	}
 	return nil
+}
+
+// releaseTargetNamespace undoes what the target set up on its namespace. Several targets may share a cluster and
+// namespace: the labels are cleared with the last of them, and a project's access with that project's last one.
+func (dt *targetServiceImpl) releaseTargetNamespace(ctx context.Context, target *model.Target) error {
+	all, err := dt.Store.List(ctx, &model.Target{}, nil)
+	if err != nil {
+		return err
+	}
+	var remaining []*model.Target
+	for _, e := range all {
+		t := e.(*model.Target)
+		if t.Name != target.Name && t.Cluster != nil && *t.Cluster == *target.Cluster {
+			remaining = append(remaining, t)
+		}
+	}
+	if len(remaining) == 0 {
+		if err := repository.DeleteTargetNamespace(ctx, dt.K8sClient, target.Cluster.ClusterName, target.Cluster.Namespace); err != nil {
+			return err
+		}
+	} else if err := repository.CreateTargetNamespace(ctx, dt.K8sClient, target.Cluster.ClusterName, target.Cluster.Namespace, remaining[0].Name); err != nil {
+		return err
+	}
+	if slices.ContainsFunc(remaining, func(t *model.Target) bool { return t.Project == target.Project }) {
+		return nil
+	}
+	return managePrivilegesForTarget(ctx, dt.K8sClient, target, true)
 }
 
 // CreateTarget will create a delivery target binding with a cluster and namespace, by default, it will use local cluster and namespace align with targetName

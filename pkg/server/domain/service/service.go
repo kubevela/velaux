@@ -53,7 +53,7 @@ func InitServiceBean(c config.Config) []interface{} {
 	expressionService := NewExpressionService(c.EnableCelExpressions)
 	reportService := NewReportService()
 	groupMappingService := NewGroupMappingService()
-	needInitData = []DataInit{pluginService, clusterService, rbacService, targetService, systemInfoService, addonService, reportService.(DataInit), groupMappingService, authenticationService.(DataInit)}
+	needInitData = []DataInit{pluginService, clusterService, rbacService, targetService, projectService.(DataInit), envService.(DataInit), systemInfoService, addonService, reportService.(DataInit), groupMappingService, authenticationService.(DataInit)}
 	return []interface{}{
 		clusterService, rbacService, projectService, envService, targetService, workflowService, oamApplicationService, definitionService, addonService, envBindingService, systemInfoService, helmService, userService,
 		authenticationService, configService, applicationService, webhookService, pipelineService, pipelineRunService,

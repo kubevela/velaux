@@ -28,6 +28,7 @@ import Configs from '../../pages/Configs';
 import Definitions from '../../pages/Definitions';
 import EnvPage from '../../pages/EnvPage';
 import GroupMappings from '../../pages/GroupMappings';
+import ProjectAccess from '../../pages/ProjectAccess';
 import NotFound from '../../pages/NotFound';
 import PipelineListPage from '../../pages/PipelineListPage';
 import PipelineRunPage from '../../pages/PipelineRunPage';
@@ -493,6 +494,12 @@ export default function Router() {
         path="/settings/group-mappings"
         render={(props: any) => {
           return <GroupMappings {...props}></GroupMappings>;
+        }}
+      />
+      <Route
+        path="/settings/project-access"
+        render={() => {
+          return <ProjectAccess />;
         }}
       />
       <Route

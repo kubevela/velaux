@@ -337,10 +337,28 @@ func compareWorkflowSteps(old, new steps) steps {
 	return workflowSteps
 }
 
+// missingTargets lists the names an env holds that the target lookup didn't return.
+func missingTargets(names []string, found []datastore.Entity) []string {
+	have := make(map[string]bool, len(found))
+	for _, e := range found {
+		have[e.(*model.Target).Name] = true
+	}
+	var missing []string
+	for _, n := range names {
+		if !have[n] {
+			missing = append(missing, n)
+		}
+	}
+	return missing
+}
+
 // UpdateEnvWorkflow will update env workflow internally
 func UpdateEnvWorkflow(ctx context.Context, kubeClient client.Client, ds datastore.DataStore, app *model.Application, env *model.Env) error {
 	// The existing step configuration should be maintained and the delivery target steps should be automatically updated.
-	envSteps, policies := GenEnvWorkflowStepsAndPolicies(ctx, kubeClient, ds, env, app)
+	envSteps, policies, err := GenEnvWorkflowStepsAndPolicies(ctx, kubeClient, ds, env, app)
+	if err != nil {
+		return err
+	}
 	workflow, err := GetWorkflowForApp(ctx, ds, app, ConvertWorkflowName(env.Name))
 	if err != nil {
 		// no workflow exist mean no need to update
@@ -392,8 +410,12 @@ func UpdateEnvWorkflow(ctx context.Context, kubeClient client.Client, ds datasto
 	return nil
 }
 
-// UpdateAppEnvWorkflow will update the all env workflows internally of the specified app
+// UpdateAppEnvWorkflow will update the all env workflows internally of the specified app, unless it came from the cluster
 func UpdateAppEnvWorkflow(ctx context.Context, kubeClient client.Client, ds datastore.DataStore, app *model.Application) error {
+	// An app from the cluster deploys where its own workflow and policies say, so they aren't regenerated from env targets.
+	if app.FromCluster() {
+		return nil
+	}
 	envbindings, err := ListEnvBindings(ctx, ds, EnvListOption{AppPrimaryKey: app.PrimaryKey(), ProjectName: app.Project})
 	if err != nil {
 		return err
@@ -506,7 +528,7 @@ func createOverrideConfigForTerraformComponent(env *model.Env, target *model.Tar
 }
 
 // GenEnvWorkflowStepsAndPolicies will generate workflow steps and policies for an env and application
-func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Client, ds datastore.DataStore, env *model.Env, app *model.Application) ([]model.WorkflowStep, []datastore.Entity) {
+func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Client, ds datastore.DataStore, env *model.Env, app *model.Application) ([]model.WorkflowStep, []datastore.Entity, error) {
 	var workflowSteps []wfTypesv1alpha1.WorkflowStep
 	var policies []datastore.Entity
 	components, err := ds.List(ctx, &model.ApplicationComponent{AppPrimaryKey: app.PrimaryKey()}, nil)
@@ -516,15 +538,20 @@ func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Clien
 	userName, _ := ctx.Value(&apisv1.CtxKeyUser).(string)
 	terraformComponents := HaveTerraformWorkload(ctx, kubeClient, components)
 
-	var target = model.Target{Project: env.Project}
-	targets, err := ds.List(ctx, &target, &datastore.ListOptions{FilterOptions: datastore.FilterOptions{
-		In: []datastore.InQueryOption{{
-			Key:    "name",
-			Values: env.Targets,
-		}},
-	}})
-	if err != nil {
-		klog.Errorf("fail to get the targets detail info, %s", err.Error())
+	var targets []datastore.Entity
+	if len(env.Targets) > 0 {
+		targets, err = ds.List(ctx, &model.Target{Project: env.Project}, &datastore.ListOptions{FilterOptions: datastore.FilterOptions{
+			In: []datastore.InQueryOption{{
+				Key:    "name",
+				Values: env.Targets,
+			}},
+		}})
+		if err != nil {
+			return nil, nil, fmt.Errorf("fail to list the targets of env %s: %w", env.Name, err)
+		}
+	}
+	if missing := missingTargets(env.Targets, targets); len(missing) > 0 {
+		return nil, nil, fmt.Errorf("env %s lists targets %s, which don't exist in project %s: %w", env.Name, strings.Join(missing, ", "), env.Project, bcode.ErrTargetNotExist)
 	}
 	if len(terraformComponents) > 0 {
 		appPolicy := &model.ApplicationPolicy{
@@ -616,7 +643,7 @@ func GenEnvWorkflowStepsAndPolicies(ctx context.Context, kubeClient client.Clien
 		// no sub steps handle here
 		steps = append(steps, ws)
 	}
-	return steps, policies
+	return steps, policies, nil
 }
 
 // UpdateWorkflowSteps will update workflow with new steps

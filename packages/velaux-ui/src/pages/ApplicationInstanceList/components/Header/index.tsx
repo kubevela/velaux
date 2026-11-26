@@ -16,6 +16,7 @@ import {
 } from '../../../../api/application';
 import { ApplicationDiff } from '../../../../components/ApplicationDiff';
 import { If } from '../../../../components/If';
+import { RemoveEnvDialog } from '../../../../components/RemoveEnvDialog';
 import { EnvironmentSlot, environmentSlots } from '../../../../components/EnvironmentSlot';
 import Permission from '../../../../components/Permission';
 import './index.less';
@@ -58,6 +59,7 @@ type Props = {
 };
 
 type State = {
+  showRemoveEnv?: boolean;
   recycleLoading: boolean;
   pauseLoading: boolean;
   deleteLoading: boolean;
@@ -285,23 +287,22 @@ class Header extends Component<Props, State> {
     });
   };
 
-  deleteEnv = async () => {
-    Dialog.confirm({
-      content: i18n.t('Are you sure you want to delete the current environment binding?').toString(),
-      onOk: () => {
-        const { applicationDetail, envName, dispatch } = this.props;
-        if (applicationDetail) {
-          deleteApplicationEnvbinding({ appName: applicationDetail.name, envName: envName }).then((re) => {
-            if (re) {
-              Message.success(i18n.t('Environment binding deleted successfully'));
-              this.updateEnvbindingList();
-              dispatch(routerRedux.push(`/applications/${applicationDetail.name}/config`));
-            }
-          });
+  deleteEnv = () => {
+    this.setState({ showRemoveEnv: true });
+  };
+
+  removeEnv = (keepWorkflow: boolean) => {
+    const { applicationDetail, envName, dispatch } = this.props;
+    this.setState({ showRemoveEnv: false });
+    if (applicationDetail) {
+      deleteApplicationEnvbinding({ appName: applicationDetail.name, envName: envName, keepWorkflow }).then((re) => {
+        if (re) {
+          Message.success(i18n.t('Environment binding deleted successfully'));
+          this.updateEnvbindingList();
+          dispatch(routerRedux.push(`/applications/${applicationDetail.name}/config`));
         }
-      },
-      locale: locale().Dialog,
-    });
+      });
+    }
   };
 
   refresh = async () => {
@@ -507,6 +508,15 @@ class Header extends Component<Props, State> {
             />
           )}
         </If>
+        {this.state.showRemoveEnv && (
+          <RemoveEnvDialog
+            appName={appName}
+            envName={envName}
+            workflowName={this.props.envbinding?.workflow?.name}
+            onRemove={this.removeEnv}
+            onClose={() => this.setState({ showRemoveEnv: false })}
+          />
+        )}
       </div>
     );
   }

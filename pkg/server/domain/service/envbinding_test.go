@@ -119,12 +119,12 @@ var _ = Describe("Test envBindingService functions", func() {
 	})
 
 	It("Test Application DeleteEnv function", func() {
-		err := envBindingService.DeleteEnvBinding(context.TODO(), testApp, "envbinding-dev")
+		err := envBindingService.DeleteEnvBinding(context.TODO(), testApp, "envbinding-dev", false)
 		Expect(err).Should(BeNil())
 		_, err = workflowService.GetWorkflow(context.TODO(), testApp, repository.ConvertWorkflowName("envbinding-dev"))
 		Expect(err).ShouldNot(BeNil())
 
-		err = envBindingService.DeleteEnvBinding(context.TODO(), testApp, "envbinding-prod")
+		err = envBindingService.DeleteEnvBinding(context.TODO(), testApp, "envbinding-prod", false)
 		Expect(err).Should(BeNil())
 		_, err = workflowService.GetWorkflow(context.TODO(), testApp, repository.ConvertWorkflowName("envbinding-prod"))
 		Expect(err).ShouldNot(BeNil())

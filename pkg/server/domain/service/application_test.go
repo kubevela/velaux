@@ -34,6 +34,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	ktypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
@@ -532,6 +533,16 @@ var _ = Describe("Test application service function", Ordered, func() {
 		appStats, err := appService.GetApplicationStatus(context.TODO(), appModel, "app-dev")
 		Expect(err).Should(BeNil())
 		Expect(appStats.Phase).Should(Equal(common.ApplicationStarting))
+		Expect(appStats.ChangedOutsideVelaUX).Should(BeFalse())
+
+		By("a spec change made outside VelaUX after the deploy is reported")
+		var deployed v1beta1.Application
+		Expect(k8sClient.Get(context.TODO(), ktypes.NamespacedName{Namespace: envnsdev, Name: testApp}, &deployed)).Should(Succeed())
+		deployed.Spec.Components[0].Properties = &runtime.RawExtension{Raw: []byte(`{"image":"changed-outside"}`)}
+		Expect(k8sClient.Update(context.TODO(), &deployed)).Should(Succeed())
+		appStats, err = appService.GetApplicationStatus(context.TODO(), appModel, "app-dev")
+		Expect(err).Should(BeNil())
+		Expect(appStats.ChangedOutsideVelaUX).Should(BeTrue())
 
 		appsStatus, err := appService.GetApplicationStatusFromAllEnvs(context.TODO(), &model.Application{
 			Name:    testApp,
@@ -615,7 +626,12 @@ var _ = Describe("Test application service function", Ordered, func() {
 		check(compareResponse, false)
 
 		By("compare when app add env, not change, should return false")
-		_, err = envService.CreateEnv(context.TODO(), v1.CreateEnvRequest{Name: "app-prod", Namespace: "envnsprod", Targets: []string{defaultTarget}, Project: "app-prod"})
+		_, err = projectService.CreateProject(context.TODO(), v1.CreateProjectRequest{Name: "app-prod"})
+		Expect(err).Should(BeNil())
+		_, err = targetService.CreateTarget(context.TODO(), v1.CreateTargetRequest{
+			Name: "app-prod-target", Project: "app-prod", Cluster: &v1.ClusterTarget{ClusterName: "local", Namespace: namespace1}})
+		Expect(err).Should(BeNil())
+		_, err = envService.CreateEnv(context.TODO(), v1.CreateEnvRequest{Name: "app-prod", Namespace: "envnsprod", Targets: []string{"app-prod-target"}, Project: "app-prod"})
 		Expect(err).Should(BeNil())
 		_, err = envBindingService.CreateEnvBinding(context.TODO(), appModel, v1.CreateApplicationEnvbindingRequest{EnvBinding: v1.EnvBinding{Name: "app-prod"}})
 		Expect(err).Should(BeNil())

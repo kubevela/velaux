@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
@@ -216,6 +217,9 @@ func (p *envServiceImpl) UpdateEnv(ctx context.Context, name string, req apisv1.
 		if len(targets) != len(req.Targets) {
 			return nil, bcode.ErrTargetNotExist
 		}
+		if err := targetsInProject(env.Project, targets); err != nil {
+			return nil, err
+		}
 		env.Targets = req.Targets
 	}
 
@@ -281,8 +285,12 @@ func (p *envServiceImpl) CreateEnv(ctx context.Context, req apisv1.CreateEnvRequ
 	}
 
 	for _, target := range req.Targets {
-		if _, exist := targetMap[target]; !exist {
+		t, exist := targetMap[target]
+		if !exist {
 			return nil, bcode.ErrTargetNotExist
+		}
+		if err := targetsInProject(req.Project, []*model.Target{t}); err != nil {
+			return nil, err
 		}
 	}
 
@@ -299,6 +307,53 @@ func (p *envServiceImpl) CreateEnv(ctx context.Context, req apisv1.CreateEnvRequ
 
 	resp := convertEnvModel2Base(newEnv, targets)
 	return resp, nil
+}
+
+// Init logs envs holding a target that is gone or belongs to another project: their next deploy fails until it's fixed.
+func (p *envServiceImpl) Init(ctx context.Context) error {
+	envs, err := p.Store.List(ctx, &model.Env{}, nil)
+	if err != nil {
+		klog.Warningf("failed to check the targets of envs: %s", err.Error())
+		return nil
+	}
+	targets, err := p.Store.List(ctx, &model.Target{}, nil)
+	if err != nil {
+		klog.Warningf("failed to check the targets of envs: %s", err.Error())
+		return nil
+	}
+	for env, bad := range envTargetProblems(envs, targets) {
+		klog.Warningf("env %s lists targets that are missing or belong to another project: %s; deploys to it fail until they're removed from the env", env, strings.Join(bad, ", "))
+	}
+	return nil
+}
+
+// envTargetProblems maps each env to the targets it lists that are missing or in another project.
+func envTargetProblems(envs, targets []datastore.Entity) map[string][]string {
+	projectOf := make(map[string]string, len(targets))
+	for _, e := range targets {
+		t := e.(*model.Target)
+		projectOf[t.Name] = t.Project
+	}
+	problems := map[string][]string{}
+	for _, e := range envs {
+		env := e.(*model.Env)
+		for _, name := range env.Targets {
+			if project, ok := projectOf[name]; !ok || project != env.Project {
+				problems[env.Name] = append(problems[env.Name], name)
+			}
+		}
+	}
+	return problems
+}
+
+// targetsInProject refuses targets from a project other than the env's: an env's workflow only deploys to its own project's targets.
+func targetsInProject(project string, targets []*model.Target) error {
+	for _, t := range targets {
+		if t.Project != project {
+			return bcode.ErrEnvTargetNotInProject
+		}
+	}
+	return nil
 }
 
 // checkEnvTarget In one project, a delivery target can only belong to one env.

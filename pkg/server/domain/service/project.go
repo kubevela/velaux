@@ -20,10 +20,14 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"slices"
+	"strings"
 
 	terraformapi "github.com/oam-dev/terraform-controller/api/v1beta1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
+	ktypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -52,6 +56,8 @@ type ProjectService interface {
 	DeleteProjectUser(ctx context.Context, projectName string, userName string) error
 	UpdateProjectUser(ctx context.Context, projectName string, userName string, req apisv1.UpdateProjectUserRequest) (*apisv1.ProjectUserBase, error)
 	ListTerraformProviders(ctx context.Context, projectName string) ([]*apisv1.TerraformProvider, error)
+	ListStaleProjectAccess(ctx context.Context) ([]apisv1.StaleProjectAccess, error)
+	RemoveStaleProjectAccess(ctx context.Context, access apisv1.StaleProjectAccess) error
 }
 
 type projectServiceImpl struct {
@@ -161,7 +167,7 @@ func (p *projectServiceImpl) ListProjects(ctx context.Context, page, pageSize in
 
 // DeleteProject delete a project
 func (p *projectServiceImpl) DeleteProject(ctx context.Context, name string) error {
-	_, err := p.GetProject(ctx, name)
+	project, err := p.GetProject(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -217,7 +223,87 @@ func (p *projectServiceImpl) DeleteProject(ctx context.Context, name string) err
 		return err
 	}
 
-	return managePrivilegesForProject(ctx, p.K8sClient, &model.Project{Name: name}, true)
+	return managePrivilegesForProject(ctx, p.K8sClient, project, true)
+}
+
+// Init logs the access deleted projects left behind, so an admin can find it without opening VelaUX.
+func (p *projectServiceImpl) Init(ctx context.Context) error {
+	stale, err := p.ListStaleProjectAccess(ctx)
+	if err != nil {
+		klog.Warningf("failed to check for access left by deleted projects: %s", err.Error())
+		return nil
+	}
+	for _, a := range stale {
+		klog.Warningf("RoleBinding %s/%s still grants group %s%s, whose project no longer exists; remove it on the Project Access admin page in VelaUX, or with kubectl",
+			a.Namespace, a.Binding, apiutils.KubeVelaProjectGroupPrefix, a.Project)
+	}
+	return nil
+}
+
+// ListStaleProjectAccess lists RoleBindings on the hub that still name the group of a project that no longer exists.
+func (p *projectServiceImpl) ListStaleProjectAccess(ctx context.Context) ([]apisv1.StaleProjectAccess, error) {
+	var bindings rbacv1.RoleBindingList
+	if err := p.K8sClient.List(ctx, &bindings); err != nil {
+		return nil, err
+	}
+	exists := map[string]bool{}
+	var stale []apisv1.StaleProjectAccess
+	for _, b := range bindings.Items {
+		for _, s := range b.Subjects {
+			project, ok := projectOfGroup(s)
+			if !ok {
+				continue
+			}
+			live, checked := exists[project]
+			if !checked {
+				var err error
+				if live, err = p.Store.IsExist(ctx, &model.Project{Name: project}); err != nil {
+					return nil, err
+				}
+				exists[project] = live
+			}
+			if !live {
+				stale = append(stale, apisv1.StaleProjectAccess{Namespace: b.Namespace, Binding: b.Name, Project: project, Role: b.RoleRef.Name})
+			}
+		}
+	}
+	return stale, nil
+}
+
+// RemoveStaleProjectAccess removes a deleted project's group from one RoleBinding, and the binding with its last subject.
+func (p *projectServiceImpl) RemoveStaleProjectAccess(ctx context.Context, access apisv1.StaleProjectAccess) error {
+	live, err := p.Store.IsExist(ctx, &model.Project{Name: access.Project})
+	if err != nil {
+		return err
+	}
+	if live {
+		return bcode.ErrProjectAccessNotStale
+	}
+	var binding rbacv1.RoleBinding
+	if err := p.K8sClient.Get(ctx, ktypes.NamespacedName{Namespace: access.Namespace, Name: access.Binding}, &binding); err != nil {
+		return client.IgnoreNotFound(err)
+	}
+	subjects := slices.DeleteFunc(slices.Clone(binding.Subjects), func(s rbacv1.Subject) bool {
+		project, ok := projectOfGroup(s)
+		return ok && project == access.Project
+	})
+	if len(subjects) == len(binding.Subjects) {
+		return nil
+	}
+	if len(subjects) == 0 {
+		return client.IgnoreNotFound(p.K8sClient.Delete(ctx, &binding))
+	}
+	binding.Subjects = subjects
+	return p.K8sClient.Update(ctx, &binding)
+}
+
+// projectOfGroup returns the project a VelaUX project group subject stands for.
+func projectOfGroup(s rbacv1.Subject) (string, bool) {
+	if s.Kind != rbacv1.GroupKind || !strings.HasPrefix(s.Name, apiutils.KubeVelaProjectGroupPrefix) {
+		return "", false
+	}
+	project := strings.TrimPrefix(s.Name, apiutils.KubeVelaProjectGroupPrefix)
+	return project, project != ""
 }
 
 // CreateProject create project

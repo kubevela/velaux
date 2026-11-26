@@ -180,6 +180,8 @@ export interface ApplicationStatus {
   workflowRestartScheduledAt?: string;
   // autoUpdate is whether the Application follows definition changes.
   autoUpdate?: boolean;
+  // changedOutsideVelaux is whether the spec changed after VelaUX last deployed it, a change KubeVela doesn't roll out.
+  changedOutsideVelaux?: boolean;
 }
 
 // ApplicationSourceStatus is how one spec.sources binding resolved.

@@ -140,3 +140,22 @@ func TestApplicationStatusFromDerivesDependenciesFromTheDeployedSpec(t *testing.
 		require.Equal(t, []apisv1.ComponentDependency{{Component: "api", DependsOn: "db", Source: "expression"}}, got.Dependencies)
 	})
 }
+
+// A spec changed since VelaUX last deployed it is never rolled out while the deploy's publishVersion stays.
+func TestApplicationStatusFromReportsChangesOutsideVelaUX(t *testing.T) {
+	for _, tc := range []struct {
+		name, annotations string
+		want              bool
+	}{
+		{"unchanged since the deploy", `{"ux.oam.dev/deployed-generation": "3"}`, false},
+		{"changed since the deploy", `{"ux.oam.dev/deployed-generation": "2"}`, true},
+		{"never deployed from VelaUX", `{}`, false},
+	} {
+		status, err := applicationStatusFrom(application(t, `{
+			"apiVersion": "core.oam.dev/v1beta1", "kind": "Application",
+			"metadata": {"name": "shop", "generation": 3, "annotations": `+tc.annotations+`},
+			"status": {"status": "running", "observedGeneration": 3}}`))
+		require.NoError(t, err)
+		require.Equal(t, tc.want, status.ChangedOutsideVelaUX, tc.name)
+	}
+}

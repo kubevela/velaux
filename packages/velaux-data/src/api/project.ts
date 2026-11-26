@@ -81,3 +81,11 @@ export interface ProjectUserQuery {
   page: number;
   pageSize: number;
 }
+
+// StaleProjectAccess is a project group left bound in a namespace after its project was deleted.
+export interface StaleProjectAccess {
+  namespace: string;
+  binding: string;
+  project: string;
+  role: string;
+}

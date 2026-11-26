@@ -36,3 +36,6 @@ var ErrEnvTargetConflict = NewBcode(400, 11006, "in one project, one target can 
 
 // ErrEnvTargetNotAllowDelete means can not remove existing targets from this environment, because there are applications deployed.
 var ErrEnvTargetNotAllowDelete = NewBcode(400, 11007, "target can not be deleted, because there are applications deployed.")
+
+// ErrEnvTargetNotInProject means a target belongs to a different project from the env
+var ErrEnvTargetNotInProject = NewBcode(400, 11008, "the target belongs to a different project from the env")
