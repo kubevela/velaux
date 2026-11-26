@@ -308,10 +308,13 @@ func (c *clusterServiceImpl) GetKubeCluster(ctx context.Context, clusterName str
 	if err = c.Store.Put(ctx, cluster); err != nil {
 		return nil, errors.Wrapf(err, "failed to update cluster %s status info", clusterName)
 	}
-	return &apis.DetailClusterResponse{
+	detail := &apis.DetailClusterResponse{
 		Cluster:      *cluster,
 		ResourceInfo: resourceInfo,
-	}, nil
+	}
+	// The kubeconfig holds the cluster's credentials, so it is written but never read back.
+	detail.KubeConfig = ""
+	return detail, nil
 }
 
 func (c *clusterServiceImpl) ModifyKubeCluster(ctx context.Context, req apis.CreateClusterRequest, clusterName string) (*apis.ClusterBase, error) {
@@ -323,6 +326,10 @@ func (c *clusterServiceImpl) ModifyKubeCluster(ctx context.Context, req apis.Cre
 		return nil, errors.Wrapf(err, "failed to found cluster %s in data store", clusterName)
 	}
 
+	// An edit without a kubeconfig keeps the stored one, which is never sent to the client to send back.
+	if req.KubeConfig == "" && req.KubeConfigSecret == "" {
+		req.KubeConfig, req.KubeConfigSecret = oldCluster.KubeConfig, oldCluster.KubeConfigSecret
+	}
 	newCluster := createClusterModelFromRequest(req, oldCluster)
 	newCluster.SetUpdateTime(time.Now())
 	if oldCluster.Name != newCluster.Name || oldCluster.KubeConfig != newCluster.KubeConfig || oldCluster.KubeConfigSecret != newCluster.KubeConfigSecret {

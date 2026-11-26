@@ -212,6 +212,7 @@
   "Please select the action you want to perform.": "请选择一项操作",
   "Please select trait type first.": "请先选择运维特征类型",
   "Please upload or edit kube config": "请上传或编辑 KubeConfig",
+  "The stored KubeConfig is not shown. Upload or paste one only to replace it.": "已保存的 KubeConfig 不会显示。仅在需要替换时上传或粘贴新的 KubeConfig。",
   "Pod Name": "Pod 名称",
   "Previous": "上一步",
   "Project": "项目",
