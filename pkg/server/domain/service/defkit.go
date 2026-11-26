@@ -20,7 +20,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -33,11 +35,13 @@ import (
 	"github.com/oam-dev/kubevela/pkg/appkeeper"
 	"github.com/oam-dev/kubevela/pkg/oam"
 	"github.com/oam-dev/kubevela/pkg/workflow/operation"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
@@ -71,7 +75,10 @@ const (
 	// that downloads and builds the module.
 	defkitMinInterval = 5 * time.Minute
 	defkitRetain      = "retain"
-	defkitDelete      = "delete"
+	// defkitPolicyType and defkitWorkflowStepType are definition types as a render names them.
+	defkitPolicyType       = "policy"
+	defkitWorkflowStepType = "workflow-step"
+	defkitDelete           = "delete"
 )
 
 // Module phases, from its Application's workflow.
@@ -121,13 +128,30 @@ func NewDefKitService() DefKitService {
 	return &defkitServiceImpl{}
 }
 
-func (s *defkitServiceImpl) addonEnabled(ctx context.Context) bool {
+// addonEnabled is whether the defkit addon's step definitions are installed.
+func (s *defkitServiceImpl) addonEnabled(ctx context.Context) (bool, error) {
 	for _, name := range []string{defkitRenderStepType, defkitApplyStepType} {
-		if err := s.KubeClient.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: name}, &v1beta1.WorkflowStepDefinition{}); err != nil {
-			return false
+		err := s.KubeClient.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: name}, &v1beta1.WorkflowStepDefinition{})
+		if apierrors.IsNotFound(err) {
+			return false, nil
+		}
+		if err != nil {
+			return false, err
 		}
 	}
-	return true
+	return true, nil
+}
+
+// needAddon refuses a change while the defkit addon is not installed.
+func (s *defkitServiceImpl) needAddon(ctx context.Context) error {
+	enabled, err := s.addonEnabled(ctx)
+	if err != nil {
+		return err
+	}
+	if !enabled {
+		return bcode.ErrDefKitAddonDisabled
+	}
+	return nil
 }
 
 func (s *defkitServiceImpl) ListModules(ctx context.Context) (*apisv1.ListDefKitModulesResponse, error) {
@@ -135,9 +159,16 @@ func (s *defkitServiceImpl) ListModules(ctx context.Context) (*apisv1.ListDefKit
 	if err := s.KubeClient.List(ctx, apps, client.InNamespace(types.DefaultKubeVelaNS), client.HasLabels{defkitModuleLabel}); err != nil {
 		return nil, err
 	}
-	resp := &apisv1.ListDefKitModulesResponse{AddonEnabled: s.addonEnabled(ctx), Modules: []*apisv1.DefKitModule{}}
+	enabled, err := s.addonEnabled(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp := &apisv1.ListDefKitModulesResponse{AddonEnabled: enabled, Modules: []*apisv1.DefKitModule{}}
 	for i := range apps.Items {
-		m, _ := s.module(ctx, &apps.Items[i])
+		m, _, err := s.module(ctx, &apps.Items[i])
+		if err != nil {
+			return nil, err
+		}
 		resp.Modules = append(resp.Modules, m)
 	}
 	sort.Slice(resp.Modules, func(i, j int) bool { return resp.Modules[i].Name < resp.Modules[j].Name })
@@ -149,8 +180,15 @@ func (s *defkitServiceImpl) DetailModule(ctx context.Context, name string) (*api
 	if err != nil {
 		return nil, err
 	}
-	m, installed := s.module(ctx, app)
-	detail := &apisv1.DefKitModuleDetail{DefKitModule: *m, Definitions: []*apisv1.DefKitDefinition{}, Application: s.moduleApplication(ctx, app)}
+	m, installed, err := s.module(ctx, app)
+	if err != nil {
+		return nil, err
+	}
+	application, err := s.moduleApplication(ctx, app)
+	if err != nil {
+		return nil, err
+	}
+	detail := &apisv1.DefKitModuleDetail{DefKitModule: *m, Definitions: []*apisv1.DefKitDefinition{}, Application: application}
 	for _, ref := range installed {
 		def := &apisv1.DefKitDefinition{Kind: ref.Kind, Name: ref.Name, Policy: effectivePolicy(m.Settings, ref.Kind, ref.Name)}
 		obj := &unstructured.Unstructured{}
@@ -165,13 +203,13 @@ func (s *defkitServiceImpl) DetailModule(ctx context.Context, name string) (*api
 }
 
 func (s *defkitServiceImpl) CreateModule(ctx context.Context, req apisv1.CreateDefKitModuleRequest) (*apisv1.DefKitModule, error) {
-	if !s.addonEnabled(ctx) {
-		return nil, bcode.ErrDefKitAddonDisabled
+	if len(validation.IsDNS1123Label(defkitAppPrefix+req.Name)) > 0 {
+		return nil, bcode.ErrDefKitInvalidSource
 	}
-	if (req.Ref == "") == (req.Git == "") {
-		return nil, bcode.ErrDefKitNoSource
+	if err := validateDefKitRequest(req.DefKitSource, req.DefKitSettings); err != nil {
+		return nil, err
 	}
-	if err := validateDefKitSettings(req.DefKitSettings); err != nil {
+	if err := s.needAddon(ctx); err != nil {
 		return nil, err
 	}
 	app := defkitApplication(req.Name, req.DefKitSource, req.DefKitSettings)
@@ -181,15 +219,15 @@ func (s *defkitServiceImpl) CreateModule(ctx context.Context, req apisv1.CreateD
 		}
 		return nil, err
 	}
-	m, _ := s.module(ctx, app)
-	return m, nil
+	m, _, err := s.module(ctx, app)
+	return m, err
 }
 
 func (s *defkitServiceImpl) UpdateModule(ctx context.Context, name string, req apisv1.UpdateDefKitModuleRequest) (*apisv1.DefKitModule, error) {
-	if (req.Ref == "") == (req.Git == "") {
-		return nil, bcode.ErrDefKitNoSource
+	if err := validateDefKitRequest(req.DefKitSource, req.DefKitSettings); err != nil {
+		return nil, err
 	}
-	if err := validateDefKitSettings(req.DefKitSettings); err != nil {
+	if err := s.needAddon(ctx); err != nil {
 		return nil, err
 	}
 	app, err := s.application(ctx, name)
@@ -209,10 +247,13 @@ func (s *defkitServiceImpl) UpdateModule(ctx context.Context, name string, req a
 		}
 	}
 	if err := s.KubeClient.Update(ctx, app); err != nil {
+		if apierrors.IsConflict(err) {
+			return nil, bcode.ErrDefKitModuleChanged
+		}
 		return nil, err
 	}
-	m, _ := s.module(ctx, app)
-	return m, nil
+	m, _, err := s.module(ctx, app)
+	return m, err
 }
 
 func (s *defkitServiceImpl) DeleteModule(ctx context.Context, name string) error {
@@ -220,7 +261,19 @@ func (s *defkitServiceImpl) DeleteModule(ctx context.Context, name string) error
 	if err != nil {
 		return err
 	}
-	return s.KubeClient.Delete(ctx, app)
+	// Its render Jobs go first, with their pods: the Application's own garbage
+	// collection cascades to them only if it was made with the Job rule, and
+	// would otherwise reach them first and orphan the pods.
+	if err := s.KubeClient.DeleteAllOf(ctx, &batchv1.Job{}, client.InNamespace(defkitRenderNamespace),
+		client.MatchingLabels{defkitModuleLabel: app.Name}, client.PropagationPolicy(metav1.DeletePropagationBackground)); err != nil {
+		return err
+	}
+	if err := s.KubeClient.Delete(ctx, app); err != nil {
+		return err
+	}
+	// Its renders are its own alone, and nothing else removes them.
+	return s.KubeClient.DeleteAllOf(ctx, &corev1.ConfigMap{}, client.InNamespace(defkitRenderNamespace),
+		client.MatchingLabels{defkitModuleLabel: app.Name})
 }
 
 func (s *defkitServiceImpl) PreviewModule(ctx context.Context, name string) (*apisv1.DefKitPreview, error) {
@@ -228,7 +281,7 @@ func (s *defkitServiceImpl) PreviewModule(ctx context.Context, name string) (*ap
 	if err != nil {
 		return nil, err
 	}
-	preview, _, err := s.preview(ctx, app)
+	preview, _, _, err := s.preview(ctx, app)
 	return preview, err
 }
 
@@ -237,12 +290,18 @@ func (s *defkitServiceImpl) ApplyPreview(ctx context.Context, name string, req a
 	if err != nil {
 		return err
 	}
-	preview, cm, err := s.preview(ctx, app)
+	preview, cm, foreign, err := s.preview(ctx, app)
 	if err != nil {
 		return err
 	}
 	if preview.Phase != defkitPhaseReview || cm == nil {
 		return bcode.ErrDefKitNotInReview
+	}
+	if req.Render != preview.Render {
+		return bcode.ErrDefKitRenderChanged
+	}
+	if foreign {
+		return bcode.ErrDefKitNotDefinitions
 	}
 	// A conflict not taken over stays unowned, which the apply step skips.
 	takeOver, remove := setOf(req.TakeOver), setOf(req.Delete)
@@ -265,9 +324,19 @@ func (s *defkitServiceImpl) ApplyPreview(ctx context.Context, name string, req a
 		obj := &unstructured.Unstructured{}
 		obj.SetAPIVersion(v1beta1.SchemeGroupVersion.String())
 		obj.SetKind(item.Kind)
-		obj.SetNamespace(types.DefaultKubeVelaNS)
-		obj.SetName(item.Name)
-		if err := s.KubeClient.Delete(ctx, obj); err != nil && !apierrors.IsNotFound(err) {
+		err := s.KubeClient.Get(ctx, client.ObjectKey{Namespace: types.DefaultKubeVelaNS, Name: item.Name}, obj)
+		if apierrors.IsNotFound(err) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		// Only what is still the module's: another may have taken it over.
+		if !ownedBy(obj, app) {
+			continue
+		}
+		uid := obj.GetUID()
+		if err := s.KubeClient.Delete(ctx, obj, client.Preconditions{UID: &uid}); err != nil && !apierrors.IsNotFound(err) {
 			return err
 		}
 	}
@@ -327,7 +396,7 @@ func (s *defkitServiceImpl) application(ctx context.Context, name string) (*v1be
 }
 
 // module is an Application as a module, with the definitions it has installed.
-func (s *defkitServiceImpl) module(ctx context.Context, app *v1beta1.Application) (*apisv1.DefKitModule, []common.ClusterObjectReference) {
+func (s *defkitServiceImpl) module(ctx context.Context, app *v1beta1.Application) (*apisv1.DefKitModule, []common.ClusterObjectReference, error) {
 	phase, message := defkitPhase(app)
 	m := &apisv1.DefKitModule{
 		Name: app.Labels[defkitModuleLabel], Source: defkitSourceOf(app), Settings: defkitSettingsOf(app),
@@ -341,27 +410,34 @@ func (s *defkitServiceImpl) module(ctx context.Context, app *v1beta1.Application
 		next := app.Status.WorkflowRestartScheduledAt.Time
 		m.NextUpdate = &next
 	}
-	if cm := s.renderFor(ctx, app); cm != nil {
+	cm, err := s.renderFor(ctx, app)
+	if err != nil {
+		return nil, nil, err
+	}
+	if cm != nil {
 		m.Info = renderInfo(cm)
 	}
-	installed := s.installed(ctx, app)
+	installed, err := s.installed(ctx, app)
+	if err != nil {
+		return nil, nil, err
+	}
 	for _, ref := range installed {
 		m.Counts[ref.Kind]++
 	}
-	return m, installed
+	return m, installed, nil
 }
 
 // installed is what the module's ResourceTracker holds of definition kinds.
-func (s *defkitServiceImpl) installed(ctx context.Context, app *v1beta1.Application) []common.ClusterObjectReference {
+func (s *defkitServiceImpl) installed(ctx context.Context, app *v1beta1.Application) ([]common.ClusterObjectReference, error) {
 	return s.tracked(ctx, app, func(kind string) bool { return definitionKinds[kind] })
 }
 
 // tracked is what the module's ResourceTrackers hold, not deleted, of the kinds
 // keep accepts, each once, sorted by kind and name.
-func (s *defkitServiceImpl) tracked(ctx context.Context, app *v1beta1.Application, keep func(kind string) bool) []common.ClusterObjectReference {
+func (s *defkitServiceImpl) tracked(ctx context.Context, app *v1beta1.Application, keep func(kind string) bool) ([]common.ClusterObjectReference, error) {
 	root, current, history, _, err := appkeeper.ListApplicationResourceTrackers(ctx, s.KubeClient, app)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("read what the module installed: %w", err)
 	}
 	seen := map[string]bool{}
 	var out []common.ClusterObjectReference
@@ -384,12 +460,12 @@ func (s *defkitServiceImpl) tracked(ctx context.Context, app *v1beta1.Applicatio
 		}
 		return out[i].Name < out[j].Name
 	})
-	return out
+	return out, nil
 }
 
 // moduleApplication is the Application a module is: its workflow's steps as
 // far as they have run, and everything it tracks.
-func (s *defkitServiceImpl) moduleApplication(ctx context.Context, app *v1beta1.Application) *apisv1.DefKitApplication {
+func (s *defkitServiceImpl) moduleApplication(ctx context.Context, app *v1beta1.Application) (*apisv1.DefKitApplication, error) {
 	out := &apisv1.DefKitApplication{
 		Name: app.Name, Namespace: app.Namespace, Phase: string(app.Status.Phase),
 		Steps: []*apisv1.DefKitStep{}, Resources: []*apisv1.DefKitResource{},
@@ -408,20 +484,25 @@ func (s *defkitServiceImpl) moduleApplication(ctx context.Context, app *v1beta1.
 			out.Steps = append(out.Steps, step)
 		}
 	}
-	for _, ref := range s.tracked(ctx, app, func(string) bool { return true }) {
+	tracked, err := s.tracked(ctx, app, func(string) bool { return true })
+	if err != nil {
+		return nil, err
+	}
+	for _, ref := range tracked {
 		out.Resources = append(out.Resources, &apisv1.DefKitResource{
 			APIVersion: ref.APIVersion, Kind: ref.Kind, Name: ref.Name, Namespace: ref.Namespace,
 		})
 	}
-	return out
+	return out, nil
 }
 
 // renderFor is the newest render ConfigMap of the Application's current
-// source: a ConfigMap records the source it was rendered from.
-func (s *defkitServiceImpl) renderFor(ctx context.Context, app *v1beta1.Application) *corev1.ConfigMap {
+// source: a ConfigMap records the source it was rendered from, its repository
+// address without credentials.
+func (s *defkitServiceImpl) renderFor(ctx context.Context, app *v1beta1.Application) (*corev1.ConfigMap, error) {
 	cms := &corev1.ConfigMapList{}
 	if err := s.KubeClient.List(ctx, cms, client.InNamespace(defkitRenderNamespace), client.MatchingLabels{defkitModuleLabel: app.Name}); err != nil {
-		return nil
+		return nil, fmt.Errorf("read the module's renders: %w", err)
 	}
 	want := defkitSourceOf(app)
 	var best *corev1.ConfigMap
@@ -437,27 +518,48 @@ func (s *defkitServiceImpl) renderFor(ctx context.Context, app *v1beta1.Applicat
 			best = cm
 		}
 	}
-	return best
+	return best, nil
 }
 
-// preview diffs the pending render against the cluster.
-func (s *defkitServiceImpl) preview(ctx context.Context, app *v1beta1.Application) (*apisv1.DefKitPreview, *corev1.ConfigMap, error) {
+// preview diffs the pending render against the cluster, and says whether the
+// render holds anything other than definitions, which is never applied.
+func (s *defkitServiceImpl) preview(ctx context.Context, app *v1beta1.Application) (*apisv1.DefKitPreview, *corev1.ConfigMap, bool, error) {
 	phase, message := defkitPhase(app)
 	settings := defkitSettingsOf(app)
 	preview := &apisv1.DefKitPreview{Phase: phase, Message: message, Items: []*apisv1.DefKitPreviewItem{}}
-	cm := s.renderFor(ctx, app)
-	if cm == nil {
-		return preview, nil, nil
+	cm, err := s.renderFor(ctx, app)
+	if err != nil || cm == nil {
+		return preview, nil, false, err
 	}
+	preview.Render = cm.Name + "/" + cm.ResourceVersion
 	preview.Info = renderInfo(cm)
-	_ = json.Unmarshal([]byte(cm.Data[defkitKeyErrors]), &preview.Errors)
+	if raw := cm.Data[defkitKeyErrors]; raw != "" {
+		if err := json.Unmarshal([]byte(raw), &preview.Errors); err != nil {
+			return nil, nil, false, fmt.Errorf("read render %s's errors: %w", cm.Name, err)
+		}
+	}
 	var rendered []map[string]interface{}
 	if err := json.Unmarshal([]byte(cm.Data[defkitKeyDefinitions]), &rendered); err != nil {
-		return nil, nil, fmt.Errorf("read render %s: %w", cm.Name, err)
+		return nil, nil, false, fmt.Errorf("read render %s: %w", cm.Name, err)
 	}
+	installed, err := s.installed(ctx, app)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	isInstalled := map[string]bool{}
+	for _, ref := range installed {
+		isInstalled[ref.Kind+"/"+ref.Name] = true
+	}
+	foreign := false
 	inRender := map[string]bool{}
 	for _, obj := range rendered {
 		next := &unstructured.Unstructured{Object: obj}
+		if next.GetAPIVersion() != v1beta1.SchemeGroupVersion.String() || !definitionKinds[next.GetKind()] {
+			foreign = true
+			preview.Errors = append(preview.Errors, fmt.Sprintf("the render holds %s %s %s, which is not a definition",
+				next.GetAPIVersion(), next.GetKind(), next.GetName()))
+			continue
+		}
 		item := &apisv1.DefKitPreviewItem{DefKitDefinition: apisv1.DefKitDefinition{
 			Kind: next.GetKind(), Name: next.GetName(),
 			Description: next.GetAnnotations()[types.AnnoDefinitionDescription],
@@ -472,11 +574,13 @@ func (s *defkitServiceImpl) preview(ctx context.Context, app *v1beta1.Applicatio
 		case apierrors.IsNotFound(err):
 			item.Status = defkitNew
 		case err != nil:
-			return nil, nil, err
+			return nil, nil, false, err
 		default:
 			item.Current = definitionYAML(current)
 			switch {
-			case current.GetLabels()[oam.LabelAppName] != app.Name || current.GetLabels()[oam.LabelAppNamespace] != app.Namespace:
+			// A definition is the module's once this Application has applied it;
+			// one an earlier module of the same name left behind is not.
+			case !ownedBy(current, app) || !isInstalled[item.Kind+"/"+item.Name]:
 				item.Status = defkitConflict
 			case sameDefinition(current, next):
 				item.Status = defkitUnchanged
@@ -487,7 +591,7 @@ func (s *defkitServiceImpl) preview(ctx context.Context, app *v1beta1.Applicatio
 		}
 		preview.Items = append(preview.Items, item)
 	}
-	for _, ref := range s.installed(ctx, app) {
+	for _, ref := range installed {
 		if !inRender[ref.Kind+"/"+ref.Name] {
 			preview.Items = append(preview.Items, &apisv1.DefKitPreviewItem{
 				DefKitDefinition: apisv1.DefKitDefinition{Kind: ref.Kind, Name: ref.Name,
@@ -496,7 +600,13 @@ func (s *defkitServiceImpl) preview(ctx context.Context, app *v1beta1.Applicatio
 			})
 		}
 	}
-	return preview, cm, nil
+	return preview, cm, foreign, nil
+}
+
+// ownedBy is whether a definition carries the labels KubeVela gives what the
+// Application applies.
+func ownedBy(obj client.Object, app *v1beta1.Application) bool {
+	return obj.GetLabels()[oam.LabelAppName] == app.Name && obj.GetLabels()[oam.LabelAppNamespace] == app.Namespace
 }
 
 // defkitApplication is the Application that installs a module.
@@ -558,7 +668,9 @@ func defkitApplication(name string, src apisv1.DefKitSource, settings apisv1.Def
 
 // gcRules are the garbage-collect rules of a module's deletion policy: one per
 // kind and strategy for the overrides, first since the first matching rule
-// wins, then the module's own for every definition kind.
+// wins, then the module's own for every definition kind. A last rule cascades
+// to a render Job's pods: deleted without a propagation policy, the API server
+// orphans a Job's pods, and KubeVela sets one only from a rule.
 func gcRules(settings apisv1.DefKitSettings) []interface{} {
 	byRule := map[[2]string][]string{}
 	for id, policy := range settings.Overrides {
@@ -596,6 +708,10 @@ func gcRules(settings apisv1.DefKitSettings) []interface{} {
 	return append(rules, map[string]interface{}{
 		"selector": map[string]interface{}{"resourceTypes": kinds},
 		"strategy": gcStrategy(settings.DeletionPolicy),
+	}, map[string]interface{}{
+		"selector":    map[string]interface{}{"resourceTypes": []string{"Job"}},
+		"strategy":    "onAppUpdate",
+		"propagation": "cascading",
 	})
 }
 
@@ -626,13 +742,86 @@ func intervalOf(settings apisv1.DefKitSettings) string {
 	return settings.Interval
 }
 
+// The render Job takes these as its arguments, so none may read as an option.
+var (
+	defkitRefRegexp     = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._~/-]{0,255}$`)
+	defkitVersionRegexp = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._/+-]{0,127}$`)
+	defkitPrefixRegexp  = regexp.MustCompile(`^[a-z0-9][-a-z0-9]{0,29}$`)
+	// defkitSCPRegexp is an SSH address as git writes it, user@host:path.
+	defkitSCPRegexp = regexp.MustCompile(`^[A-Za-z0-9._-]+@[A-Za-z0-9.-]+:[A-Za-z0-9._~/-]+$`)
+	// defkitTypes are the definition types a render can be limited to.
+	defkitTypes = map[string]bool{componentKind: true, traitKind: true, defkitPolicyType: true, defkitWorkflowStepType: true}
+)
+
+func validateDefKitRequest(src apisv1.DefKitSource, settings apisv1.DefKitSettings) error {
+	if err := validateDefKitSource(src); err != nil {
+		return err
+	}
+	return validateDefKitSettings(settings)
+}
+
+// validateDefKitSource checks a module's source is one the render can fetch:
+// a module path or a public repository, at a version.
+func validateDefKitSource(src apisv1.DefKitSource) error {
+	if (src.Ref == "") == (src.Git == "") {
+		return bcode.ErrDefKitNoSource
+	}
+	if src.Ref != "" && !defkitRefRegexp.MatchString(src.Ref) {
+		return bcode.ErrDefKitInvalidSource
+	}
+	if src.Git != "" {
+		if err := validateDefKitGit(src.Git); err != nil {
+			return err
+		}
+	}
+	if src.Version != "" && !defkitVersionRegexp.MatchString(src.Version) {
+		return bcode.ErrDefKitInvalidSource
+	}
+	if src.Prefix != "" && !defkitPrefixRegexp.MatchString(src.Prefix) {
+		return bcode.ErrDefKitInvalidSource
+	}
+	for _, t := range src.Types {
+		if !defkitTypes[t] {
+			return bcode.ErrDefKitInvalidSource
+		}
+	}
+	return nil
+}
+
+// validateDefKitGit accepts an http(s), ssh or git address, or git's
+// user@host:path, carrying no secret.
+func validateDefKitGit(raw string) error {
+	if defkitSCPRegexp.MatchString(raw) {
+		return nil
+	}
+	u, err := url.Parse(raw)
+	if err != nil || u.Host == "" || strings.HasPrefix(raw, "-") {
+		return bcode.ErrDefKitInvalidSource
+	}
+	switch u.Scheme {
+	case "https", "http":
+		// A token sits in the user part as often as in the password.
+		if u.User != nil {
+			return bcode.ErrDefKitGitCredentials
+		}
+	case "ssh", "git":
+		if _, hasPassword := u.User.Password(); hasPassword {
+			return bcode.ErrDefKitGitCredentials
+		}
+	default:
+		return bcode.ErrDefKitInvalidSource
+	}
+	return nil
+}
+
 func validateDefKitSettings(settings apisv1.DefKitSettings) error {
 	valid := func(p string) bool { return p == defkitRetain || p == defkitDelete }
 	if settings.DeletionPolicy != "" && !valid(settings.DeletionPolicy) {
 		return bcode.ErrDefKitInvalidSettings
 	}
-	for _, p := range settings.Overrides {
-		if !valid(p) {
+	for id, p := range settings.Overrides {
+		kind, name, _ := strings.Cut(id, "/")
+		if !valid(p) || !definitionKinds[kind] || len(validation.IsDNS1123Subdomain(name)) > 0 {
 			return bcode.ErrDefKitInvalidSettings
 		}
 	}
@@ -663,7 +852,19 @@ func defkitSourceOf(app *v1beta1.Application) apisv1.DefKitSource {
 			_ = json.Unmarshal(step.Properties.Raw, &src)
 		}
 	}
+	src.Git = withoutCredentials(src.Git)
 	return src
+}
+
+// withoutCredentials is a repository address without any user info, as the
+// render records it.
+func withoutCredentials(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil || u.User == nil || u.Scheme == "" {
+		return raw
+	}
+	u.User = nil
+	return u.String()
 }
 
 // defkitPhase reads where a module's workflow is. A spec the controller has
@@ -689,7 +890,8 @@ func defkitPhase(app *v1beta1.Application) (string, string) {
 		return defkitPhaseApplying, ""
 	case steps[defkitReviewStep].Phase == workflowv1alpha1.WorkflowStepPhaseSuspending:
 		return defkitPhaseReview, ""
-	case steps[defkitReviewStep].Phase == workflowv1alpha1.WorkflowStepPhaseSucceeded:
+	case steps[defkitReviewStep].Phase == workflowv1alpha1.WorkflowStepPhaseSucceeded,
+		steps[defkitReviewStep].Phase == workflowv1alpha1.WorkflowStepPhaseRunning:
 		return defkitPhaseApplying, ""
 	}
 	return defkitPhaseRendering, steps[defkitRenderStep].Message

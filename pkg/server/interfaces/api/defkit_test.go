@@ -19,10 +19,12 @@ package api
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kubevela/velaux/pkg/server/domain/service"
 )
@@ -66,4 +68,42 @@ func TestDefKitAuthenticatesBeforePermissions(t *testing.T) {
 	container.ServeHTTP(res, httptest.NewRequest(http.MethodGet, versionPrefix+"/defkit", nil))
 	assert.Equal(t, http.StatusUnauthorized, res.Code)
 	assert.False(t, perms.checked, "a request without a token never reaches the permission check")
+}
+
+// permsRecorder records each permission a request is checked for.
+type permsRecorder struct {
+	service.RBACService
+	checked []string
+}
+
+func (p *permsRecorder) CheckPerm(resource string, actions ...string) func(req *restful.Request, res *restful.Response, chain *restful.FilterChain) {
+	return func(req *restful.Request, res *restful.Response, chain *restful.FilterChain) {
+		p.checked = append(p.checked, resource+":"+strings.Join(actions, ","))
+		chain.ProcessFilter(req, res)
+	}
+}
+
+// A module writes global definitions, so changing one takes the definition
+// permission as well as the DefKit one.
+func TestDefKitWritesNeedTheDefinitionPermission(t *testing.T) {
+	for _, tc := range []struct {
+		method, path string
+		want         []string
+	}{
+		{http.MethodGet, "/defkit/defs", []string{"defkit:detail"}},
+		{http.MethodPost, "/defkit", []string{"defkit:create", "definition:create"}},
+		{http.MethodPut, "/defkit/defs", []string{"defkit:update", "definition:update"}},
+		{http.MethodPost, "/defkit/defs/apply", []string{"defkit:update", "definition:create", "definition:update", "definition:delete"}},
+		{http.MethodDelete, "/defkit/defs", []string{"defkit:delete", "definition:delete"}},
+	} {
+		perms := &permsRecorder{}
+		ws := (&defkit{RbacService: perms}).GetWebServiceRoute()
+		req := httptest.NewRequest(tc.method, versionPrefix+tc.path, nil)
+		req.Header.Set("Content-Type", restful.MIME_JSON)
+		_, route, err := restful.CurlyRouter{}.SelectRoute([]*restful.WebService{ws}, req)
+		require.NoError(t, err, tc.method+" "+tc.path)
+		chain := &restful.FilterChain{Filters: route.Filters, Target: func(*restful.Request, *restful.Response) {}}
+		chain.ProcessFilter(restful.NewRequest(httptest.NewRequest(tc.method, versionPrefix+tc.path, nil)), restful.NewResponse(httptest.NewRecorder()))
+		assert.Equal(t, tc.want, perms.checked, tc.method+" "+tc.path)
+	}
 }
