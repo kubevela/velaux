@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/oam-dev/kubevela/pkg/multicluster"
 
@@ -338,6 +339,7 @@ func (u *userServiceImpl) UpdateUser(ctx context.Context, user *model.User, req 
 			return nil, err
 		}
 		user.Password = hash
+		user.TokenGeneration++
 	}
 	if req.Email != "" {
 		if user.Email != "" {
@@ -348,12 +350,22 @@ func (u *userServiceImpl) UpdateUser(ctx context.Context, user *model.User, req 
 
 	// TODO: validate the roles, they must be platform roles
 	if req.Roles != nil {
+		if !sameRoles(user.UserRoles, *req.Roles) {
+			user.TokenGeneration++
+		}
 		user.UserRoles = *req.Roles
 	}
 	if err := u.Store.Put(ctx, user); err != nil {
 		return nil, err
 	}
 	return convertUserBase(user), nil
+}
+
+func sameRoles(a, b []string) bool {
+	a, b = slices.Clone(a), slices.Clone(b)
+	slices.Sort(a)
+	slices.Sort(b)
+	return slices.Equal(a, b)
 }
 
 // ListUsers list users
@@ -408,6 +420,7 @@ func (u *userServiceImpl) DisableUser(ctx context.Context, user *model.User) err
 		return bcode.ErrUserAlreadyDisabled
 	}
 	user.Disabled = true
+	user.TokenGeneration++
 	return u.Store.Put(ctx, user)
 }
 

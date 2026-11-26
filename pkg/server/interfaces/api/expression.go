@@ -55,6 +55,7 @@ func (e *expression) GetWebServiceRoute() *restful.WebService {
 
 	tags := []string{"application"}
 
+	ws.Filter(authCheckFilter)
 	ws.Route(ws.GET("/env").To(e.env).
 		Doc("what a $( ) expression in an application being created can read on a surface").
 		Param(ws.QueryParameter("surface", "component, trait, workflowstep or source").DataType("string").Required(true)).

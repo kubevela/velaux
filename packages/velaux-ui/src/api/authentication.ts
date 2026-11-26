@@ -4,6 +4,7 @@ import {
   authenticationInitAdmin,
   authenticationLogin,
   authenticationLoginType,
+  authenticationLogout,
   authenticationSystemInfo,
   authenticationUserInfo,
 } from './productionLink';
@@ -17,6 +18,10 @@ export function loginSSO(params: { code: string }) {
 export function loginLocal(params: { username: string; password: string }) {
   const url = authenticationLogin;
   return post(url, { ...params }, true).then((res) => res);
+}
+
+export function logout() {
+  return post(authenticationLogout, {}, true);
 }
 
 export function getDexConfig() {

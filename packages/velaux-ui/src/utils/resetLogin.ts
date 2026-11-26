@@ -2,18 +2,20 @@ import { Dialog } from '@alifd/next';
 
 import i18n from '../i18n';
 
+import { signedOutTitle } from './authError';
+
 import { locale } from './locale';
 
 class ResetLogin {
   private static singleton: ResetLogin;
   public reset: React.ReactNode | null;
-  constructor() {
-    this.reset = this.resetDom();
+  constructor(code?: number) {
+    this.reset = this.resetDom(code);
   }
-  private resetDom(): React.ReactNode | null {
+  private resetDom(code?: number): React.ReactNode | null {
     if (window.location.href.indexOf('/login') === -1) {
       return Dialog.alert({
-        title: i18n.t('The token is expired(12010)').toString(),
+        title: i18n.t(signedOutTitle(code)).toString(),
         content: i18n.t('Authentication failed, please log in again').toString(),
         closeable: true,
         closeMode: [],
@@ -29,9 +31,9 @@ class ResetLogin {
       return null;
     }
   }
-  static getInstance() {
+  static getInstance(code?: number) {
     if (!ResetLogin.singleton) {
-      ResetLogin.singleton = new ResetLogin();
+      ResetLogin.singleton = new ResetLogin(code);
     }
     return ResetLogin.singleton;
   }

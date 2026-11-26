@@ -56,6 +56,7 @@ func permOf(t *testing.T, ws *restful.WebService, method, path string) string {
 }
 
 func TestConfigRoutesAskForTheirAction(t *testing.T) {
+	withSessions(t, parsingSessions{})
 	project := (&project{RbacService: permAsker{}, RBACService: permAsker{}}).GetWebServiceRoute()
 	global := (&config{RbacService: permAsker{}}).GetWebServiceRoute()
 	for _, c := range []struct {

@@ -520,6 +520,7 @@
   "the username is not exist(14008)": "用户名不存在",
   "Repository name": "仓库名",
   "The token is expired(12010)": "认证令牌已过期(12010)",
+  "Your session has ended(12013)": "会话已结束(12013)",
   "Type": "类型",
   "TypeAlias(TypeName)": "类型别名(类型名称)",
   "Application deployed successfully": "应用部署成功",

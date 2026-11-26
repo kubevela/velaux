@@ -18,12 +18,19 @@ package service
 
 import (
 	"context"
+	cryptorand "crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	velatypes "github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/version"
 
 	"github.com/kubevela/velaux/pkg/server/domain/model"
@@ -66,7 +73,6 @@ func (u systemInfoServiceImpl) Get(ctx context.Context) (*model.SystemInfo, erro
 		}
 		return info, nil
 	}
-	info.SignedKey = rand.String(32)
 	installID := rand.String(16)
 	info.InstallID = installID
 	info.EnableCollection = true
@@ -171,9 +177,62 @@ func (u systemInfoServiceImpl) Init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	signedKey = info.SignedKey
+	key, err := loadTokenSigningKey(ctx, u.KubeClient)
+	if err != nil {
+		return err
+	}
+	signedKey = key
+	if info.SignedKey != "" {
+		info.SignedKey = ""
+		if err := u.Store.Put(ctx, info); err != nil {
+			return err
+		}
+	}
 	_, err = initDexConfig(ctx, u.KubeClient, "http://velaux.com")
 	return err
+}
+
+const (
+	// tokenSigningKeySecret holds the key VelaUX signs access and refresh tokens with. It is
+	// kept out of the system info record: the default datastore stores records in ConfigMaps,
+	// which the built-in view role can read, and the key mints tokens for any user.
+	tokenSigningKeySecret = "velaux-token-signing-key"
+	tokenSigningKeyField  = "key"
+)
+
+// loadTokenSigningKey returns the token signing key, creating its Secret on first start. A
+// key found in an older system info record is not reused, since it may have been read.
+func loadTokenSigningKey(ctx context.Context, cli client.Client) (string, error) {
+	name := types.NamespacedName{Name: tokenSigningKeySecret, Namespace: velatypes.DefaultKubeVelaNS}
+	secret := &corev1.Secret{}
+	err := cli.Get(ctx, name, secret)
+	if err == nil {
+		if key := secret.Data[tokenSigningKeyField]; len(key) > 0 {
+			return string(key), nil
+		}
+		return "", fmt.Errorf("secret %s holds no %q", name, tokenSigningKeyField)
+	}
+	if !kerrors.IsNotFound(err) {
+		return "", err
+	}
+	raw := make([]byte, 32)
+	if _, err := cryptorand.Read(raw); err != nil {
+		return "", err
+	}
+	key := base64.RawURLEncoding.EncodeToString(raw)
+	secret = &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{Name: name.Name, Namespace: name.Namespace},
+		Type:       corev1.SecretTypeOpaque,
+		Data:       map[string][]byte{tokenSigningKeyField: []byte(key)},
+	}
+	if err := cli.Create(ctx, secret); err != nil {
+		if kerrors.IsAlreadyExists(err) {
+			// Another replica created it first; use its key.
+			return loadTokenSigningKey(ctx, cli)
+		}
+		return "", err
+	}
+	return key, nil
 }
 
 func convertInfoToBase(info *model.SystemInfo) v1.SystemInfo {
