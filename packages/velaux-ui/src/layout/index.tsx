@@ -1,5 +1,6 @@
 import { ConfigProvider } from '@alifd/next';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import LayoutRouter from './LayoutRouter';
 import LeftMenu from './LeftMenu';
 import Header from './Header';
@@ -11,6 +12,8 @@ import { locationService } from '../services/LocationService';
 import { menuService } from '../services/MenuService';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { ErrorShow } from '../components/ErrorShow';
+import { getLanguage } from '../utils/common';
+import { getConfigProviderLocale } from '../utils/locale';
 
 // sidebarCollapsedKey remembers the sidebar minimised to icons across pages
 // and visits, as a query parameter would not survive the next link.
@@ -25,6 +28,8 @@ function readCollapsed(): boolean {
 }
 
 export default function MainLayout(props: any) {
+  const { i18n } = useTranslation();
+  const nextLocale = getConfigProviderLocale(i18n.language || getLanguage());
   const [workspace, setWorkspace] = useState<Workspace>();
   const [collapsed, setCollapsed] = useState<boolean>(readCollapsed());
   const toggleCollapsed = () => {
@@ -48,7 +53,7 @@ export default function MainLayout(props: any) {
     });
   }, [query, path]);
   return (
-    <ConfigProvider>
+    <ConfigProvider locale={nextLocale}>
       <ErrorBoundary>
         {({ error, errorInfo }) => {
           if (error) {

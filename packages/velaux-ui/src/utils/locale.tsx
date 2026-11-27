@@ -1,3 +1,6 @@
+import enUS from '@alifd/next/lib/locale/en-us';
+import zhCN from '@alifd/next/lib/locale/zh-cn';
+
 import { getLanguage } from '../utils/common';
 const localeData = {
   en: {
@@ -188,3 +191,8 @@ class SingletonLocal {
 }
 SingletonLocal.getInstance().setLocal(localeData);
 export const locale = SingletonLocal.getInstance().getLocal();
+
+export function getConfigProviderLocale(language: string = getLanguage()): Record<string, unknown> {
+  const nextLocale = language.startsWith('zh') ? zhCN : enUS;
+  return nextLocale as unknown as Record<string, unknown>;
+}
