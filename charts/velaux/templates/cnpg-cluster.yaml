@@ -1,0 +1,29 @@
+{{- if .Values.datastore.cnpg.enabled -}}
+# Provisioned by the velaux chart. Requires the CloudNativePG operator.
+# CNPG generates Secret "{{ include "velaux.cnpgName" . }}-app" (keys: uri, username, password, ...)
+# which the VelaUX Deployment consumes as its datastore URL.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "velaux.cnpgName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "velaux.labels" . | nindent 4 }}
+spec:
+  instances: {{ .Values.datastore.cnpg.instances }}
+  {{- with .Values.datastore.cnpg.imageName }}
+  imageName: {{ . }}
+  {{- end }}
+  storage:
+    size: {{ .Values.datastore.cnpg.storage.size }}
+    {{- with .Values.datastore.cnpg.storage.storageClass }}
+    storageClass: {{ . }}
+    {{- end }}
+  bootstrap:
+    initdb:
+      database: {{ .Values.datastore.cnpg.database }}
+      owner: {{ .Values.datastore.cnpg.owner }}
+  {{- with .Values.datastore.cnpg.extraSpec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}
