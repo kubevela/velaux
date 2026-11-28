@@ -931,6 +931,7 @@ class UISchema extends Component<Props, State> {
               >
                 <Input
                   disabled={disableEdit}
+                  placeholder={param.style?.placeholder}
                   {...init(param.jsonKey, {
                     initValue: initValue,
                     rules: convertRule(param.validate),
